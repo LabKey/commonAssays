@@ -1,12 +1,12 @@
 <%@ page import="Issues.IssuesController"%>
-<%@ page import="org.fhcrc.cpas.data.ColumnInfo"%>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.view.JspView"%>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.data.ColumnInfo"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.JspView"%>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page import="Issues.model.IssueManager" %>
 <%@ page import="java.sql.SQLException" %>
-<%@ page extends="org.fhcrc.cpas.jsp.JspBase" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<IssuesController.IssuesPreference> me = (JspView<IssuesController.IssuesPreference>) HttpView.currentView();
     IssuesController.IssuesPreference bean = me.getModel();

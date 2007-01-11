@@ -5,8 +5,8 @@ import org.fhcrc.cpas.flow.data.FlowScript;
 import org.fhcrc.cpas.flow.data.FlowProtocolStep;
 import org.fhcrc.cpas.flow.data.FlowProtocol;
 import org.fhcrc.cpas.flow.data.SampleKey;
-import org.fhcrc.cpas.view.ViewBackgroundInfo;
-import org.fhcrc.cpas.exp.api.ExpMaterial;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.exp.api.ExpMaterial;
 
 import java.io.File;
 import java.util.List;

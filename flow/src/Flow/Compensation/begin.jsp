@@ -2,7 +2,7 @@
 <%@ page import="org.fhcrc.cpas.flow.data.FlowCompensationMatrix"%>
 <%@ page import="org.fhcrc.cpas.flow.util.PFUtil"%>
 <%@ page import="java.util.List"%>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib uri="http://cpas.fhcrc.org/taglib/cpas" prefix="cpas" %>
 
 <% List<FlowCompensationMatrix> matrices = FlowCompensationMatrix.getUploadedCompensationMatrices(getContainer()); %>

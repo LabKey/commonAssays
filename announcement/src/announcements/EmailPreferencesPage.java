@@ -1,6 +1,6 @@
 package announcements;
 
-import org.fhcrc.cpas.jsp.JspBase;
+import org.labkey.api.jsp.JspBase;
 
 abstract public class EmailPreferencesPage extends JspBase
     {

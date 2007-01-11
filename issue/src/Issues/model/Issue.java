@@ -15,11 +15,11 @@
  */
 package Issues.model;
 
-import org.fhcrc.cpas.data.Container;
-import org.fhcrc.cpas.data.Entity;
-import org.fhcrc.cpas.security.User;
-import org.fhcrc.cpas.security.UserManager;
-import org.fhcrc.cpas.util.MemTracker;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.Entity;
+import org.labkey.api.security.User;
+import org.labkey.api.security.UserManager;
+import org.labkey.api.util.MemTracker;
 
 import javax.ejb.*;
 import java.io.Serializable;

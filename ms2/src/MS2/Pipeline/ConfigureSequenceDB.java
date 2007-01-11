@@ -1,6 +1,6 @@
 package MS2.Pipeline;
 
-import org.fhcrc.cpas.jsp.JspBase;
+import org.labkey.api.jsp.JspBase;
 
 /**
  * User: brittp

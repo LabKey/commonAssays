@@ -1,7 +1,7 @@
 <%@ page import="java.text.DecimalFormat"%>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
-<%@ page import="org.fhcrc.cpas.view.ViewContext"%>
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.view.ViewContext"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.fhcrc.cpas.tools.SensitivitySummary"%>
 
 <table>

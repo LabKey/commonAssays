@@ -1,6 +1,6 @@
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.util.DateUtil" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.util.DateUtil" %>
 <form method="post" action="update.post">
 <input type="hidden" name="rowId" value="${announcement.rowId}">
 <input type="hidden" name="entityId" value="${announcement.entityId}">

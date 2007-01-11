@@ -1,10 +1,10 @@
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.view.JspView"%>
-<%@ page import="org.fhcrc.cpas.view.ViewContext"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.JspView"%>
+<%@ page import="org.labkey.api.view.ViewContext"%>
 <%@ page import="Nab.NabController" %>
-<%@ page import="org.fhcrc.cpas.data.Container" %>
+<%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="java.util.Map" %>
-<%@ page extends="org.fhcrc.cpas.jsp.JspBase" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.PublishBean> me = (JspView<NabController.PublishBean>) HttpView.currentView();
     NabController.PublishBean bean = me.getModel();

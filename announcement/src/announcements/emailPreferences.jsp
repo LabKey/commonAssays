@@ -1,4 +1,4 @@
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="announcements.EmailPreferencesPage" %>
 <%=message == null ? "" : message%>
 <form action="updateEmailPreferences.post" method="post">

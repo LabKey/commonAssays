@@ -1,6 +1,6 @@
 package Issues;
 
-import org.fhcrc.cpas.jsp.JspBase;
+import org.labkey.api.jsp.JspBase;
 import Issues.model.Issue;
 
 abstract public class UpdateEmailPage extends JspBase

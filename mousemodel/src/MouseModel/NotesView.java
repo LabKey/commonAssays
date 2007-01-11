@@ -1,10 +1,10 @@
 package MouseModel;
 
-import org.fhcrc.cpas.data.Container;
-import org.fhcrc.cpas.view.ViewURLHelper;
-import org.fhcrc.cpas.view.GroovyView;
-import org.fhcrc.cpas.announcements.Announcement;
-import org.fhcrc.cpas.announcements.AnnouncementManager;
+import org.labkey.api.data.Container;
+import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.GroovyView;
+import org.labkey.api.announcements.Announcement;
+import org.labkey.api.announcements.AnnouncementManager;
 
 import javax.servlet.ServletException;
 

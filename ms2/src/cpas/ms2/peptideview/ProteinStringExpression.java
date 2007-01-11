@@ -1,6 +1,6 @@
 package cpas.ms2.peptideview;
 
-import org.fhcrc.cpas.util.StringExpressionFactory;
+import org.labkey.api.util.StringExpressionFactory;
 
 import java.util.Map;
 import java.io.Writer;

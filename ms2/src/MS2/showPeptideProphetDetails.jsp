@@ -1,5 +1,5 @@
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
-<%@ page import="org.fhcrc.cpas.ms2.MS2Run"%>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.ms2.MS2Run"%>
 
 <%@ include file="showSensitivityDetails.jsp" %>
 

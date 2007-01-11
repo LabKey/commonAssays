@@ -1,8 +1,8 @@
 package announcements;
 
-import org.fhcrc.cpas.jsp.JspBase;
-import org.fhcrc.cpas.announcements.Announcement;
-import org.fhcrc.cpas.announcements.AnnouncementManager;
+import org.labkey.api.jsp.JspBase;
+import org.labkey.api.announcements.Announcement;
+import org.labkey.api.announcements.AnnouncementManager;
 
 
 abstract public class EmailResponsePage extends JspBase

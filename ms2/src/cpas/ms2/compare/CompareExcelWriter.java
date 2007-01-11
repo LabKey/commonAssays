@@ -1,8 +1,8 @@
 package cpas.ms2.compare;
 
-import org.fhcrc.cpas.data.ExcelWriter;
-import org.fhcrc.cpas.data.ExcelColumn;
-import org.fhcrc.cpas.data.DisplayColumn;
+import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.ExcelColumn;
+import org.labkey.api.data.DisplayColumn;
 
 import java.util.List;
 import java.sql.ResultSet;

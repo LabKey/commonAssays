@@ -1,13 +1,13 @@
 <%@ page import="cpas.assays.nab.Luc5Assay"%>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="java.text.DecimalFormat"%>
 <%@ page import="cpas.assays.nab.DilutionSummary"%>
 <%@ page import="Nab.NabController"%>
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.view.JspView"%>
-<%@ page import="org.fhcrc.cpas.study.WellData" %>
-<%@page extends="org.fhcrc.cpas.jsp.JspBase"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.JspView"%>
+<%@ page import="org.labkey.api.study.WellData" %>
+<%@page extends="org.labkey.api.jsp.JspBase"%>
 
 <%
     JspView<NabController.GraphSelectedBean> me = (JspView<NabController.GraphSelectedBean>) HttpView.currentView();

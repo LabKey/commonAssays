@@ -1,7 +1,7 @@
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.view.JspView"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="Nab.NabController"%>
-<%@ page extends="org.fhcrc.cpas.jsp.JspBase" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.HeaderBean> me = (JspView<NabController.HeaderBean>) HttpView.currentView();
     NabController.HeaderBean bean = me.getModel();

@@ -1,10 +1,10 @@
 package org.fhcrc.cpas.flow.data;
 
-import org.fhcrc.cpas.exp.api.DataType;
-import org.fhcrc.cpas.exp.api.ExperimentService;
-import org.fhcrc.cpas.exp.api.ExpData;
-import org.fhcrc.cpas.util.AppProps;
-import org.fhcrc.cpas.util.UnexpectedException;
+import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.util.AppProps;
+import org.labkey.api.util.UnexpectedException;
 import org.fhcrc.cpas.flow.persist.ObjectType;
 
 import java.net.URI;

@@ -1,5 +1,5 @@
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%
 if (null != error)
     out.print("<font class=\"cpas-error\">" + error + "<br>");

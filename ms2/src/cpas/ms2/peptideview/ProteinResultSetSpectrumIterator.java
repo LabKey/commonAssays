@@ -1,11 +1,11 @@
 package cpas.ms2.peptideview;
 
-import org.fhcrc.cpas.data.SQLFragment;
-import org.fhcrc.cpas.data.Table;
-import org.fhcrc.cpas.ms2.MS2Run;
-import org.fhcrc.cpas.ms2.MS2Manager;
-import org.fhcrc.cpas.protein.ProteinManager;
-import org.fhcrc.cpas.view.ViewURLHelper;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Table;
+import org.labkey.api.ms2.MS2Run;
+import org.labkey.api.ms2.MS2Manager;
+import org.labkey.api.protein.ProteinManager;
+import org.labkey.api.view.ViewURLHelper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -19,12 +19,12 @@ package MouseModel.Cages;
 import MouseModel.MouseModelController;
 import MouseModel.MouseModelController.MouseModelTemplateView;
 import MouseModel.Necropsy.NecropsyController;
-import org.fhcrc.cpas.data.*;
-import org.fhcrc.cpas.sample.Cage;
-import org.fhcrc.cpas.sample.MouseSchema;
-import org.fhcrc.cpas.security.ACL;
-import org.fhcrc.cpas.util.PageFlowUtil;
-import org.fhcrc.cpas.view.*;
+import org.labkey.api.data.*;
+import org.labkey.api.sample.Cage;
+import org.labkey.api.sample.MouseSchema;
+import org.labkey.api.security.ACL;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.*;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.beehive.netui.pageflow.Forward;
 

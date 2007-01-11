@@ -1,7 +1,7 @@
 package org.fhcrc.cpas.flow.data;
 
-import org.fhcrc.cpas.view.ViewURLHelper;
-import org.fhcrc.cpas.exp.api.ExpData;
+import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.exp.api.ExpData;
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.apache.commons.lang.StringUtils;
 

@@ -19,22 +19,22 @@ import announcements.AnnouncementsController;
 import junit.framework.TestCase;
 import org.apache.commons.collections.MultiMap;
 import org.apache.log4j.Logger;
-import org.fhcrc.cpas.announcements.AnnouncementManager;
-import org.fhcrc.cpas.announcements.CommSchema;
-import org.fhcrc.cpas.attachments.AttachmentService;
-import org.fhcrc.cpas.data.Container;
-import org.fhcrc.cpas.data.ContainerManager;
-import org.fhcrc.cpas.data.DbSchema;
-import org.fhcrc.cpas.module.DefaultModule;
-import org.fhcrc.cpas.module.ModuleContext;
-import org.fhcrc.cpas.security.*;
-import org.fhcrc.cpas.security.SecurityManager;
-import org.fhcrc.cpas.util.PageFlowUtil;
-import org.fhcrc.cpas.util.Search;
-import org.fhcrc.cpas.view.Portal;
-import org.fhcrc.cpas.view.ViewContext;
-import org.fhcrc.cpas.view.WebPartFactory;
-import org.fhcrc.cpas.view.WebPartView;
+import org.labkey.api.announcements.AnnouncementManager;
+import org.labkey.api.announcements.CommSchema;
+import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.ModuleContext;
+import org.labkey.api.security.*;
+import org.labkey.api.security.SecurityManager;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Search;
+import org.labkey.api.view.Portal;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.view.WebPartView;
 
 import javax.servlet.ServletException;
 import java.beans.PropertyChangeEvent;
@@ -62,7 +62,7 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
 
     public static final String WEB_PART_NAME = "Messages";
 
-    private static Logger _log = Logger.getLogger("org.fhcrc.cpas." + AnnouncementModule.class);
+    private static Logger _log = Logger.getLogger("org.labkey.api." + AnnouncementModule.class);
 
     private boolean _newInstall = false;
     private User _installerUser = null;
@@ -244,7 +244,7 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
     public Set<Class<? extends TestCase>> getJUnitTests()
     {
         return new HashSet<Class<? extends TestCase>>(Arrays.asList(
-            org.fhcrc.cpas.announcements.AnnouncementManager.TestCase.class));
+            org.labkey.api.announcements.AnnouncementManager.TestCase.class));
     }
 
     @Override

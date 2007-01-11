@@ -1,8 +1,8 @@
 package org.fhcrc.cpas.flow.data;
 
-import org.fhcrc.cpas.exp.*;
-import org.fhcrc.cpas.exp.api.*;
-import org.fhcrc.cpas.data.*;
+import org.labkey.api.exp.*;
+import org.labkey.api.exp.api.*;
+import org.labkey.api.data.*;
 import org.fhcrc.cpas.flow.persist.AttributeSet;
 import org.fhcrc.cpas.flow.persist.FlowManager;
 import org.fhcrc.cpas.flow.persist.AttrObject;

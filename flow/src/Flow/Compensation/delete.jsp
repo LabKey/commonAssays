@@ -1,7 +1,7 @@
 <%@ page import="org.fhcrc.cpas.flow.data.FlowCompensationMatrix"%>
 <%@ page import="Flow.Compensation.CompensationController"%>
 <%@ page import="org.fhcrc.cpas.flow.util.PFUtil"%>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
 <% FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getViewContext().getViewURLHelper(), request); %>
 <form method="POST" action="<%=comp.urlFor(CompensationController.Action.delete)%>">

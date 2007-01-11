@@ -1,7 +1,7 @@
 <%@ page import="Issues.model.IssueManager" %>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.view.ViewContext"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.ViewContext"%>
 <%@ page extends="Issues.EmailPreferencesPage" %>
 
 <%

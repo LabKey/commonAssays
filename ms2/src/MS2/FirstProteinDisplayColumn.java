@@ -1,6 +1,6 @@
 package MS2;
 
-import org.fhcrc.cpas.data.*;
+import org.labkey.api.data.*;
 
 import java.util.Map;
 import java.util.List;

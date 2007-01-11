@@ -1,6 +1,6 @@
 package Flow;
 
-import org.fhcrc.cpas.view.ViewForm;
+import org.labkey.api.view.ViewForm;
 import org.fhcrc.cpas.flow.FlowSettings;
 import org.apache.struts.action.ActionMapping;
 

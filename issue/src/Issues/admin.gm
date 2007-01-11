@@ -1,4 +1,4 @@
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <br>
 <table border=0 cellspacing=4 cellpadding=0>
 <tr><td><a href="list.view?.lastFilter=true"><img border=0 src="<%=PageFlowUtil.buttonSrc("Back to Issues")%>"></a></td></tr>

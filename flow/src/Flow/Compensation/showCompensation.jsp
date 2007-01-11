@@ -3,15 +3,15 @@
 <%@ page import="com.labkey.flow.web.GraphSpec" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.fhcrc.cpas.flow.data.*" %>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page import="Flow.Well.WellController" %>
 <%@ page import="Flow.FlowParam" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.HashMap" %>
-<%@ page import="org.fhcrc.cpas.jsp.JspLoader"%>
+<%@ page import="org.labkey.api.jsp.JspLoader"%>
 <%@ page import="org.fhcrc.cpas.flow.view.GraphView"%>
-<%@ page import="org.fhcrc.cpas.view.JspView"%>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page import="org.labkey.api.view.JspView"%>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%!
     String compImg(FlowWell well, String param) throws Exception
     {

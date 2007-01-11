@@ -1,11 +1,11 @@
 <%@ page import="Issues.IssuesController"%>
-<%@ page import="org.fhcrc.cpas.query.api.CustomView"%>
-<%@ page import="org.fhcrc.cpas.security.ACL"%>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.view.JspView"%>
-<%@ page import="org.fhcrc.cpas.view.ViewContext" %>
-<%@ page extends="org.fhcrc.cpas.jsp.JspBase" %>
+<%@ page import="org.labkey.api.query.api.CustomView"%>
+<%@ page import="org.labkey.api.security.ACL"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.JspView"%>
+<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
     JspView<IssuesController.ListForm> me = (JspView<IssuesController.ListForm>) HttpView.currentView();

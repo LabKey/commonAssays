@@ -4,7 +4,7 @@
 <%@ page import="org.fhcrc.cpas.flow.data.FlowScript" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowObject" %>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib uri="http://cpas.fhcrc.org/taglib/cpas" prefix="cpas" %>
 <% ChooseRunsToUploadForm form = (ChooseRunsToUploadForm) __form; %>
 <form method="POST" action="<%=PFUtil.urlFor(AnalysisScriptController.Action.uploadRuns, getContainer())%>">

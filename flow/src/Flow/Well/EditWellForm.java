@@ -1,7 +1,7 @@
 package Flow.Well;
 
 import org.fhcrc.cpas.flow.data.FlowWell;
-import org.fhcrc.cpas.view.ViewForm;
+import org.labkey.api.view.ViewForm;
 
 import java.util.Map;
 

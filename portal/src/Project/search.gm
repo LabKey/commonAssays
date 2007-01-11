@@ -1,4 +1,4 @@
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <form method="post" action="${postURL}">
 Search ${what} in this <%=container.isProject() ? "project" : "folder and all subfolders"%>
 <table>

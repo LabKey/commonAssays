@@ -1,8 +1,8 @@
 package Flow.EditScript;
 
 import Flow.EditScript.ScriptController.Action;
-import org.fhcrc.cpas.view.HttpView;
-import org.fhcrc.cpas.view.JspView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.JspView;
 
 import java.io.Writer;
 

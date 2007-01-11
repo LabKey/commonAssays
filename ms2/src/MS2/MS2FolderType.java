@@ -1,9 +1,9 @@
 package MS2;
 
-import org.fhcrc.cpas.module.DefaultFolderType;
-import org.fhcrc.cpas.module.ModuleLoader;
-import org.fhcrc.cpas.view.Portal;
-import static org.fhcrc.cpas.util.PageFlowUtil.set;
+import org.labkey.api.module.DefaultFolderType;
+import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.view.Portal;
+import static org.labkey.api.util.PageFlowUtil.set;
 import java.util.Arrays;
 
 public class MS2FolderType extends DefaultFolderType

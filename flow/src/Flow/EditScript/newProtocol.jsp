@@ -1,8 +1,8 @@
 <%@ page import="java.util.List" %>
 <%@ page import="Flow.EditScript.ScriptController" %>
 <%@ page import="Flow.EditScript.NewProtocolForm"%>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib uri="http://cpas.fhcrc.org/taglib/cpas" prefix="cpas" %>
 <%
     NewProtocolForm form = (NewProtocolForm) __form;

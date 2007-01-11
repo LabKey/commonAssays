@@ -1,7 +1,7 @@
 package org.fhcrc.cpas.flow.query;
 
-import org.fhcrc.cpas.exp.api.ExpDataTable;
-import org.fhcrc.cpas.data.ColumnInfo;
+import org.labkey.api.exp.api.ExpDataTable;
+import org.labkey.api.data.ColumnInfo;
 import org.apache.commons.lang.StringUtils;
 import com.labkey.flow.web.SubsetSpec;
 import com.labkey.flow.web.StatisticSpec;

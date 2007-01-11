@@ -1,4 +1,4 @@
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="Issues.IssuesController"%>
 <table border=0 cellspacing=4 cellpadding=0>
 <tr><%

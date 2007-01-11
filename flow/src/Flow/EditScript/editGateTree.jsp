@@ -1,7 +1,7 @@
 <%@ page import="Flow.EditScript.ScriptController"%>
 <%@ page import="com.labkey.flow.web.SubsetSpec"%>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page extends="Flow.EditScript.ScriptController.Page" %>
 
 <%! String indent(SubsetSpec subset)

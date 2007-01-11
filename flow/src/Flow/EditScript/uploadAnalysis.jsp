@@ -1,4 +1,4 @@
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="Flow.EditScript.ScriptController" %>
 <%@ page import="com.labkey.flow.model.FlowJoWorkspace.StatisticSet" %>
 <%@ page import="java.util.Map" %>

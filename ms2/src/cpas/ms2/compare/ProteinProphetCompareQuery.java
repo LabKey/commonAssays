@@ -1,15 +1,15 @@
 package cpas.ms2.compare;
 
 import MS2.GroupNumberDisplayColumn;
-import org.fhcrc.cpas.data.ColumnInfo;
-import org.fhcrc.cpas.data.DisplayColumn;
-import org.fhcrc.cpas.data.SimpleFilter;
-import org.fhcrc.cpas.data.TableInfo;
-import org.fhcrc.cpas.ms2.MS2Manager;
-import org.fhcrc.cpas.ms2.MS2Run;
-import org.fhcrc.cpas.protein.ProteinManager;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.ms2.MS2Manager;
+import org.labkey.api.ms2.MS2Run;
+import org.labkey.api.protein.ProteinManager;
 import org.fhcrc.cpas.util.Pair;
-import org.fhcrc.cpas.view.ViewURLHelper;
+import org.labkey.api.view.ViewURLHelper;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;

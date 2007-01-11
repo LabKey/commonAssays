@@ -1,7 +1,7 @@
 <%@ page import="Flow.Protocol.ProtocolForm"%>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowProtocol"%>
 <%@ page import="Flow.Protocol.ProtocolController.Action" %>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
 <% ProtocolForm form = (ProtocolForm) __form;
    FlowProtocol protocol = form.getProtocol();

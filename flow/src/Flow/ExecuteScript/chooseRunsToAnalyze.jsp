@@ -6,7 +6,7 @@
 <%@ page import="Flow.ExecuteScript.AnalysisScriptController"%>
 <%@ page import="com.labkey.flow.model.PopulationSet"%>
 <%@ taglib uri="http://cpas.fhcrc.org/taglib/cpas" prefix="cpas" %>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%!
     String select(String name, Object curVal, Collection<? extends FlowObject> objs, String nullLabel)
     {

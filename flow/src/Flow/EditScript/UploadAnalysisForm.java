@@ -4,7 +4,7 @@ import org.apache.struts.upload.FormFile;
 import org.apache.struts.action.ActionMapping;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.fhcrc.cpas.util.PageFlowUtil;
+import org.labkey.api.util.PageFlowUtil;
 import com.labkey.flow.model.FlowJoWorkspace;
 import com.labkey.flow.model.Analysis;
 import com.labkey.flow.model.FlowJoWorkspace.StatisticSet;

@@ -1,6 +1,6 @@
 <%@ page import="Flow.Protocol.UpdateSamplesForm"%>
 <%@ page import="Flow.Protocol.ProtocolController.Action"%>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
 <% UpdateSamplesForm form = (UpdateSamplesForm) __form;%>
 <cpas:errors />

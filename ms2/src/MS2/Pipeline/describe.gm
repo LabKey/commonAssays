@@ -1,6 +1,6 @@
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
-<%@ page import="org.fhcrc.cpas.view.ThemeFont"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.view.ThemeFont"%>
 <p/>
 <form method=post action="describeMS2Run.post">
 <input type="hidden" name="size" value="<%=fileStatus.size()%>">

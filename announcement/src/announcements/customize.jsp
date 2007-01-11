@@ -1,6 +1,6 @@
-<%@ page import="org.fhcrc.cpas.announcements.AnnouncementManager" %>
-<%@ page import="org.fhcrc.cpas.view.HttpView" %>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.announcements.AnnouncementManager" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <% HttpView<AnnouncementManager.Settings> me = (HttpView<AnnouncementManager.Settings>) HttpView.currentView();
     AnnouncementManager.Settings settings = me.getModel();
 %><form action="customize.post" method="post">

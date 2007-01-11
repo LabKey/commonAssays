@@ -10,18 +10,18 @@ import org.apache.struts.upload.FormFile;
 
 import java.util.*;
 
-import org.fhcrc.cpas.data.*;
-import org.fhcrc.cpas.exp.Lsid;
-import org.fhcrc.cpas.exp.ObjectProperty;
-import org.fhcrc.cpas.exp.OntologyManager;
-import org.fhcrc.cpas.exp.PropertyType;
-import org.fhcrc.cpas.security.User;
-import org.fhcrc.cpas.study.*;
-import org.fhcrc.cpas.view.ViewURLHelper;
-import org.fhcrc.cpas.view.ViewContext;
-import org.fhcrc.cpas.util.ExceptionUtil;
-import org.fhcrc.cpas.attachments.Attachment;
-import org.fhcrc.cpas.attachments.AttachmentService;
+import org.labkey.api.data.*;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.ObjectProperty;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyType;
+import org.labkey.api.security.User;
+import org.labkey.api.study.*;
+import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.attachments.Attachment;
+import org.labkey.api.attachments.AttachmentService;
 
 import javax.servlet.ServletException;
 import java.io.IOException;

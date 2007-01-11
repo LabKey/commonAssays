@@ -1,7 +1,7 @@
 package org.fhcrc.cpas.flow.data;
 
-import org.fhcrc.cpas.exp.Data;
-import org.fhcrc.cpas.exp.api.ExpData;
+import org.labkey.api.exp.Data;
+import org.labkey.api.exp.api.ExpData;
 
 public class FlowFCSAnalysis extends FlowWell
 {

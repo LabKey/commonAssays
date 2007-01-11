@@ -1,14 +1,14 @@
 package Flow.Protocol;
 
-import org.fhcrc.cpas.query.api.FieldKey;
-import org.fhcrc.cpas.query.api.TableKey;
-import org.fhcrc.cpas.exp.PropertyDescriptor;
+import org.labkey.api.query.api.FieldKey;
+import org.labkey.api.query.api.TableKey;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.fhcrc.cpas.flow.data.FlowProtocol;
 import org.fhcrc.cpas.flow.query.FlowSchema;
 import org.fhcrc.cpas.flow.query.FlowTableType;
-import org.fhcrc.cpas.data.ColumnInfo;
-import org.fhcrc.cpas.data.TableInfo;
-import org.fhcrc.cpas.util.UnexpectedException;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.util.UnexpectedException;
 import org.apache.struts.action.ActionMapping;
 
 import javax.servlet.ServletException;

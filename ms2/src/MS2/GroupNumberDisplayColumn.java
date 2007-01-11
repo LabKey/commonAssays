@@ -1,9 +1,9 @@
 package MS2;
 
-import org.fhcrc.cpas.data.DataColumn;
-import org.fhcrc.cpas.data.ColumnInfo;
-import org.fhcrc.cpas.data.RenderContext;
-import org.fhcrc.cpas.view.ViewURLHelper;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.view.ViewURLHelper;
 
 import java.util.Map;
 

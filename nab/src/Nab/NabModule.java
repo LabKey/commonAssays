@@ -1,13 +1,13 @@
 package Nab;
 
-import org.fhcrc.cpas.module.DefaultModule;
-import org.fhcrc.cpas.module.ModuleContext;
-import org.fhcrc.cpas.data.Container;
-import org.fhcrc.cpas.data.ContainerManager;
-import org.fhcrc.cpas.data.RuntimeSQLException;
-import org.fhcrc.cpas.study.PlateService;
-import org.fhcrc.cpas.study.AssayService;
-import org.fhcrc.cpas.view.ViewContext;
+import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.ModuleContext;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.study.PlateService;
+import org.labkey.api.study.AssayService;
+import org.labkey.api.view.ViewContext;
 import cpas.assays.nab.NabManager;
 
 import java.beans.PropertyChangeEvent;

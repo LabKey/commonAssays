@@ -1,7 +1,7 @@
 package org.fhcrc.cpas.flow.query;
 
-import org.fhcrc.cpas.data.*;
-import org.fhcrc.cpas.query.api.AbstractMethodInfo;
+import org.labkey.api.data.*;
+import org.labkey.api.query.api.AbstractMethodInfo;
 
 import java.sql.Types;
 

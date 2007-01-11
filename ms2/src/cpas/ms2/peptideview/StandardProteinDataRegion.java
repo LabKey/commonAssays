@@ -1,9 +1,9 @@
 package cpas.ms2.peptideview;
 
-import org.fhcrc.cpas.data.RenderContext;
-import org.fhcrc.cpas.data.DisplayColumn;
-import org.fhcrc.cpas.ms2.Protein;
-import org.fhcrc.cpas.view.ViewURLHelper;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.ms2.Protein;
+import org.labkey.api.view.ViewURLHelper;
 
 import java.io.Writer;
 import java.io.IOException;

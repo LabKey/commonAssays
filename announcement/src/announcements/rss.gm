@@ -1,4 +1,4 @@
-<%import org.fhcrc.cpas.util.PageFlowUtil;%><rss version="2.0">
+<%import org.labkey.api.util.PageFlowUtil;%><rss version="2.0">
 <channel>
     <title>${app.systemShortName}: ${app.systemDescription}</title>
     <link>${homePageUrl}</link>

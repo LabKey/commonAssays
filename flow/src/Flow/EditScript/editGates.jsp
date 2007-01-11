@@ -2,8 +2,8 @@
 <%@ page import="com.labkey.flow.model.Population" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="Flow.EditScript.ScriptController" %>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper" %>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowWell" %>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page extends="Flow.EditScript.EditGatesPage" %>

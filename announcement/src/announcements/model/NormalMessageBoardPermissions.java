@@ -1,11 +1,11 @@
 package announcements.model;
 
-import org.fhcrc.cpas.announcements.Announcement;
-import org.fhcrc.cpas.announcements.CommSchema;
-import org.fhcrc.cpas.data.Container;
-import org.fhcrc.cpas.data.SimpleFilter;
-import org.fhcrc.cpas.security.ACL;
-import org.fhcrc.cpas.security.User;
+import org.labkey.api.announcements.Announcement;
+import org.labkey.api.announcements.CommSchema;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
 
 /**
  * User: adam

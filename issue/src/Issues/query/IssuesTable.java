@@ -3,11 +3,11 @@ package Issues.query;
 import Issues.IssuesController;
 import Issues.model.IssueManager;
 import org.apache.log4j.Logger;
-import org.fhcrc.cpas.data.*;
-import org.fhcrc.cpas.issues.IssuesSchema;
-import org.fhcrc.cpas.query.api.*;
-import org.fhcrc.cpas.util.StringExpressionFactory;
-import org.fhcrc.cpas.view.ViewURLHelper;
+import org.labkey.api.data.*;
+import org.labkey.api.issues.IssuesSchema;
+import org.labkey.api.query.api.*;
+import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.view.ViewURLHelper;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class IssuesTable extends FilteredTable
 {
-    private static Logger _log = Logger.getLogger("org.fhcrc.cpas." + IssuesTable.class);
+    private static Logger _log = Logger.getLogger("org.labkey.api." + IssuesTable.class);
 
     private static final String DEFAULT_LIST_COLUMNS = "IssueId,Type,Area,Title,AssignedTo,Priority,Status,Milestone";
     private IssuesQuerySchema _schema;

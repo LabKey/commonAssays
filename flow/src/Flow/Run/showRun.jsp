@@ -1,6 +1,6 @@
 <%@ page import="Flow.Run.RunController" %>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowLog" %>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page import="Flow.Run.RunForm"%>
 <%@ page import="org.fhcrc.cpas.flow.view.FlowQueryView"%>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowCompensationMatrix"%>

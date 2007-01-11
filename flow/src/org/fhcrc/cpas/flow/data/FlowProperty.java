@@ -1,7 +1,7 @@
 package org.fhcrc.cpas.flow.data;
 
-import org.fhcrc.cpas.exp.PropertyType;
-import org.fhcrc.cpas.exp.property.SystemProperty;
+import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.property.SystemProperty;
 
 abstract public class FlowProperty
 {

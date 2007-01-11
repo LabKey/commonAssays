@@ -1,13 +1,13 @@
 package Flow.EditScript;
 
-import org.fhcrc.cpas.view.ViewForm;
-import org.fhcrc.cpas.view.ViewURLHelper;
+import org.labkey.api.view.ViewForm;
+import org.labkey.api.view.ViewURLHelper;
 import org.fhcrc.cpas.flow.data.*;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.fhcrc.cpas.flow.query.FlowSchema;
 import org.fhcrc.cpas.flow.query.FlowPropertySet;
 import org.fhcrc.cpas.flow.query.FlowTableType;
-import org.fhcrc.cpas.util.UnexpectedException;
+import org.labkey.api.util.UnexpectedException;
 import org.apache.struts.action.ActionMapping;
 import org.apache.log4j.Logger;
 

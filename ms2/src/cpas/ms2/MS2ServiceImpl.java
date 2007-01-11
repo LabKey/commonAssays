@@ -1,8 +1,8 @@
 package cpas.ms2;
 
-import org.fhcrc.cpas.ms2.MS2Service;
-import org.fhcrc.cpas.ms2.MS2Manager;
-import org.fhcrc.cpas.ms2.pipeline.MascotClientImpl;
+import org.labkey.api.ms2.MS2Service;
+import org.labkey.api.ms2.MS2Manager;
+import org.labkey.api.ms2.pipeline.MascotClientImpl;
 import org.apache.log4j.Logger;
 
 /**

@@ -7,13 +7,13 @@ import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ObjectUtils;
-import org.fhcrc.cpas.view.ViewForward;
-import org.fhcrc.cpas.view.HomeTemplate;
-import org.fhcrc.cpas.view.JspView;
+import org.labkey.api.view.ViewForward;
+import org.labkey.api.view.HomeTemplate;
+import org.labkey.api.view.JspView;
 import org.fhcrc.cpas.flow.data.*;
-import org.fhcrc.cpas.exp.PropertyDescriptor;
-import org.fhcrc.cpas.exp.OntologyManager;
-import org.fhcrc.cpas.exp.ExperimentManager;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.ExperimentManager;
 
 import java.sql.SQLException;
 

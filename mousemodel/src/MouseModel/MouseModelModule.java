@@ -16,17 +16,17 @@
 package MouseModel;
 
 import org.apache.log4j.Logger;
-import org.fhcrc.cpas.data.*;
-import org.fhcrc.cpas.exp.Lsid;
-import org.fhcrc.cpas.exp.Identifiable;
-import org.fhcrc.cpas.exp.LsidManager;
-import org.fhcrc.cpas.module.DefaultModule;
-import org.fhcrc.cpas.module.ModuleContext;
-import org.fhcrc.cpas.sample.*;
-import org.fhcrc.cpas.security.Group;
-import org.fhcrc.cpas.security.SecurityManager;
-import org.fhcrc.cpas.util.PageFlowUtil;
-import org.fhcrc.cpas.view.*;
+import org.labkey.api.data.*;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.Identifiable;
+import org.labkey.api.exp.LsidManager;
+import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.ModuleContext;
+import org.labkey.api.sample.*;
+import org.labkey.api.security.Group;
+import org.labkey.api.security.SecurityManager;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.*;
 
 import java.sql.SQLException;
 import java.util.Set;
@@ -47,7 +47,7 @@ public class MouseModelModule extends DefaultModule implements LsidManager.LsidH
 {
     public static final String NAME = "MouseModels";
 
-    private static Logger _log = Logger.getLogger("org.fhcrc.cpas." + MouseModelModule.class);
+    private static Logger _log = Logger.getLogger("org.labkey.api." + MouseModelModule.class);
 
 
     public MouseModelModule()

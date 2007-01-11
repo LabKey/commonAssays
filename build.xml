@@ -604,7 +604,7 @@
                  validateXml="false"
                  uriroot="${moduleJspTempDir}/webapp"
                  outputDir="${moduleJspTempDir}/classes"
-                 package="org.fhcrc.cpas.jsp.compiled"
+                 package="org.labkey.jsp.compiled"
                  compilerTargetVM="1.5"
                  compilerSourceVM="1.5"
                  trimSpaces="false"

@@ -18,16 +18,16 @@ package attachments;
 
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
-import org.fhcrc.cpas.attachments.AttachmentForm;
-import org.fhcrc.cpas.attachments.AttachmentService;
-import org.fhcrc.cpas.data.Container;
-import org.fhcrc.cpas.data.CoreSchema;
-import org.fhcrc.cpas.security.ACL;
-import org.fhcrc.cpas.security.User;
-import org.fhcrc.cpas.util.ContainerUtil;
-import org.fhcrc.cpas.view.HttpView;
-import org.fhcrc.cpas.view.ViewController;
-import org.fhcrc.cpas.view.ViewForm;
+import org.labkey.api.attachments.AttachmentForm;
+import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.CoreSchema;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
+import org.labkey.api.util.ContainerUtil;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewController;
+import org.labkey.api.view.ViewForm;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -71,7 +71,7 @@ public class AttachmentsController extends ViewController
         if (!c.hasPermission(getUser(), ACL.PERM_READ))
             return false;
 
-        ACL acl = org.fhcrc.cpas.security.SecurityManager.getACL(c, entityId);
+        ACL acl = org.labkey.api.security.SecurityManager.getACL(c, entityId);
         //An empty acl really means one doesn't exist.
         if (null == acl || acl.isEmpty())
             return true;

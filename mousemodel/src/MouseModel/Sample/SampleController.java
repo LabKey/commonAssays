@@ -28,12 +28,12 @@ import org.apache.log4j.Logger;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.FormData;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
-import org.fhcrc.cpas.data.*;
-import org.fhcrc.cpas.sample.*;
-import org.fhcrc.cpas.security.ACL;
-import org.fhcrc.cpas.view.*;
-import org.fhcrc.cpas.exp.ExperimentManager;
-import org.fhcrc.cpas.exp.MaterialSource;
+import org.labkey.api.data.*;
+import org.labkey.api.sample.*;
+import org.labkey.api.security.ACL;
+import org.labkey.api.view.*;
+import org.labkey.api.exp.ExperimentManager;
+import org.labkey.api.exp.MaterialSource;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletException;
@@ -47,15 +47,15 @@ import java.sql.SQLException;
 import static org.apache.commons.lang.StringUtils.trimToNull;
 import static org.apache.commons.lang.StringUtils.trimToEmpty;
 import org.apache.commons.lang.StringUtils;
-import static org.fhcrc.cpas.util.PageFlowUtil.filter;
-import org.fhcrc.cpas.util.PageFlowUtil;
+import static org.labkey.api.util.PageFlowUtil.filter;
+import org.labkey.api.util.PageFlowUtil;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class SampleController extends ViewController
 {
 
     private static Logger _log =
-            Logger.getLogger("org.fhcrc.cpas." + SampleController.class);
+            Logger.getLogger("org.labkey.api." + SampleController.class);
 
     private DataRegion getDataRegion()
     {

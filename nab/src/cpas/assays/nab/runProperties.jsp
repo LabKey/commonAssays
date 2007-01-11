@@ -1,11 +1,11 @@
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.view.JspView"%>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.JspView"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="Nab.NabController"%>
 <%@ page import="cpas.assays.nab.SampleInfo"%>
 <%@ page import="cpas.assays.nab.RunSettings"%>
-<%@ page extends="org.fhcrc.cpas.jsp.JspBase" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.UploadAssayForm> me = (JspView<NabController.UploadAssayForm>) HttpView.currentView();
     NabController.UploadAssayForm form = me.getModel();

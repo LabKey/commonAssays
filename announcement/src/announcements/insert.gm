@@ -1,4 +1,4 @@
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%
 userAgent = request.getHeader("user-agent");
 unsupported = userAgent.contains("MSIE") && userAgent.contains("Mac");

@@ -1,8 +1,8 @@
 package cpas.ms2.peptideview;
 
-import org.fhcrc.cpas.data.ExcelWriter;
-import org.fhcrc.cpas.data.GroupedResultSet;
-import org.fhcrc.cpas.data.ExcelColumn;
+import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.GroupedResultSet;
+import org.labkey.api.data.ExcelColumn;
 
 import java.sql.SQLException;
 import java.sql.ResultSet;

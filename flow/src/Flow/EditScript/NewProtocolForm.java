@@ -1,7 +1,7 @@
 package Flow.EditScript;
 
-import org.fhcrc.cpas.view.ViewForm;
-import org.fhcrc.cpas.util.URIUtil;
+import org.labkey.api.view.ViewForm;
+import org.labkey.api.util.URIUtil;
 import org.apache.struts.action.ActionMapping;
 
 import javax.servlet.http.HttpServletRequest;

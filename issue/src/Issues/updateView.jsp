@@ -1,13 +1,13 @@
 <%@ page import="Issues.IssuesController"%>
 <%@ page import="Issues.model.Issue"%>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
-<%@ page import="org.fhcrc.cpas.data.Container"%>
-<%@ page import="org.fhcrc.cpas.data.DataRegion"%>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
-<%@ page import="org.fhcrc.cpas.view.ButtonServlet"%>
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.view.ViewContext"%>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.data.Container"%>
+<%@ page import="org.labkey.api.data.DataRegion"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.ButtonServlet"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.ViewContext"%>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page extends="Issues.IssuePage" %>
 <%
     ViewContext context = HttpView.getRootContext();

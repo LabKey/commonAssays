@@ -1,5 +1,5 @@
-<%@ page import="org.fhcrc.cpas.view.WebTheme" %>
-<%@ page import="org.fhcrc.cpas.view.ThemeFont" %>
+<%@ page import="org.labkey.api.view.WebTheme" %>
+<%@ page import="org.labkey.api.view.ThemeFont" %>
 <style type="text/css">
     .graphView TD {
         font-family: verdana;

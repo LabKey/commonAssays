@@ -1,11 +1,11 @@
 package org.fhcrc.cpas.flow.query;
 
-import org.fhcrc.cpas.query.api.ExprColumn;
-import org.fhcrc.cpas.data.SQLFragment;
-import org.fhcrc.cpas.data.ColumnInfo;
-import org.fhcrc.cpas.data.ForeignKey;
-import org.fhcrc.cpas.data.TableInfo;
-import org.fhcrc.cpas.util.StringExpressionFactory;
+import org.labkey.api.query.api.ExprColumn;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ForeignKey;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.util.StringExpressionFactory;
 import org.fhcrc.cpas.flow.view.GraphColumn;
 
 import com.labkey.flow.web.GraphSpec;

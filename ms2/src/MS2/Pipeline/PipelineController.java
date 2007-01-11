@@ -22,23 +22,23 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.upload.FormFile;
-import org.fhcrc.cpas.data.*;
-import org.fhcrc.cpas.exp.*;
+import org.labkey.api.data.*;
+import org.labkey.api.exp.*;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
-import org.fhcrc.cpas.jsp.JspLoader;
-import org.fhcrc.cpas.ms2.MS2Manager;
-import org.fhcrc.cpas.ms2.RunForm;
-import org.fhcrc.cpas.ms2.MS2Run;
-import org.fhcrc.cpas.ms2.MS2Fraction;
-import org.fhcrc.cpas.ms2.pipeline.MS2PipelineManager;
-import org.fhcrc.cpas.ms2.protocol.*;
-import org.fhcrc.cpas.pipeline.PipelineService;
-import org.fhcrc.cpas.security.ACL;
-import org.fhcrc.cpas.util.NetworkDrive;
-import org.fhcrc.cpas.util.PageFlowUtil;
-import org.fhcrc.cpas.util.URIUtil;
-import org.fhcrc.cpas.util.AppProps;
-import org.fhcrc.cpas.view.*;
+import org.labkey.api.jsp.JspLoader;
+import org.labkey.api.ms2.MS2Manager;
+import org.labkey.api.ms2.RunForm;
+import org.labkey.api.ms2.MS2Run;
+import org.labkey.api.ms2.MS2Fraction;
+import org.labkey.api.ms2.pipeline.MS2PipelineManager;
+import org.labkey.api.ms2.protocol.*;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.security.ACL;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.URIUtil;
+import org.labkey.api.util.AppProps;
+import org.labkey.api.view.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -48,12 +48,12 @@ import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.*;
 
-import org.fhcrc.cpas.ms2.pipeline.FileStatus;
+import org.labkey.api.ms2.pipeline.FileStatus;
 
-import org.fhcrc.cpas.ms2.pipeline.MascotClientImpl;
-import org.fhcrc.cpas.pipeline.PipelineProtocol;
-import org.fhcrc.cpas.pipeline.PipelineProtocolFactory;
-import org.fhcrc.cpas.pipeline.PipelineValidationException;
+import org.labkey.api.ms2.pipeline.MascotClientImpl;
+import org.labkey.api.pipeline.PipelineProtocol;
+import org.labkey.api.pipeline.PipelineProtocolFactory;
+import org.labkey.api.pipeline.PipelineValidationException;
 
 /**
  *
@@ -61,7 +61,7 @@ import org.fhcrc.cpas.pipeline.PipelineValidationException;
 @Jpf.Controller(longLived = true) //PageFlow is long lived so we can stash results of multi-step protocol fill-in
 public class PipelineController extends ViewController
 {
-    private static Logger _log = Logger.getLogger("org.fhcrc.cpas." + PipelineController.class);
+    private static Logger _log = Logger.getLogger("org.labkey.api." + PipelineController.class);
 
     public static final String DEFAULT_EXPERIMENT_OBJECTID = "DefaultExperiment";
     

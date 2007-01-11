@@ -1,6 +1,6 @@
 package org.fhcrc.cpas.flow.script;
 
-import org.fhcrc.cpas.view.ViewBackgroundInfo;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.fhcrc.cpas.flow.data.FlowProtocolStep;
 import org.fhcrc.cpas.flow.data.FlowRun;
 import org.fhcrc.cpas.flow.data.FlowScript;

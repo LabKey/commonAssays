@@ -1,10 +1,10 @@
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.view.JspView"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="Nab.NabController" %>
-<%@ page import="org.fhcrc.cpas.study.WellGroup" %>
-<%@ page import="org.fhcrc.cpas.study.GenericAssayService" %>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil" %>
-<%@ page extends="org.fhcrc.cpas.jsp.JspBase" %>
+<%@ page import="org.labkey.api.study.WellGroup" %>
+<%@ page import="org.labkey.api.study.GenericAssayService" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.PublishVerifyBean> me = (JspView<NabController.PublishVerifyBean>) HttpView.currentView();
     NabController.PublishVerifyBean bean = me.getModel();

@@ -21,14 +21,14 @@ import org.apache.commons.collections.MultiMap;
 import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.fhcrc.cpas.data.*;
-import org.fhcrc.cpas.issues.IssuesSchema;
-import org.fhcrc.cpas.security.SecurityManager;
-import org.fhcrc.cpas.security.User;
-import org.fhcrc.cpas.security.UserComparator;
-import org.fhcrc.cpas.security.UserManager;
-import org.fhcrc.cpas.util.*;
-import org.fhcrc.cpas.view.ViewURLHelper;
+import org.labkey.api.data.*;
+import org.labkey.api.issues.IssuesSchema;
+import org.labkey.api.security.SecurityManager;
+import org.labkey.api.security.User;
+import org.labkey.api.security.UserComparator;
+import org.labkey.api.security.UserManager;
+import org.labkey.api.util.*;
+import org.labkey.api.view.ViewURLHelper;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class IssueManager
     private static TableInfo _tinfoIssueKeywords = _issuesSchema.getTableInfoIssueKeywords();
     private static TableInfo _tinfoComments = _issuesSchema.getTableInfoComments();
     private static TableInfo _tinfoEmailPrefs = _issuesSchema.getTableInfoEmailPrefs();
-    private static Logger _log = Logger.getLogger("org.fhcrc.cpas." + IssueManager.class);
+    private static Logger _log = Logger.getLogger("org.labkey.api." + IssueManager.class);
 
     public static final int NOTIFY_ASSIGNEDTO_OPEN = 1;     // if a bug is assigned to me
     public static final int NOTIFY_ASSIGNEDTO_UPDATE = 2;   // if a bug assigned to me is modified

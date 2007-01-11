@@ -1,7 +1,7 @@
 package org.fhcrc.cpas.flow.query;
 
-import org.fhcrc.cpas.data.ColumnInfo;
-import org.fhcrc.cpas.data.SQLFragment;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.SQLFragment;
 
 public class KeywordForeignKey extends AttributeForeignKey<String>
 {

@@ -1,4 +1,4 @@
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <a name="response"/>
 <%=PageFlowUtil.getStrutsError(request, "main")%>
 <form method=post enctype="multipart/form-data" action="respond.post"><table>

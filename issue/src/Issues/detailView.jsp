@@ -1,11 +1,11 @@
 
 <%@ page import="Issues.model.Issue"%>
-<%@ page import="org.fhcrc.cpas.data.DataRegion"%>
-<%@ page import="org.fhcrc.cpas.util.HelpUtil"%>
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.view.ViewContext"%>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
-<%@ page import="org.fhcrc.cpas.data.Container"%>
+<%@ page import="org.labkey.api.data.DataRegion"%>
+<%@ page import="org.labkey.api.util.HelpUtil"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.ViewContext"%>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.data.Container"%>
 <%@ page import="Issues.IssuesController"%>
 <%@ page extends="Issues.IssuePage" %>
 <%

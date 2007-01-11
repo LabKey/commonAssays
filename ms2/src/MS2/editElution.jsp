@@ -1,12 +1,12 @@
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
 <%@ page import="MS2.MS2Controller"%>
-<%@ page import="org.fhcrc.cpas.view.JspView"%>
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.ms2.Quantitation"%>
+<%@ page import="org.labkey.api.view.JspView"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.ms2.Quantitation"%>
 <%@ page import="java.text.DecimalFormat"%>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
-<%@ page import="org.fhcrc.cpas.ms2.MS2Peptide"%>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.ms2.MS2Peptide"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%
     JspView<MS2Controller.EditElutionGraphContext> me = (JspView<MS2Controller.EditElutionGraphContext>) HttpView.currentView();
     MS2Controller.EditElutionGraphContext ctx = me.getModel();

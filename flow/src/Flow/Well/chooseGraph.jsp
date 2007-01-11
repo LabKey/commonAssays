@@ -4,14 +4,14 @@
 <%@ page import="org.fhcrc.cpas.flow.data.FlowScript" %>
 <%@ page import="Flow.Well.ChooseGraphForm" %>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowCompensationMatrix" %>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page import="org.fhcrc.cpas.flow.util.PFUtil" %>
 <%@ page import="Flow.Well.WellController" %>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowWell" %>
 <%@ page import="java.util.*" %>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowProtocolStep" %>
 <%@ page import="Flow.FlowParam" %>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
 <%
     ChooseGraphForm form = (ChooseGraphForm) __form;

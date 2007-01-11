@@ -1,6 +1,6 @@
 <%@ page import="Flow.ExecuteScript.ChooseRunsToAnalyzeForm"%>
-<%@ page import="org.fhcrc.cpas.data.DataRegion"%>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page import="org.labkey.api.data.DataRegion"%>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ page import="Flow.ExecuteScript.AnalysisScriptController.Action" %>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
 <% ChooseRunsToAnalyzeForm form = (ChooseRunsToAnalyzeForm) __form; %>

@@ -1,6 +1,6 @@
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
-<%@ page import="org.fhcrc.cpas.ms2.pipeline.FileStatus"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.ms2.pipeline.FileStatus"%>
 <p/>
 <form method=post action="showDescribeMS2Run.post">
 <%

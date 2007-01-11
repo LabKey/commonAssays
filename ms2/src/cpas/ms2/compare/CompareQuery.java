@@ -1,10 +1,10 @@
 package cpas.ms2.compare;
 
-import org.fhcrc.cpas.view.ViewURLHelper;
+import org.labkey.api.view.ViewURLHelper;
 import org.fhcrc.cpas.util.Pair;
-import org.fhcrc.cpas.ms2.MS2Run;
-import org.fhcrc.cpas.ms2.MS2Manager;
-import org.fhcrc.cpas.data.*;
+import org.labkey.api.ms2.MS2Run;
+import org.labkey.api.ms2.MS2Manager;
+import org.labkey.api.data.*;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;

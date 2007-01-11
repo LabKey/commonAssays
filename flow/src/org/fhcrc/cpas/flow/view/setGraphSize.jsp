@@ -1,7 +1,7 @@
 <%@ page import="org.fhcrc.cpas.flow.FlowPreference" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.LinkedHashMap" %>
-<%@ page extends="org.fhcrc.cpas.jsp.JspBase" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
 <% String graphSize = FlowPreference.graphSize.getValue(request);
     Map<String, String> sizes = new LinkedHashMap();

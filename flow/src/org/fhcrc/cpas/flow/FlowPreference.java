@@ -1,6 +1,6 @@
 package org.fhcrc.cpas.flow;
 
-import org.fhcrc.cpas.view.ViewURLHelper;
+import org.labkey.api.view.ViewURLHelper;
 import org.fhcrc.cpas.flow.util.PFUtil;
 
 import javax.servlet.http.HttpServletRequest;

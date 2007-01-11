@@ -4,7 +4,7 @@ import org.fhcrc.cpas.flow.data.*;
 import org.fhcrc.cpas.flow.query.FlowQueryForm;
 import org.fhcrc.cpas.flow.query.FlowSchema;
 import org.fhcrc.cpas.flow.query.FlowTableType;
-import org.fhcrc.cpas.query.api.QuerySettings;
+import org.labkey.api.query.api.QuerySettings;
 
 public class RunForm extends FlowQueryForm
 {

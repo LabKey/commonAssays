@@ -1,12 +1,12 @@
 package cpas.ms2.peptideview;
 
-import org.fhcrc.cpas.data.*;
-import org.fhcrc.cpas.view.ViewURLHelper;
-import org.fhcrc.cpas.view.GridView;
-import org.fhcrc.cpas.ms2.*;
-import org.fhcrc.cpas.security.User;
-import org.fhcrc.cpas.protein.ProteinManager;
-import org.fhcrc.cpas.protein.tools.ProteinDictionaryHelpers;
+import org.labkey.api.data.*;
+import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.GridView;
+import org.labkey.api.ms2.*;
+import org.labkey.api.security.User;
+import org.labkey.api.protein.ProteinManager;
+import org.labkey.api.protein.tools.ProteinDictionaryHelpers;
 import org.fhcrc.cpas.util.Pair;
 import org.apache.log4j.Logger;
 

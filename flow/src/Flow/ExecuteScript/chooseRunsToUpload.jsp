@@ -4,10 +4,10 @@
 <%@ page import="java.net.URI" %>
 <%@ page import="java.util.List" %>
 <%@ page import="Flow.ExecuteScript.AnalysisScriptController" %>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper" %>
-<%@ page import="org.fhcrc.cpas.pipeline.PipelineService" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.fhcrc.cpas.flow.script.FlowPipelineProvider" %>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%
     ChooseRunsToUploadForm form = (ChooseRunsToUploadForm) __form;
 %>

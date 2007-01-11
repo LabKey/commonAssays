@@ -1,5 +1,5 @@
 <%@ page extends="Flow.EditScript.ScriptController.EditPage" %>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.fhcrc.cpas.flow.ScriptParser"%>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowScript"%>
 <%@ page import="Flow.EditScript.ScriptController"%>

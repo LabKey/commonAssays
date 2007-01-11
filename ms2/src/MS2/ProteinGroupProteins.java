@@ -1,9 +1,9 @@
 package MS2;
 
-import org.fhcrc.cpas.protein.ProteinManager;
-import org.fhcrc.cpas.ms2.MS2Manager;
-import org.fhcrc.cpas.ms2.MS2Run;
-import org.fhcrc.cpas.data.Table;
+import org.labkey.api.protein.ProteinManager;
+import org.labkey.api.ms2.MS2Manager;
+import org.labkey.api.ms2.MS2Run;
+import org.labkey.api.data.Table;
 
 import java.util.List;
 import java.util.Map;

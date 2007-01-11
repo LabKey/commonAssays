@@ -1,6 +1,6 @@
 package Flow.ExecuteScript;
 
-import org.fhcrc.cpas.view.ViewForm;
+import org.labkey.api.view.ViewForm;
 import org.fhcrc.cpas.flow.data.FlowScript;
 import org.fhcrc.cpas.flow.data.FlowExperiment;
 import org.fhcrc.cpas.flow.data.FlowProtocolStep;

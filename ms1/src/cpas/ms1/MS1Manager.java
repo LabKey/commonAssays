@@ -1,6 +1,6 @@
 package cpas.ms1;
 
-import org.fhcrc.cpas.data.DbSchema;
+import org.labkey.api.data.DbSchema;
 
 public class MS1Manager
 {

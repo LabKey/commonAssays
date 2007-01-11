@@ -1,10 +1,10 @@
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
-<%@ page import="org.fhcrc.cpas.ms2.MS2Run"%>
-<%@ page import="org.fhcrc.cpas.ms2.ProteinGroupWithQuantitation" %>
-<%@ page import="org.fhcrc.cpas.view.ViewContext" %>
-<%@ page import="org.fhcrc.cpas.view.HttpView" %>
-<%@ page import="org.fhcrc.cpas.ms2.Protein" %>
-<%@ page import="org.fhcrc.cpas.util.Formats" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.ms2.MS2Run"%>
+<%@ page import="org.labkey.api.ms2.ProteinGroupWithQuantitation" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.ms2.Protein" %>
+<%@ page import="org.labkey.api.util.Formats" %>
 
 <%
     ViewContext me = HttpView.currentContext();

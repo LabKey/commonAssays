@@ -1,6 +1,6 @@
 package cpas.assays.nab;
 
-import org.fhcrc.cpas.util.DateUtil;
+import org.labkey.api.util.DateUtil;
 
 import java.io.Serializable;
 import java.util.Date;

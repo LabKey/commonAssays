@@ -2,7 +2,7 @@
 <%@ page import="org.fhcrc.cpas.flow.script.xml.ScriptDocument" %>
 <%@ page import="Flow.EditScript.ScriptController" %>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowProtocolStep" %>
-<%@ page import="org.fhcrc.cpas.security.ACL" %>
+<%@ page import="org.labkey.api.security.ACL" %>
 <%@ page import="Flow.ExecuteScript.AnalysisScriptController.Action" %>
 <%@ page extends="Flow.ExecuteScript.AnalysisScriptController.Page" %>
 <%

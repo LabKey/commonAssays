@@ -1,12 +1,12 @@
 package cpas.assays.nab;
 
-import org.fhcrc.cpas.study.WellGroup;
-import org.fhcrc.cpas.study.WellData;
+import org.labkey.api.study.WellGroup;
+import org.labkey.api.study.WellData;
 
 import java.io.Serializable;
 import java.util.List;
 
-import org.fhcrc.cpas.study.DilutionCurve;
+import org.labkey.api.study.DilutionCurve;
 
 /**
  * User: brittp

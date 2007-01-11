@@ -1,7 +1,7 @@
 package cpas.ms1.pipeline;
 
-import org.fhcrc.cpas.pipeline.PipelineProvider;
-import org.fhcrc.cpas.view.ViewContext;
+import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.view.ViewContext;
 
 import java.util.List;
 import java.io.File;

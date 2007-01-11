@@ -1,6 +1,6 @@
 package Issues;
 
-import org.fhcrc.cpas.jsp.JspBase;
+import org.labkey.api.jsp.JspBase;
 
 /**
  * Created by IntelliJ IDEA.

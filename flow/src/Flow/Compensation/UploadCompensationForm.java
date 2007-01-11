@@ -1,6 +1,6 @@
 package Flow.Compensation;
 
-import org.fhcrc.cpas.view.ViewForm;
+import org.labkey.api.view.ViewForm;
 import org.apache.struts.upload.FormFile;
 
 public class UploadCompensationForm extends ViewForm

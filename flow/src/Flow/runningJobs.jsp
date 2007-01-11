@@ -1,11 +1,11 @@
-<%@ page import="org.fhcrc.cpas.pipeline.PipelineQueue"%>
-<%@ page import="org.fhcrc.cpas.pipeline.PipelineService"%>
-<%@ page import="org.fhcrc.cpas.pipeline.PipelineJob"%>
+<%@ page import="org.labkey.api.pipeline.PipelineQueue"%>
+<%@ page import="org.labkey.api.pipeline.PipelineService"%>
+<%@ page import="org.labkey.api.pipeline.PipelineJob"%>
 <%@ page import="org.fhcrc.cpas.flow.script.ScriptJob"%>
 <%@ page import="java.util.List"%>
 <%@ page import="java.util.ArrayList"%>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
 <%
 PipelineQueue.JobData data = PipelineService.get().getPipelineQueue().getJobData(null);

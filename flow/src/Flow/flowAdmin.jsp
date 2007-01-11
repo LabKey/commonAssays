@@ -1,9 +1,9 @@
 <%@ page import="org.fhcrc.cpas.flow.util.PFUtil"%>
 <%@ page import="Flow.FlowController"%>
-<%@ page import="org.fhcrc.cpas.data.ContainerManager"%>
+<%@ page import="org.labkey.api.data.ContainerManager"%>
 <%@ page import="Flow.FlowAdminForm"%>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
 
 <% FlowAdminForm form = (FlowAdminForm) __form; %>

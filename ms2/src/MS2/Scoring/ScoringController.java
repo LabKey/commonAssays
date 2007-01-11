@@ -15,12 +15,12 @@
  */
 package MS2.Scoring;
 
-import org.fhcrc.cpas.view.*;
-import org.fhcrc.cpas.security.ACL;
-import org.fhcrc.cpas.data.Container;
-import org.fhcrc.cpas.data.DataRegion;
-import org.fhcrc.cpas.ms2.MS2Manager;
-import org.fhcrc.cpas.ms2.MS2Run;
+import org.labkey.api.view.*;
+import org.labkey.api.security.ACL;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.ms2.MS2Manager;
+import org.labkey.api.ms2.MS2Run;
 import org.apache.log4j.Logger;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.beehive.netui.pageflow.Forward;
@@ -46,7 +46,7 @@ import java.awt.*;
 @Jpf.Controller
 public class ScoringController extends ViewController
 {
-    private static Logger _log = Logger.getLogger("org.fhcrc.cpas." + ScoringController.class);
+    private static Logger _log = Logger.getLogger("org.labkey.api." + ScoringController.class);
 
     private Forward _renderInTemplate(HttpView view, String title, String helpTopic) throws Exception
     {

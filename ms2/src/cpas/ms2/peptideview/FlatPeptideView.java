@@ -1,15 +1,15 @@
 package cpas.ms2.peptideview;
 
-import org.fhcrc.cpas.data.ButtonBar;
-import org.fhcrc.cpas.data.Container;
-import org.fhcrc.cpas.data.DataRegion;
-import org.fhcrc.cpas.data.DisplayColumn;
-import org.fhcrc.cpas.ms2.MS2Manager;
-import org.fhcrc.cpas.ms2.MS2Run;
-import org.fhcrc.cpas.protein.ProteinManager;
-import org.fhcrc.cpas.security.User;
-import org.fhcrc.cpas.view.GridView;
-import org.fhcrc.cpas.view.ViewURLHelper;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.ms2.MS2Manager;
+import org.labkey.api.ms2.MS2Run;
+import org.labkey.api.protein.ProteinManager;
+import org.labkey.api.security.User;
+import org.labkey.api.view.GridView;
+import org.labkey.api.view.ViewURLHelper;
 import org.fhcrc.cpas.util.Pair;
 
 import javax.servlet.ServletException;

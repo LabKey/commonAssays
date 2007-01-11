@@ -1,9 +1,9 @@
 package cpas.ms2.peptideview;
 
-import org.fhcrc.cpas.data.DisplayColumn;
-import org.fhcrc.cpas.data.GroupedResultSet;
-import org.fhcrc.cpas.data.TSVGridWriter;
-import org.fhcrc.cpas.data.RenderContext;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.GroupedResultSet;
+import org.labkey.api.data.TSVGridWriter;
+import org.labkey.api.data.RenderContext;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;

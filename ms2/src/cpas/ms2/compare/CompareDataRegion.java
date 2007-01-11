@@ -1,9 +1,9 @@
 package cpas.ms2.compare;
 
-import org.fhcrc.cpas.data.DataRegion;
-import org.fhcrc.cpas.data.RenderContext;
-import org.fhcrc.cpas.data.DisplayColumn;
-import org.fhcrc.cpas.ms2.MS2Manager;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.ms2.MS2Manager;
 
 import java.util.List;
 import java.io.Writer;

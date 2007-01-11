@@ -23,20 +23,20 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionError;
 import org.fhcrc.cpas.flow.script.*;
 import org.fhcrc.cpas.flow.view.JobStatusView;
-import org.fhcrc.cpas.jsp.FormPage;
+import org.labkey.api.jsp.FormPage;
 import org.fhcrc.cpas.flow.util.PFUtil;
 import org.fhcrc.cpas.flow.FlowSettings;
 import org.fhcrc.cpas.flow.FlowPreference;
-import org.fhcrc.cpas.security.ACL;
-import org.fhcrc.cpas.view.*;
-import org.fhcrc.cpas.pipeline.PipelineService;
-import org.fhcrc.cpas.pipeline.PipelineJob;
-import org.fhcrc.cpas.pipeline.PipelineStatusFile;
-import org.fhcrc.cpas.pipeline.PipelineStatusManager;
-import org.fhcrc.cpas.data.ContainerManager;
-import org.fhcrc.cpas.data.Container;
-import org.fhcrc.cpas.util.PageFlowUtil;
-import org.fhcrc.cpas.module.Module;
+import org.labkey.api.security.ACL;
+import org.labkey.api.view.*;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.pipeline.PipelineStatusManager;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.Container;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.module.Module;
 
 import java.util.*;
 import java.io.File;
@@ -44,7 +44,7 @@ import java.io.File;
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class FlowController extends BaseFlowController<FlowController.Action>
 {
-    private static Logger _log = Logger.getLogger("org.fhcrc.cpas." + FlowController.class);
+    private static Logger _log = Logger.getLogger("org.labkey.api." + FlowController.class);
 
     public enum Action
     {

@@ -3,13 +3,13 @@
 <%@ page import="cpas.assays.nab.Luc5Assay"%>
 <%@ page import="cpas.assays.nab.SampleInfo"%>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
-<%@ page import="org.fhcrc.cpas.study.WellData"%>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.view.JspView" %>
+<%@ page import="org.labkey.api.study.WellData"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.List" %>
-<%@ page extends="org.fhcrc.cpas.jsp.JspBase" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.RenderAssayBean> me = (JspView<NabController.RenderAssayBean>) HttpView.currentView();
     NabController.RenderAssayBean bean = me.getModel();

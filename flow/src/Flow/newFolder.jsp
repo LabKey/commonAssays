@@ -1,7 +1,7 @@
 <%@ page import="Flow.FlowController"%>
 <%@ page import="org.fhcrc.cpas.flow.util.PFUtil"%>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <% FlowController.NewFolderForm form = (FlowController.NewFolderForm) __form; %>
 
 <form method="POST" action="<%=PFUtil.urlFor(FlowController.Action.newFolder, getContainer())%>">

@@ -2,7 +2,7 @@
 <%@ page import="Flow.Well.WellController" %>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowDataType"%>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowWell"%>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
 
 <%  EditWellForm form = (EditWellForm) __form;

@@ -1,10 +1,10 @@
 package org.fhcrc.cpas.flow.data;
 
-import org.fhcrc.cpas.exp.api.ProtocolImplementation;
-import org.fhcrc.cpas.exp.api.ExperimentService;
-import org.fhcrc.cpas.exp.api.ExpProtocol;
-import org.fhcrc.cpas.exp.api.ExpMaterial;
-import org.fhcrc.cpas.security.User;
+import org.labkey.api.exp.api.ProtocolImplementation;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.security.User;
 
 import java.util.List;
 

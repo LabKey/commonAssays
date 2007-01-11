@@ -1,9 +1,9 @@
 package cpas.ms2.peptideview;
 
-import org.fhcrc.cpas.data.ResultSetWrapper;
-import org.fhcrc.cpas.data.SimpleFilter;
-import org.fhcrc.cpas.data.Sort;
-import org.fhcrc.cpas.ms2.MS2Run;
+import org.labkey.api.data.ResultSetWrapper;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.ms2.MS2Run;
 
 import java.sql.SQLException;
 import java.sql.ResultSet;

@@ -1,12 +1,12 @@
 package Issues.query;
 
-import org.fhcrc.cpas.query.api.UserSchema;
-import org.fhcrc.cpas.query.api.DefaultSchema;
-import org.fhcrc.cpas.query.api.QuerySchema;
-import org.fhcrc.cpas.security.User;
-import org.fhcrc.cpas.data.Container;
-import org.fhcrc.cpas.data.TableInfo;
-import org.fhcrc.cpas.issues.IssuesSchema;
+import org.labkey.api.query.api.UserSchema;
+import org.labkey.api.query.api.DefaultSchema;
+import org.labkey.api.query.api.QuerySchema;
+import org.labkey.api.security.User;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.issues.IssuesSchema;
 
 import java.util.Set;
 import java.util.LinkedHashSet;

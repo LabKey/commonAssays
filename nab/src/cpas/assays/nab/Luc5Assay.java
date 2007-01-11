@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Date;
 
-import org.fhcrc.cpas.study.*;
-import org.fhcrc.cpas.study.DilutionCurve;
+import org.labkey.api.study.*;
+import org.labkey.api.study.DilutionCurve;
 
 /**
  * Copyright (C) 2004 Fred Hutchinson Cancer Research Center. All Rights Reserved.

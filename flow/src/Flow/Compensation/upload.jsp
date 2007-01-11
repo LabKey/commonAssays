@@ -1,5 +1,5 @@
 <%@ page import="org.fhcrc.cpas.flow.util.PFUtil" %>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ page import="Flow.Compensation.CompensationController.Action" %>
 <%@ page import="Flow.Compensation.UploadCompensationForm" %>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>

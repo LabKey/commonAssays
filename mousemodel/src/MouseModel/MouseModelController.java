@@ -22,12 +22,12 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.struts.action.ActionError;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
-import org.fhcrc.cpas.data.*;
-import org.fhcrc.cpas.sample.*;
-import org.fhcrc.cpas.security.ACL;
-import org.fhcrc.cpas.util.PageFlowUtil;
+import org.labkey.api.data.*;
+import org.labkey.api.sample.*;
+import org.labkey.api.security.ACL;
+import org.labkey.api.util.PageFlowUtil;
 import org.fhcrc.cpas.util.Pair;
-import org.fhcrc.cpas.view.*;
+import org.labkey.api.view.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

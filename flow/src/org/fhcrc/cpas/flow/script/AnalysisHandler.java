@@ -7,7 +7,7 @@ import org.fhcrc.cpas.flow.persist.AttributeSet;
 import org.fhcrc.cpas.flow.persist.ObjectType;
 import org.fhcrc.cpas.flow.persist.FlowDataHandler;
 import org.fhcrc.cpas.exp.xml.*;
-import org.fhcrc.cpas.util.URIUtil;
+import org.labkey.api.util.URIUtil;
 import org.w3c.dom.Element;
 
 import java.util.List;

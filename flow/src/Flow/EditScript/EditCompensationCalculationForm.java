@@ -8,8 +8,8 @@ import org.fhcrc.cpas.flow.script.xml.ChannelDef;
 import org.fhcrc.cpas.flow.script.xml.ChannelSubsetDef;
 import org.fhcrc.cpas.flow.script.xml.CriteriaDef;
 import org.fhcrc.cpas.flow.data.FlowProtocolStep;
-import org.fhcrc.cpas.util.PageFlowUtil;
-import org.fhcrc.cpas.util.UnexpectedException;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.UnexpectedException;
 import com.labkey.flow.model.FlowJoWorkspace;
 
 import javax.servlet.http.HttpServletRequest;

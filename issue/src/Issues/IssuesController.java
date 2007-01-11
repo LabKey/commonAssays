@@ -29,22 +29,22 @@ import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.fhcrc.cpas.data.*;
-import org.fhcrc.cpas.issues.IssuesSchema;
-import org.fhcrc.cpas.jsp.JspLoader;
-import org.fhcrc.cpas.module.Module;
-import org.fhcrc.cpas.module.ModuleLoader;
-import org.fhcrc.cpas.query.api.*;
-import org.fhcrc.cpas.security.ACL;
-import org.fhcrc.cpas.security.User;
-import org.fhcrc.cpas.security.UserManager;
-import org.fhcrc.cpas.security.ValidEmail;
-import org.fhcrc.cpas.util.AppProps;
-import org.fhcrc.cpas.util.MailHelper;
-import org.fhcrc.cpas.util.MailHelper.ViewMessage;
-import org.fhcrc.cpas.util.PageFlowUtil;
-import org.fhcrc.cpas.util.Search;
-import org.fhcrc.cpas.view.*;
+import org.labkey.api.data.*;
+import org.labkey.api.issues.IssuesSchema;
+import org.labkey.api.jsp.JspLoader;
+import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.api.*;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
+import org.labkey.api.security.UserManager;
+import org.labkey.api.security.ValidEmail;
+import org.labkey.api.util.AppProps;
+import org.labkey.api.util.MailHelper;
+import org.labkey.api.util.MailHelper.ViewMessage;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Search;
+import org.labkey.api.view.*;
 import org.labkey.wiki.WikiRenderer;
 import org.labkey.wiki.WikiRendererType;
 import org.labkey.wiki.WikiService;
@@ -61,7 +61,7 @@ import java.util.*;
 @Jpf.Controller
 public class IssuesController extends ViewController
 {
-    private static Logger _log = Logger.getLogger("org.fhcrc.cpas." + IssuesController.class);
+    private static Logger _log = Logger.getLogger("org.labkey.api." + IssuesController.class);
 
     // keywords enum
     public static final int ISSUE_NONE = 0;
@@ -664,7 +664,7 @@ public class IssuesController extends ViewController
     {
         String[] rawEmails = _toString(form.getNotifyList()).split("\n");
         List<String> invalidEmails = new ArrayList<String>();
-        List<ValidEmail> emails = org.fhcrc.cpas.security.SecurityManager.normalizeEmails(rawEmails, invalidEmails);
+        List<ValidEmail> emails = org.labkey.api.security.SecurityManager.normalizeEmails(rawEmails, invalidEmails);
 
         StringBuffer message = new StringBuffer();
 

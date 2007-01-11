@@ -3,14 +3,14 @@ package Issues;
 import Issues.model.Issue;
 import Issues.model.IssueManager;
 import org.apache.log4j.Logger;
-import org.fhcrc.cpas.data.ColumnInfo;
-import org.fhcrc.cpas.data.Container;
-import org.fhcrc.cpas.data.DbCache;
-import org.fhcrc.cpas.issues.IssuesSchema;
-import org.fhcrc.cpas.jsp.JspBase;
-import org.fhcrc.cpas.security.User;
-import org.fhcrc.cpas.util.Cache;
-import org.fhcrc.cpas.util.PageFlowUtil;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DbCache;
+import org.labkey.api.issues.IssuesSchema;
+import org.labkey.api.jsp.JspBase;
+import org.labkey.api.security.User;
+import org.labkey.api.util.Cache;
+import org.labkey.api.util.PageFlowUtil;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -35,7 +35,7 @@ abstract public class IssuePage extends JspBase
     private boolean _hasUpdatePermissions;
     private String _requiredFields = IssueManager.getRequiredIssueFields();
 
-    private static Logger _log = Logger.getLogger("org.fhcrc.cpas." + IssuePage.class);
+    private static Logger _log = Logger.getLogger("org.labkey.api." + IssuePage.class);
 
     public Issue getIssue()
     {

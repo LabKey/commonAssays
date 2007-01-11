@@ -19,26 +19,26 @@ import cpas.ms2.pipeline.ProteinProphetPipelineProvider;
 import cpas.ms2.MS2SearchExperimentRunFilter;
 import cpas.ms2.MS2ServiceImpl;
 import org.apache.log4j.Logger;
-import org.fhcrc.cpas.data.*;
-import org.fhcrc.cpas.exp.ExperimentDataHandler;
-import org.fhcrc.cpas.exp.ExperimentRunFilter;
-import org.fhcrc.cpas.exp.api.ExperimentService;
-import org.fhcrc.cpas.module.DefaultModule;
-import org.fhcrc.cpas.module.ModuleContext;
-import org.fhcrc.cpas.module.ModuleLoader;
-import org.fhcrc.cpas.ms2.MS2Manager;
-import org.fhcrc.cpas.ms2.PepXmlExperimentDataHandler;
-import org.fhcrc.cpas.ms2.ProteinProphetExperimentDataHandler;
-import org.fhcrc.cpas.ms2.MS2Service;
-import org.fhcrc.cpas.ms2.query.MS2Schema;
-import org.fhcrc.cpas.ms2.pipeline.*;
-import org.fhcrc.cpas.pipeline.PipelineService;
-import org.fhcrc.cpas.protein.ProteinManager;
-import org.fhcrc.cpas.util.HashHelpers;
-import org.fhcrc.cpas.security.User;
-import org.fhcrc.cpas.util.NetworkDrive;
-import org.fhcrc.cpas.util.PageFlowUtil;
-import org.fhcrc.cpas.view.*;
+import org.labkey.api.data.*;
+import org.labkey.api.exp.ExperimentDataHandler;
+import org.labkey.api.exp.ExperimentRunFilter;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.ModuleContext;
+import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.ms2.MS2Manager;
+import org.labkey.api.ms2.PepXmlExperimentDataHandler;
+import org.labkey.api.ms2.ProteinProphetExperimentDataHandler;
+import org.labkey.api.ms2.MS2Service;
+import org.labkey.api.ms2.query.MS2Schema;
+import org.labkey.api.ms2.pipeline.*;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.protein.ProteinManager;
+import org.labkey.api.util.HashHelpers;
+import org.labkey.api.security.User;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.*;
 
 import java.beans.PropertyChangeEvent;
 import java.io.File;
@@ -275,13 +275,13 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
     public Set<Class<? extends TestCase>> getJUnitTests()
     {
         return new HashSet<Class<? extends TestCase>>(Arrays.asList(
-            org.fhcrc.cpas.ms2.pipeline.SequestParamsBuilder.TestCase.class,
-            org.fhcrc.cpas.ms2.pipeline.PositiveDoubleParamsValidator.TestCase.class,
-            org.fhcrc.cpas.ms2.pipeline.NaturalNumberParamsValidator.TestCase.class,
-            org.fhcrc.cpas.ms2.pipeline.NaturalNumberParamsValidator.TestCase.class,
-            org.fhcrc.cpas.ms2.pipeline.RealNumberParamsValidator.TestCase.class,
-            org.fhcrc.cpas.ms2.pipeline.BooleanParamsValidator.TestCase.class,
-            org.fhcrc.cpas.ms2.pipeline.PositiveIntegerParamsValidator.TestCase.class));
+            org.labkey.api.ms2.pipeline.SequestParamsBuilder.TestCase.class,
+            org.labkey.api.ms2.pipeline.PositiveDoubleParamsValidator.TestCase.class,
+            org.labkey.api.ms2.pipeline.NaturalNumberParamsValidator.TestCase.class,
+            org.labkey.api.ms2.pipeline.NaturalNumberParamsValidator.TestCase.class,
+            org.labkey.api.ms2.pipeline.RealNumberParamsValidator.TestCase.class,
+            org.labkey.api.ms2.pipeline.BooleanParamsValidator.TestCase.class,
+            org.labkey.api.ms2.pipeline.PositiveIntegerParamsValidator.TestCase.class));
     }
 
 

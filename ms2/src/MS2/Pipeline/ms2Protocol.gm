@@ -1,5 +1,5 @@
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
 <form action="createMS2Protocol.view" method="POST" onsubmit="return checkName()">
 <input type="hidden" name="path" value="<%=filter(form.path)%>">
 <table>

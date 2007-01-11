@@ -15,15 +15,15 @@
  */
 package Project;
 
-import org.fhcrc.cpas.module.Module;
-import org.fhcrc.cpas.module.DefaultModule;
-import org.fhcrc.cpas.module.ModuleContext;
-import org.fhcrc.cpas.view.WebPartFactory;
-import org.fhcrc.cpas.view.WebPartView;
-import org.fhcrc.cpas.view.Portal;
-import org.fhcrc.cpas.view.ViewContext;
-import org.fhcrc.cpas.data.ContainerManager;
-import org.fhcrc.cpas.data.Container;
+import org.labkey.api.module.Module;
+import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.ModuleContext;
+import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.view.WebPartView;
+import org.labkey.api.view.Portal;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.Container;
 import org.apache.log4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;

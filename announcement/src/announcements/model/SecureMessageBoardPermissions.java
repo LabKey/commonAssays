@@ -1,12 +1,12 @@
 package announcements.model;
 
-import org.fhcrc.cpas.announcements.Announcement;
-import org.fhcrc.cpas.announcements.AnnouncementManager;
-import org.fhcrc.cpas.data.Container;
-import org.fhcrc.cpas.data.Filter;
-import org.fhcrc.cpas.data.SimpleFilter;
-import org.fhcrc.cpas.security.ACL;
-import org.fhcrc.cpas.security.User;
+import org.labkey.api.announcements.Announcement;
+import org.labkey.api.announcements.AnnouncementManager;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.Filter;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
 
 /**
  * User: adam
@@ -15,7 +15,7 @@ import org.fhcrc.cpas.security.User;
  */
 public class SecureMessageBoardPermissions extends NormalMessageBoardPermissions
 {
-    protected final static int EDITOR_PERM = org.fhcrc.cpas.security.SecurityManager.PermissionSet.EDITOR.getPermissions();
+    protected final static int EDITOR_PERM = org.labkey.api.security.SecurityManager.PermissionSet.EDITOR.getPermissions();
     protected AnnouncementManager.Settings _settings;
 
     public SecureMessageBoardPermissions(Container c, User user, AnnouncementManager.Settings settings)

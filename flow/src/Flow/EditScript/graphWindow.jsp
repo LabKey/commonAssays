@@ -1,4 +1,4 @@
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
 <%@ page import="Flow.EditScript.ScriptController"%>
 <%@ page extends="Flow.EditScript.ScriptController.GraphWindowPage" %>
 <% ViewURLHelper urlGraph = getPageFlow().cloneViewURLHelper();

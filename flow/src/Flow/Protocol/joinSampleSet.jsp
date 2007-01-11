@@ -1,9 +1,9 @@
 <%@ page import="Flow.Protocol.JoinSampleSetForm"%>
 <%@ page import="java.util.Map"%>
-<%@ page import="org.fhcrc.cpas.query.api.FieldKey"%>
+<%@ page import="org.labkey.api.query.api.FieldKey"%>
 <%@ page import="Flow.Protocol.ProtocolController.Action"%>
 <%@ page import="org.fhcrc.cpas.flow.util.PFUtil"%>
-<%@ page extends="org.fhcrc.cpas.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib uri="http://cpas.fhcrc.org/taglib/cpas" prefix="cpas" %>
 <% JoinSampleSetForm form = (JoinSampleSetForm) __form;
     Map<String, String> sampleKeyFields = form.getAvailableSampleKeyFields();

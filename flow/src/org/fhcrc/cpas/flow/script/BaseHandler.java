@@ -4,8 +4,8 @@ import org.fhcrc.cpas.flow.data.*;
 import org.fhcrc.cpas.flow.data.FlowDataType;
 import org.fhcrc.cpas.flow.persist.AttributeSet;
 import org.fhcrc.cpas.exp.xml.*;
-import org.fhcrc.cpas.exp.PropertyDescriptor;
-import org.fhcrc.cpas.data.Container;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.data.Container;
 
 import java.util.*;
 import java.sql.SQLException;

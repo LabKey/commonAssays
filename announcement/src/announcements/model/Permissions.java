@@ -1,7 +1,7 @@
 package announcements.model;
 
-import org.fhcrc.cpas.announcements.Announcement;
-import org.fhcrc.cpas.data.SimpleFilter;
+import org.labkey.api.announcements.Announcement;
+import org.labkey.api.data.SimpleFilter;
 
 /**
  * User: adam

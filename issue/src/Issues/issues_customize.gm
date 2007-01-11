@@ -1,4 +1,4 @@
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 
 <form name= "frmCustomize" method="post" action="${postURL}">
 <input type="hidden" name="pageId" value="${webPart.pageId}">

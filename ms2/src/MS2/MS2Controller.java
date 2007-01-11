@@ -27,28 +27,29 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionMapping;
-import org.fhcrc.cpas.data.*;
-import org.fhcrc.cpas.data.Container;
-import org.fhcrc.cpas.exp.*;
-import org.fhcrc.cpas.exp.api.ExperimentService;
-import org.fhcrc.cpas.exp.api.ExpRun;
-import org.fhcrc.cpas.ms2.*;
-import org.fhcrc.cpas.ms2.pipeline.MS2PipelineManager;
-import org.fhcrc.cpas.ms2.pipeline.MascotClientImpl;
-import org.fhcrc.cpas.pipeline.PipelineJob;
-import org.fhcrc.cpas.pipeline.PipelineService;
-import org.fhcrc.cpas.pipeline.PipelineStatusFile;
-import org.fhcrc.cpas.pipeline.PipelineStatusManager;
-import org.fhcrc.cpas.protein.*;
-import org.fhcrc.cpas.protein.tools.NullOutputStream;
-import org.fhcrc.cpas.protein.tools.PieJChartHelper;
-import org.fhcrc.cpas.protein.tools.ProteinDictionaryHelpers;
-import org.fhcrc.cpas.security.ACL;
-import org.fhcrc.cpas.security.User;
+import org.labkey.api.data.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.exp.*;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.ms2.*;
+import org.labkey.api.ms2.pipeline.MS2PipelineManager;
+import org.labkey.api.ms2.pipeline.MascotClientImpl;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.pipeline.PipelineStatusManager;
+import org.labkey.api.protein.*;
+import org.labkey.api.protein.tools.NullOutputStream;
+import org.labkey.api.protein.tools.PieJChartHelper;
+import org.labkey.api.protein.tools.ProteinDictionaryHelpers;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
 import org.fhcrc.cpas.tools.MS2Modification;
 import org.fhcrc.cpas.tools.PeptideProphetSummary;
-import org.fhcrc.cpas.util.*;
-import org.fhcrc.cpas.view.*;
+import org.fhcrc.cpas.util.Pair;
+import org.labkey.api.util.*;
+import org.labkey.api.view.*;
 import org.jfree.chart.imagemap.ImageMapUtilities;
 
 import javax.servlet.ServletException;
@@ -71,7 +72,7 @@ public class MS2Controller extends ViewController
 {
     private static final int MAX_INSERTIONS_DISPLAY_ROWS = 1000; // Limit annotation table insertions to 1000 rows
 
-    private static Logger _log = Logger.getLogger("org.fhcrc.cpas." + MS2Controller.class);
+    private static Logger _log = Logger.getLogger("org.labkey.api." + MS2Controller.class);
     private static final String MS2_VIEWS_CATEGORY = "MS2Views";
 
     private static final String CAPTION_SCORING_BUTTON = "Compare Scoring";

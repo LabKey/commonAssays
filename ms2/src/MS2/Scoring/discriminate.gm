@@ -1,6 +1,6 @@
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
-<%@ page import="org.fhcrc.cpas.view.ThemeFont"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.view.ThemeFont"%>
 <% StringBuffer params = new StringBuffer(); %>
 <form method=get action="discriminate.post">
 <%  if (error != null && error.length() > 0) { %>

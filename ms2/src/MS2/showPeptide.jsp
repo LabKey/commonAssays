@@ -1,14 +1,14 @@
-<%@ page import="org.fhcrc.cpas.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
-<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
-<%@ page import="org.fhcrc.cpas.ms2.*"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.ms2.*"%>
 <%@ page import="MS2.MS2Controller"%>
-<%@ page import="org.fhcrc.cpas.view.JspView"%>
+<%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="MS2.MS2Controller.ShowPeptideContext"%>
-<%@ page import="org.fhcrc.cpas.util.URLHelper"%>
+<%@ page import="org.labkey.api.util.URLHelper"%>
 <%@ page import="java.text.DecimalFormat"%>
-<%@ page import="org.fhcrc.cpas.security.ACL"%>
-<%@ page import="org.fhcrc.cpas.util.Formats"%>
+<%@ page import="org.labkey.api.security.ACL"%>
+<%@ page import="org.labkey.api.util.Formats"%>
 <%
     JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
     MS2Controller.ShowPeptideContext ctx = me.getModel();

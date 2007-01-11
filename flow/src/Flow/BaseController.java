@@ -1,7 +1,7 @@
 package Flow;
 
-import org.fhcrc.cpas.view.ViewController;
-import org.fhcrc.cpas.view.ViewURLHelper;
+import org.labkey.api.view.ViewController;
+import org.labkey.api.view.ViewURLHelper;
 import org.fhcrc.cpas.flow.util.PFUtil;
 
 abstract public class BaseController<A extends Enum, P extends Enum> extends ViewController
