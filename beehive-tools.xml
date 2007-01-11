@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<!--
+   Copyright 2004-2005 The Apache Software Foundation.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+   
+       http://www.apache.org/licenses/LICENSE-2.0
+   
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+  
+   $Header:$
+ -->
+
+<!--
+  This Ant build file contains <macrodef>s that are used to build
+  Beehive-related source artifacts.
+-->
+<project name="Beehive/Tools" default="usage">
+
+    <path id="apt.task.classpath">
+        <path refid="controls.dependency.path"/>
+        <path refid="velocity.dependency.path"/>
+    </path>
+
+    <macrodef name="build-schemas">
+        <attribute name="srcdir" description="The directory containing XML Schemas or XMLBeans xsdconfig files to build"/>
+        <attribute name="destdir" description="The directory to use for files generated during an XSD build"/>
+        <sequential>
+            <taskdef name="xmlbeanbuild" 
+                     classname="org.apache.xmlbeans.impl.tool.XMLBean" 
+                     classpathref="xbean.dependency.path"/>
+
+            <xmlbeanbuild classpathref="xbean.dependency.path"
+                          schema="@{srcdir}"
+                          classgendir="@{destdir}"
+                          failonerror="true"/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="build-controls">
+        <attribute name="srcdir" description="The directory containing controls to build.  Required."/>
+        <attribute name="destdir" description="The destination directory for compiled class files.  Required."/>
+        <attribute name="tempdir" description="The temporary directory for generated files.  Required."/>
+        <attribute name="classpathref" description="The classpath reference for building the controls.  Required."/>
+        <sequential>
+            <taskdef name="apt" 
+                     classname="org.apache.beehive.controls.runtime.generator.AptTask" 
+                     classpathref="apt.task.classpath"
+                     onerror="fail"/>
+
+            <!-- 
+                 since Velocity is required at build time for controls, it needs to be
+                 explicitly added  here via the velocity.dependency.path
+              -->
+            <path id="_controls.build.classpath">
+                <path refid="@{classpathref}"/>
+                <path refid="velocity.dependency.path"/>
+            </path>
+
+            <apt srcdir="@{srcdir}"
+                 destdir="@{destdir}"
+                 gendir="@{tempdir}"
+                 classpathref="_controls.build.classpath"
+                 compileByExtension="true" 
+                 srcExtensions="*.java,*.jcx,*.jcs,*.jws" 
+                 debug="true"/>
+        </sequential>
+    </macrodef>
+
+    <!-- This macrodef is intended for the compilation of the *page flow* portions of a web application.
+         This macrodef will *not* compile controls inside of a web application.  If the web application
+         contains controls, they must be compiled first using the macrodef "build-controls" (see above); 
+         once the compilation of the controls is complete, the page flows within the web app can be compiled 
+         using the macrodef below. --> 
+    <macrodef name="build-pageflows">
+        <attribute name="srcdir" description="The root directory which will be scanned for source files.  Required."/>
+        <attribute name="classpathref" description="The classpath reference for building page flows. Required."/>
+        <attribute name="sourcepathref" default="_pageflow.default.sourcepath" description="A reference to a path that contains all the source roots.  Defaults to a path that contains @{srcdir} and @{srcdir}/WEB-INF/src."/>
+        <attribute name="webcontentdir" default="@{srcdir}" description="The root location for web content (e.g., JSPs, web.xml, etc.).  Defaults to @{srcdir}."/>
+        <attribute name="destdir" default="@{srcdir}/WEB-INF/classes" description="The directory for compiled classes and generated resources.  Defaults to @{srcdir}/WEB-INF/classes."/>
+        <attribute name="tempdir" default="@{srcdir}/WEB-INF/.tmpbeansrc" description="The directory for temporary .java files, copied from page flows (etc.) with non-.java extensions.  Defaults to @{srcdir}/WEB-INF/.tmpbeansrc."/>
+
+        <sequential>
+            <taskdef name="apt" 
+                     classname="org.apache.beehive.controls.runtime.generator.AptTask" 
+                     classpathref="apt.task.classpath"
+                     onerror="fail"/>
+
+            <!-- 
+                 since the annotation processor for JPFs isn't contained inside of the JPF runtime
+                 JAR, it needs to be explicitly added here via the netui-compiler.dependency.path
+              -->
+            <path id="_pageflow.build.classpath">
+                <path refid="@{classpathref}"/>
+                <path refid="netui-compiler.dependency.path"/>
+                <path refid="velocity.dependency.path"/>
+            </path>
+
+            <path id="_pageflow.default.sourcepath">
+                <pathelement path="@{srcdir}"/>
+                <pathelement path="@{srcdir}/WEB-INF/src"/>
+            </path>
+
+            <property name="_pageflow.build.classpath" refid="_pageflow.build.classpath"/>
+            <property name="_pageflow.build.sourcepath" refid="@{sourcepathref}"/>
+
+            <echo>    srcdir: @{srcdir}</echo>
+            <echo>    classpath: ${_pageflow.build.classpath}</echo>
+            <echo>    sourcepath: ${_pageflow.build.sourcepath}</echo>
+            <echo>    webcontentdir: @{webcontentdir}</echo>
+            <echo>    destdir: @{destdir}</echo>
+            <echo>    tempdir: @{tempdir}</echo>
+
+            <mkdir dir="@{destdir}"/>
+
+            <apt srcdir="@{srcdir}" 
+                 destdir="@{destdir}"
+                 gendir="@{tempdir}"
+                 classpathref="_pageflow.build.classpath"
+                 sourcepathref="@{sourcepathref}"
+                 srcExtensions="*.jpf,*.jpfs,*.app,*.jsfb,*.java" 
+                 processorOptions="web.content.root=@{webcontentdir}"
+                 debug="true"/>
+        </sequential>
+    </macrodef>
+
+    <!-- create a jar of a control -->
+<!--
+    <taskdef name="control-jar" 
+             classname="org.apache.beehive.controls.runtime.packaging.ControlJarTask" 
+             classpathref="controls.dependency.path" onerror="report" />             
+-->
+    <target name="usage" description="Print the usage for this Ant build file.">
+        <echo>
+The beehive-tools.xml file contains Ant macros which can be used 
+to build Beehive related source artifacts such as Controls, Page Flows, 
+and XML Schemas.  For examples of how to use these macros, see the 
+Beehive samples.
+
+Note, this build file does not contain targets that can be called 
+directly on the command line.
+        </echo>
+    </target>
+
+</project>

@@ -1,0 +1,12 @@
+<table class="dataRegion">
+  <tr><td>$viewInstructions<br><br>
+To define a view: display a run, filter the run, click "Save View", and pick a name.  The filter you've set up will be saved with the view and the name will then appear in the list below.</td></tr>
+  <tr><td><form method="get" action="$nextUrl">
+    <table class="dataRegion" border="0">
+      <tr><td>$select</td></tr>
+      <tr><td><input type="hidden" name="runList" value="${runList}"></td></tr>
+      $!extraHtml
+      <tr><td><br><input type="image" src="${tools.buttonSrc('Go')}" name="submit"></td></tr>
+    </table></form></td>
+  </tr>
+</table>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><ns:tables xmlns:ns="http://cpas.fhcrc.org/data/xml">
+  <ns:table tableName="Attribute" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="RowId"/>
+      <ns:column columnName="Name"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="Keyword" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="RowId"/>
+      <ns:column columnName="ObjectId"/>
+      <ns:column columnName="KeywordId"/>
+      <ns:column columnName="Value"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="Graph" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="RowId"/>
+      <ns:column columnName="ObjectId"/>
+      <ns:column columnName="GraphId"/>
+      <ns:column columnName="Data"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="Statistic" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="RowId"/>
+      <ns:column columnName="ObjectId"/>
+      <ns:column columnName="StatisticId"/>
+      <ns:column columnName="Value"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="Object" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="RowId"/>
+      <ns:column columnName="DataId"/>
+      <ns:column columnName="TypeId"/>
+      <ns:column columnName="Uri"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="Script" tableDbType="TABLE">
+      <ns:columns>
+          <ns:column columnName="RowId" />
+          <ns:column columnName="ObjectId" />
+          <ns:column columnName="Text" />
+      </ns:columns>
+  </ns:table>
+</ns:tables>

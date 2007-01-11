@@ -1,0 +1,46 @@
+<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
+<form action="createMS2Protocol.view" method="POST" onsubmit="return checkName()">
+<input type="hidden" name="path" value="<%=filter(form.path)%>">
+<table>
+    <tr>
+        <td class="ms-searchform">Protocol Name</td>
+        <td class="ms-vb"><input id="protocolName" name="name" value="<%=filter(form.name)%>"></td>
+    </tr>
+    <tr>
+        <td class="ms-searchform">Sample Preparation Protocol</td>
+        <td class="ms-vb">
+            <textarea name="descriptionSamplePrep" rows="10" cols="50"><%=filter(form.descriptionSamplePrep)%></textarea>
+        </td>
+    </tr>
+    <tr>
+        <td class="ms-searchform">LCMS2 Protocol</td>
+        <td class="ms-vb">
+            <textarea name="descriptionLcms" rows="10" cols="50"><%=filter(form.descriptionLcms)%></textarea>
+        </td>
+    </tr>
+</table>
+<input type="image" src="<%=PageFlowUtil.buttonSrc("Submit")%>">&nbsp;<a href="<%=ViewURLHelper.toPathString("Pipeline", "returnToReferer", container.getPath())%>"><%=PageFlowUtil.buttonImg("Cancel")%></a>
+
+</form>
+<script >
+    function checkName()
+    {
+        var input = document.getElementById("protocolName");
+        var value = input.value;
+        //TRIM
+        if (null != value)
+            value = value.replace(/ +<%="\$"%>/, "");
+        if (value == "")
+        {
+            alert("Please supply a name for the protocol");
+            return false;
+        }
+        if (value.indexOf(":") >= 0 || value.indexOf("/") >= 0 || value.indexOf("\\") >= 0)
+        {
+            alert("Protocol Name cannot contain special characters");
+            return false;
+        }
+        return true;
+    }
+</script>

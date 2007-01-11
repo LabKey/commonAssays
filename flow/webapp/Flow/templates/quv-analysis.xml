@@ -1,0 +1,564 @@
+<script xmlns="http://cpas.fhcrc.org/flow/script/xml">
+  <compensationCalculation>
+    <population name="Sing">
+      <gate>
+        <polygon xAxis="FSC-H" yAxis="FSC-A">
+          <point x="133120.0" y="153600.0"/>
+          <point x="63488.0" y="67584.0"/>
+          <point x="32768.0" y="28672.0"/>
+          <point x="14336.0" y="31744.0"/>
+          <point x="10240.0" y="64512.0"/>
+          <point x="64512.0" y="149504.0"/>
+          <point x="137216.0" y="237568.0"/>
+          <point x="152576.0" y="262144.0"/>
+          <point x="215040.0" y="262144.0"/>
+        </polygon>
+      </gate>
+      <population name="L">
+        <gate>
+          <polygon xAxis="SSC-A" yAxis="FSC-A">
+            <point x="45056.0" y="166912.0"/>
+            <point x="36864.0" y="90112.0"/>
+            <point x="27648.0" y="58368.0"/>
+            <point x="20480.0" y="44032.0"/>
+            <point x="-512.0" y="36864.0"/>
+            <point x="-512.0" y="45056.0"/>
+            <point x="-512.0" y="150528.0"/>
+            <point x="24576.0" y="193536.0"/>
+          </polygon>
+        </gate>
+        <population name="-">
+          <gate>
+            <polygon xAxis="SSC-A" yAxis="PE Tx RD-A">
+              <point x="52224.0" y="215.0"/>
+              <point x="-512.0" y="215.0"/>
+              <point x="-512.0" y="-121.0"/>
+              <point x="52224.0" y="-121.0"/>
+            </polygon>
+          </gate>
+        </population>
+        <population name="Alx700+">
+          <gate>
+            <polygon xAxis="SSC-A" yAxis="Alexa 680-A">
+              <point x="62464.0" y="3825.0"/>
+              <point x="-512.0" y="3825.0"/>
+              <point x="-512.0" y="193.0"/>
+              <point x="62464.0" y="193.0"/>
+            </polygon>
+          </gate>
+        </population>
+        <population name="APC+">
+          <gate>
+            <polygon xAxis="SSC-A" yAxis="APC-A">
+              <point x="56320.0" y="16118.0"/>
+              <point x="-512.0" y="16118.0"/>
+              <point x="-512.0" y="1105.0"/>
+              <point x="56320.0" y="1105.0"/>
+            </polygon>
+          </gate>
+        </population>
+        <population name="FITC+">
+          <gate>
+            <polygon xAxis="SSC-A" yAxis="FITC-A">
+              <point x="58368.0" y="6412.0"/>
+              <point x="-512.0" y="6412.0"/>
+              <point x="-512.0" y="318.0"/>
+              <point x="58368.0" y="318.0"/>
+            </polygon>
+          </gate>
+        </population>
+        <population name="PE+">
+          <gate>
+            <polygon xAxis="SSC-A" yAxis="PE Green laser-A">
+              <point x="59392.0" y="107000.0"/>
+              <point x="-512.0" y="107000.0"/>
+              <point x="-512.0" y="5920.0"/>
+              <point x="59392.0" y="5920.0"/>
+            </polygon>
+          </gate>
+        </population>
+        <population name="PE-Cy7+">
+          <gate>
+            <polygon xAxis="SSC-A" yAxis="PE Cy7-A">
+              <point x="46080.0" y="77749.0"/>
+              <point x="-512.0" y="77749.0"/>
+              <point x="-512.0" y="1818.0"/>
+              <point x="46080.0" y="1818.0"/>
+            </polygon>
+          </gate>
+        </population>
+        <population name="PerCP-Cy55+">
+          <gate>
+            <polygon xAxis="SSC-A" yAxis="PE Cy55-A">
+              <point x="55296.0" y="2903.0"/>
+              <point x="-512.0" y="2903.0"/>
+              <point x="-512.0" y="239.0"/>
+              <point x="55296.0" y="239.0"/>
+            </polygon>
+          </gate>
+        </population>
+        <population name="TR-PE+">
+          <gate>
+            <polygon xAxis="SSC-A" yAxis="PE Tx RD-A">
+              <point x="66560.0" y="61008.0"/>
+              <point x="-512.0" y="61008.0"/>
+              <point x="-512.0" y="4663.0"/>
+              <point x="66560.0" y="4663.0"/>
+            </polygon>
+          </gate>
+        </population>
+        <population name="Vi LD+">
+          <gate>
+            <polygon xAxis="SSC-A" yAxis="Pacific Blue-A">
+              <point x="68608.0" y="3398.0"/>
+              <point x="-512.0" y="3398.0"/>
+              <point x="-512.0" y="296.0"/>
+              <point x="68608.0" y="296.0"/>
+            </polygon>
+          </gate>
+        </population>
+      </population>
+    </population>
+    <channel name="PE Green laser-A">
+      <positive subset="Sing/L/PE+">
+        <criteria keyword="Comp" pattern="PE CD8"/>
+      </positive>
+      <negative subset="Sing/L">
+        <criteria keyword="WELL ID" pattern="H01"/>
+      </negative>
+    </channel>
+    <channel name="FITC-A">
+      <positive subset="Sing/L/FITC+">
+        <criteria keyword="Comp" pattern="FITC CD4"/>
+      </positive>
+      <negative subset="Sing/L">
+        <criteria keyword="WELL ID" pattern="H01"/>
+      </negative>
+    </channel>
+    <channel name="Alexa 680-A">
+      <positive subset="Sing/L/Alx700+">
+        <criteria keyword="Comp" pattern="Alx700 TNFa"/>
+      </positive>
+      <negative subset="Sing/L">
+        <criteria keyword="WELL ID" pattern="H01"/>
+      </negative>
+    </channel>
+    <channel name="APC-A">
+      <positive subset="Sing/L/APC+">
+        <criteria keyword="Comp" pattern="APC CD3"/>
+      </positive>
+      <negative subset="Sing/L">
+        <criteria keyword="WELL ID" pattern="H01"/>
+      </negative>
+    </channel>
+    <channel name="PE Cy55-A">
+      <positive subset="Sing/L/PerCP-Cy55+">
+        <criteria keyword="Comp" pattern="PerCP-Cy5.5 CD8"/>
+      </positive>
+      <negative subset="Sing/L">
+        <criteria keyword="WELL ID" pattern="H01"/>
+      </negative>
+    </channel>
+    <channel name="Pacific Blue-A">
+      <positive subset="Sing/L/Vi LD+">
+        <criteria keyword="Comp" pattern="PacBlue Vi L/D"/>
+      </positive>
+      <negative subset="Sing/L">
+        <criteria keyword="WELL ID" pattern="H01"/>
+      </negative>
+    </channel>
+    <channel name="PE Tx RD-A">
+      <positive subset="Sing/L/TR-PE+">
+        <criteria keyword="Comp" pattern="TR-PE CD3"/>
+      </positive>
+      <negative subset="Sing/L">
+        <criteria keyword="WELL ID" pattern="H01"/>
+      </negative>
+    </channel>
+    <channel name="PE Cy7-A">
+      <positive subset="Sing/L/PE-Cy7+">
+        <criteria keyword="Comp" pattern="PE-Cy7 IFNg"/>
+      </positive>
+      <negative subset="Sing/L">
+        <criteria keyword="WELL ID" pattern="H01"/>
+      </negative>
+    </channel>
+  </compensationCalculation>
+  <analysis>
+    <population name="Singlets">
+      <gate>
+        <polygon xAxis="FSC-H" yAxis="FSC-A">
+          <point x="155648.0" y="169984.0"/>
+          <point x="60416.0" y="52224.0"/>
+          <point x="25600.0" y="20480.0"/>
+          <point x="7168.0" y="53248.0"/>
+          <point x="52224.0" y="107520.0"/>
+          <point x="89088.0" y="171008.0"/>
+          <point x="139264.0" y="235520.0"/>
+          <point x="189440.0" y="266240.0"/>
+          <point x="242688.0" y="266240.0"/>
+        </polygon>
+      </gate>
+      <population name="L">
+        <gate>
+          <polygon xAxis="SSC-A" yAxis="FSC-A">
+            <point x="43008.0" y="184320.0"/>
+            <point x="41984.0" y="125952.0"/>
+            <point x="33792.0" y="83968.0"/>
+            <point x="24576.0" y="52224.0"/>
+            <point x="17408.0" y="39936.0"/>
+            <point x="3072.0" y="36864.0"/>
+            <point x="0.0" y="57344.0"/>
+            <point x="0.0" y="126976.0"/>
+            <point x="7168.0" y="195584.0"/>
+            <point x="27648.0" y="207872.0"/>
+          </polygon>
+        </gate>
+        <population name="Live">
+          <gate>
+            <polygon xAxis="&lt;Pacific Blue-A&gt;" yAxis="FSC-A">
+              <point x="106.0" y="212992.0"/>
+              <point x="-114.0" y="212992.0"/>
+              <point x="-114.0" y="32768.0"/>
+              <point x="106.0" y="32768.0"/>
+            </polygon>
+          </gate>
+          <population name="3+">
+            <gate>
+              <polygon xAxis="&lt;PE Cy55-A&gt;" yAxis="&lt;PE Tx RD-A&gt;">
+                <point x="-114.0" y="47876.0"/>
+                <point x="3140.0" y="47876.0"/>
+                <point x="3140.0" y="439.0"/>
+                <point x="-114.0" y="439.0"/>
+              </polygon>
+            </gate>
+            <population name="4+">
+              <gate>
+                <polygon xAxis="&lt;PE Cy55-A&gt;" yAxis="&lt;FITC-A&gt;">
+                  <point x="121.0" y="2482.0"/>
+                  <point x="116.0" y="354.0"/>
+                  <point x="79.8" y="200.0"/>
+                  <point x="19.4" y="131.0"/>
+                  <point x="-114.0" y="137.0"/>
+                  <point x="-114.0" y="2684.0"/>
+                </polygon>
+              </gate>
+              <population name="IFNg+">
+                <gate>
+                  <polygon xAxis="SSC-A" yAxis="&lt;PE Cy7-A&gt;">
+                    <point x="72704.0" y="103000.0"/>
+                    <point x="-2560.0" y="103000.0"/>
+                    <point x="-2560.0" y="380.0"/>
+                    <point x="72704.0" y="380.0"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="IL2+">
+                <gate>
+                  <polygon xAxis="SSC-A" yAxis="&lt;PE Green laser-A&gt;">
+                    <point x="-6656.0" y="116000.0"/>
+                    <point x="96256.0" y="116000.0"/>
+                    <point x="96256.0" y="472.0"/>
+                    <point x="-6656.0" y="472.0"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="IL4+">
+                <gate>
+                  <polygon xAxis="SSC-A" yAxis="&lt;APC-A&gt;">
+                    <point x="69632.0" y="33291.0"/>
+                    <point x="-1536.0" y="33291.0"/>
+                    <point x="-1536.0" y="154.0"/>
+                    <point x="69632.0" y="154.0"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="Q1: IL2-; IFNg+">
+                <gate>
+                  <polygon xAxis="&lt;PE Green laser-A&gt;" yAxis="&lt;PE Cy7-A&gt;">
+                    <point x="-1170000.0" y="4.71E7"/>
+                    <point x="-1170000.0" y="380.0"/>
+                    <point x="472.0" y="380.0"/>
+                    <point x="472.0" y="4.71E7"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="Q2: IL2+; IFNg+">
+                <gate>
+                  <polygon xAxis="&lt;PE Green laser-A&gt;" yAxis="&lt;PE Cy7-A&gt;">
+                    <point x="472.0" y="4.71E7"/>
+                    <point x="472.0" y="380.0"/>
+                    <point x="6.67E7" y="380.0"/>
+                    <point x="6.67E7" y="4.71E7"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="Q3: IL2+; IFNg-">
+                <gate>
+                  <polygon xAxis="&lt;PE Green laser-A&gt;" yAxis="&lt;PE Cy7-A&gt;">
+                    <point x="472.0" y="380.0"/>
+                    <point x="472.0" y="-1650000.0"/>
+                    <point x="6.67E7" y="-1650000.0"/>
+                    <point x="6.67E7" y="380.0"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="Q4: IL2-; IFNg-">
+                <gate>
+                  <polygon xAxis="&lt;PE Green laser-A&gt;" yAxis="&lt;PE Cy7-A&gt;">
+                    <point x="-1170000.0" y="380.0"/>
+                    <point x="-1170000.0" y="-1650000.0"/>
+                    <point x="472.0" y="-1650000.0"/>
+                    <point x="472.0" y="380.0"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="TNF+">
+                <gate>
+                  <polygon xAxis="SSC-A" yAxis="&lt;Alexa 680-A&gt;">
+                    <point x="69632.0" y="24110.0"/>
+                    <point x="-4608.0" y="24110.0"/>
+                    <point x="-4608.0" y="186.0"/>
+                    <point x="69632.0" y="186.0"/>
+                  </polygon>
+                </gate>
+              </population>
+            </population>
+            <population name="8+">
+              <gate>
+                <polygon xAxis="&lt;PE Cy55-A&gt;" yAxis="&lt;FITC-A&gt;">
+                  <point x="1889.0" y="160.0"/>
+                  <point x="296.0" y="160.0"/>
+                  <point x="148.0" y="131.0"/>
+                  <point x="88.3" y="55.9"/>
+                  <point x="84.0" y="-121.0"/>
+                  <point x="2207.0" y="-121.0"/>
+                </polygon>
+              </gate>
+              <population name="IFNg+">
+                <gate>
+                  <polygon xAxis="SSC-A" yAxis="&lt;PE Cy7-A&gt;">
+                    <point x="73728.0" y="148000.0"/>
+                    <point x="-1536.0" y="148000.0"/>
+                    <point x="-1536.0" y="526.0"/>
+                    <point x="73728.0" y="526.0"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="IL2+">
+                <gate>
+                  <polygon xAxis="SSC-A" yAxis="&lt;PE Green laser-A&gt;">
+                    <point x="-5632.0" y="116000.0"/>
+                    <point x="106496.0" y="116000.0"/>
+                    <point x="106496.0" y="380.0"/>
+                    <point x="-5632.0" y="380.0"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="IL4+">
+                <gate>
+                  <polygon xAxis="SSC-A" yAxis="&lt;APC-A&gt;">
+                    <point x="68608.0" y="38783.0"/>
+                    <point x="-2560.0" y="38783.0"/>
+                    <point x="-2560.0" y="174.0"/>
+                    <point x="68608.0" y="174.0"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="Q1: IL2-; IFNg+">
+                <gate>
+                  <polygon xAxis="&lt;PE Green laser-A&gt;" yAxis="&lt;PE Cy7-A&gt;">
+                    <point x="-1750000.0" y="7.93E7"/>
+                    <point x="-1750000.0" y="526.0"/>
+                    <point x="367.0" y="526.0"/>
+                    <point x="367.0" y="7.93E7"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="Q2: IL2+; IFNg+">
+                <gate>
+                  <polygon xAxis="&lt;PE Green laser-A&gt;" yAxis="&lt;PE Cy7-A&gt;">
+                    <point x="367.0" y="7.93E7"/>
+                    <point x="367.0" y="526.0"/>
+                    <point x="4.45E7" y="526.0"/>
+                    <point x="4.45E7" y="7.93E7"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="Q3: IL2+; IFNg-">
+                <gate>
+                  <polygon xAxis="&lt;PE Green laser-A&gt;" yAxis="&lt;PE Cy7-A&gt;">
+                    <point x="367.0" y="526.0"/>
+                    <point x="367.0" y="-980000.0"/>
+                    <point x="4.45E7" y="-980000.0"/>
+                    <point x="4.45E7" y="526.0"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="Q4: IL2-; IFNg-">
+                <gate>
+                  <polygon xAxis="&lt;PE Green laser-A&gt;" yAxis="&lt;PE Cy7-A&gt;">
+                    <point x="-1750000.0" y="526.0"/>
+                    <point x="-1750000.0" y="-980000.0"/>
+                    <point x="367.0" y="-980000.0"/>
+                    <point x="367.0" y="526.0"/>
+                  </polygon>
+                </gate>
+              </population>
+              <population name="TNF+">
+                <gate>
+                  <polygon xAxis="SSC-A" yAxis="&lt;Alexa 680-A&gt;">
+                    <point x="69632.0" y="26135.0"/>
+                    <point x="-4608.0" y="26135.0"/>
+                    <point x="-4608.0" y="193.0"/>
+                    <point x="69632.0" y="193.0"/>
+                  </polygon>
+                </gate>
+              </population>
+            </population>
+          </population>
+        </population>
+      </population>
+    </population>
+    <statistic name="Count"/>
+    <statistic name="Count" subset="Singlets"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets"/>
+    <statistic name="Count" subset="Singlets/L"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L"/>
+    <statistic name="Count" subset="Singlets/L/Live"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;IL2+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;IL2+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;!IL2+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;!IL2+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;!IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;!IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;!IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;!IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;!IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;!IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;!IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(IFNg+&amp;!IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;IL2+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;IL2+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;!IL2+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;!IL2+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;!IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;!IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;!IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;!IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;!IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;!IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;!IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/(!IFNg+&amp;!IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/IFNg+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/IFNg+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/IL2+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/IL2+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/IL4+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/IL4+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/Q1: IL2-; IFNg+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/Q1: IL2-; IFNg+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/Q2: IL2+; IFNg+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/Q2: IL2+; IFNg+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/Q3: IL2+; IFNg-"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/Q3: IL2+; IFNg-"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/Q4: IL2-; IFNg-"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/Q4: IL2-; IFNg-"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/4+/TNF+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/4+/TNF+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;IL2+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;IL2+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;!IL2+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;!IL2+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;!IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;!IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;!IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;!IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;!IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;!IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;!IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(IFNg+&amp;!IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;IL2+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;IL2+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;!IL2+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;!IL2+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;!IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;!IL2+&amp;IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;!IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;!IL2+&amp;IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;!IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;!IL2+&amp;!IL4+&amp;TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;!IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/(!IFNg+&amp;!IL2+&amp;!IL4+&amp;!TNF+)"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/IFNg+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/IFNg+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/IL2+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/IL2+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/IL4+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/IL4+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/Q1: IL2-; IFNg+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/Q1: IL2-; IFNg+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/Q2: IL2+; IFNg+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/Q2: IL2+; IFNg+"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/Q3: IL2+; IFNg-"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/Q3: IL2+; IFNg-"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/Q4: IL2-; IFNg-"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/Q4: IL2-; IFNg-"/>
+    <statistic name="Count" subset="Singlets/L/Live/3+/8+/TNF+"/>
+    <statistic name="Freq_Of_Parent" subset="Singlets/L/Live/3+/8+/TNF+"/>
+    <graph xAxis="FSC-H" yAxis="FSC-A"/>
+    <graph subset="Singlets" xAxis="SSC-A" yAxis="FSC-A"/>
+    <graph subset="Singlets/L" xAxis="&lt;Pacific Blue-A&gt;" yAxis="FSC-A"/>
+    <graph subset="Singlets/L/Live" xAxis="&lt;PE Cy55-A&gt;" yAxis="&lt;PE Tx RD-A&gt;"/>
+    <graph subset="Singlets/L/Live/3+" xAxis="&lt;PE Cy55-A&gt;" yAxis="&lt;FITC-A&gt;"/>
+    <graph subset="Singlets/L/Live/3+/4+" xAxis="SSC-A" yAxis="&lt;PE Cy7-A&gt;"/>
+    <graph subset="Singlets/L/Live/3+/4+" xAxis="SSC-A" yAxis="&lt;PE Green laser-A&gt;"/>
+    <graph subset="Singlets/L/Live/3+/4+" xAxis="SSC-A" yAxis="&lt;APC-A&gt;"/>
+    <graph subset="Singlets/L/Live/3+/4+" xAxis="&lt;PE Green laser-A&gt;" yAxis="&lt;PE Cy7-A&gt;"/>
+    <graph subset="Singlets/L/Live/3+/4+" xAxis="SSC-A" yAxis="&lt;Alexa 680-A&gt;"/>
+    <graph subset="Singlets/L/Live/3+/8+" xAxis="SSC-A" yAxis="&lt;PE Cy7-A&gt;"/>
+    <graph subset="Singlets/L/Live/3+/8+" xAxis="SSC-A" yAxis="&lt;PE Green laser-A&gt;"/>
+    <graph subset="Singlets/L/Live/3+/8+" xAxis="SSC-A" yAxis="&lt;APC-A&gt;"/>
+    <graph subset="Singlets/L/Live/3+/8+" xAxis="&lt;PE Green laser-A&gt;" yAxis="&lt;PE Cy7-A&gt;"/>
+    <graph subset="Singlets/L/Live/3+/8+" xAxis="SSC-A" yAxis="&lt;Alexa 680-A&gt;"/>
+  </analysis>
+</script>

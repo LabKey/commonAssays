@@ -1,0 +1,17 @@
+<%import org.fhcrc.cpas.util.PageFlowUtil;%><rss version="2.0">
+<channel>
+    <title>${app.systemShortName}: ${app.systemDescription}</title>
+    <link>${homePageUrl}</link>
+    <description>${app.systemShortName}: ${app.systemDescription}</description>
+<%
+for (ann in announcements)
+    {%>
+    <item>
+        <title>${PageFlowUtil.filter(ann.title)}</title>
+        <link>${url}${ann.rowId}</link>
+        <description>${PageFlowUtil.filter(ann.body)}</description>
+        <pubDate>${ann.created}</pubDate>
+    </item><%
+    }%>
+</channel>
+</rss>

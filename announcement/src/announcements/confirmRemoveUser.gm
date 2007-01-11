@@ -1,0 +1,15 @@
+<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%  if (message)
+    {
+        %>${message}<%
+    }
+    else
+    {
+%><form action="${action}" method="POST">
+Are you sure you want to remove yourself (${email}) from the members list for this ${settings.conversationName.toLowerCase()}?
+<p/>
+<b>Title: ${thread.getTitle()}</b><br/>
+<p/>
+<input type=image src="<%=PageFlowUtil.buttonSrc("Remove","large")%>" value="Remove">&nbsp;<input type=image src="<%=PageFlowUtil.buttonSrc("Cancel","large")%>" value="Cancel" onclick="javascript:window.history.back(); return false;">
+</form>
+<%  } %>

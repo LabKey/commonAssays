@@ -1,0 +1,121 @@
+<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
+<%@ page import="org.fhcrc.cpas.view.ThemeFont"%>
+<% StringBuffer params = new StringBuffer(); %>
+<form method=get action="compare.post">
+<%  if (error != null && error.length() > 0) { %>
+<table border="0">
+    <tr><td class="cpas-error"><%=error%></td></tr>
+</table>
+    <br>
+<%  } %>
+<% if (runs != null && runs.length > 0) { %>
+<input type="hidden" name="size" value="<%=runs.size()%>">
+<% params.append("size=").append(runs.size()); %>
+<table>
+    <tr><td colspan=2 style="font-size:<%=ThemeFont.getThemeFont().getHeader_1Size()%>">
+    Choose discrimate values to display in ROC chart.<br>
+    </td></tr>
+    <tr><td valign="top">
+<table border="0">
+<%
+int index = 0;
+int validRuns = 0;
+for (run in runs)
+    {
+%>
+  <tr><td colspan="2" class="heading-1"><%=filter(run.description)%></td>
+    <tr><td>&nbsp;</td>
+<% if (runErrors[index] != null && runErrors[index].length() > 0) { %>
+        <td class="cpas-error"><%=runErrors[index]%></td></tr>
+<% } else { %>
+     <td class="ms-vb">
+        <input type="hidden" name="runIds[${index}]" value="<%=run.run%>">
+<%
+    params.append("&runIds[").append(index).append("]=").append(run.run);
+    validRuns++;
+
+    String s = run.discriminateExpressions;
+    String[] discriminates = s.split("\\s*,\\s*");
+    int discIndex = 0;
+    for (String discriminate in discriminates)
+        {
+        if (discriminate.startsWith("-"))
+            discriminate = discriminate.substring(1);
+
+%>
+        <input type="checkbox" name="discriminates_${index}_${discIndex}"><%=filter(discriminate)%><br>
+<%
+        discIndex++;
+        }
+%>
+      </td></tr>
+<%
+      }
+    index++;
+    }
+
+    if (validRuns > 0)
+    { %>
+        <tr><td>&nbsp;</td></tr>
+        <tr><td colspan=2>
+            <table border="0">
+                <tr><td class="ms-searchform">Title</td>
+                    <td class="ms-vb"><input type="text" size="15" name="title" value="${form.title}"></td></tr>
+                <tr><td class="ms-searchform">Increment</td>
+                    <td class="ms-vb"><input type="text" size="4" name="increment" value="${form.increment}">%</td></tr>
+                <tr><td class="ms-searchform">Limit</td>
+                    <td class="ms-vb"><input type="text" size="4" name="limit" value="${form.limit}"></td></tr>
+                <tr><td class="ms-searchform">Chart width</td>
+                    <td class="ms-vb"><input type="text" size="4" name="width" value="${form.width}"></td></tr>
+                <tr><td class="ms-searchform">Chart height</td>
+                    <td class="ms-vb"><input type="text" size="4" name="height" value="${form.height}"></td></tr>
+                <tr><td class="ms-searchform">Marks</td>
+                    <td class="ms-vb"><input type="text" size="15" name="marks" value="${form.marks}"></td></tr>
+            </table>
+        </td></tr>
+        <tr>
+            <td colspan="2"><input type=image src="<%=PageFlowUtil.submitSrc()%>"></td>
+        </tr>
+<%   } %>
+</table>
+</td>
+<%
+    params.append("&title=").append(filter(form.title))
+        .append("&increment=").append(filter(form.increment))
+        .append("&limit=").append(filter(form.limit))
+        .append("&width=").append(filter(form.width))
+        .append("&height=").append(filter(form.height))
+        .append("&marks=").append(filter(form.marks));
+
+    boolean hasData = false;
+    int d1 = 0;
+    boolean[][] discs = form.getDiscriminates();
+    while(d1 < discs.length)
+    {
+        int d2 = 0;
+        while (d2 < discs[d1].length)
+        {
+            if (discs[d1][d2])
+            {
+                params.append("&discriminates_").append(d1).append("_").append(d2).append("=on");
+                hasData = true;
+            }
+
+            d2++;
+        }
+
+        d1++;
+    }
+
+    if (hasData)
+    { %>
+
+    <td valign="top"><img src="chartCompare.view?<%=params%>"></td>
+
+<%  } %>
+
+</tr>
+</table>
+<% } %>
+</form>

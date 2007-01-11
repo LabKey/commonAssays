@@ -1,0 +1,363 @@
+<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.fhcrc.cpas.ms2.MS2Manager"%><?xml version="1.0" encoding="UTF-8"?>
+<exp:ExperimentArchive xmlns:exp="http://cpas.fhcrc.org/exp/xml" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://cpas.fhcrc.org/exp/xml http://cpas.fhcrc.org/download/XarSchema/V1.7/expTypes.xsd"">
+<%
+    //Make up an ObjectId for the overall protocol
+    //Must be different for all the actions in the protocol
+    def protocolObjectId = "";
+    if (null != prepProtocol)
+        protocolObjectId += prepProtocol.name + ".";
+    if (fractions.length > 1 )
+        protocolObjectId += "Fractions.";
+    protocolObjectId += run.type;
+
+def getDataFileUrl()
+    {
+
+    }
+
+%>
+	<exp:Experiment rdf:about="${experimentLSID}">
+		<exp:Name>Experiment for Container ${PageFlowUtil.filter(container.path)} </exp:Name>
+		<exp:Hypothesis>[describe]</exp:Hypothesis>
+		<exp:Properties>
+		</exp:Properties>
+	</exp:Experiment>
+	<exp:ProtocolDefinitions>
+    <% def preparedLSID = sample.LSID; %>
+    <% if (null != prepProtocol){
+        preparedLSID = "urn:lsid:${lsidAuthority}:Material.Prepared:${run.run}"
+    %>
+        <exp:Protocol rdf:about="${prepProtocol.LSID}">
+            <exp:Name>${PageFlowUtil.filter(prepProtocol.name)}</exp:Name>
+            <exp:ProtocolDescription>${PageFlowUtil.filter(prepProtocol.protocolDescription)}</exp:ProtocolDescription>
+			<exp:ApplicationType>SamplePreparation</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>1</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>0</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>1</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>0</exp:OutputDataPerInstance>
+			            <exp:Properties>
+            			</exp:Properties>
+
+        </exp:Protocol>
+
+    <%
+       }
+    %>
+		<exp:Protocol rdf:about="urn:lsid:cpas.fhcrc.org:Protocol.MS2:Fractionate">
+			<exp:Name>Fractionate</exp:Name>
+			<exp:ApplicationType>Fractionation</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>1</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>0</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>4</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+			<exp:OutputDataType>Data</exp:OutputDataType>
+			<exp:Instrument>Fractionate</exp:Instrument>
+			<exp:Properties>
+			</exp:Properties>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="urn:lsid:cpas.fhcrc.org:Protocol.MS2:LSMS2">
+			<exp:Name>Do MS2 Scans</exp:Name>
+			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>1</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>0</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+			<exp:OutputDataType>Data</exp:OutputDataType>
+			<exp:Instrument></exp:Instrument>
+			<exp:Properties>
+			</exp:Properties>
+		</exp:Protocol>
+
+		<exp:Protocol rdf:about="urn:lsid:cpas.fhcrc.org:Protocol.MS2:ConvertToMzXML">
+			<exp:Name>Convert to mzXML</exp:Name>
+			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>0</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>1</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+			<exp:OutputDataType>Data</exp:OutputDataType>
+			<exp:Instrument></exp:Instrument>
+			<exp:Properties>
+			</exp:Properties>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="urn:lsid:cpas.fhcrc.org:Protocol.MS2:${run.type}Search">
+			<exp:Name>${run.type} analysis</exp:Name>
+			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>0</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>1</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+			<exp:OutputDataType>Data</exp:OutputDataType>
+			<exp:Instrument></exp:Instrument>
+			<exp:Properties>
+			</exp:Properties>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="urn:lsid:cpas.fhcrc.org:Protocol.MS2:PeptideProphet">
+			<exp:Name>Peptide Prophet</exp:Name>
+			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>0</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>4</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+			<exp:OutputMaterialType/>
+			<exp:OutputDataType>Data</exp:OutputDataType>
+			<exp:Instrument></exp:Instrument>
+			<exp:Properties>
+			</exp:Properties>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="urn:lsid:cpas.fhcrc.org:Protocol.MS2:ExperimentRunOutput">
+			<exp:Name>Mark Run Outputs</exp:Name>
+			<exp:ProtocolDescription/>
+			<exp:ApplicationType>ExperimentRunOutput</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance xsi:nil="true"/>
+			<exp:MaxInputDataPerInstance xsi:nil="true"/>
+			<exp:OutputMaterialPerInstance xsi:nil="true"/>
+			<exp:OutputDataPerInstance xsi:nil="true"/>
+			<exp:Properties>
+			</exp:Properties>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="urn:lsid:cpas.fhcrc.org:Protocol.MS2:${protocolObjectId}">
+			<exp:Name>MS2 Experiment using ${run.type}</exp:Name>
+			<exp:ProtocolDescription>using ${run.type}</exp:ProtocolDescription>
+			<exp:ApplicationType>ExperimentRun</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance xsi:nil="true"/>
+			<exp:MaxInputDataPerInstance xsi:nil="true"/>
+			<exp:OutputMaterialPerInstance xsi:nil="true"/>
+			<exp:OutputDataPerInstance xsi:nil="true"/>
+			<exp:Contact>
+				<exp:ContactId>${user.email}</exp:ContactId>
+				<exp:Email>${user.email}</exp:Email>
+				<exp:FirstName/>
+				<exp:LastName/>
+				<exp:Properties/>
+			</exp:Contact>
+			<exp:Properties>
+			</exp:Properties>
+		</exp:Protocol>
+	</exp:ProtocolDefinitions>
+	<exp:ProtocolActionDefinitions>
+		<exp:ProtocolActionSet ParentProtocolLSID="urn:lsid:cpas.fhcrc.org:Protocol.MS2:${protocolObjectId}">
+			<exp:ProtocolAction ChildProtocolLSID="urn:lsid:cpas.fhcrc.org:Protocol.MS2:${protocolObjectId}" ActionSequence="1">
+				<exp:PredecessorAction ActionSequenceRef="1"/>
+			</exp:ProtocolAction>
+
+            <% def predecessor = 1 %>
+            <%if(null != prepProtocol) {%>
+			<exp:ProtocolAction ChildProtocolLSID="${prepProtocol.LSID}" ActionSequence="2">
+				<exp:PredecessorAction ActionSequenceRef="${predecessor}"/>
+			</exp:ProtocolAction>
+            <%
+            predecessor = 2;
+            }
+            %>
+
+			<%if(fractions.length > 1) {%>
+			<exp:ProtocolAction ChildProtocolLSID="urn:lsid:cpas.fhcrc.org:Protocol.MS2:Fractionate" ActionSequence="5">
+				<exp:PredecessorAction ActionSequenceRef="${predecessor}"/>
+			</exp:ProtocolAction>
+			<%
+            predecessor = 5;
+            }%>
+
+			<exp:ProtocolAction ChildProtocolLSID="urn:lsid:cpas.fhcrc.org:Protocol.MS2:LSMS2" ActionSequence="10">
+				<exp:PredecessorAction ActionSequenceRef="${predecessor}"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="urn:lsid:cpas.fhcrc.org:Protocol.MS2:ConvertToMzXML" ActionSequence="20">
+				<exp:PredecessorAction ActionSequenceRef="10"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="urn:lsid:cpas.fhcrc.org:Protocol.MS2:${run.type}Search" ActionSequence="30">
+				<exp:PredecessorAction ActionSequenceRef="20"/>
+			</exp:ProtocolAction>
+		<exp:ProtocolAction ChildProtocolLSID="urn:lsid:cpas.fhcrc.org:Protocol.MS2:PeptideProphet" ActionSequence="40">
+				<exp:PredecessorAction ActionSequenceRef="30"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="urn:lsid:cpas.fhcrc.org:Protocol.MS2:ExperimentRunOutput" ActionSequence="50">
+				<exp:PredecessorAction ActionSequenceRef="40"/>
+			</exp:ProtocolAction>
+		</exp:ProtocolActionSet>
+	</exp:ProtocolActionDefinitions>
+	<exp:StartingInputDefinitions>
+		<exp:Material rdf:about="${sample.LSID}" xsi:type="exp:BioSourceType">
+			<exp:Name>${sample.Name}</exp:Name>
+			<exp:CpasType>BioSource</exp:CpasType>
+			<exp:SourceProtocolLSID/>
+			<exp:Properties>
+			</exp:Properties>
+			<exp:Individual/>
+			<exp:SampleOriginDate>2005-04-29</exp:SampleOriginDate>
+		</exp:Material>
+	</exp:StartingInputDefinitions>
+	<exp:ExperimentRuns>
+		<exp:ExperimentRun rdf:about="urn:lsid:${lsidAuthority}:ExperimentRun.MS2:${run.run}" CreateNewIfDuplicate="true" >
+			<exp:Name>${run.type} Run ${new File(run.path).name}</exp:Name>
+			<exp:ProtocolLSID>urn:lsid:cpas.fhcrc.org:Protocol.MS2:${protocolObjectId}</exp:ProtocolLSID>
+			<exp:Comments/>
+			<exp:Properties/>
+			<exp:ExperimentLog/>
+		<exp:ProtocolApplications>
+			<exp:ProtocolApplication rdf:about="urn:lsid:${lsidAuthority}:ProtocolApplication.MS2:${run.run}">
+				<exp:Name>${description == "" ? run.description : PageFlowUtil.filter(description)}</exp:Name>
+				<exp:CpasType>ExperimentRun</exp:CpasType>
+				<exp:ProtocolLSID>urn:lsid:cpas.fhcrc.org:Protocol.MS2:${protocolObjectId}</exp:ProtocolLSID>
+				<exp:ActionSequence>1</exp:ActionSequence>
+				<exp:ActivityDate>2005-01-01</exp:ActivityDate>
+				<exp:InputRefs>
+				<exp:MaterialLSID>${sample.LSID}</exp:MaterialLSID>
+				</exp:InputRefs>
+				          <exp:ProtocolApplicationParameters/>
+				<exp:OutputMaterials></exp:OutputMaterials>
+				<exp:OutputDataObjects></exp:OutputDataObjects>
+			</exp:ProtocolApplication>
+            <%if(null != prepProtocol) {%>
+            <exp:ProtocolApplication rdf:about="urn:lsid:${lsidAuthority}:ProtocolApplication.SamplePreparation:${run.run}">
+            				<exp:Name>${PageFlowUtil.filter(prepProtocol.name)}</exp:Name>
+            				<exp:CpasType>SamplePreparation</exp:CpasType>
+            				<exp:ProtocolLSID>${prepProtocol.LSID}</exp:ProtocolLSID>
+            				<exp:ActionSequence>2</exp:ActionSequence>
+            				<exp:ActivityDate>2005-01-01</exp:ActivityDate>
+            				<exp:InputRefs>
+            				<exp:MaterialLSID>${sample.LSID}</exp:MaterialLSID>
+            				</exp:InputRefs>
+            				<exp:ProtocolApplicationParameters/>
+            				<exp:OutputMaterials>
+                                <exp:Material rdf:about="${preparedLSID}">
+                					<exp:Name>Prepared Material</exp:Name>
+                					<exp:CpasType>Material</exp:CpasType>
+                				</exp:Material>
+
+            				</exp:OutputMaterials>
+            				<exp:OutputDataObjects></exp:OutputDataObjects>
+            			</exp:ProtocolApplication>
+
+            <%}%>
+			<%if(fractions.length >1) { %>
+			<exp:ProtocolApplication rdf:about="urn:lsid:${lsidAuthority}:ProtocolApplication.MS2.Fractionate:${run.run}">
+				<exp:Name>LCMS 2</exp:Name>
+				<exp:CpasType>Fractionation</exp:CpasType>
+				<exp:ProtocolLSID>urn:lsid:cpas.fhcrc.org:Protocol.MS2:LSMS2</exp:ProtocolLSID>
+				<exp:ActionSequence>5</exp:ActionSequence>
+				<exp:ActivityDate>2005-01-01</exp:ActivityDate>
+				<exp:InputRefs>
+				<exp:MaterialLSID>${preparedLSID}</exp:MaterialLSID>
+				</exp:InputRefs>
+				          <exp:ProtocolApplicationParameters/>
+				<exp:OutputMaterials>
+				<% def i = 0
+for (fraction in fractions){
+				i++
+				%>
+				<exp:Material rdf:about="urn:lsid:${lsidAuthority}:Material.Fraction:${fraction.fraction}">
+					<exp:Name>Fraction ${i}</exp:Name>
+					<exp:CpasType>Material</exp:CpasType>
+				</exp:Material>
+				<%}%>
+				</exp:OutputMaterials>
+				<exp:OutputDataObjects>
+				</exp:OutputDataObjects>
+			</exp:ProtocolApplication>
+			<%}%>
+			
+				<% for (fraction in fractions){%>
+			<exp:ProtocolApplication rdf:about="urn:lsid:${lsidAuthority}:ProtocolApplication.MS2.LSMS2:${fraction.fraction}">
+				<exp:Name>LCMS 2</exp:Name>
+				<exp:CpasType>ProtocolApplication</exp:CpasType>
+				<exp:ProtocolLSID>urn:lsid:cpas.fhcrc.org:Protocol.MS2:LSMS2</exp:ProtocolLSID>
+				<exp:ActionSequence>10</exp:ActionSequence>
+				<exp:ActivityDate>2005-01-01</exp:ActivityDate>
+				<exp:InputRefs>
+				<exp:MaterialLSID><%=fractions.length == 1 ? preparedLSID : "urn:lsid:${lsidAuthority}:Material.Fraction:" + fraction.fraction%></exp:MaterialLSID>
+				</exp:InputRefs>
+				          <exp:ProtocolApplicationParameters/>
+				<exp:OutputMaterials></exp:OutputMaterials>
+				<exp:OutputDataObjects>
+				<exp:Data rdf:about="urn:lsid:${lsidAuthority}:Data.RAWFile:${fraction.fraction}">
+					<exp:Name>Raw</exp:Name>
+					<exp:CpasType>RAW File</exp:CpasType>
+					<exp:SourceProtocolLSID></exp:SourceProtocolLSID>
+					<exp:DataFileUrl>${MS2Manager.getRawPath(fraction)}</exp:DataFileUrl>
+				</exp:Data>
+				</exp:OutputDataObjects>
+			</exp:ProtocolApplication>
+			<exp:ProtocolApplication rdf:about="urn:lsid:${lsidAuthority}:ProtocolApplication.MS2.ConvertToMzXML:${fraction.fraction}">
+				<exp:Name>Convert to mzXML</exp:Name>
+				<exp:CpasType>ProtocolApplication</exp:CpasType>
+				<exp:ProtocolLSID>urn:lsid:cpas.fhcrc.org:Protocol.MS2:ConvertToMzXML</exp:ProtocolLSID>
+				<exp:ActionSequence>20</exp:ActionSequence>
+				<exp:ActivityDate>2005-01-01</exp:ActivityDate>
+				<exp:InputRefs>
+				<exp:DataLSID>urn:lsid:${lsidAuthority}:Data.RAWFile:${fraction.fraction}</exp:DataLSID>
+				</exp:InputRefs>
+				          <exp:ProtocolApplicationParameters/>
+				<exp:OutputMaterials></exp:OutputMaterials>
+				<exp:OutputDataObjects>
+				<exp:Data rdf:about="urn:lsid:${lsidAuthority}:Data.MzXMLFile:${fraction.fraction}">
+					<exp:Name>MzXML</exp:Name>
+					<exp:CpasType>ProtocolApplication</exp:CpasType>
+					<exp:SourceProtocolLSID></exp:SourceProtocolLSID>
+					<exp:DataFileUrl>${MS2Manager.getMzXMLPath(fraction)}</exp:DataFileUrl>
+				</exp:Data>
+				</exp:OutputDataObjects>
+			</exp:ProtocolApplication>
+			<exp:ProtocolApplication rdf:about="urn:lsid:${lsidAuthority}:ProtocolApplication.MS2.${run.type}:${fraction.fraction}">
+				<exp:Name>${run.type} Database Search</exp:Name>
+				<exp:CpasType>ProtocolApplication</exp:CpasType>
+				<exp:ProtocolLSID>urn:lsid:cpas.fhcrc.org:Protocol.MS2:${run.type}Search</exp:ProtocolLSID>
+				<exp:ActionSequence>30</exp:ActionSequence>
+				<exp:ActivityDate>2005-01-01</exp:ActivityDate>
+				<exp:InputRefs>
+				<exp:DataLSID>urn:lsid:${lsidAuthority}:Data.MzXMLFile:${fraction.fraction}</exp:DataLSID>
+				</exp:InputRefs>
+				          <exp:ProtocolApplicationParameters/>
+				<exp:OutputMaterials></exp:OutputMaterials>
+				<exp:OutputDataObjects>
+				<exp:Data rdf:about="urn:lsid:${lsidAuthority}:Data.${run.type}:${fraction.fraction}">
+					<exp:Name>${run.type} Search Results</exp:Name>
+					<exp:CpasType></exp:CpasType>
+					<exp:SourceProtocolLSID>urn:lsid:cpas.fhcrc.org:Protocol.MS2:${run.type}Search</exp:SourceProtocolLSID>
+					<exp:DataFileUrl>${getDataFileUrl()}</exp:DataFileUrl>
+				</exp:Data>
+				</exp:OutputDataObjects>
+			</exp:ProtocolApplication>
+			<%}%>
+			<exp:ProtocolApplication rdf:about="urn:lsid:${lsidAuthority}:ProtocolApplication.MS2.PeptideProphet:${run.run}">
+				<exp:Name>Peptide Prophet</exp:Name>
+				<exp:CpasType>ProtocolApplication</exp:CpasType>
+				<exp:ProtocolLSID>urn:lsid:cpas.fhcrc.org:Protocol.MS2:PeptideProphet</exp:ProtocolLSID>
+				<exp:ActionSequence>40</exp:ActionSequence>
+				<exp:ActivityDate>2005-01-01</exp:ActivityDate>
+				<exp:InputRefs>
+				<%for(fraction in fractions) {%>
+				<exp:DataLSID>urn:lsid:${lsidAuthority}:Data.${run.type}:${fraction.fraction}</exp:DataLSID>
+				<%}%>
+				</exp:InputRefs>
+				          <exp:ProtocolApplicationParameters/>
+				<exp:OutputMaterials></exp:OutputMaterials>
+				<exp:OutputDataObjects>
+				<exp:Data rdf:about="urn:lsid:${lsidAuthority}:Data.prob:${run.run}">
+					<exp:Name>Peptide Prophet File</exp:Name>
+					<exp:CpasType></exp:CpasType>
+					<exp:SourceProtocolLSID>urn:lsid:cpas.fhcrc.org:Protocol.MS2:PeptideProphet</exp:SourceProtocolLSID>
+					<exp:DataFileUrl></exp:DataFileUrl>
+				</exp:Data>
+				</exp:OutputDataObjects>
+			</exp:ProtocolApplication>
+			<exp:ProtocolApplication rdf:about="urn:lsid:${lsidAuthority}:ProtocolApplication.MS2.ExperimentRunOutput:${run.run}">
+				<exp:Name>Complete</exp:Name>
+				<exp:CpasType>ExperimentRunOutput</exp:CpasType>
+				<exp:ProtocolLSID>urn:lsid:cpas.fhcrc.org:Protocol.MS2:ExperimentRunOutput</exp:ProtocolLSID>
+				<exp:ActionSequence>50</exp:ActionSequence>
+				<exp:ActivityDate>2005-01-01</exp:ActivityDate>
+				<exp:InputRefs>
+				<exp:DataLSID>urn:lsid:${lsidAuthority}:Data.prob:${run.run}</exp:DataLSID>
+				</exp:InputRefs>
+				          <exp:ProtocolApplicationParameters/>
+				
+				<exp:OutputMaterials></exp:OutputMaterials>
+				<exp:OutputDataObjects>
+				</exp:OutputDataObjects>
+			</exp:ProtocolApplication>
+		</exp:ProtocolApplications>
+		</exp:ExperimentRun>
+	</exp:ExperimentRuns>
+</exp:ExperimentArchive>

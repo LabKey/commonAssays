@@ -1,0 +1,17 @@
+<table class="dataRegion">
+<tr><td></td><td><b>MS2 Runs</b></td><td><b>MS2 Peptides</b></td><td><b>MS2 Spectra</b></td></tr>
+<tr><td>Successful:</td><td><a href="$urls.successful">$stats.successfulRuns</a></td><td>$stats.successfulPeptides</td><td>$stats.successfulSpectra</td></tr>
+<tr><td>In-Process:</td><td><a href="$urls.inprocess">$stats.inProcessRuns</a></td><td>$stats.inProcessPeptides</td><td>$stats.inProcessSpectra</td></tr>
+<tr><td>Failed:</td><td><a href="$urls.failed">$stats.failedRuns</a></td><td>$stats.failedPeptides</td><td>$stats.failedSpectra</td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td>Deleted:</td><td><a href="$urls.deleted">$stats.deletedRuns</a></td><td>$stats.deletedPeptides</td><td>$stats.deletedSpectra</td></tr>
+<tr><td>To Be Purged:</td><td>$stats.purgedRuns</td><td>$stats.purgedPeptides</td><td>$stats.purgedSpectra</td></tr>
+</table><br>
+
+#if($purgeStatus)
+<table class="dataRegion"><tr><td>$purgeStatus  Refresh this page to update status.</td></tr></table>
+#else
+<form method="post" action="purgeRuns.post">
+<table class="dataRegion"><tr><td>Currently set to purge all MS2 runs deleted <input name="days" value="$days" size="2"> days ago or before&nbsp;<input type="image" src="$tools.buttonSrc('Update')" onclick="this.form.action='showMS2Admin.view';"></td></tr>
+<tr><td><input type="image" src="$tools.buttonSrc('Purge Deleted MS2 Runs')"></td></tr></table></form>
+#end

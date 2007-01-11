@@ -1,0 +1,39 @@
+<br>
+<font size='+1'>Enter the full path of a protein annotation or FASTA file,
+then click "Insert Annotations."</font><br><br>
+<form method="post" action="processAnnots.post" enctype="multipart/form-data">
+<table border="0">
+    <tr>
+      <td>Full file path:</td>
+      <td><input type="text" name="fileName" id='fname' size="70"></td>
+    </tr>
+    <tr>
+      <td>Type:</td>
+      <td>
+       <select size='1' name='fileType'>
+          <option value='uniprot'>uniprot</option>
+          <option value='fasta'>fasta</option>
+       </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Comment:</td>
+      <td><input type='text' name='comment' size='70'></td>
+    </tr>
+    <tr>
+       <td>Try to guess organism?</td>
+       <td><input type='checkbox' name='shouldGuess' checked value='1'></td>
+    <tr>
+       <td>Default Organism:</td>
+       <td><input type='text' name='defaultOrganism' size='50' value='Unknown unknown'></td>
+    </tr>
+    <tr>
+      <td colspan=2 align=center style="height:50">
+      <input type="submit" value="Insert Annotations">
+      </td>
+   </tr>
+</table>
+</form>
+<script for=window event=onload>
+try {document.getElementById("fname").focus();} catch(x){}
+</script>

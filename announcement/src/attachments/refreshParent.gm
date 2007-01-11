@@ -1,0 +1,19 @@
+<html>
+<head></head>
+<body>
+<%
+if (message)
+    {
+    %><%= message %><%
+    }
+else
+    {
+    %>Close this window. (You shouldn't be seeing this...)<%
+    }%>
+<script>
+if (window.opener && window.opener != window)
+    window.opener.location.reload();
+window.close();
+</script>
+</body>
+</html>

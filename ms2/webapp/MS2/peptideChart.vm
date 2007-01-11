@@ -1,0 +1,20 @@
+$runInfo<br>
+$filterInfo<br>
+<form name="chartForm" action="peptideCharts.view">
+$imageMap
+<table align="left">
+<tr><td>
+<input type="image" src='$tools.buttonSrc("GO Piechart")'>
+<select name="chartType" id="chartType">
+<option value="$GOC">$GOC</option>
+<option value="$GOF">$GOF</option>
+<option value="$GOP">$GOP</option>
+</select>
+</td></tr>
+<tr><td>
+<img src='$tools.filter("doOnePeptideChart.post$PieSliceString")' WIDTH="800" HEIGHT="800" alt="Peptide Chart" usemap="#pie1">
+<input type="hidden" name="run" value="$run">
+<input type="hidden" name="queryString" value="$queryString">
+</td></tr>
+</table>
+</form>

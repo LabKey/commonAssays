@@ -1,0 +1,15 @@
+<%
+if (null != form.error)
+    out.print("<b>" + form.error + "</b><br>");
+%>
+Enter the local file name to import.&nbsp;&nbsp;File name must include the full path and extension (.htm, .html or .xml).<br><br>
+<form name="upload" action="addRun.post">
+<table border="0">
+    <tr><td>Description:</td><td><input id="Description" type="text" name="description" value="${form.description}" style="width:500;"></td></tr>
+    <tr><td>File Name:</td><td><input id="File" type="text" name="fileName" value="${form.fileName}" style="width:500;"></td></tr>
+    <tr><td colspan=2 align=center style="height:50"><input type=SUBMIT value="Upload Files" name="upload">&nbsp;<input type=SUBMIT value="Show Runs" name="list"></td></tr>
+</table>
+</form>
+<script for=window event=onload>
+try {document.getElementById("description").focus();} catch(x){}
+</script>

@@ -1,0 +1,76 @@
+<form name='ProtAnnotForm'>
+<table>
+<tr>
+   <td align='left'>Sequence name:</td><td>$!SeqName</td>
+</tr>
+<tr>
+   <td align='left'>Description:</td><td>$!SeqDesc</td>
+</tr>
+<tr>
+   <td align='left'>Gene Name(s):</td><td>$!GeneName</td>
+</tr>
+<tr>
+   <td align='left'>Organisms(s):</td>
+   <td>
+       #set ($nOfOrgs = $SeqOrgs.size())
+       #if($nOfOrgs == 1)
+          #foreach($OrgName in $SeqOrgs)
+             $!OrgName
+          #end
+       #else
+          #if($nOfOrgs > 3)
+             #set ($nOfOrgs = 3)
+          #end
+          <select name='Orgs' size="$nOfOrgs">
+          #foreach($OrgName in $SeqOrgs)
+             <option>$!OrgName</option>
+          #end
+          </select>
+       #end
+   </td>
+</tr>
+</table>
+<br>
+<table cellspacing='20'>
+<tr>
+   <th>Genbank IDs</th><th>GIs</th><th>SwissProt IDs</th><th>SwissProtNames</th><th>Ensembl</th><th>IPI numbers</th><th>GO Categories</th>
+</tr>
+<tr valign='top'>
+   <td>
+   #foreach($GBID in $GenBankIds)
+      $!GBID <br>
+   #end
+   </td>
+   <td>
+   #foreach($GI in $GIs)
+      $GI <br>
+   #end
+   </td>
+   <td>
+   #foreach($SWID in $SwissProtAccns)
+      $SWID <br>
+   #end
+   </td>
+   <td>
+   #foreach($SWN in $SwissProtNames)
+      $SWN <br>
+   #end
+    </td>
+     <td>
+   #foreach($EID in $EnsemblIDs)
+      $EID <br>
+   #end
+   </td>
+   <td>
+   #foreach($IPID in $IPIDs)
+      $IPID <br>
+   #end
+   </td>
+   <td>
+   #foreach($GO in $GOCategories)
+      $GO<br>
+   #end
+   </td>
+</tr>
+</table>
+</form>

@@ -1,0 +1,39 @@
+&nbsp;<br>
+<font size='+1'>
+Annotation Load Details for $!filetype file $!filename (ID #$!insertid)<br>
+</font>
+<br>
+<blockquote style='padding-left: 2.0in'>
+<i>
+$!comment
+</i>
+</blockquote>
+<br>
+First entered at $!insertdate<br><br>
+<table cellspacing='15'>
+<tr>
+   <td>&nbsp;</td><td>Current</td><td align='center'>Most Recent Batch<br>$!changedate</td>
+</tr>
+<tr><td colspan='3'><hr></td></tr>
+<tr>
+   <td align='left'>Records</td><td align='right'>$!recordsprocessed</td><td align='right'>$!mrmsize</td>
+</tr>
+<tr>
+   <td align='left'>Organisms</td><td align='right'>$!organismsadded</td><td align='right'>$!mrmorganismsadded</td>
+</tr>
+<tr>
+   <td align='left'>Sequences</td><td align='right'>$!sequencesadded</td><td align='right'>$!mrmsequencesadded</td>
+</tr>
+<tr>
+   <td align='left'>Identifiers</td><td align='right'>$!identifiersadded</td><td align='right'>$!mrmidentifiersadded</td>
+</tr>
+<tr>
+   <td align='left'>Annotations</td><td align='right'>$!annotationsadded</td><td align='right'>$!mrmannotationsadded</td>
+</tr>
+<tr><td colspan='3'><hr></td></tr>
+<tr>
+   <td align='left'>Batches Processed</td><td align='right'>$!mouthsful</td>
+</tr>
+</table>
+<br><br>
+Completed at $!completiondate<br>

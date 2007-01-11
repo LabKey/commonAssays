@@ -1,0 +1,65 @@
+<form method="post" action="$saveUrl">
+<table class="dataRegion">
+    <tr>
+        <td><strong>Common:</strong></td>
+        <td>$commonColumns</td>
+        <td nowrap><input type="image" src="$tools.buttonSrc('Pick')" onclick="return setCurrent('$commonColumns')"> <input type="image" src="$tools.buttonSrc('Add')" onclick="return appendToCurrent('$commonColumns')"></td>
+    </tr>
+    <tr>
+        <td nowrap><strong>Protein Prophet:</strong></td>
+        <td>$proteinProphetColumns</td>
+        <td nowrap align=right><input type="image" src="$tools.buttonSrc('Add')" onclick="return appendToCurrent('$proteinProphetColumns')"></td>
+    </tr>
+    <tr>
+        <td><strong>Quantitation:</strong></td>
+        <td>$quantitationColumns</td>
+        <td nowrap align=right><input type="image" src="$tools.buttonSrc('Add')" onclick="return appendToCurrent('$quantitationColumns')"></td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td><i>If you are viewing a run that does not have Protein Prophet or quantitation data loaded, those columns will be blank.</i></td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+      <tr>
+          <td>&nbsp;</td>
+      </tr>
+    <tr>
+        <td><strong>Default:</strong></td>
+        <td>$defaultColumns</td>
+        <td nowrap ><input type="image" src="$tools.buttonSrc('Pick')" onclick="return setCurrent('$defaultColumns');"> <input type="image" src="$tools.buttonSrc('Add')" onclick="return appendToCurrent('$defaultColumns')"></td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td><strong>Current:</strong></td>
+        <td><textarea style="font-family: verdana; font-size: 11; width:100%;" name="columns" id="columns" rows="3" cols="100">$currentColumns</textArea></td>
+    </tr>
+    <tr><td colspan=2><input type=hidden value="$queryString" name="queryString"></td></tr>
+    <tr><td colspan=2 align=center><input type="image" src="$tools.buttonSrc('Pick Columns')"> <input type="image" src="$tools.buttonSrc('Save As Default')" onclick="this.form.action='$saveDefaultUrl';"></td></tr>
+</table></form>
+
+<script type="text/javascript" for=window event=onload>
+try {document.getElementById("columns").focus();} catch (x) {}
+</script>
+<script type="text/javascript">
+function setCurrent(newString)
+{
+    document.getElementById("columns").value = newString;
+    return false;
+}
+function appendToCurrent(newString)
+{
+    if (document.getElementById("columns") != "")
+    {
+        document.getElementById("columns").value += ", ";
+    }
+    document.getElementById("columns").value += newString;
+    return false;
+}
+</script>

@@ -1,0 +1,92 @@
+<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.fhcrc.cpas.view.HttpView"%>
+<%@ page import="org.fhcrc.cpas.util.DateUtil" %>
+<form method="post" action="update.post">
+<input type="hidden" name="rowId" value="${announcement.rowId}">
+<input type="hidden" name="entityId" value="${announcement.entityId}">
+<input type="hidden" name=".oldValues" value="${PageFlowUtil.encodeObject(announcement)}">
+<table><% if( announcement.getParent() == null )
+{ %>
+  <tr>
+    <td class='ms-searchform'>Title</td><td class='ms-vb'>
+    <input name="title" size="40" value="<%=filter(announcement.title)%>">
+    </td>
+  </tr>
+<%
+    if (settings.hasStatus())
+    {%>
+  <tr><td class='ms-searchform'>Status</td><td class='ms-vb'>
+<%=statusSelect%>
+  </td></tr>
+<%
+    }
+    if (settings.hasAssignedTo())
+    {%>
+  <tr><td class='ms-searchform'>Assigned&nbsp;To</td><td class='ms-vb'>
+<%=assignedToSelect%>
+  </td></tr>
+<%
+    }
+    if (settings.hasExpires())
+{%>
+  <tr>
+    <td class="ms-searchform">Expires</td>
+    <td class="ms-vb"><input name="expires" size="23" value="<%=DateUtil.formatDate(announcement.getExpires())%>">
+    <%
+    if (form.getErrors("expires"))
+        out.print("<span style=\"font-color:red\">" + form.getErrors("expires") + "</span>");
+    %></td>
+  </tr>
+<% }
+} %>
+  <tr>
+    <td class='ms-searchform'>Body</td>
+    <td class='ms-vb' style="width:100%;">
+        <textarea cols="120" rows ="15" name='body' style="width:100%;"><%=filter(announcement.body)%></textarea>
+    </td>
+  </tr>
+<%  if (settings.hasFormatPicker())
+    { %>
+  <tr>
+    <td class="ms-searchform">Render As</td>
+    <td class="ms-vb">
+      <select name="rendererType"><%
+        for (entry in renderers)
+        {
+            def value = entry.name();
+            def displayName = entry.getDisplayName();
+            def selected = entry == currentRendererType ? "selected " : "";
+            %>
+        <option <%=selected%>value="<%=filter(value)%>"><%=filter(displayName)%></option><%
+        }%>
+      </select>
+    </td>
+  </tr>
+<%  } %>
+  <tr>
+    <td class='ms-searchform'>Attachments</td>
+    <td class="ms-summarycustombody">
+<%
+    for (attach in announcement.attachments)
+        {
+        out.print(PageFlowUtil.filter(attach.name));
+        deleteURLHelper.setFileName(attach.name);
+        out.print(" [<a href=\"#deleteAttachment\" onClick=\"window.open('");
+        out.print(deleteURLHelper.getLocalURIString())
+        out.print("', null, 'height=200,width=450', false);\" style=\"color:green;\">");
+        out.print("Delete");
+        out.print("</a>]");
+        out.print("<br>\n");
+        }
+%>
+    [<a href="#addAttachment" onclick="window.open('${addAttachmentURL}',null,'height=200,width=450', false);" style="color:green;">add attachment</a>]
+	</td>
+  </tr>
+  <tr>
+    <td colspan=2 align=left><table border=0 cellspacing=2 cellpadding=0><tr><td><input type='image' src='<%=PageFlowUtil.buttonSrc("Submit")%>' name='update.post' value='Submit' onClick='this.form.action="update.post";this.form.method="post";' ></td></tr></table></td>
+  </tr>
+</table>
+</form>
+<p/>
+<% if (currentRendererType.displayName == "Wiki Page")
+        HttpView.currentView().include(helpView); %>

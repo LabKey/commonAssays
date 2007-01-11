@@ -1,0 +1,1 @@
+ALTER TABLE ms2.PeptideProphetSummaries RENAME COLUMN RunId TO Run;

@@ -1,0 +1,181 @@
+<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
+<%@ page import="org.fhcrc.cpas.ms2.pipeline.FileStatus"%>
+<p/>
+<form method=post action="showDescribeMS2Run.post">
+<%
+    Integer annotFileCount = 0;
+    for (file in fileStatus.keySet())
+        if (fileStatus.get(file) == FileStatus.UNKNOWN)
+            annotFileCount++;
+%>
+<input type="hidden" name="size" value="<%=annotFileCount%>">
+<input type="hidden" name="path" value="<%=filter(form.path)%>">
+<!--WCH:mascotdev-->
+<input type="hidden" name="searchEngine" value="<%=filter(form.searchEngine)%>">
+<!--END-WCH:mascotdev-->
+<br>
+
+Specify an optional experimental protocol to describe how the LC-MS/MS sample was processed to create the mzXML file.
+<br>
+<br>
+
+<table>
+    <tr>
+        <td>
+            <a href="<%=currentContext.viewURLHelper.relativeUrl("showCreateMS2Protocol.view", "")%>path=<%=PageFlowUtil.encode(form.path)%>&searchEngine=${form.searchEngine}"><%=PageFlowUtil.buttonImg("Create New Protocol")%></a>
+        </td>
+        <td>
+            <a href="<%=currentContext.viewURLHelper.relativeUrl("search.view", "")%>path=<%=PageFlowUtil.encode(form.path)%>&skipDescription=true&provider=ms2&action=search&searchEngine=${form.searchEngine}"><%=PageFlowUtil.buttonImg("Skip and Continue")%></a>
+        </td>
+    </tr>
+</table>
+<br>
+        <%
+            if(form.hasErrors())
+            {
+                out.write("<span class=\"cpas-error\">");
+             out.write(form.getError(0));
+                out.write("</span><br>");
+            }%>
+
+<%
+    if (protocols != null && protocols.length > 0)
+    {
+%>
+    <table border=0>
+<%
+    if (annotFileCount > 1)
+    {
+%>
+        <tr>
+            <td colspan=3>
+                <input type="radio" <%=(null == form.protocolSharing || form.protocolSharing == "shared") ? "checked" : "" %> id="protocolSharing.shared" name="protocolSharing" value="share"><span class="heading-1"> The same protocol was used to create all files</span><br>
+            </td>
+        </tr>
+        <tr><td>&nbsp;&nbsp;&nbsp;</td><td class="ms-vb">Shared Protocol</td>
+            <td>
+                <select name="sharedProtocol" onclick="checkItem('protocolSharing.shared')">
+                  <option></option>
+                <%
+                  for (protocol in protocols)
+                  {
+                      out.print("<option>");
+                      out.print(filter(protocol));
+                      out.print("</option>");
+                  }
+                %>
+            </select>
+        </td>
+      </tr>
+    <tr>
+        <td colspan=2>
+    <input type="radio" <%=form.protocolSharing == "fractions" ? "checked" : "" %> id="protocolSharing.fractions" name="protocolSharing" value="fractions"><span class="heading-1">  All files are fractions of the same sample</span><br>
+        </td>
+    </tr>
+    <tr><td>&nbsp;&nbsp;&nbsp;</td><td class="ms-vb">Fractionation Protocol</td>
+        <td>
+    <select name="fractionProtocol" onclick="checkItem('protocolSharing.fractions')">
+      <option></option>
+        <%
+      for (protocol in protocols)
+      {
+          out.print("<option>");
+          out.print(filter(protocol));
+          out.print("</option>");
+      }
+        %>
+  </select>
+        </td>
+      </tr>
+<tr>
+    <td colspan=3>
+    <input type="radio" <%=form.protocolSharing == "none" ? "checked" : "" %> name="protocolSharing" id="protocolSharing.none" value="none"> <span class="heading-1"> Each file was created with a different protocol</span><br>
+    </td>
+</tr>
+    <%
+    }
+    else
+    {
+        out.print("<input type=hidden name=protocolSharing value=none>");
+    }
+    %>
+    <tr><td></td><td class="ms-vh">File</td><td class="ms-vh">Protocol</td></tr>
+<%
+int index = 0;
+for (file in fileStatus.keySet())
+    {
+    FileStatus status = fileStatus.get(file);
+    if (status != FileStatus.UNKNOWN)
+        continue;   // Already annotated.
+        String protocolName = "";
+        String error = "";
+        if (index < form.runNames.length)
+            {
+            protocolName = form.protocolNames[index];
+            error = form.getError(index);
+            }
+
+%>
+  <tr><td></td><td class="ms-vb"><%=filter(file.name)%></td>
+        <td class="ms-vb">
+          <select name="protocolNames[${index}]" onclick="checkItem('protocolSharing.none')" >
+            <option></option>
+<%
+    for (protocol in protocols)
+        {
+        if (protocolName == protocol)
+            out.print("<option selected>");
+        else
+            out.print("<option>");
+        out.print(filter(protocol));
+        out.print("</option>");
+        }
+%>
+        </select>
+      </td></tr>
+<%
+    index++;
+    } %>
+</table>
+
+<table>
+    <tr>
+        <td>
+            <input type=image src="<%=PageFlowUtil.submitSrc()%>">
+        </td>
+        <td>
+            <a href="<%=ViewURLHelper.toPathString("Pipeline", "returnToReferer", container.getPath())%>"><%=PageFlowUtil.buttonImg("Cancel")%></a>
+        </td>
+    </tr>
+</table>
+
+</form>
+<script type="">
+    function checkItem(id)
+    {
+        try
+        {
+            var elem = document.getElementById(id);
+            if (elem)
+            {
+                elem.checked = true;
+            }
+        }
+        catch(e)
+        {
+
+        }
+    }
+</script>
+<%
+    }
+    else
+    {
+%>
+This step allows you to record additional information about the sample that
+was used to generate the mzXML file and the specific steps ("protocol")
+used to prepare the sample. 
+<%
+    }
+%>

@@ -1,0 +1,92 @@
+<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.apache.commons.lang.StringUtils"%>
+
+<%
+    String errors = PageFlowUtil.getStrutsError(request, "main");
+    out.println(errors);
+%>
+
+    <form action="bulkEdit.post" method="POST">
+
+<table class="normal">
+    <tr><td></td></tr>
+    <tr>
+        <td>The current project default setting is: <%=projectEmailOption%></td>
+    </tr>
+    <tr><td></td></tr>
+</table>
+
+
+    <table style="border:solid 1px #AAAAAA" cellspacing="0" cellpadding="1">
+        <tr>
+            <th class='ms-vh'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Email</th>
+            <th class='ms-vh'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>First Name</th>
+            <th class='ms-vh'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Last Name</th>
+            <th class='ms-vh'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Display Name</th>
+            <th class='ms-vh'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Email Option</th>
+            <th class='ms-vh'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Project Member?</th>
+        </tr>
+
+        <%
+        int i = 1;
+        for (emailPref in emailPrefList)
+        {
+                String bgColor = "#FFFFFF";
+                //shade odd rows in gray
+                if (i % 2 == 1)
+                    bgColor = "#EEEEEE";
+
+                int userId = emailPref.getUserId();
+                String email = emailPref.getEmail();
+                String firstName = emailPref.getFirstName();
+                String lastName = emailPref.getLastName();
+                String displayName = emailPref.getDisplayName();
+                //integer value
+                String emailOptionId = emailPref.getEmailOptionId();
+
+                int emailOptionValue = -1;
+                if (emailOptionId != null)
+                    emailOptionValue = Integer.parseInt(emailOptionId);
+                %>
+                <tr bgcolor="<%=bgColor%>">
+                    <td style='border-right:solid 1px #AAAAAA'>
+                        <input type="hidden" name="userId" value="<%=userId%>">
+                        <%= email %>
+                    </td>
+                    <td style='border-right:solid 1px #AAAAAA'>
+                        <%= firstName %>&nbsp;
+                    </td>
+                    <td style='border-right:solid 1px #AAAAAA'>
+                        <%= lastName %>&nbsp;
+                    </td>
+                    <td style='border-right:solid 1px #AAAAAA'>
+                        <%= displayName %>
+                    </td>
+                    <td style='border-right:solid 1px #AAAAAA'>
+                        <select name="emailOptionId">
+                            <% if (emailPref.isProjectMember())
+                            {%>
+                                <option value='-1' <%=emailOptionValue == -1 ? "selected" : "" %> >&lt;Project default&gt;</option>
+                            <%}%>
+                            <option value='0' <%=emailOptionValue == 0 ? "selected" : "" %> >No Email</option>
+                            <option value='1' <%=emailOptionValue == 1 ? "selected" : "" %> >All Messages</option>
+                            <option value='2' <%=emailOptionValue == 2 ? "selected" : "" %> >Posted threads only</option>
+                        </select>
+                    </td>
+                    <td align="center" style='border-right:solid 1px #AAAAAA'>
+                        <%  if (emailPref.isProjectMember())
+                                out.write("Yes");
+                            else
+                                out.write("No");
+                        %>
+                    </td>
+                </tr>
+                <%
+                i++;
+        }%>
+    <tr>
+        <td colspan="5"></td>
+    </tr>
+    </table>
+    <input type="image" src="<%=PageFlowUtil.submitSrc()%>">&nbsp;<input type=image src="<%=PageFlowUtil.buttonSrc("Cancel")%>" value="Cancel" onclick="javascript:window.history.back(); return false;">
+    </form>

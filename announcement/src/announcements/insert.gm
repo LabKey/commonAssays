@@ -1,0 +1,98 @@
+<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%
+userAgent = request.getHeader("user-agent");
+unsupported = userAgent.contains("MSIE") && userAgent.contains("Mac");
+
+if (unsupported)
+{%>
+    <font color="red">Sorry, Mac/IE is not fully supported. See page <a href="<%=PageFlowUtil.getHelpLinkForTopic("gettingStarted")%>">Getting Started with CPAS</a>.</font>
+<%}
+else
+{%>
+    <%=PageFlowUtil.getStrutsError(request, "main")%>
+<%}%>
+
+<form method=post enctype="multipart/form-data" action='insert.post'>
+<table>
+  <tr><td class='ms-searchform'>Title</td><td class='ms-vb' colspan='2'><input type='text' size='60' name='title' value="<%=filter(form.get("title"))%>"></td></tr><%
+    if (settings.hasStatus())
+    {%>
+  <tr><td class='ms-searchform'>Status</td><td class='ms-vb'>
+<%=statusSelect%>
+  </td></tr><%
+    }
+    if (settings.hasAssignedTo())
+    {%>
+  <tr><td class='ms-searchform'>Assigned&nbsp;To</td><td class='ms-vb'>
+<%=assignedToSelect%>
+  </td></tr><%
+    }
+    if (settings.hasUserList())
+    {%>
+  <tr><td class='ms-searchform'>Members</td><td class='ms-vb'>
+<%=userList%>
+  </td><td><i><%
+  if (settings.isSecure())
+  { %> This <%=settings.conversationName.toLowerCase()%> is private; only editors and the users on this list can view it.  These users will also<%
+  }
+  else
+  {
+  %> The users on the Members list<%
+  }
+  %> receive email notifications of new posts to this <%=settings.conversationName.toLowerCase()%>.<br><br>Enter one or more email addresses, each on its own line.</i></td></tr><%
+    }
+    if (settings.hasExpires())
+    {%>
+  <tr><td class='ms-searchform'>Expires</td><td class='ms-vb'><input type='text' size='23' name='expires' value='<%=filter(form.get("expires"))%>' ></td><td><i>By default the Expires field is set to one month from today. <br>Expired messages are not deleted, they are just no longer shown on the Portal page.</i></td></tr><%
+    }%>
+  <tr><td class='ms-searchform'>Body</td><td class='ms-vb' colspan='2' style="width:100%;"><textarea cols='120' rows='15' name='body' style="width:100%;"><%=filter(form.get("body"))%></textarea></td></tr><%
+    if (settings.hasFormatPicker())
+{%>
+  <tr><td class="ms-searchform">Render As</td><td class="ms-vb">
+    <select name="rendererType"><%
+        for (entry in renderers)
+        {
+            def value = entry.name();
+            def displayName = entry.getDisplayName();
+            def selected = entry == currentRendererType ? "selected " : "";
+        %>
+      <option <%=selected%>value="<%=filter(value)%>"><%=filter(displayName)%></option><%
+        }%>
+    </select>
+  </td></tr>
+<%}%>  <tr><td colspan=3 align=left></td></tr>
+</table>
+<%
+if(allowBroadcast)
+{%>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr class="ms-WPHeader">
+    <td title="Admin Broadcast" colspan="2" nowrap>
+      <div class="ms-WPTitle"><span>Admin Broadcast</span></div>
+    </td>
+  </tr>
+  <tr>
+    <td width="2%"><input type="checkbox" name="broadcast"></td>
+    <td>Send this message as email to all site users (site admins only)</td>
+  </tr>
+</table>
+<%}%>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr class="ms-WPHeader">
+		<td title="Attachments" style="width:100%;" nowrap>
+		<div class="ms-WPTitle"><span>Attachments</span></div>
+		</td>
+	</tr>
+	<tr><td class="ms-summarycustombody">
+		File 1: <input type="file" name="formFiles[0]"><br>
+		File 2: <input type="file" name="formFiles[1]"><br>
+		File 3: <input type="file" name="formFiles[2]"><br>
+	</td>
+	</tr>
+</table>
+<br>
+<input type=image src="<%=PageFlowUtil.submitSrc()%>" value="Insert">
+</form>
+<p/>
+<% if (currentRendererType.displayName == "Wiki Page")
+    currentView.include(helpView); %>

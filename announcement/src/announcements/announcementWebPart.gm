@@ -1,0 +1,64 @@
+<%@ page import="org.fhcrc.cpas.util.DateUtil" %>
+<!--ANNOUNCEMENTS-->
+<table width="100%">
+    <tr>
+        <td align="left" class="ms-vb"><%
+if (insertURL)
+    {
+    %>[<a href="${insertURL}">New ${settings.conversationName}</a>]&nbsp;<%
+    }
+if (listURL)
+    {
+    %>[<a href="${listURL}">View List</a>]<%
+    }
+%></td>
+<td colspan="2" align="right" class="ms-vb" style="padding:2px;"><%
+if (customizeURL)
+    {
+    %>[<a href="${customizeURL}">Customize</a>]<%
+        if (emailPrefsURL)
+        {
+            %>&nbsp;<%
+        }
+    }
+if (emailPrefsURL)
+    {
+    %>[<a href="${emailPrefsURL}">My Email Preferences</a>]<%
+    }
+%></td>
+</tr>
+</table>
+<table width="100%" cellpadding=0><%
+if (0 == announcements.length)
+    {
+    %><tr><td colspan=3 class=ms-vb>&nbsp;</td></tr>
+    <tr><td colspan=3 class=ms-vb>No new messages</td></tr><%
+    }
+for (a in announcements)
+    { %>
+    <tr>
+        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align="left"><span class="ms-announcementtitle"><%=filter(a.title)%></span><%
+        if( a.getResponses().size())
+            out.print(" (" + a.responses.size() + (a.responses.size() == 1 ? "&nbsp;response)" : " responses)"));
+        %></td>
+        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align="center"><%=filter(a.createdByName)%></td>
+        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align="right" nowrap><%=DateUtil.formatDateTime(a.getCreated())%></td>
+    </tr>
+    <tr style="height:1;"><td colspan=3 class="ms-titlearealine"><img height=1 width=1 src="<%=request.getContextPath()%>/_.gif"></td></tr>
+    <tr><td colspan=3 class="ms-vb"><%=a.translateBody(request,container)%></td></tr>
+<%
+    if (a.attachments.size())
+        { %>
+    <tr><td colspan=3 class="ms-vb"><%
+        for (d in a.attachments)
+            {
+            %>
+        <a href="<%=filter(d.getDownloadUrl(request))%>"><img border=0 src="<%=request.getContextPath()%><%=d.getFileIcon()%>">&nbsp;<%=d.name%></a>&nbsp;<%
+            }
+        %>
+    </td></tr>
+<%      } %>    <tr><td class="ms-vb" style="padding-bottom:4;" colspan=3 align="left">[<a href="<%=filter(a.getThreadUrl(request,container))%>rowId=<%=a.rowId%>">View ${settings.conversationName}</a>]</td></tr>
+<%
+    }
+%></table>
+<!--/ANNOUNCEMENTS-->

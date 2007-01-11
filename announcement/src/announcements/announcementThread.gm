@@ -1,0 +1,157 @@
+<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="org.fhcrc.cpas.util.DateUtil" %>
+<!--ANNOUNCEMENTS--><%
+if (message)
+{%>
+    <span class=ms-vb><%=message%></span>
+<%}
+else if (!announcement)
+{%>
+    <span class=ms-vb><%=settings.conversationName%> not found</span>
+<%}
+else
+{%>
+    <table width="100%">
+    <tr>
+    <td align="left" class="ms-vb">
+    <%
+    if(messagesURL)
+    {%>
+        [<a href="<%=messagesURL%>"><%=settings.boardName%> Home</a>]
+    <%}
+    if (listURL)
+    {%>
+        [<a href="<%=listURL%>">View List</a>]
+    <%}%>
+    </td>
+    </tr>
+    </table>
+
+    <table width="100%" cellpadding=0>
+    <tr>
+        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align=left><span class="ms-announcementtitle"><%=filter(announcement.title)%></span></td>
+        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align=center><%=filter(announcement.getCreatedByName())%></td>
+        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align="right" nowrap><%
+
+    if (perm.allowUpdate(announcement))
+    {
+    %>[<a href="showUpdate.view?rowId=<%=announcement.getRowId()%>&amp;entityId=<%=announcement.getEntityId()%>">Edit</a>]<%
+    }
+
+    %>&nbsp;<%=DateUtil.formatDateTime(announcement.getCreated())%></td>
+    </tr>
+    <tr style="height:1;"><td colspan=3 class=ms-titlearealine><img height=1 width=1 src="<%=request.getContextPath()%>/_.gif"></td></tr><%
+
+    if (settings.hasUserList() && announcement.emailList)
+    {
+    %><tr><td colspan="3">Members: <%=announcement.emailList%></td></tr>
+    <% }
+
+    if (settings.hasStatus() && announcement.status)
+    {
+    %><tr><td>Status: <%=announcement.status%></td></tr>
+    <% }
+
+    if (settings.hasExpires() && announcement.expires)
+    {
+    %><tr><td>Expires: <%=DateUtil.formatDate(announcement.expires)%></td></tr>
+    <% }
+
+    if (settings.hasAssignedTo() && announcement.assignedTo)
+    {
+    %><tr><td>Assigned&nbsp;To: <%=announcement.assignedToName%></td></tr>
+    <% }
+
+    if (null != announcement.body)
+    {
+    %><tr><td colspan="3">&nbsp;</td></tr>
+    <% }
+
+    %><tr><td colspan="3" class="ms-vb"><%=announcement.translateBody(request,container)%></td></tr>
+    <%
+    if(0 < announcement.attachments.size())
+    {%>
+        <tr><td colspan="3"><div class="ms-vb">
+        <%
+        for (d in announcement.attachments)
+        {%>
+            <a href="<%=filter(d.getDownloadUrl(request))%>"><img border=0 src="<%=request.getContextPath() + d.getFileIcon()%>">&nbsp;<%=d.name%></a>&nbsp;
+        <%}%>
+        </div></td></tr>
+    <%}%>
+    <tr><td colspan="3">&nbsp;</td></tr>
+    <%
+    if(0 < announcement.getResponses().size())
+    {
+        def prev = announcement;
+        %>
+    <tr><td colspan="3"><table width="100%" border="0" cellspacing="0" cellpadding="2">
+        <tr>
+        <td width="2%">&nbsp;</td>
+        <td colspan="2" width="100%">
+            <table width="100%" border="0" cellspacing="0" cellpadding="2"><%
+
+            for (r in announcement.getResponses())
+            {%>
+                <tr>
+                    <td class="ms-vb" colspan="2" style="background-color: #dddddd"><a name="row:<%=r.rowId%>"></a><%=r.getCreatedByName() + " responded:"%></td>
+                    <td class="ms-vb" align="right" style="background-color: #dddddd"><%
+                    if (perm.allowUpdate(r))
+                    {
+                    %>[<a href="showUpdate.view?rowId=<%=r.getRowId()%>&amp;entityId=<%=r.getEntityId()%>">Edit</a>]<%
+                    }
+                    if (perm.allowDeleteMessage(r))
+                    {
+                    %>[<a href="deleteSingleAnnouncement.view?rowId=<%=r.getRowId()%>&amp;entityId=<%=r.getEntityId()%>">Delete</a>]<%
+                    }
+                    %><%=DateUtil.formatDateTime(r.getCreated())%></td>
+                </tr>
+                <%
+                if (settings.hasUserList() && r.emailList != prev.emailList) { %>
+                <tr><td>Members: <%=filter(r.emailList)%></td></tr><% }
+                if (settings.hasStatus() && r.status != prev.status) { %>
+                <tr><td>Status: <%=r.status%></td></tr><% }
+                if (settings.hasExpires() && r.expires != prev.expires) { %>
+                <tr><td>Expires: <%=DateUtil.formatDate(r.expires)%></td></tr><% }
+                if (settings.hasAssignedTo() && r.assignedTo != prev.assignedTo) { %>
+                <tr><td>Assigned&nbsp;To: <%=r.assignedToName%></td></tr><% }
+                if (r.title && r.title != prev.title) { %>
+                <tr><td>Title: <%=filter(r.title)%></td></tr><% }
+                %>
+                <tr><td colspan="3" class="ms-vb"><%=r.translateBody(request,container)%></td></tr>
+                <%
+                if(0 < r.attachments.size())
+                {%>
+                    <tr><td colspan="3"><div class="ms-vb">
+                    <%
+                    for(rd in r.attachments)
+                    {%>
+                        <a href="<%=filter(rd.getDownloadUrl(request))%>"><img border=0 src="<%=request.getContextPath()+ rd.getFileIcon()%>">&nbsp;<%=rd.name%></a>&nbsp;
+                    <%}%>
+                    </div></td></tr>
+                <%}
+                prev = r;
+                %>
+                <tr><td colspan="2">&nbsp;</td></tr>
+            <%}%>
+            </table>
+        </td>
+        </tr>
+    </table></td></tr>
+    <%}%>
+    <tr><td colspan="3" class="ms-vb">
+    <%
+    if(!isResponse)
+    {
+        if (perm.allowResponse(announcement)) 
+        { %>
+        <a href="showResponse.view?parentId=<%=announcement.getEntityId()%>"><img src='<%=PageFlowUtil.buttonSrc("Post Response")%>' border="0" alt="[post response]"></a>
+        <% }
+        if (perm.allowDeleteThread())
+        {%>
+        <a href="confirmDelete.view?rowId=<%=announcement.getRowId()%>&amp;entityId=<%=announcement.getEntityId()%>"><img src='<%=PageFlowUtil.buttonSrc("Delete " + settings.conversationName)%>' border="0" alt="[delete ${settings.conversationName.toLowerCase()}]"></a>
+        <%}
+    }%>
+    </td></tr>
+    </table>
+<%}%>

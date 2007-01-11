@@ -1,0 +1,47 @@
+<table class="dataRegion">
+<tr>
+  <td><form method="post" action="$urls.applyView"><table class="dataRegion" border="0"><tr>
+      <td valign=bottom>$applyView</td>
+      <td valign=bottom><input type="image" value="Go" src="$tools.buttonSrc('Go')"></td>
+      <td>&nbsp;</td>
+      <td valign=bottom><a href="$urls.saveView"><img border=0 src="$tools.buttonSrc('Save View')"></a></td>
+      <td valign=bottom><a href="$urls.manageViews"><img border=0 src="$tools.buttonSrc('Manage Views')"></a></td>
+      <td valign=bottom><a href="$urls.pickPeptideColumns"><img border=0 src="$tools.buttonSrc('Pick Peptide Columns')"></a></td>
+      <td valign=bottom><a href="$urls.pickProteinColumns"><img border=0 src="$tools.buttonSrc('Pick Protein Columns')"></a></td>
+  </tr></table></form></td>
+</tr>
+
+<tr><td><table class="dataRegion" border="0"><tr>
+    <td>Grouping:</td>
+    <td>$tabPeptide</td>
+    <td>$tabCollapsedProtein</td>
+    <td>$tabExpandedProtein</td>
+    <td>
+        #if ($tabCollapsedProteinProphet)
+            $tabCollapsedProteinProphet
+        #end
+    </td>
+    <td>
+        #if ($tabExpandedProteinProphet)
+            $tabExpandedProteinProphet
+        #end
+    </td>
+</tr></table></td></tr>
+
+<tr>
+  <td><form method="post" action="$urls.extraFilter">
+    <table class="dataRegion" border="0"><tr>
+      <td>${run.chargeFilterColumnName}:&nbsp;1+&nbsp;<input id="Charge1" type="text" name=charge1 value="$charge1" style="width:50;"></td>
+      <td>               2+&nbsp;<input id="Charge2" type="text" name=charge2 value="$charge2" style="width:50;"></td>
+      <td>               3+&nbsp;<input id="Charge3" type="text" name=charge3 value="$charge3" style="width:50;"></td>
+      <td>Tryptic&nbsp;ends:&nbsp;<input type="radio" name="tryptic" #if($tryptic == 0)checked#end value="0">0
+                                  <input type="radio" name="tryptic" #if($tryptic == 1)checked#end value="1">1
+                                  <input type="radio" name="tryptic" #if($tryptic == 2)checked#end value="2">2
+                                  <input type="image" value="Add Filter" src="$tools.buttonSrc('Add Filter')" name=""></td>
+    </tr></table>
+  </form></td>
+</tr>
+<tr><td>
+#parse("/MS2/renderFilter.vm")
+</td></tr>
+</table>

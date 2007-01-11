@@ -1,0 +1,60 @@
+<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<%@ page import="Issues.IssuesController"%>
+<table border=0 cellspacing=4 cellpadding=0>
+<tr><%
+    for (kw in keywords)
+    {
+        IssuesController.KeywordAdminView.Keyword keyword = kw;
+%>
+    <!--<%=keyword.plural%>-->
+    <td class="ms-vb">
+    <div class="ms-searchform"><b><%=keyword.plural%></b></div>
+    <form id="form<%=keyword.plural%>" method="POST" action="deleteKeyword.post" style="margin:0px;">
+<%
+if (keyword.values.length == 0)
+    out.println("    <i>no " + keyword.plural + "</i><br>");
+else
+    {
+    out.print("    <table>");
+    for (it in keyword.values)
+        {
+        value = PageFlowUtil.filter(it);
+        %>
+        <tr><td class=ms-vb>${value}</td><td class=ms-vb><a href="javascript:deleteKeyword('form<%=keyword.plural%>','${value}')">[delete]</a></td></tr><%
+        }
+    out.println("\n    </table>");
+    }
+%>    <input type="hidden" name="keyword" value=""><input type="hidden" name="type" value="<%=keyword.type%>">
+    </form>
+    </td>
+<%
+    }
+%>
+</tr>
+<tr>
+<%
+    for (kw in keywords)
+    {
+        IssuesController.KeywordAdminView.Keyword keyword = kw;
+%>
+<td>
+    <form method="POST" name="add<%=keyword.name%>" action="addKeyword.post" style="margin:0px;">
+    <input name="keyword" value=""><br>
+    <input type="image" src="<%=PageFlowUtil.buttonSrc("Add " + keyword.name)%>" value="Add <%=keyword.name%>"><br>
+    <input type="hidden" name="type" value="<%=keyword.type%>">
+    </form>
+</td><%
+    }
+%>
+</tr>
+</table>
+
+<script type="text/javascript">
+function deleteKeyword(form, word)
+{
+    f = document.forms[form];
+    f['keyword'].value = word;
+    f.action = "deleteKeyword.post";
+    f.submit();
+}
+</script>

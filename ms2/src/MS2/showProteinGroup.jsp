@@ -1,0 +1,74 @@
+<%@ page import="org.fhcrc.cpas.view.ViewURLHelper"%>
+<%@ page import="org.fhcrc.cpas.ms2.MS2Run"%>
+<%@ page import="org.fhcrc.cpas.ms2.ProteinGroupWithQuantitation" %>
+<%@ page import="org.fhcrc.cpas.view.ViewContext" %>
+<%@ page import="org.fhcrc.cpas.view.HttpView" %>
+<%@ page import="org.fhcrc.cpas.ms2.Protein" %>
+<%@ page import="org.fhcrc.cpas.util.Formats" %>
+
+<%
+    ViewContext me = HttpView.currentContext();
+    ProteinGroupWithQuantitation group = (ProteinGroupWithQuantitation) me.get("proteinGroup");
+%>
+
+<table>
+    <tr>
+        <td>Group number:</td>
+        <td><%= group.getGroupNumber() %><% if (group.getIndistinguishableCollectionId() != 0) { %>-<%= group.getIndistinguishableCollectionId() %><% } %></td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td>Group probability:</td>
+        <td><%= group.getGroupProbability() %></td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td>Protein probability:</td>
+        <td><%= group.getProteinProbability() %></td>
+    </tr>
+    <tr>
+        <td>Total number of peptides:</td>
+        <td><%= group.getTotalNumberPeptides() %></td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td>Number of unique peptides:</td>
+        <td><%= group.getUniquePeptidesCount() %></td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td>Percent spectrum ids:</td>
+        <td><%= Formats.percent.format(group.getPctSpectrumIds()) %></td>
+    </tr>
+    <tr>
+        <td>Percent coverage:</td>
+        <td><%= Formats.percent.format(group.getPercentCoverage()) %></td>
+    </tr>
+
+    <% if (group.getRatioMean() != null) { %>
+        <tr>
+            <td>Ratio mean:</td>
+            <td><%= group.getRatioMean() %></td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>Ratio standard dev:</td>
+            <td><%= group.getRatioStandardDev() %></td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>Number of quantitation peptides:</td>
+            <td><%= group.getRatioNumberPeptides() %></td>
+        </tr>
+        <tr>
+            <td>Heavy to light ratio mean:</td>
+            <td><%= group.getHeavy2LightRatioMean() %></td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>Heavy to light standard dev:</td>
+            <td><%= group.getHeavy2LightRatioStandardDev() %></td>
+        </tr>
+    <% } %>
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Jump to:</td>
+        <td colspan="7"><%
+            Protein[] proteins = group.lookupProteins();
+            for (int i = 0; i < proteins.length; i++)
+            {
+                Protein protein = proteins[i]; %>
+                <a href="#Protein<%= i %>"><%= protein.getLookupString() %></a>,
+            <% } %>
+            <a href="#Peptides">Peptides</a>
+        </td>
+    </tr>
+</table>

@@ -1,0 +1,25 @@
+<!--ANNOUNCEMENTS-->
+<table width="100%">
+<tr>
+<td align="left" class="ms-vb" style="padding-top:2px;"><%
+if (messagesURL)
+    {
+    %>[<a href="${messagesURL}"><%=settings.boardName%> Home</a>]<%
+    }
+if (insertURL)
+    {
+    %>&nbsp;[<a href="${insertURL}">New ${settings.conversationName}</a>]<%
+    }
+%></td>
+<td colspan="2" align="right" class="ms-vb" style="padding:2px;"><%
+if (emailPrefsURL)
+    {
+    %>[<a href="${emailPrefsURL}">My Email Preferences</a>]<%
+    }
+if (emailManageURL)
+    {
+    %>&nbsp;[<a href="${emailManageURL}">Admin Email Preferences</a>]<%
+    }
+%></td>
+</tr>
+</table>

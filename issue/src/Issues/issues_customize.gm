@@ -1,0 +1,22 @@
+<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+
+<form name= "frmCustomize" method="post" action="${postURL}">
+<input type="hidden" name="pageId" value="${webPart.pageId}">
+<input type="hidden" name="index" value="${webPart.index}">
+
+<table>
+    <tr>
+        <td class="ms-vb">
+        Enter title for the Issues Summary web part.
+        </td>
+        <td>
+        <input name="title" size="25" type="text" value="<%= webPart.propertyMap.title == null ? "Issues Summary" : filter(webPart.propertyMap.title) %>">
+        </td>
+     </tr>
+<tr>
+    <td colspan=2 align="right">
+        <input type="image" src="<%=PageFlowUtil.submitSrc()%>">
+    </td>
+</tr>
+</table>
+</form>

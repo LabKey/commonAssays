@@ -1,0 +1,7 @@
+<%@ page import="org.fhcrc.cpas.util.PageFlowUtil"%>
+<form method="post" action="${postURL}">
+Search ${what} in this <%=container.isProject() ? "project" : "folder and all subfolders"%>
+<table>
+<tr><td><input type="text" name="search" value=""></td><td><input type="image" src="<%=PageFlowUtil.buttonSrc("Search")%>"></td></tr>
+</table>
+</form>
