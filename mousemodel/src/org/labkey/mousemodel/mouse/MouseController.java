@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package MouseModel.Mouse;
+package org.labkey.mousemodel.mouse;
 
-import MouseModel.MouseModelController;
-import MouseModel.MouseModelController.MouseModelTemplateView;
-import MouseModel.NotesView;
-import MouseModel.Sample.SampleController;
+import org.labkey.mousemodel.MouseModelController;
+import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
+import org.labkey.mousemodel.NotesView;
+import org.labkey.mousemodel.sample.SampleController;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.commons.beanutils.ConversionException;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package MouseModel;
+package org.labkey.mousemodel;
 
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
@@ -31,7 +31,6 @@ import org.labkey.api.view.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -411,7 +410,7 @@ public class MouseModelController extends ViewController
 
         public MouseModelDetailsView(MouseModelForm form)
         {
-            super("/MouseModel/details.gm");
+            super("/org/labkey/mousemodel/details.gm");
             if (form.isDataLoaded())
                 _model = form.getBean();
             else
@@ -420,7 +419,7 @@ public class MouseModelController extends ViewController
 
         public MouseModelDetailsView(int modelId)
         {
-            super("/MouseModel/details.gm");
+            super("/org/labkey/mousemodel/details.gm");
             _model = MouseModelManager.getModel(modelId);
         }
 

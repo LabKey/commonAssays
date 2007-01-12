@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package MouseModel;
+package org.labkey.mousemodel;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
@@ -27,6 +27,8 @@ import org.labkey.api.security.Group;
 import org.labkey.api.security.SecurityManager;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.mousemodel.mouse.MouseController;
+import org.labkey.mousemodel.necropsy.NecropsyController;
 
 import java.sql.SQLException;
 import java.util.Set;
@@ -34,9 +36,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.beans.PropertyChangeEvent;
 
-import MouseModel.Mouse.MouseController;
-import MouseModel.Sample.SampleController;
-import MouseModel.Necropsy.NecropsyController;
+import org.labkey.mousemodel.sample.SampleController;
+import org.labkey.mousemodel.MouseModelController;
 
 /**
  * User: migra

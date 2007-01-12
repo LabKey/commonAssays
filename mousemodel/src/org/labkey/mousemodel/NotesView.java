@@ -1,4 +1,4 @@
-package MouseModel;
+package org.labkey.mousemodel;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.view.ViewURLHelper;

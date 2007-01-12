@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package MouseModel.Cages;
+package org.labkey.mousemodel.cages;
 
-import MouseModel.MouseModelController;
-import MouseModel.MouseModelController.MouseModelTemplateView;
-import MouseModel.Necropsy.NecropsyController;
+import org.labkey.mousemodel.MouseModelController;
+import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
+import org.labkey.mousemodel.necropsy.NecropsyController;
 import org.labkey.api.data.*;
 import org.labkey.api.sample.Cage;
 import org.labkey.api.sample.MouseSchema;

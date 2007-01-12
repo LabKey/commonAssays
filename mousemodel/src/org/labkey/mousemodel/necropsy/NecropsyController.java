@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package MouseModel.Necropsy;
+package org.labkey.mousemodel.necropsy;
 
-import MouseModel.MouseModelController;
-import MouseModel.MouseModelController.MouseModelForm;
-import MouseModel.MouseModelController.MouseModelTemplateView;
+import org.labkey.mousemodel.MouseModelController;
+import org.labkey.mousemodel.MouseModelController.MouseModelForm;
+import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.commons.beanutils.ConvertUtils;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package Project;
+package org.labkey.portal;
 
 import org.apache.beehive.netui.pageflow.FormData;
 import org.apache.beehive.netui.pageflow.Forward;
@@ -243,7 +243,7 @@ public class ProjectController extends ViewController
          */
         public CustomizeWebPartView(PropertyDescriptor[] propertyDescriptors)
         {
-            super("/Project/customizeWebPart.gm");
+            super("/org/labkey/portal/customizeWebPart.gm");
             //Get nicer display names for default property names
             for (PropertyDescriptor desc : propertyDescriptors)
             {
@@ -438,7 +438,7 @@ public class ProjectController extends ViewController
     {
         public SearchWebPart()
         {
-            super("/Project/search.gm");
+            super("/org/labkey/portal/search.gm");
         }
 
         @Override

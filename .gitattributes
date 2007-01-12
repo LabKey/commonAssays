@@ -272,9 +272,9 @@ moduleTemplate/src/cpas/MODULE_DIR_NAME/view/hello.jsp -text
 moduleTemplate/webapp/MODULE_DIR_NAME/scripts/postgresql/MODULE_LOWERCASE_NAME-0.00-0.01.sql -text
 moduleTemplate/webapp/MODULE_DIR_NAME/scripts/sql[!!-~]server/MODULE_LOWERCASE_NAME-0.00-0.01.sql -text
 mousemodel/module.properties -text
-mousemodel/src/MouseModel/MouseModelModule.java -text
-mousemodel/src/MouseModel/NotesView.java -text
-mousemodel/src/MouseModel/details.gm -text
+mousemodel/src/org/labkey/mousemodel/MouseModelModule.java -text
+mousemodel/src/org/labkey/mousemodel/NotesView.java -text
+mousemodel/src/org/labkey/mousemodel/details.gm -text
 mousemodel/webapp/MouseModel/Mouse/bulkUpdate.vm -text
 mousemodel/webapp/MouseModel/Sample/EnterSampleLocations.vm -text
 mousemodel/webapp/MouseModel/insert.vm -text
@@ -503,6 +503,6 @@ nab/src/org/labkey/nab/publishVerify.jsp -text
 nab/src/org/labkey/nab/runProperties.jsp -text
 nab/src/org/labkey/nab/runResults.jsp -text
 portal/module.properties -text
-portal/src/Project/PortalModule.java -text
-portal/src/Project/customizeWebPart.gm -text
-portal/src/Project/search.gm -text
+portal/src/org/labkey/portal/PortalModule.java -text
+portal/src/org/labkey/portal/customizeWebPart.gm -text
+portal/src/org/labkey/portal/search.gm -text

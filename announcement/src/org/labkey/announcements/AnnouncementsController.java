@@ -699,7 +699,7 @@ public class AnnouncementsController extends ViewController
         initView(insertView, c, form, null, reshow);
 
         insertView.addObject("renderers", WikiRendererType.values());
-        insertView.addObject("helpView", new GroovyView("/Wiki/wiki_help.gm"));
+        insertView.addObject("helpView", new GroovyView("/org/labkey/wiki/view/wiki_help.gm"));
         insertView.addObject("allowBroadcast", !settings.isSecure() && getUser().isAdministrator());
 
         return _renderInTemplate(insertView, c, "forms[0].title");
@@ -818,7 +818,7 @@ public class AnnouncementsController extends ViewController
         initView(respondView, c, form, latestPost, reshow);
 
         respondView.addObject("parentAnnouncement", parent);
-        respondView.addObject("helpView", new GroovyView("/Wiki/wiki_help.gm"));
+        respondView.addObject("helpView", new GroovyView("/org/labkey/wiki/view/wiki_help.gm"));
 
         return _renderInTemplate(new VBox(threadView, respondView), c, "forms[0].body", null, "response");
     }
@@ -1652,7 +1652,7 @@ public class AnnouncementsController extends ViewController
         {
             super("/org/labkey/announcements/announcementUpdate.gm");
 
-            addObject("helpView", new GroovyView("/Wiki/wiki_help.gm"));
+            addObject("helpView", new GroovyView("/org/labkey/wiki/view/wiki_help.gm"));
             addObject("currentRendererType", WikiRendererType.valueOf(ann.getRendererType()));
             addObject("renderers", WikiRendererType.values());
 

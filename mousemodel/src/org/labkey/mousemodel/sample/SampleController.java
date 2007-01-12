@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package MouseModel.Sample;
+package org.labkey.mousemodel.sample;
 
-import MouseModel.NotesView;
-import MouseModel.MouseModelController;
-import MouseModel.Mouse.MouseController;
-import MouseModel.MouseModelController.MouseModelTemplateView;
+import org.labkey.mousemodel.NotesView;
+import org.labkey.mousemodel.MouseModelController;
+import org.labkey.mousemodel.mouse.MouseController;
+import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
 import org.apache.struts.upload.FormFile;
 import org.apache.struts.upload.MultipartRequestHandler;
 import org.apache.struts.action.ActionMapping;
@@ -26,7 +26,6 @@ import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionError;
 import org.apache.log4j.Logger;
 import org.apache.beehive.netui.pageflow.Forward;
-import org.apache.beehive.netui.pageflow.FormData;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.labkey.api.data.*;
 import org.labkey.api.sample.*;
@@ -36,16 +35,13 @@ import org.labkey.api.exp.ExperimentManager;
 import org.labkey.api.exp.MaterialSource;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.ServletException;
 import javax.swing.text.View;
 import java.util.Map;
 import java.net.URI;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.sql.SQLException;
 
 import static org.apache.commons.lang.StringUtils.trimToNull;
-import static org.apache.commons.lang.StringUtils.trimToEmpty;
 import org.apache.commons.lang.StringUtils;
 import static org.labkey.api.util.PageFlowUtil.filter;
 import org.labkey.api.util.PageFlowUtil;

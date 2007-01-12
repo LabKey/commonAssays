@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package Project;
+package org.labkey.portal;
 
 import org.labkey.api.module.Module;
 import org.labkey.api.module.DefaultModule;
