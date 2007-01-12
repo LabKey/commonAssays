@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package announcements;
+package org.labkey.announcements;
 
-import announcements.model.NormalMessageBoardPermissions;
-import announcements.model.Permissions;
-import announcements.model.SecureMessageBoardPermissions;
+import org.labkey.announcements.model.NormalMessageBoardPermissions;
+import org.labkey.announcements.model.Permissions;
+import org.labkey.announcements.model.SecureMessageBoardPermissions;
 import org.apache.beehive.netui.pageflow.FormData;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
@@ -44,7 +44,7 @@ import org.labkey.api.view.*;
 import org.labkey.wiki.WikiRenderer;
 import org.labkey.wiki.WikiRendererType;
 import org.labkey.wiki.WikiService;
-import announcements.EmailResponsePage.Reason;
+import org.labkey.announcements.EmailResponsePage.Reason;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -243,7 +243,7 @@ public class AnnouncementsController extends ViewController
             if (rs != null) try { rs.close(); } catch (SQLException e) {}
         }
 
-        HttpView v = new GroovyView("/announcements/bulkEdit.gm");
+        HttpView v = new GroovyView("/org/labkey/announcements/bulkEdit.gm");
         v.addObject("title", "Admin Email Preferences");
         v.addObject("emailPrefList", emailPrefList);
 
@@ -315,7 +315,7 @@ public class AnnouncementsController extends ViewController
         if(!perm.allowDeleteMessage(message))
             HttpView.throwUnauthorized();
 
-        GroovyView confirmDeleteView = new GroovyView("/announcements/confirmDelete.gm");
+        GroovyView confirmDeleteView = new GroovyView("/org/labkey/announcements/confirmDelete.gm");
         confirmDeleteView.addObject("message", message);
         confirmDeleteView.addObject("settings", getSettings());
         HttpView template = new LoginTemplate(confirmDeleteView);
@@ -387,7 +387,7 @@ public class AnnouncementsController extends ViewController
         }
 
         String postUrl = cloneViewURLHelper().setAction("removeFromUserList").getEncodedLocalURIString();
-        GroovyView confirmDeleteView = new GroovyView("/announcements/confirmRemoveUser.gm");
+        GroovyView confirmDeleteView = new GroovyView("/org/labkey/announcements/confirmRemoveUser.gm");
         confirmDeleteView.addObject("message", message);
         confirmDeleteView.addObject("email", user.getEmail());
         confirmDeleteView.addObject("settings", getSettings());
@@ -455,7 +455,7 @@ public class AnnouncementsController extends ViewController
         requiresAdmin();
 
         Settings settings = AnnouncementManager.getMessageBoardSettings(getContainer());
-        JspView<Settings> view = new JspView<Settings>("/announcements/customize.jsp", settings);
+        JspView<Settings> view = new JspView<Settings>("/org/labkey/announcements/customize.jsp", settings);
         _renderInTemplate(view, getContainer(), null, "Customize " + settings.getBoardName(), null);
 
         return null;
@@ -693,7 +693,7 @@ public class AnnouncementsController extends ViewController
         if (!perm.allowInsert())
             HttpView.throwUnauthorized();
 
-        GroovyView insertView = new GroovyView("/announcements/insert.gm", "New " + settings.getConversationName());
+        GroovyView insertView = new GroovyView("/org/labkey/announcements/insert.gm", "New " + settings.getConversationName());
 
         boolean reshow = (PageFlowUtil.getStrutsError(getRequest(), "main").length() != 0);
         initView(insertView, c, form, null, reshow);
@@ -810,7 +810,7 @@ public class AnnouncementsController extends ViewController
 
         Container c = getContainer();
         HttpView threadView = new ThreadView(c, parent, perm);
-        GroovyView respondView = new GroovyView("/announcements/respond.gm", "Response");
+        GroovyView respondView = new GroovyView("/org/labkey/announcements/respond.gm", "Response");
 
         Announcement latestPost = AnnouncementManager.getLatestPost(c, parent);
 
@@ -835,7 +835,7 @@ public class AnnouncementsController extends ViewController
         SimpleFilter filter = getRecentAnnouncementsFilter(getSettings(), getPermissions(), true);
         Announcement[] announcements = AnnouncementManager.getAnnouncements(c, filter);
 
-        HttpView v = new GroovyView("/announcements/rss.gm");
+        HttpView v = new GroovyView("/org/labkey/announcements/rss.gm");
         v.addObject("announcements", announcements);
         v.addObject("container", c);
         v.addObject("request", getRequest());
@@ -1072,7 +1072,7 @@ public class AnnouncementsController extends ViewController
 
     private void showEmailPreferencesPage(EmailOptionsForm form, String message) throws Exception
     {
-        JspView view = new JspView("/announcements/emailPreferences.jsp");
+        JspView view = new JspView("/org/labkey/announcements/emailPreferences.jsp");
         EmailPreferencesPage page = (EmailPreferencesPage)view.getPage();
         view.setTitle("Email Preferences");
         page.emailPreference = form.getEmailPreference();
@@ -1357,7 +1357,7 @@ public class AnnouncementsController extends ViewController
 
         public AnnouncementEmailDefaults(Container c)
         {
-            super("/announcements/announcementEmailDefaults.gm", "Admin Email Preferences");
+            super("/org/labkey/announcements/announcementEmailDefaults.gm", "Admin Email Preferences");
             addObject("emailOptionsList", null);
             addObject("defaultEmailOption", null);
             setContainer(c);
@@ -1394,7 +1394,7 @@ public class AnnouncementsController extends ViewController
     {
         public AnnouncementListLinkBar(Container c, User user, Settings settings, Permissions perm)
         {
-            super("/announcements/announcementListLinkBar.gm");
+            super("/org/labkey/announcements/announcementListLinkBar.gm");
 
             addObject("settings", settings);
             addObject("insertURL", perm.allowInsert() ? ViewURLHelper.toPathString("announcements", "showInsert", c.getPath()) : null);
@@ -1409,7 +1409,7 @@ public class AnnouncementsController extends ViewController
     {
         public AnnouncementWebPart(Container c, User user, boolean displayAll) throws SQLException, ServletException
         {
-            super("/announcements/announcementWebPart.gm");
+            super("/org/labkey/announcements/announcementWebPart.gm");
 
             Settings settings = getSettings(c);
             setTitle(settings.getBoardName());
@@ -1564,7 +1564,7 @@ public class AnnouncementsController extends ViewController
     {
         private ThreadView()
         {
-            super("/announcements/announcementThread.gm");
+            super("/org/labkey/announcements/announcementThread.gm");
         }
 
         public ThreadView(AnnouncementsForm form, Permissions perm)
@@ -1650,7 +1650,7 @@ public class AnnouncementsController extends ViewController
 
         public AnnouncementUpdateView(AnnouncementsForm form, Announcement ann)
         {
-            super("/announcements/announcementUpdate.gm");
+            super("/org/labkey/announcements/announcementUpdate.gm");
 
             addObject("helpView", new GroovyView("/Wiki/wiki_help.gm"));
             addObject("currentRendererType", WikiRendererType.valueOf(ann.getRendererType()));

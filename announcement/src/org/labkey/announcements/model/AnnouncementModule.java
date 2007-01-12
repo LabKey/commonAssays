@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package announcements.model;
+package org.labkey.announcements.model;
 
-import announcements.AnnouncementsController;
+import org.labkey.announcements.AnnouncementsController;
 import junit.framework.TestCase;
 import org.apache.commons.collections.MultiMap;
 import org.apache.log4j.Logger;
@@ -44,7 +44,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import attachments.AttachmentsController;
+import org.labkey.attachments.AttachmentsController;
 
 /**
  * User: migra

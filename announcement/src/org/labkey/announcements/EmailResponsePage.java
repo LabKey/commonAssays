@@ -1,4 +1,4 @@
-package announcements;
+package org.labkey.announcements;
 
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.announcements.Announcement;

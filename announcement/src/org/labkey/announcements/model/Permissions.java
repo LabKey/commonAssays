@@ -1,4 +1,4 @@
-package announcements.model;
+package org.labkey.announcements.model;
 
 import org.labkey.api.announcements.Announcement;
 import org.labkey.api.data.SimpleFilter;

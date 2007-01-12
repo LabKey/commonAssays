@@ -1,4 +1,4 @@
-<%@ page extends="announcements.EmailResponsePage" %>
+<%@ page extends="org.labkey.announcements.EmailResponsePage" %>
 
 <%=responseAnnouncement.getCreatedByName() + (responseAnnouncement.getParent() != null ? " responded" : " created a new " + settings.getConversationName().toLowerCase()) %>
 <%=formatDateTime(responseAnnouncement.getCreated())%><%

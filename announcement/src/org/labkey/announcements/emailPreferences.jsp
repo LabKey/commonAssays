@@ -1,5 +1,5 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page extends="announcements.EmailPreferencesPage" %>
+<%@ page extends="org.labkey.announcements.EmailPreferencesPage" %>
 <%=message == null ? "" : message%>
 <form action="updateEmailPreferences.post" method="post">
     <input type="radio" value="0" name="emailPreference" <%=emailPreference == 0 ? " checked" : ""%>>

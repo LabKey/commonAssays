@@ -1,4 +1,4 @@
-<%@ page extends="announcements.EmailResponsePage" %>
+<%@ page extends="org.labkey.announcements.EmailResponsePage" %>
 <html>
 <head>
 <link href="<%=cssURL%>" rel="stylesheet" type="text/css">

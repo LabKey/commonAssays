@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package attachments;
+package org.labkey.attachments;
 
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
