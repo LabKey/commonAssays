@@ -1,7 +1,7 @@
-package Issues;
+package org.labkey.issue;
 
-import Issues.model.Issue;
-import Issues.model.IssueManager;
+import org.labkey.issue.model.Issue;
+import org.labkey.issue.model.IssueManager;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;

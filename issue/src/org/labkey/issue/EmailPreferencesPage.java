@@ -1,4 +1,4 @@
-package Issues;
+package org.labkey.issue;
 
 import org.labkey.api.jsp.JspBase;
 

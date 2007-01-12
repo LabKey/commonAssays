@@ -1,13 +1,13 @@
 
-<%@ page import="Issues.model.Issue"%>
+<%@ page import="org.labkey.issue.model.Issue"%>
 <%@ page import="org.labkey.api.data.DataRegion"%>
 <%@ page import="org.labkey.api.util.HelpUtil"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.ViewContext"%>
 <%@ page import="org.labkey.api.view.ViewURLHelper"%>
 <%@ page import="org.labkey.api.data.Container"%>
-<%@ page import="Issues.IssuesController"%>
-<%@ page extends="Issues.IssuePage" %>
+<%@ page import="org.labkey.issue.IssuesController"%>
+<%@ page extends="org.labkey.issue.IssuePage" %>
 <%
     ViewContext context = HttpView.currentContext();
     final Issue issue = getIssue();

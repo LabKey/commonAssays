@@ -1,5 +1,5 @@
-<%@ page import="Issues.IssuesController"%>
-<%@ page import="Issues.model.Issue"%>
+<%@ page import="org.labkey.issue.IssuesController"%>
+<%@ page import="org.labkey.issue.model.Issue"%>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="org.labkey.api.data.Container"%>
 <%@ page import="org.labkey.api.data.DataRegion"%>
@@ -8,7 +8,7 @@
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.ViewContext"%>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
-<%@ page extends="Issues.IssuePage" %>
+<%@ page extends="org.labkey.issue.IssuePage" %>
 <%
     ViewContext context = HttpView.getRootContext();
     final Issue issue = getIssue();

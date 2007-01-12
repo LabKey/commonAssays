@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package Issues;
+package org.labkey.issue;
 
-import Issues.model.IssueManager;
-import Issues.query.IssuesQuerySchema;
+import org.labkey.issue.model.IssueManager;
+import org.labkey.issue.query.IssuesQuerySchema;
 import junit.framework.TestCase;
 import org.apache.commons.collections.MultiMap;
 //import org.apache.log4j.Logger;
@@ -171,8 +171,8 @@ public class IssuesModule extends DefaultModule implements ContainerManager.Cont
     public Set<Class<? extends TestCase>> getJUnitTests()
     {
         return new HashSet<Class<? extends TestCase>>(Arrays.asList(
-            Issues.IssuesController.TestCase.class,
-            Issues.model.IssueManager.TestCase.class ));
+            org.labkey.issue.IssuesController.TestCase.class,
+            org.labkey.issue.model.IssueManager.TestCase.class ));
     }
 
     public Set<DbSchema> getSchemasToTest()

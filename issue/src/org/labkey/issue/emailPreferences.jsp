@@ -1,8 +1,8 @@
-<%@ page import="Issues.model.IssueManager" %>
+<%@ page import="org.labkey.issue.model.IssueManager" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.ViewContext"%>
-<%@ page extends="Issues.EmailPreferencesPage" %>
+<%@ page extends="org.labkey.issue.EmailPreferencesPage" %>
 
 <%
     ViewContext context = HttpView.currentContext();

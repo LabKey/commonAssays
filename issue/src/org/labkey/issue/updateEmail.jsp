@@ -1,6 +1,6 @@
-<%@ page import="Issues.model.Issue" %>
+<%@ page import="org.labkey.issue.model.Issue" %>
 <%@ page import="java.util.Iterator" %>
-<%@ page extends="Issues.UpdateEmailPage"%>
+<%@ page extends="org.labkey.issue.UpdateEmailPage"%>
 <%
     String changeComment = "(No change comment)";
     Iterator<Issue.Comment> it = issue.getComments().iterator();

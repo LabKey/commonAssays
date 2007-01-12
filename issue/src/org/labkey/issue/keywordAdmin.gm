@@ -1,5 +1,5 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
-<%@ page import="Issues.IssuesController"%>
+<%@ page import="org.labkey.issue.IssuesController"%>
 <table border=0 cellspacing=4 cellpadding=0>
 <tr><%
     for (kw in keywords)

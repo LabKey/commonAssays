@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package Issues;
+package org.labkey.issue;
 
-import Issues.model.Issue;
-import Issues.model.IssueManager;
-import Issues.model.IssueManager.CustomColumnConfiguration;
-import Issues.query.IssuesQuerySchema;
-import Issues.query.IssuesQueryView;
-import Issues.query.IssuesTable;
+import org.labkey.issue.model.Issue;
+import org.labkey.issue.model.IssueManager;
+import org.labkey.issue.model.IssueManager.CustomColumnConfiguration;
+import org.labkey.issue.query.IssuesQuerySchema;
+import org.labkey.issue.query.IssuesQueryView;
+import org.labkey.issue.query.IssuesTable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.beehive.netui.pageflow.FormData;
@@ -204,7 +204,7 @@ public class IssuesController extends ViewController
         if (form.getPrint())
             queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.NONE);
         else
-            box.addView(new JspView<ListForm>("/Issues/list.jsp", form));
+            box.addView(new JspView<ListForm>("/org/labkey/issue/list.jsp", form));
 
         box.addView(queryView);
         return box;
@@ -904,7 +904,7 @@ public class IssuesController extends ViewController
             ObjectFactory f = ObjectFactory.Registry.getFactory(Issue.class);
             Issue[] issues = (Issue[]) f.handleArray(rs);
 
-            HttpView v = new GroovyView("/Issues/rss.gm");
+            HttpView v = new GroovyView("/org/labkey/issue/rss.gm");
             v.addObject("issues", issues);
             ViewURLHelper url = cloneViewURLHelper();
             url.deleteParameters();
@@ -1121,7 +1121,7 @@ public class IssuesController extends ViewController
 
         public AdminView(Container c, User user, CustomColumnConfiguration ccc)
         {
-            super("/Issues/admin.gm");
+            super("/org/labkey/issue/admin.gm");
 
             _ccc = ccc;
 
@@ -1147,7 +1147,7 @@ public class IssuesController extends ViewController
             ColumnInfo[] cols = IssuesSchema.getInstance().getTableInfoIssues().getColumns(columnNames.toArray(new String[0]));
 
             IssuesPreference bean = new IssuesPreference(cols, IssueManager.getRequiredIssueFields());
-            _requiredFieldsView = new JspView<IssuesPreference>("/Issues/requiredFields.jsp", bean);
+            _requiredFieldsView = new JspView<IssuesPreference>("/org/labkey/issue/requiredFields.jsp", bean);
         }
 
 
@@ -1186,7 +1186,7 @@ public class IssuesController extends ViewController
 
         public KeywordAdminView(Container c)
         {
-            super("/Issues/keywordAdmin.gm");
+            super("/org/labkey/issue/keywordAdmin.gm");
             _c = c;
         }
 
@@ -1290,7 +1290,7 @@ public class IssuesController extends ViewController
     {
         public SummaryWebPart()
         {
-            super("/Issues/summary_webpart.gm");
+            super("/org/labkey/issue/summary_webpart.gm");
             addObject("isGuest", Boolean.TRUE);
             addObject("hasPermission", Boolean.TRUE);
             addObject("title", null);
@@ -1521,7 +1521,7 @@ public class IssuesController extends ViewController
     {
         public CustomizeIssuesPartView()
         {
-            super("/Issues/issues_customize.gm");
+            super("/org/labkey/issue/issues_customize.gm");
         }
 
         @Override

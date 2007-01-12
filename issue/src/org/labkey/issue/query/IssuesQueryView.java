@@ -1,4 +1,4 @@
-package Issues.query;
+package org.labkey.issue.query;
 
 import org.labkey.api.data.*;
 import org.labkey.api.query.api.*;

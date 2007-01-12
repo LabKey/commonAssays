@@ -1,4 +1,4 @@
-<%@ page import="Issues.IssuesController"%>
+<%@ page import="org.labkey.issue.IssuesController"%>
 <%@ page import="org.labkey.api.query.api.CustomView"%>
 <%@ page import="org.labkey.api.security.ACL"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>

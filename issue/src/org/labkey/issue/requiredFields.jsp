@@ -1,10 +1,9 @@
-<%@ page import="Issues.IssuesController"%>
+<%@ page import="org.labkey.issue.IssuesController"%>
 <%@ page import="org.labkey.api.data.ColumnInfo"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
-<%@ page import="Issues.model.IssueManager" %>
+<%@ page import="org.labkey.issue.model.IssueManager" %>
 <%@ page import="java.sql.SQLException" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
