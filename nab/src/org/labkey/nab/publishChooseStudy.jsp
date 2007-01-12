@@ -1,12 +1,12 @@
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.api.view.ViewContext"%>
-<%@ page import="Nab.NabController" %>
+<%@ page import="org.labkey.nab.NabController" %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<NabController.PublishBean> me = (JspView<NabController.PublishBean>) HttpView.currentView();
+    JspView<NabController.PublishBean> me = (JspView<org.labkey.nab.NabController.PublishBean>) HttpView.currentView();
     NabController.PublishBean bean = me.getModel();
 %>
 <form action="publishVerify.post" method="POST">

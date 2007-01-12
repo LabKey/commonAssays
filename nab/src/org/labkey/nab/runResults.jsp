@@ -1,7 +1,7 @@
-<%@ page import="Nab.NabController"%>
-<%@ page import="cpas.assays.nab.DilutionSummary"%>
-<%@ page import="cpas.assays.nab.Luc5Assay"%>
-<%@ page import="cpas.assays.nab.SampleInfo"%>
+<%@ page import="org.labkey.nab.NabController"%>
+<%@ page import="org.labkey.nab.DilutionSummary"%>
+<%@ page import="org.labkey.nab.Luc5Assay"%>
+<%@ page import="org.labkey.nab.SampleInfo"%>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="org.labkey.api.study.WellData"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
@@ -11,7 +11,7 @@
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<NabController.RenderAssayBean> me = (JspView<NabController.RenderAssayBean>) HttpView.currentView();
+    JspView<org.labkey.nab.NabController.RenderAssayBean> me = (JspView<NabController.RenderAssayBean>) HttpView.currentView();
     NabController.RenderAssayBean bean = me.getModel();
     Luc5Assay assay = bean.getAssay();
     String headerTDStyle = "text-align:left;background-color:#EEEEEE;border-top:solid 1px";

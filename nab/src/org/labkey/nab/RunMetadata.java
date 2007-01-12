@@ -1,4 +1,4 @@
-package cpas.assays.nab;
+package org.labkey.nab;
 
 import org.labkey.api.util.DateUtil;
 

@@ -1,4 +1,4 @@
-package cpas.assays.nab;
+package org.labkey.nab;
 
 import java.io.Serializable;
 

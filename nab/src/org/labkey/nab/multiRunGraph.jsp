@@ -1,9 +1,9 @@
-<%@ page import="cpas.assays.nab.Luc5Assay"%>
+<%@ page import="org.labkey.nab.Luc5Assay"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="java.text.DecimalFormat"%>
-<%@ page import="cpas.assays.nab.DilutionSummary"%>
-<%@ page import="Nab.NabController"%>
+<%@ page import="org.labkey.nab.DilutionSummary"%>
+<%@ page import="org.labkey.nab.NabController"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.api.study.WellData" %>
@@ -11,7 +11,7 @@
 
 <%
     JspView<NabController.GraphSelectedBean> me = (JspView<NabController.GraphSelectedBean>) HttpView.currentView();
-    NabController.GraphSelectedBean bean = me.getModel();
+    org.labkey.nab.NabController.GraphSelectedBean bean = me.getModel();
 
     String errs = PageFlowUtil.getStrutsError(request, "main");
     if (null != StringUtils.trimToNull(errs))

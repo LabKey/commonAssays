@@ -1,6 +1,6 @@
-package Nab;
+package org.labkey.nab;
 
-import cpas.assays.nab.*;
+import org.labkey.nab.*;
 import jxl.read.biff.BiffException;
 import org.apache.beehive.netui.pageflow.FormData;
 import org.apache.beehive.netui.pageflow.Forward;
@@ -90,7 +90,7 @@ public class NabController extends ViewController
     protected Forward editRunParameters(UploadAssayForm assayForm) throws Exception
     {
         requiresPermission(ACL.PERM_INSERT);
-        JspView<UploadAssayForm> assayView = new JspView<UploadAssayForm>("/cpas/assays/nab/runProperties.jsp", assayForm);
+        JspView<UploadAssayForm> assayView = new JspView<UploadAssayForm>("/org/labkey/nab/runProperties.jsp", assayForm);
         return _renderInTemplate(assayView, "Create Nab Run");
     }
 
@@ -197,7 +197,7 @@ public class NabController extends ViewController
 
     private Forward renderDetailPage(Luc5Assay assay, boolean newRun, boolean printView) throws Exception
     {
-        JspView<RenderAssayBean> assayView = new JspView<RenderAssayBean>("/cpas/assays/nab/runResults.jsp",
+        JspView<RenderAssayBean> assayView = new JspView<RenderAssayBean>("/org/labkey/nab/runResults.jsp",
                 new RenderAssayBean(assay, newRun));
         if (printView)
             return _renderInTemplate(assayView, "NAB Run Details: " + assay.getName(), null, true);
@@ -341,7 +341,7 @@ public class NabController extends ViewController
         Collections.sort(cutoffList);
         _cachedSummaries = summaries.toArray(new DilutionSummary[summaries.size()]);
         _cachedCutoffs = cutoffList;
-        JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/cpas/assays/nab/multiRunGraph.jsp",
+        JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/multiRunGraph.jsp",
                 new GraphSelectedBean(summaries, cutoffList));
 
         ViewURLHelper printLink = null;
@@ -622,7 +622,7 @@ public class NabController extends ViewController
             sampleInfoMap.put(wellgroup, sampleInfo);
         }
 
-        JspView<PublishVerifyBean> publishVerifyView = new JspView<PublishVerifyBean>("/cpas/assays/nab/publishVerify.jsp",
+        JspView<PublishVerifyBean> publishVerifyView = new JspView<PublishVerifyBean>("/org/labkey/nab/publishVerify.jsp",
                 new PublishVerifyBean(targetContainer, sampleInfoMap));
         return _renderInTemplate(publishVerifyView, "Choose Target Study");
     }
@@ -651,7 +651,7 @@ public class NabController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
         List<Integer> wellgroupIds = getCheckboxIds();
-        JspView<PublishBean> chooseStudyView = new JspView<PublishBean>("/cpas/assays/nab/publishChooseStudy.jsp",
+        JspView<PublishBean> chooseStudyView = new JspView<PublishBean>("/org/labkey/nab/publishChooseStudy.jsp",
                 new PublishBean(getViewContext(), wellgroupIds, false));
         return _renderInTemplate(chooseStudyView, "Choose Target Study");
     }
@@ -661,7 +661,7 @@ public class NabController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
         List<Integer> plateIds = getCheckboxIds();
-        JspView<PublishBean> chooseStudyView = new JspView<PublishBean>("/cpas/assays/nab/publishChooseStudy.jsp",
+        JspView<PublishBean> chooseStudyView = new JspView<PublishBean>("/org/labkey/nab/publishChooseStudy.jsp",
                 new PublishBean(getViewContext(), plateIds, true));
         return _renderInTemplate(chooseStudyView, "Choose Target Study");
     }
@@ -958,7 +958,7 @@ public class NabController extends ViewController
             ViewURLHelper customizeLink = null;
             if (view instanceof PlateQueryView)
                 customizeLink = ((PlateQueryView) view).getCustomizeURL();
-            JspView<HeaderBean> headerView = new JspView<HeaderBean>("/cpas/assays/nab/header.jsp",
+            JspView<HeaderBean> headerView = new JspView<HeaderBean>("/org/labkey/nab/header.jsp",
                     new HeaderBean(getViewContext(), printLink,
                             dataFilePlate != null ? NabManager.get().getDataFileDownloadLink(dataFilePlate) : null, customizeLink));
             VBox box = new VBox(headerView, view);

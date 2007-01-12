@@ -1,6 +1,6 @@
-package cpas.assays.nab;
+package org.labkey.nab;
 
-import Nab.NabController;
+import org.labkey.nab.NabController;
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;

@@ -2,13 +2,13 @@
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
-<%@ page import="Nab.NabController"%>
-<%@ page import="cpas.assays.nab.SampleInfo"%>
-<%@ page import="cpas.assays.nab.RunSettings"%>
+<%@ page import="org.labkey.nab.NabController"%>
+<%@ page import="org.labkey.nab.SampleInfo"%>
+<%@ page import="org.labkey.nab.RunSettings"%>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.UploadAssayForm> me = (JspView<NabController.UploadAssayForm>) HttpView.currentView();
-    NabController.UploadAssayForm form = me.getModel();
+    org.labkey.nab.NabController.UploadAssayForm form = me.getModel();
     String headerTDStyle = "text-align:left;background-color:#EEEEEE;border-top:solid 1px";
     String dataTDStyle = "padding-left:20px";
 

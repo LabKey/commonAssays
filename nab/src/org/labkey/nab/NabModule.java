@@ -1,4 +1,4 @@
-package Nab;
+package org.labkey.nab;
 
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -8,7 +8,8 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.AssayService;
 import org.labkey.api.view.ViewContext;
-import cpas.assays.nab.NabManager;
+import org.labkey.nab.NabController;
+import org.labkey.nab.NabManager;
 
 import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
