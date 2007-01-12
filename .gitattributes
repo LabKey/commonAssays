@@ -59,8 +59,6 @@ announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/core-0.59-0.6
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/cpas-0.00-0.60.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/cpas-0.00-0.70.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/cpas-0.58-0.59.sql -text
-/beehive-tools.xml -text
-/build-info.properties.template -text
 flow/module.properties -text
 flow/src/Flow/BaseController.java -text
 flow/src/Flow/BaseFlowController.java -text
