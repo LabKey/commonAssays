@@ -1,5 +1,6 @@
 * text=auto !eol
 announcement/module.properties -text
+announcement/src/META-INF/comm.xml -text
 announcement/src/announcements/EmailPreferencesPage.java -text
 announcement/src/announcements/EmailResponsePage.java -text
 announcement/src/announcements/announcementEmailDefaults.gm -text
@@ -23,7 +24,6 @@ announcement/src/announcements/respond.gm -text
 announcement/src/announcements/rss.gm -text
 announcement/src/attachments/confirmDelete.gm -text
 announcement/src/attachments/refreshParent.gm -text
-announcement/src/cpasProperties/comm.xml -text
 announcement/webapp/announcements/scripts/postgresql/comm-0.00-1.10.sql -text
 announcement/webapp/announcements/scripts/postgresql/comm-1.00-1.10.sql -text
 announcement/webapp/announcements/scripts/postgresql/comm-1.20-1.30.sql -text
@@ -134,7 +134,7 @@ flow/src/Flow/flowAdmin.jsp -text
 flow/src/Flow/main.jsp -text
 flow/src/Flow/newFolder.jsp -text
 flow/src/Flow/runningJobs.jsp -text
-flow/src/cpasProperties/flow.xml -text
+flow/src/META-INF/flow.xml -text
 flow/src/org/fhcrc/cpas/flow/FlowPreference.java -text
 flow/src/org/fhcrc/cpas/flow/FlowSettings.java -text
 flow/src/org/fhcrc/cpas/flow/ScriptParser.java -text
@@ -263,12 +263,12 @@ issue/webapp/Issues/scripts/sql[!!-~]server/obsolete/cpas-0.00-0.81.sql -text
 issue/webapp/Issues/scripts/sql[!!-~]server/obsolete/cpas-0.69-0.70.sql -text
 moduleTemplate/MODULE_NAME.iml -text
 moduleTemplate/module.properties -text
+moduleTemplate/src/META-INF/MODULE_LOWERCASE_NAME.xml -text
 moduleTemplate/src/MODULE_DIR_NAME/MODULE_NAMEController.java -text
 moduleTemplate/src/cpas/MODULE_DIR_NAME/MODULE_NAMEManager.java -text
 moduleTemplate/src/cpas/MODULE_DIR_NAME/MODULE_NAMEModule.java -text
 moduleTemplate/src/cpas/MODULE_DIR_NAME/MODULE_NAMESchema.java -text
 moduleTemplate/src/cpas/MODULE_DIR_NAME/view/hello.jsp -text
-moduleTemplate/src/cpasProperties/MODULE_LOWERCASE_NAME.xml -text
 moduleTemplate/webapp/MODULE_DIR_NAME/scripts/postgresql/MODULE_LOWERCASE_NAME-0.00-0.01.sql -text
 moduleTemplate/webapp/MODULE_DIR_NAME/scripts/sql[!!-~]server/MODULE_LOWERCASE_NAME-0.00-0.01.sql -text
 mousemodel/module.properties -text
@@ -293,6 +293,7 @@ mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/obsolete/sample-0.60-0.61.s
 mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/sample-drop.sql -text
 ms1/MS1.iml -text
 ms1/module.properties -text
+ms1/src/META-INF/ms1.xml -text
 ms1/src/cpas/ms1/MS1Manager.java -text
 ms1/src/cpas/ms1/MS1Module.java -text
 ms1/src/cpas/ms1/MS1Schema.java -text
@@ -301,11 +302,12 @@ ms1/src/cpas/ms1/pipeline/MS1FileFilter.java -text
 ms1/src/cpas/ms1/pipeline/MSInspectImportPipelineJob.java -text
 ms1/src/cpas/ms1/pipeline/MSInspectPipelineProvider.java -text
 ms1/src/cpas/ms1/pipeline/templates/msInspectFeatureFinding.xml -text
-ms1/src/cpasProperties/ms1.xml -text
 ms1/src/ms1/MS1Controller.java -text
 ms1/webapp/ms1/scripts/postgresql/ms1-0.00-0.01.sql -text
 ms1/webapp/ms1/scripts/sql[!!-~]server/ms1-0.00-0.01.sql -text
 ms2/module.properties -text
+ms2/src/META-INF/defaultViews.properties -text
+ms2/src/META-INF/ms2.xml -text
 ms2/src/MS2/FirstProteinDisplayColumn.java -text
 ms2/src/MS2/GroupNumberDisplayColumn.java -text
 ms2/src/MS2/MS2FolderType.java -text
@@ -368,8 +370,6 @@ ms2/src/cpas/ms2/peptideview/StandardProteinPeptideView.java -text
 ms2/src/cpas/ms2/peptideview/StandardProteinTSVGridWriter.java -text
 ms2/src/cpas/ms2/pipeline/ProteinProphetPipelineJob.java -text
 ms2/src/cpas/ms2/pipeline/ProteinProphetPipelineProvider.java -text
-ms2/src/cpasProperties/defaultViews.properties -text
-ms2/src/cpasProperties/ms2.xml -text
 ms2/webapp/MS2/PiesliceDetailListHeader.vm -text
 ms2/webapp/MS2/ProtAnnots.vm -text
 ms2/webapp/MS2/annotLoadDetails.vm -text
