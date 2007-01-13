@@ -1,8 +1,8 @@
 package org.labkey.issue.query;
 
-import org.labkey.api.query.api.UserSchema;
-import org.labkey.api.query.api.DefaultSchema;
-import org.labkey.api.query.api.QuerySchema;
+import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.DefaultSchema;
+import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;

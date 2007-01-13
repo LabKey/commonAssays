@@ -3,9 +3,9 @@ package org.fhcrc.cpas.flow.query;
 import org.labkey.api.data.*;
 import org.fhcrc.cpas.flow.persist.FlowManager;
 import org.labkey.api.util.StringExpressionFactory;
-import org.labkey.api.query.api.ExprColumn;
-import org.labkey.api.query.api.FieldKey;
-import org.labkey.api.query.api.TableKey;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.TableKey;
 
 import java.util.Collection;
 

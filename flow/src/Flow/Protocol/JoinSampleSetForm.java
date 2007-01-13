@@ -1,7 +1,7 @@
 package Flow.Protocol;
 
-import org.labkey.api.query.api.FieldKey;
-import org.labkey.api.query.api.TableKey;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.TableKey;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.fhcrc.cpas.flow.data.FlowProtocol;
 import org.fhcrc.cpas.flow.query.FlowSchema;

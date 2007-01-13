@@ -1,6 +1,6 @@
 package org.fhcrc.cpas.flow.query;
 
-import org.labkey.api.query.api.ExprColumn;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ForeignKey;

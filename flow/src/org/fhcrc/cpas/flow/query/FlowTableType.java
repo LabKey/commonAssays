@@ -3,8 +3,8 @@ package org.fhcrc.cpas.flow.query;
 import org.fhcrc.cpas.flow.util.PFUtil;
 import org.fhcrc.cpas.flow.query.FlowSchema;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.query.api.QueryAction;
-import org.labkey.api.query.api.QueryDefinition;
+import org.labkey.api.query.QueryAction;
+import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.data.Container;
 
 public enum FlowTableType

@@ -1,5 +1,5 @@
 <%@ page import="org.labkey.issue.IssuesController"%>
-<%@ page import="org.labkey.api.query.api.CustomView"%>
+<%@ page import="org.labkey.api.query.CustomView"%>
 <%@ page import="org.labkey.api.security.ACL"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.HttpView"%>

@@ -1,6 +1,6 @@
 package org.fhcrc.cpas.flow.query;
 
-import org.labkey.api.query.api.QueryForm;
+import org.labkey.api.query.QueryForm;
 import org.fhcrc.cpas.flow.data.FlowExperiment;
 import org.fhcrc.cpas.flow.data.FlowRun;
 import org.labkey.api.util.UnexpectedException;

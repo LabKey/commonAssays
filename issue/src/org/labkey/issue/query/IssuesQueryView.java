@@ -1,7 +1,7 @@
 package org.labkey.issue.query;
 
 import org.labkey.api.data.*;
-import org.labkey.api.query.api.*;
+import org.labkey.api.query.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;

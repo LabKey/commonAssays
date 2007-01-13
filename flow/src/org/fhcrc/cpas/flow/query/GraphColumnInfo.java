@@ -1,8 +1,8 @@
 /*package org.fhcrc.cpas.flow.query;
 
-import org.labkey.api.query.api.WrappedColumn;
-import org.labkey.api.query.api.QueryColumn;
-import org.labkey.api.query.api.FieldKey;
+import org.labkey.api.query.WrappedColumn;
+import org.labkey.api.query.QueryColumn;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.exp.PropertyType;
 import org.fhcrc.cpas.flow.data.GraphProperty;

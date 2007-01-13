@@ -4,7 +4,7 @@ import org.labkey.issue.IssuesController;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.issues.IssuesSchema;
-import org.labkey.api.query.api.*;
+import org.labkey.api.query.*;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.issue.model.IssueManager;

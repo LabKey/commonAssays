@@ -1,6 +1,6 @@
 package org.fhcrc.cpas.flow.query;
 
-import org.labkey.api.query.api.*;
+import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentManager;

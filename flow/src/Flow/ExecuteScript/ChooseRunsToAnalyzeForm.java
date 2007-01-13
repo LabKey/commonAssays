@@ -7,7 +7,7 @@ import org.fhcrc.cpas.flow.query.FlowTableType;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.data.*;
-import org.labkey.api.query.api.QuerySettings;
+import org.labkey.api.query.QuerySettings;
 import org.apache.struts.action.ActionError;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;

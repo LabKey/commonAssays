@@ -41,9 +41,9 @@ import org.labkey.api.security.SecurityManager;
 import org.labkey.api.util.*;
 import org.labkey.api.util.MailHelper.ViewMessage;
 import org.labkey.api.view.*;
-import org.labkey.wiki.WikiRenderer;
-import org.labkey.wiki.WikiRendererType;
-import org.labkey.wiki.WikiService;
+import org.labkey.api.wiki.WikiRenderer;
+import org.labkey.api.wiki.WikiRendererType;
+import org.labkey.api.wiki.WikiService;
 import org.labkey.announcements.EmailResponsePage.Reason;
 
 import javax.mail.Message;

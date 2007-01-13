@@ -1,6 +1,6 @@
 package org.fhcrc.cpas.flow.query;
 
-import org.labkey.api.query.api.QuerySettings;
+import org.labkey.api.query.QuerySettings;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewURLHelper;

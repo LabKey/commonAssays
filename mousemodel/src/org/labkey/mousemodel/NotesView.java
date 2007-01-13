@@ -24,7 +24,7 @@ public class NotesView extends GroovyView
      */
     public NotesView(Container c, String parentId)
     {
-        super("/announcements/notes.gm", "Notes");
+        super("/org/labkey/announcements/notes.gm", "Notes");
         _container = c;
         _parentId = parentId;
     }

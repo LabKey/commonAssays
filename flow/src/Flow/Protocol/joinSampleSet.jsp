@@ -1,6 +1,6 @@
 <%@ page import="Flow.Protocol.JoinSampleSetForm"%>
 <%@ page import="java.util.Map"%>
-<%@ page import="org.labkey.api.query.api.FieldKey"%>
+<%@ page import="org.labkey.api.query.FieldKey"%>
 <%@ page import="Flow.Protocol.ProtocolController.Action"%>
 <%@ page import="org.fhcrc.cpas.flow.util.PFUtil"%>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>

@@ -5,8 +5,8 @@ import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.data.*;
 import org.fhcrc.cpas.flow.view.FlowQueryView;
-import org.labkey.api.query.api.QueryPicker;
-import org.labkey.api.query.api.QueryAction;
+import org.labkey.api.query.QueryPicker;
+import org.labkey.api.query.QueryAction;
 
 import java.util.List;
 import java.util.Collections;

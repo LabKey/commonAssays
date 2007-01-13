@@ -8,7 +8,7 @@ import org.labkey.api.data.*;
 import org.fhcrc.cpas.flow.query.FlowSchema;
 import org.fhcrc.cpas.flow.query.FlowTableType;
 import org.labkey.api.security.User;
-import org.labkey.api.query.api.QueryAction;
+import org.labkey.api.query.QueryAction;
 import org.apache.log4j.Logger;
 import org.apache.commons.lang.ObjectUtils;
 
