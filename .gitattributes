@@ -261,16 +261,6 @@ issue/webapp/Issues/scripts/sql[!!-~]server/obsolete/cpas-0.00-0.58.sql -text
 issue/webapp/Issues/scripts/sql[!!-~]server/obsolete/cpas-0.00-0.70.sql -text
 issue/webapp/Issues/scripts/sql[!!-~]server/obsolete/cpas-0.00-0.81.sql -text
 issue/webapp/Issues/scripts/sql[!!-~]server/obsolete/cpas-0.69-0.70.sql -text
-moduleTemplate/MODULE_NAME.iml -text
-moduleTemplate/module.properties -text
-moduleTemplate/src/META-INF/MODULE_LOWERCASE_NAME.xml -text
-moduleTemplate/src/MODULE_DIR_NAME/MODULE_NAMEController.java -text
-moduleTemplate/src/cpas/MODULE_DIR_NAME/MODULE_NAMEManager.java -text
-moduleTemplate/src/cpas/MODULE_DIR_NAME/MODULE_NAMEModule.java -text
-moduleTemplate/src/cpas/MODULE_DIR_NAME/MODULE_NAMESchema.java -text
-moduleTemplate/src/cpas/MODULE_DIR_NAME/view/hello.jsp -text
-moduleTemplate/webapp/MODULE_DIR_NAME/scripts/postgresql/MODULE_LOWERCASE_NAME-0.00-0.01.sql -text
-moduleTemplate/webapp/MODULE_DIR_NAME/scripts/sql[!!-~]server/MODULE_LOWERCASE_NAME-0.00-0.01.sql -text
 mousemodel/module.properties -text
 mousemodel/src/org/labkey/mousemodel/MouseModelModule.java -text
 mousemodel/src/org/labkey/mousemodel/NotesView.java -text
