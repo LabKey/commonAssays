@@ -3,7 +3,7 @@ package org.labkey.ms2.compare;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.ms2.MS2Manager;
+import org.labkey.ms2.MS2Manager;
 
 import java.util.List;
 import java.io.Writer;

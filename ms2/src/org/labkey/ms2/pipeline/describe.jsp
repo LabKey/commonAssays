@@ -5,7 +5,7 @@
 <%@ page import="org.fhcrc.cpas.exp.xml.ProtocolBaseType"%>
 <%@ page import="org.fhcrc.cpas.exp.xml.ExperimentArchiveType"%>
 <%@ page import="java.util.Map"%>
-<%@ page import="org.labkey.api.ms2.pipeline.FileStatus"%>
+<%@ page import="org.labkey.ms2.pipeline.FileStatus"%>
 <%@ page import="org.labkey.api.view.ThemeFont"%>
 <%@ page import="org.labkey.api.exp.Material" %>
 <p/>

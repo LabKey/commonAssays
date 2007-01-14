@@ -8,10 +8,10 @@ import org.labkey.api.util.PathRelativizer;
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.ms2.protocol.MassSpecProtocol;
+import org.labkey.ms2.protocol.MassSpecProtocol;
 import org.labkey.api.pipeline.PipelineService;
 import org.apache.commons.lang.StringUtils;
-import org.labkey.api.ms2.pipeline.FileStatus;
+import org.labkey.ms2.pipeline.FileStatus;
 
 import javax.servlet.ServletException;
 import java.io.*;

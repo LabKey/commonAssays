@@ -3,7 +3,7 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.data.ResultSetWrapper;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
-import org.labkey.api.ms2.MS2Run;
+import org.labkey.ms2.MS2Run;
 
 import java.sql.SQLException;
 import java.sql.ResultSet;

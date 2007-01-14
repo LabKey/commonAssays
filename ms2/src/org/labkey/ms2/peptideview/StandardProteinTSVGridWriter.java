@@ -3,7 +3,7 @@ package org.labkey.ms2.peptideview;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
-import org.labkey.api.ms2.Protein;
+import org.labkey.ms2.Protein;
 
 import java.io.PrintWriter;
 import java.sql.ResultSet;

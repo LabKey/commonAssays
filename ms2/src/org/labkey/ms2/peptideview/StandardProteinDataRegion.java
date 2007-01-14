@@ -2,7 +2,7 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.ms2.Protein;
+import org.labkey.ms2.Protein;
 import org.labkey.api.view.ViewURLHelper;
 
 import java.io.Writer;

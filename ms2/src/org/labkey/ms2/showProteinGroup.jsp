@@ -1,9 +1,9 @@
 <%@ page import="org.labkey.api.view.ViewURLHelper"%>
-<%@ page import="org.labkey.api.ms2.MS2Run"%>
-<%@ page import="org.labkey.api.ms2.ProteinGroupWithQuantitation" %>
+<%@ page import="org.labkey.ms2.MS2Run"%>
+<%@ page import="org.labkey.ms2.ProteinGroupWithQuantitation" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.api.ms2.Protein" %>
+<%@ page import="org.labkey.ms2.Protein" %>
 <%@ page import="org.labkey.api.util.Formats" %>
 
 <%

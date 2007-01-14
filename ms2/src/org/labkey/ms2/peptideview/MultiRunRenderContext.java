@@ -1,9 +1,9 @@
 package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.*;
-import org.labkey.api.ms2.MS2Run;
+import org.labkey.ms2.MS2Run;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

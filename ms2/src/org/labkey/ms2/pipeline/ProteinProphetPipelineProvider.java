@@ -2,7 +2,7 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.ms2.pipeline.MS2PipelineManager;
+import org.labkey.ms2.pipeline.MS2PipelineManager;
 
 import java.io.File;
 import java.io.FileFilter;

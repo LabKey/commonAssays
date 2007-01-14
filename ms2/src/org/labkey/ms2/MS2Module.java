@@ -24,14 +24,11 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.ms2.MS2Manager;
-import org.labkey.api.ms2.PepXmlExperimentDataHandler;
-import org.labkey.api.ms2.ProteinProphetExperimentDataHandler;
 import org.labkey.api.ms2.MS2Service;
-import org.labkey.api.ms2.query.MS2Schema;
-import org.labkey.api.ms2.pipeline.*;
+import org.labkey.ms2.query.MS2Schema;
+import org.labkey.ms2.pipeline.*;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.security.User;
 import org.labkey.api.util.NetworkDrive;
@@ -273,13 +270,13 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
     public Set<Class<? extends TestCase>> getJUnitTests()
     {
         return new HashSet<Class<? extends TestCase>>(Arrays.asList(
-            org.labkey.api.ms2.pipeline.SequestParamsBuilder.TestCase.class,
-            org.labkey.api.ms2.pipeline.PositiveDoubleParamsValidator.TestCase.class,
-            org.labkey.api.ms2.pipeline.NaturalNumberParamsValidator.TestCase.class,
-            org.labkey.api.ms2.pipeline.NaturalNumberParamsValidator.TestCase.class,
-            org.labkey.api.ms2.pipeline.RealNumberParamsValidator.TestCase.class,
-            org.labkey.api.ms2.pipeline.BooleanParamsValidator.TestCase.class,
-            org.labkey.api.ms2.pipeline.PositiveIntegerParamsValidator.TestCase.class));
+            org.labkey.ms2.pipeline.SequestParamsBuilder.TestCase.class,
+            org.labkey.ms2.pipeline.PositiveDoubleParamsValidator.TestCase.class,
+            org.labkey.ms2.pipeline.NaturalNumberParamsValidator.TestCase.class,
+            org.labkey.ms2.pipeline.NaturalNumberParamsValidator.TestCase.class,
+            org.labkey.ms2.pipeline.RealNumberParamsValidator.TestCase.class,
+            org.labkey.ms2.pipeline.BooleanParamsValidator.TestCase.class,
+            org.labkey.ms2.pipeline.PositiveIntegerParamsValidator.TestCase.class));
     }
 
 

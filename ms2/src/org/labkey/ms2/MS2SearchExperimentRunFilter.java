@@ -1,7 +1,7 @@
 package org.labkey.ms2;
 
 import org.labkey.api.exp.ExperimentRunFilter;
-import org.labkey.api.ms2.query.MS2Schema;
+import org.labkey.ms2.query.MS2Schema;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.ButtonBar;

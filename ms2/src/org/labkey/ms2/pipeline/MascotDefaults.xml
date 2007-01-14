@@ -1,0 +1,171 @@
+<?xml version="1.0"?>
+<bioml>
+<note>list path parameters</note>
+  <note type="input" label="list path, default parameters">mascot_default_input.xml</note>
+    <note>This value is ignored when it is present in the default parameter
+          list path.</note>
+
+<note>pipeline parameters</note>
+  <note>Please consult 
+        http://www.matrixscience.com/help/search_field_help.html 
+        for details of each parameters.</note>
+
+  <note type="input" label="search, protocol name">cluster</note>
+        <note>Use by CPAS to named this protocol described by this set of parameters</note>
+
+  <note type="input" label="search, protocol description">cluster protocol</note>
+        <note>A general description of this protocol</note>
+
+  <note type="input" label="mascot, peptide_charge">1+, 2+ and 3+</note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#TWO</note>
+
+  <note type="input" label="mascot, enzyme">Trypsin</note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#CLE</note>
+
+  <note type="input" label="mascot, comment">Comments on this Mascot search</note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#COM</note>
+
+  <note type="input" label="pipeline, database">IPI_human_plus</note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#DB
+              Name of database in mascot</note>
+
+  <note type="input" label="spectrum, path type">Mascot generic</note>
+        <note>See http://www.matrixscience.com/help/data_file_help.html</note>
+
+  <note type="input" label="mascot, icat"></note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#ICAT</note>
+
+  <note type="input" label="mascot, instrument">Default</note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#INSTRUMENT</note>
+
+  <note type="input" label="mascot, variable modifications"></note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#MODS
+              and http://www.matrixscience.com/help/pt_mods_help.html</note>
+
+    <note type="input" label="spectrum, fragment mass error">0.8</note>
+          <note>See http://www.matrixscience.com/help/search_field_help.html#ITOL</note>
+
+    <note type="input" label="spectrum, fragment monoisotopic mass error">0.8</note>
+          <note>See http://www.matrixscience.com/help/search_field_help.html#ITOL</note>
+
+    <note type="input" label="spectrum, fragment mass error units">Da</note>
+          <note>See http://www.matrixscience.com/help/search_field_help.html#ITOL</note>
+
+    <note type="input" label="spectrum, fragment monoisotopic mass error units">Da</note>
+          <note>See http://www.matrixscience.com/help/search_field_help.html#ITOL</note>
+
+  <note type="input" label="spectrum, fragment mass type">Average</note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#MASS</note>
+
+  <note type="input" label="mascot, fixed modifications"></note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#MODS</note>
+
+  <note type="input" label="mascot, overview"></note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#OVERVIEW</note>
+
+  <note type="input" label="scoring, maximum missed cleavage sites">1</note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#PFA
+              Number of missed cleavages allowed</note>
+
+  <note type="input" label="mascot, precursor"></note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#PRECURSOR</note>
+
+  <note type="input" label="mascot, report top results">20</note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#REPORT</note>
+
+  <note type="input" label="mascot, protein mass"></note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#SEG</note>
+
+  <note type="input" label="protein, taxon">All entries</note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#TAXONOMY</note>
+
+    <note type="input" label="spectrum, parent monoisotopic mass error plus">2.0</note>
+          <note>See http://www.matrixscience.com/help/search_field_help.html#TOL</note>
+
+    <note type="input" label="spectrum, parent monoisotopic mass error minus">2.0</note>
+          <note>See http://www.matrixscience.com/help/search_field_help.html#TOL</note>
+
+  <note type="input" label="spectrum, parent monoisotopic mass error units">Da</note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#TOL</note>
+
+  <note type="input" label="pipeline, email address">useremail@domain</note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#NAME</note>
+
+  <note type="input" label="pipeline, user name">username</note>
+        <note>See http://www.matrixscience.com/help/search_field_help.html#NAME</note>
+
+<note>default search input parameters</note>
+  <note type="input" label="mascot, accession"></note>
+        <note>List of accession strings for error tolerant search. Strings are
+                  quoted and comma separated.</note>
+
+  <note type="input" label="mascot, cutout"></note>
+        <note>See your Mascot Installation and Setup manual,
+              Table 8.1 Mascot Search Parameters</note>
+
+  <note type="input" label="mascot, error_tolerant">0</note>
+        <note>See your Mascot Installation and Setup manual,
+              Table 8.1 Mascot Search Parameters</note>
+
+  <note type="input" label="spectrum, path"></note>
+        <note>See your Mascot Installation and Setup manual,
+              Table 8.1 Mascot Search Parameters,
+              will be supplied by CPAS pipeline</note>
+
+  <note type="input" label="mascot, form version">1.01</note>
+        <note>See your Mascot Installation and Setup manual,
+              Table 8.1 Mascot Search Parameters</note>
+
+  <note type="input" label="mascot, iatol">0</note>
+
+  <note type="input" label="mascot, iastol">0</note>
+
+  <note type="input" label="mascot, ia2tol">0</note>
+
+  <note type="input" label="mascot, ibtol">1</note>
+
+  <note type="input" label="mascot, ibstol">0</note>
+
+  <note type="input" label="mascot, ib2tol">1</note>
+
+  <note type="input" label="mascot, intermediate"></note>
+        <note>See your Mascot Installation and Setup manual,
+              Table 8.1 Mascot Search Parameters</note>
+
+  <note type="input" label="mascot, iytol">1</note>
+
+  <note type="input" label="mascot, iystol">0</note>
+
+  <note type="input" label="mascot, iy2tol">1</note>
+
+  <note type="input" label="mascot, ltol"></note>
+
+  <note type="input" label="mascot, peak">auto</note>
+
+  <note type="input" label="mascot, report type">peptide</note>
+        <note>See your Mascot Installation and Setup manual,
+              Table 8.1 Mascot Search Parameters,
+              must be peptide</note>
+
+  <note type="input" label="mascot, rtinseconds"></note>
+        <note>See your Mascot Installation and Setup manual,
+              Table 8.1 Mascot Search Parameters</note>
+
+  <note type="input" label="mascot, scans"></note>
+        <note>See your Mascot Installation and Setup manual,
+              Table 8.1 Mascot Search Parameters</note>
+
+  <note type="input" label="mascot, search type">MIS</note>
+        <note>See your Mascot Installation and Setup manual,
+              Table 8.1 Mascot Search Parameters,
+              values = PMF|SQ|MIS, must be MIS for MS/MS</note>
+
+  <note type="input" label="mascot, showallmods"></note>
+
+  <note type="input" label="mascot, subcluster"></note>
+        <note>See your Mascot Installation and Setup manual,
+              Table 8.1 Mascot Search Parameters</note>
+
+<note type="description">ADDITIONAL EXPLANATIONS</note>
+  <note type="description">Sample explanation.</note>
+</bioml>

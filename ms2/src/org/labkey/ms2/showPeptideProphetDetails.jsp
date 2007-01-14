@@ -1,5 +1,5 @@
 <%@ page import="org.labkey.api.view.ViewURLHelper"%>
-<%@ page import="org.labkey.api.ms2.MS2Run"%>
+<%@ page import="org.labkey.ms2.MS2Run"%>
 
 <%@ include file="showSensitivityDetails.jsp" %>
 

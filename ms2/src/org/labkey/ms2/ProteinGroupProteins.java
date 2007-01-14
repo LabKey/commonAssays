@@ -1,8 +1,8 @@
 package org.labkey.ms2;
 
-import org.labkey.api.protein.ProteinManager;
-import org.labkey.api.ms2.MS2Manager;
-import org.labkey.api.ms2.MS2Run;
+import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
 import org.labkey.api.data.Table;
 
 import java.util.List;

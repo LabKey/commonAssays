@@ -1,0 +1,198 @@
+package org.labkey.ms2;
+
+import org.fhcrc.cpas.tools.PeptideProphetSummary;
+import org.fhcrc.cpas.tools.SensitivitySummary;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.Container;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.ResultSet;
+
+/**
+ * User: arauch
+ * Date: Mar 2, 2006
+ * Time: 3:16:38 PM
+ */
+public class PeptideProphetGraphs
+{
+    public static void renderSensitivityGraph(HttpServletResponse response, SensitivitySummary summary) throws IOException
+    {
+        XYSeriesCollection collection = new XYSeriesCollection();
+
+        collection.addSeries(toXYSeries("Sensitivity", summary.getMinProb(), summary.getSensitivity()));
+        collection.addSeries(toXYSeries("Error", summary.getMinProb(), summary.getError()));
+
+        JFreeChart chart = ChartFactory.createXYLineChart("Sensitivity and Error",
+                "Min Probability",
+                "Sensitivity and Error",
+                collection,
+                PlotOrientation.VERTICAL,
+                true,
+                true,
+                false);
+
+        outputChart(response, chart);
+    }
+
+
+    public static void renderDistribution(HttpServletResponse response, PeptideProphetSummary summary, int charge, boolean cumulative) throws IOException
+    {
+        XYSeriesCollection collection = new XYSeriesCollection();
+        float[] fval = summary.getFval();
+        float[] obs = (cumulative ? convertToCumulative(summary.getObs(charge)) : summary.getObs(charge));
+        float[] total = (cumulative ? convertToCumulative(summary.getModelTotal(charge)) : summary.getModelTotal(charge));
+
+        collection.addSeries(toXYSeries("observed", fval, obs));
+        collection.addSeries(toXYSeries("model total", fval, total));
+
+        if (!cumulative)
+        {
+            collection.addSeries(toXYSeries("model pos", fval, summary.getModelPos(charge)));
+            collection.addSeries(toXYSeries("model neg", fval, summary.getModelNeg(charge)));
+        }
+
+        JFreeChart chart = ChartFactory.createXYLineChart("Charge " + charge + "+ " + (cumulative ? "Cumulative" : "") + " Distribution",
+                "fval",
+                "distribution",
+                collection,
+                PlotOrientation.VERTICAL,
+                true,
+                true,
+                false);
+
+        outputChart(response, chart);
+    }
+
+
+    public static void renderObservedVsModel(HttpServletResponse response, PeptideProphetSummary summary, int charge, boolean cumulative) throws IOException
+    {
+        XYSeriesCollection collection = new XYSeriesCollection();
+
+        float[] obs = (cumulative ? convertToCumulative(summary.getObs(charge)) : summary.getObs(charge));
+        float[] total = (cumulative ? convertToCumulative(summary.getModelTotal(charge)) : summary.getModelTotal(charge));
+
+        collection.addSeries(toXYSeries("xy", obs, total));
+
+        JFreeChart chart = ChartFactory.createXYLineChart("Charge " + charge + "+ " + (cumulative ? "Cumulative" : "") + " Observed vs. Model",
+                "observed",
+                "model",
+                collection,
+                PlotOrientation.VERTICAL,
+                false,
+                true,
+                false);
+
+        outputChart(response, chart);
+    }
+
+    public static void renderObservedVsPPScore(HttpServletResponse response, Container c, int runId, int charge, boolean cumulative) throws IOException, SQLException
+    {
+        String chargeSQL = "SELECT count(*) " +
+                        "FROM " + MS2Manager.getTableInfoPeptides().getFromSQL() + " " +
+                        "WHERE Run = ? AND Charge = ?";
+        String negHitPrefix = MS2Manager.getNegativeHitPrefix(c);
+
+        int total = Table.executeSingleton(MS2Manager.getSchema(),
+                        chargeSQL,
+                        new Object[] { runId, charge }, Integer.class);
+        int zeroScores = Table.executeSingleton(MS2Manager.getSchema(),
+                        chargeSQL +  " AND PeptideProphet = 0",
+                        new Object[] { runId, charge }, Integer.class);
+        int zeroScoresNegative = Table.executeSingleton(MS2Manager.getSchema(),
+                        chargeSQL + " AND PeptideProphet = 0 AND Protein LIKE ?",
+                        new Object[] { runId, charge, negHitPrefix + '%' }, Integer.class);
+        int zeroScoresPositive = zeroScores - zeroScoresNegative;
+
+        float ratioRandom = (float) zeroScoresPositive / (float) zeroScoresNegative;
+
+        XYSeries series = new XYSeries("xy");
+        ResultSet rs = Table.executeQuery(MS2Manager.getSchema(),
+                                    "SELECT Protein, PeptideProphet " +
+                                    "FROM " + MS2Manager.getTableInfoPeptides().getFromSQL() + " " +
+                                    "WHERE Run = ? AND Charge = ? " +
+                                    "ORDER BY PeptideProphet",
+                                    new Object[] { runId, charge });
+
+        int increment = total / 250;
+        if (increment < 50)
+            increment = 50;
+        int negative = 0;
+        int count = 0;
+        float score = 0.0f;
+
+        while (rs.next())
+        {
+            if (rs.getString(1).startsWith(negHitPrefix))
+                negative++;
+            count++;
+            score += rs.getFloat(2);
+
+            if (count == increment)
+            {
+                negative += negative * ratioRandom; // add back random positives
+                if (negative > count)
+                    negative = count;
+                score /= (float) count; // mean score
+                series.add((float) (count - negative) / (float) count, score);
+
+                count = 0;
+                negative = 0;
+                score = 0;
+            }
+        }
+
+        XYSeriesCollection collection = new XYSeriesCollection();
+        collection.addSeries(series);
+        JFreeChart chart = ChartFactory.createXYLineChart("Charge " + charge + "+ " + (cumulative ? "Cumulative" : "") + " Observed vs. Prophet",
+                "observed",
+                "prophet",
+                collection,
+                PlotOrientation.VERTICAL,
+                false,
+                true,
+                false);
+
+        outputChart(response, chart);
+    }
+
+    private static void outputChart(HttpServletResponse response, JFreeChart chart) throws IOException
+    {
+        response.setContentType("image/png");
+        ChartUtilities.writeChartAsPNG(response.getOutputStream(), chart, 450, 300);
+    }
+
+
+    private static XYSeries toXYSeries(Comparable key, float[] x, float[] y)
+    {
+        XYSeries xy = new XYSeries(key);
+
+        for (int i=0; i<x.length; i++)
+            xy.add(x[i], y[i]);
+
+        return xy;
+    }
+
+
+    private static float[] convertToCumulative(float[] x)
+    {
+        float[] y = new float[x.length];
+
+        if (x.length > 0)
+        {
+            y[0] = x[0];
+
+            for(int i=1; i<x.length; i++)
+                y[i] = y[i-1] + x[i];
+        }
+
+        return y;
+    }
+}

@@ -2,10 +2,10 @@
 <%@ page import="org.labkey.ms2.MS2Controller"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
-<%@ page import="org.labkey.api.ms2.Quantitation"%>
+<%@ page import="org.labkey.ms2.Quantitation"%>
 <%@ page import="java.text.DecimalFormat"%>
 <%@ page import="org.labkey.api.view.ViewURLHelper"%>
-<%@ page import="org.labkey.api.ms2.MS2Peptide"%>
+<%@ page import="org.labkey.ms2.MS2Peptide"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%
     JspView<MS2Controller.EditElutionGraphContext> me = (JspView<MS2Controller.EditElutionGraphContext>) HttpView.currentView();

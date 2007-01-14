@@ -4,8 +4,8 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.Table;
-import org.labkey.api.ms2.*;
-import org.labkey.api.protein.ProteinManager;
+import org.labkey.ms2.*;
+import org.labkey.ms2.protein.ProteinManager;
 import org.fhcrc.cpas.util.Pair;
 
 import java.sql.ResultSet;
