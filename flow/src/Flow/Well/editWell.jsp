@@ -2,6 +2,7 @@
 <%@ page import="Flow.Well.WellController" %>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowDataType"%>
 <%@ page import="org.fhcrc.cpas.flow.data.FlowWell"%>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
 
@@ -11,7 +12,7 @@ FlowWell well = form.getWell();%>
 <form method="POST" action="<%=h(well.urlFor(WellController.Action.editWell))%>" class="normal">
     <%=well.strHiddenFields()%>
     <table>
-        <tr><td>Run Name:</td><td><a href="showRun.view?runId=<%=well.getRun().getRunId()%>"><%=h(well.getRun().getName())%></a></td></tr>
+        <tr><td>Run Name:</td><td><a href="<%= ViewURLHelper.toPathString("Flow-Run", "showRun", getContainer())%>?runId=<%=well.getRun().getRunId()%>"><%=h(well.getRun().getName())%></a></td></tr>
         <tr><td>Well Name:</td><td><input type="text" name="ff_name" value="<%=h(form.ff_name)%>"></td></tr>
         <tr><td>Comment:</td><td><textarea rows="5" cols="40" name="ff_comment"><%=h(form.ff_comment)%></textarea></tr>
 <% if (well.getDataType() == FlowDataType.FCSFile) { %>

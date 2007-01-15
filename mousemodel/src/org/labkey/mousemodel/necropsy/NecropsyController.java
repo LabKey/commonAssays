@@ -221,7 +221,7 @@ public class NecropsyController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
 
-        VelocityView photoForm = new VelocityView("necropsyPhotoForm.vm");
+        VelocityView photoForm = new VelocityView("/MouseModel/Necropsy/necropsyPhotoForm.vm");
         int modelId = MouseModelController.getModelId(form);
         photoForm.addObject("modelId", new Integer(modelId));
         photoForm.setTitle("Enter necropsy photos");

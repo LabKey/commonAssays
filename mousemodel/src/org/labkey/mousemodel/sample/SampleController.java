@@ -315,7 +315,7 @@ public class SampleController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
 
-        HttpView insertSlideView = new VelocityView("insertSlide.vm");
+        HttpView insertSlideView = new VelocityView("/MouseModel/Sample/insertSlide.vm");
         insertSlideView.addObject("form", form);
         insertSlideView.addObject("stains", MouseSchema.getStain().getSelectList());
 

@@ -37,6 +37,8 @@ import Flow.ExecuteScript.AnalysisScriptController;
 import Flow.EditScript.ScriptController;
 import Flow.Well.WellController;
 import Flow.Log.LogController;
+import Flow.Compensation.CompensationController;
+import Flow.Protocol.ProtocolController;
 
 import java.sql.SQLException;
 import java.util.Set;
@@ -69,6 +71,8 @@ public class FlowModule extends DefaultModule
         addController("Flow-EditScript", ScriptController.class);
         addController("Flow-Well", WellController.class);
         addController("Flow-Log", LogController.class);
+        addController("Flow-Compensation", CompensationController.class);
+        addController("Flow-Protocol", ProtocolController.class);
         FlowDataType.register();
         FlowProperty.register();
         _handlers = Collections.singleton((ExperimentDataHandler) new FlowDataHandler());
