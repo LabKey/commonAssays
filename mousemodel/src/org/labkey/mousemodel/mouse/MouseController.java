@@ -30,8 +30,8 @@ import org.apache.struts.action.ActionErrors;
 import org.labkey.api.attachments.Attachment;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.ExperimentManager;
 import org.labkey.api.exp.MaterialSource;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.sample.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
@@ -426,7 +426,7 @@ public class MouseController extends ViewController
         Sample sample = form.getBean();
 
         MouseModel model = MouseModelController.getModel(form);
-        MaterialSource source = ExperimentManager.get().getMaterialSource(model.getMaterialSourceLSID());
+        MaterialSource source = ExperimentService.get().getMaterialSource(model.getMaterialSourceLSID());
         sample.setLSID(source.getMaterialLSIDPrefix() + sample.getSampleId());
         SampleManager.insert(getUser(), sample);
 

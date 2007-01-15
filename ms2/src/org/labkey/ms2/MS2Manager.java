@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.*;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
 //wch: mascotdev
 import org.labkey.ms2.pipeline.MascotImportPipelineJob;
@@ -621,7 +622,7 @@ public class MS2Manager
                 try
                 {
                     File file = new File(run.getPath(), run.getFileName());
-                    Data data = ExperimentManager.get().getDataByURL(file, c);
+                    Data data = ExperimentService.get().getDataByURL(file, c);
                     if (data != null && data.getRunId() != null)
                     {
                         experimentRunsToDelete.add(data.getRunId());
@@ -660,7 +661,7 @@ public class MS2Manager
         {
             try
             {
-                ExperimentManager.get().deleteExperimentRun(experimentRunId, c);
+                ExperimentService.get().deleteExperimentRun(experimentRunId, c);
             }
             catch (SQLException e)
             {

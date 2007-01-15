@@ -7,9 +7,6 @@ import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.HttpClient;
-import org.labkey.api.util.XMLValidationParser;
-import org.labkey.api.exp.Data;
-import org.labkey.api.exp.ExperimentManager;
 
 import java.util.*;
 import java.net.URL;

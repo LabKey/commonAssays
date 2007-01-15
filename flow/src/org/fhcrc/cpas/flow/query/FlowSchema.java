@@ -3,7 +3,6 @@ package org.fhcrc.cpas.flow.query;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.ExperimentManager;
 import org.labkey.api.exp.api.*;
 import org.fhcrc.cpas.flow.data.*;
 import org.fhcrc.cpas.flow.data.FlowDataType;
@@ -38,7 +37,7 @@ public class FlowSchema extends UserSchema
 
     public FlowSchema(User user, Container container)
     {
-        super(SCHEMANAME, user, container, ExperimentManager.get().getExpSchema());
+        super(SCHEMANAME, user, container, ExperimentService.get().getSchema());
         _protocol = FlowProtocol.getForContainer(_container);
     }
 
@@ -176,7 +175,7 @@ public class FlowSchema extends UserSchema
             throw new UnsupportedOperationException();
         try
         {
-            ExperimentManager.get().deleteExpRunsByRowIds(pks, getContainer());
+            ExperimentService.get().deleteExpRunsByRowIds(pks, getContainer());
         }
         catch (Exception e)
         {
@@ -203,7 +202,7 @@ public class FlowSchema extends UserSchema
         }
         if (_experiment != null)
         {
-            ret.setExperiment(ExperimentService.get().getExperiment(_experiment.getExperimentId()));
+            ret.setExperiment(ExperimentService.get().getExpExperiment(_experiment.getExperimentId()));
         }
         ret.addColumn(ExpRunTable.Column.RowId);
         ret.setDetailsURL(new DetailsURL(PFUtil.urlFor(RunController.Action.showRun, _container), Collections.singletonMap(FlowParam.runId.toString(), ExpRunTable.Column.RowId.toString())));
@@ -285,7 +284,7 @@ public class FlowSchema extends UserSchema
         });
         if (_run != null)
         {
-            ret.setRun(ExperimentService.get().getExperimentRun(_run.getRunId()));
+            ret.setRun(ExperimentService.get().getExpRun(_run.getRunId()));
         }
         return ret;
     }
@@ -337,7 +336,7 @@ public class FlowSchema extends UserSchema
         ret.setDetailsURL(new DetailsURL(PFUtil.urlFor(WellController.Action.showWell, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         if (getExperiment() != null)
         {
-            ret.setExperiment(ExperimentService.get().getExperiment(getExperiment().getLSID()));
+            ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
         }
         addStatisticColumn(ret, "Statistic");
         ColumnInfo colGraph = addObjectIdColumn(ret, "Graph");

@@ -96,7 +96,7 @@ public class MS1Controller extends ViewController
         // it to the browser. To add a richer UI, this is the place to start
         // on the rendering code.
         Container c = getContainer(ACL.PERM_READ);
-        ExpData data = ExperimentService.get().getData(form.getDataRowId());
+        ExpData data = ExperimentService.get().getExpData(form.getDataRowId());
         if (data == null)
         {
             return HttpView.throwNotFound("Could not find data object with rowId " + form.getDataRowId());

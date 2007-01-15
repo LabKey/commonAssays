@@ -138,7 +138,7 @@ public class ScriptController extends BaseFlowController
 
     protected boolean isScriptNameUnique(String name) throws Exception
     {
-        return ExperimentService.get().getData(FlowScript.lsidForName(getContainer(), name)) == null;
+        return ExperimentService.get().getExpData(FlowScript.lsidForName(getContainer(), name)) == null;
     }
 
     public boolean isEmptyScript(FlowScript analysisScript)

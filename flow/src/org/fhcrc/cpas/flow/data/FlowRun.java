@@ -121,7 +121,7 @@ public class FlowRun extends FlowObject<ExpRun>
 
     private FlowLog createLog(User user, LogType type) throws SQLException
     {
-        /*ExperimentManager mgr = ExperimentManager.get();
+        /*ExperimentService mgr = ExperimentService.get();
         ProtocolApplication[] apps = mgr.getProtocolApplicationForRun(getRunId());
         for (ProtocolApplication app : apps)
         {
@@ -137,12 +137,12 @@ public class FlowRun extends FlowObject<ExpRun>
     {
         if (id == 0)
             return null;
-        return fromRun(ExperimentService.get().getExperimentRun(id));
+        return fromRun(ExperimentService.get().getExpRun(id));
     }
 
     static public FlowRun fromLSID(String lsid)
     {
-        return fromRun(ExperimentService.get().getExperimentRun(lsid));
+        return fromRun(ExperimentService.get().getExpRun(lsid));
     }
 
     static public FlowRun fromRun(ExpRun run)
@@ -244,7 +244,7 @@ public class FlowRun extends FlowObject<ExpRun>
     {
         try
         {
-            for (ProtocolApplication app : ExperimentManager.get().getProtocolApplicationForRun(getRunId()))
+            for (ProtocolApplication app : ExperimentService.get().getProtocolApplicationForRun(getRunId()))
             {
                 FlowProtocolStep step = FlowProtocolStep.fromActionSequence(app.getActionSequence());
                 if (step != null)

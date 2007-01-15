@@ -32,7 +32,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.ms2.*;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.MascotClientImpl;
 import org.labkey.api.pipeline.PipelineJob;
@@ -3610,7 +3609,7 @@ public class MS2Controller extends ViewController
             MS2Run run = null;
             if (experimentRunIds)
             {
-                ExpRun expRun = ExperimentService.get().getExperimentRun(runId.intValue());
+                ExpRun expRun = ExperimentService.get().getExpRun(runId.intValue());
                 if (expRun != null)
                 {
                     run = MS2Manager.getRunByExperimentRunLSID(expRun.getLSID());
@@ -4227,9 +4226,9 @@ public class MS2Controller extends ViewController
 
         public ExperimentInfoColumns(Container c)
         {
-            runInputData = ExperimentManager.get().getRunInputData(c);
-            runInputMaterial = ExperimentManager.get().getRunInputMaterial(c);
-            dataCreatingRuns = ExperimentManager.get().getDataCreatingRuns(c);
+            runInputData = ExperimentService.get().getRunInputData(c);
+            runInputMaterial = ExperimentService.get().getRunInputMaterial(c);
+            dataCreatingRuns = ExperimentService.get().getDataCreatingRuns(c);
         }
 
         private String getDataCreatingRun(String lsid)
@@ -4238,7 +4237,7 @@ public class MS2Controller extends ViewController
             {
                 return dataCreatingRuns.get(lsid);
             }
-            String result = ExperimentManager.get().getDataCreatingRun(lsid);
+            String result = ExperimentService.get().getDataCreatingRun(lsid);
             dataCreatingRuns.put(lsid, result);
             return result;
         }
@@ -4250,7 +4249,7 @@ public class MS2Controller extends ViewController
             {
                 try
                 {
-                    result = ExperimentManager.get().getRunInputData(lsid);
+                    result = ExperimentService.get().getRunInputData(lsid);
                     runInputData.put(lsid, result);
                 }
                 catch (SQLException e)
@@ -4268,7 +4267,7 @@ public class MS2Controller extends ViewController
             {
                 try
                 {
-                    result = ExperimentManager.get().getRunInputMaterial(lsid);
+                    result = ExperimentService.get().getRunInputMaterial(lsid);
                     runInputMaterial.put(lsid, result);
                 }
                 catch (SQLException e)
@@ -4434,8 +4433,8 @@ public class MS2Controller extends ViewController
                     if (predecessorLinks.containsKey(creatingRunLsid))
                         continue;
 
-                    ExperimentRun run = ExperimentManager.get().getExperimentRun(creatingRunLsid);
-                    Protocol p = ExperimentManager.get().getProtocol(run.getProtocolLSID());
+                    ExperimentRun run = ExperimentService.get().getExperimentRun(creatingRunLsid);
+                    Protocol p = ExperimentService.get().getProtocol(run.getProtocolLSID());
                     predecessorLinks.put(creatingRunLsid, getRunLink(ctx, run.getRowId(), p.getName()));
                 }
 

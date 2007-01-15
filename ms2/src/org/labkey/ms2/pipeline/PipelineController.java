@@ -24,6 +24,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.upload.FormFile;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.*;
+import org.labkey.api.exp.api.ExperimentService;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.ms2.MS2Manager;
@@ -541,7 +542,7 @@ public class PipelineController extends ViewController
         File[] mzXMLFiles = new File(uriData).listFiles(MS2PipelineManager.getAnalyzeFilter());
         for (File mzXMLFile : mzXMLFiles)
         {
-            ExperimentRun run = ExperimentManager.get().getCreatingRun(mzXMLFile, c);
+            ExperimentRun run = ExperimentService.get().getCreatingRun(mzXMLFile, c);
             if (run != null)
             {
                 creatingRuns.add(run);
@@ -1075,10 +1076,10 @@ public class PipelineController extends ViewController
         File[] mzXMLFiles = new File(uriData).listFiles(MS2PipelineManager.getAnalyzeFilter());
         for (File mzXMLFile : mzXMLFiles)
         {
-            ExperimentRun run = ExperimentManager.get().getCreatingRun(mzXMLFile, c);
+            ExperimentRun run = ExperimentService.get().getCreatingRun(mzXMLFile, c);
             if (run != null)
             {
-                ExperimentManager.get().deleteExperimentRun(run.getRowId(), c);
+                ExperimentService.get().deleteExperimentRun(run.getRowId(), c);
             }
             File annotationFile = MS2PipelineManager.findAnnotationFile(mzXMLFile);
             if (annotationFile != null)
@@ -1107,8 +1108,8 @@ public class PipelineController extends ViewController
         if (uriData == null)
             HttpView.throwNotFound();
 
-        ExperimentManager.get().ensureDefaultMaterialSource();
-        MaterialSource activeMaterialSource = ExperimentManager.get().ensureActiveMaterialSource(getContainer());
+        ExperimentService.get().ensureDefaultMaterialSource();
+        MaterialSource activeMaterialSource = ExperimentService.get().ensureActiveMaterialSource(getContainer());
 
         ViewBackgroundInfo info =
                 PipelineService.get().getJobBackgroundInfo(getViewBackgroundInfo(), new File(uriData));
@@ -1150,19 +1151,19 @@ public class PipelineController extends ViewController
             drv.setMzXmlFileStatus(mzXmlFileStatus);
             drv.setForm(form);
             MaterialSource[] materialSources;
-            if (activeMaterialSource.getLSID().equals(ExperimentManager.DEFAULT_MATERIAL_SOURCE_LSID))
+            if (activeMaterialSource.getLSID().equals(ExperimentService.DEFAULT_MATERIAL_SOURCE_LSID))
             {
                 materialSources = new MaterialSource[] { activeMaterialSource };
             }
             else
             {
-                materialSources = new MaterialSource[] { activeMaterialSource, ExperimentManager.get().ensureDefaultMaterialSource() };
+                materialSources = new MaterialSource[] { activeMaterialSource, ExperimentService.get().ensureDefaultMaterialSource() };
             }
 
             Map<Integer, Material[]> materialSourceMaterials = new HashMap<Integer, Material[]>();
             for (MaterialSource source : materialSources)
             {
-                Material[] materials = ExperimentManager.get().getMaterialsForMaterialSource(source.getMaterialLSIDPrefix(), source.getContainer());
+                Material[] materials = ExperimentService.get().getMaterialsForMaterialSource(source.getMaterialLSIDPrefix(), source.getContainer());
                 materialSourceMaterials.put(source.getRowId(), materials);
             }
             drv.setMaterialSources(materialSources);
@@ -1670,18 +1671,18 @@ public class PipelineController extends ViewController
             requiresPermission(ACL.PERM_UPDATE, run.getContainer());
             GroovyView gv = new GroovyView("/Experiment/AnnotateRun.gm");
             gv.addObject("run", run);
-            MaterialSource[] sources = ExperimentManager.get().getMaterialSources();
+            MaterialSource[] sources = ExperimentService.get().getMaterialSources();
             if (sources.length == 0)
             {
-                ExperimentManager.get().insertMaterialSource(getUser(), getContainer(), "Default");
-                sources = ExperimentManager.get().getMaterialSources();
+                ExperimentService.get().insertMaterialSource(getUser(), getContainer(), "Default");
+                sources = ExperimentService.get().getMaterialSources();
             }
 
             gv.addObject("materialSources", sources);
             //TODO: Get containers right
-            Protocol[] samplePreps = ExperimentManager.get().getProtocolsByType("SamplePreparation", null);
+            Protocol[] samplePreps = ExperimentService.get().getProtocolsByType("SamplePreparation", null);
             gv.addObject("samplePreps", samplePreps);
-            Protocol[] protocols = ExperimentManager.get().getProtocolsByType("ExperimentRun", null);
+            Protocol[] protocols = ExperimentService.get().getProtocolsByType("ExperimentRun", null);
             gv.addObject("protocols", protocols);
             return renderInTemplate(gv, getContainer(), "Annotate MS2 Run");
         }
@@ -1701,7 +1702,7 @@ public class PipelineController extends ViewController
         MS2Run msrun = MS2Manager.getRun(run);
         requiresAdmin(msrun.getContainer());
 
-        MaterialSource source = ExperimentManager.get().getMaterialSource(form.getMaterialSource());
+        MaterialSource source = ExperimentService.get().getMaterialSource(form.getMaterialSource());
         Material mat = new Material();
         //getResponse().setContentType("text/xml;charset=UTF-8");
         GroovyView gv = new GroovyView("/org/labkey/ms2/pipeline/ExperimentTemplate.gm");
@@ -1725,7 +1726,7 @@ public class PipelineController extends ViewController
         else if (!"_none".equals(prepId))
         {
             //TODO: Error out if null
-            prepProtocol = ExperimentManager.get().getProtocol(Integer.parseInt(prepId));
+            prepProtocol = ExperimentService.get().getProtocol(Integer.parseInt(prepId));
         }
         MS2Fraction[] fractions = MS2Manager.getFractions(run);
         gv.addObject("sample", mat);
@@ -1749,7 +1750,7 @@ public class PipelineController extends ViewController
 
         //BUGBUG: This should not happen unless upload succeeds!!
         String runLsid = "urn:lsid:" + AppProps.getInstance().getDefaultLsidAuthority() + ":ExperimentRun.MS2:" + run;
-        ExperimentManager.get().updateMS2Application(run, runLsid);
+        ExperimentService.get().updateMS2Application(run, runLsid);
         System.out.println(tempFile.getAbsolutePath());
         HttpView.throwRedirect(getViewURLHelper().relativeUrl("begin.view", "", "Project"));
 

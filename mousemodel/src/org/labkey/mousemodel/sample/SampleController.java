@@ -31,8 +31,8 @@ import org.labkey.api.data.*;
 import org.labkey.api.sample.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.*;
-import org.labkey.api.exp.ExperimentManager;
 import org.labkey.api.exp.MaterialSource;
+import org.labkey.api.exp.api.ExperimentService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.swing.text.View;
@@ -200,7 +200,7 @@ public class SampleController extends ViewController
         if (null == lsid)
         {
             MouseModel model = MouseModelController.getModel(form);
-            MaterialSource matSource = ExperimentManager.get().getMaterialSource(model.getMaterialSourceLSID());
+            MaterialSource matSource = ExperimentService.get().getMaterialSource(model.getMaterialSourceLSID());
             String prefix = matSource.getMaterialLSIDPrefix();
             lsid = prefix + sample.getSampleId();
         }
@@ -662,7 +662,7 @@ public class SampleController extends ViewController
 
         public void setMaterialSourceLSID(String sampleSource)
         {
-            this.materialSource = ExperimentManager.get().getMaterialSource(sampleSource);
+            this.materialSource = ExperimentService.get().getMaterialSource(sampleSource);
         }
 
         public String getMaterialSourceLSID()

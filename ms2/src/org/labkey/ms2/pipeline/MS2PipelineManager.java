@@ -23,16 +23,11 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.XMLValidationParser;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
-//wch: mascotdev
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.PipelineProtocolFactory;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.ms2.pipeline.MascotClientImpl;
-import org.labkey.api.exp.ExperimentManager;
-//END-wch: mascotdev
-//WDN:20060828 sequestdev
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms2.protocol.*;
-//END-WDN:20060828 sequestdev
 
 import java.io.*;
 import java.net.URI;
@@ -770,7 +765,7 @@ public class MS2PipelineManager
                 }
                 if (status == FileStatus.UNKNOWN)
                 {
-                    if (ExperimentManager.get().getCreatingRun(file, c) != null)
+                    if (ExperimentService.get().getCreatingRun(file, c) != null)
                     {
                         status = FileStatus.ANNOTATED;
                     }

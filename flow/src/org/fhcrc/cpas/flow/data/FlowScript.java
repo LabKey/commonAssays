@@ -2,10 +2,8 @@ package org.fhcrc.cpas.flow.data;
 
 import org.labkey.api.security.User;
 
-import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
-import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.labkey.api.data.*;
 import org.fhcrc.cpas.flow.script.xml.*;
 import org.fhcrc.cpas.flow.script.FlowAnalyzer;
@@ -18,7 +16,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.util.*;
-import java.net.URI;
 import java.io.File;
 
 import Flow.ExecuteScript.AnalysisScriptController;
@@ -37,12 +34,12 @@ public class FlowScript extends FlowDataObject
     {
         if (id == 0)
             return null;
-        return new FlowScript(ExperimentService.get().getData(id));
+        return new FlowScript(ExperimentService.get().getExpData(id));
     }
 
     static public FlowScript fromLSID(String lsid)
     {
-        return new FlowScript(ExperimentService.get().getData(lsid));
+        return new FlowScript(ExperimentService.get().getExpData(lsid));
     }
 
     static public FlowScript fromURL(ViewURLHelper url) throws ServletException
@@ -62,7 +59,7 @@ public class FlowScript extends FlowDataObject
 
     static public FlowScript[] getScripts(Container container)
     {
-        ExpData[] datas = ExperimentService.get().getDatas(container, FlowDataType.Script);
+        ExpData[] datas = ExperimentService.get().getExpDatas(container, FlowDataType.Script);
         FlowScript[] ret = new FlowScript[datas.length];
         for (int i = 0; i < datas.length; i ++)
         {

@@ -11,8 +11,6 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.fhcrc.cpas.flow.FlowSettings;
 import org.fhcrc.cpas.flow.util.PFUtil;
 import org.fhcrc.cpas.exp.xml.*;
-import org.labkey.api.exp.XarReader;
-import org.labkey.api.exp.ExperimentManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpRun;
@@ -436,7 +434,7 @@ abstract public class ScriptJob extends PipelineJob
         appInput.setName("Starting inputs");
         appInput.setProtocolLSID(getProtocol().getLSID());
         appInput.setActionSequence(0);
-        appInput.setCpasType(ExperimentManager.EXPERIMENT_RUN_CPAS_TYPE);
+        appInput.setCpasType(ExperimentService.EXPERIMENT_RUN_CPAS_TYPE);
         for (Map.Entry<LogType, StringBuffer> logEntry : _runData._logs.entrySet())
         {
             StringBuffer buf = logEntry.getValue();
@@ -476,7 +474,7 @@ abstract public class ScriptJob extends PipelineJob
         appOutput.setName("Mark run outputs");
         appOutput.setProtocolLSID(getProtocol().getLSID());
         appOutput.setActionSequence(FlowProtocolStep.markRunOutputs.getDefaultActionSequence());
-        appOutput.setCpasType(ExperimentManager.EXPERIMENT_RUN_OUTPUT_CPAS_TYPE);
+        appOutput.setCpasType(ExperimentService.EXPERIMENT_RUN_OUTPUT_CPAS_TYPE);
         inputRefs = appOutput.getInputRefs();
         for (String lsid : _runData._runOutputs)
         {
@@ -542,8 +540,7 @@ abstract public class ScriptJob extends PipelineJob
             try
             {
                 ScriptXarSource source = new ScriptXarSource(xardoc, root, workingDirectory);
-                XarReader reader = new XarReader(source, this);
-                reader.parseAndLoad();
+                ExperimentService.get().loadExperiment(source, this);
             }
             catch (Throwable t)
             {

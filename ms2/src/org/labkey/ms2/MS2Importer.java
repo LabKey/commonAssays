@@ -21,9 +21,9 @@ import org.labkey.api.data.*;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.security.User;
 import org.labkey.api.util.CsvSet;
-import org.labkey.api.exp.ExperimentManager;
 import org.labkey.api.exp.Data;
 import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.api.ExperimentService;
 
 import javax.xml.stream.XMLStreamException;
 import java.sql.Connection;
@@ -349,7 +349,7 @@ public abstract class MS2Importer
             }
             File pepXMLFile = new File(path, pepXMLFileName);
 
-            Data pepXMLData = ExperimentManager.get().getDataByURL(pepXMLFile, c);
+            Data pepXMLData = ExperimentService.get().getDataByURL(pepXMLFile, c);
             if (pepXMLData != null)
             {
                 fractionMap.put("PepXmlDataLSID", pepXMLData.getLSID());

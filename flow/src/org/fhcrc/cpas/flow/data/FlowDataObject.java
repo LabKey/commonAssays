@@ -41,12 +41,12 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
 
     static public FlowObject fromRowId(int id)
     {
-        return fromData(ExperimentService.get().getData(id));
+        return fromData(ExperimentService.get().getExpData(id));
     }
 
     static public FlowObject fromLSID(String lsid)
     {
-        return fromData(ExperimentService.get().getData(lsid));
+        return fromData(ExperimentService.get().getExpData(lsid));
     }
 
     static public FlowObject fromAttrObjectId(int id)
@@ -141,7 +141,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
 
     static public List<FlowDataObject> getForContainer(Container container, FlowDataType type)
     {
-        return fromDatas(ExperimentService.get().getDatas(container, type));
+        return fromDatas(ExperimentService.get().getExpDatas(container, type));
     }
 
     /**

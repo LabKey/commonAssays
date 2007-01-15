@@ -68,7 +68,7 @@ public class CompensationController extends BaseFlowController<CompensationContr
         if (errors)
             return null;
         String lsid = svc.generateLSID(getContainer(), FlowDataType.CompensationMatrix, form.ff_compensationMatrixName);
-        if (svc.getData(lsid) != null)
+        if (svc.getExpData(lsid) != null)
         {
             errors = addError("The name '" + form.ff_compensationMatrixName + "' is already being used.");
             return null;

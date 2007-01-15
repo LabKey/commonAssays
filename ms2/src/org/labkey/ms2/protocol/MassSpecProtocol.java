@@ -17,6 +17,7 @@ package org.labkey.ms2.protocol;
 
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.exp.*;
+import org.labkey.api.exp.api.ExperimentService;
 import org.fhcrc.cpas.exp.xml.*;
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.apache.log4j.Logger;
@@ -264,14 +265,14 @@ public class MassSpecProtocol extends PipelineProtocol
 
             if ("Existing".equals(runInfo.getSampleIdsType()[i]) && runInfo.getSampleIdsExisting()[i] != null)
             {
-                Material material = ExperimentManager.get().getMaterial(runInfo.getSampleIdsExisting()[i].intValue());
+                Material material = ExperimentService.get().getMaterial(runInfo.getSampleIdsExisting()[i].intValue());
                 materialLSID = material.getLSID();
                 materialName = material.getName();
             }
             else
             {
                 Integer matSourceId = runInfo.getMaterialSourceIds()[i];
-                MaterialSource matSource = ExperimentManager.get().getMaterialSource(matSourceId);
+                MaterialSource matSource = ExperimentService.get().getMaterialSource(matSourceId);
 
                 materialLSID = matSource.getMaterialLSIDPrefix() + runInfo.getSampleIdsNew()[i];
                 materialName = runInfo.getSampleIdsNew()[i];
@@ -385,7 +386,7 @@ public class MassSpecProtocol extends PipelineProtocol
                 }
                 else
                 {
-                    Material material = ExperimentManager.get().getMaterial(runInfo.sampleIdsExisting[i]);
+                    Material material = ExperimentService.get().getMaterial(runInfo.sampleIdsExisting[i]);
                     if (material == null)
                     {
                         errorBuilder.append("Please enter a sample id for input ").append(i + 1);

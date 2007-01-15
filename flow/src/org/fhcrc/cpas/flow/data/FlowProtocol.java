@@ -42,7 +42,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             }
             return ret;
         }
-        ExpProtocol protocol = ExperimentService.get().createProtocol(container, DEFAULT_PROTOCOL_NAME, ExpProtocol.ApplicationType.ExperimentRun);
+        ExpProtocol protocol = ExperimentService.get().createExpProtocol(container, DEFAULT_PROTOCOL_NAME, ExpProtocol.ApplicationType.ExperimentRun);
         protocol.save(user);
         ret = new FlowProtocol(protocol);
         FlowProtocolStep.initProtocol(user, ret);
@@ -72,7 +72,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     static public FlowProtocol fromProtocolId(int id)
     {
-        ExpProtocol protocol = ExperimentService.get().getProtocol(id);
+        ExpProtocol protocol = ExperimentService.get().getExpProtocol(id);
         if (protocol == null)
             return null;
         return new FlowProtocol(protocol);
@@ -80,7 +80,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     static public FlowProtocol getForContainer(Container container, String name)
     {
-        ExpProtocol protocol = ExperimentService.get().getProtocol(container, name);
+        ExpProtocol protocol = ExperimentService.get().getExpProtocol(container, name);
         if (protocol != null)
             return new FlowProtocol(protocol);
         return null;
@@ -198,7 +198,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         while (rsSamples.next())
         {
             int rowId = ((Number) colRowId.getValue(rsSamples)).intValue();
-            ExpMaterial sample = ExperimentService.get().getMaterial(rowId);
+            ExpMaterial sample = ExperimentService.get().getExpMaterial(rowId);
             if (sample == null)
                 continue;
             SampleKey key = new SampleKey();
@@ -245,7 +245,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             while (rs.next())
             {
                 int fcsFileId = ((Number) colRowId.getValue(rs)).intValue();
-                ExpData fcsFile = svc.getData(fcsFileId);
+                ExpData fcsFile = svc.getExpData(fcsFileId);
                 if (fcsFile == null)
                     continue;
                 SampleKey key = new SampleKey();

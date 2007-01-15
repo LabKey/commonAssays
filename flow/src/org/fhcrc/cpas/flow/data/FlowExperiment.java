@@ -35,7 +35,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     {
         if (lsid == null)
             return null;
-        ExpExperiment exp = ExperimentService.get().getExperiment(lsid);
+        ExpExperiment exp = ExperimentService.get().getExpExperiment(lsid);
         if (exp == null)
             return null;
         return new FlowExperiment(exp);
@@ -43,7 +43,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
 
     static public FlowExperiment fromExperimentId(int id)
     {
-        ExpExperiment experiment = ExperimentService.get().getExperiment(id);
+        ExpExperiment experiment = ExperimentService.get().getExpExperiment(id);
         if (experiment == null)
             return null;
         return new FlowExperiment(experiment);
@@ -52,7 +52,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     static public FlowExperiment[] getExperiments(Container container)
     {
         ExperimentService.Interface svc = ExperimentService.get();
-        ExpExperiment[] experiments = svc.getExperiments(container);
+        ExpExperiment[] experiments = svc.getExpExperiments(container);
         FlowExperiment[] ret = new FlowExperiment[experiments.length];
         for (int i = 0; i < experiments.length; i ++)
         {
@@ -113,7 +113,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     static public FlowExperiment getExperimentRunExperiment(Container container)
     {
         String lsidDefault = FlowObject.generateLSID(container, "Experiment", FlowExperimentRunExperimentName);
-        ExpExperiment exp = ExperimentService.get().getExperiment(lsidDefault);
+        ExpExperiment exp = ExperimentService.get().getExpExperiment(lsidDefault);
         if (exp != null)
             return new FlowExperiment(exp);
 
@@ -223,7 +223,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         ExpProtocol protocol = null;
         if (step != null)
         {
-            protocol = ExperimentService.get().getProtocol(step.getLSID(getContainer()));
+            protocol = ExperimentService.get().getExpProtocol(step.getLSID(getContainer()));
             if (protocol == null)
                 return new FlowRun[0];
         }

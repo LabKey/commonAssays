@@ -3,9 +3,9 @@ package org.labkey.ms2.query;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.ExperimentManager;
 import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.api.ExpRunTable;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.AppProps;
@@ -48,7 +48,7 @@ public class MS2Schema extends UserSchema
 
     public MS2Schema(User user, Container container)
     {
-        super(SCHEMA_NAME, user, container, ExperimentManager.get().getExpSchema());
+        super(SCHEMA_NAME, user, container, ExperimentService.get().getSchema());
         _expSchema = new ExpSchema(user, container);
     }
 
