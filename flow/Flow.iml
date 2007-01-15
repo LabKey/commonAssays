@@ -16,7 +16,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../build/cpasWebapp/explodedWar/WEB-INF/jsp/flow_jsp.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../build/labkeyWebapp/explodedWar/WEB-INF/jsp/flow_jsp.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
