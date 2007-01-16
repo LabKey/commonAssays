@@ -21,6 +21,7 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
         showProtocol,
         joinSampleSet,
         updateSamples,
+        editFCSAnalysisName,
     }
 
     @Jpf.Action
@@ -70,4 +71,16 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
         return renderInTemplate(FormPage.getView(ProtocolController.class, form, "updateSamples.jsp"), form.getProtocol(), "Update Samples", Action.updateSamples);
     }
 
+    @Jpf.Action
+    protected Forward editFCSAnalysisName(EditFCSAnalysisNameForm form) throws Exception
+    {
+        requiresPermission(ACL.PERM_UPDATE);
+        if (isPost())
+        {
+            form.getProtocol().setFCSAnalysisNameExpr(getUser(), form.getFieldSubstitution());
+            form.getProtocol().updateFCSAnalysisName(getUser());
+            return new ViewForward(form.getProtocol().urlShow());
+        }
+        return renderInTemplate(FormPage.getView(ProtocolController.class, form, "editFCSAnalysisName.jsp"), form.getProtocol(), "Edit FCS Analysis Name", Action.editFCSAnalysisName);
+    }
 }

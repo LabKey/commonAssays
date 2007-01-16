@@ -12,18 +12,11 @@ import java.net.URI;
 
 public class NewProtocolForm extends ViewForm
 {
-    public String ff_template;
     public String ff_name;
 
     public void reset(ActionMapping actionMapping, HttpServletRequest servletRequest)
     {
         super.reset(actionMapping, servletRequest);
-        ff_template = "blank.xml";
-    }
-
-    public void setFf_template(String template)
-    {
-        ff_template = template;
     }
 
     public void setFf_name(String name)

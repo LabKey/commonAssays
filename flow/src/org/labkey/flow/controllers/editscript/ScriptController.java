@@ -164,14 +164,13 @@ public class ScriptController extends BaseFlowController
         {
             errors = addError("The name '" + form.ff_name + "' is already in use.  Please choose a unique name.");
         }
-        if (form.ff_template == null)
-        {
-            errors = addError("Please choose a template.");
-        }
         if (errors)
             return null;
 
-        FlowScript script = FlowScript.create(getUser(), getContainer(), form.ff_name, readTemplate(form.ff_template));
+        ScriptDocument doc = ScriptDocument.Factory.newInstance();
+        doc.addNewScript();
+
+        FlowScript script = FlowScript.create(getUser(), getContainer(), form.ff_name, doc.toString());
 
 
         ViewURLHelper forward;

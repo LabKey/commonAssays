@@ -174,11 +174,13 @@ flow/src/org/labkey/flow/controllers/log/LogController.java -text
 flow/src/org/labkey/flow/controllers/log/showLog.jsp -text
 flow/src/org/labkey/flow/controllers/main.jsp -text
 flow/src/org/labkey/flow/controllers/newFolder.jsp -text
+flow/src/org/labkey/flow/controllers/protocol/EditFCSAnalysisNameForm.java -text
 flow/src/org/labkey/flow/controllers/protocol/JoinSampleSetForm.java -text
 flow/src/org/labkey/flow/controllers/protocol/ProtocolController.java -text
 flow/src/org/labkey/flow/controllers/protocol/ProtocolForm.java -text
 flow/src/org/labkey/flow/controllers/protocol/UpdateSamplesForm.java -text
 flow/src/org/labkey/flow/controllers/protocol/begin.jsp -text
+flow/src/org/labkey/flow/controllers/protocol/editFCSAnalysisName.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/joinSampleSet.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/showProtocol.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/updateSamples.jsp -text
@@ -193,6 +195,7 @@ flow/src/org/labkey/flow/controllers/well/chooseGraph.jsp -text
 flow/src/org/labkey/flow/controllers/well/editWell.jsp -text
 flow/src/org/labkey/flow/controllers/well/showWell.jsp -text
 flow/src/org/labkey/flow/data/AttributeType.java -text
+flow/src/org/labkey/flow/data/FieldSubstitution.java -text
 flow/src/org/labkey/flow/data/FlowCompensationControl.java -text
 flow/src/org/labkey/flow/data/FlowCompensationMatrix.java -text
 flow/src/org/labkey/flow/data/FlowDataObject.java -text
@@ -271,9 +274,6 @@ flow/webapp/Flow/scripts/postgresql/obsolete/flow-1.53-1.54.sql -text
 flow/webapp/Flow/scripts/sql[!!-~]server/flow-1.50-1.60.sql -text
 flow/webapp/Flow/scripts/sql[!!-~]server/obsolete/flow-1.53-1.54.sql -text
 flow/webapp/Flow/statisticColumn.png -text
-flow/webapp/Flow/templates/blank.xml -text
-flow/webapp/Flow/templates/lod-analysis.xml -text
-flow/webapp/Flow/templates/quv-analysis.xml -text
 flow/webapp/Flow/unflagAnalysisScript.gif -text
 flow/webapp/Flow/unflagCompensationControl.gif -text
 flow/webapp/Flow/unflagFCSAnalysis.gif -text

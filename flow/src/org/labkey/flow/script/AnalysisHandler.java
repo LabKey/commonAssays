@@ -48,6 +48,7 @@ public class AnalysisHandler extends BaseHandler
     {
         ProtocolApplicationBaseType app = addProtocolApplication(runElement);
         DataBaseType ret = duplicateWell(app, src, FlowDataType.FCSAnalysis);
+        ret.setName(_job.getProtocol().getFCSAnalysisName(src));
         if (flowComp != null)
         {
             _job.addInput(app, flowComp, InputRole.CompensationMatrix);

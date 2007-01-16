@@ -16,6 +16,7 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.persist.AttributeSet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ObjectUtils;
+import org.apache.log4j.Logger;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 
@@ -27,8 +28,7 @@ import java.sql.ResultSet;
 
 public class FlowProtocol extends FlowObject<ExpProtocol>
 {
-    
-
+    static private final Logger _log = Logger.getLogger(FlowProtocol.class);
     static private final String DEFAULT_PROTOCOL_NAME = "Flow";
     static final private String SAMPLESET_NAME = "Samples";
     static public FlowProtocol ensureForContainer(User user, Container container) throws Exception
@@ -193,21 +193,28 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         {
             selectedColumns.add(colProperty.getFk().createLookupColumn(colProperty, propertyName));
         }
-        ResultSet rsSamples = Table.select(sampleTable, selectedColumns.toArray(new ColumnInfo[0]), null, null);
         Map<SampleKey, ExpMaterial> ret = new HashMap();
-        while (rsSamples.next())
+        ResultSet rsSamples = Table.select(sampleTable, selectedColumns.toArray(new ColumnInfo[0]), null, null);
+        try
         {
-            int rowId = ((Number) colRowId.getValue(rsSamples)).intValue();
-            ExpMaterial sample = ExperimentService.get().getExpMaterial(rowId);
-            if (sample == null)
-                continue;
-            SampleKey key = new SampleKey();
-            for (int i = 1; i < selectedColumns.size(); i ++)
+            while (rsSamples.next())
             {
-                ColumnInfo column = selectedColumns.get(i);
-                key.addValue(column.getValue(rsSamples));
+                int rowId = ((Number) colRowId.getValue(rsSamples)).intValue();
+                ExpMaterial sample = ExperimentService.get().getExpMaterial(rowId);
+                if (sample == null)
+                    continue;
+                SampleKey key = new SampleKey();
+                for (int i = 1; i < selectedColumns.size(); i ++)
+                {
+                    ColumnInfo column = selectedColumns.get(i);
+                    key.addValue(column.getValue(rsSamples));
+                }
+                ret.put(key, sample);
             }
-            ret.put(key, sample);
+        }
+        finally
+        {
+            rsSamples.close();
         }
         return ret;
     }
@@ -230,83 +237,90 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(fcsFilesTable, fields);
         ColumnInfo colRowId = columns.get(fieldRowId);
         ColumnInfo colSampleId = columns.get(fieldSampleRowId);
-        ResultSet rs = Table.select(fcsFilesTable, columns.values().toArray(new ColumnInfo[0]), null, null);
         int ret = 0;
-        boolean fTransaction = false;
+        ResultSet rs = Table.select(fcsFilesTable, columns.values().toArray(new ColumnInfo[0]), null, null);
         try
         {
-            PropertyDescriptor pdInputRole = null;
-
-            if (!svc.isTransactionActive())
+            boolean fTransaction = false;
+            try
             {
-                svc.beginTransaction();
-                fTransaction = true;
-            }
-            while (rs.next())
-            {
-                int fcsFileId = ((Number) colRowId.getValue(rs)).intValue();
-                ExpData fcsFile = svc.getExpData(fcsFileId);
-                if (fcsFile == null)
-                    continue;
-                SampleKey key = new SampleKey();
-                for (FieldKey fieldKey : joinFields.values())
-                {
-                    ColumnInfo column = columns.get(fieldKey);
-                    Object value = null;
-                    if (column != null)
-                    {
-                        value = column.getValue(rs);
-                    }
-                    key.addValue(value);
-                }
-                ExpMaterial sample = sampleMap.get(key);
-                Integer newSampleId = sample == null ? null : sample.getRowId();
-                Object oldSampleId = colSampleId.getValue(rs);
-                if (ObjectUtils.equals(newSampleId, oldSampleId))
-                    continue;
-                ExpProtocolApplication app = fcsFile.getSourceApplication();
-                if (app == null)
-                {
-                    // This will happen for orphaned FCSFiles (where the ExperimentRun has been deleted).
-                    continue;
-                }
+                PropertyDescriptor pdInputRole = null;
 
-                boolean found = false;
-                for (ExpMaterial material : app.getInputMaterials())
+                if (!svc.isTransactionActive())
                 {
-                    if (material.getSampleSet() == null || material.getSampleSet().getRowId() != ss.getRowId())
+                    svc.beginTransaction();
+                    fTransaction = true;
+                }
+                while (rs.next())
+                {
+                    int fcsFileId = ((Number) colRowId.getValue(rs)).intValue();
+                    ExpData fcsFile = svc.getExpData(fcsFileId);
+                    if (fcsFile == null)
                         continue;
-                    if (sample != null)
+                    SampleKey key = new SampleKey();
+                    for (FieldKey fieldKey : joinFields.values())
                     {
-                        if (material.equals(sample))
+                        ColumnInfo column = columns.get(fieldKey);
+                        Object value = null;
+                        if (column != null)
                         {
-                            found = true;
-                            ret ++;
-                            break;
+                            value = column.getValue(rs);
                         }
+                        key.addValue(value);
                     }
-                    app.removeMaterialInput(user, material);
-                }
-                if (!found && sample != null)
-                {
-                    pdInputRole = app.addMaterialInput(user, sample, null, pdInputRole);
-                    ret ++;
+                    ExpMaterial sample = sampleMap.get(key);
+                    Integer newSampleId = sample == null ? null : sample.getRowId();
+                    Object oldSampleId = colSampleId.getValue(rs);
+                    if (ObjectUtils.equals(newSampleId, oldSampleId))
+                        continue;
+                    ExpProtocolApplication app = fcsFile.getSourceApplication();
+                    if (app == null)
+                    {
+                        // This will happen for orphaned FCSFiles (where the ExperimentRun has been deleted).
+                        continue;
+                    }
+
+                    boolean found = false;
+                    for (ExpMaterial material : app.getInputMaterials())
+                    {
+                        if (material.getSampleSet() == null || material.getSampleSet().getRowId() != ss.getRowId())
+                            continue;
+                        if (sample != null)
+                        {
+                            if (material.equals(sample))
+                            {
+                                found = true;
+                                ret ++;
+                                break;
+                            }
+                        }
+                        app.removeMaterialInput(user, material);
+                    }
+                    if (!found && sample != null)
+                    {
+                        pdInputRole = app.addMaterialInput(user, sample, null, pdInputRole);
+                        ret ++;
+                    }
                 }
             }
-        }
-        catch (Exception e)
-        {
-            if (fTransaction)
+            catch (Exception e)
             {
-                svc.rollbackTransaction();
-                fTransaction = false;
+                if (fTransaction)
+                {
+                    svc.rollbackTransaction();
+                    fTransaction = false;
+                }
+                throw e;
             }
-            throw e;
+            finally
+            {
+                if (fTransaction)
+                    svc.commitTransaction();
+            }
         }
         finally
         {
-            if (fTransaction)
-                svc.commitTransaction();
+            rs.close();
         }
         return ret;
     }
@@ -349,5 +363,101 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             }
         }
         return ret;
+    }
+
+    public FieldSubstitution getFCSAnalysisNameExpr()
+    {
+        String ret = (String) getProperty(FlowProperty.FCSAnalysisName);
+        if (ret == null)
+        {
+            FieldSubstitution fs = new FieldSubstitution(new Object[] {new FieldKey(null, "Name")});
+            return fs;
+        }
+        return FieldSubstitution.fromString(ret);
+    }
+
+    public void setFCSAnalysisNameExpr(User user, FieldSubstitution fs) throws Exception
+    {
+        String value = fs.toString();
+        if (StringUtils.isEmpty(value))
+        {
+            value = null;
+        }
+        setProperty(user, FlowProperty.FCSAnalysisName.getPropertyDescriptor(), value);
+    }
+
+    public void updateFCSAnalysisName(User user) throws Exception
+    {
+        ExperimentService.Interface expService = ExperimentService.get();
+        FieldSubstitution fs = getFCSAnalysisNameExpr();
+        fs.insertParent(new TableKey(null, "FCSFile"));
+        FlowSchema schema = new FlowSchema(user, getContainer());
+        ExpDataTable table = schema.createFCSAnalysisTable("FCSAnalysis", FlowDataType.FCSAnalysis);
+        Map<FieldKey, ColumnInfo> columns = new HashMap();
+        ColumnInfo colRowId = table.getColumn(ExpDataTable.Column.RowId);
+        columns.put(new FieldKey(null, "RowId"), colRowId);
+        columns.putAll(QueryService.get().getColumns(table, Arrays.asList(fs.getFieldKeys())));
+        boolean fTrans = false;
+        ResultSet rs = Table.select(table, columns.values().toArray(new ColumnInfo[0]), null, null);
+        try
+        {
+            if (!expService.isTransactionActive())
+            {
+                expService.beginTransaction();
+                fTrans = true;
+            }
+            while (rs.next())
+            {
+                int rowid = ((Number) colRowId.getValue(rs)).intValue();
+                FlowObject obj = FlowDataObject.fromRowId(rowid);
+                if (obj instanceof FlowFCSAnalysis)
+                {
+                    ExpData data = ((FlowFCSAnalysis) obj).getData();
+                    String name = fs.eval(columns, rs);
+                    if (!ObjectUtils.equals(name, data.getName()))
+                    {
+                        data.setName(name);
+                        data.save(user);
+                    }
+                }
+            }
+            if (fTrans)
+            {
+                expService.commitTransaction();
+                fTrans = false;
+            }
+        }
+        finally
+        {
+            if (fTrans)
+            {
+                expService.rollbackTransaction();
+            }
+        }
+        rs.close();
+    }
+
+    public String getFCSAnalysisName(FlowWell well) throws SQLException
+    {
+        FlowSchema schema = new FlowSchema(null, getContainer());
+        ExpDataTable table = schema.createFCSFileTable("fcsFiles");
+        ColumnInfo colRowId = table.getColumn(ExpDataTable.Column.RowId);
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(colRowId, well.getRowId());
+        FieldSubstitution fs = getFCSAnalysisNameExpr();
+        Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(table, Arrays.asList(fs.getFieldKeys()));
+        ResultSet rs = Table.select(table, columns.values().toArray(new ColumnInfo[0]), filter, null);
+        try
+        {
+            if (rs.next())
+            {
+                return fs.eval(columns, rs);
+            }
+        }
+        finally
+        {
+            rs.close();
+        }
+        return well.getName();
     }
 }
