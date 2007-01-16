@@ -16,12 +16,6 @@
 
 package org.labkey.issue;
 
-import org.labkey.issue.model.Issue;
-import org.labkey.issue.model.IssueManager;
-import org.labkey.issue.model.IssueManager.CustomColumnConfiguration;
-import org.labkey.issue.query.IssuesQuerySchema;
-import org.labkey.issue.query.IssuesQueryView;
-import org.labkey.issue.query.IssuesTable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.beehive.netui.pageflow.FormData;
@@ -35,10 +29,7 @@ import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.*;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.User;
-import org.labkey.api.security.UserManager;
-import org.labkey.api.security.ValidEmail;
+import org.labkey.api.security.*;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.MailHelper;
 import org.labkey.api.util.MailHelper.ViewMessage;
@@ -48,6 +39,12 @@ import org.labkey.api.view.*;
 import org.labkey.api.wiki.WikiRenderer;
 import org.labkey.api.wiki.WikiRendererType;
 import org.labkey.api.wiki.WikiService;
+import org.labkey.issue.model.Issue;
+import org.labkey.issue.model.IssueManager;
+import org.labkey.issue.model.IssueManager.CustomColumnConfiguration;
+import org.labkey.issue.query.IssuesQuerySchema;
+import org.labkey.issue.query.IssuesQueryView;
+import org.labkey.issue.query.IssuesTable;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -73,9 +70,11 @@ public class IssuesController extends ViewController
     public static final int ISSUE_PRIORITY = 6;
     public static final int ISSUE_RESOLUTION = 7;
 
+
     public IssuesController() throws Exception
     {
     }
+
 
     private Issue getIssue(Container c, int issueId) throws SQLException
     {
@@ -103,13 +102,14 @@ public class IssuesController extends ViewController
     /**
      * This method represents the point of entry into the pageflow
      */
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
     public Forward begin() throws Exception
     {
         ViewURLHelper url = new ViewURLHelper("Issues", "list", getContainer());
         url.addParameter("Issues.Status~neq","closed");
         return new ViewForward(url);
     }
+
 
     public static final String ISSUES_COLUMNS_LOOKUP = "IssuesColumns";
 
@@ -135,11 +135,9 @@ public class IssuesController extends ViewController
 
     // Lame "column picker" for grid... not hooked up to UI yet, but this action can be called to add/remove/reorder columns for this container
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
     public Forward setListColumns() throws Exception
     {
-        requiresPermission(ACL.PERM_ADMIN);
-
         String columnNames = (String)getViewContext().get("columns");
         setListColumnNames(columnNames);
 
@@ -147,21 +145,19 @@ public class IssuesController extends ViewController
     }
 
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
     public Forward setCustomColumnConfiguration() throws Exception
     {
-        requiresPermission(ACL.PERM_ADMIN);
-
         CustomColumnConfiguration ccc = new CustomColumnConfiguration(getViewContext());
         IssueManager.saveCustomColumnConfiguration(getContainer(), ccc);
 
         return adminForward();
     }
 
-    @Jpf.Action
+
+    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
     public Forward updateRequiredFields(IssuePreferenceForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_ADMIN);
         final StringBuffer sb = new StringBuffer();
         if (form.getRequiredFields().length > 0)
         {
@@ -177,12 +173,14 @@ public class IssuesController extends ViewController
         return adminForward();
     }
 
+
     private static ViewURLHelper getListUrl(Container c)
     {
         ViewURLHelper url = new ViewURLHelper("Issues", "list", c);
         url.addParameter(DataRegion.LAST_FILTER_PARAM, "true");
         return url;
     }
+
 
     private static final String ISSUES_QUERY = "Issues";
     private HttpView getIssuesView(ListForm form) throws SQLException, ServletException
@@ -210,11 +208,9 @@ public class IssuesController extends ViewController
         return box;
     }
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
     public Forward list(ListForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_READ);
-
         // convert AssignedTo/Email to AssignedTo/DisplayName: old bookmarks
         // reference Email, which is no longer displayed.
         ViewURLHelper url = cloneViewURLHelper();
@@ -225,7 +221,7 @@ public class IssuesController extends ViewController
                 url.deleteParameter(emailFilter);
             return new ViewForward(url);
         }
-
+                                                                                              
         HttpView view = getIssuesView(form);
         if (view != null)
         {
@@ -242,10 +238,9 @@ public class IssuesController extends ViewController
         return null;
     }
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
     protected Forward exportTsv(QueryForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_READ);
         QueryView view = QueryView.create(form);
         
         final TSVGridWriter writer = view.getTsvWriter();
@@ -255,11 +250,9 @@ public class IssuesController extends ViewController
         return null;
     }
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
     public Forward details() throws Exception
     {
-        requiresPermission(ACL.PERM_READ);
-
         int issueId = getIssueId();
         Issue issue = getIssue(getContainer(), issueId);
         if (null == issue)
@@ -278,11 +271,9 @@ public class IssuesController extends ViewController
     }
 
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_INSERT)
     public Forward insert(InsertForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_INSERT);
-
         Issue issue = new Issue();
 
         if (form.getAssignedto() != null)
@@ -315,7 +306,7 @@ public class IssuesController extends ViewController
         return _renderInTemplate(v, "Insert new issue", null);
     }
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_UPDATEOWN)
     public Forward update() throws Exception
     {
         int issueId = getIssueId();
@@ -364,7 +355,7 @@ public class IssuesController extends ViewController
         return editable;
     }
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_UPDATEOWN)
     public Forward resolve() throws Exception
     {
         int issueId = getIssueId();
@@ -389,7 +380,7 @@ public class IssuesController extends ViewController
     }
 
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_UPDATEOWN)
     public Forward close() throws Exception
     {
         int issueId = getIssueId();
@@ -414,7 +405,7 @@ public class IssuesController extends ViewController
     }
 
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_UPDATEOWN)
     public Forward reopen() throws Exception
     {
         int issueId = getIssueId();
@@ -439,11 +430,9 @@ public class IssuesController extends ViewController
     }
 
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_INSERT)
     protected Forward doInsert(IssuesForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_INSERT);
-
         Container c = getContainer();
         User user = getUser();
 
@@ -520,7 +509,7 @@ public class IssuesController extends ViewController
         }
     }
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_UPDATEOWN)
     protected Forward doUpdate(IssuesForm form) throws Exception
     {
         Container c = getContainer();
@@ -703,10 +692,10 @@ public class IssuesController extends ViewController
         public void setIssueId(String issueId){_issueId = issueId;}
     }
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
     protected Forward completeUser(CompleteUserForm form) throws Exception
     {
-        Container c = getContainer(ACL.PERM_READ);
+        Container c = getContainer();
 
         final int issueId = Integer.valueOf(form.getIssueId());
         Issue issue = getIssue(getContainer(), issueId);
@@ -807,11 +796,12 @@ public class IssuesController extends ViewController
             return IssueManager.NOTIFY_ASSIGNEDTO_UPDATE | IssueManager.NOTIFY_CREATED_UPDATE;
     }
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
     protected Forward emailPrefs(EmailPrefsForm form) throws Exception
     {
         return emailPrefs((String)null);
     }
+
 
     private Forward emailPrefs(String message) throws Exception
     {
@@ -825,7 +815,8 @@ public class IssuesController extends ViewController
         return _renderInTemplate(v, "Email preferences for issues in: " + getContainer().getPath(), null);
     }
 
-    @Jpf.Action
+
+    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
     protected Forward updateEmailPrefs(EmailPrefsForm form) throws Exception
     {
         int emailPref = 0;
@@ -838,18 +829,18 @@ public class IssuesController extends ViewController
         return emailPrefs("Settings updated successfully");
     }
 
+
     private ViewForward adminForward() throws URISyntaxException, ServletException
     {
         return new ViewForward("Issues", "admin", getContainer());
     }
 
+
     private static final String REQUIRED_FIELDS_COLUMNS = "Title,AssignedTo,Type,Area,Priority,Milestone,NotifyList";
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
     protected Forward admin(AdminForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_ADMIN);
-
         // TODO: This hack ensures that priority & resolution option defaults get populated if first reference is the admin page.  Fix this.
         IssuePage page = new IssuePage()
         {
@@ -866,33 +857,25 @@ public class IssuesController extends ViewController
         return null;
     }
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
     protected Forward addKeyword(AdminForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_ADMIN);
-
         IssueManager.addKeyword(getContainer(), form.getType(), form.getKeyword());
-
         return adminForward();
     }
 
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
     protected Forward deleteKeyword(AdminForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_ADMIN);
-
         IssueManager.deleteKeyword(getContainer(), form.getType(), form.getKeyword());
-
         return adminForward();
     }
 
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
     protected Forward rss() throws Exception
     {
-        requiresPermission(ACL.PERM_READ);
-
         try
         {
             DataRegion r = new DataRegion();
@@ -924,7 +907,7 @@ public class IssuesController extends ViewController
     }
 
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
     protected Forward purge() throws ServletException, SQLException, IOException
     {
         requiresGlobalAdmin();
@@ -936,10 +919,10 @@ public class IssuesController extends ViewController
     }
 
 
-    @Jpf.Action
+    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
     public Forward jumpToIssue(JumpToIssueForm form) throws Exception
     {
-        Container c = getContainer(ACL.PERM_READ);
+        Container c = getContainer();
 
         String issueId = form.getIssueId();
         if (issueId != null)
@@ -971,7 +954,8 @@ public class IssuesController extends ViewController
         return new ViewForward(urlHelper);
     }
 
-    @Jpf.Action
+
+    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
     protected Forward search() throws Exception
     {
         Container c = getContainer();
@@ -1057,6 +1041,7 @@ public class IssuesController extends ViewController
         issue.addComment(user, formattedComment.toString());
     }
 
+
     private Forward _renderInTemplate(HttpView view, String title, String helpTopic) throws Exception
     {
         if (helpTopic == null)
@@ -1072,6 +1057,7 @@ public class IssuesController extends ViewController
         includeView(template);
         return null;
     }
+
 
     private static void _appendCustomColumnChange(StringBuffer sb, String field, String from, String to, Map<String, String> columnCaptions)
     {
@@ -1416,9 +1402,10 @@ public class IssuesController extends ViewController
     private void requiresUpdatePermission(User user, Issue issue)
             throws ServletException
     {
-        if (! hasUpdatePermission(user, issue))
+        if (!hasUpdatePermission(user, issue))
             HttpView.throwUnauthorized();
     }
+
 
     public static class InsertForm extends ViewForm
     {
@@ -1502,6 +1489,7 @@ public class IssuesController extends ViewController
         public void setViews(Map<String, CustomView> views) {_views = views;}
     }
 
+
     public static class JumpToIssueForm extends ViewForm
     {
         private String _issueId;
@@ -1516,6 +1504,7 @@ public class IssuesController extends ViewController
             _issueId = issueId;
         }
     }
+
 
     public static class CustomizeIssuesPartView extends AbstractCustomizeWebPartView<Object>
     {
@@ -1532,6 +1521,7 @@ public class IssuesController extends ViewController
         }
     }
 
+
     public static class IssuesPreference
     {
         private ColumnInfo[] _columns;
@@ -1546,6 +1536,7 @@ public class IssuesController extends ViewController
         public ColumnInfo[] getColumns(){return _columns;}
         public String getRequiredFields(){return _requiredFields;}
     }
+
 
     public static class IssuePreferenceForm extends ViewForm
     {
