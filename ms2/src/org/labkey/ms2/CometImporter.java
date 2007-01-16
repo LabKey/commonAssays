@@ -21,6 +21,7 @@ import org.labkey.api.exp.XarContext;
 
 import javax.xml.stream.XMLStreamException;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -54,6 +55,7 @@ public abstract class CometImporter extends MS2Importer
         _stmt.setDouble(n++, Double.parseDouble(mass));        // Store as double so mass + deltaMass results returns high mass accuracy precursor
         _stmt.setFloat(n++, Float.parseFloat(deltaMass));
         _stmt.setFloat(n++, Float.parseFloat(peptideProphet));
+        _stmt.setNull(n++, Types.REAL); // No PeptideProphet error rate 
         _stmt.setString(n++, peptide);
         _stmt.setString(n++, prevAA);
         _stmt.setString(n++, trimmedPeptide);

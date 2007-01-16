@@ -119,7 +119,7 @@ public class PepXmlImporter extends MS2Importer
                     // we omit them for the uploading
                     if (null != peptide.getTrimmedPeptide())
                     {
-	                    write(peptide);
+	                    write(peptide, summary);
 		                scans.add(peptide.getScan());
                     }
                     count++;
@@ -142,52 +142,6 @@ public class PepXmlImporter extends MS2Importer
             if (null != loader)
                 loader.close();
         }
-    }
-
-
-    // Returns a map from scan number to retention time
-    private Map<Integer, Double> loadRetentionTimes(PepXmlFraction fraction)
-    {
-        _log.info("Starting to load retention times from mzXML file");
-        String mzXmlFileName = getMzXMLFileName(fraction);
-
-        Map<Integer, Double> times = new HashMap<Integer, Double>();
-
-        if (null == mzXmlFileName)
-        {
-            _log.info("mzXML file name was not specified in pepXML file; retention times will not be loaded");
-            return times;
-        }
-
-        SequentialMzxmlIterator scanIterator = null;
-
-        try
-        {
-            scanIterator = new SequentialMzxmlIterator(mzXmlFileName, 2);
-
-            while(scanIterator.hasNext())
-            {
-                SimpleScan ss = scanIterator.next();
-                times.put(ss.getScan(), ss.getRetentionTime());
-            }
-
-            _log.info("Finished loading retention times from " + mzXmlFileName);
-        }
-        catch (FileNotFoundException e)
-        {
-            _log.warn("Could not open " + mzXmlFileName + "; retention times will not be loaded.");
-        }
-        catch (XMLStreamException e)
-        {
-            _log.error("Could not load retention times from mzXML file", e);
-        }
-        finally
-        {
-            if (null != scanIterator)
-                scanIterator.close();
-        }
-
-        return times;
     }
 
 
@@ -379,7 +333,7 @@ public class PepXmlImporter extends MS2Importer
     }
 
 
-    protected void setPeptideParameters(PreparedStatement stmt, PepXmlPeptide peptide) throws SQLException
+    protected void setPeptideParameters(PreparedStatement stmt, PepXmlPeptide peptide, PeptideProphetSummary peptideProphetSummary) throws SQLException
     {
         int n = 1;
 
@@ -402,6 +356,21 @@ public class PepXmlImporter extends MS2Importer
 
         PeptideProphetHandler.PeptideProphetResult pp = peptide.getPeptideProphetResult();
         stmt.setFloat(n++, (null == pp ? 0 : pp.getProbability()));
+
+        Float errorRate = null;
+        if (peptideProphetSummary != null && pp != null)
+        {
+            errorRate = peptideProphetSummary.calculateErrorRate(pp.getProbability());
+        }
+        
+        if (errorRate != null)
+        {
+            stmt.setFloat(n++, errorRate.floatValue());
+        }
+        else
+        {
+            stmt.setNull(n++, Types.REAL);
+        }
 
         stmt.setString(n++, peptide.getPeptide());
         stmt.setString(n++, peptide.getPrevAA());
@@ -462,7 +431,7 @@ public class PepXmlImporter extends MS2Importer
         }
     }
 
-    protected void write(PepXmlPeptide peptide) throws SQLException
+    protected void write(PepXmlPeptide peptide, PeptideProphetSummary peptideProphetSummary) throws SQLException
     {
         // If we have relative quantitation (XPress or Q3), use the statement that reselects the rowId; otherwise, use the simple insert statement
         PeptideProphetHandler.PeptideProphetResult pp = peptide.getPeptideProphetResult();
@@ -471,7 +440,7 @@ public class PepXmlImporter extends MS2Importer
 
         PreparedStatement stmt = (hasProphet || hasQuant ? _stmtWithReselect : _stmt);
 
-        setPeptideParameters(stmt, peptide);
+        setPeptideParameters(stmt, peptide, peptideProphetSummary);
         stmt.execute();
 
         long peptideId = -1;

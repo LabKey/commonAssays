@@ -455,7 +455,7 @@ public abstract class MS2Importer
 
     protected String getTableColumnNames()
     {
-        return "Fraction, Scan, RetentionTime, Charge, IonPercent, Mass, DeltaMass, PeptideProphet, Peptide, PrevAA, TrimmedPeptide, NextAA, ProteinHits, Protein";
+        return "Fraction, Scan, RetentionTime, Charge, IonPercent, Mass, DeltaMass, PeptideProphet, PeptideProphetErrorRate, Peptide, PrevAA, TrimmedPeptide, NextAA, ProteinHits, Protein";
     }
 
 

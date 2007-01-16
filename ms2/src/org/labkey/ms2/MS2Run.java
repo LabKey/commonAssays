@@ -151,7 +151,7 @@ public abstract class MS2Run implements Serializable
 
     public String getCommonPeptideColumnNames()
     {
-        return "Scan, RetentionTime, Run, RunDescription, Fraction, FractionName, Charge, " + getScoreColumnNames() + "IonPercent, Mass, DeltaMass, DeltaMassPPM, FractionalDeltaMass, FractionalDeltaMassPPM, PrecursorMass, MZ, PeptideProphet, Peptide, StrippedPeptide, PrevAA, TrimmedPeptide, NextAA, ProteinHits, SequencePosition, H, DeltaScan, Protein, Description, GeneName, SeqId";
+        return "Scan, RetentionTime, Run, RunDescription, Fraction, FractionName, Charge, " + getScoreColumnNames() + "IonPercent, Mass, DeltaMass, DeltaMassPPM, FractionalDeltaMass, FractionalDeltaMassPPM, PrecursorMass, MZ, PeptideProphet, PeptideProphetErrorRate, Peptide, StrippedPeptide, PrevAA, TrimmedPeptide, NextAA, ProteinHits, SequencePosition, H, DeltaScan, Protein, Description, GeneName, SeqId";
     }
 
     public String getProteinProphetPeptideColumnNames()
@@ -176,12 +176,12 @@ public abstract class MS2Run implements Serializable
 
     public static String getDefaultProteinProphetProteinColumnNames()
     {
-        return "GroupNumber, GroupProbability, PctSpectrumIds, ProteinProbability";
+        return "GroupNumber, GroupProbability, PctSpectrumIds";
     }
 
     public static String getProteinProphetProteinColumnNames()
     {
-        return getDefaultProteinProphetProteinColumnNames() + ", FirstProtein, FirstDescription, FirstGeneName, FirstBestName";
+        return getDefaultProteinProphetProteinColumnNames() + ", ErrorRate, FirstProtein, FirstDescription, FirstGeneName, FirstBestName";
     }
 
     public String getQuantitationProteinColumnNames()

@@ -272,6 +272,7 @@ public class ProteinProphetImporter
         insertGroup.setUniquePeptidesCount(protein.getUniquePeptidesCount());
         insertGroup.setTotalNumberPeptides(protein.getTotalNumberPeptides());
         insertGroup.setPercentCoverage(protein.getPercentCoverage());
+        insertGroup.setErrorRate(file.calculateErrorRate(groupProbability));
         Table.insert(info.getUser(), MS2Manager.getTableInfoProteinGroups(), insertGroup);
 
         ProtXmlReader.QuantitationRatio xpressRatio = protein.getQuantitationRatio();
