@@ -22,7 +22,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="flow" />
+    <orderEntry type="module" module-name="Flow" />
     <orderEntryProperties />
   </component>
 </module>
