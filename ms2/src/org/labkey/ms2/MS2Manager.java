@@ -39,6 +39,7 @@ import org.labkey.api.view.Portal;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.ms2.MS2Service;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.plot.XYPlot;
@@ -1026,6 +1027,13 @@ public class MS2Manager
         return stats;
     }
 
+    public static void updateMS2Application(int ms2RunId, String LSID) throws SQLException
+    {
+        String sql = " UPDATE " + getTableInfoRuns() + " SET ExperimentRunLSID = ? "
+                + " WHERE Run = ? ;";
+
+        Table.execute(getSchema(), sql, new Object[]{LSID, ms2RunId});
+    }
 
     private static void addStats(Map<String, String> stats, String prefix, String whereSql, Object[] params) throws SQLException
     {

@@ -1750,8 +1750,8 @@ public class PipelineController extends ViewController
 
         //BUGBUG: This should not happen unless upload succeeds!!
         String runLsid = "urn:lsid:" + AppProps.getInstance().getDefaultLsidAuthority() + ":ExperimentRun.MS2:" + run;
-        ExperimentService.get().updateMS2Application(run, runLsid);
-        System.out.println(tempFile.getAbsolutePath());
+        MS2Manager.updateMS2Application(run, runLsid);
+
         HttpView.throwRedirect(getViewURLHelper().relativeUrl("begin.view", "", "Project"));
 
         return null;
