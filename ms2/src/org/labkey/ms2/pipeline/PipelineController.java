@@ -1151,7 +1151,7 @@ public class PipelineController extends ViewController
             drv.setMzXmlFileStatus(mzXmlFileStatus);
             drv.setForm(form);
             MaterialSource[] materialSources;
-            if (activeMaterialSource.getLSID().equals(ExperimentService.DEFAULT_MATERIAL_SOURCE_LSID))
+            if (activeMaterialSource.getLSID().equals(ExperimentService.get().getDefaultMaterialSourceLsid()))
             {
                 materialSources = new MaterialSource[] { activeMaterialSource };
             }
