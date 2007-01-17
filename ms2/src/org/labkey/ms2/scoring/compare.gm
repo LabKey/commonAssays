@@ -5,7 +5,7 @@
 <form method=get action="compare.post">
 <%  if (error != null && error.length() > 0) { %>
 <table border="0">
-    <tr><td class="cpas-error"><%=error%></td></tr>
+    <tr><td class="labkey-error"><%=error%></td></tr>
 </table>
     <br>
 <%  } %>
@@ -27,7 +27,7 @@ for (run in runs)
   <tr><td colspan="2" class="heading-1"><%=filter(run.description)%></td>
     <tr><td>&nbsp;</td>
 <% if (runErrors[index] != null && runErrors[index].length() > 0) { %>
-        <td class="cpas-error"><%=runErrors[index]%></td></tr>
+        <td class="labkey-error"><%=runErrors[index]%></td></tr>
 <% } else { %>
      <td class="ms-vb">
         <input type="hidden" name="runIds[${index}]" value="<%=run.run%>">

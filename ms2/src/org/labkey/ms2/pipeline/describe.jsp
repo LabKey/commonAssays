@@ -77,7 +77,7 @@
 <tr><td>&nbsp;</td><td>
    <table border="0">
 <%  if (error != null && error.length() > 0) { %>
-   <tr><td class="cpas-error" colspan="2"><%=error%></td></tr>
+   <tr><td class="labkey-error" colspan="2"><%=error%></td></tr>
 <%  } %>
    <tr><td class="ms-searchform">Run Name</td>
      <td class="ms-vb">
@@ -157,7 +157,7 @@ for (File file : getMzXmlFileStatus().keySet())
   <tr><td>&nbsp;</td><td>
     <table border="0">
 <%  if (error != null && error.length() > 0) { %>
-    <tr><td class="cpas-error" colspan="2"><%=error%></td></tr>
+    <tr><td class="labkey-error" colspan="2"><%=error%></td></tr>
 <%  } %>
     <tr><td class="ms-searchform">Run Name</td>
       <td class="ms-vb"><input type="hidden" name="fileNames[<%=index%>]" value="<%=h(file.getName())%>">

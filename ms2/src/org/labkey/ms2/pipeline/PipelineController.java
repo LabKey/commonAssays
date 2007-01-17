@@ -1016,7 +1016,7 @@ public class PipelineController extends ViewController
             dr.setButtonBar(bb);
 
             if (null != form.getError())
-                out.write("<span class=\"cpas-error\">" + form.getError() + "</span>");
+                out.write("<span class=\"labkey-error\">" + form.getError() + "</span>");
 
             RenderContext rc = new RenderContext(getViewContext());
             rc.setMode(DataRegion.MODE_INSERT);

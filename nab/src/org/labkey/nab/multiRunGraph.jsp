@@ -16,7 +16,7 @@
     String errs = PageFlowUtil.getStrutsError(request, "main");
     if (null != StringUtils.trimToNull(errs))
     {
-        out.write("<span class=\"cpas-error\">");
+        out.write("<span class=\"labkey-error\">");
         out.write(errs);
         out.write("</span>");
     }

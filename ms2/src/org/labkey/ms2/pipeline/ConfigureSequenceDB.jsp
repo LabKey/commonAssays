@@ -3,7 +3,7 @@
 <% if (getError() != null)
     {
 %>
-    <font class="cpas-error"><%= getError() %></font><br>
+    <font class="labkey-error"><%= getError() %></font><br>
 <%
     }
 %>

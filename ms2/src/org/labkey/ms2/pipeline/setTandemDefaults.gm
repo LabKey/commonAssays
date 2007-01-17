@@ -2,7 +2,7 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%
 if (null != error)
-    out.print("<font class=\"cpas-error\">" + error + "<br>");
+    out.print("<font class=\"labkey-error\">" + error + "<br>");
 %>
 <form method="post" action="setTandemDefaults.post">
 <table border="0">

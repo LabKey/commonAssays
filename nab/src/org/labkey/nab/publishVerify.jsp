@@ -10,7 +10,7 @@
     NabController.PublishVerifyBean bean = me.getModel();
     String errors = PageFlowUtil.getStrutsError(request, "main");
 %>
-<span class="cpas-error"><%=errors%></span>
+<span class="labkey-error"><%=errors%></span>
 Publishing results to <b></b><%= h(bean.getTargetContainer().getPath()) %></b>.<br><br>
 <form action="handlePublish.post" method="POST">
     <input type="hidden" name="plateIds" value="false">

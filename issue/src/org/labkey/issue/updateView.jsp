@@ -28,7 +28,7 @@
     <%
     }
     if (!StringUtils.isEmpty(getRequiredFields()))
-        out.print("<tr><td>Fields marked with an asterisk <span class=\"cpas-error\">*</span> are required.</td></tr>");
+        out.print("<tr><td>Fields marked with an asterisk <span class=\"labkey-error\">*</span> are required.</td></tr>");
     %>
     </tr></table>
     <table border=0 cellspacing=2 cellpadding=0><tr>

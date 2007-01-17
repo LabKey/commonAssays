@@ -2,7 +2,7 @@
 <%@ page import="org.labkey.api.view.ViewURLHelper"%>
 <%
 if (null != error)
-    out.print("<font class=\"cpas-error\">" + error + "<br>");
+    out.print("<font class=\"labkey-error\">" + error + "<br>");
 %>
 <form method="post" action="addSequenceDB.post" enctype="multipart/form-data">
 <table border="0">

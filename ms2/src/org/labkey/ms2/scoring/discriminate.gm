@@ -5,7 +5,7 @@
 <form method=get action="discriminate.post">
 <%  if (error != null && error.length() > 0) { %>
 <table border="0">
-    <tr><td class="cpas-error"><%=error%></td></tr>
+    <tr><td class="labkey-error"><%=error%></td></tr>
 </table>
     <br>
 <%  } %>

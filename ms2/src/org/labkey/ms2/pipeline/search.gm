@@ -8,7 +8,7 @@
 boolean hasWork = false;
 if (null != error)
     {
-    out.print("<font class=\"cpas-error\">");
+    out.print("<font class=\"labkey-error\">");
     out.print(filter(error));
     out.print("<br>");
     out.print("</font>");

@@ -345,7 +345,7 @@ abstract public class IssuePage extends JspBase
         if (name != null)
         {
             if (_requiredFields != null && _requiredFields.indexOf(columnName.toLowerCase()) != -1)
-                    return "<span class=\"cpas-error\">*</span>&nbsp;" + name;
+                    return "<span class=\"labkey-error\">*</span>&nbsp;" + name;
             return name;
         }
         return columnName;
