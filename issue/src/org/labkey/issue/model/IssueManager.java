@@ -29,6 +29,7 @@ import org.labkey.api.security.UserComparator;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.util.*;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.issue.IssuesController;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -553,10 +554,11 @@ public class IssueManager
 
     public static String getRequiredIssueFields()
     {
+        String requiredFields = IssuesController.DEFAULT_REQUIRED_FIELDS;
         Map<String, Object> map = PropertyManager.getProperties(ContainerManager.getRoot().getId(), ISSUES_PREF_MAP, false);
         if (map != null)
-            return (String)map.get(ISSUES_REQUIRED_FIELDS);
-        return null;
+            requiredFields = (String)map.get(ISSUES_REQUIRED_FIELDS);
+        return requiredFields;
     }
 
     public static void setRequiredIssueFields(String requiredFields) throws SQLException

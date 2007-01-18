@@ -978,7 +978,7 @@ public class AnnouncementsController extends ViewController
 
     private ViewMessage getMessage(Container c, Settings settings, Announcement parent, Announcement a, boolean isResponse, String removeUrl, WikiRendererType currentRendererType, Reason reason) throws Exception
     {
-        ViewMessage m = MailHelper.createMultipartMessage(AppProps.getInstance().getSystemEmailAddress(), null);
+        ViewMessage m = MailHelper.createMultipartViewMessage(AppProps.getInstance().getSystemEmailAddress(), null);
         m.setSubject(StringUtils.trimToEmpty(isResponse ? "RE: " + parent.getTitle() : a.getTitle()));
 
         EmailResponsePage page = createResponseTemplate("emailResponsePlain.jsp", false, c, settings, parent, a, removeUrl, currentRendererType, reason);

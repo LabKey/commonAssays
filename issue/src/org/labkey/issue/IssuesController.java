@@ -221,7 +221,7 @@ public class IssuesController extends ViewController
                 url.deleteParameter(emailFilter);
             return new ViewForward(url);
         }
-                                                                                              
+
         HttpView view = getIssuesView(form);
         if (view != null)
         {
@@ -242,7 +242,7 @@ public class IssuesController extends ViewController
     protected Forward exportTsv(QueryForm form) throws Exception
     {
         QueryView view = QueryView.create(form);
-        
+
         final TSVGridWriter writer = view.getTsvWriter();
         writer.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
         writer.write(getResponse());
@@ -835,8 +835,8 @@ public class IssuesController extends ViewController
         return new ViewForward("Issues", "admin", getContainer());
     }
 
-
-    private static final String REQUIRED_FIELDS_COLUMNS = "Title,AssignedTo,Type,Area,Priority,Milestone,NotifyList";
+    public static final String REQUIRED_FIELDS_COLUMNS = "Title,AssignedTo,Type,Area,Priority,Milestone,NotifyList";
+    public static final String DEFAULT_REQUIRED_FIELDS = "title;assignedto";
 
     @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
     protected Forward admin(AdminForm form) throws Exception
