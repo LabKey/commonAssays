@@ -172,7 +172,26 @@ public class MS2Controller extends ViewController
 
     private enum Template
     {
-        home, fast, print
+        home
+        {
+            public HttpView createTemplate(ViewContext viewContext, HttpView view, NavTrailConfig navTrail)
+            {
+                return new HomeTemplate(viewContext, view, navTrail);
+            }},
+        fast
+        {
+            public HttpView createTemplate(ViewContext viewContext, HttpView view, NavTrailConfig navTrail)
+            {
+                return new FastTemplate(viewContext, view, navTrail);
+            }},
+        print
+        {
+            public HttpView createTemplate(ViewContext viewContext, HttpView view, NavTrailConfig navTrail)
+            {
+                return new PrintTemplate(viewContext, view, navTrail.getTitle());
+            }};
+
+        public abstract HttpView createTemplate(ViewContext viewContext, HttpView view, NavTrailConfig navTrail);
     }
 
 
@@ -193,22 +212,7 @@ public class MS2Controller extends ViewController
         trailConfig.setExploratoryFeatures(exploratoryFeatures);
         trailConfig.setExtraChildren(navTrailChildren);
 
-        HttpView template = null;
-
-        switch(templateType)
-        {
-            case home:
-                template = new HomeTemplate(getViewContext(), view, trailConfig);
-                break;
-
-            case fast:
-                template = new FastTemplate(getViewContext(), view, trailConfig);
-                break;
-
-            case print:
-                template = new PrintTemplate(getViewContext(), view, title);
-                break;
-        }
+        HttpView template = templateType.createTemplate(getViewContext(), view, trailConfig);
 
         return includeView(template);
     }
@@ -3520,7 +3524,7 @@ public class MS2Controller extends ViewController
         else
         {
             rgn.setOffset(offset);
-            rgn.setColSpan(gridColumns.size());
+            rgn.setColSpan(query.getColumnsPerRun());
             rgn.setMultiColumnCaptions(runCaptions);
 
             VelocityView filterView = new VelocityView("/MS2/renderFilter.vm");
@@ -3544,7 +3548,7 @@ public class MS2Controller extends ViewController
             }
             for (String runCaption : runCaptions)
             {
-                for (RunColumn gridColumn : gridColumns)
+                for (int j = 0; j < query.getColumnsPerRun(); j++)
                 {
                     if (shaded)
                     {

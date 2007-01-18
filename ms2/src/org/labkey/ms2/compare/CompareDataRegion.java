@@ -66,7 +66,7 @@ public class CompareDataRegion extends DataRegion
             {
                 out.write(" bgcolor=\"#EEEEEE\"");
             }
-            out.write("><b>" + caption + "</b></td>");
+            out.write("><div style=\"text-align: center; writing-mode: tb-rl;filter: flipv fliph;\">" + caption + "</div></td>");
             shade = !shade;
         }
 

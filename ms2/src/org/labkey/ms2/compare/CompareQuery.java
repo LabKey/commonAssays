@@ -23,6 +23,7 @@ public abstract class CompareQuery extends SQLFragment
     protected ViewURLHelper _currentUrl;
     protected String _compareColumn;
     protected List<RunColumn> _gridColumns = new ArrayList<RunColumn>();
+    protected int _columnsPerRun;
     protected List<MS2Run> _runs;
     protected int _runCount;
     private int _indent = 0;
@@ -243,6 +244,11 @@ public abstract class CompareQuery extends SQLFragment
     /** @return link filter */
     protected abstract String setupComparisonColumnLink(ViewURLHelper linkURL, String columnName, String runPrefix);
 
+    public int getColumnsPerRun()
+    {
+        return _columnsPerRun;
+    }
+
     // CONSIDER: Split into getCompareGrid (for Excel export) and getCompareGridForDisplay?
     public CompareDataRegion getCompareGrid() throws SQLException
     {
@@ -270,6 +276,7 @@ public abstract class CompareQuery extends SQLFragment
             linkURL.setExtraPath(ContainerManager.getForId(_runs.get(i).getContainer()).getPath());
             linkURL.replaceParameter("run", String.valueOf(_runs.get(i).getRun()));
 
+            _columnsPerRun = 0;
             for (RunColumn column : _gridColumns)
             {
                 String runPrefix = "Run" + i;
@@ -278,6 +285,7 @@ public abstract class CompareQuery extends SQLFragment
                 DisplayColumn displayColumn = createColumn(linkURL, column, runPrefix, columnName, ti, md, rgn);
                 if (displayColumn != null)
                 {
+                    _columnsPerRun++;
                     rgn.addColumn(displayColumn);
                 }
             }
