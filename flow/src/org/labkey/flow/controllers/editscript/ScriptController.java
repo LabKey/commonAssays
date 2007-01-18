@@ -1,46 +1,46 @@
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.beehive.netui.pageflow.Forward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionError;
-import org.apache.struts.upload.FormFile;
+import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.commons.lang.StringUtils;
-import org.apache.xmlbeans.XmlObject;
 import org.apache.log4j.Logger;
-import org.labkey.api.view.*;
-import org.labkey.api.security.ACL;
-import org.labkey.flow.ScriptParser;
-import org.labkey.flow.util.PFUtil;
-import org.labkey.api.jsp.FormPage;
+import org.apache.struts.action.ActionError;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.upload.FormFile;
+import org.apache.xmlbeans.XmlObject;
 import org.fhcrc.cpas.flow.script.xml.*;
-import org.labkey.flow.script.FlowAnalyzer;
-import org.labkey.flow.data.*;
-import org.labkey.flow.analysis.model.Polygon;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.util.URIUtil;
+import org.labkey.api.jsp.FormPage;
+import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.UnexpectedException;
-import org.fhcrc.cpas.util.Pair;
-import org.w3c.dom.Element;
-import org.labkey.flow.controllers.*;
+import org.labkey.api.view.*;
+import org.labkey.flow.ScriptParser;
+import org.labkey.flow.analysis.model.*;
+import org.labkey.flow.analysis.model.Polygon;
+import org.labkey.flow.analysis.web.*;
+import org.labkey.flow.controllers.BaseFlowController;
+import org.labkey.flow.controllers.FlowController;
+import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
+import org.labkey.flow.data.*;
+import org.labkey.flow.script.FlowAnalyzer;
+import org.labkey.flow.util.PFUtil;
+import org.w3c.dom.Element;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
-import java.net.URI;
-import java.io.InputStream;
-import java.io.ByteArrayOutputStream;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-
-import org.labkey.flow.analysis.web.*;
-import org.labkey.flow.analysis.model.*;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class ScriptController extends BaseFlowController
@@ -381,11 +381,11 @@ public class ScriptController extends BaseFlowController
     protected Forward renderInTemplate(Page page, String title, Action action) throws Exception
     {
         NavTrailConfig ntc = getFlowNavConfig(getViewContext(), page.getScript(), title, action);
-        List<Pair> children = new ArrayList(Arrays.asList(ntc.getExtraChildren()));
+        List<NavTree> children = new ArrayList(Arrays.asList(ntc.getExtraChildren()));
         ViewURLHelper urlBegin = page.form.urlFor(Action.begin);
         if (action != Action.begin)
-            children.add(new Pair("Choose editor", urlBegin));
-        ntc.setExtraChildren(children.toArray(new Pair[0]));
+            children.add(new NavTree("Choose editor", urlBegin));
+        ntc.setExtraChildren(children.toArray(new NavTree[0]));
         TemplatePage templatePage = (TemplatePage) getPage("template.jsp", page.form);
         templatePage.body = page;
         templatePage.curAction = action;

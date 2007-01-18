@@ -1,24 +1,22 @@
 package org.labkey.flow.controllers;
 
-import org.labkey.api.jsp.JspLoader;
+import org.apache.beehive.netui.pageflow.Forward;
+import org.labkey.api.data.Container;
 import org.labkey.api.jsp.FormPage;
-import org.labkey.flow.data.*;
+import org.labkey.api.jsp.JspLoader;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.security.User;
+import org.labkey.api.view.*;
+import org.labkey.flow.data.FlowObject;
+import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.script.ScriptJob;
 import org.labkey.flow.util.PFUtil;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineStatusManager;
-import org.labkey.api.view.*;
-import org.fhcrc.cpas.util.Pair;
-import org.labkey.api.data.Container;
-import org.labkey.api.security.User;
-import org.apache.beehive.netui.pageflow.Forward;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Map;
-import java.io.IOException;
 
 public class BaseFlowController<A extends Enum<A>> extends BaseController<A, FlowParam>
 {
@@ -59,24 +57,24 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
 
     static public NavTrailConfig getFlowNavConfig(ViewContext context, FlowObject object, String title, Enum action)
     {
-        ArrayList<Pair> children = new ArrayList();
+        ArrayList<NavTree> children = new ArrayList<NavTree>();
         ViewURLHelper url = PFUtil.urlFor(FlowController.Action.begin, context.getContainer().getPath());
 
         while (object != null)
         {
-            children.add(0, new Pair(object.getLabel(), object.urlShow()));
+            children.add(0, new NavTree(object.getLabel(), object.urlShow()));
             object = object.getParent();
         }
-        children.add(0, new Pair(FlowModule.getShortProductName(), url.clone()));
+        children.add(0, new NavTree(FlowModule.getShortProductName(), url.clone()));
 
 
         NavTrailConfig ntc = new NavTrailConfig(context);
         if (title == null)
         {
-            Map.Entry<String, ViewURLHelper> last = children.remove(children.size() - 1);
+            NavTree last = children.remove(children.size() - 1);
             title = last.getKey();
         }
-        ntc.setExtraChildren(children.toArray(new Pair[0]));
+        ntc.setExtraChildren(children.toArray(new NavTree[0]));
         ntc.setTitle(title);
         ntc.setHelpTopic(PFUtil.helpTopic(action));
         return ntc;

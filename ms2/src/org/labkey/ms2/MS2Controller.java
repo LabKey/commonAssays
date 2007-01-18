@@ -16,9 +16,6 @@
 
 package org.labkey.ms2;
 
-import org.labkey.ms2.compare.*;
-import org.labkey.ms2.peptideview.*;
-import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import jxl.write.WritableWorkbook;
 import org.apache.beehive.netui.pageflow.FormData;
 import org.apache.beehive.netui.pageflow.Forward;
@@ -27,29 +24,35 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionMapping;
+import org.fhcrc.cpas.tools.MS2Modification;
+import org.fhcrc.cpas.tools.PeptideProphetSummary;
+import org.fhcrc.cpas.util.Pair;
+import org.jfree.chart.imagemap.ImageMapUtilities;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.*;
-import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.Data;
+import org.labkey.api.exp.ExperimentRun;
+import org.labkey.api.exp.Material;
+import org.labkey.api.exp.Protocol;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
-import org.labkey.ms2.pipeline.MascotClientImpl;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.PipelineStatusManager;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
+import org.labkey.api.util.*;
+import org.labkey.api.view.*;
+import org.labkey.ms2.compare.*;
+import org.labkey.ms2.peptideview.*;
+import org.labkey.ms2.pipeline.MS2PipelineManager;
+import org.labkey.ms2.pipeline.MascotClientImpl;
+import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.protein.*;
 import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.User;
-import org.fhcrc.cpas.tools.MS2Modification;
-import org.fhcrc.cpas.tools.PeptideProphetSummary;
-import org.fhcrc.cpas.util.Pair;
-import org.labkey.api.util.*;
-import org.labkey.api.view.*;
-import org.jfree.chart.imagemap.ImageMapUtilities;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -173,12 +176,12 @@ public class MS2Controller extends ViewController
     }
 
 
-    private Forward _renderInTemplate(HttpView view, boolean fastTemplate, String title, String helpTopic, Pair<String, ViewURLHelper>... navTrailChildren) throws Exception
+    private Forward _renderInTemplate(HttpView view, boolean fastTemplate, String title, String helpTopic, NavTree... navTrailChildren) throws Exception
     {
         return _renderInTemplate(view, fastTemplate ? Template.fast : Template.home, title, helpTopic, false, navTrailChildren);
     }
 
-    private Forward _renderInTemplate(HttpView view, Template templateType, String title, String helpTopic, boolean exploratoryFeatures, Pair<String, ViewURLHelper>... navTrailChildren) throws Exception
+    private Forward _renderInTemplate(HttpView view, Template templateType, String title, String helpTopic, boolean exploratoryFeatures, NavTree... navTrailChildren) throws Exception
     {
         if (helpTopic == null)
             helpTopic = "ms2";
@@ -265,7 +268,7 @@ public class MS2Controller extends ViewController
         sb.append("</table>");
         HtmlView view = new HtmlView(sb.toString());
         return _renderInTemplate(view, false, "Error", null,
-                new Pair<String, ViewURLHelper>("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())));
+                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())));
     }
 
 
@@ -477,7 +480,7 @@ public class MS2Controller extends ViewController
         _log.info("Lookup took " + (System.currentTimeMillis() - time) + " milliseconds");
         time = System.currentTimeMillis();
         _renderInTemplate(vBox, Template.fast, run.getDescription(), "viewRun", exploratoryFeatures,
-                new Pair<String, ViewURLHelper>("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())));
+                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
         _log.info("Render took " + (System.currentTimeMillis() - time) + " milliseconds");
         return null;
     }
@@ -783,8 +786,8 @@ public class MS2Controller extends ViewController
         pickName.addObject("viewParams", PageFlowUtil.filter(newUrl.getRawQuery()));
 
         return _renderInTemplate(pickName, true, "Save View", "viewRun",
-                new Pair<String, ViewURLHelper>("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
-                new Pair<String, ViewURLHelper>(MS2Manager.getRun(form.run).getDescription(), returnUrl));
+                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
+                new NavTree(MS2Manager.getRun(form.run).getDescription(), returnUrl));
     }
 
 
@@ -841,8 +844,8 @@ public class MS2Controller extends ViewController
         manageViews.addObject("select", renderViewSelect(10, false, ACL.PERM_DELETE, false));
 
         return _renderInTemplate(manageViews, false, "Manage Views", "viewRun",
-                new Pair<String, ViewURLHelper>("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
-                new Pair<String, ViewURLHelper>(run.getDescription(), runUrl));
+                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
+                new NavTree(run.getDescription(), runUrl));
     }
 
 
@@ -942,8 +945,8 @@ public class MS2Controller extends ViewController
         pickColumns.addObject("saveUrl", url.getEncodedLocalURIString());
         pickColumns.addObject("saveDefaultUrl", url.addParameter("saveDefault", "1").getEncodedLocalURIString());
         return _renderInTemplate(pickColumns, false, "Pick Peptide Columns", "pickPeptideColumns",
-                new Pair<String, ViewURLHelper>("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
-                new Pair<String, ViewURLHelper>(run.getDescription(), cloneViewURLHelper().setAction("showRun")));
+                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
+                new NavTree(run.getDescription(), cloneViewURLHelper().setAction("showRun")));
     }
 
     @Jpf.Action
@@ -976,8 +979,8 @@ public class MS2Controller extends ViewController
         pickColumns.addObject("saveUrl", url.getEncodedLocalURIString());
         pickColumns.addObject("saveDefaultUrl", url.addParameter("saveDefault", "1").getEncodedLocalURIString());
         return _renderInTemplate(pickColumns, false, "Pick Protein Columns", "pickProteinColumns",
-                new Pair<String, ViewURLHelper>("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
-                new Pair<String, ViewURLHelper>(run.getDescription(), cloneViewURLHelper().setAction("showRun")));
+                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
+                new NavTree(run.getDescription(), cloneViewURLHelper().setAction("showRun")));
     }
 
 
@@ -1924,7 +1927,7 @@ public class MS2Controller extends ViewController
         html.append("</table>");
 
         return _renderInTemplate(new HtmlView(html.toString()), false, "Move Runs", "ms2RunsList",
-                new Pair<String, ViewURLHelper>("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())));
+                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
     }
 
 
@@ -2050,7 +2053,7 @@ public class MS2Controller extends ViewController
         html.append("</table></form>");
 
         return _renderInTemplate(new HtmlView(html.toString()), false, "Hierarchy", "ms2RunsList",
-                new Pair<String, ViewURLHelper>("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())));
+                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
     }
 
 
@@ -3373,7 +3376,7 @@ public class MS2Controller extends ViewController
         pickView.addObject("runList", runListIndex);
 
         return _renderInTemplate(pickView, false, navTreeName, helpTopic,
-                new Pair<String, ViewURLHelper>("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())));
+                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
     }
 
 
@@ -3562,7 +3565,7 @@ public class MS2Controller extends ViewController
             }
 
             _renderInTemplate(new VBox(filterView, compareView), false, query.getComparisonDescription(), "ms2RunsList",
-                    new Pair<String, ViewURLHelper>("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())));
+                    new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
         }
 
         return null;
@@ -3750,8 +3753,8 @@ public class MS2Controller extends ViewController
         VBox fullPage = new VBox(summaryView, view);
 
         return _renderInTemplate(fullPage, false, "Protein Group Details", "showProteinGroup",
-                new Pair<String, ViewURLHelper>("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
-                new Pair<String, ViewURLHelper>(MS2Manager.getRun(form.run).getDescription(), getViewURLHelper().clone().setAction("showRun")));
+                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
+                new NavTree(MS2Manager.getRun(form.run).getDescription(), getViewURLHelper().clone().setAction("showRun")));
     }
 
     @Jpf.Action
@@ -3780,15 +3783,15 @@ public class MS2Controller extends ViewController
         ViewURLHelper runUrl = currentUrl.clone();
         runUrl.deleteParameter("seqId");
 
-        List<Pair<String, ViewURLHelper>> navTrail = new ArrayList<Pair<String, ViewURLHelper>>();
-        navTrail.add(new Pair<String, ViewURLHelper>("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())));
+        List<NavTree> navTrail = new ArrayList<NavTree>();
+        navTrail.add(new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())));
         if (run != null)
         {
-            navTrail.add(new Pair<String, ViewURLHelper>(run.getDescription(), runUrl.setAction("showRun")));
+            navTrail.add(new NavTree(run.getDescription(), runUrl.setAction("showRun")));
         }
 
         return _renderInTemplate(proteinView, Template.print, getProteinTitle(protein, true), "showProtein", false,
-                navTrail.toArray(new Pair[navTrail.size()]));
+                navTrail.toArray(new NavTree[navTrail.size()]));
     }
 
 
@@ -3820,8 +3823,8 @@ public class MS2Controller extends ViewController
         currentUrl.deleteParameter("peptideId");
 
         return _renderInTemplate(proteinView, false, "Proteins Containing " + peptide, "showProtein",
-                new Pair<String, ViewURLHelper>("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
-                new Pair<String, ViewURLHelper>(MS2Manager.getRun(form.run).getDescription(), currentUrl.setAction("showRun")));
+                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
+                new NavTree(MS2Manager.getRun(form.run).getDescription(), currentUrl.setAction("showRun")));
     }
 
 

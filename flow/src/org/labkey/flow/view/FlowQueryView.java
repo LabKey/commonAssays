@@ -1,27 +1,28 @@
 package org.labkey.flow.view;
 
+import org.apache.log4j.Logger;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.api.ExpRunTable;
+import org.labkey.api.jsp.JspLoader;
+import org.labkey.api.query.QueryPicker;
+import org.labkey.api.query.QueryView;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
-import org.labkey.flow.data.*;
-import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.controllers.FlowController;
+import org.labkey.flow.controllers.FlowModule;
+import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.query.FlowQueryForm;
 import org.labkey.flow.query.FlowQuerySettings;
+import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.util.PFUtil;
-import org.labkey.api.util.PageFlowUtil;
-import org.fhcrc.cpas.util.Pair;
-import org.labkey.api.data.*;
-import org.labkey.api.query.*;
-import org.labkey.api.security.User;
-import org.labkey.api.security.ACL;
-import org.labkey.api.jsp.JspLoader;
-import org.labkey.api.exp.api.ExpRunTable;
-import org.apache.log4j.Logger;
 
 import java.io.PrintWriter;
 import java.util.*;
-
-import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.FlowController;
-import org.labkey.flow.controllers.FlowModule;
 
 public class FlowQueryView extends QueryView
 {
@@ -169,22 +170,22 @@ public class FlowQueryView extends QueryView
         NavTrailConfig ntc = super.getNavTrailConfig();
         FlowSchema schema = getSchema();
         FlowRun run = schema.getRun();
-        List<Pair> children = new ArrayList();
-        children.add(new Pair(FlowModule.getShortProductName(), PFUtil.urlFor(FlowController.Action.begin, getContainer())));
+        List<NavTree> children = new ArrayList<NavTree>();
+        children.add(new NavTree(FlowModule.getShortProductName(), PFUtil.urlFor(FlowController.Action.begin, getContainer())));
         if (run != null)
         {
             FlowExperiment experiment = run.getExperiment();
             if (experiment != null)
             {
-                children.add(new Pair(experiment.getLabel(), experiment.urlShow()));
+                children.add(new NavTree(experiment.getLabel(), experiment.urlShow()));
             }
-            children.add(new Pair(run.getLabel(), run.urlShow()));
-            ntc.setExtraChildren(children.toArray(new Pair[0]));
+            children.add(new NavTree(run.getLabel(), run.urlShow()));
+            ntc.setExtraChildren(children.toArray(new NavTree[0]));
         }
         else if (schema.getExperiment() != null)
         {
-            children.add(new Pair(schema.getExperiment().getLabel(), schema.getExperiment().urlShow()));
-            ntc.setExtraChildren(children.toArray(new Pair[0]));
+            children.add(new NavTree(schema.getExperiment().getLabel(), schema.getExperiment().urlShow()));
+            ntc.setExtraChildren(children.toArray(new NavTree[0]));
         }
         return ntc;
     }

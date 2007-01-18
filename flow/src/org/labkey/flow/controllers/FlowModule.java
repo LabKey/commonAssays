@@ -16,34 +16,34 @@
 
 package org.labkey.flow.controllers;
 
+import org.apache.log4j.Logger;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.exp.ExperimentDataHandler;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.flow.script.FlowPipelineProvider;
+import org.labkey.api.query.DefaultSchema;
+import org.labkey.api.query.QuerySchema;
+import org.labkey.api.view.ViewContext;
+import org.labkey.flow.controllers.compensation.CompensationController;
+import org.labkey.flow.controllers.editscript.ScriptController;
+import org.labkey.flow.controllers.executescript.AnalysisScriptController;
+import org.labkey.flow.controllers.log.LogController;
+import org.labkey.flow.controllers.protocol.ProtocolController;
+import org.labkey.flow.controllers.run.RunController;
+import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocolImplementation;
-import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.persist.FlowDataHandler;
-import org.labkey.api.query.DefaultSchema;
-import org.labkey.api.query.QuerySchema;
-import org.labkey.api.data.*;
-import org.labkey.api.exp.ExperimentDataHandler;
-import org.apache.log4j.Logger;
-import org.labkey.flow.controllers.run.RunController;
-import org.labkey.flow.controllers.executescript.AnalysisScriptController;
-import org.labkey.flow.controllers.editscript.ScriptController;
-import org.labkey.flow.controllers.well.WellController;
-import org.labkey.flow.controllers.log.LogController;
-import org.labkey.flow.controllers.compensation.CompensationController;
-import org.labkey.flow.controllers.protocol.ProtocolController;
+import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.script.FlowPipelineProvider;
 
-import java.sql.SQLException;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class FlowModule extends DefaultModule
 {
@@ -111,19 +111,12 @@ public class FlowModule extends DefaultModule
 
     static public boolean isActive(Container container)
     {
-        try
+        for (Module module : container.getActiveModules())
         {
-            for (Module module : container.getActiveModules())
-            {
-                if (module instanceof FlowModule)
-                    return true;
-            }
-            return false;
+            if (module instanceof FlowModule)
+                return true;
         }
-        catch (SQLException e)
-        {
-            return false;
-        }
+        return false;
     }
 
     @Override
