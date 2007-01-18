@@ -14,7 +14,7 @@
 
     for (Map slide : slides)
     {
-        String downloadUrl = new DownloadUrlHelper(context.getContainer(), (String) slide.get("slideEntityId"), (String) slide.get("DocumentName")).getEncodedLocalURIString();
+        String downloadUrl = new DownloadUrlHelper("MouseModel-Mouse", context.getContainer().getPath(), (String) slide.get("slideEntityId"), (String) slide.get("DocumentName")).getEncodedLocalURIString();
         String sampleUrl = new ViewURLHelper("MouseModel-Sample", "details.view", context.getContainer())
             .addParameter("sampleId", (String)slide.get("sampleId"))
             .addParameter("modelId", String.valueOf(slide.get("modelId")))

@@ -1,6 +1,5 @@
 package org.labkey.nab;
 
-import org.labkey.nab.*;
 import jxl.read.biff.BiffException;
 import org.apache.beehive.netui.pageflow.FormData;
 import org.apache.beehive.netui.pageflow.Forward;
@@ -12,16 +11,6 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.upload.FormFile;
 import org.apache.struts.upload.MultipartRequestHandler;
-import org.labkey.api.data.ActionButton;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.User;
-import org.labkey.api.study.*;
-import org.labkey.api.util.DateUtil;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.*;
 import org.jfree.chart.ChartColor;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
@@ -33,8 +22,21 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
+import org.labkey.api.study.*;
+import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.*;
+import org.labkey.api.attachments.AttachmentForm;
+import org.labkey.api.attachments.AttachmentService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletException;
 import java.awt.*;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -437,6 +439,16 @@ public class NabController extends ViewController
         for (int cutoff : cutoffs)
             chart.getXYPlot().addRangeMarker(new ValueMarker(cutoff));
         ChartUtilities.writeChartAsPNG(getResponse().getOutputStream(), chart, 425, 300);
+    }
+
+    @Jpf.Action
+    protected Forward download(AttachmentForm form) throws IOException, ServletException
+    {
+        form.requiresPermission(ACL.PERM_READ);
+
+        AttachmentService.get().download(getResponse(), getUser(), form);
+
+        return null;
     }
 
     @Jpf.Action

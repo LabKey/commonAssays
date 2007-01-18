@@ -369,7 +369,7 @@ public class NecropsyController extends ViewController
                         }, true);
             }
 
-            AttachmentService.get().addAttachments(form.getUser(), form.getContainer(), mouse.getEntityId(), new FormFile[]{formFiles[i]});
+            AttachmentService.get().addAttachments(form.getUser(), form.getContainer(), mouse.getEntityId(), formFiles[i]);
         }
 
         return form.getForward("showNecropsyPhotoForm", new Pair[]

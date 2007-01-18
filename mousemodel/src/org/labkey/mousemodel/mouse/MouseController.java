@@ -251,12 +251,12 @@ public class MouseController extends ViewController
         MouseModel model = MouseModelManager.getModel(mouse.getModelId());
         HttpView slidesView = new SampleController.SlidesView(model, mouse, getViewContext());
 
-        VelocityView photoView = new VelocityView("/MouseModel/Mouse/showPhoto.vm");
+        JspView photoView = new JspView("/org/labkey/mousemodel/mouse/showPhoto.jsp");
         photoView.setTitle("Necropsy Photos");
         Attachment[] attachments = AttachmentService.get().getAttachments(mouse.getEntityId());
 //        photoView.addObject("parent", form.get("entityId"));
         photoView.addObject("attachments", attachments);
-        DownloadUrlHelper deleteUrl = new DownloadUrlHelper(getRequest(), "MouseModels-Mouse", getContainer().getPath(), mouse.getEntityId(), null);
+        DownloadUrlHelper deleteUrl = new DownloadUrlHelper(getRequest(), "MouseModel-Mouse", getContainer().getPath(), mouse.getEntityId(), null);
         deleteUrl.setAction("showConfirmDelete.view");
         photoView.addObject("deleteUrl", deleteUrl);
         photoView.addObject("canDelete", getViewContext().hasPermission(ACL.PERM_UPDATE));
@@ -264,6 +264,17 @@ public class MouseController extends ViewController
         VBox box = new VBox(detailsView, sampleView, photoView, slidesView, notesView);
 
         _renderInTemplate(box, form);
+
+        return null;
+    }
+
+
+    @Jpf.Action
+    protected Forward download(AttachmentForm form) throws IOException, ServletException
+    {
+        form.requiresPermission(ACL.PERM_READ);
+
+        AttachmentService.get().download(getResponse(), getUser(), form);
 
         return null;
     }

@@ -21,17 +21,13 @@ import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.CoreSchema;
 import org.labkey.api.security.ACL;
-import org.labkey.api.security.User;
-import org.labkey.api.util.ContainerUtil;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewController;
 import org.labkey.api.view.ViewForm;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.sql.SQLException;
 
 
 @Jpf.Controller
@@ -72,23 +68,6 @@ public class AttachmentsController extends ViewController
 
 
     @Jpf.Action
-    protected Forward showAddAttachment(AttachmentForm form) throws Exception
-    {
-        return includeView(AttachmentService.get().getAddAttachmentView(form));
-    }
-
-
-    @Jpf.Action
-    protected Forward addAttachment(AttachmentForm form) throws Exception
-    {
-        //Use form's container because legacy URLs to attachments use funny container path
-        form.requiresPermission(ACL.PERM_UPDATE);
-
-        return includeView(AttachmentService.get().add(form));
-    }
-
-
-    @Jpf.Action
     protected Forward download(AttachmentForm form) throws IOException, ServletException
     {
         if (!hasReadPermission(form))
@@ -96,36 +75,6 @@ public class AttachmentsController extends ViewController
 
         AttachmentService.get().download(getResponse(), getUser(), form);
 
-        return null;
-    }
-
-
-    @Jpf.Action
-    protected Forward showConfirmDelete(AttachmentForm form) throws Exception
-    {
-        form.requiresPermission(ACL.PERM_DELETE);
-
-        return includeView(AttachmentService.get().getConfirmDeleteView(form));
-    }
-
-
-    @Jpf.Action
-    protected Forward deleteAttachment(AttachmentForm form) throws Exception
-    {
-        form.requiresPermission(ACL.PERM_DELETE);
-
-        return includeView(AttachmentService.get().delete(form));
-    }
-
-
-    @Jpf.Action
-    protected Forward purge() throws ServletException, SQLException, IOException
-    {
-        User user = (User) getRequest().getUserPrincipal();
-        if (!user.isAdministrator())
-            HttpView.throwUnauthorized();
-        int rows = ContainerUtil.purgeTable(CoreSchema.getInstance().getTableInfoDocuments(), null);
-        getResponse().getWriter().println("deleted " + rows + " documents<br>");
         return null;
     }
 }

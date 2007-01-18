@@ -354,7 +354,7 @@ public class NabManager
 
     public ViewURLHelper getDataFileDownloadLink(Plate plate)
     {
-        return PlateService.get().getDataFileURL(plate);
+        return PlateService.get().getDataFileURL(plate, "Nab");
     }
 
     private boolean groupInPlate(Plate plate, WellGroup group)

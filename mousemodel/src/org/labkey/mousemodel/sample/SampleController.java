@@ -15,37 +15,35 @@
  */
 package org.labkey.mousemodel.sample;
 
-import org.labkey.mousemodel.NotesView;
-import org.labkey.mousemodel.MouseModelController;
-import org.labkey.mousemodel.mouse.MouseController;
-import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
-import org.apache.struts.upload.FormFile;
-import org.apache.struts.upload.MultipartRequestHandler;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionError;
-import org.apache.log4j.Logger;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
+import org.apache.commons.lang.StringUtils;
+import static org.apache.commons.lang.StringUtils.trimToNull;
+import org.apache.log4j.Logger;
+import org.apache.struts.action.ActionError;
+import org.apache.struts.action.ActionErrors;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.upload.FormFile;
+import org.apache.struts.upload.MultipartRequestHandler;
 import org.labkey.api.data.*;
-import org.labkey.api.sample.*;
-import org.labkey.api.security.ACL;
-import org.labkey.api.view.*;
 import org.labkey.api.exp.MaterialSource;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.sample.*;
+import org.labkey.api.security.ACL;
+import org.labkey.api.util.PageFlowUtil;
+import static org.labkey.api.util.PageFlowUtil.filter;
+import org.labkey.api.view.*;
+import org.labkey.mousemodel.MouseModelController;
+import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
+import org.labkey.mousemodel.NotesView;
+import org.labkey.mousemodel.mouse.MouseController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.swing.text.View;
-import java.util.Map;
-import java.net.URI;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.sql.SQLException;
-
-import static org.apache.commons.lang.StringUtils.trimToNull;
-import org.apache.commons.lang.StringUtils;
-import static org.labkey.api.util.PageFlowUtil.filter;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.attachments.DownloadUrlHelper;
+import java.util.Map;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class SampleController extends ViewController
