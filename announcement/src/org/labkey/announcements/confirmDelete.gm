@@ -8,7 +8,7 @@
 %><form action="deleteSingleAnnouncement.post?rowId=${message.rowId}&entityId=${message.entityId}" method="POST">
 Are you sure you want to delete this ${settings.conversationName.toLowerCase()}?
 <p/>
-<b>Title: ${message.getTitle()}</b><br/>
+<b>Title: ${filter(message.getTitle())}</b><br/>
 <p/>
 <input type=image src="<%=PageFlowUtil.buttonSrc("Delete","large")%>" value="Delete">&nbsp;<input type=image src="<%=PageFlowUtil.buttonSrc("Cancel","large")%>" value="Cancel" onclick="javascript:window.history.back(); return false;">
 </form>

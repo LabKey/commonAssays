@@ -45,8 +45,8 @@ Browse for file and then click submit<br>
 <input type="file" name="formFiles[0]"><br>
 <input type="hidden" name="entityId" value="<%= entityId %>" />
 <br>
-<input type="image" src='${PageFlowUtil.buttonSrc("Submit")}'>
-<img onClick="window.close();" alt="Cancel" src='${PageFlowUtil.buttonSrc("Cancel")}'>
+<input type="image" src="<%=PageFlowUtil.buttonSrc("Submit")%>">
+<img onClick="window.close();" alt="Cancel" src="<%=PageFlowUtil.buttonSrc("Cancel")%>">
 </form>
 			</td></tr>
 			<tr><td height="20" style="background-color:#e5e5cc;" ><img src="${contextPath}/_.gif" width=400 height=1></td></tr>

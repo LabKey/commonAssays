@@ -53,7 +53,7 @@ for (a in announcements)
         for (d in a.attachments)
             {
             %>
-        <a href="<%=filter(d.getDownloadUrl(request))%>"><img border=0 src="<%=request.getContextPath()%><%=d.getFileIcon()%>">&nbsp;<%=d.name%></a>&nbsp;<%
+        <a href="<%=filter(d.getDownloadUrl(request, "announcements"))%>"><img border=0 src="<%=request.getContextPath()%><%=d.getFileIcon()%>">&nbsp;<%=d.name%></a>&nbsp;<%
             }
         %>
     </td></tr>

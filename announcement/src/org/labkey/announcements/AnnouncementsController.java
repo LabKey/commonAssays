@@ -44,6 +44,9 @@ import org.labkey.api.view.*;
 import org.labkey.api.wiki.WikiRenderer;
 import org.labkey.api.wiki.WikiRendererType;
 import org.labkey.api.wiki.WikiService;
+import org.labkey.api.attachments.DownloadUrlHelper;
+import org.labkey.api.attachments.AttachmentForm;
+import org.labkey.api.attachments.AttachmentService;
 import org.labkey.announcements.EmailResponsePage.Reason;
 
 import javax.mail.Message;
@@ -416,6 +419,54 @@ public class AnnouncementsController extends ViewController
     }
 
 
+    @Jpf.Action
+    protected Forward showAddAttachment(AttachmentForm form) throws Exception
+    {
+        //Use form's container because legacy URLs to attachments use funny container path
+        form.requiresPermission(ACL.PERM_UPDATE);
+
+        return includeView(AttachmentService.get().getAddAttachmentView(form));
+    }
+
+
+    @Jpf.Action
+    protected Forward addAttachment(AttachmentForm form) throws Exception
+    {
+        form.requiresPermission(ACL.PERM_UPDATE);
+
+        return includeView(AttachmentService.get().add(form));
+    }
+
+
+    @Jpf.Action
+    protected Forward download(AttachmentForm form) throws IOException, ServletException
+    {
+        form.requiresPermission(ACL.PERM_READ);
+
+        AttachmentService.get().download(getResponse(), getUser(), form);
+
+        return null;
+    }
+
+
+    @Jpf.Action
+    protected Forward showConfirmDelete(AttachmentForm form) throws Exception
+    {
+        form.requiresPermission(ACL.PERM_DELETE);
+
+        return includeView(AttachmentService.get().getConfirmDeleteView(form));
+    }
+
+
+    @Jpf.Action
+    protected Forward deleteAttachment(AttachmentForm form) throws Exception
+    {
+        form.requiresPermission(ACL.PERM_DELETE);
+
+        return includeView(AttachmentService.get().delete(form));
+    }
+
+
     public static class UserListRemovalForm extends FormData
     {
         private int _userId;
@@ -526,7 +577,7 @@ public class AnnouncementsController extends ViewController
             insert.setUserList(form.getUserList());  // TODO: Do this in validate()?
 
         //NOTE: title should not be null if validate() is working
-        assert insert.getTitle() != null;
+//        assert insert.getTitle() != null;
 
         AnnouncementManager.insertAnnouncement(c, u, insert, formFiles);
 
@@ -1676,7 +1727,7 @@ public class AnnouncementsController extends ViewController
             Settings settings = getSettings(c);
 
             addObject("announcement", _announcement);
-            DownloadUrlHelper attachmentURL = new DownloadUrlHelper(getViewContext().getRequest(), c.getPath(), _announcement.getEntityId(), null);
+            DownloadUrlHelper attachmentURL = new DownloadUrlHelper(getViewContext().getRequest(), "announcements", c.getPath(), _announcement.getEntityId(), null);
             attachmentURL.setAction("showAddAttachment.view");
             addObject("addAttachmentURL", attachmentURL.getLocalURIString());
             attachmentURL.setAction("showConfirmDelete.view");

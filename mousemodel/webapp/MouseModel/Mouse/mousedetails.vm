@@ -1,6 +1,4 @@
 #foreach($row in $dr.rows)
-<table border=0 cellspacing=0 width="100%" bgcolor="lightgray">
-
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr class="ms-WPHeader"><td  colspan=3 title="$caption" style="width:100%;" nowrap><div class="ms-WPTitle"><span>$caption</span></div></td></tr>
 <tr>

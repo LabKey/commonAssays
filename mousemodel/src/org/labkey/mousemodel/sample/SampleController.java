@@ -45,6 +45,7 @@ import static org.apache.commons.lang.StringUtils.trimToNull;
 import org.apache.commons.lang.StringUtils;
 import static org.labkey.api.util.PageFlowUtil.filter;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.attachments.DownloadUrlHelper;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class SampleController extends ViewController
@@ -248,10 +249,10 @@ public class SampleController extends ViewController
         DetailsView locationView = new DetailsView(locationRegion, sample.getLSID());
         locationView.setTitle("Location");
 
-        VelocityView slidesView = new SlidesView(model, sample, getViewContext());
+        SlidesView slidesView = new SlidesView(model, sample, getViewContext());
         NotesView notesView = new NotesView(form.getContainer(), (String) form.getTypedValue("entityId"));
 
-        VBox vbox = new VBox(new HttpView[]{new HBox(new HttpView[]{detailsView, locationView}), slidesView, notesView});
+        VBox vbox = new VBox(new HBox(new HttpView[]{detailsView, locationView}), slidesView, notesView);
         _renderInTemplate(vbox, modelId);
 
         return null;
@@ -801,12 +802,11 @@ public class SampleController extends ViewController
         }
     }
 
-    public static class SlidesView extends VelocityView
+    public static class SlidesView extends JspView
     {
         private SlidesView(MouseModel model, ViewContext context)
         {
-
-            super("/MouseModel/Sample/slides.vm");
+            super("/org/labkey/mousemodel/sample/slides.jsp");
             addObject("modelId", model.getModelId());
             if (context.getContainer().hasPermission(context.getUser(),  ACL.PERM_DELETE))
             {
@@ -814,7 +814,7 @@ public class SampleController extends ViewController
                 deleteURL.setPageFlow("MouseModel-Sample").setAction("deleteSlide");
                 deleteURL.deleteParameters();
                 deleteURL.replaceParameter("modelId", String.valueOf(model.getModelId()));
-                addObject("deleteURL", deleteURL.getLocalURIString());
+                addObject("deleteURL", deleteURL);
             }
         }
 
@@ -834,10 +834,8 @@ public class SampleController extends ViewController
             String entityId = mouse.getEntityId();
             setTitle("Slides for Mouse " + mouse.getMouseNo());
             SimpleFilter slideFilter = new SimpleFilter("mouseEntityId", entityId);
-            Map[] slides = (Map[]) Table.select(MouseSchema.getMouseSlide(), Table.ALL_COLUMNS, slideFilter, null, Map.class);
+            Map[] slides = Table.select(MouseSchema.getMouseSlide(), Table.ALL_COLUMNS, slideFilter, null, Map.class);
             addObject("slides", slides);
         }
     }
-
-
 }

@@ -75,7 +75,7 @@ else
         <%
         for (d in announcement.attachments)
         {%>
-            <a href="<%=filter(d.getDownloadUrl(request))%>"><img border=0 src="<%=request.getContextPath() + d.getFileIcon()%>">&nbsp;<%=d.name%></a>&nbsp;
+            <a href="<%=filter(d.getDownloadUrl(request, "announcements"))%>"><img border=0 src="<%=request.getContextPath() + d.getFileIcon()%>">&nbsp;<%=d.name%></a>&nbsp;
         <%}%>
         </div></td></tr>
     <%}%>
@@ -126,7 +126,7 @@ else
                     <%
                     for(rd in r.attachments)
                     {%>
-                        <a href="<%=filter(rd.getDownloadUrl(request))%>"><img border=0 src="<%=request.getContextPath()+ rd.getFileIcon()%>">&nbsp;<%=rd.name%></a>&nbsp;
+                        <a href="<%=filter(rd.getDownloadUrl(request, "announcements"))%>"><img border=0 src="<%=request.getContextPath()+ rd.getFileIcon()%>">&nbsp;<%=rd.name%></a>&nbsp;
                     <%}%>
                     </div></td></tr>
                 <%}

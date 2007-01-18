@@ -1,6 +1,6 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.util.DateUtil"%>
-<!--ANNOUNCEMENTS-->
+<!--NOTES-->
         <table width="100%" border="0" cellspacing="0" cellpadding="2">
 <% for(r in notes) {%>
             <tr><td class="ms-vb" colspan="2" style="background-color: #dddddd">Note added by: ${r.createdByName}</td>
@@ -9,11 +9,11 @@
     <% if (r.attachments) { %>
         	<tr><td colspan="3"><div class="ms-vb">
     <%for (rd in r.attachments) { %>
-                <a href="${rd.getDownloadUrl(request)}"><img border=0 src="${request.getContextPath()}${rd.fileIcon}">&nbsp;${rd.name}</a>&nbsp;
+                <a href="<%=filter(rd.getDownloadUrl(request, "announcements"))%>"><img border=0 src="${request.getContextPath()}${rd.fileIcon}">&nbsp;${rd.name}</a>&nbsp;
     <% } %>
             </div></td></tr>
     <% } %>
-        <tr><td colspan="2">&nbsp</td></tr>
+        <tr><td colspan="2">&nbsp;</td></tr>
 <% } %>
 <% if (insertMode) { %>
 <tr>
@@ -47,7 +47,7 @@
 </td>
 </tr>
 <% } else { %>
-    <tr><td colspan="3" class="ms-vb"><a href="${clientURL}&NotesView.insertMode"><img border=0 src="<%=PageFlowUtil.buttonSrc("Add a Note")%>"></a></td></tr>
+    <tr><td colspan="3" class="ms-vb"><a href="${clientURL}&amp;NotesView.insertMode"><img border=0 src="<%=PageFlowUtil.buttonSrc("Add a Note")%>"></a></td></tr>
 <% } %>
         </table>
-<!--/ANNOUNCEMENTS-->
+<!--/NOTES-->

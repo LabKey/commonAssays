@@ -20,7 +20,7 @@ var submit=0;
 </tr>
 <tr>
   <td class="ms-vb">
-        <a href="${deleteURL}"><img border=0 src='${PageFlowUtil.buttonSrc("OK")}'></a>
+        <a href="<%=filter(deleteURL)%>"><img border=0 src='${PageFlowUtil.buttonSrc("OK")}'></a>
         <a href="#cancel"><img border=0 onClick="window.close()" src='${PageFlowUtil.buttonSrc("Cancel")}'></a>
   </td>
 </tr>

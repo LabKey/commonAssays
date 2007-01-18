@@ -319,6 +319,7 @@ mousemodel/module.properties -text
 mousemodel/src/org/labkey/mousemodel/MouseModelModule.java -text
 mousemodel/src/org/labkey/mousemodel/NotesView.java -text
 mousemodel/src/org/labkey/mousemodel/details.gm -text
+mousemodel/src/org/labkey/mousemodel/sample/slides.jsp -text
 mousemodel/webapp/MouseModel/Mouse/bulkUpdate.vm -text
 mousemodel/webapp/MouseModel/Sample/EnterSampleLocations.vm -text
 mousemodel/webapp/MouseModel/insert.vm -text

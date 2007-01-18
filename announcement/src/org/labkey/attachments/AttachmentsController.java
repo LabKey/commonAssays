@@ -44,17 +44,6 @@ public class AttachmentsController extends ViewController
         return null;
     }
 
-    @Jpf.Action
-    protected Forward download(AttachmentForm form) throws IOException, ServletException
-    {
-        if (!hasReadPermission(form))
-            HttpView.throwUnauthorized();
-
-        AttachmentService.get().download(getViewContext(), form);
-
-        return null;
-    }
-
     /**
      * Some entities (reports) can have their own ACLs. If they do, check
      * those too.
@@ -81,23 +70,6 @@ public class AttachmentsController extends ViewController
         return (perm & ACL.PERM_READ) != 0;
     }
 
-    @Jpf.Action
-    protected Forward deleteAttachment(AttachmentForm form) throws Exception
-    {
-        form.requiresPermission(ACL.PERM_DELETE);
-
-        return includeView(AttachmentService.get().delete(form));
-    }
-
-
-    @Jpf.Action
-    protected Forward showConfirmDelete(AttachmentForm form) throws Exception
-    {
-        form.requiresPermission(ACL.PERM_DELETE);
-
-        return includeView(AttachmentService.get().getConfirmDeleteView(form));
-    }
-
 
     @Jpf.Action
     protected Forward showAddAttachment(AttachmentForm form) throws Exception
@@ -113,6 +85,36 @@ public class AttachmentsController extends ViewController
         form.requiresPermission(ACL.PERM_UPDATE);
 
         return includeView(AttachmentService.get().add(form));
+    }
+
+
+    @Jpf.Action
+    protected Forward download(AttachmentForm form) throws IOException, ServletException
+    {
+        if (!hasReadPermission(form))
+            HttpView.throwUnauthorized();
+
+        AttachmentService.get().download(getResponse(), getUser(), form);
+
+        return null;
+    }
+
+
+    @Jpf.Action
+    protected Forward showConfirmDelete(AttachmentForm form) throws Exception
+    {
+        form.requiresPermission(ACL.PERM_DELETE);
+
+        return includeView(AttachmentService.get().getConfirmDeleteView(form));
+    }
+
+
+    @Jpf.Action
+    protected Forward deleteAttachment(AttachmentForm form) throws Exception
+    {
+        form.requiresPermission(ACL.PERM_DELETE);
+
+        return includeView(AttachmentService.get().delete(form));
     }
 
 

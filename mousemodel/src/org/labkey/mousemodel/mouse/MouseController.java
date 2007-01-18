@@ -29,6 +29,8 @@ import org.apache.struts.action.ActionError;
 import org.apache.struts.action.ActionErrors;
 import org.labkey.api.attachments.Attachment;
 import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.attachments.DownloadUrlHelper;
+import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.MaterialSource;
 import org.labkey.api.exp.api.ExperimentService;
@@ -254,16 +256,34 @@ public class MouseController extends ViewController
         Attachment[] attachments = AttachmentService.get().getAttachments(mouse.getEntityId());
 //        photoView.addObject("parent", form.get("entityId"));
         photoView.addObject("attachments", attachments);
-        DownloadUrlHelper deleteUrl = new DownloadUrlHelper(getRequest(), getContainer().getPath(), mouse.getEntityId(), null);
+        DownloadUrlHelper deleteUrl = new DownloadUrlHelper(getRequest(), "MouseModels-Mouse", getContainer().getPath(), mouse.getEntityId(), null);
         deleteUrl.setAction("showConfirmDelete.view");
         photoView.addObject("deleteUrl", deleteUrl);
         photoView.addObject("canDelete", getViewContext().hasPermission(ACL.PERM_UPDATE));
 
-        VBox box = new VBox(new HttpView[]{detailsView, sampleView, photoView, slidesView, notesView});
+        VBox box = new VBox(detailsView, sampleView, photoView, slidesView, notesView);
 
         _renderInTemplate(box, form);
 
         return null;
+    }
+
+
+    @Jpf.Action
+    protected Forward showConfirmDelete(AttachmentForm form) throws Exception
+    {
+        form.requiresPermission(ACL.PERM_UPDATE);  // TODO: Shouldn't this be DELETE?  But it's UPDATE above...
+
+        return includeView(AttachmentService.get().getConfirmDeleteView(form));
+    }
+
+
+    @Jpf.Action
+    protected Forward deleteAttachment(AttachmentForm form) throws Exception
+    {
+        form.requiresPermission(ACL.PERM_DELETE);  // TODO: DELETE or UPDATE?
+
+        return includeView(AttachmentService.get().delete(form));
     }
 
 
@@ -364,15 +384,14 @@ public class MouseController extends ViewController
         mouseView.addObject("caption", "Sample Details");
         mouseView.setView("child", detailsView);
 
-        VelocityView slidesView = new VelocityView("/MouseModel/Sample/slides.vm");
+        JspView slidesView = new JspView("/org/labkey/mousemodel/sample/slides.jsp");
         slidesView.setTitle("Slides");
         SimpleFilter filter = new SimpleFilter("sampleId", form.getTypedValue("sampleId"));
-        Map[] slides = (Map[]) Table.select(MouseSchema.getMouseSlide(), Table.ALL_COLUMNS, filter, null, Map.class);
+        Map[] slides = Table.select(MouseSchema.getMouseSlide(), Table.ALL_COLUMNS, filter, null, Map.class);
         slidesView.addObject("slides", slides);
 
-
-        NotesView notesView = new NotesView(form.getContainer(), ((Sample) form.getBean()).getEntityId());
-        VBox box = new VBox(new HttpView[]{mouseView, slidesView, notesView});
+        NotesView notesView = new NotesView(form.getContainer(), form.getBean().getEntityId());
+        VBox box = new VBox(mouseView, slidesView, notesView);
 
         //InsertView insertView = new InsertView(getDefaultRegion());
         _renderInTemplate(box, form);
@@ -385,7 +404,7 @@ public class MouseController extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        //This may be entered with only an mouseId, if so, select the mouse
+        //This may be entered with only a mouseId; if so, select the mouse
         Container c = form.getContainer();
         Mouse mouse = form.getMouse();
         if (null == mouse.getEntityId())
