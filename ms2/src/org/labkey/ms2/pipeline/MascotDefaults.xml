@@ -11,7 +11,7 @@
         for details of each parameters.</note>
 
   <note type="input" label="search, protocol name">cluster</note>
-        <note>Use by CPAS to named this protocol described by this set of parameters</note>
+        <note>Used by LabKey Server to named the protocol described by this set of parameters</note>
 
   <note type="input" label="search, protocol description">cluster protocol</note>
         <note>A general description of this protocol</note>
@@ -110,7 +110,7 @@
   <note type="input" label="spectrum, path"></note>
         <note>See your Mascot Installation and Setup manual,
               Table 8.1 Mascot Search Parameters,
-              will be supplied by CPAS pipeline</note>
+              will be supplied by LabKey Server pipeline</note>
 
   <note type="input" label="mascot, form version">1.01</note>
         <note>See your Mascot Installation and Setup manual,

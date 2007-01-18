@@ -235,7 +235,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
         }
         //defaultParser.setInputParameter("search, db", parser.getInputParameter("pipeline, database"));
         //defaultParser.setInputParameter("search, useremail", parser.getInputParameter("pipeline, email address"));
-        defaultParser.setInputParameter("pipeline, user name", "CPAS User");
+        defaultParser.setInputParameter("pipeline, user name", "LabKey User");
 
         String xml = defaultParser.getXML();
 

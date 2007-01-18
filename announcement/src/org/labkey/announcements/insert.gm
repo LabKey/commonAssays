@@ -5,7 +5,7 @@ unsupported = userAgent.contains("MSIE") && userAgent.contains("Mac");
 
 if (unsupported)
 {%>
-    <font color="red">Sorry, Mac/IE is not fully supported. See page <a href="<%=PageFlowUtil.getHelpLinkForTopic("gettingStarted")%>">Getting Started with CPAS</a>.</font>
+    <font color="red">Sorry, Mac/IE is not fully supported. See page <a href="<%=PageFlowUtil.getHelpLinkForTopic("gettingStarted")%>">Getting Started with LabKey Server</a>.</font>
 <%}
 else
 {%>

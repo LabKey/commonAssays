@@ -20,7 +20,7 @@ if (null != error)
     {
         if ("mascot".equalsIgnoreCase(form.searchEngine))
         {
-            out.print ("In order to perform a search using Mascot, CPAS must be able to contact your Mascot server and protein database must have already been uploaded to it.<br>");
+            out.print ("In order to perform a search using Mascot, LabKey Server must be able to contact your Mascot server and protein database must have already been uploaded to it.<br>");
         }
         else
         {

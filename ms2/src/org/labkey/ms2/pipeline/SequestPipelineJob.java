@@ -258,7 +258,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
             }
             defaultParser.setInputParameter("list path, sequest parameters", "sequest.params");
             defaultParser.setInputParameter("search, useremail", parser.getInputParameter("pipeline, email address"));
-            defaultParser.setInputParameter("search, username", "CPAS User");
+            defaultParser.setInputParameter("search, username", "LabKey User");
 
             String xml = defaultParser.getXML();
 
