@@ -19,7 +19,7 @@ package org.labkey.ms2;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.util.NetworkDrive;
-import org.fhcrc.cpas.tools.SimpleXMLStreamReader;
+import org.labkey.common.tools.SimpleXMLStreamReader;
 import org.labkey.api.exp.XarContext;
 import org.apache.log4j.Logger;
 

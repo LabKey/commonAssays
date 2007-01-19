@@ -2,7 +2,7 @@ package org.labkey.ms2;
 
 import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
 import org.labkey.ms2.reader.SimpleScan;
-import org.fhcrc.cpas.tools.RelativeQuantAnalysisSummary;
+import org.labkey.common.tools.RelativeQuantAnalysisSummary;
 import org.labkey.api.util.NetworkDrive;
 
 import java.net.URI;

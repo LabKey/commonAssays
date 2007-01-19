@@ -22,8 +22,8 @@ import org.labkey.api.util.HashHelpers;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.fasta.FastaDbHelper;
 import org.labkey.ms2.protein.organism.*;
-import org.fhcrc.cpas.tools.FastaLoader;
-import org.fhcrc.cpas.tools.Protein;
+import org.labkey.common.tools.FastaLoader;
+import org.labkey.common.tools.Protein;
 import org.labkey.api.exp.XarContext;
 import org.apache.log4j.Logger;
 

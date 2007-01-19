@@ -24,7 +24,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
-import org.fhcrc.cpas.util.Pair;
+import org.labkey.common.util.Pair;
 import org.labkey.api.util.Search;
 import org.labkey.api.view.*;
 import org.labkey.api.module.FolderType;

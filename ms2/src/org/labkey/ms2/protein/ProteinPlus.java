@@ -1,6 +1,6 @@
 package org.labkey.ms2.protein;
 
-import org.fhcrc.cpas.tools.Protein;
+import org.labkey.common.tools.Protein;
 import org.labkey.api.util.HashHelpers;
 
 /**

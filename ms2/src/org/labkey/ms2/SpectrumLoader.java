@@ -19,7 +19,7 @@ package org.labkey.ms2;
 import org.apache.log4j.Logger;
 import org.labkey.ms2.reader.*;
 import org.labkey.api.util.NetworkDrive;
-import org.fhcrc.cpas.util.Pair;
+import org.labkey.common.util.Pair;
 import org.labkey.api.data.DbSchema;
 
 import javax.xml.stream.XMLStreamException;

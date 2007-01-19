@@ -1,7 +1,7 @@
 package org.labkey.ms2.compare;
 
 import org.labkey.api.view.ViewURLHelper;
-import org.fhcrc.cpas.util.Pair;
+import org.labkey.common.util.Pair;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.ProteinManager;

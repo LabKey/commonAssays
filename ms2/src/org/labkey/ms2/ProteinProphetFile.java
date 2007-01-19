@@ -1,8 +1,8 @@
 package org.labkey.ms2;
 
-import org.fhcrc.cpas.tools.PeptideProphetSummary;
-import org.fhcrc.cpas.tools.SimpleXMLStreamReader;
-import org.fhcrc.cpas.tools.SensitivitySummary;
+import org.labkey.common.tools.PeptideProphetSummary;
+import org.labkey.common.tools.SimpleXMLStreamReader;
+import org.labkey.common.tools.SensitivitySummary;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.List;

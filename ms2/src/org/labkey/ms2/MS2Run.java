@@ -18,7 +18,7 @@ package org.labkey.ms2;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
-import org.fhcrc.cpas.tools.MS2Modification;
+import org.labkey.common.tools.MS2Modification;
 import org.labkey.api.util.MemTracker;
 
 import java.io.Serializable;

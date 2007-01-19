@@ -26,7 +26,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.sample.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
-import org.fhcrc.cpas.util.Pair;
+import org.labkey.common.util.Pair;
 import org.labkey.api.view.*;
 
 import javax.servlet.ServletException;

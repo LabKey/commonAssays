@@ -8,7 +8,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.protein.ProteinManager;
-import org.fhcrc.cpas.util.Pair;
+import org.labkey.common.util.Pair;
 import org.labkey.api.view.ViewURLHelper;
 
 import java.sql.ResultSetMetaData;

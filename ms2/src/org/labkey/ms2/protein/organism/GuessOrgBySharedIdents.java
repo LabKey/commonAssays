@@ -5,7 +5,7 @@ import org.labkey.api.data.Table;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinPlus;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
-import org.fhcrc.cpas.tools.Protein;
+import org.labkey.common.tools.Protein;
 import org.labkey.api.util.LimitedCacheMap;
 
 import java.sql.SQLException;

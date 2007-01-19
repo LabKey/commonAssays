@@ -1,7 +1,7 @@
 package org.labkey.ms2;
 
 import org.labkey.api.data.BeanObjectFactory;
-import org.fhcrc.cpas.tools.SimpleXMLStreamReader;
+import org.labkey.common.tools.SimpleXMLStreamReader;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.InputStream;

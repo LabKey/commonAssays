@@ -1,7 +1,7 @@
 package org.labkey.ms2;
 
-import org.fhcrc.cpas.tools.PeptideProphetSummary;
-import org.fhcrc.cpas.tools.SensitivitySummary;
+import org.labkey.common.tools.PeptideProphetSummary;
+import org.labkey.common.tools.SensitivitySummary;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.Container;
 import org.jfree.chart.ChartFactory;

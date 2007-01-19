@@ -8,7 +8,7 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.data.*;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.security.User;
-import org.fhcrc.cpas.util.Pair;
+import org.labkey.common.util.Pair;
 
 import java.sql.SQLException;
 import java.sql.ResultSet;

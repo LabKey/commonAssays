@@ -18,9 +18,9 @@ package org.labkey.ms2;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.fhcrc.cpas.tools.Peptide;
-import org.fhcrc.cpas.tools.Hydrophobicity3;
-import org.fhcrc.cpas.util.Pair;
+import org.labkey.common.tools.Peptide;
+import org.labkey.common.tools.Hydrophobicity3;
+import org.labkey.common.util.Pair;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;

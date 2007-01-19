@@ -10,7 +10,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.security.User;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.ViewURLHelper;
-import org.fhcrc.cpas.util.Pair;
+import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;

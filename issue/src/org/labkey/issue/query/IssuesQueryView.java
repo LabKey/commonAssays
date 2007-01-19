@@ -6,7 +6,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
-import org.fhcrc.cpas.util.Pair;
+import org.labkey.common.util.Pair;
 
 import java.io.PrintWriter;
 import java.io.IOException;

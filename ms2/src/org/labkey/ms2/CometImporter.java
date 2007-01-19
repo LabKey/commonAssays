@@ -16,7 +16,7 @@
 
 package org.labkey.ms2;
 
-import org.fhcrc.cpas.tools.SimpleXMLStreamReader;
+import org.labkey.common.tools.SimpleXMLStreamReader;
 import org.labkey.api.exp.XarContext;
 
 import javax.xml.stream.XMLStreamException;

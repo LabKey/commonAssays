@@ -21,8 +21,8 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.Table;
-import org.fhcrc.cpas.tools.DoubleArray;
-import org.fhcrc.cpas.tools.MatrixUtil;
+import org.labkey.common.tools.DoubleArray;
+import org.labkey.common.tools.MatrixUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

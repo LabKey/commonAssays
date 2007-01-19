@@ -2,7 +2,7 @@
 <%@ page import="org.labkey.api.view.ViewURLHelper"%>
 <%@ page import="org.labkey.api.view.ViewContext"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
-<%@ page import="org.fhcrc.cpas.tools.SensitivitySummary"%>
+<%@ page import="org.labkey.common.tools.SensitivitySummary"%>
 
 <table>
 <%

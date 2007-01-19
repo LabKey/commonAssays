@@ -20,7 +20,7 @@ import com.ice.tar.TarInputStream;
 import org.apache.log4j.Logger;
 import org.labkey.ms2.MS2Importer;
 import org.labkey.ms2.FloatParser;
-import org.fhcrc.cpas.tools.FloatArray;
+import org.labkey.common.tools.FloatArray;
 
 import java.io.IOException;
 import java.io.InputStream;

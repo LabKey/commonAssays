@@ -21,7 +21,7 @@ import org.labkey.api.data.Table;
 import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.util.NetworkDrive;
-import org.fhcrc.cpas.tools.MS2Modification;
+import org.labkey.common.tools.MS2Modification;
 import org.labkey.api.exp.XarContext;
 
 import java.io.*;

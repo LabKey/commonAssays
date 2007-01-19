@@ -17,7 +17,7 @@ package org.labkey.ms2.protein.tools;
 
 import org.labkey.api.data.*;
 import org.labkey.ms2.protein.ProteinManager;
-import org.fhcrc.cpas.tools.TabLoader;
+import org.labkey.common.tools.TabLoader;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.ms2.MS2Manager;
 import org.apache.log4j.Logger;

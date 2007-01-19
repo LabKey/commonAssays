@@ -8,7 +8,7 @@ import org.labkey.api.security.User;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 import org.labkey.api.util.CaseInsensitiveHashMap;
-import org.fhcrc.cpas.util.Pair;
+import org.labkey.common.util.Pair;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletException;
