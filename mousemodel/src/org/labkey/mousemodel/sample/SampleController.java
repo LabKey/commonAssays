@@ -33,14 +33,18 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
 import static org.labkey.api.util.PageFlowUtil.filter;
 import org.labkey.api.view.*;
+import org.labkey.api.attachments.AttachmentForm;
+import org.labkey.api.attachments.AttachmentService;
 import org.labkey.mousemodel.MouseModelController;
 import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
 import org.labkey.mousemodel.NotesView;
 import org.labkey.mousemodel.mouse.MouseController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletException;
 import javax.swing.text.View;
 import java.io.PrintWriter;
+import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.Map;
@@ -255,6 +259,22 @@ public class SampleController extends ViewController
 
         return null;
     }
+
+    @Jpf.Action
+    protected Forward download(AttachmentForm form) throws IOException, ServletException, SQLException
+    {
+        form.requiresPermission(ACL.PERM_READ);
+
+        Slide slide = SampleManager.getSlide(getContainer(), form.getEntityId());
+
+        if (null == slide)
+            HttpView.throwNotFound("Unable to find slide");
+
+        AttachmentService.get().download(getResponse(), getUser(), slide, form);
+
+        return null;
+    }
+
 
     @Jpf.Action
     protected Forward toggleUsed(SampleForm form) throws Exception

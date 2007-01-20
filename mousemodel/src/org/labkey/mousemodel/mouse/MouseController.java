@@ -274,7 +274,12 @@ public class MouseController extends ViewController
     {
         form.requiresPermission(ACL.PERM_READ);
 
-        AttachmentService.get().download(getResponse(), getUser(), form);
+        Mouse mouse = MouseModelManager.getMouse(form.getEntityId());
+
+        if (null == mouse || !mouse.getContainer().equals(getContainer().getId()))
+            HttpView.throwNotFound("Unable to find mouse");
+
+        AttachmentService.get().download(getResponse(), getUser(), mouse, form);
 
         return null;
     }

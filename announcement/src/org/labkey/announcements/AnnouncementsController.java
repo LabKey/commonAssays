@@ -439,11 +439,19 @@ public class AnnouncementsController extends ViewController
 
 
     @Jpf.Action
-    protected Forward download(AttachmentForm form) throws IOException, ServletException
+    protected Forward download(AttachmentForm form) throws IOException, ServletException, SQLException
     {
-        form.requiresPermission(ACL.PERM_READ);
+        Permissions perm = getPermissions();
 
-        AttachmentService.get().download(getResponse(), getUser(), form);
+        Announcement ann = AnnouncementManager.getAnnouncement(form.getContainer(), form.getEntityId());
+
+        if (null == ann)
+            HttpView.throwNotFound("Couldn't find " + getSettings().getConversationName());
+
+        if (!perm.allowRead(ann))
+            HttpView.throwUnauthorized();
+
+        AttachmentService.get().download(getResponse(), getUser(), ann, form);
 
         return null;
     }

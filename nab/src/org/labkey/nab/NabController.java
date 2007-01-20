@@ -34,6 +34,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.attachments.Attachable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletException;
@@ -43,6 +44,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.*;
 import java.util.List;
+import java.sql.SQLException;
 
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
@@ -442,11 +444,13 @@ public class NabController extends ViewController
     }
 
     @Jpf.Action
-    protected Forward download(AttachmentForm form) throws IOException, ServletException
+    protected Forward download(AttachmentForm form) throws IOException, ServletException, SQLException
     {
         form.requiresPermission(ACL.PERM_READ);
 
-        AttachmentService.get().download(getResponse(), getUser(), form);
+        Plate plate = PlateService.get().getPlate(getContainer(), form.getEntityId());
+
+        AttachmentService.get().download(getResponse(), getUser(), plate, form);
 
         return null;
     }

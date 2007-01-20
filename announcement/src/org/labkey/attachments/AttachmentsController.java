@@ -47,6 +47,8 @@ public class AttachmentsController extends ViewController
      * @return
      * @throws ServletException
      */
+
+    // TODO: Move this to reports
     private boolean hasReadPermission(AttachmentForm form) throws ServletException
     {
         Container c = form.getContainer();
@@ -73,7 +75,7 @@ public class AttachmentsController extends ViewController
         if (!hasReadPermission(form))
             HttpView.throwUnauthorized();
 
-        AttachmentService.get().download(getResponse(), getUser(), form);
+//        AttachmentService.get().download(getResponse(), getUser(), form);
 
         return null;
     }
