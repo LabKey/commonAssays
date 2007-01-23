@@ -22,8 +22,6 @@ announcement/src/org/labkey/announcements/model/SecureMessageBoardPermissions.ja
 announcement/src/org/labkey/announcements/notes.gm -text
 announcement/src/org/labkey/announcements/respond.gm -text
 announcement/src/org/labkey/announcements/rss.gm -text
-announcement/src/org/labkey/attachments/confirmDelete.gm -text
-announcement/src/org/labkey/attachments/refreshParent.gm -text
 announcement/webapp/announcements/scripts/postgresql/comm-0.00-1.10.sql -text
 announcement/webapp/announcements/scripts/postgresql/comm-1.00-1.10.sql -text
 announcement/webapp/announcements/scripts/postgresql/comm-1.20-1.30.sql -text
