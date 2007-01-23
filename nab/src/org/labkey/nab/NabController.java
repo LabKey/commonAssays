@@ -22,6 +22,8 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.labkey.api.attachments.AttachmentForm;
+import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -32,19 +34,16 @@ import org.labkey.api.study.*;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.attachments.AttachmentForm;
-import org.labkey.api.attachments.AttachmentService;
-import org.labkey.api.attachments.Attachable;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import java.awt.*;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.*;
 import java.util.List;
-import java.sql.SQLException;
 
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
@@ -446,11 +445,11 @@ public class NabController extends ViewController
     @Jpf.Action
     protected Forward download(AttachmentForm form) throws IOException, ServletException, SQLException
     {
-        form.requiresPermission(ACL.PERM_READ);
+        requiresPermission(ACL.PERM_READ);
 
         Plate plate = PlateService.get().getPlate(getContainer(), form.getEntityId());
 
-        AttachmentService.get().download(getResponse(), getUser(), plate, form);
+        AttachmentService.get().download(getResponse(), plate, form);
 
         return null;
     }

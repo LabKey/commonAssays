@@ -19,7 +19,6 @@ package org.labkey.attachments;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.labkey.api.attachments.AttachmentForm;
-import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.HttpView;
@@ -51,7 +50,7 @@ public class AttachmentsController extends ViewController
     // TODO: Move this to reports
     private boolean hasReadPermission(AttachmentForm form) throws ServletException
     {
-        Container c = form.getContainer();
+        Container c = getContainer();
         String entityId = form.getEntityId();
 
         //If no read on container, give up.

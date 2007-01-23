@@ -419,39 +419,50 @@ public class AnnouncementsController extends ViewController
     }
 
 
+    private Announcement getAnnouncement(AttachmentForm form) throws SQLException, ServletException
+    {
+        Announcement ann = AnnouncementManager.getAnnouncement(getContainer(), form.getEntityId());
+
+        if (null == ann)
+            HttpView.throwNotFound("Couldn't find " + getSettings().getConversationName());
+
+        return ann;
+    }
+
+
     @Jpf.Action
     protected Forward showAddAttachment(AttachmentForm form) throws Exception
     {
-        //Use form's container because legacy URLs to attachments use funny container path
-        form.requiresPermission(ACL.PERM_UPDATE);
+        Announcement ann = getAnnouncement(form);
 
-        return includeView(AttachmentService.get().getAddAttachmentView(form));
+        if (!getPermissions().allowUpdate(ann))
+            HttpView.throwUnauthorized();
+
+        return includeView(AttachmentService.get().getAddAttachmentView(ann, form));
     }
 
 
     @Jpf.Action
     protected Forward addAttachment(AttachmentForm form) throws Exception
     {
-        form.requiresPermission(ACL.PERM_UPDATE);
+        Announcement ann = getAnnouncement(form);
 
-        return includeView(AttachmentService.get().add(form));
+        if (!getPermissions().allowUpdate(ann))
+            HttpView.throwUnauthorized();
+
+        return includeView(AttachmentService.get().add(ann, form));
     }
 
 
     @Jpf.Action
     protected Forward download(AttachmentForm form) throws IOException, ServletException, SQLException
     {
-        Permissions perm = getPermissions();
+        Announcement ann = getAnnouncement(form);
 
-        Announcement ann = AnnouncementManager.getAnnouncement(form.getContainer(), form.getEntityId());
-
-        if (null == ann)
-            HttpView.throwNotFound("Couldn't find " + getSettings().getConversationName());
-
-        if (!perm.allowRead(ann))
+        if (!getPermissions().allowRead(ann))
             HttpView.throwUnauthorized();
 
-        AttachmentService.get().download(getResponse(), getUser(), ann, form);
+        AttachmentService.get().download(getResponse(), ann, form);
 
         return null;
     }
@@ -460,18 +471,24 @@ public class AnnouncementsController extends ViewController
     @Jpf.Action
     protected Forward showConfirmDelete(AttachmentForm form) throws Exception
     {
-        form.requiresPermission(ACL.PERM_DELETE);
+        Announcement ann = getAnnouncement(form);
 
-        return includeView(AttachmentService.get().getConfirmDeleteView(form));
+        if (!getPermissions().allowUpdate(ann))
+            HttpView.throwUnauthorized();
+
+        return includeView(AttachmentService.get().getConfirmDeleteView(ann, form));
     }
 
 
     @Jpf.Action
     protected Forward deleteAttachment(AttachmentForm form) throws Exception
     {
-        form.requiresPermission(ACL.PERM_DELETE);
+        Announcement ann = getAnnouncement(form);
 
-        return includeView(AttachmentService.get().delete(form));
+        if (!getPermissions().allowUpdate(ann))
+            HttpView.throwUnauthorized();
+
+        return includeView(AttachmentService.get().delete(ann, form));
     }
 
 

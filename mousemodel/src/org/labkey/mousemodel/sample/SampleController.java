@@ -263,14 +263,14 @@ public class SampleController extends ViewController
     @Jpf.Action
     protected Forward download(AttachmentForm form) throws IOException, ServletException, SQLException
     {
-        form.requiresPermission(ACL.PERM_READ);
+        requiresPermission(ACL.PERM_READ);
 
         Slide slide = SampleManager.getSlide(getContainer(), form.getEntityId());
 
         if (null == slide)
             HttpView.throwNotFound("Unable to find slide");
 
-        AttachmentService.get().download(getResponse(), getUser(), slide, form);
+        AttachmentService.get().download(getResponse(), slide, form);
 
         return null;
     }
@@ -388,7 +388,7 @@ public class SampleController extends ViewController
             FormFile[] formFiles = (FormFile[]) fileMap.values().toArray(new FormFile[fileMap.size()]);
 
             if (formFiles.length > 0 && StringUtils.trimToNull(formFiles[0].getFileName()) != null && formFiles[0].getFileSize() > 0)
-                SampleManager.insertSlide(getUser(), getContainer(), slide, formFiles[0]);
+                SampleManager.insertSlide(getUser(), slide, formFiles[0]);
             else
             {
                 form.message = "Attached files not found.";
@@ -410,11 +410,11 @@ public class SampleController extends ViewController
         requiresPermission(ACL.PERM_DELETE);
 
         Slide slide = SampleManager.getSlide(getContainer(), form.getEntityId());
-        View v;
+
         if (null == slide)
             return _renderInTemplate(new HtmlView("Slide not found"), MouseModelController.getModelId(form));
 
-        SampleManager.deleteSlide(getUser(), getContainer(), slide.getEntityId());
+        SampleManager.deleteSlide(getContainer(), slide);
 
         ViewURLHelper url = cloneViewURLHelper();
         url.setAction("details");

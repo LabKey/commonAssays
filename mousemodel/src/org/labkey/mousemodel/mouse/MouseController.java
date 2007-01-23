@@ -253,7 +253,7 @@ public class MouseController extends ViewController
 
         JspView photoView = new JspView("/org/labkey/mousemodel/mouse/showPhoto.jsp");
         photoView.setTitle("Necropsy Photos");
-        Attachment[] attachments = AttachmentService.get().getAttachments(mouse.getEntityId());
+        Attachment[] attachments = AttachmentService.get().getAttachments(mouse);
 //        photoView.addObject("parent", form.get("entityId"));
         photoView.addObject("attachments", attachments);
         DownloadUrlHelper deleteUrl = new DownloadUrlHelper(getRequest(), "MouseModel-Mouse", getContainer().getPath(), mouse.getEntityId(), null);
@@ -269,17 +269,25 @@ public class MouseController extends ViewController
     }
 
 
-    @Jpf.Action
-    protected Forward download(AttachmentForm form) throws IOException, ServletException
+    private Mouse getMouse(AttachmentForm form, int perm) throws ServletException
     {
-        form.requiresPermission(ACL.PERM_READ);
+        requiresPermission(perm);
 
         Mouse mouse = MouseModelManager.getMouse(form.getEntityId());
 
         if (null == mouse || !mouse.getContainer().equals(getContainer().getId()))
             HttpView.throwNotFound("Unable to find mouse");
 
-        AttachmentService.get().download(getResponse(), getUser(), mouse, form);
+        return mouse;
+    }
+
+
+    @Jpf.Action
+    protected Forward download(AttachmentForm form) throws IOException, ServletException
+    {
+        Mouse mouse = getMouse(form, ACL.PERM_READ);
+
+        AttachmentService.get().download(getResponse(), mouse, form);
 
         return null;
     }
@@ -288,18 +296,18 @@ public class MouseController extends ViewController
     @Jpf.Action
     protected Forward showConfirmDelete(AttachmentForm form) throws Exception
     {
-        form.requiresPermission(ACL.PERM_UPDATE);  // TODO: Shouldn't this be DELETE?  But it's UPDATE above...
+        Mouse mouse = getMouse(form, ACL.PERM_UPDATE);  // TODO: Shouldn't this be DELETE?  But it's UPDATE above...
 
-        return includeView(AttachmentService.get().getConfirmDeleteView(form));
+        return includeView(AttachmentService.get().getConfirmDeleteView(mouse, form));
     }
 
 
     @Jpf.Action
     protected Forward deleteAttachment(AttachmentForm form) throws Exception
     {
-        form.requiresPermission(ACL.PERM_DELETE);  // TODO: DELETE or UPDATE?
+        Mouse mouse = getMouse(form, ACL.PERM_DELETE);  // TODO: DELETE or UPDATE?
 
-        return includeView(AttachmentService.get().delete(form));
+        return includeView(AttachmentService.get().delete(mouse, form));
     }
 
 

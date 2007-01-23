@@ -1,34 +1,30 @@
 package org.labkey.nab;
 
-import org.labkey.nab.NabController;
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
 import org.apache.log4j.Logger;
 import org.apache.struts.upload.FormFile;
-
-import java.util.*;
-
-import org.labkey.api.data.*;
+import org.labkey.api.attachments.Attachment;
+import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.PropertyManager;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
-import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.util.ExceptionUtil;
-import org.labkey.api.attachments.Attachment;
-import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.ViewURLHelper;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: brittp
@@ -612,7 +608,7 @@ public class NabManager
                 InputStream stream = null;
                 try
                 {
-                    stream = AttachmentService.get().getInputStream(user, attachments[0]);
+                    stream = AttachmentService.get().getInputStream(attachments[0]);
                     return createLuc5Assay(container, user, metadata, infos, cutoffs, attachments[0].getName(), stream);
                 }
                 finally
