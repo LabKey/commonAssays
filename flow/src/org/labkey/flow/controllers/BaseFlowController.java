@@ -13,6 +13,7 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.script.ScriptJob;
 import org.labkey.flow.util.PFUtil;
+import org.labkey.flow.webparts.FlowFolderType;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
@@ -65,8 +66,15 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
             children.add(0, new NavTree(object.getLabel(), object.urlShow()));
             object = object.getParent();
         }
-        children.add(0, new NavTree(FlowModule.getShortProductName(), url.clone()));
 
+        if (context.getContainer().getFolderType() instanceof FlowFolderType)
+        {
+            children.add(0, new NavTree("Flow Dashboard", new ViewURLHelper("Project", "begin", context.getContainer())));
+        }
+        else
+        {
+            children.add(0, new NavTree(FlowModule.getShortProductName(), url.clone()));
+        }
 
         NavTrailConfig ntc = new NavTrailConfig(context);
         if (title == null)

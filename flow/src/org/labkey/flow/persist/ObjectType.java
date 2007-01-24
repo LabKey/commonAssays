@@ -1,22 +1,31 @@
 package org.labkey.flow.persist;
 
+import org.labkey.flow.data.InputRole;
+
 public enum ObjectType
 {
-    fcsKeywords(1),
-    compensationControl(2),
-    fcsAnalysis(3),
-    compensationMatrix(4),
-    script(5),
+    fcsKeywords(1, InputRole.FCSFile),
+    compensationControl(2, null),
+    fcsAnalysis(3, null),
+    compensationMatrix(4, InputRole.CompensationMatrix),
+    script(5, InputRole.AnalysisScript),
     ;
 
     final int _typeId;
-    ObjectType(int typeId)
+    final InputRole _inputRole;
+    ObjectType(int typeId, InputRole role)
     {
         _typeId = typeId;
+        _inputRole = role;
     }
     public int getTypeId()
     {
         return _typeId;
+    }
+
+    public InputRole getInputRole()
+    {
+        return _inputRole;
     }
 
     static public ObjectType fromTypeId(int value)

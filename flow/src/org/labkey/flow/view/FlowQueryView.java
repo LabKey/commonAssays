@@ -11,6 +11,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.controllers.FlowParam;
@@ -20,6 +21,7 @@ import org.labkey.flow.query.FlowQueryForm;
 import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.util.PFUtil;
+import org.labkey.flow.webparts.FlowFolderType;
 
 import java.io.PrintWriter;
 import java.util.*;
@@ -171,7 +173,14 @@ public class FlowQueryView extends QueryView
         FlowSchema schema = getSchema();
         FlowRun run = schema.getRun();
         List<NavTree> children = new ArrayList<NavTree>();
-        children.add(new NavTree(FlowModule.getShortProductName(), PFUtil.urlFor(FlowController.Action.begin, getContainer())));
+        if (getContainer().getFolderType() instanceof FlowFolderType)
+        {
+            children.add(0, new NavTree("Flow Dashboard", new ViewURLHelper("Project", "begin", getContainer())));
+        }
+        else
+        {
+            children.add(0, new NavTree(FlowModule.getShortProductName(), PFUtil.urlFor(FlowController.Action.begin, getContainer())));
+        }
         if (run != null)
         {
             FlowExperiment experiment = run.getExperiment();
@@ -187,6 +196,7 @@ public class FlowQueryView extends QueryView
             children.add(new NavTree(schema.getExperiment().getLabel(), schema.getExperiment().urlShow()));
             ntc.setExtraChildren(children.toArray(new NavTree[0]));
         }
+        ntc.setModuleOwner(ModuleLoader.getInstance().getModule(FlowModule.NAME));
         return ntc;
     }
 }

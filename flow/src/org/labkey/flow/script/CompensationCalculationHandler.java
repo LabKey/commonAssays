@@ -41,7 +41,7 @@ public class CompensationCalculationHandler extends BaseHandler
         dbtComp.setAbout(FlowDataObject.generateDataLSID(getContainer(), FlowDataType.CompensationMatrix));
         dbtComp.setSourceProtocolLSID(_step.getLSID(_job.getContainer()));
         attrsComp.save(_job.decideFileName(outputDirectory, "Compensation", FlowDataHandler.EXT_DATA), dbtComp);
-        _job.addRunOutput(dbtComp.getAbout());
+        _job.addRunOutput(dbtComp.getAbout(), InputRole.CompensationMatrix);
 
         for (CompensationResult result : results)
         {

@@ -104,7 +104,7 @@ public class EditScriptForm extends ViewForm
             return run;
         try
         {
-            FlowRun[] available = FlowRun.getRunsForContainer(getContainer());
+            FlowRun[] available = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
             if (available.length == 0)
                 return null;
             run = available[0];

@@ -67,10 +67,10 @@ public class FlowLog extends FlowDataObject
         return eol;
     }
 
-    static public void append(StringBuffer buf, Map<Object, Object> valuesIn)
+    static public void append(StringBuffer buf, Map<? extends Object, Object> valuesIn)
     {
         LinkedHashMap<String,String> values = new LinkedHashMap();
-        for (Map.Entry<Object,Object> entry : valuesIn.entrySet())
+        for (Map.Entry<? extends Object,Object> entry : valuesIn.entrySet())
         {
             values.put(cleanValue(entry.getKey()), cleanValue(entry.getValue()));
         }

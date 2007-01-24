@@ -8,13 +8,20 @@ import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.fhcrc.cpas.exp.xml.*;
 import org.labkey.api.util.URIUtil;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.query.QueryService;
 import org.w3c.dom.Element;
 
 import java.util.List;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.ArrayList;
 import java.net.URI;
 import java.sql.SQLException;
+import java.sql.ResultSet;
 import java.io.File;
 
 import org.labkey.flow.analysis.model.CompensationMatrix;
@@ -24,12 +31,14 @@ import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.FCSRef;
+import org.labkey.flow.query.FlowSchema;
 
 public class AnalysisHandler extends BaseHandler
 {
     AnalysisDef _analysis;
     Analysis _groupAnalysis;
     SampleCriteria _sampleCriteria;
+    int _wellIndex;
 
     public AnalysisHandler(ScriptJob job, AnalysisDef analysis) throws Exception
     {
@@ -44,7 +53,7 @@ public class AnalysisHandler extends BaseHandler
         return FCSAnalyzer.get().matchesCriteria(_sampleCriteria, ref);
     }
 
-    public DataBaseType addWell(ExperimentRunType runElement, FlowWell src, FlowCompensationMatrix flowComp) throws SQLException
+    synchronized public DataBaseType addWell(ExperimentRunType runElement, FlowWell src, FlowCompensationMatrix flowComp) throws SQLException
     {
         ProtocolApplicationBaseType app = addProtocolApplication(runElement);
         DataBaseType ret = duplicateWell(app, src, FlowDataType.FCSAnalysis);
@@ -53,7 +62,7 @@ public class AnalysisHandler extends BaseHandler
         {
             _job.addInput(app, flowComp, InputRole.CompensationMatrix);
         }
-        _job.addRunOutput(ret.getAbout());
+        _job.addRunOutput(ret.getAbout(), null);
         return ret;
     }
 
@@ -70,31 +79,101 @@ public class AnalysisHandler extends BaseHandler
             _job.addError(null, null, "No compensation matrix found.");
             return;
         }
-        FlowWell[] wells = run.getWells();
-        Set<StatisticSpec> statistics = new LinkedHashSet(_groupAnalysis.getStatistics());
-        Set<GraphSpec> graphs = new LinkedHashSet(_groupAnalysis.getGraphs());
-
-        for (int iWell = 0; iWell < wells.length; iWell ++)
+        FlowSchema schema = new FlowSchema(_job.getUser(), getContainer());
+        schema.setRun(run);
+        TableInfo tblFCSFiles = schema.createFCSFileTable("FCSFiles");
+        ColumnInfo colRowId = tblFCSFiles.getColumn("RowId");
+        try
         {
-            FlowWell well = wells[iWell];
-            if (_job.checkInterrupted())
+            ResultSet rs = QueryService.get().select(tblFCSFiles, new ColumnInfo[] { colRowId }, _job.getProtocol().getFCSAnalysisFilter(), null);
+            List<Integer> ids = new ArrayList();
+            while (rs.next())
             {
-                throw new InterruptedException("User interrupted");
+                ids.add((Integer) colRowId.getValue(rs));
             }
-            FCSRef ref = FlowAnalyzer.getFCSRef(well);
-            URI uri = ref.getURI();
-            if (!checkProcessWell(ref))
-                continue;
-            _job.addStatus("Processing well " + (iWell + 1) + "/" + wells.length + ":" + run.getName() + ":" + well.getName());
+            rs.close();
+            if (ids.size() == 0)
+            {
+                FlowWell[] allWells = run.getWells();
+                if (allWells.length == 0)
+                {
+                    _job.addStatus("This run contains no FCS files");
+                }
+                else
+                {
+                    _job.addStatus("This run contains FCS files but they are all excluded by the Protocol's FCS Analysis Filter");
+                }
+                return;
+            }
+            _wellIndex = 0;
+            Runnable[] tasks = new Runnable[ids.size()];
+            for (int iWell = 0; iWell < ids.size(); iWell ++)
+            {
+                Runnable task = new AnalyzeTask(workingDirectory, run, runElement, FlowWell.fromWellId(ids.get(iWell)), ids.size(), flowComp, comp);
+                tasks[iWell] = task;
+            }
+            FlowThreadPool.runTaskSet(new FlowTaskSet(tasks));
+        }
+        catch (SQLException e)
+        {
+            _job.addStatus("An exception occurred: " + e);
+        }
+    }
 
+    synchronized int getNextWellIndex()
+    {
+        return ++_wellIndex;
+    }
 
-            List<FCSAnalyzer.StatResult> stats = FCSAnalyzer.get().calculateStatistics(uri, comp, _groupAnalysis, statistics);
-            DataBaseType dbt = addWell(runElement, well, flowComp);
-            AttributeSet attrs = new AttributeSet(ObjectType.fcsAnalysis, uri);
-            addResults(dbt, attrs, stats);
-            List<FCSAnalyzer.GraphResult> graphResults = FCSAnalyzer.get().generateGraphs(well.getFCSURI(), comp, _groupAnalysis, graphs);
-            addResults(dbt, attrs, graphResults);
-            attrs.save(_job.decideFileName(workingDirectory, URIUtil.getFilename(uri), FlowDataHandler.EXT_DATA), dbt);
+    private class AnalyzeTask implements Runnable
+    {
+        File _workingDirectory;
+        FlowRun _run;
+        FlowWell _well;
+        int _wellCount;
+        CompensationMatrix _comp;
+        FlowCompensationMatrix _flowComp;
+        ExperimentRunType _runElement;
+        AnalyzeTask(File workingDirectory, FlowRun run, ExperimentRunType runElement, FlowWell well, int wellCount, FlowCompensationMatrix flowComp, CompensationMatrix comp)
+        {
+            _workingDirectory = workingDirectory;
+            _run = run;
+            _runElement = runElement;
+            _well = well;
+            _wellCount = wellCount;
+            _flowComp = flowComp;
+            _comp = comp;
+        }
+        public void run()
+        {
+            try
+            {
+                int iWell = getNextWellIndex();
+                if (_job.checkInterrupted())
+                    return;
+                FCSRef ref = FlowAnalyzer.getFCSRef(_well);
+                URI uri = ref.getURI();
+                if (!checkProcessWell(ref))
+                    return;
+
+                String description = "well " + iWell + "/" + _wellCount + ":" + _run.getName() + ":" + _well.getName();
+                _job.addStatus("Starting " + description);
+                Set<StatisticSpec> statistics = new LinkedHashSet(_groupAnalysis.getStatistics());
+                Set<GraphSpec> graphs = new LinkedHashSet(_groupAnalysis.getGraphs());
+                List<FCSAnalyzer.StatResult> stats = FCSAnalyzer.get().calculateStatistics(uri, _comp, _groupAnalysis, statistics);
+                DataBaseType dbt = addWell(_runElement, _well, _flowComp);
+                AttributeSet attrs = new AttributeSet(ObjectType.fcsAnalysis, uri);
+                addResults(dbt, attrs, stats);
+                List<FCSAnalyzer.GraphResult> graphResults = FCSAnalyzer.get().generateGraphs(_well.getFCSURI(), _comp, _groupAnalysis, graphs);
+                addResults(dbt, attrs, graphResults);
+                attrs.save(_job.decideFileName(_workingDirectory, URIUtil.getFilename(uri), FlowDataHandler.EXT_DATA), dbt);
+                _job.addStatus("Completed " + description);
+            }
+            catch (Throwable t)
+            {
+                _job.handleException(t);
+            }
+
         }
     }
 }

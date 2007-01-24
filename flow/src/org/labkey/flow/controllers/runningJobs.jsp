@@ -26,14 +26,15 @@ for (PipelineJob job : data.getRunningJobs())
 <% } else {
 %>
 <table>
-    <tr><th>Status</th><th>Description</th><th>Owner</th></tr>
+    <tr><th>Status</th><th>Description</th><th>Folder</th><th>Owner</th></tr>
 <% for (ScriptJob job : jobs) {
 %>
     <tr><td><a href="<%=h(job.urlStatus())%>"><%=h(job.getStatusText())%></a></td>
         <td><%=h(job.getDescription())%></td>
+        <td><a href="<%=h(new ViewURLHelper("Project", "begin", job.getContainer()))%>"><%=h(job.getContainer().getPath())%></a></td>
         <td><%=h(String.valueOf(job.getUser()))%></td><td><cpas:button text="Cancel" href="<%=job.urlCancel()%>"/></tr>
 <% } %>
 </table>
 <% } %>
-<cpas:link href="<%=h(new ViewURLHelper("Pipeline-Status", "showList", getContainer()))%>" text="all jobs in this folder"/>
+<cpas:link href="<%=h(new ViewURLHelper("Pipeline-Status", "showList", getContainer()))%>" text="all jobs in this folder (including completed ones)"/>
 

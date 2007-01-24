@@ -13,6 +13,10 @@
 <%@ page import="org.labkey.api.security.ACL"%>
 <%@ page import="org.labkey.api.security.User" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.flow.persist.FlowManager" %>
+<%@ page import="org.labkey.flow.persist.ObjectType" %>
+<%@ page import="org.labkey.flow.query.FlowTableType" %>
+<%@ page import="org.labkey.api.query.QueryAction" %>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
 <%@ page extends="org.labkey.flow.controllers.BaseFlowController.FlowPage" %>
 <style>
@@ -74,23 +78,21 @@ else
 </p>
 <% } %>
 <% } %>
-<% FlowExperiment experimentRunExperiment = FlowExperiment.getExperimentRunExperiment(getContainer());
-    if (experimentRunExperiment == null)
+<p>
+    <% FlowManager mgr = FlowManager.get();
+    int fcsFileCount = mgr.getObjectCount(getContainer(), ObjectType.fcsKeywords);
+    int fcsRunCount = mgr.getRunCount(getContainer(), ObjectType.fcsKeywords);
+    if (fcsFileCount == 0)
     { %>
-<p>There are no flow experiment runs in this folder.</p>
+There are no flow experiment runs in this folder.
 <% }
 else
-{ %>
-<table class="normal" style="border:solid black 1px;">
-    <tr><th colspan="4" class="tablemainheader">Groups of experiment runs:<th></tr>
-    <tr><th>Group Name</th><th>Created</th><th>Created By</th><th>Number of Runs</th></tr>
-    <tr><td><a href="<%=experimentRunExperiment.urlShow()%>"><%=h(experimentRunExperiment.getLabel())%></a></td>
-        <td><%=formatDateTime(experimentRunExperiment.getExperiment().getCreated())%></td>
-        <td><%=h(strUser(experimentRunExperiment.getExperiment().getCreatedBy()))%></td>
-        <td><%=strRunCount(experimentRunExperiment, FlowProtocolStep.keywords)%></td>
-    </tr>
-</table>
+{         ViewURLHelper urlShowRuns = FlowTableType.Runs.urlFor(getContainer(), "ProtocolStep", FlowProtocolStep.keywords.getName());
+    %>There are <a
+        href="<%=h(FlowTableType.FCSFiles.urlFor(getContainer(), QueryAction.executeQuery))%>"><%=fcsFileCount%> FCS
+    files</a> in <a href="<%=h(urlShowRuns)%>"><%=fcsRunCount%> runs</a>.<br>
 <% } %>
+</p>
 
 
 <% FlowExperiment[] analyses = FlowExperiment.getAnalyses(getContainer());

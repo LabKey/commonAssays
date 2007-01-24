@@ -50,8 +50,7 @@ abstract public class BaseHandler
 
     public DataBaseType duplicateWell(ProtocolApplicationBaseType app, FlowWell src, FlowDataType type) throws SQLException
     {
-        _job.addInput(app, src, null);
-        addDataLSID(app.getInputRefs(), src.getLSID(), null);
+        _job.addInput(app, src, InputRole.FCSFile);
         DataBaseType ret = app.getOutputDataObjects().addNewData();
         ret.setName(src.getName());
         ret.setAbout(FlowDataObject.generateDataLSID(getContainer(), type));
@@ -60,7 +59,7 @@ abstract public class BaseHandler
         return ret;
     }
 
-    public void addResults(DataBaseType dbt, AttributeSet attrs, List<? extends FCSAnalyzer.Result> results) throws Exception
+    synchronized public void addResults(DataBaseType dbt, AttributeSet attrs, List<? extends FCSAnalyzer.Result> results) throws Exception
     {
         for (FCSAnalyzer.Result result : results)
         {
@@ -88,11 +87,6 @@ abstract public class BaseHandler
     }
 
     abstract public void processRun(FlowRun srcRun, ExperimentRunType runElement, File workingDirectory) throws Exception;
-
-    protected Map<FlowProperty, PropertyDescriptor> getPdCacheMap()
-    {
-        return _job.getPdCacheMap();
-    }
 
     protected void addDataLSID(InputOutputRefsType refs, String lsid, InputRole role)
     {

@@ -38,11 +38,6 @@ public class ChooseRunsToUploadForm extends ViewForm
         return FlowScript.getProtocolsWithStep(getContainer(), FlowProtocolStep.keywords);
     }
 
-    public FlowExperiment getExperiment()
-    {
-        return FlowExperiment.getExperimentRunExperiment(getContainer());
-    }
-
     public List<URI> getNewPaths()
     {
         return newPaths;

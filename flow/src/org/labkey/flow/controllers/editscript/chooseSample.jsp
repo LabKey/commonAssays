@@ -3,6 +3,7 @@
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix"%>
 <%@ page import="org.labkey.flow.data.FlowWell"%>
 <%@ page import="java.util.List"%>
+<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%  ScriptController.ChooseSampleForm form = (ScriptController.ChooseSampleForm) this.form;
     if (form.redirect != null)
@@ -14,7 +15,8 @@
 
 <%
 
-    FlowRun[] runs = FlowRun.getRunsForContainer(getContainer());
+    FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
+    ;
     List<FlowCompensationMatrix> comps = FlowCompensationMatrix.getCompensationMatrices(getContainer());
 %>
 <% if (runs.length == 0)

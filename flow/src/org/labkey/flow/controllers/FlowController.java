@@ -27,6 +27,10 @@ import org.labkey.api.jsp.FormPage;
 import org.labkey.flow.util.PFUtil;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.FlowPreference;
+import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.webparts.FlowFolderType;
+import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.FlowScript;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.*;
 import org.labkey.api.pipeline.PipelineService;
@@ -37,6 +41,7 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.module.Module;
+import org.labkey.api.query.QueryForm;
 
 import java.util.*;
 import java.io.File;
@@ -52,6 +57,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
         cancelJob,
         showJobs,
         showStatusJob,
+        executeQuery,
         showStatusFile,
         flowAdmin,
         newFolder,
@@ -64,6 +70,10 @@ public class FlowController extends BaseFlowController<FlowController.Action>
     @Jpf.Action
     protected Forward begin() throws Exception
     {
+        if (getContainer().getFolderType() instanceof FlowFolderType)
+        {
+            return new ViewForward(new ViewURLHelper("Project", "begin", getContainer()));
+        }
         requiresPermission(ACL.PERM_READ);
         FlowPage page = getFlowPage("main.jsp");
         NavTrailConfig ntc = getNavTrailConfig(null, null, Action.begin);
@@ -173,6 +183,8 @@ public class FlowController extends BaseFlowController<FlowController.Action>
     protected Forward newFolder(NewFolderForm form) throws Exception
     {
         requiresPermission(ACL.PERM_UPDATE);
+        if (getContainer().getParent() == null)
+            HttpView.throwUnauthorized();
         if (isPost())
         {
             Forward forward = doNewFolder(form);
@@ -188,10 +200,10 @@ public class FlowController extends BaseFlowController<FlowController.Action>
 
     protected Forward doNewFolder(NewFolderForm form) throws Exception
     {
-        Container container = getContainer();
-        if (container.hasChild(form.ff_folderName))
+        Container parent = getContainer().getParent();
+        if (parent.hasChild(form.ff_folderName))
         {
-            addError("There is alread a folder with the name '" + form.ff_folderName + "'");
+            addError("There is already a folder with the name '" + form.ff_folderName + "'");
             return null;
         }
         StringBuffer error = new StringBuffer();
@@ -201,7 +213,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
             return null;
         }
         FlowModule flowModule = null;
-        for (Module module : container.getActiveModules())
+        for (Module module : getContainer().getActiveModules())
         {
             if (module instanceof FlowModule)
             {
@@ -214,24 +226,36 @@ public class FlowController extends BaseFlowController<FlowController.Action>
             return null;
         }
 
-        Container newContainer = ContainerManager.createContainer(container, form.ff_folderName);
-        newContainer.setActiveModules(container.getActiveModules());
-        newContainer.setDefaultModule(flowModule);
+        Container destContainer = ContainerManager.createContainer(parent, form.ff_folderName);
+        destContainer.setActiveModules(getContainer().getActiveModules());
+        destContainer.setFolderType(getContainer().getFolderType());
+        destContainer.setDefaultModule(flowModule);
         PipelineService service = PipelineService.get();
-        service.setPipelineRoot(getUser(), newContainer, service.getPipelineRoot(container));
-        ViewURLHelper forward = PFUtil.urlFor(Action.begin, newContainer);
+        service.setPipelineRoot(getUser(), destContainer, service.getPipelineRoot(getContainer()));
+        FlowProtocol srcProtocol = FlowProtocol.getForContainer(getContainer());
+        if (srcProtocol != null)
+        {
+            if (form.ff_copyProtocol)
+            {
+                FlowProtocol destProtocol = FlowProtocol.ensureForContainer(getUser(), destContainer);
+                destProtocol.setFCSAnalysisNameExpr(getUser(), srcProtocol.getFCSAnalysisNameExpr());
+                destProtocol.setSampleSetJoinFields(getUser(), srcProtocol.getSampleSetJoinFields());
+                destProtocol.setFCSAnalysisFilter(getUser(), srcProtocol.getFCSAnalysisFilterString());
+            }
+            for (String analysisScriptName : form.ff_copyAnalysisScript)
+            {
+                FlowScript srcScript = FlowScript.fromName(getContainer(), analysisScriptName);
+                if (srcScript != null)
+                {
+                    FlowScript.create(getUser(), destContainer, srcScript.getName(), srcScript.getAnalysisScript());
+                }
+            }
+        }
+        ViewURLHelper forward = PFUtil.urlFor(Action.begin, destContainer);
         return new ViewForward(forward);
     }
 
 
-    static public class NewFolderForm extends ViewForm
-    {
-        public String ff_folderName;
-        public void setFf_folderName(String name)
-        {
-            ff_folderName = name;
-        }
-    }
     protected boolean addError(String error)
     {
         PageFlowUtil.getActionErrors(getRequest(), true).add("main", new ActionError("Error", error));

@@ -2,6 +2,7 @@
 <%@ page import="org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef" %>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.controllers.FlowModule" %>
+<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <form method="POST" action="<%=formAction(ScriptController.Action.editCompensationCalculation)%>"
       enctype="multipart/form-data">
@@ -16,9 +17,8 @@
         The normal way to define the compensation calculation is to upload a Flow Jo XML workspace<br>
         <input type="file" name="workspaceFile"><br>
         This workspace should contain only one set of compensation controls.</p>
-        <% FlowRun[] runs = FlowRun.getRunsForContainer(getContainer());
-            if (runs.length > 0)
-            { %>
+        <% FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
+            if (runs.length > 0) { %>
     <p>Another way to specify which keywords identify the compensation controls is to
         choose an existing experiment run.  You can use this if you have
         used the online gate editor to define the gates.<br>

@@ -1,6 +1,7 @@
 package org.labkey.flow.controllers.protocol;
 
 import org.labkey.flow.data.FieldSubstitution;
+import org.labkey.flow.data.FlowProtocol;
 import org.labkey.api.query.FieldKey;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionMapping;
@@ -21,7 +22,15 @@ public class EditFCSAnalysisNameForm extends ProtocolForm
         super.reset(actionMapping, request);
         try
         {
-            setFieldSubstitution(getProtocol().getFCSAnalysisNameExpr());
+            FieldSubstitution fs = getProtocol().getFCSAnalysisNameExpr();
+            if (fs != null)
+            {
+                setFieldSubstitution(fs);
+            }
+            else
+            {
+                setFieldSubstitution(FlowProtocol.getDefaultFCSAnalysisNameExpr());
+            }
         }
         catch (ServletException e)
         {

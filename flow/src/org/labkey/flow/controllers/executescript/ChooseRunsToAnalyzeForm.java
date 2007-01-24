@@ -144,11 +144,6 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
     public void populate() throws Exception
     {
         Collection<FlowScript> availableProtocols = Arrays.asList(FlowScript.getScripts(getContainer()));
-        FlowExperiment experiment = FlowExperiment.getExperimentRunExperiment(getContainer());
-        if (experiment == null)
-        {
-            addActionError("There are no experiments in this folder.");
-        }
         if (availableProtocols.size() == 0)
         {
             addActionError("There are no analysis or compensation protocols in this folder.");
@@ -232,8 +227,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
     private void addHasCompensationMatrixFilter(TableInfo table, SimpleFilter filter) throws Exception
     {
         FlowScript analysisScript = getProtocol();
-        PopulationSet populationSet = analysisScript.getCompensationCalcOrAnalysis(getProtocolStep());
-        if (!populationSet.requiresCompensationMatrix())
+        if (!analysisScript.requiresCompensationMatrix(getProtocolStep()))
             return;
         if (getCompensationMatrixId() != 0)
             return;

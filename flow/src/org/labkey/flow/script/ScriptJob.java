@@ -20,6 +20,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.DateUtil;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +40,6 @@ abstract public class ScriptJob extends PipelineJob
     }
 
     private Logger _log = Logger.getLogger(ScriptJob.class);
-    private Map<FlowProperty, PropertyDescriptor> _pdCacheMap;
     private Map<SampleKey, ExpMaterial> _sampleMap;
     private File _containerFolder;
 
@@ -62,7 +62,7 @@ abstract public class ScriptJob extends PipelineJob
         }
         ExperimentRunType _run;
         Map<LogType, StringBuffer> _logs = new EnumMap(LogType.class);
-        Set<String> _runOutputs = new LinkedHashSet();
+        Map<String, StartingInput> _runOutputs = new LinkedHashMap();
         Map<String, StartingInput> _startingDataInputs = new HashMap();
         Map<String, StartingInput> _startingMaterialInputs = new HashMap();
         public void logError(String lsid, String propertyURI, String message)
@@ -73,7 +73,7 @@ abstract public class ScriptJob extends PipelineJob
                 buf = new StringBuffer();
                 _logs.put(LogType.error, buf);
             }
-            EnumMap values = new EnumMap(LogField.class);
+            EnumMap<LogField, Object> values = new EnumMap(LogField.class);
             values.put(LogField.date, new Date());
             values.put(LogField.type, LogType.error);
             values.put(LogField.user, getUser());
@@ -114,7 +114,6 @@ abstract public class ScriptJob extends PipelineJob
     public ScriptJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript script, FlowProtocolStep step) throws Exception
     {
         super("flow", info);
-        _pdCacheMap = new HashMap();
         _runAnalysisScript = script;
         _step = step;
         _experimentName = experimentName;
@@ -187,7 +186,9 @@ abstract public class ScriptJob extends PipelineJob
     {
         FlowExperiment experiment = getExperiment();
         if (experiment == null)
+        {
             return new FlowRun[0];
+        }
         return experiment.findRun(path, step);
     }
 
@@ -344,6 +345,7 @@ abstract public class ScriptJob extends PipelineJob
     {
         _start = new Date();
         setStatus("Running");
+        addStatus("Job started at " + DateUtil.formatDateTime(_start));
         try
         {
             doRun();
@@ -358,6 +360,9 @@ abstract public class ScriptJob extends PipelineJob
         finally
         {
             _end = new Date();
+            addStatus("Job completed at " + DateUtil.formatDateTime(_end));
+            long duration = Math.max(0, _end.getTime() - _start.getTime());
+            addStatus("Elapsed time " + DateUtil.formatDuration(duration));
             if (_logWriter != null)
             {
                 try
@@ -396,15 +401,24 @@ abstract public class ScriptJob extends PipelineJob
         return true;
     }
 
+    public synchronized boolean interrupt()
+    {
+        addStatus("Job Interrupted");
+        return super.interrupt();
+    }
+
     public ExperimentArchiveDocument createExperimentArchive()
     {
         ExperimentArchiveDocument xarDoc = ExperimentArchiveDocument.Factory.newInstance();
         ExperimentArchiveType xar = xarDoc.addNewExperimentArchive();
         xar.addNewStartingInputDefinitions();
-        ExperimentType experiment = xar.addNewExperiment();
-        experiment.setAbout(_experimentLSID);
-        experiment.setName(_experimentName);
-        experiment.setHypothesis("");
+        if (_experimentLSID != null)
+        {
+            ExperimentType experiment = xar.addNewExperiment();
+            experiment.setAbout(_experimentLSID);
+            experiment.setName(_experimentName);
+            experiment.setHypothesis("");
+        }
         xar.addNewProtocolDefinitions();
         xar.addNewExperimentRuns();
         return xarDoc;
@@ -476,9 +490,14 @@ abstract public class ScriptJob extends PipelineJob
         appOutput.setActionSequence(FlowProtocolStep.markRunOutputs.getDefaultActionSequence());
         appOutput.setCpasType(ExperimentService.EXPERIMENT_RUN_OUTPUT_CPAS_TYPE);
         inputRefs = appOutput.getInputRefs();
-        for (String lsid : _runData._runOutputs)
+        for (Map.Entry<String, StartingInput> entry : _runData._runOutputs.entrySet())
         {
-            inputRefs.addNewDataLSID().setStringValue(lsid);
+            InputOutputRefsType.DataLSID dataLSID = inputRefs.addNewDataLSID();
+            dataLSID.setStringValue(entry.getKey());
+            if (entry.getValue().role != null)
+            {
+                dataLSID.setRoleName(entry.getValue().role.toString());
+            }
         }
         _pendingRunLSIDs.add(_runData.getLSID());
         _runData = null;
@@ -537,6 +556,7 @@ abstract public class ScriptJob extends PipelineJob
     {
         if (xardoc.getExperimentArchive().getExperimentRuns().getExperimentRunArray().length > 0)
         {
+            addStatus("Inserting records into database");
             try
             {
                 ScriptXarSource source = new ScriptXarSource(xardoc, root, workingDirectory);
@@ -555,9 +575,10 @@ abstract public class ScriptJob extends PipelineJob
         _pendingRunLSIDs.clear();
     }
 
-    public void addRunOutput(String lsid)
+    public void addRunOutput(String lsid, InputRole role)
     {
-        _runData._runOutputs.add(lsid);
+        StartingInput input = new StartingInput(lsid, null, role);
+        _runData._runOutputs.put(lsid, input);
     }
 
     public void addStartingInput(String lsid, String name, File file, InputRole role)
@@ -568,17 +589,6 @@ abstract public class ScriptJob extends PipelineJob
     public boolean allowMultipleSimultaneousJobs()
     {
         return true;
-    }
-
-    /**
-     * Returns a map of FlowProperties.
-     * We ensure that all properties we set on the XML beans have been inserted.  This is because it is expensive
-     * to insert these property descriptors in XarReader because there is a transaction active, they can't get cached,
-     * amd there is the potential for someone to insert the same properties in another transaction.
-     */
-    public Map<FlowProperty, PropertyDescriptor> getPdCacheMap()
-    {
-        return _pdCacheMap;
     }
 
     public boolean hasErrors()
@@ -654,7 +664,7 @@ abstract public class ScriptJob extends PipelineJob
         }
     }
 
-    public File decideFileName(File directory, String name, String extension)
+    synchronized public File decideFileName(File directory, String name, String extension)
     {
         File fileTry = new File(directory, name + "." + extension);
         if (!fileTry.exists())
@@ -718,5 +728,11 @@ abstract public class ScriptJob extends PipelineJob
         ViewURLHelper ret = PFUtil.urlFor(FlowController.Action.cancelJob, getContainer());
         ret.addParameter(FlowParam.statusFile.toString(), getStatusFilePath());
         return ret;
+    }
+
+    public void handleException(Throwable e)
+    {
+        _log.error("Error", e);
+        addError(null, null, e.toString());
     }
 }

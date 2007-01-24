@@ -17,33 +17,42 @@
 package org.labkey.flow.controllers;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentDataHandler;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.view.ViewContext;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
-import org.labkey.api.view.ViewContext;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.log.LogController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
+import org.labkey.flow.webparts.FlowFolderType;
+import org.labkey.flow.webparts.OverviewWebPart;
+import org.labkey.flow.webparts.AnalysesWebPart;
+import org.labkey.flow.webparts.AnalysisScriptsWebPart;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocolImplementation;
+import org.labkey.flow.data.InputRole;
 import org.labkey.flow.persist.FlowDataHandler;
+import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.script.FlowPipelineProvider;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class FlowModule extends DefaultModule
 {
@@ -54,7 +63,10 @@ public class FlowModule extends DefaultModule
 
     public FlowModule()
     {
-        super(NAME, 1.70, "/Flow");
+        super(NAME, 1.71, "/Flow",
+                OverviewWebPart.FACTORY,
+                AnalysesWebPart.FACTORY,
+                AnalysisScriptsWebPart.FACTORY);
         PipelineService.get().registerPipelineProvider(new FlowPipelineProvider());
         DefaultSchema.registerProvider(FlowSchema.SCHEMANAME, new DefaultSchema.SchemaProvider()
         {
@@ -83,9 +95,17 @@ public class FlowModule extends DefaultModule
     public Set<String> getModuleDependencies()
     {
         Set<String> result = new HashSet<String>();
-        result.add("Pipeline");
         result.add("Experiment");
         return result;
+    }
+
+    public void afterSchemaUpdate(ModuleContext moduleContext, ViewContext viewContext)
+    {
+        super.afterSchemaUpdate(moduleContext, viewContext);
+        if (moduleContext.getInstalledVersion() >= 1.54 && moduleContext.getInstalledVersion() < 1.71)
+        {
+            ensureDataInputRoles(viewContext);
+        }
     }
 
     @Override
@@ -130,7 +150,9 @@ public class FlowModule extends DefaultModule
     {
         FlowProtocolImplementation.register();
         super.startup(moduleContext);
+        ModuleLoader.getInstance().registerFolderType(new FlowFolderType(this));
     }
+
 
     public static String getShortProductName()
     {
@@ -140,5 +162,62 @@ public class FlowModule extends DefaultModule
     public static String getLongProductName()
     {
         return "LabKey Flow";
+    }
+
+    public Set<Module> getActiveModulesForOwnedFolder()
+    {
+        Set<Module> ret = new HashSet();
+        ret.add(this);
+        ret.add(ModuleLoader.getInstance().getModule("Query"));
+        ret.add(ModuleLoader.getInstance().getModule("Experiment"));
+        ret.add(ModuleLoader.getInstance().getModule("Pipeline"));
+        return ret;
+    }
+
+    /**
+     * Go through all data inputs, and make sure that the PropertyId column is set to a value
+     * which is appropriate for the type of input.
+     */
+    private void ensureDataInputRoles(ViewContext ctx)
+    {
+        try
+        {
+            DbSchema expSchema = ExperimentService.get().getSchema();
+            ResultSet rs = Table.executeQuery(expSchema,
+                    new SQLFragment("SELECT flow.object.typeid, exp.data.container, exp.datainput.dataid, exp.datainput.targetapplicationid" +
+                    "\nFROM exp.datainput INNER JOIN exp.data ON exp.datainput.dataid = exp.data.rowid" +
+                    "\nINNER JOIN flow.object ON exp.datainput.dataid = flow.object.dataid WHERE flow.object.typeid IS NOT NULL" +
+                    "\nAND exp.datainput.propertyid IS NULL"
+                    ));
+            while (rs.next())
+            {
+                String containerId = rs.getString("container");
+                int typeId = rs.getInt("typeid");
+                int dataId = rs.getInt("dataid");
+                int targetApplicationid = rs.getInt("targetApplicationId");
+
+                Container container = ContainerManager.getForId(containerId);
+                if (container == null)
+                {
+                    continue;
+                }
+                ObjectType type = ObjectType.fromTypeId(typeId);
+                if (type == null)
+                    continue;
+                InputRole role = type.getInputRole();
+                if (role == null)
+                    continue;
+                PropertyDescriptor pd = ExperimentService.get().ensureDataInputRole(ctx.getUser(), container, role.toString(), null);
+                if (pd != null)
+                {
+                    Table.execute(expSchema, "UPDATE exp.datainput SET propertyid = " + pd.getPropertyId() +
+                            "\nWHERE exp.datainput.dataid = " + dataId + " AND exp.datainput.targetapplicationid = " + targetApplicationid, null);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _log.error("Error updating flow to add propertyid's to datainput's", e);
+        }
     }
 }

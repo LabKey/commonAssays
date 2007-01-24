@@ -1255,7 +1255,7 @@ public class ScriptController extends BaseFlowController
         if (form.well != null)
             return;
 
-        FlowRun[] runs = FlowRun.getRunsForContainer(getContainer());
+        FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
         if (runs.length != 0)
         {
             form.run = runs[0];

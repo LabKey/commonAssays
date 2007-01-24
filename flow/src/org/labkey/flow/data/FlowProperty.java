@@ -9,6 +9,7 @@ abstract public class FlowProperty
     static public final SystemProperty SampleSetJoin = new SystemProperty(PROPERTY_BASE + "SampleSetJoin", PropertyType.STRING);
     static public final SystemProperty LogText = new SystemProperty(PROPERTY_BASE + "LogText", PropertyType.STRING);
     static public final SystemProperty FCSAnalysisName = new SystemProperty(PROPERTY_BASE + "FCSAnalysisName", PropertyType.STRING);
+    static public final SystemProperty FCSAnalysisFilter = new SystemProperty(PROPERTY_BASE + "FCSAnalysisFilter", PropertyType.STRING);
     static public void register()
     {
 

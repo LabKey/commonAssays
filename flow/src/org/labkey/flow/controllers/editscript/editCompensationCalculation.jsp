@@ -32,6 +32,19 @@ for (Map.Entry<String, Map<String, FlowJoWorkspace.SampleInfo>> keywordEntry : k
     %>
 
 </script>
+<p><b>Instructions:</b></p>
+<p>
+    For each parameter which requires compensation, specify the keyword name and value
+    which are to be used to identify the compensation control in experiment runs.
+</p>
+<p>
+    <b>If you do not see the keyword you are looking for:</b><br>
+    This page only allows you to choose keyword/value pairs that uniquely identify a
+    sample in the workspace.  If you do not see the keyword that you would like to use,
+    this might be because the workspace that you uploaded contained more than one sample
+    with that keyword value.  Use FlowJo to save a workspace that contains only one set of
+    compensation controls, and upload that new workspace.
+</p>
 
 <form method="POST" action="<%=formAction(ScriptController.Action.editCompensationCalculation)%>">
     <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form.workspace)%>">
@@ -57,14 +70,4 @@ for (Map.Entry<String, Map<String, FlowJoWorkspace.SampleInfo>> keywordEntry : k
     </table>
     <input type="Submit" value="Submit">
 </form>
-<p><b>Instructions:</b></p>
-<p>
-    For each parameter which requires compensation, specify the keyword name and value
-    which are to be used to identify the compensation control in experiment runs.
-</p>
-<p>
-    This page only allows you to choose keyword/value pairs that uniquely identify a
-    sample in the workspace.  If you do not see the keyword that you would like to use,
-    this might be because the workspace that you uploaded contained more than one sample
-    with that keyword value.  Choose a different keyword at this point.
-</p>
+

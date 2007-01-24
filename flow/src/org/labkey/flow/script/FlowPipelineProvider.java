@@ -41,6 +41,14 @@ public class FlowPipelineProvider extends PipelineProvider
         url.setPageFlow(PFUtil.getPageFlowName(AnalysisScriptController.Action.chooseRunsToUpload));
         url.setAction(AnalysisScriptController.Action.chooseRunsToUpload.toString());
         FileAction action = new FileAction("Upload FCS files", url, new File[] { new File(entry.getURI())});
+        action.setDescription("<p><b>Flow Instructions:</b><br>Navigate to the directories containing FCS files.  Click the button to upload FCS files in the directories shown.</p>");
         entry.addAction(action);
+    }
+
+    public boolean suppressOverlappingRootsWarning(ViewContext context)
+    {
+        if (!hasFlowModule(context))
+            return super.suppressOverlappingRootsWarning(context);
+        return true;
     }
 }

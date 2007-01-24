@@ -63,12 +63,13 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
 
     static public FlowExperiment[] getAnalyses(Container container)
     {
-        FlowExperiment[] all = getExperiments(container);
         List<FlowExperiment> ret = new ArrayList();
-        for (FlowExperiment exp : all)
+        for (FlowExperiment experiment : getExperiments(container))
         {
-            if (exp.getRunCount(FlowProtocolStep.analysis) != 0 || exp.getRunCount(FlowProtocolStep.calculateCompensation) != 0)
-                ret.add(exp);
+            if (experiment.isAnalysis())
+            {
+                ret.add(experiment);
+            }
         }
         return ret.toArray(new FlowExperiment[0]);
     }
@@ -96,35 +97,12 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
 
     static public String getExperimentRunExperimentLSID(Container container)
     {
-        FlowExperiment exp = getExperimentRunExperiment(container);
-        if (exp != null)
-            return exp.getLSID();
         return FlowObject.generateLSID(container, "Experiment", FlowExperimentRunExperimentName);
     }
 
     static public String getExperimentRunExperimentName(Container container)
     {
-        FlowExperiment exp = getExperimentRunExperiment(container);
-        if (exp != null)
-            return exp.getName();
         return FlowExperimentRunExperimentName;
-    }
-
-    static public FlowExperiment getExperimentRunExperiment(Container container)
-    {
-        String lsidDefault = FlowObject.generateLSID(container, "Experiment", FlowExperimentRunExperimentName);
-        ExpExperiment exp = ExperimentService.get().getExpExperiment(lsidDefault);
-        if (exp != null)
-            return new FlowExperiment(exp);
-
-        for (FlowExperiment experiment : getExperiments(container))
-        {
-            if (experiment.getRunCount(FlowProtocolStep.keywords) != 0)
-            {
-                return experiment;
-            }
-        }
-        return null;
     }
 
     static public FlowExperiment fromURL(ViewURLHelper url) throws ServletException
@@ -234,5 +212,10 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     {
         PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(user.getUserId(), getContainer().getId(), PROP_CATEGORY, true);
         map.put(PROP_PRIMARY_ANALYSIS, getLSID());
+    }
+
+    public boolean isAnalysis()
+    {
+        return !FlowExperimentRunExperimentName.equals(getName());
     }
 }

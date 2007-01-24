@@ -151,7 +151,7 @@ public class KeywordsHandler extends BaseHandler
                 // mlsid.setRoleName(InputRole.Sample.toString());
             }
 
-            _job.addRunOutput(well.getAbout());
+            _job.addRunOutput(well.getAbout(), InputRole.FCSFile);
         }
         _job.finishExperimentRun(xar, run);
         _job.importRuns(xarDoc, directory, runDirectory);

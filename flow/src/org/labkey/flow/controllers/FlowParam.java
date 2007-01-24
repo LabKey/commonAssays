@@ -17,6 +17,7 @@ public enum FlowParam
     columnList,
     sampleId,
     sampleSetId,
+    statisticSetId,
     objectId,
     protocolId,
 }

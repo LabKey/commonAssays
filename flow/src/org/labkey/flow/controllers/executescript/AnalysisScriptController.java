@@ -4,6 +4,7 @@ import org.labkey.flow.controllers.BaseFlowController;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.struts.action.ActionError;
+import org.apache.commons.lang.StringUtils;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.*;
 import org.labkey.api.jsp.FormPage;
@@ -109,28 +110,38 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             addError("The pipeline root is not set.");
             return Collections.EMPTY_LIST;
         }
+
+        String displayPath;
+        if (StringUtils.isEmpty(form.path))
+        {
+            displayPath = "this directory";
+        }
+        else
+        {
+            displayPath = "'" + form.path + "'";
+        }
         URI pathRoot = URIUtil.resolve(root, form.path);
         if (pathRoot == null)
         {
-            addError("The path '" + form.path + "' is invalid.");
+            addError("The path " + displayPath + " is invalid.");
             return Collections.EMPTY_LIST;
         }
 
         File fileRoot = new File(URIUtil.resolve(root, form.path));
         if (!fileRoot.isDirectory())
         {
-            addError("'" + form.path + "' is not a directory.");
+            addError(displayPath + " is not a directory.");
         }
         List<File> files = new ArrayList();
         files.add(fileRoot);
         files.addAll(Arrays.asList(fileRoot.listFiles()));
 
-        FlowExperiment exp = form.getExperiment();
         Set<String> usedPaths = new HashSet();
-        if (exp != null)
+        for (FlowRun run : FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords))
         {
-            usedPaths.addAll(Arrays.asList(exp.getAnalyzedRunPaths(getUser(), FlowProtocolStep.keywords)));
+            usedPaths.add(run.getExperimentRun().getFilePathRoot());
         }
+
         List<URI> ret = new ArrayList();
         boolean anyFCSDirectories = false;
         for (File file : files)
@@ -148,11 +159,11 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         {
             if (anyFCSDirectories)
             {
-                addError("All of the directories in '" + form.path + "' have already been uploaded.");
+                addError("All of the directories in " + displayPath + " have already been uploaded.");
             }
             else
             {
-                addError("No FCS files were found in '" + form.path + "' or its children.");
+                addError("No FCS files were found in " + displayPath + " or its children.");
             }
         }
         return ret;
@@ -208,10 +219,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             paths.add(new File(URIUtil.resolve(root, path)));
         }
 
-        String experimentName = FlowExperiment.getExperimentRunExperimentName(getContainer());
-        String experimentLSID = FlowExperiment.getExperimentRunExperimentLSID(getContainer());
-
-        AddRunsJob job = new AddRunsJob(getViewBackgroundInfo(), experimentName, experimentLSID, FlowProtocol.ensureForContainer(getUser(), getContainer()), analysisScript, paths);
+        AddRunsJob job = new AddRunsJob(getViewBackgroundInfo(), FlowProtocol.ensureForContainer(getUser(), getContainer()), analysisScript, paths);
         return executeScript(job, analysisScript);
     }
 

@@ -1,18 +1,17 @@
 package org.labkey.flow.data;
 
 import org.labkey.api.exp.*;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpExperiment;
+import org.labkey.api.exp.api.*;
 import org.labkey.api.data.*;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ViewURLHelper;
 import org.apache.log4j.Logger;
+import org.apache.commons.lang.StringUtils;
 
 import java.sql.SQLException;
 import java.util.*;
 import java.net.URI;
+import java.io.File;
 
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.FlowParam;
@@ -225,16 +224,22 @@ public class FlowRun extends FlowObject<ExpRun>
         });
     }
 
-    static public FlowRun[] getRunsForContainer(Container container) throws SQLException
+    static public FlowRun[] getRunsForContainer(Container container, FlowProtocolStep step) throws SQLException
     {
-        Set<String> urls = new HashSet();
         List<FlowRun> ret = new ArrayList();
-        FlowExperiment experiment = FlowExperiment.getExperimentRunExperiment(container);
-        if (experiment == null)
-            return new FlowRun[0];
-        for (FlowRun run : experiment.getRuns(FlowProtocolStep.keywords))
+        ExpProtocol childProtocol = null;
+        if (step != null)
         {
-            ret.add(run);
+            FlowProtocol childFlowProtocol = step.getForContainer(container);
+            if (childFlowProtocol == null)
+            {
+                return new FlowRun[0];
+            }
+            childProtocol = childFlowProtocol.getProtocol();
+        }
+        for (ExpRun run : ExperimentService.get().getExpRuns(container, null, childProtocol))
+        {
+            ret.add(new FlowRun(run));
         }
         sortRuns(ret);
         return ret.toArray(new FlowRun[0]);

@@ -1,10 +1,7 @@
 package org.labkey.flow.script;
 
 import org.apache.log4j.Logger;
-import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.data.FlowProtocolStep;
-import org.labkey.flow.data.FlowProtocol;
-import org.labkey.flow.data.SampleKey;
+import org.labkey.flow.data.*;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.exp.api.ExpMaterial;
 
@@ -18,9 +15,9 @@ public class AddRunsJob extends ScriptJob
 
     List<File> _paths;
 
-    public AddRunsJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript script, List<File> paths) throws Exception
+    public AddRunsJob(ViewBackgroundInfo info, FlowProtocol protocol, FlowScript script, List<File> paths) throws Exception
     {
-        super(info, experimentName, experimentLSID, protocol, script, FlowProtocolStep.keywords);
+        super(info, FlowExperiment.getExperimentRunExperimentName(info.getContainer()), FlowExperiment.getExperimentRunExperimentLSID(info.getContainer()), protocol, script, FlowProtocolStep.keywords);
 
         _paths = paths;
     }

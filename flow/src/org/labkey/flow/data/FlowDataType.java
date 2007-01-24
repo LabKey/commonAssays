@@ -63,6 +63,7 @@ abstract public class FlowDataType extends DataType
         }
     };
 
+
     static public void register()
     {
         ExperimentService.registerDataType(FCSFile);
@@ -93,11 +94,6 @@ abstract public class FlowDataType extends DataType
         ret.append(_name);
         ret.append(".gif");
         return ret.toString();
-    }
-
-    public String getNamespace()
-    {
-        return "Flow-" + toString();
     }
 
     static public FlowDataType ofNamespace(String namespace)

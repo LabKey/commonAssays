@@ -42,12 +42,20 @@ public class FlowScript extends FlowDataObject
 
     static public FlowScript fromLSID(String lsid)
     {
-        return new FlowScript(ExperimentService.get().getExpData(lsid));
+        ExpData data = ExperimentService.get().getExpData(lsid);
+        if (data == null)
+            return null;
+        return new FlowScript(data);
     }
 
     static public FlowScript fromURL(ViewURLHelper url) throws ServletException
     {
         return fromURL(url, null);
+    }
+
+    static public FlowScript fromName(Container container, String name)
+    {
+        return FlowScript.fromLSID(FlowObject.generateLSID(container, FlowDataType.Script.getNamespacePrefix(), name));
     }
 
 
@@ -293,5 +301,18 @@ public class FlowScript extends FlowDataObject
     public int getRunCount()
     {
         return getExpObject().getTargetRuns().length;
+    }
+
+    public boolean requiresCompensationMatrix(FlowProtocolStep step)
+    {
+        try
+        {
+            PopulationSet populationSet = getCompensationCalcOrAnalysis(step);
+            return populationSet.requiresCompensationMatrix();
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 }

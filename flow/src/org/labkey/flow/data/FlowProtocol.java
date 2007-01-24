@@ -171,6 +171,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     {
         ViewURLHelper ret = new ViewURLHelper("Experiment", "showUploadMaterials", getContainerPath());
         ret.addParameter("name", SAMPLESET_NAME);
+        ret.addParameter("nameReadOnly", "true");
         return ret;
     }
 
@@ -365,20 +366,26 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return ret;
     }
 
+    static public FieldSubstitution getDefaultFCSAnalysisNameExpr()
+    {
+        return new FieldSubstitution(new Object[] {new FieldKey(null, "Name")});
+    }
+
     public FieldSubstitution getFCSAnalysisNameExpr()
     {
         String ret = (String) getProperty(FlowProperty.FCSAnalysisName);
         if (ret == null)
         {
-            FieldSubstitution fs = new FieldSubstitution(new Object[] {new FieldKey(null, "Name")});
-            return fs;
+            return null;
         }
         return FieldSubstitution.fromString(ret);
     }
 
     public void setFCSAnalysisNameExpr(User user, FieldSubstitution fs) throws Exception
     {
-        String value = fs.toString();
+        String value = null;
+        if (fs != null)
+            value = fs.toString();
         if (StringUtils.isEmpty(value))
         {
             value = null;
@@ -390,6 +397,10 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     {
         ExperimentService.Interface expService = ExperimentService.get();
         FieldSubstitution fs = getFCSAnalysisNameExpr();
+        if (fs == null)
+        {
+            fs = FlowProtocol.getDefaultFCSAnalysisNameExpr();
+        }
         fs.insertParent(new TableKey(null, "FCSFile"));
         FlowSchema schema = new FlowSchema(user, getContainer());
         ExpDataTable table = schema.createFCSAnalysisTable("FCSAnalysis", FlowDataType.FCSAnalysis);
@@ -445,6 +456,8 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(colRowId, well.getRowId());
         FieldSubstitution fs = getFCSAnalysisNameExpr();
+        if (fs == null)
+            return well.getName();
         Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(table, Arrays.asList(fs.getFieldKeys()));
         ResultSet rs = Table.select(table, columns.values().toArray(new ColumnInfo[0]), filter, null);
         try
@@ -459,5 +472,28 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             rs.close();
         }
         return well.getName();
+    }
+
+    public String getFCSAnalysisFilterString()
+    {
+        return (String) getProperty(FlowProperty.FCSAnalysisFilter);
+    }
+
+    public SimpleFilter getFCSAnalysisFilter()
+    {
+        SimpleFilter ret = new SimpleFilter();
+        String value = getFCSAnalysisFilterString();
+        if (value != null)
+        {
+            ViewURLHelper url = new ViewURLHelper();
+            url.setRawQuery(value);
+            ret.addUrlFilters(url, null);
+        }
+        return ret;
+    }
+
+    public void setFCSAnalysisFilter(User user, String value) throws SQLException
+    {
+        setProperty(user, FlowProperty.FCSAnalysisFilter.getPropertyDescriptor(), value);
     }
 }

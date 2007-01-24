@@ -53,9 +53,9 @@
     <% for (Map.Entry<StatisticSpec, Double> statistic : getStatistics().entrySet())
     { %>
     <tr><td><%=h(statistic.getKey().toString())%></td><td><%=statistic.getValue()%></td></tr>
-    <% }
-    } %>
+    <% } %>
 </table>
+<% } %>
 
 <% for (GraphSpec graph : getGraphs())
 { %>

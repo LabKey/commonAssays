@@ -90,6 +90,17 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         return ret.toArray(new String[0]);
     }
 
+    protected boolean isValidCompKeyword(String keyword)
+    {
+        if ("$BEGINDATA".equals(keyword) || "$ENDDATA".equals(keyword) || "$TOT".equals(keyword))
+            return false;
+        if (keyword.startsWith("$P") && keyword.endsWith("V"))
+        {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Walks all of the samples in the workspace, looking for keyword/value pairs that uniquely identify a sample.
      * For each pair that is found, returns the list of subset names.
@@ -109,6 +120,8 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         Map<String,Map<String, FlowJoWorkspace.SampleInfo>> keywordValueSubsetListMap = new LinkedHashMap();
         for (String keyword : keywordsSet)
         {
+            if (!isValidCompKeyword(keyword))
+                continue;
             Map<String, List<FlowJoWorkspace.SampleInfo>> sampleMap = new LinkedHashMap();
             for (FlowJoWorkspace.SampleInfo sample : sampleSubsetMap.keySet())
             {

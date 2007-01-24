@@ -11,6 +11,7 @@ import org.apache.xmlbeans.impl.xb.xsdschema.SchemaDocument;
 import org.labkey.api.security.User;
 
 import java.sql.SQLException;
+import java.sql.ResultSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.net.URI;
 
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.data.FlowProtocolStep;
 
 public class FlowManager
 {
@@ -305,5 +307,24 @@ public class FlowManager
             script.setText(scriptText);
             script = Table.update(user, getTinfoScript(), script, script.getRowId(), null);
         }
+    }
+
+    public int getObjectCount(Container container, ObjectType type) throws SQLException
+    {
+        String sqlFCSFileCount = "SELECT COUNT(flow.object.rowid) FROM flow.object\n" +
+                "INNER JOIN exp.data ON flow.object.dataid = exp.data.rowid\n" +
+                "WHERE exp.data.container = ? AND " +
+                "flow.object.typeid = ?";
+        return Table.executeSingleton(getSchema(), sqlFCSFileCount, new Object[] { container.getId(), type.getTypeId() }, Integer.class);
+    }
+
+    public int getRunCount(Container container, ObjectType type) throws SQLException
+    {
+        String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
+                "WHERE exp.ExperimentRun.RowId IN (" +
+                "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
+                "AND exp.data.container = ?\n" +
+                "AND flow.object.typeid = ?)";
+        return Table.executeSingleton(getSchema(), sqlFCSRunCount, new Object[] { container.getId(), type.getTypeId() }, Integer.class);
     }
 }

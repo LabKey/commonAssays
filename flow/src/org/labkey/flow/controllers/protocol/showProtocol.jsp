@@ -24,3 +24,7 @@
     When you analyze an FCS file, the FCS analysis can be given a name composed from keyword values from the FCS file.<br>
     <cpas:link href="<%=protocol.urlFor(ProtocolController.Action.editFCSAnalysisName)%>" text="Change FCS Analyses Names" />
 </p>
+<p><b>FCS Analysis Filter</b><br>
+    You can choose to only analyze FCS files where the keywords match certain criteria.<br>
+    <cpas:link href="<%=protocol.urlFor(ProtocolController.Action.editFCSAnalysisFilter)%>" text="Edit FCS Analysis Filter" /> 
+</p>
