@@ -1,10 +1,6 @@
-<%@ page import="org.labkey.api.view.HttpView"%>
-<%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.nab.NabController" %>
-<%@ page import="org.labkey.api.study.WellGroup" %>
-<%@ page import="org.labkey.api.study.GenericAssayService" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.nab.NabController"%>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<script type="text/javascript">LABKEY.requiresScript('completion.js');</script>
 <%
     JspView<org.labkey.nab.NabController.PublishVerifyBean> me = (JspView<NabController.PublishVerifyBean>) HttpView.currentView();
     NabController.PublishVerifyBean bean = me.getModel();

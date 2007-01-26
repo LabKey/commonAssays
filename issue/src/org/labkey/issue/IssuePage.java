@@ -1,7 +1,5 @@
 package org.labkey.issue;
 
-import org.labkey.issue.model.Issue;
-import org.labkey.issue.model.IssueManager;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -11,6 +9,8 @@ import org.labkey.api.jsp.JspBase;
 import org.labkey.api.security.User;
 import org.labkey.api.util.Cache;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.issue.model.Issue;
+import org.labkey.issue.model.IssueManager;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -309,6 +309,7 @@ abstract public class IssuePage extends JspBase
         }
         final StringBuilder sb = new StringBuilder();
 
+        sb.append("<script type=\"text/javascript\">LABKEY.requiresScript('completion.js');</script>");
         sb.append("<textarea name=\"notifyList\" id=\"notifyList\" cols=\"30\" rows=\"4\"" );
         sb.append(" onKeyDown=\"return ctrlKeyCheck(event);\"");
         sb.append(" onBlur=\"hideCompletionDiv();\"");

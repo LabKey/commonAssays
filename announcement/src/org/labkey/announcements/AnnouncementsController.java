@@ -16,9 +16,6 @@
 
 package org.labkey.announcements;
 
-import org.labkey.announcements.model.NormalMessageBoardPermissions;
-import org.labkey.announcements.model.Permissions;
-import org.labkey.announcements.model.SecureMessageBoardPermissions;
 import org.apache.beehive.netui.pageflow.FormData;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
@@ -30,24 +27,24 @@ import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.upload.FormFile;
+import org.labkey.announcements.EmailResponsePage.Reason;
+import org.labkey.announcements.model.NormalMessageBoardPermissions;
+import org.labkey.announcements.model.Permissions;
+import org.labkey.announcements.model.SecureMessageBoardPermissions;
 import org.labkey.api.announcements.Announcement;
 import org.labkey.api.announcements.AnnouncementManager;
 import org.labkey.api.announcements.AnnouncementManager.Settings;
 import org.labkey.api.announcements.CommSchema;
-import org.labkey.api.data.*;
+import org.labkey.api.attachments.AttachmentForm;
+import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.attachments.DownloadUrlHelper;
+import org.labkey.api.data.BeanViewForm;
 import org.labkey.api.jsp.JspLoader;
-import org.labkey.api.security.*;
 import org.labkey.api.security.SecurityManager;
-import org.labkey.api.util.*;
 import org.labkey.api.util.MailHelper.ViewMessage;
-import org.labkey.api.view.*;
 import org.labkey.api.wiki.WikiRenderer;
 import org.labkey.api.wiki.WikiRendererType;
 import org.labkey.api.wiki.WikiService;
-import org.labkey.api.attachments.DownloadUrlHelper;
-import org.labkey.api.attachments.AttachmentForm;
-import org.labkey.api.attachments.AttachmentService;
-import org.labkey.announcements.EmailResponsePage.Reason;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -703,7 +700,7 @@ public class AnnouncementsController extends ViewController
     private String getUserListTextArea(Announcement ann, String emailList)
     {
         StringBuilder sb = new StringBuilder();
-
+        sb.append("<script type=\"text/javascript\">LABKEY.requiresScript('completion.js');</script>");
         sb.append("<textarea name=\"emailList\" id=\"emailList\" cols=\"30\" rows=\"5\"" );
         sb.append(" onKeyDown=\"return ctrlKeyCheck(event);\"");
         sb.append(" onBlur=\"hideCompletionDiv();\"");
