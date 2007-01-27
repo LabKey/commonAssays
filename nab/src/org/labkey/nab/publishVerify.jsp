@@ -12,7 +12,7 @@
     String errors = PageFlowUtil.getStrutsError(request, "main");
 %>
 <span class="labkey-error"><%=errors%></span>
-Publishing results to <b></b><%= h(bean.getTargetContainer().getPath()) %></b>.<br><br>
+Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All data must be associated with a participant/visit within the target study.<br><br>
 <form action="handlePublish.post" method="POST">
     <input type="hidden" name="plateIds" value="false">
     <input type="hidden" name="targetContainerId" value="<%= bean.getTargetContainer().getId() %>">

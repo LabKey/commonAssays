@@ -639,7 +639,7 @@ public class NabController extends ViewController
 
         JspView<PublishVerifyBean> publishVerifyView = new JspView<PublishVerifyBean>("/org/labkey/nab/publishVerify.jsp",
                 new PublishVerifyBean(targetContainer, sampleInfoMap));
-        return _renderInTemplate(publishVerifyView, "Choose Target Study");
+        return _renderInTemplate(publishVerifyView, "Associate Data");
     }
 
     private List<Integer> getCheckboxIds()
