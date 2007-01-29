@@ -44,6 +44,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
+import org.labkey.api.query.QueryView;
 import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
@@ -471,14 +472,28 @@ public class MS2Controller extends ViewController
         AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
         vBox.addView(createHeader(currentUrl, form, run, peptideView));
 
-        GridView grid = peptideView.getGridView(form);
+        WebPartView grid = peptideView.createGridView(form);
+        List<DisplayColumn> displayColumns;
+        if (grid instanceof QueryView)
+        {
+            displayColumns = ((QueryView)grid).getDisplayColumns();
+        }
+        else
+        {
+            displayColumns = ((GridView)grid).getDataRegion().getDisplayColumnList();
+        }
 
-        boolean exploratoryFeatures =
-        (
-            null != grid.getDataRegion().getDisplayColumn("H") ||
-            null != grid.getDataRegion().getDisplayColumn("DeltaScan") ||
-            run instanceof XTandemRun && run.getHasPeptideProphet() && null != grid.getDataRegion().getDisplayColumn("PeptideProphet")
-        );
+        boolean exploratoryFeatures = false;
+        for (DisplayColumn displayColumn : displayColumns)
+        {
+            if (displayColumn.getName().equals("H") ||
+                displayColumn.getName().equals("DeltaScan") ||
+                run instanceof XTandemRun && run.getHasPeptideProphet() && displayColumn.getName().equals("PeptideProphet"))
+            {
+                exploratoryFeatures = true;
+                break;
+            }
+        }
 
         vBox.addView(grid);
         _log.info("Lookup took " + (System.currentTimeMillis() - time) + " milliseconds");
@@ -604,7 +619,10 @@ public class MS2Controller extends ViewController
         cloneUrl.deleteParameter("grouping");
         cloneUrl.setAction("showRun");
         String grouping = form.getGrouping();
-        headerView.addObject("tabPeptide", renderTab(cloneUrl, "&nbsp;None&nbsp;", !"protein".equals(grouping) && !"proteinprophet".equals(grouping)));
+        headerView.addObject("tabPeptide", renderTab(cloneUrl, "&nbsp;None&nbsp;", !"protein".equals(grouping) && !"proteinprophet".equals(grouping) && !"query".equals(grouping)));
+
+        cloneUrl.replaceParameter("grouping", "query");
+        headerView.addObject("tabQuery", renderTab(cloneUrl, "&nbsp;Query&nbsp;", "query".equals(grouping)));
 
         cloneUrl.replaceParameter("grouping", "protein");
         headerView.addObject("tabCollapsedProtein", renderTab(cloneUrl, "&nbsp;Protein&nbsp;Collapsed&nbsp;", "protein".equals(grouping) && !form.getExpanded()));
@@ -1046,7 +1064,7 @@ public class MS2Controller extends ViewController
 
     private AbstractPeptideView getPeptideView(String grouping, MS2Run... runs) throws ServletException
     {
-        return AbstractPeptideView.getPeptideView(grouping, getContainer(), getUser(), getViewURLHelper(), runs);
+        return AbstractPeptideView.getPeptideView(grouping, getContainer(), getUser(), getViewURLHelper(), getViewContext(), runs);
     }
 
 

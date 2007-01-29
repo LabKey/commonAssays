@@ -27,7 +27,7 @@ public class StandardProteinPeptideView extends AbstractPeptideView
         super(c, u, "NestedPeptides", url, runs);
     }
 
-    public GridView getGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws ServletException, SQLException
+    public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws ServletException, SQLException
     {
         DataRegion proteinRgn = createProteinDataRegion(expanded, requestedPeptideColumnNames, requestedProteinColumnNames);
         proteinRgn.setTable(MS2Manager.getTableInfoProteins());

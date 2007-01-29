@@ -116,7 +116,7 @@ public class PieJChartHelper extends JChartHelper
         sql.append(" pa INNER JOIN\n      ");
         sql.append(ProteinManager.getTableInfoGoTerm());
         sql.append(" gt ON gt.acc = ");
-        sql.append(ProteinManager.getSqlDialect().getSubstringFunction("pa.AnnotVal", 1, 10));
+        sql.append(ProteinManager.getSqlDialect().getSubstringFunction("pa.AnnotVal", "1", "10"));
         sql.append(" AND pa.");
         sql.append(ProteinDictionaryHelpers.getAnnotTypeWhereClause(goChartType));
         sql.append(" AND pa.SeqId IN (");

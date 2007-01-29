@@ -29,7 +29,7 @@ public class FlatPeptideView extends AbstractPeptideView
         super(container, user, "Peptides", url, runs);
     }
 
-    public GridView getGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws ServletException, SQLException
+    public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws ServletException, SQLException
     {
         DataRegion rgn = getPeptideGridForDisplay(requestedPeptideColumnNames);
         GridView peptideView = new GridView(rgn);

@@ -14,6 +14,7 @@
 <tr><td><table class="dataRegion" border="0"><tr>
     <td>Grouping:</td>
     <td>$tabPeptide</td>
+    <td>$tabQuery</td>
     <td>$tabCollapsedProtein</td>
     <td>$tabExpandedProtein</td>
     <td>

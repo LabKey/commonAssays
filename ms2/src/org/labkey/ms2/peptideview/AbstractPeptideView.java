@@ -3,11 +3,12 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.GridView;
+import org.labkey.api.view.WebPartView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.*;
 import org.labkey.api.security.User;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
-import org.labkey.api.util.CaseInsensitiveHashMap;
 import org.labkey.common.util.Pair;
 import org.apache.log4j.Logger;
 
@@ -50,7 +51,7 @@ public abstract class AbstractPeptideView
     protected final MS2Run[] _runs;
     private String _columnPropertyName;
 
-    public static AbstractPeptideView getPeptideView(String grouping, Container c, User user, ViewURLHelper url, MS2Run... runs)
+    public static AbstractPeptideView getPeptideView(String grouping, Container c, User user, ViewURLHelper url, ViewContext viewContext, MS2Run... runs)
     {
         if ("protein".equals(grouping))
         {
@@ -59,6 +60,10 @@ public abstract class AbstractPeptideView
         else if ("proteinprophet".equals(grouping))
         {
             return new ProteinProphetPeptideView(c, user, url, runs);
+        }
+        else if ("query".equals(grouping))
+        {
+            return new QueryFlatPeptideView(c, user, url, runs, viewContext);
         }
         else
         {
@@ -75,13 +80,13 @@ public abstract class AbstractPeptideView
         _runs = runs;
     }
 
-    public GridView getGridView(MS2Controller.RunForm form) throws ServletException, SQLException
+    public WebPartView createGridView(MS2Controller.RunForm form) throws ServletException, SQLException
     {
         String peptideColumnNames = getPeptideColumnNames(form.getColumns());
-        return getGridView(form.getExpanded(), peptideColumnNames, form.getProteinColumns());
+        return createGridView(form.getExpanded(), peptideColumnNames, form.getProteinColumns());
     }
 
-    public abstract GridView getGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws ServletException, SQLException;
+    public abstract WebPartView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws ServletException, SQLException;
 
     public abstract AbstractProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException;
 
@@ -118,7 +123,7 @@ public abstract class AbstractPeptideView
         return _container;
     }
 
-    protected ButtonBar createButtonBar(String exportAllAction, String exportSelectedAction, String whatWeAreSelecting) throws SQLException
+    protected ButtonBar createButtonBar(String exportAllAction, String exportSelectedAction, String whatWeAreSelecting)
     {
         ButtonBar result = new ButtonBar();
 

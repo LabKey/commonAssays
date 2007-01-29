@@ -248,7 +248,7 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
         return null;
     }
 
-    public GridView getGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws ServletException, SQLException
+    public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws ServletException, SQLException
     {
         DataRegion proteinRgn = createProteinDataRegion(expanded, requestedPeptideColumnNames, requestedProteinColumnNames);
         GridView proteinView = new GridView(proteinRgn);
