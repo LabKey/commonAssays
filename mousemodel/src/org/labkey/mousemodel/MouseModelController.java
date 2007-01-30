@@ -80,7 +80,7 @@ public class MouseModelController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
 
-        VelocityDataView v = new VelocityDataView(getDefaultRegion(), form, "/MouseModel/insert.vm");
+        VelocityDataView v = new VelocityDataView(getDefaultRegion(), form, "/org/labkey/mousemodel/insert.vm");
         v.setMode(DataRegion.MODE_INSERT);
         _renderInTemplate(v, form.getContainer());
         return null;
@@ -157,16 +157,16 @@ public class MouseModelController extends ViewController
 
         Integer modelId = (Integer) form.getTypedValue("modelId");
         MouseModel model = MouseModelManager.getModel(modelId);
-        VelocityView dashboardView = new VelocityView("/MouseModel/dashboard.vm");
+        VelocityView dashboardView = new VelocityView("/org/labkey/mousemodel/dashboard.vm");
         dashboardView.addObject("modelId", modelId);
         dashboardView.addObject("container", form.getContainer().getId());
         dashboardView.setTitle("Links");
 
-        VelocityView startNecropsyView = new VelocityView("/MouseModel/Necropsy/startNecropsyForm.vm");
+        VelocityView startNecropsyView = new VelocityView("/org/labkey/mousemodel/necropsy/startNecropsyForm.vm");
         startNecropsyView.addObject("modelId", modelId);
         startNecropsyView.setTitle("Necropsy and Bleed");
 
-        VelocityView locateSampleView = new VelocityView("/MouseModel/locateSampleForm.vm");
+        VelocityView locateSampleView = new VelocityView("/org/labkey/mousemodel/locateSampleForm.vm");
         locateSampleView.addObject("modelId", modelId);
         locateSampleView.addObject("materialSourceLSID", model.getMaterialSourceLSID());
         locateSampleView.setTitle("Locate Sample");
@@ -229,7 +229,7 @@ public class MouseModelController extends ViewController
         if (null == form.getCages()[0].getCageName() || "".equals(form.getCages()[0].getCageName()))
             form.populateDefaults(pair);
 
-        VelocityView v = new VelocityView("/MouseModel/confirmLitter.vm");
+        VelocityView v = new VelocityView("/org/labkey/mousemodel/confirmLitter.vm");
         v.addObject("form", form);
         v.addObject("cages", form.getCages());
         v.addObject("breedingPair", pair);

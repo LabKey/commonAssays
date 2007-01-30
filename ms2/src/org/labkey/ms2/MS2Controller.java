@@ -462,7 +462,7 @@ public class MS2Controller extends ViewController
 
         VBox vBox = new VBox();
         vBox.addView(new GroovyView("/org/labkey/ms2/nestedGridScript.gm"));
-        VelocityView runSummary = new VelocityView("/MS2/runSummary.vm");
+        VelocityView runSummary = new VelocityView("/org/labkey/ms2/runSummary.vm");
         runSummary.addObject("run", run);
         runSummary.addObject("modHref", modificationHref(run));
         runSummary.addObject("writePermissions", getViewContext().hasPermission(ACL.PERM_UPDATE));
@@ -541,7 +541,7 @@ public class MS2Controller extends ViewController
         if (description == null || description.length() == 0)
             description = run.getDescription();
 
-        VelocityView view = new VelocityView("/MS2/renameRun.vm");
+        VelocityView view = new VelocityView("/org/labkey/ms2/renameRun.vm");
         view.addObject("run", run);
         view.addObject("description", description);
 
@@ -598,7 +598,7 @@ public class MS2Controller extends ViewController
     {
         String chargeFilterParamName = run.getChargeFilterParamName();
 
-        VelocityView headerView = new VelocityView("/MS2/filterHeader.vm");
+        VelocityView headerView = new VelocityView("/org/labkey/ms2/filterHeader.vm");
         headerView.addObject("run", run);
 
         Map<String, String> urlMap = new HashMap<String, String>();
@@ -795,7 +795,7 @@ public class MS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        VelocityView pickName = new VelocityView("/MS2/pickName.vm");
+        VelocityView pickName = new VelocityView("/org/labkey/ms2/pickName.vm");
 
         ViewURLHelper returnUrl = cloneViewURLHelper().setAction("showRun");
         pickName.addObject("returnUrl", returnUrl);
@@ -861,7 +861,7 @@ public class MS2Controller extends ViewController
         postUrl.deleteParameter("x");
         postUrl.deleteParameter("y");
 
-        VelocityView manageViews = new VelocityView("/MS2/manageViews.vm");
+        VelocityView manageViews = new VelocityView("/org/labkey/ms2/manageViews.vm");
         manageViews.addObject("postUrl", postUrl.getEncodedLocalURIString());
         manageViews.addObject("select", renderViewSelect(10, false, ACL.PERM_DELETE, false));
 
@@ -951,7 +951,7 @@ public class MS2Controller extends ViewController
 
         AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
 
-        VelocityView pickColumns = new VelocityView("/MS2/pickPeptideColumns.vm");
+        VelocityView pickColumns = new VelocityView("/org/labkey/ms2/pickPeptideColumns.vm");
         pickColumns.addObject("commonColumns", run.getCommonPeptideColumnNames());
         pickColumns.addObject("proteinProphetColumns", run.getProteinProphetPeptideColumnNames());
         pickColumns.addObject("quantitationColumns", run.getQuantitationPeptideColumnNames());
@@ -985,7 +985,7 @@ public class MS2Controller extends ViewController
 
         AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
 
-        VelocityView pickColumns = new VelocityView("/MS2/pickProteinColumns.vm");
+        VelocityView pickColumns = new VelocityView("/org/labkey/ms2/pickProteinColumns.vm");
         pickColumns.addObject("commonColumns", MS2Run.getCommonProteinColumnNames());
         pickColumns.addObject("proteinProphetColumns", MS2Run.getProteinProphetProteinColumnNames());
         pickColumns.addObject("quantitationColumns", run.getQuantitationProteinColumnNames());
@@ -1190,7 +1190,7 @@ public class MS2Controller extends ViewController
 
         PieJChartHelper pjch = PieJChartHelper.prepareGOPie(chartTitle, fragment, goChartType);
 
-        HttpView v = new VelocityView("/MS2/peptideChart.vm");
+        HttpView v = new VelocityView("/org/labkey/ms2/peptideChart.vm");
 
         String runInfo = "Run: " + run;
         v.addObject("runInfo", runInfo);
@@ -1253,7 +1253,7 @@ public class MS2Controller extends ViewController
         VBox lotsOfAnnots = new VBox();
         HttpServletRequest req = getRequest();
 
-        VelocityView vv = new VelocityView("/MS2/PiesliceDetailListHeader.vm", "Definition");
+        VelocityView vv = new VelocityView("/org/labkey/ms2/PiesliceDetailListHeader.vm", "Definition");
         String accn = req.getParameter("sliceTitle").split(" ")[0];
         vv.addObject("sliceDefinition", ProteinDictionaryHelpers.getGODefinitionFromAcc(accn));
         lotsOfAnnots.addView(vv);
@@ -1528,7 +1528,7 @@ public class MS2Controller extends ViewController
         VelocityView retVal = null;
         try
         {
-            retVal = new VelocityView("/MS2/annotLoadDetails.vm");
+            retVal = new VelocityView("/org/labkey/ms2/annotLoadDetails.vm");
             ResultSet rs =
                     Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE insertId=" + insertId, null);
             rs.next();
@@ -3385,7 +3385,7 @@ public class MS2Controller extends ViewController
         if (!errors.isEmpty())
             return _renderErrors(errors);
 
-        VelocityView pickView = new VelocityView("/MS2/pickView.vm");
+        VelocityView pickView = new VelocityView("/org/labkey/ms2/pickView.vm");
 
         nextUrl.deleteParameters("button");
         nextUrl.deleteParameters("button.x");
@@ -3545,7 +3545,7 @@ public class MS2Controller extends ViewController
             rgn.setColSpan(query.getColumnsPerRun());
             rgn.setMultiColumnCaptions(runCaptions);
 
-            VelocityView filterView = new VelocityView("/MS2/renderFilter.vm");
+            VelocityView filterView = new VelocityView("/org/labkey/ms2/renderFilter.vm");
 
             filterView.addObject("headers", new String[]{query.getHeader()});
             filterView.addObject("sqlSummaries", query.getSQLSummaries());
@@ -3853,7 +3853,7 @@ public class MS2Controller extends ViewController
     // TODO: Pass in Protein object
     protected VelocityView annotView(String title, int seqId) throws Exception
     {
-        VelocityView retVal = new VelocityView("/MS2/ProtAnnots.vm");
+        VelocityView retVal = new VelocityView("/org/labkey/ms2/ProtAnnots.vm");
         if (title != null)
         {
             retVal.setTitle("Annotations for " + title);
@@ -3950,7 +3950,7 @@ public class MS2Controller extends ViewController
 
         for (int i = 0; i < proteinCount; i++)
         {
-            VelocityView proteinSummary = new VelocityView("/MS2/protein.vm");
+            VelocityView proteinSummary = new VelocityView("/org/labkey/ms2/protein.vm");
 
             proteins[i].setPeptides(peptides);
             proteins[i].setShowEntireFragmentInCoverage(stringSearch);
@@ -3968,7 +3968,7 @@ public class MS2Controller extends ViewController
 
         if (showPeptides)
         {
-            VelocityView peptideFilter = new VelocityView("/MS2/renderFilter.vm");
+            VelocityView peptideFilter = new VelocityView("/org/labkey/ms2/renderFilter.vm");
             vbox.addView(peptideFilter);
             vbox.addView(new HtmlView("<a name=\"Peptides\"/>"));
             List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
@@ -3996,7 +3996,7 @@ public class MS2Controller extends ViewController
         int days = getDays();
 
         Map stats = MS2Manager.getStats(days);
-        VelocityView vv = new VelocityView("/MS2/ms2Admin.vm");
+        VelocityView vv = new VelocityView("/org/labkey/ms2/ms2Admin.vm");
         vv.addObject("stats", stats);
         vv.addObject("days", days);
         vv.addObject("purgeStatus", MS2Manager.getPurgeStatus());
@@ -4650,7 +4650,7 @@ public class MS2Controller extends ViewController
     {
         public MS2StatsWebPart()
         {
-            super("/MS2/stats.vm");
+            super("/org/labkey/ms2/stats.vm");
             setTitle("MS2 Statistics");
             Map stats;
             try

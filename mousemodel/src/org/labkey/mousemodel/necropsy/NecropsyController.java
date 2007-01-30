@@ -91,14 +91,14 @@ public class NecropsyController extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        VelocityView formView = new VelocityView("/MouseModel/Necropsy/startNecropsyForm.vm");
+        VelocityView formView = new VelocityView("/org/labkey/mousemodel/necropsy/startNecropsyForm.vm");
         formView.addObject("modelId", form.getTypedValue("modelId"));
         formView.addObject("action", "addCageNecropsy.post");
         formView.addObject("collectionDate", formatDate());
         formView.setTitle("Add Forms");
 
         /*
-        VelocityView selectBoxView = new VelocityView("/MouseModel/Necropsy/selectBox.vm");
+        VelocityView selectBoxView = new VelocityView("/org/labkey/mousemodel/necropsy/selectBox.vm");
         BoxForm boxForm = new BoxForm();
         boxForm.reset(null, getRequest());
         boxForm.setModelId((Integer) form.getTypedValue("modelId"));
@@ -199,7 +199,7 @@ public class NecropsyController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
 
-        VelocityView necropsyView = new VelocityView("/MouseModel/Necropsy/Necropsy.vm");
+        VelocityView necropsyView = new VelocityView("/org/labkey/mousemodel/necropsy/Necropsy.vm");
         Mouse mouse = form.getMouse(); //May be null
 
         necropsyView.addObject("form", form);
@@ -221,7 +221,7 @@ public class NecropsyController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
 
-        VelocityView photoForm = new VelocityView("/MouseModel/Necropsy/necropsyPhotoForm.vm");
+        VelocityView photoForm = new VelocityView("/org/labkey/mousemodel/necropsy/necropsyPhotoForm.vm");
         int modelId = MouseModelController.getModelId(form);
         photoForm.addObject("modelId", new Integer(modelId));
         photoForm.setTitle("Enter necropsy photos");
@@ -236,7 +236,7 @@ public class NecropsyController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
 
-        VelocityView bleedView = new VelocityView("/MouseModel/Necropsy/Bleed.vm");
+        VelocityView bleedView = new VelocityView("/org/labkey/mousemodel/necropsy/Bleed.vm");
         Mouse mouse = null;
         if (null != form.getMouseEntityId())
             mouse = MouseModelManager.getMouse(form.getMouseEntityId());

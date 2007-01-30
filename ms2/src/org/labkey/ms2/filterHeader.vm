@@ -43,6 +43,6 @@
   </form></td>
 </tr>
 <tr><td>
-#parse("/MS2/renderFilter.vm")
+#parse("/org/labkey/ms2/renderFilter.vm")
 </td></tr>
 </table>

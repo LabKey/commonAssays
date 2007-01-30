@@ -187,7 +187,7 @@ public class MouseController extends ViewController
         ButtonBar bb = new ButtonBar();
         bb.add(new ActionButton("bulkUpdate.post", "Update"));
         dr.setButtonBar(bb, DataRegion.MODE_INSERT);
-        VelocityDataView view = new VelocityDataView(dr, form, "/MouseModel/Mouse/bulkUpdate.vm");
+        VelocityDataView view = new VelocityDataView(dr, form, "/org/labkey/mousemodel/mouse/bulkUpdate.vm");
         view.setMode(DataRegion.MODE_INSERT);
         view.addObject("selectedRows", selectedRows);
         view.addObject("modelId", new Integer(MouseModelController.getModelId(form)));

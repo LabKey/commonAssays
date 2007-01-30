@@ -110,7 +110,7 @@ public class SampleController extends ViewController
         gridViewSamples.setSort(new Sort("+SampleId"));
         gridViewSamples.setTitle("Samples");
 
-        VelocityView locateSampleView = new VelocityView("/MouseModel/locateSampleForm.vm");
+        VelocityView locateSampleView = new VelocityView("/org/labkey/mousemodel/locateSampleForm.vm");
         locateSampleView.addObject("modelId", MouseModelController.getModelId(form));
         locateSampleView.setTitle("Locate Sample");
 
@@ -144,7 +144,7 @@ public class SampleController extends ViewController
         }
         if (null == samples || samples.length == 0)
         {
-            VelocityView locateSampleView = new VelocityView("/MouseModel/locateSampleForm.vm");
+            VelocityView locateSampleView = new VelocityView("/org/labkey/mousemodel/locateSampleForm.vm");
             String message;
             if (null == sampleId)
                 message = "Please enter a sample Id";
@@ -214,7 +214,7 @@ public class SampleController extends ViewController
         sample = SampleManager.getSample(lsid);
         if (null == sample)
         {
-            VelocityView locateSampleView = new VelocityView("/MouseModel/locateSampleForm.vm");
+            VelocityView locateSampleView = new VelocityView("/org/labkey/mousemodel/locateSampleForm.vm");
             locateSampleView.addObject("message", "Sample " + lsid + " not found.");
             locateSampleView.addObject("modelId", modelId);
             locateSampleView.setTitle("Locate Sample");
@@ -334,7 +334,7 @@ public class SampleController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
 
-        HttpView insertSlideView = new VelocityView("/MouseModel/Sample/insertSlide.vm");
+        HttpView insertSlideView = new VelocityView("/org/labkey/mousemodel/sample/insertSlide.vm");
         insertSlideView.addObject("form", form);
         insertSlideView.addObject("stains", MouseSchema.getStain().getSelectList());
 
@@ -561,7 +561,7 @@ public class SampleController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
 
-        VelocityView view = new VelocityView("/MouseModel/Sample/EnterSampleLocations.vm");
+        VelocityView view = new VelocityView("/org/labkey/mousemodel/sample/EnterSampleLocations.vm");
         if ("true".equals(getRequest().getParameter("success")))
             view.addObject("message", "Locations entered successfully");
         view.addObject("form", form);
