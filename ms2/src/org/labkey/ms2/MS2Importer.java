@@ -17,26 +17,27 @@ package org.labkey.ms2;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.labkey.api.data.*;
-import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.api.security.User;
-import org.labkey.api.util.CsvSet;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Table;
 import org.labkey.api.exp.Data;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.security.User;
+import org.labkey.api.util.CsvSet;
+import org.labkey.ms2.protein.ProteinManager;
 
 import javax.xml.stream.XMLStreamException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: arauch
@@ -426,8 +427,6 @@ public abstract class MS2Importer
     {
         updateRunStatus("Updating peptide columns");
         MS2Run run = MS2Manager.getRun(_runId);
-        Date loaded = Table.executeSingleton(ProteinManager.getSchema(), "SELECT Loaded FROM " + ProteinManager.getTableInfoFastaFiles() + " WHERE FastaId=?", new Object[] {run.getFastaId()}, Date.class);
-        // TODO: Short circuit if loaded = null (FASTA isn't loaded)
 
         long start = System.currentTimeMillis();
         Table.execute(MS2Manager.getSchema(), _updateSeqIdSql, new Object[]{run.getFastaId(), _runId});
@@ -487,13 +486,13 @@ public abstract class MS2Importer
 
     protected void updateRunStatus(String status, int statusId)
     {
-        // Default statusId = running
         updateRunStatus(_runId, status, statusId);
     }
 
 
     protected static void updateRunStatus(int run, String status)
     {
+        // Default statusId = running
         updateRunStatus(run, status, STATUS_RUNNING);
     }
 

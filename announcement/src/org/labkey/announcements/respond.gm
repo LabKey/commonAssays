@@ -79,5 +79,4 @@
 <input type=image src="<%=PageFlowUtil.submitSrc()%>" value="Insert"> <a href="thread.view?rowId=<%=parentAnnouncement.getRowId()%>"><img src="<%=PageFlowUtil.buttonSrc("Cancel")%>" border="0"></a>
 </form>
 <br>
-<% if (currentRendererType.displayName == "Wiki Page")
-        currentView.include(helpView); %>
+<% currentView.include(currentRendererType.getSyntaxHelpView()); %>

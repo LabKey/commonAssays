@@ -88,5 +88,4 @@
 </table>
 </form>
 <p/>
-<% if (currentRendererType.displayName == "Wiki Page")
-        HttpView.currentView().include(helpView); %>
+<% HttpView.currentView().include(currentRendererType.getSyntaxHelpView()); %>

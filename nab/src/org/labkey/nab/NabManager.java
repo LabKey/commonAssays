@@ -601,14 +601,14 @@ public class NabManager
                 info.setMethodName(specimenParams[i].getProperty("Method").getStringValue());
                 infos[i] = info;
             }
-            Attachment[] attachments = AttachmentService.get().getAttachments(runEntityId);
+            Attachment[] attachments = null; // AttachmentService.get().getAttachments(runEntityId);
             assert attachments.length == 1 : "Unexpected number of attachments for nab run: " + attachments.length;
             if (attachments.length == 1)
             {
                 InputStream stream = null;
                 try
                 {
-                    stream = AttachmentService.get().getInputStream(attachments[0]);
+                    stream = null; // AttachmentService.get().getInputStream(attachments[0]);
                     return createLuc5Assay(container, user, metadata, infos, cutoffs, attachments[0].getName(), stream);
                 }
                 finally
@@ -646,7 +646,7 @@ public class NabManager
                 throw new IllegalStateException("Run parameter set count incorrect: " + runParamArray.length);
 
             String runEntityId = runParamArray[0].getProperty("RunEntityId").getStringValue();
-            return AttachmentService.get().getAttachments(runEntityId)[0];
+            return null; // AttachmentService.get().getAttachments(runEntityId)[0];
         }
 
         public void deleteRun(Container container, int rowId) throws SQLException
@@ -674,7 +674,9 @@ public class NabManager
             AssayData[] runParamArray = run.getAssayData(DATATYPE_RUNPARAMS);
             String runEntityId = getStringSafe(runParamArray[0], "RunEntityId");
             if (runEntityId != null)
-                AttachmentService.get().deleteAttachments(runEntityId);
+            {
+                //AttachmentService.get().deleteAttachments(runEntityId);
+            }
             AssayService.get().deleteRun(run);
         }
 

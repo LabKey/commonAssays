@@ -1,12 +1,11 @@
 
-<%@ page import="org.labkey.issue.model.Issue"%>
+<%@ page import="org.labkey.api.data.Container"%>
 <%@ page import="org.labkey.api.data.DataRegion"%>
-<%@ page import="org.labkey.api.util.HelpUtil"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.ViewContext"%>
 <%@ page import="org.labkey.api.view.ViewURLHelper"%>
-<%@ page import="org.labkey.api.data.Container"%>
 <%@ page import="org.labkey.issue.IssuesController"%>
+<%@ page import="org.labkey.issue.model.Issue"%>
 <%@ page extends="org.labkey.issue.IssuePage" %>
 <%
     ViewContext context = HttpView.currentContext();
@@ -14,6 +13,9 @@
     final Container c = context.getContainer();
     final String issueId = Integer.toString(issue.getIssueId());
     final boolean hasUpdatePerms = getHasUpdatePermissions();
+
+    if (!isPrint())
+    {
 %>
 
 <form action="jumpToIssue.view" method="get">
@@ -42,10 +44,14 @@
 <%
     }
 %>
+    <td><%= textLink("print", context.cloneViewURLHelper().replaceParameter("print", "1"))%></td>
     <td>&nbsp;&nbsp;&nbsp;Jump to issue: <input type="text" size="5" name="issueId"/></td>
 </tr></table>
 </form>
 
+<%
+    }
+%>
 <script language="javascript" TYPE="text/javascript" src="<%=context.getContextPath()%>/select.js"></script>
 <table width=640>
     <tr><td class="ms-WPTitle" colspan="3"><%=issueId + " : " + issue.getTitle()%></td></tr>

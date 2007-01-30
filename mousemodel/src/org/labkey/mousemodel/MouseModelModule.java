@@ -17,8 +17,8 @@ package org.labkey.mousemodel;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.Identifiable;
+import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.LsidManager;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -29,15 +29,13 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.mousemodel.mouse.MouseController;
 import org.labkey.mousemodel.necropsy.NecropsyController;
+import org.labkey.mousemodel.sample.SampleController;
 
+import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
-import java.util.Set;
 import java.util.Collection;
 import java.util.HashSet;
-import java.beans.PropertyChangeEvent;
-
-import org.labkey.mousemodel.sample.SampleController;
-import org.labkey.mousemodel.MouseModelController;
+import java.util.Set;
 
 /**
  * User: migra
@@ -53,7 +51,7 @@ public class MouseModelModule extends DefaultModule implements LsidManager.LsidH
 
     public MouseModelModule()
     {
-        super(NAME, 1.70, "/MouseModel",
+        super(NAME, 1.70, "/org/labkey/mousemodel", "/MouseModel",
                 new WebPartFactory("Mouse Models"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
@@ -172,6 +170,12 @@ public class MouseModelModule extends DefaultModule implements LsidManager.LsidH
 
     }
 
+
+    @Override
+    public Set<String> getSchemaNames()
+    {
+        return PageFlowUtil.set(MouseSchema.getSchemaName());
+    }
 
     @Override
     public Set<DbSchema> getSchemasToTest()

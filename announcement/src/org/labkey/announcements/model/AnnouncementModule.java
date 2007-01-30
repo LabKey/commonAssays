@@ -15,13 +15,12 @@
  */
 package org.labkey.announcements.model;
 
-import org.labkey.announcements.AnnouncementsController;
 import junit.framework.TestCase;
 import org.apache.commons.collections.MultiMap;
 import org.apache.log4j.Logger;
+import org.labkey.announcements.AnnouncementsController;
 import org.labkey.api.announcements.AnnouncementManager;
 import org.labkey.api.announcements.CommSchema;
-import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
@@ -43,8 +42,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.labkey.attachments.AttachmentsController;
 
 /**
  * User: migra
@@ -69,7 +66,7 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
 
     public AnnouncementModule()
     {
-        super(NAME, 1.70, "/announcements", 
+        super(NAME, 1.70, "/org/labkey/announcements", "/announcements",
             new WebPartFactory(WEB_PART_NAME)
             {
                 public WebPartView getWebPartView(ViewContext parentCtx, Portal.WebPart webPart)
@@ -100,7 +97,6 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
             }
         );
         addController("announcements", AnnouncementsController.class);
-        addController("attachments", AttachmentsController.class);
     }
 
     public String getTabName()
@@ -156,19 +152,12 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
     {
     }
 
+    // Note: Attachments are purged by AttachmentServiceImpl.containerDeleted()
     public void containerDeleted(Container c)
     {
         try
         {
             AnnouncementManager.purgeContainer(c);
-        }
-        catch (Throwable t)
-        {
-            _log.error(t);
-        }
-        try
-        {
-            AttachmentService.get().purgeContainer(c);
         }
         catch (Throwable t)
         {
@@ -251,6 +240,12 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
     public Set<DbSchema> getSchemasToTest()
     {
         return PageFlowUtil.set(CommSchema.getInstance().getSchema());
+    }
+
+    @Override
+    public Set<String> getSchemaNames()
+    {
+        return PageFlowUtil.set(CommSchema.getInstance().getSchemaName());
     }
 
     @Override

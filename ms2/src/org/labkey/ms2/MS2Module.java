@@ -66,7 +66,7 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
 
     public MS2Module()
     {
-        super(NAME, 1.72, "/MS2",
+        super(NAME, 1.72, "/org/labkey/ms2", "/MS2",
                 new WebPartFactory("MS2 Runs"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
@@ -248,6 +248,11 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
         }
     }
 
+
+    public Set<String> getSchemaNames()
+    {
+        return PageFlowUtil.set(MS2Schema.SCHEMA_NAME, ProteinManager.getSchemaName());
+    }
 
     @Override
     public Set<DbSchema> getSchemasToTest()

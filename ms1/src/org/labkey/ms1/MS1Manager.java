@@ -5,6 +5,7 @@ import org.labkey.api.data.DbSchema;
 public class MS1Manager
 {
     private static MS1Manager _instance;
+    private static final String SCHEMA_NAME = "ms1";
 
     private MS1Manager()
     {
@@ -18,8 +19,12 @@ public class MS1Manager
         return _instance;
     }
 
+    public String getSchemaName()
+    {
+        return SCHEMA_NAME;
+    }
     public DbSchema getSchema()
     {
-        return DbSchema.get("ms1");
+        return DbSchema.get(SCHEMA_NAME);
     }
 }

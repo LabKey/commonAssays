@@ -54,7 +54,7 @@ public class IssuesModule extends DefaultModule implements ContainerManager.Cont
 
     public IssuesModule()
     {
-        super(NAME, 1.70, "/Issues", new IssuesWebPartFactory());
+        super(NAME, 1.70, "/org/labkey/issue", "/Issues", new IssuesWebPartFactory());
         addController("Issues", IssuesController.class);
 
         IssuesQuerySchema.register();
@@ -178,6 +178,11 @@ public class IssuesModule extends DefaultModule implements ContainerManager.Cont
     public Set<DbSchema> getSchemasToTest()
     {
         return PageFlowUtil.set(IssuesSchema.getInstance().getSchema());
+    }
+
+    public Set<String> getSchemaNames()
+    {
+        return PageFlowUtil.set(IssuesSchema.getInstance().getSchemaName());
     }
 
     public Set<String> getModuleDependencies()

@@ -31,7 +31,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
 
     public MS1Module()
     {
-        super(NAME, 0.01, "/ms1");
+        super(NAME, 0.01, null, "/ms1");
         addController("ms1", MS1Controller.class);
 
         // Tell the pipeline that we know how to handle msInspect files
@@ -67,6 +67,13 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
         super.startup(moduleContext);
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(this);
+    }
+
+
+    @Override
+    public Set<String> getSchemaNames()
+    {
+        return PageFlowUtil.set(MS1Manager.get().getSchemaName());
     }
 
 

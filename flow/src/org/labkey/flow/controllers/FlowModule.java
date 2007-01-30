@@ -21,24 +21,20 @@ import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentDataHandler;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.log.LogController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
-import org.labkey.flow.webparts.FlowFolderType;
-import org.labkey.flow.webparts.OverviewWebPart;
-import org.labkey.flow.webparts.AnalysesWebPart;
-import org.labkey.flow.webparts.AnalysisScriptsWebPart;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowDataType;
@@ -47,12 +43,18 @@ import org.labkey.flow.data.FlowProtocolImplementation;
 import org.labkey.flow.data.InputRole;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.ObjectType;
+import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.script.FlowPipelineProvider;
+import org.labkey.flow.webparts.AnalysesWebPart;
+import org.labkey.flow.webparts.AnalysisScriptsWebPart;
+import org.labkey.flow.webparts.FlowFolderType;
+import org.labkey.flow.webparts.OverviewWebPart;
 
-import java.util.*;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class FlowModule extends DefaultModule
 {
@@ -63,7 +65,7 @@ public class FlowModule extends DefaultModule
 
     public FlowModule()
     {
-        super(NAME, 1.71, "/Flow",
+        super(NAME, 1.71, null, "/Flow",
                 OverviewWebPart.FACTORY,
                 AnalysesWebPart.FACTORY,
                 AnalysisScriptsWebPart.FACTORY);
@@ -154,6 +156,12 @@ public class FlowModule extends DefaultModule
     }
 
 
+    public Set<String> getSchemaNames()
+    {
+        return PageFlowUtil.set(FlowManager.get().getSchemaName());
+    }
+
+
     public static String getShortProductName()
     {
         return "Flow";
@@ -166,7 +174,7 @@ public class FlowModule extends DefaultModule
 
     public Set<Module> getActiveModulesForOwnedFolder()
     {
-        Set<Module> ret = new HashSet();
+        Set<Module> ret = new HashSet<Module>();
         ret.add(this);
         ret.add(ModuleLoader.getInstance().getModule("Query"));
         ret.add(ModuleLoader.getInstance().getModule("Experiment"));

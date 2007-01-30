@@ -37,11 +37,7 @@ import java.util.List;
 public class ProteinManager
 {
     private static Logger _log = Logger.getLogger(ProteinManager.class);
-
-    private static final String nTerm = "(Peptide " + getSqlDialect().getLikeOperator() + " '[KR].[^P]%' OR Peptide " + getSqlDialect().getLikeOperator() + " '-.%')";
-    private static final String cTerm = "(Peptide " + getSqlDialect().getLikeOperator() + " '%[KR].[^P]' OR Peptide " + getSqlDialect().getLikeOperator() + " '%.-')";
-    private static final String tryptic1 = nTerm + " OR " + cTerm;
-    private static final String tryptic2 = nTerm + " AND " + cTerm;
+    private static final String SCHEMA_NAME = "prot";
 
     private static Boolean _goLoaded = null;
 
@@ -51,9 +47,15 @@ public class ProteinManager
     public static final int PROTEIN_FILTER = 8;
     public static final int ALL_FILTERS = RUN_FILTER + URL_FILTER + EXTRA_FILTER + PROTEIN_FILTER;
 
+    public static String getSchemaName()
+    {
+        return SCHEMA_NAME;
+    }
+
+
     public static DbSchema getSchema()
     {
-        return DbSchema.get("prot");
+        return DbSchema.get(SCHEMA_NAME);
     }
 
 
@@ -267,9 +269,29 @@ public class ProteinManager
 
         // Add tryptic filter
         if ("1".equals(tryptic))
-            filter.addWhereClause(tryptic1, new Object[]{}, "Peptide");
+            filter.addWhereClause(getTryptic1(), new Object[]{}, "Peptide");
         else if ("2".equals(tryptic))
-            filter.addWhereClause(tryptic2, new Object[]{}, "Peptide");
+            filter.addWhereClause(getTryptic2(), new Object[]{}, "Peptide");
+    }
+
+    private static String nTerm()
+    {
+        return "(Peptide " + getSqlDialect().getLikeOperator() + " '[KR].[^P]%' OR Peptide " + getSqlDialect().getLikeOperator() + " '-.%')";
+    }
+
+    private static String cTerm()
+    {
+        return "(Peptide " + getSqlDialect().getLikeOperator() + " '%[KR].[^P]' OR Peptide " + getSqlDialect().getLikeOperator() + " '%.-')";
+    }
+
+    private static String getTryptic1()
+    {
+        return nTerm() + " OR " + cTerm();
+    }
+
+    private static String getTryptic2()
+    {
+        return nTerm() + " AND " + cTerm();
     }
 
     public static Sort getPeptideBaseSort()

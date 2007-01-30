@@ -3,7 +3,6 @@ package org.labkey.announcements.model;
 import org.labkey.api.announcements.Announcement;
 import org.labkey.api.announcements.AnnouncementManager;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.Filter;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;

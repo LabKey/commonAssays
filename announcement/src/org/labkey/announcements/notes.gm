@@ -4,7 +4,7 @@
         <table width="100%" border="0" cellspacing="0" cellpadding="2">
 <% for(r in notes) {%>
             <tr><td class="ms-vb" colspan="2" style="background-color: #dddddd">Note added by: ${r.createdByName}</td>
-                <td class="ms-vb" align="right" style="background-color: #dddddd">${DateUtil.formatDate(r.created)}</td></tr>
+                <td class="ms-vb" align="right" style="background-color: #dddddd"><%=DateUtil.formatDateTime(r.created)%></td></tr>
             <tr><td colspan="3" class="ms-vb">${r.translateBody(request,container)}</td></tr>
     <% if (r.attachments) { %>
         	<tr><td colspan="3"><div class="ms-vb">

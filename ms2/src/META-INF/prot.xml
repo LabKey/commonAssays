@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+
+ * Copyright (c) 2003-2005 Fred Hutchinson Cancer Research Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+
+ -->
+<ns:tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<ns:table tableName="Annotations" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="AnnotId"/>
+			<ns:column columnName="AnnotTypeId"/>
+			<ns:column columnName="AnnotVal"/>
+			<ns:column columnName="AnnotIdent"/>
+			<ns:column columnName="SeqId"/>
+			<ns:column columnName="AnnotSourceId"/>
+			<ns:column columnName="AnnotSourceVersion"/>
+			<ns:column columnName="InsertDate"/>
+			<ns:column columnName="ModDate"/>
+			<ns:column columnName="StartPos"/>
+			<ns:column columnName="EndPos"/>
+			<ns:column columnName="Deleted"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="AnnotationTypes" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="AnnotTypeId"/>
+			<ns:column columnName="Name"/>
+			<ns:column columnName="SourceId"/>
+			<ns:column columnName="Description"/>
+			<ns:column columnName="EntryDate"/>
+			<ns:column columnName="ModDate"/>
+			<ns:column columnName="Deleted"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="AnnotInsertions" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="InsertId"/>
+			<ns:column columnName="FileName"/>
+			<ns:column columnName="FileType"/>
+			<ns:column columnName="Comment"/>
+			<ns:column columnName="InsertDate"/>
+			<ns:column columnName="ChangeDate"/>
+			<ns:column columnName="Mouthsful"/>
+			<ns:column columnName="RecordsProcessed"/>
+			<ns:column columnName="CompletionDate"/>
+			<ns:column columnName="SequencesAdded"/>
+			<ns:column columnName="AnnotationsAdded"/>
+			<ns:column columnName="IdentifiersAdded"/>
+			<ns:column columnName="OrganismsAdded"/>
+			<ns:column columnName="MRMSize"/>
+			<ns:column columnName="MRMSequencesAdded"/>
+			<ns:column columnName="MRMAnnotationsAdded"/>
+			<ns:column columnName="MRMIdentifiersAdded"/>
+			<ns:column columnName="MRMOrganismsAdded"/>
+			<ns:column columnName="DefaultOrganism"/>
+			<ns:column columnName="OrgShouldBeGuessed"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="FastaFiles" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="FastaId"/>
+			<ns:column columnName="FileName"/>
+			<ns:column columnName="Loaded"/>
+			<ns:column columnName="FileChecksum"/>
+            <ns:column columnName="ScoringAnalysis"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="FastaSequences" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="FastaId"/>
+			<ns:column columnName="LookupString"/>
+			<ns:column columnName="SeqId"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="FastaLoads" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="FastaId"/>
+			<ns:column columnName="FileName"/>
+			<ns:column columnName="FileChecksum"/>
+			<ns:column columnName="Comment"/>
+			<ns:column columnName="InsertDate"/>
+			<ns:column columnName="DbName"/>
+			<ns:column columnName="DbVersion"/>
+			<ns:column columnName="DbSource"/>
+			<ns:column columnName="DbDate"/>
+			<ns:column columnName="Reference"/>
+			<ns:column columnName="NSequences"/>
+			<ns:column columnName="Sequences"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="Identifiers" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="IdentId"/>
+			<ns:column columnName="IdentTypeId"/>
+			<ns:column columnName="Identifier"/>
+			<ns:column columnName="SeqId"/>
+			<ns:column columnName="SourceId"/>
+			<ns:column columnName="EntryDate"/>
+			<ns:column columnName="SourceVersion"/>
+			<ns:column columnName="Deleted"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="IdentTypes" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="IdentTypeId"/>
+			<ns:column columnName="Name"/>
+			<ns:column columnName="CannonicalSourceId"/>
+			<ns:column columnName="EntryDate"/>
+			<ns:column columnName="Description"/>
+			<ns:column columnName="Deleted"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="InfoSources" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="SourceId"/>
+			<ns:column columnName="Name"/>
+			<ns:column columnName="CurrentVersion"/>
+			<ns:column columnName="CurrentVersionDate"/>
+			<ns:column columnName="Url"/>
+			<ns:column columnName="ProcessToObtain"/>
+			<ns:column columnName="LastUpdate"/>
+			<ns:column columnName="InsertDate"/>
+			<ns:column columnName="ModDate"/>
+			<ns:column columnName="Deleted"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="Organisms" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="OrgId"/>
+			<ns:column columnName="CommonName"/>
+			<ns:column columnName="Genus"/>
+			<ns:column columnName="Species"/>
+			<ns:column columnName="Comments"/>
+			<ns:column columnName="IdentId"/>
+			<ns:column columnName="Deleted"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="Sequences" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="SeqId"/>
+			<ns:column columnName="ProtSequence"/>
+			<ns:column columnName="Hash"/>
+			<ns:column columnName="Description"/>
+			<ns:column columnName="SourceId"/>
+			<ns:column columnName="SourceVersion"/>
+			<ns:column columnName="InsertDate"/>
+			<ns:column columnName="ChangeDate"/>
+			<ns:column columnName="SourceChangeDate"/>
+			<ns:column columnName="SourceInsertDate"/>
+			<ns:column columnName="OrgId"/>
+			<ns:column columnName="Mass"/>
+			<ns:column columnName="BestName"/>
+			<ns:column columnName="BestGeneName"/>
+			<ns:column columnName="Length"/>
+			<ns:column columnName="Deleted"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="SprotOrgMap" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="SprotSuffix"/>
+			<ns:column columnName="SuperKingdomCode"/>
+			<ns:column columnName="TaxonId"/>
+			<ns:column columnName="FullName"/>
+			<ns:column columnName="Genus"/>
+			<ns:column columnName="Species"/>
+			<ns:column columnName="CommonName"/>
+			<ns:column columnName="Synonym"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="FastaAdmin" tableDbType="VIEW">
+		<ns:columns>
+			<ns:column columnName="Filename">
+				<ns:columnTitle>FASTA File Name</ns:columnTitle>
+				<ns:inputType>text</ns:inputType>
+				<ns:displayWidth>400</ns:displayWidth>
+				<ns:scale>200</ns:scale>
+				<ns:inputLength>40</ns:inputLength>
+				<ns:isReadOnly>false</ns:isReadOnly>
+				<ns:isUserEditable>false</ns:isUserEditable>
+			</ns:column>
+			<ns:column columnName="FastaId">
+				<ns:datatype>int identity</ns:datatype>
+				<ns:columnTitle>ID</ns:columnTitle>
+				<ns:inputType>text</ns:inputType>
+				<ns:displayWidth>50</ns:displayWidth>
+				<ns:inputLength>10</ns:inputLength>
+				<ns:nullable>false</ns:nullable>
+				<ns:isAutoInc>true</ns:isAutoInc>
+				<ns:isReadOnly>true</ns:isReadOnly>
+				<ns:isKeyField>true</ns:isKeyField>
+			</ns:column>
+			<ns:column columnName="Loaded">
+				<ns:columnTitle>Loaded</ns:columnTitle>
+				<ns:inputType>text</ns:inputType>
+				<ns:formatString>DateTime</ns:formatString>
+				<ns:displayWidth>120</ns:displayWidth>
+				<ns:scale>100</ns:scale>
+				<ns:inputLength>23</ns:inputLength>
+				<ns:isReadOnly>true</ns:isReadOnly>
+			</ns:column>
+			<ns:column columnName="Runs">
+				<ns:columnTitle>Runs</ns:columnTitle>
+				<ns:inputType>text</ns:inputType>
+				<ns:formatString>#,###</ns:formatString>
+				<ns:displayWidth>40</ns:displayWidth>
+				<ns:inputLength>10</ns:inputLength>
+				<ns:nullable>false</ns:nullable>
+				<ns:isReadOnly>true</ns:isReadOnly>
+				<ns:isUserEditable>true</ns:isUserEditable>
+			</ns:column>
+		</ns:columns>
+		<ns:tableTitle>FastaAdmin</ns:tableTitle>
+		<ns:pkColumnName>FastaId</ns:pkColumnName>
+	</ns:table>
+	<ns:table tableName="gographpath" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="id"/>
+			<ns:column columnName="term1id"/>
+			<ns:column columnName="term2id"/>
+			<ns:column columnName="distance"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="goterm" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="id"/>
+			<ns:column columnName="name"/>
+			<ns:column columnName="termtype"/>
+			<ns:column columnName="acc"/>
+			<ns:column columnName="isobsolete"/>
+			<ns:column columnName="isroot"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="goterm2term" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="id"/>
+			<ns:column columnName="relationshiptypeid"/>
+			<ns:column columnName="term1id"/>
+			<ns:column columnName="term2id"/>
+			<ns:column columnName="complete"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="gotermdefinition" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="termid"/>
+			<ns:column columnName="termdefinition"/>
+			<ns:column columnName="dbxrefid"/>
+			<ns:column columnName="termcomment"/>
+			<ns:column columnName="reference"/>
+		</ns:columns>
+	</ns:table>
+	<ns:table tableName="gotermsynonym" tableDbType="TABLE">
+		<ns:columns>
+			<ns:column columnName="termid"/>
+			<ns:column columnName="termsynonym"/>
+			<ns:column columnName="accsynonym"/>
+			<ns:column columnName="synonymtypeid"/>
+		</ns:columns>
+	</ns:table>
+</ns:tables>

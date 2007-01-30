@@ -92,7 +92,7 @@ if(allowBroadcast)
 </table>
 <br>
 <input type=image src="<%=PageFlowUtil.submitSrc()%>" value="Insert">
+<input type=image src="<%=PageFlowUtil.buttonSrc("Cancel")%>" value="Cancel" onclick="javascript:window.history.back(); return false;">
 </form>
 <p/>
-<% if (currentRendererType.displayName == "Wiki Page")
-    currentView.include(helpView); %>
+<% currentView.include(currentRendererType.getSyntaxHelpView()); %>

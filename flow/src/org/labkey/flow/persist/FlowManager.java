@@ -1,38 +1,41 @@
 package org.labkey.flow.persist;
 
-import org.labkey.api.data.*;
-import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.util.LimitedCacheMap;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.Data;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ObjectUtils;
-import org.apache.xmlbeans.impl.xb.xsdschema.SchemaDocument;
+import org.apache.commons.lang.StringUtils;
+import org.labkey.api.data.*;
+import org.labkey.api.exp.Data;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.security.User;
+import org.labkey.api.util.LimitedCacheMap;
+import org.labkey.api.util.UnexpectedException;
+import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.StatisticSpec;
 
+import java.net.URI;
 import java.sql.SQLException;
-import java.sql.ResultSet;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
-import java.net.URI;
-
-import org.labkey.flow.analysis.web.StatisticSpec;
-import org.labkey.flow.analysis.web.GraphSpec;
-import org.labkey.flow.data.FlowProtocolStep;
+import java.util.Map;
 
 public class FlowManager
 {
     static private FlowManager instance = new FlowManager();
+    private static final String SCHEMA_NAME = "flow";
     private final Map<String, Integer> _attridCacheMap = new LimitedCacheMap(1000, 10000);
+
     static public FlowManager get()
     {
         return instance;
     }
 
+    public String getSchemaName()
+    {
+        return SCHEMA_NAME;
+    }
+
     public DbSchema getSchema()
     {
-        return DbSchema.get("flow");
+        return DbSchema.get(SCHEMA_NAME);
     }
 
     public SqlDialect getDialect()

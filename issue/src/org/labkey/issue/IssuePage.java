@@ -34,6 +34,7 @@ abstract public class IssuePage extends JspBase
     private String _body;
     private boolean _hasUpdatePermissions;
     private String _requiredFields = IssueManager.getRequiredIssueFields();
+    private boolean _print = false;
 
     private static Logger _log = Logger.getLogger("org.labkey.api." + IssuePage.class);
 
@@ -107,6 +108,16 @@ abstract public class IssuePage extends JspBase
         _body = body;
     }
 
+    public boolean isPrint()
+    {
+        return _print;
+    }
+
+    public void setPrint(boolean print)
+    {
+        _print = print;
+    }
+
     public String _toString(Object a)
     {
         return null == a ? "" : a.toString();
@@ -128,7 +139,7 @@ abstract public class IssuePage extends JspBase
 
             sb.append("<tr><td class=\"ms-searchform\">");
             sb.append(getLabel(tableColumnName));
-            sb.append("</td><td class=\"ms-vb>\"");
+            sb.append("</td><td class=\"ms-vb\">");
 
             // If custom column has pick list, then show select with keywords, otherwise input box
             if (_ccc.getPickListColumns().contains(tableColumnName))

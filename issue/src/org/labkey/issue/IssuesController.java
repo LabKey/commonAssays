@@ -251,13 +251,22 @@ public class IssuesController extends ViewController
     }
 
     @Jpf.Action @RequiresPermission(ACL.PERM_READ)
-    public Forward details() throws Exception
+    public Forward details(DetailsForm form) throws Exception
     {
-        int issueId = getIssueId();
-        Issue issue = getIssue(getContainer(), issueId);
-        if (null == issue)
-            HttpView.throwNotFound();
-        assert null != issue; // suppress warning
+        Integer issueId = null;
+        Issue issue = null;
+
+        try
+        {
+            issueId = Integer.parseInt(form.getIssueId());
+        }
+        catch(NumberFormatException e)
+        {
+            // Fall through
+        }
+
+        if (issueId == null || (issue = getIssue(getContainer(), issueId)) == null)
+            HttpView.throwNotFound("Unable to find issue " + form.getIssueId());
 
         IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "detailView.jsp");
         JspView v = new JspView(page);
@@ -267,7 +276,13 @@ public class IssuesController extends ViewController
         //pass user's update perms to jsp page to determine whether to show notify list
         page.setUserHasUpdatePermissions(hasUpdatePermission(getUser(), issue));
 
-        return _renderInTemplate(v, "" + issue.getIssueId() + ": " + issue.getTitle(), null);
+        if (form.isPrint())
+        {
+            page.setPrint(true);
+            return includeView(new PrintTemplate(getViewContext(), v, "Issues List"));
+        }
+        else
+            return _renderInTemplate(v, "" + issue.getIssueId() + " : " + issue.getTitle(), null);
     }
 
 
@@ -920,7 +935,7 @@ public class IssuesController extends ViewController
 
 
     @Jpf.Action @RequiresPermission(ACL.PERM_READ)
-    public Forward jumpToIssue(JumpToIssueForm form) throws Exception
+    public Forward jumpToIssue(DetailsForm form) throws Exception
     {
         Container c = getContainer();
 
@@ -961,7 +976,7 @@ public class IssuesController extends ViewController
         Container c = getContainer();
         String searchTerm = (String)getViewContext().get("search");
 
-        Module module = ModuleLoader.getCurrentModule();
+        Module module = ModuleLoader.getInstance().getCurrentModule();
         List<Search.Searchable> l = new ArrayList<Search.Searchable>();
         l.add((Search.Searchable)module);
 
@@ -1490,9 +1505,10 @@ public class IssuesController extends ViewController
     }
 
 
-    public static class JumpToIssueForm extends ViewForm
+    public static class DetailsForm extends ViewForm
     {
         private String _issueId;
+        private boolean _print;
 
         public String getIssueId()
         {
@@ -1502,6 +1518,16 @@ public class IssuesController extends ViewController
         public void setIssueId(String issueId)
         {
             _issueId = issueId;
+        }
+
+        public boolean isPrint()
+        {
+            return _print;
+        }
+
+        public void setPrint(boolean print)
+        {
+            _print = print;
         }
     }
 

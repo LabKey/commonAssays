@@ -321,7 +321,7 @@ public class AnnouncementsController extends ViewController
         GroovyView confirmDeleteView = new GroovyView("/org/labkey/announcements/confirmDelete.gm");
         confirmDeleteView.addObject("message", message);
         confirmDeleteView.addObject("settings", getSettings());
-        HttpView template = new LoginTemplate(confirmDeleteView);
+        HttpView template = new DialogTemplate(confirmDeleteView);
         includeView(template);
 
         return null;
@@ -396,7 +396,7 @@ public class AnnouncementsController extends ViewController
         confirmDeleteView.addObject("settings", getSettings());
         confirmDeleteView.addObject("thread", thread);
         confirmDeleteView.addObject("action", postUrl);
-        HttpView template = new LoginTemplate(confirmDeleteView);
+        HttpView template = new DialogTemplate(confirmDeleteView);
         includeView(template);
 
         return null;
@@ -421,7 +421,7 @@ public class AnnouncementsController extends ViewController
 
     private Announcement getAnnouncement(AttachmentForm form) throws SQLException, ServletException
     {
-        Announcement ann = AnnouncementManager.getAnnouncement(getContainer(), form.getEntityId());
+        Announcement ann = AnnouncementManager.getAnnouncement(getContainer(), form.getEntityId(), true);  // Force user list to be selected
 
         if (null == ann)
             HttpView.throwNotFound("Couldn't find " + getSettings().getConversationName());
@@ -554,14 +554,14 @@ public class AnnouncementsController extends ViewController
     @Jpf.Action(validationErrorForward = @Jpf.Forward(path = "showResponse.do", name = "validate"))
     protected Forward respond(AnnouncementsForm form) throws Exception
     {
-        return _insert(form);
+        return _insert(form, false);
     }
 
 
     @Jpf.Action(validationErrorForward = @Jpf.Forward(path = "showInsert.do", name = "validate"))
     protected Forward insert(AnnouncementsForm form) throws Exception
     {
-        return _insert(form);
+        return _insert(form, false);
     }
 
 
@@ -570,11 +570,11 @@ public class AnnouncementsController extends ViewController
     @Jpf.Action
     protected Forward insertNote(AnnouncementsForm form) throws Exception
     {
-        return _insert(form);
+        return _insert(form, true);
     }
 
 
-    private Forward _insert(AnnouncementsForm form) throws Exception
+    private Forward _insert(AnnouncementsForm form, boolean isNote) throws Exception
     {
         Permissions perm = getPermissions();
 
@@ -596,7 +596,7 @@ public class AnnouncementsController extends ViewController
         if (null == insert.getParent() || 0 == insert.getParent().length())
             insert.setParent(form.getParentId());
 
-        if (getSettings().hasUserList() && null == form.getUserList())
+        if (!isNote && getSettings().hasUserList() && null == form.getUserList())
             insert.setUserList(Collections.<User>emptyList());  // Force member list to get deleted, bug #2484
         else
             insert.setUserList(form.getUserList());  // TODO: Do this in validate()?
@@ -607,9 +607,11 @@ public class AnnouncementsController extends ViewController
         AnnouncementManager.insertAnnouncement(c, u, insert, formFiles);
 
         // Redirect now in the "notes" case (e.g., from MouseModels), since we don't send email for notes.
-        String redirectURL = getRequest().getParameter("redirectURL");
-        if (null != redirectURL)
+        if (isNote)
+        {
+            String redirectURL = getRequest().getParameter("redirectURL");
             HttpView.throwRedirect(redirectURL);
+        }
 
         if (null != insert.getBody())
         {
@@ -774,8 +776,6 @@ public class AnnouncementsController extends ViewController
         boolean reshow = (PageFlowUtil.getStrutsError(getRequest(), "main").length() != 0);
         initView(insertView, c, form, null, reshow);
 
-        insertView.addObject("renderers", WikiRendererType.values());
-        insertView.addObject("helpView", new GroovyView("/org/labkey/wiki/view/wiki_help.gm"));
         insertView.addObject("allowBroadcast", !settings.isSecure() && getUser().isAdministrator());
 
         return _renderInTemplate(insertView, c, "forms[0].title");
@@ -894,7 +894,6 @@ public class AnnouncementsController extends ViewController
         initView(respondView, c, form, latestPost, reshow);
 
         respondView.addObject("parentAnnouncement", parent);
-        respondView.addObject("helpView", new GroovyView("/org/labkey/wiki/view/wiki_help.gm"));
 
         return _renderInTemplate(new VBox(threadView, respondView), c, "forms[0].body", null, "response");
     }
@@ -1728,7 +1727,6 @@ public class AnnouncementsController extends ViewController
         {
             super("/org/labkey/announcements/announcementUpdate.gm");
 
-            addObject("helpView", new GroovyView("/org/labkey/wiki/view/wiki_help.gm"));
             addObject("currentRendererType", WikiRendererType.valueOf(ann.getRendererType()));
             addObject("renderers", WikiRendererType.values());
 

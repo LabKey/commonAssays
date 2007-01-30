@@ -17,7 +17,7 @@
 %>
 <form style="margin:0" method="POST" action="<%=ViewURLHelper.toPathString("Issues", "doUpdate.post", context.getContainer().getPath())%>">
 
-    <table border=0 cellspacing=2 cellpadding=0><tr>
+    <table border=0 cellspacing=2 cellpadding=0>
     <%
     if (null != getError() && 0 != getError().length())
     {
@@ -30,7 +30,7 @@
     if (!StringUtils.isEmpty(getRequiredFields()))
         out.print("<tr><td>Fields marked with an asterisk <span class=\"labkey-error\">*</span> are required.</td></tr>");
     %>
-    </tr></table>
+    </table>
     <table border=0 cellspacing=2 cellpadding=0><tr>
         <td><input name="<%=getAction()%>" type="image" value="Submit" src="<%=ButtonServlet.buttonSrc("Submit")%>"></td>
         <td><%= buttonLink("View Grid", new ViewURLHelper("Issues", "list", context.getContainer()).addParameter(DataRegion.LAST_FILTER_PARAM, "true"))%></td>

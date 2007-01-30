@@ -1082,7 +1082,7 @@ public class MS2Controller extends ViewController
 
         HttpView v = new GroovyView("/org/labkey/ms2/addRun.gm");
         v.addObject("form", form);
-        return includeView(new LoginTemplate(v));
+        return includeView(new DialogTemplate(v));
     }
 
 
@@ -4519,7 +4519,7 @@ public class MS2Controller extends ViewController
         HttpView view = new GroovyView("admin/testMascot.gm");
         form.setPassword(("".equals(form.getPassword())) ? "" : "***");  // do not show password in clear
         view.addObject("form", form);
-        return includeView(new LoginTemplate(view));
+        return includeView(new DialogTemplate(view));
     }
 
     @Jpf.Action

@@ -365,6 +365,7 @@ ms1/webapp/ms1/scripts/sql[!!-~]server/ms1-0.00-0.01.sql -text
 ms2/module.properties -text
 ms2/src/META-INF/defaultViews.properties -text
 ms2/src/META-INF/ms2.xml -text
+ms2/src/META-INF/prot.xml -text
 ms2/src/org/labkey/ms2/AACoverageColumn.java -text
 ms2/src/org/labkey/ms2/BeanXMLStreamReader.java -text
 ms2/src/org/labkey/ms2/CometDefLoader.java -text

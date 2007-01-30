@@ -1,14 +1,13 @@
 package org.labkey.flow.util;
 
 import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ViewController;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.module.ModuleLoader;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -33,9 +32,8 @@ public class PFUtil
 
     static private String getPageFlowName(Package p)
     {
-        return ModuleLoader.getPageFlowForPackage(p);
+        return ModuleLoader.getInstance().getPageFlowForPackage(p);
     }
-
 
     static public ViewURLHelper urlFor(Enum action, String containerPath)
     {
