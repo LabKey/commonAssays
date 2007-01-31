@@ -54,7 +54,7 @@ public class SampleController extends ViewController
 {
 
     private static Logger _log =
-            Logger.getLogger("org.labkey.api." + SampleController.class);
+            Logger.getLogger(SampleController.class);
 
     private DataRegion getDataRegion()
     {

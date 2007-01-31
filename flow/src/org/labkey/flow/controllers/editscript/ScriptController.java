@@ -47,7 +47,7 @@ public class ScriptController extends BaseFlowController
 {
     public static final int MAX_CHANNELS = 20;
     public static final int MAX_POINTS = 100;
-    private static Logger _log = Logger.getLogger(ScriptController.class.getName());
+    private static Logger _log = Logger.getLogger(ScriptController.class);
 
     public enum Action
     {

@@ -46,7 +46,7 @@ public class MouseModelModule extends DefaultModule implements LsidManager.LsidH
 {
     public static final String NAME = "MouseModels";
 
-    private static Logger _log = Logger.getLogger("org.labkey.api." + MouseModelModule.class);
+    private static Logger _log = Logger.getLogger(MouseModelModule.class);
 
 
     public MouseModelModule()

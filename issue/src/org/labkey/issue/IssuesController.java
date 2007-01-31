@@ -58,7 +58,7 @@ import java.util.*;
 @Jpf.Controller
 public class IssuesController extends ViewController
 {
-    private static Logger _log = Logger.getLogger("org.labkey.api." + IssuesController.class);
+    private static Logger _log = Logger.getLogger(IssuesController.class);
 
     // keywords enum
     public static final int ISSUE_NONE = 0;
@@ -276,13 +276,15 @@ public class IssuesController extends ViewController
         //pass user's update perms to jsp page to determine whether to show notify list
         page.setUserHasUpdatePermissions(hasUpdatePermission(getUser(), issue));
 
+        String title = "" + issue.getIssueId() + " : " + issue.getTitle();
+
         if (form.isPrint())
         {
             page.setPrint(true);
-            return includeView(new PrintTemplate(v, "Issues List"));
+            return includeView(new PrintTemplate(v, title));
         }
         else
-            return _renderInTemplate(v, "" + issue.getIssueId() + " : " + issue.getTitle(), null);
+            return _renderInTemplate(v, title, null);
     }
 
 

@@ -1,9 +1,12 @@
 <%@ page import="org.labkey.api.announcements.AnnouncementManager" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <% HttpView<AnnouncementManager.Settings> me = (HttpView<AnnouncementManager.Settings>) HttpView.currentView();
     AnnouncementManager.Settings settings = me.getModel();
+    ViewURLHelper returnUrl = (ViewURLHelper)me.getViewContext().get("returnUrl");
 %><form action="customize.post" method="post">
+<input type="hidden" name="returnUrl" value="<%=returnUrl.getEncodedLocalURIString()%>">
 <table>
     <tr>
         <td class="ms-searchform">Board name</td>
@@ -49,7 +52,8 @@
         <td class="ms-vb"><input type="checkbox" name="formatPicker"<%=settings.hasFormatPicker() ? " checked" : ""%>></td>
     </tr>
     <tr>
-        <td><input type="image" src="<%=PageFlowUtil.buttonSrc("Save")%>"/></td>
+        <td><input type="image" src="<%=PageFlowUtil.buttonSrc("Save")%>"/>
+        <%=PageFlowUtil.buttonLink("Cancel", returnUrl)%></td>
     </tr>
 </table>
 </form>

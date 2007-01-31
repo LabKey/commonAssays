@@ -46,7 +46,7 @@ import java.awt.*;
 @Jpf.Controller
 public class ScoringController extends ViewController
 {
-    private static Logger _log = Logger.getLogger("org.labkey.api." + ScoringController.class);
+    private static Logger _log = Logger.getLogger(ScoringController.class);
 
     private Forward _renderInTemplate(HttpView view, String title, String helpTopic) throws Exception
     {

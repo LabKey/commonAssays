@@ -59,7 +59,7 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
 
     public static final String WEB_PART_NAME = "Messages";
 
-    private static Logger _log = Logger.getLogger("org.labkey.api." + AnnouncementModule.class);
+    private static Logger _log = Logger.getLogger(AnnouncementModule.class);
 
     private boolean _newInstall = false;
     private User _installerUser = null;

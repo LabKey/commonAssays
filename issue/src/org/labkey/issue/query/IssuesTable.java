@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class IssuesTable extends FilteredTable
 {
-    private static Logger _log = Logger.getLogger("org.labkey.api." + IssuesTable.class);
+    private static Logger _log = Logger.getLogger(IssuesTable.class);
 
     private static final String DEFAULT_LIST_COLUMNS = "IssueId,Type,Area,Title,AssignedTo,Priority,Status,Milestone";
     private IssuesQuerySchema _schema;

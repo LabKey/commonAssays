@@ -102,7 +102,7 @@ public class AnnouncementsController extends ViewController
         requiresPermission(ACL.PERM_READ);
 
         boolean displayAll = getViewURLHelper().getPageFlow().equalsIgnoreCase("announcements");
-        WebPartView v = new AnnouncementWebPart(getContainer(), getUser(), displayAll);
+        WebPartView v = new AnnouncementWebPart(getContainer(), getViewURLHelper(), getUser(), displayAll);
         _renderInTemplate(v, getContainer(), null);
 
         return null;
@@ -519,9 +519,11 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private static ViewURLHelper getShowCustomizeUrl(Container c)
+    private static ViewURLHelper getShowCustomizeUrl(Container c, ViewURLHelper returnUrl)
     {
-        return new ViewURLHelper("announcements", "showCustomize", c);
+        ViewURLHelper url = new ViewURLHelper("announcements", "showCustomize", c);
+        url.addParameter("returnUrl", returnUrl.getLocalURIString());
+        return url;
     }
 
 
@@ -532,6 +534,7 @@ public class AnnouncementsController extends ViewController
 
         Settings settings = AnnouncementManager.getMessageBoardSettings(getContainer());
         JspView<Settings> view = new JspView<Settings>("/org/labkey/announcements/customize.jsp", settings);
+        view.addObject("returnUrl", new ViewURLHelper(getViewURLHelper().getParameter("returnUrl")));
         _renderInTemplate(view, getContainer(), null, "Customize " + settings.getBoardName(), null);
 
         return null;
@@ -545,9 +548,7 @@ public class AnnouncementsController extends ViewController
 
         AnnouncementManager.saveMessageBoardSettings(getContainer(), form);
 
-        ViewURLHelper portal = new ViewURLHelper("Project", "begin", getContainer());
-
-        return new ViewForward(portal);
+        return new ViewForward((String)getViewContext().get("returnUrl"));
     }
 
 
@@ -761,6 +762,12 @@ public class AnnouncementsController extends ViewController
     }
 
 
+    private static ViewURLHelper getShowInsertUrl(Container c, ViewURLHelper returnUrl)
+    {
+        return new ViewURLHelper("announcements", "showInsert", c).addParameter("returnUrl", returnUrl.getLocalURIString());
+    }
+
+
     @Jpf.Action
     protected Forward showInsert(AnnouncementsForm form) throws Exception
     {
@@ -777,6 +784,7 @@ public class AnnouncementsController extends ViewController
         initView(insertView, c, form, null, reshow);
 
         insertView.addObject("allowBroadcast", !settings.isSecure() && getUser().isAdministrator());
+        insertView.addObject("returnUrl", new ViewURLHelper(getViewURLHelper().getParameter("returnUrl")));
 
         return _renderInTemplate(insertView, c, "forms[0].title");
     }
@@ -1480,12 +1488,12 @@ public class AnnouncementsController extends ViewController
 
     public static class AnnouncementListLinkBar extends GroovyView
     {
-        public AnnouncementListLinkBar(Container c, User user, Settings settings, Permissions perm)
+        public AnnouncementListLinkBar(Container c, ViewURLHelper url, User user, Settings settings, Permissions perm)
         {
             super("/org/labkey/announcements/announcementListLinkBar.gm");
 
             addObject("settings", settings);
-            addObject("insertURL", perm.allowInsert() ? ViewURLHelper.toPathString("announcements", "showInsert", c.getPath()) : null);
+            addObject("insertURL", perm.allowInsert() ? getShowInsertUrl(c, url) : null);
             addObject("messagesURL", ViewURLHelper.toPathString("announcements", "begin", c.getPath()));
             addObject("emailPrefsURL", user.isGuest() ? null : ViewURLHelper.toPathString("announcements", "showEmailPreferences", c.getPath()));
             addObject("emailManageURL", c.hasPermission(user, ACL.PERM_ADMIN) ? ViewURLHelper.toPathString("announcements", "adminEmail", c.getPath()) : null);
@@ -1495,7 +1503,7 @@ public class AnnouncementsController extends ViewController
 
     public static class AnnouncementWebPart extends GroovyView
     {
-        public AnnouncementWebPart(Container c, User user, boolean displayAll) throws SQLException, ServletException
+        public AnnouncementWebPart(Container c, ViewURLHelper url, User user, boolean displayAll) throws SQLException, ServletException
         {
             super("/org/labkey/announcements/announcementWebPart.gm");
 
@@ -1510,15 +1518,15 @@ public class AnnouncementsController extends ViewController
             addObject("settings", settings);
             addObject("container", c);
             addObject("emailPrefsURL", user.isGuest() ? null : ViewURLHelper.toPathString("announcements", "showEmailPreferences", c.getPath()));
-            addObject("insertURL", perm.allowInsert() ? ViewURLHelper.toPathString("announcements", "showInsert", c.getPath()) : null);
-            addObject("customizeURL", c.hasPermission(user, ACL.PERM_ADMIN) ? getShowCustomizeUrl(c) : null);
+            addObject("insertURL", perm.allowInsert() ? getShowInsertUrl(c, url) : null);
+            addObject("customizeURL", c.hasPermission(user, ACL.PERM_ADMIN) ? getShowCustomizeUrl(c, url) : null);
             addObject("listURL", getListUrl(c));
             addObject("announcements", announcements);
         }
 
         public AnnouncementWebPart(ViewContext ctx) throws SQLException, ServletException
         {
-            this(ctx.getContainer(), ctx.getUser(), false);
+            this(ctx.getContainer(), ctx.getViewURLHelper(), ctx.getUser(), false);
         }
     }
 
@@ -1602,7 +1610,7 @@ public class AnnouncementsController extends ViewController
             SimpleFilter filter = getFilter(settings, perm, displayAll);
             gridView.setFilter(filter);
 
-            _vbox = new VBox(new AnnouncementListLinkBar(c, user, settings, perm), gridView);
+            _vbox = new VBox(new AnnouncementListLinkBar(c, url, user, settings, perm), gridView);
         }
 
         protected DataRegion getDataRegion(Permissions perm)

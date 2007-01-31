@@ -24,7 +24,7 @@ import javax.imageio.ImageIO;
 public class FCSAnalyzer
 {
     static private FCSAnalyzer instance;
-    static private Logger _log = Logger.getLogger(FCSAnalyzer.class.getName());
+    static private Logger _log = Logger.getLogger(FCSAnalyzer.class);
     static private int GRAPH_HEIGHT = 300;
     static private int GRAPH_WIDTH = 300;
 

@@ -22,7 +22,7 @@ import java.util.*;
 
 public class EditScriptForm extends ViewForm
 {
-    static private Logger _log = Logger.getLogger(EditScriptForm.class.toString());
+    static private Logger _log = Logger.getLogger(EditScriptForm.class);
     private static int MAX_WELLS_TO_POLL = 15;
 
     public FlowScript analysisScript;

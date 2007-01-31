@@ -12,7 +12,7 @@ else
     <%=PageFlowUtil.getStrutsError(request, "main")%>
 <%}%>
 
-<form method=post enctype="multipart/form-data" action='insert.post'>
+<form method=post enctype="multipart/form-data" action="insert.post?returnUrl=<%=returnUrl.getLocalURIString()%>">
 <table>
   <tr><td class='ms-searchform'>Title</td><td class='ms-vb' colspan='2'><input type='text' size='60' name='title' value="<%=filter(form.get("title"))%>"></td></tr><%
     if (settings.hasStatus())
@@ -94,7 +94,7 @@ if(allowBroadcast)
 </table>
 <br>
 <input type=image src="<%=PageFlowUtil.submitSrc()%>" value="Insert">
-<input type=image src="<%=PageFlowUtil.buttonSrc("Cancel")%>" value="Cancel" onclick="javascript:window.history.back(); return false;">
+<%=PageFlowUtil.buttonLink("Cancel", returnUrl)%>
 </form>
 <p/>
 <% currentView.include(currentRendererType.getSyntaxHelpView()); %>

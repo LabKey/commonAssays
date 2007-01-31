@@ -36,9 +36,9 @@
     <td>&nbsp;views:</td>
     <td><select onchange="document.location.href=this.options[this.selectedIndex].value">
         <option value="#"></option>
-        <option value="?Issues.sort=-Milestone%2CAssignedTo/DisplayName">all</option>
-        <option value="?Issues.Status~eq=open&amp;Issues.sort=-Milestone%2CAssignedTo/DisplayName">open</option>
-        <option value="?Issues.Status~eq=resolved&amp;Issues.sort=-Milestone%2CAssignedTo/DisplayName">resolved</option>
+        <option value="list.view">all</option>
+        <option value="?Issues.Status~eq=open&amp;Issues.sort=Milestone%2CAssignedTo/DisplayName">open</option>
+        <option value="?Issues.Status~eq=resolved&amp;Issues.sort=Milestone%2CAssignedTo/DisplayName">resolved</option>
     <%
         if (!context.getUser().isGuest())
         {

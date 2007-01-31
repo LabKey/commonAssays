@@ -62,7 +62,7 @@ import org.labkey.api.pipeline.PipelineValidationException;
 @Jpf.Controller(longLived = true) //PageFlow is long lived so we can stash results of multi-step protocol fill-in
 public class PipelineController extends ViewController
 {
-    private static Logger _log = Logger.getLogger("org.labkey.api." + PipelineController.class);
+    private static Logger _log = Logger.getLogger(PipelineController.class);
 
     public static final String DEFAULT_EXPERIMENT_OBJECTID = "DefaultExperiment";
     

@@ -36,7 +36,7 @@ abstract public class IssuePage extends JspBase
     private String _requiredFields = IssueManager.getRequiredIssueFields();
     private boolean _print = false;
 
-    private static Logger _log = Logger.getLogger("org.labkey.api." + IssuePage.class);
+    private static Logger _log = Logger.getLogger(IssuePage.class);
 
     public Issue getIssue()
     {

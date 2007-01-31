@@ -49,7 +49,7 @@ import java.io.File;
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class FlowController extends BaseFlowController<FlowController.Action>
 {
-    private static Logger _log = Logger.getLogger("org.labkey.api." + FlowController.class);
+    private static Logger _log = Logger.getLogger(FlowController.class);
 
     public enum Action
     {

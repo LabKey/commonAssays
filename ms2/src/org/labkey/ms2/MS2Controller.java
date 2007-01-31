@@ -75,7 +75,7 @@ public class MS2Controller extends ViewController
 {
     private static final int MAX_INSERTIONS_DISPLAY_ROWS = 1000; // Limit annotation table insertions to 1000 rows
 
-    private static Logger _log = Logger.getLogger("org.labkey.api." + MS2Controller.class);
+    private static Logger _log = Logger.getLogger(MS2Controller.class);
     private static final String MS2_VIEWS_CATEGORY = "MS2Views";
 
     private static final String CAPTION_SCORING_BUTTON = "Compare Scoring";

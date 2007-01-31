@@ -53,7 +53,7 @@ public class IssueManager
     private static TableInfo _tinfoIssueKeywords = _issuesSchema.getTableInfoIssueKeywords();
     private static TableInfo _tinfoComments = _issuesSchema.getTableInfoComments();
     private static TableInfo _tinfoEmailPrefs = _issuesSchema.getTableInfoEmailPrefs();
-    private static Logger _log = Logger.getLogger("org.labkey.api." + IssueManager.class);
+    private static Logger _log = Logger.getLogger(IssueManager.class);
 
     public static final int NOTIFY_ASSIGNEDTO_OPEN = 1;     // if a bug is assigned to me
     public static final int NOTIFY_ASSIGNEDTO_UPDATE = 2;   // if a bug assigned to me is modified
