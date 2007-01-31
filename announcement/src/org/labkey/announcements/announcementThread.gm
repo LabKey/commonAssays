@@ -10,22 +10,29 @@ else if (!announcement)
     <span class=ms-vb><%=settings.conversationName%> not found</span>
 <%}
 else
-{%>
+{
+    if (!print)
+    {%>
     <table width="100%">
     <tr>
     <td align="left" class="ms-vb">
     <%
-    if(messagesURL)
+    if (messagesURL)
     {%>
         [<a href="<%=messagesURL%>"><%=settings.boardName%> Home</a>]
     <%}
     if (listURL)
     {%>
         [<a href="<%=listURL%>">View List</a>]
+    <%}
+    if (!isResponse)
+    {%>
+        [<a href="<%=printURL%>" target="printAnn">Print</a>]
     <%}%>
     </td>
     </tr>
     </table>
+    <%}%>
 
     <table width="100%" cellpadding=0>
     <tr>
@@ -33,7 +40,7 @@ else
         <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align=center><%=filter(announcement.getCreatedByName())%></td>
         <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align="right" nowrap><%
 
-    if (perm.allowUpdate(announcement))
+    if (perm.allowUpdate(announcement) && !print)
     {
     %>[<a href="showUpdate.view?rowId=<%=announcement.getRowId()%>&amp;entityId=<%=announcement.getEntityId()%>">Edit</a>]<%
     }
@@ -96,11 +103,11 @@ else
                 <tr>
                     <td class="ms-vb" colspan="2" style="background-color: #dddddd"><a name="row:<%=r.rowId%>"></a><%=r.getCreatedByName() + " responded:"%></td>
                     <td class="ms-vb" align="right" style="background-color: #dddddd"><%
-                    if (perm.allowUpdate(r))
+                    if (perm.allowUpdate(r) && !print)
                     {
                     %>[<a href="showUpdate.view?rowId=<%=r.getRowId()%>&amp;entityId=<%=r.getEntityId()%>">Edit</a>]<%
                     }
-                    if (perm.allowDeleteMessage(r))
+                    if (perm.allowDeleteMessage(r) && !print)
                     {
                     %>[<a href="deleteSingleAnnouncement.view?rowId=<%=r.getRowId()%>&amp;entityId=<%=r.getEntityId()%>">Delete</a>]<%
                     }
@@ -141,7 +148,7 @@ else
     <%}%>
     <tr><td colspan="3" class="ms-vb">
     <%
-    if(!isResponse)
+    if(!isResponse && !print)
     {
         if (perm.allowResponse(announcement)) 
         { %>
@@ -154,4 +161,8 @@ else
     }%>
     </td></tr>
     </table>
-<%}%>
+<%  if (isResponse)
+    {%>
+<a name="response"/>
+    <%}
+}%>

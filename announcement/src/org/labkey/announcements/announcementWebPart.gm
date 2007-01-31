@@ -37,7 +37,7 @@ if (0 == announcements.length)
 for (a in announcements)
     { %>
     <tr>
-        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align="left"><span class="ms-announcementtitle"><%=filter(a.title)%></span><%
+        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align="left"><span class="ms-announcementtitle"><a href="<%=filter(a.getThreadUrl(request,container))%>rowId=<%=a.rowId%>"><%=filter(a.title)%></a></span><%
         if( a.getResponses().size())
             out.print(" (" + a.responses.size() + (a.responses.size() == 1 ? "&nbsp;response)" : " responses)"));
         %></td>

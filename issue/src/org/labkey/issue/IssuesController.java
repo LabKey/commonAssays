@@ -228,7 +228,7 @@ public class IssuesController extends ViewController
             // Use export=1, print=1 parameters on list() action so .lastFilter=true works in export & print cases
             if (form.getPrint())
             {
-                includeView(new PrintTemplate(getViewContext(), view, "Issues List"));
+                includeView(new PrintTemplate(view, "Issues List"));
             }
             else
             {
@@ -279,7 +279,7 @@ public class IssuesController extends ViewController
         if (form.isPrint())
         {
             page.setPrint(true);
-            return includeView(new PrintTemplate(getViewContext(), v, "Issues List"));
+            return includeView(new PrintTemplate(v, "Issues List"));
         }
         else
             return _renderInTemplate(v, "" + issue.getIssueId() + " : " + issue.getTitle(), null);

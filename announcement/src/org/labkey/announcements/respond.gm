@@ -1,5 +1,4 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
-<a name="response"/>
 <%=PageFlowUtil.getStrutsError(request, "main")%>
 <form method=post enctype="multipart/form-data" action="respond.post"><table>
   <tr><td class="ms-searchform">Title</td><td class="ms-vb" colspan="2"><input type="text" size="40" name="title" value="<%=filter(form.get("title"))%>"></td></tr><%
@@ -69,9 +68,11 @@
 		</td>
 	</tr>
 	<tr><td class="ms-summarycustombody">
-		File 1: <input type="file" name="formFiles[0]"><br>
-		File 2: <input type="file" name="formFiles[1]"><br>
-		File 3: <input type="file" name="formFiles[2]"><br>
+        <table>
+        <tr><td>File 1: <input type="file" name="formFiles[0]" size="60" onChange="ShowPathname(this, 'filename1')"></td><td><label class="ms-vb" id="filename1"></label></td></tr>
+		<tr><td>File 2: <input type="file" name="formFiles[1]" size="60" onChange="ShowPathname(this, 'filename2')"></td><td><label class="ms-vb" id="filename2"></label></td></tr>
+		<tr><td>File 3: <input type="file" name="formFiles[2]" size="60" onChange="ShowPathname(this, 'filename3')"></td><td><label class="ms-vb" id="filename3"></label></td></tr>
+        </table>
 	</td>
 	</tr>
 </table>

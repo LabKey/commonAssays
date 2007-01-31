@@ -967,7 +967,7 @@ public class NabController extends ViewController
     {
         HttpView template;
         if (isPrintView)
-            template = new PrintTemplate(getViewContext(), view, title);
+            template = new PrintTemplate(view, title);
         else
         {
             ViewURLHelper customizeLink = null;

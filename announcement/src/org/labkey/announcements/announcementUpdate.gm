@@ -79,7 +79,7 @@
         out.print("<br>\n");
         }
 %>
-    [<a href="#addAttachment" onclick="window.open('${addAttachmentURL}',null,'height=200,width=450', false);" style="color:green;">add attachment</a>]
+    [<a href="#addAttachment" onclick="window.open('${addAttachmentURL}',null,'height=200,width=550', false);" style="color:green;">add attachment</a>]
 	</td>
   </tr>
   <tr>

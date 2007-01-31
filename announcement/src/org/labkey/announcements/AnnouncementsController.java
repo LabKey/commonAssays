@@ -863,9 +863,22 @@ public class AnnouncementsController extends ViewController
     protected Forward thread(AnnouncementsForm form) throws Exception
     {
         Container c = getContainer(ACL.PERM_READ); // TODO: Shouldn't need this check once ThreadView throws Unauthorized
-        HttpView threadView = new ThreadView(form, getPermissions());
-        String anchor = getViewURLHelper().getParameter("anchor");
-        return _renderInTemplate(threadView, c, null, null, (null != anchor ? "row:" + anchor : null));
+        boolean print = "1".equals(getViewURLHelper().getParameter("print"));
+        ThreadView threadView = new ThreadView(form, getContainer(), getViewURLHelper(), getPermissions(), print);
+        Announcement ann = threadView.getAnnouncement();
+        String title = ann != null ? ann.getTitle() : "Error";
+
+        if (print)
+        {
+            threadView.setFrame(WebPartView.FrameType.DIV);
+            PrintTemplate template = new PrintTemplate(threadView, title);
+            return includeView(template);
+        }
+        else
+        {
+            String anchor = getViewURLHelper().getParameter("anchor");
+            return _renderInTemplate(threadView, c, null, title, (null != anchor ? "row:" + anchor : null));
+        }
     }
 
 
@@ -885,7 +898,7 @@ public class AnnouncementsController extends ViewController
             HttpView.throwUnauthorized();
 
         Container c = getContainer();
-        HttpView threadView = new ThreadView(c, parent, perm);
+        HttpView threadView = new ThreadView(c, getViewURLHelper(), parent, perm);
         GroovyView respondView = new GroovyView("/org/labkey/announcements/respond.gm", "Response");
 
         Announcement latestPost = AnnouncementManager.getLatestPost(c, parent);
@@ -905,9 +918,10 @@ public class AnnouncementsController extends ViewController
         // First level of permission checking... must at least be able to read.
         Container c = getContainer(ACL.PERM_READ);
 
+        // getFilter performs further permission checking on secure board (e.g., non-Editors only see threads where they're on the user list)
+        SimpleFilter filter = getFilter(getSettings(), getPermissions(), true);
+
         // TODO: This only grabs announcements... add responses too?
-        // getRecentAnnouncements performs further permission checking on secure board (e.g., non-Editors only see threads where they're on the user list)
-        SimpleFilter filter = getRecentAnnouncementsFilter(getSettings(), getPermissions(), true);
         Announcement[] announcements = AnnouncementManager.getAnnouncements(c, filter);
 
         HttpView v = new GroovyView("/org/labkey/announcements/rss.gm");
@@ -1189,8 +1203,7 @@ public class AnnouncementsController extends ViewController
 
         template.getModel().setAnchor(anchor);
 
-        includeView(template);
-        return null;
+        return includeView(template);
     }
 
     public static class BulkEditEmailPrefsForm extends FormData
@@ -1248,7 +1261,7 @@ public class AnnouncementsController extends ViewController
     public static class AnnouncementsForm extends BeanViewForm<Announcement>
     {
         Announcement _selectedAnnouncement = null;
-        List<User> _userList = null;        
+        List<User> _userList = null;
 
         public AnnouncementsForm()
         {
@@ -1491,7 +1504,7 @@ public class AnnouncementsController extends ViewController
             setTitleHref(ViewURLHelper.toPathString("announcements", "begin", c.getPath()));
 
             Permissions perm = getPermissions(c, user, settings);
-            SimpleFilter filter = getRecentAnnouncementsFilter(settings, perm, displayAll);
+            SimpleFilter filter = getFilter(settings, perm, displayAll);
             Announcement[] announcements = AnnouncementManager.getAnnouncements(c, filter);
 
             addObject("settings", settings);
@@ -1510,7 +1523,7 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private static SimpleFilter getRecentAnnouncementsFilter(Settings settings, Permissions perm, boolean displayAll)
+    private static SimpleFilter getFilter(Settings settings, Permissions perm, boolean displayAll)
     {
         // Filter out threads that this user can't read
         SimpleFilter filter = perm.getThreadFilter();
@@ -1525,6 +1538,12 @@ public class AnnouncementsController extends ViewController
         }
 
         return filter;
+    }
+
+
+    private static String getFilterText(Settings settings, Permissions perm, boolean displayAll)
+    {
+        return "";
     }
 
 
@@ -1580,7 +1599,7 @@ public class AnnouncementsController extends ViewController
             gridView.setContainer(c);
             gridView.setSort(new Sort("-Created"));
 
-            SimpleFilter filter = getRecentAnnouncementsFilter(settings, perm, displayAll);
+            SimpleFilter filter = getFilter(settings, perm, displayAll);
             gridView.setFilter(filter);
 
             _vbox = new VBox(new AnnouncementListLinkBar(c, user, settings, perm), gridView);
@@ -1590,6 +1609,7 @@ public class AnnouncementsController extends ViewController
         {
             DataRegion rgn = new DataRegion();
             rgn.setButtonBar(ButtonBar.BUTTON_BAR_EMPTY);
+            rgn.setShadeAlternatingRows(true);
             return rgn;
         }
 
@@ -1637,12 +1657,14 @@ public class AnnouncementsController extends ViewController
 
     public static class ThreadView extends GroovyView
     {
+        Announcement _ann;
+
         private ThreadView()
         {
             super("/org/labkey/announcements/announcementThread.gm");
         }
 
-        public ThreadView(AnnouncementsForm form, Permissions perm)
+        public ThreadView(AnnouncementsForm form, Container c, ViewURLHelper url, Permissions perm, boolean print)
                 throws ServletException
         {
             this();
@@ -1671,50 +1693,54 @@ public class AnnouncementsController extends ViewController
                     rowId = 0;
             }
 
-            Container c = form.getContainer();
-            Announcement announcement;
-
             try
             {
                 if (null != rowId)
-                    announcement = AnnouncementManager.getAnnouncement(c, rowId, AnnouncementManager.INCLUDE_ATTACHMENTS + AnnouncementManager.INCLUDE_RESPONSES + AnnouncementManager.INCLUDE_USERLIST);
+                    _ann = AnnouncementManager.getAnnouncement(c, rowId, AnnouncementManager.INCLUDE_ATTACHMENTS + AnnouncementManager.INCLUDE_RESPONSES + AnnouncementManager.INCLUDE_USERLIST);
                 else
-                    announcement = AnnouncementManager.getAnnouncement(c, entityId, true);
+                    _ann = AnnouncementManager.getAnnouncement(c, entityId, true);
             }
             catch (SQLException x)
             {
                 throw new ServletException(x);
             }
 
-            init(c, announcement, perm, false);
+            init(c, url, perm, false, print);
         }
 
 
-        public ThreadView(Container c, Announcement ann, Permissions perm)
-                throws ServletException
+        public ThreadView(Container c, ViewURLHelper url, Announcement ann, Permissions perm) throws ServletException
         {
             this();
-            init(c, ann, perm, true);
+            _ann = ann;
+            init(c, url, perm, true, false);
         }
 
 
-        private void init(Container c, Announcement ann, Permissions perm, boolean isResponse) throws ServletException
+        private void init(Container c, ViewURLHelper url, Permissions perm, boolean isResponse, boolean print) throws ServletException
         {
             Settings settings = getSettings(c);
 
             // TODO: Include message in throw?  Check for guest, display message if not?
-            if (null == c || !perm.allowRead(ann))
+            if (null == c || !perm.allowRead(_ann))
                 HttpView.throwUnauthorized();
 
             addObject("message", null);
-            addObject("announcement", ann);
+            addObject("announcement", _ann);
             addObject("perm", perm);
             addObject("isResponse", isResponse);
             addObject("settings", settings);
             addObject("messagesURL", ViewURLHelper.toPathString("announcements", "begin", c));
             addObject("listURL", getListUrl(c));
+            addObject("printURL", url.clone().replaceParameter("print", "1").getEncodedLocalURIString());
+            addObject("print", print);
 
             setTitle("View " + settings.getConversationName());
+        }
+
+        public Announcement getAnnouncement()
+        {
+            return _ann;
         }
     }
 

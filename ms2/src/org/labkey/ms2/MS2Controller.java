@@ -189,7 +189,7 @@ public class MS2Controller extends ViewController
         {
             public HttpView createTemplate(ViewContext viewContext, HttpView view, NavTrailConfig navTrail)
             {
-                return new PrintTemplate(viewContext, view, navTrail.getTitle());
+                return new PrintTemplate(view, navTrail.getTitle());
             }};
 
         public abstract HttpView createTemplate(ViewContext viewContext, HttpView view, NavTrailConfig navTrail);

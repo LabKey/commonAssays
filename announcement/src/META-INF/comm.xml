@@ -274,9 +274,10 @@
         </ns:column>
         <ns:column columnName="Created">
           <ns:formatString>DateTime</ns:formatString>
+          <ns:displayWidth>150</ns:displayWidth>
         </ns:column>
         <ns:column columnName="ResponseCreatedBy">
-          <ns:columnTitle>Last Updated By</ns:columnTitle>
+          <ns:columnTitle>Most Recent Post By</ns:columnTitle>
           <ns:fk>
             <ns:fkColumnName>UserId</ns:fkColumnName>
             <ns:fkTable>Users</ns:fkTable>
@@ -284,8 +285,9 @@
           </ns:fk>
         </ns:column>
         <ns:column columnName="ResponseCreated">
-          <ns:columnTitle>Last Updated</ns:columnTitle>
+          <ns:columnTitle>Most Recent Post</ns:columnTitle>
           <ns:formatString>DateTime</ns:formatString>
+          <ns:displayWidth>150</ns:displayWidth>
         </ns:column>
         <ns:column columnName="AssignedTo">
           <ns:fk>
@@ -295,7 +297,9 @@
           </ns:fk>
         </ns:column>
         <ns:column columnName="Container"/>
-        <ns:column columnName="Title"/>
+        <ns:column columnName="Title">
+          <ns:displayWidth>200</ns:displayWidth>
+        </ns:column>
         <ns:column columnName="Body"/>
         <ns:column columnName="RendererType"/>
         <ns:column columnName="Expires"/>
