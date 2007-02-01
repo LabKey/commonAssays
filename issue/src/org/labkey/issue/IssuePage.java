@@ -129,7 +129,7 @@ abstract public class IssuePage extends JspBase
         return DateFormat.getDateInstance().format(d);
     }
 
-    public String writeCustomColumn(String container, String tableColumnName, String value, int type) throws IOException
+    public String writeCustomColumn(String container, String tableColumnName, String value, int keywordType) throws IOException
     {
         final String caption = _ccc.getColumnCaptions().get(tableColumnName);
 
@@ -143,7 +143,9 @@ abstract public class IssuePage extends JspBase
 
             // If custom column has pick list, then show select with keywords, otherwise input box
             if (_ccc.getPickListColumns().contains(tableColumnName))
-                sb.append(writeSelect(tableColumnName, value, getKeywordOptions(container, type, true)));
+                sb.append(writeSelect(tableColumnName, value, getKeywordOptions(container, keywordType, true)));
+            else if (tableColumnName.startsWith("int"))
+                sb.append(writeIntegerInput(tableColumnName, value));
             else
                 sb.append(writeInput(tableColumnName, value));
 
@@ -176,6 +178,12 @@ abstract public class IssuePage extends JspBase
             sb.append(">");
         }
         return sb.toString();
+    }
+
+    // Limit number of characters in an integer field
+    public String writeIntegerInput(String field, String value)
+    {
+        return writeInput(field, value, "maxlength=\"10\" size=\"8\"");
     }
 
     public String writeInput(String field, String value)
