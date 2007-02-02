@@ -13,6 +13,6 @@ public class MS1FileFilter implements FileFilter
 {
     public boolean accept(File f)
     {
-        return f.getName().toLowerCase().endsWith(".tsv");
+        return f.getName().toLowerCase().endsWith(".features.tsv");
     }
 }

@@ -2056,7 +2056,11 @@ public class MS2Controller extends ViewController
         ViewURLHelper currentUrl = cloneViewURLHelper();
         MS2RunHierarchyTree ht = new MS2RunHierarchyTree(currentUrl.getExtraPath(), getUser(), ACL.PERM_READ, currentUrl);
 
-        StringBuilder html = new StringBuilder("<form method=post action=''><table class=\"dataRegion\">");
+        StringBuilder html = new StringBuilder();
+        html.append("<script type=\"text/javascript\">\n");
+        html.append("LABKEY.requiresScript('filter.js');\n");
+        html.append("</script>");
+        html.append("<form method=post action=''><table class=\"dataRegion\">");
         ht.render(html);
         renderHierarchyButtonBar(html);
         html.append("</table></form>");
