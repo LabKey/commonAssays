@@ -422,19 +422,6 @@ public class MS2Controller extends ViewController
         return _renderInTemplate(gridView, true, pageName, helpTopic);
     }
 
-
-    @Jpf.Action
-    protected Forward getProteinGroupingPeptides(RunForm form) throws Exception
-    {
-        MS2Run run = MS2Manager.getRun(form.getRun());
-
-        AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
-
-        GridView gridView = peptideView.getPeptideViewForProteinGrouping(form.getProteinGroupingId(), form.getColumns());
-        return includeView(gridView);
-    }
-
-
     @Jpf.Action
     protected Forward applyRunView(MS2ViewForm form) throws Exception
     {

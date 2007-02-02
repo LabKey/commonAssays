@@ -328,6 +328,7 @@
         <ns:columnTitle>_ts</ns:columnTitle>
         <ns:inputType>text</ns:inputType>
         <ns:inputLength>8</ns:inputLength>
+        <ns:isHidden>true</ns:isHidden>
         <ns:isReadOnly>false</ns:isReadOnly>
       </ns:column>
       <ns:column columnName="Run">
@@ -376,12 +377,18 @@
         <ns:inputLength>36</ns:inputLength>
         <ns:nullable>false</ns:nullable>
         <ns:isReadOnly>false</ns:isReadOnly>
+        <ns:fk>
+            <ns:fkColumnName>EntityId</ns:fkColumnName>
+            <ns:fkDbSchema>core</ns:fkDbSchema>
+            <ns:fkTable>container</ns:fkTable>
+        </ns:fk>
       </ns:column>
       <ns:column columnName="EntityId">
         <ns:columnTitle>Entity Id</ns:columnTitle>
         <ns:inputType>text</ns:inputType>
         <ns:inputLength>36</ns:inputLength>
         <ns:isReadOnly>false</ns:isReadOnly>
+        <ns:isHidden>true</ns:isHidden>
       </ns:column>
       <ns:column columnName="Description">
         <ns:columnTitle>Description</ns:columnTitle>
@@ -416,15 +423,18 @@
         <ns:isReadOnly>false</ns:isReadOnly>
         <ns:isUserEditable>true</ns:isUserEditable>
       </ns:column>
-      <ns:column columnName="StatusId"/>
+      <ns:column columnName="StatusId">
+        <ns:isHidden>true</ns:isHidden>
+      </ns:column>
       <ns:column columnName="Type"/>
       <ns:column columnName="SearchEngine"/>
       <ns:column columnName="MassSpecType"/>
       <ns:column columnName="FastaId">
+          <ns:columnTitle>FASTA</ns:columnTitle>
           <ns:fk>
-              <ns:fkColumnName>prot</ns:fkColumnName>
+              <ns:fkColumnName>fastaid</ns:fkColumnName>
               <ns:fkTable>fastafiles</ns:fkTable>
-              <ns:fkDbSchema>fastaid</ns:fkDbSchema>
+              <ns:fkDbSchema>prot</ns:fkDbSchema>
           </ns:fk>
       </ns:column>
       <ns:column columnName="SearchEnzyme"/>
@@ -1688,18 +1698,25 @@
   </ns:table>
   <ns:table tableName="ProteinGroups" tableDbType="TABLE">
     <ns:columns>
-      <ns:column columnName="RowId"/>
+      <ns:column columnName="RowId">
+          <ns:isHidden>true</ns:isHidden>
+      </ns:column>
       <ns:column columnName="GroupProbability">
         <ns:columnTitle>Prob</ns:columnTitle>
       </ns:column>
       <ns:column columnName="ProteinProbability">
         <ns:columnTitle>Protein Prob</ns:columnTitle>
       </ns:column>
-      <ns:column columnName="ProteinProphetFileId"/>
+      <ns:column columnName="ProteinProphetFileId">
+        <ns:isHidden>true</ns:isHidden>
+      </ns:column>
       <ns:column columnName="GroupNumber">
         <ns:columnTitle>Group</ns:columnTitle>
+        <ns:isHidden>true</ns:isHidden>
       </ns:column>
-      <ns:column columnName="IndistinguishableCollectionId"/>
+      <ns:column columnName="IndistinguishableCollectionId">
+        <ns:isHidden>true</ns:isHidden>
+      </ns:column>
       <ns:column columnName="UniquePeptidesCount">
         <ns:columnTitle>Unique</ns:columnTitle>
         <ns:sortDescending>true</ns:sortDescending>
@@ -1733,8 +1750,12 @@
   </ns:table>
   <ns:table tableName="PeptideMemberships" tableDbType="TABLE">
     <ns:columns>
-      <ns:column columnName="PeptideId"/>
-      <ns:column columnName="ProteinGroupId"/>
+      <ns:column columnName="PeptideId">
+          <ns:columnTitle>Peptide</ns:columnTitle>
+      </ns:column>
+      <ns:column columnName="ProteinGroupId">
+          <ns:columnTitle>Protein Group</ns:columnTitle>
+      </ns:column>
       <ns:column columnName="NSPAdjustedProbability">
         <ns:columnTitle>NSPAdjProb</ns:columnTitle>
       </ns:column>

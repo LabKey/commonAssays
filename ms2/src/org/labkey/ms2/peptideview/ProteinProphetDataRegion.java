@@ -2,7 +2,6 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.view.ViewURLHelper;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -15,9 +14,9 @@ import java.sql.ResultSet;
  */
 public class ProteinProphetDataRegion extends AbstractProteinDataRegion
 {
-    public ProteinProphetDataRegion(ViewURLHelper urlHelper)
+    public ProteinProphetDataRegion()
     {
-        super("ProteinGroupId", urlHelper);
+        super("ProteinGroupId");
         setShadeAlternatingRows(true);
     }
 
@@ -25,27 +24,20 @@ public class ProteinProphetDataRegion extends AbstractProteinDataRegion
     {
         super.renderTableRow(ctx, out, renderers, rowIndex);
 
-        if (_expanded)
-        {
-            _groupedRS.previous();
-            ResultSet nestedRS = _groupedRS.getNextResultSet();
+        _groupedRS.previous();
+        ResultSet nestedRS = _groupedRS.getNextResultSet();
 
-            // Validate that the inner and outer result sets are sorted the same
-            while (nestedRS.next())
+        // Validate that the inner and outer result sets are sorted the same
+        while (nestedRS.next())
+        {
+            if (!ctx.getRow().get("ProteinGroupId").equals(nestedRS.getInt("ProteinGroupId")))
             {
-                if (!ctx.getRow().get("ProteinGroupId").equals(nestedRS.getInt("ProteinGroupId")))
-                {
-                    throw new IllegalArgumentException("ProteinGroup ids do not match for the outer and inner queries");
-                }
+                throw new IllegalArgumentException("ProteinGroup ids do not match for the outer and inner queries");
             }
-            nestedRS.beforeFirst();
+        }
+        nestedRS.beforeFirst();
 
-            renderNestedGrid(out, ctx, nestedRS, rowIndex);
-            nestedRS.close();
-        }
-        else
-        {
-            renderPlaceholderGrid(out, ctx, rowIndex);
-        }
+        renderNestedGrid(out, ctx, nestedRS, rowIndex);
+        nestedRS.close();
     }
 }

@@ -10,9 +10,7 @@ import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
+import java.util.*;
 
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
@@ -75,7 +73,7 @@ public class QueryFlatPeptideView extends AbstractPeptideView
 
         QuerySettings settings = createQuerySettings(DATA_REGION_NAME, schema, MAX_PEPTIDE_DISPLAY_ROWS);
 
-        FlatPeptideQueryView peptideView = new FlatPeptideQueryView(_viewContext, schema, settings);
+        FlatPeptideQueryView peptideView = new FlatPeptideQueryView(_viewContext, schema, settings, expanded);
         FilteredTable table = peptideView.getFilteredTable();
         List<Object> params = new ArrayList<Object>(_runs.length);
         for (MS2Run run : _runs)
@@ -90,17 +88,147 @@ public class QueryFlatPeptideView extends AbstractPeptideView
         return peptideView;
     }
 
+    private class NestingOption
+    {
+        private String _prefix;
+        private String _rowIdColumnName;
+        private DataColumn _groupIdColumn;
+        
+        public NestingOption(String prefix, String rowIdColumnName)
+        {
+            _prefix = prefix;
+            _rowIdColumnName = rowIdColumnName;
+        }
+
+        public DataColumn getGroupIdColumn()
+        {
+            return _groupIdColumn;
+        }
+
+        public void setupGroupIdColumn(List<DisplayColumn> allColumns, List<DisplayColumn> groupingColumns, TableInfo parentTable)
+        {
+            if (_groupIdColumn != null)
+            {
+                return;
+            }
+            Map<FieldKey, ColumnInfo> infos = QueryService.get().getColumns(parentTable, Collections.singleton(FieldKey.fromString(_rowIdColumnName)));
+            for (ColumnInfo info : infos.values())
+            {
+                _groupIdColumn = new DataColumn(info);
+                _groupIdColumn.setVisible(false);
+                allColumns.add(_groupIdColumn);
+                groupingColumns.add(_groupIdColumn);
+            }
+        }
+        
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            NestingOption that = (NestingOption) o;
+
+            if (_prefix != null ? !_prefix.equals(that._prefix) : that._prefix != null) return false;
+            if (_rowIdColumnName != null ? !_rowIdColumnName.equals(that._rowIdColumnName) : that._rowIdColumnName != null)
+                return false;
+
+            return true;
+        }
+
+        public int hashCode()
+        {
+            int result;
+            result = (_prefix != null ? _prefix.hashCode() : 0);
+            result = 31 * result + (_rowIdColumnName != null ? _rowIdColumnName.hashCode() : 0);
+            return result;
+        }
+
+        public boolean isNested(String name)
+        {
+            return name.toLowerCase().startsWith(_prefix.toLowerCase());
+        }
+    }
+
     private class FlatPeptideQueryView extends QueryView
     {
-        public FlatPeptideQueryView(ViewContext context, UserSchema schema, QuerySettings settings)
+        private NestingOption _selectedNestingOption;
+        private static final String PROTEIN_GROUP_PREFIX = "ProteinProphetData/ProteinGroupId/";
+        private static final String PROTEIN_GROUP_ROWID = PROTEIN_GROUP_PREFIX + "RowId";
+
+        private static final String PROTEIN_PREFIX = "SeqId/";
+        private static final String PROTEIN_ROWID = PROTEIN_PREFIX + "SeqId";
+        private final boolean _expanded;
+
+        public FlatPeptideQueryView(ViewContext context, UserSchema schema, QuerySettings settings, boolean expanded)
         {
             super(context, schema, settings);
+            _expanded = expanded;
             _buttonBarPosition = DataRegion.ButtonBarPosition.BOTTOM; 
         }
 
         protected DataRegion createDataRegion()
         {
-            DataRegion rgn = super.createDataRegion();
+            List<DisplayColumn> originalColumns = getDisplayColumns();
+            List<DisplayColumn> peptideColumns = new ArrayList<DisplayColumn>();
+            List<DisplayColumn> groupingColumns = new ArrayList<DisplayColumn>();
+            List<DisplayColumn> allColumns = new ArrayList<DisplayColumn>();
+
+            Set<NestingOption> nestingOptions = new HashSet<NestingOption>();
+            nestingOptions.add(new NestingOption(PROTEIN_GROUP_PREFIX, PROTEIN_GROUP_ROWID));
+            nestingOptions.add(new NestingOption(PROTEIN_PREFIX, PROTEIN_ROWID));
+
+            for (DisplayColumn column : originalColumns)
+            {
+                boolean nestedColumn = false;
+                for (NestingOption option : nestingOptions)
+                {
+                    if (option.isNested(column.getColumnInfo().getName()))
+                    {
+                        nestedColumn = true;
+                        if (_selectedNestingOption != null && _selectedNestingOption != option)
+                        {
+                            throw new IllegalArgumentException();
+                        }
+                        _selectedNestingOption = option;
+                        _selectedNestingOption.setupGroupIdColumn(allColumns, groupingColumns, column.getColumnInfo().getParentTable());
+                        groupingColumns.add(column);
+                    }
+                }
+                if (!nestedColumn)
+                {
+                    peptideColumns.add(column);
+                }
+                allColumns.add(column);
+            }
+
+            DataRegion rgn;
+            if (_selectedNestingOption != null)
+            {
+                QueryPeptideDataRegion ppRgn = new QueryPeptideDataRegion(allColumns, _selectedNestingOption.getGroupIdColumn());
+                ppRgn.setExpanded(_expanded);
+                ppRgn.setRecordSelectorValueColumns(_selectedNestingOption.getGroupIdColumn().getColumnInfo().getAlias());
+                DataRegion nestedRgn = new DataRegion();
+                nestedRgn.setName(getDataRegionName());
+                nestedRgn.setButtonBarPosition(DataRegion.ButtonBarPosition.NONE);
+                nestedRgn.setDisplayColumnList(peptideColumns);
+                ppRgn.setNestedRegion(nestedRgn);
+                for (DisplayColumn column : groupingColumns)
+                {
+                    column.setCaption(column.getColumnInfo().getCaption());
+                }
+                ppRgn.setDisplayColumnList(groupingColumns);
+
+                rgn = ppRgn;
+            }
+            else
+            {
+                rgn = new DataRegion();
+                rgn.setDisplayColumnList(peptideColumns);
+            }
+            rgn.setMaxRows(getMaxRows());
+            rgn.setShowRecordSelectors(showRecordSelectors());
+            rgn.setName(getDataRegionName());
+
             rgn.setShowRecordSelectors(true);
             rgn.setFixedWidthColumns(true);
 
@@ -114,12 +242,65 @@ public class QueryFlatPeptideView extends AbstractPeptideView
             return rgn;
         }
 
+        private class SortRewriterRenderContext extends RenderContext
+        {
+            public SortRewriterRenderContext(ViewContext context)
+            {
+                super(context);
+            }
+
+
+            protected Sort buildSort(TableInfo tinfo, ViewURLHelper url, String name)
+            {
+                Sort standardSort = super.buildSort(tinfo, url, name);
+                if (_selectedNestingOption != null)
+                {
+                    boolean foundGroupId = false;
+                    standardSort.getSortList();
+                    Sort sort = new Sort();
+                    sort.setMaxClauses(standardSort.getMaxClauses());
+
+                    int totalIndex = 0;
+                    int proteinIndex = 0;
+                    for (Sort.SortField field : standardSort.getSortList())
+                    {
+                        boolean proteinGroupColumn = field.getColumnName().toLowerCase().startsWith(_selectedNestingOption._prefix);
+                        foundGroupId = foundGroupId || field.getColumnName().equalsIgnoreCase(_selectedNestingOption._rowIdColumnName);
+                        sort.insertSortColumn(field.toUrlString(), field.isUrlClause(), proteinGroupColumn ? proteinIndex++ : totalIndex);
+                        totalIndex++;
+                    }
+
+                    if (!foundGroupId)
+                    {
+                        sort.insertSortColumn(_selectedNestingOption._rowIdColumnName, false, proteinIndex++);
+                    }
+
+                    return sort;
+                }
+                else
+                {
+                    return standardSort;
+                }
+            }
+        }
 
         protected DataView createDataView()
         {
-            DataView result = super.createDataView();
-            result.getRenderContext().setBaseSort(ProteinManager.getPeptideBaseSort());
-            result.getRenderContext().setBaseFilter(ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.EXTRA_FILTER));
+            DataRegion rgn = createDataRegion();
+            GridView result = new GridView(rgn, new SortRewriterRenderContext(getViewContext()));
+            setupDataView(result);
+
+            Sort customViewSort = result.getRenderContext().getBaseSort();
+            Sort sort = ProteinManager.getPeptideBaseSort();
+            if (customViewSort != null)
+            {
+                sort.insertSort(customViewSort);
+            }
+            result.getRenderContext().setBaseSort(sort);
+            Filter customViewFilter = result.getRenderContext().getBaseFilter();
+            SimpleFilter filter = new SimpleFilter(customViewFilter);
+            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.EXTRA_FILTER));
+            result.getRenderContext().setBaseFilter(filter);
             return result;
         }
 
@@ -162,11 +343,6 @@ public class QueryFlatPeptideView extends AbstractPeptideView
     public void addSQLSummaries(List<Pair<String, String>> sqlSummaries)
     {
 
-    }
-
-    public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
-    {
-        throw new UnsupportedOperationException();
     }
 
     public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form)

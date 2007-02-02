@@ -47,7 +47,7 @@ public class StandardProteinPeptideView extends AbstractPeptideView
 
     private StandardProteinDataRegion createProteinDataRegion(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws SQLException
     {
-        StandardProteinDataRegion proteinRgn = new StandardProteinDataRegion(_url);
+        StandardProteinDataRegion proteinRgn = new StandardProteinDataRegion();
         proteinRgn.addColumns(getProteinDisplayColumns(requestedProteinColumnNames));
         proteinRgn.setShowRecordSelectors(true);
         proteinRgn.setExpanded(expanded);
@@ -55,11 +55,11 @@ public class StandardProteinPeptideView extends AbstractPeptideView
 
         MS2Run run = getSingleRun();
 
-        String columnNames = getPeptideColumnNames(requestedPeptideColumnNames, expanded);
+        String columnNames = getPeptideColumnNames(requestedPeptideColumnNames);
 
         DataRegion peptideGrid = getNestedPeptideGrid(run, columnNames, true);
         proteinRgn.setNestedRegion(peptideGrid);
-        GroupedResultSet peptideResultSet = createPeptideResultSet(columnNames, run, expanded, MAX_PROTEIN_DISPLAY_ROWS, null);
+        GroupedResultSet peptideResultSet = createPeptideResultSet(columnNames, run, MAX_PROTEIN_DISPLAY_ROWS, null);
         proteinRgn.setGroupedResultSet(peptideResultSet);
 
         ViewURLHelper proteinUrl = _url.clone();
@@ -79,9 +79,9 @@ public class StandardProteinPeptideView extends AbstractPeptideView
         return proteinRgn;
     }
 
-    public GroupedResultSet createPeptideResultSet(String columnNames, MS2Run run, boolean expanded, int maxRows, String extraWhere) throws SQLException
+    public GroupedResultSet createPeptideResultSet(String columnNames, MS2Run run, int maxRows, String extraWhere) throws SQLException
     {
-        String sqlColumnNames = getPeptideSQLColumnNames(columnNames, run, expanded);
+        String sqlColumnNames = getPeptideSQLColumnNames(columnNames, run);
         return ProteinManager.getPeptideRS(_url, run, extraWhere, maxRows, sqlColumnNames);
     }
 
@@ -99,28 +99,15 @@ public class StandardProteinPeptideView extends AbstractPeptideView
     }
 
 
-    private String getPeptideColumnNames(String requestedPeptideColumnNames, boolean expanded) throws SQLException
+    private String getPeptideSQLColumnNames(String peptideColumnNames, MS2Run run)
     {
-        if (expanded)
-        {
-            return getPeptideColumnNames(requestedPeptideColumnNames);
-        }
-        return "Protein, Peptide";
-    }
-
-    private String getPeptideSQLColumnNames(String peptideColumnNames, MS2Run run, boolean expanded)
-    {
-        if (expanded)
-        {
-            return run.getSQLPeptideColumnNames(peptideColumnNames + ", Protein, Peptide, RowId", true, MS2Manager.getTableInfoPeptides());
-        }
-        return "Protein, Peptide, RowId";
+        return run.getSQLPeptideColumnNames(peptideColumnNames + ", Protein, Peptide, RowId", true, MS2Manager.getTableInfoPeptides());
     }
 
     public void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException
     {
-        String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumnNames, expanded);
-        String sqlPeptideColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run, expanded);
+        String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumnNames);
+        String sqlPeptideColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
 
         ResultSet proteinRS = ProteinManager.getProteinRS(_url, run, where, ExcelWriter.MAX_ROWS);
         GroupedResultSet peptideRS = ProteinManager.getPeptideRS(_url, run, where, ExcelWriter.MAX_ROWS, sqlPeptideColumnNames);
@@ -143,8 +130,8 @@ public class StandardProteinPeptideView extends AbstractPeptideView
 
     public void exportTSVProteinGrid(ProteinTSVGridWriter tw, String requestedPeptideColumns, MS2Run run, String where) throws SQLException
     {
-        String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumns, tw.getExpanded());
-        String peptideSqlColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run, tw.getExpanded());
+        String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumns);
+        String peptideSqlColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
 
         ResultSet proteinRS = null;
         GroupedResultSet peptideRS = null;
@@ -185,16 +172,6 @@ public class StandardProteinPeptideView extends AbstractPeptideView
     {
         sqlSummaries.add(new Pair<String, String>("Protein Filter", new SimpleFilter(_url, MS2Manager.getDataRegionNameProteins()).getFilterText(MS2Manager.getSqlDialect())));
         sqlSummaries.add(new Pair<String, String>("Protein Sort", new Sort(_url, MS2Manager.getDataRegionNameProteins()).getSortText(MS2Manager.getSqlDialect())));
-    }
-
-    public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
-    {
-        String peptideColumns = getPeptideColumnNames(columns);
-        DataRegion peptideRegion = getNestedPeptideGrid(_runs[0], peptideColumns, true);
-        GridView view = new GridView(peptideRegion);
-        String extraWhere = MS2Manager.getTableInfoPeptides() + ".Protein= '" + proteinGroupingId + "'";
-        view.setResultSet(createPeptideResultSet(peptideColumns, _runs[0], true, MAX_PROTEIN_DISPLAY_ROWS, extraWhere));
-        return view;
     }
 
     public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form) throws SQLException

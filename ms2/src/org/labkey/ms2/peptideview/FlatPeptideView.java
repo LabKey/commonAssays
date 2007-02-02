@@ -84,11 +84,6 @@ public class FlatPeptideView extends AbstractPeptideView
 
     }
 
-    public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
-    {
-        throw new UnsupportedOperationException();
-    }
-
     public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form)
     {
         throw new UnsupportedOperationException();

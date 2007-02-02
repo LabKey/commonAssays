@@ -116,8 +116,6 @@ public abstract class AbstractPeptideView
 
     public abstract void addSQLSummaries(List<Pair<String, String>> sqlSummaries);
 
-    public abstract GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException;
-
     public Container getContainer()
     {
         return _container;

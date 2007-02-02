@@ -20,9 +20,9 @@ public class StandardProteinDataRegion extends AbstractProteinDataRegion
 {
     private int _peptideIndex = -1;
 
-    public StandardProteinDataRegion(ViewURLHelper urlHelper)
+    public StandardProteinDataRegion()
     {
-        super("Protein", urlHelper);
+        super("Protein");
         setShadeAlternatingRows(true);
     }
 
@@ -43,9 +43,8 @@ public class StandardProteinDataRegion extends AbstractProteinDataRegion
                 peptides.add(nestedRS.getString(getPeptideIndex()));
             }
 
-            // If expanded view, back up to the first peptide in this group
-            if (_expanded)
-                nestedRS.beforeFirst();
+            // Back up to the first peptide in this group
+            nestedRS.beforeFirst();
 
             String[] peptideArray = new String[peptides.size()];
             protein.setPeptides(peptides.toArray(peptideArray));
@@ -60,17 +59,7 @@ public class StandardProteinDataRegion extends AbstractProteinDataRegion
 
         super.renderTableRow(ctx, out, renderers, rowIndex);
 
-        // If expanded, output the peptides... otherwise "close" the resultset (move to the next protein)
-        if (outerSeqId != null && _expanded)
-            renderNestedGrid(out, ctx, nestedRS, rowIndex);
-        else
-        {
-            if (nestedRS != null)
-            {
-                nestedRS.close();
-            }
-            renderPlaceholderGrid(out, ctx, rowIndex);
-        }
+        renderNestedGrid(out, ctx, nestedRS, rowIndex);
     }
 
     private int getPeptideIndex() throws SQLException

@@ -106,7 +106,7 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
 
     private ProteinProphetDataRegion createProteinDataRegion(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws SQLException
     {
-        ProteinProphetDataRegion proteinRgn = new ProteinProphetDataRegion(_url);
+        ProteinProphetDataRegion proteinRgn = new ProteinProphetDataRegion();
         proteinRgn.setTable(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
         proteinRgn.setName(MS2Manager.getDataRegionNameProteinGroups());
         proteinRgn.addColumns(getProteinDisplayColumns(requestedProteinColumnNames));
@@ -118,12 +118,9 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
         ResultSet rs = createPeptideResultSet(requestedPeptideColumnNames, null);
         _rs = new GroupedResultSet(rs, "ProteinGroupId", proteinRgn.getMaxRows());
 
-        if (expanded)
-        {
-            proteinRgn.setGroupedResultSet((GroupedResultSet)_rs);
-            DataRegion peptideGrid = createPeptideDataRegion(requestedPeptideColumnNames);
-            proteinRgn.setNestedRegion(peptideGrid);
-        }
+        proteinRgn.setGroupedResultSet((GroupedResultSet)_rs);
+        DataRegion peptideGrid = createPeptideDataRegion(requestedPeptideColumnNames);
+        proteinRgn.setNestedRegion(peptideGrid);
 
         ButtonBar bb = createButtonBar("exportProteinGroups", "exportSelectedProteinGroups", "protein groups");
 
@@ -345,16 +342,5 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
     {
         sqlSummaries.add(new Pair<String, String>("Protein Group Filter", new SimpleFilter(_url, MS2Manager.getDataRegionNameProteinGroups()).getFilterText(MS2Manager.getSqlDialect())));
         sqlSummaries.add(new Pair<String, String>("Protein Group Sort", new Sort(_url, MS2Manager.getDataRegionNameProteinGroups()).getSortText(MS2Manager.getSqlDialect())));
-    }
-
-    public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String requestedPeptideColumns)
-            throws SQLException
-    {
-        String peptideColumns = getPeptideColumnNames(requestedPeptideColumns);
-        DataRegion peptideRegion = createPeptideDataRegion(requestedPeptideColumns);
-        GridView view = new GridView(peptideRegion);
-        String extraWhere = MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId = " + proteinGroupingId;
-        view.setResultSet(createPeptideResultSet(peptideColumns, extraWhere));
-        return view;
     }
 }
