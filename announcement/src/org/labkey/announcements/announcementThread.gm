@@ -49,7 +49,7 @@ else
     </tr>
     <tr style="height:1;"><td colspan=3 class=ms-titlearealine><img height=1 width=1 src="<%=request.getContextPath()%>/_.gif"></td></tr><%
 
-    if (settings.hasUserList() && announcement.emailList)
+    if (settings.hasMemberList() && announcement.emailList)
     {
     %><tr><td colspan="3">Members: <%=announcement.emailList%></td></tr>
     <% }
@@ -114,7 +114,7 @@ else
                     %><%=DateUtil.formatDateTime(r.getCreated())%></td>
                 </tr>
                 <%
-                if (settings.hasUserList() && r.emailList != prev.emailList) { %>
+                if (settings.hasMemberList() && r.emailList != prev.emailList) { %>
                 <tr><td>Members: <%=filter(r.emailList)%></td></tr><% }
                 if (settings.hasStatus() && r.status != prev.status) { %>
                 <tr><td>Status: <%=r.status%></td></tr><% }

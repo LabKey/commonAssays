@@ -27,17 +27,17 @@ else
 <%=assignedToSelect%>
   </td></tr><%
     }
-    if (settings.hasUserList())
+    if (settings.hasMemberList())
     {%>
   <tr><td class='ms-searchform'>Members</td><td class='ms-vb'>
-<%=userList%>
+<%=memberList%>
   </td><td><i><%
   if (settings.isSecure())
   { %> This <%=settings.conversationName.toLowerCase()%> is private; only editors and the users on this list can view it.  These users will also<%
   }
   else
   {
-  %> The users on the Members list<%
+  %> The users on the member list<%
   }
   %> receive email notifications of new posts to this <%=settings.conversationName.toLowerCase()%>.<br><br>Enter one or more email addresses, each on its own line.</i></td></tr><%
     }

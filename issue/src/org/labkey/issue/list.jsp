@@ -30,7 +30,7 @@
     <%
     if (context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT))
 	{
-	%><td><a href="insert.view"><%=PageFlowUtil.buttonImg("New Issue")%></td><%
+	%><td><a href="insert.view"><%=PageFlowUtil.buttonImg("New Issue")%></a></td><%
 	}
     %>
     <td>&nbsp;views:</td>

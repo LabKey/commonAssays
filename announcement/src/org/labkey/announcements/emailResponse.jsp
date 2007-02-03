@@ -33,8 +33,8 @@
   If you no longer wish to receive these notifications, please <a href="<%=removeUrl%>">change your email preferences</a>.<%
             break;
 
-            case userList:
-    %>you are on the Members list for this <%=settings.getConversationName().toLowerCase()%>.  If you no longer wish to receive these notifications,
+        case memberList:
+    %>you are on the member list for this <%=settings.getConversationName().toLowerCase()%>.  If you no longer wish to receive these notifications,
   please <a href="<%=removeUrl%>">click here to remove yourself</a> from this <%=settings.getConversationName().toLowerCase()%>.<%
             break;
         }

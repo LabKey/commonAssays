@@ -98,7 +98,7 @@ public class AnnouncementsController extends ViewController
     protected Forward begin() throws Exception
     {
         // Anyone with read permission can attempt to view the list.  AnnoucementWebPart will do further permission checking, for example,
-        //   in a secure message board, those without Editor permissions will only see messages when they are on the user list
+        //   in a secure message board, those without Editor permissions will only see messages when they are on the member list
         requiresPermission(ACL.PERM_READ);
 
         boolean displayAll = getViewURLHelper().getPageFlow().equalsIgnoreCase("announcements");
@@ -311,7 +311,7 @@ public class AnnouncementsController extends ViewController
 
 
     @Jpf.Action
-    protected Forward confirmDelete(AnnouncementsForm form) throws Exception
+    protected Forward confirmDelete(AnnouncementForm form) throws Exception
     {
         Permissions perm = getPermissions();
         Announcement message = form.selectAnnouncement();
@@ -362,13 +362,13 @@ public class AnnouncementsController extends ViewController
 
 
     @Jpf.Action
-    protected Forward confirmRemove(UserListRemovalForm form) throws Exception
+    protected Forward confirmRemove(MemberListRemovalForm form) throws Exception
     {
         requiresLogin();
 
         User user = getUser();
         Settings settings = getSettings();
-        Announcement thread = AnnouncementManager.getAnnouncement(getContainer(), form.getMessageId(), AnnouncementManager.INCLUDE_USERLIST);
+        Announcement thread = AnnouncementManager.getAnnouncement(getContainer(), form.getMessageId(), AnnouncementManager.INCLUDE_MEMBERLIST);
         String message = null;
 
         if (form.getUserId() != user.getUserId())
@@ -384,12 +384,12 @@ public class AnnouncementsController extends ViewController
         {
             message = settings.getConversationName().toLowerCase() + " not found.";
         }
-        else if (!thread.getUserList().contains(getUser()))
+        else if (!thread.getMemberList().contains(getUser()))
         {
-            message = "You are not on the to list for this " + settings.getConversationName().toLowerCase() + ".";
+            message = "You are not on the member list for this " + settings.getConversationName().toLowerCase() + ".";
         }
 
-        String postUrl = cloneViewURLHelper().setAction("removeFromUserList").getEncodedLocalURIString();
+        String postUrl = cloneViewURLHelper().setAction("removeFromMemberList").getEncodedLocalURIString();
         GroovyView confirmDeleteView = new GroovyView("/org/labkey/announcements/confirmRemoveUser.gm");
         confirmDeleteView.addObject("message", message);
         confirmDeleteView.addObject("email", user.getEmail());
@@ -403,17 +403,25 @@ public class AnnouncementsController extends ViewController
     }
 
 
+    // For backward compatibility (pre-2.0 used "removeFromUserList" action).  TODO: Remove this action in LabKey 2.1
     @Jpf.Action
-    protected Forward removeFromUserList(UserListRemovalForm form) throws Exception
+    protected Forward removeFromUserList(MemberListRemovalForm form) throws Exception
+    {
+        return removeFromMemberList(form);
+    }
+
+
+    @Jpf.Action
+    protected Forward removeFromMemberList(MemberListRemovalForm form) throws Exception
     {
         requiresLogin();
 
         if (form.getUserId() != getUser().getUserId())
             HttpView.throwUnauthorized();
 
-        // TODO: Could check that user is on user list...
+        // TODO: Could check that user is on member list...
         // TODO: Make this insert a new message to get history?
-        AnnouncementManager.deleteUserFromUserList(getUser(), form.getMessageId());
+        AnnouncementManager.deleteUserFromMemberList(getUser(), form.getMessageId());
 
         return new ViewForward(cloneViewURLHelper().setPageFlow("Project").setAction("begin"), true);
     }
@@ -421,7 +429,7 @@ public class AnnouncementsController extends ViewController
 
     private Announcement getAnnouncement(AttachmentForm form) throws SQLException, ServletException
     {
-        Announcement ann = AnnouncementManager.getAnnouncement(getContainer(), form.getEntityId(), true);  // Force user list to be selected
+        Announcement ann = AnnouncementManager.getAnnouncement(getContainer(), form.getEntityId(), true);  // Force member list to be selected
 
         if (null == ann)
             HttpView.throwNotFound("Couldn't find " + getSettings().getConversationName());
@@ -492,7 +500,7 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    public static class UserListRemovalForm extends FormData
+    public static class MemberListRemovalForm extends FormData
     {
         private int _userId;
         private int _messageId;
@@ -535,6 +543,7 @@ public class AnnouncementsController extends ViewController
         Settings settings = AnnouncementManager.getMessageBoardSettings(getContainer());
         JspView<Settings> view = new JspView<Settings>("/org/labkey/announcements/customize.jsp", settings);
         view.addObject("returnUrl", new ViewURLHelper(getViewURLHelper().getParameter("returnUrl")));
+        view.addObject("assignedToSelect", getAssignedToSelect(getContainer(), settings.getDefaultAssignedTo(), "defaultAssignedTo"));
         _renderInTemplate(view, getContainer(), null, "Customize " + settings.getBoardName(), null);
 
         return null;
@@ -553,14 +562,14 @@ public class AnnouncementsController extends ViewController
 
 
     @Jpf.Action(validationErrorForward = @Jpf.Forward(path = "showResponse.do", name = "validate"))
-    protected Forward respond(AnnouncementsForm form) throws Exception
+    protected Forward respond(AnnouncementForm form) throws Exception
     {
         return _insert(form, false);
     }
 
 
     @Jpf.Action(validationErrorForward = @Jpf.Forward(path = "showInsert.do", name = "validate"))
-    protected Forward insert(AnnouncementsForm form) throws Exception
+    protected Forward insert(AnnouncementForm form) throws Exception
     {
         return _insert(form, false);
     }
@@ -569,13 +578,13 @@ public class AnnouncementsController extends ViewController
     // Different action ensures no validation in notes case
 
     @Jpf.Action
-    protected Forward insertNote(AnnouncementsForm form) throws Exception
+    protected Forward insertNote(AnnouncementForm form) throws Exception
     {
         return _insert(form, true);
     }
 
 
-    private Forward _insert(AnnouncementsForm form, boolean isNote) throws Exception
+    private Forward _insert(AnnouncementForm form, boolean isNote) throws Exception
     {
         Permissions perm = getPermissions();
 
@@ -597,10 +606,10 @@ public class AnnouncementsController extends ViewController
         if (null == insert.getParent() || 0 == insert.getParent().length())
             insert.setParent(form.getParentId());
 
-        if (!isNote && getSettings().hasUserList() && null == form.getUserList())
-            insert.setUserList(Collections.<User>emptyList());  // Force member list to get deleted, bug #2484
+        if (!isNote && getSettings().hasMemberList() && null == form.getMemberList())
+            insert.setMemberList(Collections.<User>emptyList());  // Force member list to get deleted, bug #2484
         else
-            insert.setUserList(form.getUserList());  // TODO: Do this in validate()?
+            insert.setMemberList(form.getMemberList());  // TODO: Do this in validate()?
 
         //NOTE: title should not be null if validate() is working
 //        assert insert.getTitle() != null;
@@ -651,18 +660,22 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private static String getAssignedToSelect(Container c, int assignedTo)
+    // AssignedTo == null => assigned to no one.
+    private static String getAssignedToSelect(Container c, Integer assignedTo, String name)
     {
         List<User> possibleAssignedTo = SecurityManager.getProjectMembers(c.getProject());
 
         // TODO: Should merge all this with IssuesManager.getAssignedToList()
-        StringBuilder select = new StringBuilder("    <select name=\"assignedTo\">\n");
+        StringBuilder select = new StringBuilder("    <select name=\"" + name + "\">\n");
+        select.append("      <option value=\"\"");
+        select.append(null == assignedTo ? " selected" : "");
+        select.append("></option>\n");
 
         for (User user : possibleAssignedTo)
         {
             select.append("      <option value=").append(user.getUserId());
 
-            if (assignedTo == user.getUserId())
+            if (assignedTo != null && assignedTo == user.getUserId())
                 select.append(" selected");
 
             select.append(">");
@@ -703,7 +716,7 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private String getUserListTextArea(Announcement ann, String emailList)
+    private String getMemberListTextArea(Announcement ann, String emailList)
     {
         StringBuilder sb = new StringBuilder();
         sb.append("<script type=\"text/javascript\">LABKEY.requiresScript('completion.js');</script>");
@@ -720,10 +733,10 @@ public class AnnouncementsController extends ViewController
         }
         else if (null != ann)
         {
-            List<User> users = ann.getUserList();
+            List<User> users = ann.getMemberList();
             sb.append(StringUtils.join(users.iterator(), "\n"));
         }
-        else
+        else if (!getUser().isGuest())
         {
             sb.append(getUser().getEmail());
         }
@@ -735,7 +748,7 @@ public class AnnouncementsController extends ViewController
 
 
     @Jpf.Action(validationErrorForward = @Jpf.Forward(path = "showUpdate.do", name = "validate"))
-    protected Forward update(AnnouncementsForm form) throws Exception
+    protected Forward update(AnnouncementForm form) throws Exception
     {
         Announcement ann = form.selectAnnouncement();
 
@@ -769,7 +782,7 @@ public class AnnouncementsController extends ViewController
 
 
     @Jpf.Action
-    protected Forward showInsert(AnnouncementsForm form) throws Exception
+    protected Forward showInsert(AnnouncementForm form) throws Exception
     {
         Container c = getContainer();
         Settings settings = getSettings(c);
@@ -790,10 +803,13 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private void initView(GroovyView view, Container c, AnnouncementsForm form, Announcement mostRecent, boolean reshow)
+    private void initView(GroovyView view, Container c, AnnouncementForm form, Announcement mostRecent, boolean reshow)
     {
         // In reshow case we leave all form values as is.
         WikiRendererType currentRendererType;
+        Integer assignedTo;
+
+        Settings settings = getSettings(c);
 
         if (reshow)
         {
@@ -803,6 +819,9 @@ public class AnnouncementsController extends ViewController
                 currentRendererType = WikiService.get().getDefaultMessageRendererType();
             else
                 currentRendererType = WikiRendererType.valueOf(rendererTypeName);
+
+            Announcement ann = form.getBean();
+            assignedTo = ann.getAssignedTo();
         }
         else if (null == mostRecent)
         {
@@ -814,6 +833,7 @@ public class AnnouncementsController extends ViewController
             String expires = DateUtil.formatDate(cal.getTime());
             form.set("expires", expires);
             currentRendererType = WikiService.get().getDefaultMessageRendererType();
+            assignedTo = settings.getDefaultAssignedTo();
         }
         else
         {
@@ -822,20 +842,17 @@ public class AnnouncementsController extends ViewController
             assert null == form.get("expires");
 
             form.set("title", mostRecent.getTitle());
-            form.set("assignedTo", null != mostRecent.getAssignedTo() ? String.valueOf(mostRecent.getAssignedTo()) : null);
             form.set("status", mostRecent.getStatus());
             form.setTypedValue("expires", DateUtil.formatDate(mostRecent.getExpires()));
 
+            assignedTo = mostRecent.getAssignedTo();
             currentRendererType = WikiRendererType.valueOf(mostRecent.getRendererType());
         }
 
-        Settings settings = getSettings(c);
-
-        String assignedTo = (String)form.get("assignedTo");
-        view.addObject("assignedToSelect", getAssignedToSelect(c, null != assignedTo ? Integer.parseInt(assignedTo) : -1));
+        view.addObject("assignedToSelect", getAssignedToSelect(c, assignedTo, "assignedTo"));
         view.addObject("settings", settings);
         view.addObject("statusSelect", getStatusSelect(settings, (String)form.get("status")));
-        view.addObject("userList", getUserListTextArea(mostRecent, (String)(reshow ? form.get("emailList") : null)));
+        view.addObject("memberList", getMemberListTextArea(mostRecent, (String)(reshow ? form.get("emailList") : null)));
         view.addObject("currentRendererType", currentRendererType);
         view.addObject("renderers", WikiRendererType.values());
 
@@ -844,7 +861,7 @@ public class AnnouncementsController extends ViewController
 
 
     @Jpf.Action
-    protected Forward showUpdate(AnnouncementsForm form) throws Exception
+    protected Forward showUpdate(AnnouncementForm form) throws Exception
     {
         Announcement ann = form.selectAnnouncement();
         if (null == ann)
@@ -868,7 +885,7 @@ public class AnnouncementsController extends ViewController
 
 
     @Jpf.Action
-    protected Forward thread(AnnouncementsForm form) throws Exception
+    protected Forward thread(AnnouncementForm form) throws Exception
     {
         Container c = getContainer(ACL.PERM_READ); // TODO: Shouldn't need this check once ThreadView throws Unauthorized
         boolean print = "1".equals(getViewURLHelper().getParameter("print"));
@@ -891,7 +908,7 @@ public class AnnouncementsController extends ViewController
 
 
     @Jpf.Action
-    protected Forward showResponse(AnnouncementsForm form) throws Exception
+    protected Forward showResponse(AnnouncementForm form) throws Exception
     {
         Permissions perm = getPermissions();
         Announcement parent = null;
@@ -926,11 +943,11 @@ public class AnnouncementsController extends ViewController
         // First level of permission checking... must at least be able to read.
         Container c = getContainer(ACL.PERM_READ);
 
-        // getFilter performs further permission checking on secure board (e.g., non-Editors only see threads where they're on the user list)
+        // getFilter performs further permission checking on secure board (e.g., non-Editors only see threads where they're on the member list)
         SimpleFilter filter = getFilter(getSettings(), getPermissions(), true);
 
         // TODO: This only grabs announcements... add responses too?
-        Announcement[] announcements = AnnouncementManager.getAnnouncements(c, filter);
+        Announcement[] announcements = AnnouncementManager.getAnnouncements(c, filter, getSettings().getSort());
 
         HttpView v = new GroovyView("/org/labkey/announcements/rss.gm");
         v.addObject("announcements", announcements);
@@ -1036,29 +1053,29 @@ public class AnnouncementsController extends ViewController
         }
         else
         {
-            // Send a notification email to everyone on the user list.  This email will include a link that removes the user from the user list.
-            Set<String> userListEmails = new HashSet<String>();
+            // Send a notification email to everyone on the member list.  This email will include a link that removes the user from the member list.
+            Set<String> memberListEmails = new HashSet<String>();
 
-            if (settings.hasUserList() && null != a.getUserList() && !a.getUserList().isEmpty())
+            if (settings.hasMemberList() && null != a.getMemberList() && !a.getMemberList().isEmpty())
             {
-                for (User user : a.getUserList())
+                for (User user : a.getMemberList())
                 {
-                    userListEmails.add(user.getEmail());
+                    memberListEmails.add(user.getEmail());
 
                     ViewURLHelper removeMeURL = new ViewURLHelper(getRequest(), "announcements", "confirmRemove", c.getPath());
                     removeMeURL.addParameter("userId", String.valueOf(user.getUserId()));
                     removeMeURL.addParameter("messageId", String.valueOf(parent.getRowId()));
 //            removeMeURL.addParameter("srcURL", boardURL.getURIString());
 
-                    ViewMessage m = getMessage(c, settings, parent, a, isResponse, removeMeURL.getURIString(), currentRendererType, Reason.userList);
+                    ViewMessage m = getMessage(c, settings, parent, a, isResponse, removeMeURL.getURIString(), currentRendererType, Reason.memberList);
                     mbe.addMessage(user.getEmail(), m);
                 }
             }
 
-            // Now send a notification email to everyone who signed up for them in this container (but remove the user list emails first).
+            // Now send a notification email to everyone who signed up for them in this container (but remove the member list emails first).
             //   This email will include a link to the email perferences page.
             Set<String> prefsEmails = AnnouncementManager.getUserEmailSet(c, a, settings);
-            prefsEmails.removeAll(userListEmails);
+            prefsEmails.removeAll(memberListEmails);
 
             if (!prefsEmails.isEmpty())
             {
@@ -1266,12 +1283,12 @@ public class AnnouncementsController extends ViewController
         }
     }
 
-    public static class AnnouncementsForm extends BeanViewForm<Announcement>
+    public static class AnnouncementForm extends BeanViewForm<Announcement>
     {
         Announcement _selectedAnnouncement = null;
-        List<User> _userList = null;
+        List<User> _memberList = null;
 
-        public AnnouncementsForm()
+        public AnnouncementForm()
         {
             super(Announcement.class, null, new String[]{"parentid"});
         }
@@ -1281,14 +1298,14 @@ public class AnnouncementsController extends ViewController
             return _stringValues.get("parentid");
         }
 
-        public List<User> getUserList()
+        public List<User> getMemberList()
         {
-            return _userList;
+            return _memberList;
         }
 
-        public void setUserList(List<User> userList)
+        public void setMemberList(List<User> memberList)
         {
-            _userList = userList;
+            _memberList = memberList;
         }
 
         Announcement selectAnnouncement() throws SQLException
@@ -1307,9 +1324,11 @@ public class AnnouncementsController extends ViewController
         @Override
         public ActionErrors validate(ActionMapping actionMapping, HttpServletRequest servletRequest)
         {
+            Settings settings = getSettings(getContainer());
             ActionErrors errors = new ActionErrors();
             Announcement bean = getBean();
 
+            // Title can never be null.  If title is not editable, it will still be posted in a hidden field.
             if (StringUtils.trimToNull(bean.getTitle()) == null)
                 errors.add("main", new ActionMessage("Error", "Title must not be blank."));
 
@@ -1325,7 +1344,7 @@ public class AnnouncementsController extends ViewController
             }
 
             String emailList = bean.getEmailList();
-            List<User> userList = Collections.emptyList();
+            List<User> memberList = Collections.emptyList();
 
             if (null != emailList)
             {
@@ -1340,7 +1359,7 @@ public class AnnouncementsController extends ViewController
                         errors.add("main", new ActionMessage("Error", rawEmail.trim() + ": Invalid email address"));
                 }
 
-                userList = new ArrayList<User>(emails.size());
+                memberList = new ArrayList<User>(emails.size());
 
                 for (ValidEmail email : emails)
                 {
@@ -1348,11 +1367,11 @@ public class AnnouncementsController extends ViewController
 
                     if (null == user)
                         errors.add("main", new ActionMessage("Error", email.toString() + ": Doesn't exist"));
-                    else if (!userList.contains(user))
-                        userList.add(user);
+                    else if (!memberList.contains(user))
+                        memberList.add(user);
                 }
 
-                setUserList(userList);
+                setMemberList(memberList);
             }
 
             Integer assignedTo = bean.getAssignedTo();
@@ -1369,11 +1388,11 @@ public class AnnouncementsController extends ViewController
                 {
                     try
                     {
-                        Permissions perm = getPermissions(getContainer(), assignedToUser, getSettings(getContainer()));
+                        Permissions perm = getPermissions(getContainer(), assignedToUser, settings);
 
                         // New up an announcement to check permissions for the assigned to user
                         Announcement ann = new Announcement();
-                        ann.setUserList(userList);
+                        ann.setMemberList(memberList);
 
                         if (!perm.allowRead(ann))
                             errors.add("main", new ActionMessage("Error", "Can't assign to " + assignedToUser.getEmail() + ": This user doesn't have permission to read the thread."));
@@ -1513,7 +1532,7 @@ public class AnnouncementsController extends ViewController
 
             Permissions perm = getPermissions(c, user, settings);
             SimpleFilter filter = getFilter(settings, perm, displayAll);
-            Announcement[] announcements = AnnouncementManager.getAnnouncements(c, filter);
+            Announcement[] announcements = AnnouncementManager.getAnnouncements(c, filter, settings.getSort());
 
             addObject("settings", settings);
             addObject("container", c);
@@ -1605,7 +1624,7 @@ public class AnnouncementsController extends ViewController
             GridView gridView = new GridView(rgn);
             gridView.setTitle(null);  // Prevent double title
             gridView.setContainer(c);
-            gridView.setSort(new Sort("-Created"));
+            gridView.setSort(settings.getSort());
 
             SimpleFilter filter = getFilter(settings, perm, displayAll);
             gridView.setFilter(filter);
@@ -1672,7 +1691,7 @@ public class AnnouncementsController extends ViewController
             super("/org/labkey/announcements/announcementThread.gm");
         }
 
-        public ThreadView(AnnouncementsForm form, Container c, ViewURLHelper url, Permissions perm, boolean print)
+        public ThreadView(AnnouncementForm form, Container c, ViewURLHelper url, Permissions perm, boolean print)
                 throws ServletException
         {
             this();
@@ -1704,7 +1723,7 @@ public class AnnouncementsController extends ViewController
             try
             {
                 if (null != rowId)
-                    _ann = AnnouncementManager.getAnnouncement(c, rowId, AnnouncementManager.INCLUDE_ATTACHMENTS + AnnouncementManager.INCLUDE_RESPONSES + AnnouncementManager.INCLUDE_USERLIST);
+                    _ann = AnnouncementManager.getAnnouncement(c, rowId, AnnouncementManager.INCLUDE_ATTACHMENTS + AnnouncementManager.INCLUDE_RESPONSES + AnnouncementManager.INCLUDE_MEMBERLIST);
                 else
                     _ann = AnnouncementManager.getAnnouncement(c, entityId, true);
             }
@@ -1757,7 +1776,7 @@ public class AnnouncementsController extends ViewController
     {
         private Announcement _announcement = null;
 
-        public AnnouncementUpdateView(AnnouncementsForm form, Announcement ann)
+        public AnnouncementUpdateView(AnnouncementForm form, Announcement ann)
         {
             super("/org/labkey/announcements/announcementUpdate.gm");
 
@@ -1791,7 +1810,7 @@ public class AnnouncementsController extends ViewController
             addObject("deleteURLHelper", attachmentURL);
             addObject("settings", settings);
             addObject("statusSelect", getStatusSelect(settings, _announcement.getStatus()));
-            addObject("assignedToSelect", getAssignedToSelect(c, null != _announcement.getAssignedTo() ? _announcement.getAssignedTo() : -1));
+            addObject("assignedToSelect", getAssignedToSelect(c, _announcement.getAssignedTo(), "assignedTo"));
         }
     }
 

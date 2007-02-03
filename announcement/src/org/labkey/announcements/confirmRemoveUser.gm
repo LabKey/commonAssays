@@ -6,7 +6,7 @@
     else
     {
 %><form action="${action}" method="POST">
-Are you sure you want to remove yourself (${email}) from the members list for this ${settings.conversationName.toLowerCase()}?
+Are you sure you want to remove yourself (${email}) from the member list for this ${settings.conversationName.toLowerCase()}?
 <p/>
 <b>Title: ${thread.getTitle()}</b><br/>
 <p/>

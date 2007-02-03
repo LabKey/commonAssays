@@ -1,7 +1,13 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%=PageFlowUtil.getStrutsError(request, "main")%>
 <form method=post enctype="multipart/form-data" action="respond.post"><table>
-  <tr><td class="ms-searchform">Title</td><td class="ms-vb" colspan="2"><input type="text" size="40" name="title" value="<%=filter(form.get("title"))%>"></td></tr><%
+<%  if (settings.isTitleEditable())
+    {%>
+  <tr><td class="ms-searchform">Title</td><td class="ms-vb" colspan="2"><input type="text" size="40" name="title" value="<%=filter(form.get("title"))%>"></td></tr><%}
+    else
+    {%>
+  <input type="hidden" name="title" value="<%=filter(form.get("title"))%>"><%
+    }
     if (settings.hasStatus())
     {%>
   <tr><td class="ms-searchform">Status</td><td class="ms-vb">
@@ -14,10 +20,10 @@
 <%=assignedToSelect%>
   </td></tr><%
     }
-    if (settings.hasUserList())
+    if (settings.hasMemberList())
     {%>
   <tr><td class="ms-searchform">Members</td><td class="ms-vb">
-<%=userList%>
+<%=memberList%>
   </td><td><i><%
   if (settings.isSecure())
   {
@@ -25,7 +31,7 @@
   }
   else
   {
-    %> The users on the Members list<%
+    %> The users on the member list<%
   }
   %> receive email notifications of new posts to this <%=settings.conversationName.toLowerCase()%>.<br><br>Enter one or more email addresses, each on its own line.</i></td></tr><%
     }
@@ -62,16 +68,16 @@
 
 <tr><td colspan=2 align=left></td></tr></table>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-	<tr class="ms-WPHeader">
-		<td title="Attachments" style="width:100%;" nowrap>
-		<div class="ms-WPTitle"><span>Attachments</span></div>
+    <tr class="ms-WPHeader">
+        <td title="Attachments" style="width:100%;" nowrap>
+        <div class="ms-WPTitle"><span>Attachments</span></div>
 		</td>
-	</tr>
-	<tr><td class="ms-summarycustombody">
+    </tr>
+    <tr><td class="ms-summarycustombody">
         <table>
         <tr><td>File 1: <input type="file" name="formFiles[0]" size="60" onChange="ShowPathname(this, 'filename1')"></td><td><label class="ms-vb" id="filename1"></label></td></tr>
-		<tr><td>File 2: <input type="file" name="formFiles[1]" size="60" onChange="ShowPathname(this, 'filename2')"></td><td><label class="ms-vb" id="filename2"></label></td></tr>
-		<tr><td>File 3: <input type="file" name="formFiles[2]" size="60" onChange="ShowPathname(this, 'filename3')"></td><td><label class="ms-vb" id="filename3"></label></td></tr>
+        <tr><td>File 2: <input type="file" name="formFiles[1]" size="60" onChange="ShowPathname(this, 'filename2')"></td><td><label class="ms-vb" id="filename2"></label></td></tr>
+        <tr><td>File 3: <input type="file" name="formFiles[2]" size="60" onChange="ShowPathname(this, 'filename3')"></td><td><label class="ms-vb" id="filename3"></label></td></tr>
         </table>
 	</td>
 	</tr>

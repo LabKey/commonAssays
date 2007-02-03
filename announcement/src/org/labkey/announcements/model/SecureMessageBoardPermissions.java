@@ -29,8 +29,8 @@ public class SecureMessageBoardPermissions extends NormalMessageBoardPermissions
         if (hasPermission(EDITOR_PERM))
             return true;
 
-        // If not an editor, message board must have a user list, user must be on it, and user must have read permissions
-        return _settings.hasUserList() && hasPermission(ACL.PERM_READ) && ann.getUserList().contains(_user);
+        // If not an editor, message board must have a member list, user must be on it, and user must have read permissions
+        return _settings.hasMemberList() && hasPermission(ACL.PERM_READ) && ann.getMemberList().contains(_user);
     }
 
     public boolean allowDeleteMessage(Announcement ann)
@@ -49,8 +49,8 @@ public class SecureMessageBoardPermissions extends NormalMessageBoardPermissions
         if (hasPermission(EDITOR_PERM))
             return true;
 
-        // If not an editor, message board must have a user list, user must be on it, and user must have insert permissions
-        return _settings.hasUserList() && hasPermission(ACL.PERM_INSERT) && ann.getUserList().contains(_user);
+        // If not an editor, message board must have a member list, user must be on it, and user must have insert permissions
+        return _settings.hasMemberList() && hasPermission(ACL.PERM_INSERT) && ann.getMemberList().contains(_user);
     }
 
     public boolean allowUpdate(Announcement ann)
@@ -63,7 +63,7 @@ public class SecureMessageBoardPermissions extends NormalMessageBoardPermissions
         SimpleFilter filter = new SimpleFilter();
 
         if (!hasPermission(EDITOR_PERM))
-            filter.addWhereClause("RowId IN (SELECT MessageId FROM " + _comm.getTableInfoUserList() + " WHERE UserId = ?)", new Object[]{_user.getUserId()});
+            filter.addWhereClause("RowId IN (SELECT MessageId FROM " + _comm.getTableInfoMemberList() + " WHERE UserId = ?)", new Object[]{_user.getUserId()});
 
         return filter;
     }

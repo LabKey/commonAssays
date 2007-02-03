@@ -8,12 +8,12 @@ import org.labkey.api.issues.IssuesSchema;
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.security.User;
 import org.labkey.api.util.Cache;
+import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.issue.model.Issue;
 import org.labkey.issue.model.IssueManager;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
@@ -126,7 +126,7 @@ abstract public class IssuePage extends JspBase
     public String writeDate(Date d)
     {
         if (null == d) return "";
-        return DateFormat.getDateInstance().format(d);
+        return DateUtil.formatDate(d);
     }
 
     public String writeCustomColumn(String container, String tableColumnName, String value, int keywordType) throws IOException
@@ -289,7 +289,6 @@ abstract public class IssuePage extends JspBase
     {
         return getKeywordOptionsWithDefault(c, IssuesController.ISSUE_RESOLUTION, new String[]{"Fixed", "Duplicate", "Won't Fix", "Not Repro", "By Design"});
     }
-
 
     public String getPriorityOptions(Container c)
     {

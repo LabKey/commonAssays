@@ -176,7 +176,7 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
         try
         {
             AnnouncementManager.deleteUserEmailPref(user, null);
-            AnnouncementManager.deleteUserFromAllUserLists(user);
+            AnnouncementManager.deleteUserFromAllMemberLists(user);
         }
         catch (SQLException e)
         {

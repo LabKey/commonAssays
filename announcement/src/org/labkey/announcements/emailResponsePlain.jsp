@@ -22,8 +22,8 @@ If you no longer wish to receive these notifications, please change your email p
 navigating to this URL: <%=removeUrl%>.<%
         break;
 
-        case userList:
-%>you are on the Members list for this <%=settings.getConversationName().toLowerCase()%>.  If you no longer wish to receive these notifications,
+    case memberList:
+%>you are on the member list for this <%=settings.getConversationName().toLowerCase()%>.  If you no longer wish to receive these notifications,
 please navigate to this URL: <%=removeUrl%> to remove yourself from this <%=settings.getConversationName().toLowerCase()%>.<%
         break;
     }
