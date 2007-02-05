@@ -88,7 +88,7 @@ public class ProjectController extends ViewController
         
         HttpServletRequest request = getRequest();
         ViewURLHelper url = getViewURLHelper();
-        if (null == url || url.getExtraPath().equals("/")) // handle RUN from workshop
+        if (null == url || url.getExtraPath().equals("/")) 
             return new ViewForward("Project", "home", ContainerManager.HOME_PROJECT_PATH);
 
         Container c = getContainer(0);
