@@ -17,15 +17,12 @@ package org.labkey.ms2.pipeline;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
-import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.XMLValidationParser;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.pipeline.PipelineProtocol;
-import org.labkey.api.pipeline.PipelineProtocolFactory;
-import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms2.protocol.*;
 
@@ -47,9 +44,7 @@ public class MS2PipelineManager
     private static Logger _log = Logger.getLogger(MS2PipelineProvider.class);
     protected static String _pipelineDefaults = "default_input.xml";
     protected static String _pipelineTandemXML = "tandem.xml";
-//wch: mascotdev
     protected static String _pipelineMascotXML = "mascot.xml";
-//END-wch: mascotdev
     protected static String _pipelineDBDir = "databases";
     protected static String _pipelineAllPepXML = "all.pep.xml";
 
@@ -58,14 +53,12 @@ public class MS2PipelineManager
     protected static String _pipelineWatersRawExt = ".raw";
     protected static String _pipelineDataAnnotationExt = ".xar.xml";
     protected static String _pipelineTandemOutExt = ".xtan.xml";
-//wch: mascotdev
     protected static String _pipelineMascotResultExt = ".dat";
     protected static String _pipelineMgfExt = ".mgf";
     protected static String _pipelineProtXSLIntermediateExt = ".pep-prot.xsl";
     protected static String _pipelineProtSHTMLIntermediateExt = ".pep-prot.shtml";
     protected static String _pipelinePepXSLIntermediateExt = ".pep.xsl";
     protected static String _pipelinePepSHTMLIntermediateExt = ".pep.shtml";
-//END-wch: mascotdev
     protected static String _pipelinePepXMLExt = ".pep.xml";
     protected static String _pipelineProtXMLExt = ".prot.xml";
     protected static String _pipelineProtXMLIntermediateExt = ".pep-prot.xml";
@@ -85,13 +78,16 @@ public class MS2PipelineManager
     //todo this the right way
     public static String _allFractionsMzXmlFileBase = "all";
 
+    public static String getBaseName(File file)
+    {
+        return getBaseName(file, 1);
+    }
 
-    public static String getBasename(File file)
+    public static String getBaseName(File file, int dots)
     {
         String baseName = file.getName();
-        int i = baseName.indexOf('.');
-        if (i != -1)
-            baseName = baseName.substring(0, i);
+        while (dots-- > 0)
+            baseName = baseName.substring(0, baseName.lastIndexOf('.'));
         return baseName;
     }
 
@@ -107,17 +103,17 @@ public class MS2PipelineManager
 
     public static boolean isMzXMLFile(File file)
     {
-        return file.isFile() && file.getName().endsWith(_pipelineMzXMLExt);
+        return file.getName().endsWith(_pipelineMzXMLExt);
     }
 
     public static boolean isThermoRawFile(File file)
     {
-        return file.isFile() && file.getName().endsWith(_pipelineThermoRawExt);
+        return file.getName().endsWith(_pipelineThermoRawExt) && file.isFile();
     }
 
     public static boolean isWatersRawDir(File file)
     {
-        return file.isDirectory() && file.getName().endsWith(_pipelineWatersRawExt);
+        return file.getName().endsWith(_pipelineWatersRawExt) && file.isDirectory();
     }
 
     public static File getAnnotationFile(File dirData, String baseName)
@@ -296,33 +292,32 @@ public class MS2PipelineManager
         return description.toString();
     }
 
-    public static class UploadFileFilter implements FileFilter
+    public static class UploadFileFilter extends PipelineProvider.FileEntryFilter
     {
-        Boolean allExists;
-
         public boolean accept(File file)
         {
-            if (allExists == null)
-            {
-                File fileAll = new File(file.getParentFile(), _pipelineAllPepXML);
-                allExists = Boolean.valueOf(fileAll.exists());
-            }
-            if (allExists.booleanValue())
-                return _pipelineAllPepXML.equals(file.getName());
+            if (isMascotResultFile(file))
+                return true;
 
-            return (!file.isDirectory() &&
-//wch: mascotdev
-                (isMs2ResultsFile(file) || isMascotResultFile(file)));
-//END-wch: mascotdev
+            if (isMs2ResultsFile(file))
+            {
+                File parent = file.getParentFile();
+                String basename = getBaseName(file, 2);
+                return !fileExists(getProtXMLFile(parent, basename)) &&
+                        !fileExists(getProtXMLIntermediatFile(parent, basename)) &&
+                        !fileExists(getSearchExperimentFile(parent, basename));
+            }
+
+            return false;
         }
     }
 
-    public static FileFilter getUploadFilter()
+    public static PipelineProvider.FileEntryFilter getUploadFilter()
     {
         return new UploadFileFilter();
     }
 
-    public static class AnalyzeFileFilter implements FileFilter
+    public static class AnalyzeFileFilter extends PipelineProvider.FileEntryFilter
     {
         public boolean accept(File file)
         {
@@ -330,17 +325,20 @@ public class MS2PipelineManager
             if (isMzXMLFile(file))
                 return true;
 
-            String basename = getBasename(file);
-            File dirData = file.getParentFile();
-            if (getMzXMLFile(dirData, basename).exists())
-                return false;
-
             // If no corresponding mzXML file, show raw files.
-            return (isThermoRawFile(file) || isWatersRawDir(file));
+            if (isThermoRawFile(file) || isWatersRawDir(file))
+            {
+                String basename = getBaseName(file);
+                File dirData = file.getParentFile();
+                if (!fileExists(getMzXMLFile(dirData, basename)))
+                    return true;
+            }
+
+            return false;
         }
     }
 
-    public static FileFilter getAnalyzeFilter()
+    public static PipelineProvider.FileEntryFilter getAnalyzeFilter()
     {
         return new AnalyzeFileFilter();
     }
@@ -807,17 +805,9 @@ public class MS2PipelineManager
         return null;
     }
 
-    private static String getBaseName(File file)
-    {
-        String baseName = file.getName().substring(0, file.getName().lastIndexOf('.'));
-        return baseName;
-    }
-
-    //wch: mascotdev
     public static File[] getAnalysisFiles(URI uriData, String protocolName, FileStatus status, Container c, String searchEngine) throws IOException
     {
         Map<File, FileStatus> mzXMLFileStatus = getAnalysisFileStatus(uriData, protocolName, c, searchEngine);
-//END-wch: mascotdev
         List<File> fileList = new ArrayList<File>();
         for (File fileMzXML : mzXMLFileStatus.keySet())
         {
@@ -827,7 +817,6 @@ public class MS2PipelineManager
         return fileList.toArray(new File[fileList.size()]);
     }
 
-//wch: mascotdev
     public static File getConfigureXMLFile(URI uriData, String name, String searchEngine)
     {
         if ("mascot".equalsIgnoreCase(searchEngine))
@@ -844,13 +833,10 @@ public class MS2PipelineManager
             return getTandemXMLFile (uriData, name);
         }
     }
-//END-wch: mascotdev
 
-//wch: mascotdev
     public static File getTandemXMLFile(URI uriData, String name)
     {
         File dirAnalysis = getAnalysisDir(uriData, name, "X!Tandem");
-//END-wch: mascotdev
         return new File(dirAnalysis, _pipelineTandemXML);
     }
 
@@ -862,7 +848,6 @@ public class MS2PipelineManager
     }
 //END-WDN:20060901 sequestdev
 
-//wch: mascotdev
     public static File getMascotXMLFile(URI uriData, String name)
     {
         File dirAnalysis = getAnalysisDir(uriData, name, "Mascot");
@@ -889,9 +874,7 @@ public class MS2PipelineManager
         }
         return searchProtocol;
     }
-//END-wch: mascotdev
 
-//wch: mascotdev
     public static void runAnalysis(ViewBackgroundInfo info,
                                    URI uriRoot,
                                    URI uriData,
@@ -1077,7 +1060,7 @@ public class MS2PipelineManager
         boolean mascotFile = "mascot".equalsIgnoreCase(searchEngine);
         File fileConfigureXML = getConfigureXMLFile(uriData, protocolName, mascotFile ? "Mascot" : "X!Tandem");
 
-        String baseName = getBasename(fileUpload);
+        String baseName = getBaseName(fileUpload, 2);
 
         File[] filesMzXML;
         if (!"all".equals(baseName))

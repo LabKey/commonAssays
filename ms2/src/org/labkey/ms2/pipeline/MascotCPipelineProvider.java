@@ -69,9 +69,8 @@ public class MascotCPipelineProvider extends PipelineProviderCluster
                 continue;
             }
 
-            File dir = new File(entry.getURI());
             addAction("MS2-Pipeline", "searchMascot", "Mascot Peptide Search",
-                    entry, dir.listFiles(MS2PipelineManager.getAnalyzeFilter()));
+                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter()));
         }
     }
 

@@ -108,7 +108,10 @@ public class PipelineController extends ViewController
 
         for (File file : files)
         {
-            String baseName = MS2PipelineManager.getBasename(file);
+            int extParts = 1;
+            if (file.getName().endsWith(".xml"))
+                extParts = 2;
+            String baseName = MS2PipelineManager.getBaseName(file, extParts);
             File dir = file.getParentFile();
             // If the data was created by our pipeline, try to get the name
             // to look like the normal generated name.
@@ -1352,7 +1355,7 @@ public class PipelineController extends ViewController
                 runInfo.setRunFileName(form.getFileNames()[i]);
 
                 File mzXMLFile = new File(dirData, form.getFileNames()[i]);
-                String baseName = MS2PipelineManager.getBasename(mzXMLFile);
+                String baseName = MS2PipelineManager.getBaseName(mzXMLFile);
 
                 // quick hack to get the search to go forward.
                 if ("fractions".equals(form.getProtocolSharing()))

@@ -28,9 +28,8 @@ public class MSInspectPipelineProvider extends PipelineProvider
             if (!entry.isDirectory())
                 continue;
 
-            File dir = new File(entry.getURI());
             addFileActions("ms1", "importMsInspect", "Import msInspect Data",
-                    entry, dir.listFiles(new MS1FileFilter()));
+                    entry, entry.listFiles(new MS1FileFilter()));
         }
     }
 

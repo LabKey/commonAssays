@@ -40,7 +40,7 @@ public class FlowPipelineProvider extends PipelineProvider
         ViewURLHelper url = entries.get(0).cloneHref();
         url.setPageFlow(PFUtil.getPageFlowName(AnalysisScriptController.Action.chooseRunsToUpload));
         url.setAction(AnalysisScriptController.Action.chooseRunsToUpload.toString());
-        FileAction action = new FileAction("Upload FCS files", url, new File[] { new File(entry.getURI())});
+        FileAction action = new FileAction("Upload FCS files", url, null);
         action.setDescription("<p><b>Flow Instructions:</b><br>Navigate to the directories containing FCS files.  Click the button to upload FCS files in the directories shown.</p>");
         entry.addAction(action);
     }

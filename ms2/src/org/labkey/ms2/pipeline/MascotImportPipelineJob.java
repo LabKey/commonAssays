@@ -20,7 +20,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
                                 MS2Importer.RunInfo runInfo, boolean appendLog) throws SQLException
     {
         super(info,
-            MS2PipelineManager.getPepXMLFile(file.getParentFile(), MS2PipelineManager.getBasename(file))
+            MS2PipelineManager.getPepXMLFile(file.getParentFile(), MS2PipelineManager.getBaseName(file))
             , description, runInfo, appendLog);
         _file = file;
     }
@@ -65,7 +65,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
         setStatus("TRANSLATING");
 
         String _dirAnalysis = _file.getParent();
-        String _baseName = MS2PipelineManager.getBasename(_file);
+        String _baseName = MS2PipelineManager.getBaseName(_file);
         File dirWork = new File(_dirAnalysis, _baseName + ".import.work");
         File workFile = new File(dirWork.getAbsolutePath(), _file.getName());
 

@@ -275,7 +275,7 @@ public class ProteinProphetImporter
                 // and looking in the same directory
                 if (MS2PipelineManager.isProtXMLFile(_file))
                 {
-                    String baseName = MS2PipelineManager.getBasename(_file);
+                    String baseName = MS2PipelineManager.getBaseName(_file, 2);
                     pepXMLFile = MS2PipelineManager.getPepXMLFile(_file.getParentFile(), baseName);
                     if (!NetworkDrive.exists(pepXMLFile))
                     {

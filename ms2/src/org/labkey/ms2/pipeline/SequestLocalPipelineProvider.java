@@ -50,9 +50,8 @@ public class SequestLocalPipelineProvider extends PipelineProvider
                 continue;
             }
 
-            File dir = new File(entry.getURI());
             addAction("MS2-Pipeline", "searchSequest", "Sequest Peptide Search",
-                entry, dir.listFiles(MS2PipelineManager.getAnalyzeFilter()));
+                entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter()));
         }
     }
 

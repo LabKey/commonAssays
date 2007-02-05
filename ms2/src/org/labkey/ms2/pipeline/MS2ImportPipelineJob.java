@@ -31,7 +31,7 @@ public class MS2ImportPipelineJob extends PipelineJob
         _description = description;
         _runInfo = runInfo;
 
-        String basename = MS2PipelineManager.getBasename(_file);
+        String basename = MS2PipelineManager.getBaseName(_file, 2);
         setLogFile(MS2PipelineManager.getLogFile(_file.getParentFile(), basename), appendLog);
 
         File fileStatus = MS2PipelineManager.getStatusFile(_file.getParentFile(), basename);

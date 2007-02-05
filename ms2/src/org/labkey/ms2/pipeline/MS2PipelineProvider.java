@@ -46,9 +46,8 @@ public class MS2PipelineProvider extends PipelineProvider
             if (!entry.isDirectory())
                 continue;
 
-            File dir = new File(entry.getURI());
-            addAction("MS2-Pipeline", "upload", "Import Peptides",
-                    entry, dir.listFiles(MS2PipelineManager.getUploadFilter()));
+            addFileActions("MS2-Pipeline", "upload", "Import Peptides",
+                    entry, entry.listFiles(MS2PipelineManager.getUploadFilter()));
         }
     }
 

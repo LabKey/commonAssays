@@ -66,11 +66,8 @@ public class XTandemLocalPipelineProvider extends PipelineProvider
                 continue;
             }
 
-            File dir = new File(entry.getURI());
-//wch: mascotdev
             addAction("MS2-Pipeline", "searchXTandem", "X!Tandem Peptide Search",
-//END-wch: mascotdev
-                    entry, dir.listFiles(MS2PipelineManager.getAnalyzeFilter()));
+                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter()));
         }
     }
 

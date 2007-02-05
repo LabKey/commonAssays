@@ -28,18 +28,25 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
             if (!entry.isDirectory())
                 continue;
 
-            File dir = new File(entry.getURI());
             addFileActions("MS2", "importProteinProphet", "Import ProteinProphet",
-                    entry, dir.listFiles(new ProteinProphetFilenameFilter()));
+                    entry, entry.listFiles(new ProteinProphetFilenameFilter()));
         }
     }
 
 
-    private static class ProteinProphetFilenameFilter implements FileFilter
+    private static class ProteinProphetFilenameFilter extends FileEntryFilter
     {
         public boolean accept(File f)
         {
-            return MS2PipelineManager.isProtXMLFile(f);
+            if (MS2PipelineManager.isProtXMLFile(f))
+            {
+                File parent = f.getParentFile();
+                String basename = MS2PipelineManager.getBaseName(f, 2);
+                
+                return !fileExists(MS2PipelineManager.getSearchExperimentFile(parent, basename));
+            }
+
+            return false;
         }
     }
 

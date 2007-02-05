@@ -1,5 +1,7 @@
 package org.labkey.ms1.pipeline;
 
+import org.labkey.api.pipeline.PipelineProvider;
+
 import java.io.FileFilter;
 import java.io.File;
 
@@ -9,7 +11,7 @@ import java.io.File;
  * This filters the files that the module knows how to import
  * as completed analysis files.
 */
-public class MS1FileFilter implements FileFilter
+public class MS1FileFilter extends PipelineProvider.FileEntryFilter
 {
     public boolean accept(File f)
     {

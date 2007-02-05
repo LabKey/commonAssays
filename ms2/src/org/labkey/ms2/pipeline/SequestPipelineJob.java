@@ -59,7 +59,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
         if (isFractions())
             _baseName = "all";
         else
-            _baseName = MS2PipelineManager.getBasename(filesMzXML[0]);
+            _baseName = MS2PipelineManager.getBaseName(filesMzXML[0]);
         _dirAnalysis = _fileSequestXML.getParentFile();
         _filePepXML = MS2PipelineManager.getPepXMLFile(_dirAnalysis, _baseName);
         setLogFile(MS2PipelineManager.getLogFile(_dirAnalysis, _baseName), append);
@@ -211,7 +211,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
         for (File fileMzXML : _filesMzXML)
         {
             setStatus("SEARCHING");
-            _baseName = MS2PipelineManager.getBasename(fileMzXML);
+            _baseName = MS2PipelineManager.getBaseName(fileMzXML);
             File fileInputMzXML = new File(dirWork, fileMzXML.getName());
             File dirSequestWork = new File(dirWork, _baseName);
             File workingSequestParams = new File(dirSequestWork, "sequest.params");

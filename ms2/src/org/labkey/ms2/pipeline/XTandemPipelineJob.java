@@ -67,7 +67,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
         if (isFractions())
             _baseName = "all";
         else
-            _baseName = MS2PipelineManager.getBasename(filesMzXML[0]);
+            _baseName = MS2PipelineManager.getBaseName(filesMzXML[0]);
         _dirAnalysis = _fileTandemXML.getParentFile();
         _filePepXML = MS2PipelineManager.getPepXMLFile(_dirAnalysis, _baseName);
         setLogFile(MS2PipelineManager.getLogFile(_dirAnalysis, _baseName), append);
