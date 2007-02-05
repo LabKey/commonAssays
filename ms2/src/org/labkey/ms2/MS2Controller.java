@@ -2060,7 +2060,7 @@ public class MS2Controller extends ViewController
         html.append("<script type=\"text/javascript\">\n");
         html.append("LABKEY.requiresScript('filter.js');\n");
         html.append("</script>");
-        html.append("<form method=post action=''><table class=\"dataRegion\">");
+        html.append("<form method=post action=''><table class=\"dataRegion\" cellspacing=\"0\" cellpadding=\"1\">");
         ht.render(html);
         renderHierarchyButtonBar(html);
         html.append("</table></form>");
@@ -2073,6 +2073,9 @@ public class MS2Controller extends ViewController
     private void renderHierarchyButtonBar(StringBuilder html) throws IOException
     {
         ButtonBar bb = new ButtonBar();
+
+        bb.add(ActionButton.BUTTON_SELECT_ALL);
+        bb.add(ActionButton.BUTTON_CLEAR_ALL);
 
         ActionButton compareProteins = new ActionButton("button", "Compare Proteins");
         compareProteins.setScript("return verifySelected(this.form, \"compareProteins.view\", \"post\", \"runs\")");
