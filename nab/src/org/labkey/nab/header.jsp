@@ -1,12 +1,13 @@
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.nab.NabController"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.HeaderBean> me = (JspView<org.labkey.nab.NabController.HeaderBean>) HttpView.currentView();
     NabController.HeaderBean bean = me.getModel();
 %>
-
+<span class="labkey-error"><%=PageFlowUtil.getStrutsError(request, "main")%></span>
 <%
     if (bean.showNewRunLink())
     {

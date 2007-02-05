@@ -646,6 +646,8 @@ public class NabController extends ViewController
     {
         List<String> idStrings = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
         List<Integer> ids = new ArrayList<Integer>();
+        if (idStrings == null)
+            return ids;
         for (String rowIdStr : idStrings)
         {
             try
@@ -666,9 +668,18 @@ public class NabController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
         List<Integer> wellgroupIds = getCheckboxIds();
-        JspView<PublishBean> chooseStudyView = new JspView<PublishBean>("/org/labkey/nab/publishChooseStudy.jsp",
-                new PublishBean(getViewContext(), wellgroupIds, false));
-        return _renderInTemplate(chooseStudyView, "Choose Target Study");
+        if (wellgroupIds.isEmpty())
+        {
+            ActionErrors actionErrors = PageFlowUtil.getActionErrors(getRequest(), true);
+            actionErrors.add("main", new ActionMessage("Error", "You must select at least one specimen to publish."));
+            return sampleList();
+        }
+        else
+        {
+            JspView<PublishBean> chooseStudyView = new JspView<PublishBean>("/org/labkey/nab/publishChooseStudy.jsp",
+                    new PublishBean(getViewContext(), wellgroupIds, false));
+            return _renderInTemplate(chooseStudyView, "Choose Target Study");
+        }
     }
 
     @Jpf.Action
@@ -676,9 +687,18 @@ public class NabController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
         List<Integer> plateIds = getCheckboxIds();
-        JspView<PublishBean> chooseStudyView = new JspView<PublishBean>("/org/labkey/nab/publishChooseStudy.jsp",
-                new PublishBean(getViewContext(), plateIds, true));
-        return _renderInTemplate(chooseStudyView, "Choose Target Study");
+        if (plateIds.isEmpty())
+        {
+            ActionErrors actionErrors = PageFlowUtil.getActionErrors(getRequest(), true);
+            actionErrors.add("main", new ActionMessage("Error", "You must select at least one run to publish."));
+            return runs();
+        }
+        else
+        {
+            JspView<PublishBean> chooseStudyView = new JspView<PublishBean>("/org/labkey/nab/publishChooseStudy.jsp",
+                    new PublishBean(getViewContext(), plateIds, true));
+            return _renderInTemplate(chooseStudyView, "Choose Target Study");
+        }
     }
 
     public static class PublishForm extends FormData
