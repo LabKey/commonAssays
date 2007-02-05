@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.ArrayList;
 
 
 @Jpf.Controller
@@ -210,14 +211,13 @@ public class ProjectController extends ViewController
         if (null == parts || parts.length == 0)
             return forward;
 
-        Portal.WebPart[] newParts = new Portal.WebPart[parts.length - 1];
+        ArrayList<Portal.WebPart> newParts = new ArrayList<Portal.WebPart>();
         int index = form.getIndex();
-        int partIndex = 0;
         for (Portal.WebPart part : parts)
             if (part.getIndex() != index)
-                newParts[partIndex++] = part;
+                newParts.add(part);
 
-        Portal.saveParts(form.getPageId(), newParts);
+        Portal.saveParts(form.getPageId(), newParts.toArray(new Portal.WebPart[0]));
         return forward;
     }
 
