@@ -63,7 +63,7 @@ public abstract class AbstractPeptideView
         }
         else if ("query".equals(grouping))
         {
-            return new QueryFlatPeptideView(c, user, url, runs, viewContext);
+            return new QueryPeptideView(c, user, url, runs, viewContext);
         }
         else
         {
@@ -487,7 +487,7 @@ public abstract class AbstractPeptideView
         }
     }
 
-    protected class ProteinColumnNameList extends MS2Run.ColumnNameList
+    protected  class ProteinColumnNameList extends MS2Run.ColumnNameList
     {
         ProteinColumnNameList(String columnNames) throws SQLException
         {

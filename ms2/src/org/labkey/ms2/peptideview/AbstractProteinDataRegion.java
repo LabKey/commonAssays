@@ -4,6 +4,7 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.GroupedResultSet;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.ms2.ProteinGroupProteins;
 
 import java.io.Writer;
 import java.io.IOException;

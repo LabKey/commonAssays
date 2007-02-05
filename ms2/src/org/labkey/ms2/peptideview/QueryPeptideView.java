@@ -21,12 +21,12 @@ import org.apache.commons.lang.StringUtils;
  * User: jeckels
  * Date: Mar 6, 2006
  */
-public class QueryFlatPeptideView extends AbstractPeptideView
+public class QueryPeptideView extends AbstractPeptideView
 {
     private ViewContext _viewContext;
     private static final String DATA_REGION_NAME = "MS2Peptides";
 
-    public QueryFlatPeptideView(Container container, User user, ViewURLHelper url, MS2Run[] runs, ViewContext viewContext)
+    public QueryPeptideView(Container container, User user, ViewURLHelper url, MS2Run[] runs, ViewContext viewContext)
     {
         super(container, user, "Peptides", url, runs);
         _viewContext = viewContext;
@@ -204,7 +204,7 @@ public class QueryFlatPeptideView extends AbstractPeptideView
             DataRegion rgn;
             if (_selectedNestingOption != null)
             {
-                QueryPeptideDataRegion ppRgn = new QueryPeptideDataRegion(allColumns, _selectedNestingOption.getGroupIdColumn());
+                QueryPeptideDataRegion ppRgn = new QueryPeptideDataRegion(allColumns, _selectedNestingOption.getGroupIdColumn(), _runs);
                 ppRgn.setExpanded(_expanded);
                 ppRgn.setRecordSelectorValueColumns(_selectedNestingOption.getGroupIdColumn().getColumnInfo().getAlias());
                 DataRegion nestedRgn = new DataRegion();
@@ -281,6 +281,17 @@ public class QueryFlatPeptideView extends AbstractPeptideView
                 {
                     return standardSort;
                 }
+            }
+
+
+            protected SimpleFilter buildFilter(TableInfo tinfo, ViewURLHelper url, String name)
+            {
+                SimpleFilter result = super.buildFilter(tinfo, url, name);
+                if (_selectedNestingOption != null)
+                {
+                    result.addCondition(_selectedNestingOption._rowIdColumnName, null, CompareType.NONBLANK);
+                }
+                return result;
             }
         }
 

@@ -443,8 +443,8 @@ ms2/src/org/labkey/ms2/peptideview/ProteinProphetPeptideView.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinResultSetSpectrumIterator.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinStringExpression.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinTSVGridWriter.java -text
-ms2/src/org/labkey/ms2/peptideview/QueryFlatPeptideView.java -text
 ms2/src/org/labkey/ms2/peptideview/QueryPeptideDataRegion.java -text
+ms2/src/org/labkey/ms2/peptideview/QueryPeptideView.java -text
 ms2/src/org/labkey/ms2/peptideview/ResultSetSpectrumIterator.java -text
 ms2/src/org/labkey/ms2/peptideview/StandardProteinDataRegion.java -text
 ms2/src/org/labkey/ms2/peptideview/StandardProteinExcelWriter.java -text

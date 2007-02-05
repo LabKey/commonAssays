@@ -4,6 +4,8 @@ import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.GroupedResultSet;
 import org.labkey.api.data.DataColumn;
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.ProteinGroupProteins;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -19,12 +21,14 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
 {
     private final List<DisplayColumn> _allColumns;
     private final DataColumn _groupIdColumn;
+    private final MS2Run[] _runs;
 
-    public QueryPeptideDataRegion(List<DisplayColumn> allColumns, DataColumn groupIdColumn)
+    public QueryPeptideDataRegion(List<DisplayColumn> allColumns, DataColumn groupIdColumn, MS2Run[] runs)
     {
         super(groupIdColumn.getColumnInfo().getAlias());
         _allColumns = allColumns;
         _groupIdColumn = groupIdColumn;
+        _runs = runs;
         setShadeAlternatingRows(true);
     }
 
@@ -62,4 +66,10 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
         renderNestedGrid(out, ctx, nestedRS, rowIndex);
         nestedRS.close();
     }
+
+    public ProteinGroupProteins lookupProteinGroupProteins()
+    {
+        return new ProteinGroupProteins(_runs);
+    }
+
 }

@@ -3,13 +3,17 @@ package org.labkey.ms2;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.ms2.peptideview.QueryPeptideDataRegion;
 
 import java.io.Writer;
 import java.io.IOException;
 import java.util.Map;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Set;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 
@@ -19,10 +23,19 @@ import java.text.DecimalFormat;
  */
 public class ProteinListDisplayColumn extends SimpleDisplayColumn
 {
-    private final List<String> _sequenceColumns;
-    private final ProteinGroupProteins _proteins;
+    private List<String> _sequenceColumns;
+    private ProteinGroupProteins _proteins;
 
     private static final DecimalFormat MASS_FORMAT = new DecimalFormat("0.0000");
+    private ColumnInfo _columnInfo;
+    private String _columnName = "ProteinGroupId";
+
+    public ProteinListDisplayColumn(ColumnInfo col)
+    {
+        _columnInfo = col;
+        _columnName = col.getAlias();
+        _sequenceColumns = Arrays.asList("Protein", "BestName", "BestGeneName", "SequenceMass", "Description");
+    }
 
     public ProteinListDisplayColumn(List<String> sequenceColumns, ProteinGroupProteins proteins)
     {
@@ -33,17 +46,23 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         setNoWrap(true);
     }
 
+
+    public ColumnInfo getColumnInfo()
+    {
+        return _columnInfo;
+    }
+
     public Object getValue(RenderContext ctx)
     {
         Map row = ctx.getRow();
         Integer id = (Integer)row.get("RowId");
         if (id == null)
         {
-            id = (Integer)row.get("ProteinGroupId");
+            id = (Integer)row.get(_columnName);
         }
         try
         {
-            List<ProteinSummary> summaryList = _proteins.getSummaries(id.intValue());
+            List<ProteinSummary> summaryList = getProteins(ctx).getSummaries(id.intValue());
             StringBuilder sb = new StringBuilder();
             sb.append(summaryList.get(0).getName());
             for (int i = 1; i < summaryList.size(); i++)
@@ -59,12 +78,21 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         }
     }
 
+    private ProteinGroupProteins getProteins(RenderContext ctx)
+    {
+        if (_proteins == null)
+        {
+            _proteins = ((QueryPeptideDataRegion)ctx.getCurrentRegion()).lookupProteinGroupProteins();
+        }
+        return _proteins;
+    }
+
     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
     {
         Map row = ctx.getRow();
         try
         {
-            List<ProteinSummary> summaryList = _proteins.getSummaries(((Integer)row.get("ProteinGroupId")).intValue());
+            List<ProteinSummary> summaryList = getProteins(ctx).getSummaries(((Integer)row.get(_columnName)).intValue());
 
             ViewURLHelper url = ctx.getViewContext().cloneViewURLHelper();
             url.setAction("showProtein.view");
@@ -83,6 +111,12 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         {
             throw new RuntimeSQLException(e);
         }
+    }
+
+
+    public void addQueryColumns(Set<ColumnInfo> set)
+    {
+        set.add(_columnInfo);
     }
 
     private void writeInfo(ProteinSummary summary, Writer out, ViewURLHelper url) throws IOException
