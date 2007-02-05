@@ -68,6 +68,9 @@ flow/src/org/labkey/flow/analysis/chart/DensityColorBar.java -text
 flow/src/org/labkey/flow/analysis/chart/DensityColorPalette.java -text
 flow/src/org/labkey/flow/analysis/chart/DensityDataset.java -text
 flow/src/org/labkey/flow/analysis/chart/DensityPlot.java -text
+flow/src/org/labkey/flow/analysis/chart/HistDataset.java -text
+flow/src/org/labkey/flow/analysis/chart/HistPlot.java -text
+flow/src/org/labkey/flow/analysis/chart/HistRenderer.java -text
 flow/src/org/labkey/flow/analysis/chart/PlotFactory.java -text
 flow/src/org/labkey/flow/analysis/data/DoubleArray.java -text
 flow/src/org/labkey/flow/analysis/data/FloatArray.java -text

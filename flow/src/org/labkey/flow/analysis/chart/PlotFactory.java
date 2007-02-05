@@ -6,11 +6,16 @@ import org.jfree.chart.axis.ColorBar;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.renderer.xy.XYDotRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.contour.ContourDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.Range;
+import org.jfree.data.statistics.HistogramDataset;
 import org.labkey.flow.analysis.model.*;
+import org.labkey.flow.analysis.data.NumberArray;
 
+import java.awt.*;
 
 /**
  */
@@ -18,6 +23,7 @@ public class PlotFactory
 {
     public static int MAX_BUCKETS = Integer.getInteger("flow.maxchannels", 512).intValue();
     public static boolean SHOW_TOOLTIPS = !Boolean.getBoolean("flow.notooltips");
+    public static final Color COLOR_GATE = Color.RED;
 
     static public double[] getPossibleValues(DataFrame.Field field, boolean fLogarithmic)
     {
@@ -181,5 +187,40 @@ public class PlotFactory
         DataFrame.Field fieldRange = getField(data, rangeAxis);
         XYDataset dataset = DatasetFactory.createXYDataset(data, fieldDomain.getIndex(), fieldRange.getIndex());
         return new XYPlot(dataset, getValueAxis(subset, domainAxis, fieldDomain), getValueAxis(subset, rangeAxis, fieldRange), new XYDotRenderer());
+    }
+
+    static public HistPlot createHistogramPlot(Subset subset, String axis)
+    {
+        DataFrame data = subset.getDataFrame();
+        DataFrame.Field field = getField(data, axis);
+        double[] bins = getPossibleValues(subset, field);
+        HistDataset dataset = new HistDataset(bins, data.getColumn(axis));
+        HistRenderer renderer = new HistRenderer();
+        renderer.setSeriesVisibleInLegend(false);
+        renderer.setPaint(Color.BLACK);
+        
+        NumberAxis xAxis;
+
+        if (displayLogarthmic(subset, field))
+        {
+            LogarithmicAxis logxAxis = new FlowLogarithmicAxis(getLabel(subset, axis));
+            logxAxis.setLog10TickLabelsFlag(true);
+            xAxis = logxAxis;
+
+        }
+        else
+        {
+            xAxis = new NumberAxis(getLabel(subset, axis));
+        }
+
+        ValueAxis yAxis = new NumberAxis("Count");
+        double yMax = 0;
+        for (int i = 1; i < dataset.getItemCount(0) - 1; i ++)
+        {
+            yMax = Math.max(dataset.getY(0, i), yMax);
+        }
+        yAxis.setRange(0, yMax * 1.1);
+        HistPlot plot = new HistPlot(dataset, xAxis, yAxis, renderer);
+        return plot;
     }
 }

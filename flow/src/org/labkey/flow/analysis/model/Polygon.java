@@ -27,10 +27,10 @@ public class Polygon implements Serializable
     public int len;
     public double[] X;
     public double[] Y;
-    double xmin = Double.MAX_VALUE;
-    double ymin = Double.MAX_VALUE;
-    double xmax = -Double.MAX_VALUE;
-    double ymax = -Double.MAX_VALUE;
+    public double xmin = Double.MAX_VALUE;
+    public double ymin = Double.MAX_VALUE;
+    public double xmax = -Double.MAX_VALUE;
+    public double ymax = -Double.MAX_VALUE;
 
     public Polygon()
     {

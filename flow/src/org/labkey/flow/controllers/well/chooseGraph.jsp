@@ -130,6 +130,7 @@
             </td>
             <td>
                 <select name="yaxis">
+                    <option value="">[[histogram]]</option>
                     <% for (Map.Entry<String, String> param : parameters.entrySet())
                     {%>
                     <option value="<%=h(param.getKey())%>" <%=param.getKey().equals(form.getYaxis()) ? " selected" : ""%>><%=h(param.getValue())%></option>
@@ -144,7 +145,16 @@
 <%
     if (form.getXaxis() != null)
     {
-        GraphSpec graphspec = new GraphSpec(SubsetSpec.fromString(form.getSubset()), form.getXaxis(), form.getYaxis());
+        String[] params;
+        if (form.getYaxis() != null)
+        {
+            params = new String[] { form.getXaxis(), form.getYaxis() };
+        }
+        else
+        {
+            params = new String[] { form.getXaxis() };
+        }
+        GraphSpec graphspec = new GraphSpec(SubsetSpec.fromString(form.getSubset()), params);
         ViewURLHelper urlGenerateGraph = PFUtil.urlFor(WellController.Action.generateGraph, getContainer());
         well.addParams(urlGenerateGraph);
         if (script != null)

@@ -10,7 +10,7 @@ class ChannelData
     static private SubsetSpec compSubset = SubsetSpec.fromString("comp");
 
     // Returns the SSC-H field, or whatever field is appropriate for histogram data
-    public DataFrame.Field findHistogramField(DataFrame data)
+    /*public DataFrame.Field findHistogramField(DataFrame data)
     {
         DataFrame.Field field = data.getField("SSC-H");
         if (field == null)
@@ -30,7 +30,7 @@ class ChannelData
             field = data.getField(0);
         }
         return field;
-    }
+    } */
 
 
     CompHandler _handler;
@@ -94,22 +94,12 @@ class ChannelData
     {
         String xAxis = getChannelName();
         String yAxis = parameter;
-        if (xAxis.equals(yAxis))
-        {
-            DataFrame.Field yAxisField = findHistogramField(subset.getDataFrame());
-            yAxis = yAxisField.getName();
-        }
-        else
-        {
-            if (compensated)
-            {
-                yAxis = makeCompensated(yAxis);
-            }
-        }
+        boolean histogram = yAxis.equals(xAxis);
 
         if (compensated)
         {
             xAxis = makeCompensated(xAxis);
+            yAxis = makeCompensated(yAxis);
         }
 
         GraphSpec spec = new GraphSpec(null, compensated ? makeCompensated(parameter) : parameter);
@@ -153,11 +143,15 @@ class ChannelData
             title.append("comp-");
         title.append(getChannelName());
         title.append(_key.getSign() == CompSign.positive ? "+" : "-");
-        title.append(":");
-        title.append(parameter);
+        if (!histogram)
+        {
+            title.append(":");
+            title.append(parameter);
+        }
         try
         {
-            result.bytes = _handler._analyzer.generateGraph(title.toString(), subset, xAxis, yAxis, displayPolys);
+            String[] axes = histogram ? new String[] { xAxis } : new String[] { xAxis, yAxis };
+            result.bytes = _handler._analyzer.generateGraph(title.toString(), subset, axes, displayPolys);
         }
         catch (Throwable t)
         {

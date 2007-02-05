@@ -780,6 +780,12 @@ public class ScriptController extends BaseFlowController
                 GraphSpec graph = new GraphSpec(parent, poly.getX(), poly.getY());
                 graphs.add(graph);
             }
+            else if (gate instanceof IntervalGate)
+            {
+                IntervalGate interval = (IntervalGate) gate;
+                GraphSpec graph = new GraphSpec(parent, interval.getAxis());
+                graphs.add(graph);
+            }
         }
         SubsetSpec subset = new SubsetSpec(parent, population.getName());
         for (Population child : population.getPopulations())

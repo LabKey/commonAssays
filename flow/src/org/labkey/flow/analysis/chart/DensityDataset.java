@@ -185,7 +185,7 @@ public class DensityDataset extends AbstractXYDataset implements ContourDataset
     /**
      * Find the nearest value in the array.
      */
-    protected int findBucket(double[] range, double value)
+    static public int findBucket(double[] range, double value)
         {
         if (value <= range[0])
             return 0;

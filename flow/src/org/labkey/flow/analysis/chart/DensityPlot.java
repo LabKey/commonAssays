@@ -43,7 +43,7 @@ public class DensityPlot extends ContourPlot
     public void render(Graphics2D g2, Rectangle2D dataArea, PlotRenderingInfo info, CrosshairState crosshairState)
     {
         super.render(g2, dataArea, info, crosshairState);
-        g2.setColor(Color.RED);
+        g2.setColor(PlotFactory.COLOR_GATE);
         for (Iterator it = _polyDatas.iterator(); it.hasNext();)
         {
             PolygonData data = (PolygonData) it.next();

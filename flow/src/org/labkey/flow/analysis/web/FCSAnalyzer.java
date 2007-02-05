@@ -3,6 +3,7 @@ package org.labkey.flow.analysis.web;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.chart.DensityPlot;
 import org.labkey.flow.analysis.chart.PlotFactory;
+import org.labkey.flow.analysis.chart.HistPlot;
 import org.labkey.flow.analysis.model.CompensationCalculation;
 import org.labkey.flow.analysis.model.Polygon;
 
@@ -15,7 +16,9 @@ import java.awt.*;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartRenderingInfo;
+import org.jfree.chart.plot.Plot;
 import org.jfree.ui.RectangleInsets;
+import org.jfree.data.Range;
 import org.apache.log4j.Logger;
 import org.labkey.api.view.Stats;
 
@@ -32,6 +35,7 @@ public class FCSAnalyzer
     {
         public T spec;
         public Throwable exception;
+
         public Result(T spec)
         {
             this.spec = spec;
@@ -41,6 +45,7 @@ public class FCSAnalyzer
     static public class StatResult extends Result<StatisticSpec>
     {
         public double value;
+
         public StatResult(StatisticSpec spec)
         {
             super(spec);
@@ -50,6 +55,7 @@ public class FCSAnalyzer
     static public class GraphResult extends Result<GraphSpec>
     {
         public byte[] bytes;
+
         public GraphResult(GraphSpec spec)
         {
             super(spec);
@@ -74,8 +80,7 @@ public class FCSAnalyzer
 
     public PopulationSet findSubGroup(PopulationSet group, SubsetSpec subset)
     {
-        if (subset == null)
-            return group;
+        if (subset == null) return group;
         for (String name : subset.getSubsets())
         {
             group = group.getPopulation(name);
@@ -83,24 +88,48 @@ public class FCSAnalyzer
         return group;
     }
 
-    public byte[] generateGraph(String title, Subset subset, String xAxis, String yAxis, List<Polygon> polys) throws Exception
+    public byte[] generateGraph(String title, Subset subset, String[] axes, List<Polygon> polys) throws Exception
     {
-        DensityPlot plot = PlotFactory.createContourPlot(subset, xAxis, yAxis);
-        JFreeChart chart = new JFreeChart(title, plot);
-        for (Polygon poly : polys)
+        Plot plot;
+        if (axes.length == 2)
         {
-            plot.addPolygon("", poly);
+            DensityPlot dPlot = PlotFactory.createContourPlot(subset, axes[0], axes[1]);
+            for (Polygon poly : polys)
+            {
+                dPlot.addPolygon("", poly);
+            }
+            plot = dPlot;
         }
-
+        else
+        {
+            HistPlot hPlot = PlotFactory.createHistogramPlot(subset, axes[0]);
+            for (Polygon poly : polys)
+            {
+                hPlot.addGate(new Range(poly.xmin, poly.xmax));
+            }
+            plot = hPlot;
+        }
+        JFreeChart chart = new JFreeChart(title, plot);
         BufferedImage img = chart.createBufferedImage(GRAPH_HEIGHT, GRAPH_WIDTH);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(img, "png", baos);
         return baos.toByteArray();
     }
 
-    private byte[] generateGraph(String title, Subset subset, PopulationSet subGroup, String xAxis, String yAxis) throws Exception
+    private byte[] generateGraph(String title, Subset subset, PopulationSet subGroup, String[] axes) throws Exception
     {
         List<Polygon> polys = new ArrayList();
+        String xAxis = axes[0];
+        String yAxis;
+        if (axes.length == 2)
+        {
+            yAxis = axes[1];
+        }
+        else
+        {
+            yAxis = xAxis;
+        }
+
         for (Population pop : subGroup.getPopulations())
         {
             for (Gate gate : pop.getGates())
@@ -108,7 +137,7 @@ public class FCSAnalyzer
                 gate.getPolygons(polys, xAxis, yAxis);
             }
         }
-        return generateGraph(title, subset, xAxis, yAxis, polys);
+        return generateGraph(title, subset, axes, polys);
     }
 
     private GraphResult generateGraph(Map<SubsetSpec, Subset> subsetMap, PopulationSet group, GraphSpec graphSpecification) throws IOException
@@ -118,7 +147,7 @@ public class FCSAnalyzer
         {
             Subset subset = getSubset(subsetMap, group, graphSpecification.getSubset());
             PopulationSet subGroup = findSubGroup(group, graphSpecification.getSubset());
-            ret.bytes = generateGraph(subset.getName(), subset, subGroup, graphSpecification.getParameters()[0], graphSpecification.getParameters()[1]);
+            ret.bytes = generateGraph(subset.getName(), subset, subGroup, graphSpecification.getParameters());
         }
         catch (Throwable t)
         {
@@ -159,14 +188,11 @@ public class FCSAnalyzer
 
     public List<StatResult> calculateStatistics(URI uri, CompensationMatrix comp, PopulationSet group, Collection<StatisticSpec> stats) throws IOException
     {
-        if (stats.size() == 0)
-            return Collections.EMPTY_LIST;
+        if (stats.size() == 0) return Collections.EMPTY_LIST;
         List<StatResult> ret = new ArrayList(stats.size());
         Map<SubsetSpec, Subset> subsetMap = new HashMap();
         Map<SubsetSpec, Map<String, Stats.DoubleStats>> subsetStatsMap = new HashMap();
-
         subsetMap.put(null, getSubset(uri, comp));
-
         for (StatisticSpec stat : stats)
         {
             StatResult result = new StatResult(stat);
@@ -205,9 +231,7 @@ public class FCSAnalyzer
     public Subset getSubset(Map<SubsetSpec, Subset> subsetMap, PopulationSet group, SubsetSpec subsetSpecification)
     {
         Subset ret = subsetMap.get(subsetSpecification);
-        if (ret != null)
-            return ret;
-
+        if (ret != null) return ret;
         Subset parentSubset = getSubset(subsetMap, group, subsetSpecification.getParent());
         if (subsetSpecification.isExpression())
         {
@@ -219,8 +243,7 @@ public class FCSAnalyzer
         else
         {
             Population pop = (Population) findSubGroup(group, subsetSpecification);
-            if (pop == null)
-                throw new FlowException("Could not find subset " + subsetSpecification);
+            if (pop == null) throw new FlowException("Could not find subset " + subsetSpecification);
             ret = parentSubset.apply(pop.getName(), pop.getGates().toArray(new Gate[0]));
         }
         subsetMap.put(subsetSpecification, ret);
@@ -274,7 +297,7 @@ public class FCSAnalyzer
     private List<String> getFieldNames(FCSHeader header)
     {
         List<String> ret = new ArrayList();
-        for (int i = 1; ; i ++)
+        for (int i = 1; ; i++)
         {
             String keyword = "$P" + i + "N";
             String name = header.getKeyword(keyword);
@@ -290,10 +313,9 @@ public class FCSAnalyzer
     {
         LinkedHashMap<String, String> ret = new LinkedHashMap();
         FCSHeader fcs = _cache.readFCSHeader(uriFCS);
-        if (fcs == null)
-            return ret;
+        if (fcs == null) return ret;
         List<String> names = getFieldNames(fcs);
-        for (int i = 0; i < names.size(); i ++)
+        for (int i = 0; i < names.size(); i++)
         {
             ret.put(names.get(i), PlotFactory.getLabel(fcs, i, false));
         }
@@ -306,7 +328,6 @@ public class FCSAnalyzer
             }
         }
         return ret;
-
     }
 
     public Map<String, String> getParameterNames(URI uriFCS, CompensationMatrix comp) throws Exception
@@ -319,24 +340,24 @@ public class FCSAnalyzer
         return getParameterNames(uriFCS, channelNames);
     }
 
-    public Map<String,String> getParameterNames(URI uriFCS, CompensationCalculation calc) throws Exception
+    public Map<String, String> getParameterNames(URI uriFCS, CompensationCalculation calc) throws Exception
     {
         String[] channelNames = new String[0];
         if (calc != null)
         {
             List<CompensationCalculation.ChannelInfo> channels = calc.getChannels();
             channelNames = new String[channels.size()];
-            for (int i = 0; i < channelNames.length; i ++)
+            for (int i = 0; i < channelNames.length; i++)
             {
                 channelNames[i] = channels.get(i).getName();
             }
         }
         return getParameterNames(uriFCS, channelNames);
     }
+
     public boolean matchesCriteria(SampleCriteria criteria, FCSRef ref) throws Exception
     {
-        if (criteria == null)
-            return true;
+        if (criteria == null) return true;
         FCSKeywordData header = resolveRef(ref);
         return criteria.matches(header);
     }
@@ -354,14 +375,12 @@ public class FCSAnalyzer
 
     public boolean containsFCSFiles(File directory)
     {
-        if (!directory.isDirectory())
-            return false;
+        if (!directory.isDirectory()) return false;
         try
         {
             for (File file : directory.listFiles())
             {
-                if (isFCSFile(file))
-                    return true;
+                if (isFCSFile(file)) return true;
             }
         }
         catch (Exception e)
