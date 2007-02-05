@@ -4510,7 +4510,7 @@ public class MS2Controller extends ViewController
 
         form.setMascotServer(originalMascotServer);
 
-        HttpView view = new GroovyView("admin/testMascot.gm");
+        HttpView view = new GroovyView("/org/labkey/core/admin/testMascot.gm");
         form.setPassword(("".equals(form.getPassword())) ? "" : "***");  // do not show password in clear
         view.addObject("form", form);
         return includeView(new DialogTemplate(view));

@@ -18,12 +18,15 @@ package org.labkey.ms2.pipeline;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.util.XMLValidationParser;
+import org.labkey.api.util.HelpUtil;
 import org.labkey.api.ms2.MascotClient;
 
 import java.io.*;
@@ -219,12 +222,11 @@ public class MascotClientImpl implements MascotClient
             if (!"".equals(url.getPath()))
                 possibleURLs.add(_url);
 
-            StringBuffer alternativeLink = new StringBuffer();
+            StringBuffer alternativeLink;
             alternativeLink = new StringBuffer("http://");
             alternativeLink.append(url.getHost());
-            if (80 != url.getPort() && -1 != url.getPort())
-            {
-                alternativeLink.append(url.getPort());
+            if (80 != url.getPort() && -1 != url.getPort()) {
+                alternativeLink.append(":").append(url.getPort());
             }
             String alternativeLinkPrefix = alternativeLink.toString();
             String alternativeUrl = "/mascot/cgi/";
@@ -357,6 +359,78 @@ public class MascotClientImpl implements MascotClient
         // we basically ignore the failure to log out
     }
 
+    public String getMascotErrorMessage(int mascotErrorCode) {
+        if (mascotErrorCode < 0) {
+            return "Non-Mascot error code";
+        }
+
+        findWorkableSettings(false);
+
+        //GET /cgi/ms-geterror.exe?<errorcode>
+        Properties parameters = new Properties();
+        parameters.setProperty("cgi", "ms-geterror.exe");
+        parameters.setProperty(Integer.toString(mascotErrorCode), "");
+        Properties results = request(parameters, false);
+        String mascotErrorString = results.getProperty("HTTPContent", "");
+        if (0 == errorCode) {
+            return mascotErrorString;
+        } else {
+            return "Sorry, unable to get Mascot error string for code " + Integer.toString(mascotErrorCode);
+        }
+    }
+
+    public String getMascotVersion() {
+
+        findWorkableSettings(false);
+
+        //GET /cgi/client.pl?version
+        // try to find out about the platform that Mascot Server is running on
+        String mascotRequestURL;
+        {
+            StringBuffer urlSB = new StringBuffer(_url);
+            if (!_url.endsWith("/"))
+                urlSB.append("/");
+            urlSB.append("client.pl?version");
+            mascotRequestURL = urlSB.toString();
+        }
+
+        GetMethod get=new GetMethod(mascotRequestURL);
+        HttpClient client = new HttpClient();
+        String result="Sorry, unable to get Mascot version";
+        try
+        {
+            int statusCode = client.executeMethod(get);
+            if (statusCode == -1) {
+                result=result+" "+get.getResponseBodyAsString();
+            } else {
+                result=get.getResponseBodyAsString()
+                        +" - "+get.getResponseHeader("Server");
+            }
+        } catch (IOException e)
+        {
+            _log.warn("Failed to get Mascot server information via '" + mascotRequestURL + "'", e);
+        } finally {
+            get.releaseConnection();
+        }
+
+        result=result.replaceAll("[\r\n]"," ");
+        return result;
+    }
+
+    public boolean isMimeResultSupported() {
+
+        findWorkableSettings(false);
+
+        //GET /cgi/client.pl?version
+        Properties parameters = new Properties();
+        parameters.setProperty("cgi", "client.pl");
+        parameters.setProperty("result_file_mime", "");
+        parameters.setProperty("task_id", "0");
+        Properties results = request(parameters, false);
+        String result = results.getProperty("HTTPContent", "");
+        return (!result.contains("Invalid keyword argument"));
+    }
+
     protected Properties getTaskID (String sessionID)
     {
         Properties results = new Properties();
@@ -380,6 +454,13 @@ public class MascotClientImpl implements MascotClient
         return results;
     }
 
+    protected Logger getLogger() {
+        Logger logInstance = _log;
+        if (null != _instanceLogger)
+            logInstance = _instanceLogger;
+        return logInstance;
+    }
+
     protected String getTaskStatus (String sessionID, String taskID)
     {
         errorCode = 0;
@@ -398,29 +479,48 @@ public class MascotClientImpl implements MascotClient
             parameters.setProperty("sessionID", sessionID);
         Properties results = request (parameters, false);
         String statusString = results.getProperty("HTTPContent", "");
-        if (statusString.contains("="))
-        {
-            results.remove("HTTPContent");
+        if (statusString.contains("=")) {
+            /*Logger tlogInstance = getLogger();
+            if (null != tlogInstance) {
+                tlogInstance.info ("Full Mascot response: (" + results.getProperty("HTTPContent","") + ")");
+            }*/
             String[] contentLines = statusString.split("\n");
-            for (String contentLine : contentLines)
-            {
-                if (contentLine.contains("="))
-                {
+            for (String contentLine : contentLines) {
+                if (contentLine.contains("=")) {
                     String[] parts = contentLine.split("=");
                     if (2 == parts.length)
                         if (!"".equals(parts[0]))
                             results.put(parts[0], parts[1]);
                 }
             }
-            if (results.containsKey("error") && !"0".equals(results.getProperty("error","-1")))
-            {
-                // fall thru', return the full HTTP Content as we need the full text for diagnosis
-                if (null != _instanceLogger)
-                    _instanceLogger.info ("Mascot search task status error: (" + results.getProperty("error","-1") + ") " +
-                        results.getProperty("errorstring",""));
-            }
-            else
+            if (results.containsKey("error")) {
+                String errorValue = results.getProperty("error", "-1");
+                if (!"0".equals(errorValue)) {
+                    // fall thru', return the full HTTP Content as we need the full text for diagnosis
+                    Logger logInstance = getLogger();
+                    if (null != logInstance) {
+                        logInstance.info("Mascot search task status error: (" + results.getProperty("error", "-1") + ") " +
+                                results.getProperty("errorstring", ""));
+                        if ("-1".equals(errorValue)) {
+                            logInstance.info("Full Mascot response: (" + results.getProperty("HTTPContent", "") + ")");
+                        } else {
+                            String mascotErrorMessage = getMascotErrorMessage(Integer.parseInt(errorValue));
+                            logInstance.info("Mascot message: (" + mascotErrorMessage + ")");
+                        }
+                    }
+                }
+            } else
                 statusString = results.getProperty("running", "");
+            results.remove("HTTPContent");
+        } else {
+            //TODO: wch - do we want to dump this, how frequent will this be?
+            String lcStatus = statusString.toLowerCase();
+            if (!lcStatus.startsWith("complete\n") && !lcStatus.startsWith("complete\r\n")) {
+                Logger logInstance = getLogger();
+                if (null != logInstance) {
+                    logInstance.info("Mascot response: (" + results.getProperty("HTTPContent", "") + ")");
+                }
+            }
         }
 
         return statusString;
@@ -470,6 +570,17 @@ public class MascotClientImpl implements MascotClient
         errorCode = 0;
         errorString = "";
 
+        String version=getMascotVersion();
+        if (null != _instanceLogger) _instanceLogger.info(version);
+        if (!isMimeResultSupported()) {
+            String msg1="Your mascot installation does not have support for MIME result download via client.pl!";
+            if (null != _instanceLogger) _instanceLogger.warn(msg1);
+            _log.warn(msg1);
+            String msg2="Result retrieval may fail. See "+HelpUtil.getHelpLinkForTopic("configMascot")+" for more info.";
+            if (null != _instanceLogger) _instanceLogger.warn(msg2);
+            _log.warn(msg2);
+        }
+
         // check if security is enabled
         // let's acquire a session id if we do not have one or security is enabled
         if (null!=_instanceLogger) _instanceLogger.info("Creating Mascot session...");
@@ -478,6 +589,8 @@ public class MascotClientImpl implements MascotClient
         {
             if (null!=_instanceLogger) _instanceLogger.info("Fail to start Mascot session");
             return 2;
+        } else {
+            if (null != _instanceLogger) _instanceLogger.info("Mascot session#"+mascotSessionId+" started.");
         }
 
         int returnCode = 0;
@@ -500,6 +613,8 @@ public class MascotClientImpl implements MascotClient
                 if (null!=_instanceLogger) _instanceLogger.info("Fail to create Mascot search task id.");
                 returnCode = 5;
                 break;
+            } else {
+                if (null != _instanceLogger) _instanceLogger.info("Mascot search task#"+taskID+" created with '"+actionString+"'.");
             }
 
             // submit job to mascot server
@@ -509,42 +624,58 @@ public class MascotClientImpl implements MascotClient
                 if (null!=_instanceLogger) _instanceLogger.info("Fail to submit search to Mascot server.");
                 returnCode = 3;
                 break;
+            } else {
+                if (null != _instanceLogger) _instanceLogger.info("Search submitted.");
             }
 
+            if (null != _instanceLogger) {
+                _instanceLogger.info("Mascot search status verbose reporting on");
+            }
+            final int delayBetweenSameStatus = 2 * 60;
+            int secSinceSameStatus = 0;
             String prevSearchStatus = null;
             String searchStatus;
-            while (true)
-            {
-                try
-                {
-                    Thread.sleep(delayAfterSubmitSec*1000);
+            final int maxNegativeErrorTry = 3;
+            int numOfNegativeError = 0;
+            while (true) {
+                try {
+                    Thread.sleep(delayAfterSubmitSec * 1000);
                 }
-                catch (InterruptedException e) { }
+                catch (InterruptedException e) {
+                }
 
-                searchStatus = getTaskStatus (mascotSessionId, taskID);
-                if (null!=_instanceLogger)
-                {
-                    if (null == prevSearchStatus || !searchStatus.equals(prevSearchStatus))
+                searchStatus = getTaskStatus(mascotSessionId, taskID);
+                if (null != _instanceLogger) {
+                    secSinceSameStatus += delayAfterSubmitSec;
+                    if (null == prevSearchStatus || !searchStatus.equals(prevSearchStatus)
+                            || secSinceSameStatus >= delayBetweenSameStatus) {
                         _instanceLogger.info("Mascot search status: " + searchStatus);
+                        secSinceSameStatus = 0;
+                    }
                     prevSearchStatus = searchStatus;
                 }
-                if (searchStatus.toLowerCase().contains("complete") ||
-                    searchStatus.toLowerCase().contains("error="))
-                {
+                if (searchStatus.toLowerCase().contains("error=-")) {
+                    numOfNegativeError++;
+                    if (numOfNegativeError>=maxNegativeErrorTry) {
+                        break;
+                    }
+                    if (null != _instanceLogger) _instanceLogger.info(searchStatus+", will retry..");
+                }
+                else if (searchStatus.toLowerCase().contains("complete") ||
+                        searchStatus.toLowerCase().contains("error=")) {
                     break;
                 }
             }
 
-            if (!searchStatus.toLowerCase().contains("complete"))
-            {
-                if (searchStatus.toLowerCase().contains("error=51"))
-                {
-                    if (null!=_instanceLogger) _instanceLogger.info("Retrying " + delayBetweenRetrySec + " seconds later...");
-                    try
-                    {
-                        Thread.sleep(delayBetweenRetrySec*1000);
+            if (!searchStatus.toLowerCase().contains("complete")) {
+                if (searchStatus.toLowerCase().contains("error=51")) {
+                    if (null != _instanceLogger)
+                        _instanceLogger.info("Retrying " + delayBetweenRetrySec + " seconds later...");
+                    try {
+                        Thread.sleep(delayBetweenRetrySec * 1000);
                     }
-                    catch (InterruptedException e) { }
+                    catch (InterruptedException e) {
+                    }
                     continue;
                 }
                 else
@@ -684,7 +815,7 @@ public class MascotClientImpl implements MascotClient
         for (i=0; i<submitFields.length; i++)
         {
             int j;
-            String [] keys =  submitFields[i];
+            String [] keys = submitFields[i];
             String formFieldKey = keys[0].toUpperCase();
             String formFieldValue = null;
             for (j=1; j<keys.length; j++)
@@ -773,9 +904,9 @@ public class MascotClientImpl implements MascotClient
         */
 
         File queryFile = new File(analysisFile);
-        try
-        {
-            parts[i] = new FilePart("FILE",queryFile);
+        if (null != _instanceLogger) _instanceLogger.info("Submitting query file, size="+queryFile.length());
+        try {
+            parts[i] = new FilePart("FILE", queryFile);
         }
         catch (FileNotFoundException err)
         {
@@ -845,8 +976,10 @@ public class MascotClientImpl implements MascotClient
                 if (str.contains(endOfUploadMarker))
                 {
                     uploadFinished = true;
-                    if (null != _instanceLogger) _instanceLogger.info ("Mascot search task status: query upload completed");
-                    break;
+                    if (null != _instanceLogger)
+                        _instanceLogger.info("Mascot search task status: query upload completed");
+                    //WCH: we cannot break for Mascot on Windows platform
+                    //break;
                 }
             }
             in.close();
@@ -884,6 +1017,7 @@ public class MascotClientImpl implements MascotClient
         if (null == in)
             return false;
 
+        long lByteRead=0;
         boolean ioError = false;
         File outFile = new File(resultFile);
         OutputStream out = null;
@@ -894,9 +1028,9 @@ public class MascotClientImpl implements MascotClient
             out = new FileOutputStream(outFile);
             byte[] buffer = new byte [4096]; // use 4-KB fragment
             int readLen;
-            while ((readLen=in.read(buffer))>0)
-            {
-                out.write(buffer,0,readLen);
+            while ((readLen = in.read(buffer)) > 0) {
+                lByteRead += readLen;
+                out.write(buffer, 0, readLen);
             }
         }
         catch (FileNotFoundException e)
@@ -920,16 +1054,26 @@ public class MascotClientImpl implements MascotClient
             }
         }
 
+        if (null != _instanceLogger)
+            _instanceLogger.info("Downloaded "+lByteRead+" bytes of result file.");
+
         if (ioError)
             return false;
 
         // let's check that we have the right file
         BufferedReader resultStream = null;
+        final int maxLines=20;
+        List<String> contentLines = new ArrayList<String>();
         String firstLine = "";
         try
         {
             resultStream = new BufferedReader(new InputStreamReader(new FileInputStream(outFile)));
-            firstLine = resultStream.readLine();
+            for (int index=0; index<maxLines; index++) {
+                firstLine = resultStream.readLine();
+                if (null != firstLine) {
+                    contentLines.add(firstLine);
+                }
+            }
         }
         catch (FileNotFoundException e)
         {
@@ -942,8 +1086,12 @@ public class MascotClientImpl implements MascotClient
             try { if (null != resultStream) resultStream.close(); } catch (IOException e) {}
         }
 
-        if (!firstLine.startsWith("MIME-Version:"))
-        {
+        firstLine=contentLines.get(0);
+        if (!firstLine.startsWith("MIME-Version:")) {
+            if (null != _instanceLogger) {
+                _instanceLogger.info("First line of Mascot result file does not start with 'MIME-Version:'... will remove file");
+                _instanceLogger.info("First "+contentLines.size()+" line(s)\n"+ StringUtils.join(contentLines.iterator(),"\n"));
+            }
             outFile.delete();
             return false;
         }

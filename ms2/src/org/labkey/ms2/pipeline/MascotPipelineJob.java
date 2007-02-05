@@ -329,8 +329,8 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
             header("Mascot2XML output");
 
             String sequenceDB = getSequenceDatabase(fileOutputDat);
-            File fileSequenceDatabase = new File(
-                    MS2PipelineManager.getSequenceDatabaseRoot(this.getContainer()).getPath(), sequenceDB);
+            File fileSequenceDatabase = new File(_uriSequenceRoot.getPath(), sequenceDB);
+
             iReturn = runSubProcess(new ProcessBuilder("Mascot2XML",
                     fileOutputDat.getName(),
                     "-D" + fileSequenceDatabase.getAbsolutePath(),
@@ -404,10 +404,6 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
         catch (InterruptedException ei)
         {
             // Handled in runSubProcess
-            return;
-        } catch (SQLException e) {
-            //TOOD: wch
-            error("SQLException", e);
             return;
         } catch (IOException e) {
             //TOOD: wch
