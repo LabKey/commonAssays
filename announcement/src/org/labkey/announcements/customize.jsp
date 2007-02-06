@@ -1,8 +1,8 @@
-<%@ page import="org.labkey.api.announcements.AnnouncementManager" %>
+<%@ page import="org.labkey.announcements.model.AnnouncementManager" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
-<%@ page import="org.labkey.api.announcements.AnnouncementManager.Settings.SortOrder" %>
+<%@ page import="org.labkey.announcements.model.AnnouncementManager.Settings.SortOrder" %>
 <% HttpView<AnnouncementManager.Settings> me = (HttpView<AnnouncementManager.Settings>) HttpView.currentView();
     AnnouncementManager.Settings settings = me.getModel();
     ViewURLHelper returnUrl = (ViewURLHelper)me.getViewContext().get("returnUrl");

@@ -4,7 +4,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.GroovyView;
 import org.labkey.api.announcements.Announcement;
-import org.labkey.api.announcements.AnnouncementManager;
+import org.labkey.api.announcements.DiscussionService;
 
 import javax.servlet.ServletException;
 
@@ -37,8 +37,7 @@ public class NotesView extends GroovyView
 
         try
         {
-            //Announcement parent = getAnnouncement(null, _parentId);
-            Announcement[] notes = AnnouncementManager.getAnnouncements(_container, _parentId);
+            Announcement[] notes = DiscussionService.get().getAnnouncements(_container, _parentId);
             addObject("notes", notes);
         }
         catch (Exception x)

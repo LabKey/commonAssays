@@ -2,7 +2,7 @@ package org.labkey.announcements;
 
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.announcements.Announcement;
-import org.labkey.api.announcements.AnnouncementManager;
+import org.labkey.announcements.model.AnnouncementManager;
 
 
 abstract public class EmailResponsePage extends JspBase

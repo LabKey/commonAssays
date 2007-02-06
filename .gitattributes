@@ -15,7 +15,9 @@ announcement/src/org/labkey/announcements/emailPreferences.jsp -text
 announcement/src/org/labkey/announcements/emailResponse.jsp -text
 announcement/src/org/labkey/announcements/emailResponsePlain.jsp -text
 announcement/src/org/labkey/announcements/insert.gm -text
+announcement/src/org/labkey/announcements/model/AnnouncementManager.java -text
 announcement/src/org/labkey/announcements/model/AnnouncementModule.java -text
+announcement/src/org/labkey/announcements/model/DiscussionServiceImpl.java -text
 announcement/src/org/labkey/announcements/model/NormalMessageBoardPermissions.java -text
 announcement/src/org/labkey/announcements/model/Permissions.java -text
 announcement/src/org/labkey/announcements/model/SecureMessageBoardPermissions.java -text

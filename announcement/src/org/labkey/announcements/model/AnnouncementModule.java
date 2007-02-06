@@ -19,8 +19,9 @@ import junit.framework.TestCase;
 import org.apache.commons.collections.MultiMap;
 import org.apache.log4j.Logger;
 import org.labkey.announcements.AnnouncementsController;
-import org.labkey.api.announcements.AnnouncementManager;
+import org.labkey.announcements.model.AnnouncementManager;
 import org.labkey.api.announcements.CommSchema;
+import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
@@ -38,10 +39,7 @@ import org.labkey.api.view.WebPartView;
 import javax.servlet.ServletException;
 import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: migra
@@ -109,6 +107,7 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
     {
         super.startup(moduleContext);
         Search.register(this);
+        DiscussionService.register(new DiscussionServiceImpl());
 
         ContainerManager.addContainerListener(this);
         UserManager.addUserListener(this);
@@ -233,7 +232,7 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
     public Set<Class<? extends TestCase>> getJUnitTests()
     {
         return new HashSet<Class<? extends TestCase>>(Arrays.asList(
-            org.labkey.api.announcements.AnnouncementManager.TestCase.class));
+            AnnouncementManager.TestCase.class));
     }
 
     @Override
@@ -254,5 +253,22 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
         Set<String> result = new HashSet<String>();
         result.add("Wiki");
         return result;
+    }
+
+
+    public Collection<String> getSummary(Container c)
+    {
+        List<String> list = new ArrayList<String>(1);
+        try
+        {
+            long count = AnnouncementManager.getMessageCount(c);
+            if (count > 0)
+                list.add("" + count + " " + (count > 1 ? "Messages/Responses" : "Message"));
+        }
+        catch (SQLException x)
+        {
+            list.add(x.toString());
+        }
+        return list;
     }
 }
