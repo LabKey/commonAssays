@@ -4064,7 +4064,7 @@ public class MS2Controller extends ViewController
         rgn.getDisplayColumn("Description").setURL(showUrlString);
 
         GridView gridView = new GridView(rgn);
-        gridView.getViewContext().setContainer(ContainerManager.getNullContainer());
+        gridView.getRenderContext().setUseContainerFilter(false);
         gridView.getViewContext().setPermissions(ACL.PERM_READ);
         SimpleFilter runFilter = new SimpleFilter();
 
