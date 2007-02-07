@@ -398,7 +398,7 @@ public class MS2Manager
                              XarContext context) throws SQLException, IOException, XMLStreamException
     {
         ViewBackgroundInfo info = job.getInfo();
-        ensureWebParts(info);
+//        ensureWebParts(info);
 
         MS2Importer importer = createImporter(file, info, file.getName() + " (" + job.getDescription() + ")", job.getLogger(), context);
         return importer.upload(runInfo);
