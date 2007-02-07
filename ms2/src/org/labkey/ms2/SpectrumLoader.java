@@ -48,21 +48,22 @@ public class SpectrumLoader
     private int _fractionId;
     private SimpleScanIterator _scanIterator;
     private String _fileName = null;
+    private boolean _uploadRetentionTime;
 
 
-    protected SpectrumLoader(String gzFileName, String dtaFileNamePrefix, String mzXmlFileName, Set scans, MS2Importer.MS2Progress progress, int fractionId, Logger log)
+    protected SpectrumLoader(String gzFileName, String dtaFileNamePrefix, String mzXmlFileName, Set scans, MS2Importer.MS2Progress progress, int fractionId, Logger log, boolean uploadRetentionTime)
     {
         _scans = scans;
         _progress = progress;
         _fractionId = fractionId;
         _log = log;
+        _uploadRetentionTime = uploadRetentionTime;
 
         if (null == scans)
             return;
 
         try
         {
-            _log.info("Attempting to load MS2 spectra from tar.gz file " + gzFileName);
             // Try to open the gz file first... if that fails, try to open the mzXML file
             File gz = new File(gzFileName);
 
@@ -88,7 +89,6 @@ public class SpectrumLoader
                     _log.warn(gzFileName + " could not be opened and no mzXML file name was specified.  Spectra will not be loaded.");
                 else
                 {
-                    _log.info(gzFileName + " could not be opened; attempting to load spectra from mzXML file " + mzXmlFileName);
                     _fileName = mzXmlFileName;
                     _scanIterator = new SequentialMzxmlIterator(mzXmlFileName, 2);
                 }
@@ -109,15 +109,14 @@ public class SpectrumLoader
     }
 
 
-    // Reads all the DTA files from the GZ stream and writes them to the MS2SpectraData table
-    // using the same Fraction & Row as the peptide table
+    // Iterates the spectra writes them to the ms2.SpectraData table using the same Fraction & Row as the peptide table
     protected void upload()
     {
         long start = System.currentTimeMillis();
 
         if (null == _scans || _scans.isEmpty())
         {
-            _log.warn("Spectrum upload abandoned: no scans were loaded from HTML/XML file.");
+            _log.warn("Spectrum upload abandoned: no scans were loaded from pep.xml file.");
             return;
         }
 
@@ -127,7 +126,7 @@ public class SpectrumLoader
             return;
         }
 
-        _log.info("Starting spectrum upload");
+        _log.info("Starting spectrum upload from " + _fileName);
 
         DbSchema schema = MS2Manager.getSchema();
         Connection conn = null;
@@ -141,8 +140,11 @@ public class SpectrumLoader
             gzStmt = conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoSpectraData() + " (Fraction, Scan, Spectrum) VALUES (?, ?, ?)");
             gzStmt.setInt(1, _fractionId);
 
-            retentionStmt = conn.prepareStatement("UPDATE " + MS2Manager.getTableInfoPeptidesData() + " SET RetentionTime = ? WHERE Scan = ? AND Fraction = ?");
-            retentionStmt.setInt(3, _fractionId);
+            if (_uploadRetentionTime)
+            {
+                retentionStmt = conn.prepareStatement("UPDATE " + MS2Manager.getTableInfoPeptidesData() + " SET RetentionTime = ? WHERE Scan = ? AND Fraction = ?");
+                retentionStmt.setInt(3, _fractionId);
+            }
 
             int file = 0;
 
@@ -151,11 +153,10 @@ public class SpectrumLoader
                 SimpleScan spectrum = _scanIterator.next();
                 int scan = spectrum.getScan();
 
-                // Load DTA only if we loaded the corresponding scan in the HTML or XML file.
+                // Load spectrum only if we loaded the corresponding scan in the HTML or XML file.
                 // Since we want to store spectrum only once per scan, remove it from the set so
-                // a different charge to ensure
-                // we only store it
-                // it again if this scan shows up again (e.g., with different charge)
+                // we store it once even if this spectrum shows up again (e.g., multiple DTA files
+                // for a single scan but different charge)
                 if (_scans.contains(scan))
                 {
                     _scans.remove(scan);
@@ -167,23 +168,26 @@ public class SpectrumLoader
                     gzStmt.setBytes(3, copyBytes);
                     gzStmt.addBatch();
 
-                    Double retentionTime = spectrum.getRetentionTime();
-                    if (retentionTime != null)
+                    if (_uploadRetentionTime)
                     {
-                        retentionStmt.setDouble(1, retentionTime.doubleValue());
-                        retentionStmt.setInt(2, scan);
-                        retentionStmt.addBatch();
+                        Double retentionTime = spectrum.getRetentionTime();
+                        if (retentionTime != null)
+                        {
+                            retentionStmt.setDouble(1, retentionTime.doubleValue());
+                            retentionStmt.setInt(2, scan);
+                            retentionStmt.addBatch();
+                        }
                     }
 
                     file++;
 
-                    if (0 == file % 5000)
-                        _log.info("uploadGZ: DTA file " + String.valueOf(file));
-
                     if (0 == file % SQL_BATCH_SIZE)
                     {
                         gzStmt.executeBatch();
-                        retentionStmt.executeBatch();
+
+                        if (_uploadRetentionTime)
+                            retentionStmt.executeBatch();
+
                         conn.commit();
                     }
 
@@ -275,7 +279,7 @@ public class SpectrumLoader
             close();
         }
 
-        MS2Importer.logElapsedTime(_log, start, "upload spectrum file");
+        MS2Importer.logElapsedTime(_log, start, "upload spectra");
     }
 
 

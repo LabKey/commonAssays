@@ -19,23 +19,20 @@ package org.labkey.ms2;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
-import org.labkey.ms2.reader.SequentialMzxmlIterator;
-import org.labkey.ms2.reader.SimpleScan;
-import org.labkey.ms2.protein.FastaDbLoader;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.api.exp.XarContext;
 import org.labkey.api.security.User;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.common.tools.*;
 import org.labkey.common.tools.PepXmlLoader.FractionIterator;
 import org.labkey.common.tools.PepXmlLoader.PepXmlFraction;
 import org.labkey.common.tools.PepXmlLoader.PepXmlPeptide;
 import org.labkey.common.tools.PepXmlLoader.PeptideIterator;
-import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.exp.XarContext;
+import org.labkey.ms2.protein.FastaDbLoader;
+import org.labkey.ms2.protein.ProteinManager;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -50,7 +47,6 @@ public class PepXmlImporter extends MS2Importer
     private Map<String, Integer> _scoreMap;
     private List<RelativeQuantAnalysisSummary> _quantSummaries;
     private boolean _scoringAnalysis;
-    private Map<Integer, Double> _retentionTimes = null;
 
     private static final int BATCH_SIZE = 100;
 
@@ -102,18 +98,20 @@ public class PepXmlImporter extends MS2Importer
                 progress.setPeptideMode();
                 writeFractionInfo(fraction);
 
-//                _retentionTimes = loadRetentionTimes(fraction);
-                _retentionTimes = new HashMap<Integer, Double>();
-
                 PeptideIterator pi = fraction.getPeptideIterator();
                 HashSet<Integer> scans = new HashSet<Integer>(1000);
                 _conn.setAutoCommit(false);
 
+                boolean retentionTimesInPepXml = false;
                 int count = 0;
 
                 while (pi.hasNext())
                 {
                     PepXmlPeptide peptide = pi.next();
+
+                    // If any peptide in the pep.xml file has retention time then don't load retention times from mzXML
+                    if (null != peptide.getRetentionTime())
+                        retentionTimesInPepXml = true;
 
                     // Mascot exported pepXML may contain unassigned spectrum
                     // we omit them for the uploading
@@ -121,20 +119,20 @@ public class PepXmlImporter extends MS2Importer
                     {
 	                    write(peptide, summary);
 		                scans.add(peptide.getScan());
-                    }
-                    count++;
-                    if (count % BATCH_SIZE == 0)
-                    {
-                        _conn.commit();
-                    }
 
+                        count++;
+                        if (count % BATCH_SIZE == 0)
+                        {
+                            _conn.commit();
+                        }
+                    }
                     progress.setCurrentMs2FileOffset(loader.getCurrentOffset());
                 }
                 _conn.commit();
                 _conn.setAutoCommit(true);
 
                 progress.setSpectrumMode(scans.size());
-                uploadSpectra(fraction, scans, progress);
+                uploadSpectra(fraction, scans, progress, !retentionTimesInPepXml);
             }
         }
         finally
@@ -275,7 +273,7 @@ public class PepXmlImporter extends MS2Importer
     }
 
 
-    protected void uploadSpectra(PepXmlFraction fraction, HashSet<Integer> scans, MS2Progress progress) throws SQLException
+    protected void uploadSpectra(PepXmlFraction fraction, HashSet<Integer> scans, MS2Progress progress, boolean uploadRetentionTime) throws SQLException
     {
         String mzXmlFileName = getMzXMLFileName(fraction);
         if (_type.equalsIgnoreCase("mascot") && null == mzXmlFileName)
@@ -286,7 +284,7 @@ public class PepXmlImporter extends MS2Importer
             mzXmlFileName = mzXmlFileName.replaceAll("\\.pep\\.tgz$", ".mzXML");
             File engineProtocolMzXMLFile = new File(_path, mzXmlFileName);
             File engineProtocolDir = engineProtocolMzXMLFile.getParentFile();
-            File engineDir =engineProtocolDir.getParentFile();
+            File engineDir = engineProtocolDir.getParentFile();
             File mzXMLFile = new File(engineDir.getParent(), mzXmlFileName);
             mzXmlFileName = mzXMLFile.getAbsolutePath();
         }
@@ -296,7 +294,7 @@ public class PepXmlImporter extends MS2Importer
         {
             gzFileName = gzFile.toString();
         }
-        SpectrumLoader sl = new SpectrumLoader(gzFileName, "", mzXmlFileName, scans, progress, _fractionId, _log);
+        SpectrumLoader sl = new SpectrumLoader(gzFileName, "", mzXmlFileName, scans, progress, _fractionId, _log, uploadRetentionTime);
         sl.upload();
         updateFractionSpectrumFileName(sl.getFile());
     }
@@ -340,7 +338,7 @@ public class PepXmlImporter extends MS2Importer
         stmt.setInt(n++, _fractionId);
         stmt.setInt(n++, peptide.getScan());
 
-        Double retentionTime = _retentionTimes.get(peptide.getScan());
+        Double retentionTime = peptide.getRetentionTime();
         if (retentionTime == null)
             stmt.setNull(n++, Types.FLOAT);
         else
