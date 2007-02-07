@@ -101,10 +101,11 @@ public class PipelineController extends ViewController
         if (pr == null || !URIUtil.exists(pr.getUri()))
             HttpView.throwNotFound();
 
-        URI uriData = URIUtil.resolve(pr.getUri(c), path);
-        File dirData = new File(uriData);
-
-        File[] files = dirData.listFiles(MS2PipelineManager.getUploadFilter());
+        URI uriUpload = URIUtil.resolve(pr.getUri(c), path);
+        File fileUpload = new File(uriUpload);
+        File[] files = new File[] { fileUpload };
+        if (fileUpload.isDirectory())
+            files = fileUpload.listFiles(MS2PipelineManager.getUploadFilter());
 
         for (File file : files)
         {
