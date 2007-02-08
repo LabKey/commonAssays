@@ -59,8 +59,9 @@
     String strPipelineRootDescription = "<i>The pipeline root tells " + FlowModule.getLongProductName() +
             " where in the file system on the server FCS files are permitted to be loaded from.</i>";
 %>
-<p><i>In this folder</i></p>
-<ul>
+<p><%=FlowModule.getLongProductName()%></p>
+<ol>
+
 <% if (canInsert && !hasPipelineRoot)
 { %>
 <li>
@@ -223,7 +224,7 @@ else if (canUpdate)
     <br>
 </li>
 <% } %>
-</ul>
+</ol>
 
 <% if (canUpdate) {
     PipelineQueue.JobData jobData = PipelineService.get().getPipelineQueue().getJobData(getContainer());

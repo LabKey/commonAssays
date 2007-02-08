@@ -9,6 +9,7 @@
 <p>
     Use this page to describe how FCSAnalyses should be named.<br>
     The name of an FCSAnalysis can be composed from keywords taken from the FCS file.<br>
+    Changes to this setting will apply to existing FCSAnalyses as well as ones created in the future.<br>
 </p>
 <% if (form.ff_keyword != null)
 {
@@ -20,7 +21,7 @@
 %>
 <form method="POST" action="<%=form.getProtocol().urlFor(ProtocolController.Action.editFCSAnalysisName)%>">
     <p>
-        Which keywords should be used to compose the FCS analysis name?<br>
+        Which keywords should be used to compose the FCSAnalysis name?<br>
         <% FieldKey[] keywords = form.ff_keyword;
         if (keywords == null)
         {
@@ -48,7 +49,7 @@
 <% } %>
 <hr>
 <form method="POST" action="<%=form.getProtocol().urlFor(ProtocolController.Action.editFCSAnalysisName)%>">
-    <p>(Advanced) You can also edit the expression that is used to build up the FCS analysis name.
+    <p>Advanced users only:<br>You can also edit the expression that is used to build up the FCS analysis name.
         Use '\${' and '}' to denote substitutions.  Keyword names should be prefixed with 'Keyword'.
         <br>
         <input type="text" width="80" name="ff_rawString" value="<%=h(form.ff_rawString)%>"/>

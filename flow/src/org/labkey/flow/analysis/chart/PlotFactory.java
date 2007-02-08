@@ -22,7 +22,6 @@ import java.awt.*;
 public class PlotFactory
 {
     public static int MAX_BUCKETS = Integer.getInteger("flow.maxchannels", 512).intValue();
-    public static boolean SHOW_TOOLTIPS = !Boolean.getBoolean("flow.notooltips");
     public static final Color COLOR_GATE = Color.RED;
 
     static public double[] getPossibleValues(DataFrame.Field field, boolean fLogarithmic)

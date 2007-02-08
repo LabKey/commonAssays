@@ -27,7 +27,6 @@ import org.labkey.api.jsp.FormPage;
 import org.labkey.flow.util.PFUtil;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.FlowPreference;
-import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowScript;
@@ -41,10 +40,10 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.module.Module;
-import org.labkey.api.query.QueryForm;
 
 import java.util.*;
 import java.io.File;
+import java.net.URI;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class FlowController extends BaseFlowController<FlowController.Action>
@@ -312,6 +311,6 @@ public class FlowController extends BaseFlowController<FlowController.Action>
     protected Forward savePreferences() throws Exception
     {
         FlowPreference.update(getRequest());
-        return new Forward(getRequest().getContextPath() + "/_.gif", true);
+        return new Forward(new URI(getRequest().getContextPath() + "/_.gif"));
     }
 }

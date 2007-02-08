@@ -35,6 +35,7 @@ public class ProtocolForm extends ViewForm
     {
         Map<FieldKey, String> options = new LinkedHashMap();
         options.put(new FieldKey(null, "Name"), "FCS file name");
+        options.put(new FieldKey(new TableKey(null, "Run"), "Name"), "Run name");
         FlowSchema schema = new FlowSchema(getUser(), getContainer());
         ExpDataTable table = schema.createFCSFileTable(null);
         FlowPropertySet fps = new FlowPropertySet(table);

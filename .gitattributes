@@ -265,6 +265,8 @@ flow/src/org/labkey/flow/webparts/AnalysesWebPart.java -text
 flow/src/org/labkey/flow/webparts/AnalysisScriptTypeColumn.java -text
 flow/src/org/labkey/flow/webparts/AnalysisScriptsWebPart.java -text
 flow/src/org/labkey/flow/webparts/FlowFolderType.java -text
+flow/src/org/labkey/flow/webparts/FlowOverview.java -text
+flow/src/org/labkey/flow/webparts/Overview.java -text
 flow/src/org/labkey/flow/webparts/OverviewWebPart.java -text
 flow/src/org/labkey/flow/webparts/overview.jsp -text
 flow/webapp/Flow/blankGraphWindow.html -text

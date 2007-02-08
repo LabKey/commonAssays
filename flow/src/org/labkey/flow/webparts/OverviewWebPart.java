@@ -9,7 +9,7 @@ import org.labkey.api.jsp.ContextPage;
 
 import java.io.PrintWriter;
 
-public class OverviewWebPart extends JspView
+public class OverviewWebPart extends HtmlView
 {
     static public final WebPartFactory FACTORY = new WebPartFactory("Flow Overview") 
     {
@@ -19,10 +19,9 @@ public class OverviewWebPart extends JspView
         }
     };
 
-    public OverviewWebPart(ViewContext portalCtx)
+    public OverviewWebPart(ViewContext portalCtx) throws Exception
     {
-        super(JspLoader.createPage(portalCtx.getRequest(), OverviewWebPart.class, "overview.jsp"));
+        super(new FlowOverview(portalCtx.getUser(), portalCtx.getContainer()).toString());
         setTitle("Flow Overview");
-        ((ContextPage) _page).setViewContext(new ViewContext(portalCtx));
     }
 }
