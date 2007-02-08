@@ -17,19 +17,22 @@
 package org.labkey.ms2;
 
 import org.apache.log4j.Logger;
-import org.labkey.ms2.reader.*;
+import org.labkey.api.data.DbSchema;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.common.util.Pair;
-import org.labkey.api.data.DbSchema;
+import org.labkey.ms2.reader.SequentialMzxmlIterator;
+import org.labkey.ms2.reader.SimpleScan;
+import org.labkey.ms2.reader.SimpleScanIterator;
+import org.labkey.ms2.reader.TarIterator;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.*;
-import java.util.Set;
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import java.util.Set;
 
 /**
  * User: arauch
@@ -42,51 +45,41 @@ public class SpectrumLoader
     private static final int SQL_BATCH_SIZE = 100;
 
     private Logger _log = null;
-    private InputStream _gzFileStream = null;
     private MS2Importer.MS2Progress _progress = null;
     private Set _scans = null;
     private int _fractionId;
     private SimpleScanIterator _scanIterator;
     private String _fileName = null;
-    private boolean _uploadRetentionTime;
+    private boolean _shouldLoadRetentionTime;
+    private boolean _shouldLoadSpectra;
 
 
-    protected SpectrumLoader(String gzFileName, String dtaFileNamePrefix, String mzXmlFileName, Set scans, MS2Importer.MS2Progress progress, int fractionId, Logger log, boolean uploadRetentionTime)
+    protected SpectrumLoader(String gzFileName, String dtaFileNamePrefix, String mzXmlFileName, Set scans, MS2Importer.MS2Progress progress, int fractionId, Logger log, boolean shouldLoadSpectra, boolean shouldLoadRetentionTime)
     {
         _scans = scans;
         _progress = progress;
         _fractionId = fractionId;
         _log = log;
-        _uploadRetentionTime = uploadRetentionTime;
+        _shouldLoadRetentionTime = shouldLoadRetentionTime;
+        _shouldLoadSpectra = shouldLoadSpectra;
 
         if (null == scans)
             return;
 
         try
         {
-            // Try to open the gz file first... if that fails, try to open the mzXML file
+            // Try to access the gz file first... if that fails, try to open the mzXML file
             File gz = new File(gzFileName);
 
             if (NetworkDrive.exists(gz))
-                _gzFileStream = new FileInputStream(gz);
-        }
-        catch (FileNotFoundException e)
-        {
-            _log.error(e);
-            _systemLog.error(e);
-        }
-
-        try
-        {
-            if (null != _gzFileStream)
             {
                 _fileName = gzFileName;
-                _scanIterator = new TarIterator(_gzFileStream, dtaFileNamePrefix);
+                _scanIterator = new TarIterator(gz, dtaFileNamePrefix);
             }
             else
             {
                 if (null == mzXmlFileName)
-                    _log.warn(gzFileName + " could not be opened and no mzXML file name was specified.  Spectra will not be loaded.");
+                    _log.warn("Spectra were not loaded: " + gzFileName + " could not be opened and no mzXML file name was specified.");
                 else
                 {
                     _fileName = mzXmlFileName;
@@ -94,53 +87,63 @@ public class SpectrumLoader
                 }
             }
         }
-        catch (IOException x)
+        catch (Exception x)
         {
-            if (null != _scanIterator)
-                _scanIterator.close();
-            _scanIterator = null;
-        }
-        catch (XMLStreamException x)
-        {
-            if (null != _scanIterator)
-                _scanIterator.close();
-            _scanIterator = null;
+            close();
+
+            throw new RuntimeException(x);
         }
     }
 
 
-    // Iterates the spectra writes them to the ms2.SpectraData table using the same Fraction & Row as the peptide table
     protected void upload()
     {
+        try
+        {
+            if (shouldLoadSpectra())
+                loadIntoDatabase();
+        }
+        finally
+        {
+            close();
+        }
+    }
+
+
+    private boolean shouldLoadSpectra()
+    {
+        if (!_shouldLoadSpectra)
+            _log.info("Spectra were not loaded: pep.xml file included \"pipeline, load spectra = no\" setting.");
+        else if (null == _scans || _scans.isEmpty())
+            _log.warn("Spectra were not loaded: no scans were loaded from pep.xml file.");
+        else if (null == _scanIterator)
+            _log.warn("Spectra were not loaded: could not open spectrum source.");
+        else
+            return true;
+
+        return false;
+    }
+
+
+    // Iterates the spectra and writes them to the ms2.SpectraData table using the same Fraction & Row as the peptide table
+    private void loadIntoDatabase()
+    {
         long start = System.currentTimeMillis();
-
-        if (null == _scans || _scans.isEmpty())
-        {
-            _log.warn("Spectrum upload abandoned: no scans were loaded from pep.xml file.");
-            return;
-        }
-
-        if (null == _scanIterator)
-        {
-            _log.warn("Spectrum upload abandoned: could not open spectrum source.");
-            return;
-        }
-
-        _log.info("Starting spectrum upload from " + _fileName);
+        _log.info("Starting spectra load from " + _fileName);
 
         DbSchema schema = MS2Manager.getSchema();
         Connection conn = null;
-        PreparedStatement gzStmt = null;
+        PreparedStatement spectraStmt = null;
         PreparedStatement retentionStmt = null;
 
         try
         {
             conn = schema.getScope().getConnection();
             conn.setAutoCommit(false);
-            gzStmt = conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoSpectraData() + " (Fraction, Scan, Spectrum) VALUES (?, ?, ?)");
-            gzStmt.setInt(1, _fractionId);
+            spectraStmt = conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoSpectraData() + " (Fraction, Scan, Spectrum) VALUES (?, ?, ?)");
+            spectraStmt.setInt(1, _fractionId);
 
-            if (_uploadRetentionTime)
+            if (_shouldLoadRetentionTime)
             {
                 retentionStmt = conn.prepareStatement("UPDATE " + MS2Manager.getTableInfoPeptidesData() + " SET RetentionTime = ? WHERE Scan = ? AND Fraction = ?");
                 retentionStmt.setInt(3, _fractionId);
@@ -164,11 +167,11 @@ public class SpectrumLoader
                     float[][] data = spectrum.getData();
                     byte[] copyBytes = floatArraysToByteArray(data[0], data[1]);
 
-                    gzStmt.setInt(2, scan);
-                    gzStmt.setBytes(3, copyBytes);
-                    gzStmt.addBatch();
+                    spectraStmt.setInt(2, scan);
+                    spectraStmt.setBytes(3, copyBytes);
+                    spectraStmt.addBatch();
 
-                    if (_uploadRetentionTime)
+                    if (_shouldLoadRetentionTime)
                     {
                         Double retentionTime = spectrum.getRetentionTime();
                         if (retentionTime != null)
@@ -183,9 +186,9 @@ public class SpectrumLoader
 
                     if (0 == file % SQL_BATCH_SIZE)
                     {
-                        gzStmt.executeBatch();
+                        spectraStmt.executeBatch();
 
-                        if (_uploadRetentionTime)
+                        if (_shouldLoadRetentionTime)
                             retentionStmt.executeBatch();
 
                         conn.commit();
@@ -213,10 +216,10 @@ public class SpectrumLoader
         {
             try
             {
-                if (null != gzStmt)
+                if (null != spectraStmt)
                 {
-                    gzStmt.executeBatch();
-                    gzStmt.close();
+                    spectraStmt.executeBatch();
+                    spectraStmt.close();
                 }
             }
             catch (SQLException e)
@@ -259,53 +262,41 @@ public class SpectrumLoader
                 _systemLog.error(e);
             }
 
-
             try
             {
                 if (null != conn)
                 {
                     schema.getScope().releaseConnection(conn);
                 }
-                close();
             }
             catch (SQLException e)
             {
                 _log.error(e);
                 _systemLog.error(e);
             }
-            if (null != _scanIterator)
-                _scanIterator.close();
-            _scanIterator = null;
-            close();
         }
 
-        MS2Importer.logElapsedTime(_log, start, "upload spectra");
+        MS2Importer.logElapsedTime(_log, start, "load spectra");
     }
 
 
-    public void close()
+    private void close()
     {
-        if (null != _gzFileStream)
-        {
-            try
-            {
-                _gzFileStream.close();
-            }
-            catch (IOException x)
-            {
-                _systemLog.error(x);
-            }
-        }
-        _gzFileStream = null;
+        if (null != _scanIterator)
+            _scanIterator.close();
+
+        _scanIterator = null;
     }
 
 
+    @Override
     protected void finalize() throws Throwable
     {
         super.finalize();
 
-        close();
+        assert null == _scanIterator;
     }
+
 
     public File getFile()
     {

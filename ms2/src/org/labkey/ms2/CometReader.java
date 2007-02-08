@@ -188,7 +188,7 @@ public class CometReader extends CometImporter
                     // Upload the GZ file
                     if (0 != _fractionId)
                     {
-                        SpectrumLoader sl = new SpectrumLoader(_path + "/" + gzFileName, dtaFileNamePrefix, null, scans, null, _fractionId, _log, false);
+                        SpectrumLoader sl = new SpectrumLoader(_path + "/" + gzFileName, dtaFileNamePrefix, null, scans, null, _fractionId, _log, true, false);
                         sl.upload();
                         updateFractionSpectrumFileName(sl.getFile());
                     }
@@ -256,7 +256,7 @@ public class CometReader extends CometImporter
         }
 
         // Upload last fraction GZ file OR upload GZ from stream
-        SpectrumLoader sl = new SpectrumLoader(_path + "/" + gzFileName, dtaFileNamePrefix, null, scans, null, _fractionId, _log, false);
+        SpectrumLoader sl = new SpectrumLoader(_path + "/" + gzFileName, dtaFileNamePrefix, null, scans, null, _fractionId, _log, true, false);
         sl.upload();
         updateFractionSpectrumFileName(sl.getFile());
     }

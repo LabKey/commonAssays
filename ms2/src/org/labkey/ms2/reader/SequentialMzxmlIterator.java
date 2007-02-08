@@ -98,10 +98,8 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
             try
             {
                 if (!findNextScan())
-                {
-                    close();
                     return false;
-                }
+
                 msLevel = Integer.parseInt(getAttributeValue("msLevel"));
                 if (msLevel != _msLevel)
                 {
@@ -113,10 +111,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
                 retentionTime = getAttributeValue("retentionTime");
 
                 if (!_parser.skipToStart("peaks"))
-                {
-                    close();
                     return false;
-                }
 
                 int precision = Integer.parseInt(getAttributeValue("precision"));
                 int nextType;
@@ -133,7 +128,6 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
             catch (XMLStreamException e)
             {
                 _log.error("Failed to parse file " + _fileName, e);
-                close();
                 return false;
             }
         }

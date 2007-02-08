@@ -132,7 +132,7 @@ public class PepXmlImporter extends MS2Importer
                 _conn.setAutoCommit(true);
 
                 progress.setSpectrumMode(scans.size());
-                uploadSpectra(fraction, scans, progress, !retentionTimesInPepXml);
+                processSpectrumFile(fraction, scans, progress, fraction.shouldLoadSpectra(), !retentionTimesInPepXml);
             }
         }
         finally
@@ -273,7 +273,7 @@ public class PepXmlImporter extends MS2Importer
     }
 
 
-    protected void uploadSpectra(PepXmlFraction fraction, HashSet<Integer> scans, MS2Progress progress, boolean uploadRetentionTime) throws SQLException
+    protected void processSpectrumFile(PepXmlFraction fraction, HashSet<Integer> scans, MS2Progress progress, boolean shouldLoadSpectra, boolean shouldLoadRetentionTimes) throws SQLException
     {
         String mzXmlFileName = getMzXMLFileName(fraction);
         if (_type.equalsIgnoreCase("mascot") && null == mzXmlFileName)
@@ -294,7 +294,7 @@ public class PepXmlImporter extends MS2Importer
         {
             gzFileName = gzFile.toString();
         }
-        SpectrumLoader sl = new SpectrumLoader(gzFileName, "", mzXmlFileName, scans, progress, _fractionId, _log, uploadRetentionTime);
+        SpectrumLoader sl = new SpectrumLoader(gzFileName, "", mzXmlFileName, scans, progress, _fractionId, _log, shouldLoadSpectra, shouldLoadRetentionTimes);
         sl.upload();
         updateFractionSpectrumFileName(sl.getFile());
     }

@@ -17,10 +17,4 @@ public abstract class AbstractMzxmlIterator implements SimpleScanIterator
     {
         throw new UnsupportedOperationException();
     }
-
-    protected void finalize() throws Throwable
-    {
-        super.finalize();
-        close();
-    }
 }

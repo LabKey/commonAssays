@@ -24,6 +24,8 @@ import org.labkey.common.tools.FloatArray;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -39,6 +41,7 @@ public class TarIterator implements SimpleScanIterator
     private Logger _log = Logger.getLogger(TarIterator.class);
 
     private String _dtaFileNamePrefix = null;
+    InputStream _is;
     GZIPInputStream _gzInputStream;
     TarInputStream _tis;
     TarEntry _te;
@@ -46,14 +49,14 @@ public class TarIterator implements SimpleScanIterator
     boolean _hasNext = false;    // set by hasNext()
     byte[] _spectrumData = new byte[BUFFER_SIZE];
 
-    public TarIterator(InputStream gzFileStream, String dtaFileNamePrefix)
-            throws java.io.IOException
+    public TarIterator(File gzFile, String dtaFileNamePrefix) throws java.io.IOException
     {
         boolean success = false;
         try
         {
             _dtaFileNamePrefix = dtaFileNamePrefix;
-            _gzInputStream = new GZIPInputStream(gzFileStream);
+            _is = new FileInputStream(gzFile);
+            _gzInputStream = new GZIPInputStream(_is);
             _tis = new TarInputStream(_gzInputStream);
             success = true;
         }
@@ -65,7 +68,7 @@ public class TarIterator implements SimpleScanIterator
     }
 
 
-    static final int BUFFER_SIZE = 128 * 1024;
+    private static final int BUFFER_SIZE = 128 * 1024;
 
     public void remove()
     {
@@ -89,8 +92,6 @@ public class TarIterator implements SimpleScanIterator
                     if (fileName.endsWith(".dta") && fileName.startsWith(_dtaFileNamePrefix))
                         break;
                 }
-                if (null == _te)
-                    close();
             }
             catch (IOException x)
             {
@@ -126,8 +127,9 @@ public class TarIterator implements SimpleScanIterator
             {
                 _log.error(x);
             }
+            _tis = null;
         }
-        _tis = null;
+
         if (null != _gzInputStream)
         {
             try
@@ -138,12 +140,28 @@ public class TarIterator implements SimpleScanIterator
             {
                 _log.error(x);
             }
+            _gzInputStream = null;
+        }
+
+        if (null != _is)
+        {
+            try
+            {
+                _is.close();
+            }
+            catch (IOException x)
+            {
+                _log.error(x);
+            }
+            _is = null;
         }
     }
 
     protected void finalize() throws Throwable
     {
-        close();
+        super.finalize();
+
+        assert null == _is && null == _gzInputStream && null == _tis;
     }
 
 

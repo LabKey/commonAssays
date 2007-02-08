@@ -144,12 +144,12 @@ public abstract class MS2Importer
                     }
                     else
                     {
-                        _log.info("prepareRun: Restarting upload from \"" + _fileName + "\"");
+                        _log.info("Restarting upload from \"" + _fileName + "\"");
                     }
                 }
                 else
                 {
-                    _log.info("prepareRun: Starting upload from \"" + _fileName + "\"");
+                    _log.info("Starting upload from \"" + _fileName + "\"");
                     _runId = createRun();
                 }
             }
@@ -430,11 +430,11 @@ public abstract class MS2Importer
 
         long start = System.currentTimeMillis();
         Table.execute(MS2Manager.getSchema(), _updateSeqIdSql, new Object[]{run.getFastaId(), _runId});
-        logElapsedTime(start, "update SeqId column in run " + _runId );
+        logElapsedTime(start, "update SeqId column");
 
         start = System.currentTimeMillis();
         Table.execute(MS2Manager.getSchema(), _updateSequencePositionSql, new Object[]{_runId});
-        logElapsedTime(start, "update SequencePosition column in run " + _runId );
+        logElapsedTime(start, "update SequencePosition column");
     }
 
 
