@@ -573,8 +573,6 @@ public class IssuesController extends ViewController
         }
         catch (Exception x)
         {
-            _log.debug("IssuesController.doUpdate", x);
-
             IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "updateView.jsp");
             JspView v = new JspView(page);
 
