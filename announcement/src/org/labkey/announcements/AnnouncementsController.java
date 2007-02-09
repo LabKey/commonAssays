@@ -28,10 +28,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.upload.FormFile;
 import org.labkey.announcements.EmailResponsePage.Reason;
-import org.labkey.announcements.model.NormalMessageBoardPermissions;
-import org.labkey.announcements.model.Permissions;
-import org.labkey.announcements.model.SecureMessageBoardPermissions;
-import org.labkey.announcements.model.AnnouncementManager;
+import org.labkey.announcements.model.*;
 import org.labkey.api.announcements.Announcement;
 import org.labkey.announcements.model.AnnouncementManager.Settings;
 import org.labkey.api.announcements.CommSchema;
@@ -76,9 +73,11 @@ public class AnnouncementsController extends ViewController
     private static CommSchema _comm = CommSchema.getInstance();
     private static Logger _log = Logger.getLogger(AnnouncementsController.class);
 
+
+
     private Permissions getPermissions() throws ServletException
     {
-        return getPermissions(getContainer(), getUser(), getSettings());
+        return getPermissions(getContainer(), getUser(), getSettings(getContainer()));
     }
 
 
@@ -630,6 +629,14 @@ public class AnnouncementsController extends ViewController
             sendNotificationEmails(insert, currentRendererType);
         }
 
+        // if this is a discussion, redirect back to originating page
+        if (null != insert.getDiscussionSrcURL())
+        {
+            ViewURLHelper src = DiscussionServiceImpl.fromSaved(insert.getDiscussionSrcURL());
+            src.addParameter("discussionId", "" + insert.getRowId());
+            HttpView.throwRedirect(src.getLocalURIString());
+        }
+
         String threadId = (null == insert.getParent() ? insert.getEntityId() : insert.getParent());
 
         return new ViewForward(getThreadUrl(getRequest(), c, threadId, String.valueOf(insert.getRowId())), true);
@@ -716,7 +723,7 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private String getMemberListTextArea(Announcement ann, String emailList)
+    private static String getMemberListTextArea(User user, Announcement ann, String emailList)
     {
         StringBuilder sb = new StringBuilder();
         sb.append("<script type=\"text/javascript\">LABKEY.requiresScript('completion.js');</script>");
@@ -736,9 +743,9 @@ public class AnnouncementsController extends ViewController
             List<User> users = ann.getMemberList();
             sb.append(StringUtils.join(users.iterator(), "\n"));
         }
-        else if (!getUser().isGuest())
+        else if (!user.isGuest())
         {
-            sb.append(getUser().getEmail());
+            sb.append(user.getEmail());
         }
 
         sb.append("</textarea>");
@@ -791,11 +798,7 @@ public class AnnouncementsController extends ViewController
         if (!perm.allowInsert())
             HttpView.throwUnauthorized();
 
-        GroovyView insertView = new GroovyView("/org/labkey/announcements/insert.gm", "New " + settings.getConversationName());
-
-        boolean reshow = (PageFlowUtil.getStrutsError(getRequest(), "main").length() != 0);
-        initView(insertView, c, form, null, reshow);
-
+        InsertMessageView insertView = new InsertMessageView(form, "New " + settings.getConversationName(), PageFlowUtil.getStrutsError(getRequest(), "main"));
         insertView.addObject("allowBroadcast", !settings.isSecure() && getUser().isAdministrator());
         insertView.addObject("returnUrl", new ViewURLHelper(getViewURLHelper().getParameter("returnUrl")));
 
@@ -803,7 +806,22 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private void initView(GroovyView view, Container c, AnnouncementForm form, Announcement mostRecent, boolean reshow)
+    // UNDONE: convert to .jsp with MessageViewBean
+    public static class InsertMessageView extends GroovyView<Object>
+    {
+        public InsertMessageView(AnnouncementForm form, String title, String errors)
+        {
+            super("/org/labkey/announcements/insert.gm", form);
+            setTitle(title);
+            addObject("allowBroadcast", false);
+            addObject("returnUrl", null);
+            boolean reshow = errors != null && errors.length() > 0;
+            initView(this, form.getContainer(), form, null, reshow);
+        }
+    }
+
+
+    private static void initView(HttpView view, Container c, AnnouncementForm form, Announcement mostRecent, boolean reshow)
     {
         // In reshow case we leave all form values as is.
         WikiRendererType currentRendererType;
@@ -852,7 +870,7 @@ public class AnnouncementsController extends ViewController
         view.addObject("assignedToSelect", getAssignedToSelect(c, assignedTo, "assignedTo"));
         view.addObject("settings", settings);
         view.addObject("statusSelect", getStatusSelect(settings, (String)form.get("status")));
-        view.addObject("memberList", getMemberListTextArea(mostRecent, (String)(reshow ? form.get("emailList") : null)));
+        view.addObject("memberList", getMemberListTextArea(form.getUser(), mostRecent, (String)(reshow ? form.get("emailList") : null)));
         view.addObject("currentRendererType", currentRendererType);
         view.addObject("renderers", WikiRendererType.values());
 
@@ -889,7 +907,9 @@ public class AnnouncementsController extends ViewController
     {
         Container c = getContainer(ACL.PERM_READ); // TODO: Shouldn't need this check once ThreadView throws Unauthorized
         boolean print = "1".equals(getViewURLHelper().getParameter("print"));
+
         ThreadView threadView = new ThreadView(form, getContainer(), getViewURLHelper(), getPermissions(), print);
+
         Announcement ann = threadView.getAnnouncement();
         String title = ann != null ? ann.getTitle() : "Error";
 
@@ -1682,87 +1702,70 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    public static class ThreadView extends GroovyView
+    public static class ThreadViewBean
+    {
+        public Announcement announcement;
+        public String message = "";
+        public Permissions perm = null;
+        public boolean isResponse = false;
+        public Settings settings;
+        public String messagesURL;
+        public ViewURLHelper listURL;
+        public String printURL;
+        public boolean print = false;
+    }
+
+
+    public static class ThreadView extends GroovyView<ThreadViewBean>
     {
         Announcement _ann;
 
         private ThreadView()
         {
-            super("/org/labkey/announcements/announcementThread.gm");
+            super("/org/labkey/announcements/announcementThread.gm", new ThreadViewBean());
         }
 
-        public ThreadView(AnnouncementForm form, Container c, ViewURLHelper url, Permissions perm, boolean print)
-                throws ServletException
+        public ThreadView(Container c, User user, String rowId, String entityId) throws ServletException
         {
             this();
-
-            Integer rowId = null;
-            String entityId = null;
-
-            if (form.get("entityId") != null)
-                entityId = (String) form.get("entityId");
-            else
-            {
-                String rowIdVal = (String) form.get("rowId");
-                //UNDONE: how best to handle this -- see bug 1477.
-                if (rowIdVal != null)
-                {
-                    try
-                    {
-                        rowId = Integer.parseInt(rowIdVal);
-                    }
-                    catch(NumberFormatException e)
-                    {
-                        throw new NotFoundException("Cannot find message with id '" + rowIdVal + "'");
-                    }
-                }
-                else
-                    rowId = 0;
-            }
-
-            try
-            {
-                if (null != rowId)
-                    _ann = AnnouncementManager.getAnnouncement(c, rowId, AnnouncementManager.INCLUDE_ATTACHMENTS + AnnouncementManager.INCLUDE_RESPONSES + AnnouncementManager.INCLUDE_MEMBERLIST);
-                else
-                    _ann = AnnouncementManager.getAnnouncement(c, entityId, true);
-            }
-            catch (SQLException x)
-            {
-                throw new ServletException(x);
-            }
-
-            init(c, url, perm, false, print);
+            init(c, findAnnouncement(c, rowId, entityId), null, getPermissions(c, user, getSettings(c)), false, false);
         }
-
 
         public ThreadView(Container c, ViewURLHelper url, Announcement ann, Permissions perm) throws ServletException
         {
             this();
-            _ann = ann;
-            init(c, url, perm, true, false);
+            init(c, ann, url, perm, true, false);
+        }
+        
+        public ThreadView(AnnouncementForm form, Container c, ViewURLHelper url, Permissions perm, boolean print)
+                throws ServletException
+        {
+            this();
+            Announcement ann = findAnnouncement(c, (String)form.get("rowId"), (String)form.get("entityId"));
+            init(c, ann, url, perm, false, print);
         }
 
-
-        private void init(Container c, ViewURLHelper url, Permissions perm, boolean isResponse, boolean print) throws ServletException
+        protected void init(Container c, Announcement ann, ViewURLHelper url, Permissions perm, boolean isResponse, boolean print)
+                throws ServletException
         {
-            Settings settings = getSettings(c);
-
-            // TODO: Include message in throw?  Check for guest, display message if not?
             if (null == c || !perm.allowRead(_ann))
                 HttpView.throwUnauthorized();
 
-            addObject("message", null);
-            addObject("announcement", _ann);
-            addObject("perm", perm);
-            addObject("isResponse", isResponse);
-            addObject("settings", settings);
-            addObject("messagesURL", ViewURLHelper.toPathString("announcements", "begin", c));
-            addObject("listURL", getListUrl(c));
-            addObject("printURL", url.clone().replaceParameter("print", "1").getEncodedLocalURIString());
-            addObject("print", print);
+            if (ann instanceof AnnouncementManager.BareAnnouncement)
+                throw new IllegalArgumentException("can't use getBareAnnoucements() with this view");
 
-            setTitle("View " + settings.getConversationName());
+            ThreadViewBean bean = getModel();
+            bean.announcement = ann;
+            bean.settings = getSettings(c);
+            bean.message = null;
+            bean.perm = perm;
+            bean.isResponse = isResponse;
+            bean.messagesURL = ViewURLHelper.toPathString("announcements", "begin", c);
+            bean.listURL = getListUrl(c);
+            bean.printURL = null == url ? null : url.clone().replaceParameter("print", "1").getEncodedLocalURIString();
+            bean.print = print;
+
+            setTitle("View " + bean.settings.getConversationName());
         }
 
         public Announcement getAnnouncement()
@@ -1770,6 +1773,37 @@ public class AnnouncementsController extends ViewController
             return _ann;
         }
     }
+
+
+    private static Announcement findAnnouncement(Container c, String rowIdVal, String entityId)
+    {
+        int rowId = 0;
+        if (rowIdVal != null)
+        {
+            try
+            {
+                rowId = Integer.parseInt(rowIdVal);
+            }
+            catch(NumberFormatException e)
+            {
+                throw new NotFoundException("Cannot find message with id '" + rowIdVal + "'");
+            }
+        }
+
+        try
+        {
+            if (0 != rowId)
+                return  AnnouncementManager.getAnnouncement(c, rowId, AnnouncementManager.INCLUDE_ATTACHMENTS + AnnouncementManager.INCLUDE_RESPONSES + AnnouncementManager.INCLUDE_MEMBERLIST);
+            else
+                return AnnouncementManager.getAnnouncement(c, entityId, true);
+        }
+        catch (SQLException x)
+        {
+            throw new RuntimeSQLException(x);
+        }
+    }
+
+    
 
 
     public static class AnnouncementUpdateView extends GroovyView

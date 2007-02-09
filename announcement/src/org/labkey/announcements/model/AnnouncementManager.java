@@ -100,17 +100,47 @@ public class AnnouncementManager
     }
 
 
-    // Get all threads in this container (but not responses), filtered using filter
-    public static Announcement[] getAnnouncements(Container c, SimpleFilter filter, Sort sort) throws SQLException
+    // Get all threads in this container, filtered using filter
+    public static Announcement[] getAnnouncements(Container c, SimpleFilter filter, Sort sort)
     {
         filter.addCondition("Container", c.getId());
 
-        Announcement[] recent = Table.select(_comm.getTableInfoThreads(), Table.ALL_COLUMNS, filter, sort, Announcement.class);
-
-        attachAttachments(recent);
-        attachResponses(c, recent);
-        return recent;
+        try
+        {
+            Announcement[] recent = Table.select(_comm.getTableInfoThreads(), Table.ALL_COLUMNS, filter, sort, Announcement.class);
+            attachAttachments(recent);
+            attachResponses(c, recent);
+            return recent;
+        }
+        catch (SQLException x)
+        {
+            throw new RuntimeSQLException(x);
+        }
     }
+
+
+    // marker for non fully loaded announcement
+    public static class BareAnnouncement extends Announcement
+    {
+    }
+    
+
+    // Get all threads in this container, filtered using filter, no attachments, no responses
+    public static Announcement[] getBareAnnouncements(Container c, SimpleFilter filter, Sort sort)
+    {
+        filter.addCondition("Container", c.getId());
+
+        try
+        {
+            Announcement[] recent = Table.select(_comm.getTableInfoThreads(), Table.ALL_COLUMNS, filter, sort, BareAnnouncement.class);
+            return recent;
+        }
+        catch (SQLException x)
+        {
+            throw new RuntimeSQLException(x);
+        }
+    }
+
 
     public static Announcement[] getAnnouncements(Container c, String parent)
     {

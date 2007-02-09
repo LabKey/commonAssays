@@ -11,6 +11,7 @@ announcement/src/org/labkey/announcements/bulkEdit.gm -text
 announcement/src/org/labkey/announcements/confirmDelete.gm -text
 announcement/src/org/labkey/announcements/confirmRemoveUser.gm -text
 announcement/src/org/labkey/announcements/customize.jsp -text
+announcement/src/org/labkey/announcements/discussionMenu.gm -text
 announcement/src/org/labkey/announcements/emailPreferences.jsp -text
 announcement/src/org/labkey/announcements/emailResponse.jsp -text
 announcement/src/org/labkey/announcements/emailResponsePlain.jsp -text
@@ -36,6 +37,7 @@ announcement/webapp/announcements/scripts/postgresql/comm-1.61-1.62.sql -text
 announcement/webapp/announcements/scripts/postgresql/comm-1.62-1.63.sql -text
 announcement/webapp/announcements/scripts/postgresql/comm-1.69-1.695.sql -text
 announcement/webapp/announcements/scripts/postgresql/comm-1.695-1.696.sql -text
+announcement/webapp/announcements/scripts/postgresql/comm-1.70-1.71.sql -text
 announcement/webapp/announcements/scripts/postgresql/obsolete/comm-0.00-1.00.sql -text
 announcement/webapp/announcements/scripts/postgresql/obsolete/comm-1.30-1.31.sql -text
 announcement/webapp/announcements/scripts/postgresql/obsolete/comm-1.31-1.32.sql -text
@@ -52,6 +54,7 @@ announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.61-1.62.sql -te
 announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.62-1.63.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.69-1.695.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.695-1.696.sql -text
+announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.70-1.71.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/comm-0.00-1.00.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/comm-1.30-1.31.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/comm-1.31-1.32.sql -text

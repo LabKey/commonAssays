@@ -1,38 +1,58 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.util.DateUtil" %>
-<!--ANNOUNCEMENTS--><%
-if (message)
-{%>
-    <span class=ms-vb><%=message%></span>
-<%}
-else if (!announcement)
-{%>
-    <span class=ms-vb><%=settings.conversationName%> not found</span>
-<%}
+<%@ page import="org.labkey.announcements.AnnouncementsController" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.announcements.model.AnnouncementManager" %>
+<%@ page import="org.labkey.api.announcements.Announcement" %>
+<%@ page import="org.labkey.api.attachments.Attachment" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.announcements.model.DiscussionServiceImpl" %>
+<!--ANNOUNCEMENTS-->
+<%
+HttpView me = HttpView.currentView();
+ViewContext context = me.getViewContext();
+AnnouncementsController.ThreadViewBean bean = me.getModel();
+
+Announcement announcement = bean.announcement;
+AnnouncementManager.Settings settings = bean.settings;
+
+if (null != bean.message)
+{
+    %><span class=ms-vb><%=filter(bean.message)%></span><%
+}
+else if (null == announcement)
+{
+    %><span class=ms-vb><%=filter(settings.getConversationName())%> not found</span><%
+}
 else
 {
-    if (!print)
-    {%>
-    <table width="100%">
-    <tr>
-    <td align="left" class="ms-vb">
-    <%
-    if (messagesURL)
-    {%>
-        [<a href="<%=messagesURL%>"><%=settings.boardName%> Home</a>]
-    <%}
-    if (listURL)
-    {%>
-        [<a href="<%=listURL%>">View List</a>]
-    <%}
-    if (!isResponse)
-    {%>
-        [<a href="<%=printURL%>" target="printAnn">Print</a>]
-    <%}%>
-    </td>
-    </tr>
-    </table>
-    <%}%>
+    // is this an embdedded discussion?
+    boolean embedded = (null != announcement.getDiscussionSrcURL() && !context.getViewURLHelper().getPageFlow().equals("announcements"));
+    
+
+    if (!bean.print && !embedded)
+    {
+        %><table width="100%">
+        <tr>
+        <td align="left" class="ms-vb"><%
+        if (null != bean.messagesURL)
+        {
+            %>[<a href="<%=bean.messagesURL%>"><%=settings.getBoardName()%> Home</a>]<%
+        }
+        if (null != bean.listURL)
+        {
+            %>[<a href="<%=bean.listURL%>">View List</a>]<%
+        }
+        if (!bean.isResponse)
+        {
+            %>[<a href="<%=bean.printURL%>" target="printAnn">Print</a>]<%
+        }
+        %></td>
+        </tr>
+        </table><%
+    }%>
 
     <table width="100%" cellpadding=0>
     <tr>
@@ -40,7 +60,7 @@ else
         <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align=center><%=filter(announcement.getCreatedByName())%></td>
         <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align="right" nowrap><%
 
-    if (perm.allowUpdate(announcement) && !print)
+    if (bean.perm.allowUpdate(announcement) && !bean.print)
     {
     %>[<a href="showUpdate.view?rowId=<%=announcement.getRowId()%>&amp;entityId=<%=announcement.getEntityId()%>">Edit</a>]<%
     }
@@ -49,39 +69,39 @@ else
     </tr>
     <tr style="height:1;"><td colspan=3 class=ms-titlearealine><img height=1 width=1 src="<%=request.getContextPath()%>/_.gif"></td></tr><%
 
-    if (settings.hasMemberList() && announcement.emailList)
+    if (settings.hasMemberList() && null != announcement.getEmailList())
     {
-    %><tr><td colspan="3">Members: <%=announcement.emailList%></td></tr>
-    <% }
+        %><tr><td colspan="3">Members: <%=announcement.getEmailList()%></td></tr><%
+    }
 
-    if (settings.hasStatus() && announcement.status)
+    if (settings.hasStatus() && null != announcement.getStatus())
     {
-    %><tr><td>Status: <%=announcement.status%></td></tr>
-    <% }
+        %><tr><td>Status: <%=announcement.getStatus()%></td></tr><%
+    }
 
-    if (settings.hasExpires() && announcement.expires)
+    if (settings.hasExpires() && null != announcement.getExpires())
     {
-    %><tr><td>Expires: <%=DateUtil.formatDate(announcement.expires)%></td></tr>
-    <% }
+        %><tr><td>Expires: <%=DateUtil.formatDate(announcement.getExpires())%></td></tr><%
+    }
 
-    if (settings.hasAssignedTo() && announcement.assignedTo)
+    if (settings.hasAssignedTo() && null != announcement.getAssignedTo())
     {
-    %><tr><td>Assigned&nbsp;To: <%=announcement.assignedToName%></td></tr>
-    <% }
+        %><tr><td>Assigned&nbsp;To: <%=announcement.getAssignedToName()%></td></tr><%
+    }
 
-    if (null != announcement.body)
+    if (null != announcement.getBody())
     {
-    %><tr><td colspan="3">&nbsp;</td></tr>
-    <% }
+        %><tr><td colspan="3">&nbsp;</td></tr><%
+    }
 
-    %><tr><td colspan="3" class="ms-vb"><%=announcement.translateBody(request,container)%></td></tr>
+    %><tr><td colspan="3" class="ms-vb"><%=announcement.translateBody(request,context.getContainer())%></td></tr>
     <%
     if(0 < announcement.attachments.size())
     {%>
         <tr><td colspan="3"><div class="ms-vb">
         <%
-        for (d in announcement.attachments)
-        {%>
+            for (Attachment d : announcement.getAttachments())
+            {%>
             <a href="<%=filter(d.getDownloadUrl(request, "announcements"))%>"><img border=0 src="<%=request.getContextPath() + d.getFileIcon()%>">&nbsp;<%=d.name%></a>&nbsp;
         <%}%>
         </div></td></tr>
@@ -90,7 +110,7 @@ else
     <%
     if(0 < announcement.getResponses().size())
     {
-        def prev = announcement;
+        Announcement prev = announcement;
         %>
     <tr><td colspan="3"><table width="100%" border="0" cellspacing="0" cellpadding="2">
         <tr>
@@ -98,71 +118,86 @@ else
         <td colspan="2" width="100%">
             <table width="100%" border="0" cellspacing="0" cellpadding="2"><%
 
-            for (r in announcement.getResponses())
+            for (Announcement r : announcement.getResponses())
             {%>
                 <tr>
                     <td class="ms-vb" colspan="2" style="background-color: #dddddd"><a name="row:<%=r.rowId%>"></a><%=r.getCreatedByName() + " responded:"%></td>
                     <td class="ms-vb" align="right" style="background-color: #dddddd"><%
-                    if (perm.allowUpdate(r) && !print)
+                    if (bean.perm.allowUpdate(r) && !bean.print)
                     {
-                    %>[<a href="showUpdate.view?rowId=<%=r.getRowId()%>&amp;entityId=<%=r.getEntityId()%>">Edit</a>]<%
+                        %>[<a href="showUpdate.view?rowId=<%=r.getRowId()%>&amp;entityId=<%=r.getEntityId()%>">Edit</a>]<%
                     }
-                    if (perm.allowDeleteMessage(r) && !print)
+                    if (bean.perm.allowDeleteMessage(r) && !bean.print)
                     {
-                    %>[<a href="deleteSingleAnnouncement.view?rowId=<%=r.getRowId()%>&amp;entityId=<%=r.getEntityId()%>">Delete</a>]<%
+                        %>[<a href="deleteSingleAnnouncement.view?rowId=<%=r.getRowId()%>&amp;entityId=<%=r.getEntityId()%>">Delete</a>]<%
                     }
                     %><%=DateUtil.formatDateTime(r.getCreated())%></td>
-                </tr>
-                <%
-                if (settings.hasMemberList() && r.emailList != prev.emailList) { %>
-                <tr><td>Members: <%=filter(r.emailList)%></td></tr><% }
-                if (settings.hasStatus() && r.status != prev.status) { %>
-                <tr><td>Status: <%=r.status%></td></tr><% }
-                if (settings.hasExpires() && r.expires != prev.expires) { %>
-                <tr><td>Expires: <%=DateUtil.formatDate(r.expires)%></td></tr><% }
-                if (settings.hasAssignedTo() && r.assignedTo != prev.assignedTo) { %>
-                <tr><td>Assigned&nbsp;To: <%=r.assignedToName%></td></tr><% }
-                if (r.title && r.title != prev.title) { %>
-                <tr><td>Title: <%=filter(r.title)%></td></tr><% }
-                %>
-                <tr><td colspan="3" class="ms-vb"><%=r.translateBody(request,container)%></td></tr>
-                <%
-                if(0 < r.attachments.size())
-                {%>
-                    <tr><td colspan="3"><div class="ms-vb">
-                    <%
-                    for(rd in r.attachments)
-                    {%>
-                        <a href="<%=filter(rd.getDownloadUrl(request, "announcements"))%>"><img border=0 src="<%=request.getContextPath()+ rd.getFileIcon()%>">&nbsp;<%=rd.name%></a>&nbsp;
-                    <%}%>
-                    </div></td></tr>
-                <%}
+                </tr><%
+                if (settings.hasMemberList() && !StringUtils.equals(r.getEmailList(),prev.getEmailList()))
+                {
+            %><tr><td>Members: <%=filter(r.getEmailList())%></td></tr><%
+                }
+                if (settings.hasStatus() && !StringUtils.equals(r.getStatus(),prev.getStatus()))
+                {
+                    %><tr><td>Status: <%=r.getStatus()%></td></tr><%
+                }
+                if (settings.hasExpires() && r.getExpires() != prev.getExpires())
+                {
+                    %><tr><td>Expires: <%=DateUtil.formatDate(r.getExpires())%></td></tr><% 
+                }
+                if (settings.hasAssignedTo() && r.getAssignedTo() != prev.getAssignedTo()) { %>
+                <tr><td>Assigned&nbsp;To: <%=r.getAssignedToName()%></td></tr><% }
+                if (null != r.getTitle() && !StringUtils.equals(r.getTitle(), prev.getTitle()))
+                {
+                    %><tr><td>Title: <%=filter(r.getTitle())%></td></tr><%
+                }
+                %><tr><td colspan="3" class="ms-vb"><%=r.translateBody(request,context.getContainer())%></td></tr><%
+                if(0 < r.getAttachments().size())
+                {
+                    %><tr><td colspan="3"><div class="ms-vb"><%
+                    for (Attachment rd : r.getAttachments())
+                    {
+                        %><a href="<%=filter(rd.getDownloadUrl(request, "announcements"))%>"><img border=0 src="<%=request.getContextPath()+ rd.getFileIcon()%>">&nbsp;<%=rd.name%></a>&nbsp;<%
+                    }
+                    %></div></td></tr><%
+                }
                 prev = r;
-                %>
-                <tr><td colspan="2">&nbsp;</td></tr>
-            <%}%>
+                %><tr><td colspan="2">&nbsp;</td></tr><%
+            }%>
             </table>
         </td>
         </tr>
-    </table></td></tr>
-    <%}%>
+        </table></td></tr><%
+    }%>
     <tr><td colspan="3" class="ms-vb">
     <%
-    if(!isResponse && !print)
-    {
-        if (perm.allowResponse(announcement)) 
-        { %>
-        <a href="showResponse.view?parentId=<%=announcement.getEntityId()%>"><img src='<%=PageFlowUtil.buttonSrc("Post Response")%>' border="0" alt="[post response]"></a>
-        <% }
-        if (perm.allowDeleteThread())
-        {%>
-        <a href="confirmDelete.view?rowId=<%=announcement.getRowId()%>&amp;entityId=<%=announcement.getEntityId()%>"><img src='<%=PageFlowUtil.buttonSrc("Delete " + settings.conversationName)%>' border="0" alt="[delete ${settings.conversationName.toLowerCase()}]"></a>
-        <%}
+        if (!bean.isResponse && !bean.print)
+        {
+            if (bean.perm.allowResponse(announcement))
+            {
+                // There are two cases here.... I'm in the wiki controller or I'm not (e.g. I'm a discussion)
+                if (embedded)
+                {
+                    ViewURLHelper url = DiscussionServiceImpl.fromSaved(announcement.getDiscussionSrcURL());
+                    %><a href="<%=filter(url.getLocalURIString())%>&discussionId=<%=announcement.getRowId()%>&postResponse=1"><img src='<%=PageFlowUtil.buttonSrc("Post Response")%>' border="0" alt="[post response]"></a><%
+            }
+            else
+            {
+                ViewURLHelper showResponse = new ViewURLHelper("announcements", "showResponse", context.getContainer());
+                %><a href="<%=showResponse.getLocalURIString()%>parentId=<%=announcement.getEntityId()%>"><img src='<%=PageFlowUtil.buttonSrc("Post Response")%>' border="0" alt="[post response]"></a><%
+            }
+        }
+        if (bean.perm.allowDeleteThread())
+        {
+            // UNDONE handle redirect for embedded discussion
+            ViewURLHelper confirmDelete = new ViewURLHelper("announcements", "confirmDelete", context.getContainer());
+            %><a href="<%=confirmDelete.getLocalURIString()%>rowId=<%=announcement.getRowId()%>&amp;entityId=<%=announcement.getEntityId()%>"><img src='<%=PageFlowUtil.buttonSrc("Delete " + settings.getConversationName())%>' border="0" alt="[delete <%=settings.getConversationName().toLowerCase()%>]"></a><%
+        }
     }%>
     </td></tr>
     </table>
-<%  if (isResponse)
-    {%>
-<a name="response"/>
-    <%}
+<%  if (bean.isResponse)
+    {
+        %><a name="response"/><%
+    }
 }%>

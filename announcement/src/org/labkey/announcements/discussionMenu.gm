@@ -1,0 +1,65 @@
+<%@ page import="org.labkey.announcements.model.DiscussionServiceImpl" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.announcements.Announcement" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.util.DateUtil" %>
+<%
+    DiscussionServiceImpl.PickerView me = (DiscussionServiceImpl.PickerView )HttpView.currentView();
+    Announcement[] announcements = me.announcements;
+    if (null == announcements)
+        announcements = new Announcement[0];
+    ViewURLHelper pageURL = me.pageURL;
+    pageURL.deleteParameter("discussionId");
+
+
+if (announcements.length > 0)
+{
+%>
+
+<script type="text/javascript">
+LABKEY.requiresMenu();
+</script>
+
+<script type="text/javascript">
+YAHOO.widget.MenuItem.prototype.IMG_ROOT = LABKEY.yahooRoot + "/menu/assets/";
+YAHOO.widget.Logger.enableBrowserConsole();
+
+var discussionMenu = {};
+(function(){
+    discussionMenu.pageUrl = <%=PageFlowUtil.jsString(pageURL.getLocalURIString())%>;
+    discussionMenu.model = [<%
+        for (Announcement a : announcements)
+        {
+            String title = a.getTitle();
+            String help = a.getCreatedByName() + ' ' + DateUtil.formatDate(a.getCreated());
+            %>{text:<%=PageFlowUtil.jsString(title)%>,helptext:<%=PageFlowUtil.jsString(help)%>,url:discussionMenu.pageUrl+'&discussionId=<%=a.getRowId()%>'},<%
+        }
+        %>{text:'Start new discussion',url:discussionMenu.pageUrl+'&startDiscussion=true'}];
+
+    discussionMenu.showEvent = function(event)
+    {
+        YAHOO.util.Event.stopPropagation(event);
+        discussionMenu.menu.show();
+    }
+
+    discussionMenu.onWindowLoad = function(event)
+    {
+        discussionMenu.menu = new YAHOO.widget.ContextMenu("menuDiscussionMenu", {context:['discussionMenuToggle','tl','tr'], position:'dynamic', visible:false});
+        discussionMenu.menu.addItems(discussionMenu.model);
+        discussionMenu.menu.render(document.body);
+        YAHOO.util.Event.addListener("discussionMenuToggle", "mousedown", discussionMenu.showEvent);
+    }
+
+    YAHOO.util.Event.addListener(window, "load", discussionMenu.onWindowLoad);
+})();
+
+</script>
+<span id=discussionMenuToggle>[<a href="#">see discussions (<%=announcements.length%>)</a>]</span><%
+}
+else
+{
+%>[<a href="<%=filter(pageURL.getLocalURIString())%>&startDiscussion=true">discuss this</a>]<%
+}
+%>
+<p></p>
