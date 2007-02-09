@@ -16,7 +16,7 @@
  * limitations under the License.
 
  -->
-<ns:tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ns:tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ns:table tableName="Annotations" tableDbType="TABLE">
 		<ns:columns>
 			<ns:column columnName="AnnotId"/>
@@ -150,22 +150,42 @@
 	<ns:table tableName="Sequences" tableDbType="TABLE">
 		<ns:columns>
 			<ns:column columnName="SeqId"/>
-			<ns:column columnName="ProtSequence"/>
-			<ns:column columnName="Hash"/>
-			<ns:column columnName="Description"/>
-			<ns:column columnName="SourceId"/>
-			<ns:column columnName="SourceVersion"/>
-			<ns:column columnName="InsertDate"/>
-			<ns:column columnName="ChangeDate"/>
-			<ns:column columnName="SourceChangeDate"/>
-			<ns:column columnName="SourceInsertDate"/>
-			<ns:column columnName="OrgId"/>
+			<ns:column columnName="ProtSequence">
+                <ns:columnTitle>Sequence</ns:columnTitle>
+            </ns:column>
+            <ns:column columnName="Hash">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+            <ns:column columnName="Description"/>
+			<ns:column columnName="SourceId">
+                <ns:columnTitle>Source</ns:columnTitle>
+            </ns:column>
+            <ns:column columnName="SourceVersion">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+			<ns:column columnName="InsertDate">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+			<ns:column columnName="ChangeDate">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+			<ns:column columnName="SourceChangeDate">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+			<ns:column columnName="SourceInsertDate">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+			<ns:column columnName="OrgId">
+                <ns:columnTitle>Organism</ns:columnTitle>
+            </ns:column>
 			<ns:column columnName="Mass"/>
 			<ns:column columnName="BestName"/>
 			<ns:column columnName="BestGeneName"/>
 			<ns:column columnName="Length"/>
-			<ns:column columnName="Deleted"/>
-		</ns:columns>
+			<ns:column columnName="Deleted">
+                <ns:isHidden>true</ns:isHidden>
+            </ns:column>
+        </ns:columns>
 	</ns:table>
 	<ns:table tableName="SprotOrgMap" tableDbType="TABLE">
 		<ns:columns>

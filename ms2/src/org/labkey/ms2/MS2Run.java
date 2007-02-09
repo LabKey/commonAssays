@@ -558,7 +558,7 @@ public abstract class MS2Run implements Serializable
     {
         if (_proteinProphetFile == null)
         {
-            _proteinProphetFile = MS2Manager.getProteinProphetFile(run);
+            _proteinProphetFile = MS2Manager.getProteinProphetFileByRun(run);
         }
         return _proteinProphetFile;
     }

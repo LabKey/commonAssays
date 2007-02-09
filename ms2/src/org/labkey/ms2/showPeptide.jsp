@@ -2,16 +2,15 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.ViewURLHelper"%>
 <%@ page import="org.labkey.ms2.*"%>
-<%@ page import="org.labkey.ms2.MS2Controller"%>
 <%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.ms2.MS2Controller.ShowPeptideContext"%>
+<%@ page import="org.labkey.ms2.ShowPeptideContext"%>
 <%@ page import="org.labkey.api.util.URLHelper"%>
 <%@ page import="java.text.DecimalFormat"%>
 <%@ page import="org.labkey.api.security.ACL"%>
 <%@ page import="org.labkey.api.util.Formats"%>
 <%
     JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
-    MS2Controller.ShowPeptideContext ctx = me.getModel();
+    ShowPeptideContext ctx = me.getModel();
     MS2Peptide p = ctx.peptide;
     MS2Fraction fraction = MS2Manager.getFraction(p.getFraction());
 %>

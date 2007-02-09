@@ -44,6 +44,7 @@ import java.util.*;
 
 import junit.framework.TestCase;
 import org.labkey.ms2.pipeline.PipelineController;
+import org.labkey.ms2.search.ProteinSearchWebPart;
 
 /**
  * User: migra
@@ -66,11 +67,11 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
 
     public MS2Module()
     {
-        super(NAME, 1.73, "/org/labkey/ms2", "/MS2",
+        super(NAME, 1.74, "/org/labkey/ms2", "/MS2",
                 new WebPartFactory("MS2 Runs"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
-                        return new MS2Controller.MS2WebPart();
+                        return new MS2WebPart();
                     }
                 },
                 new WebPartFactory(MS2_RUNS_ENHANCED_NAME){
@@ -92,7 +93,13 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
                 new WebPartFactory("MS2 Statistics","right"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
-                        return new MS2Controller.MS2StatsWebPart();
+                        return new MS2StatsWebPart();
+                    }
+                },
+                new WebPartFactory(ProteinSearchWebPart.NAME,"right"){
+                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                    {
+                        return new ProteinSearchWebPart();
                     }
                 });
         addController("MS2", MS2Controller.class);

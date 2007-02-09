@@ -380,7 +380,7 @@
         <ns:fk>
             <ns:fkColumnName>EntityId</ns:fkColumnName>
             <ns:fkDbSchema>core</ns:fkDbSchema>
-            <ns:fkTable>container</ns:fkTable>
+            <ns:fkTable>containers</ns:fkTable>
         </ns:fk>
       </ns:column>
       <ns:column columnName="EntityId">
@@ -1708,7 +1708,7 @@
         <ns:columnTitle>Protein Prob</ns:columnTitle>
       </ns:column>
       <ns:column columnName="ProteinProphetFileId">
-        <ns:isHidden>true</ns:isHidden>
+          <ns:columnTitle>Protein Prophet File</ns:columnTitle>
       </ns:column>
       <ns:column columnName="GroupNumber">
         <ns:columnTitle>Group</ns:columnTitle>

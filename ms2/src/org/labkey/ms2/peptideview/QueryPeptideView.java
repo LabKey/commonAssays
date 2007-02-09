@@ -37,7 +37,7 @@ public class QueryPeptideView extends AbstractPeptideView
         QuerySettings settings = new QuerySettings(_url, DATA_REGION_NAME);
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
-        settings.setQueryName("FlatPeptides");
+        settings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
         settings.setDataRegionName(MS2Manager.getDataRegionNamePeptides());
         settings.setMaxRows(maxRows);
         String columnNames = _url.getParameter("columns");
@@ -264,7 +264,7 @@ public class QueryPeptideView extends AbstractPeptideView
                     int proteinIndex = 0;
                     for (Sort.SortField field : standardSort.getSortList())
                     {
-                        boolean proteinGroupColumn = field.getColumnName().toLowerCase().startsWith(_selectedNestingOption._prefix);
+                        boolean proteinGroupColumn = field.getColumnName().toLowerCase().startsWith(_selectedNestingOption._prefix.toLowerCase());
                         foundGroupId = foundGroupId || field.getColumnName().equalsIgnoreCase(_selectedNestingOption._rowIdColumnName);
                         sort.insertSortColumn(field.toUrlString(), field.isUrlClause(), proteinGroupColumn ? proteinIndex++ : totalIndex);
                         totalIndex++;

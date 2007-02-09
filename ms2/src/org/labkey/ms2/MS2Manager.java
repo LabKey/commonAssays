@@ -39,7 +39,6 @@ import org.labkey.api.view.Portal;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.WebPartFactory;
-import org.labkey.api.ms2.MS2Service;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.plot.XYPlot;
@@ -287,17 +286,28 @@ public class MS2Manager
         throw new IllegalStateException("Expected a zero or one matching ProteinProphetFiles");
     }
 
-    public static ProteinProphetFile getProteinProphetFile(int runId) throws SQLException
+    public static ProteinProphetFile getProteinProphetFileByRun(int runId) throws SQLException
+    {
+        return lookupProteinProphetFile(runId, "Run");
+    }
+
+    public static ProteinProphetFile getProteinProphetFile(int proteinProphetFileId) throws SQLException
+    {
+        return lookupProteinProphetFile(proteinProphetFileId, "RowId");
+    }
+
+    private static ProteinProphetFile lookupProteinProphetFile(int id, String columnName)
+        throws SQLException
     {
         String sql = "SELECT " +
                 getTableInfoProteinProphetFiles() + ".* FROM " +
                 getTableInfoProteinProphetFiles() + ", " +
                 getTableInfoRuns() + " WHERE " +
-                getTableInfoProteinProphetFiles() + ".Run = ? AND " +
+                getTableInfoProteinProphetFiles() + "." + columnName + " = ? AND " +
                 getTableInfoProteinProphetFiles() + ".Run = " + getTableInfoRuns() + ".Run AND " +
                 getTableInfoRuns() + ".Deleted = ?";
 
-        ProteinProphetFile[] files = Table.executeQuery(getSchema(), sql, new Object[] { runId, Boolean.FALSE }, ProteinProphetFile.class);
+        ProteinProphetFile[] files = Table.executeQuery(getSchema(), sql, new Object[] { id, Boolean.FALSE }, ProteinProphetFile.class);
         if (files.length == 0)
         {
             return null;
@@ -774,6 +784,23 @@ public class MS2Manager
             "AND pg.IndistinguishableCollectionId = ? " +
             "AND pg.ProteinProphetFileId = ?";
         return Table.executeQuery(getSchema(), sql, new Object[] {groupNumber, indistinguishableCollectionId, rowId}, Protein.class);
+    }
+
+    public static ProteinGroupWithQuantitation getProteinGroup(int proteinGroupId) throws SQLException
+    {
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition("RowId", proteinGroupId);
+        ProteinGroupWithQuantitation[] groups = Table.select(getTableInfoProteinGroupsWithQuantitation(), Table.ALL_COLUMNS, filter, null, ProteinGroupWithQuantitation.class);
+        if (groups.length == 0)
+        {
+            return null;
+        }
+        if (groups.length == 1)
+        {
+            return groups[0];
+        }
+        throw new IllegalStateException("Expected zero or one protein groups for rowId=" + proteinGroupId);
+
     }
 
     public static ProteinGroupWithQuantitation getProteinGroup(int proteinProphetFileId, int groupNumber, int indistinguishableCollectionId) throws SQLException

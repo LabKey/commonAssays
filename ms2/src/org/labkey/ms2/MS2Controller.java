@@ -30,10 +30,6 @@ import org.labkey.common.util.Pair;
 import org.jfree.chart.imagemap.ImageMapUtilities;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.Data;
-import org.labkey.api.exp.ExperimentRun;
-import org.labkey.api.exp.Material;
-import org.labkey.api.exp.Protocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipelineJob;
@@ -41,10 +37,11 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.PipelineStatusManager;
 import org.labkey.api.security.ACL;
-import org.labkey.api.security.User;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryService;
 import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
@@ -54,6 +51,8 @@ import org.labkey.ms2.protein.*;
 import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
+import org.labkey.ms2.query.MS2Schema;
+import org.labkey.ms2.query.ProteinGroupTableInfo;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -78,7 +77,7 @@ public class MS2Controller extends ViewController
     private static Logger _log = Logger.getLogger(MS2Controller.class);
     private static final String MS2_VIEWS_CATEGORY = "MS2Views";
 
-    private static final String CAPTION_SCORING_BUTTON = "Compare Scoring";
+    public static final String CAPTION_SCORING_BUTTON = "Compare Scoring";
 
 
     private ButtonBar getListButtonBar(Container c)
@@ -241,7 +240,11 @@ public class MS2Controller extends ViewController
             if (null != cId && cId.equals(c.getId()))
                 success = true;
             else
-                message = "No permission";
+            {
+                ViewURLHelper url = getViewURLHelper().clone();
+                url.setExtraPath(ContainerManager.getForId(run.getContainer()).getPath());
+                HttpView.throwRedirect(url);
+            }
         }
 
         if (null != message)
@@ -362,35 +365,6 @@ public class MS2Controller extends ViewController
         return showRuns(getManageButtonBar(), "Manage Runs", "ms2RunsList");
     }
 
-    private static class HideShowScoringColumn extends SimpleDisplayColumn
-    {
-        private ActionButton btnScoring;
-
-        public HideShowScoringColumn(ButtonBar bb)
-        {
-            List<DisplayElement> buttons = bb.getList();
-            for (DisplayElement button : buttons)
-            {
-                if (CAPTION_SCORING_BUTTON.equals(button.getCaption()))
-                    btnScoring = (ActionButton) button;
-            }
-        }
-
-        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-        {
-            if (btnScoring == null)
-                return;
-
-            Map cols = ctx.getRow();
-            Integer peptideCount = (Integer) cols.get("PeptideCount");
-            Integer revPeptideCount = (Integer) cols.get("NegativeHitCount");
-
-            // Show the scoring button, if one of the rows contains over 50% reversed peptides.
-            if (revPeptideCount.intValue() > peptideCount / 3)
-                btnScoring.setVisible(true);
-        }
-    }
-
     private Forward showRuns(ButtonBar bb, String pageName, String helpTopic) throws Exception
     {
         ViewURLHelper currentUrl = cloneViewURLHelper();
@@ -436,13 +410,14 @@ public class MS2Controller extends ViewController
     protected Forward showRun(RunForm form) throws Exception
     {
         long time = System.currentTimeMillis();
-        requiresPermission(ACL.PERM_READ);
 
         if (form.getErrors().size() > 0)
             return _renderErrors(form.getErrors());
 
         if (!isAuthorized(form.run))
             return null;
+
+        requiresPermission(ACL.PERM_READ);
 
         ViewURLHelper currentUrl = getViewURLHelper();
         MS2Run run = MS2Manager.getRun(form.run);
@@ -1256,65 +1231,6 @@ public class MS2Controller extends ViewController
     }
 
 
-    public static class DisplayThreadStatusColumn extends SimpleDisplayColumn
-    {
-        public DisplayThreadStatusColumn()
-        {
-            super("");
-        }
-
-        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-        {
-            Map rowMap = ctx.getRow();
-            int curId = (Integer) rowMap.get("insertId");
-            if (curId <= 0) return;
-            AnnotationLoader.Status curStatus;
-            try
-            {
-                curStatus = AnnotationUploadManager.getInstance().annotThreadStatus(curId);
-            }
-            catch (SQLException e)
-            {
-                throw (IOException)new IOException().initCause(e);
-            }
-            String curStatusString = curStatus.toString();
-            String button1 = "";
-            String button2 = "";
-            if (!ctx.getViewContext().getUser().isAdministrator())
-            {
-                out.write(curStatusString);
-                return;
-            }
-            switch (curStatus)
-            {
-                case RUNNING:
-                    button1 =
-                            "<a href=\"annotThreadControl.view?button=kill&id=" + curId + "\"><img border='0' align='middle' src='" + PageFlowUtil.buttonSrc("Kill") + "'></a>";
-                    button2 =
-                            "<a href=\"annotThreadControl.view?button=pause&id=" + curId + "\"><img border='0' align='middle' src='" + PageFlowUtil.buttonSrc("Pause") + "'></a>";
-                    break;
-                case PAUSED:
-                    button1 =
-                            "<a href=\"annotThreadControl.view?button=kill&id=" + curId + "\"><img border='0' align='middle' src='" + PageFlowUtil.buttonSrc("Kill") + "'></a>";
-                    button2 =
-                            "<a href=\"annotThreadControl.view?button=continue&id=" + curId + "\"><img border='0' align='middle' src='" + PageFlowUtil.buttonSrc("Continue") + "'></a>";
-                    break;
-                case INCOMPLETE:
-                    button1 =
-                            "<a href=\"annotThreadControl.view?button=recover&id=" + curId + "\"><img border='0' align='middle' src='" + PageFlowUtil.buttonSrc("Recover") + "'></a>";
-                    button2 = "";
-                    break;
-                case UNKNOWN:
-                case COMPLETE:
-                    button1 = "";
-                    button2 = "";
-                    break;
-            }
-            out.write(curStatusString + "&nbsp;" + button1 + "&nbsp;" + button2);
-        }
-    }
-
-
     private static ActionButton NewAnnot = new ActionButton("insertAnnots.post", "Load New Annot File");
     private static ActionButton ReloadSprotOrgMap = new ActionButton("reloadSPOM.post", "Reload SWP Org Map");
     private static ActionButton ReloadGO = new ActionButton("reloadGO.post", "Load/Reload GO");
@@ -1962,92 +1878,6 @@ public class MS2Controller extends ViewController
     }
 
 
-    private static class MS2RunHierarchyTree extends ContainerTree
-    {
-        public MS2RunHierarchyTree(String rootPath, User user, int perm)
-        {
-            super(rootPath, user, perm);
-        }
-
-
-        public MS2RunHierarchyTree(String rootPath, User user, int perm, ViewURLHelper url)
-        {
-            super(rootPath, user, perm, url);
-        }
-
-
-        @Override
-        protected void renderNode(StringBuilder html, Container parent, ViewURLHelper url, boolean isAuthorized, int level)
-        {
-            html.append("<tr>");
-            String firstTd = "<td style=\"padding-left:" + 20 * level + "\">";
-            html.append(firstTd);
-
-            if (isAuthorized)
-            {
-                html.append("<a href=\"");
-                url.setExtraPath(parent.getPath());
-                html.append(url.getEncodedLocalURIString());
-                html.append("\">");
-            }
-
-            html.append(PageFlowUtil.filter(parent.getName()));
-
-            if (isAuthorized)
-                html.append("</a>");
-
-            html.append("</td></tr>\n");
-
-            if (isAuthorized)
-            {
-                try
-                {
-                    ResultSet rs = Table.executeQuery(MS2Manager.getSchema(), "SELECT Run, Description, FileName FROM " + MS2Manager.getTableInfoRuns() + " WHERE Container=? AND Deleted=?", new Object[]{parent.getId(), Boolean.FALSE});
-
-                    boolean moreRuns = rs.next();
-
-                    if (moreRuns)
-                    {
-                        ViewURLHelper runUrl = url.clone();
-                        runUrl.setAction("showRun");
-
-                        html.append("<tr>");
-                        html.append(firstTd);
-                        html.append("<table>\n");
-
-                        while (moreRuns)
-                        {
-                            int run = rs.getInt(1);
-                            runUrl.replaceParameter("run", String.valueOf(run));
-                            html.append("<tr><td>");
-                            html.append("<input type=checkbox name='");
-                            html.append(DataRegion.SELECT_CHECKBOX_NAME);
-                            html.append("' value='");
-                            html.append(run);
-                            html.append("'></td><td><a href=\"");
-                            html.append(runUrl.getEncodedLocalURIString());
-                            html.append("\">");
-                            html.append(PageFlowUtil.filter(rs.getString(2)));
-                            html.append("</a></td><td>");
-                            html.append(PageFlowUtil.filter(rs.getString(3)));
-                            html.append("</td></tr>\n");
-                            moreRuns = rs.next();
-                        }
-
-                        html.append("</table></td></tr>\n");
-                    }
-
-                    rs.close();
-                }
-                catch (SQLException e)
-                {
-                    _log.error("renderHierarchyChildren", e);
-                }
-            }
-        }
-    }
-
-
     @Jpf.Action
     protected Forward showHierarchy() throws Exception
     {
@@ -2164,13 +1994,13 @@ public class MS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        if (!isAuthorized(form.run))
-            return null;
-
         MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
 
         if (null != peptide)
         {
+            if (!isAuthorized(peptide.getRun()))
+                return null;
+
             HttpServletResponse response = getResponse();
             response.setDateHeader("Expires", System.currentTimeMillis() + DateUtils.MILLIS_PER_HOUR);
             response.setHeader("Pragma", "");
@@ -2247,13 +2077,20 @@ public class MS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        if (!isAuthorized(form.run))
-            return null;
-
-        ViewURLHelper currentUrl = getViewURLHelper();
-
         long peptideId = form.getPeptideId();
         MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
+
+        if (peptide == null)
+        {
+            return HttpView.throwNotFound("Could not find peptide with RowId " + peptideId);
+        }
+
+        int runId = peptide.getRun();
+
+        if (!isAuthorized(runId))
+            return HttpView.throwUnauthorized();
+
+        ViewURLHelper currentUrl = getViewURLHelper();
 
         if (null == peptide)
             return _renderError("Peptide was not found");
@@ -2261,7 +2098,7 @@ public class MS2Controller extends ViewController
         int sqlRowIndex = form.getRowIndex();
         int rowIndex = sqlRowIndex - 1;  // Switch 1-based, JDBC row index to 0-based row index for array lookup
 
-        MS2Run run = MS2Manager.getRun(form.run);
+        MS2Run run = MS2Manager.getRun(runId);
         long[] peptideIndex = getPeptideIndex(currentUrl, run);
         rowIndex = MS2Manager.verifyRowIndex(peptideIndex, rowIndex, peptideId);
 
@@ -2304,142 +2141,6 @@ public class MS2Controller extends ViewController
         includeView(v);
 
         return null;
-    }
-
-    public static class EditElutionGraphContext
-    {
-        private final List<Quantitation.ScanInfo> _lightElutionProfile;
-        private final List<Quantitation.ScanInfo> _heavyElutionProfile;
-        private final ViewURLHelper _url;
-        private final MS2Peptide _peptide;
-
-        public float getMaxLightIntensity()
-        {
-            return _maxLightIntensity;
-        }
-
-        public float getMaxHeavyIntensity()
-        {
-            return _maxHeavyIntensity;
-        }
-
-        private float _maxLightIntensity;
-        private float _maxHeavyIntensity;
-
-        public Quantitation getQuantitation()
-        {
-            return _quantitation;
-        }
-
-        private Quantitation _quantitation;
-
-        public EditElutionGraphContext(List<Quantitation.ScanInfo> lightElutionProfile, List<Quantitation.ScanInfo> heavyElutionProfile, Quantitation quant, ViewURLHelper url, MS2Peptide peptide)
-        {
-            _lightElutionProfile = lightElutionProfile;
-            _heavyElutionProfile = heavyElutionProfile;
-            _maxLightIntensity = findMaxIntensity(_lightElutionProfile);
-            _maxHeavyIntensity = findMaxIntensity(_heavyElutionProfile);
-            _quantitation = quant;
-            _url = url;
-            _peptide = peptide;
-        }
-
-
-        public ViewURLHelper getUrl()
-        {
-            return _url;
-        }
-
-        private float findMaxIntensity(List<Quantitation.ScanInfo> scanInfos)
-        {
-            float max = 0f;
-            for (Quantitation.ScanInfo scanInfo : scanInfos)
-            {
-                max = Math.max(max, scanInfo.getIntensity());
-            }
-            return max;
-        }
-
-        private Float getProfileValue(int scan, List<Quantitation.ScanInfo> infos)
-        {
-            for (Quantitation.ScanInfo scanInfo : infos)
-            {
-                if (scanInfo.getScan() == scan)
-                {
-                    return new Float(scanInfo.getIntensity());
-                }
-            }
-            return null;
-
-        }
-
-        public Float getLightValue(int scan)
-        {
-            return getProfileValue(scan, _lightElutionProfile);
-        }
-
-        public Float getHeavyValue(int scan)
-        {
-            return getProfileValue(scan, _heavyElutionProfile);
-        }
-
-        public List<Quantitation.ScanInfo> getLightElutionProfile()
-        {
-            return _lightElutionProfile;
-        }
-
-        public List<Quantitation.ScanInfo> getHeavyElutionProfile()
-        {
-            return _heavyElutionProfile;
-        }
-
-        public MS2Peptide getPeptide()
-        {
-            return _peptide;
-        }
-    }
-
-    public static class ShowPeptideContext
-    {
-        public DetailsForm form;
-        public MS2Run run;
-        public final Container container;
-        public final User user;
-        public MS2Fraction fraction;
-        public MS2Peptide peptide;
-        public ViewURLHelper url;
-        public ViewURLHelper previousUrl;
-        public ViewURLHelper nextUrl;
-        public ViewURLHelper showGzUrl;
-        public String actualXStart;
-        public String actualXEnd;
-        public String modificationHref;
-
-        ShowPeptideContext(DetailsForm form, MS2Run run, MS2Peptide peptide, ViewURLHelper url, ViewURLHelper previousUrl, ViewURLHelper nextUrl, ViewURLHelper showGzUrl, String modHref, Container container, User user)
-        {
-            this.form = form;
-            this.run = run;
-            this.container = container;
-            this.user = user;
-            this.fraction = MS2Manager.getFraction(peptide.getFraction());
-            this.peptide = peptide;
-            this.url = url;
-            this.previousUrl = previousUrl;
-            this.nextUrl = nextUrl;
-            this.showGzUrl = showGzUrl;
-            this.modificationHref = modHref;
-
-            calcXRange();
-        }
-
-
-        private void calcXRange()
-        {
-            SpectrumGraph graph = new SpectrumGraph(peptide, form.width, form.height, form.tolerance, form.xStart,  form.xEnd);
-
-            actualXStart = Formats.f0.format(graph.getXStart());
-            actualXEnd = Formats.f0.format(graph.getXEnd());
-        }
     }
 
 
@@ -2497,7 +2198,7 @@ public class MS2Controller extends ViewController
         if (!isAuthorized(form.run))
             return null;
 
-        ProteinProphetFile summary = MS2Manager.getProteinProphetFile(form.run);
+        ProteinProphetFile summary = MS2Manager.getProteinProphetFileByRun(form.run);
 
         JspView view = new JspView("/org/labkey/ms2/showSensitivityDetails.jsp");
         view.addObject("summary", summary);
@@ -2530,7 +2231,7 @@ public class MS2Controller extends ViewController
         if (!isAuthorized(form.run))
             return null;
 
-        ProteinProphetFile summary = MS2Manager.getProteinProphetFile(form.run);
+        ProteinProphetFile summary = MS2Manager.getProteinProphetFileByRun(form.run);
 
         PeptideProphetGraphs.renderSensitivityGraph(getResponse(), summary);
 
@@ -3746,9 +3447,24 @@ public class MS2Controller extends ViewController
     @Jpf.Action
     protected Forward showProteinGroup(DetailsForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_READ);
+        // May have a runId, a group number, and an indistinguishableGroupId, or might just have a
+        // proteinGroupId
+        if (form.getProteinGroupId() != null)
+        {
+            ProteinGroupWithQuantitation group = MS2Manager.getProteinGroup(form.getProteinGroupId());
+            if (group != null)
+            {
+                ProteinProphetFile file = MS2Manager.getProteinProphetFile(group.getProteinProphetFileId());
+                if (file != null)
+                {
+                    form.run = file.getRun();
+                    form.groupNumber = group.getGroupNumber();
+                    form.indistinguishableCollectionId = group.getIndistinguishableCollectionId();
+                }
+            }
+        }
 
-        if (form.run != 0 && !isAuthorized(form.run))
+        if (!isAuthorized(form.run))
             return null;
 
         MS2Run run = MS2Manager.getRun(form.run);
@@ -3778,12 +3494,34 @@ public class MS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        if (form.run != 0 && !isAuthorized(form.run))
-            return null;
+        int runId;
+        int seqId;
+        if (form.run != 0)
+        {
+            runId = form.run;
+            seqId = form.seqId;
+        }
+        else
+        {
+            MS2Peptide peptide = MS2Manager.getPeptide(form.peptideId);
+            if (peptide != null)
+            {
+                runId = peptide.getRun();
+                seqId = peptide.getSeqId();
+            }
+            else
+            {
+                return HttpView.throwNotFound();
+            }
+        }
+        if (!isAuthorized(runId))
+        {
+            return HttpView.throwUnauthorized();
+        }
+
 
         ViewURLHelper currentUrl = getViewURLHelper();
-        MS2Run run = MS2Manager.getRun(form.run);
-        int seqId = form.getSeqId();
+        MS2Run run = MS2Manager.getRun(runId);
 
         if (0 == seqId)
             return _renderInTemplate(new HtmlView("No details are available for protein " + form.getProtein() + "; its sequence is not available"), false, "Protein sequence not found", null);
@@ -4180,306 +3918,59 @@ public class MS2Controller extends ViewController
         return rgn;
     }
 
-    public static class MS2WebPart extends WebPartView
+    @Jpf.Action
+    public Forward doProteinSearch(ProteinSearchForm form) throws Exception, ServletException
     {
-        public MS2WebPart()
-        {
-        }
+        requiresPermission(ACL.PERM_READ);
 
+        QuerySettings settings = new QuerySettings(getViewURLHelper(), "ProteinSearchResults");
+        settings.setQueryName(MS2Schema.PROTEIN_GROUPS_TABLE_NAME);
+        settings.setAllowChooseQuery(false);
+        QueryView queryView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), settings);
+        queryView.setShowExportButtons(false);
+        ProteinGroupTableInfo table = (ProteinGroupTableInfo)queryView.getTable();
+        table.addProteinNameFilter(form.getIdentifier());
+        table.addContainerCondition(getContainer(), getUser(), true);
 
-        @Override
-        public void renderView(Object model, PrintWriter out) throws Exception
-        {
-            Container c = hasAccess(getViewContext(), "MS2 Runs");
-            if (c == null)
-            {
-                return;
-            }
+        queryView.setTitle("Protein Group Results");
 
-            DataRegion rgn = getGridRegionWebPart(c);
-            rgn.getDisplayColumn(0).setURL(ViewURLHelper.toPathString("MS2", "showRun", c.getPath()) + "?run=${Run}");
-
-            GridView gridView = new GridView(rgn);
-            gridView.setCustomizeLinks(getCustomizeLinks());
-            gridView.setTitle("MS2 Runs");
-            gridView.setTitleHref(ViewURLHelper.toPathString("MS2", "showList", c.getPath()));
-            gridView.setFilter(new SimpleFilter("Deleted", Boolean.FALSE));
-            gridView.setSort(MS2Manager.getRunsBaseSort());
-
-            include(gridView);
-        }
-
-
-        private DataRegion getGridRegionWebPart(Container c)
-        {
-            DataRegion rgn = new DataRegion();
-            rgn.setName(MS2Manager.getDataRegionNameExperimentRuns());
-            TableInfo ti = MS2Manager.getTableInfoExperimentRuns();
-            ColumnInfo[] cols = ti.getColumns("Description", "Path", "Created", "Run", "ExperimentRunLSID", "ProtocolName", "ExperimentRunRowId");
-            rgn.setColumns(cols);
-            rgn.getDisplayColumn(3).setVisible(false);
-            rgn.getDisplayColumn(4).setVisible(false);
-            rgn.getDisplayColumn(5).setVisible(false);
-            rgn.getDisplayColumn(6).setVisible(false);
-
-            ExperimentInfoColumns experimentCols = new ExperimentInfoColumns(c);
-            DisplayColumn dcSample = experimentCols.getSampleColumn();
-            rgn.addColumn(dcSample);
-
-            DisplayColumn dcProtocol = experimentCols.getProtocolColumn();
-            rgn.addColumn(dcProtocol);
-
-            rgn.setButtonBar(ButtonBar.BUTTON_BAR_EMPTY, DataRegion.MODE_GRID);
-            return rgn;
-        }
+        return renderInTemplate(queryView, getContainer(), "Protein Group Results");
     }
 
-    /**
-     * Class holds a bunch of info about all the experiments in this folder.
-     */
-    public static class ExperimentInfoColumns
+    public static class ProteinSearchForm extends FormData
     {
-        private Map<String, List<Data>> runInputData;
-        private Map<String, List<Material>> runInputMaterial;
-        private Map<String, String> dataCreatingRuns;
+        private String _identifier;
+        private Float _minimumProbability;
+        private Float _maximumErrorRate;
 
-        public ExperimentInfoColumns(Container c)
+        public String getIdentifier()
         {
-            runInputData = ExperimentService.get().getRunInputData(c);
-            runInputMaterial = ExperimentService.get().getRunInputMaterial(c);
-            dataCreatingRuns = ExperimentService.get().getDataCreatingRuns(c);
+            return _identifier;
         }
 
-        private String getDataCreatingRun(String lsid)
+        public void setIdentifier(String identifier)
         {
-            if (dataCreatingRuns.containsKey(lsid))
-            {
-                return dataCreatingRuns.get(lsid);
-            }
-            String result = ExperimentService.get().getDataCreatingRun(lsid);
-            dataCreatingRuns.put(lsid, result);
-            return result;
+            _identifier = identifier;
         }
 
-        private List<Data> getRunInputData(String lsid)
+        public Float getMaximumErrorRate()
         {
-            List<Data> result = runInputData.get(lsid);
-            if (result == null)
-            {
-                try
-                {
-                    result = ExperimentService.get().getRunInputData(lsid);
-                    runInputData.put(lsid, result);
-                }
-                catch (SQLException e)
-                {
-                    throw new RuntimeSQLException(e);
-                }
-            }
-            return result;
+            return _maximumErrorRate;
         }
 
-        private List<Material> getRunInputMaterial(String lsid)
+        public void setMaximumErrorRate(Float maximumErrorRate)
         {
-            List<Material> result = runInputMaterial.get(lsid);
-            if (result == null)
-            {
-                try
-                {
-                    result = ExperimentService.get().getRunInputMaterial(lsid);
-                    runInputMaterial.put(lsid, result);
-                }
-                catch (SQLException e)
-                {
-                    throw new RuntimeSQLException(e);
-                }
-            }
-            return result;
+            _maximumErrorRate = maximumErrorRate;
         }
 
-        public SampleColumn getSampleColumn()
+        public Float getMinimumProbability()
         {
-            return new SampleColumn();
+            return _minimumProbability;
         }
 
-        public ProtocolColumn getProtocolColumn()
+        public void setMinimumProbability(Float minimumProbability)
         {
-            return new ProtocolColumn();
-        }
-
-        public class SampleColumn extends SimpleDisplayColumn
-        {
-            public SampleColumn()
-            {
-                setWidth(null);
-                setCaption("Sample");
-            }
-
-            @Override
-            public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-            {
-                assert ctx.containsKey("ExperimentRunLSID") : "Data region should select ExperimentRunLSID column";
-                String runLSID = (String) ctx.get("ExperimentRunLSID");
-                int run = ((Integer)ctx.get("Run")).intValue();
-                calculateAndRenderLinks(runLSID, ctx.getViewContext().getViewURLHelper(), run, out, true);
-            }
-
-            private void calculateAndRenderLinks(String runLSID, ViewURLHelper urlHelper, int run, Writer out, boolean collapse)
-                    throws IOException
-            {
-                //TODO: Should be able to annotate run from here.
-                if (null == runLSID)
-                    return;
-
-                //Render links for all the direct and indirect inputs.
-                List<Material> inputMaterials = new ArrayList<Material>(getRunInputMaterial(runLSID));
-                List<Data> inputData = getRunInputData(runLSID);
-                for (Data d : inputData)
-                {
-                    String creatingRunLsid = getDataCreatingRun(d.getLSID());
-                    if (null != creatingRunLsid)
-                    {
-                        List<Material> tmpM = getRunInputMaterial(creatingRunLsid);
-                        for (Material m : tmpM)
-                        {
-                            boolean foundMatch = false;
-                            for (Material m2 : inputMaterials)
-                            {
-                                if (m2.getLSID().equals(m.getLSID()))
-                                {
-                                    foundMatch = true;
-                                    break;
-                                }
-                            }
-                            if (!foundMatch)
-                            {
-                                inputMaterials.add(m);
-                            }
-                        }
-                    }
-                }
-                renderMaterialLinks(inputMaterials, urlHelper, run, out, collapse);
-            }
-
-            private void renderMaterialLinks(List<Material> inputMaterials, ViewURLHelper currentURL, int run, Writer out, boolean collapse) throws IOException
-            {
-                ViewURLHelper resolveHelper = currentURL.clone();
-                String resolveURL = resolveHelper.relativeUrl("resolveLSID.view", "lsid=", "Experiment");
-                ViewURLHelper fullMaterialListHelper = currentURL.clone();
-                String fullMaterialListURL = fullMaterialListHelper.relativeUrl("showFullMaterialList.view", "run=" + run, "MS2");
-
-                if (collapse && inputMaterials.size() > 2)
-                {
-                    renderMaterialLink(out, resolveURL, inputMaterials.get(0));
-                    out.write(",<br/><a href=\"");
-                    out.write(fullMaterialListURL);
-                    StringBuilder sb = new StringBuilder();
-                    String sep = "";
-                    for (int i = 1; i < inputMaterials.size(); i++)
-                    {
-                        sb.append(sep);
-                        sb.append(PageFlowUtil.filter(inputMaterials.get(i).getName()));
-                        sep = ", ";
-                    }
-                    out.write("\" title=\"");
-                    out.write(sb.toString());
-                    out.write("\">");
-                    out.write(Integer.toString(inputMaterials.size() - 1));
-                    out.write(" more samples...</a>");
-                }
-                else
-                {
-                    String sep = "";
-                    for (Material mat : inputMaterials)
-                    {
-                        out.write(sep);
-                        renderMaterialLink(out, resolveURL, mat);
-                        sep = ",<br/>";
-                    }
-                }
-            }
-
-            private void renderMaterialLink(Writer out, String resolveURL, Material mat)
-                    throws IOException
-            {
-                out.write("<a href='");
-                out.write(resolveURL);
-                out.write(PageFlowUtil.filter(mat.getLSID()));
-                out.write("'>");
-                out.write(PageFlowUtil.filter(mat.getName()));
-                out.write("</a>");
-            }
-
-        }
-
-        public class ProtocolColumn extends SimpleDisplayColumn
-        {
-            public ProtocolColumn()
-            {
-                setWidth(null);
-                setCaption("Protocol");
-            }
-
-            @Override
-            public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-            {
-                assert ctx.containsKey("ExperimentRunLSID") : "Data region should select ExperimentRunLSID column";
-                assert ctx.containsKey("ExperimentRunRowId") : "Data region should select ExperimentRunRowId column";
-                assert ctx.containsKey("ProtocolName") : "Data region should select ProtocolName column";
-                String runLSID = (String) ctx.get("ExperimentRunLSID");
-                if (null == runLSID)
-                    return;
-                Integer runRowId = (Integer) ctx.get("ExperimentRunRowId");
-                String protocolName = (String) ctx.get("ProtocolName");
-
-                String runLink = getRunLink(ctx, runRowId, protocolName);
-                List<Data> inputData = getRunInputData(runLSID);
-                if (null == inputData)
-                {
-                    out.write(runLink);
-                    return;
-                }
-
-                Map<String, String> predecessorLinks = new HashMap<String, String>();
-
-                for (Data data : inputData)
-                {
-                    //TODO: Make this faster. All of this should be queried at the same time..
-                    //ExperimentRun and Protocol are cached however, so in usual cases this isn't tragic
-                    String creatingRunLsid = getDataCreatingRun(data.getLSID());
-                    if (null == creatingRunLsid)
-                        continue;
-                    if (predecessorLinks.containsKey(creatingRunLsid))
-                        continue;
-
-                    ExperimentRun run = ExperimentService.get().getExperimentRun(creatingRunLsid);
-                    Protocol p = ExperimentService.get().getProtocol(run.getProtocolLSID());
-                    predecessorLinks.put(creatingRunLsid, getRunLink(ctx, run.getRowId(), p.getName()));
-                }
-
-                if (predecessorLinks.values().size() == 0)
-                    out.write(runLink);
-                else
-                {
-                    String sep = "";
-                    for (String s : predecessorLinks.values())
-                    {
-                        out.write(sep);
-                        out.write(s);
-                        sep = ", ";
-                    }
-                    out.write(" -> ");
-                    out.write(runLink);
-                }
-            }
-
-            public String getRunLink(RenderContext ctx, Integer experimentRunRowId, String protocolName)
-            {
-                ViewURLHelper helper = ctx.getViewContext().getViewURLHelper();
-                String resolveURL = helper.relativeUrl("showRunGraph.view", "rowId=", "Experiment");
-
-                return "<a href='" + resolveURL + experimentRunRowId + "'>" + PageFlowUtil.filter(protocolName) + "</a>";
-            }
+            _minimumProbability = minimumProbability;
         }
     }
 
@@ -4637,33 +4128,6 @@ public class MS2Controller extends ViewController
         }
 
         return null;
-    }
-
-
-    public static class MS2StatsWebPart extends VelocityView
-    {
-        public MS2StatsWebPart()
-        {
-            super("/org/labkey/ms2/stats.vm");
-            setTitle("MS2 Statistics");
-            Map stats;
-            try
-            {
-                stats = MS2Manager.getBasicStats();
-            } catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
-            addObject("stats", stats);
-        }
-
-
-        @Override
-        protected void prepareWebPart(Object model)
-        {
-            if (!getViewContext().getUser().isGuest())
-                setTitleHref(ViewURLHelper.toPathString("MS2", "exportHistory", ""));
-        }
     }
 
 
@@ -4904,6 +4368,17 @@ public class MS2Controller extends ViewController
         private int quantitationCharge;
         private int groupNumber;
         private int indistinguishableCollectionId;
+        private Integer proteinGroupId;
+
+        public Integer getProteinGroupId()
+        {
+            return proteinGroupId;
+        }
+
+        public void setProteinGroupId(Integer proteinGroupId)
+        {
+            this.proteinGroupId = proteinGroupId;
+        }
 
         public int getGroupNumber()
         {

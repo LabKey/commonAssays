@@ -7,8 +7,8 @@ import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.GroupNumberDisplayColumn;
 import org.labkey.ms2.ProteinListDisplayColumn;
+import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.CaseInsensitiveHashSet;
@@ -32,17 +32,14 @@ public class MS2Schema extends UserSchema
     public static final String SEQUEST_SEARCH_EXPERIMENT_RUNS_TABLE_NAME = "SequestSearchRuns";
     public static final String GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME = "MS2SearchRuns";
 
-    public static final String FLAT_PEPTIDES_TABLE_NAME = "FlatPeptides";
-    public static final String FRACTIONS_TABLE_NAME = "QueryFractions";
-    public static final String PEPTIDE_MEMBERSHIPS_TABLE_NAME = "PeptideMemberships";
-    private static final String PROTEIN_GROUPS_TABLE_NAME = "ProteinGroups";
+    public static final String PEPTIDES_TABLE_NAME = "QueryPeptides";
+    public static final String PROTEIN_GROUPS_TABLE_NAME = "QueryProteinGroups";
 
     private static final String MASCOT_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.Mascot%";
     private static final String SEQUEST_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.Sequest%";
     private static final String XTANDEM_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.XTandem%";
     private static final String SAMPLE_PREP_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.PreSearch.%";
 
-    private static final Set<String> HIDDEN_PROTEIN_GROUP_COLUMN_NAMES = new CaseInsensitiveHashSet(Arrays.asList("RowId", "ProteinProphetFileId", "GroupNumber", "IndistinguishableCollectionId"));
     private static final Set<String> HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet(Arrays.asList("PeptideId"));
 
     static public void register()
@@ -71,9 +68,7 @@ public class MS2Schema extends UserSchema
         result.add(MASCOT_SEARCH_EXPERIMENT_RUNS_TABLE_NAME);
         result.add(SEQUEST_SEARCH_EXPERIMENT_RUNS_TABLE_NAME);
         result.add(GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME);
-        result.add(FLAT_PEPTIDES_TABLE_NAME);
-        result.add(FRACTIONS_TABLE_NAME);
-        result.add(PEPTIDE_MEMBERSHIPS_TABLE_NAME);
+        result.add(PEPTIDES_TABLE_NAME);
         result.add(PROTEIN_GROUPS_TABLE_NAME);
         return result;
     }
@@ -102,26 +97,23 @@ public class MS2Schema extends UserSchema
         {
             return createSearchTable(alias, XTANDEM_PROTOCOL_PATTERN, MASCOT_PROTOCOL_PATTERN,SEQUEST_PROTOCOL_PATTERN);
         }
-        else if (PEPTIDE_MEMBERSHIPS_TABLE_NAME.equalsIgnoreCase(name))
+        else if (PEPTIDES_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createPeptideMembershipsTable();
+            return createPeptidesTable(alias);
         }
         else if (PROTEIN_GROUPS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createProteinGroupsTable();
-        }
-        else if (FRACTIONS_TABLE_NAME.equalsIgnoreCase(name))
-        {
-            return createFractionsTable();
-        }
-        if (FLAT_PEPTIDES_TABLE_NAME.equalsIgnoreCase(name))
-        {
-            return createPeptidesTable();
+            return createQueryProteinGroupsTable(alias);
         }
         else
         {
             return super.getTable(name, alias);
         }
+    }
+
+    private TableInfo createQueryProteinGroupsTable(String alias)
+    {
+        return new ProteinGroupTableInfo(alias);
     }
 
     private TableInfo createPeptideMembershipsTable()
@@ -136,19 +128,11 @@ public class MS2Schema extends UserSchema
                 newColumn.setIsHidden(true);
             }
         }
-        result.getColumn("ProteinGroupId").setFk(new RowIdForeignKey(createProteinGroupsTable().getColumn("RowId"))
+        result.getColumn("ProteinGroupId").setFk(new LookupForeignKey("RowId", false)
         {
-            public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
+            public TableInfo getLookupTableInfo()
             {
-                TableInfo lookupTable = getLookupTableInfo();
-                if (displayField == null)
-                    displayField = lookupTable.getTitleColumn();
-                if (displayField == null)
-                    return null;
-                ColumnInfo originalColumn = lookupTable.getColumn(displayField);
-                ColumnInfo result = LookupColumn.create(parent, _rowidColumn, originalColumn);
-                result.setCaption(originalColumn.getCaption());
-                return result;
+                return createProteinGroupsTable();
             }
         });
         return result;
@@ -156,21 +140,9 @@ public class MS2Schema extends UserSchema
 
     private TableInfo createProteinGroupsTable()
     {
-        TableInfo info = MS2Manager.getTableInfoProteinGroups();
-        FilteredTable result = new FilteredTable(info);
-        for (ColumnInfo col : info.getColumns())
-        {
-            ColumnInfo newColumn = result.wrapColumn(col);
-            if (HIDDEN_PROTEIN_GROUP_COLUMN_NAMES.contains(newColumn.getName()))
-            {
-                newColumn.setIsHidden(true);
-            }
-        }
-        ColumnInfo groupNumberColumn = result.wrapColumn("Group", info.getColumn("GroupNumber"));
-        groupNumberColumn.setRenderClass(GroupNumberDisplayColumn.class);
-        result.addColumn(groupNumberColumn);
+        ProteinGroupTableInfo result = new ProteinGroupTableInfo(null, false);
 
-        ColumnInfo proteinsColumn = result.wrapColumn("Proteins", info.getColumn("RowId"));
+        ColumnInfo proteinsColumn = result.wrapColumn("Proteins", result.getRealTable().getColumn("RowId"));
         proteinsColumn.setRenderClass(ProteinListDisplayColumn.class);
         proteinsColumn.setKeyField(false);
         result.addColumn(proteinsColumn);
@@ -178,15 +150,21 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
+    private FilteredTable wrapTable(TableInfo originalTableInfo)
+    {
+        FilteredTable result = new FilteredTable(originalTableInfo);
+        for (ColumnInfo col : originalTableInfo.getColumns())
+        {
+            ColumnInfo newCol = result.wrapColumn(col);
+            newCol.setIsHidden(col.isHidden());
+        }
+        return result;
+    }
+
     private TableInfo createFractionsTable()
     {
         SqlDialect dialect = MS2Manager.getSqlDialect();
-        TableInfo info = MS2Manager.getTableInfoFractions();
-        FilteredTable result = new FilteredTable(info);
-        for (ColumnInfo col : info.getColumns())
-        {
-            result.wrapColumn(col);
-        }
+        FilteredTable result = wrapTable(MS2Manager.getTableInfoFractions());
 
         SQLFragment fractionNameSQL = new SQLFragment(dialect.getSubstringFunction(ExprColumn.STR_TABLE_ALIAS + ".FileName", "1", dialect.getStringIndexOfFunction("'.'", ExprColumn.STR_TABLE_ALIAS + ".FileName") + "- 1"));
 
@@ -198,11 +176,26 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    private TableInfo createPeptidesTable()
+    private TableInfo createSequencesTable(String aliasName)
+    {
+        FilteredTable result = wrapTable(ProteinManager.getTableInfoSequences());
+
+        SQLFragment fastaNameSQL = new SQLFragment(aliasName + ".Protein");
+        ExprColumn fastaNameColumn = new ExprColumn(result, "Database Sequence Name", fastaNameSQL, Types.VARCHAR);
+
+        ViewURLHelper showProteinURL = new ViewURLHelper("MS2", "showProtein.view", getContainer());
+        String showProteinURLString = showProteinURL.getLocalURIString() + "peptideId=${RowId}";
+        fastaNameColumn.setURL(showProteinURLString);
+        result.addColumn(fastaNameColumn);
+
+        return result;
+    }
+
+    private TableInfo createPeptidesTable(final String alias)
     {
         SqlDialect dialect = MS2Manager.getSqlDialect();
         TableInfo info = MS2Manager.getTableInfoPeptidesData();
-        FilteredTable result = new FilteredTable(info)
+        final FilteredTable result = new FilteredTable(info)
         {
             public List<FieldKey> getDefaultVisibleColumns()
             {
@@ -277,19 +270,56 @@ public class MS2Schema extends UserSchema
         result.addColumn(strippedPeptide);
 
         ColumnInfo quantitation = result.wrapColumn("Quantitation", info.getColumn("RowId"));
-        quantitation.setFk(new RowIdForeignKey(MS2Manager.getTableInfoQuantitation().getColumn("PeptideId")));
+        quantitation.setFk(new LookupForeignKey("PeptideId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return MS2Manager.getTableInfoQuantitation();
+            }
+        });
         quantitation.setKeyField(false);
         result.addColumn(quantitation);
 
         ColumnInfo proteinGroup = result.wrapColumn("ProteinProphetData", info.getColumn("RowId"));
-        proteinGroup.setFk(new RowIdForeignKey(createPeptideMembershipsTable().getColumn("PeptideId")));
+        proteinGroup.setFk(new LookupForeignKey("PeptideId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return createPeptideMembershipsTable();
+            }
+        });
         proteinGroup.setKeyField(false);
         result.addColumn(proteinGroup);
 
         ColumnInfo peptideProphetData = result.wrapColumn("PeptideProphetDetails", info.getColumn("RowId"));
-        peptideProphetData.setFk(new RowIdForeignKey(MS2Manager.getTableInfoPeptideProphetData().getColumn("PeptideId")));
+        peptideProphetData.setFk(new LookupForeignKey("PeptideId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return MS2Manager.getTableInfoPeptideProphetData();
+            }
+        });
         peptideProphetData.setKeyField(false);
         result.addColumn(peptideProphetData);
+
+        result.getColumn("SeqId").setFk(new LookupForeignKey("SeqId", false)
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return createSequencesTable(result.getAliasName());
+            }
+        });
+
+        ViewURLHelper showProteinURL = new ViewURLHelper("MS2", "showProtein.view", getContainer());
+        String showProteinURLString = showProteinURL.getLocalURIString() + "&peptideId=${RowId}";
+        result.getColumn("SeqId").setURL(showProteinURLString);
+        result.getColumn("Protein").setURL(showProteinURLString);
+        result.getColumn("SeqId").setCaption("Search Engine Protein");
+
+        ViewURLHelper showPeptideURL = new ViewURLHelper("MS2", "showPeptide.view", getContainer());
+        String showPeptideURLString = showPeptideURL.getLocalURIString() + "&peptideId=${RowId}";
+        result.getColumn("Scan").setURL(showPeptideURLString);
+        result.getColumn("Peptide").setURL(showPeptideURLString);
 
         result.addColumn(result.wrapColumn("RawScore", info.getColumn("score1"))).setCaption("Raw");
         result.addColumn(result.wrapColumn("DiffScore", info.getColumn("score2"))).setCaption("dScore");
@@ -310,7 +340,13 @@ public class MS2Schema extends UserSchema
         result.addColumn(result.wrapColumn("Identity", info.getColumn("score2")));
         result.addColumn(result.wrapColumn("Homology", info.getColumn("score3")));
 
-        result.getColumn("Fraction").setFk(new RowIdForeignKey(createFractionsTable().getColumn("Fraction")));
+        result.getColumn("Fraction").setFk(new LookupForeignKey("Fraction")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return createFractionsTable();
+            }
+        });
 
         return result;
     }

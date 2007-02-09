@@ -7,9 +7,10 @@
 <%@ page import="org.labkey.api.view.ViewURLHelper"%>
 <%@ page import="org.labkey.ms2.MS2Peptide"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.ms2.EditElutionGraphContext" %>
 <%
-    JspView<MS2Controller.EditElutionGraphContext> me = (JspView<MS2Controller.EditElutionGraphContext>) HttpView.currentView();
-    MS2Controller.EditElutionGraphContext ctx = me.getModel();
+    JspView<EditElutionGraphContext> me = (JspView<EditElutionGraphContext>) HttpView.currentView();
+    org.labkey.ms2.EditElutionGraphContext ctx = me.getModel();
     String contextPath = request.getContextPath();
     MS2Peptide p = ctx.getPeptide();
     Quantitation quant = ctx.getQuantitation();
