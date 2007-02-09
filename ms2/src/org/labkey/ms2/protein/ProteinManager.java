@@ -204,7 +204,7 @@ public class ProteinManager
             //TODO:  make search tryptic so that number that match = ProteinHits
             int MAX_PROTEIN_HITS = 20;  //based on observations of 2 larger ms2 databases, TOP 20 causes better query plan generation in SQL Server
             sql.append("SELECT  SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + getTableInfoSequences() );
-            sql.append(" WHERE SeqId IN (SELECT SeqId FROM " + getTableInfoFastaSequences() + " WHERE FastaId=?) AND ProtSequence " + getSqlDialect().getLikeOperator() + " ?" );
+            sql.append(" WHERE SeqId IN (SELECT SeqId FROM " + getTableInfoFastaSequences() + " WHERE FastaId=?) AND ProtSequence " + getSqlDialect().getCharClassLikeOperator() + " ?" );
             sql = getSchema().getSqlDialect().limitRows(sql, MAX_PROTEIN_HITS);
             params = new Object[]{fastaId, "%" + peptide.getTrimmedPeptide() + "%"};
         }
@@ -276,12 +276,12 @@ public class ProteinManager
 
     private static String nTerm()
     {
-        return "(Peptide " + getSqlDialect().getLikeOperator() + " '[KR].[^P]%' OR Peptide " + getSqlDialect().getLikeOperator() + " '-.%')";
+        return "(Peptide " + getSqlDialect().getCharClassLikeOperator() + " '[KR].[^P]%' OR Peptide " + getSqlDialect().getCharClassLikeOperator() + " '-.%')";
     }
 
     private static String cTerm()
     {
-        return "(Peptide " + getSqlDialect().getLikeOperator() + " '%[KR].[^P]' OR Peptide " + getSqlDialect().getLikeOperator() + " '%.-')";
+        return "(Peptide " + getSqlDialect().getCharClassLikeOperator() + " '%[KR].[^P]' OR Peptide " + getSqlDialect().getCharClassLikeOperator() + " '%.-')";
     }
 
     private static String getTryptic1()
@@ -636,7 +636,7 @@ public class ProteinManager
         HashSet<String> retVal = new HashSet<String>();
         Integer paramArr[] = {id};
         String rvString[] = Table.executeArray(getSchema(),
-                "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annotTypeId in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getLikeOperator() + " '%Organism%') AND seqID=?",
+                "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annotTypeId in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getCharClassLikeOperator() + " '%Organism%') AND seqID=?",
                 paramArr,
                 String.class);
 
@@ -660,7 +660,7 @@ public class ProteinManager
     {
         try
         {
-            return Table.executeArray(getSchema(), "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annottypeid in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getLikeOperator() + " 'GO;_%' ESCAPE ';') AND seqId =?",
+            return Table.executeArray(getSchema(), "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annottypeid in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getCharClassLikeOperator() + " 'GO;_%' ESCAPE ';') AND seqId =?",
                     new Integer[]{id}, String.class);
         }
         catch (SQLException e)
