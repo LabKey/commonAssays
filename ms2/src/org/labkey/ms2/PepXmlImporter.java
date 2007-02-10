@@ -99,7 +99,10 @@ public class PepXmlImporter extends MS2Importer
                 writeFractionInfo(fraction);
 
                 PeptideIterator pi = fraction.getPeptideIterator();
-                HashSet<Integer> scans = new HashSet<Integer>(1000);
+                boolean shouldLoadSpectra = fraction.shouldLoadSpectra();
+                progress.setLoadSpectra(shouldLoadSpectra);
+                // Initialize scans to a decent size, but only if we're going to load spectra
+                HashSet<Integer> scans = new HashSet<Integer>(shouldLoadSpectra ? 1000 : 0);
                 _conn.setAutoCommit(false);
 
                 boolean retentionTimesInPepXml = false;
@@ -118,7 +121,9 @@ public class PepXmlImporter extends MS2Importer
                     if (null != peptide.getTrimmedPeptide())
                     {
 	                    write(peptide, summary);
-		                scans.add(peptide.getScan());
+
+                        if (shouldLoadSpectra)
+                            scans.add(peptide.getScan());
 
                         count++;
                         if (count % BATCH_SIZE == 0)
@@ -132,7 +137,7 @@ public class PepXmlImporter extends MS2Importer
                 _conn.setAutoCommit(true);
 
                 progress.setSpectrumMode(scans.size());
-                processSpectrumFile(fraction, scans, progress, fraction.shouldLoadSpectra(), !retentionTimesInPepXml);
+                processSpectrumFile(fraction, scans, progress, shouldLoadSpectra, !retentionTimesInPepXml);
             }
         }
         finally

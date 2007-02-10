@@ -866,7 +866,7 @@ public class IssuesController extends ViewController
         page.getPriorityOptions(getContainer());
         page.getResolutionOptions(getContainer());
 
-        AdminView adminView = new AdminView(getContainer(), getUser(), getCustomColumnConfiguration());
+        AdminView adminView = new AdminView(getContainer(), getCustomColumnConfiguration());
 
         _includeView(adminView, "Issues Admin Page");
         return null;
@@ -1120,18 +1120,18 @@ public class IssuesController extends ViewController
         KeywordAdminView _keywordAdminView;
         JspView<IssuesPreference> _requiredFieldsView;
 
-        public AdminView(Container c, User user, CustomColumnConfiguration ccc)
+        public AdminView(Container c, CustomColumnConfiguration ccc)
         {
             super("/org/labkey/issue/admin.gm");
 
             _ccc = ccc;
 
             _keywordAdminView = new KeywordAdminView(c);
-            _keywordAdminView.addKeyword("Priority", ISSUE_PRIORITY);
-            _keywordAdminView.addKeyword("Resolution", ISSUE_RESOLUTION);
-            _keywordAdminView.addKeyword("Area", ISSUE_AREA);
             _keywordAdminView.addKeyword("Type", ISSUE_TYPE);
+            _keywordAdminView.addKeyword("Area", ISSUE_AREA);
+            _keywordAdminView.addKeyword("Priority", ISSUE_PRIORITY);
             _keywordAdminView.addKeyword("Milestone", ISSUE_MILESTONE);
+            _keywordAdminView.addKeyword("Resolution", ISSUE_RESOLUTION);
 
             addCustomColumn("string1", ISSUE_STRING1);
             addCustomColumn("string2", ISSUE_STRING2);

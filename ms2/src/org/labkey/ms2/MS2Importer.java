@@ -381,14 +381,23 @@ public abstract class MS2Importer
     {
         StringBuilder sql = new StringBuilder();
 
+        /*
+            UPDATE ms2.PeptidesData
+	            SET SeqId = fs.SeqId
+	            FROM prot.FastaSequences fs
+	            WHERE Fraction IN (SELECT Fraction FROM ms2.Fractions WHERE Run = ?) AND
+		            ms2.PeptidesData.Protein = fs.LookupString AND fs.FastaId = ?
+         */
+
         sql.append("UPDATE ");
         sql.append(MS2Manager.getTableInfoPeptidesData());
-        sql.append(" SET SeqId = (SELECT SeqId FROM ");
+        sql.append(" SET SeqId = fs.SeqId\nFROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences());
-        sql.append(" WHERE LookupString = Protein AND FastaId = ?)");
-        sql.append(" WHERE Fraction IN (SELECT Fraction FROM ");
+        sql.append(" fs WHERE Fraction IN (SELECT Fraction FROM ");
         sql.append(MS2Manager.getTableInfoFractions());
-        sql.append(" WHERE Run = ?)");
+        sql.append(" WHERE Run = ?) AND ");
+        sql.append(MS2Manager.getTableInfoPeptidesData());
+        sql.append(".Protein = fs.LookupString AND fs.FastaId = ?");
 
         _updateSeqIdSql = sql.toString();
     }
@@ -429,7 +438,7 @@ public abstract class MS2Importer
         MS2Run run = MS2Manager.getRun(_runId);
 
         long start = System.currentTimeMillis();
-        Table.execute(MS2Manager.getSchema(), _updateSeqIdSql, new Object[]{run.getFastaId(), _runId});
+        Table.execute(MS2Manager.getSchema(), _updateSeqIdSql, new Object[]{_runId, run.getFastaId()});
         logElapsedTime(start, "update SeqId column");
 
         start = System.currentTimeMillis();
@@ -565,25 +574,27 @@ public abstract class MS2Importer
     }
 
 
-    // Calculates progress of an MS2 import.  PepXML file progress based on offset within the peptide portion of the file;
+    // Calculates progress of an MS2 import.  PepXML file progress is based on offset within the peptide portion of the file;
     // progress through each fraction's spectra based on actual number of scans loaded vs. expected.
     protected class MS2Progress
     {
-        // Equal weighting between scans and spectra... change this if (for example) loading one takes
-        // significantly longer than the other.
-        private static final float MS2_WEIGHT = 0.5f;
-        private static final float SPECTRUM_WEIGHT = 0.5f;
+        // Default assumption is equal weighting between scans and spectra... change this value if (for example) loading
+        // a spectrum takes significantly longer than loading a peptide.  Value is time to load a peptide as a fraction
+        // of total time for loading both a peptide and a spectrum.  Always a fraction of 1.0.
+        private static final float DEFAULT_PEPTIDE_WEIGHTING = 0.5f;
+
+        private float _peptideWeighting = DEFAULT_PEPTIDE_WEIGHTING;
 
         private boolean _peptideMode = true;
 
-        private long _ms2FileSize;
-        private long _ms2FileInitialOffset;
-        private long _ms2FileCurrentOffset;
+        private long _peptideFileSize;
+        private long _peptideFileInitialOffset;
+        private long _peptideFileCurrentOffset;
 
         private long _spectrumEstimate;
         private long _spectrumCount;
 
-        private float _ms2Percent;
+        private float _peptidePercent;
         private float _spectrumPercent;
         private float _previousSpectrumPercent;
 
@@ -591,17 +602,39 @@ public abstract class MS2Importer
 
         protected void setMs2FileInfo(long size, long initialOffset)
         {
-            _ms2FileSize = size;
-            _ms2FileInitialOffset = initialOffset;
-            _ms2FileCurrentOffset = initialOffset;
+            _peptideFileSize = size;
+            _peptideFileInitialOffset = initialOffset;
+            _peptideFileCurrentOffset = initialOffset;
             updateIfChanged();
         }
 
 
         protected void setCurrentMs2FileOffset(long offset)
         {
-            _ms2FileCurrentOffset = offset;
+            _peptideFileCurrentOffset = offset;
             updateIfChanged();
+        }
+
+
+        // If we're not loading spectra then use the peptide file progress only (weight the spectrum progress at 0.0).
+        // This should work on multiple fraction runs, even those where some fractions have spectra loaded and some
+        // don't, since progress in the peptide file is always the master.  Call this method before each fraction is
+        // loaded to reset the weights appropriately.
+        protected void setLoadSpectra(boolean loadSpectra)
+        {
+            _peptideWeighting = loadSpectra ? DEFAULT_PEPTIDE_WEIGHTING : 1.0F;
+        }
+
+
+        private float getPeptideWeighting()
+        {
+            return _peptideWeighting;
+        }
+
+
+        private float getSpectrumWeighting()
+        {
+            return 1.0F - _peptideWeighting;  // Weightings always total 1.0
         }
 
 
@@ -609,7 +642,7 @@ public abstract class MS2Importer
         {
             _peptideMode = true;
             updateIfChanged();
-            _previousSpectrumPercent = _ms2Percent;
+            _previousSpectrumPercent = _peptidePercent;
         }
 
 
@@ -656,11 +689,11 @@ public abstract class MS2Importer
         private int getPercentComplete()
         {
             if (_peptideMode)
-                _ms2Percent = ((float)_ms2FileCurrentOffset - _ms2FileInitialOffset)/(_ms2FileSize - _ms2FileInitialOffset);
+                _peptidePercent = ((float) _peptideFileCurrentOffset - _peptideFileInitialOffset)/(_peptideFileSize - _peptideFileInitialOffset);
             else
-                _spectrumPercent = (_previousSpectrumPercent + (_ms2Percent - _previousSpectrumPercent) * ((float)_spectrumCount / _spectrumEstimate));
+                _spectrumPercent = _previousSpectrumPercent + (_peptidePercent - _previousSpectrumPercent) * (0 != _spectrumEstimate ? ((float)_spectrumCount / _spectrumEstimate) : 0);
 
-            return Math.round((MS2_WEIGHT * _ms2Percent + SPECTRUM_WEIGHT * _spectrumPercent) * 100);
+            return Math.round((getPeptideWeighting() * _peptidePercent + getSpectrumWeighting() * _spectrumPercent) * 100);
         }
     }
 }

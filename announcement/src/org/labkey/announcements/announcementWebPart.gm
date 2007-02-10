@@ -57,7 +57,7 @@ for (a in announcements)
             }
         %>
     </td></tr>
-<%      } %>    <tr><td class="ms-vb" style="padding-bottom:4;" colspan=3 align="left">[<a href="<%=filter(a.getThreadUrl(request,container))%>rowId=<%=a.rowId%>">View ${settings.conversationName}</a>]</td></tr>
+<%      } %>    <tr><td class="ms-vb" style="padding-bottom:4;" colspan=3 align="left">[<a href="<%=filter(a.getThreadUrl(request,container))%>rowId=<%=a.rowId%>">View ${settings.conversationName.toLowerCase()}<%if (insertURL) {%> or respond<%}%></a>]</td></tr>
 <%
     }
 %></table>
