@@ -124,4 +124,20 @@ public class ProteinGroupTableInfo extends FilteredTable
         sql.append("))");
         addCondition(sql);
     }
+
+    public void addMinimumProbability(float minProb)
+    {
+        SQLFragment sql = new SQLFragment();
+        sql.append("GroupProbability >= ?");
+        sql.add(minProb);
+        addCondition(sql);
+    }
+
+    public void addMaximumErrorRate(float maxError)
+    {
+        SQLFragment sql = new SQLFragment();
+        sql.append("ErrorRate <= ?");
+        sql.add(maxError);
+        addCondition(sql);
+    }
 }

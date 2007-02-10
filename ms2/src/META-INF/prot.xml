@@ -149,8 +149,10 @@
 	</ns:table>
 	<ns:table tableName="Sequences" tableDbType="TABLE">
 		<ns:columns>
-			<ns:column columnName="SeqId"/>
-			<ns:column columnName="ProtSequence">
+			<ns:column columnName="SeqId">
+                <ns:isKeyField>true</ns:isKeyField>
+            </ns:column>
+            <ns:column columnName="ProtSequence">
                 <ns:columnTitle>Sequence</ns:columnTitle>
             </ns:column>
             <ns:column columnName="Hash">
@@ -178,8 +180,10 @@
 			<ns:column columnName="OrgId">
                 <ns:columnTitle>Organism</ns:columnTitle>
             </ns:column>
-			<ns:column columnName="Mass"/>
-			<ns:column columnName="BestName"/>
+			<ns:column columnName="Mass">
+                <ns:formatString>0</ns:formatString>
+            </ns:column>
+            <ns:column columnName="BestName"/>
 			<ns:column columnName="BestGeneName"/>
 			<ns:column columnName="Length"/>
 			<ns:column columnName="Deleted">

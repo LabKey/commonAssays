@@ -592,6 +592,7 @@ ms2/src/org/labkey/ms2/protocol/XarTemplate.java -text
 ms2/src/org/labkey/ms2/query/MS2Schema.java -text
 ms2/src/org/labkey/ms2/query/ProteinGroupTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinProphetFileTableInfo.java -text
+ms2/src/org/labkey/ms2/query/SequencesTableInfo.java -text
 ms2/src/org/labkey/ms2/reader/AbstractMzxmlIterator.java -text
 ms2/src/org/labkey/ms2/reader/RandomAccessMzxmlIterator.java -text
 ms2/src/org/labkey/ms2/reader/SequentialMzxmlIterator.java -text

@@ -34,6 +34,7 @@ public class MS2Schema extends UserSchema
 
     public static final String PEPTIDES_TABLE_NAME = "QueryPeptides";
     public static final String PROTEIN_GROUPS_TABLE_NAME = "QueryProteinGroups";
+    public static final String SEQUENCES_TABLE_NAME = "QuerySequences";
 
     private static final String MASCOT_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.Mascot%";
     private static final String SEQUEST_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.Sequest%";
@@ -62,15 +63,15 @@ public class MS2Schema extends UserSchema
 
     public Set<String> getTableNames()
     {
-        Set<String> result = new HashSet<String>();
-        result.add(SAMPLE_PREP_EXPERIMENT_RUNS_TABLE_NAME);
-        result.add(XTANDEM_SEARCH_EXPERIMENT_RUNS_TABLE_NAME);
-        result.add(MASCOT_SEARCH_EXPERIMENT_RUNS_TABLE_NAME);
-        result.add(SEQUEST_SEARCH_EXPERIMENT_RUNS_TABLE_NAME);
-        result.add(GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME);
-        result.add(PEPTIDES_TABLE_NAME);
-        result.add(PROTEIN_GROUPS_TABLE_NAME);
-        return result;
+        return new HashSet<String>(Arrays.asList(
+            SAMPLE_PREP_EXPERIMENT_RUNS_TABLE_NAME,
+            XTANDEM_SEARCH_EXPERIMENT_RUNS_TABLE_NAME,
+            MASCOT_SEARCH_EXPERIMENT_RUNS_TABLE_NAME,
+            SEQUEST_SEARCH_EXPERIMENT_RUNS_TABLE_NAME,
+            GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME,
+            PEPTIDES_TABLE_NAME,
+            PROTEIN_GROUPS_TABLE_NAME,
+            SEQUENCES_TABLE_NAME));
     }
 
     public TableInfo getTable(String name, String alias)
@@ -104,6 +105,10 @@ public class MS2Schema extends UserSchema
         else if (PROTEIN_GROUPS_TABLE_NAME.equalsIgnoreCase(name))
         {
             return createQueryProteinGroupsTable(alias);
+        }
+        else if (SEQUENCES_TABLE_NAME.equalsIgnoreCase(name))
+        {
+            return createSequencesTable(alias);
         }
         else
         {
@@ -150,21 +155,11 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    private FilteredTable wrapTable(TableInfo originalTableInfo)
-    {
-        FilteredTable result = new FilteredTable(originalTableInfo);
-        for (ColumnInfo col : originalTableInfo.getColumns())
-        {
-            ColumnInfo newCol = result.wrapColumn(col);
-            newCol.setIsHidden(col.isHidden());
-        }
-        return result;
-    }
-
     private TableInfo createFractionsTable()
     {
         SqlDialect dialect = MS2Manager.getSqlDialect();
-        FilteredTable result = wrapTable(MS2Manager.getTableInfoFractions());
+        FilteredTable result = new FilteredTable(MS2Manager.getTableInfoFractions());
+        result.wrapAllColumns(true);
 
         SQLFragment fractionNameSQL = new SQLFragment(dialect.getSubstringFunction(ExprColumn.STR_TABLE_ALIAS + ".FileName", "1", dialect.getStringIndexOfFunction("'.'", ExprColumn.STR_TABLE_ALIAS + ".FileName") + "- 1"));
 
@@ -176,19 +171,9 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    private TableInfo createSequencesTable(String aliasName)
+    private SequencesTableInfo createSequencesTable(String aliasName)
     {
-        FilteredTable result = wrapTable(ProteinManager.getTableInfoSequences());
-
-        SQLFragment fastaNameSQL = new SQLFragment(aliasName + ".Protein");
-        ExprColumn fastaNameColumn = new ExprColumn(result, "Database Sequence Name", fastaNameSQL, Types.VARCHAR);
-
-        ViewURLHelper showProteinURL = new ViewURLHelper("MS2", "showProtein.view", getContainer());
-        String showProteinURLString = showProteinURL.getLocalURIString() + "peptideId=${RowId}";
-        fastaNameColumn.setURL(showProteinURLString);
-        result.addColumn(fastaNameColumn);
-
-        return result;
+        return new SequencesTableInfo(aliasName, getContainer());
     }
 
     private TableInfo createPeptidesTable(final String alias)
@@ -306,7 +291,16 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                return createSequencesTable(result.getAliasName());
+                SequencesTableInfo sequenceTable = new SequencesTableInfo(null, getContainer());
+                SQLFragment fastaNameSQL = new SQLFragment(result.getAliasName() + ".Protein");
+                ExprColumn fastaNameColumn = new ExprColumn(result, "Database Sequence Name", fastaNameSQL, Types.VARCHAR);
+                sequenceTable.addColumn(fastaNameColumn);
+
+                ViewURLHelper showProteinURL = new ViewURLHelper("MS2", "showProtein.view", getContainer());
+                String showProteinURLString = showProteinURL.getLocalURIString() + "peptideId=${RowId}";
+                fastaNameColumn.setURL(showProteinURLString);
+
+                return sequenceTable;
             }
         });
 

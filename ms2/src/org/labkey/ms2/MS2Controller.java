@@ -53,6 +53,7 @@ import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
+import org.labkey.ms2.query.SequencesTableInfo;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -3501,7 +3502,7 @@ public class MS2Controller extends ViewController
             runId = form.run;
             seqId = form.seqId;
         }
-        else
+        else if (form.peptideId != 0)
         {
             MS2Peptide peptide = MS2Manager.getPeptide(form.peptideId);
             if (peptide != null)
@@ -3514,37 +3515,55 @@ public class MS2Controller extends ViewController
                 return HttpView.throwNotFound();
             }
         }
-        if (!isAuthorized(runId))
+        else
         {
-            return HttpView.throwUnauthorized();
+            seqId = form.seqId;
+            runId = 0;
         }
 
 
         ViewURLHelper currentUrl = getViewURLHelper();
-        MS2Run run = MS2Manager.getRun(runId);
 
         if (0 == seqId)
             return _renderInTemplate(new HtmlView("No details are available for protein " + form.getProtein() + "; its sequence is not available"), false, "Protein sequence not found", null);
 
         Protein protein = ProteinManager.getProtein(seqId);
 
-        // Set the protein name used in this run's FASTA file; we want to include this in the view.
-        protein.setLookupString(form.getProtein());
-
-        AbstractPeptideView peptideView = new StandardProteinPeptideView(getContainer(), getUser(), getViewURLHelper(), run);
-        HttpView proteinView = getShowProteinsView(currentUrl, run, form, new Protein[] {protein}, null, peptideView);
-
-        ViewURLHelper runUrl = currentUrl.clone();
-        runUrl.deleteParameter("seqId");
-
+        HttpView proteinView;
         List<NavTree> navTrail = new ArrayList<NavTree>();
-        navTrail.add(new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())));
-        if (run != null)
+        Template template;
+
+        if (runId != 0)
         {
-            navTrail.add(new NavTree(run.getDescription(), runUrl.setAction("showRun")));
+            MS2Run run = MS2Manager.getRun(runId);
+            if (!isAuthorized(runId))
+            {
+                return HttpView.throwUnauthorized();
+            }
+
+            AbstractPeptideView peptideView = new StandardProteinPeptideView(getContainer(), getUser(), getViewURLHelper(), run);
+            proteinView = getShowProteinsView(currentUrl, run, form, new Protein[] {protein}, null, peptideView);
+
+            // Set the protein name used in this run's FASTA file; we want to include this in the view.
+            protein.setLookupString(form.getProtein());
+
+            ViewURLHelper runUrl = currentUrl.clone();
+            runUrl.deleteParameter("seqId");
+
+            navTrail.add(new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())));
+            if (run != null)
+            {
+                navTrail.add(new NavTree(run.getDescription(), runUrl.setAction("showRun")));
+            }
+            template = Template.print;
+        }
+        else
+        {
+            proteinView = getShowProteinsView(currentUrl, null, form, new Protein[] {protein}, null, null);
+            template = Template.home;
         }
 
-        return _renderInTemplate(proteinView, Template.print, getProteinTitle(protein, true), "showProtein", false,
+        return _renderInTemplate(proteinView, template, getProteinTitle(protein, true), "showProtein", false,
                 navTrail.toArray(new NavTree[navTrail.size()]));
     }
 
@@ -3919,22 +3938,41 @@ public class MS2Controller extends ViewController
     }
 
     @Jpf.Action
-    public Forward doProteinSearch(ProteinSearchForm form) throws Exception, ServletException
+    public Forward doProteinSearch(ProteinSearchForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
 
-        QuerySettings settings = new QuerySettings(getViewURLHelper(), "ProteinSearchResults");
-        settings.setQueryName(MS2Schema.PROTEIN_GROUPS_TABLE_NAME);
-        settings.setAllowChooseQuery(false);
-        QueryView queryView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), settings);
-        queryView.setShowExportButtons(false);
-        ProteinGroupTableInfo table = (ProteinGroupTableInfo)queryView.getTable();
+        QuerySettings proteinsSettings = new QuerySettings(getViewURLHelper(), "PotentialProteins");
+        proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);
+        proteinsSettings.setAllowChooseQuery(false);
+        QueryView proteinsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), proteinsSettings);
+        proteinsView.setShowExportButtons(false);
+        SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
+        sequencesTableInfo.addProteinNameFilter(form.getIdentifier());
+        proteinsView.setTitle("Matching Proteins");
+
+        QuerySettings groupsSettings = new QuerySettings(getViewURLHelper(), "ProteinSearchResults");
+        groupsSettings.setQueryName(MS2Schema.PROTEIN_GROUPS_TABLE_NAME);
+        groupsSettings.setAllowChooseQuery(false);
+        QueryView groupsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), groupsSettings);
+        groupsView.setShowExportButtons(false);
+        ProteinGroupTableInfo table = (ProteinGroupTableInfo)groupsView.getTable();
         table.addProteinNameFilter(form.getIdentifier());
         table.addContainerCondition(getContainer(), getUser(), true);
+        if (form.getMaximumErrorRate() != null)
+        {
+            table.addMaximumErrorRate(form.getMaximumErrorRate().floatValue());
+        }
+        if (form.getMinimumProbability() != null)
+        {
+            table.addMinimumProbability(form.getMinimumProbability().floatValue());
+        }
 
-        queryView.setTitle("Protein Group Results");
+        groupsView.setTitle("Protein Group Results");
 
-        return renderInTemplate(queryView, getContainer(), "Protein Group Results");
+        VBox vbox = new VBox(proteinsView, groupsView);
+
+        return renderInTemplate(vbox, getContainer(), "Protein Search Results");
     }
 
     public static class ProteinSearchForm extends FormData
