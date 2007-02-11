@@ -28,6 +28,8 @@ import org.labkey.flow.util.PFUtil;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.webparts.FlowFolderType;
+import org.labkey.flow.webparts.FlowOverview;
+import org.labkey.flow.webparts.OverviewWebPart;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.api.security.ACL;
@@ -74,9 +76,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
             return new ViewForward(new ViewURLHelper("Project", "begin", getContainer()));
         }
         requiresPermission(ACL.PERM_READ);
-        FlowPage page = getFlowPage("main.jsp");
-        NavTrailConfig ntc = getNavTrailConfig(null, null, Action.begin);
-        return includeView(new HomeTemplate(getViewContext(), new JspView(page), ntc));
+        return includeView(new HomeTemplate(getViewContext(), new OverviewWebPart(getViewContext()), getNavTrailConfig(null, FlowModule.getLongProductName(), Action.begin)));
     }
 
     @Jpf.Action
