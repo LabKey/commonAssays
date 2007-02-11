@@ -76,9 +76,8 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
                 else
                 {
                     // If the run failed the first time, then restart it.
-                    if (existingRun.statusId == MS2Importer.STATUS_FAILED)
+                    if (existingRun.statusId != MS2Importer.STATUS_SUCCESS)
                         restart = true;
-                    // TODO: What should we do, if the statusId is STATUS_RUNNING?
 
                     existingRun.setExperimentRunLSID(expRun.getLSID());
                     MS2Manager.updateRun(existingRun, null);

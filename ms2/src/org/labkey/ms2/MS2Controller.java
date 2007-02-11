@@ -342,7 +342,7 @@ public class MS2Controller extends ViewController
         }
         else
         {
-            throw new FileNotFoundException("Unable to open the file '" + form.getPath() + "' to load as a ProteinProphet file");
+            HttpView.throwNotFound("Unable to open the file '" + form.getPath() + "' to load as a ProteinProphet file");
         }
 
         ViewURLHelper url = new ViewURLHelper(getRequest(), "Project", "begin", c.getPath());

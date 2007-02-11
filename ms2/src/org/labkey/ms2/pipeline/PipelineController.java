@@ -151,7 +151,7 @@ public class PipelineController extends ViewController
             {
                 if (MS2PipelineManager.isSearchExperimentFile(file))
                 {
-                    ExperimentPipelineJob job = new ExperimentPipelineJob(info, file, description);
+                    ExperimentPipelineJob job = new ExperimentPipelineJob(info, file, description, false);
                     PipelineService.get().queueJob(job);
                 }
                 else if (MS2PipelineManager.isMs2ResultsFile(file))
@@ -1370,7 +1370,7 @@ public class PipelineController extends ViewController
                 // lives on disk, not where the generated XAR file sits. This is important for when
                 // the container's pipeline is configured to mirror the file system hierarchy.
                 ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), mzXMLFile);
-                ExperimentPipelineJob job = new ExperimentPipelineJob(info, fileInstance, dataDescription);
+                ExperimentPipelineJob job = new ExperimentPipelineJob(info, fileInstance, dataDescription, false);
                 PipelineService.get().queueJob(job);
             }
 
@@ -1749,7 +1749,7 @@ public class PipelineController extends ViewController
         PipelineService service = PipelineService.get();
         ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), tempFile);
 
-        ExperimentPipelineJob job = new ExperimentPipelineJob(info, tempFile, form.getDescription());
+        ExperimentPipelineJob job = new ExperimentPipelineJob(info, tempFile, form.getDescription(), false);
         PipelineService.get().queueJob(job);
 
         //BUGBUG: This should not happen unless upload succeeds!!

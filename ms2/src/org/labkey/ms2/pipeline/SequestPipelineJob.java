@@ -171,7 +171,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
         File fileExperimentXMLFinal = new File(_dirAnalysis, fileExperimentXML.getName());
 
         FileXarSource source = new FileXarSource(fileExperimentXMLFinal);
-        String status = ExperimentPipelineJob.loadExperiment(this, source);
+        String status = ExperimentPipelineJob.loadExperiment(this, source, false);
         _experimentRowId = source.getExperimentRowId();
 
         setStatus(status);
@@ -671,7 +671,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
 
         setStatus("LOADING");
         FileXarSource source = new FileXarSource(fileExperimentXMLFinal);
-        String status = ExperimentPipelineJob.loadExperiment(this, source);
+        String status = ExperimentPipelineJob.loadExperiment(this, source, false);
         _experimentRowId = source.getExperimentRowId();
 
         if (fileTgzFinal == null || !fileTgzFinal.delete())

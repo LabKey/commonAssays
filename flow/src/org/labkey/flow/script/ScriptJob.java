@@ -11,7 +11,6 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.util.PFUtil;
 import org.fhcrc.cpas.exp.xml.*;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpProtocolApplication;
@@ -560,7 +559,7 @@ abstract public class ScriptJob extends PipelineJob
             try
             {
                 ScriptXarSource source = new ScriptXarSource(xardoc, root, workingDirectory);
-                ExperimentService.get().loadExperiment(source, this);
+                ExperimentService.get().loadExperiment(source, this, true);
             }
             catch (Throwable t)
             {

@@ -53,7 +53,7 @@ public class RandomAccessMzxmlIterator extends AbstractMzxmlIterator
             throws IOException
     {
         this(fileName, msLevel);
-        _currScan = startingScan;
+        _currScan = startingScan - 1;
     }
 
 

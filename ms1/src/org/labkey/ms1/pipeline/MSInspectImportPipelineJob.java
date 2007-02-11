@@ -174,7 +174,7 @@ public class MSInspectImportPipelineJob extends PipelineJob
             File xarFile = writeExperiment();
             setStatus("LOADING EXPERIMENT");
             // Kick off an experiment load 
-            String status = ExperimentPipelineJob.loadExperiment(this, new FileXarSource(xarFile));
+            String status = ExperimentPipelineJob.loadExperiment(this, new FileXarSource(xarFile), false);
 
             setStatus(status);
             completeStatus = true;

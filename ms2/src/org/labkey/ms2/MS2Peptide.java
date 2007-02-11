@@ -21,12 +21,18 @@ import org.apache.log4j.Logger;
 import org.labkey.common.tools.Peptide;
 import org.labkey.common.tools.Hydrophobicity3;
 import org.labkey.common.util.Pair;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
+import org.labkey.ms2.reader.SimpleScan;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.net.URL;
+import java.net.URISyntaxException;
 
 public class MS2Peptide
 {
@@ -78,7 +84,7 @@ public class MS2Peptide
 
 
     // TODO: Move into constructor?  Or rename?  Or just do on demand (when requesting _massMatches, etc.)?
-    public void init(double tolerance, double xStart, double xEnd)
+    public void init(double tolerance, double xStart, double xEnd) throws IOException
     {
         MS2Run run = MS2Manager.getRun(_runId);
         _massTable = run.getMassTable();
@@ -89,9 +95,51 @@ public class MS2Peptide
         fragment();
 
         byte[] spectrumBytes = MS2Manager.getSpectrum(_fractionId, _scan);
-        Pair<float[], float[]> pData = SpectrumLoader.byteArrayToFloatArrays(spectrumBytes);
-        _spectrumMZ = pData.first;
-        _spectrumIntensity = pData.second;
+        if (spectrumBytes == null)
+        {
+            MS2Fraction fraction = MS2Manager.getFraction(_fractionId);
+            if (fraction != null && fraction.getMzXmlURL() != null)
+            {
+                URL url = new URL(fraction.getMzXmlURL());
+                File f;
+                try
+                {
+                    f = new File(url.toURI());
+                }
+                catch (URISyntaxException e)
+                {
+                    throw ((IOException)new IOException("Bad URI").initCause(e));
+                }
+                if (NetworkDrive.exists(f))
+                {
+                    RandomAccessMzxmlIterator iter = null;
+                    try
+                    {
+                        iter = new RandomAccessMzxmlIterator(f.getAbsolutePath(), 2, getScan());
+                        if (iter.hasNext())
+                        {
+                            SimpleScan scan = iter.next();
+                            float[][] data = scan.getData();
+                            _spectrumMZ = data[0];
+                            _spectrumIntensity = data[1];
+                        }
+                    }
+                    finally
+                    {
+                        if (iter != null)
+                        {
+                            iter.close();
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            Pair<float[], float[]> pData = SpectrumLoader.byteArrayToFloatArrays(spectrumBytes);
+            _spectrumMZ = pData.first;
+            _spectrumIntensity = pData.second;
+        }
 
         if (null != _spectrumMZ)
         {
