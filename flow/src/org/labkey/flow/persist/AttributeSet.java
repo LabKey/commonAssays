@@ -7,6 +7,7 @@ import org.fhcrc.cpas.exp.xml.DataBaseType;
 import org.labkey.api.security.User;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.DbCache;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.XMLUtil;
@@ -254,6 +255,7 @@ public class AttributeSet
                     paramsList.add(new Object[] { obj.getRowId(), mgr.getAttributeId(entry.getKey()), entry.getValue()});
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
+                DbCache.clear(mgr.getTinfoKeyword());
             }
             if (_statistics != null)
             {
@@ -264,6 +266,7 @@ public class AttributeSet
                     paramsList.add(new Object[] { obj.getRowId(), mgr.getAttributeId(entry.getKey().toString()), entry.getValue() });
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
+                DbCache.clear(mgr.getTinfoStatistic());
             }
             if (_graphs != null)
             {
@@ -274,6 +277,7 @@ public class AttributeSet
                     paramsList.add(new Object[] { obj.getRowId(), mgr.getAttributeId(entry.getKey().toString()), entry.getValue()});
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
+                DbCache.clear(mgr.getTinfoGraph());
             }
             if (fTransaction)
             {

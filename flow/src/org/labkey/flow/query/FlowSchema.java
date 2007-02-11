@@ -417,7 +417,7 @@ public class FlowSchema extends UserSchema
             colAnalysisRunCount.setURL(detailsURL + "&" + FlowParam.experimentId.toString() + "=${RowId}");
             ret.addColumn(colAnalysisRunCount);
         }
-        ret.setDetailsURL(new DetailsURL(FlowTableType.Runs.urlFor(getContainer(), QueryAction.executeQuery),
+        ret.setDetailsURL(new DetailsURL(FlowTableType.Runs.urlFor(getContainer(), (SimpleFilter) null, new Sort("ProtocolStep")),
                 Collections.singletonMap(FlowParam.experimentId.toString(), ExpExperimentTable.Column.RowId.toString())));
         SQLFragment lsidCondition = new SQLFragment("LSID <> ");
         lsidCondition.appendStringLiteral(FlowExperiment.getExperimentRunExperimentLSID(getContainer()));

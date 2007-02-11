@@ -47,7 +47,6 @@ abstract public class AttributeCache<T>
         Map<T, Integer> ret = (Map) DbCache.get(_table, key);
         if (ret != null)
             return ret;
-
         try
         {
             ResultSet rs = Table.executeQuery(FlowManager.get().getSchema(), sql);
@@ -57,8 +56,9 @@ abstract public class AttributeCache<T>
                 ret.put(keyFromString(rs.getString(2)), rs.getInt(1));
             }
             ret = Collections.unmodifiableMap(ret);
-            DbCache.put(_table, key, ret, Cache.HOUR);
             rs.close();
+
+            DbCache.put(_table, key, ret, Cache.HOUR);
             return ret;
         }
         catch (SQLException e)
@@ -66,7 +66,6 @@ abstract public class AttributeCache<T>
             _log.error("exception", e);
             return Collections.EMPTY_MAP;
         }
-
     }
 
     abstract protected T keyFromString(String str);

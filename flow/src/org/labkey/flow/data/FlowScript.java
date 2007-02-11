@@ -148,7 +148,7 @@ public class FlowScript extends FlowDataObject
 
     public String getLabel()
     {
-        return getName();
+        return "Script '" + getName() + "'";
     }
 
     public FlowObject getParent()

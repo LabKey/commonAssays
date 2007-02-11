@@ -6,11 +6,9 @@ import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineQueue;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.Overview;
 import org.labkey.api.query.QueryAction;
-import org.labkey.api.query.QueryDefinition;
-import org.labkey.api.query.QueryService;
 import org.labkey.api.exp.api.ExpSampleSet;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.controllers.FlowModule;
@@ -23,17 +21,10 @@ import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.query.FlowTableType;
-import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.util.PFUtil;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
 
 public class FlowOverview extends Overview
 {
-    User _user;
-    Container _container;
     boolean _hasPipelineRoot;
     boolean _canSetPipelineRoot;
     boolean _canInsert;
@@ -53,19 +44,18 @@ public class FlowOverview extends Overview
 
     public FlowOverview(User user, Container container) throws Exception
     {
-        _user = user;
-        _container = container;
+        super(user, container);
         PipelineService pipeService = PipelineService.get();
-        _hasPipelineRoot = pipeService.getPipelineRoot(_container) != null;
-        _canSetPipelineRoot = _container.hasPermission(_user, ACL.PERM_ADMIN);
-        _canInsert = _container.hasPermission(_user, ACL.PERM_INSERT);
-        _canUpdate = _container.hasPermission(_user, ACL.PERM_UPDATE);
-        _fcsFileCount = FlowManager.get().getObjectCount(_container, ObjectType.fcsKeywords);
-        _fcsRunCount = FlowManager.get().getRunCount(_container, ObjectType.fcsKeywords);
-        _fcsAnalysisCount = FlowManager.get().getObjectCount(_container, ObjectType.fcsAnalysis);
-        _fcsAnalysisRunCount = FlowManager.get().getRunCount(_container, ObjectType.fcsAnalysis);
-        _compensationMatrixCount = FlowManager.get().getObjectCount(_container, ObjectType.compensationMatrix);
-        _compensationRunCount = FlowManager.get().getRunCount(_container, ObjectType.compensationControl);
+        _hasPipelineRoot = pipeService.getPipelineRoot(getContainer()) != null;
+        _canSetPipelineRoot = hasPermission(ACL.PERM_ADMIN);
+        _canInsert = hasPermission(ACL.PERM_INSERT);
+        _canUpdate = hasPermission(ACL.PERM_UPDATE);
+        _fcsFileCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.fcsKeywords);
+        _fcsRunCount = FlowManager.get().getRunCount(getContainer(), ObjectType.fcsKeywords);
+        _fcsAnalysisCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.fcsAnalysis);
+        _fcsAnalysisRunCount = FlowManager.get().getRunCount(getContainer(), ObjectType.fcsAnalysis);
+        _compensationMatrixCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.compensationMatrix);
+        _compensationRunCount = FlowManager.get().getRunCount(getContainer(), ObjectType.compensationControl);
         _scripts = FlowScript.getAnalysisScripts(getContainer());
         _protocol = FlowProtocol.getForContainer(getContainer());
         for (FlowScript script : _scripts)
@@ -97,11 +87,29 @@ public class FlowOverview extends Overview
                 }
             }
         }
-    }
 
-    protected Container getContainer()
-    {
-        return _container;
+        addStep(getFCSFileStep());
+        addStep(getAnalysisScriptStep());
+        addStep(getCompensationMatrixStep());
+        addStep(getAnalyzeStep());
+        addStep(getSamplesStep());
+        if (_canUpdate)
+        {
+            PipelineQueue.JobData jobData = PipelineService.get().getPipelineQueue().getJobData(getContainer());
+            int jobCount = jobData.getPendingJobs().size() + jobData.getRunningJobs().size();
+            if (jobCount != 0)
+            {
+                Action action = new Action("Show jobs", PFUtil.urlFor(FlowController.Action.showJobs, getContainer()));
+                action.setDescriptionHTML("There are " + jobCount + " jobs running in this folder.");
+                addAction(action);
+            }
+        }
+        if (_hasPipelineRoot && _canUpdate && _protocol != null)
+        {
+            Action action = new Action("Create new folder", PFUtil.urlFor(FlowController.Action.newFolder, getContainer()));
+            action.setDescriptionHTML("<i>If you want to analyze a new set of experiment runs with a different protocol, you should create a new folder to do this work in. You can copy some of the settings from this folder.</i>");
+            addAction(action);
+        }
     }
 
     private Action getPipelineRootAction()
@@ -111,7 +119,7 @@ public class FlowOverview extends Overview
         StringBuilder description = new StringBuilder("The pipeline root tells " + FlowModule.getLongProductName() + " where in the file system FCS files are permitted to be loaded from.");
         if (_canSetPipelineRoot)
         {
-            ViewURLHelper urlPipelineRoot = new ViewURLHelper("Pipeline", "setup", _container);
+            ViewURLHelper urlPipelineRoot = new ViewURLHelper("Pipeline", "setup", getContainer());
             if (_hasPipelineRoot)
             {
                 Action ret = new Action("Change pipeline root", urlPipelineRoot);
@@ -135,13 +143,13 @@ public class FlowOverview extends Overview
     private Action getBrowseForFCSFilesAction()
     {
         if (!_hasPipelineRoot || !_canInsert) return null;
-        ViewURLHelper urlUploadFCSFiles = new ViewURLHelper("Pipeline", "browse", _container);
+        ViewURLHelper urlUploadFCSFiles = new ViewURLHelper("Pipeline", "browse", getContainer());
         return new Action(_fcsFileCount == 0 ? "Browse for FCS files to be loaded" : "Browse for more FCS files to be loaded", urlUploadFCSFiles);
     }
 
     private Step getFCSFileStep()
     {
-        Step ret = new Step("Load FCS Files", _fcsFileCount == 0 ? Step.Status.undone : Step.Status.completed);
+        Step ret = new Step("Load FCS Files", _fcsFileCount == 0 ? Step.Status.required : Step.Status.normal);
         if (_fcsFileCount != 0)
         {
             StringBuilder status = new StringBuilder();
@@ -168,7 +176,7 @@ public class FlowOverview extends Overview
         Step.Status status;
         if (_scriptAnalysis != null)
         {
-            status = Step.Status.completed;
+            status = Step.Status.normal;
         }
         else
         {
@@ -178,7 +186,7 @@ public class FlowOverview extends Overview
             }
             else
             {
-                status = Step.Status.undone;
+                status = Step.Status.required;
             }
         }
         Step ret = new Step("Create Analysis Script", status);
@@ -233,9 +241,9 @@ public class FlowOverview extends Overview
             if (_compensationSeparateStep)
             {
                 if (_compensationMatrixCount == 0)
-                    status = Step.Status.undone;
+                    status = Step.Status.required;
                 else
-                    status = Step.Status.completed;
+                    status = Step.Status.normal;
             }
             else
             {
@@ -304,11 +312,11 @@ public class FlowOverview extends Overview
         {
             if (_fcsAnalysisCount == 0)
             {
-                stepStatus = Step.Status.undone;
+                stepStatus = Step.Status.required;
             }
             else
             {
-                stepStatus = Step.Status.completed;
+                stepStatus = Step.Status.normal;
             }
         }
         
@@ -373,34 +381,5 @@ public class FlowOverview extends Overview
             ret.addAction(new Action("Other settings", protocol.urlShow()));
         }
         return ret;
-    }
-
-    public String toString()
-    {
-        List<Step> steps = new ArrayList();
-        List<Action> miscActions = new ArrayList();
-        steps.add(getFCSFileStep());
-        steps.add(getAnalysisScriptStep());
-        steps.add(getCompensationMatrixStep());
-        steps.add(getAnalyzeStep());
-        steps.add(getSamplesStep());
-        if (_canUpdate)
-        {
-            PipelineQueue.JobData jobData = PipelineService.get().getPipelineQueue().getJobData(getContainer());
-            int jobCount = jobData.getPendingJobs().size() + jobData.getRunningJobs().size();
-            if (jobCount != 0)
-            {
-                Action action = new Action("Show jobs", PFUtil.urlFor(FlowController.Action.showJobs, getContainer()));
-                action.setDescriptionHTML("There are " + jobCount + " jobs running in this folder.");
-                miscActions.add(action);
-            }
-        }
-        if (_hasPipelineRoot && _canUpdate && _protocol != null)
-        {
-            Action action = new Action("Create new folder", PFUtil.urlFor(FlowController.Action.newFolder, getContainer()));
-            action.setDescriptionHTML("<i>If you want to analyze a new set of experiment runs with a different protocol, you should create a new folder to do this work in. You can copy some of the settings from this folder.");
-            miscActions.add(action);
-        }
-        return formatOverview("Flow Experiment Management", null, steps, miscActions);
     }
 }

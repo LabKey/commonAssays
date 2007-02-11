@@ -1,5 +1,7 @@
 package org.labkey.flow.controllers.editscript;
 
+import org.labkey.flow.data.FlowWell;
+
 public class EditGatesForm extends EditScriptForm
 {
     public String subset;
@@ -29,5 +31,10 @@ public class EditGatesForm extends EditScriptForm
     public void setPtY(double[] ptY)
     {
         this.ptY = ptY;
+    }
+
+    public FlowWell getWell() throws Exception
+    {
+        return FlowWell.fromURL(getContext().getViewURLHelper(), getRequest());
     }
 }

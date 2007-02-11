@@ -3,44 +3,26 @@
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.controllers.FlowModule" %>
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
-<form method="POST" action="<%=formAction(ScriptController.Action.editCompensationCalculation)%>"
-      enctype="multipart/form-data">
-    <p>
-        The compensation calculation tells <%=FlowModule.getLongProductName()%> how
-        to identify the compensation controls in an experiment run, and what gates
-        to apply.  A compensation control is identified as having a particular value
-        for a specific keyword.
-    </p>
-
-    <p>
-        The normal way to define the compensation calculation is to upload a Flow Jo XML workspace<br>
-        <input type="file" name="workspaceFile"><br>
-        This workspace should contain only one set of compensation controls.</p>
-        <% FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-            if (runs.length > 0) { %>
-    <p>Another way to specify which keywords identify the compensation controls is to
-        choose an existing experiment run.  You can use this if you have
-        used the online gate editor to define the gates.<br>
-        <select name="selectedRunId">
-            <option value="0"></option>
-            <% for (FlowRun run : runs)
-            { %>
-            <option value="<%=run.getRunId()%>"><%=h(run.getName())%></option>
-            <% } %>
-        </select>
-    </p>
-        <% } %>
-        <input type="submit" value="Submit">
-</form>
+<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%!
+    String subsetLink(String subset)
+    {
+        if (StringUtils.isEmpty(subset))
+        {
+            return "Ungated";
+        }
+        ViewURLHelper ret = form.analysisScript.urlFor(ScriptController.Action.editGates, FlowProtocolStep.calculateCompensation);
+        ret.addParameter("subset", subset);
+        return "<a href=\"" + h(ret) + "\">" + h(subset) + "</a>";
+    }
+%>
 
 <%  CompensationCalculationDef calc = compensationCalculationDef();
-    if (calc == null)
+    if (calc != null)
     {
-%><p>There is no compensation calculation defined.</p>
-<% }
-else
-{
 %>
 <table class="normal" border="1"><tr><th rowspan="2">Channel</th><th colspan="3">Positive</th><th colspan="3">
     Negative</th></tr>
@@ -54,12 +36,20 @@ else
     <tr><td><%=h(channel)%></td>
         <td><%=h(form.positiveKeywordName[i])%></td>
         <td><%=h(form.positiveKeywordValue[i])%></td>
-        <td><%=h(form.positiveSubset[i])%></td>
+        <td><%=subsetLink(form.positiveSubset[i])%></td>
         <td><%=h(form.negativeKeywordName[i])%></td>
         <td><%=h(form.negativeKeywordValue[i])%></td>
-        <td><%=h(form.negativeSubset[i])%></td>
+        <td><%=subsetLink(form.negativeSubset[i])%></td>
     </tr>
     <% } %>
 </table>
 <% } %>
-</form>
+<% if (form.canEdit()) { %>
+    <p>
+        This compensation calculation may be edited in a number of ways:<br>
+        <cpas:link text="Upload a Flow Jo workspace" href="<%=form.analysisScript.urlFor(ScriptController.Action.uploadCompensationCalculation)%>" /><br>
+        <cpas:link text="Switch keywords or gates" href="<%=form.analysisScript.urlFor(ScriptController.Action.chooseCompensationRun)%>" /><br>
+        <cpas:link text="Move or define gates" href="<%=form.analysisScript.urlFor(ScriptController.Action.editGates, FlowProtocolStep.calculateCompensation)%>" /><br>
+        <cpas:link href="<%=form.analysisScript.urlFor(ScriptController.Action.editGateTree, FlowProtocolStep.calculateCompensation)%>" text="Rename gates" /><br>
+    </p>
+<% } %>

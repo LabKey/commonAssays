@@ -22,6 +22,6 @@ public class OverviewWebPart extends HtmlView
     public OverviewWebPart(ViewContext portalCtx) throws Exception
     {
         super(new FlowOverview(portalCtx.getUser(), portalCtx.getContainer()).toString());
-        setTitle("Flow Overview");
+        setTitle("Experiment Management");
     }
 }

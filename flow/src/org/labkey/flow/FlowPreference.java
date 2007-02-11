@@ -10,7 +10,12 @@ import org.labkey.flow.controllers.FlowController;
 
 public enum FlowPreference
 {
-    graphSize("300");
+    graphSize("300"),
+    editScriptRunId(null),
+    editScriptCompId(null),
+    editScriptWellId(null)
+    ;
+
     FlowPreference(String defValue)
     {
         _defValue = defValue;

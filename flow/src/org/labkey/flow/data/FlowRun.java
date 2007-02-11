@@ -18,8 +18,16 @@ import java.io.File;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.analysis.model.FCSKeywordData;
+import org.labkey.flow.analysis.model.PopulationSet;
+import org.labkey.flow.analysis.model.CompensationCalculation;
+import org.labkey.flow.analysis.model.SampleCriteria;
+import org.labkey.flow.analysis.web.FCSRef;
+import org.labkey.flow.analysis.web.FCSAnalyzer;
+import org.labkey.flow.script.FlowAnalyzer;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 public class FlowRun extends FlowObject<ExpRun>
 {
@@ -156,15 +164,17 @@ public class FlowRun extends FlowObject<ExpRun>
 
     static public FlowRun fromURL(ViewURLHelper url) throws ServletException
     {
-        String strRunId = url.getParameter("runId");
-        if (strRunId == null)
-            return null;
-        FlowRun ret = fromRunId(Integer.valueOf(strRunId));
-        if (ret == null)
-            return null;
-
-        ret.checkContainer(url);
+        return fromURL(url, null);
+    }
+    static public FlowRun fromURL(ViewURLHelper url, HttpServletRequest request) throws ServletException
+    {
+        FlowRun ret = fromRunId(getIntParam(url, request, FlowParam.runId));
+        if (ret != null)
+        {
+            ret.checkContainer(url);
+        }
         return ret;
+
     }
 
     public String getAnalysisScript() throws SQLException
@@ -271,6 +281,7 @@ public class FlowRun extends FlowObject<ExpRun>
         if (protocol == null)
             return getWells();
         FlowSchema schema = new FlowSchema(null, getContainer());
+        schema.setRun(this);
         TableInfo table = schema.createFCSFileTable("FCSFiles");
         ColumnInfo colRowId = table.getColumn("RowId");
         List<FlowWell> ret = new ArrayList();
@@ -285,5 +296,70 @@ public class FlowRun extends FlowObject<ExpRun>
         }
         rs.close();
         return ret.toArray(new FlowWell[0]);
+    }
+
+    private void addMatchingWell(Map<Integer, String> map, String label, SampleCriteria criteria, FlowWell[] wells, FCSKeywordData[] datas)
+    {
+        for (int i = 0; i < datas.length; i ++)
+        {
+            FCSKeywordData data = datas[i];
+            if (data == null)
+                continue;
+
+            if (criteria.matches(data))
+            {
+                FlowWell well = wells[i];
+                if (map.containsKey(well.getWellId()))
+                    return;
+                label += " (" + well.getName() + ")";
+                map.put(well.getRowId(), label);
+                return;
+            }
+        }
+    }
+
+    public Map<Integer, String> getWells(FlowProtocol protocol, PopulationSet popset, FlowProtocolStep step) throws Exception
+    {
+        FlowWell[] wells = getWells();
+        Map<Integer, String> ret = new LinkedHashMap();
+        if (step == FlowProtocolStep.calculateCompensation)
+        {
+            CompensationCalculation calc = (CompensationCalculation) popset;
+            FCSKeywordData[] keywordData = new FCSKeywordData[wells.length];
+            for (int i = 0; i < keywordData.length; i ++)
+            {
+                keywordData[i] = FCSAnalyzer.get().readAllKeywords(FlowAnalyzer.getFCSRef(wells[i]));
+            }
+            for (int i = 0; i < calc.getChannelCount(); i ++)
+            {
+                CompensationCalculation.ChannelInfo info = calc.getChannelInfo(i);
+                addMatchingWell(ret, info.getName() + "+", info.getPositive().getCriteria(), wells, keywordData);
+                addMatchingWell(ret, info.getName() + "-", info.getNegative().getCriteria(), wells, keywordData);
+            }
+            for (FlowWell well : wells)
+            {
+                if (ret.containsKey(well.getRowId()))
+                    continue;
+                ret.put(well.getRowId(), well.getName());
+            }
+        }
+        else
+        {
+            if (protocol != null)
+            {
+                FlowWell[] wellsToBeAnalyzed = getWellsToBeAnalyzed(protocol);
+                for (FlowWell well : wellsToBeAnalyzed)
+                {
+                    ret.put(well.getRowId(), protocol.getFCSAnalysisName(well));
+                }
+            }
+            for (FlowWell well : wells)
+            {
+                if (ret.containsKey(well.getRowId()))
+                    continue;
+                ret.put(well.getRowId(), well.getName());
+            }
+        }
+        return ret;
     }
 }

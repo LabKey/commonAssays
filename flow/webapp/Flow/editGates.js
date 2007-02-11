@@ -11,7 +11,11 @@ var g_graphOptions = {
 function reloadGraph()
 {
     var elGraph = document.getElementById("graph");
-    if (!g_graphOptions.subset || !g_graphOptions.xAxis)
+    if (!g_graphOptions.subset)
+    {
+        return;
+    }
+    if (!g_graphOptions.xAxis)
     {
         elGraph.src = "about:blank";
         return;
@@ -266,6 +270,7 @@ function createNewPopulation()
     g_graphOptions.yAxis = null;
     g_graphOptions.points = [];
     g_graphOptions.complexGate = false;
+    g_graphOptions.intervalGate = false;
     updateAll();
 }
 function initGraph(subset, xAxis, yAxis)
@@ -277,6 +282,7 @@ function initGraph(subset, xAxis, yAxis)
     else
     {
         document.getElementById("polygon").innerHTML = '';
+        document.getElementById("graph").src = g_urlInstructions;
     }
 }
 

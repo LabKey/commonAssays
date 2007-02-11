@@ -2,6 +2,7 @@
 <%@ page import="java.util.List"%>
 <%@ page import="java.util.Map"%>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
+<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
 <%=pageHeader(ScriptController.Action.editAnalysis)%>
 <% ScriptController.AnalysisForm bean = (ScriptController.AnalysisForm) form; %>
 <%Map<String,String> params = form.getParameters();
@@ -78,10 +79,6 @@
 </script>
 
 <form method="post" action="<%=formAction(ScriptController.Action.editAnalysis)%>">
-    <p class="normal">
-        Should this analysis be performed on all FCS files in the run, or only those where a keyword matches a particular value?<br>
-        Keyword: <input name="analysisKeywordName" type="text" value="<%=h(bean.analysisKeywordName)%>"> matches: <input name="analysisKeywordPattern" type="text" value="<%=h(bean.analysisKeywordPattern)%>">
-    </p>
     <p class="normal">Which statistics do you want to calculate? Enter one statistic per line.<br>
         <textarea name="statistics" rows="10" cols="60" wrap="off"><%=h(bean.statistics)%></textarea><br>
         <table>

@@ -6,8 +6,8 @@ import org.labkey.flow.data.*;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowPropertySet;
-import org.labkey.flow.query.FlowTableType;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.security.ACL;
 import org.apache.struts.action.ActionMapping;
 import org.apache.log4j.Logger;
 
@@ -21,6 +21,8 @@ import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.FCSRef;
 import org.labkey.flow.script.FlowAnalyzer;
+import org.labkey.flow.FlowPreference;
+import org.labkey.flow.controllers.FlowParam;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -31,11 +33,11 @@ public class EditScriptForm extends ViewForm
     private static int MAX_WELLS_TO_POLL = 15;
 
     public FlowScript analysisScript;
-    public FlowRun run;
-    public FlowWell well;
-    public FlowCompensationMatrix comp;
     public ScriptDocument analysisDocument;
     public FlowProtocolStep step;
+    private int _runCount;
+    private FlowCompensationMatrix _comp;
+    private FlowRun _run;
 
     public void reset(ActionMapping mapping, HttpServletRequest request)
     {
@@ -43,25 +45,22 @@ public class EditScriptForm extends ViewForm
         {
             super.reset(mapping, request);
             analysisScript = FlowScript.fromScriptId(Integer.valueOf(request.getParameter("scriptId")));
+            _runCount = analysisScript.getRunCount();
             step = FlowProtocolStep.fromRequest(request);
-            String strRunId = request.getParameter("runId");
-            if (strRunId != null)
+            _run = FlowRun.fromURL(getContext().getViewURLHelper(), getRequest());
+            if (_run != null)
             {
-                run = FlowRun.fromRunId(Integer.valueOf(strRunId));
+                FlowPreference.editScriptRunId.setValue(request, Integer.toString(_run.getRunId()));
             }
-            String strWellId = request.getParameter("wellId");
+            _comp = FlowCompensationMatrix.fromURL(getContext().getViewURLHelper(), getRequest());
+            if (_comp != null)
+            {
+                FlowPreference.editScriptCompId.setValue(request, Integer.toString(_comp.getRowId()));
+            }
+            String strWellId = request.getParameter(FlowParam.wellId.toString());
             if (strWellId != null)
             {
-                well = FlowWell.fromWellId(Integer.valueOf(strWellId));
-            }
-            String strCompId = request.getParameter("compId");
-            if (strCompId != null)
-            {
-                comp = FlowCompensationMatrix.fromCompId(Integer.valueOf(strCompId));
-            }
-            if (run == null && well != null)
-            {
-                run = well.getRun();
+                FlowPreference.editScriptWellId.setValue(request, strWellId);
             }
         }
         catch (Exception e)
@@ -105,40 +104,53 @@ public class EditScriptForm extends ViewForm
 
     public FlowRun getRun()
     {
-        if (run != null)
-            return run;
+        if (_run != null)
+            return _run;
+        int runId = FlowPreference.editScriptRunId.getIntValue(getRequest());
+        FlowRun run = FlowRun.fromRunId(runId);
+        if (run != null && run.getContainer().equals(getContainer()))
+        {
+            _run = run;
+            return _run;
+        }
         try
         {
             FlowRun[] available = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-            if (available.length == 0)
-                return null;
-            run = available[0];
-            return run;
+            if (available.length != 0)
+            {
+                _run = available[0];
+            }
         }
         catch (Throwable t)
         {
             _log.error("Error", t);
-            return run;
         }
+        return _run;
     }
 
     public FlowCompensationMatrix getCompensationMatrix()
     {
-        if (comp != null)
-            return comp;
+        if (_comp != null)
+            return _comp;
+        int compId = FlowPreference.editScriptCompId.getIntValue(getRequest());
+        FlowCompensationMatrix comp = FlowCompensationMatrix.fromCompId(compId);
+        if (comp != null && comp.getContainer().equals(getContainer()))
+        {
+            _comp = comp;
+            return _comp;
+        }
         try
         {
             List matrices = FlowCompensationMatrix.getCompensationMatrices(getContainer());
             if (matrices.size() == 0)
                 return null;
-            comp = (FlowCompensationMatrix) matrices.get(0);
-            return comp;
+            _comp = (FlowCompensationMatrix) matrices.get(0);
         }
         catch (Throwable t)
         {
             _log.error("Error", t);
-            return comp;
         }
+        return _comp;
     }
 
     public Map<String, String> getParameters()
@@ -150,13 +162,7 @@ public class EditScriptForm extends ViewForm
             {
                 if (getRun() != null)
                 {
-                    FlowCompensationMatrix matrix = getRun().getCompensationMatrix();
-                    if (matrix == null)
-                    {
-                        List<FlowCompensationMatrix> matrices = FlowCompensationMatrix.getCompensationMatrices(getContainer());
-                        if (matrices.size() > 0)
-                            matrix = matrices.get(0);
-                    }
+                    FlowCompensationMatrix matrix = getCompensationMatrix();
                     if (matrix != null)
                     {
                         compChannels = matrix.getCompensationMatrix().getChannelNames();
@@ -200,18 +206,6 @@ public class EditScriptForm extends ViewForm
     public ViewURLHelper urlFor(ScriptController.Action action)
     {
         ViewURLHelper url = analysisScript.urlFor(action);
-        if (run != null)
-        {
-            run.addParams(url);
-        }
-        if (well != null)
-        {
-            well.addParams(url);
-        }
-        if (comp != null)
-        {
-            comp.addParams(url);
-        }
         if (step != null)
         {
             step.addParams(url);
@@ -240,45 +234,19 @@ public class EditScriptForm extends ViewForm
         Arrays.sort(ret);
         return ret;
     }
-    public String getWellLabel(FlowWell well)
-    {
-        if (step == FlowProtocolStep.calculateCompensation)
-        {
-            try
-            {
-                CompensationCalculation calc = (CompensationCalculation) this.analysisScript.getCompensationCalcOrAnalysis(FlowProtocolStep.calculateCompensation);
-                FCSRef fcsRef = FlowAnalyzer.getFCSRef(well);
-                FCSKeywordData fkd = FCSAnalyzer.get().readAllKeywords(fcsRef);
-                for (int i = 0; i < calc.getChannelCount(); i ++)
-                {
-                    CompensationCalculation.ChannelInfo ci = calc.getChannelInfo(i);
-                    if (ci.getPositive().getCriteria().matches(fkd))
-                    {
-                        return ci.getName() + "+ (" + well.getName() + ")";
-                    }
-                    if (ci.getNegative().getCriteria().matches(fkd))
-                    {
-                        return ci.getName() + "- (" + well.getName() + ")";
-                    }
-                }
-            }
-            catch (Exception e)
-            {
 
-            }
-        }
-        FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
-        if (protocol != null)
+    public boolean canEdit()
+    {
+        return getContainer().hasPermission(getUser(), ACL.PERM_UPDATE) && _runCount == 0;
+    }
+
+    public Map<Integer, String> getExperimentRuns() throws Exception
+    {
+        LinkedHashMap<Integer, String> ret = new LinkedHashMap();
+        for (FlowRun run : FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords))
         {
-            try
-            {
-                return protocol.getFCSAnalysisName(well);
-            }
-            catch (SQLException e)
-            {
-                //
-            }
+            ret.put(run.getRunId(), run.getName());
         }
-        return well.getName();
+        return ret;
     }
 }

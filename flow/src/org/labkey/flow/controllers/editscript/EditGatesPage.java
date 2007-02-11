@@ -22,7 +22,7 @@ abstract public class EditGatesPage extends ScriptController.Page<EditGatesForm>
             comp = form.getCompensationMatrix().getCompensationMatrix();
         }
 
-        Map<String, String> params = FlowAnalyzer.getParameters(form.well, comp);
+        Map<String, String> params = FlowAnalyzer.getParameters(form.getWell(), comp);
 
 
         return params;

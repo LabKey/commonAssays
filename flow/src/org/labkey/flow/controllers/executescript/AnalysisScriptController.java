@@ -41,8 +41,9 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
     protected Forward begin() throws Exception
     {
         requiresPermission(ACL.PERM_READ);
-        Page page = getPage("main.jsp");
-        return includeView(new HomeTemplate(getViewContext(), new JspView(page), getNavTrailConfig(page.getScript(), null, Action.begin)));
+        FlowScript script = FlowScript.fromURL(getViewURLHelper(), getRequest());
+        ScriptOverview overview = new ScriptOverview(getUser(), getContainer(), script);
+        return includeView(new HomeTemplate(getViewContext(), new HtmlView(overview.toString()), getNavTrailConfig(script, null, Action.begin)));
     }
 
     protected Page getPage(String name) throws Exception

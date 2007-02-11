@@ -8,6 +8,7 @@ import org.labkey.api.query.QueryAction;
 import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
 import org.labkey.api.util.PageFlowUtil;
 
 import java.util.Map;
@@ -50,11 +51,23 @@ public enum FlowTableType
 
     public ViewURLHelper urlFor(Container container, SimpleFilter filter)
     {
+        return urlFor(container, filter, null);
+    }
+
+    public ViewURLHelper urlFor(Container container, SimpleFilter filter, Sort sort)
+    {
         ViewURLHelper ret = urlFor(container, QueryAction.executeQuery);
-        String strQuery = filter.toQueryString(FlowQueryView.DATAREGIONNAME_DEFAULT);
-        for (Map.Entry<String, String> entry : PageFlowUtil.fromQueryString(strQuery))
+        if (filter != null)
         {
-            ret.addParameter(entry.getKey(), entry.getValue());
+            String strQuery = filter.toQueryString(FlowQueryView.DATAREGIONNAME_DEFAULT);
+            for (Map.Entry<String, String> entry : PageFlowUtil.fromQueryString(strQuery))
+            {
+                ret.addParameter(entry.getKey(), entry.getValue());
+            }
+        }
+        if (sort != null)
+        {
+            ret.addParameter(FlowQueryView.DATAREGIONNAME_DEFAULT + ".sort", sort.getSortParamValue());
         }
         return ret;
     }

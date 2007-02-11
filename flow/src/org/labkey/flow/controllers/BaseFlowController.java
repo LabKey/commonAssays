@@ -69,7 +69,7 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
 
         if (context.getContainer().getFolderType() instanceof FlowFolderType)
         {
-            children.add(0, new NavTree("Flow Dashboard", new ViewURLHelper("Project", "begin", context.getContainer())));
+            children.add(0, new NavTree("Dashboard", new ViewURLHelper("Project", "begin", context.getContainer())));
         }
         else
         {

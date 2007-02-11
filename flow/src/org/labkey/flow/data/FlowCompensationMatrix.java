@@ -30,7 +30,8 @@ public class FlowCompensationMatrix extends FlowDataObject
     static public FlowCompensationMatrix fromURL(ViewURLHelper url, HttpServletRequest request) throws Exception
     {
         FlowCompensationMatrix ret = fromCompId(getIntParam(url, request, FlowParam.compId));
-        ret.checkContainer(url);
+        if (ret != null)
+            ret.checkContainer(url);
         return ret;
     }
 

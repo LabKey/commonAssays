@@ -1,4 +1,6 @@
-<%@ page import="java.util.Map"%><%@ page import="org.labkey.flow.analysis.web.SubsetSpec"%><%@ page import="org.labkey.flow.analysis.model.*"%><%@ page import="org.labkey.flow.data.FlowWell"%><%@ page import="org.labkey.flow.script.FlowAnalyzer"%><%@ page import="org.labkey.flow.analysis.web.FCSAnalyzer"%><%@page contentType="text/javascript"%>
+<%@ page import="java.util.Map"%>
+<%@ page import="org.labkey.flow.analysis.web.SubsetSpec"%>
+<%@ page import="org.labkey.flow.analysis.model.*"%><%@ page import="org.labkey.flow.data.FlowWell"%><%@ page import="org.labkey.flow.script.FlowAnalyzer"%><%@ page import="org.labkey.flow.analysis.web.FCSAnalyzer"%><%@page contentType="text/javascript"%>
 <%@page extends="org.labkey.flow.controllers.editscript.EditGatesPage" %>
 <%!
 String jsGate(Population pop)
@@ -52,7 +54,6 @@ String q(Object val)
     return "'" + val + "'";
 }
 %>
-var wellId = <%=form.well.getWellId()%>;
 var scriptId = <%=form.analysisScript.getScriptId()%>;
 var parameters = [];
 
@@ -81,9 +82,9 @@ var subsetWellMap = {};
 <%
 // For the compensation calculation, we want to automatically select the right sample if they pick a gate which is used
 // for a particular channel.
-if (analysis instanceof CompensationCalculation && form.run != null)
+if (analysis instanceof CompensationCalculation && form.getRun() != null)
 {
-    FlowWell[] wells = form.run.getWells();
+    FlowWell[] wells = form.getRun().getWells();
     FCSKeywordData[] data = new FCSKeywordData[wells.length];
     for (int i = 0; i < wells.length; i ++)
     {

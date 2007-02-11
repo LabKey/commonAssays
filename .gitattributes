@@ -150,7 +150,7 @@ flow/src/org/labkey/flow/controllers/editscript/ScriptController.java -text
 flow/src/org/labkey/flow/controllers/editscript/TemplatePage.java -text
 flow/src/org/labkey/flow/controllers/editscript/UploadAnalysisForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/analysisJS.jsp -text
-flow/src/org/labkey/flow/controllers/editscript/chooseSample.jsp -text
+flow/src/org/labkey/flow/controllers/editscript/chooseCompensationRun.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/copy.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/delete.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/editAnalysis.jsp -text
@@ -161,15 +161,16 @@ flow/src/org/labkey/flow/controllers/editscript/editProperties.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/editRun.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/editScript.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/graphWindow.jsp -text
-flow/src/org/labkey/flow/controllers/editscript/main.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/newProtocol.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/showCompensationCalculation.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/template.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/uploadAnalysis.jsp -text
+flow/src/org/labkey/flow/controllers/editscript/uploadCompensationCalculation.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/AnalysisScriptController.java -text
 flow/src/org/labkey/flow/controllers/executescript/ChooseRunsToAnalyzeForm.java -text
 flow/src/org/labkey/flow/controllers/executescript/ChooseRunsToUploadForm.java -text
 flow/src/org/labkey/flow/controllers/executescript/ChooseRunsView.java -text
+flow/src/org/labkey/flow/controllers/executescript/ScriptOverview.java -text
 flow/src/org/labkey/flow/controllers/executescript/chooseAnalysisName.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/chooseRunsToAnalyze.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/chooseRunsToUpload.jsp -text
@@ -269,7 +270,6 @@ flow/src/org/labkey/flow/webparts/AnalysisScriptTypeColumn.java -text
 flow/src/org/labkey/flow/webparts/AnalysisScriptsWebPart.java -text
 flow/src/org/labkey/flow/webparts/FlowFolderType.java -text
 flow/src/org/labkey/flow/webparts/FlowOverview.java -text
-flow/src/org/labkey/flow/webparts/Overview.java -text
 flow/src/org/labkey/flow/webparts/OverviewWebPart.java -text
 flow/webapp/Flow/blankGraphWindow.html -text
 flow/webapp/Flow/editCompensationCalculation.js -text

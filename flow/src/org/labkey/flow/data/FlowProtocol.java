@@ -497,4 +497,53 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     {
         setProperty(user, FlowProperty.FCSAnalysisFilter.getPropertyDescriptor(), value);
     }
+
+    public String getProtocolSettingsDescription()
+    {
+        List<String> parts = new ArrayList();
+        if (getSampleSetJoinFields().size() != 0)
+        {
+            parts.add("Sample set join fields");
+        }
+        if (getFCSAnalysisFilterString() != null)
+        {
+            parts.add("FCSAnalysis filter");
+        }
+        if (getFCSAnalysisNameExpr() != null)
+        {
+            parts.add("FCSAnalysis name setting");
+        }
+        if (parts.size() == 0)
+            return null;
+        StringBuilder ret = new StringBuilder("Protocol Settings (");
+        if (parts.size() ==1)
+        {
+            ret.append(parts.get(0));
+        }
+        else
+        {
+            for (int i = 0; i < parts.size(); i++)
+            {
+                if (i != 0)
+                {
+                    if (i != parts.size() - 1)
+                    {
+                        ret.append(", ");
+                    }
+                    else
+                    {
+                        ret.append(" and ");
+                    }
+                }
+                ret.append(parts.get(i));
+            }
+        }
+        ret.append(")");
+        return ret.toString();
+    }
+
+    public String getLabel()
+    {
+        return "Protocol '" + getName() + "'";
+    }
 }

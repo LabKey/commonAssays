@@ -24,7 +24,6 @@ import org.labkey.flow.analysis.web.*;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.util.PFUtil;
@@ -42,8 +41,6 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
-import java.text.NumberFormat;
-import java.text.DecimalFormat;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class ScriptController extends BaseFlowController
@@ -55,13 +52,14 @@ public class ScriptController extends BaseFlowController
     public enum Action
     {
         begin,
-        chooseSample,
         editScript,
         newProtocol,
         editRun,
         editProperties,
         editCompensationCalculation,
+        showCompensationCalulation,
         uploadCompensationCalculation,
+        chooseCompensationRun,
         editAnalysis,
         editGateTree,
         editGates,
@@ -77,9 +75,12 @@ public class ScriptController extends BaseFlowController
     @Jpf.Action
     protected Forward begin(EditScriptForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_UPDATE);
-        Page page = getPage("main.jsp", form);
-        return renderInTemplate(page, "Choose editor", Action.begin);
+        FlowScript script = form.analysisScript;
+        if (script == null)
+        {
+            return new ViewForward(PFUtil.urlFor(FlowController.Action.begin, getContainer()));
+        }
+        return new ViewForward(script.urlShow());
     }
 
     @Jpf.Action
@@ -176,16 +177,7 @@ public class ScriptController extends BaseFlowController
         FlowScript script = FlowScript.create(getUser(), getContainer(), form.ff_name, doc.toString());
 
 
-        ViewURLHelper forward;
-        if (isEmptyScript(script))
-        {
-            forward = script.urlFor(Action.begin);
-        }
-        else
-        {
-            forward = script.urlFor(AnalysisScriptController.Action.begin);
-        }
-
+        ViewURLHelper forward = script.urlShow();
         putParam(forward, FlowParam.scriptId, script.getScriptId());
         return new ViewForward(forward);
     }
@@ -364,15 +356,9 @@ public class ScriptController extends BaseFlowController
             {
                 analysis.removeCriteria(analysis.getCriteriaArray().length - 1);
             }
-            if (!StringUtils.isEmpty(form.analysisKeywordName))
-            {
-                CriteriaDef criteria = analysis.addNewCriteria();
-                criteria.setKeyword(form.analysisKeywordName);
-                criteria.setPattern(form.analysisKeywordPattern);
-            }
             if (!safeSetAnalysisScript(form.analysisScript, doc.toString()))
                 return null;
-            return new ViewForward(form.urlFor(Action.begin));
+            return new ViewForward(form.analysisScript.urlShow());
         }
         catch (FlowException e)
         {
@@ -384,11 +370,6 @@ public class ScriptController extends BaseFlowController
     protected Forward renderInTemplate(Page page, String title, Action action) throws Exception
     {
         NavTrailConfig ntc = getFlowNavConfig(getViewContext(), page.getScript(), title, action);
-        List<NavTree> children = new ArrayList(Arrays.asList(ntc.getExtraChildren()));
-        ViewURLHelper urlBegin = page.form.urlFor(Action.begin);
-        if (action != Action.begin)
-            children.add(new NavTree("Choose editor", urlBegin));
-        ntc.setExtraChildren(children.toArray(new NavTree[0]));
         TemplatePage templatePage = (TemplatePage) getPage("template.jsp", page.form);
         templatePage.body = page;
         templatePage.curAction = action;
@@ -461,8 +442,6 @@ public class ScriptController extends BaseFlowController
 
     public static class AnalysisForm extends EditScriptForm
     {
-        public String analysisKeywordName;
-        public String analysisKeywordPattern;
         public String statistics;
         public String graphs;
 
@@ -489,24 +468,7 @@ public class ScriptController extends BaseFlowController
                 graphs.add(FlowAnalyzer.makeGraphSpec(graph));
             }
             this.graphs = StringUtils.join(graphs.iterator(), "\n");
-            CriteriaDef[] arrCriteria = analysis.getCriteriaArray();
-            if (arrCriteria.length > 0)
-            {
-                CriteriaDef criteria = arrCriteria[arrCriteria.length - 1];
-                analysisKeywordName = criteria.getKeyword();
-                analysisKeywordPattern = criteria.getPattern();
-            }
         }
-        public void setAnalysisKeywordName(String analysisKeywordName)
-        {
-            this.analysisKeywordName = analysisKeywordName;
-        }
-
-        public void setAnalysisKeywordPattern(String analysisKeywordPattern)
-        {
-            this.analysisKeywordPattern = analysisKeywordPattern;
-        }
-
         public void setGraphs(String graphs)
         {
             this.graphs = graphs;
@@ -655,6 +617,28 @@ public class ScriptController extends BaseFlowController
         return handleWorkspaceUpload(form.workspaceFile, EnumSet.noneOf(FlowJoWorkspace.StatisticSet.class));
     }
 
+    @Jpf.Action
+    protected Forward uploadCompensationCalculation(EditCompensationCalculationForm form) throws Exception
+    {
+        requiresPermission(ACL.PERM_UPDATE);
+        if (isPost())
+        {
+            return editCompensationCalculation(form);
+        }
+        return renderInTemplate(getPage("uploadCompensationCalculation.jsp", form), "Upload Flow Jo Workspace compensation", Action.uploadCompensationCalculation);
+    }
+
+    @Jpf.Action
+    protected Forward chooseCompensationRun(EditCompensationCalculationForm form) throws Exception
+    {
+        requiresPermission(ACL.PERM_UPDATE);
+        if (isPost())
+        {
+            return editCompensationCalculation(form);
+        }
+        return renderInTemplate(getPage("chooseCompensationRun.jsp", form), "Choose run for compensation", Action.chooseCompensationRun);
+    }
+
     protected Forward doUploadAnalysis(UploadAnalysisForm form) throws Exception
     {
         FlowJoWorkspace newWorkspace = handleWorkspaceUpload(form.workspaceFile, form.ff_statisticSet);
@@ -754,7 +738,7 @@ public class ScriptController extends BaseFlowController
         FlowAnalyzer.makeAnalysis(doc.getScript(), null, makePopulationSet(analysis));
         if (!safeSetAnalysisScript(analysisScript, doc.toString()))
             return null;
-        return new ViewForward(form.urlFor(Action.begin));
+        return new ViewForward(analysisScript.urlShow());
     }
 
     /**
@@ -923,132 +907,6 @@ public class ScriptController extends BaseFlowController
         return true;
     }
 
-    public static class ChooseSampleForm extends EditScriptForm
-    {
-        public boolean compRequired;
-        public String redirect;
-        public String title;
-        public int curWellId;
-        public int curRunId;
-        public int curCompId;
-        public void setCurWellId(int wellId)
-        {
-            this.curWellId = wellId;
-        }
-        public void setCurCompId(int compensationId)
-        {
-            this.curCompId = compensationId;
-        }
-        public void setCompRequired(boolean b)
-        {
-            this.compRequired = b;
-        }
-        public void setCurRunId(int runId)
-        {
-            this.curRunId = runId;
-        }
-        public void reset(ActionMapping mapping, HttpServletRequest request)
-        {
-            super.reset(mapping, request);
-            if (run != null)
-            {
-                curRunId = run.getRunId();
-            }
-            if (well != null)
-            {
-                curWellId = well.getWellId();
-            }
-        }
-        public void setRedirect(String redirect)
-        {
-            this.redirect = redirect;
-        }
-        public void setTitle(String title)
-        {
-            this.title = title;
-        }
-    }
-
-    @Jpf.Action
-    protected Forward chooseSample(ChooseSampleForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        Page page = getPage("chooseSample.jsp", form);
-        if (isPost())
-        {
-            FlowRun run = null;
-            FlowWell well = null;
-            FlowCompensationMatrix comp = null;
-
-            if (form.curRunId != 0)
-            {
-                run = FlowRun.fromRunId(form.curRunId);
-            }
-            if (form.curWellId != 0)
-            {
-                well = FlowWell.fromWellId(form.curWellId);
-            }
-            if (form.curCompId != 0)
-            {
-                comp = FlowCompensationMatrix.fromCompId(form.curCompId);
-            }
-
-            if (well != null)
-            {
-                if (run == null)
-                {
-                    run = well.getRun();
-                }
-            }
-            else
-            {
-                if (run != null)
-                {
-                    FlowWell[] wells = run.getWells();
-                    if (wells.length == 0)
-                    {
-                        addError("The run '" + run.getName() + "' has no samples.");
-                    }
-                    else
-                    {
-                        well = wells[0];
-                    }
-                }
-            }
-            ViewURLHelper redirect = null;
-            if (well != null && (!form.compRequired || comp != null))
-            {
-                if (form.redirect != null)
-                {
-                    redirect = new ViewURLHelper(form.redirect);
-                }
-            }
-
-            if (redirect == null)
-            {
-                redirect = form.analysisScript.urlFor(Action.chooseSample);
-            }
-            redirect.deleteParameter("runId");
-            redirect.deleteParameter("wellId");
-            redirect.deleteParameter("compId");
-            if (run != null)
-            {
-                run.addParams(redirect);
-            }
-            if (well != null)
-            {
-                well.addParams(redirect);
-            }
-            if (comp != null)
-            {
-                comp.addParams(redirect);
-            }
-            return new ViewForward(redirect);
-        }
-
-        return renderInTemplate(page, "Sample Chooser", Action.chooseSample);
-    }
-
     static public class GraphForm extends EditGatesForm
     {
         public int height = 300;
@@ -1200,7 +1058,8 @@ public class ScriptController extends BaseFlowController
             graphSpec = new GraphSpec(SubsetSpec.fromString(form.subset).getParent(), form.xAxis, form.yAxis);
         }
         PopulationSet group = form.getAnalysis();
-        GraphCacheKey key = new GraphCacheKey(graphSpec, form.well, group, form.width, form.height);
+        FlowWell well = form.getWell();
+        GraphCacheKey key = new GraphCacheKey(graphSpec, well, group, form.width, form.height);
         if (key.equals(_cacheKey))
         {
             return _plotCache;
@@ -1210,7 +1069,7 @@ public class ScriptController extends BaseFlowController
         {
             comp = form.getCompensationMatrix().getCompensationMatrix();
         }
-        PlotInfo ret = FCSAnalyzer.get().generateDesignGraph(FlowAnalyzer.getFCSUri(form.well), comp, group, graphSpec, form.width, form.height);
+        PlotInfo ret = FCSAnalyzer.get().generateDesignGraph(FlowAnalyzer.getFCSUri(well), comp, group, graphSpec, form.width, form.height);
         if (ret != null)
         {
             _cacheKey = key;
@@ -1260,38 +1119,10 @@ public class ScriptController extends BaseFlowController
         return parent.getPopulation(subset.getSubset());
     }
 
-    protected void requireWell(EditScriptForm form, String title, Integer actionSequence) throws Exception
-    {
-        if (form.well != null)
-            return;
-
-        FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-        if (runs.length != 0)
-        {
-            form.run = runs[0];
-            form.well = form.run.getWells()[0];
-            return;
-        }
-
-        ViewURLHelper redirect = form.urlFor(Action.chooseSample);
-        redirect.addParameter("redirect", getViewURLHelper().toString());
-        redirect.addParameter("title", title);
-        if (actionSequence == null)
-        {
-            redirect.deleteParameter("actionSequence");
-        }
-        else
-        {
-            redirect.replaceParameter("actionSequence", Integer.toString(actionSequence));
-        }
-        HttpView.throwRedirect(redirect.toString());
-    }
-
     @Jpf.Action
     protected Forward editGates(EditGatesForm form) throws Exception
     {
         requiresPermission(ACL.PERM_UPDATE);
-        requireWell(form, "Edit Gates", null);
         EditGatesPage page = (EditGatesPage) getPage("editGates.jsp", form);
         return renderInTemplate(page, "Gate Editor", Action.editGates);
     }
@@ -1559,7 +1390,7 @@ public class ScriptController extends BaseFlowController
             addChild(script, src.getAnalysis());
         }
         FlowScript newAnalysisScript = FlowScript.create(getUser(), getContainer(), form.name, doc.toString());
-        ViewURLHelper forward = newAnalysisScript.urlFor(Action.begin);
+        ViewURLHelper forward = newAnalysisScript.urlShow();
         return new ViewForward(forward);
     }
 

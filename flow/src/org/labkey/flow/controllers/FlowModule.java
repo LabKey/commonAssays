@@ -72,12 +72,10 @@ public class FlowModule extends DefaultModule
         PipelineService.get().registerPipelineProvider(new FlowPipelineProvider());
         DefaultSchema.registerProvider(FlowSchema.SCHEMANAME, new DefaultSchema.SchemaProvider()
         {
-        public QuerySchema getSchema(DefaultSchema schema)
-        {
-            if (!isActive(schema.getContainer()))
-                return null;
-            return new FlowSchema(schema.getUser(), schema.getContainer());
-        }
+            public QuerySchema getSchema(DefaultSchema schema)
+            {
+                return new FlowSchema(schema.getUser(), schema.getContainer());
+            }
         });
         addController("Flow", FlowController.class);
         addController("Flow-ExecuteScript", AnalysisScriptController.class);
