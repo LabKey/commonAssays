@@ -8,21 +8,31 @@ String jsGate(Population pop)
     if (pop.getGates().size() == 0)
         return "null";
     Gate gate = pop.getGates().get(0);
-    if (!(gate instanceof PolygonGate))
-        return "null";
-    PolygonGate polyGate = (PolygonGate) gate;
-    Polygon poly = polyGate.getPolygon();
     StringBuilder ret = new StringBuilder("{");
-    ret.append("xAxis:'" + polyGate.getX() + "',");
-    ret.append("yAxis:'" + polyGate.getY() + "',");
-    ret.append("points:[");
-    for (int i = 0; i < poly.X.length; i ++)
-        {
-        if (i != 0)
-            ret.append(",");
-        ret.append("{x : " + poly.X[i] + ",y:" + poly.Y[i] + "}");
-        }
-    ret.append("]}");
+    if (gate instanceof PolygonGate)
+    {
+        PolygonGate polyGate = (PolygonGate) gate;
+        Polygon poly = polyGate.getPolygon();
+        ret.append("xAxis:'" + polyGate.getX() + "',");
+        ret.append("yAxis:'" + polyGate.getY() + "',");
+        ret.append("points:[");
+        for (int i = 0; i < poly.X.length; i ++)
+            {
+            if (i != 0)
+                ret.append(",");
+            ret.append("{x : " + poly.X[i] + ",y:" + poly.Y[i] + "}");
+            }
+        ret.append("]");
+    }
+    else if (gate instanceof IntervalGate)
+    {
+        IntervalGate intervalGate = (IntervalGate) gate;
+        ret.append("xAxis:'" + intervalGate.getAxis() + "',");
+        ret.append("yAxis:'',");
+        ret.append("points:[{x : " + intervalGate.getMin() + ",y:0},{x:" + intervalGate.getMax() + ",y:0}],");
+        ret.append("intervalGate:true");
+    }
+    ret.append("}");
     return ret.toString();
 }
 boolean complexGate(Population pop)
@@ -31,7 +41,7 @@ boolean complexGate(Population pop)
         return false;
     if (pop.getGates().size() > 1)
         return true;
-    if (!(pop.getGates().get(0) instanceof PolygonGate))
+    if (!(pop.getGates().get(0) instanceof PolygonGate) && !(pop.getGates().get(0) instanceof IntervalGate))
         return true;
     return false;
 }

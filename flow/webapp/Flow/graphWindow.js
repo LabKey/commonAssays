@@ -3,6 +3,7 @@ var g_ptCapture;
 var g_polygon;
 var g_fAddingPoints;
 
+
 function captureMouse(o, event)
 {
     g_oCapture = o;
@@ -158,6 +159,7 @@ function polygon()
 function polygonPoint(index)
 {
     var ret = {};
+    var isInterval = parent.g_graphOptions.intervalGate;
     ret.index = index;
     function getOffset(event)
     {
@@ -221,21 +223,33 @@ function polygonPoint(index)
             return;
         }
         this.img.style.display = 'inline';
-        this.img.style.left = ptS.x - 1 + xOffset;
-        this.img.style.top = ptS.y - 1 + yOffset;
+        if (isInterval)
+        {
+            this.img.style.left = ptS.x + xOffset;
+            this.img.style.top = rcData.y;
+        }
+        else
+        {
+            this.img.style.left = ptS.x - 1 + xOffset;
+            this.img.style.top = ptS.y - 1 + yOffset;
+        }
     },
     ret.update = function()
     {
         this.offsetPosition(0, 0);
     }
-    ret.setLogicalPosition = function(pt)
-    {
-        this.setPosition(toScreenCoordinates(pt.x, pt.y));
-    }
     ret.img = document.createElement("img");
     ret.img.src = handleSrc;
     ret.img.style.position = "absolute";
-    ret.img.style.width = ret.img.style.height = 3;
+    if (isInterval)
+    {
+        ret.img.style.width = 1;
+        ret.img.style.height = rcData.height;
+    }
+    else
+    {
+        ret.img.style.width = ret.img.style.height = 3;
+    }
     document.body.appendChild(ret.img);
     ret.update();
     return ret;
@@ -351,6 +365,11 @@ function mouseUp(el, event)
         }
         var ptL = toLogicalCoordinates(event.clientX, event.clientY);
         parent.setPoint(getPoints().length, ptL);
+        if (!parent.g_graphOptions.yAxis && getPoints().length >= 2)
+        {
+            finishAddingPoints();
+            return;
+        }
         return;
     }
     var o = hitTest(event);
@@ -369,10 +388,9 @@ function updateImage()
         var arr = [];
         for (var i = 0; i < points.length; i ++)
         {
-            var coor = toScreenCoordinates(points[i].x, points[i].y);
-            arr[i] = coor.x + "," + coor.y;
+            href += "&ptX=" + points[i].x;
+            href += "&ptY=" + points[i].y;
         }
-        href += "&points=" + arr.join(",");
         if (g_fAddingPoints)
         {
             href += "&open=true";
@@ -384,44 +402,86 @@ function updateImage()
     //href = href.replace("graphImage.view", "selectionImage.view");
     //document.getElementById("selection").src = href;
 }
-function translate(coor, width, max, log)
+
+function adjustedLog10(val)
+{
+    var neg = false;
+    if (val < 0)
+    {
+        neg = true;
+        val = -val;
+    }
+    if (val < 10.0)
+    {
+        val += (10.0 - val) / 10.0;
+    }
+    var ret = Math.log(val) / Math.log(10);
+    if (neg)
+    {
+        ret = -ret;
+    }
+    return ret;
+}
+
+function adjustedPow10(val)
+{
+    var neg = false;
+    if (val < 0)
+    {
+        neg = true;
+        val = - val;
+    }
+    var ret = Math.pow(10, val);
+    if (ret < 10)
+    {
+        ret = 10 * (ret - 1) / 9;
+    }
+    if (neg)
+    {
+        ret = -ret;
+    }
+    return ret;
+}
+
+function roundValue(value)
+{
+    if (value > 10)
+        return Math.round(value);
+    return Math.round(value * 10) / 10;
+}
+
+function translate(coor, width, min, max, log)
 {
     if (coor < 0)
-        return -1;
-    if (coor == 0)
-        return 0;
+        return - 1;
     if (!log)
     {
-        return Math.round(max * coor / width);
+        return roundValue(min + (max - min) * coor / width);
     }
-    return Math.round(Math.exp(coor / width * Math.log(max)));
+    return roundValue(adjustedPow10(adjustedLog10(min) + coor / width * (adjustedLog10(max) - adjustedLog10(min))));
 }
-function untranslate(val, width, max, log)
+function untranslate(val, width, min, max, log)
 {
-    if (val < 0)
+    if (val < min)
         return -1;
-    if (val == 0)
-        return 0;
     if (!log)
     {
-        return Math.round(val * width / max);
+        return Math.round((val - min) * width / (max - min));
     }
-    if (val <= 0)
-        return 0;
-    return Math.round(Math.log(val) / Math.log(max) * width);
+    return Math.round((adjustedLog10(val) - adjustedLog10(min)) / (adjustedLog10(max) - adjustedLog10(min)) * width);
 }
 
 function toLogicalCoordinates(x, y)
 {
     return {
-        x: translate(x - rcData.x, rcData.width, rangeX.max, rangeX.log),
-        y: translate(rcData.y + rcData.height - y, rcData.height, rangeY.max, rangeY.log)
+        x: translate(x - rcData.x, rcData.width, rangeX.min, rangeX.max, rangeX.log),
+        y: translate(rcData.y + rcData.height - y, rcData.height, rangeY.min, rangeY.max, rangeY.log)
     }
 }
 function toScreenCoordinates(x, y)
 {
-    return { x : untranslate(x, rcData.width, rangeX.max, rangeX.log) + rcData.x,
-            y: rcData.y + rcData.height - untranslate(y, rcData.height, rangeY.max, rangeY.log)
+    return { x : untranslate(x, rcData.width, rangeX.min, rangeX.max, rangeX.log) + rcData.x,
+            y: rcData.y + rcData.height - untranslate(y, rcData.height, rangeY.min, rangeY.max, rangeY.log)
             }
 
 }

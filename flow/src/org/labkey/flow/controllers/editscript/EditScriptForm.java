@@ -15,10 +15,15 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.labkey.flow.analysis.model.PopulationSet;
 import org.labkey.flow.analysis.model.Population;
+import org.labkey.flow.analysis.model.CompensationCalculation;
+import org.labkey.flow.analysis.model.FCSKeywordData;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
+import org.labkey.flow.analysis.web.FCSRef;
+import org.labkey.flow.script.FlowAnalyzer;
 
 import java.util.*;
+import java.sql.SQLException;
 
 public class EditScriptForm extends ViewForm
 {
@@ -235,5 +240,45 @@ public class EditScriptForm extends ViewForm
         Arrays.sort(ret);
         return ret;
     }
+    public String getWellLabel(FlowWell well)
+    {
+        if (step == FlowProtocolStep.calculateCompensation)
+        {
+            try
+            {
+                CompensationCalculation calc = (CompensationCalculation) this.analysisScript.getCompensationCalcOrAnalysis(FlowProtocolStep.calculateCompensation);
+                FCSRef fcsRef = FlowAnalyzer.getFCSRef(well);
+                FCSKeywordData fkd = FCSAnalyzer.get().readAllKeywords(fcsRef);
+                for (int i = 0; i < calc.getChannelCount(); i ++)
+                {
+                    CompensationCalculation.ChannelInfo ci = calc.getChannelInfo(i);
+                    if (ci.getPositive().getCriteria().matches(fkd))
+                    {
+                        return ci.getName() + "+ (" + well.getName() + ")";
+                    }
+                    if (ci.getNegative().getCriteria().matches(fkd))
+                    {
+                        return ci.getName() + "- (" + well.getName() + ")";
+                    }
+                }
+            }
+            catch (Exception e)
+            {
 
+            }
+        }
+        FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+        if (protocol != null)
+        {
+            try
+            {
+                return protocol.getFCSAnalysisName(well);
+            }
+            catch (SQLException e)
+            {
+                //
+            }
+        }
+        return well.getName();
+    }
 }

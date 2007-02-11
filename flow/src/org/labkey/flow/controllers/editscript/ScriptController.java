@@ -34,6 +34,7 @@ import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -41,6 +42,8 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
+import java.text.NumberFormat;
+import java.text.DecimalFormat;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class ScriptController extends BaseFlowController
@@ -1046,27 +1049,11 @@ public class ScriptController extends BaseFlowController
         return renderInTemplate(page, "Sample Chooser", Action.chooseSample);
     }
 
-    static public class GraphForm extends EditScriptForm
+    static public class GraphForm extends EditGatesForm
     {
-        public String x;
-        public String y;
-        public String subset;
-        public String points;
         public int height = 300;
         public int width = 300;
         public boolean open;
-        public void setX(String xAxis)
-        {
-            this.x = xAxis;
-        }
-        public void setY(String yAxis)
-        {
-            this.y = yAxis;
-        }
-        public void setSubset(String subset)
-        {
-            this.subset = subset;
-        }
         public void setWidth(int width)
         {
             this.width = width;
@@ -1078,11 +1065,6 @@ public class ScriptController extends BaseFlowController
         public void setOpen(boolean open)
         {
             this.open = open;
-        }
-        // A comma separated list: x1,y1,x2,y2,...
-        public void setPoints(String points)
-        {
-            this.points = points;
         }
     }
 
@@ -1124,27 +1106,42 @@ public class ScriptController extends BaseFlowController
         requiresPermission(ACL.PERM_UPDATE);
         PlotInfo info = getPlotInfo(form);
         BufferedImage image = info.getImage();
-        image = addSelection(image, decodePoints(form.points), !form.open);
+        Gate gate = gateFromPoints(form.xAxis, form.yAxis, form.ptX, form.ptY, form.open);
+        image = addSelection(image, info, gate, !form.open);
         return streamImage(image);
     }
 
-    protected BufferedImage addSelection(BufferedImage imageIn, Point[] pts, boolean closePoly)
+    protected BufferedImage addSelection(BufferedImage imageIn, PlotInfo info, Gate gate, boolean closePoly)
     {
-        if (pts.length == 0)
+        if (gate == null)
             return imageIn;
         BufferedImage image = new BufferedImage(imageIn.getWidth(), imageIn.getHeight(), imageIn.getType());
         imageIn.copyData(image.getRaster());
         Graphics2D g = image.createGraphics();
         g.setColor(Color.BLACK);
-        for (int i = 0; i < pts.length - 1; i ++)
+        if (gate instanceof PolygonGate)
         {
-            g.drawLine(pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y);
+            PolygonGate polyGate = (PolygonGate) gate;
+            Polygon polygon = polyGate.getPolygon();
+            Point[] pts = new Point[polygon.X.length];
+            for (int i = 0; i < pts.length; i ++)
+            {
+                pts[i] = info.toScreenCoordinates(new Point2D.Double(polygon.X[i], polygon.Y[i]));
+            }
+
+            for (int i = 0; i < polygon.X.length - 1; i ++)
+            {
+                g.drawLine(pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y);
+            }
+            if (closePoly)
+            {
+                g.drawLine(pts[pts.length - 1].x, pts[pts.length- 1].y, pts[0].x, pts[0].y);
+            }
         }
-        if (closePoly)
-        {
-            g.drawLine(pts[pts.length - 1].x, pts[pts.length- 1].y, pts[0].x, pts[0].y);
-        }
+        String strFreq = info.getFrequency(gate);
+        g.drawString(strFreq, 0, image.getHeight() - g.getFontMetrics().getDescent());
         g.dispose();
+        
         return image;
     }
 
@@ -1193,8 +1190,15 @@ public class ScriptController extends BaseFlowController
 
     protected PlotInfo getPlotInfo(GraphForm form) throws Exception
     {
-        GraphSpec graphSpec = new GraphSpec(SubsetSpec.fromString(form.subset).getParent(), form.x, form.y);
-
+        GraphSpec graphSpec;
+        if (StringUtils.isEmpty(form.yAxis))
+        {
+            graphSpec = new GraphSpec(SubsetSpec.fromString(form.subset).getParent(), form.xAxis);
+        }
+        else
+        {
+            graphSpec = new GraphSpec(SubsetSpec.fromString(form.subset).getParent(), form.xAxis, form.yAxis);
+        }
         PopulationSet group = form.getAnalysis();
         GraphCacheKey key = new GraphCacheKey(graphSpec, form.well, group, form.width, form.height);
         if (key.equals(_cacheKey))
@@ -1292,6 +1296,22 @@ public class ScriptController extends BaseFlowController
         return renderInTemplate(page, "Gate Editor", Action.editGates);
     }
 
+    protected Gate gateFromPoints(String xAxis, String yAxis, double[] arrX, double[] arrY, boolean unfinishedGate)
+    {
+        if (arrX == null || arrX.length < 2)
+        {
+            return null;
+        }
+        if (StringUtils.isEmpty(yAxis) || arrX.length == 2 && !unfinishedGate)
+        {
+            double min = Math.min(arrX[0], arrX[1]);
+            double max = Math.max(arrX[0], arrX[1]);
+            return new IntervalGate(xAxis, min, max);
+        }
+        PolygonGate poly = new PolygonGate(xAxis, yAxis, new Polygon(arrX, arrY));
+        return poly;
+    }
+
     @Jpf.Action
     protected Forward saveGate(EditGatesForm form) throws Exception
     {
@@ -1314,20 +1334,13 @@ public class ScriptController extends BaseFlowController
             pop.setName(subset.getSubset());
             parent.addPopulation(pop);
         }
-        pop.getGates().clear();
-        List<Double> lstX = new ArrayList();
-        List<Double> lstY = new ArrayList();
-        for (int i = 0; ; i ++)
+        Gate gate = gateFromPoints(form.xAxis, form.yAxis, form.ptX, form.ptY, false);
+        if (gate == null)
         {
-            String strX = getRequest().getParameter("ptX[" + i + "]");
-            String strY = getRequest().getParameter("ptY[" + i + "]");
-            if (strX == null)
-                break;
-            lstX.add(Double.valueOf(strX));
-            lstY.add(Double.valueOf(strY));
+            return null;
         }
-        PolygonGate poly = new PolygonGate(form.xAxis, form.yAxis, new Polygon(lstX, lstY));
-        pop.addGate(poly);
+        pop.getGates().clear();
+        pop.addGate(gate);
         ScriptDocument doc = getScript().getAnalysisScriptDocument();
         if (root instanceof Analysis)
         {

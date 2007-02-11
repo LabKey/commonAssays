@@ -7,7 +7,10 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineQueue;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.query.QueryAction;
+import org.labkey.api.query.QueryDefinition;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.controllers.FlowModule;
@@ -20,10 +23,12 @@ import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.query.FlowTableType;
+import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.util.PFUtil;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class FlowOverview extends Overview
 {
@@ -393,9 +398,9 @@ public class FlowOverview extends Overview
         if (_hasPipelineRoot && _canUpdate && _protocol != null)
         {
             Action action = new Action("Create new folder", PFUtil.urlFor(FlowController.Action.newFolder, getContainer()));
-            action.setDescriptionHTML("<i>If you want to analyze a new set of experiment runs with a slightly different protocol, " + "you should create a new folder to do this work in. You can copy some of the settings from this folder.");
+            action.setDescriptionHTML("<i>If you want to analyze a new set of experiment runs with a different protocol, you should create a new folder to do this work in. You can copy some of the settings from this folder.");
             miscActions.add(action);
         }
-        return formatOverview("Flow Overview", null, steps, miscActions);
+        return formatOverview("Flow Experiment Management", null, steps, miscActions);
     }
 }

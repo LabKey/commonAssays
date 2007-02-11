@@ -5,16 +5,19 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.data.*;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.query.QueryService;
 import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
 
 import java.sql.SQLException;
+import java.sql.ResultSet;
 import java.util.*;
 import java.net.URI;
 import java.io.File;
 
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.query.FlowSchema;
 
 import javax.servlet.ServletException;
 
@@ -261,5 +264,26 @@ public class FlowRun extends FlowObject<ExpRun>
             _log.error("error", e);
         }
         return null;
+    }
+
+    public FlowWell[] getWellsToBeAnalyzed(FlowProtocol protocol) throws SQLException
+    {
+        if (protocol == null)
+            return getWells();
+        FlowSchema schema = new FlowSchema(null, getContainer());
+        TableInfo table = schema.createFCSFileTable("FCSFiles");
+        ColumnInfo colRowId = table.getColumn("RowId");
+        List<FlowWell> ret = new ArrayList();
+        ResultSet rs = QueryService.get().select(table, new ColumnInfo[] { colRowId }, protocol.getFCSAnalysisFilter(), null);
+        while (rs.next())
+        {
+            FlowWell well = FlowWell.fromWellId(colRowId.getIntValue(rs));
+            if (well != null)
+            {
+                ret.add(well);
+            }
+        }
+        rs.close();
+        return ret.toArray(new FlowWell[0]);
     }
 }

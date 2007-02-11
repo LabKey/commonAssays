@@ -5,6 +5,8 @@ public class EditGatesForm extends EditScriptForm
     public String subset;
     public String xAxis;
     public String yAxis;
+    public double[] ptX;
+    public double[] ptY;
     
     public void setSubset(String subset)
     {
@@ -19,4 +21,13 @@ public class EditGatesForm extends EditScriptForm
         this.yAxis = axis;
     }
 
+    public void setPtX(double[] ptX)
+    {
+        this.ptX = ptX;
+    }
+
+    public void setPtY(double[] ptY)
+    {
+        this.ptY = ptY;
+    }
 }

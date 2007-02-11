@@ -16,6 +16,7 @@ import java.awt.*;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartRenderingInfo;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.Plot;
 import org.jfree.ui.RectangleInsets;
 import org.jfree.data.Range;
@@ -177,13 +178,28 @@ public class FCSAnalyzer
         Map<SubsetSpec, Subset> subsetMap = new HashMap();
         subsetMap.put(null, getSubset(uri, comp));
         Subset subset = getSubset(subsetMap, group, spec.getSubset());
-        DensityPlot plot = PlotFactory.createContourPlot(subset, spec.getParameters()[0], spec.getParameters()[1]);
-        plot.setToolTipGenerator(null);
-        plot.setInsets(new RectangleInsets(0, 0, 0, 0));
-        JFreeChart chart = new JFreeChart(plot);
+        ValueAxis domainAxis, rangeAxis;
+        JFreeChart chart;
+        if (spec.getParameters().length == 1)
+        {
+            HistPlot plot = PlotFactory.createHistogramPlot(subset, spec.getParameters()[0]);
+            plot.setInsets(new RectangleInsets(0, 0, 0, 0));
+            domainAxis = plot.getDomainAxis();
+            rangeAxis = plot.getRangeAxis();
+            chart = new JFreeChart(plot);
+        }
+        else
+        {
+            DensityPlot plot = PlotFactory.createContourPlot(subset, spec.getParameters()[0], spec.getParameters()[1]);
+            plot.setToolTipGenerator(null);
+            plot.setInsets(new RectangleInsets(0, 0, 0, 0));
+            domainAxis = plot.getDomainAxis();
+            rangeAxis = plot.getRangeAxis();
+            chart = new JFreeChart(plot);
+        }
         ChartRenderingInfo info = new ChartRenderingInfo(null);
         BufferedImage img = chart.createBufferedImage(width, height, info);
-        return new PlotInfo(img, info, plot);
+        return new PlotInfo(subset, img, info, domainAxis, rangeAxis);
     }
 
     public List<StatResult> calculateStatistics(URI uri, CompensationMatrix comp, PopulationSet group, Collection<StatisticSpec> stats) throws IOException

@@ -85,14 +85,8 @@ public class AnalysisHandler extends BaseHandler
         ColumnInfo colRowId = tblFCSFiles.getColumn("RowId");
         try
         {
-            ResultSet rs = QueryService.get().select(tblFCSFiles, new ColumnInfo[] { colRowId }, _job.getProtocol().getFCSAnalysisFilter(), null);
-            List<Integer> ids = new ArrayList();
-            while (rs.next())
-            {
-                ids.add((Integer) colRowId.getValue(rs));
-            }
-            rs.close();
-            if (ids.size() == 0)
+            FlowWell[] wells = run.getWellsToBeAnalyzed(_job.getProtocol());
+            if (wells.length == 0)
             {
                 FlowWell[] allWells = run.getWells();
                 if (allWells.length == 0)
@@ -106,10 +100,10 @@ public class AnalysisHandler extends BaseHandler
                 return;
             }
             _wellIndex = 0;
-            Runnable[] tasks = new Runnable[ids.size()];
-            for (int iWell = 0; iWell < ids.size(); iWell ++)
+            Runnable[] tasks = new Runnable[wells.length];
+            for (int iWell = 0; iWell < wells.length; iWell ++)
             {
-                Runnable task = new AnalyzeTask(workingDirectory, run, runElement, FlowWell.fromWellId(ids.get(iWell)), ids.size(), flowComp, comp);
+                Runnable task = new AnalyzeTask(workingDirectory, run, runElement, wells[iWell], wells.length, flowComp, comp);
                 tasks[iWell] = task;
             }
             FlowThreadPool.runTaskSet(new FlowTaskSet(tasks));

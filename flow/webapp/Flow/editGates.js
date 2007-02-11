@@ -3,29 +3,40 @@ var g_graphOptions = {
     xAxis : null,
     yAxis : null,
     points : [],
-    complexGate: false
+    complexGate: false,
+    intervalGate: false,
+    dirty: false
 };
-
 
 function reloadGraph()
 {
     var elGraph = document.getElementById("graph");
-    if (!g_graphOptions.subset || !g_graphOptions.xAxis || !g_graphOptions.yAxis)
+    if (!g_graphOptions.subset || !g_graphOptions.xAxis)
     {
         elGraph.src = "about:blank";
         return;
     }
     var src = g_urlGraphWindow +
-              "&x=" + urlEncode(g_graphOptions.xAxis) +
-              "&y=" + urlEncode(g_graphOptions.yAxis) +
+              "&xaxis=" + urlEncode(g_graphOptions.xAxis) +
               "&subset=" + urlEncode(g_graphOptions.subset);
+    if (g_graphOptions.yAxis)
+    {
+        src += "&yaxis=" + urlEncode(g_graphOptions.yAxis);
+    }
     src += "&width=400&height=400";
     elGraph.src = src;
 }
 
-function parameterOptions(curParam)
+function parameterOptions(curParam, axis)
 {
     var ret = [];
+    if (axis == 1)
+    {
+        ret.push('<option value=""');
+        if (!curParam || curParam.length == 0)
+            ret.push(' selected');
+        ret.push('>[[histogram]]</option>');
+    }
     for (var i = 0; i < parameters.length; i ++)
     {
         ret.push('<option value="' + parameters[i].name + '"');
@@ -46,11 +57,14 @@ function setXAxis(el)
 function setYAxis(el)
 {
     g_graphOptions.yAxis = getValue(el);
+    g_graphOptions.intervalGate == !!g_graphOptions.yAxis;
     updateAll();
 }
 
 function getLabel(axis)
 {
+    if (!axis || axis.length == 0)
+        return "Count";
     for (var i = 0; i < parameters.length; i ++)
     {
         if (parameters[i].name == axis)
@@ -66,10 +80,11 @@ function gatePointEditor()
         var ret = ['<table class="normal"><tr><td colspan="2">'];
         ret.push(g_graphOptions.subset);
         ret.push('</td></tr>');
+        ret.push('<tr><th>X Axis</th><th>Y Axis</th></tr>')
         ret.push('<tr><td><select id="xAxis" onchange="setXAxis(this)">');
-        ret.push(parameterOptions(g_graphOptions.xAxis));
+        ret.push(parameterOptions(g_graphOptions.xAxis, 0));
         ret.push('</select></td><td><select id="yAxis" onchange="setYAxis(this)">');
-        ret.push(parameterOptions(g_graphOptions.yAxis));
+        ret.push(parameterOptions(g_graphOptions.yAxis, 1));
         ret.push('</select></td></tr>')
         if (g_graphOptions.complexGate)
         {
@@ -79,31 +94,64 @@ function gatePointEditor()
         ret.push('</table>');
         return ret.join("");
     }
+    var interval = g_graphOptions.intervalGate || !g_graphOptions.yAxis;
     function row(index)
     {
         var ret = BaseObj();
-        ret.str = ['<tr id="row|index|" onclick="selectPoint(|index|)">',
-             '<td><input type="hidden" name="ptX[|index|]" value="|x|">',
+        if (interval)
+        {
+            ret.str = ['<tr id="row|index|" onclick="selectPoint(|index|)">',
+                '<td>',
+                index == 0 ? 'Min:' : 'Max:',
+                '</td>',
+                '<td><input type="hidden" name="ptX" value="|x|">|x|</td></tr>'].join('');
+        }
+        else
+        {
+            ret.str = ['<tr id="row|index|" onclick="selectPoint(|index|)">',
+             '<td><input type="hidden" name="ptX" value="|x|">',
              '|x|</td>',
-             '<td><input type="hidden" name="ptY[|index|]" value="|y|">',
+             '<td><input type="hidden" name="ptY" value="|y|">',
              '|y|</td></tr>'].join('');
+        }
         ret.x = g_graphOptions.points[index].x;
         ret.y = g_graphOptions.points[index].y;
         ret.index = index;
         return ret;
     }
     var ret = BaseObj();
-    ret.str = ['<form class="normal" method="post" action="|formAction|">',
-            '<input type="hidden" name="xaxis" value="|xAxis|">',
-            '<input type="hidden" name="yaxis" value="|yAxis|">',
-            '<input type="hidden" name="subset" value="|subset|">',
-            '<table class="gateEditor" border="1">',
-            '<tr><th colspan="2">|subset|</th></tr>',
-            '<th>|xAxisLabel|</th><th>|yAxisLabel|</th></tr>',
-            '|rows|',
-            '<tr><td colspan="2"><input type="button" value="Clear All Points" onclick="setPoints([])"></td></tr>',
-            '<tr><td colspan="2"><input type="submit" value="Save Changes"></td></tr>',
-            '</table></form>'].join('');
+    var saveable = g_graphOptions.points.length >= 2 && g_graphOptions.dirty;
+    if (interval)
+    {
+        ret.str = ['<form class="normal" method="post" action="|formAction|">',
+                '<input type="hidden" name="xaxis" value="|xAxis|">',
+                '<input type="hidden" name="yaxis" value="|yAxis|">',
+                '<input type="hidden" name="subset" value="|subset|">',
+                '<table class="gateEditor" border="1">',
+                '<tr><th colspan="2">|subset|</th></tr>',
+                '<tr><td colspan="2">Interval gate on |xAxisLabel|</td></tr>',
+                '<tr><td colspan="2">Plotted against: <select id="yAxis" onchange="setYAxis(this)">',
+                parameterOptions(g_graphOptions.yAxis, 1),
+                '</select></td></tr>',
+                '|rows|',
+                '<tr><td colspan="2"><input type="button" value="Clear All Points" onclick="setPoints([])"></td></tr>',
+                saveable ? '<tr><td colspan="2"><input type="submit" value="Save Changes"></td></tr>' : '',
+                '</table></form>'].join('');
+    }
+    else
+    {
+        ret.str = ['<form class="normal" method="post" action="|formAction|">',
+                '<input type="hidden" name="xaxis" value="|xAxis|">',
+                '<input type="hidden" name="yaxis" value="|yAxis|">',
+                '<input type="hidden" name="subset" value="|subset|">',
+                '<table class="gateEditor" border="1">',
+                '<tr><th colspan="2">|subset|</th></tr>',
+                '<tr><th>|xAxisLabel|</th><th>|yAxisLabel|</th></tr>',
+                '|rows|',
+                '<tr><td colspan="2"><input type="button" value="Clear All Points" onclick="setPoints([])"></td></tr>',
+                saveable ? '<tr><td colspan="2"><input type="submit" value="Save Changes"></td></tr>' : '',
+                '</table></form>'].join('');
+    }
     ret.formAction = g_formAction;
     ret.xAxis = g_graphOptions.xAxis;
     ret.yAxis = g_graphOptions.yAxis;
@@ -111,18 +159,21 @@ function gatePointEditor()
     ret.yAxisLabel = getLabel(g_graphOptions.yAxis);
     ret.subset = g_graphOptions.subset;
     ret.rows = StringArray();
-    if (g_graphOptions.points.length)
+    
+    for (var i = 0; i < g_graphOptions.points.length; i ++)
     {
-        for (var i = 0; i < g_graphOptions.points.length; i ++)
-        {
-            ret.rows.push(row(i));
-        }
+        ret.rows.push(row(i));
     }
     return ret;
 }
 
 function updateGateEditor()
 {
+    if (!g_graphOptions.subset)
+    {
+        initGraph();
+        return;
+    }
     document.getElementById("polygon").innerHTML = gatePointEditor().toString();
     if (window.frames.graph.updateImage)
     {
@@ -140,11 +191,13 @@ function setPopulation(name)
 {
     var pop = populations[name];
     g_graphOptions.subset = name;
+    g_graphOptions.dirty = false;
     if (pop.gate)
     {
         g_graphOptions.xAxis = pop.gate.xAxis;
         g_graphOptions.yAxis = pop.gate.yAxis;
         g_graphOptions.points = pop.gate.points;
+        g_graphOptions.intervalGate = pop.gate.intervalGate;
     }
     else
     {
@@ -163,12 +216,18 @@ function setPopulation(name)
 function setPoint(index, pt)
 {
     g_graphOptions.points[index] = pt;
+    g_graphOptions.dirty = true;
     updateGateEditor();
 }
 
 function setPoints(pts)
 {
     g_graphOptions.points = pts;
+    g_graphOptions.dirty = true;
+    if (pts.length == 0)
+    {
+        g_graphOptions.intervalGate = !!g_graphOptions.yAxis;
+    }
     updateGateEditor();
 }
 
@@ -209,7 +268,6 @@ function createNewPopulation()
     g_graphOptions.complexGate = false;
     updateAll();
 }
-
 function initGraph(subset, xAxis, yAxis)
 {
     if (subset)
@@ -218,8 +276,7 @@ function initGraph(subset, xAxis, yAxis)
     }
     else
     {
-        document.getElementById("polygon").innerHTML =
-            "To begin using the gate editor, either select a population from the dropdown, or click the 'new' button to create a new population."
+        document.getElementById("polygon").innerHTML = '';
     }
 }
 
