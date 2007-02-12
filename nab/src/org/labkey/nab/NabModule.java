@@ -52,26 +52,6 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
 
 
     @Override
-    public void afterSchemaUpdate(ModuleContext moduleContext, ViewContext viewContext)
-    {
-
-        double version = moduleContext.getInstalledVersion();
-        if (version > 0 && version <= 1.6)
-        {
-            try
-            {
-                List<Container> containers = AssayService.get().getAssayContainers();
-                for (Container container : containers)
-                    NabManager.get().convert(viewContext.getUser(), container);
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
-        }
-    }
-
-    @Override
     public void startup(ModuleContext moduleContext)
     {
         PlateService.get().registerDetailsLink(NabManager.PLATE_TEMPLATE_NAME, "Nab", "display");

@@ -118,10 +118,13 @@ public class NabController extends ViewController
         deleteButton.setDisplayPermission(ACL.PERM_DELETE);
         buttons.add(deleteButton);
 
-        ActionButton publishButton = new ActionButton("publishPlatesChooseStudy.view", "Publish Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
-        publishButton.setDisplayPermission(ACL.PERM_INSERT);
-        buttons.add(publishButton);
-
+        if (!GenericAssayService.get().getValidPublishTargets(getUser()).isEmpty())
+        {
+            ActionButton publishButton = new ActionButton("publishPlatesChooseStudy.view", "Publish Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            publishButton.setDisplayPermission(ACL.PERM_INSERT);
+            buttons.add(publishButton);
+        }
+        
         previousRuns.setButtons(buttons);
         return _renderInTemplate(previousRuns, "Nab Runs");
     }
@@ -964,10 +967,13 @@ public class NabController extends ViewController
         graphSelectedButton.setActionType(ActionButton.Action.GET);
         buttons.add(graphSelectedButton);
 
-        ActionButton publishButton = new ActionButton("publishWellGroupsChooseStudy.view", "Publish Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
-        publishButton.setDisplayPermission(ACL.PERM_INSERT);
-        buttons.add(publishButton);
-
+        if (!GenericAssayService.get().getValidPublishTargets(getUser()).isEmpty())
+        {
+            ActionButton publishButton = new ActionButton("publishWellGroupsChooseStudy.view", "Publish Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            publishButton.setDisplayPermission(ACL.PERM_INSERT);
+            buttons.add(publishButton);
+        }
+        
         queryView.setButtons(buttons);
 
         return _renderInTemplate(queryView, "NAB Runs By Sample");

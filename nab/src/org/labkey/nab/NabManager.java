@@ -6,13 +6,8 @@ import jxl.Workbook;
 import jxl.read.biff.BiffException;
 import org.apache.log4j.Logger;
 import org.apache.struts.upload.FormFile;
-import org.labkey.api.attachments.Attachment;
-import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyManager;
-import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.ObjectProperty;
-import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
@@ -101,28 +96,7 @@ public class NabManager
             _instance = new NabManager();
         return _instance;
     }
-
-    public void convert(User user, Container container) throws SQLException
-    {
-        if (container == null)
-            return;
-
-        List<Integer> ids = AssayService.get().getAllAssayRunIds(container);
-        OldNab converter = new OldNab();
-        for (Integer id : ids)
-        {
-            try
-            {
-                converter.copyToPlateManager(user, container, id);
-                converter.deleteRun(container, id);
-            }
-            catch (Exception e)
-            {
-                _log.error("Unable to convert old Nab run " + id + " in container " + container.getPath(), e);
-            }
-        }
-    }
-
+    
     public void deleteContainerData(Container container) throws SQLException
     {
         PlateService.get().deleteAllPlateData(container);
@@ -370,7 +344,8 @@ public class NabManager
             Map<String, Object> properties =
                     PropertyManager.getWritableProperties(context.getUser().getUserId(),
                             context.getContainer().getId(), Luc5Assay.class.getName(), true);
-            settingsToMap(form, properties);
+            if (form != null)
+                settingsToMap(form, properties);
             PropertyManager.saveProperties(properties);
         }
         catch (Exception e)
@@ -385,7 +360,7 @@ public class NabManager
     {
         Map<String, Object> properties = PropertyManager.getProperties(context.getUser().getUserId(),
                 context.getContainer().getId(), Luc5Assay.class.getName(), false);
-        if (properties != null)
+        if (properties != null && !properties.isEmpty())
         {
             try
             {
@@ -537,152 +512,5 @@ public class NabManager
         settings.setSameInitialValue(Boolean.valueOf((String) properties.get("sameInitialValue")));
         settings.setSameMethod(Boolean.valueOf((String) properties.get("sameMethod")));
         return form;
-    }
-
-    private class OldNab
-    {
-        public String PROTOCOL_LSID = new Lsid("Assays", "Luc5").toString();
-        public static final String ASSAY_NAME = "NAB";
-
-        public Luc5Assay copyToPlateManager(User user, Container container, int assayServiceRowId) throws Exception
-        {
-            AssayRun run = AssayService.get().getAssayRun(container, assayServiceRowId);
-            if (run == null)
-                return null;
-            AssayData[] runParamArray = run.getAssayData(DATATYPE_RUNPARAMS);
-            if (runParamArray.length != 1)
-                throw new IllegalStateException("Run parameter set count incorrect: " + runParamArray.length);
-
-            String runEntityId = runParamArray[0].getProperty("RunEntityId").getStringValue();
-
-            // load metadata:
-            RunMetadata metadata = new RunMetadata();
-            metadata.setVirusName(getStringSafe(runParamArray[0], "VirusName"));
-            metadata.setVirusId(getStringSafe(runParamArray[0], "VirusId"));
-            metadata.setHostCell(getStringSafe(runParamArray[0], "HostCell"));
-            metadata.setStudyName(getStringSafe(runParamArray[0], "StudyName"));
-            if (runParamArray[0].getProperty("ExperimentDate") != null)
-                metadata.setExperimentDate(runParamArray[0].getProperty("ExperimentDate").getDateTimeValue());
-            metadata.setExperimentPerformer(getStringSafe(runParamArray[0], "ExperimentPerformer"));
-            metadata.setExperimentId(getStringSafe(runParamArray[0], "ExperimentId"));
-            metadata.setFileId(getStringSafe(runParamArray[0], "FileId"));
-            metadata.setIncubationTime(getStringSafe(runParamArray[0], "IncubationTime"));
-            metadata.setPlateNumber(getStringSafe(runParamArray[0], "PlateNumber"));
-
-            String cutoffList = getStringSafe(runParamArray[0], "Cutoffs");
-            int[] cutoffs;
-            if (cutoffList != null)
-            {
-                String[] split = cutoffList.split(",");
-                cutoffs = new int[split.length];
-                for (int i = 0; i < split.length; i++)
-                    cutoffs[i] = Integer.parseInt(split[i]);
-            }
-            else
-                cutoffs = new int[]{50, 80};
-
-
-            AssayData[] specimenParams = run.getAssayData(DATATYPE_SPECIMEN);
-            if (runParamArray.length != 1)
-                throw new IllegalStateException("Specimen dataset count incorrect: " + specimenParams.length);
-            SampleInfo[] infos = new SampleInfo[5];
-            for (int i = 0; i < infos.length; i++)
-            {
-                Double initialDilution = specimenParams[i].getProperty("InitialDilution").getFloatValue();
-                String sampleId = specimenParams[i].getProperty("SampleId").getStringValue();
-                SampleInfo info = new SampleInfo(sampleId);
-                ObjectProperty endpointsOptionalProp = specimenParams[i].getProperty("EndpointsOptional");
-                boolean endpointsOptional = endpointsOptionalProp != null && Boolean.parseBoolean(endpointsOptionalProp.getStringValue());
-                info.setEndpointsOptional(endpointsOptional);
-                info.setInitialDilution(initialDilution);
-                info.setFixedSlope(specimenParams[i].getProperty("Slope").getFloatValue());
-                info.setDilutionSummaryLsid(specimenParams[i].getInstanceURI());
-                info.setFactor(specimenParams[i].getProperty("Factor").getFloatValue());
-                info.setMethodName(specimenParams[i].getProperty("Method").getStringValue());
-                infos[i] = info;
-            }
-            Attachment[] attachments = null; // AttachmentService.get().getAttachments(runEntityId);
-            assert attachments.length == 1 : "Unexpected number of attachments for nab run: " + attachments.length;
-            if (attachments.length == 1)
-            {
-                InputStream stream = null;
-                try
-                {
-                    stream = null; // AttachmentService.get().getInputStream(attachments[0]);
-                    return createLuc5Assay(container, user, metadata, infos, cutoffs, attachments[0].getName(), stream);
-                }
-                finally
-                {
-                    if (stream != null) try
-                    {
-                        stream.close();
-                    }
-                    catch (IOException e)
-                    {
-                    }
-                }
-            }
-            else
-                return null;
-        }
-
-        private String getStringSafe(AssayData data, String paramName)
-        {
-            if (data == null)
-                return null;
-            ObjectProperty property = data.getProperty(paramName);
-            if (property == null)
-                return null;
-            return property.getEitherStringValue();
-        }
-
-        public Attachment getDataFile(Container container, int rowId) throws SQLException
-        {
-            AssayRun run = AssayService.get().getAssayRun(container, rowId);
-            if (run == null)
-                return null;
-            AssayData[] runParamArray = run.getAssayData(DATATYPE_RUNPARAMS);
-            if (runParamArray.length != 1)
-                throw new IllegalStateException("Run parameter set count incorrect: " + runParamArray.length);
-
-            String runEntityId = runParamArray[0].getProperty("RunEntityId").getStringValue();
-            return null; // AttachmentService.get().getAttachments(runEntityId)[0];
-        }
-
-        public void deleteRun(Container container, int rowId) throws SQLException
-        {
-            AssayRun run = AssayService.get().getAssayRun(container, rowId);
-            deleteRun(run);
-        }
-
-        public void deleteRun(Container container, Luc5Assay assay) throws SQLException
-        {
-            AssayRun run = AssayService.get().getAssayRun(container, assay.getRunRowId());
-            deleteRun(run);
-        }
-
-        public void deleteRun(Container container, String lsid) throws SQLException
-        {
-            AssayRun run = AssayService.get().getAssayRun(container, lsid);
-            deleteRun(run);
-        }
-
-        public void deleteRun(AssayRun run) throws SQLException
-        {
-            if (run == null)
-                return;
-            AssayData[] runParamArray = run.getAssayData(DATATYPE_RUNPARAMS);
-            String runEntityId = getStringSafe(runParamArray[0], "RunEntityId");
-            if (runEntityId != null)
-            {
-                //AttachmentService.get().deleteAttachments(runEntityId);
-            }
-            AssayService.get().deleteRun(run);
-        }
-
-        public void deleteContainerData(Container container) throws SQLException
-        {
-            OntologyManager.deleteAllObjects(container);
-        }
     }
 }
