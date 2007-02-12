@@ -230,7 +230,7 @@ function setPoints(pts)
     g_graphOptions.dirty = true;
     if (pts.length == 0)
     {
-        g_graphOptions.intervalGate = !!g_graphOptions.yAxis;
+        g_graphOptions.intervalGate = !g_graphOptions.yAxis;
     }
     updateGateEditor();
 }
