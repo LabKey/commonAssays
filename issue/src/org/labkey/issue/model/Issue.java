@@ -106,8 +106,8 @@ public class Issue extends Entity implements Serializable, Cloneable
         status = statusRESOLVED;
         resolution = "Fixed";
 
-        resolvedBy = getModifiedBy();
-        resolved = getModified();
+        resolvedBy = u.getUserId(); // Current user
+        resolved = new Date();      // Current date
 
         assignedTo = getCreatedBy();
     }

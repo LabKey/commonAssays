@@ -28,11 +28,15 @@ if (emailPrefsURL)
 %></td>
 </tr>
 </table>
-<table width="100%" cellpadding=0><%
+<table width="100%" cellpadding=0>
+<tr><td colspan=3 class=ms-vb>&nbsp;</td></tr><%
 if (0 == announcements.length)
-    {
-    %><tr><td colspan=3 class=ms-vb>&nbsp;</td></tr>
-    <tr><td colspan=3 class=ms-vb>No new messages</td></tr><%
+    {%>
+    <tr><td colspan=3 class=ms-vb>No <%=filterText%></td></tr><%
+    }
+else
+    { %>
+    <tr><td colspan=3 class=ms-vb>Displaying <%=filterText%></td></tr><%        
     }
 for (a in announcements)
     { %>

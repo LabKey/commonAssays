@@ -46,9 +46,6 @@ import org.labkey.api.wiki.WikiRenderer;
 import org.labkey.api.wiki.WikiRendererType;
 import org.labkey.api.wiki.WikiService;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -1058,7 +1055,7 @@ public class AnnouncementsController extends ViewController
             parent = AnnouncementManager.getAnnouncement(c, a.getParent());
 
         // Email all copies of this message in a background thread
-        MessageBoardEmailer mbe = new MessageBoardEmailer();
+        MailHelper.BulkEmailer emailer = new MailHelper.BulkEmailer();
 
         if (a.isBroadcast())
         {
@@ -1069,7 +1066,7 @@ public class AnnouncementsController extends ViewController
             // Get all site users' email addresses
             List<String> emails = UserManager.getUserEmailList();
             ViewMessage m = getMessage(c, settings, parent, a, isResponse, null, currentRendererType, Reason.broadcast);
-            mbe.addMessage(emails, m);
+            emailer.addMessage(emails, m);
         }
         else
         {
@@ -1088,7 +1085,7 @@ public class AnnouncementsController extends ViewController
 //            removeMeURL.addParameter("srcURL", boardURL.getURIString());
 
                     ViewMessage m = getMessage(c, settings, parent, a, isResponse, removeMeURL.getURIString(), currentRendererType, Reason.memberList);
-                    mbe.addMessage(user.getEmail(), m);
+                    emailer.addMessage(user.getEmail(), m);
                 }
             }
 
@@ -1102,11 +1099,11 @@ public class AnnouncementsController extends ViewController
                 ViewURLHelper changeEmailURL = new ViewURLHelper(getRequest(), "announcements", "showEmailPreferences", c.getPath());
                 changeEmailURL.addParameter("srcURL", new ViewURLHelper(getRequest(), "announcements", "begin", c.getPath()).getURIString());
                 ViewMessage m = getMessage(c, settings, parent, a, isResponse, changeEmailURL.getURIString(), currentRendererType, Reason.signedUp);
-                mbe.addMessage(prefsEmails, m);
+                emailer.addMessage(prefsEmails, m);
             }
         }
 
-        mbe.start();
+        emailer.start();
     }
 
 
@@ -1160,49 +1157,6 @@ public class AnnouncementsController extends ViewController
         }
         return page;
     }
-
-    // TODO: Move to MailHelper
-    private static class MessageBoardEmailer extends Thread
-    {
-        private Map<Collection<String>, ViewMessage> _map = new HashMap<Collection<String>, ViewMessage>(10);
-
-        private MessageBoardEmailer()
-        {
-        }
-
-        private void addMessage(Collection<String> emails, ViewMessage m)
-        {
-            _map.put(emails, m);
-        }
-
-        private void addMessage(String email, ViewMessage m)
-        {
-            _map.put(PageFlowUtil.set(email), m);
-        }
-
-        public void run()
-        {
-            for (Map.Entry<Collection<String>, ViewMessage> entry : _map.entrySet())
-            {
-                Collection<String> emails = entry.getKey();
-                ViewMessage m = entry.getValue();
-
-                for (String email : emails)
-                {
-                    try
-                    {
-                        m.setRecipient(Message.RecipientType.TO, new InternetAddress(email));
-                        MailHelper.send(m);
-                    }
-                    catch(MessagingException e)
-                    {
-                        _log.error("Failed to send message to " + email, e);
-                    }
-                }
-            }
-        }
-    }
-
 
     private void showEmailPreferencesPage(EmailOptionsForm form, String message) throws Exception
     {
@@ -1561,6 +1515,7 @@ public class AnnouncementsController extends ViewController
             addObject("customizeURL", c.hasPermission(user, ACL.PERM_ADMIN) ? getShowCustomizeUrl(c, url) : null);
             addObject("listURL", getListUrl(c));
             addObject("announcements", announcements);
+            addObject("filterText", getFilterText(settings, perm, displayAll));
         }
 
         public AnnouncementWebPart(ViewContext ctx) throws SQLException, ServletException
@@ -1590,7 +1545,25 @@ public class AnnouncementsController extends ViewController
 
     private static String getFilterText(Settings settings, Permissions perm, boolean displayAll)
     {
-        return "";
+        StringBuilder sb = new StringBuilder();
+
+        if (displayAll)
+        {
+            sb.append("all ");
+        }
+        else
+        {
+            if (settings.hasExpires())
+                sb.append("unexpired ");
+
+            if (settings.hasStatus())
+                sb.append("unclosed ");
+        }
+
+        sb.append(settings.getConversationName().toLowerCase());
+        sb.append("s");
+
+        return sb.toString();
     }
 
 
