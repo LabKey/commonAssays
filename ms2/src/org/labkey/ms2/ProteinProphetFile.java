@@ -17,7 +17,6 @@ public class ProteinProphetFile extends SensitivitySummary
 {
     private int _rowId;
     private String _filePath;
-    private String _container;
     private boolean _uploadCompleted = false;
     private int[] _predictedNumberCorrect = new int[0];
     private int[] _predictedNumberIncorrect = new int[0];
@@ -92,16 +91,6 @@ public class ProteinProphetFile extends SensitivitySummary
     public void setFilePath(String filePath)
     {
         _filePath = filePath;
-    }
-
-    public String getContainer()
-    {
-        return _container;
-    }
-
-    public void setContainer(String container)
-    {
-        _container = container;
     }
 
     public boolean isUploadCompleted()

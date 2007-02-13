@@ -3838,6 +3838,21 @@ public class MS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
+        SimpleFilter filter = new SimpleFilter();
+        boolean addedFilter = false;
+        if (form.getMaximumErrorRate() != null)
+        {
+            filter.addCondition("errorrate", form.getMaximumErrorRate(), CompareType.LTE);
+            addedFilter = true;
+        }
+        if (form.getMinimumProbability() != null)
+        {
+            filter.addCondition("groupprobability", form.getMinimumProbability(), CompareType.GTE);
+            addedFilter = true;
+        }
+        
+        filter.toQueryString("ProteinSearchResults")
+
         QuerySettings proteinsSettings = new QuerySettings(getViewURLHelper(), "PotentialProteins");
         proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);
         proteinsSettings.setAllowChooseQuery(false);
@@ -3855,14 +3870,6 @@ public class MS2Controller extends ViewController
         ProteinGroupTableInfo table = (ProteinGroupTableInfo)groupsView.getTable();
         table.addProteinNameFilter(form.getIdentifier());
         table.addContainerCondition(getContainer(), getUser(), true);
-        if (form.getMaximumErrorRate() != null)
-        {
-            table.addMaximumErrorRate(form.getMaximumErrorRate().floatValue());
-        }
-        if (form.getMinimumProbability() != null)
-        {
-            table.addMinimumProbability(form.getMinimumProbability().floatValue());
-        }
 
         groupsView.setTitle("Protein Group Results");
 

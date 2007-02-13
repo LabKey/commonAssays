@@ -235,11 +235,14 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
             String sql = "SELECT Peptide FROM " + MS2Manager.getTableInfoPeptides() + " p, " +
                     MS2Manager.getTableInfoPeptideMemberships() + " pm," +
                     MS2Manager.getTableInfoProteinGroupMemberships() + " pgm, " +
-                    MS2Manager.getTableInfoProteinGroups() + " pg " +
+                    MS2Manager.getTableInfoProteinGroups() + " pg, " +
+                    "(SELECT Run as PPRun, RowId FROM " + MS2Manager.getTableInfoProteinProphetFiles() + ") ppf " +
                     coverageFilter.getWhereSQL(ProteinManager.getSqlDialect()) +
                     " AND pg.RowId = pgm.ProteinGroupId" +
                     " AND pm.PeptideId = p.RowId" +
-                    " AND pm.ProteinGroupId = pgm.ProteinGroupId";
+                    " AND pm.ProteinGroupId = pgm.ProteinGroupId" +
+                    " AND ppf.PPRun = p.Run" +
+                    " AND ppf.RowId = pg.ProteinProphetFileId";
             return Table.executeArray(ProteinManager.getSchema(), sql, coverageFilter.getWhereParams(MS2Manager.getTableInfoPeptides()).toArray(), String.class);
         }
         return null;

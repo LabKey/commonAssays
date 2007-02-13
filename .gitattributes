@@ -641,6 +641,7 @@ ms2/webapp/MS2/scripts/postgresql/ms2-1.70-1.71.sql -text
 ms2/webapp/MS2/scripts/postgresql/ms2-1.71-1.72.sql -text
 ms2/webapp/MS2/scripts/postgresql/ms2-1.72-1.73.sql -text
 ms2/webapp/MS2/scripts/postgresql/ms2-1.73-1.74.sql -text
+ms2/webapp/MS2/scripts/postgresql/ms2-1.74-1.75.sql -text
 ms2/webapp/MS2/scripts/postgresql/obsolete/ms2-1.00-1.01.sql -text
 ms2/webapp/MS2/scripts/postgresql/obsolete/ms2-1.01-1.02.sql -text
 ms2/webapp/MS2/scripts/postgresql/obsolete/ms2-1.10-1.11.sql -text
@@ -686,6 +687,7 @@ ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-1.70-1.71.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-1.71-1.72.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-1.72-1.73.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-1.73-1.74.sql -text
+ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-1.74-1.75.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-drop.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.62.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.63.sql -text

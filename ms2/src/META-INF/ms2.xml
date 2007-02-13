@@ -1685,7 +1685,6 @@
       <ns:column columnName="RowId"/>
       <ns:column columnName="FilePath"/>
       <ns:column columnName="Run"/>
-      <ns:column columnName="Container"/>
       <ns:column columnName="UploadCompleted"/>
       <ns:column columnName="ErrorSeries"/>
       <ns:column columnName="MinProbSeries"/>

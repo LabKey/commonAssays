@@ -252,7 +252,6 @@ public class ProteinProphetImporter
     {
         ProteinProphetFile file = new ProteinProphetFile(parser);
         file.setFilePath(_file.getCanonicalPath());
-        file.setContainer(info.getContainer().getId());
         file.setRun(run.getRun());
 
         Table.insert(info.getUser(), MS2Manager.getTableInfoProteinProphetFiles(), file);
