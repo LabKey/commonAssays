@@ -3851,7 +3851,7 @@ public class MS2Controller extends ViewController
             addedFilter = true;
         }
         
-        filter.toQueryString("ProteinSearchResults")
+//        filter.toQueryString("ProteinSearchResults");
 
         QuerySettings proteinsSettings = new QuerySettings(getViewURLHelper(), "PotentialProteins");
         proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);
