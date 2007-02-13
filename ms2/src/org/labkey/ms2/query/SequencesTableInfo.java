@@ -9,6 +9,7 @@ import org.labkey.ms2.protein.ProteinManager;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 /**
  * User: jeckels
@@ -38,24 +39,54 @@ public class SequencesTableInfo extends FilteredTable
         setDefaultVisibleColumns(cols);
     }
 
+    /*package*/ static String getIdentifierInClause(String identifiers)
+    {
+        if (identifiers == null || identifiers.trim().equals(""))
+        {
+            return "(NULL)";
+        }
+        StringTokenizer st = new StringTokenizer(identifiers, " \t\n\r,");
+        StringBuilder sb = new StringBuilder();
+        String separator = "";
+        sb.append("(");
+        if (!st.hasMoreTokens())
+        {
+            sb.append("NULL");
+        }
+        while (st.hasMoreTokens())
+        {
+            sb.append(separator);
+            sb.append("'");
+            sb.append(st.nextToken().replaceAll("'", "''"));
+            sb.append("'");
+            separator = ", ";
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+
     public void addProteinNameFilter(String identifier)
     {
+        String inClause = getIdentifierInClause(identifier);
         SQLFragment sql = new SQLFragment();
         sql.append("SeqId IN (\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoAnnotations());
-        sql.append(" a WHERE a.AnnotVal = ?\n");
-        sql.add(identifier);
+        sql.append(" a WHERE a.AnnotVal IN ");
+        sql.append(inClause);
+        sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences());
-        sql.append(" fs WHERE fs.LookupString = ?\n");
-        sql.add(identifier);
+        sql.append(" fs WHERE fs.LookupString IN ");
+        sql.append(inClause);
+        sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoIdentifiers());
-        sql.append(" i WHERE i.Identifier = ?\n");
-        sql.add(identifier);
+        sql.append(" i WHERE i.Identifier IN ");
+        sql.append(inClause);
+        sql.append("\n");
         sql.append(")");
         addCondition(sql);
     }

@@ -325,4 +325,13 @@ public abstract class CompareQuery extends SQLFragment
     protected abstract ColumnInfo getComparisonCommonColumn(TableInfo ti);
 
     public abstract List<Pair<String, String>> getSQLSummaries();
+
+    public void checkForErrors(List<String> errors) throws SQLException
+    {
+        if (getGridColumns().size() == 0)
+            errors.add("You must choose at least one column to display in the grid.");
+
+        if (_runs.size() > 63)
+            errors.add("You can't compare more than 63 runs at a time.");
+    }
 }

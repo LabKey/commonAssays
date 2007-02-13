@@ -190,4 +190,17 @@ public class ProteinProphetCompareQuery extends CompareQuery
         filter.addWhereClause("ppf.rowid = pg.proteinprophetfileid", new Object[0]);
         filter.addWhereClause("pg.rowId = pgm.proteingroupid", new Object[0]);
     }
+
+
+    public void checkForErrors(List<String> errors) throws SQLException
+    {
+        super.checkForErrors(errors);
+        for (MS2Run run : _runs)
+        {
+            if (run.getProteinProphetFile() == null)
+            {
+                errors.add("Run " + run.getDescription() + " does not have ProteinProphet results.");
+            }
+        }
+    }
 }

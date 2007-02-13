@@ -87,23 +87,11 @@ public class MS2Controller extends ViewController
 
         addSelectAndClearButtons(bb);
 
-        ActionButton compareProteins = new ActionButton("button", "Compare Proteins");
-        compareProteins.setScript("return verifySelected(this.form, \"compareProteins.view\", \"post\", \"runs\")");
-        compareProteins.setActionType(ActionButton.Action.GET);
-        compareProteins.setDisplayPermission(ACL.PERM_READ);
-        bb.add(compareProteins);
-
-        ActionButton compareProteinProphet = new ActionButton("button", "Compare ProteinProphet");
-        compareProteinProphet.setScript("return verifySelected(this.form, \"compareProteinProphetProteins.view\", \"post\", \"runs\")");
-        compareProteinProphet.setActionType(ActionButton.Action.GET);
-        compareProteinProphet.setDisplayPermission(ACL.PERM_READ);
-        bb.add(compareProteinProphet);
-
-        ActionButton comparePeptides = new ActionButton("button", "Compare Peptides");
-        comparePeptides.setScript("return verifySelected(this.form, \"comparePeptides.view\", \"post\", \"runs\")");
-        comparePeptides.setActionType(ActionButton.Action.GET);
-        comparePeptides.setDisplayPermission(ACL.PERM_READ);
-        bb.add(comparePeptides);
+        ActionButton compareRuns = new ActionButton("button", "Compare Runs");
+        compareRuns.setScript("return verifySelected(this.form, \"compare.view\", \"post\", \"runs\")");
+        compareRuns.setActionType(ActionButton.Action.GET);
+        compareRuns.setDisplayPermission(ACL.PERM_READ);
+        bb.add(compareRuns);
 
         ActionButton compareScoring = new ActionButton("", CAPTION_SCORING_BUTTON);
         compareScoring.setScript("return verifySelected(this.form, \"" + ViewURLHelper.toPathString("MS2-Scoring", "compare", c.getPath())+ "\", \"get\", \"runs\")");
@@ -123,21 +111,6 @@ public class MS2Controller extends ViewController
         showHierarchy.setDisplayPermission(ACL.PERM_READ);
         bb.add(showHierarchy);
 
-        ActionButton showManage = new ActionButton("showManage.view", "Manage Runs");
-        showManage.setActionType(ActionButton.Action.GET);
-        showManage.setDisplayPermission(ACL.PERM_INSERT | ACL.PERM_DELETE);
-        bb.add(showManage);
-
-        return bb;
-    }
-
-
-    private ButtonBar getManageButtonBar()
-    {
-        ButtonBar bb = new ButtonBar();
-
-        addSelectAndClearButtons(bb);
-
         ActionButton moveRuns = new ActionButton("", "Move Runs");
         moveRuns.setScript("return verifySelected(this.form, \"selectMoveLocation.view\", \"get\", \"runs\")");
         moveRuns.setActionType(ActionButton.Action.GET);
@@ -149,16 +122,6 @@ public class MS2Controller extends ViewController
         deleteRuns.setActionType(ActionButton.Action.GET);
         deleteRuns.setDisplayPermission(ACL.PERM_DELETE);
         bb.add(deleteRuns);
-
-        ActionButton addRun = new ActionButton("showAddRun.view", "Add Run");
-        addRun.setActionType(ActionButton.Action.LINK);
-        addRun.setDisplayPermission(ACL.PERM_ADMIN);
-        bb.add(addRun);
-
-        ActionButton showManage = new ActionButton("showList.view", "Show Runs");
-        showManage.setActionType(ActionButton.Action.GET);
-        showManage.setDisplayPermission(ACL.PERM_READ);
-        bb.add(showManage);
 
         return bb;
     }
@@ -357,14 +320,6 @@ public class MS2Controller extends ViewController
         return showRuns(getListButtonBar(getContainer()), "MS2 Runs", "ms2RunsList");
     }
 
-
-    @Jpf.Action
-    protected Forward showManage() throws Exception
-    {
-        requiresPermission(ACL.PERM_INSERT | ACL.PERM_DELETE);
-
-        return showRuns(getManageButtonBar(), "Manage Runs", "ms2RunsList");
-    }
 
     private Forward showRuns(ButtonBar bb, String pageName, String helpTopic) throws Exception
     {
@@ -1035,17 +990,6 @@ public class MS2Controller extends ViewController
     {
         AbstractPeptideView view = getPeptideView(currentUrl.getParameter("grouping"), run);
         return view.getPeptideIndex(currentUrl);
-    }
-
-
-    @Jpf.Action
-    protected Forward showAddRun(AddRunForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_ADMIN);
-
-        HttpView v = new GroovyView("/org/labkey/ms2/addRun.gm");
-        v.addObject("form", form);
-        return includeView(new DialogTemplate(v));
     }
 
 
@@ -1870,7 +1814,7 @@ public class MS2Controller extends ViewController
         {
             ids.add(new Integer(idString));
         }
-        List<MS2Run> runs = getRuns(ids, new ArrayList<String>(), false, false);
+        List<MS2Run> runs = getRuns(ids, new ArrayList<String>(), false);
         MS2Manager.moveRuns(getUser(), runs, getContainer());
 
         currentUrl.setAction("showList");
@@ -1908,23 +1852,11 @@ public class MS2Controller extends ViewController
         bb.add(ActionButton.BUTTON_SELECT_ALL);
         bb.add(ActionButton.BUTTON_CLEAR_ALL);
 
-        ActionButton compareProteins = new ActionButton("button", "Compare Proteins");
-        compareProteins.setScript("return verifySelected(this.form, \"compareProteins.view\", \"post\", \"runs\")");
-        compareProteins.setActionType(ActionButton.Action.GET);
-        compareProteins.setDisplayPermission(ACL.PERM_READ);
-        bb.add(compareProteins);
-
-        ActionButton comparePeptides = new ActionButton("button", "Compare Peptides");
-        comparePeptides.setScript("return verifySelected(this.form, \"comparePeptides.view\", \"post\", \"runs\")");
-        comparePeptides.setActionType(ActionButton.Action.GET);
-        comparePeptides.setDisplayPermission(ACL.PERM_READ);
-        bb.add(comparePeptides);
-
-        ActionButton compareProteinProphet = new ActionButton("button", "Compare ProteinProphet");
-        compareProteinProphet.setScript("return verifySelected(this.form, \"compareProteinProphetProteins.view\", \"post\", \"runs\")");
-        compareProteinProphet.setActionType(ActionButton.Action.GET);
-        compareProteinProphet.setDisplayPermission(ACL.PERM_READ);
-        bb.add(compareProteinProphet);
+        ActionButton compareRuns = new ActionButton("button", "Compare Runs");
+        compareRuns.setScript("return verifySelected(this.form, \"compare.view\", \"post\", \"runs\")");
+        compareRuns.setActionType(ActionButton.Action.GET);
+        compareRuns.setDisplayPermission(ACL.PERM_READ);
+        bb.add(compareRuns);
 
         ActionButton exportRuns = new ActionButton("button", "Export Runs");
         exportRuns.setScript("return verifySelected(this.form, \"pickExportRunsView.view\", \"post\", \"runs\")");
@@ -2370,7 +2302,7 @@ public class MS2Controller extends ViewController
             "<tr><td><input type=\"radio\" name=\"exportFormat\" value=\"PKL\">Spectra as PKL</td></tr>\n" +
             "<tr><td><input type=\"radio\" name=\"exportFormat\" value=\"AMT\">AMT (Accurate Mass & Time) file</td></tr>\n";
 
-        return pickView(cloneViewURLHelper().setAction("applyExportRunsView"), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraFormHtml, "Export Runs", "ms2RunsList", false);
+        return pickView(cloneViewURLHelper().setAction("applyExportRunsView"), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraFormHtml, "Export Runs", "ms2RunsList");
     }
 
 
@@ -3073,10 +3005,10 @@ public class MS2Controller extends ViewController
 
 
     // extraFormHtml gets inserted between the view dropdown and the button.
-    private Forward pickView(ViewURLHelper nextUrl, String viewInstructions, String extraFormHtml, String navTreeName, String helpTopic, boolean requireProteinProphet) throws Exception
+    private Forward pickView(ViewURLHelper nextUrl, String viewInstructions, String extraFormHtml, String navTreeName, String helpTopic) throws Exception
     {
         List<String> errors = new ArrayList<String>();
-        int runListIndex = cacheSelectedRuns(errors, requireProteinProphet);
+        int runListIndex = cacheSelectedRuns(errors);
 
         if (!errors.isEmpty())
             return _renderErrors(errors);
@@ -3099,54 +3031,37 @@ public class MS2Controller extends ViewController
 
 
     @Jpf.Action
-    protected Forward compareProteins(ExportForm form) throws Exception
-    {
-        // Don't require any particular permission in current container, since we could be in hierarchy mode
-
-        String extraFormHtml =
-            "<tr><td><br>Choose what columns should appear in the grid:</td></tr>\n" +
-            "<tr><td><input type=\"hidden\" name=\"column\" value=\"Protein\"></td></tr>\n" +
-            "<tr><td><input type=\"checkbox\" name=\"unique\" value=\"1\" checked=\"checked\">Unique Peptides</td></tr>\n" +
-            "<tr><td><input type=\"checkbox\" name=\"total\" value=\"1\">Total Peptides</td></tr>\n";
-
-        return pickCompareView(ProteinCompareQuery.COMPARISON_DESCRIPTION, extraFormHtml, false);
-    }
-
-    @Jpf.Action
-    protected Forward compareProteinProphetProteins(ExportForm form) throws Exception
-    {
-        // Don't require any particular permission in current container, since we could be in hierarchy mode
-
-        String extraFormHtml =
-            "<tr><td><br>Choose what columns should appear in the grid:</td></tr>\n" +
-            "<tr><td><input type=\"hidden\" name=\"column\" value=\"ProteinProphet\"></td></tr>\n" +
-            "<tr><td><input type=\"checkbox\" name=\"proteinGroup\" value=\"1\" checked=\"checked\" disabled>Protein Group</td></tr>\n" +
-            "<tr><td><input type=\"checkbox\" name=\"groupProbability\" value=\"1\" checked=\"checked\">Group Probability</td></tr>\n" +
-            "<tr><td><input type=\"checkbox\" name=\"light2HeavyRatioMean\" value=\"1\">Light to Heavy Quantitation</td></tr>\n" +
-            "<tr><td><input type=\"checkbox\" name=\"heavy2LightRatioMean\" value=\"1\">Heavy to Light Quantitation</td></tr>\n" +
-            "<tr><td><input type=\"checkbox\" name=\"totalPeptides\" value=\"1\">Total Peptides</td></tr>\n" +
-            "<tr><td><input type=\"checkbox\" name=\"uniquePeptides\" value=\"1\">Unique Peptides</td></tr>";
-
-        return pickCompareView(ProteinProphetCompareQuery.COMPARISON_DESCRIPTION, extraFormHtml, true);
-    }
-
-    @Jpf.Action
-    protected Forward comparePeptides() throws Exception
+    protected Forward compare() throws Exception
     {
         // Don't require any particular permission in current container, since this could be in hierarchy mode
 
-        String extraFormHtml = "<tr><td><input type=\"hidden\" name=\"column\" value=\"Peptide\"></td></tr>\n";
+        StringBuilder sb = new StringBuilder();
 
-        return pickCompareView(PeptideCompareQuery.COMPARISON_DESCRIPTION, extraFormHtml, false);
-    }
+        sb.append("<tr><td>");
+        sb.append("<p>Choose a way to compare the runs:</p>");
+        sb.append("<input type=\"radio\" name=\"column\" value=\"ProteinProphet\" checked /><b>Protein Prophet</b><br/>");
+        sb.append("<div style=\"padding-left: 20px;\">Choose what columns should appear in the grid:<br/>\n");
+        sb.append("<div style=\"padding-left: 20px;\"><input type=\"checkbox\" name=\"proteinGroup\" value=\"1\" checked=\"checked\" disabled>Protein Group<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"groupProbability\" value=\"1\" checked=\"checked\">Group Probability<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"light2HeavyRatioMean\" value=\"1\">Light to Heavy Quantitation<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"heavy2LightRatioMean\" value=\"1\">Heavy to Light Quantitation<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"totalPeptides\" value=\"1\">Total Peptides<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"uniquePeptides\" value=\"1\">Unique Peptides<br/>\n");
+        sb.append("</div></div><br/>");
 
+        sb.append("<input type=\"radio\" name=\"column\" value=\"Protein\" /><b>Search Engine Protein Assignment</b><br/>");
+        sb.append("<div style=\"padding-left: 20px;\">Choose what columns should appear in the grid:<br/>\n");
+        sb.append("<div style=\"padding-left: 20px;\"><input type=\"checkbox\" name=\"unique\" value=\"1\" checked=\"checked\">Unique Peptides<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"total\" value=\"1\">Total Peptides<br/>\n");
+        sb.append("</div></div><br/>");
 
-    private Forward pickCompareView(String comparisonDescription, String extraHtml, boolean requireProteinProphet) throws Exception
-    {
+        sb.append("<input type=\"radio\" name=\"column\" value=\"Peptide\" /><b>Peptide</b><br/>");
+
+        sb.append("</td></tr>\n");
+
         ViewURLHelper nextUrl = cloneViewURLHelper().setAction("applyCompareView");
-        return pickView(nextUrl, "Select a view to apply a filter to all the runs.", extraHtml, comparisonDescription, "ms2RunsList", requireProteinProphet);
+        return pickView(nextUrl, "Select a view to apply a filter to all the runs.", sb.toString(), "Compare Runs", "ms2RunsList");
     }
-
 
     @Jpf.Action
     protected Forward applyCompareView(MS2ViewForm form) throws Exception
@@ -3193,11 +3108,7 @@ public class MS2Controller extends ViewController
         if (query == null)
             return _renderError("You must specify a column name");
 
-        if (query.getGridColumns().size() == 0)
-            errors.add("You must choose at least one column to display in the grid.");
-
-        if (runs.size() > 63)
-            errors.add("You can't compare more than 63 runs at a time.");
+        query.checkForErrors(errors);
 
         if (errors.size() > 0)
             return _renderErrors(errors);
@@ -3289,7 +3200,7 @@ public class MS2Controller extends ViewController
         return null;
     }
 
-    private List<MS2Run> getSelectedRuns(List<String> errors, boolean requireProteinProphet) throws ServletException
+    private List<MS2Run> getSelectedRuns(List<String> errors) throws ServletException
     {
         ViewContext ctx = getViewContext();
         List<String> stringIds = ctx.getList(DataRegion.SELECT_CHECKBOX_NAME);
@@ -3315,11 +3226,11 @@ public class MS2Controller extends ViewController
             }
         }
 
-        return getRuns(runIds, errors, requireProteinProphet, true);
+        return getRuns(runIds, errors, true);
     }
 
 
-    private List<MS2Run> getRuns(List<Integer> runIds, List<String> errors, boolean requireProteinProphet, boolean requireSameType) throws ServletException
+    private List<MS2Run> getRuns(List<Integer> runIds, List<String> errors, boolean requireSameType) throws ServletException
     {
         List<MS2Run> runs = new ArrayList<MS2Run>(runIds.size());
         boolean experimentRunIds = "true".equals(getRequest().getParameter("ExperimentRunIds"));
@@ -3371,21 +3282,6 @@ public class MS2Controller extends ViewController
                 continue;
             }
 
-            if (requireProteinProphet)
-            {
-                try
-                {
-                    if (run.getProteinProphetFile() == null)
-                    {
-                        errors.add(run.getDescription() + " does not have ProteinProphet data associated with it.");
-                    }
-                }
-                catch (SQLException e)
-                {
-                    throw new ServletException(e);
-                }
-            }
-
             if (requireSameType)
             {
                 if (null == type)
@@ -3412,9 +3308,9 @@ public class MS2Controller extends ViewController
 
     // We cache just the list of run IDs, not the runs themselves.  This keeps things small and eases mem tracking.  Even though we're
     // just caching the list, we do all error & security checks upfront to alert the user early.
-    private int cacheSelectedRuns(List<String> errors, boolean requireProteinProphet) throws ServletException
+    private int cacheSelectedRuns(List<String> errors) throws ServletException
     {
-        List<MS2Run> runs = getSelectedRuns(errors, requireProteinProphet);
+        List<MS2Run> runs = getSelectedRuns(errors);
 
         if (errors.size() > 0)
             return 0;
@@ -3442,7 +3338,7 @@ public class MS2Controller extends ViewController
             return null;
         }
 
-        return getRuns(runIds, errors, false, true);
+        return getRuns(runIds, errors, true);
     }
 
     @Jpf.Action
