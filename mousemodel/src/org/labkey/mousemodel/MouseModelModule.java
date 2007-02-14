@@ -51,7 +51,7 @@ public class MouseModelModule extends DefaultModule implements LsidManager.LsidH
 
     public MouseModelModule()
     {
-        super(NAME, 1.70, "/org/labkey/mousemodel", "/MouseModel",
+        super(NAME, 1.73, "/org/labkey/mousemodel", "/MouseModel",
                 new WebPartFactory("Mouse Models"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
@@ -210,6 +210,9 @@ public class MouseModelModule extends DefaultModule implements LsidManager.LsidH
     {
         Set<String> result = new HashSet<String>();
         result.add("Experiment");
+        // we depond on "comm" for notes
+        result.add("Wiki");
+        result.add("Announcements");
         return result;
     }
 }

@@ -3015,9 +3015,9 @@ public class MS2Controller extends ViewController
 
         VelocityView pickView = new VelocityView("/org/labkey/ms2/pickView.vm");
 
-        nextUrl.deleteParameters("button");
-        nextUrl.deleteParameters("button.x");
-        nextUrl.deleteParameters("button.y");
+        nextUrl.deleteFilterParameters("button");
+        nextUrl.deleteFilterParameters("button.x");
+        nextUrl.deleteFilterParameters("button.y");
 
         pickView.addObject("nextUrl", nextUrl.getEncodedLocalURIString());
         pickView.addObject("select", renderViewSelect(0, true, ACL.PERM_READ, false));

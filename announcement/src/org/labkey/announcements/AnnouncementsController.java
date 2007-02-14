@@ -22,7 +22,6 @@ import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
@@ -54,6 +53,7 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.net.URISyntaxException;
 
 
 @Jpf.Controller(
@@ -68,9 +68,6 @@ import java.util.*;
 public class AnnouncementsController extends ViewController
 {
     private static CommSchema _comm = CommSchema.getInstance();
-    private static Logger _log = Logger.getLogger(AnnouncementsController.class);
-
-
 
     private Permissions getPermissions() throws ServletException
     {
@@ -155,7 +152,7 @@ public class AnnouncementsController extends ViewController
         }
         finally
         {
-            if (rs != null) try { rs.close(); } catch (SQLException e) {}
+            ResultSetUtil.close(rs);
         }
 
         DisplayColumn colGroupMembership = new GroupMembershipDisplayColumn(c);
@@ -239,7 +236,7 @@ public class AnnouncementsController extends ViewController
         }
         finally
         {
-            if (rs != null) try { rs.close(); } catch (SQLException e) {}
+            ResultSetUtil.close(rs);
         }
 
         HttpView v = new GroovyView("/org/labkey/announcements/bulkEdit.gm");
@@ -307,16 +304,25 @@ public class AnnouncementsController extends ViewController
 
 
     @Jpf.Action
-    protected Forward confirmDelete(AnnouncementForm form) throws Exception
+    protected Forward confirmDelete(AnnouncementDeleteForm form) throws Exception
     {
         Permissions perm = getPermissions();
-        Announcement message = form.selectAnnouncement();
+
+        Announcement message = null; 
+        if (null != form.getEntityId())
+            message = AnnouncementManager.getAnnouncement(getContainer(), form.getEntityId());
+        if (null == message)
+            message = AnnouncementManager.getAnnouncement(getContainer(), form.getRowId());
+
+        if (null == message)
+            HttpView.throwNotFound();
         if(!perm.allowDeleteMessage(message))
             HttpView.throwUnauthorized();
 
         GroovyView confirmDeleteView = new GroovyView("/org/labkey/announcements/confirmDelete.gm");
         confirmDeleteView.addObject("message", message);
         confirmDeleteView.addObject("settings", getSettings());
+        confirmDeleteView.addObject("redirect", form.getRedirect());
         HttpView template = new DialogTemplate(confirmDeleteView);
         includeView(template);
 
@@ -328,30 +334,43 @@ public class AnnouncementsController extends ViewController
     protected Forward deleteSingleAnnouncement(AnnouncementDeleteForm form) throws Exception
     {
         Permissions perm = getPermissions();
-        int rowId = form.getRowId();
         Container c = getContainer();
 
-        Announcement message = AnnouncementManager.getAnnouncement(c, rowId);
+        Announcement message = null;
+        if (null != form.getEntityId())
+            message = AnnouncementManager.getAnnouncement(getContainer(), form.getEntityId());
+        if (null == message)
+            message = AnnouncementManager.getAnnouncement(getContainer(), form.getRowId());
 
         if (message == null)
-            return HttpView.throwNotFound("Message not found");  // TODO
-
+            return HttpView.throwNotFound("Message not found");
         if (!perm.allowDeleteMessage(message))
             HttpView.throwUnauthorized();
 
         AnnouncementManager.deleteAnnouncement(c, message.getRowId());
 
-        //if this is a response, return to thread view
-        ViewURLHelper url = cloneViewURLHelper();
-        url.deleteParameters();
-        if (message.getParent() != null)
+        ViewURLHelper url = null;
+
+        String redirect = StringUtils.trimToNull(form.getRedirect());
+        if (null != redirect)
         {
-            Announcement parent = AnnouncementManager.getAnnouncement(c, message.getParent());
-            url.setAction("thread");
-            url.addParameter("rowId", Integer.toString(parent.getRowId()));
+            try { url = new ViewURLHelper(redirect); } catch (URISyntaxException x) {/* */}
         }
-        else
-            url.setAction("begin");
+
+        if (null == url)
+        {
+            //if this is a response, return to thread view
+            url = cloneViewURLHelper();
+            url.deleteParameters();
+            if (message.getParent() != null)
+            {
+                Announcement parent = AnnouncementManager.getAnnouncement(c, message.getParent());
+                url.setAction("thread");
+                url.addParameter("rowId", Integer.toString(parent.getRowId()));
+            }
+            else
+                url.setAction("begin");
+        }
 
         return new ViewForward(url);
     }
@@ -630,7 +649,7 @@ public class AnnouncementsController extends ViewController
         if (null != insert.getDiscussionSrcURL())
         {
             ViewURLHelper src = DiscussionServiceImpl.fromSaved(insert.getDiscussionSrcURL());
-            src.addParameter("discussionId", "" + insert.getRowId());
+            src.addParameter("discussion.id", "" + insert.getRowId());
             HttpView.throwRedirect(src.getLocalURIString());
         }
 
@@ -1054,6 +1073,9 @@ public class AnnouncementsController extends ViewController
         if (isResponse)
             parent = AnnouncementManager.getAnnouncement(c, a.getParent());
 
+        String messageId = "<" + a.getEntityId() + "@" + AppProps.getInstance().getDefaultDomain() + ">";
+        String references = messageId + " <" + parent.getEntityId() + "@" + AppProps.getInstance().getDefaultDomain() + ">";
+
         // Email all copies of this message in a background thread
         MailHelper.BulkEmailer emailer = new MailHelper.BulkEmailer();
 
@@ -1066,6 +1088,7 @@ public class AnnouncementsController extends ViewController
             // Get all site users' email addresses
             List<String> emails = UserManager.getUserEmailList();
             ViewMessage m = getMessage(c, settings, parent, a, isResponse, null, currentRendererType, Reason.broadcast);
+            m.setHeader("References", references);
             emailer.addMessage(emails, m);
         }
         else
@@ -1099,6 +1122,8 @@ public class AnnouncementsController extends ViewController
                 ViewURLHelper changeEmailURL = new ViewURLHelper(getRequest(), "announcements", "showEmailPreferences", c.getPath());
                 changeEmailURL.addParameter("srcURL", new ViewURLHelper(getRequest(), "announcements", "begin", c.getPath()).getURIString());
                 ViewMessage m = getMessage(c, settings, parent, a, isResponse, changeEmailURL.getURIString(), currentRendererType, Reason.signedUp);
+                m.setHeader("References", references);
+                m.setHeader("Message-ID", messageId);
                 emailer.addMessage(prefsEmails, m);
             }
         }
@@ -1235,6 +1260,7 @@ public class AnnouncementsController extends ViewController
     {
         private int _rowId;
         private String _entityId;
+        private String _redirect = null;
 
         public String getEntityId()
         {
@@ -1254,6 +1280,16 @@ public class AnnouncementsController extends ViewController
         public void setRowId(int rowId)
         {
             _rowId = rowId;
+        }
+
+        public String getRedirect()
+        {
+            return _redirect;
+        }
+
+        public void setRedirect(String redirect)
+        {
+            this._redirect = redirect;
         }
     }
 
@@ -1707,13 +1743,11 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    public static class ThreadView extends GroovyView<ThreadViewBean>
+    public static class ThreadView extends JspView<ThreadViewBean>
     {
-        Announcement _ann;
-
         private ThreadView()
         {
-            super("/org/labkey/announcements/announcementThread.gm", new ThreadViewBean());
+            super("/org/labkey/announcements/announcementThread.jsp", new ThreadViewBean());
         }
 
         public ThreadView(Container c, User user, String rowId, String entityId) throws ServletException
@@ -1739,7 +1773,7 @@ public class AnnouncementsController extends ViewController
         protected void init(Container c, Announcement ann, ViewURLHelper url, Permissions perm, boolean isResponse, boolean print)
                 throws ServletException
         {
-            if (null == c || !perm.allowRead(_ann))
+            if (null == c || !perm.allowRead(ann))
                 HttpView.throwUnauthorized();
 
             if (ann instanceof AnnouncementManager.BareAnnouncement)
@@ -1761,7 +1795,7 @@ public class AnnouncementsController extends ViewController
 
         public Announcement getAnnouncement()
         {
-            return _ann;
+            return getModel().announcement;
         }
     }
 

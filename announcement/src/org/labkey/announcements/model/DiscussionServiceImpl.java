@@ -8,12 +8,9 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.security.User;
-import static org.labkey.api.util.PageFlowUtil.filter;
 import org.labkey.api.util.AppProps;
-import org.labkey.api.util.PageFlowUtil;
-import static org.labkey.api.util.PageFlowUtil.jsString;
-import static org.labkey.api.util.PageFlowUtil.filter;
 import org.labkey.announcements.AnnouncementsController;
+import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.ServletException;
 import java.net.URISyntaxException;
@@ -61,7 +58,8 @@ public class DiscussionServiceImpl implements DiscussionService.Service
         if (saved.startsWith("~/"))
             saved = AppProps.getInstance().getContextPath() + saved.substring(1);
         ViewURLHelper url = new ViewURLHelper(saved);
-        Container c = ContainerManager.getForId(url.getExtraPath());
+        String id = StringUtils.strip(url.getExtraPath(),"/");
+        Container c = ContainerManager.getForId(id);
         if (null != c)
             url.setExtraPath(c.getPath());
         return url;
@@ -82,7 +80,9 @@ public class DiscussionServiceImpl implements DiscussionService.Service
         {
             // NOTE: don't pass in Announcement, it came from getBareAnnouncements()
             AnnouncementsController.ThreadView threadView = new AnnouncementsController.ThreadView(c, user, null, ann.getEntityId());
-            return threadView;
+            // want some custom formatting here....
+            HttpView wrapper = new ThreadWrapper(threadView, "Discussion");
+            return wrapper;
         }
         catch (ServletException x)
         {
@@ -97,24 +97,24 @@ public class DiscussionServiceImpl implements DiscussionService.Service
     }
 
 
-    public HttpView getDisussionArea(ViewContext context, Container c, User user, String objectId, ViewURLHelper pageURL, String title)
+    public HttpView getDisussionArea(ViewContext context, Container c, User user, String objectId, ViewURLHelper pageURL,String title)
     {
-        if (true)
-            return null;
+        // clean up discussion parameters (in cause caller didn't)
+        pageURL.deleteScopeParameters("discussion");
         
-        if (context.get("startDiscussion") != null)
+        if (context.get("discussion.start") != null)
         {
-            return startDiscussion(c, user, objectId, pageURL, title, "");
+            return new ThreadWrapper(startDiscussion(c, user, objectId, pageURL, title, ""), "Start a new discussion");
         }
         else
         {
             Announcement[] announcements = getDiscussions(c, objectId, user);
 
             HttpView discussionView = null;
-            if (context.get("discussionId") != null)
+            if (context.get("discussion.id") != null)
             {
                 int discussionId = 0;
-                try {discussionId = Integer.parseInt((String)context.get("discussionId"));} catch (Exception x) {/* */}
+                try {discussionId = Integer.parseInt((String)context.get("discussion.id"));} catch (Exception x) {/* */}
                 for (Announcement ann : announcements)
                 {
                     if (ann.getRowId() == discussionId)
@@ -128,6 +128,27 @@ public class DiscussionServiceImpl implements DiscussionService.Service
             HttpView pickerView = new PickerView(pageURL, announcements);
 
             return new VBox(pickerView, discussionView);
+        }
+    }
+
+
+    public static class ThreadWrapper extends HttpView
+    {
+        HttpView _thread;
+
+        ThreadWrapper(WebPartView thread, String caption)
+        {
+            _thread = thread;
+            thread.setTitle(caption);
+            thread.setFrame(WebPartView.FrameType.DIALOG);
+        }
+
+
+        protected void renderInternal(Object model, PrintWriter out) throws Exception
+        {
+            out.write("<table><tr><th valign=top width=50px><img src='" + getViewContext().getContextPath() + "/_.gif' width=50 height=1></th><td class=normal>");
+            _thread.render(getViewContext().getRequest(), getViewContext().getResponse());
+            out.write("</td></tr></table>");
         }
     }
 

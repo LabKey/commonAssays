@@ -19,10 +19,7 @@ import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.commons.lang.StringUtils;
 import static org.apache.commons.lang.StringUtils.trimToNull;
-import org.apache.log4j.Logger;
-import org.apache.struts.action.ActionError;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
+import org.apache.struts.action.*;
 import org.apache.struts.upload.FormFile;
 import org.apache.struts.upload.MultipartRequestHandler;
 import org.labkey.api.data.*;
@@ -35,14 +32,13 @@ import static org.labkey.api.util.PageFlowUtil.filter;
 import org.labkey.api.view.*;
 import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.announcements.DiscussionService;
 import org.labkey.mousemodel.MouseModelController;
 import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
-import org.labkey.mousemodel.NotesView;
 import org.labkey.mousemodel.mouse.MouseController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletException;
-import javax.swing.text.View;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.net.URI;
@@ -52,10 +48,6 @@ import java.util.Map;
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class SampleController extends ViewController
 {
-
-    private static Logger _log =
-            Logger.getLogger(SampleController.class);
-
     private DataRegion getDataRegion()
     {
         DataRegion region = new DataRegion();
@@ -106,7 +98,7 @@ public class SampleController extends ViewController
         rgn.setButtonBar(bb);
 
         GridView gridViewSamples = new GridView(rgn);
-        gridViewSamples.setFilter(new SimpleFilter("ModelId", new Integer(MouseModelController.getModelId(form))));
+        gridViewSamples.setFilter(new SimpleFilter("ModelId", MouseModelController.getModelId(form)));
         gridViewSamples.setSort(new Sort("+SampleId"));
         gridViewSamples.setTitle("Samples");
 
@@ -198,7 +190,7 @@ public class SampleController extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        Sample sample = (Sample) form.getBean();
+        Sample sample = form.getBean();
         String lsid = sample.getLSID();
         if (null == lsid)
         {
@@ -252,9 +244,11 @@ public class SampleController extends ViewController
         locationView.setTitle("Location");
 
         SlidesView slidesView = new SlidesView(model, sample, getViewContext());
-        NotesView notesView = new NotesView(form.getContainer(), (String) form.getTypedValue("entityId"));
 
-        VBox vbox = new VBox(new HBox(new HttpView[]{detailsView, locationView}), slidesView, notesView);
+//        NotesView notesView = new NotesView(form.getContainer(), (String) form.getTypedValue("entityId"));
+        HttpView discussionView = DiscussionService.get().getDisussionArea(getViewContext(), getContainer(), getUser(), sample.getLSID(), getViewContext().cloneViewURLHelper(), sample.getSampleId());
+
+        VBox vbox = new VBox(new HBox(new HttpView[]{detailsView, locationView}), slidesView, discussionView);
         _renderInTemplate(vbox, modelId);
 
         return null;
@@ -280,12 +274,13 @@ public class SampleController extends ViewController
     protected Forward toggleUsed(SampleForm form) throws Exception
     {
         requiresPermission(ACL.PERM_UPDATE);
-        Sample sample = (Sample) form.getBean();
+        Sample sample = form.getBean();
         if (null == sample || null == StringUtils.trimToNull(sample.getLSID()))
             throw new IllegalArgumentException("No sample supplied");
-        sample = SampleManager.getSample(sample.getLSID());
-        if (null == sample || null == StringUtils.trimToNull(sample.getLSID()))
-            throw new IllegalArgumentException("Could not fine the sample " + sample.getLSID());
+        Sample findSample = SampleManager.getSample(sample.getLSID());
+        if (null == findSample || null == StringUtils.trimToNull(findSample.getLSID()))
+            throw new IllegalArgumentException("Could not find the sample " + sample.getLSID());
+        sample = findSample;
 
         sample.setFrozenUsed(!sample.getFrozenUsed());
         SampleManager.update(getUser(), sample);
@@ -320,8 +315,8 @@ public class SampleController extends ViewController
         requiresPermission(ACL.PERM_DELETE);
         String[] selectedRows = form.getSelectedRows();
         if (null != selectedRows)
-            for (int i = 0; i < selectedRows.length; i++)
-                SampleManager.deleteSample(selectedRows[i], getContainer());
+            for (String selectedRow : selectedRows)
+                SampleManager.deleteSample(selectedRow, getContainer());
         ViewURLHelper helper = cloneViewURLHelper();
         helper.setAction("begin.view");
         helper.replaceParameter(DataRegion.LAST_FILTER_PARAM, "1");
@@ -636,6 +631,7 @@ public class SampleController extends ViewController
             return locations;
         }
 
+        @Override
         public void reset(ActionMapping actionMapping, HttpServletRequest servletRequest)
         {
             super.reset(actionMapping, servletRequest);
@@ -644,10 +640,9 @@ public class SampleController extends ViewController
                 locations[i] = new Location();
         }
 
+        @Override
         public ActionErrors validate(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
         {
-            ActionErrors errors = new ActionErrors();
-
             for (int i = 0; i < locations.length; i++)
             {
                 Location location = locations[i];
@@ -655,27 +650,25 @@ public class SampleController extends ViewController
                 if (sampleId != null && sampleId.trim().length() > 0)
                 {
                     if (location.getCell() == 0)
-                        errors.add("main", new ActionError("Error", "No cell set for sample " + (i + 1)));
+                        addActionError("No cell set for sample " + (i + 1));
                     if (location.getBox() == null || "".equals(location.getBox()))
-                        errors.add("main", new ActionError("Error", "No box set for sample " + (i + 1)));
+                        addActionError("No box set for sample " + (i + 1));
                     if (location.getRack() == null || "".equals(location.getRack()))
-                        errors.add("main", new ActionError("Error", "No rack set for sample " + (i + 1)));
+                        addActionError("No rack set for sample " + (i + 1));
 
                     try
                     {
                         Sample samp = SampleManager.getSampleFromLocation(location.getFreezer(), location.getRack(), location.getBox(), location.getCell());
                         if (null != samp)
-                            errors.add("main", new ActionError("Error", "Sample " + samp.getSampleId() + " already exists at " + location.getFreezer() + "," + location.getRack() + "," + location.getBox() + "," + location.getCell()));
+                            addActionError("Sample " + samp.getSampleId() + " already exists at " + location.getFreezer() + "," + location.getRack() + "," + location.getBox() + "," + location.getCell());
                     } catch (SQLException e)
                     {
                         //Skip
                     }
-
-
                 }
             }
 
-            return errors;
+            return getActionErrors();
         }
 
 
@@ -735,12 +728,14 @@ public class SampleController extends ViewController
         private int modelId;
         private String notes;
         private String sampleId;
-        private Sample sample;
         private String message;
         private int stainId;
         private boolean success;
 
-        public SlideForm() {}
+        public SlideForm()
+        {
+        }
+
         public SlideForm(MouseModel model)
         {
             this.modelId = model.getModelId();
@@ -774,11 +769,6 @@ public class SampleController extends ViewController
         public void setSampleId(String sampleId)
         {
             this.sampleId = sampleId;
-        }
-
-        public void setSample(Sample sample)
-        {
-            this.sample = sample;
         }
 
         public String getMessage()

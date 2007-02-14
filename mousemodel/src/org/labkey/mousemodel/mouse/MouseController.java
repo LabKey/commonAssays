@@ -18,7 +18,6 @@ package org.labkey.mousemodel.mouse;
 
 import org.labkey.mousemodel.MouseModelController;
 import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
-import org.labkey.mousemodel.NotesView;
 import org.labkey.mousemodel.sample.SampleController;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
@@ -39,6 +38,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.common.util.Pair;
 import org.labkey.api.view.*;
+import org.labkey.api.announcements.DiscussionService;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -242,7 +242,11 @@ public class MouseController extends ViewController
         DetailsView detailsView = new DetailsView(getDetailsRegion(form), form);
         detailsView.setTitle("Mouse Details");
 
-        NotesView notesView = new NotesView(c, form.getEntityId());
+//        NotesView notesView = new NotesView(c, form.getEntityId());
+        HttpView discussionView = DiscussionService.get().getDisussionArea(
+                getViewContext(), getContainer(), getUser(),
+                mouse.getEntityId(), getViewContext().cloneViewURLHelper(), mouse.getMouseNo());
+
         GridView sampleView = new GridView(getSamplesGridRegion(mouse));
         SimpleFilter filter = new SimpleFilter("organismId", form.getEntityId());
         sampleView.setFilter(filter);
@@ -261,7 +265,7 @@ public class MouseController extends ViewController
         photoView.addObject("deleteUrl", deleteUrl);
         photoView.addObject("canDelete", getViewContext().hasPermission(ACL.PERM_UPDATE));
 
-        VBox box = new VBox(detailsView, sampleView, photoView, slidesView, notesView);
+        VBox box = new VBox(detailsView, sampleView, photoView, slidesView, discussionView);
 
         _renderInTemplate(box, form);
 
@@ -350,12 +354,8 @@ public class MouseController extends ViewController
         return rgn;
     }
 
-    private DataRegion getSamplesDefaultRegion(String organismId)
+/*    private DataRegion getSamplesDefaultRegion(String organismId)
     {
-        /*
-        if (null == _samplesDefaultRegion)
-            {
-        */
         DataRegion rgn = new DataRegion();
         rgn.setColumns(getSampleTable().getUserEditableColumns());
 
@@ -389,10 +389,10 @@ public class MouseController extends ViewController
         rgn.setButtonBar(bbUpdate, DataRegion.MODE_UPDATE);
 
         return rgn;
-    }
+    } */
 
 
-    @Jpf.Action
+/*    @Jpf.Action
     protected Forward sampleDetails(MouseSampleForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
@@ -414,13 +414,16 @@ public class MouseController extends ViewController
         Map[] slides = Table.select(MouseSchema.getMouseSlide(), Table.ALL_COLUMNS, filter, null, Map.class);
         slidesView.addObject("slides", slides);
 
-        NotesView notesView = new NotesView(form.getContainer(), form.getBean().getEntityId());
-        VBox box = new VBox(mouseView, slidesView, notesView);
+//        NotesView notesView = new NotesView(form.getContainer(), form.getBean().getEntityId());
+        Sample sample = form.getBean();
+        HttpView discussionView = DiscussionService.get().getDisussionArea(
+            getViewContext(), getContainer(), getUser(), sample.getLSID(), getViewContext().cloneViewURLHelper(), sample.getSampleId());
+        VBox box = new VBox(mouseView, slidesView, discussionView);
 
         //InsertView insertView = new InsertView(getDefaultRegion());
         _renderInTemplate(box, form);
         return null;
-    }
+    } */
 
 
     @Jpf.Action
@@ -481,7 +484,7 @@ public class MouseController extends ViewController
     }
 
 
-    @Jpf.Action
+/*    @Jpf.Action
     protected Forward showInsertSample(MouseForm form) throws Exception
     {
         Container c = getContainer(ACL.PERM_READ);
@@ -504,9 +507,9 @@ public class MouseController extends ViewController
         _renderInTemplate(mouseView, form);
 
         return null;
-    }
+    } */
 
-    @Jpf.Action
+/*    @Jpf.Action
     protected Forward showUpdateSample(MouseSampleForm form) throws Exception
     {
         requiresPermission(ACL.PERM_UPDATE);
@@ -525,7 +528,7 @@ public class MouseController extends ViewController
         _renderInTemplate(mouseView, form);
 
         return null;
-    }
+    } */
 
     @Jpf.Action(validationErrorForward = @Jpf.Forward(path = "showUpdateSample.do", name = "validate"))
     protected Forward updateSample(MouseSampleForm form) throws Exception

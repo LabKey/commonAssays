@@ -10,8 +10,6 @@
     if (null == announcements)
         announcements = new Announcement[0];
     ViewURLHelper pageURL = me.pageURL;
-    pageURL.deleteParameter("discussionId");
-
 
 if (announcements.length > 0)
 {
@@ -33,9 +31,9 @@ var discussionMenu = {};
         {
             String title = a.getTitle();
             String help = a.getCreatedByName() + ' ' + DateUtil.formatDate(a.getCreated());
-            %>{text:<%=PageFlowUtil.jsString(title)%>,helptext:<%=PageFlowUtil.jsString(help)%>,url:discussionMenu.pageUrl+'&discussionId=<%=a.getRowId()%>'},<%
+            %>{text:<%=PageFlowUtil.jsString(title)%>,helptext:<%=PageFlowUtil.jsString(help)%>,url:discussionMenu.pageUrl+'&discussion.id=<%=a.getRowId()%>'},<%
         }
-        %>{text:'Start new discussion',url:discussionMenu.pageUrl+'&startDiscussion=true'}];
+        %>{text:'Start new discussion',url:discussionMenu.pageUrl+'&discussion.start=true'}];
 
     discussionMenu.showEvent = function(event)
     {
@@ -59,7 +57,6 @@ var discussionMenu = {};
 }
 else
 {
-%>[<a href="<%=filter(pageURL.getLocalURIString())%>&startDiscussion=true">discuss this</a>]<%
+%>[<a href="<%=filter(pageURL.getLocalURIString())%>&discussion.start=true">discuss this</a>]<%
 }
 %>
-<p></p>

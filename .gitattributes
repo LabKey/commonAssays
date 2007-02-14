@@ -5,7 +5,7 @@ announcement/src/org/labkey/announcements/EmailPreferencesPage.java -text
 announcement/src/org/labkey/announcements/EmailResponsePage.java -text
 announcement/src/org/labkey/announcements/announcementEmailDefaults.gm -text
 announcement/src/org/labkey/announcements/announcementListLinkBar.gm -text
-announcement/src/org/labkey/announcements/announcementThread.gm -text
+announcement/src/org/labkey/announcements/announcementThread.jsp -text
 announcement/src/org/labkey/announcements/announcementUpdate.gm -text
 announcement/src/org/labkey/announcements/bulkEdit.gm -text
 announcement/src/org/labkey/announcements/confirmDelete.gm -text
@@ -38,6 +38,7 @@ announcement/webapp/announcements/scripts/postgresql/comm-1.62-1.63.sql -text
 announcement/webapp/announcements/scripts/postgresql/comm-1.69-1.695.sql -text
 announcement/webapp/announcements/scripts/postgresql/comm-1.695-1.696.sql -text
 announcement/webapp/announcements/scripts/postgresql/comm-1.70-1.71.sql -text
+announcement/webapp/announcements/scripts/postgresql/comm-1.71-1.72.sql -text
 announcement/webapp/announcements/scripts/postgresql/obsolete/comm-0.00-1.00.sql -text
 announcement/webapp/announcements/scripts/postgresql/obsolete/comm-1.30-1.31.sql -text
 announcement/webapp/announcements/scripts/postgresql/obsolete/comm-1.31-1.32.sql -text
@@ -55,6 +56,7 @@ announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.62-1.63.sql -te
 announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.69-1.695.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.695-1.696.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.70-1.71.sql -text
+announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.71-1.72.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/comm-0.00-1.00.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/comm-1.30-1.31.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/comm-1.31-1.32.sql -text
@@ -345,11 +347,13 @@ mousemodel/src/org/labkey/mousemodel/sample/EnterSampleLocations.vm -text
 mousemodel/src/org/labkey/mousemodel/sample/slides.jsp -text
 mousemodel/webapp/MouseModel/scripts/postgresql/mousemod-0.80-1.30.sql -text
 mousemodel/webapp/MouseModel/scripts/postgresql/mousemod-1.50-1.60.sql -text
+mousemodel/webapp/MouseModel/scripts/postgresql/mousemod-1.72-1.73.sql -text
 mousemodel/webapp/MouseModel/scripts/postgresql/mousemod-drop-1.11.sql -text
 mousemodel/webapp/MouseModel/scripts/postgresql/obsolete/mousemod-1.59-1.591.sql -text
 mousemodel/webapp/MouseModel/scripts/postgresql/obsolete/sample-0.00-1.00.sql -text
 mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/mousemod-0.80-1.30.sql -text
 mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/mousemod-1.50-1.60.sql -text
+mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/mousemod-1.72-1.73.sql -text
 mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/mousemod-drop-1.11.sql -text
 mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/obsolete/mousemod-1.59-1.591.sql -text
 mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/obsolete/sample-0.00-0.61.sql -text

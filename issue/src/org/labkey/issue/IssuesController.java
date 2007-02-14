@@ -724,6 +724,7 @@ public class IssuesController extends ViewController
         return sendAjaxCompletions(completions);
     }
 
+
     private void sendUpdateEmail(Issue issue, ViewURLHelper detailsUrl, String change, String action)
     {
         try
@@ -731,6 +732,9 @@ public class IssuesController extends ViewController
             final String to = getEmailAddresses(issue, action);
             if (to.length() > 0)
             {
+                Issue.Comment lastComment = issue.getLastComment();
+                String messageId = "<" + issue.getEntityId() + "." + lastComment.getCommentId() + "@" + AppProps.getInstance().getDefaultDomain() + ">";
+                String references = messageId + " <" + issue.getEntityId() + "@" + AppProps.getInstance().getDefaultDomain() + ">";
                 ViewMessage m = MailHelper.createMessage(AppProps.getInstance().getSystemEmailAddress(), to);
                 if (m.getAllRecipients().length > 0)
                 {
@@ -743,6 +747,7 @@ public class IssuesController extends ViewController
                     m.setTemplateContent(getViewContext(), view, "text/plain");
                     page.isPlain = false;
                     m.setTemplateContent(getViewContext(), view, "text/html");
+                    m.setHeader("References", references);
 
                     MailHelper.send(m);
                 }

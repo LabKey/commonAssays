@@ -28,6 +28,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.common.util.Pair;
 import org.labkey.api.view.*;
+import org.labkey.api.announcements.DiscussionService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -172,10 +173,12 @@ public class MouseModelController extends ViewController
         locateSampleView.setTitle("Locate Sample");
 
         HBox hbox = new HBox(new HttpView[]{dashboardView, startNecropsyView, locateSampleView});
-        NotesView notesView = new NotesView(form.getContainer(), (form.getBean()).getEntityId());
+        //NotesView notesView = new NotesView(form.getContainer(), (form.getBean()).getEntityId());
+        HttpView discussionView = DiscussionService.get().getDisussionArea(
+                getViewContext(), getContainer(), getUser(),
+                model.getEntityId(), getViewContext().cloneViewURLHelper(), model.getName());
 
-        MouseModelTemplateView v = new MouseModelTemplateView(form, 0, new VBox(hbox, notesView));
-
+        MouseModelTemplateView v = new MouseModelTemplateView(form, 0, new VBox(hbox, discussionView));
 
         _renderInTemplate(v, form.getContainer());
         return null;

@@ -257,7 +257,7 @@ public abstract class CompareQuery extends SQLFragment
         rgn.addColumn(getComparisonCommonColumn(ti));
 
         ViewURLHelper originalLinkURL = this._currentUrl.clone();
-        originalLinkURL.deleteParameters(".select");
+        originalLinkURL.deleteFilterParameters(".select");
         originalLinkURL.deleteParameter("column");
         originalLinkURL.deleteParameter("total");
         originalLinkURL.deleteParameter("unique");

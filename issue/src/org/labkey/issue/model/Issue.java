@@ -412,6 +412,15 @@ public class Issue extends Entity implements Serializable, Cloneable
         return comments;
     }
 
+    public Issue.Comment getLastComment()
+    {
+        if (null == comments)
+            return null;
+        Object[] a = comments.toArray();
+        return a.length == 0 ? null : (Issue.Comment)a[a.length-1];
+    }
+
+
 
     public void setComments(Collection<Issue.Comment> comments)
     {

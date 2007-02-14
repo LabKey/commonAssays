@@ -8,23 +8,23 @@
 <%@ page import="org.labkey.api.attachments.Attachment" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
-<%@ page import="org.labkey.announcements.model.DiscussionServiceImpl" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <!--ANNOUNCEMENTS-->
 <%
-HttpView me = HttpView.currentView();
-ViewContext context = me.getViewContext();
-AnnouncementsController.ThreadViewBean bean = me.getModel();
+    AnnouncementsController.ThreadView me = (AnnouncementsController.ThreadView) HttpView.currentView();
+    ViewContext context = me.getViewContext();
+    AnnouncementsController.ThreadViewBean bean = me.getModel();
 
-Announcement announcement = bean.announcement;
-AnnouncementManager.Settings settings = bean.settings;
+    Announcement announcement = bean.announcement;
+    AnnouncementManager.Settings settings = bean.settings;
 
-if (null != bean.message)
-{
-    %><span class=ms-vb><%=filter(bean.message)%></span><%
+    if (null != bean.message)
+    {
+%><span class=ms-vb><%=h(bean.message)%></span><%
 }
 else if (null == announcement)
 {
-    %><span class=ms-vb><%=filter(settings.getConversationName())%> not found</span><%
+    %><span class=ms-vb><%=h(settings.getConversationName())%> not found</span><%
 }
 else
 {
@@ -56,9 +56,9 @@ else
 
     <table width="100%" cellpadding=0>
     <tr>
-        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align=left><span class="ms-announcementtitle"><%=filter(announcement.title)%></span></td>
-        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align=center><%=filter(announcement.getCreatedByName())%></td>
-        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align="right" nowrap><%
+        <td class="ms-vb" style="padding-top:14px; padding-bottom:2px; width:33%;" align=left><span class="ms-announcementtitle"><%=h(announcement.getTitle())%></span></td>
+        <td class="ms-vb" style="padding-top:14px; padding-bottom:2px; width:33%;" align=center><%=h(announcement.getCreatedByName())%></td>
+        <td class="ms-vb" style="padding-top:14px; padding-bottom:2px; width:33%;" align="right" nowrap><%
 
     if (bean.perm.allowUpdate(announcement) && !bean.print)
     {
@@ -67,7 +67,7 @@ else
 
     %>&nbsp;<%=DateUtil.formatDateTime(announcement.getCreated())%></td>
     </tr>
-    <tr style="height:1;"><td colspan=3 class=ms-titlearealine><img height=1 width=1 src="<%=request.getContextPath()%>/_.gif"></td></tr><%
+    <tr style="height:1px;"><td colspan=3 class=ms-titlearealine><img alt="" height=1 width=1 src="<%=request.getContextPath()%>/_.gif"></td></tr><%
 
     if (settings.hasMemberList() && null != announcement.getEmailList())
     {
@@ -96,13 +96,13 @@ else
 
     %><tr><td colspan="3" class="ms-vb"><%=announcement.translateBody(request,context.getContainer())%></td></tr>
     <%
-    if(0 < announcement.attachments.size())
+    if(0 < announcement.getAttachments().size())
     {%>
         <tr><td colspan="3"><div class="ms-vb">
         <%
             for (Attachment d : announcement.getAttachments())
             {%>
-            <a href="<%=filter(d.getDownloadUrl(request, "announcements"))%>"><img border=0 src="<%=request.getContextPath() + d.getFileIcon()%>">&nbsp;<%=d.name%></a>&nbsp;
+            <a href="<%=h(d.getDownloadUrl(request, "announcements"))%>"><img alt="" border=0 src="<%=request.getContextPath() + d.getFileIcon()%>">&nbsp;<%=d.getName()%></a>&nbsp;
         <%}%>
         </div></td></tr>
     <%}%>
@@ -121,7 +121,7 @@ else
             for (Announcement r : announcement.getResponses())
             {%>
                 <tr>
-                    <td class="ms-vb" colspan="2" style="background-color: #dddddd"><a name="row:<%=r.rowId%>"></a><%=r.getCreatedByName() + " responded:"%></td>
+                    <td class="ms-vb" colspan="2" style="background-color: #dddddd"><a name="row:<%=r.getRowId()%>"></a><%=r.getCreatedByName() + " responded:"%></td>
                     <td class="ms-vb" align="right" style="background-color: #dddddd"><%
                     if (bean.perm.allowUpdate(r) && !bean.print)
                     {
@@ -135,7 +135,7 @@ else
                 </tr><%
                 if (settings.hasMemberList() && !StringUtils.equals(r.getEmailList(),prev.getEmailList()))
                 {
-            %><tr><td>Members: <%=filter(r.getEmailList())%></td></tr><%
+            %><tr><td>Members: <%=h(r.getEmailList())%></td></tr><%
                 }
                 if (settings.hasStatus() && !StringUtils.equals(r.getStatus(),prev.getStatus()))
                 {
@@ -149,7 +149,7 @@ else
                 <tr><td>Assigned&nbsp;To: <%=r.getAssignedToName()%></td></tr><% }
                 if (null != r.getTitle() && !StringUtils.equals(r.getTitle(), prev.getTitle()))
                 {
-                    %><tr><td>Title: <%=filter(r.getTitle())%></td></tr><%
+                    %><tr><td>Title: <%=h(r.getTitle())%></td></tr><%
                 }
                 %><tr><td colspan="3" class="ms-vb"><%=r.translateBody(request,context.getContainer())%></td></tr><%
                 if(0 < r.getAttachments().size())
@@ -157,7 +157,7 @@ else
                     %><tr><td colspan="3"><div class="ms-vb"><%
                     for (Attachment rd : r.getAttachments())
                     {
-                        %><a href="<%=filter(rd.getDownloadUrl(request, "announcements"))%>"><img border=0 src="<%=request.getContextPath()+ rd.getFileIcon()%>">&nbsp;<%=rd.name%></a>&nbsp;<%
+                        %><a href="<%=h(rd.getDownloadUrl(request, "announcements"))%>"><img alt="" border=0 src="<%=request.getContextPath()+ rd.getFileIcon()%>">&nbsp;<%=rd.getName()%></a>&nbsp;<%
                     }
                     %></div></td></tr><%
                 }
@@ -168,36 +168,46 @@ else
         </td>
         </tr>
         </table></td></tr><%
-    }%>
-    <tr><td colspan="3" class="ms-vb">
-    <%
-        if (!bean.isResponse && !bean.print)
+    }
+    %><tr><td colspan="3" class="ms-vb"><%
+    if (!bean.isResponse && !bean.print)
+    {
+        if (bean.perm.allowResponse(announcement))
         {
-            if (bean.perm.allowResponse(announcement))
+            // There are two cases here.... I'm in the wiki controller or I'm not (e.g. I'm a discussion)
+            if (false && embedded)
             {
-                // There are two cases here.... I'm in the wiki controller or I'm not (e.g. I'm a discussion)
-                if (embedded)
-                {
-                    ViewURLHelper url = DiscussionServiceImpl.fromSaved(announcement.getDiscussionSrcURL());
-                    %><a href="<%=filter(url.getLocalURIString())%>&discussionId=<%=announcement.getRowId()%>&postResponse=1"><img src='<%=PageFlowUtil.buttonSrc("Post Response")%>' border="0" alt="[post response]"></a><%
+                // UNDONE: respond in place
+                ViewURLHelper url = context.cloneViewURLHelper();
+                url.replaceParameter("discussion.id",""+announcement.getRowId());
+                url.replaceParameter("discussion.reply","1");
+                %><a href="<%=h(url.getLocalURIString())%>"><img src='<%=PageFlowUtil.buttonSrc("Post Response")%>' border="0" alt="[post response]"></a><%
             }
             else
             {
                 ViewURLHelper showResponse = new ViewURLHelper("announcements", "showResponse", context.getContainer());
-                %><a href="<%=showResponse.getLocalURIString()%>parentId=<%=announcement.getEntityId()%>"><img src='<%=PageFlowUtil.buttonSrc("Post Response")%>' border="0" alt="[post response]"></a><%
+                showResponse.replaceParameter("parentId", announcement.getEntityId());
+                %><a href="<%=showResponse.getLocalURIString()%>"><img src='<%=PageFlowUtil.buttonSrc("Post Response")%>' border="0" alt="[post response]"></a><%
             }
         }
         if (bean.perm.allowDeleteThread())
         {
-            // UNDONE handle redirect for embedded discussion
             ViewURLHelper confirmDelete = new ViewURLHelper("announcements", "confirmDelete", context.getContainer());
-            %><a href="<%=confirmDelete.getLocalURIString()%>rowId=<%=announcement.getRowId()%>&amp;entityId=<%=announcement.getEntityId()%>"><img src='<%=PageFlowUtil.buttonSrc("Delete " + settings.getConversationName())%>' border="0" alt="[delete <%=settings.getConversationName().toLowerCase()%>]"></a><%
+            confirmDelete.replaceParameter("rowId", "" + announcement.getRowId());
+            confirmDelete.replaceParameter("entityId", announcement.getEntityId());
+            if (embedded)
+            {
+                ViewURLHelper redirect = context.cloneViewURLHelper().deleteScopeParameters("discussion");
+                confirmDelete.addParameter("redirect", redirect.getLocalURIString());
+            }
+            %><a href="<%=confirmDelete.getLocalURIString()%>"><img src='<%=PageFlowUtil.buttonSrc("Delete " + settings.getConversationName())%>' border="0" alt="[delete <%=settings.getConversationName().toLowerCase()%>]"></a><%
         }
-    }%>
-    </td></tr>
-    </table>
-<%  if (bean.isResponse)
+    }
+    %></td></tr></table><%
+    if (bean.isResponse)
     {
         %><a name="response"/><%
     }
-}%>
+}
+
+%>
