@@ -21,15 +21,18 @@ import java.util.*;
 public class ProteinGroupTableInfo extends FilteredTable
 {
     private static final Set<String> HIDDEN_PROTEIN_GROUP_COLUMN_NAMES = new CaseInsensitiveHashSet(Arrays.asList("RowId", "GroupNumber", "IndistinguishableCollectionId"));
+    private final MS2Schema _schema;
 
-    public ProteinGroupTableInfo(String alias)
+    public ProteinGroupTableInfo(String alias, MS2Schema schema)
     {
-        this(alias, true);
+        this(alias, true, schema);
     }
 
-    public ProteinGroupTableInfo(String alias, boolean standalone)
+
+    public ProteinGroupTableInfo(String alias, boolean standalone, MS2Schema schema)
     {
         super(MS2Manager.getTableInfoProteinGroups());
+        _schema = schema;
         setAlias(alias);
 
         ColumnInfo groupNumberColumn = wrapColumn("Group", getRealTable().getColumn("GroupNumber"));
@@ -41,6 +44,17 @@ public class ProteinGroupTableInfo extends FilteredTable
         addColumn(groupNumberColumn);
 
         wrapAllColumns(true);
+
+        ColumnInfo quantitation = wrapColumn("Quantitation", getRealTable().getColumn("RowId"));
+        quantitation.setFk(new LookupForeignKey("ProteinGroupId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return MS2Manager.getTableInfoProteinQuantitation();
+            }
+        });
+        quantitation.setKeyField(false);
+        addColumn(quantitation);
 
         for (ColumnInfo col : getColumns())
         {
@@ -58,7 +72,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return new ProteinProphetFileTableInfo();
+                return new ProteinProphetFileTableInfo(_schema);
             }
         });
 

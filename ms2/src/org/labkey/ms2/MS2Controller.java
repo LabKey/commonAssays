@@ -3842,16 +3842,22 @@ public class MS2Controller extends ViewController
         boolean addedFilter = false;
         if (form.getMaximumErrorRate() != null)
         {
-            filter.addCondition("errorrate", form.getMaximumErrorRate(), CompareType.LTE);
+            filter.addCondition("ErrorRate", form.getMaximumErrorRate(), CompareType.LTE);
             addedFilter = true;
         }
         if (form.getMinimumProbability() != null)
         {
-            filter.addCondition("groupprobability", form.getMinimumProbability(), CompareType.GTE);
+            filter.addCondition("GroupProbability", form.getMinimumProbability(), CompareType.GTE);
             addedFilter = true;
         }
         
-//        filter.toQueryString("ProteinSearchResults");
+        if (addedFilter)
+        {
+            ViewURLHelper url = getViewURLHelper().clone();
+            url.deleteParameter("minimumProbability");
+            url.deleteParameter("maximumErrorRate");
+            HttpView.throwRedirect(url + "&" + filter.toQueryString("ProteinSearchResults"));
+        }
 
         QuerySettings proteinsSettings = new QuerySettings(getViewURLHelper(), "PotentialProteins");
         proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);

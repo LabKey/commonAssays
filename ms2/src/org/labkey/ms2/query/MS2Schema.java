@@ -118,7 +118,7 @@ public class MS2Schema extends UserSchema
 
     private TableInfo createQueryProteinGroupsTable(String alias)
     {
-        return new ProteinGroupTableInfo(alias);
+        return new ProteinGroupTableInfo(alias, this);
     }
 
     private TableInfo createPeptideMembershipsTable()
@@ -145,7 +145,7 @@ public class MS2Schema extends UserSchema
 
     private TableInfo createProteinGroupsTable()
     {
-        ProteinGroupTableInfo result = new ProteinGroupTableInfo(null, false);
+        ProteinGroupTableInfo result = new ProteinGroupTableInfo(null, false, this);
 
         ColumnInfo proteinsColumn = result.wrapColumn("Proteins", result.getRealTable().getColumn("RowId"));
         proteinsColumn.setRenderClass(ProteinListDisplayColumn.class);

@@ -2,9 +2,11 @@ package org.labkey.ms2.query;
 
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.CoreSchema;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.ms2.MS2Manager;
 
 /**
@@ -13,9 +15,12 @@ import org.labkey.ms2.MS2Manager;
  */
 public class ProteinProphetFileTableInfo extends FilteredTable
 {
-    public ProteinProphetFileTableInfo()
+    private final MS2Schema _schema;
+
+    public ProteinProphetFileTableInfo(MS2Schema schema)
     {
         super(MS2Manager.getTableInfoProteinProphetFiles());
+        _schema = schema;
         wrapAllColumns(true);
 
         ViewURLHelper url = new ViewURLHelper("MS2", "showRun.view", "");
@@ -35,6 +40,18 @@ public class ProteinProphetFileTableInfo extends FilteredTable
                         return CoreSchema.getInstance().getTableInfoContainers();
                     }
                 });
+
+                ColumnInfo erLSIDColumn = result.getColumn("ExperimentRunLSID");
+                erLSIDColumn.setCaption("Experiment Run");
+                erLSIDColumn.setFk(new LookupForeignKey("LSID")
+                {
+                    public TableInfo getLookupTableInfo()
+                    {
+                        ExpSchema schema = new ExpSchema(_schema.getUser(), _schema.getContainer());
+                        return schema.createRunsTable(null);
+                    }
+                });
+
                 return result;
             }
         });

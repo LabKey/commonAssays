@@ -18,13 +18,13 @@
 #end
     $modHref
 #if($run.paramsFileName && $run.path)
-    <a href="showParamsFile.view?run=${run.run}"><img border=0 src='$tools.buttonSrc("Show $run.paramsFileName")'></a>
+    <a target="paramFile" href="showParamsFile.view?run=${run.run}"><img border=0 src='$tools.buttonSrc("Show $run.paramsFileName")'></a>
 #end
 #if($run.hasPeptideProphet)
-    <a href="showPeptideProphetDetails.view?run=${run.run}"><img border=0 src='$tools.buttonSrc("Show Peptide Prophet Details")'></a>
+    <a target="peptideProphetSummary" href="showPeptideProphetDetails.view?run=${run.run}"><img border=0 src='$tools.buttonSrc("Show Peptide Prophet Details")'></a>
 #end
 #if($run.hasProteinProphet())
-    <a href="showProteinProphetDetails.view?run=${run.run}"><img border=0 src='$tools.buttonSrc("Show Protein Prophet Details")'></a>
+    <a target="proteinProphetSummary" href="showProteinProphetDetails.view?run=${run.run}"><img border=0 src='$tools.buttonSrc("Show Protein Prophet Details")'></a>
 #end
 #if($run.getNegativeHitCount() > $run.getPeptideCount() / 3)
     <a href="discriminateScore.view?run=${run.run}"><img border=0 src='$tools.buttonSrc("Discriminate")'></a>
