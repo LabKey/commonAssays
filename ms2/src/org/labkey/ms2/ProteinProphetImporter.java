@@ -17,10 +17,7 @@ import org.apache.log4j.Logger;
 
 import javax.xml.stream.XMLStreamException;
 import java.sql.*;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -34,6 +31,7 @@ public class ProteinProphetImporter
     private final File _file;
     private final String _experimentRunLSID;
     private final XarContext _context;
+    private static final int STREAM_BUFFER_SIZE = 128 * 1024;
 
     public ProteinProphetImporter(File f, String experimentRunLSID, XarContext context)
     {
@@ -419,10 +417,10 @@ public class ProteinProphetImporter
     private String getPepXMLFileName() throws FileNotFoundException, XMLStreamException
     {
         BeanXMLStreamReader parser = null;
-        FileInputStream fIn = null;
+        InputStream fIn = null;
         try
         {
-            fIn = new FileInputStream(_file);
+            fIn = new BufferedInputStream(new FileInputStream(_file), STREAM_BUFFER_SIZE);
             parser = new BeanXMLStreamReader(fIn);
             if (parser.skipToStart("protein_summary_header"))
             {

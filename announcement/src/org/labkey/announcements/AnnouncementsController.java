@@ -1481,15 +1481,23 @@ public class AnnouncementsController extends ViewController
 
     public static class AnnouncementListLinkBar extends GroovyView
     {
-        public AnnouncementListLinkBar(Container c, ViewURLHelper url, User user, Settings settings, Permissions perm)
+        public AnnouncementListLinkBar(Container c, ViewURLHelper url, User user, Settings settings, Permissions perm, boolean displayAll)
         {
             super("/org/labkey/announcements/announcementListLinkBar.gm");
+
+            String filterText = getFilterText(settings, displayAll, true);
+
+            SimpleFilter urlFilter = new SimpleFilter(url, "Threads");
+
+            if (!urlFilter.getWhereParamNames().isEmpty())
+                filterText = filterText + " further filtered by " + urlFilter.getFilterText(CommSchema.getInstance().getSqlDialect());
 
             addObject("settings", settings);
             addObject("insertURL", perm.allowInsert() ? getShowInsertUrl(c, url) : null);
             addObject("messagesURL", ViewURLHelper.toPathString("announcements", "begin", c.getPath()));
             addObject("emailPrefsURL", user.isGuest() ? null : ViewURLHelper.toPathString("announcements", "showEmailPreferences", c.getPath()));
             addObject("emailManageURL", c.hasPermission(user, ACL.PERM_ADMIN) ? ViewURLHelper.toPathString("announcements", "adminEmail", c.getPath()) : null);
+            addObject("filterText", filterText);
         }
     }
 
@@ -1515,7 +1523,7 @@ public class AnnouncementsController extends ViewController
             addObject("customizeURL", c.hasPermission(user, ACL.PERM_ADMIN) ? getShowCustomizeUrl(c, url) : null);
             addObject("listURL", getListUrl(c));
             addObject("announcements", announcements);
-            addObject("filterText", getFilterText(settings, perm, displayAll));
+            addObject("filterText", getFilterText(settings, displayAll, announcements.length > 0));
         }
 
         public AnnouncementWebPart(ViewContext ctx) throws SQLException, ServletException
@@ -1543,23 +1551,33 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private static String getFilterText(Settings settings, Permissions perm, boolean displayAll)
+    private static String getFilterText(Settings settings, boolean displayAll, boolean showingAnnouncements)
     {
         StringBuilder sb = new StringBuilder();
 
         if (displayAll)
         {
-            sb.append("all ");
+            if (showingAnnouncements)
+                sb.append("all");
         }
         else
         {
+            String separator = "";
+
             if (settings.hasExpires())
-                sb.append("unexpired ");
+            {
+                sb.append("unexpired");
+                separator = ", ";
+            }
 
             if (settings.hasStatus())
-                sb.append("unclosed ");
+            {
+                sb.append(separator);
+                sb.append("unclosed");
+            }
         }
 
+        sb.append(" ");
         sb.append(settings.getConversationName().toLowerCase());
         sb.append("s");
 
@@ -1622,7 +1640,7 @@ public class AnnouncementsController extends ViewController
             SimpleFilter filter = getFilter(settings, perm, displayAll);
             gridView.setFilter(filter);
 
-            _vbox = new VBox(new AnnouncementListLinkBar(c, url, user, settings, perm), gridView);
+            _vbox = new VBox(new AnnouncementListLinkBar(c, url, user, settings, perm, displayAll), gridView);
         }
 
         protected DataRegion getDataRegion(Permissions perm)

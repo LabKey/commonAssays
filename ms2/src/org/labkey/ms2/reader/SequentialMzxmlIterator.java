@@ -24,6 +24,8 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
     private SimpleXMLStreamReader _parser;
     private int _scanCount = 0;
     private SimpleScan _currentScan;
+    private static final int STREAM_BUFFER_SIZE = 128 * 1024;
+
 
     public SequentialMzxmlIterator(String fileName, int msLevel) throws FileNotFoundException, XMLStreamException
     {
@@ -34,8 +36,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
         {
             throw new FileNotFoundException(fileName);
         }
-        FileInputStream fIn = new FileInputStream(f);
-        _in = new BufferedInputStream(new BufferedInputStream(fIn));
+        _in = new BufferedInputStream(new FileInputStream(f), STREAM_BUFFER_SIZE);
         _parser = new SimpleXMLStreamReader(_in);
         if (!_parser.skipToStart("msRun"))
         {

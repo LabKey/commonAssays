@@ -22,4 +22,5 @@ if (emailManageURL)
     }
 %></td>
 </tr>
+<tr><td class="ms-vb" colspan=2 style="padding-top:8px;">Displaying <%=filterText%></td></tr>
 </table>
