@@ -13,8 +13,11 @@ import org.labkey.announcements.AnnouncementsController;
 import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.net.URISyntaxException;
 import java.io.PrintWriter;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -74,15 +77,13 @@ public class DiscussionServiceImpl implements DiscussionService.Service
     }
 
 
-    public HttpView getDiscussion(Container c, Announcement ann, User user)
+    public WebPartView getDiscussion(Container c, Announcement ann, User user)
     {
         try
         {
             // NOTE: don't pass in Announcement, it came from getBareAnnouncements()
             AnnouncementsController.ThreadView threadView = new AnnouncementsController.ThreadView(c, user, null, ann.getEntityId());
-            // want some custom formatting here....
-            HttpView wrapper = new ThreadWrapper(threadView, "Discussion");
-            return wrapper;
+            return threadView;
         }
         catch (ServletException x)
         {
@@ -97,57 +98,93 @@ public class DiscussionServiceImpl implements DiscussionService.Service
     }
 
 
-    public HttpView getDisussionArea(ViewContext context, Container c, User user, String objectId, ViewURLHelper pageURL,String title)
+    
+    public HttpView getDisussionArea(ViewContext context, Container c, User user, String objectId, ViewURLHelper pageURL, String title)
     {
-        // clean up discussion parameters (in cause caller didn't)
+        int discussionId = 0;
+        try {discussionId = Integer.parseInt((String)context.get("discussion.id"));} catch (Exception x) {/* */}
+
+        // clean up discussion parameters (in case caller didn't)
         pageURL.deleteScopeParameters("discussion");
+
+        // often, but not necessarily the same as pageURL, assume we want to return to current page
+        ViewURLHelper returnUrl = context.cloneViewURLHelper().deleteScopeParameters("discussion");
+        if (0 != discussionId)
+            returnUrl.addParameter("discussion.id", "" + discussionId);
         
         if (context.get("discussion.start") != null)
         {
-            return new ThreadWrapper(startDiscussion(c, user, objectId, pageURL, title, ""), "Start a new discussion");
+            WebPartView start = startDiscussion(c, user, objectId, pageURL, title, "");
+            start.setFrame(WebPartView.FrameType.NONE);
+            return new ThreadWrapper("Start a new discussion", start);
         }
         else
         {
             Announcement[] announcements = getDiscussions(c, objectId, user);
+            Announcement selected = null;
 
-            HttpView discussionView = null;
-            if (context.get("discussion.id") != null)
+            WebPartView discussionView = null;
+            HttpView respondView = null;
+
+            if (discussionId != 0)
             {
-                int discussionId = 0;
-                try {discussionId = Integer.parseInt((String)context.get("discussion.id"));} catch (Exception x) {/* */}
                 for (Announcement ann : announcements)
                 {
                     if (ann.getRowId() == discussionId)
                     {
-                        discussionView = getDiscussion(c, ann, user);
+                        selected = ann;
                         break;
+                    }
+                }
+
+                if (selected != null)
+                {
+                    discussionView = getDiscussion(c, selected, user);
+                    discussionView.setFrame(WebPartView.FrameType.NONE);
+                    if (context.get("discussion.reply") != null)
+                    {
+                        ((AnnouncementsController.ThreadView)discussionView).getModel().isResponse = true;
+                        respondView = new AnnouncementsController.RespondView(c, selected, returnUrl);
                     }
                 }
             }
 
             HttpView pickerView = new PickerView(pageURL, announcements);
-
-            return new VBox(pickerView, discussionView);
+            if (discussionView == null)
+                return pickerView;
+            return new VBox(pickerView, new ThreadWrapper("Discussion", discussionView, respondView));
         }
     }
 
 
-    public static class ThreadWrapper extends HttpView
+    public static class ThreadWrapper extends WebPartView
     {
-        HttpView _thread;
+        WebPartView _vbox;
 
-        ThreadWrapper(WebPartView thread, String caption)
+        ThreadWrapper(String caption, HttpView... views)
         {
-            _thread = thread;
-            thread.setTitle(caption);
-            thread.setFrame(WebPartView.FrameType.DIALOG);
+            _vbox = new VBox(views);
+            _vbox.setTitle(caption);
+            _vbox.setFrame(WebPartView.FrameType.DIALOG);
         }
 
+        public ThreadWrapper()
+        {
+            super();
+        }
 
-        protected void renderInternal(Object model, PrintWriter out) throws Exception
+        public void doStartTag(Map context, PrintWriter out)
         {
             out.write("<table><tr><th valign=top width=50px><img src='" + getViewContext().getContextPath() + "/_.gif' width=50 height=1></th><td class=normal>");
-            _thread.render(getViewContext().getRequest(), getViewContext().getResponse());
+        }
+
+        protected void renderView(Object model, HttpServletRequest request, HttpServletResponse response) throws Exception
+        {
+            _vbox.render(request, response);
+        }
+
+        public void doEndTag(Map context, PrintWriter out)
+        {
             out.write("</td></tr></table>");
         }
     }

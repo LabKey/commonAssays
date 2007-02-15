@@ -191,13 +191,13 @@ if (!bean.isResponse && !bean.print)
     if (bean.perm.allowResponse(announcement))
     {
         // There are two cases here.... I'm in the wiki controller or I'm not (e.g. I'm a discussion)
-        if (false && embedded)
+        if (embedded)
         {
             // UNDONE: respond in place
             ViewURLHelper url = context.cloneViewURLHelper();
             url.replaceParameter("discussion.id",""+announcement.getRowId());
             url.replaceParameter("discussion.reply","1");
-            %><a href="<%=h(url.getLocalURIString())%>"><img src='<%=PageFlowUtil.buttonSrc("Post Response")%>' border="0" alt="[post response]"></a><%
+            %><a href="<%=h(url.getLocalURIString())%>"><img src='<%=PageFlowUtil.buttonSrc("Post Response")%>' border="0" alt="[post response]"></a>&nbsp;<%
         }
         else
         {

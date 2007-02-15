@@ -123,7 +123,7 @@ public class AnnouncementManager
     public static class BareAnnouncement extends Announcement
     {
     }
-    
+
 
     // Get all threads in this container, filtered using filter, no attachments, no responses
     public static Announcement[] getBareAnnouncements(Container c, SimpleFilter filter, Sort sort)
@@ -261,14 +261,21 @@ public class AnnouncementManager
     }
 
 
-    public static Announcement getLatestPost(Container c, Announcement parent) throws SQLException
+    public static Announcement getLatestPost(Container c, Announcement parent)
     {
-        Integer postId = Table.executeSingleton(_comm.getSchema(), "SELECT LatestId FROM " + _comm.getTableInfoThreads() + " WHERE RowId=?", new Object[]{parent.getRowId()}, Integer.class);
+        try
+        {
+            Integer postId = Table.executeSingleton(_comm.getSchema(), "SELECT LatestId FROM " + _comm.getTableInfoThreads() + " WHERE RowId=?", new Object[]{parent.getRowId()}, Integer.class);
 
-        if (null == postId)
-            throw new NotFoundException("Can't find most recent post");
+            if (null == postId)
+                throw new NotFoundException("Can't find most recent post");
 
-        return getAnnouncement(c, postId, INCLUDE_MEMBERLIST);
+            return getAnnouncement(c, postId, INCLUDE_MEMBERLIST);
+        }
+        catch (SQLException x)
+        {
+            throw new RuntimeSQLException(x);
+        }
     }
 
 

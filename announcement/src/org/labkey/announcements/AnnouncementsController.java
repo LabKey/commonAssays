@@ -960,16 +960,30 @@ public class AnnouncementsController extends ViewController
 
         Container c = getContainer();
         HttpView threadView = new ThreadView(c, getViewURLHelper(), parent, perm);
-        GroovyView respondView = new GroovyView("/org/labkey/announcements/respond.gm", "Response");
-
-        Announcement latestPost = AnnouncementManager.getLatestPost(c, parent);
 
         boolean reshow = (PageFlowUtil.getStrutsError(getRequest(), "main").length() != 0);
-        initView(respondView, c, form, latestPost, reshow);
-
-        respondView.addObject("parentAnnouncement", parent);
+        HttpView respondView = new RespondView(c, parent, form, reshow);
 
         return _renderInTemplate(new VBox(threadView, respondView), c, "forms[0].body", null, "response");
+    }
+
+
+    public static class RespondView extends GroovyView
+    {
+        public RespondView(Container c, Announcement parent, AnnouncementForm form, boolean reshow)
+        {
+            super("/org/labkey/announcements/respond.gm", "Response");
+            Announcement latestPost = AnnouncementManager.getLatestPost(c, parent);
+            initView(this, c, form, latestPost, reshow);
+            addObject("parentAnnouncement", parent);
+            addObject("returnUrl", null);
+        }
+
+        public RespondView(Container c, Announcement parent, ViewURLHelper returnUrl)
+        {
+            this(c, parent, new AnnouncementForm(), false);
+            addObject("returnUrl", returnUrl);
+        }
     }
 
 

@@ -20,7 +20,8 @@ ViewURLHelper insertAction = new ViewURLHelper("announcements", "insert.post", c
     
 %>
 <%=PageFlowUtil.getStrutsError(request, "main")%>
-<form method=post enctype="multipart/form-data" action="<%=filter(insertAction.getLocalURIString())%>&returnUrl=<%=filter(returnUrl?returnUrl.getLocalURIString():"")%>">
+<form method=post enctype="multipart/form-data" action="<%=filter(insertAction.getLocalURIString())%>">
+<input type=hidden name=returnUrl value="<%=filter(returnUrl?returnUrl.getLocalURIString():null)%>">
 <table>
   <tr><td class='ms-searchform'>Title</td><td class='ms-vb' colspan='2'><input type='text' size='60' name='title' value="<%=filter(form.get("title"))%>"></td></tr><%
     if (settings.hasStatus())
@@ -94,8 +95,7 @@ if(allowBroadcast)
 	</td>
 	</tr>
 </table>
-<br>
-<input type=image src="<%=PageFlowUtil.submitSrc()%>" value="Insert"><%
+<br>&nbsp;<input type=image src="<%=PageFlowUtil.submitSrc()%>" value="Insert">&nbsp;<%
 if (returnUrl)
 {
     %><%=PageFlowUtil.buttonLink("Cancel", returnUrl)%><%
