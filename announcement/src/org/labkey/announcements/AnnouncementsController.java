@@ -631,30 +631,32 @@ public class AnnouncementsController extends ViewController
 
         AnnouncementManager.insertAnnouncement(c, u, insert, formFiles);
 
-        // Redirect now in the "notes" case (e.g., from MouseModels), since we don't send email for notes.
-        if (isNote)
-        {
-            String redirectURL = getRequest().getParameter("redirectURL");
-            HttpView.throwRedirect(redirectURL);
-        }
+        String redirectURL = getRequest().getParameter("returnUrl");
 
-        if (null != insert.getBody())
+        // we don't send email for notes.
+        if (!isNote && null != insert.getBody())
         {
             String rendererTypeName = (String) form.get("rendererType");
             WikiRendererType currentRendererType = (null == rendererTypeName ? WikiService.get().getDefaultMessageRendererType() : WikiRendererType.valueOf(rendererTypeName));
             sendNotificationEmails(insert, currentRendererType);
         }
 
+        if (null != redirectURL)
+            HttpView.throwRedirect(redirectURL);
+
         // if this is a discussion, redirect back to originating page
-        if (null != insert.getDiscussionSrcURL())
+        Announcement thread = insert;
+        if (null != insert.getParent())
+            thread = AnnouncementManager.getAnnouncement(getContainer(), insert.getParent(), true);
+
+        if (null != thread.getDiscussionSrcURL())
         {
-            ViewURLHelper src = DiscussionServiceImpl.fromSaved(insert.getDiscussionSrcURL());
+            ViewURLHelper src = DiscussionServiceImpl.fromSaved(thread.getDiscussionSrcURL());
             src.addParameter("discussion.id", "" + insert.getRowId());
             HttpView.throwRedirect(src.getLocalURIString());
         }
 
-        String threadId = (null == insert.getParent() ? insert.getEntityId() : insert.getParent());
-
+        String threadId = thread.getEntityId();
         return new ViewForward(getThreadUrl(getRequest(), c, threadId, String.valueOf(insert.getRowId())), true);
     }
 
