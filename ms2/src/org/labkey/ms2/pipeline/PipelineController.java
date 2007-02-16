@@ -35,10 +35,7 @@ import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.protocol.*;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
-import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.URIUtil;
-import org.labkey.api.util.AppProps;
+import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 
 import javax.servlet.ServletException;
@@ -74,7 +71,7 @@ public class PipelineController extends ViewController
         NavTrailConfig trailConfig = new NavTrailConfig(getViewContext());
         if (title != null)
             trailConfig.setTitle(title);
-        trailConfig.setHelpTopic(helpTopic);
+        trailConfig.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.COMMON));
 
         return includeView(new HomeTemplate(getViewContext(), view, trailConfig));
     }

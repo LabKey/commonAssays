@@ -7,6 +7,7 @@ import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
 import org.labkey.api.view.*;
+import org.labkey.api.util.HelpTopic;
 import org.labkey.flow.data.FlowObject;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
@@ -84,7 +85,7 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
         }
         ntc.setExtraChildren(children.toArray(new NavTree[0]));
         ntc.setTitle(title);
-        ntc.setHelpTopic(PFUtil.helpTopic(action));
+        ntc.setHelpTopic(new HelpTopic(PFUtil.helpTopic(action), HelpTopic.Area.FLOW));
         return ntc;
 
     }

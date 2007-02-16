@@ -19,6 +19,7 @@ import org.labkey.api.view.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.util.HelpTopic;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.apache.log4j.Logger;
@@ -56,8 +57,8 @@ public class ScoringController extends ViewController
         NavTrailConfig trailConfig = new NavTrailConfig(getViewContext());
         if (title != null)
             trailConfig.setTitle(title);
-        trailConfig.setHelpTopic(helpTopic);
-
+        trailConfig.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.CPAS));
+        
         return includeView(new HomeTemplate(getViewContext(), view, trailConfig));
     }
 

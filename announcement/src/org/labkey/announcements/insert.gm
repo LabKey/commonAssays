@@ -3,12 +3,13 @@
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.util.HelpTopic" %>
 <%
 String userAgent = request.getHeader("user-agent");
 boolean unsupported = userAgent.contains("MSIE") && userAgent.contains("Mac");
 if (unsupported)
 {
-    %><font color="red">Sorry, Mac/IE is not fully supported. See page <a href="<%=PageFlowUtil.getHelpLinkForTopic("gettingStarted")%>">Getting Started with LabKey Server</a>.</font><%
+    %><font color="red">Sorry, Mac/IE is not fully supported. See page <a href="<%=(new HelpTopic("gettingStarted", HelpTopic.Area.COMMON)).getHelpTopicLink()%>">Getting Started with LabKey Server</a>.</font><%
 }
 
 ViewContext context = HttpView.currentContext();

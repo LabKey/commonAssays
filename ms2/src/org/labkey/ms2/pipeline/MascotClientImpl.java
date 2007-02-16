@@ -26,7 +26,7 @@ import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.util.XMLValidationParser;
-import org.labkey.api.util.HelpUtil;
+import org.labkey.api.util.HelpTopic;
 import org.labkey.api.ms2.MascotClient;
 
 import java.io.*;
@@ -576,7 +576,8 @@ public class MascotClientImpl implements MascotClient
             String msg1="Your mascot installation does not have support for MIME result download via client.pl!";
             if (null != _instanceLogger) _instanceLogger.warn(msg1);
             _log.warn(msg1);
-            String msg2="Result retrieval may fail. See "+HelpUtil.getHelpLinkForTopic("configMascot")+" for more info.";
+            String msg2="Result retrieval may fail. See " +
+                    (new HelpTopic("configMascot", HelpTopic.Area.INSTALL)).getHelpTopicLink() +" for more info.";
             if (null != _instanceLogger) _instanceLogger.warn(msg2);
             _log.warn(msg2);
         }

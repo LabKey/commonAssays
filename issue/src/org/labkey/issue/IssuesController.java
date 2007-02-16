@@ -30,11 +30,8 @@ import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.*;
 import org.labkey.api.security.*;
-import org.labkey.api.util.AppProps;
-import org.labkey.api.util.MailHelper;
 import org.labkey.api.util.MailHelper.ViewMessage;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.Search;
+import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.wiki.WikiRenderer;
 import org.labkey.api.wiki.WikiRendererType;
@@ -1071,7 +1068,7 @@ public class IssuesController extends ViewController
         NavTrailConfig trailConfig = new NavTrailConfig(getViewContext(), navTrailContainer);
         if (title != null)
             trailConfig.setTitle(title);
-        trailConfig.setHelpTopic(helpTopic);
+        trailConfig.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.COMMON));
 
         HomeTemplate template = new HomeTemplate(getViewContext(), getContainer(), view, trailConfig);
         includeView(template);
@@ -1098,7 +1095,7 @@ public class IssuesController extends ViewController
     {
         NavTrailConfig navtrail = new NavTrailConfig(getViewContext());
         navtrail.setTitle(title);
-        navtrail.setHelpTopic(helpTopic);
+        navtrail.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.COMMON));
 
         HttpView template = new HomeTemplate(getViewContext(), v, navtrail);
         template.addObject("pageTitle", title);
@@ -1111,7 +1108,7 @@ public class IssuesController extends ViewController
     {
         NavTrailConfig navtrail = new NavTrailConfig(getViewContext());
         navtrail.setTitle(title);
-        navtrail.setHelpTopic(helpTopic);
+        navtrail.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.COMMON));
 
         HttpView template = new HomeTemplate(getViewContext(), v, navtrail);
 

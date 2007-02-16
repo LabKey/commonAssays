@@ -172,7 +172,7 @@ public class MS2Controller extends ViewController
         NavTrailConfig trailConfig = new NavTrailConfig(getViewContext());
         if (title != null)
             trailConfig.setTitle(title);
-        trailConfig.setHelpTopic(helpTopic);
+        trailConfig.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.CPAS));
         trailConfig.setExploratoryFeatures(exploratoryFeatures);
         trailConfig.setExtraChildren(navTrailChildren);
 
