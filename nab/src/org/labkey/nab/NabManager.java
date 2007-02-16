@@ -36,7 +36,7 @@ public class NabManager
     public static final String DATATYPE_RUNPARAMS = "RunParameters";
     public static final String DATATYPE_SPECIMEN = "SpecimenData";
 
-    public static final String PLATE_TEMPLATE_NAME = "NAB";
+    public static final String DEFAULT_TEMPLATE_NAME = "NAb: 5 specimens in duplicate";
 
     public enum PlateProperty
     {
@@ -131,9 +131,9 @@ public class NabManager
         return null;
     }
 
-    public Luc5Assay saveResults(Container container, User user, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, FormFile datafile) throws SQLException, IOException, BiffException, ServletException
+    public Luc5Assay saveResults(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, FormFile datafile) throws SQLException, IOException, BiffException, ServletException
     {
-        return createLuc5Assay(container, user, metadata, sampleInfos, cutoffs, datafile);
+        return createLuc5Assay(container, user, plateTemplate, metadata, sampleInfos, cutoffs, datafile);
     }
 
     private int[] getCutoffs(Plate plate)
@@ -155,12 +155,12 @@ public class NabManager
         }
     }
 
-    public PlateTemplate getPlateTemplate(Container container, User user) throws SQLException
+    public PlateTemplate ensurePlateTemplate(Container container, User user) throws SQLException
     {
-        PlateTemplate template = PlateService.get().getPlateTemplate(container, user, PLATE_TEMPLATE_NAME);
+        PlateTemplate template = PlateService.get().getPlateTemplate(container, user, DEFAULT_TEMPLATE_NAME);
         if (template == null)
         {
-            template = PlateService.get().createPlateTemplate(container, user, PLATE_TEMPLATE_NAME);
+            template = PlateService.get().createPlateTemplate(container, user, DEFAULT_TEMPLATE_NAME);
             for (PlateProperty prop : PlateProperty.values())
                 template.setProperty(prop.name(), "");
 
@@ -188,7 +188,7 @@ public class NabManager
             }
 
             PlateService.get().save(container, user, template);
-            template = PlateService.get().getPlateTemplate(container, user, PLATE_TEMPLATE_NAME);
+            template = PlateService.get().getPlateTemplate(container, user, DEFAULT_TEMPLATE_NAME);
         }
         return template;
     }
@@ -196,9 +196,9 @@ public class NabManager
     private static final int START_ROW = 6; //0 based, row 7 inthe workshet
     private static final int START_COL = 0;
 
-    protected Luc5Assay createLuc5Assay(Container container, User user, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, String datafileName, InputStream attachmentStream) throws SQLException, IOException, ServletException, BiffException
+    protected Luc5Assay createLuc5Assay(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, String datafileName, InputStream attachmentStream) throws SQLException, IOException, ServletException, BiffException
     {
-        PlateTemplate nabTemplate = getPlateTemplate(container, user);
+        PlateTemplate nabTemplate = PlateService.get().getPlateTemplate(container, user, plateTemplate);
 
         Workbook workbook = Workbook.getWorkbook(attachmentStream);
         double[][] cellValues = new double[nabTemplate.getRows()][nabTemplate.getColumns()];
@@ -300,13 +300,14 @@ public class NabManager
         return new Luc5Assay(plate, cutoffs);
     }
 
-    protected Luc5Assay createLuc5Assay(Container container, User user, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, FormFile datafile) throws SQLException, IOException, ServletException, BiffException
+    protected Luc5Assay createLuc5Assay(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, FormFile datafile) throws SQLException, IOException, ServletException, BiffException
     {
         InputStream attachmentStream = null;
         try
         {
             attachmentStream = datafile.getInputStream();
-            Luc5Assay assay = createLuc5Assay(container, user, metadata, sampleInfos, cutoffs, datafile.getFileName(), attachmentStream);
+            Luc5Assay assay = createLuc5Assay(container, user, plateTemplate, metadata,
+                    sampleInfos, cutoffs, datafile.getFileName(), attachmentStream);
             PlateService.get().setDataFile(user, assay.getPlate(), datafile);
             return assay;
         }
@@ -396,6 +397,7 @@ public class NabManager
 
     private void settingsToMap(NabController.UploadAssayForm form, Map<String, Object> targetMap)
     {
+        targetMap.put("plateTemplateName", form.getPlateTemplate());
         for (int i = 0; i < form.getSampleInfos().length; i++)
         {
             String prefix = "sampleInfo" + i + ".";
@@ -451,7 +453,9 @@ public class NabManager
         int sampleCount = 0;
         while (properties.get("sampleInfo" + sampleCount + ".sampleId") != null)
             sampleCount++;
-        NabController.UploadAssayForm form = new NabController.UploadAssayForm();
+        NabController.UploadAssayForm form = new NabController.UploadAssayForm(false);
+
+        form.setPlateTemplate((String) properties.get("plateTemplateName"));
         SampleInfo[] sampleInfos = new SampleInfo[sampleCount];
         for (int i = 0; i < sampleInfos.length; i++)
         {

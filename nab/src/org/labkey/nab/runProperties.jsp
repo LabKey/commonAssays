@@ -5,14 +5,21 @@
 <%@ page import="org.labkey.nab.NabController"%>
 <%@ page import="org.labkey.nab.SampleInfo"%>
 <%@ page import="org.labkey.nab.RunSettings"%>
+<%@ page import="org.labkey.api.study.PlateTemplate" %>
+<%@ page import="org.labkey.api.study.WellGroup" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.UploadAssayForm> me = (JspView<NabController.UploadAssayForm>) HttpView.currentView();
     org.labkey.nab.NabController.UploadAssayForm form = me.getModel();
     String headerTDStyle = "text-align:left;background-color:#EEEEEE;border-top:solid 1px";
     String dataTDStyle = "padding-left:20px";
-
+    PlateTemplate activeTemplate = me.getModel().getActivePlateTemplate(me.getViewContext().getContainer(), me.getViewContext().getUser());
+    PlateTemplate[] templates = me.getModel().getPlateTemplates(me.getViewContext().getContainer(), me.getViewContext().getUser());
+    int specimenCount = activeTemplate.getWellGroupCount(WellGroup.Type.SPECIMEN);
     String errs = PageFlowUtil.getStrutsError(request, "main");
+    ViewURLHelper choosePlateURL = new ViewURLHelper("Plate", "plateTemplateList", me.getViewContext().getContainer());
+
     if (null != StringUtils.trimToNull(errs))
     {
         out.write("<span class=\"labkey-error\">");
@@ -31,7 +38,7 @@
 <script type="text/javascript">
     function changeVisibility(elementPrefix, visible)
     {
-        for (var sampId = 1; sampId < 5; sampId++)
+        for (var sampId = 1; sampId < <%= specimenCount %>; sampId++)
         {
             var elem = document.getElementById(elementPrefix + sampId);
             elem.style.display = (visible ? "block" : "none");
@@ -53,7 +60,7 @@
         if (!checkbox.checked)
             return;
         var copiedValue = document.getElementById(prefix + "0").value;
-        for (var i = 1; i < 5; i++)
+        for (var i = 1; i < <%= specimenCount %>; i++)
             document.getElementById(prefix + i).value = copiedValue;
     }
 
@@ -67,13 +74,29 @@
 
 <table>
     <tr>
-        <th style="<%= headerTDStyle %>">NAB Datafile</th>
+        <th style="<%= headerTDStyle %>">Plate Data</th>
     </tr>
     <tr>
         <td>
             <table style="<%= dataTDStyle %>">
                 <tr>
                     <td align=top>
+                        Plate template:<br><select name="plateTemplate" onChange="document.location='begin.view?plateTemplate=' + escape(this.options[this.selectedIndex].value)">
+                        <%
+                            for (PlateTemplate current : templates)
+                            {
+                        %>
+                            <option value="<%= h(current.getName()) %>" <%= activeTemplate.getName().equals(current.getName()) ? "SELECTED" : ""%>>
+                            <%= h(current.getName()) %></option>
+                        <%
+                            }
+                        %>
+                        </select> <%= textLink("edit templates", choosePlateURL)%>
+                    </td>
+                </tr>
+                <tr>
+                    <td align=top>
+                        Data file:<br>
                         <input type="file" size="40" name="dataFile" value="<%= h(form.getFileName()) %>">
                     </td>
                 </tr>
@@ -103,7 +126,7 @@
                                     Factor</td>
                             </tr>
                             <%
-                                for (int sampId = 0; sampId < 5; sampId++)
+                                for (int sampId = 0; sampId < specimenCount; sampId++)
                                 {
                                     SampleInfo sampleInfo = form.getSampleInfos()[sampId];
                             %>

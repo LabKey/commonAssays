@@ -6,8 +6,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.study.PlateService;
-import org.labkey.api.study.AssayService;
-import org.labkey.api.view.ViewContext;
 import org.labkey.nab.NabController;
 import org.labkey.nab.NabManager;
 
@@ -54,7 +52,7 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
     @Override
     public void startup(ModuleContext moduleContext)
     {
-        PlateService.get().registerDetailsLink(NabManager.PLATE_TEMPLATE_NAME, "Nab", "display");
+        PlateService.get().registerDetailsLink(NabManager.DEFAULT_TEMPLATE_NAME, "Nab", "display");
     }
 
 

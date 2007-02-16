@@ -15,7 +15,9 @@
           <root url="jar://$MODULE_DIR$/../../../build/labkeyWebapp/explodedWar/WEB-INF/jsp/nab_jsp.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../../../build/labkeyWebapp/explodedWar/WEB-INF/jsp/nab_jsp.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="Internal" />

@@ -24,10 +24,8 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
-import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DataRegion;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
@@ -70,13 +68,19 @@ public class NabController extends ViewController
             NabManager.get().saveAsLastInputs(getViewContext(), null);
         }
         else
+        {
             assayForm = NabManager.get().getLastInputs(getViewContext());
+            if (form.getPlateTemplate() != null)
+                assayForm.setPlateTemplate(form.getPlateTemplate());
+        }
+
         return editRunParameters(assayForm);
     }
 
     public static class BeginForm extends FormData
     {
         private boolean _reset;
+        private String _plateTemplate;
 
         public boolean isReset()
         {
@@ -86,6 +90,16 @@ public class NabController extends ViewController
         public void setReset(boolean reset)
         {
             _reset = reset;
+        }
+
+        public String getPlateTemplate()
+        {
+            return _plateTemplate;
+        }
+
+        public void setPlateTemplate(String plateTemplate)
+        {
+            _plateTemplate = plateTemplate;
         }
     }
 
@@ -102,7 +116,7 @@ public class NabController extends ViewController
     protected Forward runs() throws Exception
     {
         requiresPermission(ACL.PERM_READ);
-        PlateQueryView previousRuns = PlateService.get().getPlateGridView(getViewContext(), NabManager.PLATE_TEMPLATE_NAME);
+        PlateQueryView previousRuns = PlateService.get().getPlateGridView(getViewContext(), NabManager.DEFAULT_TEMPLATE_NAME);
 
         List<ActionButton> buttons = new ArrayList<ActionButton>();
 
@@ -170,7 +184,8 @@ public class NabController extends ViewController
         Luc5Assay assay;
         try
         {
-            assay = NabManager.get().saveResults(getContainer(), getUser(), assayForm.getMetadata(),
+            assay = NabManager.get().saveResults(getContainer(), getUser(),
+                    assayForm.getPlateTemplate(), assayForm.getMetadata(),
                     assayForm.getSampleInfos(), cutoffs, datafile);
         }
         catch (BiffException e)
@@ -566,7 +581,7 @@ public class NabController extends ViewController
             if (!sampleProperties.isEmpty())
             {
                 List<String> errors = GenericAssayService.get().publishAssayData(getUser(), targetContainer,
-                        NabManager.PLATE_TEMPLATE_NAME, sampleProperties.toArray(new Map[sampleProperties.size()]),
+                        NabManager.DEFAULT_TEMPLATE_NAME, sampleProperties.toArray(new Map[sampleProperties.size()]),
                         NabManager.get().getPropertyTypes(plates),
                         NabManager.PlateProperty.VirusId.name());
                 if (errors != null && !errors.isEmpty())
@@ -951,7 +966,7 @@ public class NabController extends ViewController
     protected Forward sampleList() throws Exception
     {
         requiresPermission(ACL.PERM_READ);
-        PlateQueryView queryView = PlateService.get().getWellGroupGridView(getViewContext(), NabManager.PLATE_TEMPLATE_NAME, WellGroup.Type.SPECIMEN);
+        PlateQueryView queryView = PlateService.get().getWellGroupGridView(getViewContext(), NabManager.DEFAULT_TEMPLATE_NAME, WellGroup.Type.SPECIMEN);
 
         List<ActionButton> buttons = new ArrayList<ActionButton>();
         ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
@@ -1052,12 +1067,13 @@ public class NabController extends ViewController
         }
     }
 
-    public static class UploadAssayForm extends FormData
+    public static class UploadAssayForm extends ViewForm
     {
         private SampleInfo[] _sampleInfos = new SampleInfo[5];
         private String _fileName;
         private RunMetadata _metadata = new RunMetadata();
         private RunSettings _runSettings;
+        private String _plateTemplate;
 
         public UploadAssayForm()
         {
@@ -1067,9 +1083,13 @@ public class NabController extends ViewController
         public UploadAssayForm(boolean returnDefaultForUnsetBools)
         {
             _runSettings = new RunSettings(returnDefaultForUnsetBools);
+            // initialize with default specimen values; these will only be kept
+            // around if the user resets their input form.  Otherwise, they'll be
+            // reinitialized from the users saved settings.
             for (int i = 0; i < _sampleInfos.length; i++)
                 _sampleInfos[i] = new SampleInfo("Sample" + (i + 1));
         }
+
 
         @Override
         public ActionErrors validate(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
@@ -1187,8 +1207,61 @@ public class NabController extends ViewController
         @Override
         public void reset(ActionMapping actionMapping, HttpServletRequest request)
         {
-            for (int i = 0; i < _sampleInfos.length; i++)
-                _sampleInfos[i] = new SampleInfo("sample" + (i + 1));
+            String plateTemplate = request.getParameter("plateTemplate");
+            try
+            {
+                PlateTemplate template = PlateService.get().getPlateTemplate(getContext().getContainer(), getContext().getUser(), plateTemplate);
+                int specimenCount = template.getWellGroupCount(WellGroup.Type.SPECIMEN);
+                _sampleInfos = new SampleInfo[specimenCount];
+                for (int i = 0; i < _sampleInfos.length; i++)
+                    _sampleInfos[i] = new SampleInfo("sample" + (i + 1));
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+
+        public PlateTemplate getActivePlateTemplate(Container container, User user)
+        {
+            try
+            {
+                if (_plateTemplate == null)
+                {
+                    PlateTemplate template = NabManager.get().ensurePlateTemplate(container, user);
+                    _plateTemplate = template.getName();
+                    return template;
+                }
+                else
+                    return PlateService.get().getPlateTemplate(container, user, _plateTemplate);
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+
+
+        public PlateTemplate[] getPlateTemplates(Container container, User user)
+        {
+            try
+            {
+                return PlateService.get().getPlateTemplates(container, user);
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+
+        public String getPlateTemplate()
+        {
+            return _plateTemplate;
+        }
+
+        public void setPlateTemplate(String plateTemplate)
+        {
+            _plateTemplate = plateTemplate;
         }
 
         public SampleInfo[] getSampleInfos()
