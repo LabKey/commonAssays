@@ -8,6 +8,7 @@ import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.security.User;
 import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.flowdata.xml.FlowdataDocument;
 import org.labkey.flow.flowdata.xml.FlowData;
@@ -101,5 +102,10 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
 
     public void deleteData(Data data, Container container) throws ExperimentException
     {
+    }
+
+    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user) throws ExperimentException
+    {
+
     }
 }

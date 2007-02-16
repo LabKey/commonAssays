@@ -22,6 +22,8 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.UnauthorizedException;
+import org.labkey.api.security.User;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.stream.XMLStreamException;
@@ -31,6 +33,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URI;
 import java.sql.SQLException;
+import java.util.Collections;
 
 /**
  * User: jeckels
@@ -144,6 +147,35 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
             }
         }
         catch (URISyntaxException e)
+        {
+            throw new ExperimentException(e);
+        }
+        catch (SQLException e)
+        {
+            throw new ExperimentException(e);
+        }
+    }
+
+    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user) throws ExperimentException
+    {
+        try
+        {
+            File f = newData.getFile();
+            if (f != null)
+            {
+                MS2Run run = getMS2Run(f, container);
+                // Run might be null if it's already been moved, possibly because
+                // the pep.xml file is referenced multiple times in the same experiment run.
+                if (run != null)
+                {
+                    MS2Manager.moveRuns(user, Collections.singletonList(run), targetContainer);
+                    run = getMS2Run(f, targetContainer);
+                    run.setExperimentRunLSID(newRunLSID);
+                    MS2Manager.updateRun(run, user);
+                }
+            }
+        }
+        catch (UnauthorizedException e)
         {
             throw new ExperimentException(e);
         }

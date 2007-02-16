@@ -32,6 +32,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.ExperimentRun;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
@@ -1802,7 +1803,7 @@ public class MS2Controller extends ViewController
 
 
     @Jpf.Action
-    protected Forward moveRuns() throws URISyntaxException, ServletException
+    protected Forward moveRuns() throws URISyntaxException, ServletException, SQLException, IOException
     {
         requiresPermission(ACL.PERM_INSERT);
 
@@ -1815,7 +1816,32 @@ public class MS2Controller extends ViewController
             ids.add(new Integer(idString));
         }
         List<MS2Run> runs = getRuns(ids, new ArrayList<String>(), false);
-        MS2Manager.moveRuns(getUser(), runs, getContainer());
+        List<ExperimentRun> expRuns = new ArrayList<ExperimentRun>();
+        Container sourceContainer = null;
+        for (Iterator<MS2Run> iter = runs.iterator(); iter.hasNext(); )
+        {
+            MS2Run run = iter.next();
+            if (run.getExperimentRunLSID() != null)
+            {
+                ExperimentRun expRun = ExperimentService.get().getExperimentRun(run.getExperimentRunLSID());
+                if (expRun != null && expRun.getContainer().equals(run.getContainer()))
+                {
+                    sourceContainer = ContainerManager.getForId(expRun.getContainer());
+                    expRuns.add(expRun);
+                    iter.remove();
+                }
+            }
+        }
+        if (runs.size() > 0)
+        {
+            MS2Manager.moveRuns(getUser(), runs, getContainer());
+        }
+        if (expRuns.size() > 0)
+        {
+            ViewBackgroundInfo info = getViewBackgroundInfo();
+            info.setContainer(getContainer());
+            ExperimentService.get().moveRuns(info, sourceContainer, expRuns);
+        }
 
         currentUrl.setAction("showList");
         currentUrl.deleteParameter("moveRuns");

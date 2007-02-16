@@ -6,6 +6,7 @@ import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.Container;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.security.User;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 
 import javax.servlet.http.HttpServletRequest;
@@ -75,6 +76,11 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
     public void deleteData(Data data, Container container) throws ExperimentException
     {
         // For now, let the PepXML file control when the data is deleted
+    }
+
+    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user) throws ExperimentException
+    {
+        // For now, let the PepXML file control when the data is moved
     }
 
     public Priority getPriority(File f)

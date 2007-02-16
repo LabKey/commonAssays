@@ -6,6 +6,7 @@ import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.Container;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.security.User;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -34,6 +35,11 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
     public void deleteData(Data data, Container container) throws ExperimentException
     {
         // Delete the database records for this features file here
+    }
+
+    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user) throws ExperimentException
+    {
+
     }
 
     public Priority getPriority(File f)
