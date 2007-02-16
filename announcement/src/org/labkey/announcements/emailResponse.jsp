@@ -16,9 +16,9 @@
     <tr><td colspan="3" class="ms-vb">&nbsp;</td></tr><%
     }  %>
     <tr><td colspan="3" class="ms-vb"><a href="<%=threadURL%>">View this <%=settings.getConversationName().toLowerCase()%></a></td></tr>
-</table>
+</table><br><br>
 
-    <hr size="1">
+<hr size="1">
 
 <table width="100%" border="0" cellspacing="0" cellpadding="4">
     <tr><td class="ms-vb">You have received this email because <%

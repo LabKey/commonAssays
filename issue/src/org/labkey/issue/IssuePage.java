@@ -12,11 +12,13 @@ import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.issue.model.Issue;
 import org.labkey.issue.model.IssueManager;
+import org.labkey.issue.model.IssueManager.*;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
+import java.sql.SQLException;
 
 /**
  * User: Karl Lum
@@ -238,14 +240,14 @@ abstract public class IssuePage extends JspBase
         if (null != s)
             return s;
 
-        String[] words = IssueManager.getKeywords(container, type);
-        StringBuffer sb = new StringBuffer(words.length * 30);
+        Keyword[] keywords = IssueManager.getKeywords(container, type);
+        StringBuffer sb = new StringBuffer(keywords.length * 30);
         if (allowBlank)
             sb.append("<option></option>\n");
-        for (String word : words)
+        for (Keyword keyword : keywords)
         {
             sb.append("<option>");
-            sb.append(PageFlowUtil.filter(word));
+            sb.append(PageFlowUtil.filter(keyword.getKeyword()));
             sb.append("</option>\n");
         }
         s = sb.toString();
@@ -253,21 +255,22 @@ abstract public class IssuePage extends JspBase
         return s;
     }
 
-    protected String getKeywordOptionsWithDefault(Container c, int type, String[] defaultValues)
+    protected String getKeywordOptionsWithDefault(Container c, int type, String[] standardValues, String def) throws SQLException
     {
         String options = getKeywordOptions(c.getId(), type, false);
 
         if (0 == options.length())
         {
-            // First reference in this container... save away default values
-            for (String value : defaultValues)
+            // First reference in this container... save away standard values
+            for (String value : standardValues)
                 IssueManager.addKeyword(c, type, value);
+
+            IssueManager.setKeywordDefault(c, type, def);
 
             options = getKeywordOptions(c.getId(), type, false);
         }
 
         return options;
-
     }
 
     public String getTypeOptions(String container)
@@ -285,14 +288,14 @@ abstract public class IssuePage extends JspBase
         return getKeywordOptions(container, IssuesController.ISSUE_MILESTONE, true);
     }
 
-    public String getResolutionOptions(Container c)
+    public String getResolutionOptions(Container c) throws SQLException
     {
-        return getKeywordOptionsWithDefault(c, IssuesController.ISSUE_RESOLUTION, new String[]{"Fixed", "Duplicate", "Won't Fix", "Not Repro", "By Design"});
+        return getKeywordOptionsWithDefault(c, IssuesController.ISSUE_RESOLUTION, new String[]{"Fixed", "Duplicate", "Won't Fix", "Not Repro", "By Design"}, "Fixed");
     }
 
-    public String getPriorityOptions(Container c)
+    public String getPriorityOptions(Container c) throws SQLException
     {
-        return getKeywordOptionsWithDefault(c, IssuesController.ISSUE_PRIORITY, new String[]{"0", "1", "2", "3", "4"});
+        return getKeywordOptionsWithDefault(c, IssuesController.ISSUE_PRIORITY, new String[]{"0", "1", "2", "3", "4"}, "3");
     }
 
     public String getUserOptions(Container c, Issue issue)

@@ -223,17 +223,42 @@ public class IssueManager
     }
 
 
-    public static String[] getKeywords(String container, int type)
+    public static class Keyword
     {
-        String[] keywords = null;
+        String _keyword;
+        boolean _default = false;
+
+        public boolean isDefault()
+        {
+            return _default;
+        }
+
+        public void setDefault(boolean def)
+        {
+            _default = def;
+        }
+
+        public String getKeyword()
+        {
+            return _keyword;
+        }
+
+        public void setKeyword(String keyword)
+        {
+            _keyword = keyword;
+        }
+    }
+
+
+    public static Keyword[] getKeywords(String container, int type)
+    {
+        Keyword[] keywords = null;
+        SimpleFilter filter = new SimpleFilter("Container", container).addCondition("Type", type);
+        Sort sort = new Sort("Keyword");
 
         try
         {
-            keywords = Table.executeArray(
-                    _issuesSchema.getSchema(),
-                    "SELECT Keyword FROM " + _tinfoIssueKeywords + " WHERE Container=? AND Type=? ORDER BY 1",
-                    new Object[]{container, new Integer(type)},
-                    String.class);
+            keywords = Table.select(_tinfoIssueKeywords, PageFlowUtil.set("Keyword", "Default"), filter, sort, Keyword.class);
         }
         catch (SQLException e)
         {
@@ -241,6 +266,53 @@ public class IssueManager
         }
 
         return keywords;
+    }
+
+
+    public static Map<Integer, String> getAllDefaults(Container container) throws SQLException
+    {
+        ResultSet rs = null;
+
+        try
+        {
+            SimpleFilter filter = new SimpleFilter("container", container.getId()).addCondition("Default", true);
+            rs = Table.select(_tinfoIssueKeywords, PageFlowUtil.set("Type", "Keyword"), filter, null);
+
+            Map<Integer, String> defaults = new HashMap<Integer, String>(5);
+
+            while (rs.next())
+                defaults.put(rs.getInt(1), rs.getString(2));
+
+            return defaults;
+        }
+        finally
+        {
+            ResultSetUtil.close(rs);
+        }
+    }
+
+
+    // Clear old default value and set new one
+    public static void setKeywordDefault(Container c, int type, String keyword) throws SQLException
+    {
+        clearKeywordDefault(c, type);
+
+        String selectName = _tinfoIssueKeywords.getColumn("Default").getSelectName();
+
+        Table.execute(_issuesSchema.getSchema(),
+                "UPDATE " + _tinfoIssueKeywords + " SET " + selectName + "=? WHERE Container=? AND Type=? AND Keyword=?",
+                new Object[]{Boolean.TRUE, c.getId(), type, keyword});
+    }
+
+
+    // Clear existing default value
+    public static void clearKeywordDefault(Container c, int type) throws SQLException
+    {
+        String selectName = _tinfoIssueKeywords.getColumn("Default").getSelectName();
+
+        Table.execute(_issuesSchema.getSchema(),
+                "UPDATE " + _tinfoIssueKeywords + " SET " + selectName + "=? WHERE Container=? AND Type=?",
+                new Object[]{Boolean.FALSE, c.getId(), type});
     }
 
 

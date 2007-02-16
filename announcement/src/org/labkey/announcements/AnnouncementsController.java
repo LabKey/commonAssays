@@ -1667,19 +1667,22 @@ public class AnnouncementsController extends ViewController
                 rgn.addColumn(tinfo.getColumn("Status"));
 
             if (settings.hasAssignedTo())
-                rgn.addColumn(tinfo.getColumn("AssignedTo"));
+            {
+                DisplayColumn dc = new DisplayColumnDisplayName(tinfo.getColumn("AssignedTo")); 
+                rgn.addColumn(dc);
+            }
 
             if (settings.hasExpires())
                 rgn.addColumn(tinfo.getColumn("Expires"));
 
             ColumnInfo colCreatedBy = tinfo.getColumn("CreatedBy"); // TODO: setRenderClass?
-            DisplayColumn dc = new DisplayColumnCreatedBy(colCreatedBy);
+            DisplayColumn dc = new DisplayColumnDisplayName(colCreatedBy);
             rgn.addColumn(dc);
 
             rgn.addColumn(tinfo.getColumn("Created"));
 
             ColumnInfo colLastUpdatedBy = tinfo.getColumn("ResponseCreatedBy"); // TODO: setRenderClass?
-            DisplayColumn lastDc = new DisplayColumnCreatedBy(colLastUpdatedBy);
+            DisplayColumn lastDc = new DisplayColumnDisplayName(colLastUpdatedBy);
             rgn.addColumn(lastDc);
 
             rgn.addColumn(tinfo.getColumn("ResponseCreated"));
@@ -1919,31 +1922,25 @@ public class AnnouncementsController extends ViewController
     }
 
     /**
-     * Don't display a name for CreatedBy "0" (Guest)
+     * Display "Guest" instead of "<0>"
      */
-    // TODO: Rename to DisplayColumnDisplayName
-    public static class DisplayColumnCreatedBy extends DataColumn
+    public static class DisplayColumnDisplayName extends DataColumn
     {
-        public DisplayColumnCreatedBy(ColumnInfo col)
+        public DisplayColumnDisplayName(ColumnInfo col)
         {
             super(col);
         }
 
-        public Object getValue(RenderContext ctx)
-        {
-            Map rowMap = ctx.getRow();
-            String displayName = (String)rowMap.get(getBoundColumn().getSelectName() + "$displayName");
-            return (null != displayName ? displayName : "Guest");
-        }
 
-        public Class getValueClass()
+        @Override
+        public String getFormattedValue(RenderContext ctx)
         {
-            return String.class;
-        }
+            String value = super.getFormattedValue(ctx);
 
-        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-        {
-            out.write(getValue(ctx).toString());
+            if ("&lt;0&gt;".equals(value))
+                return "Guest";
+            else
+                return value;
         }
     }
 

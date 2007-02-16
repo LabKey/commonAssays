@@ -23,6 +23,7 @@ import org.labkey.api.util.MemTracker;
 
 import javax.ejb.*;
 import java.io.Serializable;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -44,7 +45,7 @@ public class Issue extends Entity implements Serializable, Cloneable
     protected String type;
 
     protected String area;
-    protected int priority = 3;
+    protected int priority;
     protected String milestone;
     protected String buildFound;
 
@@ -79,17 +80,16 @@ public class Issue extends Entity implements Serializable, Cloneable
         beforeUpdate(u);
     }
 
-    public void Open(Container c, User u)
+    public void Open(Container c, User u) throws SQLException
     {
         Open(c, u, false);
     }
 
-    public void Open(Container c, User u, boolean fSave)
+    public void Open(Container c, User u, boolean fSave) throws SQLException
     {
-        if (0 == getCreatedBy())
+        if (0 == getCreatedBy()) // TODO: Check for brand new issue (vs. reopen)?  What if guest opens issue?
         {
             beforeInsert(u, c.getId());
-            priority = 3;
         }
         Change(u);
 
@@ -104,7 +104,6 @@ public class Issue extends Entity implements Serializable, Cloneable
     public void beforeResolve(User u)
     {
         status = statusRESOLVED;
-        resolution = "Fixed";
 
         resolvedBy = u.getUserId(); // Current user
         resolved = new Date();      // Current date

@@ -61,6 +61,7 @@
 			<ns:column columnName="Container"/>
 			<ns:column columnName="Type"/>
 			<ns:column columnName="Keyword"/>
+            <ns:column columnName="Default"/>
 		</ns:columns>
 	</ns:table>
 	<ns:table tableName="Issues" tableDbType="TABLE">

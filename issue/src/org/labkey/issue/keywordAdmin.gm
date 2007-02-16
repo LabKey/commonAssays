@@ -2,29 +2,35 @@
 <%@ page import="org.labkey.issue.IssuesController"%>
 <table border=0 cellspacing=4 cellpadding=0>
 <tr><%
-    for (kw in keywords)
-    {
-        IssuesController.KeywordAdminView.Keyword keyword = kw;
+    for (kwp in keywordPickers) {
+        IssuesController.KeywordAdminView.KeywordPicker keywordPicker = kwp;
 %>
-    <!--<%=keyword.plural%>-->
+    <!--<%=keywordPicker.plural%>-->
     <td class="ms-vb">
-    <div class="ms-searchform"><b><%=keyword.plural%></b></div>
-    <form id="form<%=keyword.plural%>" method="POST" action="deleteKeyword.post" style="margin:0px;">
+    <div class="ms-searchform"><b><%=keywordPicker.plural%></b></div>
+    <form id="form<%=keywordPicker.plural%>" method="POST" action="deleteKeyword.post" style="margin:0px;">
 <%
-if (keyword.values.length == 0)
-    out.println("    <i>no " + keyword.plural + "</i><br>");
-else
-    {
-    out.print("    <table>");
-    for (it in keyword.values)
-        {
-        value = PageFlowUtil.filter(it);
-        %>
-        <tr><td class=ms-vb>${value}</td><td class=ms-vb><a href="javascript:deleteKeyword('form<%=keyword.plural%>','${value}')">[delete]</a></td></tr><%
+    if (keywordPicker.keywords.length == 0)
+        out.println("    <i>no " + keywordPicker.plural + "</i><br>");
+    else {
+        out.print("    <table>");
+        for (keyword in keywordPicker.keywords) {
+            value = PageFlowUtil.filter(keyword.keyword);
+            selected = keyword.isDefault();
+%>
+        <tr><td class=ms-vb><%=selected ? "<b>" + value + "</b>" : value%></td><td class=ms-vb>[<a href="javascript:callAction('deleteKeyword','form<%=keywordPicker.plural%>','<%=PageFlowUtil.encode(value)%>')" title="Delete this keyword">delete</a>]&nbsp;<%
+            if (selected)
+            {
+                %>[<a href="javascript:callAction('clearKeywordDefault','form<%=keywordPicker.plural%>','<%=PageFlowUtil.encode(value)%>')" title="Clear the default value">clear</a>]<%
+            }
+            else
+            {
+                %>[<a href="javascript:callAction('setKeywordDefault','form<%=keywordPicker.plural%>','<%=PageFlowUtil.encode(value)%>')" title="Set as the default value">set</a>]<%
+            }%></td></tr><%
         }
     out.println("\n    </table>");
     }
-%>    <input type="hidden" name="keyword" value=""><input type="hidden" name="type" value="<%=keyword.type%>">
+%>    <input type="hidden" name="keyword" value=""><input type="hidden" name="type" value="<%=keywordPicker.type%>">
     </form>
     </td>
 <%
@@ -33,15 +39,14 @@ else
 </tr>
 <tr>
 <%
-    for (kw in keywords)
-    {
-        IssuesController.KeywordAdminView.Keyword keyword = kw;
+    for (kwp in keywordPickers) {
+        IssuesController.KeywordAdminView.KeywordPicker keywordPicker = kwp;
 %>
 <td>
-    <form method="POST" name="add<%=keyword.name%>" action="addKeyword.post" style="margin:0px;">
+    <form method="POST" name="add<%=keywordPicker.name%>" action="addKeyword.post" style="margin:0px;">
     <input name="keyword" value=""><br>
-    <input type="image" src="<%=PageFlowUtil.buttonSrc("Add " + keyword.name)%>" value="Add <%=keyword.name%>"><br>
-    <input type="hidden" name="type" value="<%=keyword.type%>">
+    <input type="image" src="<%=PageFlowUtil.buttonSrc("Add " + keywordPicker.name)%>" value="Add <%=keywordPicker.name%>"><br>
+    <input type="hidden" name="type" value="<%=keywordPicker.type%>">
     </form>
 </td><%
     }
@@ -50,11 +55,11 @@ else
 </table>
 
 <script type="text/javascript">
-function deleteKeyword(form, word)
+function callAction(action, form, word)
 {
     f = document.forms[form];
     f['keyword'].value = word;
-    f.action = "deleteKeyword.post";
+    f.action = action + ".post";
     f.submit();
 }
 </script>

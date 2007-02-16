@@ -39,6 +39,7 @@ import org.labkey.api.wiki.WikiService;
 import org.labkey.issue.model.Issue;
 import org.labkey.issue.model.IssueManager;
 import org.labkey.issue.model.IssueManager.CustomColumnConfiguration;
+import org.labkey.issue.model.IssueManager.Keyword;
 import org.labkey.issue.query.IssuesQuerySchema;
 import org.labkey.issue.query.IssuesQueryView;
 import org.labkey.issue.query.IssuesTable;
@@ -304,6 +305,7 @@ public class IssuesController extends ViewController
             issue.setTitle(form.getTitle());
         }
         issue.Open(getContainer(), getUser());
+        setNewIssueDefaults(issue);
 
         IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "updateView.jsp");
         JspView v = new JspView(page);
@@ -318,6 +320,20 @@ public class IssuesController extends ViewController
         page.setEditable(getEditableFields(page.getAction(), ccc));
 
         return _renderInTemplate(v, "Insert new issue", null);
+    }
+
+    private void setNewIssueDefaults(Issue issue) throws SQLException, ServletException
+    {
+        Map<Integer, String> defaults = IssueManager.getAllDefaults(getContainer());
+
+        issue.setArea(defaults.get(ISSUE_AREA));
+        issue.setType(defaults.get(ISSUE_TYPE));
+        issue.setMilestone(defaults.get(ISSUE_MILESTONE));
+        issue.setString1(defaults.get(ISSUE_STRING1));
+        issue.setString2(defaults.get(ISSUE_STRING2));
+
+        String priority = defaults.get(ISSUE_PRIORITY);
+        issue.setPriority(null != priority ? Integer.parseInt(defaults.get(ISSUE_PRIORITY)) : 3);
     }
 
     @Jpf.Action @RequiresPermission(ACL.PERM_UPDATEOWN)
@@ -379,6 +395,16 @@ public class IssuesController extends ViewController
         requiresUpdatePermission(user, issue);
 
         issue.beforeResolve(user);
+
+        if (null == issue.getResolution())
+        {
+            Map<Integer, String> defaults = IssueManager.getAllDefaults(getContainer());
+
+            String resolution = defaults.get(ISSUE_RESOLUTION);
+
+            if (null != resolution)
+                issue.setResolution(resolution);
+        }
 
         IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "updateView.jsp");
         JspView v = new JspView(page);
@@ -757,7 +783,7 @@ public class IssuesController extends ViewController
     }
 
     /**
-     * Builds the list of email address for notification based on the user
+     * Builds the list of email addresses for notification based on the user
      * preferences and the explicit notification list.
      */
     private String getEmailAddresses(Issue issue, String action) throws ServletException
@@ -886,6 +912,22 @@ public class IssuesController extends ViewController
     protected Forward deleteKeyword(AdminForm form) throws Exception
     {
         IssueManager.deleteKeyword(getContainer(), form.getType(), form.getKeyword());
+        return adminForward();
+    }
+
+
+    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
+    protected Forward setKeywordDefault(AdminForm form) throws Exception
+    {
+        IssueManager.setKeywordDefault(getContainer(), form.getType(), form.getKeyword());
+        return adminForward();
+    }
+
+
+    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
+    protected Forward clearKeywordDefault(AdminForm form) throws Exception
+    {
+        IssueManager.clearKeywordDefault(getContainer(), form.getType());
         return adminForward();
     }
 
@@ -1185,7 +1227,7 @@ public class IssuesController extends ViewController
     public static class KeywordAdminView extends GroovyView
     {
         private Container _c;
-        private List<Keyword> _keywords = new ArrayList<Keyword>(5);
+        private List<KeywordPicker> _keywordPickers = new ArrayList<KeywordPicker>(5);
 
         public KeywordAdminView(Container c)
         {
@@ -1195,27 +1237,27 @@ public class IssuesController extends ViewController
 
         public void addKeyword(String name, int type)
         {
-            _keywords.add(new Keyword(_c, name, type));
+            _keywordPickers.add(new KeywordPicker(_c, name, type));
         }
 
         protected void prepareWebPart(Object context) throws ServletException
         {
-            addObject("keywords", _keywords);
+            addObject("keywordPickers", _keywordPickers);
         }
 
-        public static class Keyword
+        public static class KeywordPicker
         {
             public String name;
             public String plural;
             public int type;
-            public String[] values;
+            public Keyword[] keywords;
 
-            Keyword(Container c, String name, int type)
+            KeywordPicker(Container c, String name, int type)
             {
                 this.name = name;
                 this.plural = name.endsWith("y") ? name.substring(0, name.length() - 1) + "ies" : name + "s";
                 this.type = type;
-                this.values = IssueManager.getKeywords(c.getId(), type);
+                this.keywords = IssueManager.getKeywords(c.getId(), type);
             }
         }
     }
