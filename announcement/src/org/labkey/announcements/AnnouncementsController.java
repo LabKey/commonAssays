@@ -75,7 +75,7 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private static Permissions getPermissions(Container c, User user, AnnouncementManager.Settings settings) throws ServletException
+    public static Permissions getPermissions(Container c, User user, AnnouncementManager.Settings settings) throws ServletException
     {
         if (settings.isSecure())
             return new SecureMessageBoardPermissions(c, user, settings);
@@ -277,6 +277,15 @@ public class AnnouncementsController extends ViewController
         }
 
         return new ViewForward(cloneViewURLHelper().setAction("adminEmail"));
+    }
+
+
+    @Jpf.Action
+    protected Forward sendDailyDigest() throws Exception
+    {
+        DailyDigest.sendDailyDigest(getViewContext());
+
+        return _renderInTemplate(new HtmlView("Daily digest sent"), getContainer(), null);
     }
 
 
@@ -911,7 +920,7 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private static ViewURLHelper getThreadUrl(HttpServletRequest request, Container c, String threadId, String anchor)
+    public static ViewURLHelper getThreadUrl(HttpServletRequest request, Container c, String threadId, String anchor)
     {
         ViewURLHelper threadUrl = new ViewURLHelper(request, "announcements", "thread", c);
         threadUrl.addParameter("entityId", threadId);
@@ -1576,6 +1585,7 @@ public class AnnouncementsController extends ViewController
             addObject("listURL", getListUrl(c));
             addObject("announcements", announcements);
             addObject("filterText", getFilterText(settings, displayAll, announcements.length > 0));
+            addObject("sendDigestURL", ViewURLHelper.toPathString("announcements", "sendDailyDigest", ""));
         }
 
         public AnnouncementWebPart(ViewContext ctx) throws SQLException, ServletException

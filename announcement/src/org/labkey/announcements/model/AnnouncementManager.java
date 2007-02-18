@@ -40,6 +40,7 @@ import org.labkey.api.announcements.CommSchema;
 import org.labkey.api.announcements.Announcement;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;

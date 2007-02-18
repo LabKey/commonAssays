@@ -25,6 +25,10 @@ if (emailPrefsURL)
     {
     %>[<a href="${emailPrefsURL}">My Email Preferences</a>]<%
     }
+if (sendDigestURL)
+    {
+    %>&nbsp;[<a href="${sendDigestURL}">Send Daily Digest</a>]<%
+    }
 %></td>
 </tr>
 </table>

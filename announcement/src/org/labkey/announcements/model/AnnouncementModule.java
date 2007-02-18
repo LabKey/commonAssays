@@ -19,7 +19,6 @@ import junit.framework.TestCase;
 import org.apache.commons.collections.MultiMap;
 import org.apache.log4j.Logger;
 import org.labkey.announcements.AnnouncementsController;
-import org.labkey.announcements.model.AnnouncementManager;
 import org.labkey.api.announcements.CommSchema;
 import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.data.Container;
@@ -131,6 +130,8 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
             _newInstall = false;
             _installerUser = null;
         }
+
+        DailyDigest.setTimer();
     }
 
     @Override

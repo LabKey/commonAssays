@@ -1,6 +1,7 @@
 * text=auto !eol
 announcement/module.properties -text
 announcement/src/META-INF/comm.xml -text
+announcement/src/org/labkey/announcements/DailyDigestPage.java -text
 announcement/src/org/labkey/announcements/EmailPreferencesPage.java -text
 announcement/src/org/labkey/announcements/EmailResponsePage.java -text
 announcement/src/org/labkey/announcements/announcementEmailDefaults.gm -text
@@ -11,6 +12,8 @@ announcement/src/org/labkey/announcements/bulkEdit.gm -text
 announcement/src/org/labkey/announcements/confirmDelete.gm -text
 announcement/src/org/labkey/announcements/confirmRemoveUser.gm -text
 announcement/src/org/labkey/announcements/customize.jsp -text
+announcement/src/org/labkey/announcements/dailyDigest.jsp -text
+announcement/src/org/labkey/announcements/dailyDigestPlain.jsp -text
 announcement/src/org/labkey/announcements/discussionMenu.gm -text
 announcement/src/org/labkey/announcements/emailPreferences.jsp -text
 announcement/src/org/labkey/announcements/emailResponse.jsp -text
@@ -18,6 +21,7 @@ announcement/src/org/labkey/announcements/emailResponsePlain.jsp -text
 announcement/src/org/labkey/announcements/insert.gm -text
 announcement/src/org/labkey/announcements/model/AnnouncementManager.java -text
 announcement/src/org/labkey/announcements/model/AnnouncementModule.java -text
+announcement/src/org/labkey/announcements/model/DailyDigest.java -text
 announcement/src/org/labkey/announcements/model/DiscussionServiceImpl.java -text
 announcement/src/org/labkey/announcements/model/NormalMessageBoardPermissions.java -text
 announcement/src/org/labkey/announcements/model/Permissions.java -text
