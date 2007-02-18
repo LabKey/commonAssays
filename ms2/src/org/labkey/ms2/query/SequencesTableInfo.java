@@ -4,12 +4,14 @@ import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.security.User;
+import org.labkey.api.security.ACL;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.MS2Manager;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * User: jeckels
@@ -63,6 +65,30 @@ public class SequencesTableInfo extends FilteredTable
         }
         sb.append(")");
         return sb.toString();
+    }
+
+    public void addContainerCondition(Container c, User u, boolean includeSubfolders)
+    {
+        Set<Container> containers = ContainerManager.getChildrenRecusively(c, u, ACL.PERM_READ);
+        SQLFragment sql = new SQLFragment();
+        sql.append("SeqId IN (SELECT SeqId FROM ");
+        sql.append(ProteinManager.getTableInfoFastaSequences());
+        sql.append(" fs, ");
+        sql.append(MS2Manager.getTableInfoRuns());
+        sql.append(" r WHERE fs.FastaId = r.FastaId AND r.Deleted = ? AND r.Container IN ");
+        sql.add(Boolean.FALSE);
+        if (includeSubfolders)
+        {
+            sql.append(ContainerManager.getIdsAsCsvList(new HashSet<Container>(containers)));
+        }
+        else
+        {
+            sql.append("(");
+            sql.append(c.getId());
+            sql.append(")");
+        }
+        sql.append(")");
+        addCondition(sql);
     }
 
     public void addProteinNameFilter(String identifier)

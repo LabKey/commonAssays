@@ -359,9 +359,9 @@ public class ProteinProphetImporter
         groupStmt.setFloat(groupIndex++, protein.getProbability());
         groupStmt.setInt(groupIndex++, collectionId);
         groupStmt.setInt(groupIndex++, file.getRowId());
-        groupStmt.setFloat(groupIndex++, protein.getPctSpectrumIds());
         groupStmt.setInt(groupIndex++, protein.getUniquePeptidesCount());
         groupStmt.setInt(groupIndex++, protein.getTotalNumberPeptides());
+        groupStmt.setFloat(groupIndex++, protein.getPctSpectrumIds());
         groupStmt.setFloat(groupIndex++, protein.getPercentCoverage());
         Float errorRate = file.calculateErrorRate(groupProbability);
         if (errorRate == null)

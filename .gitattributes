@@ -552,8 +552,8 @@ ms2/src/org/labkey/ms2/protein/ProteinManager.java -text
 ms2/src/org/labkey/ms2/protein/ProteinPlus.java -text
 ms2/src/org/labkey/ms2/protein/XMLProteinHandler.java -text
 ms2/src/org/labkey/ms2/protein/XMLProteinLoader.java -text
-ms2/src/org/labkey/ms2/protein/fasta/Fasta.java -text
 ms2/src/org/labkey/ms2/protein/fasta/FastaDbHelper.java -text
+ms2/src/org/labkey/ms2/protein/fasta/FastaFile.java -text
 ms2/src/org/labkey/ms2/protein/organism/GuessOrgByParsing.java -text
 ms2/src/org/labkey/ms2/protein/organism/GuessOrgBySharedHash.java -text
 ms2/src/org/labkey/ms2/protein/organism/GuessOrgBySharedIdents.java -text

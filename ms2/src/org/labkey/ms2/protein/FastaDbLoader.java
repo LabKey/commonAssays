@@ -21,6 +21,7 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.fasta.FastaDbHelper;
+import org.labkey.ms2.protein.fasta.FastaFile;
 import org.labkey.ms2.protein.organism.*;
 import org.labkey.common.tools.FastaLoader;
 import org.labkey.common.tools.Protein;
@@ -119,16 +120,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             NetworkDrive.ensureDrive(f.getPath());
 
         // Can't access file... set loaded date to null
-        if (f.exists())
-        {
-            Table.execute(ProteinManager.getSchema(), "UPDATE " + ProteinManager.getTableInfoFastaFiles() + " SET Loaded=? WHERE FastaId=?", new Object[]{new Date(), associatedFastaId});
-            return true;
-        }
-        else
-        {
-            Table.execute(ProteinManager.getSchema(), "UPDATE " + ProteinManager.getTableInfoFastaFiles() + " SET Loaded=NULL WHERE FastaId=?", new Object[]{associatedFastaId});
-            return false;
-        }
+        return f.exists();
     }
 
     public void parseFile() throws SQLException, IOException
@@ -141,11 +133,11 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
         synchronized (LOCK)
         {
-            HashMap<String, String> dbMap = new HashMap<String, String>();
-            dbMap.put("FileName", getParseFName());
-            dbMap.put("FileChecksum", _fileHash);
-            Map returnMap = Table.insert(null, ProteinManager.getTableInfoFastaFiles(), dbMap);
-            associatedFastaId = ((Integer)returnMap.get("FastaId")).intValue();
+            FastaFile file = new FastaFile();
+            file.setFilename(getParseFName());
+            file.setFileChecksum(_fileHash);
+            file = Table.insert(null, ProteinManager.getTableInfoFastaFiles(), file);
+            associatedFastaId = file.getFastaId();
         }
 
         if (isFileAvailable())
@@ -157,6 +149,8 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
                 try
                 {
                     parse();
+
+                    Table.execute(ProteinManager.getSchema(), "UPDATE " + ProteinManager.getTableInfoFastaFiles() + " SET Loaded=? WHERE FastaId=?", new Object[]{new Date(), associatedFastaId});
                 }
                 finally
                 {
@@ -781,10 +775,23 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         String convertedName = getCanonicalPath(f);
         String hash = HashHelpers.hashFileContents(convertedName);
         String[] hashArray = new String[] {hash};
-        Integer existingFastaId = Table.executeSingleton(ProteinManager.getSchema(), "SELECT FastaId FROM " + ProteinManager.getTableInfoFastaFiles() + " WHERE FileChecksum=?", hashArray, Integer.class);
+
+        FastaFile[] files = Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoFastaFiles() + " WHERE FileChecksum=? ORDER BY FastaId", hashArray, FastaFile.class);
+        FastaFile loadedFile = null;
+        for (FastaFile file : files)
+        {
+            if (file.getLoaded() == null)
+            {
+                ProteinManager.deleteFastaFile(file.getFastaId());
+            }
+            else
+            {
+                loadedFile = file;
+            }
+        }
 
         Long existingProtFastasCount = Table.executeSingleton(ProteinManager.getSchema(), "SELECT COUNT(*) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hashArray, Long.class);
-        if (existingFastaId != null && existingProtFastasCount != null && existingProtFastasCount.longValue() > 0)
+        if (loadedFile != null && existingProtFastasCount != null && existingProtFastasCount.longValue() > 0)
         {
             String previousFileWithSameChecksum =
                     Table.executeSingleton(ProteinManager.getSchema(), "SELECT FileName FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hashArray, String.class);
@@ -793,7 +800,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
                 log.info("FASTA file \"" + convertedName + "\" has already been loaded");
             else
                 log.info("FASTA file \"" + convertedName + "\" not loaded; another file, '" + previousFileWithSameChecksum + "', has the same checksum");
-            return existingFastaId.intValue();
+            return loadedFile.getFastaId();
         }
 
         FastaDbLoader fdbl = new FastaDbLoader(f, hash, log);

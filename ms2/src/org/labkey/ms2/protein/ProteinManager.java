@@ -775,7 +775,7 @@ public class ProteinManager
         return _goLoaded;
     }
 
-    /** Deletes all ProteinSequences, and the FastFile record as well */
+    /** Deletes all ProteinSequences, and the FastaFile record as well */
     public static void deleteFastaFile(int fastaId) throws SQLException
     {
         Table.execute(getSchema(), "DELETE FROM " + getTableInfoFastaSequences() + " WHERE FastaId = ?", new Object[]{fastaId});

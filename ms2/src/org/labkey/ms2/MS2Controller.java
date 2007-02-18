@@ -3892,6 +3892,7 @@ public class MS2Controller extends ViewController
         proteinsView.setShowExportButtons(false);
         SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
         sequencesTableInfo.addProteinNameFilter(form.getIdentifier());
+//        sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
         proteinsView.setTitle("Matching Proteins");
 
         QuerySettings groupsSettings = new QuerySettings(getViewURLHelper(), "ProteinSearchResults");
