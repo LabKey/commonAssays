@@ -219,7 +219,7 @@ public class NabController extends ViewController
     private Forward renderDetailPage(Luc5Assay assay, boolean newRun, boolean printView) throws Exception
     {
         JspView<RenderAssayBean> assayView = new JspView<RenderAssayBean>("/org/labkey/nab/runResults.jsp",
-                new RenderAssayBean(assay, newRun));
+                new RenderAssayBean(assay, newRun, printView));
         if (printView)
             return _renderInTemplate(assayView, "NAB Run Details: " + assay.getName(), null, true);
         else
@@ -235,11 +235,13 @@ public class NabController extends ViewController
     {
         private Luc5Assay _assay;
         private boolean _newRun;
+        private boolean _printView;
 
-        public RenderAssayBean(Luc5Assay assay, boolean newRun)
+        public RenderAssayBean(Luc5Assay assay, boolean newRun, boolean printView)
         {
             _assay = assay;
             _newRun = newRun;
+            _printView = printView;
         }
 
         public Luc5Assay getAssay()
@@ -250,6 +252,34 @@ public class NabController extends ViewController
         public boolean isNewRun()
         {
             return _newRun;
+        }
+
+        public PlateQueryView getDuplicateDataFileView(ViewContext context, Luc5Assay assay)
+        {
+            SimpleFilter filter = new SimpleFilter("Property/DataFile", assay.getPlate().getProperty("DataFile"));
+            filter.addCondition("RowId", assay.getRunRowId(), CompareType.NEQ);
+            PlateQueryView duplicateDataFileView = PlateService.get().getPlateGridView(context, NabManager.DEFAULT_TEMPLATE_NAME, filter);
+            ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
+            selectButton.setDisplayPermission(ACL.PERM_INSERT);
+            List<ActionButton> buttons = new ArrayList<ActionButton>();
+            buttons.add(selectButton);
+
+            ActionButton clearButton = ActionButton.BUTTON_CLEAR_ALL.clone();
+            clearButton.setDisplayPermission(ACL.PERM_INSERT);
+            buttons.add(clearButton);
+
+            ActionButton deleteButton = new ActionButton("deleteRuns.view", "Delete Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            deleteButton.setDisplayPermission(ACL.PERM_DELETE);
+            buttons.add(deleteButton);
+            duplicateDataFileView.setButtons(buttons);
+            duplicateDataFileView.addHiddenFormField("runId", "" + assay.getRunRowId());
+            duplicateDataFileView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
+            return duplicateDataFileView;
+        }
+
+        public boolean isPrintView()
+        {
+            return _printView;
         }
     }
 
@@ -517,8 +547,23 @@ public class NabController extends ViewController
         return new ViewForward(getViewURLHelper().relativeUrl("display", "rowId=" + rowid));
     }
 
+    public static class RunIdForm extends FormData
+    {
+        private Integer _runId;
+
+        public Integer getRunId()
+        {
+            return _runId;
+        }
+
+        public void setRunId(Integer runId)
+        {
+            _runId = runId;
+        }
+    }
+
     @Jpf.Action
-    protected Forward deleteRuns() throws Exception
+    protected Forward deleteRuns(RunIdForm form) throws Exception
     {
         requiresPermission(ACL.PERM_DELETE);
         List<String> rowids = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
@@ -535,7 +580,10 @@ public class NabController extends ViewController
                 _log.warn("Bad post to delete runs.", e);
             }
         }
-        return new ViewForward(getViewURLHelper().relativeUrl("runs", null));
+        if (form.getRunId() != null)
+            return new ViewForward(getViewURLHelper().relativeUrl("display", "rowId=" + form.getRunId()));
+        else
+            return new ViewForward(getViewURLHelper().relativeUrl("runs", null));
     }
 
     @Jpf.Action(validationErrorForward = @Jpf.Forward(path = "publishVerify.do", name = "validate"))

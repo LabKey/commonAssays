@@ -1,7 +1,3 @@
-<%@ page import="org.labkey.nab.NabController"%>
-<%@ page import="org.labkey.nab.DilutionSummary"%>
-<%@ page import="org.labkey.nab.Luc5Assay"%>
-<%@ page import="org.labkey.nab.SampleInfo"%>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="org.labkey.api.study.WellData"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
@@ -9,6 +5,15 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.data.SimpleFilter" %>
+<%@ page import="org.labkey.api.study.PlateQueryView" %>
+<%@ page import="org.labkey.api.study.PlateService" %>
+<%@ page import="org.labkey.nab.*" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.api.data.ActionButton" %>
+<%@ page import="org.labkey.api.security.ACL" %>
+<%@ page import="org.labkey.api.data.DataRegion" %>
+<%@ page import="java.util.ArrayList" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<org.labkey.nab.NabController.RenderAssayBean> me = (JspView<NabController.RenderAssayBean>) HttpView.currentView();
@@ -25,13 +30,32 @@
     }
     String labelStyle = "text-align:left;vertical-align:middle;font-weight:bold";
 
+    PlateQueryView duplicateDataFileView = bean.getDuplicateDataFileView(me.getViewContext(), assay);
+
     if (bean.isNewRun())
     {
 %>
     This run has been automatically saved. <%= buttonLink("Delete Run", "deleteRun.view?rowId=" + assay.getRunRowId())%><br>
 <%
     }
+    if (!bean.isPrintView() &&  duplicateDataFileView.hasRecords())
+    {
 %>
+<table>
+    <tr>
+        <th style="<%= headerTDStyle %>">Warnings</th>
+    </tr>
+    <tr>
+        <td class="ms-searchform">
+            <span class="labkey-error"><b>WARNING</b>: The following runs use a data file by the same name.</span><br><br>
+            <% include(duplicateDataFileView, out); %>
+        </td>
+    </tr>
+</table>
+    <%
+        }
+    %>
+
 <form method="post" action="upload.view" enctype="multipart/form-data" class="normal">
 <input type="hidden" name="rowId" value="<%= assay.getRunRowId() %>">
 <table>
