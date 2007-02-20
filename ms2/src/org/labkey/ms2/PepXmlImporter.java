@@ -450,9 +450,13 @@ public class PepXmlImporter extends MS2Importer
         if (hasProphet)
         {
             peptideId = getPeptideId(stmt);
-            pp.setPeptideId(peptideId);
-            // TODO: too slow
-            Table.insert(_user, MS2Manager.getTableInfoPeptideProphetData(), pp);
+            int index = 1;
+            _prophetStmt.setLong(index++, peptideId);
+            _prophetStmt.setFloat(index++, pp.getProphetFval());
+            _prophetStmt.setFloat(index++, pp.getProphetDeltaMass());
+            _prophetStmt.setInt(index++, pp.getProphetNumTrypticTerm());
+            _prophetStmt.setInt(index++, pp.getProphetNumMissedCleav());
+            _prophetStmt.executeUpdate();
         }
         if (hasQuant)
         {

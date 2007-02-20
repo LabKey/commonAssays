@@ -179,7 +179,7 @@ public abstract class CompareQuery extends SQLFragment
 
     protected String getFromClause()
     {
-        return MS2Manager.getTableInfoPeptides().toString();        
+        return MS2Manager.getTableInfoPeptides().toString() + " p";        
     }
 
     protected abstract void addWhereClauses(SimpleFilter filter);

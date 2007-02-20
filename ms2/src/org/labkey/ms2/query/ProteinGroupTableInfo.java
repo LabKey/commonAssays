@@ -104,9 +104,9 @@ public class ProteinGroupTableInfo extends FilteredTable
         }
         else
         {
-            sql.append("(");
+            sql.append("('");
             sql.append(c.getId());
-            sql.append(")");
+            sql.append("')");
         }
         sql.append(")");
         addCondition(sql);
@@ -114,7 +114,8 @@ public class ProteinGroupTableInfo extends FilteredTable
 
     public void addProteinNameFilter(String identifier)
     {
-        String inClause = SequencesTableInfo.getIdentifierInClause(identifier);
+        List<Parameter> params = SequencesTableInfo.getIdentifierParameters(identifier);
+        String inClause = SequencesTableInfo.getIdentifierInClause(params);
         SQLFragment sql = new SQLFragment();
         sql.append("RowId IN (\n");
         sql.append("SELECT ProteinGroupId FROM ");
@@ -124,18 +125,21 @@ public class ProteinGroupTableInfo extends FilteredTable
         sql.append(ProteinManager.getTableInfoAnnotations());
         sql.append(" a WHERE a.AnnotVal IN ");
         sql.append(inClause);
+        sql.addAll(params);
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences());
         sql.append(" fs WHERE fs.LookupString IN ");
         sql.append(inClause);
+        sql.addAll(params);
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoIdentifiers());
         sql.append(" i WHERE i.Identifier IN ");
         sql.append(inClause);
+        sql.addAll(params);
         sql.append("\n");
         sql.append("))");
         addCondition(sql);

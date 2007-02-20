@@ -5,6 +5,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.Parameter;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.security.User;
 import org.labkey.api.security.ACL;
@@ -41,26 +42,35 @@ public class SequencesTableInfo extends FilteredTable
         setDefaultVisibleColumns(cols);
     }
 
-    /*package*/ static String getIdentifierInClause(String identifiers)
+    /*package*/ static List<Parameter> getIdentifierParameters(String identifiers)
     {
+        List<Parameter> result = new ArrayList<Parameter>();
         if (identifiers == null || identifiers.trim().equals(""))
         {
-            return "(NULL)";
+            return result;
         }
+
         StringTokenizer st = new StringTokenizer(identifiers, " \t\n\r,");
+        while (st.hasMoreTokens())
+        {
+            result.add(new Parameter(st.nextToken(), false));
+        }
+        return result;
+    }
+
+    /*package*/ static String getIdentifierInClause(List<Parameter> params)
+    {
         StringBuilder sb = new StringBuilder();
         String separator = "";
         sb.append("(");
-        if (!st.hasMoreTokens())
+        if (params.isEmpty())
         {
             sb.append("NULL");
         }
-        while (st.hasMoreTokens())
+        for (Parameter param : params)
         {
             sb.append(separator);
-            sb.append("'");
-            sb.append(st.nextToken().replaceAll("'", "''"));
-            sb.append("'");
+            sb.append("?");
             separator = ", ";
         }
         sb.append(")");
@@ -83,9 +93,9 @@ public class SequencesTableInfo extends FilteredTable
         }
         else
         {
-            sql.append("(");
+            sql.append("('");
             sql.append(c.getId());
-            sql.append(")");
+            sql.append("')");
         }
         sql.append(")");
         addCondition(sql);
@@ -93,25 +103,29 @@ public class SequencesTableInfo extends FilteredTable
 
     public void addProteinNameFilter(String identifier)
     {
-        String inClause = getIdentifierInClause(identifier);
+        List<Parameter> params = getIdentifierParameters(identifier);
+        String inClause = getIdentifierInClause(params);
         SQLFragment sql = new SQLFragment();
         sql.append("SeqId IN (\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoAnnotations());
         sql.append(" a WHERE a.AnnotVal IN ");
         sql.append(inClause);
+        sql.addAll(params);
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences());
         sql.append(" fs WHERE fs.LookupString IN ");
         sql.append(inClause);
+        sql.addAll(params);
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoIdentifiers());
         sql.append(" i WHERE i.Identifier IN ");
         sql.append(inClause);
+        sql.addAll(params);
         sql.append("\n");
         sql.append(")");
         addCondition(sql);

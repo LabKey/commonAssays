@@ -268,7 +268,7 @@ public abstract class MS2Importer
         }
         catch (SQLException e)
         {
-            logError("Error closing reselect prepared statement", e);
+            logError("Error closing quantitation prepared statement", e);
         }
 
         try
@@ -278,7 +278,7 @@ public abstract class MS2Importer
         }
         catch (SQLException e)
         {
-            logError("Error closing reselect prepared statement", e);
+            logError("Error closing PeptideProphet data prepared statement", e);
         }
 
         try
@@ -481,6 +481,8 @@ public abstract class MS2Importer
 
         _systemLog.debug(insertWithReselectSql);
         _stmtWithReselect = _conn.prepareStatement(insertWithReselectSql);
+
+        _prophetStmt = _conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoPeptideProphetData() + " (PeptideId,ProphetFVal,ProphetDeltaMass,ProphetNumTrypticTerm,ProphetNumMissedCleav) VALUES (?,?,?,?,?)");
 
         _quantStmt = _conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoQuantitation() + "(PeptideId, LightFirstScan, LightLastScan, LightMass, HeavyFirstScan, HeavyLastScan, HeavyMass, Ratio, Heavy2LightRatio, LightArea, HeavyArea, DecimalRatio, QuantId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     }

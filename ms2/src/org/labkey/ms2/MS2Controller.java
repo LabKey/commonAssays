@@ -3121,11 +3121,22 @@ public class MS2Controller extends ViewController
 
     private Forward compareRuns(int runListIndex, boolean exportToExcel) throws Exception
     {
+        getContainer(ACL.PERM_READ);
+
         List<String> errors = new ArrayList<String>();
         List<MS2Run> runs = getCachedRuns(runListIndex, errors);
 
         if (!errors.isEmpty())
             return _renderErrors(errors);
+
+        for (MS2Run run : runs)
+        {
+            Container c = ContainerManager.getForId(run.getContainer());
+            if (c == null || !c.hasPermission(getUser(), ACL.PERM_READ))
+            {
+                return HttpView.throwUnauthorized();
+            }
+        }
 
         ViewURLHelper currentUrl = getViewURLHelper();
         String column = currentUrl.getParameter("column");
@@ -3902,7 +3913,7 @@ public class MS2Controller extends ViewController
         groupsView.setShowExportButtons(false);
         ProteinGroupTableInfo table = (ProteinGroupTableInfo)groupsView.getTable();
         table.addProteinNameFilter(form.getIdentifier());
-        table.addContainerCondition(getContainer(), getUser(), true);
+        table.addContainerCondition(getContainer(), getUser(), form.isIncludeSubfolders());
 
         groupsView.setTitle("Protein Group Results");
 
@@ -3916,6 +3927,7 @@ public class MS2Controller extends ViewController
         private String _identifier;
         private Float _minimumProbability;
         private Float _maximumErrorRate;
+        private boolean _includeSubfolders;
 
         public String getIdentifier()
         {
@@ -3945,6 +3957,16 @@ public class MS2Controller extends ViewController
         public void setMinimumProbability(Float minimumProbability)
         {
             _minimumProbability = minimumProbability;
+        }
+
+        public boolean isIncludeSubfolders()
+        {
+            return _includeSubfolders;
+        }
+
+        public void setIncludeSubfolders(boolean includeSubfolders)
+        {
+            _includeSubfolders = includeSubfolders;
         }
     }
 

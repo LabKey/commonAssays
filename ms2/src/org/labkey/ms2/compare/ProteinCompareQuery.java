@@ -70,12 +70,30 @@ public class ProteinCompareQuery extends CompareQuery
         super.selectColumns();
     }
 
+    protected String getFromClause()
+    {
+        return MS2Manager.getTableInfoPeptides() + " p LEFT OUTER JOIN " +
+            "(SELECT Mass AS SequenceMass, BestName, BestGeneName, SeqId AS SeqSeqId FROM " + ProteinManager.getTableInfoSequences() + ") s ON " +
+            "p.SeqId = s.SeqSeqId ";
+    }
+
     protected void selectRows()
     {
         super.selectRows();
-        appendNewLine();
 
         SimpleFilter proteinFilter = new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteins());
+        // Add to GROUP BY
+        for (String columnName : proteinFilter.getAllColumnNames())
+        {
+            if (!columnName.equalsIgnoreCase("Peptides") && !columnName.equalsIgnoreCase("UniquePeptides"))
+            {
+                append(", ");
+                append(columnName);
+            }
+        }
+
+        appendNewLine();
+
 
         // TODO: Make Nick happy by using a sub-SELECT instead of HAVING
         String proteinHaving = proteinFilter.getWhereSQL(MS2Manager.getSqlDialect()).replaceFirst("WHERE", "HAVING");
