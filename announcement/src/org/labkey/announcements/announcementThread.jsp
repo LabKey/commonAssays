@@ -78,7 +78,8 @@ if (null != discussionSrc)
 
 if (bean.perm.allowUpdate(announcement) && !bean.print)
 {
-%>[<a href="showUpdate.view?rowId=<%=announcement.getRowId()%>&amp;entityId=<%=announcement.getEntityId()%>">Edit</a>]<%
+    ViewURLHelper showUpdate = announcementURL(context, "showUpdate", "entityId", announcement.getEntityId());
+    %>[<a href="<%=showUpdate.getLocalURIString()%>">Edit</a>]<%
 }
 
 %>&nbsp;<%=DateUtil.formatDateTime(announcement.getCreated())%></td>
@@ -141,11 +142,13 @@ if(0 < announcement.getResponses().size())
                 <td class="ms-vb" align="right" style="background-color: #dddddd"><%
                 if (bean.perm.allowUpdate(r) && !bean.print)
                 {
-                    %>[<a href="showUpdate.view?rowId=<%=r.getRowId()%>&amp;entityId=<%=r.getEntityId()%>">Edit</a>]<%
+                    ViewURLHelper showUpdate = announcementURL(context, "showUpdate", "entityId", r.getEntityId());
+                    %>[<a href="<%=showUpdate.getLocalURIString()%>">Edit</a>]<%
                 }
                 if (bean.perm.allowDeleteMessage(r) && !bean.print)
                 {
-                    %>[<a href="deleteSingleAnnouncement.view?rowId=<%=r.getRowId()%>&amp;entityId=<%=r.getEntityId()%>">Delete</a>]<%
+                    ViewURLHelper deleteSingleAnnouncement = announcementURL(context, "deleteSingleAnnouncement", "entityId", r.getEntityId());
+                    %>[<a href="<%=deleteSingleAnnouncement.getLocalURIString()%>">Delete</a>]<%
                 }
                 %><%=DateUtil.formatDateTime(r.getCreated())%></td>
             </tr><%
@@ -201,16 +204,13 @@ if (!bean.isResponse && !bean.print)
         }
         else
         {
-            ViewURLHelper showResponse = new ViewURLHelper("announcements", "showResponse", context.getContainer());
-            showResponse.replaceParameter("parentId", announcement.getEntityId());
+            ViewURLHelper showResponse = announcementURL(context, "showResponse", "parentId", announcement.getEntityId());
             %><a href="<%=showResponse.getLocalURIString()%>"><img src='<%=PageFlowUtil.buttonSrc("Post Response")%>' border="0" alt="[post response]"></a>&nbsp;<%
         }
     }
     if (bean.perm.allowDeleteThread())
     {
-        ViewURLHelper confirmDelete = new ViewURLHelper("announcements", "confirmDelete", context.getContainer());
-        confirmDelete.replaceParameter("rowId", "" + announcement.getRowId());
-        confirmDelete.replaceParameter("entityId", announcement.getEntityId());
+        ViewURLHelper confirmDelete = announcementURL(context, "confirmDelete", "entityId", ""+announcement.getEntityId());
         if (embedded)
         {
             ViewURLHelper redirect = context.cloneViewURLHelper().deleteScopeParameters("discussion");
@@ -229,4 +229,14 @@ if (bean.isResponse)
     %><a name="response"/><%
 }
 
+%>
+
+<%!
+    ViewURLHelper announcementURL(ViewContext context, String action, String... params)
+    {
+        ViewURLHelper url = new ViewURLHelper("announcements", action, context.getContainer());
+        for (int i=0 ; i<params.length ; i+=2)
+            url.addParameter(params[i], params[i+1]);
+        return url;
+    }
 %>
