@@ -27,7 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.util.XMLValidationParser;
 import org.labkey.api.util.HelpTopic;
-import org.labkey.api.ms2.MascotClient;
+import org.labkey.api.ms2.SearchClient;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -40,7 +40,7 @@ import java.util.*;
  * Client to make Mascot-specific request
  */
 
-public class MascotClientImpl implements MascotClient
+public class MascotClientImpl implements SearchClient
 {
     private static Logger _log = Logger.getLogger(MascotClientImpl.class);
     private Logger _instanceLogger = null;

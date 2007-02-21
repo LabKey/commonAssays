@@ -7,6 +7,7 @@ import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.HttpClient;
+import org.labkey.api.ms2.SearchClient;
 
 import java.util.*;
 import java.net.URL;
@@ -19,8 +20,8 @@ import java.io.*;
  * Date: Dec 13, 2006
  * Time: 4:35:42 PM
  */
-public class SequestClient {
-    private static Logger _log = Logger.getLogger(SequestClient.class);
+public class SequestClientImpl implements SearchClient {
+    private static Logger _log = Logger.getLogger(SequestClientImpl.class);
     private Logger _instanceLogger = null;
     private String _url;
     private String _userAccount = "";
@@ -36,7 +37,7 @@ public class SequestClient {
     private static volatile String _lastProvidedUserPassword = "";
     private static volatile String _lastProvidedProxy = "";
 
-    public SequestClient (String url, Logger instanceLogger)
+    public SequestClientImpl(String url, Logger instanceLogger)
     {
         _url = url;
         _instanceLogger = instanceLogger;
@@ -44,26 +45,6 @@ public class SequestClient {
         _userPassword = "";
         errorCode = 0;
         errorString = "";
-    }
-
-    public SequestClient(String url, Logger instanceLogger, String userAccount, String userPassword)
-    {
-        _url = url;
-        _instanceLogger = instanceLogger;
-        _userAccount = (null == userAccount) ? "" : userAccount;
-        _userPassword = (null == userPassword) ? "" : userPassword;
-        errorCode = 0;
-        errorString="";
-    }
-
-    public void setUserAccount (String userAccount)
-    {
-        _userAccount = (null == userAccount) ? "" : userAccount;
-    }
-
-    public void setUserPassword (String userPassword)
-    {
-        _userPassword = (null == userPassword) ? "" : userPassword;
     }
 
     public int getErrorCode ()
@@ -78,34 +59,7 @@ public class SequestClient {
 
     public boolean setProxyURL (String proxyURL)
     {
-        // let' works on the proxy server setup
-        boolean succeeded = false;
-        if (null == proxyURL || "".equals(proxyURL))
-        {
-            proxyURL = "";
-            Properties systemProperties = System.getProperties();
-            systemProperties.setProperty("http.proxyHost","");
-            systemProperties.setProperty("http.proxyPort","80");
-            succeeded = true;
-        }
-        else
-        {
-            try
-            {
-                URL url = new URL(proxyURL);
-                Properties systemProperties = System.getProperties();
-                systemProperties.setProperty("http.proxyHost",url.getHost());
-                systemProperties.setProperty("http.proxyPort",Integer.toString(url.getPort()));
-                succeeded = true;
-            }
-            catch (MalformedURLException x)
-            {
-                _log.error("request(proxyURL="+proxyURL+")", x);
-            }
-        }
-        if (succeeded)
-            _proxyURL = proxyURL;
-        return succeeded;
+        return false;
     }
 
     public boolean requireAuthentication ()
@@ -437,7 +391,7 @@ public class SequestClient {
 
             // get a TaskID to submit the job
             if (null!=_instanceLogger) _instanceLogger.info("Creating Sequest search task...");
-            String taskId = getTaskID (sequestSessionId);
+            String taskId = getTaskID(sequestSessionId);
             if ("".equals(taskId))
             {
                 if (null!=_instanceLogger) _instanceLogger.info("Fail to create Sequest search task id.");
@@ -446,8 +400,8 @@ public class SequestClient {
             }
 
             // submit job to sequest server
-            if (null!=_instanceLogger) _instanceLogger.info("Submitting search to Sequest server...");
-            if (!submitFile (sequestSessionId, taskId, sequestParamFile, mzXmlFile, mzXmlCommand))
+            if (null!=_instanceLogger) _instanceLogger.info("Submitting search to Sequest server (taskId=" + taskId + ").");
+            if (!submitFile(sequestSessionId, taskId, sequestParamFile, mzXmlFile, mzXmlCommand))
             {
                 if (null!=_instanceLogger) _instanceLogger.info("Failed to submit search to Sequest server.");
                 returnCode = 3;
@@ -504,15 +458,15 @@ public class SequestClient {
             catch (InterruptedException e) { }
 
             if (null!=_instanceLogger) _instanceLogger.info("Retrieving Sequest search result...");
-            if (getResultFile (sequestSessionId, taskId, resultFile))
+            if (getResultFile(sequestSessionId, taskId, resultFile))
             {
                 if (null!=_instanceLogger) _instanceLogger.info("Sequest search result retrieved.");
+                clean(sequestSessionId, taskId);
             }
             else
             {
                 returnCode = 3;
             }
-
             break;
         }
 
@@ -721,7 +675,7 @@ public class SequestClient {
             try { if (null != resultStream) resultStream.close(); } catch (IOException e) {}
         }
 
-        if (!firstLine.startsWith("<?xml"))
+        if (!firstLine.startsWith("<HTML>"))
         {
             outFile.delete();
             return false;
@@ -730,6 +684,51 @@ public class SequestClient {
         {
             return true;
         }
+    }
+
+    protected String clean(String sessionID, String taskId)
+    {
+        errorCode = 0;
+        errorString = "";
+
+       if ("".equals(taskId))
+            return "";
+
+        Properties parameters = new Properties();
+        parameters.setProperty("cgi", "SequestQueue");
+        parameters.setProperty("cmd", "clean");
+        parameters.setProperty("taskId", taskId);
+        if (!"".equals(sessionID))
+            parameters.setProperty("sessionID", sessionID);
+        Properties results = request(parameters, false);
+        String statusString = results.getProperty("HTTPContent", "");
+        if (statusString.contains("="))
+        {
+            results.remove("HTTPContent");
+            String[] contentLines = statusString.split("\n");
+            for (String contentLine : contentLines)
+            {
+                if (contentLine.contains("="))
+                {
+                    String[] parts = contentLine.split("=");
+                    if (2 == parts.length)
+                        if (!"".equals(parts[0]))
+                            results.put(parts[0], parts[1]);
+                }
+            }
+            if (results.contains("error") && !"0".equals(results.getProperty("error","-1")))
+            {
+                // fall thru', return the full HTTP Content as we need the full text for diagnosis
+                if (null != _instanceLogger)
+                    _instanceLogger.info ("Sequest search task status error: (" + results.getProperty("error","-1") + ") " +
+                        results.getProperty("errorstring",""));
+            }
+            else
+                statusString = results.getProperty("running", "");
+        }
+
+        return statusString;
+
     }
 
     public String getParameters()

@@ -4,6 +4,8 @@ import java.util.*;
 import java.net.URI;
 import java.io.File;
 import java.io.IOException;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -14,66 +16,26 @@ import org.labkey.api.util.AppProps;
  * Date: Sep 7, 2006
  * Time: 8:24:51 PM
  */
-public class SequestParamsBuilder
+public abstract class SequestParamsBuilder
 {
 
-    private BioMLInputParser sequestInputParser;
-    private URI uriSequenceRoot;
-    private char[] _validResidues = {'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'O'};
-    private HashMap<String, String> _supportedEnzymes = new HashMap<String, String>();
-    private SequestParams _params;
+    BioMLInputParser sequestInputParser;
+    URI uriSequenceRoot;
+    char[] _validResidues = {'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'O'};
+    HashMap<String, String> supportedEnzymes = new HashMap<String, String>();
+    SequestParams _params;
 
 
-    SequestParamsBuilder(SequestInputParser sequestInputParser, URI uriSequenceRoot)
+
+    public SequestParamsBuilder(SequestInputParser sequestInputParser, URI uriSequenceRoot)
     {
         this.sequestInputParser = sequestInputParser;
         this.uriSequenceRoot = uriSequenceRoot;
-        this._params = new SequestParams();
 
-        _supportedEnzymes.put("[X]|[X]", "No_Enzyme\t\t\t\t0\t-\t\t-");
-        _supportedEnzymes.put("[KR]|{P}", "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP");
-        _supportedEnzymes.put("[K]|{P}", "Trypsin_K\t\t\t\t1\tK\t\tP");
-        _supportedEnzymes.put("[R]|{P}", "Trypsin_R\t\t\t\t1\tR\t\tP");
-        _supportedEnzymes.put("[KR]|[X]", "Trypsin(KR)\t\t\t\t1\tKR\t\t-");
-        _supportedEnzymes.put("[KRLNH]|[X]", "Trypsin(KRLNH)\t\t\t\t1\tKRLNH\t\t-");
-        _supportedEnzymes.put("[KRLNH]|{P}", "Trypsin(KRLNH/P)\t\t\t\t1\tKRLNH\t\tP");
-        _supportedEnzymes.put("[KMR]|{P}", "Trypsin/CnBr\t\t\t\t1\tKMR\t\tP");
-        _supportedEnzymes.put("[FMWY]|{P}", "Chymotrypsin(FMWY/P)\t\t\t\t1\tFMWY\t\tP");
-        _supportedEnzymes.put("[FWYL]|[X]", "Chymotrypsin(FWYL)\t\t\t\t1\tFWYL\t\t-");
-        _supportedEnzymes.put("[FWY]|{P}", "Chymotrypsin(FWY/P)\t\t\t\t1\tFWY\t\tP");
-        _supportedEnzymes.put("[R]|[X]", "Clostripain\t\t\t\t1\tR\t\t-");
-        _supportedEnzymes.put("[M]|[X]", "Cyanogen_Bromide(M)\t\t\t\t1\tM\t\t-");
-        _supportedEnzymes.put("[M]|{P}", "Cyanogen_Bromide(M/P)\t\t\t\t1\tM\t\tP");
-        _supportedEnzymes.put("[W]|[X]", "IodosoBenzoate\t\t\t\t1\tW\t\t-");
-        _supportedEnzymes.put("[P]|[X]", "Proline_Endopept\t\t\t\t1\tP\t\t-");
-        _supportedEnzymes.put("[E]|[X]", "Staph_Protease\t\t\t\t1\tE\t\t-");
-        _supportedEnzymes.put("[ED]|[X]", "GluC(ED)\t\t\t\t1\tED\t\t-");
-        _supportedEnzymes.put("[ED]|{P}", "GluC(ED/P)\t\t\t\t1\tED\t\tP");
-        _supportedEnzymes.put("[K]|[X]", "LysC\t\t\t\t1\tK\t\t-");
-        _supportedEnzymes.put("[X]|[D]", "AspN\t\t\t\t0\tD\t\t-");
-        _supportedEnzymes.put("[ALIV]|{P}", "Elastase(ALIV/P)\t\t\t\t1\tALIV\t\tP");
-        _supportedEnzymes.put("[AGILV]|{P}", "Elastase(AGILV/P)\t\t\t\t1\tAGILV\t\tP");
-        _supportedEnzymes.put("[E]|{P}", "GluC_Bicarb\t\t\t\t1\tE\t\tP");
-        _supportedEnzymes.put("[ALIVKRWFY]|{P}", "Elastase/Tryp/Chymo\t\t\t\t1\tALIVKRWFY\t\tP");
     }
 
-    public String initXmlValues()
-    {
-        StringBuilder parserError = new StringBuilder();
-        parserError.append(initDatabases());
-        parserError.append(initPeptideMassTolerance());
-//        parserError.append(initMassUnits());
-        parserError.append(initIonScoring());
-        parserError.append(initEnzymeInfo());
-        parserError.append(initDynamicMods());
-        parserError.append(initTermDynamicMods());
-        parserError.append(initMassType());
-//        parserError.append(initMassRange());
-        parserError.append(initStaticMods());
-        parserError.append(initPassThroughs());
+    public abstract String initXmlValues();
 
-        return parserError.toString();
-    }
 
     public String getPropertyValue(String property)
     {
@@ -85,7 +47,7 @@ public class SequestParamsBuilder
         return _validResidues;
     }
 
-    private String initDatabases()
+    String initDatabases()
     {
         String parserError = "";
         ArrayList<String> databases = new ArrayList<String>();
@@ -133,7 +95,7 @@ public class SequestParamsBuilder
     }
 
 
-    private String initPeptideMassTolerance()
+    String initPeptideMassTolerance()
     {
         String parserError = "";
         String plusValueString =
@@ -183,7 +145,7 @@ public class SequestParamsBuilder
     each ion series has (relative to the others). So an ion series with 0.5 contains half the weighting or relevance of
     an ion series with a 1.0 parameter. */
 
-    private String initIonScoring()
+    String initIonScoring()
     {
         Param ions = _params.getParam("ion_series");
         StringBuilder parserError = new StringBuilder();
@@ -256,124 +218,12 @@ public class SequestParamsBuilder
         return parserError.toString();
     }
 
-    private String initEnzymeInfo()
-    {
-        String parserError = "";
-        String cleavageSites;
-        String cleavageBlockers = "-";
-        String offset;
-        String enzyme = sequestInputParser.getInputParameter("protein, cleavage site");
-        if (enzyme == null) return parserError;
-        if (enzyme.equals(""))
-        {
-            parserError = "protein, cleavage site did not contain a value.\n";
-            return parserError;
-        }
-        enzyme = enzyme.trim();
-        if (enzyme.startsWith("{"))
-        {
-            parserError = "protein, cleavage site does not support n-terminal blocking AAs(" + enzyme + ").\n";
-            return parserError;
-        }
-        String supportedEnzyme = lookUpEnzyme(enzyme);
-        if (supportedEnzyme != null)
-        {
-            if (supportedEnzyme.equals("No_Enzyme\t\t\t\t0\t-\t\t-"))
-            {
-                _params.getParam("enzyme_number").setValue("0");
-                return parserError;
-            }
-            else
-            {
-                _params.getParam("enzyme_number").setValue("1");
-                _params.getParam("enzyme1").setValue(supportedEnzyme);
-                return parserError;
-            }
-        }
 
-        if (enzyme.indexOf(',') != -1)
-        {
-            parserError = "protein, cleavage site contained more than one cleavage site(" + enzyme + ").\n";
-            return parserError;
-        }
-        StringTokenizer sites = new StringTokenizer(enzyme, "|");
-        if (sites.countTokens() != 2)
-        {
-            parserError = "protein, cleavage site contained invalid format(" + enzyme + ").\n";
-            return parserError;
-        }
-        String cTermInfo = sites.nextToken().trim();
-        String nTermInfo = sites.nextToken().trim();
 
-        if (cTermInfo.startsWith("[") & cTermInfo.endsWith("]"))
-        {
-            cTermInfo = cTermInfo.substring(1, (cTermInfo.length() - 1)).trim();
-            if (cTermInfo.equals("X"))
-            {
-                // [X]|[X]   is looked up in the hashtable above.
-                if (nTermInfo.startsWith("[") & nTermInfo.endsWith("]"))
-                {
-                    nTermInfo = nTermInfo.substring(1, (nTermInfo.length() - 1)).trim();
-                    if (isValidResidue(nTermInfo))
-                    {
-                        cleavageSites = nTermInfo;
-                        offset = "0";
-                    }
-                    else
-                    {
-                        parserError = "protein, cleavage site contained invalid residue(" + nTermInfo + ").\n";
-                        return parserError;
-                    }
+    abstract String initEnzymeInfo();
+    
 
-                }
-                else
-                {
-                    parserError = "protein, cleavage site contained invalid format(" + enzyme + ").\n";
-                    return parserError;
-                }
-            }
-            else
-            {
-                if (isValidResidue(cTermInfo))
-                {
-                    cleavageSites = cTermInfo;
-                    offset = "1";
-                    if (nTermInfo.startsWith("{") & nTermInfo.endsWith("}"))
-                    {
-                        nTermInfo = nTermInfo.substring(1, (nTermInfo.length() - 1)).trim();
-                        if (isValidResidue(nTermInfo))
-                        {
-                            cleavageBlockers = nTermInfo;
-                        }
-                        else
-                        {
-                            parserError = "protein, cleavage site contained invalid format(" + enzyme + ").\n";
-                            return parserError;
-                        }
-                    }
-                    else if (nTermInfo.equals("[X]"))
-                    {
-                        cleavageBlockers = "-";
-                    }
-                }
-                else
-                {
-                    parserError = "protein, cleavage site contained invalid residue(" + cTermInfo + ").\n";
-                    return parserError;
-                }
-            }
-
-        }
-        else
-        {
-            parserError = "protein, cleavage site contained invalid format(" + enzyme + ").\n";
-            return parserError;
-        }
-        _params.getParam("enzyme1").setValue("Unknown(" + enzyme + ")\t\t\t\t" + offset + "\t" + cleavageSites + "\t\t" + cleavageBlockers);
-        return parserError;
-    }
-
-    private String initDynamicMods()
+    String initDynamicMods()
     {
         HashMap<Character,String> defaultMods = new HashMap<Character, String>();
         defaultMods.put('S', "0.000000");
@@ -414,7 +264,7 @@ public class SequestParamsBuilder
     }
 
 
-    private String initStaticMods()
+    String initStaticMods()
     {
         String parserError;
         String mods = sequestInputParser.getInputParameter("residue, modification mass");
@@ -474,7 +324,7 @@ public class SequestParamsBuilder
     }
 
 
-    private String initTermDynamicMods()
+    String initTermDynamicMods()
     {
         String parserError = "";
         String nMod = sequestInputParser.getInputParameter("potential N-terminus modifications");
@@ -511,7 +361,7 @@ public class SequestParamsBuilder
         return parserError;
     }
 
-    private String initMassType()
+    String initMassType()
     {
         String parserError = "";
         String massType = sequestInputParser.getInputParameter("spectrum, fragment mass type");
@@ -542,78 +392,80 @@ public class SequestParamsBuilder
         return parserError;
     }
 
-//    private String initMassUnits()
-//    {
-//        String parserError = "";
-//        String pepMassUnit = sequestInputParser.getInputParameter("spectrum, parent mass error units");
-//        if(pepMassUnit == null || pepMassUnit.equals(""))
-//        {
-//            //Check depricated param
-//            pepMassUnit = sequestInputParser.getInputParameter("spectrum, parent monoisotopic mass error units");
-//            if(pepMassUnit == null || pepMassUnit.equals("")) return parserError;
-//        }
-//        if(pepMassUnit.equalsIgnoreCase("dalton"))
-//            _params.getParam("peptide_mass_units").setValue("0");
-//        if(pepMassUnit.equalsIgnoreCase("ppm"))
-//            _params.getParam("peptide_mass_units").setValue("2");
-//        else
-//            parserError = "spectrum, parent monoisotopic mass error units contained an invalid value for Sequest: (" +
-//                 pepMassUnit + ").\n";
-//        return parserError;
-//    }
-
-//
-//   private void initMassRange()
-//   {
-//       String rangeMin = sequestInputParser.getInputParameter("spectrum, minimum parent m+h");
-//       String rangeMax = sequestInputParser.getInputParameter("sequest, maximum parent m+h");
-//       String defaultMin = null;
-//       String defaultMax = null;
-//       SequestParam sequestProp = _params.getParam("digest_mass_range");
-//       String defaultValue = sequestProp.getValue();
-//       StringTokenizer st = new StringTokenizer(defaultValue);
-//       defaultMin = st.nextToken();
-//       defaultMax = st.nextToken();
-//       if(rangeMin == null || rangeMin.equals(""))
-//       {
-//            rangeMin = defaultMin;
-//       }
-//       else
-//       {
-//           try
-//           {
-//                Double.parseDouble(rangeMin);
-//           }
-//           catch( NumberFormatException e)
-//           {
-//                _log.info("spectrum, minimum parent m+h is an invalid value: (" +
-//                 rangeMin + "). Using default value.");
-//               rangeMin = defaultMin;
-//           }
-//       }
-//       if(rangeMax == null || rangeMax.equals(""))
-//       {
-//            rangeMax = defaultMax;
-//       }
-//       else
-//       {
-//           try
-//           {
-//                Double.parseDouble(rangeMax);
-//           }
-//           catch( NumberFormatException e)
-//           {
-//                _log.info("spectrum, maximum parent m+h is an invalid value: (" +
-//                 rangeMax + "). Using default value.");
-//               rangeMax = defaultMax;
-//           }
-//       }
-//       sequestProp.setValue(rangeMin + " " + rangeMax);
-//   }
-
-    private String initPassThroughs()
+    String initMassUnits()
     {
         String parserError = "";
+        String pepMassUnit = sequestInputParser.getInputParameter("spectrum, parent mass error units");
+        if(pepMassUnit == null || pepMassUnit.equals(""))
+        {
+            //Check depricated param
+            pepMassUnit = sequestInputParser.getInputParameter("spectrum, parent monoisotopic mass error units");
+            if(pepMassUnit == null || pepMassUnit.equals("")) return parserError;
+        }
+        if(pepMassUnit.equalsIgnoreCase("daltons"))
+            _params.getParam("peptide_mass_units").setValue("0");
+        else if(pepMassUnit.equalsIgnoreCase("ppm"))
+            _params.getParam("peptide_mass_units").setValue("2");
+        else
+            parserError = "spectrum, parent monoisotopic mass error units contained an invalid value for Sequest: (" +
+                 pepMassUnit + ").\n";
+        return parserError;
+    }
+
+
+   String initMassRange()
+   {
+       StringBuilder parserError = new StringBuilder();
+       String rangeMin = sequestInputParser.getInputParameter("spectrum, minimum parent m+h");
+       String rangeMax = sequestInputParser.getInputParameter("sequest, maximum parent m+h");
+       String defaultMin;
+       String defaultMax;
+       Param sequestProp = _params.getParam("digest_mass_range");
+       String defaultValue = sequestProp.getValue();
+       StringTokenizer st = new StringTokenizer(defaultValue);
+       defaultMin = st.nextToken();
+       defaultMax = st.nextToken();
+       if(rangeMin == null || rangeMin.equals(""))
+       {
+            rangeMin = defaultMin;
+       }
+       else
+       {
+           try
+           {
+                Double.parseDouble(rangeMin);
+           }
+           catch( NumberFormatException e)
+           {
+               parserError.append("spectrum, minimum parent m+h is an invalid value: (" +
+               rangeMin + ").");
+               return parserError.toString();
+           }
+       }
+       if(rangeMax == null || rangeMax.equals(""))
+       {
+            rangeMax = defaultMax;
+       }
+       else
+       {
+           try
+           {
+                Double.parseDouble(rangeMax);
+           }
+           catch( NumberFormatException e)
+           {
+                parserError.append("spectrum, maximum parent m+h is an invalid value: (" +
+                 rangeMax + ").");
+               return parserError.toString();
+           }
+       }
+       sequestProp.setValue(rangeMin + " " + rangeMax);
+       return parserError.toString();
+   }
+
+    String initPassThroughs()
+    {
+        StringBuilder parserError = new StringBuilder();
         Collection<SequestParam> passThroughs = _params.getPassThroughs();
         for (SequestParam passThrough : passThroughs)
         {
@@ -623,10 +475,16 @@ public class SequestParamsBuilder
             {
                 continue;
             }
+            String defaultValue = passThrough.getValue();
             passThrough.setValue(value);
-            parserError = passThrough.validate();
+            String errorString = passThrough.validate();
+            if(errorString.length() > 0 )
+            {
+                passThrough.setValue(defaultValue);
+                parserError.append(errorString);
+            }
         }
-        return parserError;
+        return parserError.toString();
     }
 
 
@@ -637,8 +495,7 @@ public class SequestParamsBuilder
         {
             sb.append(prop.convert());
             sb.append("\n");
-            if (prop.getName().equals("first_database_name") ||
-                prop.getName().equals("sequence_header_filter") ||
+            if (prop.getName().equals("sequence_header_filter") ||
                 prop.getName().equals("add_W_Tryptophan"))
             {
                 sb.append("\n");
@@ -681,12 +538,12 @@ public class SequestParamsBuilder
         return parserError;
     }
 
-    private boolean isValidResidue(char residue)
+    public boolean isValidResidue(char residue)
     {
         return isValidResidue(Character.toString(residue));
     }
 
-    private boolean isValidResidue(String residueString)
+    public boolean isValidResidue(String residueString)
     {
         char[] residues = residueString.toCharArray();
         boolean isValid;
@@ -707,8 +564,8 @@ public class SequestParamsBuilder
         }
         return true;
     }
-
-    private String lookUpEnzyme(String enzyme)
+    //The Sequest2xm uses an older version of the sequest.params file(version = 1)supported sequest uses version = 2;
+    String lookUpEnzyme(String enzyme)
     {
         char bracket2a = '{';
         char bracket2b = '}';
@@ -742,9 +599,9 @@ public class SequestParamsBuilder
             blockSites = new StringBuilder();
         }
 
-        Set<String> supportedEnzymes = _supportedEnzymes.keySet();
+        Set<String> supportedEnzymesKes = supportedEnzymes.keySet();
         boolean matches = false;
-        for (String lookUp : supportedEnzymes)
+        for (String lookUp : supportedEnzymesKes)
         {
             String lookUpBlocks;
             String lookUpCuts;
@@ -797,7 +654,7 @@ public class SequestParamsBuilder
                     matches = false;
                 }
             }
-            if (matches) return _supportedEnzymes.get(lookUp);
+            if (matches) return supportedEnzymes.get(lookUp);
         }
         return null;
     }
@@ -929,7 +786,7 @@ public class SequestParamsBuilder
             File root = new File(projectRoot);
             root = new File(root, "/sampledata/xarfiles/ms2pipe/databases");
             dbPath = root.getCanonicalPath();
-            spb = new SequestParamsBuilder(ip, root.toURI());
+            spb = SequestParamsBuilderFactory.createVersion2Builder(ip, root.toURI());
         }
 
         protected void tearDown()
@@ -1470,7 +1327,8 @@ public class SequestParamsBuilder
         {
             //Testing no enzyme
             String expected1 = "0";
-            String expected2 = "No_Enzyme\t\t\t\t0\t0\t-\t\t-";
+            //String expected2 = "No_Enzyme\t\t\t\t0\t0\t-\t\t-";
+            String expected2 = "No_Enzyme 0 0 - -";
             ip.parse("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[X]|[X]</note>" +
@@ -1478,16 +1336,21 @@ public class SequestParamsBuilder
 
             String parserError = spb.initEnzymeInfo();
             if (!parserError.equals("")) fail(parserError);
-            Param sp = spb.getProperties().getParam("enzyme_number");
-            String actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+//            Param sp = spb.getProperties().getParam("enzyme_number");
+//            String actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
 
-            sp = spb.getProperties().getParam("enzyme0");
-            actual = sp.getValue();
+//            sp = spb.getProperties().getParam("enzyme0");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
+
+            Param sp = spb.getProperties().getParam("enzyme_info");
+            String actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
 
             expected1 = "1";
-            expected2 = "Trypsin_K\t\t\t\t1\tK\t\tP";
+            //expected2 = "Trypsin_K\t\t\t\t1\tK\t\tP";
+            expected2 = "Trypsin_K 1 1 K P";
             ip.parse("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[K]|{P}</note>" +
@@ -1495,16 +1358,21 @@ public class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (!parserError.equals("")) fail(parserError);
-            sp = spb.getProperties().getParam("enzyme_number");
-            actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+//            sp = spb.getProperties().getParam("enzyme_number");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
+//
+//            sp = spb.getProperties().getParam("enzyme1");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
 
-            sp = spb.getProperties().getParam("enzyme1");
+            sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
 
             expected1 = "1";
-            expected2 = "Trypsin(KRLNH)\t\t\t\t1\tKRLNH\t\t-";
+            //expected2 = "Trypsin(KRLNH)\t\t\t\t1\tKRLNH\t\t-";
+            expected2 = "Trypsin(KRLNH) 1 1 KRLNH -";
             ip.parse("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[KRLNH]|[X]</note>" +
@@ -1512,11 +1380,15 @@ public class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (!parserError.equals("")) fail(parserError);
-            sp = spb.getProperties().getParam("enzyme_number");
-            actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+//            sp = spb.getProperties().getParam("enzyme_number");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
+//
+//            sp = spb.getProperties().getParam("enzyme1");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
 
-            sp = spb.getProperties().getParam("enzyme1");
+            sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
         }
@@ -1524,7 +1396,7 @@ public class SequestParamsBuilder
         public void testInitEnzymeInfoUnsupported()
         {
             String expected1 = "1";
-            String expected2 = "Unknown([QND]|[X])\t\t\t\t1\tQND\t\t-";
+            String expected2 = "Unknown([QND]|[X]) 1 1 QND -";
             ip.parse("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[QND]|[X]</note>" +
@@ -1532,16 +1404,20 @@ public class SequestParamsBuilder
 
             String parserError = spb.initEnzymeInfo();
             if (!parserError.equals("")) fail(parserError);
-            Param sp = spb.getProperties().getParam("enzyme_number");
-            String actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+//            Param sp = spb.getProperties().getParam("enzyme_number");
+//            String actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
+//
+//            sp = spb.getProperties().getParam("enzyme1");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
 
-            sp = spb.getProperties().getParam("enzyme1");
-            actual = sp.getValue();
+            Param sp = spb.getProperties().getParam("enzyme_info");
+            String actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
 
             expected1 = "1";
-            expected2 = "Unknown([PGY]|{W})\t\t\t\t1\tPGY\t\tW";
+            expected2 = "Unknown([PGY]|{W}) 1 1 PGY W";
             ip.parse("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[PGY]|{W}</note>" +
@@ -1549,17 +1425,21 @@ public class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (!parserError.equals("")) fail(parserError);
-            sp = spb.getProperties().getParam("enzyme_number");
-            actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+//            sp = spb.getProperties().getParam("enzyme_number");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
+//
+//            sp = spb.getProperties().getParam("enzyme1");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
 
-            sp = spb.getProperties().getParam("enzyme1");
+            sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
 
-
             expected1 = "1";
-            expected2 = "Unknown([X]|[W])\t\t\t\t0\tW\t\t-";
+            //TODO: I don't know if this syntax is right(1 or 0)?
+            expected2 = "Unknown([X]|[W]) 1 0 W -";
             ip.parse("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[X]|[W]</note>" +
@@ -1567,11 +1447,15 @@ public class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (!parserError.equals("")) fail(parserError);
-            sp = spb.getProperties().getParam("enzyme_number");
-            actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+//            sp = spb.getProperties().getParam("enzyme_number");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
+//
+//            sp = spb.getProperties().getParam("enzyme1");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
 
-            sp = spb.getProperties().getParam("enzyme1");
+            sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
 
@@ -1580,26 +1464,32 @@ public class SequestParamsBuilder
         public void testInitEnzymeInfoDefault()
         {
             String expected1 = "1";
-            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
+//            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
+            String expected2 = "Trypsin(KR/P) 1 1 KR P";
             ip.parse("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "</bioml>");
 
-            String parserError = spb.initEnzymeInfo();
-            if (!parserError.equals("")) fail(parserError);
-            Param sp = spb.getProperties().getParam("enzyme_number");
-            String actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+           String parserError = spb.initEnzymeInfo();
+           if (!parserError.equals("")) fail(parserError);
+//            Param sp = spb.getProperties().getParam("enzyme_number");
+//            String actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
+//
+//            sp = spb.getProperties().getParam("enzyme1");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
 
-            sp = spb.getProperties().getParam("enzyme1");
-            actual = sp.getValue();
+            Param sp = spb.getProperties().getParam("enzyme_info");
+            String actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
         }
 
         public void testInitEnzymeInfoMissingValue()
         {
             String expected1 = "1";
-            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
+//            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
+            String expected2 = "Trypsin(KR/P) 1 1 KR P";
             ip.parse("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\"></note>" +
@@ -1607,12 +1497,17 @@ public class SequestParamsBuilder
 
             String parserError = spb.initEnzymeInfo();
             if (parserError.equals("")) fail("Expected error message");
-            Param sp = spb.getProperties().getParam("enzyme_number");
-            String actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+//            Param sp = spb.getProperties().getParam("enzyme_number");
+//            String actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
+//
+//            sp = spb.getProperties().getParam("enzyme1");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
+//            assertEquals("enzyme_description", "protein, cleavage site did not contain a value.\n", parserError);
 
-            sp = spb.getProperties().getParam("enzyme1");
-            actual = sp.getValue();
+            Param sp = spb.getProperties().getParam("enzyme_info");
+            String actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
             assertEquals("enzyme_description", "protein, cleavage site did not contain a value.\n", parserError);
 
@@ -1621,7 +1516,8 @@ public class SequestParamsBuilder
         public void testInitEnzymeInfoGarbage()
         {
             String expected1 = "1";
-            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
+//            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
+            String expected2 = "Trypsin(KR/P) 1 1 KR P";
             ip.parse("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">foo</note>" +
@@ -1629,12 +1525,17 @@ public class SequestParamsBuilder
 
             String parserError = spb.initEnzymeInfo();
             if (parserError.equals("")) fail("Expected error message");
-            Param sp = spb.getProperties().getParam("enzyme_number");
-            String actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+//            Param sp = spb.getProperties().getParam("enzyme_number");
+//            String actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
+//
+//            sp = spb.getProperties().getParam("enzyme1");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
+//            assertEquals("enzyme_description", "protein, cleavage site contained invalid format(foo).\n", parserError);
 
-            sp = spb.getProperties().getParam("enzyme1");
-            actual = sp.getValue();
+            Param sp = spb.getProperties().getParam("enzyme_info");
+            String actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
             assertEquals("enzyme_description", "protein, cleavage site contained invalid format(foo).\n", parserError);
 
@@ -1645,11 +1546,16 @@ public class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (parserError.equals("")) fail("Expected error message");
-            sp = spb.getProperties().getParam("enzyme_number");
-            actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+//            sp = spb.getProperties().getParam("enzyme_number");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
+//
+//            sp = spb.getProperties().getParam("enzyme1");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
+//            assertEquals("protein, cleavage site contained more than one cleavage site([CV]|{P},[KR]|{P}).\n", parserError);
 
-            sp = spb.getProperties().getParam("enzyme1");
+            sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
             assertEquals("protein, cleavage site contained more than one cleavage site([CV]|{P},[KR]|{P}).\n", parserError);
@@ -1661,11 +1567,16 @@ public class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (parserError.equals("")) fail("Expected error message");
-            sp = spb.getProperties().getParam("enzyme_number");
-            actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+//            sp = spb.getProperties().getParam("enzyme_number");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
+//
+//            sp = spb.getProperties().getParam("enzyme1");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
+//            assertEquals("protein, cleavage site does not support n-terminal blocking AAs({P}|[KR]).\n", parserError);
 
-            sp = spb.getProperties().getParam("enzyme1");
+            sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
             assertEquals("protein, cleavage site does not support n-terminal blocking AAs({P}|[KR]).\n", parserError);
@@ -1677,11 +1588,16 @@ public class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (parserError.equals("")) fail("Expected error message");
-            sp = spb.getProperties().getParam("enzyme_number");
-            actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+//            sp = spb.getProperties().getParam("enzyme_number");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
+//
+//            sp = spb.getProperties().getParam("enzyme1");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
+//            assertEquals("protein, cleavage site contained invalid residue(a).\n", parserError);
 
-            sp = spb.getProperties().getParam("enzyme1");
+            sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
             assertEquals("protein, cleavage site contained invalid residue(a).\n", parserError);
@@ -1693,11 +1609,16 @@ public class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (parserError.equals("")) fail("Expected error message");
-            sp = spb.getProperties().getParam("enzyme_number");
-            actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+//            sp = spb.getProperties().getParam("enzyme_number");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
+//
+//            sp = spb.getProperties().getParam("enzyme1");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
+//            assertEquals("protein, cleavage site contained invalid residue(a).\n", parserError);
 
-            sp = spb.getProperties().getParam("enzyme1");
+            sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
             assertEquals("protein, cleavage site contained invalid residue(a).\n", parserError);
@@ -1709,11 +1630,16 @@ public class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (parserError.equals("")) fail("Expected error message");
-            sp = spb.getProperties().getParam("enzyme_number");
-            actual = sp.getValue();
-            assertEquals("enzyme_number", expected1, actual);
+//            sp = spb.getProperties().getParam("enzyme_number");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_number", expected1, actual);
+//
+//            sp = spb.getProperties().getParam("enzyme1");
+//            actual = sp.getValue();
+//            assertEquals("enzyme_description", expected2, actual);
+//            assertEquals("protein, cleavage site contained invalid format([X]|P).\n", parserError);
 
-            sp = spb.getProperties().getParam("enzyme1");
+            sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
             assertEquals("protein, cleavage site contained invalid format([X]|P).\n", parserError);
@@ -2112,6 +2038,12 @@ public class SequestParamsBuilder
                     passThrough.setValue("2");
                     assertEquals("", passThrough.validate());
                 }
+                else if (passThrough.getValidator().getClass() == ListParamsValidator.class)
+                {
+                    ((ListParamsValidator)passThrough.getValidator()).setList(new String[]{"0","1","2"});
+                    passThrough.setValue("2");
+                    assertEquals("", passThrough.validate());
+                }
                 else
                 {
                     fail("Unknown validator class.");
@@ -2158,6 +2090,12 @@ public class SequestParamsBuilder
                     passThrough.setValue(value);
                     assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a positive integer(" + value + ").\n", passThrough.validate());
                 }
+                else if (passThrough.getValidator().getClass() == ListParamsValidator.class)
+                {
+                    String listValue = "";
+                    passThrough.setValue(listValue);
+                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", " + "this value is not set.\n", passThrough.validate());
+                }
                 else
                 {
                     fail("Unknown validator class.");
@@ -2200,9 +2138,15 @@ public class SequestParamsBuilder
                 }
                 else if (passThrough.getValidator().getClass() == RealNumberParamsValidator.class)
                 {
-                    String value = "";
+                    String value = "-1.3";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a real number(" + value + ").\n", passThrough.validate());
+                    assertEquals("", passThrough.validate());
+                }
+                else if (passThrough.getValidator().getClass() == ListParamsValidator.class)
+                {
+                    ((ListParamsValidator)passThrough.getValidator()).setList(new String[]{"a","b","c"});
+                    passThrough.setValue("-1");
+                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", " + "this value (-1) is not in the valid list.\n", passThrough.validate());
                 }
                 else
                 {
@@ -2251,9 +2195,43 @@ public class SequestParamsBuilder
                     passThrough.setValue(value);
                     assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a positive integer(" + value + ").\n", passThrough.validate());
                 }
+                else if (passThrough.getValidator().getClass() == ListParamsValidator.class)
+                {
+                    ((ListParamsValidator)passThrough.getValidator()).setList(new String[]{"a","b","c"});
+                    passThrough.setValue("foo");
+                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", " + "this value (foo) is not in the valid list.\n", passThrough.validate());
+                }
                 else
                 {
                     fail("Unknown validator class.");
+                }
+            }
+        }
+    }
+
+    public void writeFile(File output) throws SequestParamsException
+    {
+        BufferedWriter writer = null;
+        try
+        {
+            writer = new BufferedWriter(new FileWriter(output));
+            writer.write(getSequestParamsText());
+        }
+        catch (IOException e)
+        {
+            throw new SequestParamsException(e);
+        }
+        finally
+        {
+            if (writer != null)
+            {
+                try
+                {
+                    writer.close();
+                }
+                catch (IOException eio)
+                {
+                    throw new SequestParamsException(eio);
                 }
             }
         }

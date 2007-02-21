@@ -238,7 +238,7 @@
                         <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">Quantitation Results</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@PEP_XML_FILE_PATH@@</exp:SimpleVal>
                     </exp:CommonParametersApplied>
-                  </exp:ExperimentLogEntry>
+                </exp:ExperimentLogEntry>
                 <exp:ExperimentLogEntry ActionSequenceRef="90">
                     <exp:CommonParametersApplied>
                         <exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:MS2.XInteract.ProteinProphet</exp:SimpleVal>

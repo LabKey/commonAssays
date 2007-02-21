@@ -70,7 +70,8 @@ public class MS2PipelineManager
     protected static String _pipelineDtaExt = "dta";
     protected static String _pipelineSequestXML = "sequest.xml";
      protected static String _pipelineSequestResultExt = ".out";
-    protected static String _pipelineSequestRawXmlExt = "-raw.xml";
+    protected static String _pipelineSequestRawXmlExt = ".xml";
+    protected static String _pipelineSequestSummaryExt = ".html";
 
     private static final String ALLOW_SEQUENCE_DB_UPLOAD_KEY = "allowSequenceDbUpload";
     public static final String SEQUENCE_DB_ROOT_TYPE = "SEQUENCE_DATABASE";
@@ -132,7 +133,6 @@ public class MS2PipelineManager
         return new File(dirAnalysis, baseName + _pipelineTandemOutExt);
     }
 
-//WDN:20060831 sequestdev
     public static File getDtaFile(File dirAnalysis, String baseName)
     {
         return new File(dirAnalysis, baseName);
@@ -142,7 +142,6 @@ public class MS2PipelineManager
     {
         return new File(dirAnalysis, baseName);
     }
-//END-WDN:20060831 sequestdev
 
 //wch: mascotdev
     public static File getMgfFile(File dirAnalysis, String baseName)
@@ -536,7 +535,7 @@ public class MS2PipelineManager
             AppProps appProps = AppProps.getInstance();
             if(!"".equals(appProps.getSequestServer()))
             {
-                SequestClient sequestClient = new SequestClient(appProps.getSequestServer(), null);
+                SequestClientImpl sequestClient = new SequestClientImpl(appProps.getSequestServer(), null);
                 // TODO sequestClient.setProxyURL(appProps.getSequestHTTPProxy());
                 return sequestClient.getSequenceDBNames();
             }
@@ -840,13 +839,17 @@ public class MS2PipelineManager
         return new File(dirAnalysis, _pipelineTandemXML);
     }
 
-//WDN:20060901 sequestdev
     public static File getSequestXMLFile(URI uriData, String name)
     {
         File dirAnalysis = getAnalysisDir(uriData, name, SEQUEST);
         return new File(dirAnalysis, _pipelineSequestXML);
     }
-//END-WDN:20060901 sequestdev
+
+
+    public static File getSequestSummaryFile(File dirData, String baseName)
+    {
+        return new File(dirData, baseName + _pipelineSequestSummaryExt);
+    }
 
     public static File getMascotXMLFile(URI uriData, String name)
     {
@@ -894,6 +897,8 @@ public class MS2PipelineManager
         String mascotHTTPProxy = appProps.getMascotHTTPProxy();
         if ("mascot".equalsIgnoreCase(searchEngine) && (!appProps.hasMascotServer() || 0==mascotServer.length()))
             throw new IllegalArgumentException("Mascot server has not been specified in site customization.");
+        if ("sequest".equalsIgnoreCase(searchEngine) && (!appProps.hasSequest()))
+            throw new IllegalArgumentException("Mascot server has not been specified in site customization.");
 
         File[] annotatedFiles = getAnalysisFiles(uriData, protocolName, FileStatus.ANNOTATED, info.getContainer(), searchEngine);
         File[] unprocessedFile = getAnalysisFiles(uriData, protocolName, FileStatus.UNKNOWN, info.getContainer(), searchEngine);
@@ -907,11 +912,12 @@ public class MS2PipelineManager
         // Make sure defaults are set before the search begins.
         // Cluster pipeline has its own default input semantics.
         boolean hasCluster = AppProps.getInstance().hasPipelineCluster();
-        if (!hasCluster && !getDefaultInputFile(uriRoot, searchEngine).exists())
+        if ((!hasCluster || searchEngine.equalsIgnoreCase(SEQUEST)) && !getDefaultInputFile(uriRoot, searchEngine).exists())
             setDefaultInputXML(uriRoot, getDefaultInputXML(uriRoot, searchEngine), searchEngine);
 
         File fileConfigureXML = getConfigureXMLFile(uriData, protocolName, searchEngine);
-
+        String dataType = "";
+        boolean fractionsCompleted = false;
         PipelineService service = PipelineService.get();
         for (File fileMzXML : mzXMLFiles)
         {
@@ -933,6 +939,10 @@ public class MS2PipelineManager
                     SequestSearchProtocol specificProtocol = (SequestSearchProtocol) protocol;
                     specificProtocol.setEmail(info.getUser().getEmail());
                     specificProtocol.saveInstance(fileConfigureXML);
+                    SequestInputParser parser = new SequestInputParser();
+                    parser.parse(specificProtocol.getXml());
+                    dataType = parser.getInputParameter("pipeline, data type");
+                    if (dataType == null) dataType = "";
                 }
                 else
                 {
@@ -960,14 +970,53 @@ public class MS2PipelineManager
             }
             else if(SEQUEST.equalsIgnoreCase(searchEngine))
             {
-               job = new SequestPipelineJob(info,
+                //It assumes that the default is fractions
+                if((dataType.equalsIgnoreCase(SequestPipelineJob.BOTH )||
+                        dataType.equalsIgnoreCase(SequestPipelineJob.FRACTIONS ) ||
+                        dataType.equalsIgnoreCase(""))
+                        && !fractionsCompleted )
+                {
+                    if(mzXMLFiles.length > 1)
+                    {
+                        job = new SequestPipelineJob(info,
+                                             protocolName,
+                                             uriRoot,
+                                             uriSequenceRoot,
+                                             mzXMLFiles,
+                                             fileConfigureXML,
+                                             true,
+                                             false);
+                        service.queueJob(job);
+                        fractionsCompleted = true;
+                    }
+                    else
+                    {
+                        dataType = SequestPipelineJob.SAMPLE;
+                    }
+                }
+                if(dataType.equalsIgnoreCase(SequestPipelineJob.BOTH)  ||
+                    dataType.equalsIgnoreCase(SequestPipelineJob.SAMPLE) )
+                {
+                    job = new SequestPipelineJob(info,
                                              protocolName,
                                              uriRoot,
                                              uriSequenceRoot,
                                              new File[] { fileMzXML },
                                              fileConfigureXML,
-                                             hasCluster,
+                                             false,
                                              false);
+                    service.queueJob(job);
+
+                }
+                else if(!(dataType.equalsIgnoreCase(SequestPipelineJob.BOTH)  ||
+                        dataType.equalsIgnoreCase(SequestPipelineJob.SAMPLE) ||
+                        dataType.equalsIgnoreCase(SequestPipelineJob.FRACTIONS) ||
+                        dataType.equals("")))
+                {
+                     throw new IllegalArgumentException("The value set for 'pipeline, data type' is not recognized. ("
+                             + dataType + ").");
+                }
+
             }
             else
             {
@@ -983,10 +1032,11 @@ public class MS2PipelineManager
             }
 
             // If there is a cluster, just let the cluster find and handle the job.
-            if (hasCluster)
+            //WDN:1/26/2007     There can be a mix of clustered and non clustered search engine
+            if (hasCluster && !SEQUEST.equalsIgnoreCase(searchEngine))
                 job.setStatus(PipelineJob.WAITING_STATUS);
             // Otherwise, queue for local search.
-            else
+            else if(!SEQUEST.equalsIgnoreCase(searchEngine))
                 service.queueJob(job);
         }
 

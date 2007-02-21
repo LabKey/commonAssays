@@ -12,4 +12,14 @@ public class SequestParamsException extends Exception
     {
         super(message);
     }
+
+    public SequestParamsException(Exception e)
+    {
+        super(e);
+    }
+
+    public SequestParamsException(String message, Exception e)
+    {
+        super(message, e);
+    }
 }

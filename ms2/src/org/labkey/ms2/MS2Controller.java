@@ -33,6 +33,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.ExperimentRun;
+import org.labkey.ms2.pipeline.SequestClientImpl;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
@@ -4016,62 +4017,158 @@ public class MS2Controller extends ViewController
     }
 
     public static class TestMascotForm extends FormData
+        {
+            private String mascotserver;
+            private String useraccount;
+            private String password;
+            private String httpproxyserver;
+            private int status;
+            private String parameters;
+            private String message;
+
+            public void reset(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
+            {
+                setMascotServer(httpServletRequest.getParameter("mascotServer").trim());
+                setUserAccount(httpServletRequest.getParameter("mascotUserAccount").trim());
+                setPassword(httpServletRequest.getParameter("mascotUserPassword").trim());
+                setHTTPProxyServer(httpServletRequest.getParameter("mascotHTTPProxy").trim());
+                super.reset(actionMapping, httpServletRequest);
+            }
+
+            public String getUserAccount()
+            {
+                return (null == useraccount ? "" : useraccount);
+            }
+
+            public void setUserAccount(String useraccount)
+            {
+                this.useraccount = useraccount;
+            }
+
+            public String getPassword()
+            {
+                return (null == password ? "" : password);
+            }
+
+            public void setPassword(String password)
+            {
+                this.password = password;
+            }
+
+            public String getMascotServer()
+            {
+                return (null == mascotserver ? "" : mascotserver);
+            }
+
+            public void setMascotServer(String mascotserver)
+            {
+                this.mascotserver = mascotserver;
+            }
+
+            public String getHTTPProxyServer()
+            {
+                return (null == httpproxyserver ? "" : httpproxyserver);
+            }
+
+            public void setHTTPProxyServer(String httpproxyserver)
+            {
+                this.httpproxyserver = httpproxyserver;
+            }
+
+            public String getMessage()
+            {
+                return message;
+            }
+
+            public void setMessage(String message)
+            {
+                this.message = message;
+            }
+
+            public int getStatus()
+            {
+                return status;
+            }
+
+            public void setStatus(int status)
+            {
+                this.status = status;
+            }
+
+            public String getParameters()
+            {
+                return (null == parameters ? "" : parameters);
+            }
+
+            public void setParameters(String parameters)
+            {
+                this.parameters = parameters;
+            }
+        }
+
+    @Jpf.Action
+    protected Forward testSequest(TestSequestForm form) throws Exception
     {
-        private String mascotserver;
-        private String useraccount;
-        private String password;
-        private String httpproxyserver;
+        requiresGlobalAdmin();
+
+        String originalSequestServer = form.getSequestServer();
+        SequestClientImpl sequestClient = new SequestClientImpl(form.getSequestServer(), null);
+        sequestClient.findWorkableSettings(true);
+        form.setStatus(sequestClient.getErrorCode());
+
+        String message;
+        if (0 == sequestClient.getErrorCode())
+        {
+            message = "Test passed.";
+            form.setParameters(sequestClient.getParameters());
+        }
+        else
+        {
+            message = "Test failed.";
+            message = message + "<br>" + sequestClient.getErrorString();
+        }
+        form.setMessage(message);
+
+        form.setSequestServer(originalSequestServer);
+
+        HttpView view = new GroovyView("org/labkey/core/admin/testSequest.gm");
+        view.addObject("form", form);
+        return includeView(new DialogTemplate(view));
+    }
+
+    @Jpf.Action
+    protected Forward showSequestTest(TestSequestForm form) throws Exception
+    {
+        return testSequest(form);
+    }
+
+    @Jpf.Action
+    protected Forward showUpgradeSequestTest(TestSequestForm form) throws Exception
+    {
+        return testSequest (form);
+    }
+
+    public static class TestSequestForm extends FormData
+    {
+        private String sequestserver;
         private int status;
         private String parameters;
         private String message;
 
         public void reset(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
         {
-            setMascotServer(httpServletRequest.getParameter("mascotServer").trim());
-            setUserAccount(httpServletRequest.getParameter("mascotUserAccount").trim());
-            setPassword(httpServletRequest.getParameter("mascotUserPassword").trim());
-            setHTTPProxyServer(httpServletRequest.getParameter("mascotHTTPProxy").trim());
+            setSequestServer(httpServletRequest.getParameter("sequestServer").trim());
             super.reset(actionMapping, httpServletRequest);
         }
 
-        public String getUserAccount()
+        public String getSequestServer()
         {
-            return (null == useraccount ? "" : useraccount);
+            return (null == sequestserver ? "" : sequestserver);
         }
 
-        public void setUserAccount(String useraccount)
+        public void setSequestServer(String sequestserver)
         {
-            this.useraccount = useraccount;
-        }
-
-        public String getPassword()
-        {
-            return (null == password ? "" : password);
-        }
-
-        public void setPassword(String password)
-        {
-            this.password = password;
-        }
-
-        public String getMascotServer()
-        {
-            return (null == mascotserver ? "" : mascotserver);
-        }
-
-        public void setMascotServer(String mascotserver)
-        {
-            this.mascotserver = mascotserver;
-        }
-
-        public String getHTTPProxyServer()
-        {
-            return (null == httpproxyserver ? "" : httpproxyserver);
-        }
-
-        public void setHTTPProxyServer(String httpproxyserver)
-        {
-            this.httpproxyserver = httpproxyserver;
+            this.sequestserver = sequestserver;
         }
 
         public String getMessage()

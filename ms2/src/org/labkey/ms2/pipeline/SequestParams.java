@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * Date: Sep 12, 2006
  * Time: 11:30:14 AM
  */
-public class SequestParams extends Params
+public abstract class SequestParams extends Params
 {
 
     public SequestParams()
@@ -62,14 +62,15 @@ public class SequestParams extends Params
         ).setInputXmlLabels("spectrum, parent monoisotopic mass error plus",
             "spectrum, parent monoisotopic mass error minus"));
 
-//               _params.add(new SequestParam(
-//                          50,                                                       //sortOrder
-//                          "0",                                                    //The value of the property
-//                          "peptide_mass_units",                                 // the sequest.params property name
-//                          "0=amu, 1=mmu, 2=ppm",                                // the sequest.params comment
-//                           new SequestBasicConverter(),                             //converts the instance to a sequest.params line
-//                           true                                                    //is pass through
-//                  ).setInputXmlLabels("spectrum, parent monoisotopic mass error units"));
+               _params.add(new SequestParam(
+                          50,                                                       //sortOrder
+                          "0",                                                    //The value of the property
+                          "peptide_mass_units",                                 // the sequest.params property name
+                          "0=amu, 1=mmu, 2=ppm",                                // the sequest.params comment
+                           ConverterFactory.getSequestBasicConverter(),                             //converts the instance to a sequest.params line
+                           null,
+                           false                                                    //is pass through
+                  ).setInputXmlLabels("spectrum, parent monoisotopic mass error units"));
 
         /* specifies the ion series to be analyzed. The first 3 parameters of that line are integers (0 or 1) that
 represents whether or not neutral losses (NH3 and H2)) for a-ions, b-ions and y-ions are considered (0=no, 1=yes)
@@ -165,25 +166,16 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             true
         ).setInputXmlLabels("sequest, print_duplicate_references"));
 
-//        _params.add(new SequestParam(
-//                          130,                                                       //sortOrder
-//                          "Trypsin(KR/P) 1 1 KR P",                                                      //The value of the property
-//                          "enzyme_info",                                           // the sequest.params property name
-//                          "[KR]|{P}",                                                       // the input.xml label
-//                           ConverterFactory.getSequestBasicConverter()                              //converts the instance to a sequest.params line
-//                  ).setInputXmlLabels("protein, cleavage site"));
-
-        _params.add(new SequestParam(
-            130,                                                       //sortOrder
-            "1",                                                      //The value of the property
-            "enzyme_number",                                           // the sequest.params property name
-            "[KR]|{P}",                                                       // the input.xml label
+          _params.add(new SequestParam(
+            135,                                                       //sortOrder
+            "4",                                                      //The value of the property
+            "max_num_differential_AA_per_mod",                        // the sequest.params property name
+            "max # of modified AA per diff",                        // the sequest.params comment
             ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels("protein, cleavage site"));
+        ).setInputXmlLabels("sequest, max_num_differential_AA_per_mod"));
 
-        //pass threw- no Xtandem counterpart
         _params.add(new SequestParam(
             140,                                                       //sortOrder
             "3",                                                      //The value of the property
@@ -283,22 +275,27 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ParamsValidatorFactory.getPositiveIntegerParamsValidator(),
             true
         ).setInputXmlLabels("scoring, maximum missed cleavage sites"));
-//       //not used in xtandem or Bioworks Browser. will leave at default setting.
-//        _params.add(new SequestParam(
-//                        240,                                                       //sortOrder
-//                        "0 0",                                            //The value of the property
-//                        "protein_mass_filter",                                // the sequest.params property name
-//                        "enter protein mass min & max value ( 0 for both = unused)",       // the sequest.params comment
-//                        ConverterFactory.getSequestBasicConverter()                      //converts the instance to a sequest.params line
-//                ).setInputXmlLabels());
 
-//        _params.add(new SequestParam(
-//                        250,                                                       //sortOrder
-//                        "0",                                            //The value of the property
-//                        "match_peak_count",                                // the sequest.params property name
-//                        "number of auto-detected peaks to try matching (max 5)",       // the sequest.params comment
-//                        ConverterFactory.getSequestBasicConverter()                      //converts the instance to a sequest.params line
-//                ).setInputXmlLabels("sequest, match_peak_count" ));
+        //not used in xtandem or Bioworks Browser. will leave at default setting.
+        _params.add(new SequestParam(
+                        240,                                                       //sortOrder
+                        "0 0",                                            //The value of the property
+                        "protein_mass_filter",                                // the sequest.params property name
+                        "enter protein mass min & max value ( 0 for both = unused)",       // the sequest.params comment
+                        ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                        null,
+                        false
+                  ).setInputXmlLabels());
+
+        _params.add(new SequestParam(
+                        250,                                                       //sortOrder
+                        "0",                                            //The value of the property
+                        "match_peak_count",                                // the sequest.params property name
+                        "number of auto-detected peaks to try matching (max 5)",       // the sequest.params comment
+                        ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
+                        null,
+                        false
+        ).setInputXmlLabels("sequest, match_peak_count" ));
 
         _params.add(new SequestParam(
             260,                                                       //sortOrder
@@ -641,35 +638,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             false
         ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
 
-        _params.add(new SequestParam(
-            580,                                                       //sortOrder
-            "[SEQUEST_ENZYME_INFO]",                                            //The value of the property
-            "enzyme header",                                // the sequest.params property name
-            "",       // the sequest.params comment
-            ConverterFactory.getSequestHeaderConverter(),                      //converts the instance to a sequest.params line
-            null,
-            false
-        ));
 
-        _params.add(new SequestParam(
-            590,                                                       //sortOrder
-            "No_Enzyme\t\t\t\t0\t0\t-\t\t-",                                            //The value of the property
-            "enzyme0",                                // the sequest.params property name
-            "0.\t",       // the sequest.params comment
-            ConverterFactory.getSequestEnzymeConverter(),                      //converts the instance to a sequest.params line
-            null,
-            false
-        ));
-
-        _params.add(new SequestParam(
-            600,                                                       //sortOrder
-            "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP",                                            //The value of the property
-            "enzyme1",                                // the sequest.params property name
-            "1.\t",       // the sequest.params comment
-            ConverterFactory.getSequestEnzymeConverter(),                      //converts the instance to a sequest.params line
-            null,
-            false
-        ));
 
 //        _params.add(new SequestParam(
 //                        580,                                                       //sortOrder

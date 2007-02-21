@@ -492,6 +492,7 @@ ms2/src/org/labkey/ms2/pipeline/FileStatus.java -text
 ms2/src/org/labkey/ms2/pipeline/IInputXMLConverter.java -text
 ms2/src/org/labkey/ms2/pipeline/IParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/InspectCPipelineProvider.java -text
+ms2/src/org/labkey/ms2/pipeline/ListParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2ImportPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineManager.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineProvider.java -text
@@ -516,7 +517,7 @@ ms2/src/org/labkey/ms2/pipeline/ProteinProphetPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/ProteinProphetPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/RealNumberParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/SequestBasicConverter.java -text
-ms2/src/org/labkey/ms2/pipeline/SequestClient.java -text
+ms2/src/org/labkey/ms2/pipeline/SequestClientImpl.java -text
 ms2/src/org/labkey/ms2/pipeline/SequestDefaults.xml -text
 ms2/src/org/labkey/ms2/pipeline/SequestEnzymeConverter.java -text
 ms2/src/org/labkey/ms2/pipeline/SequestHeaderConverter.java -text
@@ -525,7 +526,12 @@ ms2/src/org/labkey/ms2/pipeline/SequestLocalPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/SequestParam.java -text
 ms2/src/org/labkey/ms2/pipeline/SequestParams.java -text
 ms2/src/org/labkey/ms2/pipeline/SequestParamsBuilder.java -text
+ms2/src/org/labkey/ms2/pipeline/SequestParamsBuilderFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/SequestParamsException.java -text
+ms2/src/org/labkey/ms2/pipeline/SequestParamsV1.java -text
+ms2/src/org/labkey/ms2/pipeline/SequestParamsV1Builder.java -text
+ms2/src/org/labkey/ms2/pipeline/SequestParamsV2.java -text
+ms2/src/org/labkey/ms2/pipeline/SequestParamsV2Builder.java -text
 ms2/src/org/labkey/ms2/pipeline/SequestPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/XTandemCPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/XTandemDefaults.xml -text
@@ -631,6 +637,8 @@ ms2/src/org/labkey/ms2/templates/MS2SearchMascotFractionsXpress.xml -text
 ms2/src/org/labkey/ms2/templates/MS2SearchMascotXpress.xml -text
 ms2/src/org/labkey/ms2/templates/MS2SearchSequest.xml -text
 ms2/src/org/labkey/ms2/templates/MS2SearchSequestFractions.xml -text
+ms2/src/org/labkey/ms2/templates/MS2SearchSequestFractionsXpress.xml -text
+ms2/src/org/labkey/ms2/templates/MS2SearchSequestXpress.xml -text
 ms2/src/org/labkey/ms2/templates/MS2SearchXComet.xml -text
 ms2/src/org/labkey/ms2/templates/MS2SearchXCometXpress.xml -text
 ms2/src/org/labkey/ms2/templates/MS2SearchXpress.xml -text

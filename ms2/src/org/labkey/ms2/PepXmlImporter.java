@@ -232,7 +232,18 @@ public class PepXmlImporter extends MS2Importer
         String baseName = fraction.getDataBasename();
 
         // Build the name of the tgz file
-        _gzFileName = switchSuffix(_fileName, dataSuffix);
+        if(fraction.getSearchEngine().equalsIgnoreCase("sequest"))
+        {
+             int i = baseName.lastIndexOf("/");
+            String newFilename =
+                    (i < 0 ? baseName : baseName.substring(i + 1));
+            newFilename += "." + "pep." + dataSuffix;
+            _gzFileName = newFilename;
+        }
+        else
+        {
+            _gzFileName = switchSuffix(_fileName, dataSuffix);
+        }
         if (! NetworkDrive.exists(new File(_path + "/" + _gzFileName)) &&
                 baseName != null)
         {

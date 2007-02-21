@@ -154,6 +154,11 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         if (paramQuant != null)
             quantOpts.add("-m");
 
+        paramQuant = parser.getInputParameter("pipeline quantitation, heavy elutes before light");
+        if (paramQuant != null)
+            if("yes".equalsIgnoreCase(paramQuant))
+                quantOpts.add("-b");
+
         paramQuant = parser.getInputParameter("pipeline quantitation, fix");
         if (paramQuant != null)
         {
@@ -241,7 +246,10 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         if (_filesMzXML.length > 1)
             return MS2PipelineManager.getDataDescription(_dirMzXML, null, _name);
         else
-            return MS2PipelineManager.getDataDescription(_dirMzXML, _baseName, _name);
+        {
+            String baseName = MS2PipelineManager.getBaseName(_filesMzXML[0]);
+            return MS2PipelineManager.getDataDescription(_dirMzXML, baseName, _name);
+        }
     }
 
     public boolean isFractions()
