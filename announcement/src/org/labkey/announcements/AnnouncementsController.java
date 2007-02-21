@@ -650,7 +650,7 @@ public class AnnouncementsController extends ViewController
             sendNotificationEmails(insert, currentRendererType);
         }
 
-        if (null != redirectURL)
+        if (null != StringUtils.trimToNull(redirectURL))
             HttpView.throwRedirect(redirectURL);
 
         // if this is a discussion, redirect back to originating page
