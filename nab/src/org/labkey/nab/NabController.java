@@ -612,7 +612,7 @@ public class NabController extends ViewController
                     {
                         plates.add(sample.getPlate());
                         String ptid = form.getParticipantIds()[i];
-                        float visitId = form.getSequenceNums()[i];
+                        double visitId = form.getSequenceNums()[i];
                         Map<String, Object> samplePropertyMap = new HashMap<String, Object>();
                         for (String property : sample.getPropertyNames())
                             samplePropertyMap.put(property, sample.getProperty(property));
@@ -770,7 +770,7 @@ public class NabController extends ViewController
     public static class PublishForm extends FormData
     {
         private String[] _includedSampleIds;
-        private Float[] _sequenceNums;
+        private Double[] _sequenceNums;
         private String[] _sampleIds;
         private String[] _participantIds;
         private int[] _id;
@@ -807,12 +807,12 @@ public class NabController extends ViewController
             _sampleIds = sampleIds;
         }
 
-        public Float[] getSequenceNums()
+        public Double[] getSequenceNums()
         {
             return _sequenceNums;
         }
 
-        public void setSequenceNums(Float[] sequenceNums)
+        public void setSequenceNums(Double[] sequenceNums)
         {
             _sequenceNums = sequenceNums;
         }
@@ -857,7 +857,7 @@ public class NabController extends ViewController
                 if (_sampleIds[index].equals(sampleId))
                 {
                     final String ptid = _participantIds[index];
-                    final Float sequenceNum = _sequenceNums[index];
+                    final Double sequenceNum = _sequenceNums[index];
                     return new GenericAssayService.SampleInfo() {
 
                         public String getParticipantId()
@@ -870,7 +870,7 @@ public class NabController extends ViewController
                             return sampleId;
                         }
 
-                        public Float getSequenceNum()
+                        public Double getSequenceNum()
                         {
                             return sequenceNum;
                         }
