@@ -24,7 +24,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionMessage;
 import org.apache.struts.upload.FormFile;
 import org.labkey.announcements.EmailResponsePage.Reason;
 import org.labkey.announcements.model.*;
@@ -1360,12 +1359,11 @@ public class AnnouncementsController extends ViewController
         public ActionErrors validate(ActionMapping actionMapping, HttpServletRequest servletRequest)
         {
             Settings settings = getSettings(getContainer());
-            ActionErrors errors = new ActionErrors();
             Announcement bean = getBean();
 
             // Title can never be null.  If title is not editable, it will still be posted in a hidden field.
             if (StringUtils.trimToNull(bean.getTitle()) == null)
-                errors.add("main", new ActionMessage("Error", "Title must not be blank."));
+                addActionError("Title must not be blank.");
 
             try
             {
@@ -1375,7 +1373,7 @@ public class AnnouncementsController extends ViewController
             }
             catch (ConversionException x)
             {
-                errors.add("main", new ActionMessage("Error", "Expires must be blank or a valid date."));
+                addActionError("Expires must be blank or a valid date.");
             }
 
             String emailList = bean.getEmailList();
@@ -1391,7 +1389,7 @@ public class AnnouncementsController extends ViewController
                 {
                     // Ignore lines of all whitespace, otherwise show an error.
                     if (!"".equals(rawEmail.trim()))
-                        errors.add("main", new ActionMessage("Error", rawEmail.trim() + ": Invalid email address"));
+                        addActionError(rawEmail.trim() + ": Invalid email address");
                 }
 
                 memberList = new ArrayList<User>(emails.size());
@@ -1401,7 +1399,7 @@ public class AnnouncementsController extends ViewController
                     User user = UserManager.getUser(email);
 
                     if (null == user)
-                        errors.add("main", new ActionMessage("Error", email.toString() + ": Doesn't exist"));
+                        addActionError(email.toString() + ": Doesn't exist");
                     else if (!memberList.contains(user))
                         memberList.add(user);
                 }
@@ -1417,7 +1415,7 @@ public class AnnouncementsController extends ViewController
 
                 if (null == assignedToUser)
                 {
-                    errors.add("main", new ActionMessage("Error", "Assigned to user " + assignedToUser.getUserId() + ": Doesn't exist"));
+                    addActionError("Assigned to user " + assignedToUser.getUserId() + ": Doesn't exist");
                 }
                 else
                 {
@@ -1430,18 +1428,26 @@ public class AnnouncementsController extends ViewController
                         ann.setMemberList(memberList);
 
                         if (!perm.allowRead(ann))
-                            errors.add("main", new ActionMessage("Error", "Can't assign to " + assignedToUser.getEmail() + ": This user doesn't have permission to read the thread."));
+                            addActionError("Can't assign to " + assignedToUser.getEmail() + ": This user doesn't have permission to read the thread.");
                     }
                     catch(ServletException e)
                     {
-                        errors.add("main", new ActionMessage("Error", "Error retrieving settings for this message board.  " + e));
+                        addActionError("Error retrieving settings for this message board.  " + e);
                     }
                 }
             }
 
-            return errors;
+            Collection<String> validateErrors = new LinkedList<String>();
+            if (!PageFlowUtil.validateHtml(bean.getBody(),validateErrors, getContainer().hasPermission(getUser(),ACL.PERM_ADMIN)))
+            {
+                for (String err : validateErrors)
+                    addActionError(err);
+            }
+
+            return getActionErrors();
         }
     }
+
 
     public static class EmailDefaultSettingsForm extends ViewForm
     {
@@ -1976,7 +1982,7 @@ public class AnnouncementsController extends ViewController
                 out.write("Yes");
             else
             {
-                int userId = ((Integer)row.get("UserId")).intValue();
+                int userId = (Integer)row.get("UserId");
 
                 if (_memberList.contains(UserManager.getUser(userId)))
                     out.write("Yes");
