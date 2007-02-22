@@ -28,7 +28,7 @@
                 %><tr><td><a href="<%=threadUrl%>">Click here to view this <%=conversationName%></a></td></tr><%
             }
 
-            threadUrl = AnnouncementsController.getThreadUrl(ctx.getRequest(), c, previousThread, String.valueOf(ann.getRowId())).getURIString();%>
+            threadUrl = h(AnnouncementsController.getThreadUrl(request, c, previousThread, String.valueOf(ann.getRowId())).getURIString());%>
             <tr><td>&nbsp;</td></tr><tr><td class="ms-vb" colspan="2" style="background-color: #dddddd"><%=ann.getTitle()%></td></tr><%
         } %>
             <tr><td><%=ann.getCreatedByName()%><% if (null == ann.getParent()) { %> created this <%=conversationName%><% } else { %> responded <% } %> at <%=DateUtil.formatDateTime(ann.getCreated())%></td></tr><%
@@ -50,7 +50,8 @@
 <hr size="1">
 
 <table width="100%" border="0" cellspacing="0" cellpadding="4">
-    <tr><td class="ms-vb">You have received this email because you signed up for a daily digest from this folder.</td></tr>
+    <tr><td class="ms-vb">You have received this email because you are signed up for a daily digest about new posts to <a href="<%=boardUrl%>"><%=boardPath%></a> at <a href="<%=siteUrl%>"><%=siteUrl%></a>.
+  If you no longer wish to receive these notifications, please <a href="<%=removeUrl%>">change your email preferences</a>.</td></tr>
 </table>    
 </body>
 </html>

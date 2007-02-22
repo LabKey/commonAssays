@@ -526,11 +526,6 @@ public class PepXmlImporter extends MS2Importer
                 }
             }
         }
-
-        _scanCount++;
-
-        if (0 == _scanCount % 5000)
-            _log.info("uploadRun: Scan " + _scanCount);
     }
 
     public static boolean isFractionsFile(File pepXmlFile)

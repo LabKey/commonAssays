@@ -23,6 +23,8 @@ import org.apache.commons.collections.MultiMap;
 import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.log4j.Logger;
 import org.apache.struts.upload.FormFile;
+import org.labkey.api.announcements.Announcement;
+import org.labkey.api.announcements.CommSchema;
 import org.labkey.api.attachments.Attachment;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.*;
@@ -36,11 +38,8 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.announcements.CommSchema;
-import org.labkey.api.announcements.Announcement;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
@@ -61,6 +60,7 @@ public class AnnouncementManager
     public static final int EMAIL_PREFERENCE_NONE = 0;
     public static final int EMAIL_PREFERENCE_ALL = 1;
     public static final int EMAIL_PREFERENCE_MINE = 2; //Only threads I've posted to
+    public static final int EMAIL_PREFERENCE_DIGEST = 3; // Daily digest of all messages
 
 //    public static final int EMAIL_FORMAT_TEXT = 0;
     public static final int EMAIL_FORMAT_HTML = 1;
@@ -572,6 +572,21 @@ public class AnnouncementManager
                 new Sort("EmailOptionId"),
                 EmailOption.class
                 );
+    }
+
+    public static List<User> getDailyDigestUsers(Container c) throws SQLException
+    {
+        TableInfo ti = _comm.getTableInfoEmailPrefs();
+        SimpleFilter filter = new SimpleFilter("Container", c).addCondition("EmailOptionId", EMAIL_PREFERENCE_DIGEST).addCondition("PageTypeId", PAGE_TYPE_MESSAGE);
+
+        Integer userIds[] = Table.executeArray(ti, ti.getColumn("UserId"), filter, null, Integer.class);
+
+        List<User> users = new ArrayList<User>(userIds.length);
+
+        for (int userId : userIds)
+            users.add(UserManager.getUser(userId));
+
+        return users;
     }
 
     public static void saveProjectEmailSettings(Container c, int emailOption) throws SQLException

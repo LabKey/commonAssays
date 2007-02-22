@@ -32,6 +32,7 @@ public abstract class CometImporter extends MS2Importer
     protected FileInputStream _fIn;
     protected SimpleXMLStreamReader parser;
     protected String scan, charge, ionPercent, mass, deltaMass, peptideProphet, peptide, prevAA, trimmedPeptide, nextAA, proteinHits, protein, dtaFileName;
+    protected int _scanCount;
 
     public CometImporter(XarContext context)
     {

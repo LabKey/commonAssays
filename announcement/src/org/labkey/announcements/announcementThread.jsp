@@ -103,7 +103,7 @@ if (settings.hasExpires() && null != announcement.getExpires())
 
 if (settings.hasAssignedTo() && null != announcement.getAssignedTo())
 {
-    %><tr><td>Assigned&nbsp;To: <%=announcement.getAssignedToName()%></td></tr><%
+    %><tr><td>Assigned&nbsp;To: <%=h(announcement.getAssignedToName())%></td></tr><%
 }
 
 if (null != announcement.getBody())
@@ -165,7 +165,7 @@ if(0 < announcement.getResponses().size())
                 %><tr><td>Expires: <%=DateUtil.formatDate(r.getExpires())%></td></tr><%
             }
             if (settings.hasAssignedTo() && r.getAssignedTo() != prev.getAssignedTo()) { %>
-            <tr><td>Assigned&nbsp;To: <%=r.getAssignedToName()%></td></tr><% }
+            <tr><td>Assigned&nbsp;To: <%=h(r.getAssignedToName())%></td></tr><% }
             if (null != r.getTitle() && !StringUtils.equals(r.getTitle(), prev.getTitle()))
             {
                 %><tr><td>Title: <%=h(r.getTitle())%></td></tr><%

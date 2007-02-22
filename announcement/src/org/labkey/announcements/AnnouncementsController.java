@@ -282,7 +282,7 @@ public class AnnouncementsController extends ViewController
     @Jpf.Action
     protected Forward sendDailyDigest() throws Exception
     {
-        DailyDigest.sendDailyDigest(getViewContext());
+        DailyDigest.sendDailyDigest();
 
         return _renderInTemplate(new HtmlView("Daily digest sent"), getContainer(), null);
     }
@@ -697,6 +697,14 @@ public class AnnouncementsController extends ViewController
     private static String getAssignedToSelect(Container c, Integer assignedTo, String name)
     {
         List<User> possibleAssignedTo = SecurityManager.getProjectMembers(c.getProject());
+
+        Collections.sort(possibleAssignedTo, new Comparator<User>()
+        {
+            public int compare(User u1, User u2)
+            {
+                return u1.getDisplayName().compareToIgnoreCase(u2.getDisplayName());
+            }
+        });
 
         // TODO: Should merge all this with IssuesManager.getAssignedToList()
         StringBuilder select = new StringBuilder("    <select name=\"" + name + "\">\n");
@@ -1164,12 +1172,12 @@ public class AnnouncementsController extends ViewController
         EmailResponsePage page = createResponseTemplate("emailResponsePlain.jsp", false, c, settings, parent, a, removeUrl, currentRendererType, reason);
         JspView view = new JspView(page);
         view.setFrame(WebPartView.FrameType.NONE);
-        m.setTemplateContent(getViewContext(), view, "text/plain");
+        m.setTemplateContent(getRequest(), view, "text/plain");
 
         page = createResponseTemplate("emailResponse.jsp", true, c, settings, parent, a, removeUrl, currentRendererType, reason);
         view = new JspView(page);
         view.setFrame(WebPartView.FrameType.NONE);
-        m.setTemplateContent(getViewContext(), view, "text/html");
+        m.setTemplateContent(getRequest(), view, "text/html");
 
         return m;
     }
@@ -1853,7 +1861,7 @@ public class AnnouncementsController extends ViewController
         try
         {
             if (0 != rowId)
-                return  AnnouncementManager.getAnnouncement(c, rowId, AnnouncementManager.INCLUDE_ATTACHMENTS + AnnouncementManager.INCLUDE_RESPONSES + AnnouncementManager.INCLUDE_MEMBERLIST);
+                return AnnouncementManager.getAnnouncement(c, rowId, AnnouncementManager.INCLUDE_ATTACHMENTS + AnnouncementManager.INCLUDE_RESPONSES + AnnouncementManager.INCLUDE_MEMBERLIST);
             else
                 return AnnouncementManager.getAnnouncement(c, entityId, true);
         }

@@ -14,8 +14,10 @@ abstract public class DailyDigestPage extends JspBase
     public Container c;
     public List<Announcement> announcements;
     public String conversationName;
-    public ViewContext ctx;
     public String cssURL;
     public AnnouncementManager.Settings settings;
-    public User user;
+    public String boardUrl;
+    public String boardPath;
+    public String siteUrl;
+    public String removeUrl;
 }

@@ -767,9 +767,9 @@ public class IssuesController extends ViewController
                     page.issue = issue;
                     page.isPlain = true;
                     final JspView view = new JspView(page);
-                    m.setTemplateContent(getViewContext(), view, "text/plain");
+                    m.setTemplateContent(getRequest(), view, "text/plain");
                     page.isPlain = false;
-                    m.setTemplateContent(getViewContext(), view, "text/html");
+                    m.setTemplateContent(getRequest(), view, "text/html");
                     m.setHeader("References", references);
 
                     MailHelper.send(m);

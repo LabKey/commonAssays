@@ -71,6 +71,7 @@
                             <option value='0' <%=emailOptionValue == 0 ? "selected" : "" %> >No Email</option>
                             <option value='1' <%=emailOptionValue == 1 ? "selected" : "" %> >All Messages</option>
                             <option value='2' <%=emailOptionValue == 2 ? "selected" : "" %> >Posted threads only</option>
+                            <option value='3' <%=emailOptionValue == 3 ? "selected" : "" %> >Daily digest of all messages</option>
                         </select>
                     </td>
                     <td align="center" style='border-right:solid 1px #AAAAAA'>

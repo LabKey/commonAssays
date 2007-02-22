@@ -21,7 +21,7 @@ View this <%=conversationName%> at this URL: <%=threadUrl%>
 <%
             }
 
-            threadUrl = AnnouncementsController.getThreadUrl(ctx.getRequest(), c, previousThread, String.valueOf(ann.getRowId())).getURIString();
+            threadUrl = AnnouncementsController.getThreadUrl(request, c, previousThread, String.valueOf(ann.getRowId())).getURIString();
             %><%=ann.getTitle()%>
 
 <%

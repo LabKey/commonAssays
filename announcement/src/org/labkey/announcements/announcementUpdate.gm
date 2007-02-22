@@ -5,7 +5,7 @@
 <input type="hidden" name="rowId" value="${announcement.rowId}">
 <input type="hidden" name="entityId" value="${announcement.entityId}">
 <input type="hidden" name=".oldValues" value="${PageFlowUtil.encodeObject(announcement)}">
-<table><% if( announcement.getParent() == null )
+<table><% if(settings.isTitleEditable())
 { %>
   <tr>
     <td class='ms-searchform'>Title</td><td class='ms-vb'>

@@ -61,7 +61,7 @@ public abstract class MS2Importer
     protected PreparedStatement _stmtWithReselect = null;
     protected PreparedStatement _prophetStmt = null;
     protected PreparedStatement _quantStmt = null;
-    protected int _runId, _fractionId, _scanCount;
+    protected int _runId, _fractionId;
     protected long _startTime;
 
     // Use passed in logger for upload status, information, and file format problems.  This should

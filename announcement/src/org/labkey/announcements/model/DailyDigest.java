@@ -11,12 +11,12 @@ import org.labkey.api.data.*;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.util.*;
-import org.labkey.api.util.MailHelper.*;
-import org.labkey.api.view.JspView;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.WebPartView;
+import org.labkey.api.util.MailHelper.ViewMessage;
+import org.labkey.api.view.*;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -35,20 +35,28 @@ public class DailyDigest
 
     private static final Logger _log = Logger.getLogger(DailyDigest.class);
 
-    public static void sendDailyDigest(ViewContext ctx) throws Exception
+    // Used only for AnnouncementsController test action -- remove when test action is removed
+    public static void sendDailyDigest() throws Exception
+    {
+        HttpServletRequest request = new MockHttpServletRequest(ViewServlet.getViewServletContext());  // Mock request used for generating jsp messages and links in the message
+        sendDailyDigest(request);
+    }
+
+
+    private static void sendDailyDigest(HttpServletRequest request) throws Exception
     {
         Date min = getLastSuccessful();
         Date current = new Date();
 
         if (null == min)
-            min = getMidnight(current, 0, 0);
+            min = getMidnight(current, -3, 0);  // TODO: Temp
 
         Date max = getMidnight(current, 1, 0);
 
         List<Container> containers = getContainersWithNewMessages(min, max);
 
         for (Container c : containers)
-            sendDailyDigest(ctx, c, min, max);
+            sendDailyDigest(request, c, min, max);
 
         setLastSuccessful(max);
     }
@@ -100,12 +108,11 @@ public class DailyDigest
     }
 
 
-    private static void sendDailyDigest(ViewContext ctx, Container c, Date min, Date max) throws Exception
+    private static void sendDailyDigest(HttpServletRequest request, Container c, Date min, Date max) throws Exception
     {
         Settings settings = AnnouncementManager.getMessageBoardSettings(c);
         Announcement[] announcements = getRecentAnnouncementsInContainer(c, min, max);
-        List<User> users = new ArrayList<User>();
-        users.add(ctx.getUser());
+        List<User> users = AnnouncementManager.getDailyDigestUsers(c);
 
         for (User user : users)
         {
@@ -118,43 +125,47 @@ public class DailyDigest
 
             if (!announcementList.isEmpty())
             {
-                ViewMessage m = getDailyDigestMessage(ctx, c, settings, announcementList, user);
+                ViewMessage m = getDailyDigestMessage(request, c, settings, announcementList, user);
                 MailHelper.send(m);
             }
         }
     }
 
 
-    private static MailHelper.ViewMessage getDailyDigestMessage(ViewContext ctx, Container c, Settings settings, List<Announcement> announcements, User user) throws Exception
+    private static MailHelper.ViewMessage getDailyDigestMessage(HttpServletRequest request, Container c, Settings settings, List<Announcement> announcements, User user) throws Exception
     {
         MailHelper.ViewMessage m = MailHelper.createMultipartViewMessage(AppProps.getInstance().getSystemEmailAddress(), user.getEmail());
         m.setSubject("New posts to " + c.getPath());
 
-        DailyDigestPage page = createPage("dailyDigestPlain.jsp", ctx, c, settings, announcements);
+        DailyDigestPage page = createPage("dailyDigestPlain.jsp", request, c, settings, announcements);
         JspView view = new JspView(page);
         view.setFrame(WebPartView.FrameType.NONE);
-        m.setTemplateContent(ctx, view, "text/plain");
+        m.setTemplateContent(request, view, "text/plain");
 
-        page = createPage("dailyDigest.jsp", ctx, c, settings, announcements);
+        page = createPage("dailyDigest.jsp", request, c, settings, announcements);
         view = new JspView(page);
         view.setFrame(WebPartView.FrameType.NONE);
-        m.setTemplateContent(ctx, view, "text/html");
+        m.setTemplateContent(request, view, "text/html");
 
         return m;
     }
 
 
-    private static DailyDigestPage createPage(String templateName, ViewContext ctx, Container c, Settings settings, List<Announcement> announcements) throws ServletException
+    private static DailyDigestPage createPage(String templateName, HttpServletRequest request, Container c, Settings settings, List<Announcement> announcements) throws ServletException
     {
-        DailyDigestPage page = (DailyDigestPage) JspLoader.createPage(ctx.getRequest(), AnnouncementsController.class, templateName);
+        DailyDigestPage page = (DailyDigestPage) JspLoader.createPage(request, AnnouncementsController.class, templateName);
 
-        page.ctx = ctx;
         page.conversationName = settings.getConversationName().toLowerCase();
         page.settings = settings;
         page.c = c;
         page.announcements = announcements;
+        page.boardPath = c.getPath();
+        ViewURLHelper boardUrl = new ViewURLHelper(request, "announcements", "begin", c.getPath());
+        page.boardUrl = boardUrl.getURIString();
+        page.siteUrl = ViewURLHelper.getBaseServerURL(request);
+        page.removeUrl = new ViewURLHelper(request, "announcements", "showEmailPreferences", c.getPath()).getURIString();
 
-        URLHelper cssURL = new URLHelper(ctx.getRequest());
+        URLHelper cssURL = new URLHelper(request);
         cssURL.setPath("/core/stylesheet.view");
         cssURL.setRawQuery(null);
         page.cssURL = cssURL.getURIString();
@@ -197,7 +208,16 @@ public class DailyDigest
         public void run()
         {
             _log.debug("Sending daily digest");
-            // sendDailyDigest();
+            HttpServletRequest request = new MockHttpServletRequest(ViewServlet.getViewServletContext());  // Mock request used for generating jsp messages and the links in the message content
+
+            try
+            {
+                sendDailyDigest(request);
+            }
+            catch(Exception e)
+            {
+                ExceptionUtil.logExceptionToMothership(request, e);
+            }
         }
 
 
