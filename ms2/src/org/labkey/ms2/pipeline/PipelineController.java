@@ -403,7 +403,7 @@ public class PipelineController extends ViewController
                     mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
                     String connectivityResult = mascotClient.testConnectivity(false);
                     if ("".equals(connectivityResult))
-                        error = "Mascot server has not database available for searching.";
+                        error = "Mascot server has no databases available for searching.";
                     else
                         error = connectivityResult;
                 }
@@ -411,6 +411,10 @@ public class PipelineController extends ViewController
                 {
                     error = "Mascot server has not been specified in site customization.";
                 }
+            }
+            if (null == error && "sequest".equalsIgnoreCase(form.getSearchEngine()))
+            {
+                error = "Sequest server has no databases available for searching.";
             }
         }
         
@@ -421,7 +425,8 @@ public class PipelineController extends ViewController
                 if (form.getProtocol().length() == 0)
                 {
                     String[] seqDBs = form.getSequenceDBs();
-                    if ("mascot".equalsIgnoreCase(form.getSearchEngine()))
+                    if ("mascot".equalsIgnoreCase(form.getSearchEngine())
+                        || "sequest".equalsIgnoreCase(form.getSearchEngine()))
                     {
                         // we check that the database exist locally
                         // so that Mascot2XML will work

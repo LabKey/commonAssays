@@ -72,7 +72,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
         _isFractions = isFractions;
 
         if (isFractions)
-            _baseName = _dirAnalysis.getName();
+            _baseName = "all";
         else
             _baseName = MS2PipelineManager.getBaseName(filesMzXML[0]);
 
@@ -356,7 +356,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
         int iReturn;
         if(pepProphetInputFiles.size() == 0) return "No raw pepXml file to analyze.";
         //boolean _isFractions = pepProphetInputFiles.size() > 1;
-        String outputBaseName = (_isFractions)?_baseName:MS2PipelineManager.getBaseName(pepProphetInputFiles.get(0));
+        String outputBaseName = (_isFractions)?"all":MS2PipelineManager.getBaseName(pepProphetInputFiles.get(0));
 
         File fileProtXML = MS2PipelineManager.getProtXMLIntermediatFile(dirWork, outputBaseName);
         _fileProtXml = MS2PipelineManager.getProtXMLFile(_dirAnalysis, outputBaseName);

@@ -21,7 +21,11 @@ if (null != error)
     {
         if ("mascot".equalsIgnoreCase(form.searchEngine))
         {
-            out.print ("In order to perform a search using Mascot, LabKey Server must be able to contact your Mascot server and protein database must have already been uploaded to it.<br>");
+            out.print ("In order to perform a search using Mascot, LabKey Server must be able to contact your Mascot server and at least one protein database must have already been uploaded to it.<br>");
+        }
+        else if("sequest".equalsIgnoreCase(form.searchEngine))
+        {
+            out.print ("In order to perform a search using Sequest, LabKey Server must be able to contact your Sequest server and at least one protein database must have already been uploaded to it.<br>");
         }
         else
         {
