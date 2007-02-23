@@ -291,6 +291,158 @@ public class MascotClientImpl implements SearchClient
         }
     }
 
+    public Map<String,String> getDBInfo(String db, String release)
+    {
+        errorCode = 0;
+        errorString = "";
+
+        findWorkableSettings (false);
+
+        Properties results;
+        Properties parameters = new Properties();
+        parameters.setProperty("cgi", "labkeydbmgmt.pl");
+        parameters.setProperty("cmd", "dbinfo");
+        parameters.setProperty("db", db);
+        parameters.setProperty("release", release);
+
+        results = request (parameters, true);
+        Map<String,String> returns=new HashMap<String,String>();
+        for(Map.Entry<Object,Object> entry: results.entrySet()) {
+            returns.put((String)entry.getKey(),(String)entry.getValue());
+        }
+        return returns;
+    }
+
+    public int downloadDB(String localDB, String db, String release, String hash, long filesize, long timestamp)
+    {
+        errorCode = 0;
+        errorString = "";
+
+        FileOutputStream fOut;
+        try
+        {
+            fOut=new FileOutputStream(localDB);
+        }
+        catch (FileNotFoundException e)
+        {
+            errorCode = 1;
+            errorString = "Fail to open "+localDB+", "+e.getMessage();
+            return 1;
+        }
+
+
+        PrintWriter writer=new PrintWriter(fOut);
+        long offset=0;
+        while (offset<filesize) {
+            String result = downloadDBChunk(db, release, offset, hash, filesize, timestamp);
+            if (result.startsWith("STATUS=OK\n")) {
+                String chunkSize="";
+                int nPos2=0;
+                int nPos1=result.indexOf("SIZE=");
+                if (-1!=nPos1) {
+                    nPos2=result.indexOf("\n",nPos1+1);
+                    if (-1!=nPos2) {
+                        chunkSize = result.substring(nPos1+5, nPos2);
+                    }
+                }
+                if ("".equals(chunkSize)) {
+                    errorCode = 2;
+                    errorString="Fail to parse chunk size";
+                    break;
+                }
+
+                int nBytes=result.length()-(nPos2+1);
+                int numChunkSize=Integer.parseInt(chunkSize);
+                if (numChunkSize<=nBytes) {
+                    // we skip the last "\n" which is added by our system
+                    writer.write(result, nPos2+1, numChunkSize);
+                    offset+=numChunkSize;
+
+                    String msg="Downloaded "+offset+" bytes.";
+                    if (null != _instanceLogger) _instanceLogger.info(msg);
+
+                } else {
+                    errorCode = 3;
+                    errorString="Chunk size "+chunkSize+" greater than read size "+nBytes;
+                    break;
+                }
+
+            } else {
+                // there was some problem, we bait out
+                errorCode = 1;
+                StringBuffer sb=new StringBuffer();
+                int nPos1=result.indexOf("\n");
+                if (-1!=nPos1) {
+                    sb.append(result.substring(0, nPos1-1));
+                }
+                int nPos2=result.indexOf("\n",nPos1+1);
+                if (-1!=nPos2) {
+                    if (-1!=nPos1) sb.append(",");
+                    sb.append(result.substring(nPos1+1, nPos2-1));
+                }
+                errorString=sb.toString();
+                break;
+            }
+        }
+        writer.close();
+
+        return errorCode;
+    }
+
+    public String downloadDBChunk(String db, String release, long offset, String hash, long filesize, long timestamp)
+    {
+        errorCode = 0;
+        errorString = "";
+
+        findWorkableSettings (false);
+
+        //Properties results;
+        Properties parameters = new Properties();
+        parameters.setProperty("cgi", "labkeydbmgmt.pl");
+        parameters.setProperty("cmd", "downloaddb");
+        parameters.setProperty("db", db);
+        parameters.setProperty("release", release);
+        StringBuffer sb;
+        sb=new StringBuffer();
+        sb.append(offset);
+        parameters.setProperty("offset", sb.toString());
+        parameters.setProperty("hash", hash);
+        sb=new StringBuffer();
+        sb.append(filesize);
+        parameters.setProperty("filesize", sb.toString());
+        sb=new StringBuffer();
+        sb.append(timestamp);
+        parameters.setProperty("timestamp", sb.toString());
+
+        //results = request (parameters, false);
+        //return results.getProperty("HTTPContent", "");
+
+        InputStream in = getRequestResultStream (parameters);
+        if (null == in)
+            return "STATUS=Fail to get result stream\n";
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        sb=new StringBuffer(5*1024*1024+4*1024);
+        char[] buffer = new char [4096]; // use 4-KB fragment
+        int readLen;
+        try
+        {
+            while ((readLen = reader.read(buffer)) > 0) {
+                sb.append(buffer, 0, readLen);
+            }
+        }
+        catch (IOException e)
+        {
+            _log.warn("Encounter exception after reading "+sb.length()+" byte(s)", e);
+        }
+        finally
+        {
+            try { in.close(); } catch (IOException e) { }
+        }
+
+        return sb.toString();
+    }
+
     public String startSession ()
     {
         findWorkableSettings (true);
@@ -1203,6 +1355,8 @@ public class MascotClientImpl implements SearchClient
             errorString = "Fail to parse Mascot Server URL";
             results.setProperty("error", "1");
             results.setProperty("errorstring", errorString);
+            results.setProperty("exceptionmessage", x.getMessage());
+            results.setProperty("exceptionclass", x.getClass().getName());
         }
         catch (Exception x)
         {
@@ -1216,6 +1370,8 @@ public class MascotClientImpl implements SearchClient
             errorString = "Fail to interact with Mascot Server";
             results.setProperty("error", "2");
             results.setProperty("errorstring", errorString);
+            results.setProperty("exceptionmessage", x.getMessage());
+            results.setProperty("exceptionclass", x.getClass().getName());
         }
 
         return results;

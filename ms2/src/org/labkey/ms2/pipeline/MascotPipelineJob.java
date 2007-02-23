@@ -40,6 +40,9 @@ import java.util.*;
 public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
 {
     private File _fileMascotXML;
+    private static final String KEY_HASH="HASH";
+    private static final String KEY_FILESIZE="FILESIZE";
+    private static final String KEY_TIMESTAMP="TIMESTAMP";
 
     public static String getProviderName(boolean cluster)
     {
@@ -220,6 +223,10 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
             return;
         }
         String[] databases = paramDatabase.split(";");
+        if (databases.length>1) {
+            error("Mascot does not support multiple databases searching. ("+paramDatabase+")");
+            return;
+        }
 
         MascotInputParser defaultParser = getInputParameters(fileDefaults);
         if (defaultParser == null)
@@ -321,14 +328,105 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
                 return;
             }
 
+            setStatus("SYNCHRONIZING");
+            header("Sequence Database Synchronization output");
+
+            //a. get database and release entry
+            String sequenceDB = getSequenceDatabase(fileOutputDat);
+            String sequenceRelease = getDatabaseRelease(fileOutputDat);
+            //b. get release information at Mascot server
+            info("Retreiving database information ("+sequenceRelease+")...");
+            Map<String,String> returns = mascotClient.getDBInfo(sequenceDB, sequenceRelease);
+            String status = returns.get("STATUS");
+            if (null == status || !"OK".equals(status))
+            {
+                error("Failed to get database from Mascot server.");
+                String exceptionMessage=returns.get("exceptionmessage");
+                String exceptionClass=returns.get("exceptionclass");
+                if (null!=exceptionMessage) {
+                    exceptionMessage=exceptionMessage.toLowerCase();
+                    exceptionClass=exceptionClass.toLowerCase();
+                    if (exceptionMessage.contains("http response code: 500")) {
+                        error("labkeydbmgmt.pl does not seem to be functioning on Mascot server.  Please ask your administrator to verify.");
+                    } else if (exceptionClass.contains("java.io.filenotfoundexception")) {
+                        error("labkeydbmgmt.pl may not have been installed on Mascot server (<mascot directory>/cgi).  Please ask your administrator to install it.");
+                    } else {
+                        error("Message: "+returns.get("exceptionmessage"));
+                    }
+                }
+                return;
+            }
+
+            String smascotFileHash=returns.get("HASH");
+            String smascotFileSize=returns.get("FILESIZE");
+            String smascotFileTimestamp=returns.get("TIMESTAMP");
+            info("Database "+sequenceRelease+", hash="+smascotFileHash+", size="+smascotFileSize+", timestamp="+smascotFileTimestamp);
+            long nmascotFileSize=Long.parseLong(smascotFileSize);
+            long nmascotFileTimestamp=Long.parseLong(smascotFileTimestamp);
+
+            File localDB = MS2PipelineManager.getLocalMascotFile(_uriSequenceRoot.getPath(), sequenceDB, sequenceRelease);
+            File localDBHash = MS2PipelineManager.getLocalMascotFileHash(_uriSequenceRoot.getPath(), sequenceDB, sequenceRelease);
+            File localDBParent = localDB.getParentFile();
+            localDBParent.mkdirs();
+            long filesize=0;
+            long timestamp=0;
+            String hash="";
+            boolean toDownloadDB = false;
+            if (!localDB.exists()) {
+                //c. if local copy does not exist, download DB and cache checking hashes
+                // use the default hashes
+                info("Local database "+sequenceRelease+" does not exist, downloading from Mascot server");
+                toDownloadDB = true;
+            } else {
+                //c. if local copy exists & cached checking hashes do not match, download new DB and cache new hashes
+                // let's get the hashes
+                Map<String,String> hashes=readLocalMascotFileHash(localDBHash.getCanonicalPath());
+                if (null!=hashes.get("HASH")) {
+                    hash=hashes.get("HASH");
+                }
+                if (null!=hashes.get("FILESIZE")) {
+                    String value=hashes.get("FILESIZE");
+                    filesize=Long.parseLong(value);
+                }
+                if (null!=hashes.get("TIMESTAMP")) {
+                    String value=hashes.get("TIMESTAMP");
+                    timestamp=Long.parseLong(value);
+                }
+                if (!smascotFileHash.equals(hash) ||
+                    nmascotFileSize!=filesize || nmascotFileTimestamp!=timestamp) {
+                    info("Local database "+sequenceRelease+" is different (hash="+
+                            hash+", size="+filesize+", timestamp="+timestamp+
+                            "), downloading from Mascot server");
+                    toDownloadDB = true;
+                } else {
+                    info("Local copy of database "+sequenceRelease+" exists, skipping download.");
+                }
+            }
+
+            if (toDownloadDB) {
+                info("Starting download of database "+sequenceRelease+"...");
+                iReturn = mascotClient.downloadDB(localDB.getCanonicalPath(),
+                        sequenceDB, sequenceRelease, smascotFileHash, nmascotFileSize, nmascotFileTimestamp);
+                if (iReturn != 0) {
+                    error("Failed to download "+sequenceDB+" from Mascot server");
+                    return;
+                } else {
+                    info("Database "+sequenceRelease+" downloaded");
+                    info("Saving its checksums...");
+                    saveLocalMascotFileHash(localDBHash.getCanonicalPath(),
+                            smascotFileHash, nmascotFileSize, nmascotFileTimestamp);
+                    info("Checksums saved.");
+                }
+            }
+
             /*
             5. translate Mascot result file to pep.xml format
             */
             setStatus("ANALYZING");
             header("Mascot2XML output");
 
-            String sequenceDB = getSequenceDatabase(fileOutputDat);
-            File fileSequenceDatabase = new File(_uriSequenceRoot.getPath(), sequenceDB);
+            //File fileSequenceDatabase = new File(_uriSequenceRoot.getPath(), sequenceDB);
+            File fileSequenceDatabase = MS2PipelineManager.getLocalMascotFile(_uriSequenceRoot.getPath(), sequenceDB, sequenceRelease);
 
             iReturn = runSubProcess(new ProcessBuilder("Mascot2XML",
                     fileOutputDat.getName(),
@@ -553,7 +651,25 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
         for (int i = 0; i < databases.length; i++)
         {
             String database = databases[i];
-            databaseFiles[i] = MS2PipelineManager.getSequenceDBFile(_uriSequenceRoot, database);
+            //TODO: how to handle fraction?!
+            File mascotDatFile = MS2PipelineManager.getMascotOutFile(_dirAnalysis, _baseName);
+            if (mascotDatFile.exists()) {
+                String sequenceDB = getSequenceDatabase(mascotDatFile);
+                String sequenceRelease = getDatabaseRelease(mascotDatFile);
+                File localDB = MS2PipelineManager.getLocalMascotFile(_uriSequenceRoot.getPath(), sequenceDB, sequenceRelease);
+                databaseFiles[i] = localDB;
+            } else {
+                File dirWork = new File(_dirAnalysis, _baseName + ".work");
+                mascotDatFile = MS2PipelineManager.getMascotOutFile(dirWork, _baseName);
+                if (mascotDatFile.exists()) {
+                    String sequenceDB = getSequenceDatabase(mascotDatFile);
+                    String sequenceRelease = getDatabaseRelease(mascotDatFile);
+                    File localDB = MS2PipelineManager.getLocalMascotFile(_uriSequenceRoot.getPath(), sequenceDB, sequenceRelease);
+                    databaseFiles[i] = localDB;
+                } else {
+                    databaseFiles[i] = MS2PipelineManager.getSequenceDBFile(_uriSequenceRoot, database);
+                }
+            }
             databaseSB.append(getStartingInputDataSnippet(databaseFiles[i], analysisDir));
         }
 
@@ -635,36 +751,164 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
 
     private String getSequenceDatabase (File datFile) throws IOException
     {
+        return getMascotResultEntity(datFile, "parameters", "DB");
+    }
+
+    private String getDatabaseRelease (File datFile) throws IOException
+    {
+        return getMascotResultEntity(datFile, "header", "release");
+    }
+
+    private String getMascotResultEntity (File datFile, String mimeName, String tag) throws FileNotFoundException
+    {
         // return the sequence database queried against in this search
         final File dat = new File(datFile.getAbsolutePath());
 
         if (!NetworkDrive.exists(dat))
             throw new FileNotFoundException(datFile.getAbsolutePath() + " not found");
 
-        InputStream datIn = new FileInputStream(dat);
+        InputStream datIn = null;
+        try
+        {
+            datIn = new FileInputStream(dat);
+        }
+        catch (FileNotFoundException e)
+        {
+            throw e;
+        }
         BufferedReader datReader = new BufferedReader(new InputStreamReader(datIn));
         boolean skipParameter = true;
-        String sequenceDatabaseTag = "DB=";
-        String sequenceDatabase = null;
-        while (true)
+        String mimeNameSubString = "; name=\""+mimeName+"\"";
+        String tagEqual=tag+"=";
+        String value = null;
+        String line = null;
+        try
         {
-            String line = datReader.readLine();
-            if (null == line) break;
-
-            // TODO: check for actual MIME boundary
-            if (line.startsWith("Content-Type: "))
+            while (null!=(line = datReader.readLine()))
             {
-                skipParameter = !line.endsWith("; name=\"parameters\"");
-            }
-            else
-            {
-                if (!skipParameter && line.startsWith(sequenceDatabaseTag))
+                // TODO: check for actual MIME boundary
+                if (line.startsWith("Content-Type: "))
                 {
-                    sequenceDatabase = line.substring(sequenceDatabaseTag.length());
-                    break;
+                    skipParameter = !line.endsWith(mimeNameSubString);
+                }
+                else
+                {
+                    if (!skipParameter && line.startsWith(tagEqual))
+                    {
+                        value = line.substring(tagEqual.length());
+                        break;
+                    }
                 }
             }
         }
-        return sequenceDatabase;
+        catch (IOException e)
+        {
+            // fail to readLine!
+        }
+        finally
+        {
+            try
+            {
+                datReader.close();
+            }
+            catch (IOException e)
+            {
+            }
+        }
+        return value;
     }
+
+    private Map<String,String> readLocalMascotFileHash(String filepath)
+    {
+        final File hashFile = new File(filepath);
+
+        Map<String,String> returns=new HashMap<String,String>();
+
+        if (hashFile.exists()) {
+            InputStream datIn = null;
+            try
+            {
+                datIn = new FileInputStream(hashFile);
+                InputStream in = new BufferedInputStream(datIn);
+
+                Properties results=new Properties();
+                try
+                {
+                    results.load(in);
+                }
+                catch (IOException e)
+                {
+                    warn("Fail to load database information "+filepath);
+                }
+                finally
+                {
+                    try
+                    {
+                        in.close();
+                    }
+                    catch (IOException e)
+                    {
+                    }
+                }
+
+                for(Map.Entry<Object,Object> entry: results.entrySet()) {
+                    returns.put((String)entry.getKey(),(String)entry.getValue());
+                }
+            }
+            catch (FileNotFoundException e)
+            {
+                //do nothing
+            }
+        }
+
+        return returns;
+    }
+
+    private boolean saveLocalMascotFileHash(String filepath, String hash, long filesize, long timestamp)
+    {
+        Properties hashes = new Properties();
+        hashes.put(KEY_HASH, hash);
+        StringBuffer sb;
+        sb=new StringBuffer();
+        sb.append(filesize);
+        hashes.put(KEY_FILESIZE, sb.toString());
+        sb=new StringBuffer();
+        sb.append(timestamp);
+        hashes.put(KEY_TIMESTAMP, sb.toString());
+
+        final File hashFile = new File(filepath);
+        OutputStream datOut = null;
+        try
+        {
+            datOut = new FileOutputStream(hashFile);
+        }
+        catch (FileNotFoundException e)
+        {
+            warn("Fail to open database information "+filepath);
+            return false;
+        }
+        boolean status = false;
+        try
+        {
+            hashes.store(datOut, "");
+            status = true;
+        }
+        catch (IOException e)
+        {
+            warn("Fail to save database information "+filepath);
+        }
+        finally
+        {
+            try
+            {
+                datOut.close();
+            }
+            catch (IOException e)
+            {
+                warn("Fail to close database information "+filepath);
+            }
+        }
+        return status;
+    }
+
 }

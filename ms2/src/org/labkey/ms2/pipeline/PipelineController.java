@@ -430,9 +430,12 @@ public class PipelineController extends ViewController
                     {
                         // we check that the database exist locally
                         // so that Mascot2XML will work
+                        //WCH: 2007-02-19 we no longer check for existence, we will download the database
+                        /*
                         File fileSequenceDB = new File(sequenceRoot.getPath(), seqDBs[0]);
                         if (!fileSequenceDB.exists())
                             throw new IllegalArgumentException("Sequence database '" + seqDBs[0] + "' is not found in local FASTA root");
+                            */
                     }
                     else
                     {

@@ -1217,4 +1217,15 @@ public class MS2PipelineManager
         out.close();
     }
 //END-wch: mascotdev
+
+    public static File getLocalMascotFile(String sequenceRoot, String db, String release)
+    {
+        return new File(sequenceRoot+File.separator+"mascot"+File.separator+db, release);
+    }
+
+    public static File getLocalMascotFileHash(String sequenceRoot, String db, String release)
+    {
+        return new File(sequenceRoot+File.separator+"mascot"+File.separator+db, release+".hash");
+    }
+
 }
