@@ -28,31 +28,7 @@ public class ProteinProphetFileTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                FilteredTable result = new FilteredTable(MS2Manager.getTableInfoRuns());
-                result.wrapAllColumns(true);
-                ViewURLHelper url = new ViewURLHelper("core", "containerRedirect", "");
-                url.addParameter("action", "showList.view");
-                url.addParameter("pageflow", "MS2");
-                result.getColumn("Container").setFk(new LookupForeignKey(url, "containerId", "EntityId", "Name")
-                {
-                    public TableInfo getLookupTableInfo()
-                    {
-                        return CoreSchema.getInstance().getTableInfoContainers();
-                    }
-                });
-
-                ColumnInfo erLSIDColumn = result.getColumn("ExperimentRunLSID");
-                erLSIDColumn.setCaption("Experiment Run");
-                erLSIDColumn.setFk(new LookupForeignKey("LSID")
-                {
-                    public TableInfo getLookupTableInfo()
-                    {
-                        ExpSchema schema = new ExpSchema(_schema.getUser(), _schema.getContainer());
-                        return schema.createRunsTable(null);
-                    }
-                });
-
-                return result;
+                return new RunTableInfo(_schema);
             }
         });
     }

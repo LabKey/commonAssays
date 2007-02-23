@@ -2,10 +2,8 @@ package org.labkey.ms2.query;
 
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.Parameter;
+import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.security.User;
 import org.labkey.api.security.ACL;
@@ -28,6 +26,18 @@ public class SequencesTableInfo extends FilteredTable
         _container = container;
         setAlias(alias);
         wrapAllColumns(true);
+
+        getColumn("OrgId").setFk(new LookupForeignKey("OrgId", "Description")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return new OrganismTableInfo();
+            }
+        });
+
+        addColumn(wrapColumn("Source", getRealTable().getColumn("SourceId")));
+        getColumn("SourceId").setIsHidden(true);
+
 
         ViewURLHelper url = new ViewURLHelper("MS2", "showProtein.view", _container);
         getColumn("BestName").setURL(url + "seqId=${SeqId}");

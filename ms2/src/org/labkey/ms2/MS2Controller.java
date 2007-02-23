@@ -3872,7 +3872,7 @@ public class MS2Controller extends ViewController
     }
 
     @Jpf.Action
-    public Forward doProteinSearch(ProteinSearchForm form) throws Exception
+    public Forward doProteinSearch(final ProteinSearchForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
 
@@ -3910,11 +3910,17 @@ public class MS2Controller extends ViewController
         QuerySettings groupsSettings = new QuerySettings(getViewURLHelper(), "ProteinSearchResults");
         groupsSettings.setQueryName(MS2Schema.PROTEIN_GROUPS_TABLE_NAME);
         groupsSettings.setAllowChooseQuery(false);
-        QueryView groupsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), groupsSettings);
+        QueryView groupsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), groupsSettings)
+        {
+            protected TableInfo createTable()
+            {
+                ProteinGroupTableInfo table = new ProteinGroupTableInfo("alias", (MS2Schema)getSchema());
+                table.addProteinNameFilter(form.getIdentifier());
+                table.addContainerCondition(getContainer(), getUser(), form.isIncludeSubfolders());
+                return table;
+            }
+        };
         groupsView.setShowExportButtons(false);
-        ProteinGroupTableInfo table = (ProteinGroupTableInfo)groupsView.getTable();
-        table.addProteinNameFilter(form.getIdentifier());
-        table.addContainerCondition(getContainer(), getUser(), form.isIncludeSubfolders());
 
         groupsView.setTitle("Protein Group Results");
 

@@ -231,7 +231,9 @@ else
 }
 %>
  on-line.</td></tr>
+<%  if (form.protocol == "") { %>
     <tr><td></td><td class='ms-vb'><input type="checkbox" name="saveProtocol" <% if (form.isSaveProtocol()) { %>checked<% } %>/> Save protocol for future use</td></tr>
+<% } %>
 <!--END-wch: mascotdev-->
 <%  if (hasWork) { %>
     <tr><td><input type="image" src="<%=PageFlowUtil.buttonSrc("Search")%>">&nbsp;<a href="<%=ViewURLHelper.toPathString("Pipeline", "returnToReferer", container.getPath())%>"><%=PageFlowUtil.buttonImg("Cancel")%></a></td></tr>

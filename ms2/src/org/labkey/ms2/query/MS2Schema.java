@@ -8,7 +8,6 @@ import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.ProteinListDisplayColumn;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.CaseInsensitiveHashSet;
@@ -32,9 +31,9 @@ public class MS2Schema extends UserSchema
     public static final String SEQUEST_SEARCH_EXPERIMENT_RUNS_TABLE_NAME = "SequestSearchRuns";
     public static final String GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME = "MS2SearchRuns";
 
-    public static final String PEPTIDES_TABLE_NAME = "QueryPeptides";
-    public static final String PROTEIN_GROUPS_TABLE_NAME = "QueryProteinGroups";
-    public static final String SEQUENCES_TABLE_NAME = "QuerySequences";
+    public static final String PEPTIDES_TABLE_NAME = "Peptides";
+    public static final String PROTEIN_GROUPS_TABLE_NAME = "ProteinGroups";
+    public static final String SEQUENCES_TABLE_NAME = "Sequences";
 
     private static final String MASCOT_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.Mascot%";
     private static final String SEQUEST_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.Sequest%";
@@ -118,7 +117,9 @@ public class MS2Schema extends UserSchema
 
     private TableInfo createQueryProteinGroupsTable(String alias)
     {
-        return new ProteinGroupTableInfo(alias, this);
+        ProteinGroupTableInfo result = new ProteinGroupTableInfo(alias, this);
+        result.addContainerCondition(getContainer(), getUser(), false);
+        return result;
     }
 
     private TableInfo createPeptideMembershipsTable()
@@ -167,6 +168,15 @@ public class MS2Schema extends UserSchema
         fractionName.setCaption("Name");
         fractionName.setWidth("200");
         result.addColumn(fractionName);
+
+        ViewURLHelper url = new ViewURLHelper("MS2", "showRun.view", getContainer());
+        result.getColumn("Run").setFk(new LookupForeignKey(url, "run", "Run", "Description")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return new RunTableInfo(MS2Schema.this);
+            }
+        });
 
         return result;
     }
@@ -342,6 +352,18 @@ public class MS2Schema extends UserSchema
             }
         });
 
+
+        SQLFragment sql = new SQLFragment();
+        sql.append("Fraction IN (SELECT Fraction FROM ");
+        sql.append(MS2Manager.getTableInfoFractions());
+        sql.append(" WHERE Run IN (SELECT Run FROM ");
+        sql.append(MS2Manager.getTableInfoRuns());
+        sql.append(" WHERE Container = ? AND Deleted = ?");
+        sql.add(getContainer().getId());
+        sql.add(Boolean.FALSE);
+        sql.append("))");
+        result.addCondition(sql);
+        
         return result;
     }
 

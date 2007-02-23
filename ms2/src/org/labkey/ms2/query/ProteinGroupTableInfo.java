@@ -20,7 +20,7 @@ import java.util.*;
  */
 public class ProteinGroupTableInfo extends FilteredTable
 {
-    private static final Set<String> HIDDEN_PROTEIN_GROUP_COLUMN_NAMES = new CaseInsensitiveHashSet(Arrays.asList("RowId", "GroupNumber", "IndistinguishableCollectionId"));
+    private static final Set<String> HIDDEN_PROTEIN_GROUP_COLUMN_NAMES = new CaseInsensitiveHashSet(Arrays.asList("RowId", "GroupNumber", "IndistinguishableCollectionId", "Deleted", "HasPeptideProphet"));
     private final MS2Schema _schema;
 
     public ProteinGroupTableInfo(String alias, MS2Schema schema)
@@ -44,6 +44,8 @@ public class ProteinGroupTableInfo extends FilteredTable
         addColumn(groupNumberColumn);
 
         wrapAllColumns(true);
+        addColumn(wrapColumn("ProteinProphet", getRealTable().getColumn("ProteinProphetFileId")));
+        getColumn("ProteinProphetFileId").setIsHidden(true);
 
         ColumnInfo quantitation = wrapColumn("Quantitation", getRealTable().getColumn("RowId"));
         quantitation.setFk(new LookupForeignKey("ProteinGroupId")
@@ -65,25 +67,27 @@ public class ProteinGroupTableInfo extends FilteredTable
         }
         if (!standalone)
         {
-            getColumn("ProteinProphetFileId").setIsHidden(true);
+            getColumn("ProteinProphet").setIsHidden(true);
         }
 
-        getColumn("ProteinProphetFileId").setFk(new LookupForeignKey("RowId", false)
+        LookupForeignKey foreignKey = new LookupForeignKey("RowId", false)
         {
             public TableInfo getLookupTableInfo()
             {
                 return new ProteinProphetFileTableInfo(_schema);
             }
-        });
+        };
+        getColumn("ProteinProphetFileId").setFk(foreignKey);
+        getColumn("ProteinProphet").setFk(foreignKey);
 
         List<FieldKey> defaultColumns = new ArrayList<FieldKey>();
-        defaultColumns.add(FieldKey.fromParts("ProteinProphetFileId", "Run", "Container"));
-        defaultColumns.add(FieldKey.fromParts("ProteinProphetFileId","Run"));
+        defaultColumns.add(FieldKey.fromParts("ProteinProphet", "Run", "Container"));
+        defaultColumns.add(FieldKey.fromParts("ProteinProphet","Run"));
         defaultColumns.add(FieldKey.fromParts("Group"));
         defaultColumns.add(FieldKey.fromParts("GroupProbability"));
         defaultColumns.add(FieldKey.fromParts("ErrorRate"));
-        defaultColumns.add(FieldKey.fromParts("UniquePeptides"));
-        defaultColumns.add(FieldKey.fromParts("TotalPeptides"));
+        defaultColumns.add(FieldKey.fromParts("UniquePeptidesCount"));
+        defaultColumns.add(FieldKey.fromParts("TotalNumberPeptides"));
 
         setDefaultVisibleColumns(defaultColumns);
     }

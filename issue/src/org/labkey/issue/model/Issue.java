@@ -109,6 +109,10 @@ public class Issue extends Entity implements Serializable, Cloneable
         resolved = new Date();      // Current date
 
         assignedTo = getCreatedBy();
+        if (getTitle().startsWith("**"))
+        {
+            setTitle(getTitle().substring(2));
+        }
     }
 
 

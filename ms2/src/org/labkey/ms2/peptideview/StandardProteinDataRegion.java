@@ -32,11 +32,10 @@ public class StandardProteinDataRegion extends AbstractProteinDataRegion
 
         protein.setSequence((String) ctx.get("Sequence"));
         Integer outerSeqId = (Integer)ctx.getRow().get("SeqId");
+        ResultSet nestedRS = _groupedRS.getNextResultSet();
 
-        ResultSet nestedRS = null;
         if (outerSeqId != null)
         {
-            nestedRS = _groupedRS.getNextResultSet();
             List<String> peptides = new ArrayList<String>();
             while (nestedRS.next())
             {
