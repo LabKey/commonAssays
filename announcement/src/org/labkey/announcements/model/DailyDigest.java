@@ -36,10 +36,10 @@ public class DailyDigest
     private static final Logger _log = Logger.getLogger(DailyDigest.class);
 
     // Used only for AnnouncementsController test action -- remove when test action is removed
+    @Deprecated
     public static void sendDailyDigest() throws Exception
     {
-        HttpServletRequest request = new MockHttpServletRequest(ViewServlet.getViewServletContext());  // Mock request used for generating jsp messages and links in the message
-        sendDailyDigest(request);
+        sendDailyDigest(createMockRequest());
     }
 
 
@@ -203,12 +203,39 @@ public class DailyDigest
     }
 
 
+    // Don't have a current request, so create a mock request to generate jsp messages and links in the message content
+    private static HttpServletRequest createMockRequest()
+    {
+        MockHttpServletRequest request = new MockHttpServletRequest(ViewServlet.getViewServletContext());
+        AppProps appProps = AppProps.getInstance();
+        request.setContextPath(appProps.getContextPath());
+        request.setServerPort(appProps.getLocalPort());
+        request.setServerName(appProps.getServerName());
+
+        return request;
+    }
+
+
     private static class DailyDigestTask extends TimerTask implements ShutdownListener
     {
         public void run()
         {
             _log.debug("Sending daily digest");
-            HttpServletRequest request = new MockHttpServletRequest(ViewServlet.getViewServletContext());  // Mock request used for generating jsp messages and the links in the message content
+
+            HttpServletRequest request;
+
+            try
+            {
+                request = createMockRequest();
+            }
+            catch(IllegalStateException e)
+            {
+                // Exception could occur if this code is run before the first request.  But that should never happen
+                // since timer is created after the first request is handled.  Just log and return... can't send to
+                // mothership without a request.
+                _log.error("DailyDigestTask couldn't create mock request", e);
+                return;
+            }
 
             try
             {

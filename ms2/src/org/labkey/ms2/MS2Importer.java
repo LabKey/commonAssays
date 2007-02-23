@@ -393,9 +393,7 @@ public abstract class MS2Importer
         sql.append(MS2Manager.getTableInfoPeptidesData());
         sql.append(" SET SeqId = fs.SeqId\nFROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences());
-        sql.append(" fs WHERE Fraction IN (SELECT Fraction FROM ");
-        sql.append(MS2Manager.getTableInfoFractions());
-        sql.append(" WHERE Run = ?) AND ");
+        sql.append(" fs WHERE Fraction = ? AND ");
         sql.append(MS2Manager.getTableInfoPeptidesData());
         sql.append(".Protein = fs.LookupString AND fs.FastaId = ?");
 
@@ -428,7 +426,7 @@ public abstract class MS2Importer
                 "       END\n" +
                 ", 0)\n" +
                 "FROM " + ProteinManager.getTableInfoSequences() + " ps\n" +
-                "WHERE " + MS2Manager.getTableInfoPeptidesData() + ".SeqId = ps.SeqId AND " + MS2Manager.getTableInfoPeptidesData() + ".Fraction IN (SELECT Fraction FROM " + MS2Manager.getTableInfoFractions() + " WHERE Run = ?)";
+                "WHERE " + MS2Manager.getTableInfoPeptidesData() + ".SeqId = ps.SeqId AND " + MS2Manager.getTableInfoPeptidesData() + ".Fraction = ?";
     }
 
 
@@ -436,13 +434,20 @@ public abstract class MS2Importer
     {
         updateRunStatus("Updating peptide columns");
         MS2Run run = MS2Manager.getRun(_runId);
+        MS2Fraction[] fractions = run.getFractions();
 
         long start = System.currentTimeMillis();
-        Table.execute(MS2Manager.getSchema(), _updateSeqIdSql, new Object[]{_runId, run.getFastaId()});
+
+        for (MS2Fraction fraction : fractions)
+            Table.execute(MS2Manager.getSchema(), _updateSeqIdSql, new Object[]{fraction.getFraction(), run.getFastaId()});
+
         logElapsedTime(start, "update SeqId column");
 
         start = System.currentTimeMillis();
-        Table.execute(MS2Manager.getSchema(), _updateSequencePositionSql, new Object[]{_runId});
+
+        for (MS2Fraction fraction : fractions)
+            Table.execute(MS2Manager.getSchema(), _updateSequencePositionSql, new Object[]{fraction.getFraction()});
+
         logElapsedTime(start, "update SequencePosition column");
     }
 

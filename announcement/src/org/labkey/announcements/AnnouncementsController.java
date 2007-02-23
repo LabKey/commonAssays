@@ -37,6 +37,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.security.*;
 import org.labkey.api.security.SecurityManager;
+import org.labkey.api.security.SecurityManager.PermissionSet;
 import org.labkey.api.util.MailHelper.ViewMessage;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
@@ -567,9 +568,25 @@ public class AnnouncementsController extends ViewController
         JspView<Settings> view = new JspView<Settings>("/org/labkey/announcements/customize.jsp", settings);
         view.addObject("returnUrl", new ViewURLHelper(getViewURLHelper().getParameter("returnUrl")));
         view.addObject("assignedToSelect", getAssignedToSelect(getContainer(), settings.getDefaultAssignedTo(), "defaultAssignedTo"));
+
+        if (hasEditorPerm(Group.groupGuests))
+            view.addObject("securityWarning", "Warning: guests have been granted editor permissions in this folder.  As a result, any anonymous user will be able to view, create, and respond to posts, regardless of the security setting below.  You may want to change permissions in this folder.");
+        else if (hasEditorPerm(Group.groupUsers))
+            view.addObject("securityWarning", "Warning: all users have been granted editor permissions in this folder.  As a result, any logged in user will be able to view, create, and respond to posts, regardless of the security setting below.  You may want to change permissions in this folder.");
+
         _renderInTemplate(view, getContainer(), null, "Customize " + settings.getBoardName(), null);
 
         return null;
+    }
+
+
+    private boolean hasEditorPerm(int groupId) throws ServletException
+    {
+        ACL acl = getContainer().getAcl();
+        int editorPerm = PermissionSet.EDITOR.getPermissions();
+        int groupPerm = acl.getPermissions(groupId);
+
+        return groupPerm == (groupPerm | editorPerm);
     }
 
 
@@ -1145,7 +1162,7 @@ public class AnnouncementsController extends ViewController
             }
 
             // Now send a notification email to everyone who signed up for them in this container (but remove the member list emails first).
-            //   This email will include a link to the email perferences page.
+            //   This email will include a link to the email preferences page.
             Set<String> prefsEmails = AnnouncementManager.getUserEmailSet(c, a, settings);
             prefsEmails.removeAll(memberListEmails);
 

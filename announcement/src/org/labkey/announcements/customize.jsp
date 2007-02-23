@@ -7,6 +7,7 @@
     AnnouncementManager.Settings settings = me.getModel();
     ViewURLHelper returnUrl = (ViewURLHelper)me.getViewContext().get("returnUrl");
     String assignedToSelect = (String)me.getViewContext().get("assignedToSelect");
+    String securityWarning = (String)me.getViewContext().get("securityWarning");
 %><form action="customize.post" method="post">
 <input type="hidden" name="returnUrl" value="<%=returnUrl.getEncodedLocalURIString()%>">
 <table>
@@ -34,7 +35,13 @@
         </td>
     </tr>
     <tr>
-    <tr><td colspan=2>&nbsp;</td></tr>
+    <tr><td colspan=2>&nbsp;</td></tr><%
+        if (null != securityWarning)
+        {
+            %>
+    <tr><td></td><td class="labkey-error"><%=securityWarning%></td></tr><%
+        }
+    %>
     <tr>
         <td class="ms-searchform" valign="middle" style="padding-top:2;">Security</td>
         <td class="ms-vb">
