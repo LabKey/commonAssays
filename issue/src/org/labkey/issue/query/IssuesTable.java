@@ -5,16 +5,12 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.issues.IssuesSchema;
 import org.labkey.api.query.*;
-import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.issue.model.IssueManager;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class IssuesTable extends FilteredTable
 {
@@ -28,54 +24,58 @@ public class IssuesTable extends FilteredTable
         super(IssuesSchema.getInstance().getTableInfoIssues(), schema.getContainer());
         _schema = schema;
 
-        for (ColumnInfo col : getAvailableColumns())
-            addColumn(col);
+        addAllColumns();
 
         setDefaultVisibleColumns(getDefaultColumns());
+        ViewURLHelper base = new ViewURLHelper("Issues", "details", _schema.getContainer());
+        setDetailsURL(new DetailsURL(base, Collections.singletonMap("issueId", "IssueId")));
+        setTitleColumn("Title");
     }
 
-    private ColumnInfo[] getAvailableColumns()
+    private void addAllColumns()
     {
-        List<ColumnInfo> columns = new ArrayList<ColumnInfo>();
-
-        final ColumnInfo col = getRealTable().getColumn("IssueId");
-        ColumnInfo issueColumn = new AliasedColumn(this, col.getName(), col);
-        issueColumn.setFk(new QueryForeignKey(_schema, "Issue", "IssueId", "IssueId")
+        ColumnInfo issueIdColumn = wrapColumn(_rootTable.getColumn("IssueId"));
+        issueIdColumn.setFk(new RowIdForeignKey(issueIdColumn)
         {
-            public StringExpressionFactory.StringExpression getURL(ColumnInfo parent) {
-                ViewURLHelper base = new ViewURLHelper("Issues", "details", _schema.getContainer());
-                return new LookupURLExpression(base, Collections.singletonMap("issueId", parent));
+            public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
+            {
+                if (displayField == null)
+                    return null;
+                return super.createLookupColumn(parent, displayField);
             }
         });
-        columns.add(issueColumn);
-        
-        addColumn(columns, "Type");
-        addColumn(columns, "Area");
-        addColumn(columns, "Title");
 
-        // Set a custom renderer for the AssignedTo column
-        final ColumnInfo info = getRealTable().getColumn("AssignedTo");
-        if (info != null)
-        {
-            info.setRenderClass(DisplayColumnAssignedTo.class);
-            columns.add(new AliasedColumn(this, info.getName(), info));
-        }
-        addColumn(columns, "Priority");
-        addColumn(columns, "Status");
-        addColumn(columns, "Milestone");
+        issueIdColumn.setKeyField(true);
+        addColumn(issueIdColumn);
+        addWrapColumn(_rootTable.getColumn("Type"));
+        addWrapColumn(_rootTable.getColumn("Area"));
+        addWrapColumn(_rootTable.getColumn("Title"));
+        ColumnInfo assignedTo = wrapColumn("AssignedTo", _rootTable.getColumn("AssignedTo"));
+        assignedTo.setFk(new UserIdForeignKey());
+        assignedTo.setRenderClass(UserIdRenderer.GuestAsBlank.class);
+        addColumn(assignedTo);
+        addWrapColumn(_rootTable.getColumn("Priority"));
+        addWrapColumn(_rootTable.getColumn("Status"));
+        addWrapColumn(_rootTable.getColumn("Milestone"));
 
-        addColumn(columns, "BuildFound");
-        addColumn(columns, "ModifiedBy");
-        addColumn(columns, "Modified");
-        addColumn(columns, "CreatedBy");
-        addColumn(columns, "Created");
-        addColumn(columns, "ResolvedBy");
-        addColumn(columns, "Resolved");
-        addColumn(columns, "Duplicate");
-        addColumn(columns, "ClosedBy");
-        addColumn(columns, "Closed");
-        addColumn(columns, "NotifyList");
-
+        addWrapColumn(_rootTable.getColumn("BuildFound"));
+        ColumnInfo modifiedBy = wrapColumn(_rootTable.getColumn("ModifiedBy"));
+        UserIdForeignKey.initColumn(modifiedBy);
+        addColumn(modifiedBy);
+        addWrapColumn(_rootTable.getColumn("Modified"));
+        ColumnInfo createdBy = wrapColumn(_rootTable.getColumn("CreatedBy"));
+        UserIdForeignKey.initColumn(createdBy);
+        addColumn(createdBy);
+        addWrapColumn(_rootTable.getColumn("Created"));
+        ColumnInfo resolvedBy = wrapColumn(_rootTable.getColumn("ResolvedBy"));
+        UserIdForeignKey.initColumn(resolvedBy);
+        addColumn(resolvedBy);
+        addWrapColumn(_rootTable.getColumn("Duplicate"));
+        ColumnInfo closedBy = wrapColumn(_rootTable.getColumn("ClosedBy"));
+        UserIdForeignKey.initColumn(closedBy);
+        addColumn(closedBy);
+        addWrapColumn(_rootTable.getColumn("Closed"));
+        addWrapColumn(_rootTable.getColumn("NotifyList"));
         // add any custom columns
         Map<String, String> customColumnCaptions = getCustomColumnCaptions(_schema.getContainer());
         for (Map.Entry<String, String> cce : customColumnCaptions.entrySet())
@@ -85,22 +85,10 @@ public class IssuesTable extends FilteredTable
             {
                 ColumnInfo column = new AliasedColumn(this, cce.getValue(), realColumn);
                 column.setAlias(cce.getKey());
-                columns.add(column);
+                if (getColumn(column.getName()) == null)
+                    addColumn(column);
             }
         }
-
-        return columns.toArray(new ColumnInfo[0]);
-    }
-
-    private void addColumn(List<ColumnInfo> columns, String columnName)
-    {
-        final ColumnInfo info = getRealTable().getColumn(columnName);
-        if (info != null)
-        {
-            columns.add(new AliasedColumn(this, info.getName(), info));
-        }
-        else
-            _log.error("Unable to add issue column name: " + columnName);
     }
 
     /**
@@ -146,32 +134,5 @@ public class IssuesTable extends FilteredTable
             _log.error(e);
         }
         return Collections.emptyMap();
-    }
-
-    /**
-     * Don't display any name for UserId "0" (Unassigned)
-     */
-    public static class DisplayColumnAssignedTo extends DataColumn
-    {
-        public DisplayColumnAssignedTo(ColumnInfo col)
-        {
-            super(col);
-        }
-
-        public Object getValue(RenderContext ctx)
-        {
-            Map rowMap = ctx.getRow();
-            String displayName = (String)rowMap.get("assignedTo$displayName");
-            return (null != displayName ? displayName : "&nbsp;");
-        }
-
-        public Class getValueClass()
-        {
-            return String.class;
-        }
-
-        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException {
-            out.write(getValue(ctx).toString());
-        }
     }
 }

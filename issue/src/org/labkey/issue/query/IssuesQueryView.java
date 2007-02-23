@@ -24,6 +24,7 @@ public class IssuesQueryView extends QueryView
     {
         super(context, schema, settings);
         _context = context;
+        setShowDetailsColumn(false);
     }
 
     // MAB: I just want a resultset....

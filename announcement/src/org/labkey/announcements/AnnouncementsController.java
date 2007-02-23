@@ -44,6 +44,7 @@ import org.labkey.api.view.*;
 import org.labkey.api.wiki.WikiRenderer;
 import org.labkey.api.wiki.WikiRendererType;
 import org.labkey.api.wiki.WikiService;
+import org.labkey.api.query.UserIdRenderer;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -1709,7 +1710,7 @@ public class AnnouncementsController extends ViewController
 
             if (settings.hasAssignedTo())
             {
-                DisplayColumn dc = new DisplayColumnDisplayName(tinfo.getColumn("AssignedTo")); 
+                DisplayColumn dc = new UserIdRenderer(tinfo.getColumn("AssignedTo"));
                 rgn.addColumn(dc);
             }
 
@@ -1717,13 +1718,13 @@ public class AnnouncementsController extends ViewController
                 rgn.addColumn(tinfo.getColumn("Expires"));
 
             ColumnInfo colCreatedBy = tinfo.getColumn("CreatedBy"); // TODO: setRenderClass?
-            DisplayColumn dc = new DisplayColumnDisplayName(colCreatedBy);
+            DisplayColumn dc = new UserIdRenderer(colCreatedBy);
             rgn.addColumn(dc);
 
             rgn.addColumn(tinfo.getColumn("Created"));
 
             ColumnInfo colLastUpdatedBy = tinfo.getColumn("ResponseCreatedBy"); // TODO: setRenderClass?
-            DisplayColumn lastDc = new DisplayColumnDisplayName(colLastUpdatedBy);
+            DisplayColumn lastDc = new UserIdRenderer(colLastUpdatedBy);
             rgn.addColumn(lastDc);
 
             rgn.addColumn(tinfo.getColumn("ResponseCreated"));

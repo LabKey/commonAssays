@@ -128,7 +128,7 @@ public class MS2Schema extends UserSchema
         FilteredTable result = new FilteredTable(info);
         for (ColumnInfo col : info.getColumns())
         {
-            ColumnInfo newColumn = result.wrapColumn(col);
+            ColumnInfo newColumn = result.addWrapColumn(col);
             if (HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES.contains(newColumn.getName()))
             {
                 newColumn.setIsHidden(true);
@@ -214,7 +214,7 @@ public class MS2Schema extends UserSchema
         {
             if (!col.getName().toLowerCase().startsWith("score"))
             {
-                result.wrapColumn(col);
+                result.addWrapColumn(col);
             }
         }
 
