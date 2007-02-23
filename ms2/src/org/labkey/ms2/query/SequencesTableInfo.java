@@ -33,12 +33,12 @@ public class SequencesTableInfo extends FilteredTable
         getColumn("BestName").setURL(url + "seqId=${SeqId}");
 
         List<FieldKey> cols = new ArrayList<FieldKey>();
-        cols.add(FieldKey.fromString("BestName"));
-        cols.add(FieldKey.fromString("Description"));
-        cols.add(FieldKey.fromString("BestGeneName"));
-        cols.add(FieldKey.fromString("Length"));
-        cols.add(FieldKey.fromString("Mass"));
-        cols.add(FieldKey.fromString("OrgId"));
+        cols.add(FieldKey.fromParts("BestName"));
+        cols.add(FieldKey.fromParts("Description"));
+        cols.add(FieldKey.fromParts("BestGeneName"));
+        cols.add(FieldKey.fromParts("Length"));
+        cols.add(FieldKey.fromParts("Mass"));
+        cols.add(FieldKey.fromParts("OrgId"));
         setDefaultVisibleColumns(cols);
     }
 

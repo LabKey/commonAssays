@@ -185,18 +185,18 @@ public class MS2Schema extends UserSchema
             public List<FieldKey> getDefaultVisibleColumns()
             {
                 List<FieldKey> result = new ArrayList<FieldKey>();
-                result.add(FieldKey.fromString("Scan"));
-                result.add(FieldKey.fromString("Charge"));
-                result.add(FieldKey.fromString("RawScore"));
-                result.add(FieldKey.fromString("DiffScore"));
-                result.add(FieldKey.fromString("Expect"));
-                result.add(FieldKey.fromString("IonPercent"));
-                result.add(FieldKey.fromString("Mass"));
-                result.add(FieldKey.fromString("DeltaMass"));
-                result.add(FieldKey.fromString("PeptideProphet"));
-                result.add(FieldKey.fromString("Peptide"));
-                result.add(FieldKey.fromString("ProteinHits"));
-                result.add(FieldKey.fromString("Protein"));
+                result.add(FieldKey.fromParts("Scan"));
+                result.add(FieldKey.fromParts("Charge"));
+                result.add(FieldKey.fromParts("RawScore"));
+                result.add(FieldKey.fromParts("DiffScore"));
+                result.add(FieldKey.fromParts("Expect"));
+                result.add(FieldKey.fromParts("IonPercent"));
+                result.add(FieldKey.fromParts("Mass"));
+                result.add(FieldKey.fromParts("DeltaMass"));
+                result.add(FieldKey.fromParts("PeptideProphet"));
+                result.add(FieldKey.fromParts("Peptide"));
+                result.add(FieldKey.fromParts("ProteinHits"));
+                result.add(FieldKey.fromParts("Protein"));
                 return result;
             }
         };

@@ -3,7 +3,6 @@ package org.labkey.flow.data;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.TableKey;
 import org.labkey.api.data.ColumnInfo;
 
 import java.util.List;
@@ -152,7 +151,7 @@ public class FieldSubstitution
         return ret.toArray(new FieldKey[0]);
     }
 
-    public void insertParent(TableKey key)
+    public void insertParent(FieldKey key)
     {
         Object[] newParts = new Object[_parts.length];
         for (int i = 0; i < _parts.length; i ++)
@@ -162,7 +161,7 @@ public class FieldSubstitution
             {
                 List<String> fieldParts = new ArrayList(key.getParts());
                 fieldParts.addAll(((FieldKey) part).getParts());
-                part = TableKey.fromParts(fieldParts).toFieldKey();
+                part = FieldKey.fromParts(fieldParts);
             }
             newParts[i] = part;
         }

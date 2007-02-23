@@ -17,6 +17,8 @@
  */
 package org.labkey.flow.analysis.model;
 
+import org.apache.log4j.Logger;
+
 import java.io.*;
 import java.util.*;
 
@@ -27,31 +29,28 @@ import java.util.*;
  * Time: 3:19:22 PM
  */
 public class FCS extends FCSHeader
-    {
+{
+    static private final Logger _log = Logger.getLogger(FCS.class);
     boolean bigEndian;
     DataFrame data;
 
-
     public FCS(File f) throws IOException
-        {
+    {
         load(f);
-        }
-
+    }
 
     public int getParameterCount()
-        {
+    {
         return data.getColCount();
-        }
-
+    }
 
     public int getEventCount()
-        {
+    {
         return data.getRowCount();
-        }
-
+    }
 
     protected void load(InputStream is) throws IOException
-        {
+    {
         super.load(is);
         //
         // METADATA
@@ -62,25 +61,24 @@ public class FCS extends FCSHeader
         else if ("1,2,3,4".equals(byteOrder))
             bigEndian = false;
         else
-            {
+        {
             // App.setMessage("$BYTEORD not specified assuming big endian.");
-            }
+        }
 
         //
         // PARAMETERS
         //
         int count = Integer.parseInt(getKeyword("$PAR"));
-        int[] bytes = new int[count];
+        int[] bitCounts = new int[count];
+        boolean packed = false;
         DataFrame.Field[] fields = new DataFrame.Field[count];
         ScalingFunction[] translators = new ScalingFunction[count];
         String datatype = getKeyword("$DATATYPE");
-
         for (int i = 0; i < count; i++)
-            {
+        {
             String key = "$P" + (i + 1);
             String name = getKeyword(key + "N");
             double range = Double.parseDouble(getKeyword(key + "R"));
-
             String E = getKeyword(key + "E");
             double decade = Double.parseDouble(E.substring(0, E.indexOf(',')));
             final double scale = Double.parseDouble(E.substring(E.indexOf(',') + 1));
@@ -88,247 +86,292 @@ public class FCS extends FCSHeader
             DataFrame.Field f = new DataFrame.Field(i, name, (int) range);
             f.setDescription(getKeyword(key + "S"));
             if (null != getKeyword(key + "B"))
-                {
+            {
                 int b = Integer.parseInt(getKeyword(key + "B"));
                 if (datatype.equals("A"))
-                    bytes[i] = b;
-                else
-                    bytes[i] = b / 8;
+                {
+                    bitCounts[i] = b * 8;
                 }
-            fields[i] = f;
+                else
+                {
+                    bitCounts[i] = b;
+                    if (b % 8 != 0)
+                    {
+                        packed = true;
+                    }
+                }
             }
+            fields[i] = f;
+        }
 
         //
         // DATA
         //
         {
-        byte[] dataBuf = new byte[(dataLast - dataOffset + 1)];
-        long read = is.read(dataBuf, 0, dataBuf.length);
-        assert read == dataBuf.length;
-
-        int expectedCount = Integer.parseInt(getKeyword("$TOT"));
-        int bytesPerRow = 0;
-        for (int i = 0; i < bytes.length; i++)
-            bytesPerRow += bytes[i];
-        int expectedBytes = expectedCount * bytesPerRow;
-        if (expectedBytes != dataBuf.length)
-            throw new IllegalArgumentException("databuf is not expected length");
-        float[][] data = new float[bytes.length][expectedCount];
-
-
-        if ("L".equals(getKeyword("$MODE")))
+            byte[] dataBuf = new byte[(dataLast - dataOffset + 1)];
+            long read = is.read(dataBuf, 0, dataBuf.length);
+            assert read == dataBuf.length;
+            int expectedCount = Integer.parseInt(getKeyword("$TOT"));
+            int bitsPerRow = 0;
+            for (int i = 0; i < bitCounts.length; i++)
+                bitsPerRow += bitCounts[i];
+            int expectedBytes = (expectedCount * bitsPerRow + 7) / 8;
+            if (expectedBytes != dataBuf.length)
             {
-            switch (datatype.charAt(0))
+                throw new IllegalArgumentException("dataBuf is of length " + dataBuf.length + " expected " + expectedBytes);
+            }
+            float[][] data = new float[bitCounts.length][expectedCount];
+            if ("L".equals(getKeyword("$MODE")))
+            {
+                switch (datatype.charAt(0))
                 {
-            case 'I':
-                this.data = ReadListDataINTEGER(dataBuf, fields, bytes, data);
-                break;
-            case 'F':
-                this.data = ReadListDataFLOAT(dataBuf, fields, bytes, data);
-                break;
-            case 'D':
-                {
-                throw new java.lang.UnsupportedOperationException("Double data not supported");
-                }
-            case 'A':
-                {
-                throw new java.lang.UnsupportedOperationException("ASCII data not supported");
-                }
+                    case'I':
+                        if (packed)
+                        {
+                            this.data = readListDataIntegerPacked(dataBuf, fields, bitCounts, data);
+                        }
+                        else
+                        {
+                            this.data = readListDataInteger(dataBuf, fields, bitCounts, data);
+                        }
+                        break;
+                    case'F':
+                        this.data = readListDataFloat(dataBuf, fields, bitCounts, data);
+                        break;
+                    case'D':
+                    {
+                        throw new java.lang.UnsupportedOperationException("Double data not supported");
+                    }
+                    case'A':
+                    {
+                        throw new java.lang.UnsupportedOperationException("ASCII data not supported");
+                    }
                 }
             }
-        else
+            else
             {
-            throw new java.lang.UnsupportedOperationException("only supports ListMode");
+                throw new java.lang.UnsupportedOperationException("only supports ListMode");
             }
-
-        this.data = this.data.Translate(translators);
+            this.data = this.data.Translate(translators);
         }
-        }
+    }
 
-
-    DataFrame ReadListDataINTEGER(byte[] dataBuf, DataFrame.Field[] fields, int[] bytes, float[][] data)
-        {
+    DataFrame readListDataInteger(byte[] dataBuf, DataFrame.Field[] fields, int[] bitCounts, float[][] data)
+    {
         int ib = 0;
         for (int row = 0; row < data[0].length; row++)
+        {
+            for (int p = 0; p < bitCounts.length; p++)
             {
-            for (int p = 0; p < bytes.length; p++)
-                {
                 int value = 0;
-                switch (bytes[p])
-                    {
-                case 1:
-                    value = toInt(dataBuf[ib ++]);
-                    break;
-                case 2:
-                    value = toInt(dataBuf[ib ++], dataBuf[ib++]);
-                    break;
-                case 4:
-                    value = toInt(dataBuf[ib++], dataBuf[ib++], dataBuf[ib++], dataBuf[ib++]);
-                    break;
-                    }
-                data[p][row] = (float)value;
+                switch (bitCounts[p])
+                {
+                    case 8:
+                        value = toInt(dataBuf[ib++]);
+                        break;
+                    case 16:
+                        value = toInt(dataBuf[ib++], dataBuf[ib++]);
+                        break;
+                    case 32:
+                        value = toInt(dataBuf[ib++], dataBuf[ib++], dataBuf[ib++], dataBuf[ib++]);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported bit count: " + bitCounts[p]);
                 }
+                data[p][row] = (float) value;
             }
-        return new DataFrame(fields, data);
         }
+        return new DataFrame(fields, data);
+    }
 
-    DataFrame ReadListDataFLOAT(byte[] dataBuf, DataFrame.Field[] fields, int[] bytes, float[][] data)
+    DataFrame readListDataIntegerPacked(byte[] dataBuf, DataFrame.Field[] fields, int[] bitCounts, float[][] data)
+    {
+        int bitOffset = 0;
+        for (int row = 0; row < data[0].length; row++)
         {
+            for (int p = 0; p < bitCounts.length; p++)
+            {
+                int value = toIntPacked(dataBuf, bitOffset, bitCounts[p]);
+                bitOffset += bitCounts[p];
+                data[p][row] = (float) value;
+            }
+        }
+        return new DataFrame(fields, data);
+    }
+
+    DataFrame readListDataFloat(byte[] dataBuf, DataFrame.Field[] fields, int[] bitCounts, float[][] data)
+    {
         int ib = 0;
         for (int row = 0; row < data[0].length; row++)
+        {
+            for (int p = 0; p < bitCounts.length; p++)
             {
-            for (int p = 0; p < bytes.length; p++)
-                {
                 float value = 0;
-                switch (bytes[p])
-                    {
-                case 4:
-                    int intValue = toInt(dataBuf[ib], dataBuf[ib+1], dataBuf[ib+2], dataBuf[ib+3]);
-                    ib += 4;
-                    value = Float.intBitsToFloat(intValue);
-                    break;
-                    }
-                data[p][row] = value;
+                switch (bitCounts[p])
+                {
+                    case 32:
+                        int intValue = toInt(dataBuf[ib], dataBuf[ib + 1], dataBuf[ib + 2], dataBuf[ib + 3]);
+                        ib += 4;
+                        value = Float.intBitsToFloat(intValue);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Only 32 bit floating point numbers are supported: " + bitCounts[p]);
                 }
+                data[p][row] = value;
             }
-        return new DataFrame(fields, data);
         }
+        return new DataFrame(fields, data);
+    }
+
+    protected final int toIntPacked(byte[] bytes, int bitOffset, int bitCount)
+    {
+        int ret = 0;
+        int bitsRemain = bitCount;
+        while (bitsRemain > 0)
+        {
+            int curByte = bytes[bitOffset / 8];
+            int bitsConsumed = Math.min(bitsRemain, (((7 - bitOffset) % 8 + 8) % 8) + 1);
+            int mask = ((1 << bitsConsumed) - 1) << (bitOffset % 8);
+            int curValue;
+            curValue = (curByte & mask) >> (bitOffset % 8);
+            curValue = curValue << (bitCount - bitsRemain);
+            bitOffset += bitsConsumed;
+            bitsRemain -= bitsConsumed;
+            ret += curValue;
+        }
+        return ret;
+    }
 
     protected final int toInt(byte a)
-        {
+    {
         return unsigned(a);
-        }
-
+    }
 
     protected final int toInt(byte a, byte b)
-        {
+    {
         if (bigEndian)
             return unsigned(a) * 256 + unsigned(b);
         else
             return unsigned(b) * 256 + unsigned(a);
-        }
-
+    }
 
     protected final int toInt(byte a, byte b, byte c, byte d)
-        {
+    {
         int value;
         if (bigEndian)
-            {
+        {
             value = unsigned(a);
             value = value * 256 + unsigned(b);
             value = value * 256 + unsigned(c);
             value = value * 256 + unsigned(d);
-            }
+        }
         else
-            {
+        {
             value = unsigned(d);
             value = value * 256 + unsigned(c);
             value = value * 256 + unsigned(b);
             value = value * 256 + unsigned(a);
-            }
-        return value;
         }
-
+        return value;
+    }
 
     protected int unsigned(byte b)
-        {
-        return ((int)b) & 0x000000ff;
-        }
-
+    {
+        return ((int) b) & 0x000000ff;
+    }
 
     public DataFrame getScaledData()
-        {
+    {
         return data;
-        }
+    }
 
     static public boolean isFCSFile(File file)
-        {
+    {
         InputStream stream = null;
         try
-            {
+        {
             stream = new FileInputStream(file);
             byte[] buffer = new byte[6];
-            byte[] compare2 = new byte[] { 'F', 'C', 'S', '2', '.', '0' };
-            byte[] compare3 = new byte[] { 'F', 'C', 'S', '3', '.', '0' };
+            byte[] compare2 = new byte[]{'F', 'C', 'S', '2', '.', '0'};
+            byte[] compare3 = new byte[]{'F', 'C', 'S', '3', '.', '0'};
             if (stream.read(buffer) != 6)
                 return false;
             if (!Arrays.equals(buffer, compare2) && !Arrays.equals(buffer, compare3))
                 return false;
             return true;
-            }
+        }
         catch (IOException e)
-            {
+        {
             return false;
-            }
+        }
         finally
-            {
+        {
             if (stream != null)
-                {
+            {
                 try
-                    {
+                {
                     stream.close();
-                    }
-                catch(IOException e)
-                    {
-                    
-                    }
                 }
-            }
-        }
-
-        private int indexOf(byte[] buf, byte[] key, int min, int max)
-        {
-outer:
-            for (int i = min; i < max - key.length; i ++)
-            {
-                for (int j = 0; j < key.length; j ++)
+                catch (IOException e)
                 {
-                    if (buf[i + j] != key[j])
-                    {
-                        continue outer;
-                    }
-                }
-                return i;
-            }
-            return -1;
-        }
-
-        private int indexOf(byte[] buf, byte key, int start, int end)
-        {
-            return indexOf(buf, new byte[] { key }, start, end);
-        }
-        public byte[] getFCSBytes(File file, int maxEventCount) throws Exception
-        {
-            int oldEventCount = data.getRowCount();
-            int newEventCount = Math.min(maxEventCount, oldEventCount);
-            int rowSize = (dataLast - dataOffset + 1) / oldEventCount;
-            int newSize = dataOffset + rowSize * newEventCount;
-            byte[] bytes = new byte[newSize];
-            InputStream is = new FileInputStream(file);
-            is.read(bytes);
-            int newDataLast = newSize - 1;
-            String strDataLast = Integer.toString(newDataLast);
-            byte[] rgbDataLast = strDataLast.getBytes("UTF-8");
-            // fill the dataLast with spaces
-            Arrays.fill(bytes, 34, 42, (byte) 32);
-            System.arraycopy(rgbDataLast, 0, bytes, 34 + 8 - rgbDataLast.length, rgbDataLast.length);
-
-            // now, look for $TOT in the file
-            byte[] rgbTotKey = new byte[] { (byte) chDelimiter, '$', 'T', 'O', 'T', (byte) chDelimiter };
-            int ibTot = indexOf(bytes, rgbTotKey, textOffset, textLast);
-            if (ibTot >= 0)
-            {
-                int ibNumberStart = ibTot + 6;
-                int ibNumberEnd = indexOf(bytes, new byte[] { (byte) chDelimiter}, ibNumberStart, textLast + 1);
-                if (ibNumberEnd > 0)
-                {
-                    Arrays.fill(bytes, ibNumberStart, ibNumberEnd, (byte) 32);
-                    String strNewTot = Integer.toString(newEventCount);
-                    byte[] rgbNewTot = strNewTot.getBytes("UTF-8");
-                    System.arraycopy(rgbNewTot, 0, bytes, ibNumberStart, rgbNewTot.length);
                 }
             }
-            return bytes;
         }
-
     }
+
+    private int indexOf(byte[] buf, byte[] key, int min, int max)
+    {
+        outer:
+        for (int i = min; i < max - key.length; i++)
+        {
+            for (int j = 0; j < key.length; j++)
+            {
+                if (buf[i + j] != key[j])
+                {
+                    continue outer;
+                }
+            }
+            return i;
+        }
+        return -1;
+    }
+
+    private int indexOf(byte[] buf, byte key, int start, int end)
+    {
+        return indexOf(buf, new byte[]{key}, start, end);
+    }
+
+    public byte[] getFCSBytes(File file, int maxEventCount) throws Exception
+    {
+        int oldEventCount = data.getRowCount();
+        int newEventCount = Math.min(maxEventCount, oldEventCount);
+        int oldByteCount = (dataLast - dataOffset + 1);
+        int newSize = dataOffset + ((oldByteCount * newEventCount) + oldEventCount - 1) / oldEventCount;
+        byte[] bytes = new byte[newSize];
+        InputStream is = new FileInputStream(file);
+        is.read(bytes);
+        int newDataLast = newSize - 1;
+        String strDataLast = Integer.toString(newDataLast);
+        byte[] rgbDataLast = strDataLast.getBytes("UTF-8");
+        // fill the dataLast with spaces
+        Arrays.fill(bytes, 34, 42, (byte) 32);
+        System.arraycopy(rgbDataLast, 0, bytes, 34 + 8 - rgbDataLast.length, rgbDataLast.length);
+
+        // now, look for $TOT in the file
+        byte[] rgbTotKey = new byte[]{(byte) chDelimiter, '$', 'T', 'O', 'T', (byte) chDelimiter};
+        int ibTot = indexOf(bytes, rgbTotKey, textOffset, textLast);
+        if (ibTot >= 0)
+        {
+            int ibNumberStart = ibTot + 6;
+            int ibNumberEnd = indexOf(bytes, new byte[]{(byte) chDelimiter}, ibNumberStart, textLast + 1);
+            if (ibNumberEnd > 0)
+            {
+                Arrays.fill(bytes, ibNumberStart, ibNumberEnd, (byte) 32);
+                String strNewTot = Integer.toString(newEventCount);
+                byte[] rgbNewTot = strNewTot.getBytes("UTF-8");
+                System.arraycopy(rgbNewTot, 0, bytes, ibNumberStart, rgbNewTot.length);
+            }
+        }
+        return bytes;
+    }
+}

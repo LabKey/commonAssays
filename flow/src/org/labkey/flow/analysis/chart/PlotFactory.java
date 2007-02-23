@@ -21,13 +21,14 @@ import java.awt.*;
  */
 public class PlotFactory
 {
-    public static int MAX_BUCKETS = Integer.getInteger("flow.maxchannels", 512).intValue();
+    public static int MAX_DENSITY_BUCKETS = Integer.getInteger("flow.maxchannels", 512).intValue();
+    public static int MAX_HISTOGRAM_BUCKETS = Integer.getInteger("flow.maxchannels", 512).intValue();
     public static final Color COLOR_GATE = Color.RED;
 
-    static public double[] getPossibleValues(DataFrame.Field field, boolean fLogarithmic)
+    static public double[] getPossibleValues(DataFrame.Field field, boolean fLogarithmic, int bucketCount)
     {
         int range = field.getRange();
-        int cBuckets = Math.min(field.getRange(), MAX_BUCKETS);
+        int cBuckets = Math.min(field.getRange(), bucketCount);
         double[] ret = new double[cBuckets];
         ScalingFunction scalingFunction = field.getScalingFunction();
         boolean fLogRawValues = fLogarithmic && (scalingFunction == null || !scalingFunction.isLogarithmic());
@@ -51,9 +52,9 @@ public class PlotFactory
         return ret;
     }
 
-    static double[] getPossibleValues(Subset subset, DataFrame.Field field)
+    static double[] getPossibleValues(Subset subset, DataFrame.Field field, int maxCount)
     {
-        return getPossibleValues(field, displayLogarthmic(subset, field));
+        return getPossibleValues(field, displayLogarthmic(subset, field), maxCount);
     }
 
     static protected boolean displayLogarthmic(Subset subset, DataFrame.Field field)
@@ -157,8 +158,8 @@ public class PlotFactory
         DataFrame data = subset.getDataFrame();
         DataFrame.Field fieldDomain = getField(data, domainAxis);
         DataFrame.Field fieldRange = getField(data, rangeAxis);
-        double[] xValues = getPossibleValues(subset, fieldDomain);
-        double[] yValues = getPossibleValues(subset, fieldRange);
+        double[] xValues = getPossibleValues(subset, fieldDomain, MAX_DENSITY_BUCKETS);
+        double[] yValues = getPossibleValues(subset, fieldRange, MAX_DENSITY_BUCKETS);
         DensityDataset cds = new DensityDataset(
                 DatasetFactory.createXYDataset(subset.getDataFrame(), fieldDomain.getIndex(), fieldRange.getIndex()),
                 xValues,
@@ -192,7 +193,7 @@ public class PlotFactory
     {
         DataFrame data = subset.getDataFrame();
         DataFrame.Field field = getField(data, axis);
-        double[] bins = getPossibleValues(subset, field);
+        double[] bins = getPossibleValues(subset, field, MAX_HISTOGRAM_BUCKETS);
         HistDataset dataset = new HistDataset(bins, data.getColumn(axis));
         HistRenderer renderer = new HistRenderer();
         renderer.setSeriesVisibleInLegend(false);

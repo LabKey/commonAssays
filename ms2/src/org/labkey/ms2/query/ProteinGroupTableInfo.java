@@ -77,13 +77,13 @@ public class ProteinGroupTableInfo extends FilteredTable
         });
 
         List<FieldKey> defaultColumns = new ArrayList<FieldKey>();
-        defaultColumns.add(FieldKey.fromString("ProteinProphetFileId/Run/Container"));
-        defaultColumns.add(FieldKey.fromString("ProteinProphetFileId/Run"));
-        defaultColumns.add(FieldKey.fromString("Group"));
-        defaultColumns.add(FieldKey.fromString("GroupProbability"));
-        defaultColumns.add(FieldKey.fromString("ErrorRate"));
-        defaultColumns.add(FieldKey.fromString("UniquePeptides"));
-        defaultColumns.add(FieldKey.fromString("TotalPeptides"));
+        defaultColumns.add(FieldKey.fromParts("ProteinProphetFileId", "Run", "Container"));
+        defaultColumns.add(FieldKey.fromParts("ProteinProphetFileId","Run"));
+        defaultColumns.add(FieldKey.fromParts("Group"));
+        defaultColumns.add(FieldKey.fromParts("GroupProbability"));
+        defaultColumns.add(FieldKey.fromParts("ErrorRate"));
+        defaultColumns.add(FieldKey.fromParts("UniquePeptides"));
+        defaultColumns.add(FieldKey.fromParts("TotalPeptides"));
 
         setDefaultVisibleColumns(defaultColumns);
     }

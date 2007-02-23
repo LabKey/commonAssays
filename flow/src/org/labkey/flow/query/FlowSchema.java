@@ -336,7 +336,7 @@ public class FlowSchema extends UserSchema
             }
         }
         List<FieldKey> defaultVisibleColumns = new ArrayList(ret.getDefaultVisibleColumns());
-        TableKey tblkeyKeyword = new TableKey(null, "Keyword");
+        FieldKey tblkeyKeyword = FieldKey.fromParts("Keyword");
         for (FieldKey keyKeyword : QueryService.get().getDefaultVisibleColumns(colKeyword.getFk().getLookupTableInfo().getColumns()))
         {
             defaultVisibleColumns.add(new FieldKey(tblkeyKeyword, keyKeyword.getName()));

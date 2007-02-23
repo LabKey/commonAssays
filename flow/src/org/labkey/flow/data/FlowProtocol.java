@@ -10,10 +10,8 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.data.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.TableKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.flow.query.FlowSchema;
-import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.persist.AttributeSet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ObjectUtils;
@@ -332,8 +330,8 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         Collection<FieldKey> fields = getSampleSetJoinFields().values();
         if (fields.size() == 0)
             return null;
-        TableKey tableRun = new TableKey(null, "Run");
-        TableKey tableKeyword = new TableKey(null, "Keyword");
+        FieldKey tableRun = FieldKey.fromParts("Run");
+        FieldKey tableKeyword = FieldKey.fromParts("Keyword");
         SampleKey ret = new SampleKey();
         for (FieldKey field : fields)
         {
@@ -402,7 +400,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         {
             fs = FlowProtocol.getDefaultFCSAnalysisNameExpr();
         }
-        fs.insertParent(new TableKey(null, "FCSFile"));
+        fs.insertParent(FieldKey.fromParts("FCSFile"));
         FlowSchema schema = new FlowSchema(user, getContainer());
         ExpDataTable table = schema.createFCSAnalysisTable("FCSAnalysis", FlowDataType.FCSAnalysis);
         Map<FieldKey, ColumnInfo> columns = new HashMap();

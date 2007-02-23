@@ -1,7 +1,6 @@
 package org.labkey.flow.controllers.protocol;
 
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.TableKey;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.query.FlowSchema;
@@ -79,8 +78,8 @@ public class JoinSampleSetForm extends ProtocolForm
 
         ret.put(null, "");
         ret.put(new FieldKey(null, "Name"), "Name");
-        ret.put(new FieldKey(new TableKey(null, "Run"), "Name"), "Run Name");
-        TableKey keyword = new TableKey(null, "Keyword");
+        ret.put(FieldKey.fromParts("Run", "Name"), "Run Name");
+        FieldKey keyword = new FieldKey(null, "Keyword");
         ColumnInfo colKeyword = tableFCSFiles.getColumn("Keyword");
         TableInfo tableKeywords = colKeyword.getFk().getLookupTableInfo();
         for (ColumnInfo column : tableKeywords.getColumns())

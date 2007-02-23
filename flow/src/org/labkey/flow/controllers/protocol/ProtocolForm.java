@@ -2,7 +2,6 @@ package org.labkey.flow.controllers.protocol;
 
 import org.labkey.api.view.ViewForm;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.TableKey;
 import org.labkey.api.exp.api.ExpDataTable;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.query.FlowPropertySet;
@@ -34,12 +33,12 @@ public class ProtocolForm extends ViewForm
     public Map<FieldKey, String> getKeywordFieldMap()
     {
         Map<FieldKey, String> options = new LinkedHashMap();
-        options.put(new FieldKey(null, "Name"), "FCS file name");
-        options.put(new FieldKey(new TableKey(null, "Run"), "Name"), "Run name");
+        options.put(FieldKey.fromParts("Name"), "FCS file name");
+        options.put(FieldKey.fromParts("Run", "Name"), "Run name");
         FlowSchema schema = new FlowSchema(getUser(), getContainer());
         ExpDataTable table = schema.createFCSFileTable(null);
         FlowPropertySet fps = new FlowPropertySet(table);
-        TableKey keyKeyword = new TableKey(null, "Keyword");
+        FieldKey keyKeyword = FieldKey.fromParts("Keyword");
         for (String keyword : fps.getKeywordProperties().keySet())
         {
             options.put(new FieldKey(keyKeyword, keyword), keyword);

@@ -13,6 +13,7 @@ import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.XMLUtil;
 import org.apache.xmlbeans.XmlOptions;
 import org.apache.xmlbeans.XmlCursor;
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Node;
 
 import java.util.*;
@@ -157,6 +158,8 @@ public class AttributeSet
             FlowData.Keywords keywords = root.addNewKeywords();
             for (Map.Entry<String, String> entry : _keywords.entrySet())
             {
+                if (StringUtils.isEmpty(entry.getKey()) || StringUtils.isEmpty(entry.getValue()))
+                    continue;
                 Keyword keyword = keywords.addNewKeyword();
                 keyword.setName(entry.getKey());
                 keyword.setValue(entry.getValue());

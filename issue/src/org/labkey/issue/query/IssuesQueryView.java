@@ -83,14 +83,14 @@ public class IssuesQueryView extends QueryView
             List<FieldKey> columns = new ArrayList<FieldKey>();
 
             view.setIsHidden(true);
-            columns.add(FieldKey.fromString("IssueId"));
-            columns.add(FieldKey.fromString("Type"));
-            columns.add(FieldKey.fromString("Area"));
-            columns.add(FieldKey.fromString("Title"));
-            columns.add(FieldKey.fromString("AssignedTo"));
-            columns.add(FieldKey.fromString("Priority"));
-            columns.add(FieldKey.fromString("Status"));
-            columns.add(FieldKey.fromString("Milestone"));
+            columns.add(FieldKey.fromParts("IssueId"));
+            columns.add(FieldKey.fromParts("Type"));
+            columns.add(FieldKey.fromParts("Area"));
+            columns.add(FieldKey.fromParts("Title"));
+            columns.add(FieldKey.fromParts("AssignedTo"));
+            columns.add(FieldKey.fromParts("Priority"));
+            columns.add(FieldKey.fromParts("Status"));
+            columns.add(FieldKey.fromParts("Milestone"));
             view.setColumns(columns);
 
             view.setFilterAndSortFromURL(new ViewURLHelper().addParameter("Issues.sort", "-Milestone,AssignedTo/DisplayName"), "Issues");
@@ -103,14 +103,14 @@ public class IssuesQueryView extends QueryView
             List<FieldKey> columns = new ArrayList<FieldKey>();
 
             view.setIsHidden(true);
-            columns.add(FieldKey.fromString("IssueId"));
-            columns.add(FieldKey.fromString("Type"));
-            columns.add(FieldKey.fromString("Area"));
-            columns.add(FieldKey.fromString("Title"));
-            columns.add(FieldKey.fromString("AssignedTo"));
-            columns.add(FieldKey.fromString("Priority"));
-            columns.add(FieldKey.fromString("Status"));
-            columns.add(FieldKey.fromString("Milestone"));
+            columns.add(FieldKey.fromParts("IssueId"));
+            columns.add(FieldKey.fromParts("Type"));
+            columns.add(FieldKey.fromParts("Area"));
+            columns.add(FieldKey.fromParts("Title"));
+            columns.add(FieldKey.fromParts("AssignedTo"));
+            columns.add(FieldKey.fromParts("Priority"));
+            columns.add(FieldKey.fromParts("Status"));
+            columns.add(FieldKey.fromParts("Milestone"));
             view.setColumns(columns);
 
             view.setFilterAndSortFromURL(new ViewURLHelper().addParameter("Issues.sort", "-Milestone,AssignedTo/DisplayName").
@@ -124,14 +124,14 @@ public class IssuesQueryView extends QueryView
             List<FieldKey> columns = new ArrayList<FieldKey>();
 
             view.setIsHidden(true);
-            columns.add(FieldKey.fromString("IssueId"));
-            columns.add(FieldKey.fromString("Type"));
-            columns.add(FieldKey.fromString("Area"));
-            columns.add(FieldKey.fromString("Title"));
-            columns.add(FieldKey.fromString("AssignedTo"));
-            columns.add(FieldKey.fromString("Priority"));
-            columns.add(FieldKey.fromString("Status"));
-            columns.add(FieldKey.fromString("Milestone"));
+            columns.add(FieldKey.fromParts("IssueId"));
+            columns.add(FieldKey.fromParts("Type"));
+            columns.add(FieldKey.fromParts("Area"));
+            columns.add(FieldKey.fromParts("Title"));
+            columns.add(FieldKey.fromParts("AssignedTo"));
+            columns.add(FieldKey.fromParts("Priority"));
+            columns.add(FieldKey.fromParts("Status"));
+            columns.add(FieldKey.fromParts("Milestone"));
             view.setColumns(columns);
 
             view.setFilterAndSortFromURL(new ViewURLHelper().addParameter("Issues.sort", "-Milestone,AssignedTo/DisplayName").
