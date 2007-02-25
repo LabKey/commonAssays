@@ -299,7 +299,7 @@
       </ns:column>
       <ns:column columnName="Container"/>
       <ns:column columnName="Title">
-        <ns:displayWidth>200</ns:displayWidth>
+        <ns:displayWidth>300</ns:displayWidth>
       </ns:column>
       <ns:column columnName="Body"/>
       <ns:column columnName="RendererType"/>

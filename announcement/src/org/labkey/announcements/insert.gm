@@ -24,18 +24,18 @@ ViewURLHelper insertAction = new ViewURLHelper("announcements", "insert.post", c
 <form method=post enctype="multipart/form-data" action="<%=filter(insertAction.getLocalURIString())%>">
 <input type=hidden name=returnUrl value="<%=filter(returnUrl?returnUrl.getLocalURIString():null)%>">
 <table>
-  <tr><td class='ms-searchform'>Title</td><td class='ms-vb' colspan='2'><input type='text' size='60' name='title' value="<%=filter(form.get("title"))%>"></td></tr><%
+  <tr><td class='ms-searchform'>Title</td><td class='ms-vb' colspan="2"><input type='text' size='60' name='title' value="<%=filter(form.get("title"))%>"></td></tr><%
     if (settings.hasStatus())
     {
-        %><tr><td class='ms-searchform'>Status</td><td class='ms-vb'><%=statusSelect%></td></tr><%
+        %><tr><td class='ms-searchform'>Status</td><td class='ms-vb' colspan="2"><%=statusSelect%></td></tr><%
     }
     if (settings.hasAssignedTo())
     {
-        %><tr><td class='ms-searchform'>Assigned&nbsp;To</td><td class='ms-vb'><%=assignedToSelect%></td></tr><%
+        %><tr><td class='ms-searchform'>Assigned&nbsp;To</td><td class='ms-vb' colspan="2"><%=assignedToSelect%></td></tr><%
     }
     if (settings.hasMemberList())
     {
-        %><tr><td class='ms-searchform'>Members</td><td class='ms-vb'><%=memberList%></td><td><i><%
+        %><tr><td class='ms-searchform'>Members</td><td class="ms-vb"><%=memberList%></td><td style="width:100%;"><i><%
         if (settings.isSecure())
         {
             %> This <%=settings.conversationName.toLowerCase()%> is private; only editors and the users on this list can view it.  These users will also<%
@@ -48,12 +48,12 @@ ViewURLHelper insertAction = new ViewURLHelper("announcements", "insert.post", c
     }
     if (settings.hasExpires())
     {
-        %><tr><td class='ms-searchform'>Expires</td><td class='ms-vb'><input type='text' size='23' name='expires' value='<%=filter(form.get("expires"))%>' ></td><td><i>By default the Expires field is set to one month from today. <br>Expired messages are not deleted, they are just no longer shown on the Portal page.</i></td></tr><%
+        %><tr><td class='ms-searchform'>Expires</td><td class='ms-vb'><input type='text' size='23' name='expires' value='<%=filter(form.get("expires"))%>' ></td><td style="width:100%;"><i>By default the Expires field is set to one month from today. <br>Expired messages are not deleted, they are just no longer shown on the Portal page.</i></td></tr><%
     }
     %><tr><td class='ms-searchform'>Body</td><td class='ms-vb' colspan='2' style="width:100%;"><textarea cols='120' rows='15' name='body' style="width:100%;"><%=filter(form.get("body"))%></textarea></td></tr><%
     if (settings.hasFormatPicker())
     {
-        %><tr><td class="ms-searchform">Render As</td><td class="ms-vb">
+        %><tr><td class="ms-searchform">Render As</td><td class="ms-vb" colspan="2">
         <select name="rendererType"><%
             for (entry in renderers)
             {
@@ -89,9 +89,9 @@ if(allowBroadcast)
 	</tr>
 	<tr><td class="ms-summarycustombody">
         <table>
-        <tr><td>File 1: <input type="file" name="formFiles[0]" size="60" onChange="ShowPathname(this, 'filename1')"></td><td><label class="ms-vb" id="filename1"></label></td></tr>
-		<tr><td>File 2: <input type="file" name="formFiles[1]" size="60" onChange="ShowPathname(this, 'filename2')"></td><td><label class="ms-vb" id="filename2"></label></td></tr>
-		<tr><td>File 3: <input type="file" name="formFiles[2]" size="60" onChange="ShowPathname(this, 'filename3')"></td><td><label class="ms-vb" id="filename3"></label></td></tr>
+        <tr><td>File 1: <input type="file" name="formFiles[0]" size="60" onChange="showPathname(this, 'filename1')"></td><td><label class="ms-vb" id="filename1"></label></td></tr>
+		<tr><td>File 2: <input type="file" name="formFiles[1]" size="60" onChange="showPathname(this, 'filename2')"></td><td><label class="ms-vb" id="filename2"></label></td></tr>
+		<tr><td>File 3: <input type="file" name="formFiles[2]" size="60" onChange="showPathname(this, 'filename3')"></td><td><label class="ms-vb" id="filename3"></label></td></tr>
         </table>
 	</td>
 	</tr>

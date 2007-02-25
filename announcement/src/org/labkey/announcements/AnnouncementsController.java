@@ -573,7 +573,7 @@ public class AnnouncementsController extends ViewController
         if (hasEditorPerm(Group.groupGuests))
             view.addObject("securityWarning", "Warning: guests have been granted editor permissions in this folder.  As a result, any anonymous user will be able to view, create, and respond to posts, regardless of the security setting below.  You may want to change permissions in this folder.");
         else if (hasEditorPerm(Group.groupUsers))
-            view.addObject("securityWarning", "Warning: all users have been granted editor permissions in this folder.  As a result, any logged in user will be able to view, create, and respond to posts, regardless of the security setting below.  You may want to change permissions in this folder.");
+            view.addObject("securityWarning", "Warning: all site users have been granted editor permissions in this folder.  As a result, any logged in user will be able to view, create, and respond to posts, regardless of the security setting below.  You may want to change permissions in this folder.");
 
         _renderInTemplate(view, getContainer(), null, "Customize " + settings.getBoardName(), null);
 
@@ -1374,9 +1374,9 @@ public class AnnouncementsController extends ViewController
             {
                 Announcement bean = getBean();
                 if (null != bean.getEntityId())
-                    _selectedAnnouncement = AnnouncementManager.getAnnouncement(getContainer(), bean.getEntityId());
+                    _selectedAnnouncement = AnnouncementManager.getAnnouncement(getContainer(), bean.getEntityId(), true);  // Need member list
                 if (null == _selectedAnnouncement)
-                    _selectedAnnouncement = AnnouncementManager.getAnnouncement(getContainer(), bean.getRowId());
+                    _selectedAnnouncement = AnnouncementManager.getAnnouncement(getContainer(), bean.getRowId(), AnnouncementManager.INCLUDE_MEMBERLIST);
             }
             return _selectedAnnouncement;
         }
@@ -1914,6 +1914,10 @@ public class AnnouncementsController extends ViewController
             _announcement = ann;
             addObject("announcement", _announcement);
             addObject("form", form);
+
+            String reshowEmailList = (String)form.get("emailList");
+            addObject("memberList", getMemberListTextArea(form.getUser(), _announcement, null != reshowEmailList ? reshowEmailList : null));
+
         }
 
         @Override
@@ -1989,7 +1993,6 @@ public class AnnouncementsController extends ViewController
 
     public static class GroupMembershipDisplayColumn extends SimpleDisplayColumn
     {
-
         private List<User> _memberList;
 
         public GroupMembershipDisplayColumn(Container c)

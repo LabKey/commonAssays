@@ -148,9 +148,9 @@ if(0 < announcement.getResponses().size())
                 if (bean.perm.allowDeleteMessage(r) && !bean.print)
                 {
                     ViewURLHelper deleteSingleAnnouncement = announcementURL(context, "deleteSingleAnnouncement", "entityId", r.getEntityId());
-                    %>[<a href="<%=deleteSingleAnnouncement.getLocalURIString()%>">Delete</a>]<%
+                    %>&nbsp;[<a href="<%=deleteSingleAnnouncement.getLocalURIString()%>">Delete</a>]<%
                 }
-                %><%=DateUtil.formatDateTime(r.getCreated())%></td>
+                %>&nbsp;<%=DateUtil.formatDateTime(r.getCreated())%></td>
             </tr><%
             if (settings.hasMemberList() && !StringUtils.equals(r.getEmailList(),prev.getEmailList()))
             {
