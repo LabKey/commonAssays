@@ -78,15 +78,16 @@ public class FlowQueryView extends QueryView
             {
                 ViewURLHelper urlHide = getViewContext().cloneViewURLHelper();
                 urlHide.deleteParameter(param("showGraphs"));
-                out.write(PageFlowUtil.buttonLink("Hide Graphs", urlHide));
-                ((HttpView) HttpView.currentView()).include(
-                        new JspView(JspLoader.createPage(getViewContext().getRequest(), FlowQueryView.class, "setGraphSize.jsp")), out);
+                out.write(textLink("Hide Graphs", urlHide));
+                JspView view = new JspView(JspLoader.createPage(getViewContext().getRequest(), FlowQueryView.class, "setGraphSize.jsp"));
+                view.setFrame(FrameType.NONE);
+                ((HttpView) HttpView.currentView()).include(view, out);
             }
             else
             {
                 ViewURLHelper urlShow = getViewContext().cloneViewURLHelper();
                 urlShow.addParameter(param("showGraphs"), "true");
-                out.write(PageFlowUtil.buttonLink("Show Graphs", urlShow));
+                out.write(textLink("Show Graphs", urlShow));
                 out.write("&nbsp;");
             }
         }
@@ -121,7 +122,7 @@ public class FlowQueryView extends QueryView
         {
             FlowExperiment[] experiments = FlowExperiment.getAnalyses(getContainer());
             Map<Object, String> availableExperiments = new LinkedHashMap();
-            availableExperiments.put(0, "");
+            availableExperiments.put(0, "<All Analyses>");
             for (FlowExperiment experiment : experiments)
             {
                 availableExperiments.put(experiment.getExperimentId(), experiment.getName());

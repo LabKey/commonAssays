@@ -39,16 +39,6 @@ public class FCS extends FCSHeader
         load(f);
     }
 
-    public int getParameterCount()
-    {
-        return data.getColCount();
-    }
-
-    public int getEventCount()
-    {
-        return data.getRowCount();
-    }
-
     protected void load(InputStream is) throws IOException
     {
         super.load(is);
@@ -65,26 +55,19 @@ public class FCS extends FCSHeader
             // App.setMessage("$BYTEORD not specified assuming big endian.");
         }
 
+        int eventCount = Integer.parseInt(getKeyword("$TOT"));
+        int count = getParameterCount();
+        float[][] data = new float[count][eventCount];
+        DataFrame frame = createDataFrame(data);
         //
         // PARAMETERS
         //
-        int count = Integer.parseInt(getKeyword("$PAR"));
         int[] bitCounts = new int[count];
         boolean packed = false;
-        DataFrame.Field[] fields = new DataFrame.Field[count];
-        ScalingFunction[] translators = new ScalingFunction[count];
         String datatype = getKeyword("$DATATYPE");
         for (int i = 0; i < count; i++)
         {
             String key = "$P" + (i + 1);
-            String name = getKeyword(key + "N");
-            double range = Double.parseDouble(getKeyword(key + "R"));
-            String E = getKeyword(key + "E");
-            double decade = Double.parseDouble(E.substring(0, E.indexOf(',')));
-            final double scale = Double.parseDouble(E.substring(E.indexOf(',') + 1));
-            translators[i] = new TranslationFunction(decade, scale, range);
-            DataFrame.Field f = new DataFrame.Field(i, name, (int) range);
-            f.setDescription(getKeyword(key + "S"));
             if (null != getKeyword(key + "B"))
             {
                 int b = Integer.parseInt(getKeyword(key + "B"));
@@ -101,7 +84,6 @@ public class FCS extends FCSHeader
                     }
                 }
             }
-            fields[i] = f;
         }
 
         //
@@ -111,7 +93,7 @@ public class FCS extends FCSHeader
             byte[] dataBuf = new byte[(dataLast - dataOffset + 1)];
             long read = is.read(dataBuf, 0, dataBuf.length);
             assert read == dataBuf.length;
-            int expectedCount = Integer.parseInt(getKeyword("$TOT"));
+            int expectedCount = eventCount;
             int bitsPerRow = 0;
             for (int i = 0; i < bitCounts.length; i++)
                 bitsPerRow += bitCounts[i];
@@ -120,7 +102,6 @@ public class FCS extends FCSHeader
             {
                 throw new IllegalArgumentException("dataBuf is of length " + dataBuf.length + " expected " + expectedBytes);
             }
-            float[][] data = new float[bitCounts.length][expectedCount];
             if ("L".equals(getKeyword("$MODE")))
             {
                 switch (datatype.charAt(0))
@@ -128,15 +109,15 @@ public class FCS extends FCSHeader
                     case'I':
                         if (packed)
                         {
-                            this.data = readListDataIntegerPacked(dataBuf, fields, bitCounts, data);
+                            readListDataIntegerPacked(dataBuf, bitCounts, data);
                         }
                         else
                         {
-                            this.data = readListDataInteger(dataBuf, fields, bitCounts, data);
+                            readListDataInteger(dataBuf, bitCounts, data);
                         }
                         break;
                     case'F':
-                        this.data = readListDataFloat(dataBuf, fields, bitCounts, data);
+                        readListDataFloat(dataBuf, bitCounts, data);
                         break;
                     case'D':
                     {
@@ -152,11 +133,11 @@ public class FCS extends FCSHeader
             {
                 throw new java.lang.UnsupportedOperationException("only supports ListMode");
             }
-            this.data = this.data.Translate(translators);
+            this.data = frame.translate();
         }
     }
 
-    DataFrame readListDataInteger(byte[] dataBuf, DataFrame.Field[] fields, int[] bitCounts, float[][] data)
+    void readListDataInteger(byte[] dataBuf, int[] bitCounts, float[][] data)
     {
         int ib = 0;
         for (int row = 0; row < data[0].length; row++)
@@ -181,10 +162,9 @@ public class FCS extends FCSHeader
                 data[p][row] = (float) value;
             }
         }
-        return new DataFrame(fields, data);
     }
 
-    DataFrame readListDataIntegerPacked(byte[] dataBuf, DataFrame.Field[] fields, int[] bitCounts, float[][] data)
+    void readListDataIntegerPacked(byte[] dataBuf, int[] bitCounts, float[][] data)
     {
         int bitOffset = 0;
         for (int row = 0; row < data[0].length; row++)
@@ -196,10 +176,9 @@ public class FCS extends FCSHeader
                 data[p][row] = (float) value;
             }
         }
-        return new DataFrame(fields, data);
     }
 
-    DataFrame readListDataFloat(byte[] dataBuf, DataFrame.Field[] fields, int[] bitCounts, float[][] data)
+    void readListDataFloat(byte[] dataBuf, int[] bitCounts, float[][] data)
     {
         int ib = 0;
         for (int row = 0; row < data[0].length; row++)
@@ -220,7 +199,6 @@ public class FCS extends FCSHeader
                 data[p][row] = value;
             }
         }
-        return new DataFrame(fields, data);
     }
 
     protected final int toIntPacked(byte[] bytes, int bitOffset, int bitCount)

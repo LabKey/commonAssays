@@ -61,7 +61,6 @@ function setXAxis(el)
 function setYAxis(el)
 {
     g_graphOptions.yAxis = getValue(el);
-    g_graphOptions.intervalGate == !!g_graphOptions.yAxis;
     updateAll();
 }
 
@@ -230,7 +229,7 @@ function setPoints(pts)
     g_graphOptions.dirty = true;
     if (pts.length == 0)
     {
-        g_graphOptions.intervalGate = !g_graphOptions.yAxis;
+        g_graphOptions.intervalGate = false;
     }
     updateGateEditor();
 }

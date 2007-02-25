@@ -90,7 +90,7 @@ abstract public class ScriptJob extends PipelineJob
     RunData _runData;
     transient FileWriter _logWriter;
     List<String> _pendingRunLSIDs = new ArrayList();
-    List<String> _processedRunLSIDs = Collections.synchronizedList(new ArrayList());
+    private final Map<FlowProtocolStep, List<String>> _processedRunLSIDs = new HashMap();
     KeywordsHandler _runHandler;
     CompensationCalculationHandler _compensationCalculationHandler;
     AnalysisHandler _analysisHandler;
@@ -226,7 +226,7 @@ abstract public class ScriptJob extends PipelineJob
             addError(null, null, e.getMessage());
         }
         finishExperimentRun(doc.getExperimentArchive(), runElement);
-        importRuns(doc, new File(srcRun.getPath()), workingDirectory);
+        importRuns(doc, new File(srcRun.getPath()), workingDirectory, handler._step);
 
         deleteAnalysisDirectory(workingDirectory);
         return FlowRun.fromLSID(runElement.getAbout());
@@ -274,9 +274,22 @@ abstract public class ScriptJob extends PipelineJob
         return PageFlowUtil.getFileContentsAsString(getLogFile());
     }
 
-    public String[] getProcessedRunLSIDs()
+    public Map<FlowProtocolStep, String[]> getProcessedRunLSIDs()
     {
-        return _processedRunLSIDs.toArray(new String[0]);
+        TreeMap<FlowProtocolStep, String[]> ret = new TreeMap<FlowProtocolStep, String[]>(new Comparator<FlowProtocolStep>() {
+            public int compare(FlowProtocolStep o1, FlowProtocolStep o2)
+            {
+                return o1.getDefaultActionSequence() - o2.getDefaultActionSequence();
+            }
+        });
+        synchronized(_processedRunLSIDs)
+        {
+            for (Map.Entry<FlowProtocolStep, List<String>> entry : _processedRunLSIDs.entrySet())
+            {
+                ret.put(entry.getKey(), entry.getValue().toArray(new String[0]));
+            }
+        }
+        return ret;
     }
 
     public int getElapsedTime()
@@ -551,7 +564,7 @@ abstract public class ScriptJob extends PipelineJob
         }
     }
 
-    public void importRuns(ExperimentArchiveDocument xardoc, File root, File workingDirectory) throws Exception
+    public void importRuns(ExperimentArchiveDocument xardoc, File root, File workingDirectory, FlowProtocolStep step) throws Exception
     {
         if (xardoc.getExperimentArchive().getExperimentRuns().getExperimentRunArray().length > 0)
         {
@@ -570,8 +583,22 @@ abstract public class ScriptJob extends PipelineJob
             }
         }
 
-        _processedRunLSIDs.addAll(_pendingRunLSIDs);
+        addRunsLSIDs(step, _pendingRunLSIDs);
         _pendingRunLSIDs.clear();
+    }
+
+    private void addRunsLSIDs(FlowProtocolStep step, List<String> lsids)
+    {
+        synchronized(_processedRunLSIDs)
+        {
+            List<String> list = _processedRunLSIDs.get(step);
+            if (list == null)
+            {
+                list = new ArrayList();
+                _processedRunLSIDs.put(step, list);
+            }
+            list.addAll(lsids);
+        }
     }
 
     public void addRunOutput(String lsid, InputRole role)

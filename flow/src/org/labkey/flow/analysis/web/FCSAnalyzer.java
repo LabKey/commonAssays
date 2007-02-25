@@ -173,10 +173,17 @@ public class FCSAnalyzer
         return ret;
     }
 
-    public PlotInfo generateDesignGraph(URI uri, CompensationMatrix comp, PopulationSet group, GraphSpec spec, int width, int height) throws IOException
+    public PlotInfo generateDesignGraph(URI uri, CompensationMatrix comp, PopulationSet group, GraphSpec spec, int width, int height, boolean useEmptyDataset) throws IOException
     {
         Map<SubsetSpec, Subset> subsetMap = new HashMap();
-        subsetMap.put(null, getSubset(uri, comp));
+        if (useEmptyDataset)
+        {
+            subsetMap.put(null, getEmptySubset(uri, comp));
+        }
+        else
+        {
+            subsetMap.put(null, getSubset(uri, comp));
+        }
         Subset subset = getSubset(subsetMap, group, spec.getSubset());
         ValueAxis domainAxis, rangeAxis;
         JFreeChart chart;
@@ -237,6 +244,17 @@ public class FCSAnalyzer
     {
         FCS fcs = _cache.readFCS(uri);
         Subset subset = new Subset(fcs);
+        if (comp != null && !comp.isSingular())
+        {
+            subset = subset.apply(comp);
+        }
+        return subset;
+    }
+
+    protected Subset getEmptySubset(URI uri, CompensationMatrix comp) throws IOException
+    {
+        FCSHeader header = _cache.readFCSHeader(uri);
+        Subset subset = new Subset(null, null, header, header.createEmptyDataFrame());
         if (comp != null && !comp.isSingular())
         {
             subset = subset.apply(comp);

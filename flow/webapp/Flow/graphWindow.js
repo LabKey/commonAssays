@@ -159,7 +159,7 @@ function polygon()
 function polygonPoint(index)
 {
     var ret = {};
-    var isInterval = parent.g_graphOptions.intervalGate;
+    var isInterval = parent.g_graphOptions.intervalGate || !parent.g_graphOptions.yAxis;
     ret.index = index;
     function getOffset(event)
     {
@@ -431,6 +431,7 @@ function adjustedPow10(val)
         neg = true;
         val = - val;
     }
+    
     var ret = Math.pow(10, val);
     if (ret < 10)
     {

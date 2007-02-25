@@ -11,7 +11,6 @@ import org.labkey.api.view.ViewURLHelper;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 

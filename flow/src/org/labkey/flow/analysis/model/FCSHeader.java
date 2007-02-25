@@ -16,9 +16,11 @@ public class FCSHeader
     int dataOffset;
     int textOffset;
     int textLast;
+    int _parameterCount;
     char chDelimiter;
     String version;
     File _file;
+
 
     public FCSHeader(File file) throws IOException
     {
@@ -179,5 +181,36 @@ public class FCSHeader
             }
         }
         is.skip(dataOffset - cbRead);
+        _parameterCount = Integer.parseInt(getKeyword("$PAR"));
+    }
+
+    int getParameterCount()
+    {
+        return _parameterCount;
+    }
+
+    protected DataFrame createDataFrame(float[][] data)
+    {
+        int count = getParameterCount();
+        DataFrame.Field[] fields = new DataFrame.Field[count];
+        for (int i = 0; i < count; i++)
+        {
+            String key = "$P" + (i + 1);
+            String name = getKeyword(key + "N");
+            double range = Double.parseDouble(getKeyword(key + "R"));
+            String E = getKeyword(key + "E");
+            double decade = Double.parseDouble(E.substring(0, E.indexOf(',')));
+            final double scale = Double.parseDouble(E.substring(E.indexOf(',') + 1));
+            DataFrame.Field f = new DataFrame.Field(i, name, (int) range);
+            f.setDescription(getKeyword(key + "S"));
+            f.setScalingFunction(new TranslationFunction(decade, scale, range));
+            fields[i] = f;
+        }
+        return new DataFrame(fields, data);
+    }
+
+    public DataFrame createEmptyDataFrame()
+    {
+        return createDataFrame(new float[getParameterCount()][0]);
     }
 }

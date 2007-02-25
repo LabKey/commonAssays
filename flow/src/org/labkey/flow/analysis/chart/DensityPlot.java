@@ -157,7 +157,7 @@ public class DensityPlot extends ContourPlot
         {
             for (int row = 0; row < arrY.length; row ++)
             {
-                int index = col * arrX.length + row;
+                int index = col * arrY.length + row;
                 double z = data.getZValue(0, index);
                 assert arrY[row] == data.getYValue(0, index);
                 assert arrX[col] == data.getXValue(0, index);

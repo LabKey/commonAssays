@@ -7,11 +7,11 @@ import java.util.BitSet;
 public class Subset
 {
     String _name;
-    FCS _fcs;
+    FCSHeader _fcs;
     DataFrame _data;
     Subset _parent;
 
-    public Subset(Subset parent, String name, FCS fcs, DataFrame data)
+    public Subset(Subset parent, String name, FCSHeader fcs, DataFrame data)
     {
         _parent = parent;
         _name = name;
@@ -59,7 +59,7 @@ public class Subset
         return apply(name, bits);
     }
 
-    public FCS getFCS()
+    public FCSHeader getFCSHeader()
     {
         return _fcs;
     }

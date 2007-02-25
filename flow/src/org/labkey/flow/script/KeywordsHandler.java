@@ -154,7 +154,7 @@ public class KeywordsHandler extends BaseHandler
             _job.addRunOutput(well.getAbout(), InputRole.FCSFile);
         }
         _job.finishExperimentRun(xar, run);
-        _job.importRuns(xarDoc, directory, runDirectory);
+        _job.importRuns(xarDoc, directory, runDirectory, FlowProtocolStep.keywords);
         _job.deleteAnalysisDirectory(runDirectory);
     }
 

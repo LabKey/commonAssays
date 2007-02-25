@@ -4,16 +4,10 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ColorBar;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.renderer.xy.XYDotRenderer;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.chart.renderer.xy.XYBarRenderer;
-import org.jfree.data.contour.ContourDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.Range;
-import org.jfree.data.statistics.HistogramDataset;
 import org.labkey.flow.analysis.model.*;
-import org.labkey.flow.analysis.data.NumberArray;
 
 import java.awt.*;
 
@@ -25,19 +19,49 @@ public class PlotFactory
     public static int MAX_HISTOGRAM_BUCKETS = Integer.getInteger("flow.maxchannels", 512).intValue();
     public static final Color COLOR_GATE = Color.RED;
 
+    static public double adjustedPow(double base, double exponent)
+    {
+        boolean neg = false;
+        if (exponent < 0)
+        {
+            neg = true;
+            exponent = - exponent;
+            }
+        double ret = Math.pow(base, exponent);
+        if (ret < 10)
+        {
+            ret = 10 * (ret - 1) / 9;
+        }
+        if (neg)
+        {
+            ret = -ret;
+        }
+        return ret;        
+    }
+
+    /**
+     * Return a set of buckets usable for binning a dataset.
+     * @param field The field in question
+     * @param fLogarithmic whether the buckets should be logarithmically spaced
+     * @param bucketCount The maximum number of buckets
+     * @return
+     */
     static public double[] getPossibleValues(DataFrame.Field field, boolean fLogarithmic, int bucketCount)
     {
         int range = field.getRange();
         int cBuckets = Math.min(field.getRange(), bucketCount);
-        double[] ret = new double[cBuckets];
+        double offset = 0;
         ScalingFunction scalingFunction = field.getScalingFunction();
         boolean fLogRawValues = fLogarithmic && (scalingFunction == null || !scalingFunction.isLogarithmic());
+        double[] ret = new double[cBuckets];
 
-        for (int i = 0; i < cBuckets; i ++)
+        int i = 0;
+
+        for (; i < cBuckets; i ++)
         {
             if (fLogRawValues)
             {
-                ret[i] = Math.pow(range, ((double) i) / cBuckets);
+                ret[i] = Math.pow(range, ((double) i + offset) / (cBuckets + offset));
             }
             else
             {
@@ -47,6 +71,12 @@ public class PlotFactory
             if (scalingFunction != null)
             {
                 ret[i] = scalingFunction.translate(ret[i]);
+                if (fLogRawValues && ret[i] < 10)
+                {
+                    // This compensates for the adjustedLog10 in LogarithmicAxis:
+                    // buckets will be evenly spaced along axis.
+                    ret[i] = 10 * (ret[i] - 1) / 9;
+                }
             }
         }
         return ret;
@@ -59,7 +89,7 @@ public class PlotFactory
 
     static protected boolean displayLogarthmic(Subset subset, DataFrame.Field field)
     {
-        String strDisplay = subset.getFCS().getKeyword("P" + (field.getOrigIndex() + 1) + "DISPLAY");
+        String strDisplay = subset.getFCSHeader().getKeyword("P" + (field.getOrigIndex() + 1) + "DISPLAY");
         if (strDisplay != null)
         {
             if ("LOG".equals(strDisplay))
@@ -73,37 +103,11 @@ public class PlotFactory
         return true;
     }
 
-    private static class FlowLogarithmicAxis extends LogarithmicAxis
-    {
-        public FlowLogarithmicAxis(String label)
-        {
-            super(label);
-        }
-
-        protected String makeTickLabel(double val)
-        {
-            double tester = val;
-            int power = 0;
-            while (tester >= 10)
-            {
-                tester = tester / 10;
-                power++;
-            }
-            if (tester == 1)
-                return "10^" + power;
-            else
-                return "";
-        }
-    }
-
     static protected ValueAxis getValueAxis(Subset subset, String name, DataFrame.Field field)
     {
         if (!displayLogarthmic(subset, field))
             return new NumberAxis(name);
-        LogarithmicAxis ret = new FlowLogarithmicAxis(name);
-        ret.setAllowNegativesFlag(true);
-        ret.setLog10TickLabelsFlag(true);
-        return ret;
+        return new FlowLogarithmicAxis(name);
     }
 
     static public DataFrame.Field getField(DataFrame data, String name)
@@ -150,7 +154,7 @@ public class PlotFactory
     {
         DataFrame.Field field = subset.getDataFrame().getField(fieldName);
         boolean compensated = field.getOrigIndex() != field.getIndex();
-        return getLabel(subset.getFCS(), field.getOrigIndex(), compensated);
+        return getLabel(subset.getFCSHeader(), field.getOrigIndex(), compensated);
     }
 
     static public DensityPlot createContourPlot(Subset subset, String domainAxis, String rangeAxis)
@@ -195,18 +199,12 @@ public class PlotFactory
         DataFrame.Field field = getField(data, axis);
         double[] bins = getPossibleValues(subset, field, MAX_HISTOGRAM_BUCKETS);
         HistDataset dataset = new HistDataset(bins, data.getColumn(axis));
-        HistRenderer renderer = new HistRenderer();
-        renderer.setSeriesVisibleInLegend(false);
-        renderer.setPaint(Color.BLACK);
-        
+
         NumberAxis xAxis;
 
         if (displayLogarthmic(subset, field))
         {
-            LogarithmicAxis logxAxis = new FlowLogarithmicAxis(getLabel(subset, axis));
-            logxAxis.setLog10TickLabelsFlag(true);
-            xAxis = logxAxis;
-
+            xAxis = new FlowLogarithmicAxis(getLabel(subset, axis));
         }
         else
         {
@@ -220,7 +218,9 @@ public class PlotFactory
             yMax = Math.max(dataset.getY(0, i), yMax);
         }
         yAxis.setRange(0, yMax * 1.1);
-        HistPlot plot = new HistPlot(dataset, xAxis, yAxis, renderer);
+        HistPlot plot = new HistPlot(dataset, xAxis, yAxis);
+        plot.setRangeGridlinesVisible(false);
+        plot.setDomainGridlinesVisible(false);
         return plot;
     }
 }

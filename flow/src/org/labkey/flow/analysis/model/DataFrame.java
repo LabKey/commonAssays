@@ -83,14 +83,14 @@ public class DataFrame
     }
 
 
-    public DataFrame Translate(ScalingFunction[] translate)
+    public DataFrame translate()
     {
         Field[] fields = new Field[getColCount()];
         NumberArray[] out = new NumberArray[data.length];
 
         for (int p = 0; p < getColCount(); p++)
         {
-            ScalingFunction fn = translate[p];
+            ScalingFunction fn = getField(p).getScalingFunction();
             NumberArray from = data[p];
 
             if (null == fn)

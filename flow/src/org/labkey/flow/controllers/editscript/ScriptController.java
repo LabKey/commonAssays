@@ -929,9 +929,9 @@ public class ScriptController extends BaseFlowController
     @Jpf.Action
     protected Forward graphWindow(GraphForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_UPDATE);
+        requiresPermission(ACL.PERM_READ);
         GraphWindowPage page = (GraphWindowPage) getPage("graphWindow.jsp", form);
-        page.plotInfo = getPlotInfo(form);
+        page.plotInfo = getPlotInfo(form, true);
         getView().include(new JspView(page));
         return null;
     }
@@ -961,8 +961,8 @@ public class ScriptController extends BaseFlowController
     @Jpf.Action
     protected Forward graphImage(GraphForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_UPDATE);
-        PlotInfo info = getPlotInfo(form);
+        requiresPermission(ACL.PERM_READ);
+        PlotInfo info = getPlotInfo(form, false);
         BufferedImage image = info.getImage();
         Gate gate = gateFromPoints(form.xAxis, form.yAxis, form.ptX, form.ptY, form.open);
         image = addSelection(image, info, gate, !form.open);
@@ -1009,21 +1009,25 @@ public class ScriptController extends BaseFlowController
         int wellId;
         int height;
         int width;
+        boolean emptyDataset;
 
-        public GraphCacheKey(GraphSpec graph, FlowWell well, PopulationSet analysis, int width, int height)
+        public GraphCacheKey(GraphSpec graph, FlowWell well, PopulationSet analysis, int width, int height, boolean emptyDataset)
         {
             this.graph = graph;
             this.wellId = well.getWellId();
             this.width = width;
             this.height = height;
+            this.emptyDataset = emptyDataset;
         }
 
-        public boolean equals(Object o)
+        public boolean isCompatibleWith(Object o)
         {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
             final GraphCacheKey that = (GraphCacheKey) o;
+            if (!this.emptyDataset && that.emptyDataset)
+                return false;
 
             if (height != that.height) return false;
             if (wellId != that.wellId) return false;
@@ -1046,7 +1050,7 @@ public class ScriptController extends BaseFlowController
     transient GraphCacheKey _cacheKey;
     transient PlotInfo _plotCache;
 
-    protected PlotInfo getPlotInfo(GraphForm form) throws Exception
+    protected PlotInfo getPlotInfo(GraphForm form, boolean useEmptySubset) throws Exception
     {
         GraphSpec graphSpec;
         if (StringUtils.isEmpty(form.yAxis))
@@ -1059,8 +1063,8 @@ public class ScriptController extends BaseFlowController
         }
         PopulationSet group = form.getAnalysis();
         FlowWell well = form.getWell();
-        GraphCacheKey key = new GraphCacheKey(graphSpec, well, group, form.width, form.height);
-        if (key.equals(_cacheKey))
+        GraphCacheKey key = new GraphCacheKey(graphSpec, well, group, form.width, form.height, useEmptySubset);
+        if (key.isCompatibleWith(_cacheKey))
         {
             return _plotCache;
         }
@@ -1069,7 +1073,7 @@ public class ScriptController extends BaseFlowController
         {
             comp = form.getCompensationMatrix().getCompensationMatrix();
         }
-        PlotInfo ret = FCSAnalyzer.get().generateDesignGraph(FlowAnalyzer.getFCSUri(well), comp, group, graphSpec, form.width, form.height);
+        PlotInfo ret = FCSAnalyzer.get().generateDesignGraph(FlowAnalyzer.getFCSUri(well), comp, group, graphSpec, form.width, form.height, useEmptySubset);
         if (ret != null)
         {
             _cacheKey = key;

@@ -27,7 +27,7 @@ public class FCSViewer
         {
         CompensationMatrix comp = new CompensationMatrix(new File(uriCompensationMatrix));
         DataFrame data = comp.getCompensatedData(_subset.getDataFrame(), false, false);
-        _subset = new Subset(_subset.getParent(), _subset.getName(), _subset.getFCS(), data);
+        _subset = new Subset(_subset.getParent(), _subset.getName(), _subset.getFCSHeader(), data);
         }
     public void writeValues(Writer writer) throws IOException
         {

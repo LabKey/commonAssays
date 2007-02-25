@@ -81,9 +81,9 @@ flow/src/org/labkey/flow/analysis/chart/DensityColorBar.java -text
 flow/src/org/labkey/flow/analysis/chart/DensityColorPalette.java -text
 flow/src/org/labkey/flow/analysis/chart/DensityDataset.java -text
 flow/src/org/labkey/flow/analysis/chart/DensityPlot.java -text
+flow/src/org/labkey/flow/analysis/chart/FlowLogarithmicAxis.java -text
 flow/src/org/labkey/flow/analysis/chart/HistDataset.java -text
 flow/src/org/labkey/flow/analysis/chart/HistPlot.java -text
-flow/src/org/labkey/flow/analysis/chart/HistRenderer.java -text
 flow/src/org/labkey/flow/analysis/chart/PlotFactory.java -text
 flow/src/org/labkey/flow/analysis/data/DoubleArray.java -text
 flow/src/org/labkey/flow/analysis/data/FloatArray.java -text
@@ -284,6 +284,7 @@ flow/webapp/Flow/editGates.js -text
 flow/webapp/Flow/editScript.js -text
 flow/webapp/Flow/flagAnalysisScript.gif -text
 flow/webapp/Flow/flagCompensationControl.gif -text
+flow/webapp/Flow/flagCompensationMatrix.gif -text
 flow/webapp/Flow/flagError.gif -text
 flow/webapp/Flow/flagFCSAnalysis.gif -text
 flow/webapp/Flow/flagFCSFile.gif -text
@@ -303,6 +304,7 @@ flow/webapp/Flow/scripts/sql[!!-~]server/obsolete/flow-1.53-1.54.sql -text
 flow/webapp/Flow/statisticColumn.png -text
 flow/webapp/Flow/unflagAnalysisScript.gif -text
 flow/webapp/Flow/unflagCompensationControl.gif -text
+flow/webapp/Flow/unflagCompensationMatrix.gif -text
 flow/webapp/Flow/unflagFCSAnalysis.gif -text
 flow/webapp/Flow/unflagFCSFile.gif -text
 flow/webapp/Flow/unflagSample.gif -text

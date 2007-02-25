@@ -16,13 +16,13 @@ import java.util.Set;
 
 public enum FlowTableType
 {
-    Runs("Used whenever a list of runs is displayed.", false),
-    CompensationMatrices("Shows compensation matrix values", false),
-    FCSFiles("Shows FCS data files", false),
-    FCSAnalyses("Shows analyses of FCS Files", false),
-    CompensationControls("Shows statistics of compensation controls", false),
-    AnalysisScripts("Shows analysis scripts", true),
-    Analyses("Shows analyses", true),
+    Runs("The flow 'Runs' table shows experiment runs in the three steps of analysis: read Keywords, calculate Compensation, and perform Analysis.", false),
+    CompensationMatrices("The 'CompensationMatrices' table shows compensation matrices and their spill values.", false),
+    FCSFiles("The 'FCSFiles' table shows FCS files and their keywords", false),
+    FCSAnalyses("The 'FCSAnalyses' table shows statistics and graphs of FCS files", false),
+    CompensationControls("The 'CompensationControls' table shows statistics and graphs of FCS files that were used to calculate a compensaton matrix.", false),
+    AnalysisScripts("An analysis script contains the rules for calculating the compensation matrix for a run, as well as gates to apply, statistics to calculate, and graphs to draw.", true),
+    Analyses("When a flow runs are analyzed, the results are grouped in an analysis.", true),
     ;
     final String _description;
     final boolean _hidden;

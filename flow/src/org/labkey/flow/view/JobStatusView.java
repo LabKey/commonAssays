@@ -2,6 +2,7 @@ package org.labkey.flow.view;
 
 import org.apache.log4j.Logger;
 import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.script.ScriptJob;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.HttpView;
@@ -73,22 +74,30 @@ public class JobStatusView extends HttpView
         out.write("</code></div>");
         if (_job != null)
         {
-            String[] runLSIDs = _job.getProcessedRunLSIDs();
-            out.write(runLSIDs.length + " runs have been processed.");
-            if (runLSIDs.length > 0)
+            Map<FlowProtocolStep, String[]> processedRuns = _job.getProcessedRunLSIDs();
+            if (!processedRuns.isEmpty())
             {
-                try
+                out.write("Completed runs:<br>");
+                for (Map.Entry<FlowProtocolStep, String[]> entry : processedRuns.entrySet())
                 {
-                    FlowRun lastRun = FlowRun.fromLSID(runLSIDs[runLSIDs.length - 1]);
-
-                    out.write("<br><a href=\"" + lastRun.urlShow() + "\">Last run processed</a>");
-                }
-                catch (Throwable t)
-                {
-                    _log.error("Error", t);
+                    out.write("<p>" + entry.getKey().getLabel() + "<br>");
+                    for (String lsid : entry.getValue())
+                    {
+                        FlowRun run = FlowRun.fromLSID(lsid);
+                        if (run == null)
+                        {
+                            out.write("Run '" + PageFlowUtil.filter(lsid) + "' not found");
+                        }
+                        else
+                        {
+                            out.write("<a href=\"" + PageFlowUtil.filter(run.urlShow()) + "\">");
+                            out.write(PageFlowUtil.filter(run.getLabel()));
+                            out.write("</a><br>");
+                        }
+                    }
+                    out.write("</p>");
                 }
             }
-
             ViewURLHelper cancelURL = new ViewURLHelper("Flow", "cancelJob", getViewContext().getContainer());
             cancelURL.addParameter("statusFile", _psf.getFilePath());
             out.write("<br>" + PageFlowUtil.buttonLink("Cancel Job", cancelURL));

@@ -2,7 +2,7 @@ package org.labkey.flow.analysis.web;
 
 import org.labkey.flow.analysis.model.Subset;
 import org.labkey.flow.analysis.model.FlowException;
-import org.labkey.flow.analysis.data.NumberArray;
+import org.labkey.flow.analysis.model.FCS;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -154,7 +154,7 @@ public class StatisticSpec implements Serializable, Comparable
             case Count:
                 return subset.getDataFrame().getRowCount();
             case Frequency:
-                return getFrequency(new Subset(subset.getFCS()), subset);
+                return getFrequency(new Subset((FCS) subset.getFCSHeader()), subset);
             case Freq_Of_Parent:
                 return getFrequency(subset.getParent(), subset);
             case Freq_Of_Grandparent:

@@ -178,6 +178,10 @@ public class WellController extends BaseFlowController
         requiresPermission(ACL.PERM_READ);
         GraphSpec graph = new GraphSpec(getRequest().getParameter("graph"));
         FCSAnalyzer.GraphResult res = FlowAnalyzer.generateGraph(form.getWell(), form.getScript(), FlowProtocolStep.fromActionSequence(form.getActionSequence()), form.getCompensationMatrix(), graph);
+        if (res.exception != null)
+        {
+            _log.error("Error generating graph", res.exception);
+        }
         return streamBytes(res.bytes, "image/png", 0);
     }
 

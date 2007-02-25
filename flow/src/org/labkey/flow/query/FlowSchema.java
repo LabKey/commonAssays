@@ -432,6 +432,21 @@ public class FlowSchema extends UserSchema
 
     public FlowQuerySettings getSettings(Portal.WebPart webPart, ViewURLHelper url)
     {
-        return new FlowQuerySettings(webPart, url);
+        return new FlowQuerySettings(webPart, url, getUser());
+    }
+
+    public QueryDefinition getQueryDefForTable(String name)
+    {
+        QueryDefinition ret = super.getQueryDefForTable(name);
+        try
+        {
+            FlowTableType type = FlowTableType.valueOf(name);
+            ret.setDescription(type.getDescription());
+        }
+        catch(IllegalArgumentException iae)
+        {
+            // ignore
+        }
+        return ret;
     }
 }

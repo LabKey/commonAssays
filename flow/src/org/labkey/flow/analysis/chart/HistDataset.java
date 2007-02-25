@@ -3,6 +3,10 @@ package org.labkey.flow.analysis.chart;
 import org.jfree.data.xy.AbstractIntervalXYDataset;
 import org.labkey.flow.analysis.data.NumberArray;
 
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Map;
+
 public class HistDataset extends AbstractIntervalXYDataset
 {
     double[] _xValues;
