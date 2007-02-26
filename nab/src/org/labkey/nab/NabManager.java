@@ -47,7 +47,7 @@ public class NabManager
         ExperimentDate(PropertyType.STRING),
         ExperimentPerformer(PropertyType.STRING),
         ExperimentId(PropertyType.STRING),
-        FileId(PropertyType.INTEGER),
+        FileId(PropertyType.STRING),
         IncubationTime(PropertyType.STRING),
         PlateNumber(PropertyType.STRING),
         Cutoffs(PropertyType.STRING),

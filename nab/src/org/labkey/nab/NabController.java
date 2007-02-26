@@ -116,7 +116,7 @@ public class NabController extends ViewController
     protected Forward runs() throws Exception
     {
         requiresPermission(ACL.PERM_READ);
-        PlateQueryView previousRuns = PlateService.get().getPlateGridView(getViewContext(), NabManager.DEFAULT_TEMPLATE_NAME);
+        PlateQueryView previousRuns = PlateService.get().getPlateGridView(getViewContext());
 
         List<ActionButton> buttons = new ArrayList<ActionButton>();
 
@@ -258,7 +258,8 @@ public class NabController extends ViewController
         {
             SimpleFilter filter = new SimpleFilter("Property/DataFile", assay.getPlate().getProperty("DataFile"));
             filter.addCondition("RowId", assay.getRunRowId(), CompareType.NEQ);
-            PlateQueryView duplicateDataFileView = PlateService.get().getPlateGridView(context, NabManager.DEFAULT_TEMPLATE_NAME, filter);
+            PlateQueryView duplicateDataFileView = PlateService.get().getPlateGridView(context, filter);
+            duplicateDataFileView.setShowExportButtons(false);
             ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
             selectButton.setDisplayPermission(ACL.PERM_INSERT);
             List<ActionButton> buttons = new ArrayList<ActionButton>();
@@ -339,6 +340,8 @@ public class NabController extends ViewController
     protected Forward display(RenderAssayForm assayForm) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
+        if (assayForm.getRowId() < 0)
+            return new ViewForward(getViewURLHelper().relativeUrl("begin", null));
         return renderDetailPage(getCachedAssay(assayForm.getRowId()), assayForm.isNewRun(), assayForm.isPrint());
     }
 
@@ -629,7 +632,7 @@ public class NabController extends ViewController
             if (!sampleProperties.isEmpty())
             {
                 List<String> errors = GenericAssayService.get().publishAssayData(getUser(), targetContainer,
-                        NabManager.DEFAULT_TEMPLATE_NAME, sampleProperties.toArray(new Map[sampleProperties.size()]),
+                        "NAB", sampleProperties.toArray(new Map[sampleProperties.size()]),
                         NabManager.get().getPropertyTypes(plates),
                         NabManager.PlateProperty.VirusId.name());
                 if (errors != null && !errors.isEmpty())
@@ -1014,7 +1017,7 @@ public class NabController extends ViewController
     protected Forward sampleList() throws Exception
     {
         requiresPermission(ACL.PERM_READ);
-        PlateQueryView queryView = PlateService.get().getWellGroupGridView(getViewContext(), NabManager.DEFAULT_TEMPLATE_NAME, WellGroup.Type.SPECIMEN);
+        PlateQueryView queryView = PlateService.get().getWellGroupGridView(getViewContext(), WellGroup.Type.SPECIMEN);
 
         List<ActionButton> buttons = new ArrayList<ActionButton>();
         ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
@@ -1375,7 +1378,7 @@ public class NabController extends ViewController
 
     public static class RowIdForm extends FormData
     {
-        private int _rowId;
+        private int _rowId = -1;
 
         public int getRowId()
         {
