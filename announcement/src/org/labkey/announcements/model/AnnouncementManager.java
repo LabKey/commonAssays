@@ -339,7 +339,7 @@ public class AnnouncementManager
     public static void updateAnnouncement(User user, Announcement update) throws SQLException
     {
         update.beforeUpdate(user);
-        Table.update(user, _comm.getTableInfoAnnouncements(), update, new Integer(update.getRowId()), null);
+        Table.update(user, _comm.getTableInfoAnnouncements(), update, update.getRowId(), null);
     }
 
 
@@ -353,10 +353,15 @@ public class AnnouncementManager
     public static void deleteAnnouncement(Container c, int rowId) throws SQLException
     {
         DbSchema schema = _comm.getSchema();
+        boolean startedTransaction = false;
 
         try
         {
-            schema.getScope().beginTransaction();
+            if (!schema.getScope().isTransactionActive())
+            {
+                schema.getScope().beginTransaction();
+                startedTransaction = true;
+            }
             Announcement ann = getAnnouncement(c, rowId, INCLUDE_RESPONSES);
             if (ann != null)
             {
@@ -373,14 +378,17 @@ public class AnnouncementManager
                     deleteAnnouncement(response);
                 }
             }
-            schema.getScope().commitTransaction();
+
+            if (startedTransaction)
+                schema.getScope().commitTransaction();
         }
         finally
         {
-            if (schema.getScope().isTransactionActive())
+            if (startedTransaction && schema.getScope().isTransactionActive())
                 schema.getScope().rollbackTransaction();
         }
     }
+    
 
     public static void deleteUserFromAllMemberLists(User user) throws SQLException
     {

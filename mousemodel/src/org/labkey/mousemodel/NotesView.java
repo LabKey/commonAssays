@@ -12,6 +12,7 @@ import javax.servlet.ServletException;
  * User: jeckels
  * Date: Nov 18, 2005
  */
+@Deprecated
 public class NotesView extends GroovyView
 {
     private Container _container;

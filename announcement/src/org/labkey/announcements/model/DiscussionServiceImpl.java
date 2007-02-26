@@ -3,10 +3,7 @@ package org.labkey.announcements.model;
 import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.announcements.Announcement;
 import org.labkey.api.view.*;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.Sort;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.*;
 import org.labkey.api.security.User;
 import org.labkey.api.util.AppProps;
 import org.labkey.announcements.AnnouncementsController;
@@ -18,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.URISyntaxException;
 import java.io.PrintWriter;
 import java.util.Map;
+import java.sql.SQLException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -153,6 +151,41 @@ public class DiscussionServiceImpl implements DiscussionService.Service
             if (discussionView == null)
                 return pickerView;
             return new VBox(pickerView, new ThreadWrapper("Discussion", discussionView, respondView));
+        }
+    }
+
+
+    public void deleteDiscussions(Container c, String identifier, User user)
+    {
+        Announcement[] anns = getDiscussions(c, identifier, user);
+        for (Announcement ann : anns)
+        {
+            try
+            {
+                AnnouncementManager.deleteAnnouncement(c, ann.getRowId());
+            }
+            catch (SQLException x)
+            {
+                throw new RuntimeSQLException(x);
+            }
+        }
+    }
+
+
+    public void unlinkDiscussions(Container c, String identifier, User user)
+    {
+        Announcement[] anns = getDiscussions(c, identifier, user);
+        for (Announcement ann : anns)
+        {
+            try
+            {
+                ann.setDiscussionSrcURL(null);
+                AnnouncementManager.updateAnnouncement(user, ann);
+            }
+            catch (SQLException x)
+            {
+                throw new RuntimeSQLException(x);
+            }
         }
     }
 
