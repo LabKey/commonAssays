@@ -101,7 +101,7 @@ public class DiscussionServiceImpl implements DiscussionService.Service
     {
         int discussionId = 0;
         try {discussionId = Integer.parseInt((String)context.get("discussion.id"));} catch (Exception x) {/* */}
-
+        pageURL = pageURL.clone();
         // clean up discussion parameters (in case caller didn't)
         pageURL.deleteScopeParameters("discussion");
 
