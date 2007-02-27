@@ -56,6 +56,7 @@ import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
 import org.labkey.ms2.query.SequencesTableInfo;
+import org.labkey.ms2.search.ProteinSearchWebPart;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -3924,7 +3925,27 @@ public class MS2Controller extends ViewController
 
         groupsView.setTitle("Protein Group Results");
 
-        VBox vbox = new VBox(proteinsView, groupsView);
+        ProteinSearchWebPart searchView = new ProteinSearchWebPart(true);
+        searchView.getModel().setIdentifier(form.getIdentifier());
+        searchView.getModel().setIncludeSubfolders(form.isIncludeSubfolders());
+        if (getRequest().getParameter("ProteinSearchResults.GroupProbability~gte") != null)
+        {
+            try
+            {
+                searchView.getModel().setMinProbability(Float.parseFloat(getRequest().getParameter("ProteinSearchResults.GroupProbability~gte")));
+            }
+            catch (NumberFormatException e) {}
+        }
+        if (getRequest().getParameter("ProteinSearchResults.ErrorRate~lte") != null)
+        {
+            try
+            {
+                searchView.getModel().setMaxErrorRate(Float.parseFloat(getRequest().getParameter("ProteinSearchResults.ErrorRate~lte")));
+            }
+            catch (NumberFormatException e) {}
+        }
+
+        VBox vbox = new VBox(searchView, proteinsView, groupsView);
 
         return renderInTemplate(vbox, getContainer(), "Protein Search Results");
     }

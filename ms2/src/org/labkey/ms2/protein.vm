@@ -16,3 +16,11 @@
     <tr><td colspan=2><big><tt>$protein.formattedSequence</tt></big></td></tr>
   #end
 </table>
+
+<script language="javascript 1.1" type="text/javascript">
+    function grabFocus()
+    {
+        self.focus();
+    }
+    window.onload = grabFocus;
+</script>

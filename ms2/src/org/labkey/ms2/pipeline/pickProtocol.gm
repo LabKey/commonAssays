@@ -16,20 +16,15 @@
 <!--END-WCH:mascotdev-->
 <br>
 
-Specify an optional experimental protocol to describe how the LC-MS/MS sample was processed to create the mzXML file.
-<br>
-<br>
+<p>You may optionally choose the experimental protocol that describes how the LC-MS/MS sample was processed to create the
+mzXML file. This step will allow you to identify the sample used as input to the run, which you can then use for later
+analysis inside of CPAS.</p>
+<p>You may choose to skip this step. If so, you can enter this information later by initiating another search through
+the pipeline.</p>
 
-<table>
-    <tr>
-        <td>
-            <a href="<%=currentContext.viewURLHelper.relativeUrl("showCreateMS2Protocol.view", "")%>path=<%=PageFlowUtil.encode(form.path)%>&searchEngine=${form.searchEngine}"><%=PageFlowUtil.buttonImg("Create New Protocol")%></a>
-        </td>
-        <td>
-            <a href="<%=currentContext.viewURLHelper.relativeUrl("search.view", "")%>path=<%=PageFlowUtil.encode(form.path)%>&skipDescription=true&provider=ms2&action=search&searchEngine=${form.searchEngine}"><%=PageFlowUtil.buttonImg("Skip and Continue")%></a>
-        </td>
-    </tr>
-</table>
+[<a href="<%=currentContext.viewURLHelper.relativeUrl("showCreateMS2Protocol.view", "")%>path=<%=PageFlowUtil.encode(form.path)%>&searchEngine=${form.searchEngine}">create a new protocol</a>]<%= PageFlowUtil.helpPopup("Create a new protocol", "Creating a new protocol lets you describe the steps taken to process a sample, or any special configuration for the mass spectrometer.") %>
+&nbsp;&nbsp;&nbsp;[<a href="<%=currentContext.viewURLHelper.relativeUrl("search.view", "")%>path=<%=PageFlowUtil.encode(form.path)%>&skipDescription=true&provider=ms2&action=search&searchEngine=${form.searchEngine}">skip this step and continue</a>]
+<br>
 <br>
         <%
             if(form.hasErrors())

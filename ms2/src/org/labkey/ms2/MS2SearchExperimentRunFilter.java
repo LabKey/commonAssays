@@ -49,12 +49,5 @@ public class MS2SearchExperimentRunFilter extends ExperimentRunFilter
         bar.add(exportRuns);
 
         bar.add(createButton(context, "showHierarchy.view", "Show Hierarchy", ActionButton.Action.LINK));
-
-        url.setAction("selectMoveLocation.view");
-        ActionButton moveRuns = new ActionButton("", "Move Runs");
-        moveRuns.setScript("return verifySelected(this.form, \"" + url.getLocalURIString() +  "ExperimentRunIds=true\", \"post\", \"runs\")");
-        moveRuns.setActionType(ActionButton.Action.GET);
-        moveRuns.setDisplayPermission(ACL.PERM_DELETE);
-        bar.add(moveRuns);
     }
 }
