@@ -946,7 +946,8 @@ public class IssuesController extends ViewController
             ObjectFactory f = ObjectFactory.Registry.getFactory(Issue.class);
             Issue[] issues = (Issue[]) f.handleArray(rs);
 
-            HttpView v = new GroovyView("/org/labkey/issue/rss.gm");
+            WebPartView v = new GroovyView("/org/labkey/issue/rss.gm");
+            v.setFrame(WebPartView.FrameType.NONE);
             v.addObject("issues", issues);
             ViewURLHelper url = cloneViewURLHelper();
             url.deleteParameters();

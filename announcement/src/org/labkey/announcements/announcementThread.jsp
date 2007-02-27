@@ -16,9 +16,9 @@
     AnnouncementsController.ThreadView me = (AnnouncementsController.ThreadView) HttpView.currentView();
     ViewContext context = me.getViewContext();
     AnnouncementsController.ThreadViewBean bean = me.getModel();
-
     Announcement announcement = bean.announcement;
     AnnouncementManager.Settings settings = bean.settings;
+    String contextPath = context.getContextPath();
 
 if (null == announcement)
 {
@@ -49,25 +49,21 @@ if (!bean.print && !embedded)
     %><table width="100%">
     <tr>
     <td align="left" class="ms-vb"><%
-    if (null != bean.messagesURL)
-    {
-        %>[<a href="<%=bean.messagesURL%>"><%=settings.getBoardName()%> Home</a>]&nbsp;<%
-    }
     if (null != bean.listURL)
     {
-        %>[<a href="<%=bean.listURL%>">View List</a>]&nbsp;<%
+        %>[<a href="<%=bean.listURL%>">view list</a>]&nbsp;<%
     }
     if (!bean.isResponse)
     {
-        %>[<a href="<%=bean.printURL%>" target="printAnn">Print</a>]&nbsp;<%
+        %>[<a href="<%=bean.printURL%>" target="printAnn">print</a>]&nbsp;<%
     }
     %></td>
     </tr>
     </table><%
 }
-if (null != discussionSrc)
+if (false && !bean.print && null != discussionSrc)
 {
-    %><p></p>This thread is a discussion. [<a href='<%=discussionSrc.getLocalURIString()%>'>view original page</a>]<%
+    %><p></p><img src="<%=contextPath%>/_images/exclaim.gif"><a href='<%=discussionSrc.getLocalURIString()%>'>view&nbsp;discussion&nbsp;in&nbsp;context</a><%
 }
 
 %><table width="100%" cellpadding=0>
@@ -76,16 +72,19 @@ if (null != discussionSrc)
     <td class="ms-vb" style="padding-top:14px; padding-bottom:2px; width:33%;" align=center><%=h(announcement.getCreatedByName())%></td>
     <td class="ms-vb" style="padding-top:14px; padding-bottom:2px; width:33%;" align="right" nowrap><%
 
+if (!bean.print && null != discussionSrc)
+{
+    %>[<a href="<%=discussionSrc.getLocalURIString()%>">view&nbsp;in&nbsp;context</a>]&nbsp;<%
+}
+
 if (bean.perm.allowUpdate(announcement) && !bean.print)
 {
     ViewURLHelper showUpdate = announcementURL(context, "showUpdate", "entityId", announcement.getEntityId());
-    %>[<a href="<%=showUpdate.getLocalURIString()%>">Edit</a>]<%
+    %>[<a href="<%=showUpdate.getLocalURIString()%>">edit</a>]<%
 }
-
 %>&nbsp;<%=DateUtil.formatDateTime(announcement.getCreated())%></td>
 </tr>
 <tr style="height:1px;"><td colspan=3 class=ms-titlearealine><img alt="" height=1 width=1 src="<%=request.getContextPath()%>/_.gif"></td></tr><%
-
 if (settings.hasMemberList() && null != announcement.getEmailList())
 {
     %><tr><td colspan="3">Members: <%=announcement.getEmailList()%></td></tr><%
@@ -143,12 +142,12 @@ if(0 < announcement.getResponses().size())
                 if (bean.perm.allowUpdate(r) && !bean.print)
                 {
                     ViewURLHelper showUpdate = announcementURL(context, "showUpdate", "entityId", r.getEntityId());
-                    %>[<a href="<%=showUpdate.getLocalURIString()%>">Edit</a>]<%
+                    %>[<a href="<%=showUpdate.getLocalURIString()%>">edit</a>]<%
                 }
                 if (bean.perm.allowDeleteMessage(r) && !bean.print)
                 {
                     ViewURLHelper confirmDeleteResponse = announcementURL(context, "confirmDeleteResponse", "entityId", r.getEntityId());
-                    %>&nbsp;[<a href="<%=confirmDeleteResponse.getLocalURIString()%>">Delete</a>]<%
+                    %>&nbsp;[<a href="<%=confirmDeleteResponse.getLocalURIString()%>">delete</a>]<%
                 }
                 %>&nbsp;<%=DateUtil.formatDateTime(r.getCreated())%></td>
             </tr><%
@@ -217,10 +216,6 @@ if (!bean.isResponse && !bean.print)
             confirmDelete.addParameter("redirect", redirect.getLocalURIString());
         }
         %><a href="<%=confirmDelete.getLocalURIString()%>"><img src='<%=PageFlowUtil.buttonSrc("Delete " + settings.getConversationName())%>' border="0" alt="[delete <%=settings.getConversationName().toLowerCase()%>]"></a>&nbsp;<%
-    }
-    if (null != discussionSrc)
-    {
-        %><a href="<%=discussionSrc.getLocalURIString()%>"><img src='<%=PageFlowUtil.buttonSrc("View original page")%>' border="0" alt="[original page]"></a>&nbsp;<%
     }
 }
 %></td></tr></table><%

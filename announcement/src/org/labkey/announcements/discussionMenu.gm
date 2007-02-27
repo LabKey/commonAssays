@@ -4,15 +4,21 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page import="org.labkey.api.util.DateUtil" %>
+<%@ page import="java.util.Set" %>
+<%@ page import="java.util.HashSet" %>
 <%
-    DiscussionServiceImpl.PickerView me = (DiscussionServiceImpl.PickerView )HttpView.currentView();
+    DiscussionServiceImpl.PickerView me = (DiscussionServiceImpl.PickerView) HttpView.currentView();
     Announcement[] announcements = me.announcements;
     if (null == announcements)
         announcements = new Announcement[0];
     ViewURLHelper pageURL = me.pageURL;
 
-if (announcements.length > 0)
-{
+    if (announcements.length > 0)
+    {
+        boolean longFormat = false;
+        Set menuItems = new HashSet();
+        for (Announcement a : announcements)
+            longFormat |= !menuItems.add(a.getCreatedByName() + "|" + DateUtil.formatDate(a.getCreated()));
 %>
 
 <script type="text/javascript">
@@ -30,10 +36,10 @@ var discussionMenu = {};
         for (Announcement a : announcements)
         {
             String title = a.getTitle();
-            String help = a.getCreatedByName() + ' ' + DateUtil.formatDate(a.getCreated());
-            %>{text:<%=PageFlowUtil.jsString(title)%>,helptext:<%=PageFlowUtil.jsString(help)%>,url:discussionMenu.pageUrl+'&discussion.id=<%=a.getRowId()%>'},<%
+            String help = a.getCreatedByName() + ' ' + (longFormat ? DateUtil.formatDateTime(a.getCreated()) : DateUtil.formatDate(a.getCreated()));
+            %>{text:<%=PageFlowUtil.jsString(title)%>,helptext:<%=PageFlowUtil.jsString(help)%>,url:discussionMenu.pageUrl+'&discussion.id=<%=a.getRowId()%>#discussionArea'},<%
         }
-        %>{text:'Start new discussion',url:discussionMenu.pageUrl+'&discussion.start=true'}];
+        %>{text:'Start new discussion',url:discussionMenu.pageUrl+'&discussion.start=true#discussionArea'}];
 
     discussionMenu.showEvent = function(event)
     {
@@ -53,7 +59,7 @@ var discussionMenu = {};
 })();
 
 </script>
-<span id=discussionMenuToggle>[<a href="#">see discussions (<%=announcements.length%>)</a>]</span><%
+<span id=discussionMenuToggle>[<a href="#" onclick="return false;">see discussions (<%=announcements.length%>)</a>]</span><%
 }
 else
 {

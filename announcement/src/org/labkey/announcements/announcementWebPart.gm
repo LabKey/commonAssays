@@ -5,29 +5,29 @@
         <td align="left" class="ms-vb"><%
 if (insertURL)
     {
-    %>[<a href="${insertURL}">New ${settings.conversationName}</a>]&nbsp;<%
+    %>[<a href="${insertURL}">new ${settings.conversationName.toLowerCase()}</a>]&nbsp;<%
     }
 if (listURL)
     {
-    %>[<a href="${listURL}">View List</a>]<%
+    %>[<a href="${listURL}">view list</a>]<%
     }
 %></td>
 <td colspan="2" align="right" class="ms-vb" style="padding:2px;"><%
 if (emailPrefsURL)
     {
-    %>[<a href="${emailPrefsURL}">My Email Preferences</a>]<%
+    %>[<a href="${emailPrefsURL}">email preferences</a>]<%
     }
 if (emailManageURL)
     {
-    %>&nbsp;[<a href="${emailManageURL}">Admin Email Preferences</a>]<%
+    %>&nbsp;[<a href="${emailManageURL}">email admin</a>]<%
     }
 if (customizeURL)
     {
-    %>&nbsp;[<a href="${customizeURL}">Customize</a>]<%
+    %>&nbsp;[<a href="${customizeURL}">customize</a>]<%
     }
 if (sendDigestURL)
     {
-    %>&nbsp;[<a href="${sendDigestURL}">Send Daily Digest</a>]<%
+    %>&nbsp;[<a href="${sendDigestURL}">send daily digest</a>]<%
     }
 %></td>
 </tr>
@@ -64,7 +64,7 @@ for (a in announcements)
             }
         %>
     </td></tr>
-<%      } %>    <tr><td class="ms-vb" style="padding-bottom:4;" colspan=3 align="left">[<a href="<%=filter(a.getThreadUrl(request,container))%>rowId=<%=a.rowId%>">View ${settings.conversationName.toLowerCase()}<%if (insertURL) {%> or respond<%}%></a>]</td></tr>
+<%      } %>    <tr><td class="ms-vb" style="padding-bottom:4;" colspan=3 align="left">[<a href="<%=filter(a.getThreadUrl(request,container))%>rowId=<%=a.rowId%>">view ${settings.conversationName.toLowerCase()}<%if (insertURL) {%> or respond<%}%></a>]</td></tr>
 <%
     }
 %></table>

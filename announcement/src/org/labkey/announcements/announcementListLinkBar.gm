@@ -6,23 +6,19 @@ if (insertURL)
     {
     %>[<a href="${insertURL}">New ${settings.conversationName}</a>]&nbsp;<%
     }
-if (messagesURL)
-    {
-    %>[<a href="${messagesURL}"><%=settings.boardName%> Home</a>]<%
-    }
 %></td>
 <td colspan="2" align="right" class="ms-vb" style="padding:2px;"><%
 if (emailPrefsURL)
     {
-    %>[<a href="${emailPrefsURL}">My Email Preferences</a>]<%
+    %>[<a href="${emailPrefsURL}">email preferences</a>]<%
     }
 if (emailManageURL)
     {
-    %>&nbsp;[<a href="${emailManageURL}">Admin Email Preferences</a>]<%
+    %>&nbsp;[<a href="${emailManageURL}">email admin</a>]<%
     }
 if (customizeURL)
     {
-    %>&nbsp;[<a href="${customizeURL}">Customize</a>]<%
+    %>&nbsp;[<a href="${customizeURL}">customize</a>]<%
     }
 %></td>
 </tr>

@@ -85,6 +85,13 @@ public class AnnouncementsController extends ViewController
     }
 
 
+
+    public ViewForward getBeginForward() throws ServletException
+    {
+        return new ViewForward("announcements", "begin", getContainer());    
+    }
+
+
     @Jpf.Action
     /**
      * This method represents the point of entry into the pageflow
@@ -97,7 +104,11 @@ public class AnnouncementsController extends ViewController
 
         boolean displayAll = getViewURLHelper().getPageFlow().equalsIgnoreCase("announcements");
         WebPartView v = new AnnouncementWebPart(getContainer(), getViewURLHelper(), getUser(), displayAll);
-        _renderInTemplate(v, getContainer(), null);
+        v.setFrame(WebPartView.FrameType.DIV);
+
+        NavTrailConfig nav = new NavTrailConfig(getViewContext(), getContainer());
+        nav.setTitle(getSettings().getBoardName());
+        _renderInTemplate(v, getContainer(), nav, null, null);
 
         return null;
     }
@@ -114,12 +125,13 @@ public class AnnouncementsController extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        HttpView view = new AnnouncementListView(getViewContext());
-
-        _renderInTemplate(view, getContainer(), null);
+        AnnouncementListView view = new AnnouncementListView(getViewContext());
+        view.setFrame(WebPartView.FrameType.DIV);
+        _renderInTemplate(view, getContainer(), getSettings().getBoardName() + " List", null, null);
 
         return null;
     }
+
 
     // TODO: Add this to customize page?
 
@@ -196,7 +208,7 @@ public class AnnouncementsController extends ViewController
         vbox.addView(new AnnouncementEmailDefaults(c));
         vbox.addView(gridView);
 
-        _renderInTemplate(vbox, c, null);
+        _renderInTemplate(vbox, c, "Admin Email Preferences", null, null);
 
         return null;
     }
@@ -249,7 +261,7 @@ public class AnnouncementsController extends ViewController
         String defaultEmailOptionName = emailOptions[defaultEmailOptionId].getEmailOption();
         v.addObject("projectEmailOption", defaultEmailOptionName);
 
-        _renderInTemplate(v, c, null);
+        _renderInTemplate(v, c, "Admin Email Preferences", null, null);
 
         return null;
     }
@@ -286,7 +298,7 @@ public class AnnouncementsController extends ViewController
     {
         DailyDigest.sendDailyDigest();
 
-        return _renderInTemplate(new HtmlView("Daily digest sent"), getContainer(), null);
+        return _renderInTemplate(new HtmlView("Daily digest sent"), getContainer(), "Email", null, null);
     }
 
 
@@ -566,6 +578,22 @@ public class AnnouncementsController extends ViewController
     }
 
 
+    private ViewURLHelper getReturnUrl()
+    {
+        String url = StringUtils.trimToNull((String)getViewContext().get("returnUrl"));
+        try
+        {
+            if (null != url)
+                return new ViewURLHelper(url);
+        }
+        catch (URISyntaxException e)
+        {
+            return null;
+        }
+        return null;
+    }
+
+    
     private static ViewURLHelper getShowCustomizeUrl(Container c, ViewURLHelper returnUrl)
     {
         ViewURLHelper url = new ViewURLHelper("announcements", "showCustomize", c);
@@ -581,7 +609,7 @@ public class AnnouncementsController extends ViewController
 
         Settings settings = AnnouncementManager.getMessageBoardSettings(getContainer());
         JspView<Settings> view = new JspView<Settings>("/org/labkey/announcements/customize.jsp", settings);
-        view.addObject("returnUrl", new ViewURLHelper(getViewURLHelper().getParameter("returnUrl")));
+        view.addObject("returnUrl", getReturnUrl());
         view.addObject("assignedToSelect", getAssignedToSelect(getContainer(), settings.getDefaultAssignedTo(), "defaultAssignedTo"));
 
         if (hasEditorPerm(Group.groupGuests))
@@ -589,7 +617,7 @@ public class AnnouncementsController extends ViewController
         else if (hasEditorPerm(Group.groupUsers))
             view.addObject("securityWarning", "Warning: all site users have been granted editor permissions in this folder.  As a result, any logged in user will be able to view, create, and respond to posts, regardless of the security setting below.  You may want to change permissions in this folder.");
 
-        _renderInTemplate(view, getContainer(), null, "Customize " + settings.getBoardName(), null);
+        _renderInTemplate(view, getContainer(), "Customize " + settings.getBoardName(), null, null);
 
         return null;
     }
@@ -612,7 +640,7 @@ public class AnnouncementsController extends ViewController
 
         AnnouncementManager.saveMessageBoardSettings(getContainer(), form);
 
-        return new ViewForward((String)getViewContext().get("returnUrl"));
+        return new ViewForward(getReturnUrl());
     }
 
 
@@ -671,8 +699,6 @@ public class AnnouncementsController extends ViewController
 
         AnnouncementManager.insertAnnouncement(c, u, insert, formFiles);
 
-        String redirectURL = getRequest().getParameter("returnUrl");
-
         // we don't send email for notes.
         if (!isNote && null != insert.getBody())
         {
@@ -681,8 +707,9 @@ public class AnnouncementsController extends ViewController
             sendNotificationEmails(insert, currentRendererType);
         }
 
-        if (null != StringUtils.trimToNull(redirectURL))
-            HttpView.throwRedirect(redirectURL);
+        ViewURLHelper returnUrl = getReturnUrl();
+        if (null != returnUrl)
+            HttpView.throwRedirect(returnUrl);
 
         // if this is a discussion, redirect back to originating page
         Announcement thread = insert;
@@ -866,9 +893,9 @@ public class AnnouncementsController extends ViewController
 
         InsertMessageView insertView = new InsertMessageView(form, "New " + settings.getConversationName(), PageFlowUtil.getStrutsError(getRequest(), "main"));
         insertView.addObject("allowBroadcast", !settings.isSecure() && getUser().isAdministrator());
-        insertView.addObject("returnUrl", new ViewURLHelper(getViewURLHelper().getParameter("returnUrl")));
+        insertView.addObject("returnUrl", getReturnUrl());
 
-        return _renderInTemplate(insertView, c, "forms[0].title");
+        return _renderInTemplate(insertView, c, "New " + settings.getConversationName(), "forms[0].title", null);
     }
 
 
@@ -955,7 +982,7 @@ public class AnnouncementsController extends ViewController
             HttpView.throwUnauthorized();
 
         AnnouncementUpdateView updateView = new AnnouncementUpdateView(form, ann);
-        return _renderInTemplate(updateView, form.getContainer(), null);
+        return _renderInTemplate(updateView, form.getContainer(), "Edit " + getSettings().getConversationName(), null, null);
     }
 
 
@@ -975,6 +1002,7 @@ public class AnnouncementsController extends ViewController
         boolean print = "1".equals(getViewURLHelper().getParameter("print"));
 
         ThreadView threadView = new ThreadView(form, getContainer(), getViewURLHelper(), getPermissions(), print);
+        threadView.setFrame(WebPartView.FrameType.DIV);
 
         Announcement ann = threadView.getAnnouncement();
         String title = ann != null ? ann.getTitle() : "Error";
@@ -988,7 +1016,7 @@ public class AnnouncementsController extends ViewController
         else
         {
             String anchor = getViewURLHelper().getParameter("anchor");
-            return _renderInTemplate(threadView, c, null, title, (null != anchor ? "row:" + anchor : null));
+            return _renderInTemplate(threadView, c, title, null, (null != anchor ? "row:" + anchor : null));
         }
     }
 
@@ -1009,12 +1037,17 @@ public class AnnouncementsController extends ViewController
             HttpView.throwUnauthorized();
 
         Container c = getContainer();
-        HttpView threadView = new ThreadView(c, getViewURLHelper(), parent, perm);
+        ThreadView threadView = new ThreadView(c, getViewURLHelper(), parent, perm);
+        threadView.setFrame(WebPartView.FrameType.DIV);
 
         boolean reshow = (PageFlowUtil.getStrutsError(getRequest(), "main").length() != 0);
         HttpView respondView = new RespondView(c, parent, form, reshow);
 
-        return _renderInTemplate(new VBox(threadView, respondView), c, "forms[0].body", null, "response");
+        NavTrailConfig trail = getDefaultNavTrail();
+        if (parent != null)
+            trail.add(new NavTree(parent.getTitle(), "thread.view?rowId=" + parent.getRowId()));
+        trail.setTitle("Respond to " + getSettings().getConversationName());
+        return _renderInTemplate(new VBox(threadView, respondView), c, trail, "forms[0].body", "response");
     }
 
 
@@ -1049,7 +1082,8 @@ public class AnnouncementsController extends ViewController
         // TODO: This only grabs announcements... add responses too?
         Announcement[] announcements = AnnouncementManager.getAnnouncements(c, filter, getSettings().getSort());
 
-        HttpView v = new GroovyView("/org/labkey/announcements/rss.gm");
+        WebPartView v = new GroovyView("/org/labkey/announcements/rss.gm");
+        v.setFrame(WebPartView.FrameType.DIV);
         v.addObject("announcements", announcements);
         v.addObject("container", c);
         v.addObject("request", getRequest());
@@ -1250,13 +1284,14 @@ public class AnnouncementsController extends ViewController
     private void showEmailPreferencesPage(EmailOptionsForm form, String message) throws Exception
     {
         JspView view = new JspView("/org/labkey/announcements/emailPreferences.jsp");
+        view.setFrame(WebPartView.FrameType.DIV);
         EmailPreferencesPage page = (EmailPreferencesPage)view.getPage();
         view.setTitle("Email Preferences");
         page.emailPreference = form.getEmailPreference();
         page.srcURL = cloneViewURLHelper().setAction("begin").toString();
         page.message = message;
 
-        _renderInTemplate(view, form.getContainer(), null);
+        _renderInTemplate(view, form.getContainer(), "Email Preferences", null, null);
     }
 
     private Settings getSettings() throws ServletException
@@ -1276,14 +1311,26 @@ public class AnnouncementsController extends ViewController
         }
     }
 
-    private Forward _renderInTemplate(HttpView view, Container c, String focus) throws Exception
+
+    private NavTrailConfig getDefaultNavTrail() throws ServletException
     {
-        return _renderInTemplate(view, c, focus, null, null);
+        NavTrailConfig trailConfig = new NavTrailConfig(getViewContext(), getContainer());
+        trailConfig.add(new NavTree(getSettings().getBoardName().toLowerCase() + " home", getBeginForward()));
+        return trailConfig;
     }
 
-    private Forward _renderInTemplate(HttpView view, Container c, String focus, String title, String anchor) throws Exception
+
+    private Forward _renderInTemplate(HttpView view, Container c, String title, String focus, String anchor) throws Exception
     {
-        NavTrailConfig trailConfig = new NavTrailConfig(getViewContext(), c).setTitle(null == title ? getSettings().getBoardName() : title);
+        NavTrailConfig trailConfig = getDefaultNavTrail();
+        if (null != title)
+            trailConfig.setTitle(title);
+        return _renderInTemplate(view, c, trailConfig, focus, anchor);
+    }
+    
+
+    private Forward _renderInTemplate(HttpView view, Container c, NavTrailConfig trailConfig, String focus, String anchor) throws Exception
+    {
         HomeTemplate template = new HomeTemplate(getViewContext(), c, view, trailConfig);
 
         if (null != focus)
@@ -1293,6 +1340,7 @@ public class AnnouncementsController extends ViewController
 
         return includeView(template);
     }
+
 
     public static class BulkEditEmailPrefsForm extends FormData
     {
@@ -1792,6 +1840,7 @@ public class AnnouncementsController extends ViewController
                 ActionButton delete = new ActionButton("button", "Delete");
                 delete.setScript("return verifySelected(this.form, \"delete.post\", \"post\", \"checkboxes\")");
                 delete.setActionType(ActionButton.Action.GET);
+                delete.setDisplayPermission(ACL.PERM_DELETE);
                 bb.add(delete);
 
                 bb.add(ActionButton.BUTTON_SELECT_ALL);

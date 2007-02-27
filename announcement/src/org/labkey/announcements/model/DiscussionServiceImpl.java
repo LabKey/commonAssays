@@ -109,12 +109,14 @@ public class DiscussionServiceImpl implements DiscussionService.Service
         ViewURLHelper returnUrl = context.cloneViewURLHelper().deleteScopeParameters("discussion");
         if (0 != discussionId)
             returnUrl.addParameter("discussion.id", "" + discussionId);
+
+        HtmlView anchorView = new HtmlView("<a name=\"discussionArea\"></a>");
         
         if (context.get("discussion.start") != null)
         {
             WebPartView start = startDiscussion(c, user, objectId, pageURL, title, "");
             start.setFrame(WebPartView.FrameType.NONE);
-            return new ThreadWrapper("Start a new discussion", start);
+            return new VBox(anchorView, new ThreadWrapper("Start a new discussion", start));
         }
         else
         {
@@ -150,7 +152,7 @@ public class DiscussionServiceImpl implements DiscussionService.Service
             HttpView pickerView = new PickerView(pageURL, announcements);
             if (discussionView == null)
                 return pickerView;
-            return new VBox(pickerView, new ThreadWrapper("Discussion", discussionView, respondView));
+            return new VBox(anchorView, pickerView, new ThreadWrapper("Discussion", discussionView, respondView));
         }
     }
 
