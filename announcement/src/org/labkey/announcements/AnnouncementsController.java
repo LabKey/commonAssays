@@ -314,7 +314,20 @@ public class AnnouncementsController extends ViewController
 
 
     @Jpf.Action
-    protected Forward confirmDelete(AnnouncementDeleteForm form) throws Exception
+    protected Forward confirmDeleteThread(AnnouncementDeleteForm form) throws Exception
+    {
+        return confirmDelete(form, "entire");
+    }
+
+
+    @Jpf.Action
+    protected Forward confirmDeleteResponse(AnnouncementDeleteForm form) throws Exception
+    {
+        return confirmDelete(form, "response from the");
+    }
+
+
+    private Forward confirmDelete(AnnouncementDeleteForm form, String what) throws Exception
     {
         Permissions perm = getPermissions();
 
@@ -331,6 +344,7 @@ public class AnnouncementsController extends ViewController
 
         GroovyView confirmDeleteView = new GroovyView("/org/labkey/announcements/confirmDelete.gm");
         confirmDeleteView.addObject("message", message);
+        confirmDeleteView.addObject("what", what);
         confirmDeleteView.addObject("settings", getSettings());
         confirmDeleteView.addObject("redirect", form.getRedirect());
         HttpView template = new DialogTemplate(confirmDeleteView);
@@ -1588,6 +1602,7 @@ public class AnnouncementsController extends ViewController
             addObject("settings", settings);
             addObject("insertURL", perm.allowInsert() ? getShowInsertUrl(c, url) : null);
             addObject("messagesURL", ViewURLHelper.toPathString("announcements", "begin", c.getPath()));
+            addObject("customizeURL", c.hasPermission(user, ACL.PERM_ADMIN) ? getShowCustomizeUrl(c, url) : null);
             addObject("emailPrefsURL", user.isGuest() ? null : ViewURLHelper.toPathString("announcements", "showEmailPreferences", c.getPath()));
             addObject("emailManageURL", c.hasPermission(user, ACL.PERM_ADMIN) ? ViewURLHelper.toPathString("announcements", "adminEmail", c.getPath()) : null);
             addObject("filterText", filterText);
@@ -1611,10 +1626,11 @@ public class AnnouncementsController extends ViewController
 
             addObject("settings", settings);
             addObject("container", c);
-            addObject("emailPrefsURL", user.isGuest() ? null : ViewURLHelper.toPathString("announcements", "showEmailPreferences", c.getPath()));
             addObject("insertURL", perm.allowInsert() ? getShowInsertUrl(c, url) : null);
-            addObject("customizeURL", c.hasPermission(user, ACL.PERM_ADMIN) ? getShowCustomizeUrl(c, url) : null);
             addObject("listURL", getListUrl(c));
+            addObject("customizeURL", c.hasPermission(user, ACL.PERM_ADMIN) ? getShowCustomizeUrl(c, url) : null);
+            addObject("emailPrefsURL", user.isGuest() ? null : ViewURLHelper.toPathString("announcements", "showEmailPreferences", c.getPath()));
+            addObject("emailManageURL", c.hasPermission(user, ACL.PERM_ADMIN) ? ViewURLHelper.toPathString("announcements", "adminEmail", c.getPath()) : null);
             addObject("announcements", announcements);
             addObject("filterText", getFilterText(settings, displayAll, announcements.length > 0));
             addObject("sendDigestURL", ViewURLHelper.toPathString("announcements", "sendDailyDigest", ""));

@@ -147,8 +147,8 @@ if(0 < announcement.getResponses().size())
                 }
                 if (bean.perm.allowDeleteMessage(r) && !bean.print)
                 {
-                    ViewURLHelper deleteSingleAnnouncement = announcementURL(context, "deleteSingleAnnouncement", "entityId", r.getEntityId());
-                    %>&nbsp;[<a href="<%=deleteSingleAnnouncement.getLocalURIString()%>">Delete</a>]<%
+                    ViewURLHelper confirmDeleteResponse = announcementURL(context, "confirmDeleteResponse", "entityId", r.getEntityId());
+                    %>&nbsp;[<a href="<%=confirmDeleteResponse.getLocalURIString()%>">Delete</a>]<%
                 }
                 %>&nbsp;<%=DateUtil.formatDateTime(r.getCreated())%></td>
             </tr><%
@@ -210,7 +210,7 @@ if (!bean.isResponse && !bean.print)
     }
     if (bean.perm.allowDeleteThread())
     {
-        ViewURLHelper confirmDelete = announcementURL(context, "confirmDelete", "entityId", ""+announcement.getEntityId());
+        ViewURLHelper confirmDelete = announcementURL(context, "confirmDeleteThread", "entityId", announcement.getEntityId());
         if (embedded)
         {
             ViewURLHelper redirect = context.cloneViewURLHelper().deleteScopeParameters("discussion");

@@ -13,17 +13,17 @@ if (listURL)
     }
 %></td>
 <td colspan="2" align="right" class="ms-vb" style="padding:2px;"><%
-if (customizeURL)
-    {
-    %>[<a href="${customizeURL}">Customize</a>]<%
-        if (emailPrefsURL)
-        {
-            %>&nbsp;<%
-        }
-    }
 if (emailPrefsURL)
     {
     %>[<a href="${emailPrefsURL}">My Email Preferences</a>]<%
+    }
+if (emailManageURL)
+    {
+    %>&nbsp;[<a href="${emailManageURL}">Admin Email Preferences</a>]<%
+    }
+if (customizeURL)
+    {
+    %>&nbsp;[<a href="${customizeURL}">Customize</a>]<%
     }
 if (sendDigestURL)
     {
