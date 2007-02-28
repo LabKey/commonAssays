@@ -1,20 +1,21 @@
 <!--ANNOUNCEMENTS-->
 <table width="100%">
 <tr>
-<td align="left" class="ms-vb" style="padding-top:2px;"><%
+<td align="left" class="ms-vb" style="padding-top:2px;width:33%;"><%
 if (insertURL)
     {
-    %>[<a href="${insertURL}">New ${settings.conversationName}</a>]&nbsp;<%
+    %>[<a href="${insertURL}">new <%=settings.conversationName.toLowerCase()%></a>]&nbsp;<%
     }
 %></td>
-<td colspan="2" align="right" class="ms-vb" style="padding:2px;"><%
+<td align="center" class="ms-vb" style="padding-top:2px;width:33%;"><%=filterText%></td>
+<td align="right" class="ms-vb"  style="padding-top:2px;width:33%;"><%
 if (emailPrefsURL)
     {
-    %>[<a href="${emailPrefsURL}">email preferences</a>]<%
+    %>[<a href="${emailPrefsURL}">email&nbsp;preferences</a>]<%
     }
 if (emailManageURL)
     {
-    %>&nbsp;[<a href="${emailManageURL}">email admin</a>]<%
+    %>&nbsp;[<a href="${emailManageURL}">email&nbsp;admin</a>]<%
     }
 if (customizeURL)
     {
@@ -22,5 +23,4 @@ if (customizeURL)
     }
 %></td>
 </tr>
-<tr><td class="ms-vb" colspan=2 style="padding-top:8px;">Displaying <%=filterText%></td></tr>
 </table>

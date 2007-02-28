@@ -1640,12 +1640,10 @@ public class AnnouncementsController extends ViewController
         {
             super("/org/labkey/announcements/announcementListLinkBar.gm");
 
-            String filterText = getFilterText(settings, displayAll, true);
-
             SimpleFilter urlFilter = new SimpleFilter(url, "Threads");
+            boolean isFiltered = !urlFilter.getWhereParamNames().isEmpty();
 
-            if (!urlFilter.getWhereParamNames().isEmpty())
-                filterText = filterText + " further filtered by " + urlFilter.getFilterText(CommSchema.getInstance().getSqlDialect());
+            String filterText = getFilterText(settings, displayAll, isFiltered);
 
             addObject("settings", settings);
             addObject("insertURL", perm.allowInsert() ? getShowInsertUrl(c, url) : null);
@@ -1680,7 +1678,7 @@ public class AnnouncementsController extends ViewController
             addObject("emailPrefsURL", user.isGuest() ? null : ViewURLHelper.toPathString("announcements", "showEmailPreferences", c.getPath()));
             addObject("emailManageURL", c.hasPermission(user, ACL.PERM_ADMIN) ? ViewURLHelper.toPathString("announcements", "adminEmail", c.getPath()) : null);
             addObject("announcements", announcements);
-            addObject("filterText", getFilterText(settings, displayAll, announcements.length > 0));
+            addObject("filterText", getFilterText(settings, displayAll, false));
             addObject("sendDigestURL", ViewURLHelper.toPathString("announcements", "sendDailyDigest", ""));
         }
 
@@ -1709,31 +1707,36 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private static String getFilterText(Settings settings, boolean displayAll, boolean showingAnnouncements)
+    private static String getFilterText(Settings settings, boolean displayAll, boolean isFiltered)
     {
         StringBuilder sb = new StringBuilder();
 
-        if (displayAll)
-        {
-            if (showingAnnouncements)
-                sb.append("all");
-        }
-        else
-        {
-            String separator = "";
+        String separator = "";
 
+        if (!displayAll)
+        {
             if (settings.hasExpires())
             {
-                sb.append("unexpired");
+                sb.append("recent");
                 separator = ", ";
             }
 
             if (settings.hasStatus())
             {
                 sb.append(separator);
-                sb.append("unclosed");
+                sb.append("open");
+                separator = ", ";
             }
         }
+
+        if (isFiltered)
+        {
+            sb.append(separator);
+            sb.append("filtered");
+        }
+
+        if (sb.length() == 0)
+            sb.append("all");
 
         sb.append(" ");
         sb.append(settings.getConversationName().toLowerCase());
@@ -1800,6 +1803,8 @@ public class AnnouncementsController extends ViewController
 
             SimpleFilter filter = getFilter(settings, perm, displayAll);
             gridView.setFilter(filter);
+
+            setTitle(settings.getBoardName() + " List");
 
             _vbox = new VBox(new AnnouncementListLinkBar(c, url, user, settings, perm, displayAll), gridView);
         }

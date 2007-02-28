@@ -15,17 +15,16 @@
     else {
         out.print("    <table>");
         for (keyword in keywordPicker.keywords) {
-            value = PageFlowUtil.filter(keyword.keyword);
             selected = keyword.isDefault();
 %>
-        <tr><td class=ms-vb><%=selected ? "<b>" + value + "</b>" : value%></td><td class=ms-vb>[<a href="javascript:callAction('deleteKeyword','form<%=keywordPicker.plural%>','<%=PageFlowUtil.encode(value)%>')" title="Delete this keyword">delete</a>]&nbsp;<%
+        <tr><td class=ms-vb><%=selected ? "<b>" + filter(keyword.keyword) + "</b>" : filter(keyword.keyword)%></td><td class=ms-vb>[<a href="javascript:callAction('deleteKeyword','form<%=keywordPicker.plural%>',<%=filter(PageFlowUtil.jsString(keyword.keyword))%>)" title="Delete this keyword">delete</a>]&nbsp;<%
             if (selected)
             {
-                %>[<a href="javascript:callAction('clearKeywordDefault','form<%=keywordPicker.plural%>','<%=PageFlowUtil.encode(value)%>')" title="Clear the default value">clear</a>]<%
+                %>[<a href="javascript:callAction('clearKeywordDefault','form<%=keywordPicker.plural%>',<%=filter(PageFlowUtil.jsString(keyword.keyword))%>)" title="Clear the default value">clear</a>]<%
             }
             else
             {
-                %>[<a href="javascript:callAction('setKeywordDefault','form<%=keywordPicker.plural%>','<%=PageFlowUtil.encode(value)%>')" title="Set as the default value">set</a>]<%
+                %>[<a href="javascript:callAction('setKeywordDefault','form<%=keywordPicker.plural%>',<%=filter(PageFlowUtil.jsString(keyword.keyword))%>)" title="Set as the default value">set</a>]<%
             }%></td></tr><%
         }
     out.println("\n    </table>");

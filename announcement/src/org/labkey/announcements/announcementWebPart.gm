@@ -2,7 +2,7 @@
 <!--ANNOUNCEMENTS-->
 <table width="100%">
     <tr>
-        <td align="left" class="ms-vb"><%
+        <td align="left" class="ms-vb" style="padding-top:2px;width:33%;"><%
 if (insertURL)
     {
     %>[<a href="${insertURL}">new ${settings.conversationName.toLowerCase()}</a>]&nbsp;<%
@@ -12,14 +12,15 @@ if (listURL)
     %>[<a href="${listURL}">view list</a>]<%
     }
 %></td>
-<td colspan="2" align="right" class="ms-vb" style="padding:2px;"><%
+<td align="center" class="ms-vb" style="padding-top:2px;width:33%;"><%=filterText%></td>
+<td align="right" class="ms-vb" style="padding-top:2px;width:33%;"><%
 if (emailPrefsURL)
     {
-    %>[<a href="${emailPrefsURL}">email preferences</a>]<%
+    %>[<a href="${emailPrefsURL}">email&nbsp;preferences</a>]<%
     }
 if (emailManageURL)
     {
-    %>&nbsp;[<a href="${emailManageURL}">email admin</a>]<%
+    %>&nbsp;[<a href="${emailManageURL}">email&nbsp;admin</a>]<%
     }
 if (customizeURL)
     {
@@ -27,7 +28,7 @@ if (customizeURL)
     }
 if (sendDigestURL)
     {
-    %>&nbsp;[<a href="${sendDigestURL}">send daily digest</a>]<%
+    %>&nbsp;[<a href="${sendDigestURL}">send&nbsp;daily&nbsp;digest</a>]<%
     }
 %></td>
 </tr>
@@ -35,11 +36,7 @@ if (sendDigestURL)
 <table width="100%" cellpadding=0><%
 if (0 == announcements.length)
     {%>
-    <tr><td colspan=3 class=ms-vb style="padding-top:4px;">No <%=filterText%></td></tr><%
-    }
-else
-    { %>
-    <tr><td colspan=3 class=ms-vb style="padding-top:4px;">Displaying <%=filterText%></td></tr><%        
+    <tr><td colspan=3 class=ms-vb style="padding-top:4px;">No <%=filterText.replace("all ", "")%></td></tr><%
     }
 for (a in announcements)
     { %>

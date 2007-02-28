@@ -25,11 +25,11 @@
             <table>
                 <tr>
                     <td valign="top"><input type="radio" name="sortOrderIndex" value="<%=SortOrder.CreationDate%>" <%=settings.getSortOrderIndex() == SortOrder.CreationDate.getIndex() ? "checked" : ""%>></td>
-                    <td class="ms-vb"><b>Initial Post</b> - Sort by date of the first posting.  This is appropriate for announcements and blogs.</td>
+                    <td class="ms-vb"><b>Initial Post</b> - Sort lists of conversations by date of the first posting.  This is appropriate for announcements and blogs.</td>
                 </tr>
                 <tr>
                     <td valign="top"><input type="radio" name="sortOrderIndex" value="<%=SortOrder.LatestResponseDate%>" <%=settings.getSortOrderIndex() == SortOrder.LatestResponseDate.getIndex() ? "checked" : ""%>></td>
-                    <td class="ms-vb"><b>Most Recent Post</b> - Sort by date of the most recent post.  This is often preferred for discussion boards.</td>
+                    <td class="ms-vb"><b>Most Recent Post</b> - Sort lists of conversations by date of the most recent post.  This is often preferred for discussion boards.</td>
                 </tr>
             </table>
         </td>
@@ -48,7 +48,7 @@
             <table>
                 <tr>
                     <td valign="top"><input type="radio" name="secure" value="0" <%=settings.isSecure() ? "" : "checked"%>></td>
-                    <td class="ms-vb"><b>OFF</b> - Converstations are visible to anyone with read permissions, content can be modified after posting, content will be sent via email</td>
+                    <td class="ms-vb"><b>OFF</b> - Conversations are visible to anyone with read permissions, content can be modified after posting, content will be sent via email</td>
                 </tr>
                 <tr>
                     <td valign="top"><input type="radio" name="secure" value="1" <%=settings.isSecure() ? "checked" : ""%>></td>
