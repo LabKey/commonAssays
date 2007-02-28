@@ -46,7 +46,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
                 AttributeSet attrs = AttributeSet.fromData(data);
                 PipelineService service = PipelineService.get();
 
-                attrs.relativizeURI(service.getPipelineRoot(data.getContainer()));
+                attrs.relativizeURI(service.findPipelineRoot(data.getContainer()).getUri());
                 attrs.save(out);
             }
         }
@@ -82,7 +82,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
                     uriFile = new URI(flowdata.getUri());
                     if (!uriFile.isAbsolute())
                     {
-                        URI uriPipelineRoot = PipelineService.get().getPipelineRoot(job.getContainer());
+                        URI uriPipelineRoot = PipelineService.get().findPipelineRoot(job.getContainer()).getUri(job.getContainer());
                         uriFile = URIUtil.resolve(uriPipelineRoot, uriPipelineRoot, flowdata.getUri());
                     }
                 }

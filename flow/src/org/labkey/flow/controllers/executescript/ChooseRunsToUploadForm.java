@@ -7,6 +7,7 @@ import org.labkey.flow.data.FlowProtocolStep;
 
 import java.util.*;
 import java.net.URI;
+import java.io.File;
 
 public class ChooseRunsToUploadForm extends ViewForm
 {
@@ -15,8 +16,9 @@ public class ChooseRunsToUploadForm extends ViewForm
     public int ff_protocolId;
     public String[] ff_path;
     public String path;
+    public String srcURL;
 
-    private List<URI> newPaths;
+    private Map<String, String> newPaths;
 
     public void setFf_protocolId(int id)
     {
@@ -38,14 +40,17 @@ public class ChooseRunsToUploadForm extends ViewForm
         return FlowScript.getProtocolsWithStep(getContainer(), FlowProtocolStep.keywords);
     }
 
-    public List<URI> getNewPaths()
+    public Map<String, String> getNewPaths()
     {
         return newPaths;
     }
 
-    public void setNewPaths(List<URI> paths)
+    public void setNewPaths(Map<String, String> newPaths)
     {
-        this.newPaths = paths;
+        this.newPaths = newPaths;
     }
-
+    public void setSrcURL(String url)
+    {
+        this.srcURL = url;
+    }
 }

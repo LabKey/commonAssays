@@ -34,10 +34,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.ExperimentRun;
 import org.labkey.ms2.pipeline.SequestClientImpl;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineStatusFile;
-import org.labkey.api.pipeline.PipelineStatusManager;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
@@ -288,7 +285,7 @@ public class MS2Controller extends ViewController
         String path = form.getPath();
         if (path != null)
         {
-            PipelineService.PipeRoot pr = service.findPipelineRoot(c);
+            PipeRoot pr = service.findPipelineRoot(c);
             if (pr != null)
             {
                 URI uriData = URIUtil.resolve(pr.getUri(c), path);
@@ -1578,7 +1575,7 @@ public class MS2Controller extends ViewController
                     HttpView.throwNotFound();
 
                 PipelineService service = PipelineService.get();
-                PipelineService.PipeRoot pr = service.findPipelineRoot(c);
+                PipeRoot pr = service.findPipelineRoot(c);
                 if (pr == null)
                     return HttpView.throwUnauthorized();
 

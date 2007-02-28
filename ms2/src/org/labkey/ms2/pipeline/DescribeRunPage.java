@@ -10,6 +10,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.ms2.protocol.MassSpecProtocol;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipeRoot;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.ms2.pipeline.FileStatus;
 
@@ -200,7 +201,7 @@ abstract public class DescribeRunPage extends JspBase
             File parentFile = mzXMLFiles.next().getParentFile();
             if (parentFile != null)
             {
-                PipelineService.PipeRoot root = PipelineService.get().findPipelineRoot(getController().getContainer());
+                PipeRoot root = PipelineService.get().findPipelineRoot(getController().getContainer());
                 if (root != null)
                 {
                     File rootFile = new File(root.getUri(getController().getContainer()));

@@ -6,6 +6,7 @@ import org.labkey.flow.view.FlowQueryView;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.query.QueryAction;
 import org.labkey.api.query.QueryDefinition;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
@@ -44,9 +45,7 @@ public enum FlowTableType
 
     public ViewURLHelper urlFor(Container container, QueryAction action)
     {
-        FlowSchema schema = new FlowSchema(null, container);
-        QueryDefinition queryDef = schema.getQueryDefForTable(name());
-        return schema.urlFor(action, queryDef);
+        return QueryService.get().urlFor(container, action, FlowSchema.SCHEMANAME, toString());
     }
 
     public ViewURLHelper urlFor(Container container, SimpleFilter filter)

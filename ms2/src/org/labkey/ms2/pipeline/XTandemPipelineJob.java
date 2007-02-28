@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.exp.ExperimentPipelineJob;
 import org.labkey.api.exp.FileXarSource;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.util.PathRelativizer;
 import org.labkey.api.util.XMLValidationParser;
 import org.labkey.api.util.NetworkDrive;
@@ -579,7 +580,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
 
         Container c = _info.getContainer();
         PipelineService service = PipelineService.get();
-        PipelineService.PipeRoot pr = service.findPipelineRoot(c);
+        PipeRoot pr = service.findPipelineRoot(c);
         if (pr == null)
             throw new FileNotFoundException("Failed to find a pipeline root for " + c.getPath());
         File containerRoot = new File(pr.getUri(c));

@@ -1,13 +1,11 @@
 package org.labkey.flow.script;
 
-import org.labkey.api.exp.StringXarSource;
 import org.labkey.api.exp.XarFormatException;
 import org.labkey.api.exp.XarSource;
 import org.labkey.api.exp.ExperimentException;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
-import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.data.Container;
-import org.labkey.flow.FlowSettings;
 import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlException;
 
@@ -55,7 +53,7 @@ public class ScriptXarSource extends XarSource
         return _root;
     }
 
-    public boolean isUnderPipelineRoot(PipelineService.PipeRoot pr, Container container, File file) throws Exception
+    public boolean isUnderPipelineRoot(PipeRoot pr, Container container, File file) throws Exception
     {
         return true;
     }

@@ -1,6 +1,8 @@
 package org.labkey.flow.script;
 
 import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.security.ACL;
@@ -9,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import java.util.*;
 import java.io.File;
+import java.sql.SQLException;
 
 import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -36,8 +39,22 @@ public class FlowPipelineProvider extends PipelineProvider
             return;
         if (entries.size() == 0)
             return;
+        PipeRoot root;
+        try
+        {
+            root = PipelineService.get().findPipelineRoot(context.getContainer());
+        }
+        catch (SQLException e)
+        {
+            return;
+        }
+
         FileEntry entry = entries.get(0);
-        ViewURLHelper url = entries.get(0).cloneHref();
+        File file = new File(entry.getURI());
+        ViewURLHelper url = PFUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer());
+
+        url.addParameter("path", root.relativePath(file));
+        url.addParameter("srcURL", context.getViewURLHelper().toString());
         url.setPageFlow(PFUtil.getPageFlowName(AnalysisScriptController.Action.chooseRunsToUpload));
         url.setAction(AnalysisScriptController.Action.chooseRunsToUpload.toString());
         FileAction action = new FileAction("Upload FCS files", url, null);

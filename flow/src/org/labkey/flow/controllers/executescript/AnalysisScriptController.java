@@ -7,15 +7,14 @@ import org.apache.struts.action.ActionError;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.*;
-import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.jsp.FormPage;
 
 import java.io.File;
-import java.net.URI;
 import java.util.*;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
@@ -102,14 +101,14 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         return includeView(template);
     }
 
-    protected List<URI> getNewPaths(ChooseRunsToUploadForm form) throws Exception
+    protected Map<String, String> getNewPaths(ChooseRunsToUploadForm form) throws Exception
     {
         PipelineService service = PipelineService.get();
-        URI root = service.getPipelineRoot(getContainer());
+        PipeRoot root = service.findPipelineRoot(getContainer());
         if (root == null)
         {
             addError("The pipeline root is not set.");
-            return Collections.EMPTY_LIST;
+            return Collections.EMPTY_MAP;
         }
 
         String displayPath;
@@ -121,21 +120,25 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         {
             displayPath = "'" + form.path + "'";
         }
-        URI pathRoot = URIUtil.resolve(root, form.path);
-        if (pathRoot == null)
+        File directory = StringUtils.isEmpty(form.path) ? root.getRootPath() : new File(root.getRootPath(), form.path);
+        if (!root.isUnderRoot(directory))
         {
             addError("The path " + displayPath + " is invalid.");
-            return Collections.EMPTY_LIST;
+            return Collections.EMPTY_MAP;
         }
 
-        File fileRoot = new File(URIUtil.resolve(root, form.path));
-        if (!fileRoot.isDirectory())
+        if (!directory.isDirectory())
         {
             addError(displayPath + " is not a directory.");
+            return Collections.EMPTY_MAP;
         }
         List<File> files = new ArrayList();
-        files.add(fileRoot);
-        files.addAll(Arrays.asList(fileRoot.listFiles()));
+        files.add(directory);
+        File[] dirFiles = directory.listFiles();
+        if (dirFiles != null)
+        {
+            files.addAll(Arrays.asList(dirFiles));
+        }
 
         Set<String> usedPaths = new HashSet();
         for (FlowRun run : FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords))
@@ -143,7 +146,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             usedPaths.add(run.getExperimentRun().getFilePathRoot());
         }
 
-        List<URI> ret = new ArrayList();
+        Map<String, String> ret = new TreeMap();
         boolean anyFCSDirectories = false;
         for (File file : files)
         {
@@ -152,7 +155,17 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                 anyFCSDirectories = true;
                 if (!usedPaths.contains(file.toString()))
                 {
-                    ret.add(URIUtil.relativize(root, file.toURI()));
+                    String relativePath = root.relativePath(file);
+                    String displayName;
+                    if (file.equals(directory))
+                    {
+                        displayName = "This Directory";
+                    }
+                    else
+                    {
+                        displayName = file.getName();
+                    }
+                    ret.put(relativePath, displayName);
                 }
             }
         }
@@ -175,6 +188,8 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
     protected Forward chooseRunsToUpload(ChooseRunsToUploadForm form) throws Exception
     {
         requiresPermission(ACL.PERM_INSERT);
+        PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+        root.requiresPermission(getContainer(), getUser(), ACL.PERM_INSERT);
 
         HttpView view = FormPage.getView(AnalysisScriptController.class, form, "chooseRunsToUpload.jsp");
 
@@ -189,46 +204,45 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
     protected Forward uploadRuns(ChooseRunsToUploadForm form) throws Exception
     {
         requiresPermission(ACL.PERM_INSERT);
+        PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+        root.requiresPermission(getContainer(), getUser(), ACL.PERM_INSERT);
         if (form.ff_path == null || form.ff_path.length == 0)
         {
             addError("You did not select any runs.");
             return chooseRunsToUpload(form);
         }
-        FlowScript analysisScript = null;
-        if (form.ff_protocolId != 0)
-        {
-            analysisScript = FlowScript.fromScriptId(form.ff_protocolId);
-        }
-        else
-        {
-            List<FlowScript> protocols = FlowScript.getProtocolsWithStep(getContainer(), FlowProtocolStep.keywords);
-            if (protocols.size() == 0)
-            {
-                analysisScript = null;
-            }
-            else if (protocols.size() == 1)
-            {
-                analysisScript = protocols.get(0);
-            }
-        }
-
-        PipelineService service = PipelineService.get();
         List<File> paths = new ArrayList();
-        URI root = service.getPipelineRoot(getContainer());
+        List<String> skippedPaths = new ArrayList();
         for (String path : form.ff_path)
         {
-            paths.add(new File(URIUtil.resolve(root, path)));
+            File file = root.resolvePath(path);
+            if (file == null)
+            {
+                skippedPaths.add(path);
+                continue;
+            }
+
+            paths.add(file);
         }
 
-        AddRunsJob job = new AddRunsJob(getViewBackgroundInfo(), FlowProtocol.ensureForContainer(getUser(), getContainer()), analysisScript, paths);
-        return executeScript(job, analysisScript);
+        ViewBackgroundInfo vbi = getViewBackgroundInfo();
+        if (paths.size() > 0)
+        {
+            vbi = PipelineService.get().getJobBackgroundInfo(vbi, paths.get(0));
+        }
+        AddRunsJob job = new AddRunsJob(vbi, FlowProtocol.ensureForContainer(getUser(), vbi.getContainer()), paths);
+        for (String path : skippedPaths)
+        {
+            job.addStatus("Skipping path '" + path + "' because it is invalid.");
+        }
+        return executeScript(job, null);
     }
 
     @Jpf.Action
     protected Forward showUploadRuns() throws Exception
     {
         requiresPermission(ACL.PERM_INSERT);
-        ViewURLHelper forward = PipelineService.get().getViewUrlHelper(getViewURLHelper(), FlowPipelineProvider.NAME, "upload", null);
+        ViewURLHelper forward = PipelineService.get().urlBrowse(getContainer());
         forward.addParameter("referer", FlowPipelineProvider.NAME);
         return new ViewForward(forward);
     }

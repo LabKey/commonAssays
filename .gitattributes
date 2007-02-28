@@ -182,8 +182,6 @@ flow/src/org/labkey/flow/controllers/executescript/ScriptOverview.java -text
 flow/src/org/labkey/flow/controllers/executescript/chooseAnalysisName.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/chooseRunsToAnalyze.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/chooseRunsToUpload.jsp -text
-flow/src/org/labkey/flow/controllers/executescript/chooseUploadProtocol.jsp -text
-flow/src/org/labkey/flow/controllers/executescript/defaultUploadProtocol.xml -text
 flow/src/org/labkey/flow/controllers/executescript/main.jsp -text
 flow/src/org/labkey/flow/controllers/flowAdmin.jsp -text
 flow/src/org/labkey/flow/controllers/log/LogController.java -text

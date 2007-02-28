@@ -5,6 +5,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineQueue;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.Overview;
 import org.labkey.api.query.QueryAction;
@@ -46,10 +47,12 @@ public class FlowOverview extends Overview
     {
         super(user, container);
         PipelineService pipeService = PipelineService.get();
-        _hasPipelineRoot = pipeService.getPipelineRoot(getContainer()) != null;
-        _canSetPipelineRoot = hasPermission(ACL.PERM_ADMIN);
+        PipeRoot pipeRoot = pipeService.findPipelineRoot(getContainer());
+        _hasPipelineRoot = pipeRoot != null && pipeRoot.getUri(container) != null;
+        _canSetPipelineRoot = hasPermission(ACL.PERM_ADMIN) && (pipeRoot == null || getContainer().equals(pipeRoot.getContainer()));
         _canInsert = hasPermission(ACL.PERM_INSERT);
         _canUpdate = hasPermission(ACL.PERM_UPDATE);
+
         _fcsFileCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.fcsKeywords);
         _fcsRunCount = FlowManager.get().getRunCount(getContainer(), ObjectType.fcsKeywords);
         _fcsAnalysisCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.fcsAnalysis);
@@ -162,7 +165,7 @@ public class FlowOverview extends Overview
             }
             else
             {
-                status.append(" These are in <a href=\"" + h(urlShowRuns) + "\">" + _fcsRunCount + " runs.");
+                status.append(" These are in <a href=\"" + h(urlShowRuns) + "\">" + _fcsRunCount + " runs</a>.");
             }
             ret.setStatusHTML(status.toString());
         }

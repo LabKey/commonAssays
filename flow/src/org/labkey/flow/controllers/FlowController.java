@@ -23,12 +23,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionError;
 import org.labkey.flow.script.*;
 import org.labkey.flow.view.JobStatusView;
-import org.labkey.api.jsp.FormPage;
 import org.labkey.flow.util.PFUtil;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.webparts.FlowFolderType;
-import org.labkey.flow.webparts.FlowOverview;
 import org.labkey.flow.webparts.OverviewWebPart;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowScript;
@@ -42,6 +40,7 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.module.Module;
+import org.labkey.api.jsp.FormPage;
 
 import java.util.*;
 import java.io.File;
@@ -167,6 +166,8 @@ public class FlowController extends BaseFlowController<FlowController.Action>
     @Jpf.Action
     protected Forward cancelJob() throws Exception
     {
+        requiresPermission(ACL.PERM_UPDATE);
+
         String statusFile = getParam(FlowParam.statusFile);
         ScriptJob job = findJob(statusFile);
         if (job == null)
@@ -229,8 +230,6 @@ public class FlowController extends BaseFlowController<FlowController.Action>
         destContainer.setActiveModules(getContainer().getActiveModules());
         destContainer.setFolderType(getContainer().getFolderType());
         destContainer.setDefaultModule(flowModule);
-        PipelineService service = PipelineService.get();
-        service.setPipelineRoot(getUser(), destContainer, service.getPipelineRoot(getContainer()));
         FlowProtocol srcProtocol = FlowProtocol.getForContainer(getContainer());
         if (srcProtocol != null)
         {

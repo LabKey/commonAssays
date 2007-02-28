@@ -1167,11 +1167,11 @@ public class MS2PipelineManager
 
     public static URI getSequenceDatabaseRoot(Container container) throws SQLException
     {
-        URI dbRoot = PipelineService.get().getPipelineRoot(container, SEQUENCE_DB_ROOT_TYPE);
+        URI dbRoot = PipelineService.get().getPipelineRootSetting(container, SEQUENCE_DB_ROOT_TYPE);
         if (dbRoot == null)
         {
             // return default root
-            URI root = PipelineService.get().getPipelineRoot(container);
+            URI root = PipelineService.get().getPipelineRootSetting(container);
             if (root != null)
                 dbRoot = new File(root.getPath(), _pipelineDBDir).toURI();
         }
@@ -1183,7 +1183,7 @@ public class MS2PipelineManager
         PipelineService service = PipelineService.get();
 
         // If the new root is just the default, then clear the entry.
-        URI root = service.getPipelineRoot(container);
+        URI root = service.getPipelineRootSetting(container);
         if (rootSeq != null && root != null && rootSeq.equals(new File(root.getPath(), _pipelineDBDir).toURI()))
              rootSeq = null;
 

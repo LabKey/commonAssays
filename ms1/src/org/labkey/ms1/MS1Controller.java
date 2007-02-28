@@ -7,6 +7,7 @@ import org.labkey.api.view.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.ACL;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.exp.api.ExperimentService;
@@ -58,7 +59,7 @@ public class MS1Controller extends ViewController
         {
             // Figure out the pipeline root for this container, which might
             // be set directly on this container, or on a parent container
-            PipelineService.PipeRoot pr = service.findPipelineRoot(c);
+            PipeRoot pr = service.findPipelineRoot(c);
             if (pr != null)
             {
                 // The path to the file to load will be relative to the pipeline root

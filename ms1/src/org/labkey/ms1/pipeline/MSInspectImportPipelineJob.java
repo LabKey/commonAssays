@@ -2,6 +2,7 @@ package org.labkey.ms1.pipeline;
 
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.data.Container;
@@ -125,7 +126,7 @@ public class MSInspectImportPipelineJob extends PipelineJob
 
         Container c = _info.getContainer();
         PipelineService service = PipelineService.get();
-        PipelineService.PipeRoot pr = service.findPipelineRoot(c);
+        PipeRoot pr = service.findPipelineRoot(c);
         if (pr == null)
             throw new FileNotFoundException("Failed to find a pipeline root for " + c.getPath());
         File containerRoot = new File(pr.getUri(c));

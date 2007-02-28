@@ -33,7 +33,6 @@ import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Fraction;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.protocol.*;
-import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
@@ -49,9 +48,7 @@ import java.util.*;
 import org.labkey.ms2.pipeline.FileStatus;
 
 import org.labkey.ms2.pipeline.MascotClientImpl;
-import org.labkey.api.pipeline.PipelineProtocol;
-import org.labkey.api.pipeline.PipelineProtocolFactory;
-import org.labkey.api.pipeline.PipelineValidationException;
+import org.labkey.api.pipeline.*;
 
 /**
  *
@@ -94,7 +91,7 @@ public class PipelineController extends ViewController
 
         String path = getViewURLHelper().getParameter(PipelineService.PARAM_Path);
 
-        PipelineService.PipeRoot pr = PipelineService.get().findPipelineRoot(c);
+        PipeRoot pr = PipelineService.get().findPipelineRoot(c);
         if (pr == null || !URIUtil.exists(pr.getUri()))
             HttpView.throwNotFound();
 
@@ -326,7 +323,7 @@ public class PipelineController extends ViewController
         Container c = getContainer();
         PipelineService service = PipelineService.get();
 
-        PipelineService.PipeRoot pr = service.findPipelineRoot(c);
+        PipeRoot pr = service.findPipelineRoot(c);
         if (pr == null || !URIUtil.exists(pr.getUri()))
             HttpView.throwNotFound();
 
@@ -653,7 +650,7 @@ public class PipelineController extends ViewController
 
         Container c = getContainer();
 
-        URI uriRoot = PipelineService.get().getPipelineRoot(c);
+        URI uriRoot = PipelineService.get().getPipelineRootSetting(c);
 
         String error = "";
         if ("POST".equalsIgnoreCase(getRequest().getMethod()))
@@ -718,7 +715,7 @@ public class PipelineController extends ViewController
 
         Container c = getContainer();
 
-        URI uriRoot = PipelineService.get().getPipelineRoot(c);
+        URI uriRoot = PipelineService.get().getPipelineRootSetting(c);
 
         String error = "";
         if ("POST".equalsIgnoreCase(getRequest().getMethod()))
@@ -780,7 +777,7 @@ public class PipelineController extends ViewController
 
         Container c = getContainer();
 
-        URI uriRoot = PipelineService.get().getPipelineRoot(c);
+        URI uriRoot = PipelineService.get().getPipelineRootSetting(c);
 
         String error = "";
         if ("POST".equalsIgnoreCase(getRequest().getMethod()))
@@ -918,7 +915,7 @@ public class PipelineController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
         form.setSearchEngine(this.getRequest().getParameter("searchEngine"));
-        PipelineService.PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
+        PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
         if (pr == null || !URIUtil.exists(pr.getUri()))
             return HttpView.throwNotFound();
 
@@ -1040,7 +1037,7 @@ public class PipelineController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
         form.setSearchEngine(this.getRequest().getParameter("searchEngine"));
-        PipelineService.PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
+        PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
         if (pr == null || !URIUtil.exists(pr.getUri()))
             HttpView.throwNotFound();
         URI uriRoot = pr.getUri();
@@ -1074,7 +1071,7 @@ public class PipelineController extends ViewController
         Container c = getContainer(ACL.PERM_DELETE);
 
         PipelineService service = PipelineService.get();
-        PipelineService.PipeRoot pr = service.findPipelineRoot(c);
+        PipeRoot pr = service.findPipelineRoot(c);
         if (pr == null || !URIUtil.exists(pr.getUri()))
             HttpView.throwNotFound();
 
@@ -1108,7 +1105,7 @@ public class PipelineController extends ViewController
 
         Container c = getContainer();
 
-        PipelineService.PipeRoot pr = PipelineService.get().findPipelineRoot(c);
+        PipeRoot pr = PipelineService.get().findPipelineRoot(c);
         if (pr == null || !URIUtil.exists(pr.getUri()))
             HttpView.throwNotFound();
 
@@ -1311,7 +1308,7 @@ public class PipelineController extends ViewController
         form.setSearchEngine(this.getRequest().getParameter("searchEngine"));
 
         PipelineService service = PipelineService.get();
-        PipelineService.PipeRoot pr = service.findPipelineRoot(getContainer());
+        PipeRoot pr = service.findPipelineRoot(getContainer());
         if (pr == null || !URIUtil.exists(pr.getUri()))
             HttpView.throwNotFound();
         URI uriRoot = pr.getUri();
@@ -1597,7 +1594,7 @@ public class PipelineController extends ViewController
 
         public Map<String, String> getTokenReplacements() throws SQLException
         {
-            PipelineService.PipeRoot pRoot = PipelineService.get().findPipelineRoot(getContainer());
+            PipeRoot pRoot = PipelineService.get().findPipelineRoot(getContainer());
             XarTemplate template = MassSpecProtocolFactory.get().getXarTemplate(pRoot.getUri(), templateName);
             Set<String> tokenNames = template.getTokens();
             Map<String, String> replacements = new HashMap<String, String>();

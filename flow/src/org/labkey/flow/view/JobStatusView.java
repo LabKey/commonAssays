@@ -74,13 +74,17 @@ public class JobStatusView extends HttpView
         out.write("</code></div>");
         if (_job != null)
         {
+            ViewURLHelper cancelURL = new ViewURLHelper("Flow", "cancelJob", getViewContext().getContainer());
+            cancelURL.addParameter("statusFile", _psf.getFilePath());
+            out.write("<br>" + PageFlowUtil.buttonLink("Cancel Job", cancelURL));
+            
             Map<FlowProtocolStep, String[]> processedRuns = _job.getProcessedRunLSIDs();
             if (!processedRuns.isEmpty())
             {
                 out.write("Completed runs:<br>");
                 for (Map.Entry<FlowProtocolStep, String[]> entry : processedRuns.entrySet())
                 {
-                    out.write("<p>" + entry.getKey().getLabel() + "<br>");
+                    out.write("<p>" + entry.getKey().getLabel() + " step<br>");
                     for (String lsid : entry.getValue())
                     {
                         FlowRun run = FlowRun.fromLSID(lsid);
@@ -98,9 +102,6 @@ public class JobStatusView extends HttpView
                     out.write("</p>");
                 }
             }
-            ViewURLHelper cancelURL = new ViewURLHelper("Flow", "cancelJob", getViewContext().getContainer());
-            cancelURL.addParameter("statusFile", _psf.getFilePath());
-            out.write("<br>" + PageFlowUtil.buttonLink("Cancel Job", cancelURL));
         }
     }
 }

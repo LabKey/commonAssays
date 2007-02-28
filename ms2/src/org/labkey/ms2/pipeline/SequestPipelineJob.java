@@ -18,6 +18,7 @@ package org.labkey.ms2.pipeline;
 import org.labkey.api.exp.ExperimentPipelineJob;
 import org.labkey.api.exp.FileXarSource;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.util.*;
 
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -616,7 +617,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
         
         Container c = _info.getContainer();
         PipelineService service = PipelineService.get();
-        PipelineService.PipeRoot pr = service.findPipelineRoot(c);
+        PipeRoot pr = service.findPipelineRoot(c);
         if (pr == null)
             throw new FileNotFoundException("Failed to find a pipeline root for " + c.getPath());
         File containerRoot = new File(pr.getUri(c));

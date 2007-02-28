@@ -47,7 +47,7 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
 
     protected Forward executeScript(ScriptJob job, FlowScript script) throws Exception
     {
-        FlowProtocol.ensureForContainer(getUser(), getContainer());
+        FlowProtocol.ensureForContainer(getUser(), job.getContainer());
         PipelineService service = PipelineService.get();
         service.getPipelineQueue().addJob(job);
 

@@ -15,9 +15,9 @@ public class AddRunsJob extends ScriptJob
 
     List<File> _paths;
 
-    public AddRunsJob(ViewBackgroundInfo info, FlowProtocol protocol, FlowScript script, List<File> paths) throws Exception
+    public AddRunsJob(ViewBackgroundInfo info, FlowProtocol protocol, List<File> paths) throws Exception
     {
-        super(info, FlowExperiment.getExperimentRunExperimentName(info.getContainer()), FlowExperiment.getExperimentRunExperimentLSID(info.getContainer()), protocol, script, FlowProtocolStep.keywords);
+        super(info, FlowExperiment.getExperimentRunExperimentName(info.getContainer()), FlowExperiment.getExperimentRunExperimentLSID(info.getContainer()), protocol, null, FlowProtocolStep.keywords);
 
         _paths = paths;
     }
