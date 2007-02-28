@@ -23,6 +23,7 @@ import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.apache.log4j.varia.NullAppender;
 import org.apache.struts.action.ActionMapping;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
@@ -4136,7 +4137,7 @@ public class MS2Controller extends ViewController
         requiresGlobalAdmin();
 
         String originalSequestServer = form.getSequestServer();
-        SequestClientImpl sequestClient = new SequestClientImpl(form.getSequestServer(), null);
+        SequestClientImpl sequestClient = new SequestClientImpl(form.getSequestServer());
         sequestClient.findWorkableSettings(true);
         form.setStatus(sequestClient.getErrorCode());
 
@@ -4144,7 +4145,7 @@ public class MS2Controller extends ViewController
         if (0 == sequestClient.getErrorCode())
         {
             message = "Test passed.";
-            form.setParameters(sequestClient.getParameters());
+            form.setParameters(sequestClient.getDbNames());
         }
         else
         {

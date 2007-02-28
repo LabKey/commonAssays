@@ -422,8 +422,7 @@ public class PipelineController extends ViewController
                 if (form.getProtocol().length() == 0)
                 {
                     String[] seqDBs = form.getSequenceDBs();
-                    if ("mascot".equalsIgnoreCase(form.getSearchEngine())
-                        || "sequest".equalsIgnoreCase(form.getSearchEngine()))
+                    if ("mascot".equalsIgnoreCase(form.getSearchEngine()))
                     {
                         // we check that the database exist locally
                         // so that Mascot2XML will work
@@ -433,6 +432,24 @@ public class PipelineController extends ViewController
                         if (!fileSequenceDB.exists())
                             throw new IllegalArgumentException("Sequence database '" + seqDBs[0] + "' is not found in local FASTA root");
                             */
+                    }
+                    if ("sequest".equalsIgnoreCase(form.getSearchEngine()))
+                    {
+                        String seqDBPath = form.getSequenceDBPath();
+                        if(seqDBs == null || seqDBs.length == 0)
+                            throw new IllegalArgumentException(
+                                    "A sequence database must be selected.");
+                        if (seqDBPath != null && seqDBPath.length() > 0)
+                        {
+                            String[] seqFullDBs = new String[seqDBs.length];
+                            for (int i = 0; i < seqDBs.length; i++)
+                                seqFullDBs[i] = seqDBPath + seqDBs[i];
+                            seqDBs = seqFullDBs;
+                        }
+
+                        File fileSequenceDB = new File(sequenceRoot.getPath(), seqDBs[0]);
+                        if (!fileSequenceDB.exists())
+                            throw new IllegalArgumentException("Sequence database '" + seqDBs[0] + "' is not found in local FASTA root");
                     }
                     else
                     {

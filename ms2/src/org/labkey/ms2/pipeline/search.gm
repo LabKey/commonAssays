@@ -27,6 +27,10 @@ if (null != error)
         {
             out.print ("In order to perform a search using Sequest, LabKey Server must be able to contact your Sequest server and at least one protein database must have already been uploaded to it.<br>");
         }
+        else if("sequest".equalsIgnoreCase(form.searchEngine))
+        {
+            out.print ("In order to perform a search using Sequest, LabKey Server must be able to contact your Sequest server and protein database must have already been uploaded to it.<br>");
+        }
         else
         {
             out.print ("In order to perform a search, you must first upload a protein database.<br>");

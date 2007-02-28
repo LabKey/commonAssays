@@ -520,7 +520,6 @@ public class MS2PipelineManager
         }
     }
 
-//wch: mascotdev
     public static Map<String, String[]> getSequenceDBNames(URI sequenceDbRoot, String searchEngine)
     {
         if ("mascot".equalsIgnoreCase(searchEngine))
@@ -533,27 +532,16 @@ public class MS2PipelineManager
         if ("sequest".equalsIgnoreCase(searchEngine))
         {
             AppProps appProps = AppProps.getInstance();
-            if(!"".equals(appProps.getSequestServer()))
-            {
-                SequestClientImpl sequestClient = new SequestClientImpl(appProps.getSequestServer(), null);
-                // TODO sequestClient.setProxyURL(appProps.getSequestHTTPProxy());
-                return sequestClient.getSequenceDBNames();
-            }
-            else
-            {
-                return addSequenceDBNames(new File(sequenceDbRoot), "", new LinkedHashMap<String, String[]>(), searchEngine);
-            }
+            SequestClientImpl sequestClient = new SequestClientImpl(appProps.getSequestServer(), _log);
+            return sequestClient.getSequenceDBNamesMap("", new LinkedHashMap<String, String[]>());
         }
         else
         {
             return addSequenceDBNames(new File(sequenceDbRoot), "", new LinkedHashMap<String, String[]>(), searchEngine);
         }
     }
-//END-wch: mascotdev
 
-//wch: mascotdev
     public static Map<String, String[]> addSequenceDBNames(File dir, String path, Map<String, String[]> m, String searchEngine)
-//END-wch: mascotdev
     {
         File[] dbFiles;
         if(searchEngine.equals(SEQUEST))

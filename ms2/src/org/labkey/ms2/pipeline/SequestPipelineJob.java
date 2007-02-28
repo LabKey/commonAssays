@@ -262,7 +262,8 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
                 AppProps appProps = AppProps.getInstance();
 
                 SequestClientImpl sequestClient = new SequestClientImpl(appProps.getSequestServer(), getLogger());
-                iReturn = sequestClient.search(_fileSequestParamsRemote.getAbsolutePath(),fileMzXML.getAbsolutePath(),
+                String sequenceRoot = new File(_uriSequenceRoot).getAbsolutePath() + File.separator;
+                iReturn = sequestClient.search(sequenceRoot,_fileSequestParamsRemote.getAbsolutePath(),fileMzXML.getAbsolutePath(),
                         fileSequestSummary.getAbsolutePath(),inputXmlParams);
 
                 if (iReturn != 0 || !fileSequestSummary.exists())

@@ -47,7 +47,7 @@ public abstract class SequestParamsBuilder
         return _validResidues;
     }
 
-    String initDatabases()
+    String initDatabases(boolean isRelative)
     {
         String parserError = "";
         ArrayList<String> databases = new ArrayList<String>();
@@ -75,7 +75,14 @@ public abstract class SequestParamsBuilder
             parserError = "pipeline, database; The database does not exist on the local server (" + databases.get(0) + ").\n";
             return parserError;
         }
-        database1.setValue(databaseFile.getAbsolutePath());
+        if(isRelative)
+        {
+            database1.setValue(databases.get(0));
+        }
+        else
+        {
+            database1.setValue(databaseFile.getAbsolutePath());
+        }
         if (databases.size() > 1)
         {
             Param database2 = _params.getParam("second_database_name");
@@ -88,7 +95,8 @@ public abstract class SequestParamsBuilder
                     parserError = "pipeline, database; The database does not exist(" + databases.get(1) + ").\n";
                     return parserError;
                 }
-                database2.setValue(databaseFile.getAbsolutePath());
+                database2.setValue(databases.get(1));
+                //database2.setValue(databaseFile.getAbsolutePath());
             }
         }
         return parserError;
@@ -803,7 +811,7 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
                 "</bioml>");
 
-            String parserError = spb.initDatabases();
+            String parserError = spb.initDatabases(false);
             if (!parserError.equals("")) fail(parserError);
             Param sp = spb.getProperties().getParam("first_database_name");
             assertEquals(new File(dbPath + File.separator + value).getCanonicalPath(), new File(sp.getValue()).getCanonicalPath());
@@ -835,7 +843,7 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
                 "</bioml>");
 
-            String parserError = spb.initDatabases();
+            String parserError = spb.initDatabases(false);
             if (parserError.equals("")) fail("Expected error.");
             assertEquals("pipeline, database; No value entered for database.\n", parserError);
         }
@@ -846,7 +854,7 @@ public abstract class SequestParamsBuilder
                 "<bioml>" +
                 "</bioml>");
 
-            String parserError = spb.initDatabases();
+            String parserError = spb.initDatabases(false);
             if (parserError.equals("")) fail("Expected error.");
             assertEquals("pipeline, database; No value entered for database.\n", parserError);
         }
@@ -859,7 +867,7 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
                 "</bioml>");
 
-            String parserError = spb.initDatabases();
+            String parserError = spb.initDatabases(false);
             if (parserError.equals("")) fail("Expected error.");
             assertEquals("pipeline, database; The database does not exist on the local server (" + value + ").\n", parserError);
 
@@ -869,7 +877,7 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
                 "</bioml>");
 
-            parserError = spb.initDatabases();
+            parserError = spb.initDatabases(false);
             if (parserError.equals("")) fail("Expected error.");
             assertEquals("pipeline, database; The database does not exist(garbage).\n", parserError);
 
@@ -879,7 +887,7 @@ public abstract class SequestParamsBuilder
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
                 "</bioml>");
 
-            parserError = spb.initDatabases();
+            parserError = spb.initDatabases(false);
             if (parserError.equals("")) fail("Expected error.");
             assertEquals("pipeline, database; The database does not exist on the local server (garbage).\n", parserError);
         }

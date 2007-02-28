@@ -48,7 +48,7 @@ public class SequestParamsV2Builder extends SequestParamsBuilder{
     public String initXmlValues()
     {
         StringBuilder parserError = new StringBuilder();
-        parserError.append(initDatabases());
+        parserError.append(initDatabases(true));
         parserError.append(initPeptideMassTolerance());
         parserError.append(initMassUnits());
         parserError.append(initIonScoring());
