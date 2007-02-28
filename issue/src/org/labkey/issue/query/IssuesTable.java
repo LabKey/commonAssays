@@ -70,6 +70,8 @@ public class IssuesTable extends FilteredTable
         ColumnInfo resolvedBy = wrapColumn(_rootTable.getColumn("ResolvedBy"));
         UserIdForeignKey.initColumn(resolvedBy);
         addColumn(resolvedBy);
+        addWrapColumn(_rootTable.getColumn("Resolved"));
+        addWrapColumn(_rootTable.getColumn("Resolution"));
         addWrapColumn(_rootTable.getColumn("Duplicate"));
         ColumnInfo closedBy = wrapColumn(_rootTable.getColumn("ClosedBy"));
         UserIdForeignKey.initColumn(closedBy);

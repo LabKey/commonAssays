@@ -2,6 +2,7 @@ package org.labkey.flow.query;
 
 import org.labkey.api.exp.api.ExpDataTable;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
@@ -11,31 +12,17 @@ import java.util.*;
 
 public class FlowPropertySet
 {
-    Map<String, Integer> _keywords;
-    Map<StatisticSpec, Integer> _statistics;
-    Map<GraphSpec, Integer> _graphs;
-    Map<String, SubsetSpec> _subsetNameAncestorMap;
+    private Container _container;
+    private ColumnInfo _colDataId;
+    private Map<String, Integer> _keywords;
+    private Map<StatisticSpec, Integer> _statistics;
+    private Map<GraphSpec, Integer> _graphs;
+    private Map<String, SubsetSpec> _subsetNameAncestorMap;
 
     public FlowPropertySet(ExpDataTable table)
     {
-        ColumnInfo colDataId = table.getColumn("RowId");
-        if (colDataId == null)
-        {
-            throw new IllegalArgumentException("Table must have rowid column");
-        }
-        _keywords = AttributeCache.KEYWORDS.getAttrValues(colDataId);
-        _statistics = AttributeCache.STATS.getAttrValues(colDataId);
-        _graphs = AttributeCache.GRAPHS.getAttrValues(colDataId);
-        Set<SubsetSpec> subsets = new HashSet();
-        for (StatisticSpec stat : _statistics.keySet())
-        {
-            subsets.add(stat.getSubset());
-        }
-        for (GraphSpec graph : _graphs.keySet())
-        {
-            subsets.add(graph.getSubset());
-        }
-        _subsetNameAncestorMap = getSubsetNameAncestorMap(subsets);
+        _colDataId = table.getColumn("RowId");
+        _container = table.getContainer();
     }
 
     static protected Map<String, SubsetSpec> getSubsetNameAncestorMap(Collection<SubsetSpec> subsets)
@@ -100,18 +87,42 @@ public class FlowPropertySet
         return new SubsetSpec(ret.getParent(), simplifySubsetExpr(ret.getSubset()));
     }
 
+    private void initStatisticsAndGraphs()
+    {
+        if (_subsetNameAncestorMap != null)
+            return;
+        _statistics = AttributeCache.STATS.getAttrValues(_container, _colDataId);
+        _graphs = AttributeCache.GRAPHS.getAttrValues(_container, _colDataId);
+        Set<SubsetSpec> subsets = new HashSet();
+        for (StatisticSpec stat : _statistics.keySet())
+        {
+            subsets.add(stat.getSubset());
+        }
+        for (GraphSpec graph : _graphs.keySet())
+        {
+            subsets.add(graph.getSubset());
+        }
+        _subsetNameAncestorMap = getSubsetNameAncestorMap(subsets);
+    }
+
     public Map<StatisticSpec, Integer> getStatistics()
     {
+        initStatisticsAndGraphs();
         return _statistics;
     }
 
     public Map<GraphSpec, Integer> getGraphProperties()
     {
+        initStatisticsAndGraphs();
         return _graphs;
     }
 
     public Map<String, Integer> getKeywordProperties()
     {
+        if (_keywords == null)
+        {
+            _keywords = AttributeCache.KEYWORDS.getAttrValues(_container, _colDataId); 
+        }
         return _keywords;
     }
 }

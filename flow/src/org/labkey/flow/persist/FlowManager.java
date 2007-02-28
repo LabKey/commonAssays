@@ -2,26 +2,40 @@ package org.labkey.flow.persist;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.Data;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.security.User;
 import org.labkey.api.util.LimitedCacheMap;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.util.CacheMap;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.query.AttributeCache;
 
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FlowManager
 {
     static private FlowManager instance = new FlowManager();
+    static private final Logger _log = Logger.getLogger(FlowManager.class);
     private static final String SCHEMA_NAME = "flow";
     private final Map<String, Integer> _attridCacheMap = new LimitedCacheMap(1000, 10000);
+    class AttrNameCacheMap extends LimitedCacheMap<Integer, String>
+    {
+        public AttrNameCacheMap(int initialSize, int maxSize)
+        {
+            super(initialSize, maxSize);
+        }
+        public Entry<Integer, String> findEntry(Object key)
+        {
+            return super.findEntry(key);
+        }
+    }
+    private final AttrNameCacheMap _attrNameCacheMap = new AttrNameCacheMap(1000, 10000);
 
     static public FlowManager get()
     {
@@ -88,12 +102,71 @@ public class FlowManager
                 _attridCacheMap.put(attr, i);
                 if (i == null)
                     return 0;
+                _attrNameCacheMap.put(i, attr);
                 return i;
             }
             catch (SQLException e)
             {
                 throw UnexpectedException.wrap(e);
             }
+        }
+    }
+
+    public Map.Entry<Integer, String>[] getAttributeNames(Integer[] ids)
+    {
+        Map.Entry<Integer, String>[] ret = new Map.Entry[ids.length];
+        boolean hasNulls = false;
+        for (int i = 0; i < ids.length; i ++)
+        {
+            Integer id = ids[i];
+            if (id != null)
+            {
+                ret[i] = getAttributeName(ids[i]);
+            }
+            if (ret[i] == null)
+            {
+                _log.error("Request for attribute " + id + " returned null.", new Exception());
+                hasNulls = true;
+            }
+        }
+        if (!hasNulls)
+            return ret;
+        ArrayList<Map.Entry<Integer, String>> lstRet = new ArrayList();
+        for (Map.Entry<Integer, String> entry : ret)
+        {
+            if (entry != null)
+            {
+                lstRet.add(entry);
+            }
+        }
+        return lstRet.toArray(new Map.Entry[0]);
+    }
+
+    public Map.Entry<Integer, String> getAttributeName(int id)
+    {
+        synchronized(_attridCacheMap)
+        {
+            Map.Entry<Integer, String>ret = _attrNameCacheMap.findEntry(id);
+            if (ret == null)
+            {
+                try
+                {
+                    String name = Table.executeSingleton(getSchema(), "SELECT Name FROM flow.Attribute WHERE RowId = ?", new Object[] { id }, String.class);
+                    if (name == null)
+                    {
+                        return null;
+                    }
+                    _attrNameCacheMap.put(id, name);
+                    _attridCacheMap.put(name, id);
+                    return _attrNameCacheMap.findEntry(id);
+                }
+                catch (SQLException e)
+                {
+                    _log.error("Error retrieving attribute " + id, e);
+                    return null;
+                }
+            }
+            return ret;
         }
     }
 
@@ -166,11 +239,13 @@ public class FlowManager
             return;
         StringBuilder sqlGetOIDs = new StringBuilder("SELECT flow.Object.RowId FROM flow.Object WHERE flow.Object.DataId IN (");
         String comma = "";
+        Set<Container> containers = new HashSet();
         for (Data data : datas)
         {
             sqlGetOIDs.append(comma);
             comma = ",";
             sqlGetOIDs.append(data.getRowId());
+            containers.add(ContainerManager.getForId(data.getContainer()));
         }
         sqlGetOIDs.append(")");
         Integer[] objectIds = Table.executeArray(getSchema(), sqlGetOIDs.toString(), null, Integer.class);
@@ -204,6 +279,10 @@ public class FlowManager
             {
                 getSchema().getScope().rollbackTransaction();
             }
+            for (Container container : containers)
+            {
+                AttributeCache.invalidateCache(container);
+            }
         }
     }
 
@@ -230,7 +309,7 @@ public class FlowManager
         {
             throw new IllegalArgumentException("Object not found.");
         }
-        int keywordId = getAttributeId(keyword);
+        int keywordId = ensureAttributeId(keyword);
         DbSchema schema = getSchema();
         boolean fTrans = false;
         try
@@ -250,7 +329,6 @@ public class FlowManager
                 schema.getScope().commitTransaction();
                 fTrans = false;
             }
-
         }
         finally
         {
@@ -258,6 +336,7 @@ public class FlowManager
             {
                 schema.getScope().commitTransaction();
             }
+            AttributeCache.invalidateCache(data.getContainer());
         }
 
     }

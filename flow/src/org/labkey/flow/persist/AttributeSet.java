@@ -2,19 +2,13 @@ package org.labkey.flow.persist;
 
 import org.labkey.flow.flowdata.xml.*;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExperimentService;
 import org.fhcrc.cpas.exp.xml.DataBaseType;
 import org.labkey.api.security.User;
 import org.labkey.api.data.Table;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.DbCache;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.XMLUtil;
-import org.apache.xmlbeans.XmlOptions;
-import org.apache.xmlbeans.XmlCursor;
 import org.apache.commons.lang.StringUtils;
-import org.w3c.dom.Node;
 
 import java.util.*;
 import java.io.*;
@@ -27,11 +21,7 @@ import org.labkey.flow.analysis.model.FCSKeywordData;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.GraphSpec;
-
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
+import org.labkey.flow.query.AttributeCache;
 
 public class AttributeSet
 {
@@ -258,7 +248,6 @@ public class AttributeSet
                     paramsList.add(new Object[] { obj.getRowId(), mgr.getAttributeId(entry.getKey()), entry.getValue()});
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
-                DbCache.clear(mgr.getTinfoKeyword());
             }
             if (_statistics != null)
             {
@@ -269,7 +258,6 @@ public class AttributeSet
                     paramsList.add(new Object[] { obj.getRowId(), mgr.getAttributeId(entry.getKey().toString()), entry.getValue() });
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
-                DbCache.clear(mgr.getTinfoStatistic());
             }
             if (_graphs != null)
             {
@@ -280,7 +268,6 @@ public class AttributeSet
                     paramsList.add(new Object[] { obj.getRowId(), mgr.getAttributeId(entry.getKey().toString()), entry.getValue()});
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
-                DbCache.clear(mgr.getTinfoGraph());
             }
             if (fTransaction)
             {
@@ -292,6 +279,7 @@ public class AttributeSet
         {
             if (fTransaction)
                 mgr.getSchema().getScope().rollbackTransaction();
+            AttributeCache.invalidateCache(data.getContainer());
         }
 
     }
