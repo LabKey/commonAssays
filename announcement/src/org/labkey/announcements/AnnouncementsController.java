@@ -719,8 +719,8 @@ public class AnnouncementsController extends ViewController
         if (null != thread.getDiscussionSrcURL())
         {
             ViewURLHelper src = DiscussionServiceImpl.fromSaved(thread.getDiscussionSrcURL());
-            src.addParameter("discussion.id", "" + insert.getRowId());
-            HttpView.throwRedirect(src.getLocalURIString());
+            src.addParameter("discussion.id", "" + thread.getRowId());
+            HttpView.throwRedirect(src.getLocalURIString() + "#discussionArea");
         }
 
         String threadId = thread.getEntityId();
