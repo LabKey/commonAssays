@@ -3,15 +3,16 @@
 <%@ page import="org.labkey.api.view.WebPartView" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.api.data.Container" %>
 <%
     WebPartView me = (WebPartView) HttpView.currentView();
     ViewContext context = me.getViewContext();
-    ViewURLHelper respond = new ViewURLHelper("announcements", "respond.post", context.getContainer());
+    Container c = context.getContainer();
+    ViewURLHelper respond = new ViewURLHelper("announcements", "respond.post", c);
     ViewURLHelper returnUrl = (ViewURLHelper) context.get("returnUrl");
-
 %><%=PageFlowUtil.getStrutsError(request, "main")%>
 <form method=post enctype="multipart/form-data" action="<%=filter(respond.getLocalURIString())%>">
-<input type=hidden name=returnUrl value="<%=filter(returnUrl?returnUrl.getLocalURIString():null)%>">
+<input type=hidden name=returnUrl value="<%=filter(returnUrl?returnUrl.getLocalURIString():"")%>">
 <table><%
 
 if (settings.isTitleEditable())
@@ -97,7 +98,17 @@ if (settings.hasFormatPicker())
 	</td>
 	</tr>
 </table>
-<br>&nbsp;<input type=image src="<%=PageFlowUtil.submitSrc()%>" value="Insert">&nbsp;<a href="thread.view?rowId=<%=parentAnnouncement.getRowId()%>"><img src="<%=PageFlowUtil.buttonSrc("Cancel")%>" border="0"></a>
+<br>&nbsp;<input type=image src="<%=PageFlowUtil.submitSrc()%>" value="Insert">&nbsp;<%
+    String cancelUrl;
+    if (null != returnUrl)
+        cancelUrl = returnUrl.getLocalURIString();
+    else
+    {
+        // UNDONE: can't call addParameter in a .gm file???
+        cancelUrl = new ViewURLHelper("announcements", "thread", c).getLocalURIString();
+        cancelUrl += "rowId=" + parentAnnouncement.getRowId();
+    }
+%><a href="<%=filter(cancelUrl)%>"><img src="<%=PageFlowUtil.buttonSrc("Cancel")%>" border="0"></a>
 </form>
 <br>
 <% currentView.include(currentRendererType.getSyntaxHelpView()); %>
