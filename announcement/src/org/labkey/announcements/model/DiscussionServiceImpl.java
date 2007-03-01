@@ -99,8 +99,18 @@ public class DiscussionServiceImpl implements DiscussionService.Service
     
     public HttpView getDisussionArea(ViewContext context, Container c, User user, String objectId, ViewURLHelper pageURL, String title)
     {
+        // get discussion parameters
+        Map<String,String> discussion = context.getViewURLHelper().getScopeParameters("discussion");
+
         int discussionId = 0;
-        try {discussionId = Integer.parseInt((String)context.get("discussion.id"));} catch (Exception x) {/* */}
+        try
+        {
+            String id = discussion.get("id");
+            if (null != id)
+                discussionId = Integer.parseInt(id);
+        }
+        catch (Exception x) {/* */}
+        
         pageURL = pageURL.clone();
         // clean up discussion parameters (in case caller didn't)
         pageURL.deleteScopeParameters("discussion");
@@ -112,7 +122,7 @@ public class DiscussionServiceImpl implements DiscussionService.Service
 
         HtmlView anchorView = new HtmlView("<a name=\"discussionArea\"></a>");
         
-        if (context.get("discussion.start") != null)
+        if (discussion.get("start") != null)
         {
             WebPartView start = startDiscussion(c, user, objectId, pageURL, title, "");
             start.setFrame(WebPartView.FrameType.NONE);
@@ -141,7 +151,7 @@ public class DiscussionServiceImpl implements DiscussionService.Service
                 {
                     discussionView = getDiscussion(c, selected, user);
                     discussionView.setFrame(WebPartView.FrameType.NONE);
-                    if (context.get("discussion.reply") != null)
+                    if (discussion.get("reply") != null)
                     {
                         ((AnnouncementsController.ThreadView)discussionView).getModel().isResponse = true;
                         respondView = new AnnouncementsController.RespondView(c, selected, returnUrl);
