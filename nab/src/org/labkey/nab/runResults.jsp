@@ -14,11 +14,14 @@
 <%@ page import="org.labkey.api.security.ACL" %>
 <%@ page import="org.labkey.api.data.DataRegion" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<org.labkey.nab.NabController.RenderAssayBean> me = (JspView<NabController.RenderAssayBean>) HttpView.currentView();
     NabController.RenderAssayBean bean = me.getModel();
     Luc5Assay assay = bean.getAssay();
+    ViewContext context = me.getViewContext();
+    boolean writer = context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT);
     String headerTDStyle = "text-align:left;background-color:#EEEEEE;border-top:solid 1px";
 
     String errs = PageFlowUtil.getStrutsError(request, "main");
@@ -346,5 +349,20 @@
             </table>
         </td>
     </tr>
+<%
+    if (false && !bean.isPrintView() && writer)
+    {
+%>
+    <tr>
+        <th style="<%= headerTDStyle %>">Discussions</th>
+    </tr>
+    <tr>
+        <td>
+            <% me.include(bean.getDiscussionView(me.getViewContext()), out); %>
+        </td>
+    </tr>
+<%
+    }
+%>
 </table>
 </form>

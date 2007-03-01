@@ -1,13 +1,15 @@
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="org.labkey.nab.NabController"%>
 <%@ page import="org.labkey.nab.SampleInfo"%>
 <%@ page import="org.labkey.nab.RunSettings"%>
 <%@ page import="org.labkey.api.study.PlateTemplate" %>
 <%@ page import="org.labkey.api.study.WellGroup" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.study.PlateService" %>
+<%@ page import="org.labkey.api.study.WellGroupTemplate" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.UploadAssayForm> me = (JspView<NabController.UploadAssayForm>) HttpView.currentView();
@@ -16,16 +18,18 @@
     String dataTDStyle = "padding-left:20px";
     PlateTemplate activeTemplate = me.getModel().getActivePlateTemplate(me.getViewContext().getContainer(), me.getViewContext().getUser());
     PlateTemplate[] templates = me.getModel().getPlateTemplates(me.getViewContext().getContainer(), me.getViewContext().getUser());
+    if (activeTemplate == null)
+        activeTemplate = templates[0];
     int specimenCount = activeTemplate.getWellGroupCount(WellGroup.Type.SPECIMEN);
-    String errs = PageFlowUtil.getStrutsError(request, "main");
-    ViewURLHelper choosePlateURL = new ViewURLHelper("Plate", "plateTemplateList", me.getViewContext().getContainer());
-
-    if (null != StringUtils.trimToNull(errs))
+    List<? extends WellGroupTemplate> wellGroupTemplates = activeTemplate.getWellGroups();
+    List<WellGroupTemplate> specimenWellGroups = new ArrayList<WellGroupTemplate>();
+    for (WellGroupTemplate groupTemplate : wellGroupTemplates)
     {
-        out.write("<span class=\"labkey-error\">");
-        out.write(errs);
-        out.write("</span>");
+        if (groupTemplate.getType() == WellGroup.Type.SPECIMEN)
+            specimenWellGroups.add(groupTemplate);
     }
+
+    ViewURLHelper choosePlateURL = new ViewURLHelper("Plate", "plateTemplateList", me.getViewContext().getContainer());
 
     String errorParameter = request.getParameter("error");
     if (errorParameter != null)
@@ -129,11 +133,14 @@
                                 for (int sampId = 0; sampId < specimenCount; sampId++)
                                 {
                                     SampleInfo sampleInfo = form.getSampleInfos()[sampId];
+                                    String sampleId = sampleInfo.getSampleId();
+                                    if (sampleId == null)
+                                        sampleId = specimenWellGroups.get(sampId).getName();
                             %>
                             <tr>
                                 <td>
                                     <input size="12" name="sampleInfos[<%= sampId %>].sampleId"
-                                           value="<%= h(sampleInfo.getSampleId()) %>">
+                                           value="<%= h(sampleId) %>">
                                 </td>
                                 <td>
                                     <input size="40" name="sampleInfos[<%= sampId %>].sampleDescription"

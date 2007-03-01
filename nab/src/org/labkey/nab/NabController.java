@@ -32,6 +32,7 @@ import org.labkey.api.study.*;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.announcements.DiscussionService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -281,6 +282,17 @@ public class NabController extends ViewController
         public boolean isPrintView()
         {
             return _printView;
+        }
+
+        public HttpView getDiscussionView(ViewContext context)
+        {
+            ViewURLHelper pageUrl = new ViewURLHelper("Nab", "display", _assay.getPlate().getContainer());
+            pageUrl.addParameter("rowId", "" + _assay.getRunRowId());
+            String discussionTitle = "Discuss Run " + _assay.getRunRowId() + ": " + _assay.getName();
+            String entityId = _assay.getPlate().getEntityId();
+            DiscussionService.Service service = DiscussionService.get();
+            return service.getDisussionArea(context, context.getContainer(), context.getUser(),
+                    entityId, pageUrl, discussionTitle);
         }
     }
 
@@ -1138,7 +1150,7 @@ public class NabController extends ViewController
             // around if the user resets their input form.  Otherwise, they'll be
             // reinitialized from the users saved settings.
             for (int i = 0; i < _sampleInfos.length; i++)
-                _sampleInfos[i] = new SampleInfo("Sample" + (i + 1));
+                _sampleInfos[i] = new SampleInfo(null);
         }
 
 
@@ -1149,6 +1161,11 @@ public class NabController extends ViewController
             FormFile dataFile = getUploadFile();
             if (null == _fileName && null == dataFile)
                 errors.add("main", new ActionMessage("Error", "Please upload a file."));
+            
+            List<String> templateErrors = NabManager.get().isValidNabPlateTemplate(getContext().getContainer(),
+                    getContext().getUser(), getPlateTemplate());
+            for (String templateError : templateErrors)
+                errors.add("main", new ActionMessage("Error", templateError));
 
             if (getMetadata().getExperimentDateString() != null)
             {
@@ -1265,7 +1282,7 @@ public class NabController extends ViewController
                 int specimenCount = template.getWellGroupCount(WellGroup.Type.SPECIMEN);
                 _sampleInfos = new SampleInfo[specimenCount];
                 for (int i = 0; i < _sampleInfos.length; i++)
-                    _sampleInfos[i] = new SampleInfo("sample" + (i + 1));
+                    _sampleInfos[i] = new SampleInfo(null);
             }
             catch (SQLException e)
             {

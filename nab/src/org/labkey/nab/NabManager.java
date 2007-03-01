@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.apache.struts.upload.FormFile;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
@@ -155,7 +156,7 @@ public class NabManager
         }
     }
 
-    public PlateTemplate ensurePlateTemplate(Container container, User user) throws SQLException
+    public synchronized PlateTemplate ensurePlateTemplate(Container container, User user) throws SQLException
     {
         PlateTemplate template = PlateService.get().getPlateTemplate(container, user, DEFAULT_TEMPLATE_NAME);
         if (template == null)
@@ -195,6 +196,40 @@ public class NabManager
 
     private static final int START_ROW = 6; //0 based, row 7 inthe workshet
     private static final int START_COL = 0;
+
+    public List<String> isValidNabPlateTemplate(Container container, User user, String plateTemplate)
+    {
+        try
+        {
+            PlateTemplate nabTemplate = PlateService.get().getPlateTemplate(container, user, plateTemplate);
+            List<String> errors = new ArrayList<String>();
+            if (nabTemplate == null)
+                errors.add("Plate template " + plateTemplate + " no longer exists.");
+            else
+            {
+                Set<String> controlGroups = new HashSet<String>();
+                int specimenCount = 0;
+                for (WellGroupTemplate groupTemplate : nabTemplate.getWellGroups())
+                {
+                    if (groupTemplate.getType() == WellGroup.Type.CONTROL)
+                        controlGroups.add(groupTemplate.getName());
+                    if (groupTemplate.getType() == WellGroup.Type.SPECIMEN)
+                        specimenCount++;
+                }
+                if (!controlGroups.contains(CELL_CONTROL_SAMPLE))
+                    errors.add("Plate template \"" + plateTemplate + "\" does not contain required cell control group with name \"" + CELL_CONTROL_SAMPLE + "\"");
+                if (!controlGroups.contains(VIRUS_CONTROL_SAMPLE))
+                    errors.add("Plate template \"" + plateTemplate + "\" does not contain required virus control group with name \"" + VIRUS_CONTROL_SAMPLE + "\"");
+                if (specimenCount == 0)
+                    errors.add("Plate template \"" + plateTemplate + "\" does not contain any specimen groups.");
+            }
+            return errors;
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+    }
 
     protected Luc5Assay createLuc5Assay(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, String datafileName, InputStream attachmentStream) throws SQLException, IOException, ServletException, BiffException
     {

@@ -7,7 +7,6 @@
     JspView<NabController.HeaderBean> me = (JspView<org.labkey.nab.NabController.HeaderBean>) HttpView.currentView();
     NabController.HeaderBean bean = me.getModel();
 %>
-<span class="labkey-error"><%=PageFlowUtil.getStrutsError(request, "main")%></span>
 <%
     if (bean.showNewRunLink())
     {
@@ -39,3 +38,4 @@
     }
 %>
 <br>
+<span class="labkey-error"><%=PageFlowUtil.getStrutsError(request, "main")%></span>
