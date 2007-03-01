@@ -42,4 +42,6 @@ View this <%=conversationName%> at this URL: <%=threadUrl%>
 
 <% } %>
 
-You have received this email because you signed up for a daily digest from this folder.
+
+You have received this email because you are signed up for a daily digest about new posts to <%=boardPath%> at <%=siteUrl%>.
+If you no longer wish to receive these notifications, please change your email preferences here: <%=removeUrl%>

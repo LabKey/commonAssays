@@ -12,12 +12,14 @@
 
     if (null != responseBody)
     {  %>
-    <tr><td colspan="3" class="ms-vb"><%=responseBody%></td></tr>
-    <tr><td colspan="3" class="ms-vb">&nbsp;</td></tr><%
+    <tr><td colspan="3" class="ms-vb"><%=responseBody%></td></tr><%
     }  %>
+    <tr><td colspan="3" class="ms-vb">&nbsp;</td></tr>
     <tr><td colspan="3" class="ms-vb"><a href="<%=threadURL%>">View this <%=settings.getConversationName().toLowerCase()%></a></td></tr>
-</table><br><br>
+</table>
 
+<br>
+<br>
 <hr size="1">
 
 <table width="100%" border="0" cellspacing="0" cellpadding="4">
@@ -30,12 +32,12 @@
 
             case signedUp:
     %>you are signed up to receive notifications about new posts to <a href="<%=boardURL%>"><%=boardPath%></a> at <a href="<%=siteURL%>"><%=siteURL%></a>.
-  If you no longer wish to receive these notifications, please <a href="<%=removeUrl%>">change your email preferences</a>.<%
+If you no longer wish to receive these notifications you can <a href="<%=removeUrl%>">change your email preferences</a>.<%
             break;
 
         case memberList:
-    %>you are on the member list for this <%=settings.getConversationName().toLowerCase()%>.  If you no longer wish to receive these notifications,
-  please <a href="<%=removeUrl%>">click here to remove yourself</a> from this <%=settings.getConversationName().toLowerCase()%>.<%
+    %>you are on the member list for this <%=settings.getConversationName().toLowerCase()%>.  If you no longer wish to receive these
+notifications you can remove yourself from the member list by <a href="<%=removeUrl%>">clicking here</a>.<%
             break;
         }
     %></td></tr>

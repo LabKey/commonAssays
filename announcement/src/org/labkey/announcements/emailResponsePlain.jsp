@@ -1,13 +1,13 @@
 <%@ page extends="org.labkey.announcements.EmailResponsePage" %>
 
-<%=responseAnnouncement.getCreatedByName() + (responseAnnouncement.getParent() != null ? " responded" : " created a new " + settings.getConversationName().toLowerCase()) %>
-<%=formatDateTime(responseAnnouncement.getCreated())%><%
+<%=responseAnnouncement.getCreatedByName() + (responseAnnouncement.getParent() != null ? " responded" : " created a new " + settings.getConversationName().toLowerCase()) %> <%=formatDateTime(responseAnnouncement.getCreated())%>
+<%
 
 if (null != responseBody)
 {  %>
     <%=responseBody%><%
 }  %>
-View this <%=settings.getConversationName().toLowerCase()%> at this URL: <%=threadURL%>
+View the <%=settings.getConversationName().toLowerCase()%> at this URL: <%=threadURL%>
 
 
 
@@ -20,13 +20,14 @@ You have received this email because <%
 
         case signedUp:
 %>you are signed up to receive notifications about new posts to <%=boardPath%> at <%=siteURL%>.
-If you no longer wish to receive these notifications, please change your email preferences by
+If you no longer wish to receive these notifications you can change your email preferences by
 navigating to this URL: <%=removeUrl%>.<%
         break;
 
         case memberList:
-%>you are on the member list for this <%=settings.getConversationName().toLowerCase()%>.  If you no longer wish to receive these notifications,
-please navigate to this URL: <%=removeUrl%> to remove yourself from this <%=settings.getConversationName().toLowerCase()%>.<%
+%>you are on the member list for this <%=settings.getConversationName().toLowerCase()%>.
+If you no longer wish to receive these notifications you can remove yourself from
+the member list by navigating here: <%=removeUrl%><%
         break;
     }
 %>

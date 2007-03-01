@@ -699,8 +699,8 @@ public class AnnouncementsController extends ViewController
 
         AnnouncementManager.insertAnnouncement(c, u, insert, formFiles);
 
-        // we don't send email for notes.
-        if (!isNote && null != insert.getBody())
+        // Don't send email for notes.  For messages, send email if there's body text or an attachment.
+        if (!isNote && (null != insert.getBody() || AttachmentService.get().hasAttachment(formFiles)))
         {
             String rendererTypeName = (String) form.get("rendererType");
             WikiRendererType currentRendererType = (null == rendererTypeName ? WikiService.get().getDefaultMessageRendererType() : WikiRendererType.valueOf(rendererTypeName));
