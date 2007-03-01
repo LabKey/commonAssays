@@ -6,8 +6,13 @@
 <%@ page import="org.labkey.api.util.DateUtil" %>
 <%@ page import="java.util.Set" %>
 <%@ page import="java.util.HashSet" %>
+<%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.api.security.ACL" %>
 <%
     DiscussionServiceImpl.PickerView me = (DiscussionServiceImpl.PickerView) HttpView.currentView();
+    ViewContext context = me.getViewContext();
+    Container c = context.getContainer();
     Announcement[] announcements = me.announcements;
     if (null == announcements)
         announcements = new Announcement[0];
@@ -39,7 +44,11 @@ var discussionMenu = {};
             String help = a.getCreatedByName() + ' ' + (longFormat ? DateUtil.formatDateTime(a.getCreated()) : DateUtil.formatDate(a.getCreated()));
             %>{text:<%=PageFlowUtil.jsString(title)%>,helptext:<%=PageFlowUtil.jsString(help)%>,url:discussionMenu.pageUrl+'&discussion.id=<%=a.getRowId()%>#discussionArea'},<%
         }
-        %>{text:'Start new discussion',url:discussionMenu.pageUrl+'&discussion.start=true#discussionArea'}];
+        if (c.hasPermission(context.getUser(), ACL.PERM_INSERT))
+        {
+            %>{text:'Start new discussion',url:discussionMenu.pageUrl+'&discussion.start=true#discussionArea'}<%
+        }
+        %>];
 
     discussionMenu.showEvent = function(event)
     {
