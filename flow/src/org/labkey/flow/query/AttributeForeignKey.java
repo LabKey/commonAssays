@@ -10,22 +10,19 @@ import java.util.Collection;
 
 abstract public class AttributeForeignKey<T> implements ForeignKey
 {
-    protected Collection<T> _attributes;
-
     public StringExpressionFactory.StringExpression getURL(ColumnInfo parent)
     {
         return null;
     }
 
-    public AttributeForeignKey(Collection<T> attributes)
+    public AttributeForeignKey()
     {
-        _attributes = attributes;
     }
 
     public TableInfo getLookupTableInfo()
     {
         VirtualTable ret = new VirtualTable(FlowManager.get().getSchema());
-        for (T attrName : _attributes)
+        for (T attrName : getAttributes())
         {
             ColumnInfo column = new ColumnInfo(attrName.toString(), ret);
             initColumn(attrName, column);
@@ -49,6 +46,7 @@ abstract public class AttributeForeignKey<T> implements ForeignKey
         return ret;
     }
 
+    abstract protected Collection<T> getAttributes();
     abstract protected SQLFragment sqlValue(ColumnInfo objectIdColumn, T attrName, int attrId);
     abstract protected void initColumn(T attrName, ColumnInfo column);
     abstract protected T attributeFromString(String field);

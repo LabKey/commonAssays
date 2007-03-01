@@ -3,16 +3,25 @@ package org.labkey.flow.query;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 
+import java.util.Collection;
+
 public class KeywordForeignKey extends AttributeForeignKey<String>
 {
+    FlowPropertySet _fps;
     public KeywordForeignKey(FlowPropertySet fps)
     {
-        super(fps.getKeywordProperties().keySet());
+        super();
+        _fps = fps;
     }
 
     protected String attributeFromString(String field)
     {
         return field;
+    }
+
+    protected Collection<String> getAttributes()
+    {
+        return _fps.getKeywordProperties().keySet();
     }
 
     protected void initColumn(String attrName, ColumnInfo column)

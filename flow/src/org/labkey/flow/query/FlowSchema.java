@@ -317,11 +317,37 @@ public class FlowSchema extends UserSchema
         return ret;
     }
 
+    static private class DeferredFCSFileVisibleColumns implements Iterable<FieldKey>
+    {
+        final private ExpDataTable _table;
+        final private ColumnInfo _colKeyword;
+        public DeferredFCSFileVisibleColumns(ExpDataTable table, ColumnInfo colKeyword)
+        {
+            _table = table;
+            _colKeyword = colKeyword;
+        }
+
+        public Iterator<FieldKey> iterator()
+        {
+            List<FieldKey> ret = QueryService.get().getDefaultVisibleColumns(_table.getColumns());
+            TableInfo lookup = _colKeyword.getFk().getLookupTableInfo();
+            FieldKey keyKeyword = new FieldKey(null, _colKeyword.getName());
+            if (lookup != null)
+            {
+                for (FieldKey key : lookup.getDefaultVisibleColumns())
+                {
+                    ret.add(FieldKey.fromParts(keyKeyword, key));
+                }
+            }
+            return ret.iterator();
+        }
+    }
+
     public ExpDataTable createFCSFileTable(String alias)
     {
-        ExpDataTable ret = createDataTable(alias, FlowDataType.FCSFile);
+        final ExpDataTable ret = createDataTable(alias, FlowDataType.FCSFile);
         ret.setDetailsURL(new DetailsURL(PFUtil.urlFor(WellController.Action.showWell, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
-        ColumnInfo colKeyword = addObjectIdColumn(ret, "Keyword");
+        final ColumnInfo colKeyword = addObjectIdColumn(ret, "Keyword");
         FlowPropertySet fps = new FlowPropertySet(ret);
         colKeyword.setFk(new KeywordForeignKey(fps));
         colKeyword.setIsUnselectable(true);
@@ -335,14 +361,8 @@ public class FlowSchema extends UserSchema
                 colMaterialInput.setIsHidden(true);
             }
         }
-        List<FieldKey> defaultVisibleColumns = new ArrayList(ret.getDefaultVisibleColumns());
-        FieldKey tblkeyKeyword = FieldKey.fromParts("Keyword");
-        for (FieldKey keyKeyword : QueryService.get().getDefaultVisibleColumns(colKeyword.getFk().getLookupTableInfo().getColumns()))
-        {
-            defaultVisibleColumns.add(new FieldKey(tblkeyKeyword, keyKeyword.getName()));
-        }
-        ret.setDefaultVisibleColumns(defaultVisibleColumns);
 
+        ret.setDefaultVisibleColumns(new DeferredFCSFileVisibleColumns(ret, colKeyword));
         return ret;
     }
 

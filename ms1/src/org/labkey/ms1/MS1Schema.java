@@ -8,10 +8,13 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Provides a customized experiment run grid with features specific to MS1 runs.
@@ -55,9 +58,10 @@ public class MS1Schema extends UserSchema
             // Filter to just the runs with the MS1 protocol
             result.setProtocolPatterns("urn:lsid:%:Protocol.%:MS1.msInspectFeatureFindingAnalysis%");
 
-            // Add columns for the input files
-            result.addDefaultVisibleColumn("Input/msInspectDefFile");
-            result.addDefaultVisibleColumn("Input/mzXMLFile");
+            List<FieldKey> columns = new ArrayList(result.getDefaultVisibleColumns());
+            columns.add(FieldKey.fromParts("Input", "msInspectDefFile"));
+            columns.add(FieldKey.fromParts("Input", "mzXMLFile"));
+            result.setDefaultVisibleColumns(columns);
             return result;
         }
         return super.getTable(name, alias);

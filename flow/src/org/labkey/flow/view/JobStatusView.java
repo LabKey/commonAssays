@@ -81,7 +81,7 @@ public class JobStatusView extends HttpView
             Map<FlowProtocolStep, String[]> processedRuns = _job.getProcessedRunLSIDs();
             if (!processedRuns.isEmpty())
             {
-                out.write("Completed runs:<br>");
+                out.write("<br>Completed runs:<br>");
                 for (Map.Entry<FlowProtocolStep, String[]> entry : processedRuns.entrySet())
                 {
                     out.write("<p>" + entry.getKey().getLabel() + " step<br>");

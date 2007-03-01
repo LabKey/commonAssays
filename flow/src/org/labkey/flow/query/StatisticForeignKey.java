@@ -5,13 +5,20 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 
+import java.util.Collection;
+
 public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
 {
     FlowPropertySet _fps;
     public StatisticForeignKey(FlowPropertySet fps)
     {
-        super(fps.getStatistics().keySet());
+        super();
         _fps = fps;
+    }
+
+    protected Collection<StatisticSpec> getAttributes()
+    {
+        return _fps.getStatistics().keySet();
     }
 
     protected StatisticSpec attributeFromString(String field)

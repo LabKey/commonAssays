@@ -384,20 +384,20 @@ public class MS2Schema extends UserSchema
             public TableInfo getLookupTableInfo()
             {
                 FilteredTable result = new FilteredTable(MS2Manager.getTableInfoRuns());
-                result.addColumn(result.getRealTable().getColumn("Run"));
-                result.addColumn(result.getRealTable().getColumn("Description"));
-                result.addColumn(result.getRealTable().getColumn("Created"));
-                result.addColumn(result.getRealTable().getColumn("Path"));
-                result.addColumn(result.getRealTable().getColumn("SearchEngine"));
-                result.addColumn(result.getRealTable().getColumn("MassSpecType"));
-                result.addColumn(result.getRealTable().getColumn("PeptideCount"));
-                result.addColumn(result.getRealTable().getColumn("SpectrumCount"));
-                result.addColumn(result.getRealTable().getColumn("SearchEnzyme"));
-                result.addColumn(result.getRealTable().getColumn("Filename"));
-                result.addColumn(result.getRealTable().getColumn("Status"));
-                result.addColumn(result.getRealTable().getColumn("Type"));
+                result.addWrapColumn(result.getRealTable().getColumn("Run"));
+                result.addWrapColumn(result.getRealTable().getColumn("Description"));
+                result.addWrapColumn(result.getRealTable().getColumn("Created"));
+                result.addWrapColumn(result.getRealTable().getColumn("Path"));
+                result.addWrapColumn(result.getRealTable().getColumn("SearchEngine"));
+                result.addWrapColumn(result.getRealTable().getColumn("MassSpecType"));
+                result.addWrapColumn(result.getRealTable().getColumn("PeptideCount"));
+                result.addWrapColumn(result.getRealTable().getColumn("SpectrumCount"));
+                result.addWrapColumn(result.getRealTable().getColumn("SearchEnzyme"));
+                result.addWrapColumn(result.getRealTable().getColumn("Filename"));
+                result.addWrapColumn(result.getRealTable().getColumn("Status"));
+                result.addWrapColumn(result.getRealTable().getColumn("Type"));
 
-                ColumnInfo iconColumn = result.wrapColumn("Links", result.getColumn("Run"));
+                ColumnInfo iconColumn = result.wrapColumn("Links", result.getRealTable().getColumn("Run"));
                 iconColumn.setRenderClass(IconLinksDisplayColumn.class);
                 result.addColumn(iconColumn);
                 return result;
@@ -406,16 +406,28 @@ public class MS2Schema extends UserSchema
         result.addColumn(ms2DetailsColumn);
 
         ms2DetailsColumn.setIsHidden(false);
-        result.addDefaultVisibleColumn("Flag");
-        result.addDefaultVisibleColumn("Links");
-        result.addDefaultVisibleColumn("MS2Details/Links");
-        result.addDefaultVisibleColumn("Name");
-        result.addDefaultVisibleColumn("Protocol");
-        result.addDefaultVisibleColumn("MS2Details/Path");
-        result.addDefaultVisibleColumn("Input/FASTA");
-        result.addDefaultVisibleColumn("Input/mzXML");
-        result.addDefaultVisibleColumn("Input/mzXMLTest");
-
+        FieldKey fieldLinks = FieldKey.fromParts("Links");
+        FieldKey fieldMS2Links = FieldKey.fromParts("MS2Details", "Links");
+        boolean ms2LinksAdded = false;
+        List<FieldKey> columns = new ArrayList();
+        for (FieldKey field : result.getDefaultVisibleColumns())
+        {
+            columns.add(field);
+            if (!ms2LinksAdded && fieldLinks.equals(field))
+            {
+                columns.add(fieldMS2Links);
+                ms2LinksAdded = true;
+            }
+        }
+        if (!ms2LinksAdded)
+        {
+            columns.add(fieldMS2Links);
+        }
+        columns.add(FieldKey.fromParts("MS2Details", "Path"));
+        columns.add(FieldKey.fromParts("Input", "FASTA"));
+        columns.add(FieldKey.fromParts("Input", "mzXML"));
+        columns.add(FieldKey.fromParts("Input", "mzXMLTest"));
+        result.setDefaultVisibleColumns(columns);
         return result;
     }
 

@@ -71,6 +71,7 @@ public class FlowPropertySet
 
     public SubsetSpec simplifySubset(SubsetSpec subset)
     {
+        initStatisticsAndGraphs();
         if (subset == null)
             return null;
         String name = simplifySubsetExpr(subset.getSubset());

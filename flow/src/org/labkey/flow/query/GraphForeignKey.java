@@ -12,14 +12,21 @@ import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 
 import java.sql.Types;
+import java.util.Collection;
 
 public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
 {
     FlowPropertySet _fps;
+
     public GraphForeignKey(FlowPropertySet fps)
     {
-        super(fps.getGraphProperties().keySet());
+        super();
         _fps = fps;
+    }
+
+    protected Collection<GraphSpec> getAttributes()
+    {
+        return _fps.getGraphProperties().keySet();
     }
 
     protected GraphSpec attributeFromString(String field)
