@@ -25,6 +25,9 @@ import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.run.RunController;
+import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.api.exp.api.SamplesSchema;
 import org.labkey.api.exp.OntologyManager;
 
@@ -68,7 +71,7 @@ public class FlowSchema extends UserSchema
                 case FCSAnalyses:
                     return createFCSAnalysisTable(alias, FlowDataType.FCSAnalysis);
                 case CompensationControls:
-                    return createFCSAnalysisTable(alias, FlowDataType.CompensationControl);
+                    return createCompensationControlTable(alias);
                 case Runs:
                     return createRunTable(alias, null);
                 case CompensationMatrices:
@@ -397,6 +400,16 @@ public class FlowSchema extends UserSchema
                     return FlowSchema.this.detach().createFCSFileTable("FCSFile");
                 }
             });
+        return ret;
+    }
+
+    public ExpDataTable createCompensationControlTable(String alias)
+    {
+        ExpDataTable ret = createFCSAnalysisTable(alias, FlowDataType.CompensationControl);
+        List<FieldKey> defColumns = new ArrayList(ret.getDefaultVisibleColumns());
+        defColumns.add(FieldKey.fromParts("Statistic", new StatisticSpec(FCSAnalyzer.compSubset, StatisticSpec.STAT.Count, null).toString()));
+        defColumns.add(FieldKey.fromParts("Statistic", new StatisticSpec(FCSAnalyzer.compSubset, StatisticSpec.STAT.Freq_Of_Parent, null).toString()));
+        ret.setDefaultVisibleColumns(defColumns);
         return ret;
     }
 

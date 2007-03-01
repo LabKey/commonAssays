@@ -50,7 +50,7 @@ public class CompensationCalculationHandler extends BaseHandler
             AttributeSet attrs = new AttributeSet(ObjectType.compensationControl, result.getURI());
             if (well != null)
             {
-                addDataLSID(app.getInputRefs(), well.getLSID(), null);
+                addDataLSID(app.getInputRefs(), well.getLSID(), InputRole.FCSFile);
                 addDataLSID(appComp.getInputRefs(), well.getLSID(), null);
                 addDataLSID(app.getInputRefs(), dbtComp.getAbout(), InputRole.CompensationMatrix);
             }

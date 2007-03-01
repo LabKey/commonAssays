@@ -334,7 +334,7 @@ public class FlowOverview extends Overview
             else
             {
                 ViewURLHelper urlShowRuns = FlowTableType.Runs.urlFor(getContainer(), "ProtocolStep", FlowProtocolStep.analysis.getName());
-                statusHTML.append("<a href=\"" + h(FlowTableType.FCSAnalyses.urlFor(getContainer(), QueryAction.executeQuery)) + "\">" + _fcsAnalysisCount + " FCS files</a> have been analyzed in " + "<a href=\"" + h(urlShowRuns) + "\">" + _fcsRunCount + " runs</a>.");
+                statusHTML.append("<a href=\"" + h(FlowTableType.FCSAnalyses.urlFor(getContainer(), QueryAction.executeQuery)) + "\">" + _fcsAnalysisCount + " FCS files</a> have been analyzed in " + "<a href=\"" + h(urlShowRuns) + "\">" + _fcsAnalysisRunCount + " runs</a>.");
             }
         }
         ret.setStatusHTML(statusHTML.toString());

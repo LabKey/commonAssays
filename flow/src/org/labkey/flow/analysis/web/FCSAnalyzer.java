@@ -27,6 +27,7 @@ import javax.imageio.ImageIO;
 
 public class FCSAnalyzer
 {
+    static public final SubsetSpec compSubset = new SubsetSpec(null, "comp");
     static private FCSAnalyzer instance;
     static private Logger _log = Logger.getLogger(FCSAnalyzer.class);
     static private int GRAPH_HEIGHT = 300;

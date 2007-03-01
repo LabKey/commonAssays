@@ -3,6 +3,7 @@ package org.labkey.flow.data;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.data.*;
 import org.labkey.flow.query.FlowSchema;
@@ -217,5 +218,41 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     public boolean isAnalysis()
     {
         return !FlowExperimentRunExperimentName.equals(getName());
+    }
+
+    public FlowRun getMostRecentRun()
+    {
+        FlowRun best = null;
+        Date bestDate = null;
+        for (FlowRun run : getRuns(null))
+        {
+            Date check = run.getExperimentRun().getCreated();
+            if (bestDate == null || bestDate.compareTo(check) < 0)
+            {
+                best = run;
+                bestDate = check;
+            }
+        }
+        return best;
+    }
+
+    static public FlowExperiment getMostRecentAnalysis(Container container)
+    {
+        FlowExperiment ret = null;
+        Date bestDate = null;
+        for (FlowExperiment experiment : getAnalyses(container))
+        {
+            FlowRun run = experiment.getMostRecentRun();
+            if (run == null)
+            {
+                continue;
+            }
+            if (bestDate == null || bestDate.compareTo(run.getExperimentRun().getCreated()) < 0)
+            {
+                bestDate = run.getExperimentRun().getCreated();
+                ret = experiment;
+            }
+        }
+        return ret;
     }
 }

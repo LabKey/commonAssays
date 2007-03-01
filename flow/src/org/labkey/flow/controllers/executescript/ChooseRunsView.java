@@ -7,9 +7,11 @@ import org.labkey.api.data.*;
 import org.labkey.flow.view.FlowQueryView;
 import org.labkey.api.query.QueryPicker;
 import org.labkey.api.query.QueryAction;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 import java.util.Collections;
+import java.io.PrintWriter;
 
 public class ChooseRunsView extends FlowQueryView
 {
@@ -31,6 +33,11 @@ public class ChooseRunsView extends FlowQueryView
         return Collections.EMPTY_LIST;
     }
 
+    protected void renderCustomizeLinks(PrintWriter out) throws Exception
+    {
+        return;
+    }
+
     protected DataView createDataView()
     {
         DataView ret = super.createDataView();
@@ -44,10 +51,7 @@ public class ChooseRunsView extends FlowQueryView
         {
             rgn.addHiddenFormField("scriptId", Integer.toString(_form.getProtocol().getScriptId()));
         }
-        if (_form.getTargetExperiment() != null)
-        {
-            rgn.addHiddenFormField("ff_targetExperimentId", _form.ff_targetExperimentId);
-        }
+        rgn.addHiddenFormField("ff_targetExperimentId", StringUtils.trimToEmpty(_form.ff_targetExperimentId));
         RenderContext ctx = ret.getRenderContext();
         Filter filter = ctx.getBaseFilter();
         if (!(filter instanceof SimpleFilter))

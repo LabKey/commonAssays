@@ -1,3 +1,4 @@
+
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToAnalyzeForm" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsView" %>
 <%@ page import="org.labkey.flow.util.PFUtil" %>
@@ -31,7 +32,7 @@
         <tr><td>Analysis step to perform:</td>
             <td><select name="actionSequence" onchange="this.form.submit()">
                 <cpas:options value="<%=form.getProtocolStep().getDefaultActionSequence()%>"
-                              map="<%=FlowObject.idLabelsFor(form.getAvailableSteps(form.getProtocol()))%>"/>
+                              map="<%=form.getAvailableSteps(form.getProtocol())%>"/>
             </select></td></tr>
         <tr><td>Analysis to put results in:</td>
             <td><select name="ff_targetExperimentId" onchange="this.form.submit()">

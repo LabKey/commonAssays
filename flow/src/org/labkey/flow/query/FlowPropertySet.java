@@ -4,6 +4,7 @@ import org.labkey.api.exp.api.ExpDataTable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -12,6 +13,7 @@ import java.util.*;
 
 public class FlowPropertySet
 {
+    static private final Logger _log = Logger.getLogger(FlowPropertySet.class);
     private Container _container;
     private ColumnInfo _colDataId;
     private Map<String, Integer> _keywords;
@@ -84,8 +86,16 @@ public class FlowPropertySet
         {
             return new SubsetSpec(null, name);
         }
-        SubsetSpec ret = SubsetSpec.fromString(subset.toString().substring(commonAncestor.toString().length() + 1));
-        return new SubsetSpec(ret.getParent(), simplifySubsetExpr(ret.getSubset()));
+        try
+        {
+            SubsetSpec ret = SubsetSpec.fromString(subset.toString().substring(commonAncestor.toString().length() + 1));
+            return new SubsetSpec(ret.getParent(), simplifySubsetExpr(ret.getSubset()));
+        }
+        catch (Exception e)
+        {
+            _log.error("Error with subset '" + subset + "' and ancestor '" + commonAncestor + "'", e);
+            return subset;
+        }
     }
 
     private void initStatisticsAndGraphs()

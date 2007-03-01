@@ -305,7 +305,7 @@ abstract public class ScriptJob extends PipelineJob
         return (int) (end.getTime() - start.getTime());
     }
 
-    public void addStatus(String status)
+    synchronized public void addStatus(String status)
     {
         try
         {

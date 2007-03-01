@@ -9,12 +9,15 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.data.*;
 import org.labkey.api.query.QuerySettings;
 import org.apache.struts.action.ActionError;
+import org.apache.struts.action.ActionMapping;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.util.*;
 
 import org.labkey.flow.analysis.model.PopulationSet;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class ChooseRunsToAnalyzeForm extends FlowQueryForm
 {
@@ -26,6 +29,16 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
     public String ff_targetExperimentId;
     private FlowScript _analysisScript;
     private FlowProtocolStep _step;
+
+    public void reset(ActionMapping actionMapping, HttpServletRequest request)
+    {
+        super.reset(actionMapping, request);
+        FlowExperiment analysis = FlowExperiment.getMostRecentAnalysis(getContainer());
+        if (analysis != null)
+        {
+            ff_targetExperimentId = Integer.toString(analysis.getExperimentId());
+        }
+    }
 
     protected FlowSchema createSchema()
     {
@@ -69,16 +82,18 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
         _step = step;
     }
 
-    public List<FlowProtocol> getAvailableSteps(FlowScript analysisScript) throws Exception
+    public Map<Integer, String> getAvailableSteps(FlowScript analysisScript) throws Exception
     {
-        ArrayList<FlowProtocol> ret = new ArrayList(2);
+        Map<Integer, String> ret = new LinkedHashMap();
         if (analysisScript.hasStep(FlowProtocolStep.calculateCompensation))
         {
-            ret.add(FlowProtocolStep.calculateCompensation.ensureForContainer(getUser(), getContainer()));
+            FlowProtocolStep.calculateCompensation.ensureForContainer(getUser(), getContainer());
+            ret.put(FlowProtocolStep.calculateCompensation.getDefaultActionSequence(), FlowProtocolStep.calculateCompensation.getName());
         }
         if (analysisScript.hasStep(FlowProtocolStep.analysis))
         {
-            ret.add(FlowProtocolStep.analysis.ensureForContainer(getUser(), getContainer()));
+            FlowProtocolStep.analysis.ensureForContainer(getUser(), getContainer());
+            ret.put(FlowProtocolStep.analysis.getDefaultActionSequence(), FlowProtocolStep.analysis.getName());
         }
         return ret;
     }
@@ -158,8 +173,8 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
             FlowProtocolStep step = getProtocolStep();
             if (step == null || !analysisScript.hasStep(step))
             {
-                List<FlowProtocol> steps = getAvailableSteps(analysisScript);
-                step = steps.get(steps.size() - 1).getStep();
+                Integer[] steps = getAvailableSteps(analysisScript).keySet().toArray(new Integer[0]);
+                step = FlowProtocolStep.fromActionSequence(steps[steps.length - 1]);
                 setProtocolStep(step);
             }
         }
