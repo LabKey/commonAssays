@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 public class ChooseRunsToAnalyzeForm extends FlowQueryForm
 {
     static private final Logger _log = Logger.getLogger(ChooseRunsToAnalyzeForm.class);
+
     static private final String COMPOPTION_EXPERIMENTLSID = "experimentlsid:";
     static private final String COMPOPTION_COMPID = "compid:";
     public String ff_compensationMatrixOption;
@@ -29,16 +30,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
     public String ff_targetExperimentId;
     private FlowScript _analysisScript;
     private FlowProtocolStep _step;
-
-    public void reset(ActionMapping actionMapping, HttpServletRequest request)
-    {
-        super.reset(actionMapping, request);
-        FlowExperiment analysis = FlowExperiment.getMostRecentAnalysis(getContainer());
-        if (analysis != null)
-        {
-            ff_targetExperimentId = Integer.toString(analysis.getExperimentId());
-        }
-    }
+    private boolean _targetExperimentSet;
 
     protected FlowSchema createSchema()
     {
@@ -108,6 +100,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
     public void setFf_targetExperimentId(String experimentId)
     {
         ff_targetExperimentId = experimentId;
+        _targetExperimentSet = true;
     }
 
     public void addActionError(String error)
@@ -158,6 +151,14 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
 
     public void populate() throws Exception
     {
+        if (!_targetExperimentSet)
+        {
+            FlowExperiment analysis = FlowExperiment.getMostRecentAnalysis(getContainer());
+            if (analysis != null)
+            {
+                ff_targetExperimentId = Integer.toString(analysis.getExperimentId());
+            }
+        }
         Collection<FlowScript> availableProtocols = Arrays.asList(FlowScript.getScripts(getContainer()));
         if (availableProtocols.size() == 0)
         {
