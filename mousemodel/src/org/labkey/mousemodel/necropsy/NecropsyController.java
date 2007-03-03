@@ -176,7 +176,7 @@ public class NecropsyController extends ViewController
         GridView gridViewTasks = new GridView(drTasks);
         gridViewTasks.setFilter(filter);
         gridViewTasks.setTitle("Pending Forms");
-        gridViewTasks.setSort(new Sort("taskTypeId,MouseEntityID$MouseNo"));
+        gridViewTasks.setSort(new Sort("taskTypeId,MouseEntityID/MouseNo"));
 
         HBox box = new HBox(new HttpView[]{gridViewTasks, formView,});
         _renderInTemplate(box, form.getContainer(), MouseModelController.getModelId(form));

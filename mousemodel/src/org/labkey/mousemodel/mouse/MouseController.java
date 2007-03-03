@@ -100,6 +100,7 @@ public class MouseController extends ViewController
         ButtonBar bb = new ButtonBar();
         bb.add(ActionButton.BUTTON_SHOW_GRID);
         bb.add(ActionButton.BUTTON_SHOW_UPDATE);
+        bb.add(new ActionButton("print.view", "Print View"));
 
         Mouse mouse = (Mouse) form.getBean();
         ViewURLHelper urlhelp = cloneViewURLHelper();
@@ -268,6 +269,46 @@ public class MouseController extends ViewController
         VBox box = new VBox(detailsView, sampleView, photoView, slidesView, discussionView);
 
         _renderInTemplate(box, form);
+
+        return null;
+    }
+
+
+    @Jpf.Action
+    protected Forward print(MouseForm form) throws Exception
+    {
+        requiresPermission(ACL.PERM_READ);
+
+        Container c = form.getContainer();
+        Mouse mouse = MouseModelManager.getMouse((Mouse) form.getBean());
+        form.setBean(mouse);
+        //form.refreshFromDb(false);
+        DataRegion detailsRegion = getDetailsRegion(form);
+
+        //No buttons in print view
+        detailsRegion.setButtonBar(new ButtonBar());
+        DetailsView detailsView = new DetailsView(detailsRegion, form);
+        detailsView.setTitle("Mouse Details");
+
+        GridView sampleView = new GridView(getSamplesGridRegion(mouse));
+        SimpleFilter filter = new SimpleFilter("organismId", form.getEntityId());
+        sampleView.setFilter(filter);
+        sampleView.setTitle("Samples");
+
+        MouseModel model = MouseModelManager.getModel(mouse.getModelId());
+        HttpView slidesView = new SampleController.SlidesView(model, mouse, getViewContext());
+
+        JspView photoView = new JspView("/org/labkey/mousemodel/mouse/showPhoto.jsp");
+        photoView.setTitle("Necropsy Photos");
+        Attachment[] attachments = AttachmentService.get().getAttachments(mouse);
+//        photoView.addObject("parent", form.get("entityId"));
+        photoView.addObject("attachments", attachments);
+        photoView.addObject("canDelete", false);
+
+        VBox box = new VBox(new HtmlView("<h1>Mouse " + mouse.getMouseNo() + "</h1>"), detailsView, sampleView, photoView, slidesView);
+
+        PrintTemplate printTemplate = new PrintTemplate(box, "Mouse " + mouse.getMouseNo());
+        HttpView.include(printTemplate, getRequest(), getResponse());
 
         return null;
     }

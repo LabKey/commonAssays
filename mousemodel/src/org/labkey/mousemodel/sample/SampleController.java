@@ -94,6 +94,7 @@ public class SampleController extends ViewController
 
         ButtonBar bb = new ButtonBar()
                 .add(ActionButton.BUTTON_DELETE)
+                .add(new ActionButton("markUsedRows.view", "Mark Used"))
                 .add(new ActionButton("reboxSamples.view?modelId=" + MouseModelController.getModelId(form), "Move a Box", DataRegion.MODE_ALL, ActionButton.Action.LINK));
         rgn.setButtonBar(bb);
 
@@ -287,6 +288,34 @@ public class SampleController extends ViewController
 
         return new ViewForward(cloneViewURLHelper().setAction("details"));
     }
+
+    @Jpf.Action
+    protected Forward markUsedRows(SampleForm form) throws Exception
+    {
+        requiresPermission(ACL.PERM_UPDATE);
+
+        ViewURLHelper forwardUrl = cloneViewURLHelper().setAction("begin.view");
+        forwardUrl.addParameter("modelId", String.valueOf(MouseModelController.getModelId(form)));
+        forwardUrl.addParameter(DataRegion.LAST_FILTER_PARAM, "true");
+        ViewForward forward = new ViewForward(forwardUrl);
+
+        String[] selectedRows = form.getSelectedRows();
+        if (null == selectedRows || selectedRows.length == 0)
+            return forward;
+
+        for (String lsid : selectedRows)
+        {
+            Sample sample = SampleManager.getSample(lsid);
+            if (null == sample || null == StringUtils.trimToNull(sample.getLSID()))
+                throw new IllegalArgumentException("Could not find the sample " + lsid);
+
+            sample.setFrozenUsed(true);
+            SampleManager.update(getUser(), sample);
+        }
+
+        return forward;
+    }
+
 
     @Jpf.Action
     protected Forward showUpdate(SampleForm form) throws Exception
