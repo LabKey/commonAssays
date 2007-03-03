@@ -59,7 +59,6 @@
         }
     %>
 
-<form method="post" action="upload.view" enctype="multipart/form-data" class="normal">
 <input type="hidden" name="rowId" value="<%= assay.getRunRowId() %>">
 <table>
 <tr>
@@ -97,6 +96,7 @@
             </table>
         </td>
     </tr>
+<form method="post" action="upload.view" enctype="multipart/form-data" class="normal">
     <tr>
         <td>
             <table>
@@ -349,8 +349,9 @@
             </table>
         </td>
     </tr>
+</form>
 <%
-    if (false && !bean.isPrintView() && writer)
+    if (!bean.isPrintView() && writer)
     {
 %>
     <tr>
@@ -358,11 +359,10 @@
     </tr>
     <tr>
         <td>
-            <% me.include(bean.getDiscussionView(me.getViewContext()), out); %>
+            <% me.include(bean.getDiscussionView(HttpView.getRootContext()), out); %>
         </td>
     </tr>
 <%
     }
 %>
 </table>
-</form>
