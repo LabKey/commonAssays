@@ -278,18 +278,12 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
     protected String getDataLSIDSnippet(File[] files, File analysisDir, String baseRoleName) throws IOException
     {
         StringBuilder sb = new StringBuilder();
-        int count = 0;
         for (File file : files)
         {
-            count++;
             sb.append("                                <exp:DataLSID DataFileUrl=\"");
             sb.append(PathRelativizer.relativizePathUnix(analysisDir, file));
             sb.append("\" RoleName=\"");
             sb.append(baseRoleName);
-            if (count > 1)
-            {
-                sb.append(count);
-            }
             sb.append("\">${AutoFileLSID}</exp:DataLSID>\n");
         }
         return sb.toString();

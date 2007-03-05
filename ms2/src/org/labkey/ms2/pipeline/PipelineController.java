@@ -1382,7 +1382,15 @@ public class PipelineController extends ViewController
                     baseName = MS2PipelineManager._allFractionsMzXmlFileBase;
 
                 File fileInstance = MS2PipelineManager.getAnnotationFile(dirData, baseName);
-                protocol.saveInstance(uriRoot, fileInstance, runInfo);
+                try
+                {
+                    protocol.saveInstance(uriRoot, fileInstance, runInfo);
+                }
+                catch (IOException e)
+                {
+                    form.setError(0, e.toString());
+                    return showDescribeMS2Run(form);
+                }
 
                 String dataDescription = MS2PipelineManager.getDataDescription(dirData, baseName, protocol.getName());
                 // The experiment needs to be loaded into the right container for where the mzXML file

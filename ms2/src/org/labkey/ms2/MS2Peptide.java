@@ -141,12 +141,15 @@ public class MS2Peptide
             _spectrumIntensity = pData.second;
         }
 
-        if (null != _spectrumMZ)
+        if (_spectrumMZ == null)
         {
-            _massMatches = new ArrayList[_spectrumMZ.length];
-            _bMatches = computeMatches(_b, "b", tolerance, xStart, xEnd);
-            _yMatches = computeMatches(_y, "y", tolerance, xStart, xEnd);
+            _spectrumMZ = new float[0];
+            _spectrumIntensity = new float[0];
         }
+        
+        _massMatches = new ArrayList[_spectrumMZ.length];
+        _bMatches = computeMatches(_b, "b", tolerance, xStart, xEnd);
+        _yMatches = computeMatches(_y, "y", tolerance, xStart, xEnd);
     }
 
 
