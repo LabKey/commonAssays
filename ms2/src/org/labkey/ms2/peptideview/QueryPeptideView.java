@@ -71,7 +71,7 @@ public class QueryPeptideView extends AbstractPeptideView
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
 
-        QuerySettings settings = createQuerySettings(DATA_REGION_NAME, schema, MAX_PEPTIDE_DISPLAY_ROWS);
+        QuerySettings settings = createQuerySettings(DATA_REGION_NAME, schema, _maxPeptideRows);
 
         FlatPeptideQueryView peptideView = new FlatPeptideQueryView(_viewContext, schema, settings, expanded);
         FilteredTable table = peptideView.getFilteredTable();
@@ -204,7 +204,7 @@ public class QueryPeptideView extends AbstractPeptideView
             DataRegion rgn;
             if (_selectedNestingOption != null)
             {
-                QueryPeptideDataRegion ppRgn = new QueryPeptideDataRegion(allColumns, _selectedNestingOption.getGroupIdColumn(), _runs);
+                QueryPeptideDataRegion ppRgn = new QueryPeptideDataRegion(allColumns, _selectedNestingOption.getGroupIdColumn(), _runs, _url);
                 ppRgn.setExpanded(_expanded);
                 ppRgn.setRecordSelectorValueColumns(_selectedNestingOption.getGroupIdColumn().getColumnInfo().getAlias());
                 DataRegion nestedRgn = new DataRegion();
@@ -372,6 +372,11 @@ public class QueryPeptideView extends AbstractPeptideView
     }
 
     public ProteinTSVGridWriter getTSVProteinGridWriter(List<DisplayColumn> proteinDisplayColumns, List<DisplayColumn> peptideDisplayColumns)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
     {
         throw new UnsupportedOperationException();
     }

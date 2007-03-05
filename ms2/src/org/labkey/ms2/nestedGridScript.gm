@@ -1,20 +1,71 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <script type="text/javascript"><!--
 
-function toggleNestedGrid(elementName)
-{
-    var rowElement = document.getElementById(elementName + "-Row");
-    var toggleElement = document.getElementById(elementName + "-Handle");
+var requestedURLs = new Object();
 
-    if (rowElement.style.display == "none")
+function callback(elementName, req, url)
+{
+    if (req.readyState == 4)
     {
-        rowElement.style.display = "";
-        toggleElement.src = "<%= request.getContextPath() %>/_images/minus.gif";
+        if (req.status == 200)
+        {
+            var proteinRowElement = document.getElementById("proteinRow" + elementName);
+            var proteinToggleElement = document.getElementById("proteinHandle" + elementName);
+            var proteinContentElement = document.getElementById("proteinContent" + elementName);
+
+            proteinContentElement.innerHTML = req.responseText;
+            proteinToggleElement.src = "<%= request.getContextPath() %>/_images/minus.gif";
+            proteinRowElement.style.display = "";
+        }
+        else
+        {
+            requestedURLs[url] = null;
+        }
+    }
+}
+
+function togglePeptides(url, elementName)
+{
+    var proteinContentElement = document.getElementById("proteinContent" + elementName);
+    var proteinRowElement = document.getElementById("proteinRow" + elementName);
+    var proteinToggleElement = document.getElementById("proteinHandle" + elementName);
+
+    if (proteinContentElement.innerHTML == "")
+    {
+        if (requestedURLs[url] == null)
+        {
+            requestedURLs[url] = elementName;
+            if (window.XMLHttpRequest)
+            {
+                req = new XMLHttpRequest();
+            }
+            else if (window.ActiveXObject)
+            {
+                req = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            req.open("GET", url, true);
+            var callbackObject = function()
+            {
+                callback(callbackElementName, callbackRequest, callbackURL);
+            };
+            var callbackElementName = elementName;
+            var callbackRequest = req;
+            var callbackURL = url;
+            req.onreadystatechange = callbackObject;
+            req.send(null);
+        }
+        return;
+    }
+
+    if (proteinRowElement.style.display == "none")
+    {
+        proteinRowElement.style.display = "";
+        proteinToggleElement.src = "<%= request.getContextPath() %>/_images/minus.gif";
     }
     else
     {
-        rowElement.style.display = "none";
-        toggleElement.src = "<%= request.getContextPath() %>/_images/plus.gif";
+        proteinRowElement.style.display = "none";
+        proteinToggleElement.src = "<%= request.getContextPath() %>/_images/plus.gif";
     }
 }
 

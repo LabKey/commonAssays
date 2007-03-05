@@ -23,7 +23,6 @@ import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
-import org.apache.log4j.varia.NullAppender;
 import org.apache.struts.action.ActionMapping;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
@@ -362,6 +361,17 @@ public class MS2Controller extends ViewController
         return new ViewForward(getApplyViewForwardUrl(form, "showRun"), true);
     }
 
+
+    @Jpf.Action
+    protected Forward getProteinGroupingPeptides(RunForm form) throws Exception
+    {
+        MS2Run run = MS2Manager.getRun(form.getRun());
+
+        AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
+
+        GridView gridView = peptideView.getPeptideViewForProteinGrouping(form.getProteinGroupingId(), form.getColumns());
+        return includeView(gridView);
+    }
 
     @Jpf.Action
     protected Forward showRun(RunForm form) throws Exception
@@ -3902,8 +3912,8 @@ public class MS2Controller extends ViewController
         QueryView proteinsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), proteinsSettings);
         proteinsView.setShowExportButtons(false);
         SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
-        sequencesTableInfo.addProteinNameFilter(form.getIdentifier());
-//        sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
+        sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
+        sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
         proteinsView.setTitle("Matching Proteins");
 
         QuerySettings groupsSettings = new QuerySettings(getViewURLHelper(), "ProteinSearchResults");
@@ -3914,7 +3924,7 @@ public class MS2Controller extends ViewController
             protected TableInfo createTable()
             {
                 ProteinGroupTableInfo table = new ProteinGroupTableInfo("alias", (MS2Schema)getSchema());
-                table.addProteinNameFilter(form.getIdentifier());
+                table.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
                 table.addContainerCondition(getContainer(), getUser(), form.isIncludeSubfolders());
                 return table;
             }
@@ -3926,6 +3936,7 @@ public class MS2Controller extends ViewController
         ProteinSearchWebPart searchView = new ProteinSearchWebPart(true);
         searchView.getModel().setIdentifier(form.getIdentifier());
         searchView.getModel().setIncludeSubfolders(form.isIncludeSubfolders());
+        searchView.getModel().setExactMatch(form.isExactMatch());
         if (getRequest().getParameter("ProteinSearchResults.GroupProbability~gte") != null)
         {
             try
@@ -3954,6 +3965,17 @@ public class MS2Controller extends ViewController
         private Float _minimumProbability;
         private Float _maximumErrorRate;
         private boolean _includeSubfolders;
+        private boolean _exactMatch;
+
+        public boolean isExactMatch()
+        {
+            return _exactMatch;
+        }
+
+        public void setExactMatch(boolean exactMatch)
+        {
+            _exactMatch = exactMatch;
+        }
 
         public String getIdentifier()
         {

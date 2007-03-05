@@ -27,9 +27,6 @@ public abstract class AbstractPeptideView
 {
     private static Logger _log = Logger.getLogger(AbstractPeptideView.class);
 
-    protected static final int MAX_PROTEIN_DISPLAY_ROWS = 250;     // Limit proteins returned to 250 rows
-    protected static final int MAX_PEPTIDE_DISPLAY_ROWS = 1000;    // Limit peptides returned to 1,000 rows
-
     protected static Map<String, Class<? extends DisplayColumn>> _calculatedPeptideColumns = new HashMap<String, Class<? extends DisplayColumn>>();
     protected static Map<String, Class<? extends DisplayColumn>> _calculatedProteinColumns = new HashMap<String, Class<? extends DisplayColumn>>();
 
@@ -49,6 +46,9 @@ public abstract class AbstractPeptideView
     private final User _user;
     protected final ViewURLHelper _url;
     protected final MS2Run[] _runs;
+    protected int _maxPeptideRows = 1000; // Limit peptides returned to 1,000 rows
+    protected int _maxGroupingRows = 250; // Limit proteins returned to 250 rows
+
     private String _columnPropertyName;
 
     public static AbstractPeptideView getPeptideView(String grouping, Container c, User user, ViewURLHelper url, ViewContext viewContext, MS2Run... runs)
@@ -91,6 +91,8 @@ public abstract class AbstractPeptideView
     public abstract AbstractProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException;
 
     protected abstract List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames) throws SQLException;
+
+    public abstract GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException;
 
     public ProteinTSVGridWriter getTSVProteinGridWriter(String requestedProteinColumnNames, String requestedPeptideColumnNames, boolean expanded) throws SQLException
     {
@@ -242,7 +244,7 @@ public abstract class AbstractPeptideView
     {
         String columnNames = getPeptideColumnNames(requestedPeptideColumnNames);
 
-        DataRegion rgn = getPeptideGrid(columnNames, MAX_PEPTIDE_DISPLAY_ROWS);
+        DataRegion rgn = getPeptideGrid(columnNames, _maxPeptideRows);
 
         if (selectSeqId && null == rgn.getDisplayColumn("SeqId"))
         {

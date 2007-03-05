@@ -20,7 +20,7 @@
     <table>
         <tr>
             <td>Name:</td>
-            <td><input size="15" type="text" name="identifier" value="<%= h(bean.getIdentifier()) %>"/> <%= helpPopup("Protein Search: Name", "This is required to search for proteins. You may use the name as specified by the FASTA file, or an annotation, such as a gene name, that has been loaded from another file. The search will only find exact matches.") %></td>
+            <td><input size="15" type="text" name="identifier" value="<%= h(bean.getIdentifier()) %>"/> <%= helpPopup("Protein Search: Name", "Required to search for proteins. You may use the name as specified by the FASTA file, or an annotation, such as a gene name, that has been loaded from an annotations file. You may comma separate multiple names.") %></td>
         <%= separator %>
             <td>Prob &gt;=</td>
             <td><input type="text" size="3" name="minimumProbability" <% if (bean.getMinProbability() != null ) { %>value="<%= bean.getMinProbability()%>"<% } %>/> <%= helpPopup("Protein Search: Probability", "If entered, only ProteinProphet protein groups that have an associated probability greater than or equal to the value will be included.") %></td>
@@ -30,6 +30,9 @@
         <%= separator %>
             <td>Subfolders:</td>
             <td><input type="checkbox" name="includeSubfolders" <% if (bean.isIncludeSubfolders()) { %>checked="true" <% } %> /> <%= helpPopup("Protein Search: Subfolders", "If checked, the search will also look in all of this folder's children.") %></td>
+        <%= separator %>
+            <td>Exact match:</td>
+            <td><input type="checkbox" name="exactMatch" <% if (bean.isExactMatch()) { %>checked="true" <% } %> /> <%= helpPopup("Protein Search: Exact Match", "If checked, the search will only find proteins with an exact name match. If not checked, proteins that start with the name entered will also match, but the search may be significantly slower.") %></td>
         <%= separator %>
             <td></td>
             <td><cpas:button text="Search" /></td>

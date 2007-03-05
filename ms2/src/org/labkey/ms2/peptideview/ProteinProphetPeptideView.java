@@ -25,7 +25,7 @@ import javax.servlet.ServletException;
  */
 public class ProteinProphetPeptideView extends AbstractPeptideView
 {
-    private ResultSet _rs;
+    private Table.TableResultSet _rs;
 
     public ProteinProphetPeptideView(Container c, User u, ViewURLHelper url, MS2Run... runs)
     {
@@ -106,17 +106,27 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
 
     private ProteinProphetDataRegion createProteinDataRegion(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws SQLException
     {
-        ProteinProphetDataRegion proteinRgn = new ProteinProphetDataRegion();
+        if (expanded)
+        {
+            _maxPeptideRows = 15000;
+            _maxGroupingRows = 250;
+        }
+        else
+        {
+            _maxPeptideRows = 75000;
+            _maxGroupingRows = 1000;
+        }
+        ProteinProphetDataRegion proteinRgn = new ProteinProphetDataRegion(_url);
         proteinRgn.setTable(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
         proteinRgn.setName(MS2Manager.getDataRegionNameProteinGroups());
         proteinRgn.addColumns(getProteinDisplayColumns(requestedProteinColumnNames));
         proteinRgn.setShowRecordSelectors(true);
         proteinRgn.setExpanded(expanded);
         proteinRgn.setRecordSelectorValueColumns("ProteinGroupId");
-        proteinRgn.setMaxRows(MAX_PEPTIDE_DISPLAY_ROWS);
+        proteinRgn.setMaxRows(_maxPeptideRows);
 
-        ResultSet rs = createPeptideResultSet(requestedPeptideColumnNames, null);
-        _rs = new GroupedResultSet(rs, "ProteinGroupId", proteinRgn.getMaxRows());
+        ResultSet rs = createPeptideResultSet(requestedPeptideColumnNames, proteinRgn.getMaxRows(), null);
+        _rs = new GroupedResultSet(rs, "ProteinGroupId", _maxPeptideRows, _maxGroupingRows);
 
         proteinRgn.setGroupedResultSet((GroupedResultSet)_rs);
         DataRegion peptideGrid = createPeptideDataRegion(requestedPeptideColumnNames);
@@ -139,13 +149,9 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
         return peptideGrid;
     }
 
-    public ResultSet createPeptideResultSet(String requestedPeptideColumnNames, String extraWhere) throws SQLException
+    public ResultSet createPeptideResultSet(String requestedPeptideColumnNames, int maxRows, String extraWhere) throws SQLException
     {
-        return createPeptideResultSet(requestedPeptideColumnNames, getSingleRun(), MAX_PEPTIDE_DISPLAY_ROWS, extraWhere);
-    }
-
-    public ResultSet createPeptideResultSet(String requestedPeptideColumnNames, MS2Run run, int maxRows, String extraWhere) throws SQLException
-    {
+        MS2Run run = getSingleRun();
         String sqlColumnNames = run.getSQLPeptideColumnNames(requestedPeptideColumnNames, false, MS2Manager.getTableInfoSimplePeptides(), MS2Manager.getTableInfoPeptideMemberships());
         return ProteinManager.getProteinProphetPeptideRS(_url, run, extraWhere, maxRows, sqlColumnNames);
     }
@@ -177,7 +183,7 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
         ResultSet rs = null;
         try
         {
-            rs = createPeptideResultSet("RowId", extraWhere);
+            rs = createPeptideResultSet("RowId", _maxPeptideRows, extraWhere);
             int columnIndex = rs.findColumn("RowId");
             ArrayList<Long> rowIdsLong = new ArrayList<Long>(100);
             while(rs.next())
@@ -259,7 +265,7 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
         }
         else
         {
-            rs = new ResultSetCollapser(_rs, "ProteinGroupId", MAX_PEPTIDE_DISPLAY_ROWS);
+            rs = new ResultSetCollapser(_rs, "ProteinGroupId", _maxPeptideRows);
         }
         proteinView.setResultSet(rs);
 
@@ -282,7 +288,7 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
 
     public void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException
     {
-        ResultSet proteinRS = ProteinManager.getProteinProphetRS(_url, run, where, ExcelWriter.MAX_ROWS);
+        ResultSet proteinRS = ProteinManager.getProteinProphetRS(_url, run, where, 0);
 
         ewProtein.setResultSet(proteinRS);
         ewProtein.setExpanded(expanded);
@@ -345,5 +351,16 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
     {
         sqlSummaries.add(new Pair<String, String>("Protein Group Filter", new SimpleFilter(_url, MS2Manager.getDataRegionNameProteinGroups()).getFilterText(MS2Manager.getSqlDialect())));
         sqlSummaries.add(new Pair<String, String>("Protein Group Sort", new Sort(_url, MS2Manager.getDataRegionNameProteinGroups()).getSortText(MS2Manager.getSqlDialect())));
+    }
+
+    public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String requestedPeptideColumns)
+            throws SQLException
+    {
+        String peptideColumns = getPeptideColumnNames(requestedPeptideColumns);
+        DataRegion peptideRegion = createPeptideDataRegion(requestedPeptideColumns);
+        GridView view = new GridView(peptideRegion);
+        String extraWhere = MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId = " + proteinGroupingId;
+        view.setResultSet(createPeptideResultSet(peptideColumns, _maxPeptideRows, extraWhere));
+        return view;
     }
 }

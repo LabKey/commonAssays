@@ -94,7 +94,6 @@ public class ProteinGroupTableInfo extends FilteredTable
 
     public void addContainerCondition(Container c, User u, boolean includeSubfolders)
     {
-        Set<Container> containers = ContainerManager.getChildrenRecusively(c, u, ACL.PERM_READ);
         SQLFragment sql = new SQLFragment();
         sql.append("ProteinProphetFileId IN (SELECT ppf.RowId FROM ");
         sql.append(MS2Manager.getTableInfoProteinProphetFiles());
@@ -104,6 +103,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         sql.add(Boolean.FALSE);
         if (includeSubfolders)
         {
+            Set<Container> containers = ContainerManager.getAllChildren(c, u, ACL.PERM_READ);
             sql.append(ContainerManager.getIdsAsCsvList(new HashSet<Container>(containers)));
         }
         else
@@ -116,10 +116,9 @@ public class ProteinGroupTableInfo extends FilteredTable
         addCondition(sql);
     }
 
-    public void addProteinNameFilter(String identifier)
+    public void addProteinNameFilter(String identifier, boolean exactMatch)
     {
-        List<Parameter> params = SequencesTableInfo.getIdentifierParameters(identifier);
-        String inClause = SequencesTableInfo.getIdentifierInClause(params);
+        List<String> params = SequencesTableInfo.getIdentifierParameters(identifier);
         SQLFragment sql = new SQLFragment();
         sql.append("RowId IN (\n");
         sql.append("SELECT ProteinGroupId FROM ");
@@ -127,23 +126,20 @@ public class ProteinGroupTableInfo extends FilteredTable
         sql.append(" pgm WHERE pgm.SeqId IN (\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoAnnotations());
-        sql.append(" a WHERE a.AnnotVal IN ");
-        sql.append(inClause);
-        sql.addAll(params);
+        sql.append(" a WHERE ");
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "a.AnnotVal", exactMatch));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences());
-        sql.append(" fs WHERE fs.LookupString IN ");
-        sql.append(inClause);
-        sql.addAll(params);
+        sql.append(" fs WHERE ");
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "fs.LookupString", exactMatch));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoIdentifiers());
-        sql.append(" i WHERE i.Identifier IN ");
-        sql.append(inClause);
-        sql.addAll(params);
+        sql.append(" i WHERE ");
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "i.Identifier", exactMatch));
         sql.append("\n");
         sql.append("))");
         addCondition(sql);

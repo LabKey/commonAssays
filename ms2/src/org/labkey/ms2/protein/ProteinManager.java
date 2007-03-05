@@ -346,7 +346,7 @@ public class ProteinManager
     public static void addRunCondition(SimpleFilter filter, MS2Run run, String runTableName)
     {
         String columnName = runTableName == null ? "Run" : runTableName + ".Run";
-        filter.addCondition(columnName, run.getRun());
+        filter.addWhereClause(columnName + " = " + run.getRun(), new Object[0], columnName);
     }
 
 
@@ -519,7 +519,7 @@ public class ProteinManager
     }
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static ResultSet getProteinProphetPeptideRS(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames) throws SQLException
+    public static Table.TableResultSet getProteinProphetPeptideRS(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames) throws SQLException
     {
         SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames);
 

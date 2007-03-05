@@ -52,9 +52,9 @@ public class SequencesTableInfo extends FilteredTable
         setDefaultVisibleColumns(cols);
     }
 
-    /*package*/ static List<Parameter> getIdentifierParameters(String identifiers)
+    /*package*/ static List<String> getIdentifierParameters(String identifiers)
     {
-        List<Parameter> result = new ArrayList<Parameter>();
+        List<String> result = new ArrayList<String>();
         if (identifiers == null || identifiers.trim().equals(""))
         {
             return result;
@@ -63,25 +63,37 @@ public class SequencesTableInfo extends FilteredTable
         StringTokenizer st = new StringTokenizer(identifiers, " \t\n\r,");
         while (st.hasMoreTokens())
         {
-            result.add(new Parameter(st.nextToken(), false));
+            result.add(st.nextToken());
         }
         return result;
     }
 
-    /*package*/ static String getIdentifierInClause(List<Parameter> params)
+    /*package*/ static String getIdentifierClause(List<String> params, String columnName, boolean exactMatch)
     {
         StringBuilder sb = new StringBuilder();
         String separator = "";
         sb.append("(");
         if (params.isEmpty())
         {
-            sb.append("NULL");
+            sb.append("1 = 2");
         }
-        for (Parameter param : params)
+        for (String param : params)
         {
             sb.append(separator);
-            sb.append("?");
-            separator = ", ";
+            sb.append(columnName);
+            if (exactMatch)
+            {
+                sb.append(" = '");
+                sb.append(param.replaceAll("'", "''"));
+                sb.append("'");
+            }
+            else
+            {
+                sb.append(" LIKE '");
+                sb.append(param.replaceAll("'", "''"));
+                sb.append("%'");
+            }
+            separator = " OR ";
         }
         sb.append(")");
         return sb.toString();
@@ -89,7 +101,7 @@ public class SequencesTableInfo extends FilteredTable
 
     public void addContainerCondition(Container c, User u, boolean includeSubfolders)
     {
-        Set<Container> containers = ContainerManager.getChildrenRecusively(c, u, ACL.PERM_READ);
+        Set<Container> containers = ContainerManager.getAllChildren(c, u, ACL.PERM_READ);
         SQLFragment sql = new SQLFragment();
         sql.append("SeqId IN (SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences());
@@ -111,31 +123,27 @@ public class SequencesTableInfo extends FilteredTable
         addCondition(sql);
     }
 
-    public void addProteinNameFilter(String identifier)
+    public void addProteinNameFilter(String identifier, boolean exactMatch)
     {
-        List<Parameter> params = getIdentifierParameters(identifier);
-        String inClause = getIdentifierInClause(params);
+        List<String> params = getIdentifierParameters(identifier);
         SQLFragment sql = new SQLFragment();
         sql.append("SeqId IN (\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoAnnotations());
-        sql.append(" a WHERE a.AnnotVal IN ");
-        sql.append(inClause);
-        sql.addAll(params);
+        sql.append(" a WHERE ");
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "a.AnnotVal", exactMatch));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoFastaSequences());
-        sql.append(" fs WHERE fs.LookupString IN ");
-        sql.append(inClause);
-        sql.addAll(params);
+        sql.append(" fs WHERE ");
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "fs.lookupstring", exactMatch));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
         sql.append(ProteinManager.getTableInfoIdentifiers());
-        sql.append(" i WHERE i.Identifier IN ");
-        sql.append(inClause);
-        sql.addAll(params);
+        sql.append(" i WHERE ");
+        sql.append(SequencesTableInfo.getIdentifierClause(params, "i.Identifier", exactMatch));
         sql.append("\n");
         sql.append(")");
         addCondition(sql);

@@ -20,9 +20,9 @@ public class StandardProteinDataRegion extends AbstractProteinDataRegion
 {
     private int _peptideIndex = -1;
 
-    public StandardProteinDataRegion()
+    public StandardProteinDataRegion(ViewURLHelper url)
     {
-        super("Protein");
+        super("Protein", url);
         setShadeAlternatingRows(true);
     }
 

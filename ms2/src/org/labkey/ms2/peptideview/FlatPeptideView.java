@@ -41,7 +41,7 @@ public class FlatPeptideView extends AbstractPeptideView
 
     private DataRegion getPeptideGridForDisplay(String columnNames) throws SQLException
     {
-        DataRegion rgn = getPeptideGrid(columnNames, MAX_PEPTIDE_DISPLAY_ROWS);
+        DataRegion rgn = getPeptideGrid(columnNames, _maxPeptideRows);
 
         rgn.setShowRecordSelectors(true);
         rgn.setFixedWidthColumns(true);
@@ -82,6 +82,11 @@ public class FlatPeptideView extends AbstractPeptideView
     public void addSQLSummaries(List<Pair<String, String>> sqlSummaries)
     {
 
+    }
+
+    public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
+    {
+        throw new UnsupportedOperationException();
     }
 
     public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form)

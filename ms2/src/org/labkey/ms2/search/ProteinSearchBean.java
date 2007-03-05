@@ -7,6 +7,7 @@ package org.labkey.ms2.search;
 public class ProteinSearchBean
 {
     private boolean _includeSubfolders = true;
+    private boolean _exactMatch = true;
     private Float _minProbability;
     private Float _maxErrorRate;
     private String _identifier = "";
@@ -25,6 +26,16 @@ public class ProteinSearchBean
     public String getIdentifier()
     {
         return _identifier;
+    }
+
+    public boolean isExactMatch()
+    {
+        return _exactMatch;
+    }
+
+    public void setExactMatch(boolean exactMatch)
+    {
+        _exactMatch = exactMatch;
     }
 
     public void setIdentifier(String identifier)

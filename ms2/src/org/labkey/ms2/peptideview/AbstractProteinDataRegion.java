@@ -20,11 +20,17 @@ public abstract class AbstractProteinDataRegion extends DataRegion
     protected boolean _expanded = false;
     protected DataRegion _nestedRegion = null;
     private final String _uniqueColumnName;
+    private final String _groupURL;
     protected GroupedResultSet _groupedRS = null;
 
-    protected AbstractProteinDataRegion(String uniqueColumnName)
+    protected AbstractProteinDataRegion(String uniqueColumnName, ViewURLHelper urlHelper)
     {
         _uniqueColumnName = uniqueColumnName;
+        ViewURLHelper groupURL = urlHelper.clone();
+        groupURL.setAction("getProteinGroupingPeptides.view");
+        groupURL.deleteParameter("proteinGroupingId");
+
+        _groupURL = groupURL.toString() + "&proteinGroupingId=";
     }
 
     public void _renderTable(RenderContext ctx, Writer out) throws SQLException, IOException
@@ -39,13 +45,14 @@ public abstract class AbstractProteinDataRegion extends DataRegion
     protected void renderExtraRecordSelectorContent(RenderContext ctx, Writer out) throws IOException
     {
         String value = getUniqueColumnValue(ctx);
-        out.write("<a href=\"javascript:toggleNestedGrid('");
-        out.write(getName());
-        out.write("-");
+        out.write("<a href=\"javascript:togglePeptides('");
+        out.write(_groupURL);
         out.write(value);
-        out.write("');\"><img valign=\"middle\" id=\"" + getName() + "-");
+        out.write("', '");
         out.write(value);
-        out.write("-Handle\" src=\"");
+        out.write("');\"><img valign=\"middle\" id=\"proteinHandle");
+        out.write(value);
+        out.write("\" src=\"");
         out.write(ctx.getViewContext().getContextPath());
         out.write("/_images/");
         out.write(_expanded ? "minus" : "plus");
@@ -93,7 +100,10 @@ public abstract class AbstractProteinDataRegion extends DataRegion
         RenderContext nestedCtx = new RenderContext(ctx.getViewContext());
         nestedCtx.setResultSet(nestedRS);
         nestedCtx.setMode(DataRegion.MODE_GRID);
-        _nestedRegion.render(nestedCtx, out);
+        if (_expanded)
+        {
+            _nestedRegion.render(nestedCtx, out);
+        }
         renderRowEnd(out);
     }
 
@@ -115,11 +125,11 @@ public abstract class AbstractProteinDataRegion extends DataRegion
         {
             out.write(" style=\"display:none\"");
         }
-        out.write(" id=\"");
-        out.write(getName());
-        out.write("-");
+        out.write(" id=\"proteinRow");
         String value = getUniqueColumnValue(ctx);
         out.write(value);
-        out.write("-Row\"><td></td><td colspan=\"20\" align=\"left\">");
+        out.write("\"><td></td><td colspan=\"20\" align=\"left\" id=\"proteinContent");
+        out.write(value);
+        out.write("\">");
     }
 }

@@ -4,6 +4,7 @@ import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.GroupedResultSet;
 import org.labkey.api.data.DataColumn;
+import org.labkey.api.view.ViewURLHelper;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.ProteinGroupProteins;
 
@@ -23,9 +24,9 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
     private final DataColumn _groupIdColumn;
     private final MS2Run[] _runs;
 
-    public QueryPeptideDataRegion(List<DisplayColumn> allColumns, DataColumn groupIdColumn, MS2Run[] runs)
+    public QueryPeptideDataRegion(List<DisplayColumn> allColumns, DataColumn groupIdColumn, MS2Run[] runs, ViewURLHelper url)
     {
-        super(groupIdColumn.getColumnInfo().getAlias());
+        super(groupIdColumn.getColumnInfo().getAlias(), url);
         _allColumns = allColumns;
         _groupIdColumn = groupIdColumn;
         _runs = runs;
