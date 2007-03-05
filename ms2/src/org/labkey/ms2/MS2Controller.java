@@ -551,7 +551,7 @@ public class MS2Controller extends ViewController
         headerView.addObject("tabPeptide", renderTab(cloneUrl, "&nbsp;None&nbsp;", !"protein".equals(grouping) && !"proteinprophet".equals(grouping) && !"query".equals(grouping)));
 
         cloneUrl.replaceParameter("grouping", "query");
-        headerView.addObject("tabQuery", renderTab(cloneUrl, "&nbsp;Query&nbsp;", "query".equals(grouping)));
+        headerView.addObject("tabQuery", renderTab(cloneUrl, "&nbsp;Query&nbsp;(Beta)&nbsp;", "query".equals(grouping)));
 
         cloneUrl.replaceParameter("grouping", "protein");
         headerView.addObject("tabCollapsedProtein", renderTab(cloneUrl, "&nbsp;Protein&nbsp;Collapsed&nbsp;", "protein".equals(grouping) && !form.getExpanded()));
@@ -4167,7 +4167,7 @@ public class MS2Controller extends ViewController
         if (0 == sequestClient.getErrorCode())
         {
             message = "Test passed.";
-            form.setParameters(sequestClient.getDbNames());
+            form.setParameters(sequestClient.getEnvironmentConf());
         }
         else
         {

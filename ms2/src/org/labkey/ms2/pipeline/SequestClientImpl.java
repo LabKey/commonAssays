@@ -21,18 +21,15 @@ import java.io.*;
  * Date: Dec 13, 2006
  * Time: 4:35:42 PM
  */
-public class SequestClientImpl implements SearchClient {
+public class SequestClientImpl implements SearchClient
+{
     private Logger _instanceLogger = null;
     private String _url;
-    private String _userAccount = "";
-    private String _userPassword = "";
-    private String _proxyURL = "";
     private int errorCode = 0;
     private String errorString = "";
     private static volatile int _lastWorkingSet = 0;
     private static volatile String _lastWorkingUrl = "";
     private static volatile String _lastProvidedUrl = "";
-    public final static String EOF = "<!--@@EOF@@-->";
 
     public SequestClientImpl(String url)
     {
@@ -42,9 +39,9 @@ public class SequestClientImpl implements SearchClient {
     public SequestClientImpl(String url, Logger instanceLogger)
     {
         _url = url;
+        if(instanceLogger == null) _instanceLogger = Logger.getLogger(SequestClientImpl.class);
+        else _instanceLogger = instanceLogger;        
         _instanceLogger = instanceLogger;
-        _userAccount = "";
-        _userPassword = "";
         errorCode = 0;
         errorString = "";
     }
@@ -166,7 +163,7 @@ public class SequestClientImpl implements SearchClient {
         }
         catch (MalformedURLException x)
         {
-            _instanceLogger.error("connect("+_url+","+_userAccount+","+_userPassword+","+_proxyURL+")", x);
+            _instanceLogger.error("connect("+_url +")", x);
             //Fail to parse Sequest Server URL
             errorCode = 1;
             errorString = "Fail to parse Sequest Server URL";
@@ -516,7 +513,7 @@ public class SequestClientImpl implements SearchClient {
             if(ioError)
             {
                 _instanceLogger.error("getResultFile(result="+resultFile+",taskid="+taskId+")." +
-                        " Incomplete download.Expected: " + EOF + " Actual: " + lastLine );
+                        " Incomplete download.Expected: </BODY></HTML> Actual: " + lastLine );
             }
         }
         catch (FileNotFoundException e)
@@ -677,6 +674,14 @@ public class SequestClientImpl implements SearchClient {
         parameters.setProperty("dir", directory);
         return request(parameters);
     }
+
+    public String getEnvironmentConf()
+    {
+        // retrieve the the configuation of SequestServer
+        Properties parameters = new Properties();
+        parameters.setProperty("cmd", "admin");
+        return request(parameters).getProperty("HTTPContent", "ERROR:Evironment configuration not found.");
+    }    
 
     private String requestURL (Properties parameters)
     {

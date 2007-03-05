@@ -14,19 +14,19 @@
 <tr><td><table class="dataRegion" border="0"><tr>
     <td>Grouping:</td>
     <td>$tabPeptide</td>
-    <td>$tabQuery</td>
     <td>$tabCollapsedProtein</td>
     <td>$tabExpandedProtein</td>
-    <td>
-        #if ($tabCollapsedProteinProphet)
+    #if ($tabCollapsedProteinProphet)
+        <td>
             $tabCollapsedProteinProphet
-        #end
-    </td>
-    <td>
-        #if ($tabExpandedProteinProphet)
+        </td>
+    #end
+    #if ($tabExpandedProteinProphet)
+        <td>
             $tabExpandedProteinProphet
-        #end
-    </td>
+        </td>
+    #end
+    <td>$tabQuery</td>
 </tr></table></td></tr>
 
 <tr>
