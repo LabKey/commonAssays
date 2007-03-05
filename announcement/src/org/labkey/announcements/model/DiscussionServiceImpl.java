@@ -100,12 +100,13 @@ public class DiscussionServiceImpl implements DiscussionService.Service
     public HttpView getDisussionArea(ViewContext context, Container c, User user, String objectId, ViewURLHelper pageURL, String title)
     {
         // get discussion parameters
-        Map<String,String> discussion = context.getViewURLHelper().getScopeParameters("discussion");
+        Map<String,String> params = context.getViewURLHelper().getScopeParameters("discussion");
+        Announcement[] announcements = getDiscussions(c, objectId, user);
 
         int discussionId = 0;
         try
         {
-            String id = discussion.get("id");
+            String id = params.get("id");
             if (null != id)
                 discussionId = Integer.parseInt(id);
         }
@@ -120,17 +121,16 @@ public class DiscussionServiceImpl implements DiscussionService.Service
         if (0 != discussionId)
             returnUrl.addParameter("discussion.id", "" + discussionId);
 
-        HtmlView anchorView = new HtmlView("<a name=\"discussionArea\"></a>");
+        HttpView discussionBox = null;
         
-        if (discussion.get("start") != null)
+        if (params.get("start") != null)
         {
             WebPartView start = startDiscussion(c, user, objectId, pageURL, title, "");
             start.setFrame(WebPartView.FrameType.NONE);
-            return new VBox(anchorView, new ThreadWrapper(context, "Start a new discussion", start));
+            discussionBox = new ThreadWrapper(context, "Start a new discussion", start);
         }
         else
         {
-            Announcement[] announcements = getDiscussions(c, objectId, user);
             Announcement selected = null;
 
             WebPartView discussionView = null;
@@ -151,7 +151,7 @@ public class DiscussionServiceImpl implements DiscussionService.Service
                 {
                     discussionView = getDiscussion(c, selected, user);
                     discussionView.setFrame(WebPartView.FrameType.NONE);
-                    if (discussion.get("reply") != null)
+                    if (params.get("reply") != null)
                     {
                         ((AnnouncementsController.ThreadView)discussionView).getModel().isResponse = true;
                         respondView = new AnnouncementsController.RespondView(c, selected, returnUrl);
@@ -159,11 +159,15 @@ public class DiscussionServiceImpl implements DiscussionService.Service
                 }
             }
 
-            HttpView pickerView = new PickerView(pageURL, announcements);
-            if (discussionView == null)
-                return pickerView;
-            return new VBox(anchorView, pickerView, new ThreadWrapper(context, "Discussion", discussionView, respondView));
+            if (discussionView != null)
+                discussionBox = new ThreadWrapper(context, "Discussion", discussionView, respondView); 
         }
+
+        HttpView pickerView = new PickerView(pageURL, announcements);
+        if (discussionBox == null)
+            return pickerView;
+
+        return new VBox(pickerView, discussionBox);
     }
 
 
@@ -202,13 +206,30 @@ public class DiscussionServiceImpl implements DiscussionService.Service
     }
 
 
+    public static class AnchorView extends HtmlView
+    {
+        AnchorView()
+        {
+            super(
+                    "<a name=\"discussionArea\"></a>"
+//                    + "<script type=\"text/javascript\" for=\"window\" event=\"onload\">window.location.href = \"#discussionArea\"</script>"
+//                    + "<script type=\"text/javascript\">window.location.href = \"#discussionArea\"</script>"
+                    );
+        }
+    }
+
+
     public static class ThreadWrapper extends WebPartView
     {
-        WebPartView _vbox;
+        VBox _vbox;
 
         ThreadWrapper(ViewContext context, String caption, HttpView... views)
         {
-            _vbox = new VBox(views);
+            _vbox = new VBox();
+            for (HttpView v : views)
+                if (v != null)
+                    _vbox.addView(v);
+            _vbox.addView(new AnchorView());
             _vbox.setTitle(caption);
             _vbox.setFrame(WebPartView.FrameType.DIALOG);
             ViewURLHelper close = context.cloneViewURLHelper().deleteScopeParameters("discussion");

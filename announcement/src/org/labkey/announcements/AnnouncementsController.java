@@ -720,7 +720,8 @@ public class AnnouncementsController extends ViewController
         {
             ViewURLHelper src = DiscussionServiceImpl.fromSaved(thread.getDiscussionSrcURL());
             src.addParameter("discussion.id", "" + thread.getRowId());
-            HttpView.throwRedirect(src.getLocalURIString() + "#discussionArea");
+            src.addParameter("_anchor", "discussionArea");
+            HttpView.throwRedirect(src.getLocalURIString());
         }
 
         String threadId = thread.getEntityId();
@@ -990,7 +991,7 @@ public class AnnouncementsController extends ViewController
     {
         ViewURLHelper threadUrl = new ViewURLHelper(request, "announcements", "thread", c);
         threadUrl.addParameter("entityId", threadId);
-        threadUrl.addParameter("anchor", anchor);
+        threadUrl.addParameter("_anchor", anchor);
         return threadUrl;
     }
 
@@ -1015,7 +1016,7 @@ public class AnnouncementsController extends ViewController
         }
         else
         {
-            String anchor = getViewURLHelper().getParameter("anchor");
+            String anchor = getViewURLHelper().getParameter("_anchor");
             return _renderInTemplate(threadView, c, title, null, (null != anchor ? "row:" + anchor : null));
         }
     }
