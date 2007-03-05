@@ -61,9 +61,9 @@ if (!bean.print && !embedded)
     </tr>
     </table><%
 }
-if (false && !bean.print && null != discussionSrc)
+if (!bean.print && null != discussionSrc)
 {
-    %><p></p><img src="<%=contextPath%>/_images/exclaim.gif"><a href='<%=discussionSrc.getLocalURIString()%>'>view&nbsp;discussion&nbsp;in&nbsp;context</a><%
+    %><p></p><img src="<%=contextPath%>/_images/exclaim.gif">&nbsp;This is a <%=settings.getConversationName().toLowerCase()%> about another page.  [<a href='<%=discussionSrc.getLocalURIString()%>'>view&nbsp;page</a>]<%
 }
 
 %><table width="100%" cellpadding=0>
@@ -72,9 +72,9 @@ if (false && !bean.print && null != discussionSrc)
     <td class="ms-vb" style="padding-top:14px; padding-bottom:2px; width:33%;" align=center><%=h(announcement.getCreatedByName())%></td>
     <td class="ms-vb" style="padding-top:14px; padding-bottom:2px; width:33%;" align="right" nowrap><%
 
-if (!bean.print && null != discussionSrc)
+if (false && !bean.print && null != discussionSrc)
 {
-    %>[<a href="<%=discussionSrc.getLocalURIString()%>">view&nbsp;in&nbsp;context</a>]&nbsp;<%
+    %>[<a href="<%=discussionSrc.getLocalURIString()%>#discussionArea">view&nbsp;in&nbsp;context</a>]&nbsp;<%
 }
 
 if (bean.perm.allowUpdate(announcement) && !bean.print)
