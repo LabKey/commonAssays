@@ -439,7 +439,7 @@
 			</ns:column>
 			<ns:column columnName="NecropsyAppearance">
 				<ns:columnTitle>Necropsy Appearance</ns:columnTitle>
-				<ns:inputType>text</ns:inputType>
+				<ns:inputType>textarea</ns:inputType>
 				<ns:scale>1073741823</ns:scale>
 				<ns:inputLength>40</ns:inputLength>
 				<ns:isReadOnly>false</ns:isReadOnly>
@@ -447,7 +447,7 @@
 			</ns:column>
 			<ns:column columnName="NecropsyGrossFindings">
 				<ns:columnTitle>Necropsy Gross Findings</ns:columnTitle>
-				<ns:inputType>text</ns:inputType>
+				<ns:inputType>textarea</ns:inputType>
 				<ns:scale>1073741823</ns:scale>
 				<ns:inputLength>40</ns:inputLength>
 				<ns:isReadOnly>false</ns:isReadOnly>
@@ -1750,7 +1750,9 @@
 				<ns:isReadOnly>false</ns:isReadOnly>
 				<ns:isUserEditable>true</ns:isUserEditable>
 			</ns:column>
-		</ns:columns>
+            <ns:column columnName="NecropsyAppearance"/>
+            <ns:column columnName="NecropsyGrossFindings"/>            
+        </ns:columns>
 		<ns:tableTitle>Mouse View</ns:tableTitle>
 		<ns:pkColumnName>entityId</ns:pkColumnName>
 		<ns:titleColumn>MouseNo</ns:titleColumn>

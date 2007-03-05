@@ -32,6 +32,7 @@ import org.apache.struts.upload.FormFile;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.MaterialSource;
+import org.labkey.api.exp.Material;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.sample.*;
 import org.labkey.api.security.ACL;
@@ -308,6 +309,11 @@ public class NecropsyController extends ViewController
                     sample.setLSID(matSource.getMaterialLSIDPrefix() + sample.getSampleId());
                     sample.setFrozen(true);
                     sample.setFixed(false);
+                    //If samples are deleted through data controller materials might be out of synch.
+                    //Deal with that...
+                    Material mat = ExperimentService.get().getMaterial(sample.getLSID());
+                    if (null != mat)
+                        ExperimentService.get().deleteMaterialByRowIds(new String[] {String.valueOf(mat.getRowId())}, getContainer());
                     SampleManager.insert(form.getUser(), sample);
 
                     Location location = form.getLocations()[i];
@@ -480,6 +486,11 @@ public class NecropsyController extends ViewController
                     sample.setContainer(form.getContainer().getId());
                     sample.setFrozen(samples[i].getFrozen());
                     sample.setFixed(samples[i].getFixed());
+                    //If samples are deleted through data controller materials might be out of synch.
+                    //Deal with that...
+                    Material mat = ExperimentService.get().getMaterial(sample.getLSID());
+                    if (null != mat)
+                        ExperimentService.get().deleteMaterialByRowIds(new String[] {String.valueOf(mat.getRowId())}, getContainer());
                     SampleManager.insert(getUser(), sample);
 
 
@@ -497,6 +508,8 @@ public class NecropsyController extends ViewController
             }
 
             mouse.setNecropsyComplete(true);
+            mouse.setNecropsyAppearance(form.getAppearance());
+            mouse.setNecropsyGrossFindings(form.getGrossFindings());
             MouseModelManager.updateMouse(getUser(), mouse);
 
             if (null != form.getTaskId())
@@ -1170,6 +1183,8 @@ public class NecropsyController extends ViewController
         private Integer _taskId = null;
         private String _mouseNo = null;
         private Mouse _mouse = null;
+        private String _appearance;
+        private String _grossFindings;
 
         public NecropsySample[] getSamples()
         {
@@ -1358,6 +1373,26 @@ public class NecropsyController extends ViewController
         public void setMouse(Mouse _mouse)
         {
             this._mouse = _mouse;
+        }
+
+        public String getAppearance()
+        {
+            return _appearance;
+        }
+
+        public void setAppearance(String _appearance)
+        {
+            this._appearance = _appearance;
+        }
+
+        public String getGrossFindings()
+        {
+            return _grossFindings;
+        }
+
+        public void setGrossFindings(String _grossFindings)
+        {
+            this._grossFindings = _grossFindings;
         }
     }
 

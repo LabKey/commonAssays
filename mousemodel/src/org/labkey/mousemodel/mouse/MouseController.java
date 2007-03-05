@@ -76,16 +76,18 @@ public class MouseController extends ViewController
     private DataRegion getDefaultRegion(ViewForm form) throws ServletException
     {
         DataRegion rgn = new DataRegion();
-        rgn.setColumns(MouseSchema.getMouse().getColumns("EntityId,MouseNo,modelId,Sex,control,BirthDate,StartDate,DeathDate,MouseComments"));
+        rgn.setColumns(MouseSchema.getMouse().getColumns("EntityId,MouseNo,modelId,Sex,control,BirthDate,StartDate,DeathDate,MouseComments,NecropsyAppearance,NecropsyGrossFindings"));
         rgn.addColumns(getCustomColumns(MouseModelController.getModel(form)));
         rgn.getDisplayColumn(0).setVisible(false);
+        ((DataColumn) rgn.getDisplayColumn("MouseNo")).setEditable(false);
+        ((DataColumn) rgn.getDisplayColumn("modelId")).setEditable(false);
         return rgn;
     }
 
     private DataRegion getDetailsRegion(MouseForm form) throws ServletException
     {
         DataRegion rgn = new DataRegion();
-        rgn.setColumns(MouseSchema.getMouseView().getColumns("MouseNo,modelId,Sex,BirthDate,StartDate,DeathDate,control,MouseComments"));
+        rgn.setColumns(MouseSchema.getMouseView().getColumns("MouseNo,modelId,Sex,BirthDate,StartDate,DeathDate,control,MouseComments,NecropsyAppearance,NecropsyGrossFindings"));
         DisplayColumn dc = new DataColumn(MouseSchema.getMouseView().getColumn("CageName"))
         {
             @Override

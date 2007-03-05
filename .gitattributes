@@ -356,12 +356,14 @@ mousemodel/src/org/labkey/mousemodel/sample/slides.jsp -text
 mousemodel/webapp/MouseModel/scripts/postgresql/mousemod-0.80-1.30.sql -text
 mousemodel/webapp/MouseModel/scripts/postgresql/mousemod-1.50-1.60.sql -text
 mousemodel/webapp/MouseModel/scripts/postgresql/mousemod-1.72-1.73.sql -text
+mousemodel/webapp/MouseModel/scripts/postgresql/mousemod-1.73-1.74.sql -text
 mousemodel/webapp/MouseModel/scripts/postgresql/mousemod-drop-1.11.sql -text
 mousemodel/webapp/MouseModel/scripts/postgresql/obsolete/mousemod-1.59-1.591.sql -text
 mousemodel/webapp/MouseModel/scripts/postgresql/obsolete/sample-0.00-1.00.sql -text
 mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/mousemod-0.80-1.30.sql -text
 mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/mousemod-1.50-1.60.sql -text
 mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/mousemod-1.72-1.73.sql -text
+mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/mousemod-1.73-1.74.sql -text
 mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/mousemod-drop-1.11.sql -text
 mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/obsolete/mousemod-1.59-1.591.sql -text
 mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/obsolete/sample-0.00-0.61.sql -text

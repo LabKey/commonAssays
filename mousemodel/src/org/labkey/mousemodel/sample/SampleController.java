@@ -322,7 +322,14 @@ public class SampleController extends ViewController
     {
         requiresPermission(ACL.PERM_UPDATE);
 
-        UpdateView updateView = new UpdateView(getDataRegion(), form);
+        DataRegion dr = getDataRegion();
+        DataColumn lsidCol = (DataColumn) dr.getDisplayColumn("LSID");
+        lsidCol.setEditable(false);
+        DataColumn sampleIdCol = (DataColumn) dr.getDisplayColumn("SampleId");
+        sampleIdCol.setEditable(false);
+        DataColumn organismIdCol = (DataColumn) dr.getDisplayColumn("OrganismId");
+        organismIdCol.setEditable(false);
+        UpdateView updateView = new UpdateView(dr, form);
         updateView.setTitle("Update Sample");
         _renderInTemplate(updateView, form);
         return null;
