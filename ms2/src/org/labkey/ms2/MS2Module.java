@@ -44,6 +44,7 @@ import java.util.*;
 
 import junit.framework.TestCase;
 import org.labkey.ms2.pipeline.PipelineController;
+import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
 /**
@@ -104,7 +105,8 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
                 });
         addController("MS2", MS2Controller.class);
         addController("MS2-Pipeline", PipelineController.class);
-        
+        addController("MS2-Scoring", ScoringController.class);
+
         Set<ExperimentDataHandler> dataHandlers = new HashSet<ExperimentDataHandler>();
         dataHandlers.add(new PepXmlExperimentDataHandler());
         dataHandlers.add(new ProteinProphetExperimentDataHandler());

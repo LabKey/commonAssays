@@ -17,12 +17,14 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineProviderCluster;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
+import org.apache.beehive.netui.pageflow.Forward;
 
 import java.io.PrintWriter;
 import java.io.File;
@@ -47,12 +49,27 @@ public class XTandemCPipelineProvider extends PipelineProviderCluster
 
     public boolean isStatusViewableFile(String name, String basename)
     {
-        if ("tandem.xml".equals(name))
+        if ("tandem.xml".equals(name) || "tandem.xml.err".equals(name))
             return true;
 
         return super.isStatusViewableFile(name, basename);
     }
 
+    public Forward handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf)
+            throws HandlerException
+    {
+        if ("Retry".equals(name) &&
+                "ERROR".equals(sf.getStatus()) &&
+                "type=database".equals(sf.getInfo()))
+        {
+            File analysisDir = new File(sf.getFilePath()).getParentFile();
+            File tandemXml = new File(analysisDir, "tandem.xml");
+            File tandemErr = new File(analysisDir, "tandem.xml.err");
+            tandemErr.renameTo(tandemXml);
+        }
+
+        return super.handleStatusAction(ctx, name, sf);
+    }
     public void updateFileProperties(ViewContext context, List<FileEntry> entries)
     {
         if (!AppProps.getInstance().hasPipelineCluster())

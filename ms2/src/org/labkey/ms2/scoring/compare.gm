@@ -10,8 +10,6 @@
     <br>
 <%  } %>
 <% if (runs != null && runs.length > 0) { %>
-<input type="hidden" name="size" value="<%=runs.size()%>">
-<% params.append("size=").append(runs.size()); %>
 <table>
     <tr><td colspan=2 style="font-size:<%=ThemeFont.getThemeFont().getHeader_1Size()%>">
     Choose discrimate values to display in ROC chart.<br>
@@ -23,6 +21,8 @@ int index = 0;
 int validRuns = 0;
 for (run in runs)
     {
+    if (run == null)
+        continue;
 %>
   <tr><td colspan="2" class="heading-1"><%=filter(run.description)%></td>
     <tr><td>&nbsp;</td>
@@ -77,7 +77,10 @@ for (run in runs)
         <tr>
             <td colspan="2"><input type=image src="<%=PageFlowUtil.submitSrc()%>"></td>
         </tr>
-<%   } %>
+<%
+        params.append("&size=").append(validRuns);
+    } %>
+    <input type="hidden" name="size" value="<%=validRuns%>">
 </table>
 </td>
 <%

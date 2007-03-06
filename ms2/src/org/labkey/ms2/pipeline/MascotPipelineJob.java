@@ -605,6 +605,12 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
             return;
         }
 
+        if ("no".compareToIgnoreCase(parser.getInputParameter("pipeline, load")) == 0)
+        {
+            setStatus("COMPLETE");
+            return;
+        }
+
         setStatus("LOADING");
         FileXarSource source = new FileXarSource(fileExperimentXMLFinal);
         String status = ExperimentPipelineJob.loadExperiment(this, source, false);

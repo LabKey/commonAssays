@@ -372,19 +372,11 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
             {
                 interactCmd.add("-nP"); // no Prophet analysis
             }
-            // Currently ProteinProphet relies on perl, so make sure the system has
-            // a valid perl version.
-            else if (hasValidPerl())
+            else
             {
                 fileProtXML = MS2PipelineManager.getProtXMLIntermediatFile(dirWork, _baseName);
                 interactCmd.add("-Opt");
                 interactCmd.add("-nR");
-            }
-            else
-            {
-                warn("No valid Perl version found on this machine.  " +
-                    "Skipping ProteinProphet analysis.  " +
-                    "Ask your system administrator to check the system path.");
             }
 
             String paramMinProb = parser.getInputParameter("pipeline prophet, min probability");
@@ -508,6 +500,13 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
         else if (!dirWork.delete())
         {
             error("Failed to delete " + dirWork.getAbsolutePath());
+            return;
+        }
+
+        String paramLoad = parser.getInputParameter("pipeline, load");
+        if (paramLoad != null && "no".compareToIgnoreCase(paramLoad) == 0)
+        {
+            setStatus("COMPLETE");
             return;
         }
 

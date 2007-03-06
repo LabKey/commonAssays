@@ -1289,9 +1289,10 @@ public class MS2Manager
                     series.setKey(series.getKey() + " (Loading)");
                 else
                 {
+                    ResultSet rs = null;
                     try
                     {
-                        ResultSet rs = Table.executeQuery(getSchema(),
+                        rs = Table.executeQuery(getSchema(),
                                                     "SELECT Protein, " + discriminate + " as Expression " +
                                                     "FROM " + getTableInfoPeptides().getFromSQL() + " " +
                                                     "WHERE Run = ? " +
@@ -1337,6 +1338,13 @@ public class MS2Manager
                         series.clear();
                         _log.error("Error getting ROC data.", e);
                     }
+                    finally
+                    {
+                        if (rs != null)
+                        {
+                            try { rs.close(); } catch(SQLException e) { _log.error("Error closing ResultSet", e); }
+                        }
+                    }
                 }
 
                 collection.addSeries(series);
@@ -1364,9 +1372,10 @@ public class MS2Manager
             String key = run.getDescription();
             XYSeriesROC series = new XYSeriesROC(key);
 
+            ResultSet rs = null;
             try
             {
-                ResultSet rs = Table.executeQuery(getSchema(),
+                rs = Table.executeQuery(getSchema(),
                                             "SELECT Protein, " +
                                                 " case" +
                                                     " when Charge = 1 then " + expressions[0] +
@@ -1417,6 +1426,13 @@ public class MS2Manager
                 series.clear();
                 _log.error("Error getting ROC data.", e);
             }
+            finally
+            {
+                if (rs != null)
+                {
+                    try { rs.close(); } catch(SQLException e) { _log.error("Error closing ResultSet", e); }
+                }
+            }
 
             collection.addSeries(series);
         }
@@ -1445,9 +1461,10 @@ public class MS2Manager
             XYSeries seriesFP = new XYSeries("False-Positives");
             //Set<SpectrumId> seen = new HashSet<SpectrumId>();
 
+            ResultSet rs = null;
             try
             {
-                ResultSet rs = Table.executeQuery(getSchema(),
+                rs = Table.executeQuery(getSchema(),
                                             "SELECT Fraction, Scan, Charge, Protein, " + expression + " as Expression " +
                                             "FROM " + getTableInfoPeptides().getFromSQL() + " " +
                                             "WHERE Run = ? " +
@@ -1516,6 +1533,13 @@ public class MS2Manager
                 seriesCorrect.setKey(seriesCorrect.getKey() + " (Error)");
                 seriesCorrect.clear();
                 _log.error("Error getting descriminate data.", e);
+            }
+            finally
+            {
+                if (rs != null)
+                {
+                    try { rs.close(); } catch(SQLException e) { _log.error("Error closing ResultSet", e); }
+                }
             }
 
             collection.addSeries(seriesFP);
