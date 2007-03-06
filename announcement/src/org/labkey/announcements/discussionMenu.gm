@@ -72,6 +72,6 @@ var discussionMenu = {};
 }
 else
 {
-%>[<a href="<%=filter(pageURL.getLocalURIString())%>&discussion.start=true">discuss this</a>]<%
+%>[<a href="<%=filter(pageURL.getLocalURIString())%>&discussion.start=true#discussionArea">discuss this</a>]<%
 }
 %>
