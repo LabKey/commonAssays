@@ -4,7 +4,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.labkey.announcements.AnnouncementsController;
 import org.labkey.announcements.DailyDigestPage;
-import org.labkey.announcements.model.AnnouncementManager.Settings;
+import org.labkey.announcements.model.AnnouncementManager.*;
 import org.labkey.api.announcements.Announcement;
 import org.labkey.api.announcements.CommSchema;
 import org.labkey.api.data.*;
@@ -36,7 +36,6 @@ public class DailyDigest
     private static final Logger _log = Logger.getLogger(DailyDigest.class);
 
     // Used only for AnnouncementsController test action -- remove when test action is removed
-    @Deprecated
     public static void sendDailyDigest() throws Exception
     {
         sendDailyDigest(createMockRequest());
@@ -49,9 +48,9 @@ public class DailyDigest
         Date current = new Date();
 
         if (null == min)
-            min = getMidnight(current, -3, 0);  // TODO: Temp
+            min = getMidnight(current, -1, 0);  // If nothing is set, start yesterday morning at midnight
 
-        Date max = getMidnight(current, 1, 0);
+        Date max = getMidnight(current, 0, 0);  // Until midnight this morning 
 
         List<Container> containers = getContainersWithNewMessages(min, max);
 
@@ -112,15 +111,17 @@ public class DailyDigest
     {
         Settings settings = AnnouncementManager.getMessageBoardSettings(c);
         Announcement[] announcements = getRecentAnnouncementsInContainer(c, min, max);
-        List<User> users = AnnouncementManager.getDailyDigestUsers(c);
 
-        for (User user : users)
+        DailyDigestEmailPrefsSelector sel = new DailyDigestEmailPrefsSelector(c);
+        List<EmailPref> emailPrefs = sel.getEmailPrefs();
+
+        for (EmailPref ep : emailPrefs)
         {
+            User user = ep.getUser();
             List<Announcement> announcementList = new ArrayList<Announcement>(announcements.length);
-            Permissions perm = AnnouncementsController.getPermissions(c, user, settings);
 
             for (Announcement ann : announcements)
-                if (perm.allowRead(ann))
+                if (sel.shouldSend(ann, ep))
                     announcementList.add(ann);
 
             if (!announcementList.isEmpty())
@@ -199,7 +200,7 @@ public class DailyDigest
         _timer = new Timer("DailyDigest", true);
         _timerTask = new DailyDigestTask();
         ContextListener.addShutdownListener(_timerTask);
-        _timer.scheduleAtFixedRate(_timerTask, getMidnight(new Date(), 1, 5), DateUtils.MILLIS_PER_DAY);
+        _timer.scheduleAtFixedRate(_timerTask, getMidnight(new Date(), 1, 5), DateUtils.MILLIS_PER_DAY);  // 12:05AM tomorrow morning
     }
 
 

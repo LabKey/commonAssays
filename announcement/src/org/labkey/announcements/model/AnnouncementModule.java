@@ -48,7 +48,7 @@ import java.util.*;
  * NOTE: Wiki handles some of the shared Communications module stuff.
  * e.g. it handles ContainerListener and Attachments
  * <p/>
- * TODO: merge into one Module
+ * TODO: merge announcement & wiki into one module?
  */
 public class AnnouncementModule extends DefaultModule implements Search.Searchable, ContainerManager.ContainerListener, UserManager.UserListener, SecurityManager.GroupListener
 {
@@ -63,7 +63,7 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
 
     public AnnouncementModule()
     {
-        super(NAME, 1.73, "/org/labkey/announcements", "/announcements",
+        super(NAME, 1.74, "/org/labkey/announcements", "/announcements",
             new WebPartFactory(WEB_PART_NAME)
             {
                 public WebPartView getWebPartView(ViewContext parentCtx, Portal.WebPart webPart)

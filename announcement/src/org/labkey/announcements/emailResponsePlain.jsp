@@ -7,7 +7,7 @@ if (null != responseBody)
 {  %>
     <%=responseBody%><%
 }  %>
-View the <%=settings.getConversationName().toLowerCase()%> at this URL: <%=threadURL%>
+View this <%=settings.getConversationName().toLowerCase()%> here: <%=threadURL%>
 
 
 
@@ -21,7 +21,7 @@ You have received this email because <%
         case signedUp:
 %>you are signed up to receive notifications about new posts to <%=boardPath%> at <%=siteURL%>.
 If you no longer wish to receive these notifications you can change your email preferences by
-navigating to this URL: <%=removeUrl%>.<%
+navigating here: <%=removeUrl%>.<%
         break;
 
         case memberList:

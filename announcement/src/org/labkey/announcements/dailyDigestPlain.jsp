@@ -16,7 +16,8 @@
             if (null != threadUrl)
             {
                 %>
-View this <%=conversationName%> at this URL: <%=threadUrl%>
+View this <%=conversationName%> here: <%=threadUrl%>
+
 
 <%
             }
@@ -26,11 +27,12 @@ View this <%=conversationName%> at this URL: <%=threadUrl%>
 
 <%
         }
-%><%=ann.getCreatedByName()%><% if (null == ann.getParent()) { %> created this <%=conversationName%><% } else { %> responded <% } %> at <%=DateUtil.formatDateTime(ann.getCreated())%>
+%><%=ann.getCreatedByName()%><% if (null == ann.getParent()) { %> created this <%=conversationName%><% } else { %> responded<% } %> at <%=DateUtil.formatDateTime(ann.getCreated())%>
 <%
         if (!settings.isSecure())
         {
 %><%=ann.getBody()%>
+
 <%
         }
     }
@@ -38,10 +40,10 @@ View this <%=conversationName%> at this URL: <%=threadUrl%>
     if (null != threadUrl)
     {
         %>
-View this <%=conversationName%> at this URL: <%=threadUrl%>
+View this <%=conversationName%> here: <%=threadUrl%>
 
 <% } %>
 
 
-You have received this email because you are signed up for a daily digest about new posts to <%=boardPath%> at <%=siteUrl%>.
+You have received this email because you are signed up for a daily digest of new posts to <%=boardPath%> at <%=siteUrl%>.
 If you no longer wish to receive these notifications, please change your email preferences here: <%=removeUrl%>

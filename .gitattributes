@@ -22,7 +22,10 @@ announcement/src/org/labkey/announcements/insert.gm -text
 announcement/src/org/labkey/announcements/model/AnnouncementManager.java -text
 announcement/src/org/labkey/announcements/model/AnnouncementModule.java -text
 announcement/src/org/labkey/announcements/model/DailyDigest.java -text
+announcement/src/org/labkey/announcements/model/DailyDigestEmailPrefsSelector.java -text
 announcement/src/org/labkey/announcements/model/DiscussionServiceImpl.java -text
+announcement/src/org/labkey/announcements/model/EmailPrefsSelector.java -text
+announcement/src/org/labkey/announcements/model/IndividualEmailPrefsSelector.java -text
 announcement/src/org/labkey/announcements/model/NormalMessageBoardPermissions.java -text
 announcement/src/org/labkey/announcements/model/Permissions.java -text
 announcement/src/org/labkey/announcements/model/SecureMessageBoardPermissions.java -text
@@ -44,6 +47,7 @@ announcement/webapp/announcements/scripts/postgresql/comm-1.695-1.696.sql -text
 announcement/webapp/announcements/scripts/postgresql/comm-1.70-1.71.sql -text
 announcement/webapp/announcements/scripts/postgresql/comm-1.71-1.72.sql -text
 announcement/webapp/announcements/scripts/postgresql/comm-1.72-1.73.sql -text
+announcement/webapp/announcements/scripts/postgresql/comm-1.73-1.74.sql -text
 announcement/webapp/announcements/scripts/postgresql/obsolete/comm-0.00-1.00.sql -text
 announcement/webapp/announcements/scripts/postgresql/obsolete/comm-1.30-1.31.sql -text
 announcement/webapp/announcements/scripts/postgresql/obsolete/comm-1.31-1.32.sql -text
@@ -63,6 +67,7 @@ announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.695-1.696.sql -
 announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.70-1.71.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.71-1.72.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.72-1.73.sql -text
+announcement/webapp/announcements/scripts/sql[!!-~]server/comm-1.73-1.74.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/comm-0.00-1.00.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/comm-1.30-1.31.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/comm-1.31-1.32.sql -text

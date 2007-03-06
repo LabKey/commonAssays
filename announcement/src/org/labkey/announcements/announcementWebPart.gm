@@ -26,10 +26,6 @@ if (customizeURL)
     {
     %>&nbsp;[<a href="${customizeURL}">customize</a>]<%
     }
-if (sendDigestURL)
-    {
-    %>&nbsp;[<a href="${sendDigestURL}">send&nbsp;daily&nbsp;digest</a>]<%
-    }
 %></td>
 </tr>
 </table>

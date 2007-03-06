@@ -28,7 +28,7 @@ import org.apache.struts.upload.FormFile;
 import org.labkey.announcements.EmailResponsePage.Reason;
 import org.labkey.announcements.model.*;
 import org.labkey.api.announcements.Announcement;
-import org.labkey.announcements.model.AnnouncementManager.Settings;
+import org.labkey.announcements.model.AnnouncementManager.*;
 import org.labkey.api.announcements.CommSchema;
 import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
@@ -98,7 +98,7 @@ public class AnnouncementsController extends ViewController
      */
     protected Forward begin() throws Exception
     {
-        // Anyone with read permission can attempt to view the list.  AnnoucementWebPart will do further permission checking, for example,
+        // Anyone with read permission can attempt to view the list.  AnnoucementWebPart will do further permission checking.  For example,
         //   in a secure message board, those without Editor permissions will only see messages when they are on the member list
         requiresPermission(ACL.PERM_READ);
 
@@ -132,8 +132,6 @@ public class AnnouncementsController extends ViewController
         return null;
     }
 
-
-    // TODO: Add this to customize page?
 
     @Jpf.Action
     protected Forward adminEmail() throws Exception
@@ -293,9 +291,12 @@ public class AnnouncementsController extends ViewController
     }
 
 
+    // Used for testing daily digest
     @Jpf.Action
     protected Forward sendDailyDigest() throws Exception
     {
+        requiresAdmin();
+
         DailyDigest.sendDailyDigest();
 
         return _renderInTemplate(new HtmlView("Daily digest sent"), getContainer(), "Email", null, null);
@@ -917,7 +918,7 @@ public class AnnouncementsController extends ViewController
 
     private static void initView(HttpView view, Container c, AnnouncementForm form, Announcement mostRecent, boolean reshow)
     {
-        // In reshow case we leave all form values as is.
+        // In reshow case we leave all form values as is so user can correct the errors.
         WikiRendererType currentRendererType;
         Integer assignedTo;
 
@@ -1118,18 +1119,18 @@ public class AnnouncementsController extends ViewController
         Container c = getContainer(ACL.PERM_READ);
 
         User user = getUser();
-        List<User> memberList = SecurityManager.getProjectMembers(c, false);
+        List<User> projectMembers = SecurityManager.getProjectMembers(c, false);
 
         int emailOption = AnnouncementManager.getUserEmailOption(c, user);
         if (emailOption == AnnouncementManager.EMAIL_PREFERENCE_DEFAULT)
         {
-            if (memberList.contains(user))
+            if (projectMembers.contains(user))
                 emailOption = AnnouncementManager.getProjectEmailOption(c);
             else
                 emailOption = AnnouncementManager.EMAIL_PREFERENCE_NONE;
         }
 
-        form.setEmailPreference(emailOption);
+        form.setEmailOption(emailOption);
 
         showEmailPreferencesPage(form, null);
         return null;
@@ -1140,7 +1141,7 @@ public class AnnouncementsController extends ViewController
     protected Forward updateEmailPreferences(EmailOptionsForm form) throws Exception
     {
         requiresLogin();
-        AnnouncementManager.saveEmailPreference(form.getUser(), form.getContainer(), form.getEmailPreference());
+        AnnouncementManager.saveEmailPreference(form.getUser(), form.getContainer(), form.getEmailOption());
 
         showEmailPreferencesPage(form, "Setting changed successfully.");
         return null;
@@ -1193,7 +1194,7 @@ public class AnnouncementsController extends ViewController
         else
         {
             // Send a notification email to everyone on the member list.  This email will include a link that removes the user from the member list.
-            Set<String> memberListEmails = new HashSet<String>();
+/*            Set<String> memberListEmails = new HashSet<String>();
 
             if (settings.hasMemberList() && null != a.getMemberList() && !a.getMemberList().isEmpty())
             {
@@ -1224,6 +1225,52 @@ public class AnnouncementsController extends ViewController
                 m.setHeader("References", references);
                 m.setHeader("Message-ID", messageId);
                 emailer.addMessage(prefsEmails, m);
+            }
+*/
+
+            IndividualEmailPrefsSelector sel = new IndividualEmailPrefsSelector(c);
+
+            List<User> users = sel.getNotificationUsers(a);
+
+            if (!users.isEmpty())
+            {
+                List<User> memberList;
+
+                if (settings.hasMemberList() && null != a.getMemberList())
+                    memberList = a.getMemberList();
+                else
+                    memberList = Collections.emptyList();
+
+                List<String> noMemberListEmails = new ArrayList<String>(users.size());
+
+                for (User user : users)
+                {
+                    if (memberList.contains(user))
+                    {
+                        ViewURLHelper removeMeURL = new ViewURLHelper(getRequest(), "announcements", "confirmRemove", c.getPath());
+                        removeMeURL.addParameter("userId", String.valueOf(user.getUserId()));
+                        removeMeURL.addParameter("messageId", String.valueOf(parent.getRowId()));
+
+                        ViewMessage m = getMessage(c, settings, parent, a, isResponse, removeMeURL.getURIString(), currentRendererType, Reason.memberList);
+                        m.setHeader("References", references);
+                        m.setHeader("Message-ID", messageId);
+                        emailer.addMessage(user.getEmail(), m);
+                    }
+                    else
+                    {
+                        noMemberListEmails.add(user.getEmail());
+                    }
+                }
+
+                if (!noMemberListEmails.isEmpty())
+                {
+                    ViewURLHelper changeEmailURL = new ViewURLHelper(getRequest(), "announcements", "showEmailPreferences", c.getPath());
+                    changeEmailURL.addParameter("srcURL", new ViewURLHelper(getRequest(), "announcements", "begin", c.getPath()).getURIString());
+                    ViewMessage m = getMessage(c, settings, parent, a, isResponse, changeEmailURL.getURIString(), currentRendererType, Reason.signedUp);
+                    m.setHeader("References", references);
+                    m.setHeader("Message-ID", messageId);
+                    emailer.addMessage(noMemberListEmails, m);
+                }
             }
         }
 
@@ -1288,9 +1335,14 @@ public class AnnouncementsController extends ViewController
         view.setFrame(WebPartView.FrameType.DIV);
         EmailPreferencesPage page = (EmailPreferencesPage)view.getPage();
         view.setTitle("Email Preferences");
+
+        Settings settings = getSettings();
         page.emailPreference = form.getEmailPreference();
+        page.notificationType = form.getNotificationType();
         page.srcURL = cloneViewURLHelper().setAction("begin").toString();
         page.message = message;
+        page.hasMemberList = settings.hasMemberList();
+        page.conversationName = settings.getConversationName().toLowerCase();
 
         _renderInTemplate(view, form.getContainer(), "Email Preferences", null, null);
     }
@@ -1300,7 +1352,7 @@ public class AnnouncementsController extends ViewController
         return getSettings(getContainer());
     }
 
-    private static Settings getSettings(Container c)
+    public static Settings getSettings(Container c)
     {
         try
         {
@@ -1567,6 +1619,25 @@ public class AnnouncementsController extends ViewController
     public static class EmailOptionsForm extends ViewForm
     {
         private int _emailPreference = AnnouncementManager.EMAIL_PREFERENCE_NONE;
+        private int _notificationType = 0;
+
+        // Email option is a single int that contains the conversation preference AND a bit for digest vs. individual
+        // This method splits them apart
+        public void setEmailOption(int emailOption)
+        {
+            _emailPreference = emailOption & AnnouncementManager.EMAIL_PREFERENCE_MASK;
+            _notificationType = emailOption & AnnouncementManager.EMAIL_NOTIFICATION_TYPE_DIGEST;
+        }
+
+        public int getEmailOption()
+        {
+            // Form allows "no email" + "daily digest" -- change this to "no email" + "individual" since they are equivalent
+            // and we don't want to deal with the former option in the database, with foreign keys, on the admin pages, etc. 
+            if (_emailPreference == AnnouncementManager.EMAIL_PREFERENCE_NONE)
+                _notificationType = 0;
+
+            return _emailPreference | _notificationType;
+        }
 
         public int getEmailPreference()
         {
@@ -1576,6 +1647,16 @@ public class AnnouncementsController extends ViewController
         public void setEmailPreference(int emailPreference)
         {
             _emailPreference = emailPreference;
+        }
+
+        public int getNotificationType()
+        {
+            return _notificationType;
+        }
+
+        public void setNotificationType(int notificationType)
+        {
+            _notificationType = notificationType;
         }
     }
 
@@ -1602,7 +1683,7 @@ public class AnnouncementsController extends ViewController
 
         public AnnouncementEmailDefaults(Container c)
         {
-            super("/org/labkey/announcements/announcementEmailDefaults.gm", "Admin Email Preferences");
+            super("/org/labkey/announcements/announcementEmailDefaults.gm");
             addObject("emailOptionsList", null);
             addObject("defaultEmailOption", null);
             setContainer(c);
@@ -1680,7 +1761,6 @@ public class AnnouncementsController extends ViewController
             addObject("emailManageURL", c.hasPermission(user, ACL.PERM_ADMIN) ? ViewURLHelper.toPathString("announcements", "adminEmail", c.getPath()) : null);
             addObject("announcements", announcements);
             addObject("filterText", getFilterText(settings, displayAll, false));
-            addObject("sendDigestURL", ViewURLHelper.toPathString("announcements", "sendDailyDigest", ""));
         }
 
         public AnnouncementWebPart(ViewContext ctx) throws SQLException, ServletException

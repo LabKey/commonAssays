@@ -59,10 +59,14 @@ public class AnnouncementManager
     public static final int EMAIL_PREFERENCE_DEFAULT = -1;
     public static final int EMAIL_PREFERENCE_NONE = 0;
     public static final int EMAIL_PREFERENCE_ALL = 1;
-    public static final int EMAIL_PREFERENCE_MINE = 2; //Only threads I've posted to
-    public static final int EMAIL_PREFERENCE_DIGEST = 3; // Daily digest of all messages
+    public static final int EMAIL_PREFERENCE_MINE = 2;    //Only threads I've posted to or where I'm on the member list
+    public static final int EMAIL_PREFERENCE_MASK = 255; 
 
-//    public static final int EMAIL_FORMAT_TEXT = 0;
+    public static final int EMAIL_NOTIFICATION_TYPE_DIGEST = 256; // If this bit is set, send daily digest instead of individual email for each post
+
+    public static final int EMAIL_DEFAULT_OPTION = EMAIL_PREFERENCE_MINE;
+
+    //    public static final int EMAIL_FORMAT_TEXT = 0;
     public static final int EMAIL_FORMAT_HTML = 1;
 
     public static final int PAGE_TYPE_MESSAGE = 0;
@@ -409,6 +413,7 @@ public class AnnouncementManager
         // In a non-secure message board, those with read permissions can elect to see all messages or those to which they've posted (or neither)
         // In a secure message board, only those with editor permissions can do this.
         int requiredPerm = settings.isSecure() ? PermissionSet.EDITOR.getPermissions() : ACL.PERM_READ;
+        int defaultOption = getProjectEmailOption(c);
 
         //get set of responders on thread, if this is a response
         boolean isResponse = null != a.getParent();
@@ -422,7 +427,7 @@ public class AnnouncementManager
         {
             User user = emailPref.getUser();
             Integer emailOption = emailPref.getEmailOptionId();
-            emailOption = emailOption == null ? getProjectEmailOption(c) : emailOption;
+            emailOption = emailOption == null ? defaultOption : emailOption;
 
             if (emailOption == AnnouncementManager.EMAIL_PREFERENCE_NONE)
                 continue;
@@ -443,7 +448,7 @@ public class AnnouncementManager
         return emailSet;
     }
 
-    private static Set<User> getResponderSet(Container c, Announcement a) throws SQLException
+    public static Set<User> getResponderSet(Container c, Announcement a) throws SQLException
     {
         Set<User> responderSet = new HashSet<User>();
         boolean isResponse = null != a.getParent();
@@ -501,7 +506,7 @@ public class AnnouncementManager
             return emailPrefs[0];
     }
 
-    private static EmailPref[] getEmailPrefs(Container c, User user) throws SQLException
+    static EmailPref[] getEmailPrefs(Container c, User user) throws SQLException
     {
         EmailPref[] emailPrefs;
 
@@ -582,10 +587,12 @@ public class AnnouncementManager
                 );
     }
 
-    public static List<User> getDailyDigestUsers(Container c) throws SQLException
+/*    public static List<User> getDailyDigestUsers(Container c) throws SQLException
     {
         TableInfo ti = _comm.getTableInfoEmailPrefs();
-        SimpleFilter filter = new SimpleFilter("Container", c).addCondition("EmailOptionId", EMAIL_PREFERENCE_DIGEST).addCondition("PageTypeId", PAGE_TYPE_MESSAGE);
+        SimpleFilter filter = new SimpleFilter("Container", c)
+            .addWhereClause("EmailOptionId & ?", new Object[]{EMAIL_NOTIFICATION_TYPE_DIGEST}, "EmailOptionId")  // Do a bit-wise AND
+            .addCondition("PageTypeId", PAGE_TYPE_MESSAGE);
 
         Integer userIds[] = Table.executeArray(ti, ti.getColumn("UserId"), filter, null, Integer.class);
 
@@ -596,7 +603,7 @@ public class AnnouncementManager
 
         return users;
     }
-
+*/
     public static void saveProjectEmailSettings(Container c, int emailOption) throws SQLException
     {
         Map<String, Object> props = PropertyManager.getWritableProperties(0, c.getId(), "defaultEmailSettings", true);
@@ -616,7 +623,7 @@ public class AnnouncementManager
                 throw new IllegalStateException("Invalid stored property value.");
         }
         else
-            return EMAIL_PREFERENCE_NONE;
+            return EMAIL_DEFAULT_OPTION;
     }
 
     //delete all user records regardless of container

@@ -52,7 +52,7 @@
 <hr size="1">
 
 <table width="100%" border="0" cellspacing="0" cellpadding="4">
-    <tr><td class="ms-vb">You have received this email because you are signed up for a daily digest about new posts to <a href="<%=boardUrl%>"><%=boardPath%></a> at <a href="<%=siteUrl%>"><%=siteUrl%></a>.
+    <tr><td class="ms-vb">You have received this email because you are signed up for a daily digest of new posts to <a href="<%=boardUrl%>"><%=boardPath%></a> at <a href="<%=siteUrl%>"><%=siteUrl%></a>.
   If you no longer wish to receive these notifications, please <a href="<%=removeUrl%>">change your email preferences</a>.</td></tr>
 </table>    
 </body>
