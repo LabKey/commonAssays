@@ -30,6 +30,7 @@ public class DailyDigest
     private static final String SET_KEY = "DailyDigest";
     private static final String LAST_KEY = "LastSuccessfulSend";
     private static CommSchema _comm = CommSchema.getInstance();
+    private static CoreSchema _core = CoreSchema.getInstance();
     private static Timer _timer = null;
     private static DailyDigestTask _timerTask = null;
 
@@ -175,21 +176,24 @@ public class DailyDigest
     }
 
 
-    // Retrieve all messages in this container with a body posted during the given timespan
+    // Retrieve from this container all messages with a body or attachments posted during the given timespan
     // Messages are grouped by thread and threads are sorted by earliest post within each thread
-    private static final String RECENT_ANN_SQL = "SELECT Ann.* FROM\n" +
+    private static final String RECENT_ANN_SQL = "SELECT ann.* FROM\n" +
             "\t(\n" +
             "\tSELECT Thread, MIN(Created) AS Earliest FROM\n" +
-            "\t\t(SELECT Created, CASE WHEN Parent IS NULL THEN EntityId ELSE Parent END AS Thread FROM comm.Announcements WHERE Container = ? AND Created >= ? AND Created < ? AND Body IS NOT NULL) x\n" +
+            "\t\t(SELECT Created, CASE WHEN Parent IS NULL THEN EntityId ELSE Parent END AS Thread FROM " + _comm.getTableInfoAnnouncements() + " ann LEFT OUTER JOIN\n" +
+            "\t\t\t(SELECT DISTINCT(Parent) AS DocParent FROM " + _core.getTableInfoDocuments() + ") doc ON ann.EntityId = DocParent\n" +
+            "\t\t\tWHERE Container = ? AND Created >= ? AND Created < ? AND (Body IS NOT NULL OR DocParent IS NOT NULL)) x\n" +
             "\tGROUP BY Thread\n" +
-            "\t) X LEFT OUTER JOIN comm.Announcements Ann ON Parent = Thread OR EntityId = Thread\n" +
-            "WHERE Created >= ? and Created < ? AND Body IS NOT NULL\n" +
+            "\t) X LEFT OUTER JOIN " + _comm.getTableInfoAnnouncements() + " ann ON Parent = Thread OR EntityId = Thread LEFT OUTER JOIN\n" +
+            "\t\t(SELECT DISTINCT(Parent) AS DocParent FROM " + _core.getTableInfoDocuments() + ") doc ON ann.EntityId = DocParent\n" + 
+            "WHERE Container = ? AND Created >= ? AND Created < ? AND (Body IS NOT NULL OR DocParent IS NOT NULL)\n" +
             "ORDER BY Earliest, Thread, Created";
 
 
     private static Announcement[] getRecentAnnouncementsInContainer(Container c, Date min, Date max) throws SQLException
     {
-        Announcement[] announcements = Table.executeQuery(_comm.getSchema(), RECENT_ANN_SQL, new Object[]{c, min, max, min, max}, AnnouncementManager.BareAnnouncement.class);
+        Announcement[] announcements = Table.executeQuery(_comm.getSchema(), RECENT_ANN_SQL, new Object[]{c, min, max, c, min, max}, AnnouncementManager.BareAnnouncement.class);
         AnnouncementManager.attachMemberLists(announcements);
         return announcements;
     }
@@ -212,6 +216,7 @@ public class DailyDigest
         request.setContextPath(appProps.getContextPath());
         request.setServerPort(appProps.getLocalPort());
         request.setServerName(appProps.getServerName());
+        request.setProtocol(appProps.getLocalProtocol());
 
         return request;
     }

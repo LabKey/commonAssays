@@ -68,7 +68,7 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
 
     public MS2Module()
     {
-        super(NAME, 1.75, "/org/labkey/ms2", "/MS2",
+        super(NAME, 1.76, "/org/labkey/ms2", "/MS2",
                 new WebPartFactory("MS2 Runs"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
@@ -305,6 +305,7 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
             filters.add(_ms2SearchRunFilter);
             filters.add(new MS2SearchExperimentRunFilter("X!Tandem Searches", MS2Schema.XTANDEM_SEARCH_EXPERIMENT_RUNS_TABLE_NAME));
             filters.add(new MS2SearchExperimentRunFilter("Mascot Searches", MS2Schema.MASCOT_SEARCH_EXPERIMENT_RUNS_TABLE_NAME));
+            filters.add(new MS2SearchExperimentRunFilter("Sequest Searches", MS2Schema.SEQUEST_SEARCH_EXPERIMENT_RUNS_TABLE_NAME));
             _filters = Collections.unmodifiableSet(filters);
         }
         return _filters;

@@ -21,6 +21,7 @@ import org.apache.beehive.netui.pageflow.FormData;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.MultiMap;
 import org.apache.commons.collections.map.MultiValueMap;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts.upload.FormFile;
 import org.labkey.api.announcements.Announcement;
@@ -28,8 +29,6 @@ import org.labkey.api.announcements.CommSchema;
 import org.labkey.api.attachments.Attachment;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.*;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.SecurityManager.PermissionSet;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.util.ContainerUtil;
@@ -113,8 +112,9 @@ public class AnnouncementManager
         try
         {
             Announcement[] recent = Table.select(_comm.getTableInfoThreads(), Table.ALL_COLUMNS, filter, sort, Announcement.class);
+            recent = (Announcement[])ArrayUtils.subarray(recent, 0, 100);  // Limit to 100 to keep messages page a reasonable size
             attachAttachments(recent);
-            attachResponses(c, recent);
+            attachResponses(c, recent); // TODO: Announcement count instead of retrieving all responses
             return recent;
         }
         catch (SQLException x)
@@ -405,7 +405,7 @@ public class AnnouncementManager
     }
 
     // Return email address for those who signed up for notifications
-    public static Set<String> getUserEmailSet(Container c, Announcement a, Settings settings)
+/*    public static Set<String> getUserEmailSet(Container c, Announcement a, Settings settings)
             throws SQLException
     {
         Set<String> emailSet = new HashSet<String>();
@@ -447,7 +447,7 @@ public class AnnouncementManager
 
         return emailSet;
     }
-
+*/
     public static Set<User> getResponderSet(Container c, Announcement a) throws SQLException
     {
         Set<User> responderSet = new HashSet<User>();
@@ -456,10 +456,9 @@ public class AnnouncementManager
         //get parent if this is a response.
         if (isResponse)
         {
-            Announcement parent = AnnouncementManager.getAnnouncement(c, a.getParent());
-            //add creator of parent to responder set
-            responderSet.add(UserManager.getUser(parent.getCreatedBy()));
-            Collection<Announcement> responses = parent.getResponses();
+            a = AnnouncementManager.getAnnouncement(c, a.getParent(), true);
+
+            Collection<Announcement> responses = a.getResponses();
 
             //add creator of each response to responder set
             for (Announcement response : responses)
@@ -470,6 +469,10 @@ public class AnnouncementManager
                 responderSet.add(user);
             }
         }
+
+        //add creator of parent to responder set
+        responderSet.add(UserManager.getUser(a.getCreatedBy()));
+
         return responderSet;
     }
 

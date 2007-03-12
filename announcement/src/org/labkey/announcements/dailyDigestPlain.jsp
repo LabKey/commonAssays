@@ -16,7 +16,8 @@
             if (null != threadUrl)
             {
                 %>
-View this <%=conversationName%> here: <%=threadUrl%>
+View this <%=conversationName%> here:
+<%=threadUrl%>
 
 
 <%

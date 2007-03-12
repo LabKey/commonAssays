@@ -7,7 +7,8 @@ if (null != responseBody)
 {  %>
     <%=responseBody%><%
 }  %>
-View this <%=settings.getConversationName().toLowerCase()%> here: <%=threadURL%>
+View this <%=settings.getConversationName().toLowerCase()%> here:
+<%=threadURL%>
 
 
 

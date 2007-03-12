@@ -371,18 +371,12 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
             */
             List<String> interactCmd = new ArrayList<String>();
             interactCmd.add("xinteract");
-            interactCmd.add("-p0"); // unfiltered results.
+            interactCmd.add("-Opt");
 
-            // Currently ProteinProphet relies on perl, so make sure the system has
-            // a valid perl version.
-            if (hasValidPerl())
-            {
-                interactCmd.add("-Opt");
-            }
-            else
-            {
-                error("Cannot run the protein prophet. PERL either doesn't exist or is a cygwin version.");
-            }
+            String paramMinProb = _parser.getInputParameter("pipeline prophet, min probability");
+            if (paramMinProb != null && paramMinProb.length() > 0)
+                interactCmd.add("-p" + paramMinProb);
+
             // Add any necessary quantiation parameters.
             String quantParam = getQuantitationCmd(_parser, _dirMzXML);
             if (quantParam != null)

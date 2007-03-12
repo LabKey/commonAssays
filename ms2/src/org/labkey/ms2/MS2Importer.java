@@ -435,18 +435,31 @@ public abstract class MS2Importer
         updateRunStatus("Updating peptide columns");
         MS2Run run = MS2Manager.getRun(_runId);
         MS2Fraction[] fractions = run.getFractions();
+        int fractionCount = fractions.length;
 
         long start = System.currentTimeMillis();
+        int i = 0;
 
         for (MS2Fraction fraction : fractions)
+        {
             Table.execute(MS2Manager.getSchema(), _updateSeqIdSql, new Object[]{fraction.getFraction(), run.getFastaId()});
+
+            if (fractionCount > 1)
+                _log.info("Updating SeqId column: " + (++i) + " fraction out of " + fractionCount);
+        }
 
         logElapsedTime(start, "update SeqId column");
 
         start = System.currentTimeMillis();
+        i = 0;
 
         for (MS2Fraction fraction : fractions)
+        {
             Table.execute(MS2Manager.getSchema(), _updateSequencePositionSql, new Object[]{fraction.getFraction()});
+
+            if (fractionCount > 1)
+                _log.info("Updating SequencePosition column: " + (++i) + " fraction out of " + fractionCount);
+        }
 
         logElapsedTime(start, "update SequencePosition column");
     }

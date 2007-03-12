@@ -1,6 +1,7 @@
 package org.labkey.ms2.protocol;
 
 import org.labkey.api.pipeline.PipelineProtocolFactory;
+import org.labkey.api.data.Container;
 import org.labkey.ms2.pipeline.SequestInputParser;
 import org.labkey.ms2.pipeline.BioMLInputParser;
 import org.apache.log4j.Logger;
@@ -29,9 +30,10 @@ public class SequestSearchProtocol extends MS2SearchPipelineProtocol
         return SequestSearchProtocolFactory.get();
     }
 
-    public void saveInstance(File file) throws IOException
+    public void saveInstance(File file, Container c) throws IOException
     {
         Map<String, String> addParams = new HashMap<String, String>();
+        addParams.put("pipeline, load folder", c.getPath());
         addParams.put("pipeline, email address", email);
         save(file, addParams);
     }

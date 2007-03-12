@@ -25,6 +25,7 @@ import org.labkey.ms2.reader.SimpleScan;
 import org.labkey.ms2.reader.SimpleScanIterator;
 import org.labkey.ms2.reader.TarIterator;
 
+import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -87,10 +88,12 @@ public class SpectrumLoader
                 }
             }
         }
-        catch (Exception x)
+        catch (IOException x)
         {
-            close();
-
+            _log.warn("Spectra were not loaded: " + x.toString());  // Note: x.getMessage() has just the file name
+        }
+        catch (XMLStreamException x)
+        {
             throw new RuntimeException(x);
         }
     }

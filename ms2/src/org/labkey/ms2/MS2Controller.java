@@ -3451,7 +3451,7 @@ public class MS2Controller extends ViewController
             if (peptide != null)
             {
                 runId = peptide.getRun();
-                seqId = peptide.getSeqId();
+                seqId = peptide.getSeqId() == null ? 0 : peptide.getSeqId().intValue();
             }
             else
             {

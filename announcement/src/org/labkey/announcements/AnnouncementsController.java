@@ -254,10 +254,17 @@ public class AnnouncementsController extends ViewController
         v.addObject("title", "Admin Email Preferences");
         v.addObject("emailPrefList", emailPrefList);
 
-        AnnouncementManager.EmailOption[] emailOptions = AnnouncementManager.getEmailOptions();
+        EmailOption[] emailOptions = AnnouncementManager.getEmailOptions();
         int defaultEmailOptionId = AnnouncementManager.getProjectEmailOption(c);
-        String defaultEmailOptionName = emailOptions[defaultEmailOptionId].getEmailOption();
-        v.addObject("projectEmailOption", defaultEmailOptionName);
+        
+        for (EmailOption emailOption : emailOptions)
+        {
+            if (defaultEmailOptionId == emailOption.getEmailOptionId())
+            {
+                v.addObject("projectEmailOption", emailOption.getEmailOption());
+                break;
+            }
+        }
 
         _renderInTemplate(v, c, "Admin Email Preferences", null, null);
 
@@ -1543,6 +1550,25 @@ public class AnnouncementsController extends ViewController
                         addActionError(email.toString() + ": Doesn't exist");
                     else if (!memberList.contains(user))
                         memberList.add(user);
+                }
+
+                // New up an announcement to check permissions for the member list
+                Announcement ann = new Announcement();
+                ann.setMemberList(memberList);
+
+                for (User user : memberList)
+                {
+                    try
+                    {
+                        Permissions perm = getPermissions(getContainer(), user, settings);
+
+                        if (!perm.allowRead(ann))
+                            addActionError("Can't add " + user.getEmail() + " to the member list: This user doesn't have permission to read the thread.");
+                    }
+                    catch(ServletException e)
+                    {
+                        addActionError("Error retrieving settings for this message board.  " + e);
+                    }
                 }
 
                 setMemberList(memberList);

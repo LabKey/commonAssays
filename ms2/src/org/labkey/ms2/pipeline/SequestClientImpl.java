@@ -273,6 +273,12 @@ public class SequestClientImpl implements SearchClient
         errorString = "";
 
         _instanceLogger.info("Creating Sequest session...");
+        startSession();
+        if (0 != getErrorCode())
+        {
+            _instanceLogger.info("Failed to start Sequest session");
+            return 2;
+        }
 
         int returnCode = 0;
         final int delayAfterSubmitSec = 30;

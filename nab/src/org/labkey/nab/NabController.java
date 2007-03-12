@@ -159,7 +159,7 @@ public class NabController extends ViewController
             {
                 if (assayForm.getRunSettings().isSameMethod())
                     info.setMethodName(assayForm.getSampleInfos()[0].getMethodName());
-                if (assayForm.getRunSettings().isSameMethod())
+                if (assayForm.getRunSettings().isSameFactor())
                     info.setFactor(assayForm.getSampleInfos()[0].getFactor());
                 if (assayForm.getRunSettings().isSameInitialValue())
                     info.setInitialDilution(assayForm.getSampleInfos()[0].getInitialDilution());
@@ -900,16 +900,21 @@ public class NabController extends ViewController
         {
             ActionErrors errors = new ActionErrors();
             Set<String> selectedSamples = new HashSet<String>();
-            for (String sample : getIncludedSampleIds())
-                selectedSamples.add(sample);
-            for (int i = 0; i < _sampleIds.length; i++)
+            if (getIncludedSampleIds() == null)
+                errors.add("main", new ActionMessage("Error", "You must select at least one specimen to publish."));
+            else
             {
-                if (!selectedSamples.contains(_sampleIds[i]))
-                    continue;
-                if (_participantIds[i] == null || _participantIds[i].length() == 0)
-                    errors.add("main", new ActionMessage("Error", "Participant ID is required for sample " + _sampleIds[i]));
-                if (_sequenceNums[i] == null)
-                    errors.add("main", new ActionMessage("Error", "Visit Sequence number is required for sample " + _sampleIds[i]));
+                for (String sample : getIncludedSampleIds())
+                    selectedSamples.add(sample);
+                for (int i = 0; i < _sampleIds.length; i++)
+                {
+                    if (!selectedSamples.contains(_sampleIds[i]))
+                        continue;
+                    if (_participantIds[i] == null || _participantIds[i].length() == 0)
+                        errors.add("main", new ActionMessage("Error", "Participant ID is required for sample " + _sampleIds[i]));
+                    if (_sequenceNums[i] == null)
+                        errors.add("main", new ActionMessage("Error", "Visit Sequence number is required for sample " + _sampleIds[i]));
+                }
             }
             return errors;
         }
@@ -1132,7 +1137,7 @@ public class NabController extends ViewController
 
     public static class UploadAssayForm extends ViewForm
     {
-        private SampleInfo[] _sampleInfos = new SampleInfo[5];
+        private SampleInfo[] _sampleInfos;
         private String _fileName;
         private RunMetadata _metadata = new RunMetadata();
         private RunSettings _runSettings;
@@ -1146,11 +1151,7 @@ public class NabController extends ViewController
         public UploadAssayForm(boolean returnDefaultForUnsetBools)
         {
             _runSettings = new RunSettings(returnDefaultForUnsetBools);
-            // initialize with default specimen values; these will only be kept
-            // around if the user resets their input form.  Otherwise, they'll be
-            // reinitialized from the users saved settings.
-            for (int i = 0; i < _sampleInfos.length; i++)
-                _sampleInfos[i] = new SampleInfo(null);
+            reset(null, getContext().getRequest());
         }
 
 
@@ -1275,46 +1276,51 @@ public class NabController extends ViewController
         @Override
         public void reset(ActionMapping actionMapping, HttpServletRequest request)
         {
-            String plateTemplate = request.getParameter("plateTemplate");
-            try
-            {
-                PlateTemplate template = PlateService.get().getPlateTemplate(getContext().getContainer(), getContext().getUser(), plateTemplate);
-                int specimenCount = template.getWellGroupCount(WellGroup.Type.SPECIMEN);
-                _sampleInfos = new SampleInfo[specimenCount];
-                for (int i = 0; i < _sampleInfos.length; i++)
-                    _sampleInfos[i] = new SampleInfo(null);
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
+            _plateTemplate = request.getParameter("plateTemplate");
+            resetSpecimens();
+        }
+
+        private void resetSpecimens()
+        {
+            PlateTemplate template = getActivePlateTemplate(getContext().getContainer(), getContext().getUser());
+            int specimenCount = template.getWellGroupCount(WellGroup.Type.SPECIMEN);
+            _sampleInfos = new SampleInfo[specimenCount];
+            for (int i = 0; i < _sampleInfos.length; i++)
+                _sampleInfos[i] = new SampleInfo(null);
         }
 
         public PlateTemplate getActivePlateTemplate(Container container, User user)
         {
             try
             {
-                if (_plateTemplate == null)
+                PlateTemplate template = null;
+                if (_plateTemplate != null)
+                    template = PlateService.get().getPlateTemplate(container, user, _plateTemplate);
+
+                if (template == null)
                 {
-                    PlateTemplate template = NabManager.get().ensurePlateTemplate(container, user);
+                    template = NabManager.get().ensurePlateTemplate(container, user);
                     _plateTemplate = template.getName();
-                    return template;
                 }
-                else
-                    return PlateService.get().getPlateTemplate(container, user, _plateTemplate);
+                return template;
             }
             catch (SQLException e)
             {
                 throw new RuntimeSQLException(e);
             }
         }
-
-
+        
         public PlateTemplate[] getPlateTemplates(Container container, User user)
         {
             try
             {
-                return PlateService.get().getPlateTemplates(container, user);
+                PlateTemplate[] templates = PlateService.get().getPlateTemplates(container, user);
+                if (templates == null || templates.length == 0)
+                {
+                    PlateTemplate defaultTemplate = NabManager.get().ensurePlateTemplate(container, user);
+                    templates = new PlateTemplate[] { defaultTemplate };
+                }
+                return templates;
             }
             catch (SQLException e)
             {
@@ -1329,7 +1335,10 @@ public class NabController extends ViewController
 
         public void setPlateTemplate(String plateTemplate)
         {
+            String previous = _plateTemplate;
             _plateTemplate = plateTemplate;
+            if (!plateTemplate.equals(previous))
+                resetSpecimens();
         }
 
         public SampleInfo[] getSampleInfos()

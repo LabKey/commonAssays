@@ -18,8 +18,6 @@
     String dataTDStyle = "padding-left:20px";
     PlateTemplate activeTemplate = me.getModel().getActivePlateTemplate(me.getViewContext().getContainer(), me.getViewContext().getUser());
     PlateTemplate[] templates = me.getModel().getPlateTemplates(me.getViewContext().getContainer(), me.getViewContext().getUser());
-    if (activeTemplate == null)
-        activeTemplate = templates[0];
     int specimenCount = activeTemplate.getWellGroupCount(WellGroup.Type.SPECIMEN);
     List<? extends WellGroupTemplate> wellGroupTemplates = activeTemplate.getWellGroups();
     List<WellGroupTemplate> specimenWellGroups = new ArrayList<WellGroupTemplate>();

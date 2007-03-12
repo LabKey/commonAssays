@@ -58,7 +58,7 @@ public class MS2Peptide
     private String _protein;
     private int _proteinHits;
     private long _rowId;
-    private int _seqId;
+    private Integer _seqId;
 
     // Calculated variables
     private double[] _massTable = null;
@@ -462,12 +462,12 @@ public class MS2Peptide
         _runId = runId;
     }
 
-    public int getSeqId()
+    public Integer getSeqId()
     {
         return _seqId;
     }
 
-    public void setSeqId(int seqId)
+    public void setSeqId(Integer seqId)
     {
         _seqId = seqId;
     }

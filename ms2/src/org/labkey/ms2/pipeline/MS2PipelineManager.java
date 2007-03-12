@@ -920,13 +920,13 @@ public class MS2PipelineManager
                     specificProtocol.setEmail(info.getUser().getEmail());
                     specificProtocol.setMascotServer(mascotServer);
                     specificProtocol.setMascotHTTPProxy(mascotHTTPProxy);
-                    specificProtocol.saveInstance(fileConfigureXML);
+                    specificProtocol.saveInstance(fileConfigureXML, info.getContainer());
                 }
                 else if(SEQUEST.equalsIgnoreCase(searchEngine))
                 {
                     SequestSearchProtocol specificProtocol = (SequestSearchProtocol) protocol;
                     specificProtocol.setEmail(info.getUser().getEmail());
-                    specificProtocol.saveInstance(fileConfigureXML);
+                    specificProtocol.saveInstance(fileConfigureXML, info.getContainer());
                     SequestInputParser parser = new SequestInputParser();
                     parser.parse(specificProtocol.getXml());
                     dataType = parser.getInputParameter("pipeline, data type");
@@ -937,7 +937,7 @@ public class MS2PipelineManager
                     // we take X! Tandem as the default case
                     XTandemSearchProtocol specificProtocol = (XTandemSearchProtocol) protocol;
                     specificProtocol.setEmail(info.getUser().getEmail());
-                    specificProtocol.saveInstance(fileConfigureXML);
+                    specificProtocol.saveInstance(fileConfigureXML, info.getContainer());
                 }
             }
 

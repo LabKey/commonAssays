@@ -13,11 +13,11 @@
 <table>
     <tr>
         <td class="ms-searchform">Board name</td>
-        <td><table><tr><td class="ms-vb"><input type="text" size="30" value="<%=settings.getBoardName()%>" name="boardName"></td></tr></table></td>
+        <td><table><tr><td class="ms-vb"><input type="text" size="30" value="<%=settings.getBoardName()%>" name="boardName"></td><td>Custom term used in this folder to refer to the entire board.  Examples: "Discussions", "Announcements", "XYZ Study Consultations", "Message Board", "My Blog", etc.</td></tr></table></td>
     </tr>
     <tr>
         <td class="ms-searchform">Conversation name</td>
-        <td><table><tr><td class="ms-vb"><input type="text" size="30" value="<%=settings.getConversationName()%>" name="conversationName"></td></tr></table></td>
+        <td><table><tr><td class="ms-vb"><input type="text" size="30" value="<%=settings.getConversationName()%>" name="conversationName"></td><td>Custom term used in this folder to refer to a conversation.  Examples: "Thread", "Discussion", "Announcement", "Consultation", etc.</td></tr></table></td>
     </tr>
     <tr>
         <td class="ms-searchform">Conversation sorting</td>
@@ -34,7 +34,6 @@
             </table>
         </td>
     </tr>
-    <tr>
     <tr><td colspan=2>&nbsp;</td></tr><%
         if (null != securityWarning)
         {
@@ -81,6 +80,7 @@
         <td class="ms-searchform">Include Format Picker</td>
         <td><table><tr><td class="ms-vb"><input type="checkbox" name="formatPicker"<%=settings.hasFormatPicker() ? " checked" : ""%>></td></tr></table></td>
     </tr>
+    <tr>
         <td colspan=2><input type="image" src="<%=PageFlowUtil.buttonSrc("Save")%>"/>
         <%=PageFlowUtil.buttonLink("Cancel", returnUrl)%></td>
     </tr>

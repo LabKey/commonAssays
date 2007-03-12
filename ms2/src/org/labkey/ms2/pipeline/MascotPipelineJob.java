@@ -459,22 +459,14 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
             */
             List<String> interactCmd = new ArrayList<String>();
             interactCmd.add("xinteract");
-            interactCmd.add("-p0"); // unfiltered results.
             interactCmd.add("-nR"); // do not run Database/RefreshParser
 
-            // Currently ProteinProphet relies on perl, so make sure the system has
-            // a valid perl version.
-            if (hasValidPerl())
-            {
-                fileProtXML = MS2PipelineManager.getProtXMLIntermediatFile(dirWork, _baseName);
-                interactCmd.add("-Opt");
-            }
-            else
-            {
-                warn("No valid Perl version found on this machine.  " +
-                    "Skipping ProteinProphet analysis.  " +
-                    "Ask your system administrator to check the system path.");
-            }
+            fileProtXML = MS2PipelineManager.getProtXMLIntermediatFile(dirWork, _baseName);
+            interactCmd.add("-Opt");
+
+            String paramMinProb = parser.getInputParameter("pipeline prophet, min probability");
+            if (paramMinProb != null && paramMinProb.length() > 0)
+                interactCmd.add("-p" + paramMinProb);
 
             String quantParam = getQuantitationCmd(parser, fileMzXML.getParentFile());
             if (quantParam != null)

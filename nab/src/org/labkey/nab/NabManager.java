@@ -295,9 +295,9 @@ public class NabManager
             List<WellData> wells = group.getWellData(true);
             boolean first = true;
             double dilution = info.getInitialDilution();
-            for (int row = plate.getRows() - 1; row >= 0; row--)
+            for (int groupIndex = wells.size() - 1; groupIndex >= 0; groupIndex--)
             {
-                WellData data = wells.get(row);
+                WellData data = wells.get(groupIndex);
                 if (!first)
                 {
                     if (info.getMethod() == SampleInfo.Method.Dilution)
@@ -382,6 +382,8 @@ public class NabManager
                             context.getContainer().getId(), Luc5Assay.class.getName(), true);
             if (form != null)
                 settingsToMap(form, properties);
+            else
+                properties.clear();
             PropertyManager.saveProperties(properties);
         }
         catch (Exception e)
