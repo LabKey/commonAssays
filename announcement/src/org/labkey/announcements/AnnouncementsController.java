@@ -1578,9 +1578,10 @@ public class AnnouncementsController extends ViewController
                 }
             }
 
-            Collection<String> validateErrors = new LinkedList<String>();
-            if (!PageFlowUtil.validateHtml(bean.getBody(),validateErrors, getContainer().hasPermission(getUser(),ACL.PERM_ADMIN)))
+            if ("HTML".equals(bean.getRendererType()))
             {
+                Collection<String> validateErrors = new LinkedList<String>();
+                PageFlowUtil.validateHtml(bean.getBody(),validateErrors, getContainer().hasPermission(getUser(),ACL.PERM_ADMIN));
                 for (String err : validateErrors)
                     addActionError(err);
             }
