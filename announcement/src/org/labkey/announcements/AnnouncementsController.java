@@ -1092,7 +1092,7 @@ public class AnnouncementsController extends ViewController
         Announcement[] announcements = AnnouncementManager.getAnnouncements(c, filter, getSettings().getSort());
 
         WebPartView v = new GroovyView("/org/labkey/announcements/rss.gm");
-        v.setFrame(WebPartView.FrameType.DIV);
+        v.setFrame(WebPartView.FrameType.NONE);
         v.addObject("announcements", announcements);
         v.addObject("container", c);
         v.addObject("request", getRequest());
