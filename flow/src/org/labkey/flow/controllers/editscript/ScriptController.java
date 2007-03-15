@@ -965,18 +965,57 @@ public class ScriptController extends BaseFlowController
         PlotInfo info = getPlotInfo(form, false);
         BufferedImage image = info.getImage();
         Gate gate = gateFromPoints(form.xAxis, form.yAxis, form.ptX, form.ptY, form.open);
-        image = addSelection(image, info, gate, !form.open);
+        image = addSelection(image, info, gate, !form.open, true);
+        SubsetSpec subset = SubsetSpec.fromString(form.subset);
+        SubsetSpec parent = subset.getParent();
+        PopulationSet popset;
+        if (parent != null)
+        {
+            popset = form.getPopulations().get(parent);
+        }
+        else
+        {
+            popset = form.getAnalysis();
+        }
+        if (popset != null && !StringUtils.isEmpty(form.yAxis))
+        {
+            for (Population childPop : popset.getPopulations())
+            {
+                if (childPop.getName().equals(subset.getSubset()))
+                    continue;
+                if (childPop.getGates().size() != 1)
+                    continue;
+                if (!(childPop.getGates().get(0) instanceof PolygonGate))
+                    continue;
+                PolygonGate polyGate = (PolygonGate) childPop.getGates().get(0);
+                if (StringUtils.equals(polyGate.getX(), form.xAxis) && StringUtils.equals(polyGate.getY(), form.yAxis))
+                {
+                    // nothing to do
+                }
+                else if (StringUtils.equals(polyGate.getY(), form.yAxis) && StringUtils.equals(polyGate.getX(), form.yAxis))
+                {
+                    Polygon newPoly = new Polygon(polyGate.getPolygon().Y, polyGate.getPolygon().X);
+                    polyGate = new PolygonGate(polyGate.getY(), polyGate.getX(), newPoly);
+                }
+                else
+                {
+                    // doesn't match
+                    continue;
+                }
+                image = addSelection(image, info, polyGate, true, false);
+            }
+        }
         return streamImage(image);
     }
 
-    protected BufferedImage addSelection(BufferedImage imageIn, PlotInfo info, Gate gate, boolean closePoly)
+    protected BufferedImage addSelection(BufferedImage imageIn, PlotInfo info, Gate gate, boolean closePoly, boolean primaryGate)
     {
         if (gate == null)
             return imageIn;
         BufferedImage image = new BufferedImage(imageIn.getWidth(), imageIn.getHeight(), imageIn.getType());
         imageIn.copyData(image.getRaster());
         Graphics2D g = image.createGraphics();
-        g.setColor(Color.BLACK);
+        g.setColor(primaryGate ? Color.BLACK : Color.GRAY);
         if (gate instanceof PolygonGate)
         {
             PolygonGate polyGate = (PolygonGate) gate;
@@ -996,8 +1035,11 @@ public class ScriptController extends BaseFlowController
                 g.drawLine(pts[pts.length - 1].x, pts[pts.length- 1].y, pts[0].x, pts[0].y);
             }
         }
-        String strFreq = info.getFrequency(gate);
-        g.drawString(strFreq, 0, image.getHeight() - g.getFontMetrics().getDescent());
+        if (primaryGate)
+        {
+            String strFreq = info.getFrequency(gate);
+            g.drawString(strFreq, 0, image.getHeight() - g.getFontMetrics().getDescent());
+        }
         g.dispose();
         
         return image;

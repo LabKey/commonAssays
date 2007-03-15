@@ -23,6 +23,8 @@ public class StatisticSpec implements Serializable, Comparable
         Frequency("Frequency", "%"),
         Freq_Of_Parent("Frequency of Parent", "%P"),
         Freq_Of_Grandparent("Frequency of Grandparent", "%G"),
+        Min("Min", "Min"),
+        Max("Max", "Max"),
         Median("Median", "Median"),
         Mean("Mean", "Mean"),
         Std_Dev("Standard_Deviation", "StdDev"),
@@ -177,6 +179,10 @@ public class StatisticSpec implements Serializable, Comparable
         }
         switch (stat.getStatistic())
         {
+            case Min:
+                return doubleStats.getMin();
+            case Max:
+                return doubleStats.getMax();
             case Mean:
                 return doubleStats.getMean();
             case Median:
