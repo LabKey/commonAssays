@@ -500,7 +500,7 @@ public class ProteinManager
         sql.append(columnNames);
         sql.append(" FROM ");
         sql.append(MS2Manager.getTableInfoPeptides());
-        sql.append(" LEFT OUTER JOIN\n(");
+        sql.append(" RIGHT OUTER JOIN\n(");
 
         ProteinManager.addProteinQuery(sql, run, currentUrl, extraWhere, maxProteinRows, true);
         sql.append(") s ON ");

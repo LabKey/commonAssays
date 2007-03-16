@@ -68,7 +68,7 @@ public class PipelineController extends ViewController
         NavTrailConfig trailConfig = new NavTrailConfig(getViewContext());
         if (title != null)
             trailConfig.setTitle(title);
-        trailConfig.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.COMMON));
+        trailConfig.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.SERVER));
 
         return includeView(new HomeTemplate(getViewContext(), view, trailConfig));
     }

@@ -88,7 +88,6 @@ class SetupWebPart extends WebPartView
         if (!context.hasPermission(ACL.PERM_INSERT))
             return;
         StringBuilder html = new StringBuilder();
-        out.write(html.toString());
         if (!AppProps.getInstance().hasPipelineCluster())
         {
             html.append("<table><tr><td class=\"ms-vb\" style=\"font-weight:bold;\">X! Tandem specific settings:</td></tr>");
@@ -97,5 +96,6 @@ class SetupWebPart extends WebPartView
                     .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
                     .append(" - Specify the default XML parameters file for X! Tandem.</td></tr>");
         }
+        out.write(html.toString());
     }
 }

@@ -214,9 +214,9 @@ public class DailyDigest
         MockHttpServletRequest request = new MockHttpServletRequest(ViewServlet.getViewServletContext());
         AppProps appProps = AppProps.getInstance();
         request.setContextPath(appProps.getContextPath());
-        request.setServerPort(appProps.getLocalPort());
+        request.setServerPort(appProps.getServerPort());
         request.setServerName(appProps.getServerName());
-        request.setProtocol(appProps.getLocalProtocol());
+        request.setProtocol(appProps.getScheme());
 
         return request;
     }

@@ -1,6 +1,7 @@
 <%@ page import="org.labkey.announcements.AnnouncementsController" %>
 <%@ page import="org.labkey.api.announcements.Announcement" %>
 <%@ page import="org.labkey.api.util.DateUtil" %>
+<%@ page import="org.labkey.api.wiki.WikiRenderer" %>
 <%@ page extends="org.labkey.announcements.DailyDigestPage" %>
 <html>
 <head>
@@ -34,8 +35,11 @@
             <tr><td><%=ann.getCreatedByName()%><% if (null == ann.getParent()) { %> created this <%=conversationName%><% } else { %> responded <% } %> at <%=DateUtil.formatDateTime(ann.getCreated())%></td></tr><%
 
         if (!settings.isSecure())
-        { %>
-            <tr><td style="padding-left:35px;"><%=ann.getBody()%></td></tr><%
+        {
+            WikiRenderer w = ann.getRenderer();
+            String body = w.format(ann.getBody());
+            %>
+            <tr><td style="padding-left:35px;"><%=body%></td></tr><%
         }
     }
 

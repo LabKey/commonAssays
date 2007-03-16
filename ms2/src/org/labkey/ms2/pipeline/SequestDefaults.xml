@@ -6,7 +6,7 @@
     <note>This value is ignored when it is present in the default parameter
           list path.</note>
   <note type="input" label="list path, taxonomy information">taxonomy.xml</note>
-	<note>This value is ignored by sequesst.</note>
+	<note>This value is ignored by sequest.</note>
 
 <note>spectrum parameters</note>
   <note type="input" label="spectrum, fragment mass type">monoisotopic</note>
@@ -154,7 +154,7 @@
           easier.</note>
 
 <note>pipeline paramaters</note>
-	<note type="input" label="pipeline, data type">Fractions</note>
+	<note type="input" label="pipeline, data type">Samples</note>
 		<note>Samples, Fractions, or Both; determines wheather input data files are treated as 
 			separate samples, or grouped as fractions into a single run, or both.</note>
 

@@ -153,7 +153,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
             return;
         }
         _databases = paramDatabase.split(";");
-        _isXpress = _parser.getInputParameter("pipeline quantitation, residue label mass") != null;
+        _isXpress = isXPressQuantitation(_parser);
         File fileExperimentXML;
         try
         {
@@ -753,9 +753,9 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
             _dataType = defaultParser.getInputParameter("pipeline, data type");
             if (_dataType == null)
             {
-               _dataType = FRACTIONS;
-               warn("Failed parsing Sequest input xml '" + _fileSequestXML.getPath() + "'.\n" +
-                    "Missing input parameter 'pipeline, datatype'.");
+               _dataType = SAMPLE;
+               info("Input parameter 'pipeline, data type' not found.\n" +
+                       "Using default 'Samples'.");
             }
             if((_dataType.equalsIgnoreCase(FRACTIONS) && _filesMzXML.length == 1)
                     || _dataType.equalsIgnoreCase(SAMPLE))
@@ -764,7 +764,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
             }
 
             _databases = paramDatabase.split(";");
-            _isXpress = _parser.getInputParameter("pipeline quantitation, residue label mass") != null;
+            _isXpress = isXPressQuantitation(_parser);
             _parser = defaultParser;
             return "";
     }

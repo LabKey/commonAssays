@@ -1111,7 +1111,7 @@ public class IssuesController extends ViewController
         NavTrailConfig trailConfig = new NavTrailConfig(getViewContext(), navTrailContainer);
         if (title != null)
             trailConfig.setTitle(title);
-        trailConfig.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.COMMON));
+        trailConfig.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.SERVER));
 
         HomeTemplate template = new HomeTemplate(getViewContext(), getContainer(), view, trailConfig);
         includeView(template);
@@ -1138,7 +1138,7 @@ public class IssuesController extends ViewController
     {
         NavTrailConfig navtrail = new NavTrailConfig(getViewContext());
         navtrail.setTitle(title);
-        navtrail.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.COMMON));
+        navtrail.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.SERVER));
 
         HttpView template = new HomeTemplate(getViewContext(), v, navtrail);
         template.addObject("pageTitle", title);
@@ -1151,7 +1151,7 @@ public class IssuesController extends ViewController
     {
         NavTrailConfig navtrail = new NavTrailConfig(getViewContext());
         navtrail.setTitle(title);
-        navtrail.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.COMMON));
+        navtrail.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.SERVER));
 
         HttpView template = new HomeTemplate(getViewContext(), v, navtrail);
 

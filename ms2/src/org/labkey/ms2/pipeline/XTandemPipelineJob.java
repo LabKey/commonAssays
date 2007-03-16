@@ -148,7 +148,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
         String[] databases = paramDatabase.split(";");
 
         boolean isXComet = "comet".equals(parser.getInputParameter("scoring, algorithm"));
-        boolean isXpress = parser.getInputParameter("pipeline quantitation, residue label mass") != null;
+        boolean isXpress = isXPressQuantitation(parser);
 
         File fileExperimentXML;
         try
@@ -418,7 +418,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
         File fileExperimentXML;
         try
         {
-            boolean isXpress = parser.getInputParameter("pipeline quantitation, residue label mass") != null;
+            boolean isXpress = isXPressQuantitation(parser);
             fileExperimentXML = writeExperimentXML(databases,
                                                     dirWork,
                                                     _dirAnalysis,

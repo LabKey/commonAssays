@@ -236,8 +236,7 @@ public class MassSpecProtocol extends PipelineProtocol
     {
         ExperimentArchiveType xar = xarDoc.getExperimentArchive();
         MaterialBaseType[] inputMaterials = xar.getStartingInputDefinitions().getMaterialArray();
-        Map<String, String> roleLSIDs = new HashMap<String, String>();
-        int genericRoleNameCount = 0;
+        Map<String, List<String>> roleLSIDs = new HashMap<String, List<String>>();
         for (int i = 0; i < inputMaterials.length; i++)
         {
             String materialLSID;
@@ -245,22 +244,14 @@ public class MassSpecProtocol extends PipelineProtocol
 
             MaterialBaseType inputMaterial = inputMaterials[i];
             String existingLSID = inputMaterial.getAbout();
-            String roleName;
+            String roleName = null;
             if (existingLSID != null && existingLSID.startsWith("${Role:") && existingLSID.endsWith("}"))
             {
                 roleName = existingLSID.substring("${Role:".length(), existingLSID.length() - "}".length());
             }
-            else
+            if ("Material".equals(roleName))
             {
-                genericRoleNameCount++;
-                if (genericRoleNameCount == 1)
-                {
-                    roleName = "Material";
-                }
-                else
-                {
-                    roleName = "Material" + genericRoleNameCount;
-                }
+                roleName = null;
             }
 
             if ("Existing".equals(runInfo.getSampleIdsType()[i]) && runInfo.getSampleIdsExisting()[i] != null)
@@ -277,7 +268,13 @@ public class MassSpecProtocol extends PipelineProtocol
                 materialLSID = matSource.getMaterialLSIDPrefix() + runInfo.getSampleIdsNew()[i];
                 materialName = runInfo.getSampleIdsNew()[i];
             }
-            roleLSIDs.put(roleName, materialLSID);
+            List<String> existingLSIDs = roleLSIDs.get(roleName);
+            if (existingLSIDs == null)
+            {
+                existingLSIDs = new ArrayList<String>();
+                roleLSIDs.put(roleName, existingLSIDs);
+            }
+            existingLSIDs.add(materialLSID);
             inputMaterials[i].setAbout(materialLSID);
             inputMaterials[i].setName(materialName);
         }
@@ -300,22 +297,19 @@ public class MassSpecProtocol extends PipelineProtocol
                                 {
                                     for (InputOutputRefsType.MaterialLSID materialLSID : details.getInstanceInputs().getMaterialLSIDArray())
                                     {
-                                        String lsid = roleLSIDs.get(materialLSID.getRoleName());
-                                        if (lsid != null)
+                                        List<String> lsids = roleLSIDs.get(materialLSID.getRoleName());
+                                        if (lsids != null && !lsids.isEmpty())
                                         {
-                                            materialLSID.setStringValue(lsid);
+                                            materialLSID.setStringValue(lsids.remove(0));
                                         }
                                     }
                                 }
                             }
                         }
-
                     }
                 }
             }
         }
-
-
     }
 
     public List<SimpleValueType> getEditableParameters(ExperimentArchiveDocument xarDoc)

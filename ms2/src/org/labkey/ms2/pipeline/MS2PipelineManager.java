@@ -930,7 +930,10 @@ public class MS2PipelineManager
                     SequestInputParser parser = new SequestInputParser();
                     parser.parse(specificProtocol.getXml());
                     dataType = parser.getInputParameter("pipeline, data type");
-                    if (dataType == null) dataType = "";
+                    if (dataType == null ||"".equals(dataType))
+                    {
+                        dataType = SequestPipelineJob.SAMPLE;
+                    }
                 }
                 else
                 {
@@ -958,10 +961,8 @@ public class MS2PipelineManager
             }
             else if(SEQUEST.equalsIgnoreCase(searchEngine))
             {
-                //It assumes that the default is fractions
                 if((dataType.equalsIgnoreCase(SequestPipelineJob.BOTH )||
-                        dataType.equalsIgnoreCase(SequestPipelineJob.FRACTIONS ) ||
-                        dataType.equalsIgnoreCase(""))
+                        dataType.equalsIgnoreCase(SequestPipelineJob.FRACTIONS ))
                         && !fractionsCompleted )
                 {
                     if(mzXMLFiles.length > 1)

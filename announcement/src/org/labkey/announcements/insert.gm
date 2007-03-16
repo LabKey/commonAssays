@@ -9,7 +9,7 @@ String userAgent = request.getHeader("user-agent");
 boolean unsupported = userAgent.contains("MSIE") && userAgent.contains("Mac");
 if (unsupported)
 {
-    %><font color="red">Sorry, Mac/IE is not fully supported. See page <a href="<%=(new HelpTopic("gettingStarted", HelpTopic.Area.COMMON)).getHelpTopicLink()%>">Getting Started with LabKey Server</a>.</font><%
+    %><font color="red">Sorry, Mac/IE is not fully supported. See page <a href="<%=(new HelpTopic("gettingStarted", HelpTopic.Area.SERVER)).getHelpTopicLink()%>">Getting Started with LabKey Server</a>.</font><%
 }
 
 ViewContext context = HttpView.currentContext();

@@ -30,18 +30,13 @@ View this <%=conversationName%> here:
         }
 %><%=ann.getCreatedByName()%><% if (null == ann.getParent()) { %> created this <%=conversationName%><% } else { %> responded<% } %> at <%=DateUtil.formatDateTime(ann.getCreated())%>
 <%
-        if (!settings.isSecure())
-        {
-%><%=ann.getBody()%>
-
-<%
-        }
     }
 
     if (null != threadUrl)
     {
         %>
-View this <%=conversationName%> here: <%=threadUrl%>
+View this <%=conversationName%> here:
+<%=threadUrl%>
 
 <% } %>
 

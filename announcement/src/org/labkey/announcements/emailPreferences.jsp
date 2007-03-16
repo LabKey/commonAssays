@@ -15,7 +15,7 @@
     <input type="radio" value="0" name="notificationType" <%= notificationType == 0 ? " checked" : ""%>>
     <b>Individual</b> - send a separate email after each post<br>
     <input type="radio" value="<%=AnnouncementManager.EMAIL_NOTIFICATION_TYPE_DIGEST%>" name="notificationType" <%=notificationType == AnnouncementManager.EMAIL_NOTIFICATION_TYPE_DIGEST ? " checked" : "" %>>
-    <b>Daily Digest</b>-send one email each day that summarizes all posts<br>
+    <b>Daily Digest</b> - send one email each day that summarizes all posts<br>
 
     <br><input type=hidden name="srcUrl"value="<%=PageFlowUtil.filter(srcURL)%>"/>
     <input type=image src="<%=PageFlowUtil.buttonSrc("Update")%>"/>

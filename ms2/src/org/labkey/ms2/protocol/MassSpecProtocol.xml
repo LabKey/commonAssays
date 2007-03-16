@@ -120,7 +120,7 @@
                     <exp:ApplicationInstanceCollection>
                         <exp:InstanceDetails>
                             <exp:InstanceInputs>
-                                <exp:MaterialLSID RoleName="Material"></exp:MaterialLSID>
+                                <exp:MaterialLSID></exp:MaterialLSID>
                             </exp:InstanceInputs>
                         </exp:InstanceDetails>
                     </exp:ApplicationInstanceCollection>

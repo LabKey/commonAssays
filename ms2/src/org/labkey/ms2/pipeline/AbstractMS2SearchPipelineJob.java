@@ -215,6 +215,11 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
                 + " -C2Q3ProteinRatioParser");
     }
 
+    public boolean isXPressQuantitation(BioMLInputParser parser)
+    {
+        return "xpress".equalsIgnoreCase(parser.getInputParameter("pipeline quantitation, algorithm"));
+    }
+
     public ViewURLHelper getStatusHref()
     {
         if (_experimentRowId != null)

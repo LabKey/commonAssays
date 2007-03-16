@@ -8,7 +8,7 @@
 <%
     ViewContext context = HttpView.currentContext();
     Map[] slides = (Map[]) context.get("slides");
-    ViewURLHelper deleteUrl = (ViewURLHelper) context.get("deleteUrl");
+    ViewURLHelper deleteUrl = (ViewURLHelper) context.get("deleteURL");
 
     int index = 0;
 

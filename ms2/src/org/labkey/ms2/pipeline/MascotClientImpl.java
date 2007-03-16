@@ -729,7 +729,7 @@ public class MascotClientImpl implements SearchClient
             if (null != _instanceLogger) _instanceLogger.warn(msg1);
             _log.warn(msg1);
             String msg2="Result retrieval may fail. See " +
-                    (new HelpTopic("configMascot", HelpTopic.Area.INSTALL)).getHelpTopicLink() +" for more info.";
+                    (new HelpTopic("configMascot", HelpTopic.Area.SERVER)).getHelpTopicLink() +" for more info.";
             if (null != _instanceLogger) _instanceLogger.warn(msg2);
             _log.warn(msg2);
         }
