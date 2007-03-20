@@ -31,8 +31,6 @@ LABKEY.requiresMenu();
 </script>
 
 <script type="text/javascript">
-YAHOO.widget.MenuItem.prototype.IMG_ROOT = LABKEY.yahooRoot + "/menu/assets/";
-YAHOO.widget.Logger.enableBrowserConsole();
 
 var discussionMenu = {};
 (function(){
@@ -58,6 +56,9 @@ var discussionMenu = {};
 
     discussionMenu.onWindowLoad = function(event)
     {
+        YAHOO.widget.MenuItem.prototype.IMG_ROOT = LABKEY.yahooRoot + "/menu/assets/";
+        YAHOO.widget.Logger.enableBrowserConsole();
+
         discussionMenu.menu = new YAHOO.widget.ContextMenu("menuDiscussionMenu", {context:['discussionMenuToggle','tl','tr'], position:'dynamic', visible:false});
         discussionMenu.menu.addItems(discussionMenu.model);
         discussionMenu.menu.render(document.body);
