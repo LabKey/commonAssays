@@ -935,6 +935,7 @@ public class IssuesController extends ViewController
     @Jpf.Action @RequiresPermission(ACL.PERM_READ)
     protected Forward rss() throws Exception
     {
+        ResultSet rs = null;
         try
         {
             DataRegion r = new DataRegion();
@@ -942,7 +943,7 @@ public class IssuesController extends ViewController
             ColumnInfo[] cols = tinfo.getColumns("IssueId,Created,Area,Title,AssignedTo,Priority,Status,Milestone");
             r.addColumns(cols);
 
-            ResultSet rs = r.getResultSet(new RenderContext(getViewContext()));
+            rs = r.getResultSet(new RenderContext(getViewContext()));
             ObjectFactory f = ObjectFactory.Registry.getFactory(Issue.class);
             Issue[] issues = (Issue[]) f.handleArray(rs);
 
@@ -962,6 +963,10 @@ public class IssuesController extends ViewController
         {
             x.printStackTrace();
             throw new ServletException(x);
+        }
+        finally
+        {
+            ResultSetUtil.close(rs);
         }
         return null;
     }

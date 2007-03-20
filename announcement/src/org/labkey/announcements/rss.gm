@@ -8,7 +8,7 @@ for (ann in announcements)
     {%>
     <item>
         <title>${PageFlowUtil.filter(ann.title)}</title>
-        <link>${url}${ann.rowId}</link>
+        <link>${url}${ann.rowId}&print=1</link>
         <description>${PageFlowUtil.filter(ann.body)}</description>
         <pubDate>${ann.created}</pubDate>
     </item><%
