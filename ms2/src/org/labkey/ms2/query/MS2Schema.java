@@ -426,7 +426,6 @@ public class MS2Schema extends UserSchema
         columns.add(FieldKey.fromParts("MS2Details", "Path"));
         columns.add(FieldKey.fromParts("Input", "FASTA"));
         columns.add(FieldKey.fromParts("Input", "mzXML"));
-        columns.add(FieldKey.fromParts("Input", "mzXMLTest"));
         result.setDefaultVisibleColumns(columns);
         return result;
     }

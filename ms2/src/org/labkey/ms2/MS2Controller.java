@@ -1801,9 +1801,32 @@ public class MS2Controller extends ViewController
 
         ViewURLHelper currentUrl = cloneViewURLHelper();
         currentUrl.setAction("moveRuns");
-        ContainerTree ct = new ContainerTree("/", getUser(), ACL.PERM_INSERT, currentUrl);
+        ContainerTree ct = new ContainerTree("/", getUser(), ACL.PERM_INSERT, currentUrl)
+        {
+            protected void renderCellContents(StringBuilder html, Container c, ViewURLHelper url)
+            {
+                boolean hasRoot = false;
+                try
+                {
+                    hasRoot = PipelineService.get().findPipelineRoot(c) != null;
+                }
+                catch (SQLException e)
+                {
+                    _log.error("Unable to determine pipeline root", e);
+                }
 
-        StringBuilder html = new StringBuilder("<table class=\"dataRegion\"><tr><td>Choose a destination folder:</td></tr><tr><td>&nbsp;</td></tr>");
+                if (hasRoot)
+                {
+                    super.renderCellContents(html, c, url);
+                }
+                else
+                {
+                    html.append(PageFlowUtil.filter(c.getName()));
+                }
+            }
+        };
+
+        StringBuilder html = new StringBuilder("<table class=\"dataRegion\"><tr><td>Please select the destination folder. Folders that are not configured with a pipeline root are not valid destinations. They are shown in the list, but are not linked.</td></tr><tr><td>&nbsp;</td></tr>");
         ct.render(html);
         html.append("</table>");
 

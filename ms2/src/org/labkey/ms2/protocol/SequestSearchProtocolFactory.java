@@ -85,6 +85,7 @@ public class SequestSearchProtocolFactory extends PipelineProtocolFactory<Seques
         // Remove the pipeline specific parameters.
         String name = parser.removeInputParameter("pipeline, protocol name");
         String description = parser.removeInputParameter("pipeline, protocol description");
+        String folder = parser.removeInputParameter("pipeline, load folder");        
         String databases = parser.removeInputParameter("pipeline, database");
         String email = parser.removeInputParameter("pipeline, email address");
 

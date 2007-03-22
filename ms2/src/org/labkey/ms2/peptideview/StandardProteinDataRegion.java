@@ -32,33 +32,44 @@ public class StandardProteinDataRegion extends AbstractProteinDataRegion
 
         protein.setSequence((String) ctx.get("Sequence"));
         Integer outerSeqId = (Integer)ctx.getRow().get("SeqId");
-        ResultSet nestedRS = _groupedRS.getNextResultSet();
-
-        if (outerSeqId != null)
+        ResultSet nestedRS = null;
+        try
         {
-            List<String> peptides = new ArrayList<String>();
-            while (nestedRS.next())
+            nestedRS = _groupedRS.getNextResultSet();
+
+            if (outerSeqId != null)
             {
-                peptides.add(nestedRS.getString(getPeptideIndex()));
+                List<String> peptides = new ArrayList<String>();
+                while (nestedRS.next())
+                {
+                    peptides.add(nestedRS.getString(getPeptideIndex()));
+                }
+
+                // Back up to the first peptide in this group
+                nestedRS.beforeFirst();
+
+                String[] peptideArray = new String[peptides.size()];
+                protein.setPeptides(peptides.toArray(peptideArray));
+
+                // Calculate amino acid coverage and add to the rowMap for AACoverageColumn to see
+                ctx.put("AACoverage", protein.getAAPercent());
+            }
+            else
+            {
+                ctx.put("AACoverage", -1.0);
             }
 
-            // Back up to the first peptide in this group
-            nestedRS.beforeFirst();
+            super.renderTableRow(ctx, out, renderers, rowIndex);
 
-            String[] peptideArray = new String[peptides.size()];
-            protein.setPeptides(peptides.toArray(peptideArray));
-
-            // Calculate amino acid coverage and add to the rowMap for AACoverageColumn to see
-            ctx.put("AACoverage", protein.getAAPercent());
+            renderNestedGrid(out, ctx, nestedRS, rowIndex);
         }
-        else
+        finally
         {
-            ctx.put("AACoverage", -1.0);
+            if (nestedRS != null)
+            {
+                try { nestedRS.close(); } catch (SQLException e) {}
+            }
         }
-
-        super.renderTableRow(ctx, out, renderers, rowIndex);
-
-        renderNestedGrid(out, ctx, nestedRS, rowIndex);
     }
 
     private int getPeptideIndex() throws SQLException

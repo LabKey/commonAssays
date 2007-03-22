@@ -16,9 +16,11 @@
 package org.labkey.ms2;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewURLHelper;
@@ -72,19 +74,21 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
             {
                 if (existingRun.getExperimentRunLSID() != null && !existingRun.getExperimentRunLSID().equals(expRun.getLSID()))
                 {
-                    throw new ExperimentException("MS2 data has already been loaded for the path " +
-                            dataFile.getPath() + " and is already associated with another experiment run (LSID='" +
-                            existingRun.getExperimentRunLSID() + "'");
+                    ExperimentRun associatedRun = ExperimentService.get().getExperimentRun(existingRun.getExperimentRunLSID());
+                    if (associatedRun != null)
+                    {
+                        throw new ExperimentException("The MS2 data '" +
+                                dataFile.getPath() + "' is already associated with an experiment run in the folder " +
+                                ContainerManager.getForId(associatedRun.getContainer()).getPath() + " (LSID= '" + existingRun.getExperimentRunLSID() + "')");
+                    }
                 }
-                else
-                {
-                    // If the run failed the first time, then restart it.
-                    if (existingRun.statusId != MS2Importer.STATUS_SUCCESS)
-                        restart = true;
 
-                    existingRun.setExperimentRunLSID(expRun.getLSID());
-                    MS2Manager.updateRun(existingRun, null);
-                }
+                // If the run failed the first time, then restart it.
+                if (existingRun.statusId != MS2Importer.STATUS_SUCCESS)
+                    restart = true;
+
+                existingRun.setExperimentRunLSID(expRun.getLSID());
+                MS2Manager.updateRun(existingRun, null);
             }
             if (existingRun != null && !restart)
             {

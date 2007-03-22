@@ -503,8 +503,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
             return;
         }
 
-        String paramLoad = parser.getInputParameter("pipeline, load");
-        if (paramLoad != null && "no".compareToIgnoreCase(paramLoad) == 0)
+        if ("no".equalsIgnoreCase(parser.getInputParameter("pipeline, load")))
         {
             setStatus("COMPLETE");
             return;

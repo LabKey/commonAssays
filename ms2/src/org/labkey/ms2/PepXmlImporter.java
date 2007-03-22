@@ -237,8 +237,10 @@ public class PepXmlImporter extends MS2Importer
              int i = baseName.lastIndexOf("/");
             String newFilename =
                     (i < 0 ? baseName : baseName.substring(i + 1));
-            newFilename += "." + "pep." + dataSuffix;
-            _gzFileName = newFilename;
+           _gzFileName =  newFilename + "." + "pep." + dataSuffix;
+            //No spectrumPath in a sequest pepXML file.
+            File sampleDir = new File(_path).getParentFile().getParentFile();
+            fraction.setSpectrumPath(new File(sampleDir, newFilename + ".mzXML").getAbsolutePath());
         }
         else
         {
@@ -292,7 +294,8 @@ public class PepXmlImporter extends MS2Importer
     protected void processSpectrumFile(PepXmlFraction fraction, HashSet<Integer> scans, MS2Progress progress, boolean shouldLoadSpectra, boolean shouldLoadRetentionTimes) throws SQLException
     {
         String mzXmlFileName = getMzXMLFileName(fraction);
-        if (_type.equalsIgnoreCase("mascot") && null == mzXmlFileName)
+        if ((_type.equalsIgnoreCase("mascot")||_type.equalsIgnoreCase("sequest"))
+                && null == mzXmlFileName)
         {
             // we attempt to load spectra from .mzXML rather than .pep.tgz
             // generation of .pep.tgz can be turned off via (Mascot2XML -notgz)
@@ -310,6 +313,15 @@ public class PepXmlImporter extends MS2Importer
         {
             gzFileName = gzFile.toString();
         }
+        //sequest spectra are loaded from the tgz but are deleted after they are loaded.
+        if(_type.equalsIgnoreCase("sequest") && mzXmlFileName != null)
+        {
+            if (NetworkDrive.exists(new File(mzXmlFileName)))
+            {
+                gzFileName = "";
+            }
+        }
+
         SpectrumLoader sl = new SpectrumLoader(gzFileName, "", mzXmlFileName, scans, progress, _fractionId, _log, shouldLoadSpectra, shouldLoadRetentionTimes);
         sl.upload();
         updateFractionSpectrumFileName(sl.getFile());

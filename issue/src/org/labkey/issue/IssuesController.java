@@ -184,9 +184,17 @@ public class IssuesController extends ViewController
     private HttpView getIssuesView(ListForm form) throws SQLException, ServletException
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), IssuesQuerySchema.SCHEMA_NAME);
-        QuerySettings settings = new QuerySettings(getViewURLHelper(), ISSUES_QUERY);
+        ViewURLHelper url = null;
+        boolean useLastFilter = ColumnInfo.booleanFromString(getRequest().getParameter(DataRegion.LAST_FILTER_PARAM));
+        if (useLastFilter)
+            url = (ViewURLHelper) getRequest().getSession().getAttribute(getRequest().getRequestURI() + DataRegion.LAST_FILTER_PARAM);
+        if (url == null)
+        {
+            url = getViewURLHelper();
+        }
+        QuerySettings settings = new QuerySettings(url, ISSUES_QUERY);
         settings.setQueryName(ISSUES_QUERY);
-
+        form.setQuerySettings(settings);
         IssuesQueryView queryView = new IssuesQueryView(getViewContext(), schema, settings);
 
         // add the header for buttons and views
@@ -1523,6 +1531,7 @@ public class IssuesController extends ViewController
 
     public static class ListForm extends FormData
     {
+        private QuerySettings _settings;
         private boolean _export;
         private boolean _print;
         private ViewURLHelper _customizeURL;
@@ -1552,6 +1561,14 @@ public class IssuesController extends ViewController
         public void setCustomizeURL(ViewURLHelper url) {_customizeURL = url;}
         public Map<String, CustomView> getViews() {return _views;}
         public void setViews(Map<String, CustomView> views) {_views = views;}
+        public QuerySettings getQuerySettings()
+        {
+            return _settings;
+        }
+        public void setQuerySettings(QuerySettings settings)
+        {
+            _settings = settings;
+        }
     }
 
 

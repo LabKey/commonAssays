@@ -597,7 +597,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
             return;
         }
 
-        if ("no".compareToIgnoreCase(parser.getInputParameter("pipeline, load")) == 0)
+        if ("no".equalsIgnoreCase(parser.getInputParameter("pipeline, load")))
         {
             setStatus("COMPLETE");
             return;

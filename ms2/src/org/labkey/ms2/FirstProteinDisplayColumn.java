@@ -25,10 +25,10 @@ public class FirstProteinDisplayColumn extends SimpleDisplayColumn
     public Object getValue(RenderContext ctx)
     {
         Map row = ctx.getRow();
-        Integer id = (Integer)row.get("RowId");
+        Number id = (Number)row.get("ProteinGroupId");
         if (id == null)
         {
-            id = (Integer)row.get("ProteinGroupId");
+            id = (Number)row.get("RowId");
         }
         try
         {

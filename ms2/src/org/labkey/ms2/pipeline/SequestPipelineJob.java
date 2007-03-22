@@ -543,6 +543,15 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
             return "Failed to delete " + dirWork.getAbsolutePath();
         }
         else if(_isFractions && !FileUtil.deleteSubDirs(dirWork))
+        {
+            return "Failed to delete " + dirWork.getAbsolutePath();
+        }
+
+        if ("no".equalsIgnoreCase(_parser.getInputParameter("pipeline, load")))
+        {
+            setStatus("COMPLETE");
+            return "";
+        }
 
         setStatus("LOADING");
         FileXarSource source = new FileXarSource(fileExperimentXMLFinal);
