@@ -79,6 +79,17 @@ announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/core-0.59-0.6
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/cpas-0.00-0.60.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/cpas-0.00-0.70.sql -text
 announcement/webapp/announcements/scripts/sql[!!-~]server/obsolete/cpas-0.58-0.59.sql -text
+caBIG/build.xml -text
+caBIG/caBIG.iml -text
+caBIG/module.properties -text
+caBIG/src/META-INF/cabig.xml -text
+caBIG/src/org/labkey/cabig/caBIGController.java -text
+caBIG/src/org/labkey/cabig/caBIGManager.java -text
+caBIG/src/org/labkey/cabig/caBIGModule.java -text
+caBIG/src/org/labkey/cabig/caBIGSchema.java -text
+caBIG/src/org/labkey/cabig/view/hello.jsp -text
+caBIG/webapp/cabig/scripts/postgresql/cabig-0.00-0.01.sql -text
+caBIG/webapp/cabig/scripts/sql[!!-~]server/cabig-0.00-0.01.sql -text
 flow/module.properties -text
 flow/src/META-INF/flow.xml -text
 flow/src/org/labkey/flow/FlowPreference.java -text
