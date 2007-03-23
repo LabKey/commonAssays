@@ -90,13 +90,13 @@ public abstract class AbstractPeptideView
 
     public abstract AbstractProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException;
 
-    protected abstract List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames) throws SQLException;
+    protected abstract List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport) throws SQLException;
 
     public abstract GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException;
 
     public ProteinTSVGridWriter getTSVProteinGridWriter(String requestedProteinColumnNames, String requestedPeptideColumnNames, boolean expanded) throws SQLException
     {
-        List<DisplayColumn> proteinDisplayColumns = getProteinDisplayColumns(requestedProteinColumnNames);
+        List<DisplayColumn> proteinDisplayColumns = getProteinDisplayColumns(requestedProteinColumnNames, true);
         List<DisplayColumn> peptideDisplayColumns = null;
 
         if (expanded)
@@ -494,6 +494,11 @@ public abstract class AbstractPeptideView
         ProteinColumnNameList(String columnNames) throws SQLException
         {
             super(getProteinColumnNames(columnNames));
+        }
+        
+        public ProteinColumnNameList(List<String> columnNames)
+        {
+            super(columnNames);
         }
     }
 

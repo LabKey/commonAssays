@@ -289,7 +289,10 @@ public class MS2Controller extends ViewController
             if (pr != null)
             {
                 URI uriData = URIUtil.resolve(pr.getUri(c), path);
-                f = new File(uriData);
+                if (uriData != null)
+                {
+                    f = new File(uriData);
+                }
             }
         }
 

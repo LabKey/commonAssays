@@ -39,7 +39,7 @@ public class StandardProteinPeptideView extends AbstractPeptideView
         return proteinView;
     }
 
-    protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames) throws SQLException
+    protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport) throws SQLException
     {
         return getColumns(_calculatedProteinColumns, new ProteinColumnNameList(requestedProteinColumnNames), MS2Manager.getTableInfoProteins());
     }
@@ -48,7 +48,7 @@ public class StandardProteinPeptideView extends AbstractPeptideView
     private StandardProteinDataRegion createProteinDataRegion(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws SQLException
     {
         StandardProteinDataRegion proteinRgn = new StandardProteinDataRegion(_url);
-        proteinRgn.addColumns(getProteinDisplayColumns(requestedProteinColumnNames));
+        proteinRgn.addColumns(getProteinDisplayColumns(requestedProteinColumnNames, false));
         proteinRgn.setShowRecordSelectors(true);
         proteinRgn.setExpanded(expanded);
         proteinRgn.setMaxRows(_maxGroupingRows);
@@ -88,7 +88,7 @@ public class StandardProteinPeptideView extends AbstractPeptideView
     public StandardProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException
     {
         StandardProteinExcelWriter ew = new StandardProteinExcelWriter();
-        ew.setColumns(getProteinDisplayColumns(requestedProteinColumnNames));
+        ew.setColumns(getProteinDisplayColumns(requestedProteinColumnNames, true));
         return ew;
     }
 

@@ -329,6 +329,14 @@ public abstract class MS2Run implements Serializable
     // CONSIDER: extend Apache ListOrderedSet (ideally) or our ArrayListMap.
     public static class ColumnNameList extends ArrayList<String>
     {
+        public ColumnNameList(List<String> columnNames)
+        {
+            for (String s : columnNames)
+            {
+                add(s);
+            }
+        }
+
         public ColumnNameList(String csvColumnNames)
         {
             super(20);

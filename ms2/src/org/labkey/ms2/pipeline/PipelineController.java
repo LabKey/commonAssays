@@ -608,6 +608,14 @@ public class PipelineController extends ViewController
             if (newSequenceRoot != null && newSequenceRoot.length() > 0)
             {
                 File file = new File(newSequenceRoot);
+                try
+                {
+                    file = file.getCanonicalFile();
+                }
+                catch (IOException e)
+                {
+                    HttpView.throwNotFound(newSequenceRoot);
+                }
                 root = file.toURI();
             }
 
@@ -1388,7 +1396,12 @@ public class PipelineController extends ViewController
                 }
                 catch (IOException e)
                 {
-                    form.setError(0, e.toString());
+                    String message = e.getMessage();
+                    if (message == null || message.length() == 0)
+                    {
+                        message = "Unable to save protocol";
+                    }
+                    form.setError(0, message);
                     return showDescribeMS2Run(form);
                 }
 

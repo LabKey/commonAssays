@@ -6,14 +6,12 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.CaseInsensitiveHashMap;
 import org.labkey.ms2.peptideview.QueryPeptideDataRegion;
 
 import java.io.Writer;
 import java.io.IOException;
-import java.util.Map;
-import java.util.List;
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 
@@ -29,21 +27,41 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
     private static final DecimalFormat MASS_FORMAT = new DecimalFormat("0.0000");
     private ColumnInfo _columnInfo;
     private String _columnName = "ProteinGroupId";
+    private static final String NO_GENE_NAME_AVAILABLE = "[No gene name available]";
+
+    public static final List<String> ALL_SEQUENCE_COLUMNS = Collections.unmodifiableList(Arrays.asList("Protein", "BestName", "BestGeneName", "SequenceMass", "Description"));
+    private static final Map<String, String> ALL_SEQUENCE_COLUMNS_MAP;
+
+    static
+    {
+        Map<String, String> values = new CaseInsensitiveHashMap<String>();
+        for (String s : ALL_SEQUENCE_COLUMNS)
+        {
+            values.put(s, s);
+        }
+        ALL_SEQUENCE_COLUMNS_MAP = Collections.unmodifiableMap(values);
+    }
 
     public ProteinListDisplayColumn(ColumnInfo col)
     {
         _columnInfo = col;
         _columnName = col.getAlias();
-        _sequenceColumns = Arrays.asList("Protein", "BestName", "BestGeneName", "SequenceMass", "Description");
+        _sequenceColumns = ALL_SEQUENCE_COLUMNS;
     }
 
     public ProteinListDisplayColumn(List<String> sequenceColumns, ProteinGroupProteins proteins)
     {
         _sequenceColumns = sequenceColumns;
         _proteins = proteins;
-        setCaption("Indistinguishable Proteins");
         setWidth("450");
         setNoWrap(true);
+        setCaption("Indistinguishable Proteins");
+    }
+
+    public ProteinListDisplayColumn(List<String> sequenceColumns, ProteinGroupProteins proteins, String columnName)
+    {
+        this(sequenceColumns, proteins);
+        setCaption(ALL_SEQUENCE_COLUMNS_MAP.get(columnName));
     }
 
 
@@ -64,11 +82,46 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         {
             List<ProteinSummary> summaryList = getProteins(ctx).getSummaries(id.intValue());
             StringBuilder sb = new StringBuilder();
-            sb.append(summaryList.get(0).getName());
-            for (int i = 1; i < summaryList.size(); i++)
+            String proteinSeparator = "";
+            for (ProteinSummary summary : summaryList)
             {
-                sb.append(", ");
-                sb.append(summaryList.get(i).getName());
+                sb.append(proteinSeparator);
+                proteinSeparator = ", ";
+
+                String valueSeparator = "";
+                for (String column : _sequenceColumns)
+                {
+                    sb.append(valueSeparator);
+                    valueSeparator = " ";
+                    if (column.equalsIgnoreCase("Protein"))
+                    {
+                        sb.append(summary.getName());
+                    }
+                    else if (column.equalsIgnoreCase("Description"))
+                    {
+                        sb.append(summary.getDescription());
+                    }
+                    else if (column.equalsIgnoreCase("BestName"))
+                    {
+                        sb.append(summary.getBestName());
+                    }
+                    else if (column.equalsIgnoreCase("BestGeneName"))
+                    {
+                        String geneName = summary.getBestGeneName();
+                        if (geneName != null)
+                        {
+                            sb.append(geneName);
+                        }
+                        else
+                        {
+                            sb.append(NO_GENE_NAME_AVAILABLE);
+                        }
+                    }
+                    else if (column.equalsIgnoreCase("SequenceMass"))
+                    {
+                        sb.append(summary.getSequenceMass());
+                    }
+                }
             }
             return sb.toString();
         }
@@ -154,7 +207,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
                 }
                 else
                 {
-                    out.write(PageFlowUtil.filter("[No gene name available]"));
+                    out.write(PageFlowUtil.filter(NO_GENE_NAME_AVAILABLE));
                 }
             }
             else if (column.equalsIgnoreCase("SequenceMass"))

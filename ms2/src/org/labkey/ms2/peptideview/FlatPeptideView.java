@@ -99,7 +99,7 @@ public class FlatPeptideView extends AbstractPeptideView
         throw new UnsupportedOperationException();
     }
 
-    protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames) throws SQLException
+    protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport) throws SQLException
     {
         throw new UnsupportedOperationException();
     }

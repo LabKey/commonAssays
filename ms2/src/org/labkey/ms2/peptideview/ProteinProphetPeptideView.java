@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.labkey.ms2.*;
 
@@ -35,7 +36,7 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
     private List<String> getSequenceColumns(String requestedProteinColumnNames) throws SQLException
     {
         ProteinColumnNameList originalNames = new ProteinColumnNameList(requestedProteinColumnNames);
-        List<String> allSequenceColumns = new ProteinColumnNameList("Description,Protein,BestName,BestGeneName,SequenceMass");
+        List<String> allSequenceColumns = new ProteinColumnNameList(ProteinListDisplayColumn.ALL_SEQUENCE_COLUMNS);
         List<String> result = new ArrayList<String>();
         for (String originalName : originalNames)
         {
@@ -47,7 +48,7 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
         return result;
     }
 
-    protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames) throws SQLException
+    protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport) throws SQLException
     {
         ProteinColumnNameList originalNames = new ProteinColumnNameList(requestedProteinColumnNames);
         List<DisplayColumn> displayColumns = new ArrayList<DisplayColumn>();
@@ -94,7 +95,17 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
         List<String> sequenceColumns = getSequenceColumns(requestedProteinColumnNames);
         if (!sequenceColumns.isEmpty())
         {
-            displayColumns.add(new ProteinListDisplayColumn(sequenceColumns, proteins));
+            if (forExport)
+            {
+                for (String sequenceColumn : sequenceColumns)
+                {
+                    displayColumns.add(new ProteinListDisplayColumn(Collections.singletonList(sequenceColumn), proteins, sequenceColumn));
+                }
+            }
+            else
+            {
+                displayColumns.add(new ProteinListDisplayColumn(sequenceColumns, proteins));
+            }
         }
         return displayColumns;
     }
@@ -119,7 +130,7 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
         ProteinProphetDataRegion proteinRgn = new ProteinProphetDataRegion(_url);
         proteinRgn.setTable(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
         proteinRgn.setName(MS2Manager.getDataRegionNameProteinGroups());
-        proteinRgn.addColumns(getProteinDisplayColumns(requestedProteinColumnNames));
+        proteinRgn.addColumns(getProteinDisplayColumns(requestedProteinColumnNames, false));
         proteinRgn.setShowRecordSelectors(true);
         proteinRgn.setExpanded(expanded);
         proteinRgn.setRecordSelectorValueColumns("ProteinGroupId");
@@ -277,7 +288,7 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
     public ProteinProphetExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException
     {
         ProteinProphetExcelWriter ew = new ProteinProphetExcelWriter();
-        ew.setColumns(getProteinDisplayColumns(requestedProteinColumnNames));
+        ew.setColumns(getProteinDisplayColumns(requestedProteinColumnNames, true));
         return ew;
     }
 
