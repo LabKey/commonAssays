@@ -18,14 +18,14 @@ package org.labkey.portal;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.view.WebPartFactory;
-import org.labkey.api.view.WebPartView;
-import org.labkey.api.view.Portal;
-import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.*;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.security.User;
 import org.apache.log4j.Logger;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
 import java.beans.PropertyChangeEvent;
 

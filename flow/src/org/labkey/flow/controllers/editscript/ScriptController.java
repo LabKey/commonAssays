@@ -823,7 +823,8 @@ public class ScriptController extends BaseFlowController
             graphDef.setSubset(graph.getSubset().toString());
         }
         graphDef.setXAxis(graph.getParameters()[0]);
-        graphDef.setYAxis(graph.getParameters()[1]);
+        if (graph.getParameters().length > 1)
+            graphDef.setYAxis(graph.getParameters()[1]);
         return graphDef;
     }
 

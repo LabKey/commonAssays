@@ -356,7 +356,7 @@ public class FlowOverview extends Overview
             ExpSampleSet ss = protocol.getSampleSet();
             if (ss != null)
             {
-                descriptionHTML.append("There are <a href=\"" + h(ss.detailsURL()) + "\">" + ss.getSamples().length + "</a> sample descriptions in this folder.");
+                descriptionHTML.append("There are <a href=\"" + h(ss.detailsURL()) + "\">" + ss.getSamples().length + " sample descriptions</a> in this folder.");
                 if (_canUpdate)
                 {
                     if (protocol.getSampleSetJoinFields().size() != 0)

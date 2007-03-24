@@ -155,6 +155,23 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return ret;
     }
 
+    public String getSampleSetLSID()
+    {
+        try
+        {
+            String propValue = (String) getProperty(ExperimentProperty.SampleSetLSID.getPropertyDescriptor());
+            if (propValue != null)
+            {
+                return propValue;
+            }
+        }
+        catch (SQLException e)
+        {
+            _log.error("Error", e);
+        }
+        return ExperimentService.get().generateLSID(getContainer(), ExpSampleSet.class, SAMPLESET_NAME);
+    }
+
     public void setSampleSetJoinFields(User user, Map<String, FieldKey> values) throws Exception
     {
         List<String> strings = new ArrayList();
@@ -164,6 +181,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         }
         String value = StringUtils.join(strings.iterator(), "&");
         setProperty(user, FlowProperty.SampleSetJoin.getPropertyDescriptor(), value);
+        setProperty(user, ExperimentProperty.SampleSetLSID.getPropertyDescriptor(), getSampleSetLSID());
     }
 
     public ViewURLHelper urlUploadSamples()

@@ -34,7 +34,7 @@ public class QueryPeptideView extends AbstractPeptideView
 
     protected QuerySettings createQuerySettings(String tableName, UserSchema schema, int maxRows) throws RedirectException
     {
-        QuerySettings settings = new QuerySettings(_url, DATA_REGION_NAME);
+        QuerySettings settings = new QuerySettings(_url, _viewContext.getRequest(), DATA_REGION_NAME);
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
         settings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);

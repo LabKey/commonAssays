@@ -38,6 +38,7 @@ import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.PipelineStatusManager;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DataRegion;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.module.Module;
 import org.labkey.api.jsp.FormPage;
@@ -72,7 +73,9 @@ public class FlowController extends BaseFlowController<FlowController.Action>
     {
         if (getContainer().getFolderType() instanceof FlowFolderType)
         {
-            return new ViewForward(new ViewURLHelper("Project", "begin", getContainer()));
+            ViewURLHelper forward = new ViewURLHelper("Project", "begin", getContainer());
+            forward.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
+            return new ViewForward(forward);
         }
         requiresPermission(ACL.PERM_READ);
         return includeView(new HomeTemplate(getViewContext(), new OverviewWebPart(getViewContext()), getNavTrailConfig(null, FlowModule.getLongProductName(), Action.begin)));

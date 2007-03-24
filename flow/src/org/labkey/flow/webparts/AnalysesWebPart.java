@@ -24,7 +24,7 @@ public class AnalysesWebPart extends FlowQueryView
         public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart wp) throws Exception
         {
             FlowSchema schema = new FlowSchema(portalCtx.getUser(), portalCtx.getContainer());
-            FlowQuerySettings settings = schema.getSettings(wp, portalCtx.getViewURLHelper());
+            FlowQuerySettings settings = schema.getSettings(wp, portalCtx);
             settings.setAllowChooseQuery(false);
             settings.setAllowChooseView(false);
             settings.setQueryName(FlowTableType.Analyses.toString());

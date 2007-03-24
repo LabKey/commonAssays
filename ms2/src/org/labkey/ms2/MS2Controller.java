@@ -3932,7 +3932,7 @@ public class MS2Controller extends ViewController
             HttpView.throwRedirect(url + "&" + filter.toQueryString("ProteinSearchResults"));
         }
 
-        QuerySettings proteinsSettings = new QuerySettings(getViewURLHelper(), "PotentialProteins");
+        QuerySettings proteinsSettings = new QuerySettings(getViewURLHelper(), getRequest(), "PotentialProteins");
         proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);
         proteinsSettings.setAllowChooseQuery(false);
         QueryView proteinsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), proteinsSettings);
@@ -3942,7 +3942,7 @@ public class MS2Controller extends ViewController
         sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
         proteinsView.setTitle("Matching Proteins");
 
-        QuerySettings groupsSettings = new QuerySettings(getViewURLHelper(), "ProteinSearchResults");
+        QuerySettings groupsSettings = new QuerySettings(getViewURLHelper(), getRequest(), "ProteinSearchResults");
         groupsSettings.setQueryName(MS2Schema.PROTEIN_GROUPS_TABLE_NAME);
         groupsSettings.setAllowChooseQuery(false);
         QueryView groupsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), groupsSettings)

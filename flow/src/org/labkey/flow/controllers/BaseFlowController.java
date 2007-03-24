@@ -60,7 +60,6 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
     static public NavTrailConfig getFlowNavConfig(ViewContext context, FlowObject object, String title, Enum action)
     {
         ArrayList<NavTree> children = new ArrayList<NavTree>();
-        ViewURLHelper url = PFUtil.urlFor(FlowController.Action.begin, context.getContainer().getPath());
 
         while (object != null)
         {
@@ -74,6 +73,7 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
         }
         else
         {
+            ViewURLHelper url = PFUtil.urlFor(FlowController.Action.begin, context.getContainer().getPath());
             children.add(0, new NavTree(FlowModule.getShortProductName(), url.clone()));
         }
 

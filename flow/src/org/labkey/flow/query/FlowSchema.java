@@ -17,6 +17,7 @@ import org.labkey.api.util.UnexpectedException;
 import org.apache.beehive.netui.pageflow.Forward;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.sql.Types;
 
@@ -458,14 +459,14 @@ public class FlowSchema extends UserSchema
         return ret;
     }
 
-    public FlowQuerySettings getSettings(ViewURLHelper url, String dataRegionName)
+    public FlowQuerySettings getSettings(ViewURLHelper url, HttpServletRequest request, String dataRegionName)
     {
-        return new FlowQuerySettings(url, dataRegionName);
+        return new FlowQuerySettings(url, request, dataRegionName);
     }
 
-    public FlowQuerySettings getSettings(Portal.WebPart webPart, ViewURLHelper url)
+    public FlowQuerySettings getSettings(Portal.WebPart webPart, ViewContext context)
     {
-        return new FlowQuerySettings(webPart, url, getUser());
+        return new FlowQuerySettings(webPart, context);
     }
 
     public QueryDefinition getQueryDefForTable(String name)
