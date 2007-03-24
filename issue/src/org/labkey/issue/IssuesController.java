@@ -184,15 +184,7 @@ public class IssuesController extends ViewController
     private HttpView getIssuesView(ListForm form) throws SQLException, ServletException
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), IssuesQuerySchema.SCHEMA_NAME);
-        ViewURLHelper url = null;
-        boolean useLastFilter = ColumnInfo.booleanFromString(getRequest().getParameter(DataRegion.LAST_FILTER_PARAM));
-        if (useLastFilter)
-            url = (ViewURLHelper) getRequest().getSession().getAttribute(getRequest().getRequestURI() + DataRegion.LAST_FILTER_PARAM);
-        if (url == null)
-        {
-            url = getViewURLHelper();
-        }
-        QuerySettings settings = new QuerySettings(url, ISSUES_QUERY);
+        QuerySettings settings = new QuerySettings(getViewURLHelper(), getRequest(), ISSUES_QUERY);
         settings.setQueryName(ISSUES_QUERY);
         form.setQuerySettings(settings);
         IssuesQueryView queryView = new IssuesQueryView(getViewContext(), schema, settings);
