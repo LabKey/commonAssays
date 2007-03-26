@@ -192,6 +192,9 @@ public class IssuesController extends ViewController
         // add the header for buttons and views
         QueryDefinition qd = schema.getQueryDefForTable(ISSUES_QUERY);
         Map<String, CustomView> views = qd.getCustomViews(getUser());
+        // don't include a customized default view in the list
+        if (views.containsKey(null))
+            views.remove(null);
 
         form.setCustomizeURL(queryView.getCustomizeURL());
         form.setViews(views);
@@ -879,7 +882,7 @@ public class IssuesController extends ViewController
     }
 
     public static final String REQUIRED_FIELDS_COLUMNS = "Title,AssignedTo,Type,Area,Priority,Milestone,NotifyList";
-    public static final String DEFAULT_REQUIRED_FIELDS = "title;assignedto";
+    public static final String DEFAULT_REQUIRED_FIELDS = "title";
 
     @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
     protected Forward admin(AdminForm form) throws Exception

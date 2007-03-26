@@ -8,13 +8,17 @@
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.ViewContext"%>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.issue.model.IssueManager" %>
 <%@ page extends="org.labkey.issue.IssuePage" %>
 <%
     ViewContext context = HttpView.getRootContext();
     final Issue issue = getIssue();
     final Container c = context.getContainer();
     final String focusId = (0 == issue.getIssueId() ? "title" : "comment");
+    int emailPrefs = IssueManager.getUserEmailPreferences(context.getContainer(), context.getUser().getUserId());
+    final String popup = getNotifyHelpPopup(emailPrefs);
 %>
+
 <form style="margin:0" method="POST" action="<%=ViewURLHelper.toPathString("Issues", "doUpdate.post", context.getContainer().getPath())%>">
 
     <table border=0 cellspacing=2 cellpadding=0>
@@ -93,7 +97,7 @@
             if (this.isEditable("notifyList"))
             {
 %>
-                <tr><td class="ms-searchform"><%=getLabel("NotifyList")%><br/>(one email address on each line)</td><td class="ms-vb"><%=getNotifyList(c, issue)%></td></tr>
+                <tr><td class="ms-searchform"><%=getLabel("NotifyList") + popup%><br/>(one email address on each line)</td><td class="ms-vb"><%=getNotifyList(c, issue)%></td></tr>
 <%
             } else {
 %>
@@ -141,3 +145,27 @@
     <input type="hidden" name="action" value="<%=getAction()%>">
 </form>
 <script type="text/javascript" for="window" event="onload">try {document.getElementById("<%=focusId%>").focus();} catch (x) {}</script>
+
+<%!
+    String getNotifyHelpPopup(int emailPrefs)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Email notifications can be controlled via either this notification list or the user ");
+        sb.append("email preferences. Email preferences are available from the 'Email Preferences' button on the Issues list view. ");
+        if (emailPrefs != 0)
+        {
+            sb.append("Your current preferences to notify are:<br>");
+            sb.append("<ul>");
+            if ((emailPrefs & IssueManager.NOTIFY_ASSIGNEDTO_OPEN) != 0)
+                sb.append("<li>when an issue is opened and assigned to me</li>");
+            if ((emailPrefs & IssueManager.NOTIFY_ASSIGNEDTO_UPDATE) != 0)
+                sb.append("<li>when an issue that's assigned to me is modified</li>");
+            if ((emailPrefs & IssueManager.NOTIFY_CREATED_UPDATE) != 0)
+                sb.append("<li>when an issue I opened is modified</li>");
+            if ((emailPrefs & IssueManager.NOTIFY_SELF_SPAM) != 0)
+                sb.append("<li>when I enter/edit an issue</li>");
+            sb.append("</ul>");
+        }
+        return PageFlowUtil.helpPopup("Email Notifications", sb.toString(), true);
+    }
+%>
