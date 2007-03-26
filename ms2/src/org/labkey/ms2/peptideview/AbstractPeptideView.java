@@ -307,21 +307,26 @@ public abstract class AbstractPeptideView
 
         peptideUrlString += "&rowIndex=${_row}";
 
-        DisplayColumn dc = rgn.getDisplayColumn("scan");
-        if (null != dc)
-        {
-            dc.setURL(peptideUrlString);
-            dc.setLinkTarget("pep");
-        }
+        setColumnURL(rgn, "scan", peptideUrlString, "pep");
+        setColumnURL(rgn, "peptide", peptideUrlString, "pep");
+        String quantURLString = peptideUrlString + "#quantitation";
 
-        dc = rgn.getDisplayColumn("peptide");
-        if (null != dc)
-        {
-            dc.setURL(peptideUrlString);
-            dc.setLinkTarget("pep");
-        }
+        setColumnURL(rgn, "lightfirstscan", quantURLString, "pep");
+        setColumnURL(rgn, "lightlastscan", quantURLString, "pep");
+        setColumnURL(rgn, "heavyfirstscan", quantURLString, "pep");
+        setColumnURL(rgn, "heavylastscan", quantURLString, "pep");
+        setColumnURL(rgn, "lightmass", quantURLString, "pep");
+        setColumnURL(rgn, "heavymass", quantURLString, "pep");
+        setColumnURL(rgn, "ratio", quantURLString, "pep");
+        setColumnURL(rgn, "heavy2lightratio", quantURLString, "pep");
+        setColumnURL(rgn, "lightarea", quantURLString, "pep");
+        setColumnURL(rgn, "heavyarea", quantURLString, "pep");
+        setColumnURL(rgn, "decimalratio", quantURLString, "pep");
 
-        dc = rgn.getDisplayColumn("protein");
+        showUrl.setAction("showAllProteins");
+        setColumnURL(rgn, "proteinHits", showUrl.getLocalURIString() + "&peptideId=${RowId}", "prot");
+
+        DisplayColumn dc = rgn.getDisplayColumn("protein");
         if (null != dc)
         {
             showUrl.setAction("showProtein");
@@ -329,16 +334,19 @@ public abstract class AbstractPeptideView
             dc.setLinkTarget("prot");
         }
 
-        dc = rgn.getDisplayColumn("proteinHits");
-        if (null != dc)
-        {
-            showUrl.setAction("showAllProteins");
-            dc.setURL(showUrl.getLocalURIString() + "&peptideId=${RowId}");
-        }
-
         dc = rgn.getDisplayColumn("GeneName");
         if (null != dc)
             dc.setURL(_geneNameUrl);
+    }
+
+    private void setColumnURL(DataRegion rgn, String columnName, String peptideUrlString, String linkTarget)
+    {
+        DisplayColumn dc = rgn.getDisplayColumn(columnName);
+        if (null != dc)
+        {
+            dc.setURL(peptideUrlString);
+            dc.setLinkTarget(linkTarget);
+        }
     }
 
     public DataRegion getPeptideGrid(String peptideColumnNames, int maxRows) throws SQLException

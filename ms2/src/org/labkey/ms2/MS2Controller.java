@@ -1804,6 +1804,7 @@ public class MS2Controller extends ViewController
 
         ViewURLHelper currentUrl = cloneViewURLHelper();
         currentUrl.setAction("moveRuns");
+        final Container originalContainer = getContainer();
         ContainerTree ct = new ContainerTree("/", getUser(), ACL.PERM_INSERT, currentUrl)
         {
             protected void renderCellContents(StringBuilder html, Container c, ViewURLHelper url)
@@ -1818,7 +1819,7 @@ public class MS2Controller extends ViewController
                     _log.error("Unable to determine pipeline root", e);
                 }
 
-                if (hasRoot)
+                if (hasRoot && !c.equals(originalContainer))
                 {
                     super.renderCellContents(html, c, url);
                 }
