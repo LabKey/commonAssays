@@ -77,6 +77,7 @@ public class MS2Peptide
     private String _trimmedPeptide;
 
     private Quantitation _quantitation;
+    private String _spectrumErrorMessage;
 
     public MS2Peptide()
     {
@@ -123,6 +124,10 @@ public class MS2Peptide
                             _spectrumMZ = data[0];
                             _spectrumIntensity = data[1];
                         }
+                        else
+                        {
+                            _spectrumErrorMessage = "Could not find scan " + getScan() + " in " + f.getName();
+                        }
                     }
                     finally
                     {
@@ -131,6 +136,10 @@ public class MS2Peptide
                             iter.close();
                         }
                     }
+                }
+                else
+                {
+                    _spectrumErrorMessage = "Could not " + f.getAbsolutePath() + " from which to load spectra";
                 }
             }
         }
@@ -408,7 +417,11 @@ public class MS2Peptide
     {
         return _spectrumMZ;
     }
-
+    
+    public String getSpectrumErrorMessage()
+    {
+        return _spectrumErrorMessage;
+    }
 
     public float[] getSpectrumIntensity()
     {

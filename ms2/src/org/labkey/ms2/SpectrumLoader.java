@@ -204,6 +204,11 @@ public class SpectrumLoader
                     }
                 }
             }
+
+            if (!_scans.isEmpty())
+            {
+                _log.warn("Could not find spectra for " + _scans.size() + " scans.");
+            }
         }
         catch (IOException e)
         {

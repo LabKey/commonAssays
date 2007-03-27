@@ -48,6 +48,7 @@ public class Quantitation
 
     private List<ScanInfo>[] _heavyProfiles;
     private List<ScanInfo>[] _lightProfiles;
+    private boolean _noScansFound = true;
 
     private MS2Fraction _fraction;
 
@@ -59,6 +60,11 @@ public class Quantitation
     public void setPeptideId(long peptideId)
     {
         _peptideId = peptideId;
+    }
+
+    public boolean isNoScansFound()
+    {
+        return _noScansFound;
     }
 
     public int getQuantId()
@@ -313,6 +319,7 @@ public class Quantitation
 
             while (iterator.hasNext())
             {
+                _noScansFound = false;
                 SimpleScan scan = iterator.next();
                 if (scan.getScan() > maxScan)
                 {

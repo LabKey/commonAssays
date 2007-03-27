@@ -38,6 +38,7 @@ public class SpectrumGraph extends Graph
         _ionCount = peptide.getIonCount();
         _massMatches = peptide.getMassMatches();
         _tolerance = tolerance;
+        setNoDataErrorMessage(peptide.getSpectrumErrorMessage());
     }
 
 

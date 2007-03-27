@@ -2017,6 +2017,7 @@ public class MS2Controller extends ViewController
         MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
 
         HttpServletResponse response = getResponse();
+        String errorMessage = null;
         if (null != peptide)
         {
             Quantitation quantitation = peptide.getQuantitation();
@@ -2036,16 +2037,28 @@ public class MS2Controller extends ViewController
                 {
                     g.addInfo(quantitation.getHeavyElutionProfile(charge), quantitation.getHeavyFirstScan(), quantitation.getHeavyLastScan(), quantitation.getMinDisplayScan(), quantitation.getMaxDisplayScan(), Color.BLUE);
                 }
-                g.render(response.getOutputStream());
-                return null;
+                if (quantitation.isNoScansFound())
+                {
+                    errorMessage = "No relevant MS1 scans found in spectra file";
+                }
+                else
+                {
+                    g.render(response.getOutputStream());
+                    return null;
+                }
+            }
+            else
+            {
+                errorMessage = "Could not open spectra file to get MS1 scans";
             }
         }
 
-        Graph g = new Graph(new float[0], new float[0], 300, ElutionGraph.HEIGHT)
+        Graph g = new Graph(new float[0], new float[0], ElutionGraph.WIDTH, ElutionGraph.HEIGHT)
         {
             protected void initializeDataPoints(Graphics2D g) {}
             protected void renderDataPoint(Graphics2D g, double x, double y) {}
         };
+        g.setNoDataErrorMessage(errorMessage);
         g.render(response.getOutputStream());
         return null;
     }

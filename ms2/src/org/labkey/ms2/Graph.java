@@ -58,6 +58,8 @@ public abstract class Graph
     protected Color _foregroundColor = Color.black;
     protected Color _backgroundColor = Color.white;
 
+    private String _noDataErrorMessage = "No data to plot";
+
 
     public Graph()
     {
@@ -84,6 +86,14 @@ public abstract class Graph
         setSize(width, height);
     }
 
+
+    public void setNoDataErrorMessage(String noDataErrorMessage)
+    {
+        if (noDataErrorMessage != null)
+        {
+            _noDataErrorMessage = noDataErrorMessage;
+        }
+    }
 
     public void setXStart(double x)
     {
@@ -183,8 +193,7 @@ public abstract class Graph
 
         if (0 == _plotCount)
         {
-            String error = "No data to plot";
-            g.drawString(error, (_width - g.getFontMetrics().stringWidth(error)) / 2, (_height - g.getFontMetrics().getHeight()) / 2);
+            g.drawString(_noDataErrorMessage, (_width - g.getFontMetrics().stringWidth(_noDataErrorMessage)) / 2, (_height - g.getFontMetrics().getHeight()) / 2);
             ImageIO.write(bi, imageType, outputStream);
             outputStream.flush();
             return;

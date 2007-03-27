@@ -17,6 +17,7 @@ package org.labkey.ms2.pipeline;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.XMLValidationParser;
@@ -24,10 +25,12 @@ import org.labkey.api.util.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.Data;
 import org.labkey.ms2.protocol.*;
 
 import java.io.*;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -704,7 +707,8 @@ public class MS2PipelineManager
 
     public static Map<File, FileStatus> getAnalysisFileStatus(URI uriData, String protocolName, Container c, String searchEngine) throws IOException
     {
-        File dirData = new File(uriData);
+        File dirData = new File(uriData).getCanonicalFile();
+        String dirDataURL = dirData.toURI().toURL().toString();
         File[] mzXMLFiles = dirData.listFiles(getAnalyzeFilter());
 
         Map<File, FileStatus> analysisMap = new LinkedHashMap<File, FileStatus>();
@@ -729,6 +733,8 @@ public class MS2PipelineManager
             boolean all = getLogFile(dirAnalysis, "all").exists();
             boolean allComplete = all && getSearchExperimentFile(dirAnalysis, "all").exists();
 
+            Data[] allContainerDatas = null;
+
             for (File file : mzXMLFiles)
             {
                 FileStatus status = FileStatus.UNKNOWN;
@@ -750,9 +756,38 @@ public class MS2PipelineManager
                 }
                 if (status == FileStatus.UNKNOWN)
                 {
-                    if (ExperimentService.get().getCreatingRun(file, c) != null)
+                    try
                     {
-                        status = FileStatus.ANNOTATED;
+                        String fileURL;
+                        try
+                        {
+                            URI localURI = new URI("file", null, "/" + file.getName(), null);
+                            // Strip off the leading "file:/" to get just the encoded file name
+                            fileURL = dirDataURL + localURI.toString().substring("file:/".length());
+                        }
+                        catch (URISyntaxException e)
+                        {
+                            throw new IllegalStateException(e);
+                        }
+                        if (allContainerDatas == null)
+                        {
+                            allContainerDatas = ExperimentService.get().getData(c);
+                        }
+                        for (Data data : allContainerDatas)
+                        {
+                            if (fileURL.equals(data.getDataFileUrl()))
+                            {
+                                if (data.getRunId() != null)
+                                {
+                                    status = FileStatus.ANNOTATED;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    catch (SQLException e)
+                    {
+                        throw new RuntimeSQLException(e);
                     }
                 }
                 analysisMap.put(file, status);

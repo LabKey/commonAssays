@@ -58,6 +58,11 @@ public class ProteinProphetImporter
             return;
         }
 
+        if (!NetworkDrive.exists(_file))
+        {
+            throw new FileNotFoundException(_file.toString());
+        }
+
         SqlDialect dialect = MS2Manager.getSchema().getSqlDialect();
         int suffix = new Random().nextInt(1000000000);
         String peptidesTempTableName = dialect.getTempTablePrefix() +  "PeptideMembershipsTemp" + suffix;
@@ -74,6 +79,7 @@ public class ProteinProphetImporter
 
         ProtXmlReader.ProteinGroupIterator iterator = null;
         boolean success = false;
+        boolean createdTempTables = false;
         int proteinGroupIndex = 0;
 
         try
@@ -109,10 +115,9 @@ public class ProteinProphetImporter
             stmt = connection.createStatement();
             stmt.execute(createProteinsTempTableSQL);
 
-            if (!NetworkDrive.exists(_file))
-            {
-                throw new FileNotFoundException(_file.toString());
-            }
+            connection.commit();
+            createdTempTables = true;
+
             ProtXmlReader reader = new ProtXmlReader(_file);
 
             peptideStmt = connection.prepareStatement("INSERT INTO " + peptidesTempTableName + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -196,7 +201,7 @@ public class ProteinProphetImporter
                 }
                 catch (SQLException e) { job.getLogger().error("Failed to rollback to clear any potential error state", e); }
             }
-            if (stmt != null)
+            if (stmt != null && createdTempTables)
             {
                 try
                 {
