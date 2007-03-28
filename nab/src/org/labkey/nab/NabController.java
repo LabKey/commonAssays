@@ -502,6 +502,7 @@ public class NabController extends ViewController
         chart.getXYPlot().addRangeMarker(new ValueMarker(0f, Color.DARK_GRAY, new BasicStroke()));
         for (int cutoff : cutoffs)
             chart.getXYPlot().addRangeMarker(new ValueMarker(cutoff));
+        getResponse().setContentType("image/png");
         ChartUtilities.writeChartAsPNG(getResponse().getOutputStream(), chart, 425, 300);
     }
 

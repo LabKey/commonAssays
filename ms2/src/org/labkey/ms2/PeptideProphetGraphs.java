@@ -7,7 +7,10 @@ import org.labkey.api.data.Container;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.ChartColor;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -15,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.awt.*;
 
 /**
  * User: arauch
@@ -42,6 +46,29 @@ public class PeptideProphetGraphs
         outputChart(response, chart);
     }
 
+    private static void setupColors(JFreeChart chart)
+    {
+        XYPlot plot = chart.getXYPlot();
+        XYItemRenderer renderer = plot.getRenderer();
+        renderer.setStroke(new BasicStroke(2.0f));
+
+        if (plot.getSeriesCount() > 0)
+        {
+            renderer.setSeriesPaint(0, ChartColor.RED);
+        }
+        if (plot.getSeriesCount() > 1)
+        {
+            renderer.setSeriesPaint(1, ChartColor.BLUE);
+        }
+        if (plot.getSeriesCount() > 2)
+        {
+            renderer.setSeriesPaint(2, ChartColor.DARK_GREEN);
+        }
+        if (plot.getSeriesCount() > 3)
+        {
+            renderer.setSeriesPaint(3, ChartColor.DARK_YELLOW);
+        }
+    }
 
     public static void renderDistribution(HttpServletResponse response, PeptideProphetSummary summary, int charge, boolean cumulative) throws IOException
     {
@@ -51,7 +78,6 @@ public class PeptideProphetGraphs
         float[] total = (cumulative ? convertToCumulative(summary.getModelTotal(charge)) : summary.getModelTotal(charge));
 
         collection.addSeries(toXYSeries("observed", fval, obs));
-        collection.addSeries(toXYSeries("model total", fval, total));
 
         if (!cumulative)
         {
@@ -59,6 +85,8 @@ public class PeptideProphetGraphs
             collection.addSeries(toXYSeries("model neg", fval, summary.getModelNeg(charge)));
         }
 
+        collection.addSeries(toXYSeries("model total", fval, total));
+        
         JFreeChart chart = ChartFactory.createXYLineChart("Charge " + charge + "+ " + (cumulative ? "Cumulative" : "") + " Distribution",
                 "fval",
                 "distribution",
@@ -166,6 +194,7 @@ public class PeptideProphetGraphs
     private static void outputChart(HttpServletResponse response, JFreeChart chart) throws IOException
     {
         response.setContentType("image/png");
+        setupColors(chart);
         ChartUtilities.writeChartAsPNG(response.getOutputStream(), chart, 450, 300);
     }
 
