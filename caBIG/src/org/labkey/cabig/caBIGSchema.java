@@ -2,6 +2,7 @@ package org.labkey.cabig;
 
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.SqlDialect;
+import org.labkey.api.data.TableInfo;
 
 public class caBIGSchema
 {
@@ -30,5 +31,10 @@ public class caBIGSchema
     public SqlDialect getSqlDialect()
     {
         return getSchema().getSqlDialect();
+    }
+
+    public TableInfo getTableInfoContainers()
+    {
+        return getSchema().getTable("Containers");
     }
 }

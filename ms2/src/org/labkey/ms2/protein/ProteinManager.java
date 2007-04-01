@@ -28,6 +28,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * User: arauch
@@ -267,31 +268,61 @@ public class ProteinManager
 
         String tryptic = currentUrl.getParameter("tryptic");
 
+
         // Add tryptic filter
         if ("1".equals(tryptic))
-            filter.addWhereClause(getTryptic1(), new Object[]{}, "Peptide");
+            filter.addClause(new TrypticFilter(1));
         else if ("2".equals(tryptic))
-            filter.addWhereClause(getTryptic2(), new Object[]{}, "Peptide");
+            filter.addClause(new TrypticFilter(2));
     }
 
-    private static String nTerm()
+    public static class TrypticFilter extends SimpleFilter.FilterClause
     {
-        return "(Peptide " + getSqlDialect().getCharClassLikeOperator() + " '[KR].[^P]%' OR Peptide " + getSqlDialect().getCharClassLikeOperator() + " '-.%')";
-    }
+        private int _termini;
 
-    private static String cTerm()
-    {
-        return "(Peptide " + getSqlDialect().getCharClassLikeOperator() + " '%[KR].[^P]' OR Peptide " + getSqlDialect().getCharClassLikeOperator() + " '%.-')";
-    }
+        public TrypticFilter(int termini)
+        {
+            _termini = termini;
+        }
 
-    private static String getTryptic1()
-    {
-        return nTerm() + " OR " + cTerm();
-    }
+        protected String toWhereClause(SqlDialect dialect)
+        {
+            switch(_termini)
+            {
+                case(0):
+                    return "";
 
-    private static String getTryptic2()
-    {
-        return nTerm() + " AND " + cTerm();
+                case(1):
+                    return nTerm(dialect) + " OR " + cTerm(dialect);
+
+                case(2):
+                    return nTerm(dialect) + " AND " + cTerm(dialect);
+            }
+
+            return "INVALID PARAMETER: TERMINI = " + _termini;
+        }
+
+        private String nTerm(SqlDialect dialect)
+        {
+            return "(Peptide " + dialect.getCharClassLikeOperator() + " '[KR].[^P]%' OR Peptide " + dialect.getCharClassLikeOperator() + " '-.%')";
+        }
+
+        private String cTerm(SqlDialect dialect)
+        {
+            return "(Peptide " + dialect.getCharClassLikeOperator() + " '%[KR].[^P]' OR Peptide " + dialect.getCharClassLikeOperator() + " '%.-')";
+        }
+
+        protected List<String> getColumnNames()
+        {
+            return Arrays.asList("Peptide");
+        }
+
+        @Override
+        protected void appendFilterText(StringBuilder sb)
+        {
+            sb.append("Peptide Trypic Termini = ");
+            sb.append(_termini);
+        }
     }
 
     public static Sort getPeptideBaseSort()

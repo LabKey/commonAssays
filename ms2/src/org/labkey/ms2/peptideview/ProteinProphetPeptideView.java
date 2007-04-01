@@ -360,8 +360,8 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
 
     public void addSQLSummaries(List<Pair<String, String>> sqlSummaries)
     {
-        sqlSummaries.add(new Pair<String, String>("Protein Group Filter", new SimpleFilter(_url, MS2Manager.getDataRegionNameProteinGroups()).getFilterText(MS2Manager.getSqlDialect())));
-        sqlSummaries.add(new Pair<String, String>("Protein Group Sort", new Sort(_url, MS2Manager.getDataRegionNameProteinGroups()).getSortText(MS2Manager.getSqlDialect())));
+        sqlSummaries.add(new Pair<String, String>("Protein Group Filter", new SimpleFilter(_url, MS2Manager.getDataRegionNameProteinGroups()).getFilterText()));
+        sqlSummaries.add(new Pair<String, String>("Protein Group Sort", new Sort(_url, MS2Manager.getDataRegionNameProteinGroups()).getSortText()));
     }
 
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String requestedPeptideColumns)

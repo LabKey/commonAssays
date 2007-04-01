@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 
- * Copyright (c) 2003-2005 Fred Hutchinson Cancer Research Center
+ * Copyright (c) 2006 Fred Hutchinson Cancer Research Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,5 +16,258 @@
  * limitations under the License.
 
  -->
-<ns:tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ns:tables xsi:schemaLocation="http://cpas.fhcrc.org/data/xml ..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ns:table tableName="temp_containers" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="entityid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="actionsuccessor" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="successoractionid"/>
+      <ns:column columnName="sequence"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="containers" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="rowid"/>
+      <ns:column columnName="entityid"/>
+      <ns:column columnName="parentid"/>
+      <ns:column columnName="name"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="customproperties" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="objectid"/>
+      <ns:column columnName="objecturi"/>
+      <ns:column columnName="ownerobjectid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="data" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="rowid"/>
+      <ns:column columnName="lsid"/>
+      <ns:column columnName="name"/>
+      <ns:column columnName="cpastype"/>
+      <ns:column columnName="sourceapplicationid"/>
+      <ns:column columnName="datafileurl"/>
+      <ns:column columnName="runid"/>
+      <ns:column columnName="containerid"/>
+      <ns:column columnName="objectid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="datainput" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="dataid"/>
+      <ns:column columnName="targetapplicationid"/>
+      <ns:column columnName="propertyid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="dataruninputs" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="dataid"/>
+      <ns:column columnName="propertyid"/>
+      <ns:column columnName="runid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="datarunoutputs" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="dataid"/>
+      <ns:column columnName="propertyid"/>
+      <ns:column columnName="runid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="domaindescriptor" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="domainid"/>
+      <ns:column columnName="name"/>
+      <ns:column columnName="domainuri"/>
+      <ns:column columnName="description"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="experiment" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="rowid"/>
+      <ns:column columnName="lsid"/>
+      <ns:column columnName="name"/>
+      <ns:column columnName="hypothesis"/>
+      <ns:column columnName="contactid"/>
+      <ns:column columnName="experimentdescriptionurl"/>
+      <ns:column columnName="comments"/>
+      <ns:column columnName="containerid"/>
+      <ns:column columnName="objectid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="experimentrun" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="rowid"/>
+      <ns:column columnName="lsid"/>
+      <ns:column columnName="name"/>
+      <ns:column columnName="protocollsid"/>
+      <ns:column columnName="comments"/>
+      <ns:column columnName="filepathroot"/>
+      <ns:column columnName="containerid"/>
+      <ns:column columnName="objectid"/>
+      <ns:column columnName="protocolid"/>
+      <ns:column columnName="actionid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="material" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="rowid"/>
+      <ns:column columnName="lsid"/>
+      <ns:column columnName="name"/>
+      <ns:column columnName="cpastype"/>
+      <ns:column columnName="sourceapplicationid"/>
+      <ns:column columnName="runid"/>
+      <ns:column columnName="containerid"/>
+      <ns:column columnName="objectid"/>
+      <ns:column columnName="materialsourceid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="materialinput" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="materialid"/>
+      <ns:column columnName="targetapplicationid"/>
+      <ns:column columnName="propertyid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="materialruninputs" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="materialid"/>
+      <ns:column columnName="propertyid"/>
+      <ns:column columnName="runid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="materialrunoutputs" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="materialid"/>
+      <ns:column columnName="propertyid"/>
+      <ns:column columnName="runid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="materialsource" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="rowid"/>
+      <ns:column columnName="name"/>
+      <ns:column columnName="lsid"/>
+      <ns:column columnName="materiallsidprefix"/>
+      <ns:column columnName="urlpattern"/>
+      <ns:column columnName="description"/>
+      <ns:column columnName="containerid"/>
+      <ns:column columnName="domainid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="propertydescriptor" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="propertyid"/>
+      <ns:column columnName="propertyuri"/>
+      <ns:column columnName="name"/>
+      <ns:column columnName="ontologyuri"/>
+      <ns:column columnName="description"/>
+      <ns:column columnName="rangeuri"/>
+      <ns:column columnName="concepturi"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="propertydomain" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="domainid"/>
+      <ns:column columnName="propertyid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="propertyvalue" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="valueid"/>
+      <ns:column columnName="objectid"/>
+      <ns:column columnName="propertyid"/>
+      <ns:column columnName="strvalue"/>
+      <ns:column columnName="propertyuri"/>
+      <ns:column columnName="name"/>
+      <ns:column columnName="rangeuri"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="protocolaction" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="actionid"/>
+      <ns:column columnName="protocolid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="protocolapplication" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="rowid"/>
+      <ns:column columnName="lsid"/>
+      <ns:column columnName="name"/>
+      <ns:column columnName="cpastype"/>
+      <ns:column columnName="protocollsid"/>
+      <ns:column columnName="activitydate"/>
+      <ns:column columnName="comments"/>
+      <ns:column columnName="runid"/>
+      <ns:column columnName="actionsequence"/>
+      <ns:column columnName="protocolid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="protocolapplicationparameter" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="rowid"/>
+      <ns:column columnName="protocolapplicationid"/>
+      <ns:column columnName="name"/>
+      <ns:column columnName="ontologyentryuri"/>
+      <ns:column columnName="valuetype"/>
+      <ns:column columnName="paramvalue"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="protocoldefinition" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="protocolid"/>
+      <ns:column columnName="lsid"/>
+      <ns:column columnName="name"/>
+      <ns:column columnName="protocoldescription"/>
+      <ns:column columnName="applicationtype"/>
+      <ns:column columnName="maxinputmaterialperinstance"/>
+      <ns:column columnName="maxinputdataperinstance"/>
+      <ns:column columnName="outputmaterialperinstance"/>
+      <ns:column columnName="outputdataperinstance"/>
+      <ns:column columnName="outputmaterialtype"/>
+      <ns:column columnName="outputdatatype"/>
+      <ns:column columnName="instrument"/>
+      <ns:column columnName="software"/>
+      <ns:column columnName="contactid"/>
+      <ns:column columnName="containerid"/>
+      <ns:column columnName="objectid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="protocolparameter" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="rowid"/>
+      <ns:column columnName="protocolid"/>
+      <ns:column columnName="name"/>
+      <ns:column columnName="ontologyentryuri"/>
+      <ns:column columnName="valuetype"/>
+      <ns:column columnName="defaultvalue"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="protocolstep" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="stepactionid"/>
+      <ns:column columnName="sequence"/>
+      <ns:column columnName="parentactionid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="runlist" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="experimentid"/>
+      <ns:column columnName="experimentrunid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="runprotocol" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="runactionid"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="successorpredecessor" tableDbType="VIEW">
+    <ns:columns>
+      <ns:column columnName="successoractionid"/>
+      <ns:column columnName="predecessoractionid"/>
+    </ns:columns>
+  </ns:table>
 </ns:tables>

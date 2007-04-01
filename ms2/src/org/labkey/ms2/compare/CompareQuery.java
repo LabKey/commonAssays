@@ -110,8 +110,11 @@ public abstract class CompareQuery extends SQLFragment
 
         String firstColumnName = _gridColumns.get(0).getLabel();
 
+        // Limit "pattern" to first 63 bits otherwise we'll overflow a BIGINT
+        int patternRunCount = Math.min(_runCount, 63);
+
         // (CASE WHEN MAX(Run0Total) IS NULL THEN 0 ELSE 8) + (CASE WHEN MAX(Run1Total) IS NULL THEN 4 ELSE 0) + ... AS Pattern
-        for (int i = 0; i < _runCount; i++)
+        for (int i = 0; i < patternRunCount; i++)
         {
             if (i > 0)
                 append("+");
@@ -119,7 +122,7 @@ public abstract class CompareQuery extends SQLFragment
             append(i);
             append(firstColumnName);
             append(") IS NULL THEN 0 ELSE ");
-            append(Math.round(Math.pow(2, _runCount - i - 1)));
+            append(Math.round(Math.pow(2, patternRunCount - i - 1)));
             append(" END)");
         }
         append(" AS Pattern");
@@ -330,8 +333,5 @@ public abstract class CompareQuery extends SQLFragment
     {
         if (getGridColumns().size() == 0)
             errors.add("You must choose at least one column to display in the grid.");
-
-        if (_runs.size() > 63)
-            errors.add("You can't compare more than 63 runs at a time.");
     }
 }

@@ -27,34 +27,35 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.upload.FormFile;
 import org.labkey.announcements.EmailResponsePage.Reason;
 import org.labkey.announcements.model.*;
+import org.labkey.announcements.model.AnnouncementManager.EmailOption;
+import org.labkey.announcements.model.AnnouncementManager.Settings;
 import org.labkey.api.announcements.Announcement;
-import org.labkey.announcements.model.AnnouncementManager.*;
 import org.labkey.api.announcements.CommSchema;
 import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.attachments.DownloadUrlHelper;
 import org.labkey.api.data.*;
 import org.labkey.api.jsp.JspLoader;
+import org.labkey.api.query.UserIdRenderer;
 import org.labkey.api.security.*;
 import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.SecurityManager.PermissionSet;
-import org.labkey.api.util.MailHelper.ViewMessage;
 import org.labkey.api.util.*;
+import org.labkey.api.util.MailHelper.ViewMessage;
 import org.labkey.api.view.*;
 import org.labkey.api.wiki.WikiRenderer;
 import org.labkey.api.wiki.WikiRendererType;
 import org.labkey.api.wiki.WikiService;
-import org.labkey.api.query.UserIdRenderer;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.net.URISyntaxException;
 
 
 @Jpf.Controller(
@@ -1749,9 +1750,18 @@ public class AnnouncementsController extends ViewController
         {
             super("/org/labkey/announcements/announcementListLinkBar.gm");
 
+            boolean useLastFilter = ColumnInfo.booleanFromString(url.getParameter(DataRegion.LAST_FILTER_PARAM));
+            if (useLastFilter)
+            {
+                HttpServletRequest request = HttpView.currentRequest();
+                ViewURLHelper lastFilterUrl = (ViewURLHelper) request.getSession().getAttribute(request.getRequestURI() + DataRegion.LAST_FILTER_PARAM);
+
+                if (null != lastFilterUrl)
+                    url = lastFilterUrl;
+            }
+
             SimpleFilter urlFilter = new SimpleFilter(url, "Threads");
             boolean isFiltered = !urlFilter.getWhereParamNames().isEmpty();
-
             String filterText = getFilterText(settings, displayAll, isFiltered);
 
             addObject("settings", settings);
@@ -1761,6 +1771,7 @@ public class AnnouncementsController extends ViewController
             addObject("emailPrefsURL", user.isGuest() ? null : ViewURLHelper.toPathString("announcements", "showEmailPreferences", c.getPath()));
             addObject("emailManageURL", c.hasPermission(user, ACL.PERM_ADMIN) ? ViewURLHelper.toPathString("announcements", "adminEmail", c.getPath()) : null);
             addObject("filterText", filterText);
+            addObject("urlFilterText", isFiltered ? urlFilter.getFilterText() : null);
         }
     }
 
@@ -1950,14 +1961,15 @@ public class AnnouncementsController extends ViewController
                 ButtonBar bb = new ButtonBar();
                 rgn.setShowRecordSelectors(true);
 
+                bb.add(ActionButton.BUTTON_SELECT_ALL);
+                bb.add(ActionButton.BUTTON_CLEAR_ALL);
+
                 ActionButton delete = new ActionButton("button", "Delete");
                 delete.setScript("return verifySelected(this.form, \"delete.post\", \"post\", \"checkboxes\")");
                 delete.setActionType(ActionButton.Action.GET);
                 delete.setDisplayPermission(ACL.PERM_DELETE);
                 bb.add(delete);
 
-                bb.add(ActionButton.BUTTON_SELECT_ALL);
-                bb.add(ActionButton.BUTTON_CLEAR_ALL);
                 rgn.setButtonBar(bb);
             }
             else

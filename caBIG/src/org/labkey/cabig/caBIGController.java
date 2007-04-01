@@ -8,7 +8,6 @@ import org.labkey.api.security.SecurityManager;
 import org.labkey.api.data.Container;
 
 import javax.servlet.ServletException;
-import java.io.PrintWriter;
 
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
@@ -27,11 +26,22 @@ public class caBIGController extends ViewController
 
 
     @Jpf.Action
-    protected Forward publishContainer() throws Exception
+    protected Forward publish() throws Exception
     {
         requiresAdmin();
 
-        caBIGManager.get().publishContainer(getContainer());
+        caBIGManager.get().publish(getContainer());
+
+        return getForward();
+    }
+
+
+    @Jpf.Action
+    protected Forward unpublish() throws Exception
+    {
+        requiresAdmin();
+
+        caBIGManager.get().unpublish(getContainer());
 
         return getForward();
     }
@@ -53,12 +63,21 @@ public class caBIGController extends ViewController
     }
 
 
-    public static class caBIGPermissionsView extends JspView
+    private static class caBIGPermissionsView extends JspView
     {
-        public caBIGPermissionsView()
+        private caBIGPermissionsView()
         {
-            super("/org/labkey/cabig/view/hello.jsp");
-            this.setTitle("caBIG Permissions");
+            super("/org/labkey/cabig/view/publish.jsp");
+            this.setTitle("Publish to caBIG");
+        }
+    }
+
+
+    public static class caBIGPermissionsViewFactory implements SecurityManager.ViewFactory
+    {
+        public HttpView createView()
+        {
+            return new caBIGPermissionsView();
         }
     }
 }

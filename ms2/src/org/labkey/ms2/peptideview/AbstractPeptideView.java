@@ -446,7 +446,7 @@ public abstract class AbstractPeptideView
     // Generate signature used to cache & retrieve the peptide index 
     protected String getIndexLookup(ViewURLHelper url)
     {
-        return "Filter:" + getPeptideFilter(url).toString() + "|Sort:" + getPeptideSort().getSortText(ProteinManager.getSqlDialect());
+        return "Filter:" + getPeptideFilter(url).toString() + "|Sort:" + getPeptideSort().getSortText();
     }
 
 

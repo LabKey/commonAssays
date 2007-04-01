@@ -2,7 +2,7 @@
 <!--ANNOUNCEMENTS-->
 <table width="100%">
     <tr>
-        <td align="left" class="ms-vb" style="padding-top:2px;width:33%;"><%
+        <td align="left" class="ms-vb" style="padding-top:2px;width:40%;"><%
 if (insertURL)
     {
     %>[<a href="${insertURL}">new ${settings.conversationName.toLowerCase()}</a>]&nbsp;<%
@@ -12,8 +12,8 @@ if (listURL)
     %>[<a href="${listURL}">view list</a>]<%
     }
 %></td>
-<td align="center" class="ms-vb" style="padding-top:2px;width:33%;"><%=filterText%></td>
-<td align="right" class="ms-vb" style="padding-top:2px;width:33%;"><%
+<td align="center" class="ms-vb" style="padding-top:2px;width:20%;"><%=filterText%></td>
+<td align="right" class="ms-vb" style="padding-top:2px;width:40%;"><%
 if (emailPrefsURL)
     {
     %>[<a href="${emailPrefsURL}">email&nbsp;preferences</a>]<%
@@ -37,12 +37,12 @@ if (0 == announcements.length)
 for (a in announcements)
     { %>
     <tr>
-        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align="left"><span class="ms-announcementtitle"><a href="<%=filter(a.getThreadUrl(request,container))%>rowId=<%=a.rowId%>"><%=filter(a.title)%></a></span><%
+        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:40%;" align="left"><span class="ms-announcementtitle"><a href="<%=filter(a.getThreadUrl(request,container))%>rowId=<%=a.rowId%>"><%=filter(a.title)%></a></span><%
         if( a.getResponses().size())
-            out.print(" (" + a.responses.size() + (a.responses.size() == 1 ? "&nbsp;response)" : " responses)"));
+            out.print(" (" + a.responses.size() + (a.responses.size() == 1 ? "&nbsp;response)" : "&nbsp;responses)"));
         %></td>
-        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align="center"><%=filter(a.createdByName)%></td>
-        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:33%;" align="right" nowrap><%=DateUtil.formatDateTime(a.getCreated())%></td>
+        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:20%;" align="center"><%=filter(a.createdByName)%></td>
+        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:40%;" align="right" nowrap><%=DateUtil.formatDateTime(a.getCreated())%></td>
     </tr>
     <tr style="height:1;"><td colspan=3 class="ms-titlearealine"><img height=1 width=1 src="<%=request.getContextPath()%>/_.gif"></td></tr>
     <tr><td colspan=3 class="ms-vb"><%=a.translateBody(request,container)%></td></tr>

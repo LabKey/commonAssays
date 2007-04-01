@@ -1,16 +1,19 @@
 package org.labkey.issue.query;
 
-import org.labkey.issue.IssuesController;
 import org.apache.log4j.Logger;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.PropertyManager;
 import org.labkey.api.issues.IssuesSchema;
 import org.labkey.api.query.*;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.issue.IssuesController;
 import org.labkey.issue.model.IssueManager;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class IssuesTable extends FilteredTable
 {

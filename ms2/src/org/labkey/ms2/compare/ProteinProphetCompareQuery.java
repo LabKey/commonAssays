@@ -168,7 +168,7 @@ public class ProteinProphetCompareQuery extends CompareQuery
     public List<Pair<String, String>> getSQLSummaries()
     {
         List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
-        result.add(new Pair<String, String>("Protein Group Filter", new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteinGroups()).getFilterText(MS2Manager.getSqlDialect())));
+        result.add(new Pair<String, String>("Protein Group Filter", new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteinGroups()).getFilterText()));
         return result;
     }
 

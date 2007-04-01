@@ -445,7 +445,7 @@ public abstract class MS2Importer
             Table.execute(MS2Manager.getSchema(), _updateSeqIdSql, new Object[]{fraction.getFraction(), run.getFastaId()});
 
             if (fractionCount > 1)
-                _log.info("Updating SeqId column: " + (++i) + " fraction out of " + fractionCount);
+                _log.info("Updating SeqId column: fraction " + (++i) + " out of " + fractionCount);
         }
 
         logElapsedTime(start, "update SeqId column");
@@ -458,7 +458,7 @@ public abstract class MS2Importer
             Table.execute(MS2Manager.getSchema(), _updateSequencePositionSql, new Object[]{fraction.getFraction()});
 
             if (fractionCount > 1)
-                _log.info("Updating SequencePosition column: " + (++i) + " fraction out of " + fractionCount);
+                _log.info("Updating SequencePosition column: fraction " + (++i) + " out of " + fractionCount);
         }
 
         logElapsedTime(start, "update SequencePosition column");

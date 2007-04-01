@@ -87,9 +87,11 @@ caBIG/src/org/labkey/cabig/caBIGController.java -text
 caBIG/src/org/labkey/cabig/caBIGManager.java -text
 caBIG/src/org/labkey/cabig/caBIGModule.java -text
 caBIG/src/org/labkey/cabig/caBIGSchema.java -text
-caBIG/src/org/labkey/cabig/view/hello.jsp -text
+caBIG/src/org/labkey/cabig/view/publish.jsp -text
 caBIG/webapp/cabig/scripts/postgresql/cabig-0.00-0.01.sql -text
+caBIG/webapp/cabig/scripts/postgresql/cabig-0.01-0.02.sql -text
 caBIG/webapp/cabig/scripts/sql[!!-~]server/cabig-0.00-0.01.sql -text
+caBIG/webapp/cabig/scripts/sql[!!-~]server/cabig-0.01-0.02.sql -text
 flow/module.properties -text
 flow/src/META-INF/flow.xml -text
 flow/src/org/labkey/flow/FlowPreference.java -text

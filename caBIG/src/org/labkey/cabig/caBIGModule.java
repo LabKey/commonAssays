@@ -21,7 +21,7 @@ public class caBIGModule extends DefaultModule
 
     public caBIGModule()
     {
-        super(NAME, 0.01, null, "/cabig");
+        super(NAME, 0.02, null, "/cabig");
         addController("cabig", caBIGController.class);
     }
 
@@ -30,7 +30,7 @@ public class caBIGModule extends DefaultModule
         super.startup(moduleContext);
         // add a container listener to unpublish containers when they're deleted
         ContainerManager.addContainerListener(caBIGManager.get());
-        SecurityManager.addPermissionsView(caBIGController.caBIGPermissionsView.class);
+        SecurityManager.addViewFactory(new caBIGController.caBIGPermissionsViewFactory());
     }
 
     public Set<String> getSchemaNames()
@@ -38,18 +38,17 @@ public class caBIGModule extends DefaultModule
         return Collections.singleton("cabig");
     }
 
-/*    public Set<DbSchema> getSchemasToTest()
+    public Set<DbSchema> getSchemasToTest()
     {
         return PageFlowUtil.set(caBIGSchema.getInstance().getSchema());
     }
-    */ // TODO: Need to add caBIG.xml
-
 
     @Override
     public Set<String> getModuleDependencies()
     {
         Set<String> result = new HashSet<String>();
         result.add("Experiment");
+        result.add("MS2");
         return result;
     }
 }

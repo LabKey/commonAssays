@@ -58,7 +58,7 @@ public class PeptideCompareQuery extends CompareQuery
         
     {
         List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
-        String filterString = ProteinManager.getPeptideFilter(_currentUrl, _runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER).getFilterText(ProteinManager.getSqlDialect());
+        String filterString = ProteinManager.getPeptideFilter(_currentUrl, _runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER).getFilterText();
         result.add(new Pair<String, String>("Peptide Filter", filterString));
         return result;
     }

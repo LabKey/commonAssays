@@ -4,10 +4,10 @@
 <td align="left" class="ms-vb" style="padding-top:2px;width:33%;"><%
 if (insertURL)
     {
-    %>[<a href="${insertURL}">new <%=settings.conversationName.toLowerCase()%></a>]&nbsp;<%
+    %>[<a href="${insertURL}">new <%=filter(settings.conversationName.toLowerCase())%></a>]&nbsp;<%
     }
 %></td>
-<td align="center" class="ms-vb" style="padding-top:2px;width:33%;"><%=filterText%></td>
+<td align="center" class="ms-vb" style="padding-top:2px;width:33%;"><%=filter(filterText)%></td>
 <td align="right" class="ms-vb"  style="padding-top:2px;width:33%;"><%
 if (emailPrefsURL)
     {
@@ -22,5 +22,9 @@ if (customizeURL)
     %>&nbsp;[<a href="${customizeURL}">customize</a>]<%
     }
 %></td>
-</tr>
-</table>
+</tr><%
+if (urlFilterText)
+{
+    %><tr><td colspan=3><br>Filter: <%=filter(urlFilterText)%></td></tr><%
+}
+%></table>

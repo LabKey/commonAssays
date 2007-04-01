@@ -586,8 +586,8 @@ public class MS2Controller extends ViewController
         SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentUrl, run, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
 
         List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
-        sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilter.getFilterText(MS2Manager.getSqlDialect())));
-        sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(currentUrl, MS2Manager.getDataRegionNamePeptides()).getSortText(MS2Manager.getSqlDialect())));
+        sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilter.getFilterText()));
+        sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(currentUrl, MS2Manager.getDataRegionNamePeptides()).getSortText()));
 
         peptideView.addSQLSummaries(sqlSummaries);
 
@@ -2777,22 +2777,22 @@ public class MS2Controller extends ViewController
     private void addPeptideFilterText(List<String> headers, MS2Run run, ViewURLHelper currentUrl)
     {
         headers.add("");
-        headers.add("Peptide Filter: " + ProteinManager.getPeptideFilter(currentUrl, run, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER).getFilterText(MS2Manager.getSqlDialect()));
-        headers.add("Peptide Sort: " + new Sort(currentUrl, MS2Manager.getDataRegionNamePeptides()).getSortText(MS2Manager.getSqlDialect()));
+        headers.add("Peptide Filter: " + ProteinManager.getPeptideFilter(currentUrl, run, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER).getFilterText());
+        headers.add("Peptide Sort: " + new Sort(currentUrl, MS2Manager.getDataRegionNamePeptides()).getSortText());
     }
 
 
     private void addProteinFilterText(List<String> headers, ViewURLHelper currentUrl)
     {
-        headers.add("Protein Filter: " + new SimpleFilter(currentUrl, MS2Manager.getDataRegionNameProteins()).getFilterText(MS2Manager.getSqlDialect()));
-        headers.add("Protein Sort: " + new Sort(currentUrl, MS2Manager.getDataRegionNameProteins()).getSortText(MS2Manager.getSqlDialect()));
+        headers.add("Protein Filter: " + new SimpleFilter(currentUrl, MS2Manager.getDataRegionNameProteins()).getFilterText());
+        headers.add("Protein Sort: " + new Sort(currentUrl, MS2Manager.getDataRegionNameProteins()).getSortText());
     }
 
 
     private void addProteinGroupFilterText(List<String> headers, ViewURLHelper currentUrl)
     {
-        headers.add("Protein Group Filter: " + new SimpleFilter(currentUrl, MS2Manager.getTableInfoProteinGroupsWithQuantitation().getName()).getFilterText(MS2Manager.getSqlDialect()));
-        headers.add("Protein Group Sort: " + new Sort(currentUrl, MS2Manager.getTableInfoProteinGroupsWithQuantitation().getName()).getSortText(MS2Manager.getSqlDialect()));
+        headers.add("Protein Group Filter: " + new SimpleFilter(currentUrl, MS2Manager.getTableInfoProteinGroupsWithQuantitation().getName()).getFilterText());
+        headers.add("Protein Group Sort: " + new Sort(currentUrl, MS2Manager.getTableInfoProteinGroupsWithQuantitation().getName()).getSortText());
     }
 
 
@@ -3710,9 +3710,9 @@ public class MS2Controller extends ViewController
             GridView peptidesGridView = peptideView.createPeptideViewForGrouping(form);
 
             peptidesGridView.getDataRegion().removeColumnsFromDisplayColumnList("Description,Protein,GeneName,SeqId");
-            String peptideFilterString = ProteinManager.getPeptideFilter(currentUrl, run, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER).getFilterText(MS2Manager.getSqlDialect());
+            String peptideFilterString = ProteinManager.getPeptideFilter(currentUrl, run, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER).getFilterText();
             sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilterString));
-            sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(currentUrl, MS2Manager.getDataRegionNamePeptides()).getSortText(MS2Manager.getSqlDialect())));
+            sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(currentUrl, MS2Manager.getDataRegionNamePeptides()).getSortText()));
             peptideFilter.addObject("sqlSummaries", sqlSummaries);
             peptideFilter.setTitle("Peptides");
 

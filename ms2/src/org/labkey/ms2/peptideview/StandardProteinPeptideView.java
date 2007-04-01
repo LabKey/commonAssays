@@ -170,8 +170,8 @@ public class StandardProteinPeptideView extends AbstractPeptideView
 
     public void addSQLSummaries(List<Pair<String, String>> sqlSummaries)
     {
-        sqlSummaries.add(new Pair<String, String>("Protein Filter", new SimpleFilter(_url, MS2Manager.getDataRegionNameProteins()).getFilterText(MS2Manager.getSqlDialect())));
-        sqlSummaries.add(new Pair<String, String>("Protein Sort", new Sort(_url, MS2Manager.getDataRegionNameProteins()).getSortText(MS2Manager.getSqlDialect())));
+        sqlSummaries.add(new Pair<String, String>("Protein Filter", new SimpleFilter(_url, MS2Manager.getDataRegionNameProteins()).getFilterText()));
+        sqlSummaries.add(new Pair<String, String>("Protein Sort", new Sort(_url, MS2Manager.getDataRegionNameProteins()).getSortText()));
     }
 
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
