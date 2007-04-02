@@ -23,7 +23,7 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
 {
     public NabModule()
     {
-        super("Nab", 1.79, null, null);
+        super("Nab", 2.0, null, null);
         addController("Nab", NabController.class);
     }
 

@@ -33,6 +33,12 @@
     [<a href="<%=deleteUrl.getEncodedLocalURIString()%>">Delete</a>]
             <%
         }
+        if (null != slide.get("Notes"))
+        {
+            %>
+            <br><%=PageFlowUtil.filter(slide.get("Notes"))%>
+            <%
+        }
 %></td><%
         index++;
 
