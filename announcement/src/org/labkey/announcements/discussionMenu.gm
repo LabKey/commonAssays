@@ -57,8 +57,6 @@ var discussionMenu = {};
     discussionMenu.onWindowLoad = function(event)
     {
         YAHOO.widget.MenuItem.prototype.IMG_ROOT = LABKEY.yahooRoot + "/menu/assets/";
-        YAHOO.widget.Logger.enableBrowserConsole();
-
         discussionMenu.menu = new YAHOO.widget.ContextMenu("menuDiscussionMenu", {context:['discussionMenuToggle','tl','tr'], position:'dynamic', visible:false});
         discussionMenu.menu.addItems(discussionMenu.model);
         discussionMenu.menu.render(document.body);
