@@ -1,8 +1,8 @@
 <%@ page import="org.labkey.api.util.DateUtil" %>
 <!--ANNOUNCEMENTS-->
-<table width="100%">
+<table width="100%" cellpadding=0>
     <tr>
-        <td align="left" class="ms-vb" style="padding-top:2px;width:40%;"><%
+        <td class="ms-vb" style="padding-top:2px; width:40%;" align="left"><%
 if (insertURL)
     {
     %>[<a href="${insertURL}">new ${settings.conversationName.toLowerCase()}</a>]&nbsp;<%
@@ -12,8 +12,8 @@ if (listURL)
     %>[<a href="${listURL}">view list</a>]<%
     }
 %></td>
-<td align="center" class="ms-vb" style="padding-top:2px;width:20%;"><%=filterText%></td>
-<td align="right" class="ms-vb" style="padding-top:2px;width:40%;"><%
+        <td class="ms-vb" style="padding-top:2px; width:20%;" align="center"><%=filterText%></td>
+        <td class="ms-vb" style="padding-top:2px; width:40%;" align="right"><%
 if (emailPrefsURL)
     {
     %>[<a href="${emailPrefsURL}">email&nbsp;preferences</a>]<%
@@ -27,9 +27,7 @@ if (customizeURL)
     %>&nbsp;[<a href="${customizeURL}">customize</a>]<%
     }
 %></td>
-</tr>
-</table>
-<table width="100%" cellpadding=0><%
+    </tr><%
 if (0 == announcements.length)
     {%>
     <tr><td colspan=3 class=ms-vb style="padding-top:4px;">No <%=filterText.replace("all ", "")%></td></tr><%
@@ -38,8 +36,8 @@ for (a in announcements)
     { %>
     <tr>
         <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:40%;" align="left"><span class="ms-announcementtitle"><a href="<%=filter(a.getThreadUrl(request,container))%>rowId=<%=a.rowId%>"><%=filter(a.title)%></a></span><%
-        if( a.getResponses().size())
-            out.print(" (" + a.responses.size() + (a.responses.size() == 1 ? "&nbsp;response)" : "&nbsp;responses)"));
+        if( a.getResponseCount())
+            out.print(" (" + a.getResponseCount() + (a.getResponseCount() == 1 ? "&nbsp;response)" : "&nbsp;responses)"));
         %></td>
         <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:20%;" align="center"><%=filter(a.createdByName)%></td>
         <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:40%;" align="right" nowrap><%=DateUtil.formatDateTime(a.getCreated())%></td>

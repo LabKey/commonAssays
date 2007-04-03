@@ -27,6 +27,7 @@ import org.apache.struts.upload.FormFile;
 import org.labkey.api.announcements.Announcement;
 import org.labkey.api.announcements.CommSchema;
 import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.attachments.Attachable;
 import org.labkey.api.data.*;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
@@ -78,13 +79,8 @@ public class AnnouncementManager
 
     protected static void attachAttachments(Announcement[] announcements) throws SQLException
     {
-        AttachmentService.get().setAttachments(announcements);
-/*        for (Announcement announcement : announcements)
-        {
-            Attachment[] att = AttachmentService.get().getAttachments(announcement);
-            announcement.setAttachments(Arrays.asList(att));
-        }
-*/    }
+        AttachmentService.get().setAttachments(Arrays.<Attachable>asList(announcements));
+    }
 
 
     protected static void attachResponses(Container c, Announcement[] announcements) throws SQLException
@@ -114,7 +110,6 @@ public class AnnouncementManager
             Announcement[] recent = Table.select(_comm.getTableInfoThreads(), Table.ALL_COLUMNS, filter, sort, Announcement.class);
             recent = (Announcement[])ArrayUtils.subarray(recent, 0, 100);  // Limit to 100 to keep messages page a reasonable size
             attachAttachments(recent);
-            attachResponses(c, recent); // TODO: Announcement count instead of retrieving all responses
             return recent;
         }
         catch (SQLException x)
@@ -404,56 +399,12 @@ public class AnnouncementManager
         Table.delete(_comm.getTableInfoMemberList(), new SimpleFilter("UserId", user.getUserId()).addCondition("MessageId", messageId));
     }
 
-    // Return email address for those who signed up for notifications
-/*    public static Set<String> getUserEmailSet(Container c, Announcement a, Settings settings)
-            throws SQLException
-    {
-        Set<String> emailSet = new HashSet<String>();
-
-        // In a non-secure message board, those with read permissions can elect to see all messages or those to which they've posted (or neither)
-        // In a secure message board, only those with editor permissions can do this.
-        int requiredPerm = settings.isSecure() ? PermissionSet.EDITOR.getPermissions() : ACL.PERM_READ;
-        int defaultOption = getProjectEmailOption(c);
-
-        //get set of responders on thread, if this is a response
-        boolean isResponse = null != a.getParent();
-        Set<User> responderSet = new HashSet<User>();
-        if (isResponse)
-            responderSet = getResponderSet(c, a);
-
-        //get email preferences for all project users (explicit and implicit)
-        EmailPref[] emailPrefs = getEmailPrefs(c, null);
-        for (EmailPref emailPref : emailPrefs)
-        {
-            User user = emailPref.getUser();
-            Integer emailOption = emailPref.getEmailOptionId();
-            emailOption = emailOption == null ? defaultOption : emailOption;
-
-            if (emailOption == AnnouncementManager.EMAIL_PREFERENCE_NONE)
-                continue;
-
-            // Ensure user has appropriate permissions on container (secure == editor, !secure = read)
-            if (!c.hasPermission(user, requiredPerm))
-                continue;
-
-            if (emailOption == EMAIL_PREFERENCE_MINE && isResponse)
-            {
-                if (responderSet.contains(user))
-                    emailSet.add(user.getEmail());
-            }
-            else
-                emailSet.add(user.getEmail());
-        }
-
-        return emailSet;
-    }
-*/
     public static Set<User> getResponderSet(Container c, Announcement a) throws SQLException
     {
         Set<User> responderSet = new HashSet<User>();
         boolean isResponse = null != a.getParent();
 
-        //get parent if this is a response.
+        // if this is a response get parent and all previous responses
         if (isResponse)
         {
             a = AnnouncementManager.getAnnouncement(c, a.getParent(), true);

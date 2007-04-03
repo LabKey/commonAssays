@@ -20,8 +20,8 @@ via the caBIG API.<br><br>
     {
 %>
 This folder is not published to the caBIG interface.  Click the button below to publish this folder to caBIG.  If you do this, and your caBIG webapp
-is running, all experiment data in this folder will be visible publically via the caBIG API.<br><br>
+is running, all experiment data in this folder will be visible publicly via the caBIG API.<br><br>
 <%=PageFlowUtil.buttonLink("Publish", url)%>
 <%  }  %>
 
-<br><br>For more information on caBIG, <a href="http://cabig.cancer.gov/index.asp" target="cabig">click here</a>.
+<br><br>For more information about caBIG, <a href="http://cabig.cancer.gov/index.asp" target="cabig">click here</a>.

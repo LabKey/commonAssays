@@ -1,7 +1,6 @@
 package org.labkey.cabig;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -9,8 +8,8 @@ import org.labkey.api.security.SecurityManager;
 import org.labkey.api.util.PageFlowUtil;
 
 import java.util.Collections;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 public class caBIGModule extends DefaultModule
 {
@@ -21,15 +20,13 @@ public class caBIGModule extends DefaultModule
 
     public caBIGModule()
     {
-        super(NAME, 0.02, null, "/cabig");
+        super(NAME, 0.03, null, "/cabig");
         addController("cabig", caBIGController.class);
     }
 
     public void startup(ModuleContext moduleContext)
     {
         super.startup(moduleContext);
-        // add a container listener to unpublish containers when they're deleted
-        ContainerManager.addContainerListener(caBIGManager.get());
         SecurityManager.addViewFactory(new caBIGController.caBIGPermissionsViewFactory());
     }
 

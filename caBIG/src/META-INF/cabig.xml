@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
- * Copyright (c) 2006 Fred Hutchinson Cancer Research Center
+ * Copyright (c) 2007 Fred Hutchinson Cancer Research Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,6 @@
 
  -->
 <ns:tables xsi:schemaLocation="http://cpas.fhcrc.org/data/xml ..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <ns:table tableName="temp_containers" tableDbType="TABLE">
-    <ns:columns>
-      <ns:column columnName="entityid"/>
-    </ns:columns>
-  </ns:table>
   <ns:table tableName="actionsuccessor" tableDbType="VIEW">
     <ns:columns>
       <ns:column columnName="successoractionid"/>
