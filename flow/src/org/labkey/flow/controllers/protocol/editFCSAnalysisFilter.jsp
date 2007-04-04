@@ -29,7 +29,7 @@
 </p>
 <form action="<%=form.getProtocol().urlFor(ProtocolController.Action.editFCSAnalysisFilter)%>" method="POST">
     <table>
-        <tr class="ms-WPHeader"><th colspan="3" class="ms-WPTitle" align="left">Only process FCS files where:</th></tr>
+        <tr class="wpHeader"><th colspan="3" class="wpTitle" align="left">Only process FCS files where:</th></tr>
         <% for (int i = 0; i < clauseCount; i ++) {
         FieldKey field = null;
         String op = null;
@@ -43,11 +43,11 @@
         }
         %>
             <% if (i != 0) { %>
-        <tr><td class="ms-vb">and</td></tr>
+        <tr><td class="normal">and</td></tr>
             <% } %>
-        <tr><td class="ms-vb"><select name="ff_field"><cpas:options value="<%=field%>" map="<%=fieldOptions%>" /> </select></td>
-            <td class="ms-vb"><select name="ff_op"><cpas:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
-            <td class="ms-vb"><input name="ff_value" type="text" value="<%=h(value)%>" /></td>
+        <tr><td class="normal"><select name="ff_field"><cpas:options value="<%=field%>" map="<%=fieldOptions%>" /> </select></td>
+            <td class="normal"><select name="ff_op"><cpas:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
+            <td class="normal"><input name="ff_value" type="text" value="<%=h(value)%>" /></td>
 
         </tr>
         <% } %>

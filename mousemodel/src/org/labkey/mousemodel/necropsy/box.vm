@@ -9,30 +9,30 @@ $!tools.pageFlowUtil.getStrutsError($request, "main")
 <form action=$action method=post onsubmit="return validateSamples()">
 <table>
 <tr>
-<td class=ms-searchform>Freezer:</td><td class=ms-vb> $!freezer.name <input type=hidden value="$!form.boxId" name=boxId></td>
+<td class=ms-searchform>Freezer:</td><td class=normal> $!freezer.name <input type=hidden value="$!form.boxId" name=boxId></td>
 <td align=right class=ms-searchform>
 #if($form.inputMode)
-Collection Date:</td><td class=ms-vb>  <input name="collectionDateString" value="$!form.collectionDateString"/>
+Collection Date:</td><td class=normal>  <input name="collectionDateString" value="$!form.collectionDateString"/>
 #end
 <input type=hidden name=modelId value="$!form.modelId">
 </td>
 </tr>
 <tr>
-<td class=ms-searchform>Rack:</td><td class=ms-vb>  $!form.rack</td>
+<td class=ms-searchform>Rack:</td><td class=normal>  $!form.rack</td>
 <td class=ms-searchform>
-Drawer:</td><td class=ms-vb>  $!form.drawer
+Drawer:</td><td class=normal>  $!form.drawer
 </td>
 </tr>
 <tr>
 <td class=ms-searchform>
-Shelf:</td><td class=ms-vb>  $!form.shelf
+Shelf:</td><td class=normal>  $!form.shelf
 </td>
-<td class=ms-searchform>Box:</td><td class=ms-vb>  $!form.boxName</td>
+<td class=ms-searchform>Box:</td><td class=normal>  $!form.boxName</td>
 </tr>
 #if($form.inputMode)
 <tr>
 <td colspan=2 class=ms-searchform>
-Sample Numbering Style: </td><td colspan=2 class=ms-vb>
+Sample Numbering Style: </td><td colspan=2 class=normal>
 &nbsp;&nbsp;<input id=numberStyleManual type=radio name=numberStyle checked value=0> Model-Date-<b>xxx</b> 
 &nbsp;&nbsp;<input id=numberStyleBarCode type=radio name=numberStyle value=1> Bar Code
 </td>
@@ -45,7 +45,7 @@ Sample Numbering Style: </td><td colspan=2 class=ms-vb>
 <tr>
     #set($colNum = 0)
     #foreach($col in $row.cols)
-    <td class=ms-vb #if($col.requested) style="background-color:red" #end>
+    <td class=normal #if($col.requested) style="background-color:red" #end>
         #if($col.filled)
         
         #if(!$form.inputMode)<a href="javascript:selectSample($rowNum, $colNum, '$!col.name')">#end

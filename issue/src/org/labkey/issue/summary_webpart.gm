@@ -1,6 +1,6 @@
 #if (hasPermission)
 <table class="dataRegion">
-    <tr><td class="ms-vh">User</td><td class="ms-vh">Open</td><td class="ms-vh">Resolved</td>
+    <tr><td class="header">User</td><td class="header">Open</td><td class="header">Resolved</td>
 <% for (bug in bugs) { %>
     <tr>
       <td>
@@ -17,7 +17,7 @@
 </table>
 [<a href="${url}Issues.Status~eq=open">view open issues</a>]
 #else
-<span class="ms-vb">
+<span class="normal">
   <% if (isGuest) { %>
      Please log in to see this data.
   <% } else { %>

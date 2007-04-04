@@ -19,12 +19,12 @@
 
     <table style="border:solid 1px #AAAAAA" cellspacing="0" cellpadding="1">
         <tr>
-            <th class='ms-vh'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Email</th>
-            <th class='ms-vh'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>First Name</th>
-            <th class='ms-vh'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Last Name</th>
-            <th class='ms-vh'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Display Name</th>
-            <th class='ms-vh'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Email Option</th>
-            <th class='ms-vh'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Project Member?</th>
+            <th class='header'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Email</th>
+            <th class='header'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>First Name</th>
+            <th class='header'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Last Name</th>
+            <th class='header'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Display Name</th>
+            <th class='header'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Email Option</th>
+            <th class='header'  style='border-right:solid 1px #AAAAAA;border-bottom:solid 1px #AAAAAA'>Project Member?</th>
         </tr>
 
         <%

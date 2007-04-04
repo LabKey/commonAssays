@@ -29,7 +29,7 @@ for (run in runs)
 <% if (runErrors[index] != null && runErrors[index].length() > 0) { %>
         <td class="labkey-error"><%=runErrors[index]%></td></tr>
 <% } else { %>
-     <td class="ms-vb">
+     <td class="normal">
         <input type="hidden" name="runIds[${index}]" value="<%=run.run%>">
 <%
     params.append("&runIds[").append(index).append("]=").append(run.run);
@@ -61,17 +61,17 @@ for (run in runs)
         <tr><td colspan=2>
             <table border="0">
                 <tr><td class="ms-searchform">Title</td>
-                    <td class="ms-vb"><input type="text" size="15" name="title" value="${form.title}"></td></tr>
+                    <td class="normal"><input type="text" size="15" name="title" value="${form.title}"></td></tr>
                 <tr><td class="ms-searchform">Increment</td>
-                    <td class="ms-vb"><input type="text" size="4" name="increment" value="${form.increment}">%</td></tr>
+                    <td class="normal"><input type="text" size="4" name="increment" value="${form.increment}">%</td></tr>
                 <tr><td class="ms-searchform">Limit</td>
-                    <td class="ms-vb"><input type="text" size="4" name="limit" value="${form.limit}"></td></tr>
+                    <td class="normal"><input type="text" size="4" name="limit" value="${form.limit}"></td></tr>
                 <tr><td class="ms-searchform">Chart width</td>
-                    <td class="ms-vb"><input type="text" size="4" name="width" value="${form.width}"></td></tr>
+                    <td class="normal"><input type="text" size="4" name="width" value="${form.width}"></td></tr>
                 <tr><td class="ms-searchform">Chart height</td>
-                    <td class="ms-vb"><input type="text" size="4" name="height" value="${form.height}"></td></tr>
+                    <td class="normal"><input type="text" size="4" name="height" value="${form.height}"></td></tr>
                 <tr><td class="ms-searchform">Marks</td>
-                    <td class="ms-vb"><input type="text" size="15" name="marks" value="${form.marks}"></td></tr>
+                    <td class="normal"><input type="text" size="15" name="marks" value="${form.marks}"></td></tr>
             </table>
         </td></tr>
         <tr>

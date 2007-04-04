@@ -12,8 +12,8 @@
 %>
 <form action="updateRequiredFields.view" method="post" name="requiredFieldsForm">
     <table class="normal">
-        <tr><td class=ms-vb colspan=2 align=center><div class="ms-searchform"><b>Required Fields for Issues</b></div></td></tr>
-        <tr><td class=ms-vb colspan=2>Select fields to be required when entering or updating an issue:</td></tr>
+        <tr><td class=normal colspan=2 align=center><div class="ms-searchform"><b>Required Fields for Issues</b></div></td></tr>
+        <tr><td class=normal colspan=2>Select fields to be required when entering or updating an issue:</td></tr>
     <%
         for (ColumnInfo info : bean.getColumns())
         {

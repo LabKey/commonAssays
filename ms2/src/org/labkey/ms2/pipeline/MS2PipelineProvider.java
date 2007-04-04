@@ -60,17 +60,17 @@ public class MS2PipelineProvider extends PipelineProvider
             if (!context.hasPermission(ACL.PERM_INSERT))
                 return;
             StringBuilder html = new StringBuilder();
-            html.append("<table><tr><td class=\"ms-vb\" style=\"font-weight:bold;\">MS2 specific settings:</td></tr>");
+            html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">MS2 specific settings:</td></tr>");
             ViewURLHelper buttonURL = new ViewURLHelper(context.getRequest(), "MS2-Pipeline",
                 "setupClusterSequenceDB", context.getViewURLHelper().getExtraPath());
-            html.append("<tr class=\"ms-vb\"><td>&nbsp;&nbsp;&nbsp;&nbsp;")
+            html.append("<tr class=\"normal\"><td>&nbsp;&nbsp;&nbsp;&nbsp;")
                     .append("<a href=\"").append(buttonURL.getLocalURIString()).append("\">Set FASTA root</a>")
                     .append(" - Specify the location on the web server where FASTA sequence files will be located.</td></tr>");
 
             if (MS2PipelineManager.allowSequenceDatabaseUploads(context.getUser(), context.getContainer()))
             {
                 buttonURL = new ViewURLHelper("MS2-Pipeline", "addSequenceDB", context.getViewURLHelper().getExtraPath());
-                html.append("<tr><td class=\"ms-vb\">&nbsp;&nbsp;&nbsp;&nbsp;")
+                html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
                         .append("<a href=\"").append(buttonURL.getLocalURIString()).append("\">Add FASTA file</a>")
                         .append(" - Add a FASTA sequence file to the current FASTA root location.</td></tr>");
             }

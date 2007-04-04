@@ -38,13 +38,13 @@
                 for (DilutionSummary dilSummary : bean.getDilutionSummaries())
                 {
                 %>
-                    <tr><td class=ms-vb>
+                    <tr><td class=normal>
                         <%= h(dilSummary.getSampleId()) %>
                     </td>
-                    <td class="ms-vb">
+                    <td class="normal">
                         <%= dilSummary.getInitialDilution() %>
                     </td>
-                    <td class="ms-vb">
+                    <td class="normal">
                         <%= dilSummary.getFactor() %>
                     </td>
 
@@ -75,14 +75,14 @@
                     {
                 %>
                 <tr>
-                    <td class="ms-vb">
+                    <td class="normal">
                         <%=h(summary.getSampleId())%>
                     </td>
                     <%
                         for (int cutoff : bean.getCutoffs())
                         {
                     %>
-                    <td class="ms-vb">
+                    <td class="normal">
                         <%
                             double val = summary.getCutoffDilution(cutoff / 100.0);
                             if (val == Double.NEGATIVE_INFINITY)
@@ -154,11 +154,11 @@
                     {
                 %>
                 <tr>
-                    <td class=ms-vb align=right><%= NabController.intString(summary.getDilution(data)) %></td>
-                    <td class=ms-vb
+                    <td class=normal align=right><%= NabController.intString(summary.getDilution(data)) %></td>
+                    <td class=normal
                         align=right><%= NabController.percentString(summary.getPercent(data)) %></td>
-                    <td class=ms-vb><%= h("±") %></td>
-                    <td class=ms-vb
+                    <td class=normal><%= h("±") %></td>
+                    <td class=normal
                         align=right><%= NabController.percentString(summary.getPlusMinus(data)) %></td>
                 </tr>
                 <%

@@ -2,10 +2,10 @@ $!request.getParameter("message")
 <form action=submitNecropsyPhotos.post method=post enctype="multipart/form-data"  >
 <table>
 <tr>
-<td class=ms-vh>
+<td class=header>
 Mouse
 </td>
-<td class=ms-vh>
+<td class=header>
 File
 </td>
 </tr>

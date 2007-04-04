@@ -68,15 +68,15 @@ Gross Findings<br>
 </table>
 Specimens
 <table>
-<tr><td align=center class=ms-vh>ID#</td>
-<!-- <td align=center class=ms-vh>Sub-Ids<br>(e.g. a-c,d)</td>-->
-<td align=center class=ms-vh>Tissue</td>
-<td align=center class=ms-vh>Fix</td><td align=center class=ms-vh>Frozen</td>
-<td align=center class=ms-vh>Freezer</td>
-<td align=center class=ms-vh>Rack</td>
-<td align=center class=ms-vh>Box</td>
-<td align=center class=ms-vh>Slot</td>
-<td align=center class=ms-vh>Notes</td></tr>
+<tr><td align=center class=header>ID#</td>
+<!-- <td align=center class=header>Sub-Ids<br>(e.g. a-c,d)</td>-->
+<td align=center class=header>Tissue</td>
+<td align=center class=header>Fix</td><td align=center class=header>Frozen</td>
+<td align=center class=header>Freezer</td>
+<td align=center class=header>Rack</td>
+<td align=center class=header>Box</td>
+<td align=center class=header>Slot</td>
+<td align=center class=header>Notes</td></tr>
 #set($i = 0)
 #foreach($sample in $samples)
 <tr>

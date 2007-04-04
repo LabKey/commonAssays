@@ -14,7 +14,7 @@
         text-decoration: none;
     }
 
-    .graphView .ms-vh {
+    .graphView .header {
         background-color:<%=WebTheme.getTheme().getEditFormColor()%>;
     }
 </style>

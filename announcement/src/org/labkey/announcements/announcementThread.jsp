@@ -22,13 +22,13 @@
 
 if (null == announcement)
 {
-    %><span class=ms-vb><%=h(settings.getConversationName())%> not found</span><%
+    %><span class=normal><%=h(settings.getConversationName())%> not found</span><%
     return;
 }
 
 if (null != bean.message)
 {
-    %><span class=ms-vb><%=h(bean.message)%></span><%
+    %><span class=normal><%=h(bean.message)%></span><%
 }
 
 // is this an embdedded discussion?
@@ -48,7 +48,7 @@ if (!bean.print && !embedded)
 {
     %><table width="100%">
     <tr>
-    <td align="left" class="ms-vb"><%
+    <td align="left" class="normal"><%
     if (null != bean.listURL)
     {
         %>[<a href="<%=bean.listURL%>">view list</a>]&nbsp;<%
@@ -68,9 +68,9 @@ if (!bean.print && null != discussionSrc)
 
 %><table width="100%" cellpadding=0>
 <tr>
-    <td class="ms-vb" style="padding-top:14px; padding-bottom:2px; width:33%;" align=left><span class="ms-announcementtitle"><%=h(announcement.getTitle())%></span></td>
-    <td class="ms-vb" style="padding-top:14px; padding-bottom:2px; width:33%;" align=center><%=h(announcement.getCreatedByName())%></td>
-    <td class="ms-vb" style="padding-top:14px; padding-bottom:2px; width:33%;" align="right" nowrap><%
+    <td class="normal" style="padding-top:14px; padding-bottom:2px; width:33%;" align=left><span class="ms-announcementtitle"><%=h(announcement.getTitle())%></span></td>
+    <td class="normal" style="padding-top:14px; padding-bottom:2px; width:33%;" align=center><%=h(announcement.getCreatedByName())%></td>
+    <td class="normal" style="padding-top:14px; padding-bottom:2px; width:33%;" align="right" nowrap><%
 
 if (false && !bean.print && null != discussionSrc)
 {
@@ -110,11 +110,11 @@ if (null != announcement.getBody())
     %><tr><td colspan="3">&nbsp;</td></tr><%
 }
 
-%><tr><td colspan="3" class="ms-vb"><%=announcement.translateBody(request,context.getContainer())%></td></tr>
+%><tr><td colspan="3" class="normal"><%=announcement.translateBody(request,context.getContainer())%></td></tr>
 <%
 if(0 < announcement.getAttachments().size())
 {%>
-    <tr><td colspan="3"><div class="ms-vb">
+    <tr><td colspan="3"><div class="normal">
     <%
         for (Attachment d : announcement.getAttachments())
         {%>
@@ -137,8 +137,8 @@ if(0 < announcement.getResponses().size())
         for (Announcement r : announcement.getResponses())
         {%>
             <tr>
-                <td class="ms-vb" colspan="2" style="background-color: #dddddd"><a name="row:<%=r.getRowId()%>"></a><%=r.getCreatedByName() + " responded:"%></td>
-                <td class="ms-vb" align="right" style="background-color: #dddddd"><%
+                <td class="normal" colspan="2" style="background-color: #dddddd"><a name="row:<%=r.getRowId()%>"></a><%=r.getCreatedByName() + " responded:"%></td>
+                <td class="normal" align="right" style="background-color: #dddddd"><%
                 if (bean.perm.allowUpdate(r) && !bean.print)
                 {
                     ViewURLHelper showUpdate = announcementURL(context, "showUpdate", "entityId", r.getEntityId());
@@ -169,10 +169,10 @@ if(0 < announcement.getResponses().size())
             {
                 %><tr><td>Title: <%=h(r.getTitle())%></td></tr><%
             }
-            %><tr><td colspan="3" class="ms-vb"><%=r.translateBody(request,context.getContainer())%></td></tr><%
+            %><tr><td colspan="3" class="normal"><%=r.translateBody(request,context.getContainer())%></td></tr><%
             if(0 < r.getAttachments().size())
             {
-                %><tr><td colspan="3"><div class="ms-vb"><%
+                %><tr><td colspan="3"><div class="normal"><%
                 for (Attachment rd : r.getAttachments())
                 {
                     %><a href="<%=h(rd.getDownloadUrl(request, "announcements"))%>"><img alt="" border=0 src="<%=request.getContextPath()+ rd.getFileIcon()%>">&nbsp;<%=rd.getName()%></a>&nbsp;<%
@@ -187,7 +187,7 @@ if(0 < announcement.getResponses().size())
     </tr>
     </table></td></tr><%
 }
-%><tr><td colspan="3" class="ms-vb"><%
+%><tr><td colspan="3" class="normal"><%
 if (!bean.isResponse && !bean.print)
 {
     if (bean.perm.allowResponse(announcement))

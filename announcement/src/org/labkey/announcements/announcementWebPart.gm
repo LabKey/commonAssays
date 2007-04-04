@@ -2,7 +2,7 @@
 <!--ANNOUNCEMENTS-->
 <table width="100%" cellpadding=0>
     <tr>
-        <td class="ms-vb" style="padding-top:2px; width:40%;" align="left"><%
+        <td class="normal" style="padding-top:2px; width:40%;" align="left"><%
 if (insertURL)
     {
     %>[<a href="${insertURL}">new ${settings.conversationName.toLowerCase()}</a>]&nbsp;<%
@@ -12,8 +12,8 @@ if (listURL)
     %>[<a href="${listURL}">view list</a>]<%
     }
 %></td>
-        <td class="ms-vb" style="padding-top:2px; width:20%;" align="center"><%=filterText%></td>
-        <td class="ms-vb" style="padding-top:2px; width:40%;" align="right"><%
+        <td class="normal" style="padding-top:2px; width:20%;" align="center"><%=filterText%></td>
+        <td class="normal" style="padding-top:2px; width:40%;" align="right"><%
 if (emailPrefsURL)
     {
     %>[<a href="${emailPrefsURL}">email&nbsp;preferences</a>]<%
@@ -30,24 +30,24 @@ if (customizeURL)
     </tr><%
 if (0 == announcements.length)
     {%>
-    <tr><td colspan=3 class=ms-vb style="padding-top:4px;">No <%=filterText.replace("all ", "")%></td></tr><%
+    <tr><td colspan=3 class=normal style="padding-top:4px;">No <%=filterText.replace("all ", "")%></td></tr><%
     }
 for (a in announcements)
     { %>
     <tr>
-        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:40%;" align="left"><span class="ms-announcementtitle"><a href="<%=filter(a.getThreadUrl(request,container))%>rowId=<%=a.rowId%>"><%=filter(a.title)%></a></span><%
+        <td class="normal" style="padding-top:14; padding-bottom:2; width:40%;" align="left"><span class="ms-announcementtitle"><a href="<%=filter(a.getThreadUrl(request,container))%>rowId=<%=a.rowId%>"><%=filter(a.title)%></a></span><%
         if( a.getResponseCount())
             out.print(" (" + a.getResponseCount() + (a.getResponseCount() == 1 ? "&nbsp;response)" : "&nbsp;responses)"));
         %></td>
-        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:20%;" align="center"><%=filter(a.createdByName)%></td>
-        <td class="ms-vb" style="padding-top:14; padding-bottom:2; width:40%;" align="right" nowrap><%=DateUtil.formatDateTime(a.getCreated())%></td>
+        <td class="normal" style="padding-top:14; padding-bottom:2; width:20%;" align="center"><%=filter(a.createdByName)%></td>
+        <td class="normal" style="padding-top:14; padding-bottom:2; width:40%;" align="right" nowrap><%=DateUtil.formatDateTime(a.getCreated())%></td>
     </tr>
     <tr style="height:1;"><td colspan=3 class="ms-titlearealine"><img height=1 width=1 src="<%=request.getContextPath()%>/_.gif"></td></tr>
-    <tr><td colspan=3 class="ms-vb"><%=a.translateBody(request,container)%></td></tr>
+    <tr><td colspan=3 class="normal"><%=a.translateBody(request,container)%></td></tr>
 <%
     if (a.attachments.size())
         { %>
-    <tr><td colspan=3 class="ms-vb"><%
+    <tr><td colspan=3 class="normal"><%
         for (d in a.attachments)
             {
             %>
@@ -55,7 +55,7 @@ for (a in announcements)
             }
         %>
     </td></tr>
-<%      } %>    <tr><td class="ms-vb" style="padding-bottom:4;" colspan=3 align="left">[<a href="<%=filter(a.getThreadUrl(request,container))%>rowId=<%=a.rowId%>">view ${settings.conversationName.toLowerCase()}<%if (insertURL) {%> or respond<%}%></a>]</td></tr>
+<%      } %>    <tr><td class="normal" style="padding-bottom:4;" colspan=3 align="left">[<a href="<%=filter(a.getThreadUrl(request,container))%>rowId=<%=a.rowId%>">view ${settings.conversationName.toLowerCase()}<%if (insertURL) {%> or respond<%}%></a>]</td></tr>
 <%
     }
 %></table>

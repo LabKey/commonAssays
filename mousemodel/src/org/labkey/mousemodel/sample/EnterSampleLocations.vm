@@ -5,11 +5,11 @@ $!message
 <input type="hidden" name="materialSourceLSID" value="$!materialSourceLSID"/>
 Specimens
 <table>
-<tr><td align=center class=ms-vh>Sample (MMDDYY-XXX)</td>
-<td align=center class=ms-vh>Freezer</td>
-<td align=center class=ms-vh>Rack</td>
-<td align=center class=ms-vh>Box</td>
-<td align=center class=ms-vh>Slot</td>
+<tr><td align=center class=header>Sample (MMDDYY-XXX)</td>
+<td align=center class=header>Freezer</td>
+<td align=center class=header>Rack</td>
+<td align=center class=header>Box</td>
+<td align=center class=header>Slot</td>
 </tr>
 #set($sampleIds = $form.sampleIds)
 #set($i = 0)

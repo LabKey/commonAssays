@@ -15,15 +15,15 @@
     </tr>
     <tr>
         <td style="padding-left:10"><b>Sample Set</b></td>
-        <td class="ms-vb">Set that contains the sample used in this analysis. <a href="<%=currentContext.viewURLHelper.relativeUrl("showUploadMaterials.view", "", "Experiment")%>">Upload</a> sample information using the experiment module. Optional.</td>
+        <td class="normal">Set that contains the sample used in this analysis. <a href="<%=currentContext.viewURLHelper.relativeUrl("showUploadMaterials.view", "", "Experiment")%>">Upload</a> sample information using the experiment module. Optional.</td>
     </tr>
     <tr>
         <td style="padding-left:10"><b>Sample Id</b></td>
-        <td class="ms-vb">Unique Id of the sample within sample set.</td>
+        <td class="normal">Unique Id of the sample within sample set.</td>
     </tr>
     <tr>
         <td style="padding-left:10"><b>Protocol</b> </td>
-    <td class="ms-vb">Protocol used to prepare sample and run Mass Spec. <a href="showCreateMS2Protocol.view?path=<%=PageFlowUtil.encode(form.path)%>">Create</a> a new protocol.</td>
+    <td class="normal">Protocol used to prepare sample and run Mass Spec. <a href="showCreateMS2Protocol.view?path=<%=PageFlowUtil.encode(form.path)%>">Create</a> a new protocol.</td>
     </tr>
     </table>
     <br>
@@ -58,11 +58,11 @@ for (file in fileStatus.keySet())
     <tr><td class="labkey-error" colspan="2"><%=error%></td></tr>
 <%  } %>
     <tr><td class="ms-searchform">Run Name</td>
-      <td class="ms-vb"><input type="hidden" name="fileNames[${index}]" value="<%=filter(file.name)%>">
+      <td class="normal"><input type="hidden" name="fileNames[${index}]" value="<%=filter(file.name)%>">
                         <input type="hidden" name="parameterCounts[${index}]" value="<%=runInfo.parameterValues.length%>">
                         <input type="hidden" name="materialCounts[${index}]" value="<%=runInfo.parameterValues.length%>">
                         <input name="runNames[${index}]" size=50 value="<%=filter(runName)%>"></td></tr>
-    <tr><td class="ms-searchform">Sample Set</td><td class="ms-vb">
+    <tr><td class="ms-searchform">Sample Set</td><td class="normal">
       <select name="materialSourceIds[${index}]" >
 <%
     for(source in materialSources)
@@ -82,9 +82,9 @@ for (file in fileStatus.keySet())
       </select>
       </td></tr>
     <tr><td class="ms-searchform">Sample ID</td>
-        <td class="ms-vb"><input type="text" name="sampleIds[${index}]" value="<%=filter(sampleId)%>"></td></tr>
+        <td class="normal"><input type="text" name="sampleIds[${index}]" value="<%=filter(sampleId)%>"></td></tr>
     <tr><td class="ms-searchform">Protocol (Sample Prep &amp; MS2)</td>
-        <td class="ms-vb">
+        <td class="normal">
           <select name="protocolNames[${index}]" onchange="changeProtocol(this)">
             <option></option>
 <%

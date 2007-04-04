@@ -17,7 +17,7 @@
 
 if (settings.isTitleEditable())
 {
-    %><tr><td class="ms-searchform">Title</td><td class="ms-vb" colspan="2"><input type="text" size="60" name="title" value="<%=filter(form.get("title"))%>"></td></tr><%
+    %><tr><td class="ms-searchform">Title</td><td class="normal" colspan="2"><input type="text" size="60" name="title" value="<%=filter(form.get("title"))%>"></td></tr><%
 }
 else
 {
@@ -26,17 +26,17 @@ else
 
 if (settings.hasStatus())
 {
-    %><tr><td class="ms-searchform">Status</td><td class="ms-vb" colspan="2"><%=statusSelect%></td></tr><%
+    %><tr><td class="ms-searchform">Status</td><td class="normal" colspan="2"><%=statusSelect%></td></tr><%
 }
 
 if (settings.hasAssignedTo())
 {
-    %><tr><td class="ms-searchform">Assigned&nbsp;To</td><td class="ms-vb" colspan="2"><%=assignedToSelect%></td></tr><%
+    %><tr><td class="ms-searchform">Assigned&nbsp;To</td><td class="normal" colspan="2"><%=assignedToSelect%></td></tr><%
 }
 
 if (settings.hasMemberList())
 {
-    %><tr><td class="ms-searchform">Members</td><td class="ms-vb"><%=memberList%></td><td style="width:100%;"><i><%
+    %><tr><td class="ms-searchform">Members</td><td class="normal"><%=memberList%></td><td style="width:100%;"><i><%
     if (settings.isSecure())
     {
         %> This <%=settings.conversationName.toLowerCase()%> is private; only editors and the users on this list can view it.  These users will also<%
@@ -50,12 +50,12 @@ if (settings.hasMemberList())
 
 if (settings.hasExpires())
 {
-    %><tr><td class="ms-searchform">Expires</td><td class="ms-vb"><input type="text" size="23" name="expires" value="<%=filter(form.get("expires"))%>" ></td><td style="width:100%;"><i>Expired messages are not deleted, they are just no longer shown on the Portal page.</i></td></tr><%
+    %><tr><td class="ms-searchform">Expires</td><td class="normal"><input type="text" size="23" name="expires" value="<%=filter(form.get("expires"))%>" ></td><td style="width:100%;"><i>Expired messages are not deleted, they are just no longer shown on the Portal page.</i></td></tr><%
 }
 
 %>
     <tr>
-    <td class="ms-searchform">Body</td><td colspan=2 class="ms-vb" style="width:100%;"><textarea cols="60" rows="15" id="body" name="body" style="width:100%;">${form.body}</textarea>
+    <td class="ms-searchform">Body</td><td colspan=2 class="normal" style="width:100%;"><textarea cols="60" rows="15" id="body" name="body" style="width:100%;">${form.body}</textarea>
         <input type="hidden" name="parentId" value="<%=parentAnnouncement.getEntityId()%>"/>
     </td>
 </tr><%
@@ -64,7 +64,7 @@ if (settings.hasFormatPicker())
 {
 %><tr>
     <td class="ms-searchform">Render As</td>
-    <td class="ms-vb" colspan="2">
+    <td class="normal" colspan="2">
         <select name="rendererType">
               <%
               for (entry in renderers)
@@ -84,16 +84,16 @@ if (settings.hasFormatPicker())
 <tr><td colspan="3"></td></tr>
 </table>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-    <tr class="ms-WPHeader">
+    <tr class="wpHeader">
         <td title="Attachments" style="width:100%;" nowrap>
-        <div class="ms-WPTitle"><span>Attachments</span></div>
+        <div class="wpTitle"><span>Attachments</span></div>
 		</td>
     </tr>
-    <tr><td class="ms-summarycustombody">
+    <tr><td class="normal">
         <table>
-        <tr><td>File 1: <input type="file" name="formFiles[0]" size="60" onChange="showPathname(this, 'filename1')"></td><td><label class="ms-vb" id="filename1"></label></td></tr>
-        <tr><td>File 2: <input type="file" name="formFiles[1]" size="60" onChange="showPathname(this, 'filename2')"></td><td><label class="ms-vb" id="filename2"></label></td></tr>
-        <tr><td>File 3: <input type="file" name="formFiles[2]" size="60" onChange="showPathname(this, 'filename3')"></td><td><label class="ms-vb" id="filename3"></label></td></tr>
+        <tr><td>File 1: <input type="file" name="formFiles[0]" size="60" onChange="showPathname(this, 'filename1')"></td><td><label class="normal" id="filename1"></label></td></tr>
+        <tr><td>File 2: <input type="file" name="formFiles[1]" size="60" onChange="showPathname(this, 'filename2')"></td><td><label class="normal" id="filename2"></label></td></tr>
+        <tr><td>File 3: <input type="file" name="formFiles[2]" size="60" onChange="showPathname(this, 'filename3')"></td><td><label class="normal" id="filename3"></label></td></tr>
         </table>
 	</td>
 	</tr>

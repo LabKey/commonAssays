@@ -141,7 +141,7 @@ abstract public class IssuePage extends JspBase
 
             sb.append("<tr><td class=\"ms-searchform\">");
             sb.append(getLabel(tableColumnName));
-            sb.append("</td><td class=\"ms-vb\">");
+            sb.append("</td><td class=\"normal\">");
 
             // If custom column has pick list, then show select with keywords, otherwise input box
             if (_ccc.getPickListColumns().contains(tableColumnName))

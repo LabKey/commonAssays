@@ -562,9 +562,9 @@ public class MouseModelController extends ViewController
                 if (null == _c || !_c.hasPermission(getViewContext().getUser(), ACL.PERM_READ))
                 {
                     if (getViewContext().getUser().isGuest())
-                        out.println("<span class=\"ms-vb\">Please log in to see this data.</span>");
+                        out.println("<span class=\"normal\">Please log in to see this data.</span>");
                     else
-                        out.println("<span class=\"ms-vb\">You do not have permission to see this data.</span>");
+                        out.println("<span class=\"normal\">You do not have permission to see this data.</span>");
                 }
                 else
                 {

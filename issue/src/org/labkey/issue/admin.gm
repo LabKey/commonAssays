@@ -16,8 +16,8 @@
 <td valign=top>
     <form action="setCustomColumnConfiguration.post" method="post">
     <table border=0 cellspacing=4 cellpadding=0>
-    <tr><td class=ms-vb colspan=2 align=center><div class="ms-searchform"><b>Custom Columns</b></div></td></tr>
-    <tr><td class=ms-vb colspan=2>Enter captions below to use custom columns in this issues list:</td></tr>
+    <tr><td class=normal colspan=2 align=center><div class="ms-searchform"><b>Custom Columns</b></div></td></tr>
+    <tr><td class=normal colspan=2>Enter captions below to use custom columns in this issues list:</td></tr>
     <tr><td colspan=2>&nbsp;</td></tr>
     <tr><td>Integer1</td><td><input name="int1" value="${captions.int1}" size=20></td></tr>
     <tr><td>Integer2</td><td><input name="int2" value="${captions.int2}" size=20></td></tr>

@@ -22,7 +22,7 @@
 
         if ((index % 3) == 0)
             out.print("<tr>");
-%><td class="ms-vb" align="center">
+%><td class="normal" align="center">
 <a href="<%=downloadUrl%>" target="_blank"><img border=0 width=300 src="<%=downloadUrl%>"></a><br>
 <%=PageFlowUtil.filter(slide.get("sampleType"))%> (<%=PageFlowUtil.filter(slide.get("stain"))%>)
 <a href="<%=sampleUrl%>"><%=slide.get("sampleId")%></a>

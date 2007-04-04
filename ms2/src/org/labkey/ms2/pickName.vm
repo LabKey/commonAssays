@@ -1,5 +1,5 @@
 <form method="get" action="saveView.view" class="dataRegion"><table>
-  <tr><td>Name:</td><td class="ms-vb"><input name="name" style="width:200;">
+  <tr><td>Name:</td><td class="normal"><input name="name" style="width:200;">
   <input type=hidden value="$viewParams" name="viewParams"><input type=hidden value="$returnUrl" name="returnUrl">
   </td></tr>
 #if($canShare)

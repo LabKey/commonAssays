@@ -16,7 +16,7 @@
 
             if ((index % 2) == 0)
                 out.print("<tr>");%>
-    <td class="ms-vb" align="center">
+    <td class="normal" align="center">
     <a href="<%=downloadUrl%>" target="_blank"><img border=0 width=300 src="<%=downloadUrl%>"></a><br>
 <%
         if (canDelete)

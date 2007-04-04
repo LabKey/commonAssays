@@ -174,7 +174,7 @@ public class SampleController extends ViewController
             {
                 ViewURLHelper url = currentContext().cloneViewURLHelper();
                 url.setAction("details.view");
-                out.printf("<table><tr><td class='ms-vh'>Sample</td></tr>\n");
+                out.printf("<table><tr><td class='header'>Sample</td></tr>\n");
                 for (Sample samp : samples)
                 {
                     url.replaceParameter("LSID", samp.getLSID());

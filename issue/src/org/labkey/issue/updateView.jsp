@@ -52,34 +52,34 @@
 <%
             } else {
 %>
-                <td class="ms-WPTitle"><%=issue.getIssueId()%></td>
+                <td class="wpTitle"><%=issue.getIssueId()%></td>
 <%
             }
 %>
-                <td class="ms-vb" width="571">
+                <td class="normal" width="571">
                 <%=writeInput("title", issue.getTitle(), "id=title style=\"width:100%;\"")%>
                 </td></tr>
             </table></td></tr>
         <tr>
             <td valign="top" width="34%"><table>
-                <tr><td class="ms-searchform"><%=getLabel("Status")%></td><td class="ms-vb"><%=h(issue.getStatus())%></td></tr>
-                <tr><td class="ms-searchform"><%=getLabel("AssignedTo")%></td><td class="ms-vb"><%=writeSelect("assignedTo", "" + issue.getAssignedTo(), issue.getAssignedToName(), getUserOptions(c, issue))%></td></tr>
-                <tr><td class="ms-searchform"><%=getLabel("Type")%></td><td class="ms-vb"><%=writeSelect("type", issue.getType(), getTypeOptions(c.getId()))%></td></tr>
-                <tr><td class="ms-searchform"><%=getLabel("Area")%></td><td class="ms-vb"><%=writeSelect("area", issue.getArea(), getAreaOptions(c.getId()))%></td></tr>
-                <tr><td class="ms-searchform"><%=getLabel("Priority")%></td><td class="ms-vb"><%=writeSelect("priority", "" + issue.getPriority(), getPriorityOptions(c))%></td></tr>
-                <tr><td class="ms-searchform"><%=getLabel("Milestone")%></td><td class="ms-vb"><%=writeSelect("milestone", issue.getMilestone(), getMilestoneOptions(c.getId()))%></td></tr>
+                <tr><td class="ms-searchform"><%=getLabel("Status")%></td><td class="normal"><%=h(issue.getStatus())%></td></tr>
+                <tr><td class="ms-searchform"><%=getLabel("AssignedTo")%></td><td class="normal"><%=writeSelect("assignedTo", "" + issue.getAssignedTo(), issue.getAssignedToName(), getUserOptions(c, issue))%></td></tr>
+                <tr><td class="ms-searchform"><%=getLabel("Type")%></td><td class="normal"><%=writeSelect("type", issue.getType(), getTypeOptions(c.getId()))%></td></tr>
+                <tr><td class="ms-searchform"><%=getLabel("Area")%></td><td class="normal"><%=writeSelect("area", issue.getArea(), getAreaOptions(c.getId()))%></td></tr>
+                <tr><td class="ms-searchform"><%=getLabel("Priority")%></td><td class="normal"><%=writeSelect("priority", "" + issue.getPriority(), getPriorityOptions(c))%></td></tr>
+                <tr><td class="ms-searchform"><%=getLabel("Milestone")%></td><td class="normal"><%=writeSelect("milestone", issue.getMilestone(), getMilestoneOptions(c.getId()))%></td></tr>
             </table></td>
             <td valign="top" width="33%"><table>
-                <tr><td class="ms-searchform"><%=getLabel("Opened&nbsp;By")%></td><td class="ms-vb"><%=h(issue.getCreatedByName())%></td></tr>
-                <tr><td class="ms-searchform"><%=getLabel("Opened")%></td><td class="ms-vb"><%=writeDate(issue.getCreated())%></td></tr>
-                <tr><td class="ms-searchform"><%=getLabel("ResolvedBy")%></td><td class="ms-vb"><%=h(issue.getResolvedByName())%></td></tr>
-                <tr><td class="ms-searchform"><%=getLabel("Resolved")%></td><td class="ms-vb"><%=writeDate(issue.getResolved())%></td></tr>
-                <tr><td class="ms-searchform"><%=getLabel("Resolution")%></td><td class="ms-vb"><%=writeSelect("resolution", issue.getResolution(), getResolutionOptions(c))%></td></tr>
+                <tr><td class="ms-searchform"><%=getLabel("Opened&nbsp;By")%></td><td class="normal"><%=h(issue.getCreatedByName())%></td></tr>
+                <tr><td class="ms-searchform"><%=getLabel("Opened")%></td><td class="normal"><%=writeDate(issue.getCreated())%></td></tr>
+                <tr><td class="ms-searchform"><%=getLabel("ResolvedBy")%></td><td class="normal"><%=h(issue.getResolvedByName())%></td></tr>
+                <tr><td class="ms-searchform"><%=getLabel("Resolved")%></td><td class="normal"><%=writeDate(issue.getResolved())%></td></tr>
+                <tr><td class="ms-searchform"><%=getLabel("Resolution")%></td><td class="normal"><%=writeSelect("resolution", issue.getResolution(), getResolutionOptions(c))%></td></tr>
 <%
             if (isEditable("resolution") || !"open".equals(issue.getStatus()) && null != issue.getDuplicate())
             {
 %>
-                <tr><td class="ms-searchform">Duplicate</td><td class="ms-vb">
+                <tr><td class="ms-searchform">Duplicate</td><td class="normal">
                 <%=writeInput("duplicate", null == issue.getDuplicate() ? null : issue.getDuplicate().toString())%>
                 </td></tr>
 <%
@@ -89,19 +89,19 @@
                 <%=writeCustomColumn(c.getId(), "int2", _toString(issue.getInt2()), IssuesController.ISSUE_NONE)%>
             </table></td>
             <td valign="top" width="33%"><table>
-                <tr><td class="ms-searchform">Changed&nbsp;By</td><td class="ms-vb"><%=h(issue.getModifiedByName())%></td></tr>
-                <tr><td class="ms-searchform">Changed</td><td class="ms-vb"><%=writeDate(issue.getModified())%></td></tr>
-                <tr><td class="ms-searchform">Closed&nbsp;By</td><td class="ms-vb"><%=h(issue.getClosedByName())%></td></tr>
-                <tr><td class="ms-searchform">Closed</td><td class="ms-vb"><%=writeDate(issue.getClosed())%></td></tr>
+                <tr><td class="ms-searchform">Changed&nbsp;By</td><td class="normal"><%=h(issue.getModifiedByName())%></td></tr>
+                <tr><td class="ms-searchform">Changed</td><td class="normal"><%=writeDate(issue.getModified())%></td></tr>
+                <tr><td class="ms-searchform">Closed&nbsp;By</td><td class="normal"><%=h(issue.getClosedByName())%></td></tr>
+                <tr><td class="ms-searchform">Closed</td><td class="normal"><%=writeDate(issue.getClosed())%></td></tr>
 <%
             if (this.isEditable("notifyList"))
             {
 %>
-                <tr><td class="ms-searchform"><%=getLabel("NotifyList") + popup%><br/>(one email address on each line)</td><td class="ms-vb"><%=getNotifyList(c, issue)%></td></tr>
+                <tr><td class="ms-searchform"><%=getLabel("NotifyList") + popup%><br/>(one email address on each line)</td><td class="normal"><%=getNotifyList(c, issue)%></td></tr>
 <%
             } else {
 %>
-                <tr><td class="ms-searchform">Notify</td><td class="ms-vb"><%=getNotifyList(c, issue)%></td></tr>
+                <tr><td class="ms-searchform">Notify</td><td class="normal"><%=getNotifyList(c, issue)%></td></tr>
 <%
             }
 %>
@@ -132,9 +132,9 @@
     for (Issue.Comment comment : issue.getComments())
     {
 %>
-        <hr><table width="100%"><tr><td align="left" class="ms-vb"><b>
+        <hr><table width="100%"><tr><td align="left" class="normal"><b>
         <%=writeDate(comment.getCreated())%>
-        </b></td><td align="right" class="ms-vb"><b>
+        </b></td><td align="right" class="normal"><b>
         <%=h(comment.getCreatedByName())%>
         </b></td></tr></table>
         <%=comment.getComment()%>

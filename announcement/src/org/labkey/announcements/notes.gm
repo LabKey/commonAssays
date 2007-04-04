@@ -3,11 +3,11 @@
 <!--NOTES-->
         <table width="100%" border="0" cellspacing="0" cellpadding="2">
 <% for(r in notes) {%>
-            <tr><td class="ms-vb" colspan="2" style="background-color: #dddddd">Note added by: ${r.createdByName}</td>
-                <td class="ms-vb" align="right" style="background-color: #dddddd"><%=DateUtil.formatDateTime(r.created)%></td></tr>
-            <tr><td colspan="3" class="ms-vb">${r.translateBody(request,container)}</td></tr>
+            <tr><td class="normal" colspan="2" style="background-color: #dddddd">Note added by: ${r.createdByName}</td>
+                <td class="normal" align="right" style="background-color: #dddddd"><%=DateUtil.formatDateTime(r.created)%></td></tr>
+            <tr><td colspan="3" class="normal">${r.translateBody(request,container)}</td></tr>
     <% if (r.attachments) { %>
-        	<tr><td colspan="3"><div class="ms-vb">
+        	<tr><td colspan="3"><div class="normal">
     <%for (rd in r.attachments) { %>
                 <a href="<%=filter(rd.getDownloadUrl(request, "announcements"))%>"><img border=0 src="${request.getContextPath()}${rd.fileIcon}">&nbsp;${rd.name}</a>&nbsp;
     <% } %>
@@ -26,12 +26,12 @@
 </td></tr>
 <tr><td colspan=2 align=left></td></tr></table>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-	<tr class="ms-WPHeader">
+	<tr class="wpHeader">
 		<td title="Attachments" style="width:100%;" nowrap>
-		<div class="ms-WPTitle"><span>Attachments</span></div>
+		<div class="wpTitle"><span>Attachments</span></div>
 		</td>
 	</tr>
-	<tr><td class="ms-summarycustombody">
+	<tr><td class="normal">
 		File 1: <input type="file" name="formFiles[0]"><br>
 		File 2: <input type="file" name="formFiles[1]"><br>
 		File 3: <input type="file" name="formFiles[2]"><br>
@@ -47,7 +47,7 @@
 </td>
 </tr>
 <% } else { %>
-    <tr><td colspan="3" class="ms-vb"><a href="${clientURL}&amp;NotesView.insertMode"><img border=0 src="<%=PageFlowUtil.buttonSrc("Add a Note")%>"></a></td></tr>
+    <tr><td colspan="3" class="normal"><a href="${clientURL}&amp;NotesView.insertMode"><img border=0 src="<%=PageFlowUtil.buttonSrc("Add a Note")%>"></a></td></tr>
 <% } %>
         </table>
 <!--/NOTES-->

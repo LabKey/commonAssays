@@ -5,17 +5,17 @@
 <table>
     <tr>
         <td class="ms-searchform">Protocol Name</td>
-        <td class="ms-vb"><input id="protocolName" name="name" value="<%=filter(form.name)%>"></td>
+        <td class="normal"><input id="protocolName" name="name" value="<%=filter(form.name)%>"></td>
     </tr>
     <tr>
         <td class="ms-searchform">Sample Preparation Protocol</td>
-        <td class="ms-vb">
+        <td class="normal">
             <textarea name="descriptionSamplePrep" rows="10" cols="50"><%=filter(form.descriptionSamplePrep)%></textarea>
         </td>
     </tr>
     <tr>
         <td class="ms-searchform">LCMS2 Protocol</td>
-        <td class="ms-vb">
+        <td class="normal">
             <textarea name="descriptionLcms" rows="10" cols="50"><%=filter(form.descriptionLcms)%></textarea>
         </td>
     </tr>

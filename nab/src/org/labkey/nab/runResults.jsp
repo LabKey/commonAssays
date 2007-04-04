@@ -131,14 +131,14 @@
                                             DilutionSummary summary = assay.getSummaries()[i];
                                     %>
                                     <tr>
-                                        <td class="ms-vb">
+                                        <td class="normal">
                                             <%=h(summary.getSampleId())%>
                                         </td>
                                         <%
                                             for (int cutoff : assay.getCutoffs())
                                             {
                                         %>
-                                        <td class="ms-vb" align="right">
+                                        <td class="normal" align="right">
                                             <%
                                                 double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0) :
                                                         summary.getInterpolatedCutoffDilution(cutoff / 100.0);
@@ -236,14 +236,14 @@
                                 <td style="<%= labelStyle %>">Host Cell</td>
                                 <td><%= h(assay.getHostCell()) %></td>
                                 <td style="<%= labelStyle %>">Range</td>
-                                <td class="ms-vb"
+                                <td class="normal"
                                     align=left><%=Luc5Assay.intString(assay.getControlRange())%></td>
                             </tr>
                             <tr>
                                 <td style="<%= labelStyle %>">Virus Control</td>
-                                <td class="ms-vb" align="left"><%=Luc5Assay.intString(assay.getVirusControlMean())%> <%=h("±")%> <%=Luc5Assay.percentString(assay.getVirusControlPlusMinus())%></td>
+                                <td class="normal" align="left"><%=Luc5Assay.intString(assay.getVirusControlMean())%> <%=h("±")%> <%=Luc5Assay.percentString(assay.getVirusControlPlusMinus())%></td>
                                 <td style="<%= labelStyle %>">Cell Control</td>
-                                <td class="ms-vb" align=left><%=Luc5Assay.intString(assay.getCellControlMean())%> <%=h("±")%> <%=Luc5Assay.percentString(assay.getCellControlPlusMinus())%></td>
+                                <td class="normal" align=left><%=Luc5Assay.intString(assay.getCellControlMean())%> <%=h("±")%> <%=Luc5Assay.percentString(assay.getCellControlPlusMinus())%></td>
                             </tr>
                         </table>
                     </td>
@@ -284,11 +284,11 @@
                                         shortDecFormat = new DecimalFormat("0");
                             %>
                             <tr>
-                                <td class=ms-vb align=right><%= shortDecFormat.format(summary.getDilution(data)) %></td>
-                                <td class=ms-vb
+                                <td class=normal align=right><%= shortDecFormat.format(summary.getDilution(data)) %></td>
+                                <td class=normal
                                     align=right><%= Luc5Assay.percentString(summary.getPercent(data)) %></td>
-                                <td class=ms-vb><%= h("±") %></td>
-                                <td class=ms-vb
+                                <td class=normal><%= h("±") %></td>
+                                <td class=normal
                                     align=right><%= Luc5Assay.percentString(summary.getPlusMinus(data)) %></td>
                             </tr>
                             <%
@@ -318,7 +318,7 @@
                                     for (int c = 1; c <= assay.getPlate().getColumns(); c++)
                                     {
                                 %>
-                                <td class="ms-vb" style="font-weight:bold"><%=c %></td>
+                                <td class="normal" style="font-weight:bold"><%=c %></td>
                                 <%
                                     }
                                 %>
@@ -328,13 +328,13 @@
                                 {
                             %>
                             <tr>
-                                <td class="ms-vb" style="font-weight:bold"><%=(char) ('A' + row)%></td>
+                                <td class="normal" style="font-weight:bold"><%=(char) ('A' + row)%></td>
 
                                 <%
                                     for (int col = 0; col < assay.getPlate().getColumns(); col++)
                                     {
                                 %>
-                                <td class=ms-vb align=right>
+                                <td class=normal align=right>
                                     <%=Luc5Assay.intString(assay.getPlate().getWell(row, col).getValue())%></td>
                                 <%
                                     }

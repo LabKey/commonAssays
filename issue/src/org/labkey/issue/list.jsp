@@ -65,7 +65,7 @@
     if ((!isHidden && !context.getUser().isGuest()) || (context.hasPermission(ACL.PERM_ADMIN)))
     {
     %>
-    <td class=ms-vb>[<a href="<%=bean.getCustomizeURL()%>">customize&nbsp;view</a>]</td>
+    <td class=normal>[<a href="<%=bean.getCustomizeURL()%>">customize&nbsp;view</a>]</td>
     <%
     }
     %>

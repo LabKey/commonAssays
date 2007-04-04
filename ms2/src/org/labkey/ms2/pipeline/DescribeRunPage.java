@@ -66,7 +66,7 @@ abstract public class DescribeRunPage extends JspBase
         String runPrefix = "runInfos[" + runIndex + "]";
         MaterialBaseType[] inputMaterials = xar.getStartingInputDefinitions().getMaterialArray();
 
-        builder.append("<tr><td class=\"ms-searchform\" colspan=2>Input Samples <span class=\"ms-vb\">(Enter sample ID and choose source for sample)</span></td></tr>");
+        builder.append("<tr><td class=\"ms-searchform\" colspan=2>Input Samples <span class=\"normal\">(Enter sample ID and choose source for sample)</span></td></tr>");
         int genericRoleNameCount = 0;
         for (int iMaterial = 0; iMaterial < inputMaterials.length; iMaterial++)
         {
@@ -120,9 +120,9 @@ abstract public class DescribeRunPage extends JspBase
                     builder.append("</td></tr>");
                     headerWritten = true;
                 }
-                builder.append("<tr><td class=\"ms-vb\">");
+                builder.append("<tr><td class=\"normal\">");
                 builder.append(ColumnInfo.captionFromName(param.getName()));
-                builder.append("</td><td class=\"ms-vb\">");
+                builder.append("</td><td class=\"normal\">");
                 builder.append("<input name=\"").append(runPrefix).append(".parameterValues[").append(iParam).append("]\" ");
                 builder.append("value=\"");
                 if (null != parameterValues && parameterValues.length > iParam && null != parameterValues[iParam])
@@ -144,7 +144,7 @@ abstract public class DescribeRunPage extends JspBase
     {
         builder.append("<tr><td class=\"ms-searchform\">");
         builder.append(roleName);
-        builder.append(" Sample ID</td><td class=\"ms-vb\">");
+        builder.append(" Sample ID</td><td class=\"normal\">");
         String namePrefix = runPrefix + ".sampleIds";
         String nameSuffix = "[" + index + "]";
         builder.append("<input type=\"radio\" id=\"" + namePrefix + "NewType" + nameSuffix + "\" name=\"" + namePrefix + "Type" + nameSuffix + "\" checked=\"checked\" value=\"New\"/>");
@@ -187,7 +187,7 @@ abstract public class DescribeRunPage extends JspBase
         builder.append("</select>");
         builder.append("</td></tr><tr><td class=\"ms-searchform\">");
         builder.append(roleName);
-        builder.append(" Sample Set</td><td class=\"ms-vb\">");
+        builder.append(" Sample Set</td><td class=\"normal\">");
         String onchange = "updateSamples(document.describeForm['" + namePrefix + "Existing" + nameSuffix + "'], document.describeForm['" + runPrefix + ".materialSourceIds[" + index + "]'], document.getElementById('" + namePrefix + "NewType" + nameSuffix + "'), document.getElementById('" + namePrefix + "ExistingType" + nameSuffix + "'))";
         builder.append(materialSourceSelect(materialSourceIds, runPrefix, index, onchange));
         builder.append("</td></tr>");

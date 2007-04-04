@@ -35,20 +35,20 @@
     </td>
     </tr>
     <tr><td style="padding-left:10px" >
-        <b>Run Name</b> </td><td class="ms-vb">Your name for this MS2 run</td>
+        <b>Run Name</b> </td><td class="normal">Your name for this MS2 run</td>
     </tr>
     <tr>
         <td style="padding-left:10px"><b>Sample Set</b></td>
-        <td class="ms-vb">Set that contains the sample used in this analysis. <a href="<%=getController().getViewURLHelper().relativeUrl("showUploadMaterials.view", "", "Experiment")%>">Upload</a> sample information using the experiment module, and <a href="<%=getController().getViewURLHelper().relativeUrl("listMaterialSources.view", "", "Experiment")%>">set the active sample set</a>. Optional.</td>
+        <td class="normal">Set that contains the sample used in this analysis. <a href="<%=getController().getViewURLHelper().relativeUrl("showUploadMaterials.view", "", "Experiment")%>">Upload</a> sample information using the experiment module, and <a href="<%=getController().getViewURLHelper().relativeUrl("listMaterialSources.view", "", "Experiment")%>">set the active sample set</a>. Optional.</td>
     </tr>
     <tr>
         <td style="padding-left:10px"><b>Sample Id</b></td>
-        <td class="ms-vb">Unique Id of the sample within sample set.</td>
+        <td class="normal">Unique Id of the sample within sample set.</td>
     </tr>
     <tr>
         <td style="padding-left:10px"><b>Protocol</b> </td>
 <!--WCH:mascotdev-->
-    <td class="ms-vb">Protocol used to prepare sample and run Mass Spec. <a href="showCreateMS2Protocol.view?path=<%=u(getForm().getPath())%>&searchEngine=<%=h(getForm().getSearchEngine())%>">Create</a> a new protocol.</td>
+    <td class="normal">Protocol used to prepare sample and run Mass Spec. <a href="showCreateMS2Protocol.view?path=<%=u(getForm().getPath())%>&searchEngine=<%=h(getForm().getSearchEngine())%>">Create</a> a new protocol.</td>
 <!--END-WCH:mascotdev-->
     </tr>
     </table>
@@ -80,7 +80,7 @@
    <tr><td class="labkey-error" colspan="2"><%=error%></td></tr>
 <%  } %>
    <tr><td class="ms-searchform">Run Name</td>
-     <td class="ms-vb">
+     <td class="normal">
          <%
              int index = 0;
              for (File file : getMzXmlFileStatus().keySet())
@@ -160,7 +160,7 @@ for (File file : getMzXmlFileStatus().keySet())
     <tr><td class="labkey-error" colspan="2"><%=error%></td></tr>
 <%  } %>
     <tr><td class="ms-searchform">Run Name</td>
-      <td class="ms-vb"><input type="hidden" name="fileNames[<%=index%>]" value="<%=h(file.getName())%>">
+      <td class="normal"><input type="hidden" name="fileNames[<%=index%>]" value="<%=h(file.getName())%>">
                         <input type="hidden" name="protocolNames[<%=index%>]" value="<%=h(protocolName)%>">
                         <input name="runNames[<%=index%>]" size=50 value="<%=h(runName)%>"></td></tr>
     <tr><td colspan="2"><%=renderXarInputs(index, getStrippedFileName(file))%>

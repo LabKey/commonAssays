@@ -24,7 +24,7 @@ if (settings.hasAssignedTo())
 
 if (settings.hasMemberList())
 {
-    %><tr><td class="ms-searchform">Members</td><td class="ms-vb"><%=memberList%></td><td style="width:100%;"><i><%
+    %><tr><td class="ms-searchform">Members</td><td class="normal"><%=memberList%></td><td style="width:100%;"><i><%
     if (settings.isSecure())
     {
         %> This <%=settings.conversationName.toLowerCase()%> is private; only editors and the users on this list can view it.  These users will also<%
@@ -38,7 +38,7 @@ if (settings.hasMemberList())
 
 if (settings.hasExpires())
 {
-    %><tr><td class="ms-searchform">Expires</td><td class="ms-vb"><input name="expires" size="23" value="<%=DateUtil.formatDate(announcement.getExpires())%>"></td><td style="width:100%;"><i>Expired messages are not deleted, they are just no longer shown on the Portal page.</i></td></tr><%
+    %><tr><td class="ms-searchform">Expires</td><td class="normal"><input name="expires" size="23" value="<%=DateUtil.formatDate(announcement.getExpires())%>"></td><td style="width:100%;"><i>Expired messages are not deleted, they are just no longer shown on the Portal page.</i></td></tr><%
 }
 
 %>
@@ -53,7 +53,7 @@ if (settings.hasExpires())
     { %>
   <tr>
     <td class="ms-searchform">Render As</td>
-    <td class="ms-vb" colspan="2">
+    <td class="normal" colspan="2">
       <select name="rendererType"><%
         for (entry in renderers)
         {
@@ -69,7 +69,7 @@ if (settings.hasExpires())
 <%  } %>
   <tr>
     <td class='ms-searchform'>Attachments</td>
-    <td class="ms-summarycustombody" colspan="2">
+    <td class="normal" colspan="2">
 <%
     for (attach in announcement.attachments)
         {

@@ -6,7 +6,7 @@
         IssuesController.KeywordAdminView.KeywordPicker keywordPicker = kwp;
 %>
     <!--<%=keywordPicker.plural%>-->
-    <td class="ms-vb">
+    <td class="normal">
     <div class="ms-searchform"><b><%=keywordPicker.plural%></b></div>
     <form id="form<%=keywordPicker.plural%>" method="POST" action="deleteKeyword.post" style="margin:0px;">
 <%
@@ -17,7 +17,7 @@
         for (keyword in keywordPicker.keywords) {
             selected = keyword.isDefault();
 %>
-        <tr><td class=ms-vb><%=selected ? "<b>" + filter(keyword.keyword) + "</b>" : filter(keyword.keyword)%></td><td class=ms-vb>[<a href="javascript:callAction('deleteKeyword','form<%=keywordPicker.plural%>',<%=filter(PageFlowUtil.jsString(keyword.keyword))%>)" title="Delete this keyword">delete</a>]&nbsp;<%
+        <tr><td class=normal><%=selected ? "<b>" + filter(keyword.keyword) + "</b>" : filter(keyword.keyword)%></td><td class=normal>[<a href="javascript:callAction('deleteKeyword','form<%=keywordPicker.plural%>',<%=filter(PageFlowUtil.jsString(keyword.keyword))%>)" title="Delete this keyword">delete</a>]&nbsp;<%
             if (selected)
             {
                 %>[<a href="javascript:callAction('clearKeywordDefault','form<%=keywordPicker.plural%>',<%=filter(PageFlowUtil.jsString(keyword.keyword))%>)" title="Clear the default value">clear</a>]<%
