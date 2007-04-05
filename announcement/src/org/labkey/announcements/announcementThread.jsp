@@ -31,7 +31,7 @@ if (null != bean.message)
     %><span class=normal><%=h(bean.message)%></span><%
 }
 
-// is this an embdedded discussion?
+// is this an embedded discussion?
 boolean embedded = (null != announcement.getDiscussionSrcURL() && !context.getViewURLHelper().getPageFlow().equals("announcements"));
 ViewURLHelper discussionSrc = null;
 
