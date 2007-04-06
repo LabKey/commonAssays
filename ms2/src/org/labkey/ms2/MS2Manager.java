@@ -750,7 +750,7 @@ public class MS2Manager
         if (0 == runIds.length)
             return;
 
-        Thread thread = new Thread(new MS2Purger(runIds));
+        Thread thread = new Thread(new MS2Purger(runIds), "MS2Purger");
         thread.start();
     }
 
@@ -844,12 +844,14 @@ public class MS2Manager
                     complete++;
                     setPurgeStatus(complete, _runIds.length);
                 }
-
-                clearPurgeStatus();
             }
             catch(SQLException e)
             {
                 _log.error("Error purging runs", e);
+            }
+            finally
+            {
+                clearPurgeStatus();
             }
         }
     }
