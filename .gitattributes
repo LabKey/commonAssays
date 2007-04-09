@@ -498,6 +498,7 @@ ms2/src/org/labkey/ms2/peptideview/AbstractProteinExcelWriter.java -text
 ms2/src/org/labkey/ms2/peptideview/FlatPeptideView.java -text
 ms2/src/org/labkey/ms2/peptideview/MS2ResultSet.java -text
 ms2/src/org/labkey/ms2/peptideview/MultiRunRenderContext.java -text
+ms2/src/org/labkey/ms2/peptideview/ProteinDisplayColumnFactory.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinProphetDataRegion.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinProphetExcelWriter.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinProphetPeptideView.java -text
@@ -586,10 +587,14 @@ ms2/src/org/labkey/ms2/pipeline/setTandemDefaults.gm -text
 ms2/src/org/labkey/ms2/protein.vm -text
 ms2/src/org/labkey/ms2/protein/AnnotationLoader.java -text
 ms2/src/org/labkey/ms2/protein/AnnotationUploadManager.java -text
+ms2/src/org/labkey/ms2/protein/CustomAnnotationSet.java -text
+ms2/src/org/labkey/ms2/protein/CustomAnnotationType.java -text
 ms2/src/org/labkey/ms2/protein/DefaultAnnotationLoader.java -text
 ms2/src/org/labkey/ms2/protein/FastaDbLoader.java -text
 ms2/src/org/labkey/ms2/protein/ParseActions.java -text
 ms2/src/org/labkey/ms2/protein/ParserTree.java -text
+ms2/src/org/labkey/ms2/protein/ProteinController.java -text
+ms2/src/org/labkey/ms2/protein/ProteinException.java -text
 ms2/src/org/labkey/ms2/protein/ProteinManager.java -text
 ms2/src/org/labkey/ms2/protein/ProteinPlus.java -text
 ms2/src/org/labkey/ms2/protein/XMLProteinHandler.java -text
@@ -601,6 +606,9 @@ ms2/src/org/labkey/ms2/protein/organism/GuessOrgBySharedHash.java -text
 ms2/src/org/labkey/ms2/protein/organism/GuessOrgBySharedIdents.java -text
 ms2/src/org/labkey/ms2/protein/organism/OrganismGuessStrategy.java -text
 ms2/src/org/labkey/ms2/protein/organism/Timer.java -text
+ms2/src/org/labkey/ms2/protein/query/CustomAnnotationSchema.java -text
+ms2/src/org/labkey/ms2/protein/query/CustomAnnotationSetsTable.java -text
+ms2/src/org/labkey/ms2/protein/query/CustomAnnotationTable.java -text
 ms2/src/org/labkey/ms2/protein/tools/GOPieSectionLabelGenerator.java -text
 ms2/src/org/labkey/ms2/protein/tools/GOPieToolTipGenerator.java -text
 ms2/src/org/labkey/ms2/protein/tools/GOPieURLGenerator.java -text
@@ -627,6 +635,7 @@ ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_organism_dbReference.java -
 ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_organism_name.java -text
 ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_protein_name.java -text
 ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_sequence.java -text
+ms2/src/org/labkey/ms2/protein/uploadCustomProteinAnnotations.jsp -text
 ms2/src/org/labkey/ms2/protocol/MS2SearchPipelineProtocol.java -text
 ms2/src/org/labkey/ms2/protocol/MascotSearchProtocol.java -text
 ms2/src/org/labkey/ms2/protocol/MascotSearchProtocolFactory.java -text
@@ -641,6 +650,7 @@ ms2/src/org/labkey/ms2/protocol/XTandemSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/protocol/XarTemplate.java -text
 ms2/src/org/labkey/ms2/query/MS2Schema.java -text
 ms2/src/org/labkey/ms2/query/OrganismTableInfo.java -text
+ms2/src/org/labkey/ms2/query/PeptidesTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinGroupTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinProphetFileTableInfo.java -text
 ms2/src/org/labkey/ms2/query/RunTableInfo.java -text
@@ -697,6 +707,7 @@ ms2/webapp/MS2/scripts/postgresql/ms2-1.72-1.73.sql -text
 ms2/webapp/MS2/scripts/postgresql/ms2-1.73-1.74.sql -text
 ms2/webapp/MS2/scripts/postgresql/ms2-1.74-1.75.sql -text
 ms2/webapp/MS2/scripts/postgresql/ms2-1.75-1.76.sql -text
+ms2/webapp/MS2/scripts/postgresql/ms2-2.00-2.01.sql -text
 ms2/webapp/MS2/scripts/postgresql/obsolete/ms2-1.00-1.01.sql -text
 ms2/webapp/MS2/scripts/postgresql/obsolete/ms2-1.01-1.02.sql -text
 ms2/webapp/MS2/scripts/postgresql/obsolete/ms2-1.10-1.11.sql -text
@@ -745,6 +756,7 @@ ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-1.72-1.73.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-1.73-1.74.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-1.74-1.75.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-1.75-1.76.sql -text
+ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-2.00-2.01.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-drop.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.62.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.63.sql -text

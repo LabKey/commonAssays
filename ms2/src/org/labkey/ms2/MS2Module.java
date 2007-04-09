@@ -29,6 +29,8 @@ import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.pipeline.*;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinController;
+import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.security.User;
 import org.labkey.api.util.NetworkDrive;
@@ -68,7 +70,7 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
 
     public MS2Module()
     {
-        super(NAME, 2.0, "/org/labkey/ms2", "/MS2",
+        super(NAME, 2.01, "/org/labkey/ms2", "/MS2",
                 new WebPartFactory("MS2 Runs"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
@@ -104,6 +106,7 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
                     }
                 });
         addController("MS2", MS2Controller.class);
+        addController("protein", ProteinController.class);
         addController("MS2-Pipeline", PipelineController.class);
         addController("MS2-Scoring", ScoringController.class);
 
@@ -117,18 +120,15 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
         service.registerPipelineProvider(new XTandemLocalPipelineProvider());
         service.registerPipelineProvider(new XTandemCPipelineProvider());
         service.registerPipelineProvider(new CometCPipelineProvider());
-//WDN:20060824    sequestdev
         service.registerPipelineProvider(new SequestLocalPipelineProvider());
-//END-WDN:20060824
-//wch: mascotdev
         service.registerPipelineProvider(new MascotLocalPipelineProvider());
         service.registerPipelineProvider(new MascotCPipelineProvider());
-//END-wch: mascotdev
-        // CONSIDER(bmaclean): MS1?
+
         service.registerPipelineProvider(new InspectCPipelineProvider());
         service.registerPipelineProvider(new ProteinProphetPipelineProvider());
 
         MS2Schema.register();
+        CustomAnnotationSchema.register();
 
         MS2Service.register(new MS2ServiceImpl());
     }

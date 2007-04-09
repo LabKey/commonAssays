@@ -1,16 +1,19 @@
 package org.labkey.ms2.query;
 
-import org.labkey.api.query.FilteredTable;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.*;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.security.User;
 import org.labkey.api.security.ACL;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.CustomAnnotationSet;
+import org.labkey.ms2.protein.CustomAnnotationType;
+import org.labkey.ms2.protein.query.CustomAnnotationSetsTable;
+import org.labkey.ms2.protein.query.CustomAnnotationTable;
 import org.labkey.ms2.MS2Manager;
 
 import java.util.*;
+import java.sql.Types;
 
 /**
  * User: jeckels
@@ -41,6 +44,59 @@ public class SequencesTableInfo extends FilteredTable
 
         ViewURLHelper url = new ViewURLHelper("MS2", "showProtein.view", _container);
         getColumn("BestName").setURL(url + "seqId=${SeqId}");
+
+        ColumnInfo annotationColumn = wrapColumn("CustomAnnotations", _rootTable.getColumn("SeqId"));
+        annotationColumn.setIsUnselectable(true);
+        annotationColumn.setFk(new LookupForeignKey("AnnotationSetCount")
+        {
+            public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
+            {
+                if (displayField == null)
+                    return null;
+
+                for (final CustomAnnotationSet annotationSet : ProteinManager.getCustomAnnotationSets(_container, true).values())
+                {
+                    if (displayField.equals(annotationSet.getName()))
+                    {
+                        SQLFragment sql = new SQLFragment();
+
+                        sql.append("(SELECT MIN(CustomAnnotationId) FROM ");
+                        sql.append(ProteinManager.getTableInfoCustomAnnotation());
+                        CustomAnnotationType type = annotationSet.lookupCustomAnnotationType();
+                        sql.append(" WHERE CustomAnnotationSetId = ? AND LookupString IN (");
+                        sql.append(type.getLookupStringSelect(parent));
+                        sql.append("))");
+                        sql.add(annotationSet.getCustomAnnotationSetId());
+                        ExprColumn ret = new ExprColumn(parent.getParentTable(), displayField,
+                            sql, Types.INTEGER, parent);
+                        ret.setFk(new LookupForeignKey("CustomAnnotationId")
+                        {
+                            public TableInfo getLookupTableInfo()
+                            {
+                                return new CustomAnnotationTable(annotationSet);
+                            }
+                        });
+                        return ret;
+                    }
+                }
+
+                return null;
+            }
+
+            public TableInfo getLookupTableInfo()
+            {
+                return new CustomAnnotationSetsTable(SequencesTableInfo.this, _container);
+            }
+        });
+        addColumn(annotationColumn);
+
+        for (CustomAnnotationType type : CustomAnnotationType.values())
+        {
+            SQLFragment sql = new SQLFragment(type.getFirstSelectForSeqId());
+            ExprColumn firstIdentColumn = new ExprColumn(this, "First" + type.toString(), sql, Types.VARCHAR);
+            firstIdentColumn.setCaption("First " + type.getDescription());
+            addColumn(firstIdentColumn);
+        }
 
         List<FieldKey> cols = new ArrayList<FieldKey>();
         cols.add(FieldKey.fromParts("BestName"));

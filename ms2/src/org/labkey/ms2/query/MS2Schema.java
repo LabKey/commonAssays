@@ -8,6 +8,7 @@ import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.ProteinListDisplayColumn;
+import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.CaseInsensitiveHashSet;
@@ -122,7 +123,7 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    private TableInfo createPeptideMembershipsTable()
+    protected TableInfo createPeptideMembershipsTable()
     {
         TableInfo info = MS2Manager.getTableInfoPeptideMemberships();
         FilteredTable result = new FilteredTable(info);
@@ -149,14 +150,14 @@ public class MS2Schema extends UserSchema
         ProteinGroupTableInfo result = new ProteinGroupTableInfo(null, false, this);
 
         ColumnInfo proteinsColumn = result.wrapColumn("Proteins", result.getRealTable().getColumn("RowId"));
-        proteinsColumn.setRenderClass(ProteinListDisplayColumn.class);
+        proteinsColumn.setDisplayColumnFactory(ProteinDisplayColumnFactory.INSTANCE);
         proteinsColumn.setKeyField(false);
         result.addColumn(proteinsColumn);
 
         return result;
     }
 
-    private TableInfo createFractionsTable()
+    protected TableInfo createFractionsTable()
     {
         SqlDialect dialect = MS2Manager.getSqlDialect();
         FilteredTable result = new FilteredTable(MS2Manager.getTableInfoFractions());
@@ -188,185 +189,10 @@ public class MS2Schema extends UserSchema
 
     private TableInfo createPeptidesTable(final String alias)
     {
-        SqlDialect dialect = MS2Manager.getSqlDialect();
-        TableInfo info = MS2Manager.getTableInfoPeptidesData();
-        final FilteredTable result = new FilteredTable(info)
-        {
-            public List<FieldKey> getDefaultVisibleColumns()
-            {
-                List<FieldKey> result = new ArrayList<FieldKey>();
-                result.add(FieldKey.fromParts("Scan"));
-                result.add(FieldKey.fromParts("Charge"));
-                result.add(FieldKey.fromParts("RawScore"));
-                result.add(FieldKey.fromParts("DiffScore"));
-                result.add(FieldKey.fromParts("Expect"));
-                result.add(FieldKey.fromParts("IonPercent"));
-                result.add(FieldKey.fromParts("Mass"));
-                result.add(FieldKey.fromParts("DeltaMass"));
-                result.add(FieldKey.fromParts("PeptideProphet"));
-                result.add(FieldKey.fromParts("Peptide"));
-                result.add(FieldKey.fromParts("ProteinHits"));
-                result.add(FieldKey.fromParts("Protein"));
-                return result;
-            }
-        };
-        for (ColumnInfo col : info.getColumns())
-        {
-            if (!col.getName().toLowerCase().startsWith("score"))
-            {
-                result.addWrapColumn(col);
-            }
-        }
-
-        SQLFragment precursorMassSQL = new SQLFragment(result.getAliasName() + ".mass + " + result.getAliasName() + ".deltamass");
-        ColumnInfo precursorMass = new ExprColumn(result, "PrecursorMass", precursorMassSQL, Types.REAL);
-        precursorMass.setFormatString("0.0000");
-        precursorMass.setWidth("65");
-        precursorMass.setCaption("ObsMH+");
-        result.addColumn(precursorMass);
-
-        SQLFragment fractionalDeltaMassSQL = new SQLFragment("ABS(" + result.getAliasName() + ".deltamass - " + dialect.getRoundFunction(result.getAliasName() + ".deltamass") + ")");
-        ColumnInfo fractionalDeltaMass = new ExprColumn(result, "FractionalDeltaMass", fractionalDeltaMassSQL, Types.REAL);
-        fractionalDeltaMass.setFormatString("0.0000");
-        fractionalDeltaMass.setWidth("55");
-        fractionalDeltaMass.setCaption("fdMass");
-        result.addColumn(fractionalDeltaMass);
-
-        SQLFragment fractionalSQL = new SQLFragment("CASE\n" +
-            "            WHEN " + ExprColumn.STR_TABLE_ALIAS + ".mass = 0.0 THEN 0.0\n" +
-            "            ELSE abs(1000000.0 * abs(" + ExprColumn.STR_TABLE_ALIAS + ".deltamass - " + dialect.getRoundFunction(ExprColumn.STR_TABLE_ALIAS + ".deltamass") + ") / (" + ExprColumn.STR_TABLE_ALIAS + ".mass + ((" + ExprColumn.STR_TABLE_ALIAS + ".charge - 1.0) * 1.007276)))\n" +
-            "        END");
-        ColumnInfo fractionalDeltaMassPPM = new ExprColumn(result, "FractionalDeltaMassPPM", fractionalSQL, Types.REAL);
-        fractionalDeltaMassPPM.setFormatString("0.0");
-        fractionalDeltaMassPPM.setWidth("80");
-        fractionalDeltaMassPPM.setCaption("fdMassPPM");
-        result.addColumn(fractionalDeltaMassPPM);
-
-        SQLFragment deltaSQL = new SQLFragment("CASE\n" +
-            "            WHEN " + ExprColumn.STR_TABLE_ALIAS + ".mass = 0.0 THEN 0.0\n" +
-            "            ELSE abs(1000000.0 * " + ExprColumn.STR_TABLE_ALIAS + ".deltamass / (" + ExprColumn.STR_TABLE_ALIAS + ".mass + ((" + ExprColumn.STR_TABLE_ALIAS + ".charge - 1.0) * 1.007276)))\n" +
-            "        END");
-        ColumnInfo deltaMassPPM = new ExprColumn(result, "DeltaMassPPM", deltaSQL, Types.REAL);
-        deltaMassPPM.setFormatString("0.0");
-        deltaMassPPM.setWidth("75");
-        deltaMassPPM.setCaption("dMassPPM");
-        result.addColumn(deltaMassPPM);
-
-        SQLFragment mzSQL = new SQLFragment("CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".Charge = 0.0 THEN 0.0 ELSE (" + ExprColumn.STR_TABLE_ALIAS + ".Mass + " + ExprColumn.STR_TABLE_ALIAS + ".DeltaMass + (" + ExprColumn.STR_TABLE_ALIAS + ".Charge - 1.0) * 1.007276) / " + ExprColumn.STR_TABLE_ALIAS + ".Charge END");
-        ColumnInfo mz = new ExprColumn(result, "MZ", mzSQL, Types.REAL);
-        mz.setFormatString("0.0000");
-        mz.setWidth("55");
-        mz.setCaption("ObsMZ");
-        result.addColumn(mz);
-
-        SQLFragment strippedPeptideSQL = new SQLFragment("LTRIM(RTRIM(" + ExprColumn.STR_TABLE_ALIAS + ".PrevAA " + dialect.getConcatenationOperator() + " " + ExprColumn.STR_TABLE_ALIAS + ".TrimmedPeptide " + dialect.getConcatenationOperator() + " " + ExprColumn.STR_TABLE_ALIAS + ".NextAA))");
-        ColumnInfo strippedPeptide = new ExprColumn(result, "StrippedPeptide", strippedPeptideSQL, Types.VARCHAR);
-        strippedPeptide.setWidth("320");
-        result.addColumn(strippedPeptide);
-
-        ColumnInfo quantitation = result.wrapColumn("Quantitation", info.getColumn("RowId"));
-        quantitation.setFk(new LookupForeignKey("PeptideId")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                return MS2Manager.getTableInfoQuantitation();
-            }
-        });
-        quantitation.setKeyField(false);
-        result.addColumn(quantitation);
-
-        ColumnInfo proteinGroup = result.wrapColumn("ProteinProphetData", info.getColumn("RowId"));
-        proteinGroup.setFk(new LookupForeignKey("PeptideId")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                return createPeptideMembershipsTable();
-            }
-        });
-        proteinGroup.setKeyField(false);
-        result.addColumn(proteinGroup);
-
-        ColumnInfo peptideProphetData = result.wrapColumn("PeptideProphetDetails", info.getColumn("RowId"));
-        peptideProphetData.setFk(new LookupForeignKey("PeptideId")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                return MS2Manager.getTableInfoPeptideProphetData();
-            }
-        });
-        peptideProphetData.setKeyField(false);
-        result.addColumn(peptideProphetData);
-
-        result.getColumn("SeqId").setFk(new LookupForeignKey("SeqId", false)
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                SequencesTableInfo sequenceTable = new SequencesTableInfo(null, getContainer());
-                SQLFragment fastaNameSQL = new SQLFragment(result.getAliasName() + ".Protein");
-                ExprColumn fastaNameColumn = new ExprColumn(result, "Database Sequence Name", fastaNameSQL, Types.VARCHAR);
-                sequenceTable.addColumn(fastaNameColumn);
-
-                ViewURLHelper showProteinURL = new ViewURLHelper("MS2", "showProtein.view", getContainer());
-                String showProteinURLString = showProteinURL.getLocalURIString() + "peptideId=${RowId}";
-                fastaNameColumn.setURL(showProteinURLString);
-
-                return sequenceTable;
-            }
-        });
-
-        ViewURLHelper showProteinURL = new ViewURLHelper("MS2", "showProtein.view", getContainer());
-        String showProteinURLString = showProteinURL.getLocalURIString() + "&peptideId=${RowId}";
-        result.getColumn("SeqId").setURL(showProteinURLString);
-        result.getColumn("Protein").setURL(showProteinURLString);
-        result.getColumn("SeqId").setCaption("Search Engine Protein");
-
-        ViewURLHelper showPeptideURL = new ViewURLHelper("MS2", "showPeptide.view", getContainer());
-        String showPeptideURLString = showPeptideURL.getLocalURIString() + "&peptideId=${RowId}";
-        result.getColumn("Scan").setURL(showPeptideURLString);
-        result.getColumn("Peptide").setURL(showPeptideURLString);
-
-        result.addColumn(result.wrapColumn("RawScore", info.getColumn("score1"))).setCaption("Raw");
-        result.addColumn(result.wrapColumn("DiffScore", info.getColumn("score2"))).setCaption("dScore");
-        result.addColumn(result.wrapColumn("ZScore", info.getColumn("score3")));
-
-        result.addColumn(result.wrapColumn("SpScore", info.getColumn("score1")));
-        result.addColumn(result.wrapColumn("DeltaCN", info.getColumn("score2")));
-        result.addColumn(result.wrapColumn("XCorr", info.getColumn("score3")));
-        result.addColumn(result.wrapColumn("SpRank", info.getColumn("score4")));
-
-        result.addColumn(result.wrapColumn("Hyper", info.getColumn("score1")));
-        result.addColumn(result.wrapColumn("Next", info.getColumn("score2")));
-        result.addColumn(result.wrapColumn("B", info.getColumn("score3")));
-        result.addColumn(result.wrapColumn("Y", info.getColumn("score4")));
-        result.addColumn(result.wrapColumn("Expect", info.getColumn("score5")));
-
-        result.addColumn(result.wrapColumn("Ion", info.getColumn("score1")));
-        result.addColumn(result.wrapColumn("Identity", info.getColumn("score2")));
-        result.addColumn(result.wrapColumn("Homology", info.getColumn("score3")));
-
-        result.getColumn("Fraction").setFk(new LookupForeignKey("Fraction")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                return createFractionsTable();
-            }
-        });
-
-
-        SQLFragment sql = new SQLFragment();
-        sql.append("Fraction IN (SELECT Fraction FROM ");
-        sql.append(MS2Manager.getTableInfoFractions());
-        sql.append(" WHERE Run IN (SELECT Run FROM ");
-        sql.append(MS2Manager.getTableInfoRuns());
-        sql.append(" WHERE Container = ? AND Deleted = ?");
-        sql.add(getContainer().getId());
-        sql.add(Boolean.FALSE);
-        sql.append("))");
-        result.addCondition(sql);
-        
+        PeptidesTableInfo result = new PeptidesTableInfo(this);
+        result.setAlias(alias);
         return result;
     }
-
 
     private TableInfo createSearchTable(String alias, String... protocolPattern)
     {
@@ -398,7 +224,13 @@ public class MS2Schema extends UserSchema
                 result.addWrapColumn(result.getRealTable().getColumn("Type"));
 
                 ColumnInfo iconColumn = result.wrapColumn("Links", result.getRealTable().getColumn("Run"));
-                iconColumn.setRenderClass(IconLinksDisplayColumn.class);
+                iconColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+                {
+                    public DisplayColumn createRenderer(ColumnInfo colInfo)
+                    {
+                        return new IconLinksDisplayColumn(colInfo);
+                    }
+                });
                 result.addColumn(iconColumn);
                 return result;
             }

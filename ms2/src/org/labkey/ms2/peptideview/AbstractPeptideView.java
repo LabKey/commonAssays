@@ -36,7 +36,7 @@ public abstract class AbstractPeptideView
         _calculatedPeptideColumns.put("DeltaScan", DeltaScanColumn.class);
 
         // Different renderer to ensure that SeqId is always selected when Protein column is displayed
-        MS2Manager.getTableInfoPeptides().getColumn("Protein").setRenderClass(ProteinDisplayColumn.class);
+        MS2Manager.getTableInfoPeptides().getColumn("Protein").setDisplayColumnFactory(ProteinDisplayColumnFactory.INSTANCE);
 
         _calculatedProteinColumns.put("AACoverage", AACoverageColumn.class);
     }
@@ -545,4 +545,5 @@ public abstract class AbstractPeptideView
 
         return null;
     }
+
 }

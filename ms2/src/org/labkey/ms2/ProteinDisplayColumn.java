@@ -15,11 +15,13 @@ public class ProteinDisplayColumn extends DataColumn
     public ProteinDisplayColumn(ColumnInfo col)
     {
         super(col);
+        setLinkTarget("prot");
     }
 
     public void addQueryColumns(Set<ColumnInfo> set)
     {
         super.addQueryColumns(set);
-        set.add(MS2Manager.getTableInfoPeptides().getColumn("SeqId"));
+        set.add(getColumnInfo().getParentTable().getColumn("SeqId"));
+        set.add(getColumnInfo().getParentTable().getColumn("Protein"));
     }
 }

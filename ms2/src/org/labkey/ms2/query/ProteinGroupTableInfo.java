@@ -37,7 +37,14 @@ public class ProteinGroupTableInfo extends FilteredTable
 
         ColumnInfo groupNumberColumn = wrapColumn("Group", getRealTable().getColumn("GroupNumber"));
         groupNumberColumn.setAlias("GroupAlias");
-        groupNumberColumn.setRenderClass(GroupNumberDisplayColumn.class);
+        groupNumberColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new GroupNumberDisplayColumn(colInfo);
+            }
+        });
+
         ViewURLHelper url = new ViewURLHelper("MS2", "showProteinGroup.view", "");
         groupNumberColumn.setURL(url + "proteinGroupId=${RowId}");
 

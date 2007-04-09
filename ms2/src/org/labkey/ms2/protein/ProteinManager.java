@@ -19,6 +19,8 @@ package org.labkey.ms2.protein;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.ms2.*;
 
 import java.io.UnsupportedEncodingException;
@@ -26,9 +28,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * User: arauch
@@ -89,6 +89,16 @@ public class ProteinManager
         return getSchema().getTable("AnnotInsertions");
     }
 
+
+    public static TableInfo getTableInfoCustomAnnotation()
+    {
+        return getSchema().getTable("CustomAnnotation");
+    }
+
+    public static TableInfo getTableInfoCustomAnnotationSet()
+    {
+        return getSchema().getTable("CustomAnnotationSet");
+    }
 
     public static TableInfo getTableInfoAnnotations()
     {
@@ -274,6 +284,145 @@ public class ProteinManager
             filter.addClause(new TrypticFilter(1));
         else if ("2".equals(tryptic))
             filter.addClause(new TrypticFilter(2));
+    }
+
+    public static Map<String, CustomAnnotationSet> getCustomAnnotationSets(Container container, boolean includeProject)
+    {
+        SQLFragment sql = new SQLFragment();
+        sql.append("SELECT * FROM ");
+        sql.append(getTableInfoCustomAnnotationSet());
+        sql.append(" WHERE Container = ? ");
+        sql.add(container.getId());
+        if (includeProject)
+        {
+            Container project = container.getProject();
+            if (!project.equals(container))
+            {
+                sql.append(" OR Container = ? ");
+                sql.add(project.getId());
+            }
+        }
+        sql.append(" ORDER BY Name");
+        try
+        {
+            CustomAnnotationSet[] allSets = Table.executeQuery(getSchema(), sql.toString(), sql.getParamsArray(), CustomAnnotationSet.class);
+
+            Set<String> setNames = new CaseInsensitiveHashSet();
+            List<CustomAnnotationSet> dedupedSets = new ArrayList<CustomAnnotationSet>(allSets.length);
+            // If there are any name collisions, we want sets in this container to mask the ones in the project
+
+            // Take a first pass through to add all the ones from this container
+            for (CustomAnnotationSet set : allSets)
+            {
+                if (set.getContainer().equals(container.getId()))
+                {
+                    setNames.add(set.getName());
+                    dedupedSets.add(set);
+                }
+            }
+
+            // Take a second pass through to add all the ones from the project that don't collide
+            for (CustomAnnotationSet set : allSets)
+            {
+                if (!set.getContainer().equals(container.getId()) && setNames.add(set.getName()))
+                {
+                    dedupedSets.add(set);
+                }
+            }
+
+            Collections.sort(dedupedSets, new Comparator<CustomAnnotationSet>()
+            {
+                public int compare(CustomAnnotationSet o1, CustomAnnotationSet o2)
+                {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
+            Map<String, CustomAnnotationSet> result = new LinkedHashMap<String, CustomAnnotationSet>();
+            for (CustomAnnotationSet set : dedupedSets)
+            {
+                result.put(set.getName(), set);
+            }
+            return result;
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+    }
+
+    public static void deleteCustomAnnotationSet(CustomAnnotationSet set)
+    {
+        try
+        {
+            Container c = ContainerManager.getForId(set.getContainer());
+            if (OntologyManager.getDomainDescriptor(set.getLsid(), c) != null)
+            {
+                OntologyManager.deleteOntologyObject(set.getLsid(), c, true);
+                OntologyManager.deleteDomain(set.getLsid(), c);
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+        
+        try
+        {
+            getSchema().getScope().beginTransaction();
+            Table.execute(getSchema(), "DELETE FROM " + getTableInfoCustomAnnotation() + " WHERE CustomAnnotationSetId = ?", new Object[] {set.getCustomAnnotationSetId()});
+            Table.delete(getTableInfoCustomAnnotationSet(), set.getCustomAnnotationSetId(), null);
+            getSchema().getScope().commitTransaction();
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+        finally
+        {
+            getSchema().getScope().closeConnection();
+        }
+    }
+
+    public static CustomAnnotationSet getCustomAnnotationSet(Container c, int id, boolean includeProject)
+    {
+        SQLFragment sql = new SQLFragment();
+        sql.append("SELECT * FROM ");
+        sql.append(getTableInfoCustomAnnotationSet());
+        sql.append(" WHERE (Container = ?");
+        sql.add(c.getId());
+        if (includeProject)
+        {
+            sql.append(" OR Container = ?");
+            sql.add(c.getProject().getId());
+        }
+        sql.append(") AND CustomAnnotationSetId = ?");
+        sql.add(id);
+        try
+        {
+            CustomAnnotationSet[] matches = Table.executeQuery(getSchema(), sql.toString(), sql.getParamsArray(), CustomAnnotationSet.class);
+            if (matches.length > 1)
+            {
+                for (CustomAnnotationSet set : matches)
+                {
+                    if (set.getContainer().equals(c.getId()))
+                    {
+                        return set;
+                    }
+                }
+                assert false : "More than one matching set was found but none were in the current container";
+                return matches[0];
+            }
+            if (matches.length == 1)
+            {
+                return matches[0];
+            }
+            return null;
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+
     }
 
     public static class TrypticFilter extends SimpleFilter.FilterClause

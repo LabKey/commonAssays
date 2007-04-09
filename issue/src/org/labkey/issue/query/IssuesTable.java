@@ -1,9 +1,7 @@
 package org.labkey.issue.query;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.*;
 import org.labkey.api.issues.IssuesSchema;
 import org.labkey.api.query.*;
 import org.labkey.api.view.ViewURLHelper;
@@ -55,7 +53,13 @@ public class IssuesTable extends FilteredTable
         addWrapColumn(_rootTable.getColumn("Title"));
         ColumnInfo assignedTo = wrapColumn("AssignedTo", _rootTable.getColumn("AssignedTo"));
         assignedTo.setFk(new UserIdForeignKey());
-        assignedTo.setRenderClass(UserIdRenderer.GuestAsBlank.class);
+        assignedTo.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new UserIdRenderer.GuestAsBlank(colInfo);
+            }
+        });
         addColumn(assignedTo);
         addWrapColumn(_rootTable.getColumn("Priority"));
         addWrapColumn(_rootTable.getColumn("Status"));

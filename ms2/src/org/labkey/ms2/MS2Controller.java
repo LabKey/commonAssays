@@ -352,7 +352,18 @@ public class MS2Controller extends ViewController
         gridView.setFilter(new SimpleFilter("Deleted", Boolean.FALSE));
         gridView.setSort(MS2Manager.getRunsBaseSort());
 
-        return _renderInTemplate(gridView, true, pageName, helpTopic);
+        ProteinSearchWebPart searchView = new ProteinSearchWebPart(true);
+
+        ViewURLHelper url = cloneViewURLHelper();
+        url.deleteParameters();
+        url.setPageFlow("protein");
+        url.setAction("begin.view");
+
+        HtmlView htmlView = new HtmlView("Protein Annotations", "<a href=\"" + url.getLocalURIString() + "\">Go to protein annotations</a>");
+
+        VBox vbox = new VBox(searchView, htmlView, gridView);
+
+        return _renderInTemplate(vbox, true, pageName, helpTopic);
     }
 
     @Jpf.Action
@@ -3950,7 +3961,8 @@ public class MS2Controller extends ViewController
         proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);
         proteinsSettings.setAllowChooseQuery(false);
         QueryView proteinsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), proteinsSettings);
-        proteinsView.setShowExportButtons(false);
+        proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
+        proteinsView.setShowExportButtons(true);
         SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
         sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
         sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
@@ -3969,7 +3981,8 @@ public class MS2Controller extends ViewController
                 return table;
             }
         };
-        groupsView.setShowExportButtons(false);
+        groupsView.setShowExportButtons(true);
+        groupsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
 
         groupsView.setTitle("Protein Group Results");
 
@@ -4793,7 +4806,6 @@ public class MS2Controller extends ViewController
             this.cumulative = cumulative;
         }
     }
-
 
     public static class MS2ViewForm extends FormData
     {

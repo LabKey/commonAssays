@@ -3,6 +3,7 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.GroupedResultSet;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.ms2.ProteinGroupProteins;
 
@@ -103,6 +104,17 @@ public abstract class AbstractProteinDataRegion extends DataRegion
         if (_expanded)
         {
             _nestedRegion.render(nestedCtx, out);
+        }
+        else
+        {
+            try
+            {
+                while(nestedRS.next());
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
         }
         renderRowEnd(out);
     }

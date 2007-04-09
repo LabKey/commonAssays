@@ -15,6 +15,7 @@ import java.util.*;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
+import org.labkey.ms2.query.PeptidesTableInfo;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -74,15 +75,6 @@ public class QueryPeptideView extends AbstractPeptideView
         QuerySettings settings = createQuerySettings(DATA_REGION_NAME, schema, _maxPeptideRows);
 
         FlatPeptideQueryView peptideView = new FlatPeptideQueryView(_viewContext, schema, settings, expanded);
-        FilteredTable table = peptideView.getFilteredTable();
-        List<Object> params = new ArrayList<Object>(_runs.length);
-        for (MS2Run run : _runs)
-        {
-            params.add(run.getRun());
-        }
-
-        table.addCondition(new SQLFragment(MS2Manager.getTableInfoPeptidesData() + ".Fraction IN " +
-            "(SELECT Fraction FROM " + MS2Manager.getTableInfoFractions() + " WHERE Run IN (?" + StringUtils.repeat(", ?", params.size() - 1) + "))", params));
 
         peptideView.setTitle("Peptides");
         return peptideView;
@@ -172,7 +164,6 @@ public class QueryPeptideView extends AbstractPeptideView
             List<DisplayColumn> peptideColumns = new ArrayList<DisplayColumn>();
             List<DisplayColumn> groupingColumns = new ArrayList<DisplayColumn>();
             List<DisplayColumn> allColumns = new ArrayList<DisplayColumn>();
-
             Set<NestingOption> nestingOptions = new HashSet<NestingOption>();
             nestingOptions.add(new NestingOption(PROTEIN_GROUP_PREFIX, PROTEIN_GROUP_ROWID));
             nestingOptions.add(new NestingOption(PROTEIN_PREFIX, PROTEIN_ROWID));
@@ -200,12 +191,12 @@ public class QueryPeptideView extends AbstractPeptideView
                 }
                 allColumns.add(column);
             }
-
             DataRegion rgn;
             if (_selectedNestingOption != null)
             {
                 QueryPeptideDataRegion ppRgn = new QueryPeptideDataRegion(allColumns, _selectedNestingOption.getGroupIdColumn(), _runs, _url);
-                ppRgn.setExpanded(_expanded);
+//                ppRgn.setExpanded(_expanded);
+                ppRgn.setExpanded(true);
                 ppRgn.setRecordSelectorValueColumns(_selectedNestingOption.getGroupIdColumn().getColumnInfo().getAlias());
                 DataRegion nestedRgn = new DataRegion();
                 nestedRgn.setName(getDataRegionName());
@@ -324,10 +315,10 @@ public class QueryPeptideView extends AbstractPeptideView
                 bar.add(element);
             }
         }
-
-        public FilteredTable getFilteredTable()
+        
+        protected PeptidesTableInfo createTable()
         {
-            return (FilteredTable)getTable();
+            return new PeptidesTableInfo((MS2Schema)getSchema(), _runs, _url.clone());
         }
     }
 

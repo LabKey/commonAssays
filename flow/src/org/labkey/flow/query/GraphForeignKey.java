@@ -1,10 +1,7 @@
 package org.labkey.flow.query;
 
 import org.labkey.api.query.ExprColumn;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.ForeignKey;
-import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.*;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.flow.view.GraphColumn;
 
@@ -69,7 +66,13 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
                 return null;
             }
         });
-        column.setRenderClass(GraphColumn.class);
+        column.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new GraphColumn(colInfo);
+            }
+        });
     }
 
     protected SQLFragment sqlValue(ColumnInfo objectIdColumn, GraphSpec attrName, int attrId)
