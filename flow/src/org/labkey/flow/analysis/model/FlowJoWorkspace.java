@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.*;
 
 import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.persist.AttributeSet;
 
 abstract public class FlowJoWorkspace implements Serializable
 {
@@ -30,6 +31,7 @@ abstract public class FlowJoWorkspace implements Serializable
 
     protected Map<String, Analysis> _groupAnalyses = new HashMap();
     protected Map<String, Analysis> _sampleAnalyses = new HashMap();
+    protected Map<String, AttributeSet> _sampleAnalysisResults = new HashMap();
     protected Map<String, SampleInfo> _sampleInfos = new HashMap();
     protected Map<String, ParameterInfo> _parameters = new LinkedHashMap();
     protected Set<StatisticSet> _statisticSets;
@@ -189,6 +191,10 @@ abstract public class FlowJoWorkspace implements Serializable
     public Analysis getSampleAnalysis(SampleInfo sample)
     {
         return _sampleAnalyses.get(sample._sampleId);
+    }
+    public AttributeSet getSampleAnalysisResults(SampleInfo sample)
+    {
+        return _sampleAnalysisResults.get(sample._sampleId);
     }
     public String[] getParameters()
     {

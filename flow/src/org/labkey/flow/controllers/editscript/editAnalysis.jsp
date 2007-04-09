@@ -73,7 +73,14 @@
         {
             graph = subset;
         }
-        graph += "(" + x + ":" + y + ")";
+        if (y)
+        {
+            graph += "(" + x + ":" + y + ")";
+        }
+        else
+        {
+            graph += "(" + x + ")";
+        }
         appendLine(document.getElementsByName("graphs")[0], graph);
     }
 </script>

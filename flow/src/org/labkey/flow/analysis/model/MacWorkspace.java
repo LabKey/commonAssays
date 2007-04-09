@@ -6,12 +6,28 @@ import org.w3c.dom.Node;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
+import java.net.URI;
 
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.ObjectType;
 
 public class MacWorkspace extends FlowJoWorkspace
 {
+    static Map<String, StatisticSpec.STAT> statMap = new HashMap();
+    static
+    {
+        statMap.put("Count", StatisticSpec.STAT.Count);
+        statMap.put("Percentile", StatisticSpec.STAT.Percentile);
+        statMap.put("Mean", StatisticSpec.STAT.Mean);
+        statMap.put("Median", StatisticSpec.STAT.Median);
+        statMap.put("FrequencyOfGrandParent", StatisticSpec.STAT.Freq_Of_Grandparent);
+        statMap.put("FrequencyOfParent", StatisticSpec.STAT.Freq_Of_Parent);
+        statMap.put("FrequencyOfTotal", StatisticSpec.STAT.Frequency);
+    }
+
+
     protected void readSamples(Element elDoc)
     {
         for (Element elSamples : getElementsByTagName(elDoc, "Samples"))
@@ -46,9 +62,15 @@ public class MacWorkspace extends FlowJoWorkspace
 
     protected Analysis readSampleAnalysis(Element elSampleAnalysis)
     {
-        Analysis ret = readAnalysis(elSampleAnalysis);
+        AttributeSet results = new AttributeSet(ObjectType.fcsAnalysis, null);
+        Analysis ret = readAnalysis(elSampleAnalysis, results);
         ret.setName(elSampleAnalysis.getAttribute("name"));
-        _sampleAnalyses.put(elSampleAnalysis.getAttribute("sampleID"), ret);
+        String sampleId = elSampleAnalysis.getAttribute("sampleID");
+        _sampleAnalyses.put(sampleId, ret);
+        if (results.getStatistics().size() > 0)
+        {
+            _sampleAnalysisResults.put(sampleId, results);
+        }
         return ret;
     }
 
@@ -164,12 +186,54 @@ public class MacWorkspace extends FlowJoWorkspace
         allStats.addAll(stats);
     }
 
-    protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, List<StatisticSpec> stats)
+    protected void readStats(SubsetSpec subset, Element elPopulation, AttributeSet results)
+    {
+        for (Element elStat : getElementsByTagName(elPopulation, "Statistic"))
+        {
+            String statistic = elStat.getAttribute("statistic");
+            StatisticSpec.STAT stat = statMap.get(statistic);
+            if (stat == null)
+                continue;
+            String parameter = StringUtils.trimToNull(elStat.getAttribute("parameter"));
+            if (parameter != null)
+            {
+                parameter = cleanName(parameter);
+            }
+            String percentile = StringUtils.trimToNull(elStat.getAttribute("statisticVariable"));
+            String strValue = elStat.getAttribute("value");
+            if (strValue == null)
+            {
+                continue;
+            }
+            double value;
+            try
+            {
+                value = Double.valueOf(strValue);
+            }
+            catch (NumberFormatException nfe)
+            {
+                continue;
+            }
+            StatisticSpec spec;
+            if (percentile == null)
+            {
+                spec = new StatisticSpec(subset, stat, parameter);
+            }
+            else
+            {
+                spec = new StatisticSpec(subset, stat, parameter + ":" + percentile);
+            }
+            results.setStatistic(spec, value);
+        }
+    }
+
+    protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, List<StatisticSpec> stats, AttributeSet results)
     {
         String booleanExpr = toBooleanExpression(elPopulation);
         if (booleanExpr != null)
         {
             SubsetSpec subset = new SubsetSpec(parentSubset, "(" + booleanExpr + ")");
+            readStats(subset, elPopulation, results);
             addStats(subset, Collections.EMPTY_SET, stats);
             return null;
         }
@@ -230,11 +294,12 @@ public class MacWorkspace extends FlowJoWorkspace
 
 
 
+        readStats(subset, elPopulation, results);
         addStats(subset, gatedParams, stats);
 
         for (Element elChild: getElementsByTagName(elPopulation, "Population"))
         {
-            Population child = readPopulation(elChild, subset, stats);
+            Population child = readPopulation(elChild, subset, stats, results);
             if (child != null)
             {
                 ret.addPopulation(child);
@@ -244,13 +309,13 @@ public class MacWorkspace extends FlowJoWorkspace
     }
 
 
-    protected Analysis readAnalysis(Element elAnalysis)
+    protected Analysis readAnalysis(Element elAnalysis, AttributeSet results)
     {
         Analysis ret = new Analysis();
         ret.getStatistics().add(new StatisticSpec(null, StatisticSpec.STAT.Count, null));
         for (Element elPopulation : getElementsByTagName(elAnalysis, "Population"))
         {
-            Population child = readPopulation(elPopulation, null, ret.getStatistics());
+            Population child = readPopulation(elPopulation, null, ret.getStatistics(), results);
             ret.addPopulation(child);
         }
 
@@ -259,7 +324,7 @@ public class MacWorkspace extends FlowJoWorkspace
 
     protected Analysis readGroupAnalysis(Element elGroupAnalysis)
     {
-        Analysis ret = readAnalysis(elGroupAnalysis);
+        Analysis ret = readAnalysis(elGroupAnalysis, null);
         ret.setName(elGroupAnalysis.getAttribute("name"));
         _groupAnalyses.put(ret.getName(), ret);
         return ret;

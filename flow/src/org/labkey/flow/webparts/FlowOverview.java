@@ -30,6 +30,7 @@ public class FlowOverview extends Overview
     boolean _canSetPipelineRoot;
     boolean _canInsert;
     boolean _canUpdate;
+    boolean _canCreateFolder;
     int _fcsFileCount;
     int _fcsRunCount;
     int _fcsAnalysisCount;
@@ -49,9 +50,11 @@ public class FlowOverview extends Overview
         PipelineService pipeService = PipelineService.get();
         PipeRoot pipeRoot = pipeService.findPipelineRoot(getContainer());
         _hasPipelineRoot = pipeRoot != null && pipeRoot.getUri(container) != null;
-        _canSetPipelineRoot = hasPermission(ACL.PERM_ADMIN) && (pipeRoot == null || getContainer().equals(pipeRoot.getContainer()));
+        _canSetPipelineRoot = isGlobalAdmin() && (pipeRoot == null || getContainer().equals(pipeRoot.getContainer()));
         _canInsert = hasPermission(ACL.PERM_INSERT);
         _canUpdate = hasPermission(ACL.PERM_UPDATE);
+        _canCreateFolder = getContainer().getParent() != null && !getContainer().getParent().isRoot() &&
+                getContainer().getParent().hasPermission(getUser(), ACL.PERM_ADMIN);
 
         _fcsFileCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.fcsKeywords);
         _fcsRunCount = FlowManager.get().getRunCount(getContainer(), ObjectType.fcsKeywords);
@@ -107,7 +110,7 @@ public class FlowOverview extends Overview
                 addAction(action);
             }
         }
-        if (_hasPipelineRoot && _canUpdate && _protocol != null)
+        if (_hasPipelineRoot && _canCreateFolder && _protocol != null)
         {
             Action action = new Action("Create new folder", PFUtil.urlFor(FlowController.Action.newFolder, getContainer()));
             action.setDescriptionHTML("<i>If you want to analyze a new set of experiment runs with a different protocol, you should create a new folder to do this work in. You can copy some of the settings from this folder.</i>");

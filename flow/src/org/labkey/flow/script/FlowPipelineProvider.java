@@ -15,6 +15,13 @@ import java.sql.SQLException;
 
 import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 public class FlowPipelineProvider extends PipelineProvider
 {
@@ -29,6 +36,51 @@ public class FlowPipelineProvider extends PipelineProvider
     private boolean hasFlowModule(ViewContext context)
     {
         return FlowModule.isActive(context.getContainer());
+    }
+
+    static class WorkspaceRecognizer extends DefaultHandler
+    {
+        boolean _isWorkspace = false;
+
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
+        {
+            if ("Workspace".equals(qName))
+            {
+                _isWorkspace = true;
+            }
+            else
+            {
+                _isWorkspace = false;
+            }
+            throw new SAXException("Stop parsing");
+        }
+        boolean isWorkspace()
+        {
+            return _isWorkspace;
+        }
+    }
+
+    private class IsFlowJoWorkspaceFilter extends FileEntryFilter
+    {
+        public boolean accept(File pathname)
+        {
+            if (pathname.getName().endsWith(".wsp"))
+                return true;
+            if (pathname.isDirectory())
+                return false;
+            WorkspaceRecognizer recognizer = new WorkspaceRecognizer();
+            try
+            {
+                SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+
+                parser.parse(pathname, recognizer);
+            }
+            catch (Exception e)
+            {
+                // suppress
+            }
+            return recognizer.isWorkspace();
+        }
     }
 
     public void updateFileProperties(ViewContext context, List<FileEntry> entries)
@@ -49,17 +101,34 @@ public class FlowPipelineProvider extends PipelineProvider
             return;
         }
 
-        FileEntry entry = entries.get(0);
-        File file = new File(entry.getURI());
-        ViewURLHelper url = PFUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer());
+        {
+            FileEntry entry = entries.get(0);
+            File file = new File(entry.getURI());
+            ViewURLHelper url = PFUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer());
 
-        url.addParameter("path", root.relativePath(file));
-        url.addParameter("srcURL", context.getViewURLHelper().toString());
-        url.setPageFlow(PFUtil.getPageFlowName(AnalysisScriptController.Action.chooseRunsToUpload));
-        url.setAction(AnalysisScriptController.Action.chooseRunsToUpload.toString());
-        FileAction action = new FileAction("Upload FCS files", url, null);
-        action.setDescription("<p><b>Flow Instructions:</b><br>Navigate to the directories containing FCS files.  Click the button to upload FCS files in the directories shown.</p>");
-        entry.addAction(action);
+            url.addParameter("path", root.relativePath(file));
+            url.addParameter("srcURL", context.getViewURLHelper().toString());
+            FileAction action = new FileAction("Upload FCS files", url, null);
+            action.setDescription("<p><b>Flow Instructions:</b><br>Navigate to the directories containing FCS files.  Click the button to upload FCS files in the directories shown.</p>");
+            entry.addAction(action);
+        }
+
+        if (false)
+        {
+            for (FileEntry entry : entries)
+            {
+                if (!entry.isDirectory())
+                    continue;
+                for (File file : entry.listFiles(new IsFlowJoWorkspaceFilter()))
+                {
+                    ViewURLHelper urlUploadWorkspace = PFUtil.urlFor(AnalysisScriptController.Action.uploadWorkspace, context.getContainer());
+                    urlUploadWorkspace.addParameter("path", root.relativePath(file));
+                    urlUploadWorkspace.addParameter("srcURL", context.getViewURLHelper().toString());
+                    FileAction wspAction = new FileAction("Upload FlowJo Workspace Analysis", urlUploadWorkspace, new File[] { file });
+                    entry.addAction(wspAction);
+                }
+            }
+        }
     }
 
     public boolean suppressOverlappingRootsWarning(ViewContext context)

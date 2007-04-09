@@ -11,6 +11,7 @@ public enum InputRole
     AnalysisScript,
     FCSFile,
     Sample,
+    Workspace,
     ;
     public PropertyDescriptor getPropertyDescriptor(Container container)
     {

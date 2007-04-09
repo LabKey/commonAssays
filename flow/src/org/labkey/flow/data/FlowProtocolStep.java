@@ -151,6 +151,18 @@ public class FlowProtocolStep
         throw new UnsupportedOperationException();
     }
 
+    public ExpProtocolAction getAction(ExpProtocol protocol)
+    {
+        for (ExpProtocolAction step : protocol.getSteps())
+        {
+            if (step.getActionSequence() == getDefaultActionSequence())
+            {
+                return step;
+            }
+        }
+        return null;
+    }
+
     static public void initProtocol(User user, FlowProtocol flowProtocol) throws Exception
     {
         ExpProtocol protocol = flowProtocol.getExpObject();

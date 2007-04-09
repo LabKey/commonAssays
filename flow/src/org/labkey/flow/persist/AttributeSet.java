@@ -123,7 +123,6 @@ public class AttributeSet
                 setStatistic(spec, matrix.getRow(iChannel)[iChannelValue]);
             }
         }
-
     }
 
     public AttributeSet(FCSKeywordData data)
@@ -134,6 +133,12 @@ public class AttributeSet
         {
             _keywords.put(keyword, data.getKeyword(keyword));
         }
+    }
+
+    public void setKeywords(Map<String, String> keywords)
+    {
+        _keywords = new TreeMap();
+        _keywords.putAll(keywords);
     }
 
     public FlowdataDocument toXML()
@@ -342,14 +347,22 @@ public class AttributeSet
 
     public Map<String, String> getKeywords()
     {
+        if (_keywords == null)
+            return Collections.EMPTY_MAP;
         return Collections.unmodifiableMap(_keywords);
     }
     public Map<StatisticSpec, Double> getStatistics()
     {
+        if (_statistics == null)
+            return Collections.EMPTY_MAP;
         return Collections.unmodifiableMap(_statistics);
     }
     public Set<GraphSpec> getGraphNames()
     {
+        if (_graphs == null)
+        {
+            return Collections.EMPTY_SET;
+        }
         return Collections.unmodifiableSet(_graphs.keySet());
     }
 

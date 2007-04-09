@@ -7,15 +7,24 @@ import org.apache.struts.action.ActionError;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.*;
+import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.labkey.flow.analysis.model.FCSKeywordData;
+import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.ObjectType;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.jsp.FormPage;
+import org.labkey.api.exp.api.*;
+import org.labkey.api.study.GenericAssayService;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.*;
+import java.net.URI;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class AnalysisScriptController extends BaseFlowController<AnalysisScriptController.Action>
@@ -31,6 +40,8 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         chooseRunsToAnalyze,
         chooseAnalysisName,
         analyzeSelectedRuns,
+
+        uploadWorkspace,
 
         showRefreshKeywords,
         refreshKeywords,
@@ -270,5 +281,61 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         return true;
     }
 
+    @Jpf.Action
+    protected Forward uploadWorkspace() throws Exception
+    {
+        requiresPermission(ACL.PERM_INSERT);
+        String path = getRequest().getParameter("path");
+        PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+        File workspaceFile = root.resolvePath(path);
+        URI dataFileURI = new File(workspaceFile.getParent(), "attributes.flowdata.xml").toURI();
+        ExperimentService.Interface svc = ExperimentService.get();
+        ExpRun run = svc.createExperimentRun(getContainer(), workspaceFile.getName());
+        FlowProtocol flowProtocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
+        ExpProtocol protocol = flowProtocol.getProtocol();
+        run.setProtocol(protocol);
+        run.save(getUser());
+        ExpData workspaceData = svc.createData(getContainer(), new DataType("Flow-Workspace"));
+        workspaceData.setDataFileURI(workspaceFile.toURI());
+        workspaceData.setName(workspaceFile.getName());
+        workspaceData.save(getUser());
 
+        FlowJoWorkspace workspace = FlowJoWorkspace.readWorkspace(new FileInputStream(workspaceFile), Collections.EMPTY_SET);
+        ExpProtocolApplication startingInputs = run.addProtocolApplication(getUser(), null, ExpProtocol.ApplicationType.ExperimentRun);
+        startingInputs.addDataInput(getUser(), workspaceData, InputRole.Workspace.toString(), InputRole.Workspace.getPropertyDescriptor(getContainer()));
+        Map<FlowJoWorkspace.SampleInfo, ExpData> fcsFiles = new HashMap();
+        for (FlowJoWorkspace.SampleInfo sample : workspace.getSamples())
+        {
+            ExpProtocolApplication paSample = run.addProtocolApplication(getUser(), FlowProtocolStep.keywords.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
+            paSample.addDataInput(getUser(), workspaceData, InputRole.Workspace.toString(), InputRole.Workspace.getPropertyDescriptor(getContainer()));
+            ExpData fcsFile = svc.createData(getContainer(), FlowDataType.FCSFile);
+            fcsFile.setName(sample.getLabel());
+            fcsFile.setDataFileURI(dataFileURI);
+
+            File dataFile = new File(workspaceFile.getParent(), sample.getLabel());
+            fcsFile.setSourceApplication(paSample);
+            fcsFile.save(getUser());
+            fcsFiles.put(sample, fcsFile);
+            AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, dataFile.toURI());
+            attrs.setKeywords(sample.getKeywords());
+            attrs.save(getUser(), fcsFile);
+        }
+        for (Map.Entry<FlowJoWorkspace.SampleInfo, ExpData> entry : fcsFiles.entrySet())
+        {
+            AttributeSet results = workspace.getSampleAnalysisResults(entry.getKey());
+            if (results != null)
+            {
+                ExpProtocolApplication paAnalysis = run.addProtocolApplication(getUser(),
+                        FlowProtocolStep.analysis.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
+                paAnalysis.addDataInput(getUser(), entry.getValue(), InputRole.FCSFile.toString(), InputRole.FCSFile.getPropertyDescriptor(getContainer()));
+                ExpData fcsAnalysis = svc.createData(getContainer(), FlowDataType.FCSAnalysis);
+                fcsAnalysis.setName(flowProtocol.getFCSAnalysisName(new FlowFCSFile(entry.getValue())));
+                fcsAnalysis.setSourceApplication(paAnalysis);
+                fcsAnalysis.setDataFileURI(dataFileURI);
+                fcsAnalysis.save(getUser());
+                results.save(getUser(), fcsAnalysis);
+            }
+        }
+        return new ViewForward(new FlowRun(run).urlShow());
+    }
 }

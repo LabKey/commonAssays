@@ -4,6 +4,7 @@
 <%@ page import="org.labkey.flow.view.FlowQueryView"%>
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix"%>
 <%@ page import="org.labkey.flow.controllers.compensation.CompensationController"%>
+<%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page extends="org.labkey.flow.controllers.run.RunController.Page" %>
 <%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas"%>
 <%
@@ -33,4 +34,5 @@
         urlShowRunGraph.addParameter("rowId", Integer.toString(getRun().getRunId()));
     %>
     <cpas:link href="<%=h(urlShowRunGraph)%>" text="Experiment Run Graph"/><br>
+    <cpas:link href="<%=getRun().urlFor(RunController.Action.download)%>" text="Download FCS Files" /><br>
 </p>

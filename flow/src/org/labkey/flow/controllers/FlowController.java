@@ -185,9 +185,13 @@ public class FlowController extends BaseFlowController<FlowController.Action>
     @Jpf.Action
     protected Forward newFolder(NewFolderForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_UPDATE);
-        if (getContainer().getParent() == null)
+        requiresAdmin();
+        if (getContainer().getParent() == null || getContainer().getParent().isRoot())
             HttpView.throwUnauthorized();
+        if (!getContainer().getParent().hasPermission(getUser(), ACL.PERM_ADMIN))
+        {
+            HttpView.throwUnauthorized();
+        }
         if (isPost())
         {
             Forward forward = doNewFolder(form);
@@ -204,6 +208,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
     protected Forward doNewFolder(NewFolderForm form) throws Exception
     {
         Container parent = getContainer().getParent();
+
         if (parent.hasChild(form.ff_folderName))
         {
             addError("There is already a folder with the name '" + form.ff_folderName + "'");

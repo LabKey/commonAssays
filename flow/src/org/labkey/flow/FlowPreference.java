@@ -11,6 +11,7 @@ import org.labkey.flow.controllers.FlowController;
 public enum FlowPreference
 {
     graphSize("300"),
+    showGraphs("1"),
     editScriptRunId(null),
     editScriptCompId(null),
     editScriptWellId(null)
