@@ -76,7 +76,7 @@ public class IssuesQueryView extends QueryView
     {
         UserSchema schema = QueryService.get().getUserSchema(null, _context.getContainer(), IssuesQuerySchema.SCHEMA_NAME);
         QueryDefinition qd = schema.getQueryDefForTable("Issues");
-        Map<String, CustomView> views = qd.getCustomViews(null);
+        Map<String, CustomView> views = qd.getCustomViews(null, _context.getRequest());
 
         if (!views.containsKey(CUSTOM_VIEW_ALL))
         {
@@ -95,7 +95,7 @@ public class IssuesQueryView extends QueryView
             view.setColumns(columns);
 
             view.setFilterAndSortFromURL(new ViewURLHelper().addParameter("Issues.sort", "-Milestone,AssignedTo/DisplayName"), "Issues");
-            view.save(null);
+            view.save(null, null);
         }
 
         if (!views.containsKey(CUSTOM_VIEW_OPEN))
@@ -116,7 +116,7 @@ public class IssuesQueryView extends QueryView
 
             view.setFilterAndSortFromURL(new ViewURLHelper().addParameter("Issues.sort", "-Milestone,AssignedTo/DisplayName").
                     addParameter("Issues.Status~eq", "open"), "Issues");
-            view.save(null);
+            view.save(null, null);
         }
 
         if (!views.containsKey(CUSTOM_VIEW_RESOLVED))
@@ -137,7 +137,7 @@ public class IssuesQueryView extends QueryView
 
             view.setFilterAndSortFromURL(new ViewURLHelper().addParameter("Issues.sort", "-Milestone,AssignedTo/DisplayName").
                     addParameter("Issues.Status~eq", "resolved"), "Issues");
-            view.save(null);
+            view.save(null, null);
         }
     }
 

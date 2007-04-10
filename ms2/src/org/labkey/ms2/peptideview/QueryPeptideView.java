@@ -45,7 +45,7 @@ public class QueryPeptideView extends AbstractPeptideView
         if (columnNames != null)
         {
             QueryDefinition def = settings.getQueryDef(schema);
-            CustomView view = def.getCustomView(getUser(), "columns");
+            CustomView view = def.getCustomView(getUser(), _viewContext.getRequest(), "columns");
             if (view == null)
             {
                 view = def.createCustomView(getUser(), "columns");
@@ -57,7 +57,7 @@ public class QueryPeptideView extends AbstractPeptideView
                 fieldKeys.add(FieldKey.fromString(st.nextToken()));
             }
             view.setColumns(fieldKeys);
-            view.save(getUser());
+            view.save(getUser(), _viewContext.getRequest());
             settings.setViewName("columns");
             ViewURLHelper url = _url.clone();
             url.deleteParameter("columns");

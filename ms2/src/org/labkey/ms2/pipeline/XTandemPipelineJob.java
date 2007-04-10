@@ -41,6 +41,10 @@ import java.util.*;
 public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
 {
     private static Logger _log = Logger.getLogger(XTandemPipelineJob.class);
+    // TODO (bug 3166): Mac OS X has a different implementation of ProcessImpl, which cannot handle quoted
+    // arguments.  We need to determine whether or not arguments should be quoted.  Until then, we
+    // allow "labkey.no_quote_arguments" to be passed to us when we start
+    static public boolean NO_QUOTE_ARGUMENTS = Boolean.getBoolean("labkey.no_quote_arguments");
 
     private File _fileTandemXML;
 
@@ -387,9 +391,16 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
             if (quantParam != null)
                 interactCmd.add(quantParam);          
 
-            interactCmd.add("\"-N" + filePepXML.getName() + "\"");
-            interactCmd.add("\"" + filePepXMLRaw.getPath() + "\"");
-
+            if (NO_QUOTE_ARGUMENTS)
+            {
+                interactCmd.add("-N" + filePepXML.getName());
+                interactCmd.add(filePepXMLRaw.getPath());
+            }
+            else
+            {
+                interactCmd.add("\"-N" + filePepXML.getName() + "\"");
+                interactCmd.add("\"" + filePepXMLRaw.getPath() + "\"");
+            }
             header("xinteract output");
 
             iReturn = runSubProcess(new ProcessBuilder(interactCmd),

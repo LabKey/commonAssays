@@ -191,7 +191,7 @@ public class IssuesController extends ViewController
 
         // add the header for buttons and views
         QueryDefinition qd = schema.getQueryDefForTable(ISSUES_QUERY);
-        Map<String, CustomView> views = qd.getCustomViews(getUser());
+        Map<String, CustomView> views = qd.getCustomViews(getUser(), getRequest());
         // don't include a customized default view in the list
         if (views.containsKey(null))
             views.remove(null);
