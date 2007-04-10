@@ -323,7 +323,7 @@ public abstract class MS2Importer
         runMap.put("Type", getType());    // TODO: Change how we handle type: For pepXML, this is null at this point... okay for Comet
 
         Map returnMap = Table.insert(_user, MS2Manager.getTableInfoRuns(), runMap);
-        return (Integer) returnMap.get("Run");
+        return ((Integer)returnMap.get("Run")).intValue();
     }
 
 
@@ -358,7 +358,7 @@ public abstract class MS2Importer
         }
 
         Map returnMap = Table.insert(user, MS2Manager.getTableInfoFractions(), fractionMap);
-        return (Integer) returnMap.get("Fraction");
+        return ((Integer) returnMap.get("Fraction")).intValue();
     }
 
 

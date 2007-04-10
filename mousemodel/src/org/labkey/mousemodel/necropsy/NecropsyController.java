@@ -127,7 +127,7 @@ public class NecropsyController extends ViewController
                 {
                     throw new RuntimeException(x);
                 }
-                int taskType = ((Integer) ctx.get("taskTypeId"));
+                int taskType = ((Integer) ctx.get("taskTypeId")).intValue();
                 switch (taskType)
                 {
                     case TASK_TYPE_NECROPSY:
@@ -480,7 +480,7 @@ public class NecropsyController extends ViewController
                     sample.setOrganismId(mouse.getEntityId());
                     sample.setCollectionDate(new java.sql.Timestamp(form.getCollectionDate().getTime()));
                     sample.setDescription(samples[i].getDescription());
-                    sample.setSampleTypeId(samples[i].getTissueId());
+                    sample.setSampleTypeId(samples[i].getTissueId().intValue());
                     sample.setSampleId(samplePrefix + samples[i].getSampleId());
                     sample.setLSID(matSource.getMaterialLSIDPrefix() + sample.getSampleId());
                     sample.setContainer(form.getContainer().getId());

@@ -357,7 +357,7 @@ public class CometReader extends CometImporter
                 chargeStart = nthLastIndexOf(fileName, ".", 2) + 1;
                 chargeEnd = fileName.indexOf(".", chargeStart + 1);
 
-                scan = Integer.valueOf(fileName.substring(scanStart, scanEnd));
+                scan = Integer.valueOf(fileName.substring(scanStart, scanEnd)).intValue();
                 charge = Short.valueOf(fileName.substring(chargeStart, chargeEnd));
 
                 // Encode scan (32 bits), fileNameIndex (16 bits), and charge (16 bits) into a long

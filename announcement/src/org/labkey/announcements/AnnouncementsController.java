@@ -1548,7 +1548,7 @@ public class AnnouncementsController extends ViewController
                     User user = UserManager.getUser(email);
 
                     if (null == user)
-                        addActionError(email.toString() + ": Doesn't exist");
+                        addActionError(email.getEmailAddress() + ": Doesn't exist");
                     else if (!memberList.contains(user))
                         memberList.add(user);
                 }

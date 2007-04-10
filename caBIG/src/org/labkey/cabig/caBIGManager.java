@@ -39,6 +39,6 @@ public class caBIGManager
     {
         Long rows = Table.executeSingleton(caBIGSchema.getInstance().getSchema(), "SELECT COUNT(*) FROM " + caBIGSchema.getInstance().getTableInfoContainers() + " WHERE EntityId = ?", new Object[]{c.getId()}, Long.class);
 
-        return (1 == rows);
+        return (1 == rows.longValue());
     }
 }

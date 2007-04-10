@@ -833,7 +833,7 @@ public class MouseController extends ViewController
         public String getValue(RenderContext ctx)
         {
             Boolean val = (Boolean) super.getValue(ctx);
-            return val ? strTrue : strFalse;
+            return val.booleanValue() ? strTrue : strFalse;
         }
     }
 
