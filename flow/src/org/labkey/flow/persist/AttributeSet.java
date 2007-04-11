@@ -7,7 +7,6 @@ import org.labkey.api.security.User;
 import org.labkey.api.data.Table;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.URIUtil;
-import org.labkey.api.util.XMLUtil;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
@@ -304,7 +303,7 @@ public class AttributeSet
 
     public void save(OutputStream os) throws Exception
     {
-        String str = XMLUtil.toString(toXML());
+        String str = toXML().toString();
         os.write(str.getBytes("UTF-8")); 
     }
 
