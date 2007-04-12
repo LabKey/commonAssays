@@ -3453,8 +3453,19 @@ public class MS2Controller extends ViewController
                 if (file != null)
                 {
                     form.run = file.getRun();
-                    form.groupNumber = group.getGroupNumber();
-                    form.indistinguishableCollectionId = group.getIndistinguishableCollectionId();
+
+                    if (!isAuthorized(form.run))
+                        return null;
+
+                    MS2Run run = MS2Manager.getRun(form.run);
+                    Container c = ContainerManager.getForId(run.getContainer());
+                    ViewURLHelper url = cloneViewURLHelper();
+                    url.deleteParameter("proteinGroupId");
+                    url.replaceParameter("run", Integer.toString(form.run));
+                    url.replaceParameter("groupNumber", Integer.toString(group.getGroupNumber()));
+                    url.replaceParameter("indistinguishableCollectionId", Integer.toString(group.getIndistinguishableCollectionId()));
+                    url.setExtraPath(c.getPath());
+                    return new ViewForward(url);
                 }
             }
         }

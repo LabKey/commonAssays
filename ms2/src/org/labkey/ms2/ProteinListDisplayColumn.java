@@ -7,7 +7,6 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.CaseInsensitiveHashMap;
-import org.labkey.ms2.peptideview.QueryPeptideDataRegion;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -21,8 +20,8 @@ import java.text.DecimalFormat;
  */
 public class ProteinListDisplayColumn extends SimpleDisplayColumn
 {
-    private List<String> _sequenceColumns;
-    private ProteinGroupProteins _proteins;
+    private String _sequenceColumn;
+    private final ProteinGroupProteins _proteins;
 
     private static final DecimalFormat MASS_FORMAT = new DecimalFormat("0.0000");
     private ColumnInfo _columnInfo;
@@ -42,28 +41,13 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         ALL_SEQUENCE_COLUMNS_MAP = Collections.unmodifiableMap(values);
     }
 
-    public ProteinListDisplayColumn(ColumnInfo col)
+    public ProteinListDisplayColumn(String sequenceColumn, ProteinGroupProteins proteins)
     {
-        _columnInfo = col;
-        _columnName = col.getAlias();
-        _sequenceColumns = ALL_SEQUENCE_COLUMNS;
-    }
-
-    public ProteinListDisplayColumn(List<String> sequenceColumns, ProteinGroupProteins proteins)
-    {
-        _sequenceColumns = sequenceColumns;
+        _sequenceColumn = ALL_SEQUENCE_COLUMNS_MAP.get(sequenceColumn);
         _proteins = proteins;
-        setWidth("450");
         setNoWrap(true);
-        setCaption("Indistinguishable Proteins");
+        setCaption(_sequenceColumn);
     }
-
-    public ProteinListDisplayColumn(List<String> sequenceColumns, ProteinGroupProteins proteins, String columnName)
-    {
-        this(sequenceColumns, proteins);
-        setCaption(ALL_SEQUENCE_COLUMNS_MAP.get(columnName));
-    }
-
 
     public ColumnInfo getColumnInfo()
     {
@@ -73,14 +57,16 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
     public Object getValue(RenderContext ctx)
     {
         Map row = ctx.getRow();
-        Integer id = (Integer)row.get("RowId");
+        String columnName = "RowId";
+        Integer id = (Integer)row.get(columnName);
         if (id == null)
         {
-            id = (Integer)row.get(_columnName);
+            columnName = _columnName;
+            id = (Integer)row.get(columnName);
         }
         try
         {
-            List<ProteinSummary> summaryList = getProteins(ctx).getSummaries(id.intValue());
+            List<ProteinSummary> summaryList = _proteins.getSummaries(id.intValue(), ctx, columnName);
             StringBuilder sb = new StringBuilder();
             String proteinSeparator = "";
             for (ProteinSummary summary : summaryList)
@@ -88,39 +74,33 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
                 sb.append(proteinSeparator);
                 proteinSeparator = ", ";
 
-                String valueSeparator = "";
-                for (String column : _sequenceColumns)
+                if (_sequenceColumn.equalsIgnoreCase("Protein"))
                 {
-                    sb.append(valueSeparator);
-                    valueSeparator = " ";
-                    if (column.equalsIgnoreCase("Protein"))
+                    sb.append(summary.getName());
+                }
+                else if (_sequenceColumn.equalsIgnoreCase("Description"))
+                {
+                    sb.append(summary.getDescription());
+                }
+                else if (_sequenceColumn.equalsIgnoreCase("BestName"))
+                {
+                    sb.append(summary.getBestName());
+                }
+                else if (_sequenceColumn.equalsIgnoreCase("BestGeneName"))
+                {
+                    String geneName = summary.getBestGeneName();
+                    if (geneName != null)
                     {
-                        sb.append(summary.getName());
+                        sb.append(geneName);
                     }
-                    else if (column.equalsIgnoreCase("Description"))
+                    else
                     {
-                        sb.append(summary.getDescription());
+                        sb.append(NO_GENE_NAME_AVAILABLE);
                     }
-                    else if (column.equalsIgnoreCase("BestName"))
-                    {
-                        sb.append(summary.getBestName());
-                    }
-                    else if (column.equalsIgnoreCase("BestGeneName"))
-                    {
-                        String geneName = summary.getBestGeneName();
-                        if (geneName != null)
-                        {
-                            sb.append(geneName);
-                        }
-                        else
-                        {
-                            sb.append(NO_GENE_NAME_AVAILABLE);
-                        }
-                    }
-                    else if (column.equalsIgnoreCase("SequenceMass"))
-                    {
-                        sb.append(summary.getSequenceMass());
-                    }
+                }
+                else if (_sequenceColumn.equalsIgnoreCase("SequenceMass"))
+                {
+                    sb.append(summary.getSequenceMass());
                 }
             }
             return sb.toString();
@@ -131,21 +111,12 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         }
     }
 
-    private ProteinGroupProteins getProteins(RenderContext ctx)
-    {
-        if (_proteins == null)
-        {
-            _proteins = ((QueryPeptideDataRegion)ctx.getCurrentRegion()).lookupProteinGroupProteins();
-        }
-        return _proteins;
-    }
-
     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
     {
         Map row = ctx.getRow();
         try
         {
-            List<ProteinSummary> summaryList = getProteins(ctx).getSummaries(((Integer)row.get(_columnName)).intValue());
+            List<ProteinSummary> summaryList = _proteins.getSummaries(((Integer)row.get(_columnName)).intValue(), ctx, _columnName);
 
             ViewURLHelper url = ctx.getViewContext().cloneViewURLHelper();
             url.setAction("showProtein.view");
@@ -154,9 +125,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
             {
                 for (ProteinSummary summary : summaryList)
                 {
-                    out.write("<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">");
                     writeInfo(summary, out, url);
-                    out.write("</table>");
                 }
             }
         }
@@ -174,50 +143,45 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
 
     private void writeInfo(ProteinSummary summary, Writer out, ViewURLHelper url) throws IOException
     {
-        out.write("<tr>");
-        for (String column : _sequenceColumns)
+        if (_sequenceColumn.equalsIgnoreCase("Protein"))
         {
-            if (column.equalsIgnoreCase("Protein"))
-            {
-                out.write("<td nowrap title=\"Protein\">");
-                url.replaceParameter("seqId", Integer.toString(summary.getSeqId()));
-                out.write("<a href=\"");
-                out.write(url.toString());
-                out.write("\" target=\"prot\">");
-                out.write(PageFlowUtil.filter(summary.getName()));
-                out.write("</a>");
-            }
-            else if (column.equalsIgnoreCase("Description"))
-            {
-                out.write("<td nowrap title=\"Description\">");
-                out.write(PageFlowUtil.filter(summary.getDescription()));
-            }
-            else if (column.equalsIgnoreCase("BestName"))
-            {
-                out.write("<td nowrap title=\"Best Name\">");
-                out.write(PageFlowUtil.filter(summary.getBestName()));
-            }
-            else if (column.equalsIgnoreCase("BestGeneName"))
-            {
-                out.write("<td nowrap title=\"Best Gene Name\">");
-                String geneName = summary.getBestGeneName();
-                if (geneName != null)
-                {
-                    out.write(PageFlowUtil.filter(geneName));
-                }
-                else
-                {
-                    out.write(PageFlowUtil.filter(NO_GENE_NAME_AVAILABLE));
-                }
-            }
-            else if (column.equalsIgnoreCase("SequenceMass"))
-            {
-                out.write("<td nowrap title=\"Sequence Mass\">");
-                out.write(PageFlowUtil.filter(MASS_FORMAT.format(summary.getSequenceMass())));
-            }
-            out.write("</td>");
+            url.replaceParameter("seqId", Integer.toString(summary.getSeqId()));
+            out.write("<a href=\"");
+            out.write(url.toString());
+            out.write("\" target=\"prot\">");
+            out.write(PageFlowUtil.filter(summary.getName()));
+            out.write("</a>");
         }
-        out.write("</tr>");
+        else if (_sequenceColumn.equalsIgnoreCase("Description"))
+        {
+            out.write(PageFlowUtil.filter(summary.getDescription()));
+        }
+        else if (_sequenceColumn.equalsIgnoreCase("BestName"))
+        {
+            out.write(PageFlowUtil.filter(summary.getBestName()));
+        }
+        else if (_sequenceColumn.equalsIgnoreCase("BestGeneName"))
+        {
+            String geneName = summary.getBestGeneName();
+            if (geneName != null)
+            {
+                out.write(PageFlowUtil.filter(geneName));
+            }
+            else
+            {
+                out.write(PageFlowUtil.filter(NO_GENE_NAME_AVAILABLE));
+            }
+        }
+        else if (_sequenceColumn.equalsIgnoreCase("SequenceMass"))
+        {
+            out.write(PageFlowUtil.filter(MASS_FORMAT.format(summary.getSequenceMass())));
+        }
+        out.write("<br/>");
     }
 
+    public void setColumnInfo(ColumnInfo colInfo)
+    {
+        _columnInfo = colInfo;
+        _columnName = colInfo.getAlias();
+    }
 }

@@ -7,9 +7,9 @@ import org.labkey.api.data.*;
 import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
-import org.labkey.api.view.ViewURLHelper;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.GroupNumberDisplayColumn;
+import org.labkey.ms2.ProteinListDisplayColumn;
 import org.labkey.ms2.protein.ProteinManager;
 
 import java.util.*;
@@ -36,17 +36,14 @@ public class ProteinGroupTableInfo extends FilteredTable
         setAlias(alias);
 
         ColumnInfo groupNumberColumn = wrapColumn("Group", getRealTable().getColumn("GroupNumber"));
-        groupNumberColumn.setAlias("GroupAlias");
         groupNumberColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                return new GroupNumberDisplayColumn(colInfo);
+                ColumnInfo collectionIdCol = getColumn("IndistinguishableCollectionId");
+                return new GroupNumberDisplayColumn(colInfo, _schema.getContainer());
             }
         });
-
-        ViewURLHelper url = new ViewURLHelper("MS2", "showProteinGroup.view", "");
-        groupNumberColumn.setURL(url + "proteinGroupId=${RowId}");
 
         addColumn(groupNumberColumn);
 
@@ -97,6 +94,41 @@ public class ProteinGroupTableInfo extends FilteredTable
         defaultColumns.add(FieldKey.fromParts("TotalNumberPeptides"));
 
         setDefaultVisibleColumns(defaultColumns);
+    }
+
+    public void addProteinDetailColumns()
+    {
+        ColumnInfo rowIdColumn = _rootTable.getColumn("RowId");
+
+        DisplayColumnFactory factory = new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                ProteinListDisplayColumn result = new ProteinListDisplayColumn(colInfo.getColumnName(), _schema.getProteinGroupProteins());
+                result.setColumnInfo(colInfo);
+                return result;
+            }
+        };
+
+        ColumnInfo proteinNameColumn = wrapColumn("Protein", rowIdColumn);
+        proteinNameColumn.setDisplayColumnFactory(factory);
+        addColumn(proteinNameColumn);
+
+        ColumnInfo bestNameColumn = wrapColumn("BestName", rowIdColumn);
+        bestNameColumn.setDisplayColumnFactory(factory);
+        addColumn(bestNameColumn);
+
+        ColumnInfo bestGeneNameColumn = wrapColumn("BestGeneName", rowIdColumn);
+        bestGeneNameColumn.setDisplayColumnFactory(factory);
+        addColumn(bestGeneNameColumn);
+
+        ColumnInfo massColumn = wrapColumn("SequenceMass", rowIdColumn);
+        massColumn.setDisplayColumnFactory(factory);
+        addColumn(massColumn);
+
+        ColumnInfo descriptionColumn = wrapColumn("Description", rowIdColumn);
+        descriptionColumn.setDisplayColumnFactory(factory);
+        addColumn(descriptionColumn);
     }
 
     public void addContainerCondition(Container c, User u, boolean includeSubfolders)

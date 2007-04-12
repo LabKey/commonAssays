@@ -1,15 +1,11 @@
 package org.labkey.ms2;
 
-import org.labkey.api.data.DataColumn;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.query.QueryService;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * User: jeckels
@@ -19,17 +15,15 @@ public class GroupNumberDisplayColumn extends DataColumn
 {
     private String _groupNumber;
     private String _collectionId;
-    private boolean _fromQuery = false;
+    private boolean _fromQuery;
+    private Container _container;
+    private ColumnInfo _collectionIdColumn;
 
-    public GroupNumberDisplayColumn(ColumnInfo col)
+    public GroupNumberDisplayColumn(ColumnInfo col, Container c)
     {
-        this(col, null);
+        super(col);
         _fromQuery = true;
-    }
-
-    public GroupNumberDisplayColumn(ColumnInfo col, ViewURLHelper url)
-    {
-        this(col, url, "GroupNumber", "IndistinguishableCollectionId");
+        _container = c;
     }
 
     public GroupNumberDisplayColumn(ColumnInfo col, ViewURLHelper url, String groupNumber, String collectionId)
@@ -38,19 +32,26 @@ public class GroupNumberDisplayColumn extends DataColumn
         setName("ProteinGroup");
         _groupNumber = groupNumber;
         _collectionId = collectionId;
-        if (url != null)
-        {
-            ViewURLHelper urlHelper = url.clone();
-            urlHelper.setAction("showProteinGroup.view");
-            setURL(urlHelper.toString() + "&groupNumber=${" + _groupNumber + "}&indistinguishableCollectionId=${" + _collectionId + "}");
-        }
+        ViewURLHelper urlHelper = url.clone();
+        urlHelper.setAction("showProteinGroup.view");
+        setURL(urlHelper.toString() + "&groupNumber=${" + _groupNumber + "}&indistinguishableCollectionId=${" + _collectionId + "}");
     }
 
     public String getFormattedValue(RenderContext ctx)
     {
         Map row = ctx.getRow();
-        int collectionId = ((Integer)row.get(_collectionId)).intValue();
-        int groupNumber = ((Integer)row.get(_groupNumber)).intValue();
+        long collectionId;
+        long groupNumber;
+        if (_fromQuery)
+        {
+            collectionId = ((Number)row.get(_collectionIdColumn.getAlias())).longValue();
+            groupNumber = ((Number)row.get(getColumnInfo().getAlias())).longValue();
+        }
+        else
+        {
+            collectionId = ((Number)row.get(_collectionId)).longValue();
+            groupNumber = ((Number)row.get(_groupNumber)).longValue();
+        }
 
         StringBuilder sb = new StringBuilder();
         sb.append(groupNumber);
@@ -68,13 +69,22 @@ public class GroupNumberDisplayColumn extends DataColumn
         if (_fromQuery)
         {
             FieldKey thisFieldKey = FieldKey.fromString(getColumnInfo().getName());
+            List<FieldKey> keys = new ArrayList<FieldKey>();
+
             FieldKey idiKey = new FieldKey(thisFieldKey.getTable(), "IndistinguishableCollectionId");
-            for (ColumnInfo columnInfo : QueryService.get().getColumns(getColumnInfo().getParentTable(), Collections.singleton(idiKey)).values())
-            {
-                columns.add(columnInfo);
-                _groupNumber = getColumnInfo().getAlias();
-                _collectionId = columnInfo.getAlias();
-            }
+            keys.add(idiKey);
+            FieldKey groupIdKey = new FieldKey(thisFieldKey.getTable(), "RowId");
+            keys.add(groupIdKey);
+            Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(getColumnInfo().getParentTable(), keys);
+
+            _collectionIdColumn = cols.get(idiKey);
+            columns.add(_collectionIdColumn);
+
+            ColumnInfo groupIdCol = cols.get(groupIdKey);
+            columns.add(groupIdCol);
+
+            ViewURLHelper urlHelper = new ViewURLHelper("MS2", "showProteinGroup.view", _container);
+            setURL(urlHelper.toString() + "&grouping=proteinprophet&proteinGroupId=${" + groupIdCol.getAlias() + "}");
         }
     }
 }

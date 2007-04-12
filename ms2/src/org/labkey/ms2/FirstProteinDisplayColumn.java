@@ -25,14 +25,16 @@ public class FirstProteinDisplayColumn extends SimpleDisplayColumn
     public Object getValue(RenderContext ctx)
     {
         Map row = ctx.getRow();
-        Number id = (Number)row.get("ProteinGroupId");
+        String columnName = "ProteinGroupId";
+        Number id = (Number)row.get(columnName);
         if (id == null)
         {
-            id = (Number)row.get("RowId");
+            columnName = "RowId";
+            id = (Number)row.get(columnName);
         }
         try
         {
-            List<ProteinSummary> summaries = _proteins.getSummaries(id.intValue());
+            List<ProteinSummary> summaries = _proteins.getSummaries(id.intValue(), ctx, columnName);
             ProteinSummary firstSummary = summaries.get(0);
             return _type.getValue(firstSummary);
         }

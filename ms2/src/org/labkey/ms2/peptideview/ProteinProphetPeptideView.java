@@ -8,13 +8,14 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.data.*;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.security.User;
+import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.common.util.Pair;
 
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Set;
 
 import org.labkey.ms2.*;
 
@@ -33,31 +34,18 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
         super(c, u, "NestedPeptides", url, runs);
     }
 
-    private List<String> getSequenceColumns(String requestedProteinColumnNames) throws SQLException
-    {
-        ProteinColumnNameList originalNames = new ProteinColumnNameList(requestedProteinColumnNames);
-        List<String> allSequenceColumns = new ProteinColumnNameList(ProteinListDisplayColumn.ALL_SEQUENCE_COLUMNS);
-        List<String> result = new ArrayList<String>();
-        for (String originalName : originalNames)
-        {
-            if (allSequenceColumns.contains(originalName))
-            {
-                result.add(originalName);
-            }
-        }
-        return result;
-    }
-
     protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport) throws SQLException
     {
         ProteinColumnNameList originalNames = new ProteinColumnNameList(requestedProteinColumnNames);
         List<DisplayColumn> displayColumns = new ArrayList<DisplayColumn>();
         ProteinGroupProteins proteins = new ProteinGroupProteins(_runs);
+        Set<String> sequenceColumnNames = new CaseInsensitiveHashSet(ProteinListDisplayColumn.ALL_SEQUENCE_COLUMNS);
+
         for (String name : originalNames)
         {
             if (name.equalsIgnoreCase("GroupNumber"))
             {
-                displayColumns.add(new GroupNumberDisplayColumn(MS2Manager.getTableInfoProteinGroupsWithQuantitation().getColumn("GroupNumber"), _url));
+                displayColumns.add(new GroupNumberDisplayColumn(MS2Manager.getTableInfoProteinGroupsWithQuantitation().getColumn("GroupNumber"), _url, "GroupNumber", "IndistinguishableCollectionId"));
             }
             else if (name.equalsIgnoreCase("AACoverage"))
             {
@@ -87,26 +75,16 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
             {
                 displayColumns.add(new FirstProteinDisplayColumn("First Best Gene Name", FirstProteinDisplayColumn.FirstProteinType.BEST_GENE_NAME, proteins));
             }
+            else if (sequenceColumnNames.contains(name))
+            {
+                displayColumns.add(new ProteinListDisplayColumn(name, proteins));
+            }
             else
             {
                 addColumn(_calculatedProteinColumns, name, displayColumns, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
             }
         }
-        List<String> sequenceColumns = getSequenceColumns(requestedProteinColumnNames);
-        if (!sequenceColumns.isEmpty())
-        {
-            if (forExport)
-            {
-                for (String sequenceColumn : sequenceColumns)
-                {
-                    displayColumns.add(new ProteinListDisplayColumn(Collections.singletonList(sequenceColumn), proteins, sequenceColumn));
-                }
-            }
-            else
-            {
-                displayColumns.add(new ProteinListDisplayColumn(sequenceColumns, proteins));
-            }
-        }
+
         return displayColumns;
     }
 

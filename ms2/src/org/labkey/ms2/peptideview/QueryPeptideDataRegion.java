@@ -3,10 +3,7 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.GroupedResultSet;
-import org.labkey.api.data.DataColumn;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.ProteinGroupProteins;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -16,20 +13,15 @@ import java.util.List;
 
 /**
  * User: jeckels
- * Date: Feb 22, 2006
  */
 public class QueryPeptideDataRegion extends AbstractProteinDataRegion
 {
     private final List<DisplayColumn> _allColumns;
-    private final DataColumn _groupIdColumn;
-    private final MS2Run[] _runs;
 
-    public QueryPeptideDataRegion(List<DisplayColumn> allColumns, DataColumn groupIdColumn, MS2Run[] runs, ViewURLHelper url)
+    public QueryPeptideDataRegion(List<DisplayColumn> allColumns, String groupingColumnName, ViewURLHelper url)
     {
-        super(groupIdColumn.getColumnInfo().getAlias(), url);
+        super(groupingColumnName, url);
         _allColumns = allColumns;
-        _groupIdColumn = groupIdColumn;
-        _runs = runs;
         setShadeAlternatingRows(true);
     }
 
@@ -41,9 +33,7 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
         ResultSet rs = super.getResultSet(ctx);
         setDisplayColumnList(realColumns);
 
-        String columnAlias = _groupIdColumn.getColumnInfo().getAlias();
-
-        _groupedRS = new GroupedResultSet(rs, columnAlias);
+        _groupedRS = new GroupedResultSet(rs, _uniqueColumnName);
         return rs;
     }
 
@@ -57,9 +47,9 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
         // Validate that the inner and outer result sets are sorted the same
         while (nestedRS.next())
         {
-            if (!ctx.getRow().get(_groupIdColumn.getColumnInfo().getAlias()).equals(nestedRS.getInt(_groupIdColumn.getColumnInfo().getAlias())))
+            if (!ctx.getRow().get(_uniqueColumnName).equals(nestedRS.getInt(_uniqueColumnName)))
             {
-                throw new IllegalArgumentException("ProteinGroup ids do not match for the outer and inner queries");
+                throw new IllegalArgumentException("Ids do not match for the outer and inner result sets");
             }
         }
         nestedRS.beforeFirst();
@@ -67,10 +57,4 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
         renderNestedGrid(out, ctx, nestedRS, rowIndex);
         nestedRS.close();
     }
-
-    public ProteinGroupProteins lookupProteinGroupProteins()
-    {
-        return new ProteinGroupProteins(_runs);
-    }
-
 }

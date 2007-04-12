@@ -7,6 +7,7 @@ import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.*;
 import org.labkey.api.security.User;
+import org.labkey.api.util.CaseInsensitiveHashMap;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 import org.labkey.common.util.Pair;
@@ -27,8 +28,8 @@ public abstract class AbstractPeptideView
 {
     private static Logger _log = Logger.getLogger(AbstractPeptideView.class);
 
-    protected static Map<String, Class<? extends DisplayColumn>> _calculatedPeptideColumns = new HashMap<String, Class<? extends DisplayColumn>>();
-    protected static Map<String, Class<? extends DisplayColumn>> _calculatedProteinColumns = new HashMap<String, Class<? extends DisplayColumn>>();
+    protected static Map<String, Class<? extends DisplayColumn>> _calculatedPeptideColumns = new CaseInsensitiveHashMap<Class<? extends DisplayColumn>>();
+    protected static Map<String, Class<? extends DisplayColumn>> _calculatedProteinColumns = new CaseInsensitiveHashMap<Class<? extends DisplayColumn>>();
 
     static
     {
@@ -504,7 +505,7 @@ public abstract class AbstractPeptideView
             super(getProteinColumnNames(columnNames));
         }
         
-        public ProteinColumnNameList(List<String> columnNames)
+        public ProteinColumnNameList(Collection<String> columnNames)
         {
             super(columnNames);
         }

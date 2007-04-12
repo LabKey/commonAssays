@@ -20,7 +20,7 @@ public abstract class AbstractProteinDataRegion extends DataRegion
 {
     protected boolean _expanded = false;
     protected DataRegion _nestedRegion = null;
-    private final String _uniqueColumnName;
+    protected final String _uniqueColumnName;
     private final String _groupURL;
     protected GroupedResultSet _groupedRS = null;
 

@@ -4,7 +4,6 @@ import org.labkey.api.query.*;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.ProteinDisplayColumn;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
 import org.apache.commons.lang.StringUtils;
@@ -168,6 +167,8 @@ public class PeptidesTableInfo extends FilteredTable
 
                 fastaNameColumn.setDisplayColumnFactory(ProteinDisplayColumnFactory.INSTANCE);
                 fastaNameColumn.setURL(showProteinURLString);
+
+                sequenceTable.addPeptideAggregationColumns();
 
                 return sequenceTable;
             }

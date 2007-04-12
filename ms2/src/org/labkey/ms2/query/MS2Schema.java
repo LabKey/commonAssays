@@ -7,8 +7,7 @@ import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.ProteinListDisplayColumn;
-import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
+import org.labkey.ms2.ProteinGroupProteins;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.CaseInsensitiveHashSet;
@@ -43,6 +42,8 @@ public class MS2Schema extends UserSchema
 
     private static final Set<String> HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet(Arrays.asList("PeptideId"));
 
+    private ProteinGroupProteins _proteinGroupProteins = new ProteinGroupProteins();
+
     static public void register()
     {
         DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider() {
@@ -72,6 +73,11 @@ public class MS2Schema extends UserSchema
             PEPTIDES_TABLE_NAME,
             PROTEIN_GROUPS_TABLE_NAME,
             SEQUENCES_TABLE_NAME));
+    }
+
+    public ProteinGroupProteins getProteinGroupProteins()
+    {
+        return _proteinGroupProteins;
     }
 
     public TableInfo getTable(String name, String alias)
@@ -104,7 +110,9 @@ public class MS2Schema extends UserSchema
         }
         else if (PROTEIN_GROUPS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createQueryProteinGroupsTable(alias);
+            ProteinGroupTableInfo result = new ProteinGroupTableInfo(alias, this);
+            result.addContainerCondition(getContainer(), getUser(), false);
+            return result;
         }
         else if (SEQUENCES_TABLE_NAME.equalsIgnoreCase(name))
         {
@@ -114,13 +122,6 @@ public class MS2Schema extends UserSchema
         {
             return super.getTable(name, alias);
         }
-    }
-
-    private TableInfo createQueryProteinGroupsTable(String alias)
-    {
-        ProteinGroupTableInfo result = new ProteinGroupTableInfo(alias, this);
-        result.addContainerCondition(getContainer(), getUser(), false);
-        return result;
     }
 
     protected TableInfo createPeptideMembershipsTable()
@@ -139,21 +140,13 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                return createProteinGroupsTable();
+                ProteinGroupTableInfo result = new ProteinGroupTableInfo(null, false, MS2Schema.this);
+
+                result.addProteinDetailColumns();
+
+                return result;
             }
         });
-        return result;
-    }
-
-    private TableInfo createProteinGroupsTable()
-    {
-        ProteinGroupTableInfo result = new ProteinGroupTableInfo(null, false, this);
-
-        ColumnInfo proteinsColumn = result.wrapColumn("Proteins", result.getRealTable().getColumn("RowId"));
-        proteinsColumn.setDisplayColumnFactory(ProteinDisplayColumnFactory.INSTANCE);
-        proteinsColumn.setKeyField(false);
-        result.addColumn(proteinsColumn);
-
         return result;
     }
 

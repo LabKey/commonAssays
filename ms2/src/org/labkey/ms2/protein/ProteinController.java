@@ -98,7 +98,15 @@ public class ProteinController extends ViewController
         settings.setAllowChooseQuery(true);
         settings.setAllowChooseView(true);
 
-        QueryView queryView = new QueryView(getViewContext(), schema, settings);
+        QueryView queryView = new QueryView(getViewContext(), schema, settings)
+        {
+            protected DataView createDataView()
+            {
+                DataView result = super.createDataView();
+                result.getRenderContext().setBaseSort(new Sort("LookupString"));
+                return result;
+            }
+        };
         queryView.setShowExportButtons(true);
         queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
 

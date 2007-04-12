@@ -108,6 +108,43 @@ public class SequencesTableInfo extends FilteredTable
         setDefaultVisibleColumns(cols);
     }
 
+    public void addPeptideAggregationColumns()
+    {
+        ColumnInfo aaColumn = wrapColumn("AACoverage", getRealTable().getColumn("ProtSequence"));
+        aaColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
+                ColumnInfo seqIdColumn = colInfo.getParentTable().getColumn("SeqId");
+                return new QueryAACoverageColumn(colInfo, seqIdColumn, peptideColumn);
+            }
+        });
+        addColumn(aaColumn);
+
+        ColumnInfo totalCount = wrapColumn("Peptides", getRealTable().getColumn("SeqId"));
+        totalCount.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
+                return new PeptideCountCoverageColumn(colInfo, peptideColumn);
+            }
+        });
+        addColumn(totalCount);
+
+        ColumnInfo uniqueCount = wrapColumn("UniquePeptides", getRealTable().getColumn("SeqId"));
+        uniqueCount.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
+                return new UniquePeptideCountCoverageColumn(colInfo, peptideColumn);
+            }
+        });
+        addColumn(uniqueCount);
+    }
+
     /*package*/ static List<String> getIdentifierParameters(String identifiers)
     {
         List<String> result = new ArrayList<String>();

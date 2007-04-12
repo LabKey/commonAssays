@@ -71,7 +71,17 @@ public class ProteinTSVGridWriter extends TSVGridWriter
         try
         {
             if (_expanded)
-                writeExpandedRow(out, ctx, displayColumns, _groupedRS.getNextResultSet());
+            {
+                ResultSet rs = _groupedRS.getNextResultSet();
+                try
+                {
+                    writeExpandedRow(out, ctx, displayColumns, rs);
+                }
+                finally
+                {
+                    if (rs != null) { try { rs.close(); } catch (SQLException e) {} }
+                }
+            }
             else
                 writeCollapsedRow(out, ctx, displayColumns);
         }

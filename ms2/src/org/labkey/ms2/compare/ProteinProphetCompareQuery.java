@@ -1,10 +1,7 @@
 package org.labkey.ms2.compare;
 
 import org.labkey.ms2.GroupNumberDisplayColumn;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.*;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.protein.ProteinManager;

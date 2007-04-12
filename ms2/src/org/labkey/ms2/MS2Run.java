@@ -329,7 +329,7 @@ public abstract class MS2Run implements Serializable
     // CONSIDER: extend Apache ListOrderedSet (ideally) or our ArrayListMap.
     public static class ColumnNameList extends ArrayList<String>
     {
-        public ColumnNameList(List<String> columnNames)
+        public ColumnNameList(Collection<String> columnNames)
         {
             for (String s : columnNames)
             {
