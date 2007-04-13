@@ -794,7 +794,7 @@ public class ProteinManager
                         "SELECT SeqId FROM " + getTableInfoFastaSequences() + " WHERE LookupString = ? AND FastaId=?",
                         lookup, Integer.class);
 
-        return (null == rvAsInteger ? 0 : rvAsInteger.intValue());
+        return (null == rvAsInteger ? 0 : rvAsInteger);
     }
 
     public static String getSeqParamFromId(String param, int id) throws SQLException

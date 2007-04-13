@@ -1126,7 +1126,7 @@ public class MS2Controller extends ViewController
 
         String runInfo = "Run: " + run;
         v.addObject("runInfo", runInfo);
-        String filterInfo = "Filter: " + filter;
+        String filterInfo = "Filter: " + filter.getFilterText();
         v.addObject("filterInfo", filterInfo);
         pjch.renderAsPNG(new NullOutputStream());
 

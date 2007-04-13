@@ -7,6 +7,7 @@ import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.RuntimeSQLException;
 import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;
@@ -19,11 +20,6 @@ import java.sql.SQLException;
 public class MS2RunHierarchyTree extends ContainerTree
 {
     private static Logger _log = Logger.getLogger(MS2RunHierarchyTree.class);
-
-    public MS2RunHierarchyTree(String rootPath, User user, int perm)
-    {
-        super(rootPath, user, perm);
-    }
 
     public MS2RunHierarchyTree(String rootPath, User user, int perm, ViewURLHelper url)
     {
@@ -54,9 +50,11 @@ public class MS2RunHierarchyTree extends ContainerTree
 
         if (isAuthorized)
         {
+            ResultSet rs = null;
+
             try
             {
-                ResultSet rs = Table.executeQuery(MS2Manager.getSchema(), "SELECT Run, Description, FileName FROM " + MS2Manager.getTableInfoRuns() + " WHERE Container=? AND Deleted=?", new Object[]{parent.getId(), Boolean.FALSE});
+                rs = Table.executeQuery(MS2Manager.getSchema(), "SELECT Run, Description, FileName FROM " + MS2Manager.getTableInfoRuns() + " WHERE Container=? AND Deleted=?", new Object[]{parent.getId(), Boolean.FALSE});
 
                 boolean moreRuns = rs.next();
 
@@ -90,12 +88,24 @@ public class MS2RunHierarchyTree extends ContainerTree
 
                     html.append("</table></td></tr>\n");
                 }
-
-                rs.close();
             }
             catch (SQLException e)
             {
-                _log.error("renderHierarchyChildren", e);
+                throw new RuntimeSQLException(e);
+            }
+            finally
+            {
+                if (null != rs)
+                {
+                    try
+                    {
+                        rs.close();
+                    }
+                    catch (SQLException e)
+                    {
+                        //
+                    }
+                }
             }
         }
     }

@@ -44,7 +44,7 @@ public enum FlowPreference
     {
         try
         {
-            return Integer.valueOf(getValue(request)).intValue();
+            return Integer.valueOf(getValue(request));
         }
         catch (Exception e)
         {

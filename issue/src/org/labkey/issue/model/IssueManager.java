@@ -480,7 +480,7 @@ public class IssueManager
             }
             return DEFAULT_EMAIL_PREFS;
         }
-        return emailPreference[0].intValue();
+        return emailPreference[0];
     }
 
     public static void setUserEmailPreferences(Container c, int userId, int emailPrefs, int currentUser)

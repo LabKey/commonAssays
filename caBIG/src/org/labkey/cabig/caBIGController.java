@@ -5,7 +5,10 @@ import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.log4j.Logger;
 import org.labkey.api.view.*;
 import org.labkey.api.security.SecurityManager;
+import org.labkey.api.security.User;
+import org.labkey.api.security.ACL;
 import org.labkey.api.data.Container;
+import org.labkey.api.util.ContainerTree;
 
 import javax.servlet.ServletException;
 
@@ -15,9 +18,6 @@ public class caBIGController extends ViewController
 {
     static Logger _log = Logger.getLogger(caBIGController.class);
 
-    /**
-     * This method represents the point of entry into the pageflow
-     */
     @Jpf.Action
     protected Forward begin() throws Exception
     {
@@ -47,6 +47,20 @@ public class caBIGController extends ViewController
     }
 
 
+    @Jpf.Action
+    protected Forward showHierarchy() throws Exception
+    {
+        requiresLogin();
+
+        caBIGHierarchyTree tree = new caBIGHierarchyTree(getContainer().getPath(), getUser(), ACL.PERM_ADMIN);
+
+        //StringBuilder html = new StringBuilder();
+        //tree.render(html);
+
+        return renderInTemplate(new HtmlView("hello world"));
+    }
+
+
     // Always forward to permissions page
     private ViewForward getForward() throws ServletException
     {
@@ -68,7 +82,7 @@ public class caBIGController extends ViewController
         private caBIGPermissionsView()
         {
             super("/org/labkey/cabig/view/publish.jsp");
-            this.setTitle("Publish to caBIG");
+            setTitle("Publish to caBIG");
         }
     }
 
@@ -78,6 +92,15 @@ public class caBIGController extends ViewController
         public HttpView createView()
         {
             return new caBIGPermissionsView();
+        }
+    }
+
+
+    private static class caBIGHierarchyTree extends ContainerTree
+    {
+        private caBIGHierarchyTree(String rootPath, User user, int perm)
+        {
+            super(rootPath, user, perm);
         }
     }
 }

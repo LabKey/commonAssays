@@ -112,7 +112,7 @@ public class ProteinDictionaryHelpers
         return loadProtSprotOrgMap(DEFAULT_PROTSPROTORGMAP_FILE);
     }
 
-    private static final int GO_REC_MAX = 5000;
+    private static final int GO_BATCH_SIZE = 5000;
 
     public static void loadAGoFile(TableInfo ti, String cols[], String fname) throws SQLException, IOException, ServletException
     {
@@ -166,7 +166,7 @@ public class ProteinDictionaryHelpers
             ps = conn.prepareStatement(SQLCommand + QMarkPart);
             for (it = t.iterator(); it.hasNext();)
             {
-                Map curRec = (Map) it.next();
+                Map curRec = it.next();
                 for (int i = 1; i <= cols.length; i++) ps.setNull(i, typeMap.get(cols[i - 1].toUpperCase()).intValue());
                 for (Object key : curRec.keySet())
                 {
@@ -181,7 +181,7 @@ public class ProteinDictionaryHelpers
                 }
                 ps.addBatch();
                 orgLineCount++;
-                if (orgLineCount % GO_REC_MAX == 0)
+                if (orgLineCount % GO_BATCH_SIZE == 0)
                 {
                     ps.executeBatch();
                     ps.clearBatch();
@@ -195,7 +195,10 @@ public class ProteinDictionaryHelpers
                 ps.executeBatch();
                 ps.close();
             }
-            _schema.getScope().releaseConnection(conn);
+            if (null != conn)
+            {
+                _schema.getScope().releaseConnection(conn);
+            }
             if (null != it)
                 it.close();
         }
