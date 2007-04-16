@@ -9,6 +9,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.common.tools.ProtXmlReader;
 import org.labkey.common.tools.ProteinGroup;
 import org.labkey.common.tools.SimpleXMLStreamReader;
+import org.labkey.common.util.Pair;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.api.exp.XarContext;
@@ -328,11 +329,11 @@ public class ProteinProphetImporter
     private void insertPeptides(ProtXmlReader.Protein protein, PreparedStatement peptideStatement, int groupId)
         throws SQLException
     {
-        Set<String> insertedSequences = new HashSet<String>();
+        Set<Pair<String, Integer>> insertedSequences = new HashSet<Pair<String, Integer>>();
 
         for (ProtXmlReader.Peptide pep : protein.getPeptides())
         {
-            if (insertedSequences.add(pep.getPeptideSequence()))
+            if (insertedSequences.add(new Pair<String, Integer>(pep.getPeptideSequence(), pep.getCharge())))
             {
                 int index = 1;
                 peptideStatement.setString(index++, pep.getPeptideSequence());

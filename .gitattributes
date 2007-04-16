@@ -544,6 +544,7 @@ ms2/src/org/labkey/ms2/peptideview/FlatPeptideView.java -text
 ms2/src/org/labkey/ms2/peptideview/MS2ResultSet.java -text
 ms2/src/org/labkey/ms2/peptideview/MultiRunRenderContext.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinDisplayColumnFactory.java -text
+ms2/src/org/labkey/ms2/peptideview/ProteinGroupQueryNestingOption.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinProphetDataRegion.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinProphetExcelWriter.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinProphetPeptideView.java -text
@@ -554,6 +555,7 @@ ms2/src/org/labkey/ms2/peptideview/ProteinTSVGridWriter.java -text
 ms2/src/org/labkey/ms2/peptideview/QueryNestingOption.java -text
 ms2/src/org/labkey/ms2/peptideview/QueryPeptideDataRegion.java -text
 ms2/src/org/labkey/ms2/peptideview/QueryPeptideView.java -text
+ms2/src/org/labkey/ms2/peptideview/QueryProteinGroupView.java -text
 ms2/src/org/labkey/ms2/peptideview/ResultSetSpectrumIterator.java -text
 ms2/src/org/labkey/ms2/peptideview/SortRewriterRenderContext.java -text
 ms2/src/org/labkey/ms2/peptideview/StandardProteinDataRegion.java -text
@@ -697,6 +699,8 @@ ms2/src/org/labkey/ms2/protocol/SequestSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/protocol/XTandemSearchProtocol.java -text
 ms2/src/org/labkey/ms2/protocol/XTandemSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/protocol/XarTemplate.java -text
+ms2/src/org/labkey/ms2/query/CompareProteinProphetTableInfo.java -text
+ms2/src/org/labkey/ms2/query/CompareProteinsView.java -text
 ms2/src/org/labkey/ms2/query/MS2Schema.java -text
 ms2/src/org/labkey/ms2/query/OrganismTableInfo.java -text
 ms2/src/org/labkey/ms2/query/PeptideAggregrationDisplayColumn.java -text

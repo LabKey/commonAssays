@@ -17,13 +17,11 @@ import java.util.ArrayList;
 */
 public abstract class QueryNestingOption
 {
-    private String _prefix;
     private String _rowIdColumnName;
     private DataColumn _groupIdColumn;
 
-    public QueryNestingOption(String prefix, String rowIdColumnName)
+    public QueryNestingOption(String rowIdColumnName)
     {
-        _prefix = prefix;
         _rowIdColumnName = rowIdColumnName;
     }
 
@@ -43,35 +41,36 @@ public abstract class QueryNestingOption
         }
     }
 
-    public boolean isNestable(List<DisplayColumn> columns)
+    public boolean isNested(List<DisplayColumn> columns)
     {
+        boolean foundInner = false;
+        boolean foundOuter = false;
         for (DisplayColumn column : columns)
         {
-            if (isNested(column))
+            if (isOuter(column))
             {
-                return true;
+                foundOuter = true;
+            }
+            else
+            {
+                foundInner = true;
             }
         }
-        return false;
+        return foundOuter && foundInner;
     }
 
-    private boolean isNested(DisplayColumn displayColumn)
+    private boolean isOuter(DisplayColumn column)
     {
-        ColumnInfo colInfo = displayColumn.getColumnInfo();
-        return colInfo != null && colInfo.getName().toLowerCase().startsWith(_prefix.toLowerCase());
+        ColumnInfo colInfo = column.getColumnInfo();
+        return colInfo != null && isOuter(colInfo.getName());
     }
+
+    public abstract boolean isOuter(String columnName);
 
     public String getRowIdColumnName()
     {
         return _rowIdColumnName;
     }
-
-    public String getPrefix()
-    {
-        return _prefix;
-    }
-
-    public abstract void calculateValues();
 
     public QueryPeptideDataRegion createDataRegion(List<DisplayColumn> originalColumns, MS2Run[] runs, ViewURLHelper url, String dataRegionName)
     {
@@ -81,7 +80,7 @@ public abstract class QueryNestingOption
 
         for (DisplayColumn column : originalColumns)
         {
-            if (isNested(column))
+            if (isOuter(column))
             {
                 setupGroupIdColumn(allColumns, outerColumns, column.getColumnInfo().getParentTable());
                 outerColumns.add(column);

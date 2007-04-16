@@ -66,6 +66,10 @@ public abstract class AbstractPeptideView
         {
             return new QueryPeptideView(c, user, url, runs, viewContext);
         }
+        else if ("queryproteingroups".equals(grouping))
+        {
+            return new QueryProteinGroupView(c, user, url, runs, viewContext);
+        }
         else
         {
             return new FlatPeptideView(c, user, url, runs);

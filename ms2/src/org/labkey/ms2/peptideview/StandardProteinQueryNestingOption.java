@@ -6,16 +6,16 @@ package org.labkey.ms2.peptideview;
  */
 public class StandardProteinQueryNestingOption extends QueryNestingOption
 {
-    private static final String PROTEIN_PREFIX = "SeqId/";
-    private static final String PROTEIN_ROWID = PROTEIN_PREFIX + "SeqId";
+    private static final String PREFIX = "SeqId/";
+    private static final String PROTEIN_ROWID = PREFIX + "SeqId";
 
     public StandardProteinQueryNestingOption()
     {
-        super(PROTEIN_PREFIX, PROTEIN_ROWID);
+        super(PROTEIN_ROWID);
     }
 
-    public void calculateValues()
+    public boolean isOuter(String columnName)
     {
-
+        return columnName.toLowerCase().startsWith(PREFIX.toLowerCase());
     }
 }

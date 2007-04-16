@@ -27,6 +27,11 @@
         </td>
     #end
     <td>$tabQuery</td>
+    #if ($tabQueryProteinGroups)
+        <td>
+            $tabQueryProteinGroups
+        </td>
+    #end
 </tr></table></td></tr>
 
 <tr>

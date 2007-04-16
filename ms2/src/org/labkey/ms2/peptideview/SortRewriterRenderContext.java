@@ -33,9 +33,9 @@ public class SortRewriterRenderContext extends RenderContext
             int outerIndex = 0;
             for (Sort.SortField field : standardSort.getSortList())
             {
-                boolean proteinGroupColumn = field.getColumnName().toLowerCase().startsWith(_nestingOption.getPrefix().toLowerCase());
+                boolean innerColumn = _nestingOption.isOuter(field.getColumnName());
                 foundGroupId = foundGroupId || field.getColumnName().equalsIgnoreCase(_nestingOption.getRowIdColumnName());
-                sort.insertSortColumn(field.toUrlString(), field.isUrlClause(), proteinGroupColumn ? outerIndex++ : totalIndex);
+                sort.insertSortColumn(field.toUrlString(), field.isUrlClause(), innerColumn ? outerIndex++ : totalIndex);
                 totalIndex++;
             }
 

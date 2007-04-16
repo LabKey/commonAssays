@@ -1682,14 +1682,24 @@
   </ns:table>
   <ns:table tableName="ProteinProphetFiles" tableDbType="TABLE">
     <ns:columns>
-      <ns:column columnName="RowId"/>
+      <ns:column columnName="RowId">
+          <ns:isHidden>true</ns:isHidden>
+      </ns:column>
       <ns:column columnName="FilePath"/>
       <ns:column columnName="Run"/>
       <ns:column columnName="UploadCompleted"/>
-      <ns:column columnName="ErrorSeries"/>
-      <ns:column columnName="MinProbSeries"/>
-      <ns:column columnName="PredictedNumberCorrectSeries"/>
-      <ns:column columnName="PredictedNumberIncorrectSeries"/>
+      <ns:column columnName="ErrorSeries">
+          <ns:isHidden>true</ns:isHidden>
+      </ns:column>
+      <ns:column columnName="MinProbSeries">
+          <ns:isHidden>true</ns:isHidden>
+      </ns:column>
+      <ns:column columnName="PredictedNumberCorrectSeries">
+          <ns:isHidden>true</ns:isHidden>
+      </ns:column>
+      <ns:column columnName="PredictedNumberIncorrectSeries">
+          <ns:isHidden>true</ns:isHidden>
+      </ns:column>
       <ns:column columnName="SensitivitySeries"/>
     </ns:columns>
     <ns:tableTitle>ProteinProphetFiles</ns:tableTitle>

@@ -434,21 +434,28 @@ public class ProteinManager
             _termini = termini;
         }
 
-        protected String toWhereClause(SqlDialect dialect)
+        public SQLFragment toSQLFragment(Map<String, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
+            SQLFragment sql = new SQLFragment();
             switch(_termini)
             {
                 case(0):
-                    return "";
+                    sql.append("");
+                    break;
 
                 case(1):
-                    return nTerm(dialect) + " OR " + cTerm(dialect);
+                    sql.append(nTerm(dialect) + " OR " + cTerm(dialect));
+                    break;
 
                 case(2):
-                    return nTerm(dialect) + " AND " + cTerm(dialect);
-            }
+                    sql.append(nTerm(dialect) + " AND " + cTerm(dialect));
+                    break;
 
-            return "INVALID PARAMETER: TERMINI = " + _termini;
+                default:
+                    throw new IllegalArgumentException("INVALID PARAMETER: TERMINI = " + _termini);
+            }
+            sql.addAll(getParamVals());
+            return sql;
         }
 
         private String nTerm(SqlDialect dialect)
@@ -461,7 +468,7 @@ public class ProteinManager
             return "(Peptide " + dialect.getCharClassLikeOperator() + " '%[KR].[^P]' OR Peptide " + dialect.getCharClassLikeOperator() + " '%.-')";
         }
 
-        protected List<String> getColumnNames()
+        public List<String> getColumnNames()
         {
             return Arrays.asList("Peptide");
         }

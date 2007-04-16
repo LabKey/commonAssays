@@ -41,6 +41,7 @@ import org.labkey.api.view.*;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.query.FieldKey;
 import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
@@ -53,6 +54,7 @@ import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
 import org.labkey.ms2.query.SequencesTableInfo;
+import org.labkey.ms2.query.CompareProteinsView;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
 import javax.servlet.ServletException;
@@ -70,7 +72,7 @@ import java.util.*;
 import java.util.List;
 
 
-@Jpf.Controller
+@Jpf.Controller(longLived = true)
 public class MS2Controller extends ViewController
 {
     private static final int MAX_INSERTIONS_DISPLAY_ROWS = 1000; // Limit annotation table insertions to 1000 rows
@@ -562,7 +564,7 @@ public class MS2Controller extends ViewController
         cloneUrl.deleteParameter("grouping");
         cloneUrl.setAction("showRun");
         String grouping = form.getGrouping();
-        headerView.addObject("tabPeptide", renderTab(cloneUrl, "&nbsp;None&nbsp;", !"protein".equals(grouping) && !"proteinprophet".equals(grouping) && !"query".equals(grouping)));
+        headerView.addObject("tabPeptide", renderTab(cloneUrl, "&nbsp;None&nbsp;", !"protein".equals(grouping) && !"proteinprophet".equals(grouping) && !"query".equals(grouping) && !"queryproteingroups".equals(grouping)));
 
         cloneUrl.replaceParameter("grouping", "query");
         headerView.addObject("tabQuery", renderTab(cloneUrl, "&nbsp;Query&nbsp;(Beta)&nbsp;", "query".equals(grouping)));
@@ -580,6 +582,9 @@ public class MS2Controller extends ViewController
             headerView.addObject("tabCollapsedProteinProphet", renderTab(cloneUrl, "&nbsp;Protein&nbsp;Prophet&nbsp;Collapsed&nbsp;", "proteinprophet".equals(grouping) && !form.getExpanded()));
             cloneUrl.replaceParameter("expanded", "1");
             headerView.addObject("tabExpandedProteinProphet", renderTab(cloneUrl, "&nbsp;Protein&nbsp;Prophet&nbsp;Expanded&nbsp;", "proteinprophet".equals(grouping) && form.getExpanded()));
+
+            cloneUrl.replaceParameter("grouping", "queryproteingroups");
+            headerView.addObject("tabQueryProteinGroups", renderTab(cloneUrl, "&nbsp;Query&nbsp;Protein&nbsp;Groups&nbsp;(Beta)&nbsp;", "queryproteingroups".equals(grouping)));
         }
 
         ViewURLHelper extraFilterUrl = currentUrl.clone().setAction("addExtraFilter.post");
@@ -3144,6 +3149,8 @@ public class MS2Controller extends ViewController
 
         sb.append("<input type=\"radio\" name=\"column\" value=\"Peptide\" /><b>Peptide</b><br/>");
 
+        sb.append("<input type=\"radio\" name=\"column\" value=\"Query\" /><b>Query (beta)</b><br/>");
+
         sb.append("</td></tr>\n");
 
         ViewURLHelper nextUrl = cloneViewURLHelper().setAction("applyCompareView");
@@ -3202,9 +3209,18 @@ public class MS2Controller extends ViewController
         ViewURLHelper currentUrl = getViewURLHelper();
         String column = currentUrl.getParameter("column");
 
+        if ("query".equalsIgnoreCase(column))
+        {
+            QuerySettings settings = new QuerySettings(cloneViewURLHelper(), getRequest(), "Compare");
+            settings.setQueryName(MS2Schema.COMPARE_PROTEIN_PROPHET_TABLE_NAME);
+            settings.setAllowChooseQuery(false);
+            CompareProteinsView view = new CompareProteinsView(getViewContext(), new MS2Schema(getUser(), getContainer()), settings, runs);
+            return _renderInTemplate(view, false, "Compare ProteinProphet", null);
+        }
+
         CompareQuery query = CompareQuery.getCompareQuery(column, currentUrl, runs);
         if (query == null)
-            return _renderError("You must specify a column name");
+            return _renderError("You must specify a comparison type");
 
         query.checkForErrors(errors);
 
@@ -3257,39 +3273,6 @@ public class MS2Controller extends ViewController
 
             GridView compareView = new GridView(rgn);
             compareView.setResultSet(rgn.getResultSet());
-            List<DisplayColumn> columns = rgn.getDisplayColumnList();
-            boolean shaded = false;
-            int i = 0;
-            while (i < offset)
-            {
-                if (shaded)
-                {
-                    columns.get(i).setBackgroundColor("#EEEEEE");
-                }
-                i++;
-                shaded = !shaded;
-            }
-            for (String runCaption : runCaptions)
-            {
-                for (int j = 0; j < query.getColumnsPerRun(); j++)
-                {
-                    if (shaded)
-                    {
-                        columns.get(i).setBackgroundColor("#EEEEEE");
-                    }
-                    i++;
-                }
-                shaded = !shaded;
-            }
-            while (i < columns.size())
-            {
-                if (shaded)
-                {
-                    columns.get(i).setBackgroundColor("#EEEEEE");
-                }
-                i++;
-                shaded = !shaded;
-            }
 
             _renderInTemplate(new VBox(filterView, compareView), false, query.getComparisonDescription(), "ms2RunsList",
                     new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
@@ -3980,15 +3963,16 @@ public class MS2Controller extends ViewController
         proteinsView.setTitle("Matching Proteins");
 
         QuerySettings groupsSettings = new QuerySettings(getViewURLHelper(), getRequest(), "ProteinSearchResults");
-        groupsSettings.setQueryName(MS2Schema.PROTEIN_GROUPS_TABLE_NAME);
+        groupsSettings.setQueryName(MS2Schema.PROTEIN_GROUPS_FOR_SEARCH_TABLE_NAME);
         groupsSettings.setAllowChooseQuery(false);
         QueryView groupsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), groupsSettings)
         {
             protected TableInfo createTable()
             {
-                ProteinGroupTableInfo table = new ProteinGroupTableInfo("alias", (MS2Schema)getSchema());
+                ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable(null);
                 table.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
                 table.addContainerCondition(getContainer(), getUser(), form.isIncludeSubfolders());
+
                 return table;
             }
         };

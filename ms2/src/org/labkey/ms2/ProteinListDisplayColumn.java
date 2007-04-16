@@ -26,7 +26,6 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
     private static final DecimalFormat MASS_FORMAT = new DecimalFormat("0.0000");
     private ColumnInfo _columnInfo;
     private String _columnName = "ProteinGroupId";
-    private static final String NO_GENE_NAME_AVAILABLE = "[No gene name available]";
 
     public static final List<String> ALL_SEQUENCE_COLUMNS = Collections.unmodifiableList(Arrays.asList("Protein", "BestName", "BestGeneName", "SequenceMass", "Description"));
     private static final Map<String, String> ALL_SEQUENCE_COLUMNS_MAP;
@@ -92,10 +91,6 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
                     if (geneName != null)
                     {
                         sb.append(geneName);
-                    }
-                    else
-                    {
-                        sb.append(NO_GENE_NAME_AVAILABLE);
                     }
                 }
                 else if (_sequenceColumn.equalsIgnoreCase("SequenceMass"))
@@ -166,10 +161,6 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
             if (geneName != null)
             {
                 out.write(PageFlowUtil.filter(geneName));
-            }
-            else
-            {
-                out.write(PageFlowUtil.filter(NO_GENE_NAME_AVAILABLE));
             }
         }
         else if (_sequenceColumn.equalsIgnoreCase("SequenceMass"))

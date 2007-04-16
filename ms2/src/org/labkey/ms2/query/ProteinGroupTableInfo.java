@@ -3,6 +3,7 @@ package org.labkey.ms2.query;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.data.*;
 import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.api.security.ACL;
@@ -13,6 +14,7 @@ import org.labkey.ms2.ProteinListDisplayColumn;
 import org.labkey.ms2.protein.ProteinManager;
 
 import java.util.*;
+import java.sql.Types;
 
 /**
  * User: jeckels
@@ -25,22 +27,18 @@ public class ProteinGroupTableInfo extends FilteredTable
 
     public ProteinGroupTableInfo(String alias, MS2Schema schema)
     {
-        this(alias, true, schema);
-    }
-
-
-    public ProteinGroupTableInfo(String alias, boolean standalone, MS2Schema schema)
-    {
         super(MS2Manager.getTableInfoProteinGroups());
         _schema = schema;
-        setAlias(alias);
+        if (alias != null)
+        {
+            setAlias(alias);
+        }
 
         ColumnInfo groupNumberColumn = wrapColumn("Group", getRealTable().getColumn("GroupNumber"));
         groupNumberColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                ColumnInfo collectionIdCol = getColumn("IndistinguishableCollectionId");
                 return new GroupNumberDisplayColumn(colInfo, _schema.getContainer());
             }
         });
@@ -69,10 +67,6 @@ public class ProteinGroupTableInfo extends FilteredTable
                 col.setIsHidden(true);
             }
         }
-        if (!standalone)
-        {
-            getColumn("ProteinProphet").setIsHidden(true);
-        }
 
         LookupForeignKey foreignKey = new LookupForeignKey("RowId", false)
         {
@@ -84,9 +78,38 @@ public class ProteinGroupTableInfo extends FilteredTable
         getColumn("ProteinProphetFileId").setFk(foreignKey);
         getColumn("ProteinProphet").setFk(foreignKey);
 
+        SQLFragment firstProteinSQL = new SQLFragment();
+        firstProteinSQL.append("SELECT s.SeqId FROM ");
+        firstProteinSQL.append(MS2Manager.getTableInfoProteinGroupMemberships());
+        firstProteinSQL.append(" pgm, ");
+        firstProteinSQL.append(ProteinManager.getTableInfoSequences());
+        firstProteinSQL.append(" s WHERE s.SeqId = pgm.SeqId AND pgm.ProteinGroupId = ");
+        firstProteinSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        firstProteinSQL.append(".RowId ORDER BY s.Length, s.BestName");
+        ProteinManager.getSqlDialect().limitRows(firstProteinSQL, 1);
+        firstProteinSQL.insert(0, "(");
+        firstProteinSQL.append(")");
+
+        ExprColumn firstProteinColumn = new ExprColumn(this, "FirstProtein", firstProteinSQL, Types.INTEGER);
+        firstProteinColumn.setFk(new LookupForeignKey("SeqId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return new SequencesTableInfo(null, _schema.getContainer());
+            }
+        });
+        addColumn(firstProteinColumn);
+
+        SQLFragment proteinCountSQL = new SQLFragment();
+        proteinCountSQL.append("(SELECT COUNT(SeqId) FROM ");
+        proteinCountSQL.append(MS2Manager.getTableInfoProteinGroupMemberships());
+        proteinCountSQL.append(" WHERE ProteinGroupId = ");
+        proteinCountSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        proteinCountSQL.append(".RowId)");
+        ExprColumn proteinCountColumn = new ExprColumn(this, "ProteinCount", proteinCountSQL, Types.INTEGER);
+        addColumn(proteinCountColumn);
+
         List<FieldKey> defaultColumns = new ArrayList<FieldKey>();
-        defaultColumns.add(FieldKey.fromParts("ProteinProphet", "Run", "Container"));
-        defaultColumns.add(FieldKey.fromParts("ProteinProphet","Run"));
         defaultColumns.add(FieldKey.fromParts("Group"));
         defaultColumns.add(FieldKey.fromParts("GroupProbability"));
         defaultColumns.add(FieldKey.fromParts("ErrorRate"));
@@ -94,6 +117,20 @@ public class ProteinGroupTableInfo extends FilteredTable
         defaultColumns.add(FieldKey.fromParts("TotalNumberPeptides"));
 
         setDefaultVisibleColumns(defaultColumns);
+    }
+
+    public void addProteinsColumn()
+    {
+        ColumnInfo proteinGroup = wrapColumn("Proteins", getRealTable().getColumn("RowId"));
+        proteinGroup.setFk(new LookupForeignKey("ProteinGroupId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return _schema.createProteinGroupMembershipsTable();
+            }
+        });
+        proteinGroup.setKeyField(false);
+        addColumn(proteinGroup);
     }
 
     public void addProteinDetailColumns()

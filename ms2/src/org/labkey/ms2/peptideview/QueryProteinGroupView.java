@@ -1,110 +1,82 @@
 package org.labkey.ms2.peptideview;
 
-import org.labkey.api.data.*;
-import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.MS2Run;
-import org.labkey.api.security.User;
 import org.labkey.api.view.*;
+import org.labkey.api.data.*;
+import org.labkey.api.security.User;
 import org.labkey.api.query.*;
-import org.labkey.common.util.Pair;
-
-import javax.servlet.ServletException;
-import java.sql.SQLException;
-import java.util.*;
-
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
-import org.labkey.ms2.query.PeptidesTableInfo;
+import org.labkey.ms2.query.ProteinGroupTableInfo;
+import org.labkey.common.util.Pair;
+
+import javax.servlet.ServletException;
+import java.util.List;
+import java.util.ArrayList;
+import java.sql.SQLException;
 
 /**
  * User: jeckels
- * Date: Mar 6, 2006
+ * Date: Apr 11, 2007
  */
-public class QueryPeptideView extends AbstractPeptideView
+public class QueryProteinGroupView extends AbstractPeptideView
 {
     private ViewContext _viewContext;
-    private static final String DATA_REGION_NAME = "MS2Peptides";
+    private static final String DATA_REGION_NAME = "ProteinGroups";
 
-    public QueryPeptideView(Container container, User user, ViewURLHelper url, MS2Run[] runs, ViewContext viewContext)
+    public QueryProteinGroupView(Container container, User user, ViewURLHelper url, MS2Run[] runs, ViewContext viewContext)
     {
         super(container, user, "Peptides", url, runs);
         _viewContext = viewContext;
     }
 
-    protected QuerySettings createQuerySettings(String tableName, MS2Schema schema, int maxRows) throws RedirectException
+    protected QuerySettings createQuerySettings(String tableName, UserSchema schema, int maxRows) throws RedirectException
     {
         QuerySettings settings = new QuerySettings(_url, _viewContext.getRequest(), DATA_REGION_NAME);
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
-        settings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
+        settings.setQueryName(MS2Schema.PROTEIN_GROUPS_FOR_RUN_TABLE_NAME);
         settings.setDataRegionName(MS2Manager.getDataRegionNamePeptides());
         settings.setMaxRows(maxRows);
-        String columnNames = _url.getParameter("columns");
-        if (columnNames != null)
-        {
-            QueryDefinition def = settings.getQueryDef(schema);
-            CustomView view = def.getCustomView(getUser(), _viewContext.getRequest(), "columns");
-            if (view == null)
-            {
-                view = def.createCustomView(getUser(), "columns");
-            }
-            StringTokenizer st = new StringTokenizer(columnNames, ", ");
-            List<FieldKey> fieldKeys = new ArrayList<FieldKey>();
-            while (st.hasMoreTokens())
-            {
-                fieldKeys.add(FieldKey.fromString(st.nextToken()));
-            }
-            view.setColumns(fieldKeys);
-            view.save(getUser(), _viewContext.getRequest());
-            settings.setViewName("columns");
-            ViewURLHelper url = _url.clone();
-            url.deleteParameter("columns");
-            url.addParameter(DATA_REGION_NAME + ".viewName", "columns");
-            throw new RedirectException(url.toString());
-        }
 
         return settings;
     }
 
     public WebPartView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws ServletException, SQLException
     {
-        MS2Schema schema = new MS2Schema(getUser(), getContainer());
+        UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
 
         QuerySettings settings = createQuerySettings(DATA_REGION_NAME, schema, _maxPeptideRows);
 
-        FlatPeptideQueryView peptideView = new FlatPeptideQueryView(_viewContext, schema, settings, expanded);
+        ProteinGroupQueryView peptideView = new ProteinGroupQueryView(_viewContext, schema, settings, expanded);
 
-        peptideView.setTitle("Peptides");
+        peptideView.setTitle("Protein Groups");
         return peptideView;
     }
 
-    private class FlatPeptideQueryView extends QueryView
+    private class ProteinGroupQueryView extends QueryView
     {
         private QueryNestingOption _selectedNestingOption;
 
         private final boolean _expanded;
 
-        public FlatPeptideQueryView(ViewContext context, MS2Schema schema, QuerySettings settings, boolean expanded)
+        public ProteinGroupQueryView(ViewContext context, UserSchema schema, QuerySettings settings, boolean expanded)
         {
             super(context, schema, settings);
             _expanded = expanded;
-            _buttonBarPosition = DataRegion.ButtonBarPosition.BOTTOM; 
+            _buttonBarPosition = DataRegion.ButtonBarPosition.BOTTOM;
         }
 
         protected DataRegion createDataRegion()
-        { 
+        {
             List<DisplayColumn> originalColumns = getDisplayColumns();
-            ProteinProphetQueryNestingOption proteinProphetNesting = new ProteinProphetQueryNestingOption();
-            StandardProteinQueryNestingOption standardProteinNesting = new StandardProteinQueryNestingOption();
+            ProteinGroupQueryNestingOption proteinGroupNesting = new ProteinGroupQueryNestingOption();
 
-            if (proteinProphetNesting.isNested(originalColumns))
+            if (proteinGroupNesting.isNested(originalColumns))
             {
-                _selectedNestingOption = proteinProphetNesting;
-            }
-            else if (standardProteinNesting.isNested(originalColumns))
-            {
-                _selectedNestingOption = standardProteinNesting;
+                _selectedNestingOption = proteinGroupNesting;
             }
 
             DataRegion rgn;
@@ -124,13 +96,6 @@ public class QueryPeptideView extends AbstractPeptideView
             rgn.setShowRecordSelectors(true);
             rgn.setFixedWidthColumns(true);
 
-            setPeptideUrls(rgn, null);
-
-            rgn.addHiddenFormField("queryString", _url.getRawQuery());  // Pass query string for exportSelectedToExcel post case... need to display filter & sort to user, and to show the right columns
-            rgn.addHiddenFormField(MS2Manager.getDataRegionNamePeptides() + ".sort", _url.getParameter(MS2Manager.getDataRegionNamePeptides() + ".sort"));     // Stick sort on the request as well so DataRegion sees it
-            rgn.addHiddenFormField("columns", _url.getParameter("columns"));
-            rgn.addHiddenFormField("run", _url.getParameter("run"));
-
             return rgn;
         }
 
@@ -141,7 +106,8 @@ public class QueryPeptideView extends AbstractPeptideView
             setupDataView(result);
 
             Sort customViewSort = result.getRenderContext().getBaseSort();
-            Sort sort = ProteinManager.getPeptideBaseSort();
+            Sort sort = new Sort("RowId");     // Always sort peptide lists by RowId
+            sort.setMaxClauses(4);             // Need room for base sort plus three clauses from URL
             if (customViewSort != null)
             {
                 sort.insertSort(customViewSort);
@@ -163,10 +129,10 @@ public class QueryPeptideView extends AbstractPeptideView
                 bar.add(element);
             }
         }
-        
-        protected PeptidesTableInfo createTable()
+
+        protected ProteinGroupTableInfo createTable()
         {
-            return new PeptidesTableInfo((MS2Schema)getSchema(), _runs, _url.clone());
+            return ((MS2Schema)getSchema()).createProteinGroupsForRunTable(null);
         }
     }
 
@@ -219,4 +185,5 @@ public class QueryPeptideView extends AbstractPeptideView
     {
         throw new UnsupportedOperationException();
     }
+
 }

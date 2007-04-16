@@ -5,6 +5,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.security.User;
 import org.labkey.api.security.ACL;
+import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.CustomAnnotationType;
@@ -27,7 +28,10 @@ public class SequencesTableInfo extends FilteredTable
     {
         super(ProteinManager.getTableInfoSequences());
         _container = container;
-        setAlias(alias);
+        if (alias != null)
+        {
+            setAlias(alias);
+        }
         wrapAllColumns(true);
 
         getColumn("OrgId").setFk(new LookupForeignKey("OrgId", "Description")
@@ -47,8 +51,13 @@ public class SequencesTableInfo extends FilteredTable
 
         ColumnInfo annotationColumn = wrapColumn("CustomAnnotations", _rootTable.getColumn("SeqId"));
         annotationColumn.setIsUnselectable(true);
-        annotationColumn.setFk(new LookupForeignKey("AnnotationSetCount")
+        annotationColumn.setFk(new ForeignKey()
         {
+            public StringExpressionFactory.StringExpression getURL(ColumnInfo parent)
+            {
+                return null;
+            }
+
             public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
             {
                 if (displayField == null)
@@ -69,6 +78,7 @@ public class SequencesTableInfo extends FilteredTable
                         sql.add(annotationSet.getCustomAnnotationSetId());
                         ExprColumn ret = new ExprColumn(parent.getParentTable(), displayField,
                             sql, Types.INTEGER, parent);
+                        ret.setCaption(annotationSet.getName());
                         ret.setFk(new LookupForeignKey("CustomAnnotationId")
                         {
                             public TableInfo getLookupTableInfo()
@@ -241,5 +251,4 @@ public class SequencesTableInfo extends FilteredTable
         sql.append(")");
         addCondition(sql);
     }
-
 }

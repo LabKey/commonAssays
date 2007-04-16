@@ -53,10 +53,16 @@ public class CompareDataRegion extends DataRegion
             out.write("<td></td>");
 
         boolean shade = false;
+        int columnIndex = 0;
         for (int i = 0; i < _offset; i++)
         {
             out.write("<td></td>");
+            if (shade)
+            {
+                renderers[columnIndex].setBackgroundColor("#EEEEEE");
+            }
             shade = !shade;
+            columnIndex++;
         }
 
         for (String caption : _multiColumnCaptions)
@@ -65,7 +71,16 @@ public class CompareDataRegion extends DataRegion
             if (shade)
             {
                 out.write(" bgcolor=\"#EEEEEE\"");
+                for (int i = 0; i < _colSpan; i++)
+                {
+                    renderers[columnIndex++].setBackgroundColor("#EEEEEE");
+                }
             }
+            else
+            {
+                columnIndex += _colSpan;
+            }
+
             out.write("><div style=\"text-align: center; writing-mode: tb-rl;filter: flipv fliph;\">" + caption + "</div></td>");
             shade = !shade;
         }

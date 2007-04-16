@@ -8,6 +8,7 @@ import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.ProteinGroupProteins;
+import org.labkey.ms2.MS2Run;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.CaseInsensitiveHashSet;
@@ -33,14 +34,18 @@ public class MS2Schema extends UserSchema
 
     public static final String PEPTIDES_TABLE_NAME = "Peptides";
     public static final String PROTEIN_GROUPS_TABLE_NAME = "ProteinGroups";
+    public static final String PROTEIN_GROUPS_FOR_RUN_TABLE_NAME = "ProteinGroupsForRun";
+    public static final String PROTEIN_GROUPS_FOR_SEARCH_TABLE_NAME = "ProteinGroupsForSearch";
     public static final String SEQUENCES_TABLE_NAME = "Sequences";
+    public static final String COMPARE_PROTEIN_PROPHET_TABLE_NAME = "CompareProteinProphet";
 
     private static final String MASCOT_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.Mascot%";
     private static final String SEQUEST_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.Sequest%";
     private static final String XTANDEM_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.XTandem%";
     private static final String SAMPLE_PREP_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.PreSearch.%";
 
-    private static final Set<String> HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet(Arrays.asList("PeptideId"));
+    private static final Set<String> HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("PeptideId");
+    private static final Set<String> HIDDEN_PROTEIN_GROUP_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("ProteinGroupId", "SeqId");
 
     private ProteinGroupProteins _proteinGroupProteins = new ProteinGroupProteins();
 
@@ -114,14 +119,49 @@ public class MS2Schema extends UserSchema
             result.addContainerCondition(getContainer(), getUser(), false);
             return result;
         }
+        else if (PROTEIN_GROUPS_FOR_SEARCH_TABLE_NAME.equalsIgnoreCase(name))
+        {
+            return createProteinGroupsForSearchTable(alias);
+        }
+        else if (PROTEIN_GROUPS_FOR_RUN_TABLE_NAME.equalsIgnoreCase(name))
+        {
+            return createProteinGroupsForRunTable(alias);
+        }
         else if (SEQUENCES_TABLE_NAME.equalsIgnoreCase(name))
         {
             return createSequencesTable(alias);
+        }
+        else if (COMPARE_PROTEIN_PROPHET_TABLE_NAME.equalsIgnoreCase(name))
+        {
+            return new CompareProteinProphetTableInfo(alias, this, null);
         }
         else
         {
             return super.getTable(name, alias);
         }
+    }
+
+    public ProteinGroupTableInfo createProteinGroupsForSearchTable(String alias)
+    {
+        ProteinGroupTableInfo result = new ProteinGroupTableInfo(alias, this);
+        List<FieldKey> defaultColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+        defaultColumns.add(0, FieldKey.fromParts("ProteinProphet","Run"));
+        defaultColumns.add(0, FieldKey.fromParts("ProteinProphet", "Run", "Container"));
+        result.setDefaultVisibleColumns(defaultColumns);
+        return result;
+    }
+
+    public ProteinGroupTableInfo createProteinGroupsForRunTable(String alias)
+    {
+        ProteinGroupTableInfo result = new ProteinGroupTableInfo(alias, this);
+        result.addProteinsColumn();
+        List<FieldKey> defaultColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "BestName"));
+        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "BestGeneName"));
+        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "Mass"));
+        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "Description"));
+        result.setDefaultVisibleColumns(defaultColumns);
+        return result;
     }
 
     protected TableInfo createPeptideMembershipsTable()
@@ -140,8 +180,8 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                ProteinGroupTableInfo result = new ProteinGroupTableInfo(null, false, MS2Schema.this);
-
+                ProteinGroupTableInfo result = new ProteinGroupTableInfo(null, MS2Schema.this);
+                result.getColumn("ProteinProphet").setIsHidden(true);
                 result.addProteinDetailColumns();
 
                 return result;
@@ -234,7 +274,7 @@ public class MS2Schema extends UserSchema
         FieldKey fieldLinks = FieldKey.fromParts("Links");
         FieldKey fieldMS2Links = FieldKey.fromParts("MS2Details", "Links");
         boolean ms2LinksAdded = false;
-        List<FieldKey> columns = new ArrayList();
+        List<FieldKey> columns = new ArrayList<FieldKey>();
         for (FieldKey field : result.getDefaultVisibleColumns())
         {
             columns.add(field);
@@ -252,6 +292,32 @@ public class MS2Schema extends UserSchema
         columns.add(FieldKey.fromParts("Input", "FASTA"));
         columns.add(FieldKey.fromParts("Input", "mzXML"));
         result.setDefaultVisibleColumns(columns);
+        return result;
+    }
+
+    public TableInfo createProteinGroupMembershipsTable()
+    {
+        TableInfo info = MS2Manager.getTableInfoProteinGroupMemberships();
+        FilteredTable result = new FilteredTable(info);
+        for (ColumnInfo col : info.getColumns())
+        {
+            ColumnInfo newColumn = result.addWrapColumn(col);
+            if (HIDDEN_PROTEIN_GROUP_MEMBERSHIPS_COLUMN_NAMES.contains(newColumn.getName()))
+            {
+                newColumn.setIsHidden(true);
+            }
+        }
+        ColumnInfo proteinColumn = result.wrapColumn("Protein", info.getColumn("SeqId"));
+        result.addColumn(proteinColumn);
+        proteinColumn.setFk(new LookupForeignKey("SeqId", false)
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                SequencesTableInfo result = new SequencesTableInfo(null, getContainer());
+
+                return result;
+            }
+        });
         return result;
     }
 
