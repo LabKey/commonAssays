@@ -62,10 +62,15 @@ public class IssuesQueryView extends QueryView
         }
         view.getDataRegion().setShadeAlternatingRows(true);
         view.getDataRegion().setShowColumnSeparators(true);
-        view.getRenderContext().setBaseSort(new Sort("-IssueId"));
 
         //ensureDefaultCustomViews();
         return view;
+    }
+
+    protected void setupDataView(DataView ret)
+    {
+        ret.getRenderContext().setBaseSort(new Sort("-IssueId"));
+        super.setupDataView(ret);
     }
 
     private static final String CUSTOM_VIEW_ALL = "all";
