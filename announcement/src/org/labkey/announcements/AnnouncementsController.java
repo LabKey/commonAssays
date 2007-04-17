@@ -1583,7 +1583,7 @@ public class AnnouncementsController extends ViewController
 
                 if (null == assignedToUser)
                 {
-                    addActionError("Assigned to user " + assignedToUser.getUserId() + ": Doesn't exist");
+                    addActionError("Assigned to user " + assignedTo + ": Doesn't exist");
                 }
                 else
                 {
