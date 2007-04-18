@@ -3,7 +3,7 @@
 <%@ page import="org.labkey.flow.util.PFUtil"%>
 <%@ page import="java.util.List"%>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
-<%@ taglib uri="http://cpas.fhcrc.org/taglib/cpas" prefix="cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
 <% List<FlowCompensationMatrix> matrices = FlowCompensationMatrix.getUploadedCompensationMatrices(getContainer()); %>
 <% if (matrices.size() == 0) { %>
@@ -16,5 +16,5 @@
     <% } %>
 </table>
 <% } %>
-<cpas:link href="<%=PFUtil.urlFor(Action.upload, getContainer())%>" text="Upload a new compensation matrix" />
+<labkey:link href="<%=PFUtil.urlFor(Action.upload, getContainer())%>" text="Upload a new compensation matrix" />
 

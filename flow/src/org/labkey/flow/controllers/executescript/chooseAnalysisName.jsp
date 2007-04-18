@@ -6,7 +6,7 @@
 <%@ page import="java.util.Set" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="java.util.HashSet" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% ChooseRunsToAnalyzeForm form = (ChooseRunsToAnalyzeForm) __form; %>
 <form method="POST" action="analyzeSelectedRuns.post">
     <%=errors()%>
@@ -33,8 +33,8 @@
         <input type="text" name="ff_analysisName" value="<%=h(name)%>">
     </p>
 
-    <cpas:button text="Analyze runs" action="<%=Action.analyzeSelectedRuns%>"/>
-    <cpas:button text="Go back" action="<%=Action.chooseRunsToAnalyze%>"/>
+    <labkey:button text="Analyze runs" action="<%=Action.analyzeSelectedRuns%>"/>
+    <labkey:button text="Go back" action="<%=Action.chooseRunsToAnalyze%>"/>
     <% for (int runid : form.getSelectedRunIds()) { %>
     <input type="hidden" name="<%=DataRegion.SELECT_CHECKBOX_NAME%>" value="<%=runid%>">
     <input type="hidden" name="scriptId" value="<%=form.getProtocol().getScriptId()%>">

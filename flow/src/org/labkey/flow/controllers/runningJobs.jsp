@@ -6,7 +6,7 @@
 <%@ page import="java.util.ArrayList"%>
 <%@ page import="org.labkey.api.view.ViewURLHelper"%>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
 PipelineQueue.JobData data = PipelineService.get().getPipelineQueue().getJobData(null);
 List<ScriptJob> jobs = new ArrayList();
@@ -32,9 +32,9 @@ for (PipelineJob job : data.getRunningJobs())
     <tr><td><a href="<%=h(job.urlStatus())%>"><%=h(job.getStatusText())%></a></td>
         <td><%=h(job.getDescription())%></td>
         <td><a href="<%=h(new ViewURLHelper("Project", "begin", job.getContainer()))%>"><%=h(job.getContainer().getPath())%></a></td>
-        <td><%=h(String.valueOf(job.getUser()))%></td><td><cpas:button text="Cancel" href="<%=job.urlCancel()%>"/></tr>
+        <td><%=h(String.valueOf(job.getUser()))%></td><td><labkey:button text="Cancel" href="<%=job.urlCancel()%>"/></tr>
 <% } %>
 </table>
 <% } %>
-<cpas:link href="<%=h(new ViewURLHelper("Pipeline-Status", "showList", getContainer()))%>" text="all jobs in this folder (including completed ones)"/>
+<labkey:link href="<%=h(new ViewURLHelper("Pipeline-Status", "showList", getContainer()))%>" text="all jobs in this folder (including completed ones)"/>
 

@@ -1,4 +1,4 @@
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page import="org.labkey.ms2.MS2Controller"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
@@ -160,7 +160,7 @@ for (int i = quant.getMinDisplayScan(); i <= quant.getMaxDisplayScan(); i++)
 <tr><td></td><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
 </table>
 
-<cpas:button text="Save Elution Profiles" onclick="var valuesOK = (document.elutionForm.lightFirstScan.value <= document.elutionForm.lightLastScan.value && document.elutionForm.heavyFirstScan.value <= document.elutionForm.heavyLastScan.value); if (!valuesOK) { alert('The first scan must come before the last scan.'); } return valuesOK;" />
+<labkey:button text="Save Elution Profiles" onclick="var valuesOK = (document.elutionForm.lightFirstScan.value <= document.elutionForm.lightLastScan.value && document.elutionForm.heavyFirstScan.value <= document.elutionForm.heavyLastScan.value); if (!valuesOK) { alert('The first scan must come before the last scan.'); } return valuesOK;" />
 
 
 </form>

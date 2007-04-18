@@ -1,9 +1,9 @@
 <%@ page import="org.labkey.flow.controllers.protocol.UpdateSamplesForm"%>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.Action"%>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% UpdateSamplesForm form = (UpdateSamplesForm) __form;%>
-<cpas:errors />
+<labkey:errors />
 <p>
     <%= form.fileCount%> FCS files were linked to samples in this sample set.
 </p>

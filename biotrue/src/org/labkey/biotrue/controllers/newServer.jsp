@@ -1,9 +1,9 @@
 <%@ page import="org.labkey.biotrue.controllers.NewServerForm" %>
 <%@ page import="org.labkey.biotrue.controllers.BtController" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas"%>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% NewServerForm form = (NewServerForm) __form;%>
-<cpas:errors />
+<labkey:errors />
 <form action="<%=BtController.Action.newServer.url(getContainer())%>" method="POST">
     <p>
         What do you want to name this BioTrue server?<br>
@@ -35,5 +35,5 @@
         Where in this web server's file system do you want to download files to?<br>
         <input type="text" name="ff_physicalRoot" style="width:200px" value="<%=h(form.ff_physicalRoot)%>">
     </p>
-    <cpas:button text="Define Server" />
+    <labkey:button text="Define Server" />
 </form>

@@ -3,7 +3,7 @@
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page import="org.labkey.ms2.search.ProteinSearchBean" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -35,7 +35,7 @@
             <td><input type="checkbox" name="exactMatch" <% if (bean.isExactMatch()) { %>checked="true" <% } %> /> <%= helpPopup("Protein Search: Exact Match", "If checked, the search will only find proteins with an exact name match. If not checked, proteins that start with the name entered will also match, but the search may be significantly slower.") %></td>
         <%= separator %>
             <td></td>
-            <td><cpas:button text="Search" /></td>
+            <td><labkey:button text="Search" /></td>
         </tr>
     </table>
 </form>

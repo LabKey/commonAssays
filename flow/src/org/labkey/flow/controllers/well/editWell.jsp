@@ -4,11 +4,11 @@
 <%@ page import="org.labkey.flow.data.FlowWell"%>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
 <%  EditWellForm form = (EditWellForm) __form;
 FlowWell well = form.getWell();%>
-<cpas:errors />
+<labkey:errors />
 <form method="POST" action="<%=h(well.urlFor(WellController.Action.editWell))%>" class="normal">
     <%=well.strHiddenFields()%>
     <table>
@@ -28,8 +28,8 @@ FlowWell well = form.getWell();%>
         <tr><td><input type="text" name="ff_keywordName" value=""></td><td><input type="text" name="ff_keywordValue"></td></tr>
 <% } %>
     </table>
-    <cpas:button text="update" />
-    <cpas:button text="cancel" href="<%=well.urlFor(WellController.Action.showWell)%>"/>
+    <labkey:button text="update" />
+    <labkey:button text="cancel" href="<%=well.urlFor(WellController.Action.showWell)%>"/>
 </form>
 
 

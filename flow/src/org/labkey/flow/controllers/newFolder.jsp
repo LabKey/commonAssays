@@ -3,10 +3,10 @@
 <%@ page import="org.labkey.flow.controllers.NewFolderForm" %>
 <%@ page import="org.labkey.flow.data.FlowScript" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <% NewFolderForm form = (NewFolderForm) __form; %>
-<cpas:errors/>
+<labkey:errors/>
 <form method="POST" action="<%=PFUtil.urlFor(FlowController.Action.newFolder, getContainer())%>">
     <p>A new folder will be created that is a sibling of this one.
         What do you want to call the new folder?<br>
@@ -47,5 +47,5 @@
         There are no analysis scripts in this folder.
         <% } %>
     </p>
-    <cpas:button text="Create Folder"/>
+    <labkey:button text="Create Folder"/>
 </form>

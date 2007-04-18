@@ -2,7 +2,7 @@
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="org.labkey.flow.controllers.FlowModule" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas"%>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <form action="<%=form.analysisScript.urlFor(ScriptController.Action.chooseCompensationRun)%>" method="POST">
 <p>
     In order to define the compensation calculation, you need to tell <%=FlowModule.getLongProductName()%> which keyword
@@ -12,8 +12,8 @@
 <p>
     Which experiment run do you want to use?<br>
     <select name="selectedRunId">
-        <cpas:options value="<%=0%>" map="<%=form.getExperimentRuns()%>"/> 
+        <labkey:options value="<%=0%>" map="<%=form.getExperimentRuns()%>"/>
     </select>
 </p>
-<cpas:button text="Next Step" />
+<labkey:button text="Next Step" />
 </form>

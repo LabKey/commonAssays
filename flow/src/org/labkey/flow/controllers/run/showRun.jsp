@@ -6,7 +6,7 @@
 <%@ page import="org.labkey.flow.controllers.compensation.CompensationController"%>
 <%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page extends="org.labkey.flow.controllers.run.RunController.Page" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas"%>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     RunForm form = (RunForm) __form;
     FlowQueryView view = new FlowQueryView(form);
@@ -28,11 +28,11 @@
         FlowCompensationMatrix comp = getCompensationMatrix();
         if (comp != null)
     { %>
-    <cpas:link text="Show Compensation" href="<%=comp.urlFor(CompensationController.Action.showCompensation)%>"/><br>
+    <labkey:link text="Show Compensation" href="<%=comp.urlFor(CompensationController.Action.showCompensation)%>"/><br>
     <% } %>
     <%  ViewURLHelper urlShowRunGraph = new ViewURLHelper("Experiment", "showRunGraph", getContainer());
         urlShowRunGraph.addParameter("rowId", Integer.toString(getRun().getRunId()));
     %>
-    <cpas:link href="<%=h(urlShowRunGraph)%>" text="Experiment Run Graph"/><br>
-    <cpas:link href="<%=getRun().urlFor(RunController.Action.download)%>" text="Download FCS Files" /><br>
+    <labkey:link href="<%=h(urlShowRunGraph)%>" text="Experiment Run Graph"/><br>
+    <labkey:link href="<%=getRun().urlFor(RunController.Action.download)%>" text="Download FCS Files" /><br>
 </p>

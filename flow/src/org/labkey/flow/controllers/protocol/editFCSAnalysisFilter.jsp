@@ -5,7 +5,7 @@
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%! void addCompare(Map<String, String> options, CompareType ct)
 {
     options.put(ct.getUrlKey(), ct.getDisplayValue()); 
@@ -23,7 +23,7 @@
     addCompare(opOptions, CompareType.CONTAINS);
     int clauseCount = Math.max(form.ff_field.length + 2, 4);
 %>
-<cpas:errors />
+<labkey:errors />
 <p>
     Use this page to specify which FCS files should be analyzed.
 </p>
@@ -45,13 +45,13 @@
             <% if (i != 0) { %>
         <tr><td class="normal">and</td></tr>
             <% } %>
-        <tr><td class="normal"><select name="ff_field"><cpas:options value="<%=field%>" map="<%=fieldOptions%>" /> </select></td>
-            <td class="normal"><select name="ff_op"><cpas:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
+        <tr><td class="normal"><select name="ff_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /> </select></td>
+            <td class="normal"><select name="ff_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
             <td class="normal"><input name="ff_value" type="text" value="<%=h(value)%>" /></td>
 
         </tr>
         <% } %>
 
     </table>
-    <cpas:button text="Set filter" /> <cpas:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
+    <labkey:button text="Set filter" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
 </form>

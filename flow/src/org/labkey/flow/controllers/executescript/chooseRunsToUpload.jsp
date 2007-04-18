@@ -1,5 +1,5 @@
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToUploadForm" %>
-<%@ taglib uri="http://cpas.fhcrc.org/taglib/cpas" prefix="cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page import="org.labkey.flow.util.PFUtil" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="java.util.Map" %>
@@ -8,7 +8,7 @@
 <%
     ChooseRunsToUploadForm form = (ChooseRunsToUploadForm) __form;
 %>
-<cpas:errors/>
+<labkey:errors/>
 <form method="POST" action="<%=PFUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, getContainer())%>"
       class="normal">
     <input type="hidden" name="path" value="<%=h(form.path)%>">
@@ -16,7 +16,7 @@
         Map<String, String> paths = form.getNewPaths();
         if (paths.size() == 0)
         {%>
-    <cpas:button text="Browse for more runs" href="<%=form.srcURL%>"/>
+    <labkey:button text="Browse for more runs" href="<%=form.srcURL%>"/>
     <% }
     else
     {%>
@@ -32,8 +32,8 @@
             <td><%=h(entry.getValue())%></td></tr>
         <%} %>
     </table>
-            <cpas:selectAll/>
-            <cpas:clearAll/>
-            <cpas:button text="Upload Selected Runs" action="<%=AnalysisScriptController.Action.uploadRuns%>"/>
+            <labkey:selectAll/>
+            <labkey:clearAll/>
+            <labkey:button text="Upload Selected Runs" action="<%=AnalysisScriptController.Action.uploadRuns%>"/>
     <% } %>
 </form>

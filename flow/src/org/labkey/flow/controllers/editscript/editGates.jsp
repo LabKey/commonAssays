@@ -11,7 +11,7 @@
 <%@ page import="org.labkey.flow.data.*" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.EditGatesPage" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     Map<SubsetSpec, Population> populations = form.getPopulations();
 
@@ -89,7 +89,7 @@ There are no experiment runs in this folder.
     <tr>
         <td>
             <select id="wells" size="<%=Math.min(25, wellOptions.size())%>" style="height:400px" onChange="setWell(getValue(this))">
-                <cpas:options value="<%=well.getWellId()%>" map="<%=wellOptions%>"/>
+                <labkey:options value="<%=well.getWellId()%>" map="<%=wellOptions%>"/>
             </select>
         </td>
         <td valign="top">
@@ -101,15 +101,15 @@ There are no experiment runs in this folder.
     <tr><td colspan="3">
     <form action="<%=form.analysisScript.urlFor(ScriptController.Action.editGates, form.step)%>" method="POST" style="display:inline">
         Experiment Run: <select name="<%=FlowParam.runId%>">
-        <cpas:options value="<%=form.getRun().getRunId()%>" map="<%=runOptions%>" />
+        <labkey:options value="<%=form.getRun().getRunId()%>" map="<%=runOptions%>" />
         </select>
         <% if (!compOptions.isEmpty()) { %>
         Compensation Matrix:
         <select name="<%=FlowParam.compId%>">
-            <cpas:options value="<%=form.getCompensationMatrix().getCompId()%>" map="<%=compOptions%>"/>
+            <labkey:options value="<%=form.getCompensationMatrix().getCompId()%>" map="<%=compOptions%>"/>
         </select>
         <% } %>
-        <cpas:button text="reload" />
+        <labkey:button text="reload" />
     </form>
     </td></tr>
 </table>

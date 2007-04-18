@@ -2,7 +2,7 @@
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace.StatisticSet" %>
 <%@ page import="java.util.Map" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.UploadAnalysisPage" %>
 <%!
     private String statOption(StatisticSet option)

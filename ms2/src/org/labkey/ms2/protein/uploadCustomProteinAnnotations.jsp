@@ -4,7 +4,7 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
 <%
     JspView<ProteinController.UploadAnnotationsForm> me = (JspView<ProteinController.UploadAnnotationsForm>) HttpView.currentView();
@@ -49,7 +49,7 @@
         </tr>
         <tr>
             <td></td>
-            <td><cpas:button text="Submit" /></td>
+            <td><labkey:button text="Submit" /></td>
         </tr>
     </table>
 </form>

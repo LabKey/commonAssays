@@ -4,7 +4,7 @@
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.Action"%>
 <%@ page import="org.labkey.flow.util.PFUtil"%>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
-<%@ taglib uri="http://cpas.fhcrc.org/taglib/cpas" prefix="cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% JoinSampleSetForm form = (JoinSampleSetForm) __form;
     Map<String, String> sampleKeyFields = form.getAvailableSampleKeyFields();
     Map<FieldKey, String> dataKeyFields = form.getAvailableDataKeyFields();
@@ -25,5 +25,5 @@
         </tr>
         <% } %>
     </table>
-    <cpas:button text="update" /> <cpas:button text="cancel" href="<%=form.getProtocol().urlShow()%>" />
+    <labkey:button text="update" /> <labkey:button text="cancel" href="<%=form.getProtocol().urlShow()%>" />
 </form>

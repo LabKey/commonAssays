@@ -2,7 +2,7 @@
 <%@ page import="java.util.List"%>
 <%@ page import="java.util.Map"%>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%=pageHeader(ScriptController.Action.editAnalysis)%>
 <% ScriptController.AnalysisForm bean = (ScriptController.AnalysisForm) form; %>
 <%Map<String,String> params = form.getParameters();

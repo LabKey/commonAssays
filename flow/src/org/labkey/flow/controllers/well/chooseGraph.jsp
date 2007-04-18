@@ -12,7 +12,7 @@
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page import="org.labkey.flow.controllers.FlowParam" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     ChooseGraphForm form = (ChooseGraphForm) __form;
 
@@ -62,7 +62,7 @@
                 scriptOptions.put(s.getScriptId(), s.getLabel());
             }%>
         <tr><td>Analysis Script:</td><td><select name="<%=FlowParam.scriptId%>" onchange="this.form.submit()">
-            <cpas:options value="<%=form.getScriptId()%>" map="<%=scriptOptions%>"/>
+            <labkey:options value="<%=form.getScriptId()%>" map="<%=scriptOptions%>"/>
         </select></td></tr>
         <%
             }
@@ -89,7 +89,7 @@
             }
         %>
         <tr><td>Compensation Matrix:</td><td><select name="compId" onchange="this.form.submit()">
-            <cpas:options value="<%=form.getCompId()%>" map="<%=compOptions%>"/>
+            <labkey:options value="<%=form.getCompId()%>" map="<%=compOptions%>"/>
         </select></td></tr>
         <% } %>
     </table>

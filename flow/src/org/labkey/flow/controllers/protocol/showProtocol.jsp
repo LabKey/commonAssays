@@ -3,7 +3,7 @@
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.Action" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% ProtocolForm form = (ProtocolForm) __form;
    FlowProtocol protocol = form.getProtocol();
 %>
@@ -14,18 +14,18 @@
     The Flow Protocol describes how to match samples from a Sample Set with FCSFiles.<br>
     <% if (protocol.getSampleSet() == null) { %>
         No samples have been uploaded in this folder.<br>
-        <cpas:link href="<%=protocol.urlUploadSamples()%>" text="Upload samples from a spreadsheet" /><br>
+        <labkey:link href="<%=protocol.urlUploadSamples()%>" text="Upload samples from a spreadsheet" /><br>
     <% } else { %>
-        <cpas:link href="<%=protocol.getSampleSet().detailsURL()%>" text="Show samples" /><br>
-        <cpas:link href="<%=protocol.urlUploadSamples()%>" text="Upload more samples from a spreadsheet" /><br>
-        <cpas:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Join samples to FCS File Data" /><br>
+        <labkey:link href="<%=protocol.getSampleSet().detailsURL()%>" text="Show samples" /><br>
+        <labkey:link href="<%=protocol.urlUploadSamples()%>" text="Upload more samples from a spreadsheet" /><br>
+        <labkey:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Join samples to FCS File Data" /><br>
     <% } %>
 </p>
 <p><b>FCS Analysis Display Names</b><br>
     When you analyze an FCS file, the FCS analysis can be given a name composed from keyword values from the FCS file.<br>
-    <cpas:link href="<%=protocol.urlFor(ProtocolController.Action.editFCSAnalysisName)%>" text="Change FCS Analyses Names" />
+    <labkey:link href="<%=protocol.urlFor(ProtocolController.Action.editFCSAnalysisName)%>" text="Change FCS Analyses Names" />
 </p>
 <p><b>FCS Analysis Filter</b><br>
     You can choose to only analyze FCS files where the keywords match certain criteria.<br>
-    <cpas:link href="<%=protocol.urlFor(ProtocolController.Action.editFCSAnalysisFilter)%>" text="Edit FCS Analysis Filter" /> 
+    <labkey:link href="<%=protocol.urlFor(ProtocolController.Action.editFCSAnalysisFilter)%>" text="Edit FCS Analysis Filter" />
 </p>

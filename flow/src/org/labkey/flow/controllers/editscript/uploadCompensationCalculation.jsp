@@ -1,8 +1,8 @@
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="org.labkey.flow.controllers.FlowModule" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
-<cpas:errors />
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
+<labkey:errors />
 <form method="POST" action="<%=formAction(ScriptController.Action.uploadCompensationCalculation)%>"
       enctype="multipart/form-data">
     <p>

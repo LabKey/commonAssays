@@ -6,7 +6,7 @@
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
     String subsetLink(String subset)
     {
@@ -47,9 +47,9 @@
 <% if (form.canEdit()) { %>
     <p>
         This compensation calculation may be edited in a number of ways:<br>
-        <cpas:link text="Upload a Flow Jo workspace" href="<%=form.analysisScript.urlFor(ScriptController.Action.uploadCompensationCalculation)%>" /><br>
-        <cpas:link text="Switch keywords or gates" href="<%=form.analysisScript.urlFor(ScriptController.Action.chooseCompensationRun)%>" /><br>
-        <cpas:link text="Move or define gates" href="<%=form.analysisScript.urlFor(ScriptController.Action.editGates, FlowProtocolStep.calculateCompensation)%>" /><br>
-        <cpas:link href="<%=form.analysisScript.urlFor(ScriptController.Action.editGateTree, FlowProtocolStep.calculateCompensation)%>" text="Rename gates" /><br>
+        <labkey:link text="Upload a Flow Jo workspace" href="<%=form.analysisScript.urlFor(ScriptController.Action.uploadCompensationCalculation)%>" /><br>
+        <labkey:link text="Switch keywords or gates" href="<%=form.analysisScript.urlFor(ScriptController.Action.chooseCompensationRun)%>" /><br>
+        <labkey:link text="Move or define gates" href="<%=form.analysisScript.urlFor(ScriptController.Action.editGates, FlowProtocolStep.calculateCompensation)%>" /><br>
+        <labkey:link href="<%=form.analysisScript.urlFor(ScriptController.Action.editGateTree, FlowProtocolStep.calculateCompensation)%>" text="Rename gates" /><br>
     </p>
 <% } %>

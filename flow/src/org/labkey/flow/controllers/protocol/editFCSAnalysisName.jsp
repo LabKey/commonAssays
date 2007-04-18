@@ -4,7 +4,7 @@
 <%@ page import="org.labkey.api.query.FieldKey" %>
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
-<%@ taglib prefix="cpas" uri="http://cpas.fhcrc.org/taglib/cpas" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% EditFCSAnalysisNameForm form = (EditFCSAnalysisNameForm) __form; %>
 <p>
     Use this page to describe how FCSAnalyses should be named.<br>
@@ -39,12 +39,12 @@
             }
         %>
             <select name="ff_keyword">
-                <cpas:options value="<%=value%>" map="<%= i == 0 ? options : optionsWithNull %>" />
+                <labkey:options value="<%=value%>" map="<%= i == 0 ? options : optionsWithNull %>" />
             </select><br>
         <% } %>
 
     </p>
-    <cpas:button text="Set names" /> <cpas:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
+    <labkey:button text="Set names" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
 </form>
 <% } %>
 <hr>
@@ -54,5 +54,5 @@
         <br>
         <input type="text" width="80" name="ff_rawString" value="<%=h(form.ff_rawString)%>"/>
     </p>
-    <cpas:button text="Set Expression" /> <cpas:button text="Cancel" href="<%=form.getProtocol().urlShow()%>" />
+    <labkey:button text="Set Expression" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>" />
 </form>
