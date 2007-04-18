@@ -77,7 +77,7 @@ public class ProteinDictionaryHelpers
 
             for (it = t.iterator(); it.hasNext();)
             {
-                Map curRec = it.next();
+                Map curRec = (Map)it.next();
                 for (int i = 1; i <= 8; i++) ps.setNull(i, Types.VARCHAR);
                 for (Object key : curRec.keySet())
                 {
@@ -166,7 +166,7 @@ public class ProteinDictionaryHelpers
             ps = conn.prepareStatement(SQLCommand + QMarkPart);
             for (it = t.iterator(); it.hasNext();)
             {
-                Map curRec = it.next();
+                Map curRec = (Map)it.next();
                 for (int i = 1; i <= cols.length; i++) ps.setNull(i, typeMap.get(cols[i - 1].toUpperCase()).intValue());
                 for (Object key : curRec.keySet())
                 {
