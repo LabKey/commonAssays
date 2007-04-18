@@ -405,28 +405,34 @@ public class MS2Controller extends ViewController
         ViewURLHelper currentUrl = getViewURLHelper();
         MS2Run run = MS2Manager.getRun(form.run);
 
+
+        AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
+
+        WebPartView grid = peptideView.createGridView(form);
+        List<DisplayColumn> displayColumns;
+        String dataRegionName;
+        if (grid instanceof QueryView)
+        {
+            displayColumns = ((QueryView)grid).getDisplayColumns();
+            dataRegionName = ((QueryView)grid).getDataRegionName();
+        }
+        else
+        {
+            displayColumns = ((GridView)grid).getDataRegion().getDisplayColumnList();
+            dataRegionName = ((GridView)grid).getDataRegion().getName();
+        }
+
         VBox vBox = new VBox();
-        vBox.addView(new GroovyView("/org/labkey/ms2/nestedGridScript.gm"));
+        GroovyView scriptView = new GroovyView("/org/labkey/ms2/nestedGridScript.gm");
+        scriptView.addObject("DataRegionName", dataRegionName);
+        vBox.addView(scriptView);
         VelocityView runSummary = new VelocityView("/org/labkey/ms2/runSummary.vm");
         runSummary.addObject("run", run);
         runSummary.addObject("modHref", modificationHref(run));
         runSummary.addObject("writePermissions", getViewContext().hasPermission(ACL.PERM_UPDATE));
         runSummary.addObject("quantAlgorithm", MS2Manager.getQuantAnalysisAlgorithm(form.run));
         vBox.addView(runSummary);
-
-        AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
         vBox.addView(createHeader(currentUrl, form, run, peptideView));
-
-        WebPartView grid = peptideView.createGridView(form);
-        List<DisplayColumn> displayColumns;
-        if (grid instanceof QueryView)
-        {
-            displayColumns = ((QueryView)grid).getDisplayColumns();
-        }
-        else
-        {
-            displayColumns = ((GridView)grid).getDataRegion().getDisplayColumnList();
-        }
 
         boolean exploratoryFeatures = false;
         for (DisplayColumn displayColumn : displayColumns)

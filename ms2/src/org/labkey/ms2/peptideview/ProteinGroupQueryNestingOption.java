@@ -10,6 +10,16 @@ public class ProteinGroupQueryNestingOption extends QueryNestingOption
     {
         super("RowId");
     }
+    
+    public int getOuterGroupLimit()
+    {
+        return 250;
+    }
+
+    public int getResultSetRowLimit()
+    {
+        return 15000;
+    }
 
     public boolean isOuter(String columnName)
     {

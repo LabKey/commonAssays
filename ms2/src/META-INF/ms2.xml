@@ -1884,7 +1884,9 @@
   </ns:table>
   <ns:table tableName="ProteinQuantitation" tableDbType="TABLE">
     <ns:columns>
-      <ns:column columnName="ProteinGroupId"/>
+      <ns:column columnName="ProteinGroupId">
+          <ns:isHidden>true</ns:isHidden>
+      </ns:column>
       <ns:column columnName="RatioMean"/>
       <ns:column columnName="RatioStandardDev"/>
       <ns:column columnName="RatioNumberPeptides"/>

@@ -54,7 +54,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return MS2Manager.getTableInfoProteinQuantitation();
+                return new ProteinQuantitationTable();
             }
         });
         quantitation.setKeyField(false);

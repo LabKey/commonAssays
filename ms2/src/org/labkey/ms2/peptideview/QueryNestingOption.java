@@ -25,6 +25,9 @@ public abstract class QueryNestingOption
         _rowIdColumnName = rowIdColumnName;
     }
 
+    public abstract int getResultSetRowLimit();
+    public abstract int getOuterGroupLimit();
+
     public void setupGroupIdColumn(List<DisplayColumn> allColumns, List<DisplayColumn> outerColumns, TableInfo parentTable)
     {
         if (_groupIdColumn != null)
@@ -72,7 +75,7 @@ public abstract class QueryNestingOption
         return _rowIdColumnName;
     }
 
-    public QueryPeptideDataRegion createDataRegion(List<DisplayColumn> originalColumns, MS2Run[] runs, ViewURLHelper url, String dataRegionName)
+    public QueryPeptideDataRegion createDataRegion(List<DisplayColumn> originalColumns, MS2Run[] runs, ViewURLHelper url, String dataRegionName, boolean expanded)
     {
         List<DisplayColumn> innerColumns = new ArrayList<DisplayColumn>();
         List<DisplayColumn> outerColumns = new ArrayList<DisplayColumn>();
@@ -91,9 +94,8 @@ public abstract class QueryNestingOption
             }
         }
 
-        QueryPeptideDataRegion ppRgn = new QueryPeptideDataRegion(allColumns, _groupIdColumn.getColumnInfo().getAlias(), url);
-//                ppRgn.setExpanded(_expanded);
-        ppRgn.setExpanded(true);
+        QueryPeptideDataRegion ppRgn = new QueryPeptideDataRegion(allColumns, _groupIdColumn.getColumnInfo().getAlias(), url, getResultSetRowLimit(), getOuterGroupLimit());
+        ppRgn.setExpanded(expanded);
         ppRgn.setRecordSelectorValueColumns(_groupIdColumn.getColumnInfo().getAlias());
         DataRegion nestedRgn = new DataRegion();
         nestedRgn.setName(dataRegionName);

@@ -46,12 +46,14 @@ public abstract class AbstractProteinDataRegion extends DataRegion
     protected void renderExtraRecordSelectorContent(RenderContext ctx, Writer out) throws IOException
     {
         String value = getUniqueColumnValue(ctx);
-        out.write("<a href=\"javascript:togglePeptides('");
+        out.write("<a href=\"javascript:toggleNestedGrid('");
         out.write(_groupURL);
         out.write(value);
         out.write("', '");
         out.write(value);
-        out.write("');\"><img valign=\"middle\" id=\"proteinHandle");
+        out.write("');\"><img valign=\"middle\" id=\"");
+        out.write(getName());
+        out.write("-Handle");
         out.write(value);
         out.write("\" src=\"");
         out.write(ctx.getViewContext().getContextPath());
@@ -137,10 +139,14 @@ public abstract class AbstractProteinDataRegion extends DataRegion
         {
             out.write(" style=\"display:none\"");
         }
-        out.write(" id=\"proteinRow");
+        out.write(" id=\"");
+        out.write(getName());
+        out.write("-Row");
         String value = getUniqueColumnValue(ctx);
         out.write(value);
-        out.write("\"><td></td><td colspan=\"20\" align=\"left\" id=\"proteinContent");
+        out.write("\"><td></td><td colspan=\"20\" align=\"left\" id=\"");
+        out.write(getName());
+        out.write("-Content");
         out.write(value);
         out.write("\">");
     }

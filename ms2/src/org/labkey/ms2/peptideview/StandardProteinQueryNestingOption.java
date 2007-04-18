@@ -14,6 +14,16 @@ public class StandardProteinQueryNestingOption extends QueryNestingOption
         super(PROTEIN_ROWID);
     }
 
+    public int getOuterGroupLimit()
+    {
+        return 250;
+    }
+
+    public int getResultSetRowLimit()
+    {
+        return 15000;
+    }
+
     public boolean isOuter(String columnName)
     {
         return columnName.toLowerCase().startsWith(PREFIX.toLowerCase());

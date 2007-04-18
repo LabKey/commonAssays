@@ -708,6 +708,7 @@ ms2/src/org/labkey/ms2/query/PeptideCountCoverageColumn.java -text
 ms2/src/org/labkey/ms2/query/PeptidesTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinGroupTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinProphetFileTableInfo.java -text
+ms2/src/org/labkey/ms2/query/ProteinQuantitationTable.java -text
 ms2/src/org/labkey/ms2/query/QueryAACoverageColumn.java -text
 ms2/src/org/labkey/ms2/query/RunTableInfo.java -text
 ms2/src/org/labkey/ms2/query/SequencesTableInfo.java -text

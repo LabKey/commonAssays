@@ -39,7 +39,6 @@ public class QueryPeptideView extends AbstractPeptideView
         settings.setAllowChooseView(true);
         settings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
         settings.setDataRegionName(MS2Manager.getDataRegionNamePeptides());
-        settings.setMaxRows(maxRows);
         String columnNames = _url.getParameter("columns");
         if (columnNames != null)
         {
@@ -73,19 +72,19 @@ public class QueryPeptideView extends AbstractPeptideView
 
         QuerySettings settings = createQuerySettings(DATA_REGION_NAME, schema, _maxPeptideRows);
 
-        FlatPeptideQueryView peptideView = new FlatPeptideQueryView(_viewContext, schema, settings, expanded);
+        PeptideQueryView peptideView = new PeptideQueryView(_viewContext, schema, settings, expanded);
 
         peptideView.setTitle("Peptides");
         return peptideView;
     }
 
-    private class FlatPeptideQueryView extends QueryView
+    private class PeptideQueryView extends QueryView
     {
         private QueryNestingOption _selectedNestingOption;
 
         private final boolean _expanded;
 
-        public FlatPeptideQueryView(ViewContext context, MS2Schema schema, QuerySettings settings, boolean expanded)
+        public PeptideQueryView(ViewContext context, MS2Schema schema, QuerySettings settings, boolean expanded)
         {
             super(context, schema, settings);
             _expanded = expanded;
@@ -110,12 +109,14 @@ public class QueryPeptideView extends AbstractPeptideView
             DataRegion rgn;
             if (_selectedNestingOption != null)
             {
-                rgn = _selectedNestingOption.createDataRegion(originalColumns, _runs, _url, getDataRegionName());
+                rgn = _selectedNestingOption.createDataRegion(originalColumns, _runs, _url, getDataRegionName(), _expanded);
+                getSettings().setMaxRows(_selectedNestingOption.getResultSetRowLimit());
             }
             else
             {
                 rgn = new DataRegion();
                 rgn.setDisplayColumnList(originalColumns);
+                getSettings().setMaxRows(1000);
             }
             rgn.setMaxRows(getMaxRows());
             rgn.setShowRecordSelectors(showRecordSelectors());
@@ -217,6 +218,31 @@ public class QueryPeptideView extends AbstractPeptideView
 
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
     {
-        throw new UnsupportedOperationException();
+        MS2Schema schema = new MS2Schema(getUser(), getContainer());
+
+        QuerySettings settings = null;
+        try
+        {
+            settings = createQuerySettings(DATA_REGION_NAME, schema, _maxPeptideRows);
+        }
+        catch (RedirectException e)
+        {
+            throw new RuntimeException(e);
+        }
+        PeptideQueryView peptideView = new PeptideQueryView(_viewContext, schema, settings, true);
+        QueryPeptideDataRegion rgn = (QueryPeptideDataRegion)peptideView.createDataRegion();
+
+        DataRegion nestedRegion = rgn.getNestedRegion();
+        GridView result = new GridView(nestedRegion);
+
+        Filter customViewFilter = result.getRenderContext().getBaseFilter();
+        SimpleFilter filter = new SimpleFilter(customViewFilter);
+        filter.addAllClauses(ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.EXTRA_FILTER));
+        filter.addCondition(peptideView._selectedNestingOption.getRowIdColumnName(), Integer.parseInt(proteinGroupingId));
+        result.getRenderContext().setBaseFilter(filter);
+
+
+        return result;
+
     }
 }

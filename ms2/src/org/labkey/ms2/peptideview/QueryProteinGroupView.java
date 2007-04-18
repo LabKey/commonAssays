@@ -14,7 +14,6 @@ import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
 import java.util.List;
-import java.util.ArrayList;
 import java.sql.SQLException;
 
 /**
@@ -82,7 +81,7 @@ public class QueryProteinGroupView extends AbstractPeptideView
             DataRegion rgn;
             if (_selectedNestingOption != null)
             {
-                rgn = _selectedNestingOption.createDataRegion(originalColumns, _runs, _url, getDataRegionName());
+                rgn = _selectedNestingOption.createDataRegion(originalColumns, _runs, _url, getDataRegionName(), _expanded);
             }
             else
             {
@@ -183,7 +182,30 @@ public class QueryProteinGroupView extends AbstractPeptideView
 
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
     {
-        throw new UnsupportedOperationException();
+        MS2Schema schema = new MS2Schema(getUser(), getContainer());
+
+        QuerySettings settings = null;
+        try
+        {
+            settings = createQuerySettings(DATA_REGION_NAME, schema, _maxPeptideRows);
+        }
+        catch (RedirectException e)
+        {
+            throw new RuntimeException(e);
+        }
+        ProteinGroupQueryView peptideView = new ProteinGroupQueryView(_viewContext, schema, settings, true);
+        QueryPeptideDataRegion rgn = (QueryPeptideDataRegion)peptideView.createDataRegion();
+
+        DataRegion nestedRegion = rgn.getNestedRegion();
+        GridView result = new GridView(nestedRegion);
+
+        Filter customViewFilter = result.getRenderContext().getBaseFilter();
+        SimpleFilter filter = new SimpleFilter(customViewFilter);
+        filter.addAllClauses(ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.EXTRA_FILTER));
+        filter.addCondition(peptideView._selectedNestingOption.getRowIdColumnName(), Integer.parseInt(proteinGroupingId));
+        result.getRenderContext().setBaseFilter(filter);
+
+        return result;
     }
 
 }
