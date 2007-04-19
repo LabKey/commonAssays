@@ -126,6 +126,7 @@ biotrue/src/org/labkey/biotrue/task/Operation.java -text
 biotrue/src/org/labkey/biotrue/task/ScheduledTask.java -text
 biotrue/webapp/biotrue/scripts/postgresql/biotrue-0.00-0.01.sql -text
 biotrue/webapp/biotrue/scripts/postgresql/biotrue-0.01-0.02.sql -text
+biotrue/webapp/biotrue/scripts/sql[!!-~]server/biotrue-0.00-0.01.sql -text
 caBIG/build.xml -text
 caBIG/caBIG.iml -text
 caBIG/module.properties -text
