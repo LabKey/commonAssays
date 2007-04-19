@@ -1771,7 +1771,15 @@ public class AnnouncementsController extends ViewController
             addObject("emailPrefsURL", user.isGuest() ? null : ViewURLHelper.toPathString("announcements", "showEmailPreferences", c.getPath()));
             addObject("emailManageURL", c.hasPermission(user, ACL.PERM_ADMIN) ? ViewURLHelper.toPathString("announcements", "adminEmail", c.getPath()) : null);
             addObject("filterText", filterText);
-            addObject("urlFilterText", isFiltered ? urlFilter.getFilterText() : null);
+            addObject("urlFilterText", isFiltered ? urlFilter.getFilterText(
+                new SimpleFilter.ColumnNameFormatter()
+                {
+                    @Override
+                    public String format(String columnName)
+                    {
+                        return super.format(columnName).replaceFirst(".DisplayName", "");
+                    }
+                }) : null);
         }
     }
 

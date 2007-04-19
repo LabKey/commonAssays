@@ -541,23 +541,6 @@ public class AnnouncementManager
                 );
     }
 
-/*    public static List<User> getDailyDigestUsers(Container c) throws SQLException
-    {
-        TableInfo ti = _comm.getTableInfoEmailPrefs();
-        SimpleFilter filter = new SimpleFilter("Container", c)
-            .addWhereClause("EmailOptionId & ?", new Object[]{EMAIL_NOTIFICATION_TYPE_DIGEST}, "EmailOptionId")  // Do a bit-wise AND
-            .addCondition("PageTypeId", PAGE_TYPE_MESSAGE);
-
-        Integer userIds[] = Table.executeArray(ti, ti.getColumn("UserId"), filter, null, Integer.class);
-
-        List<User> users = new ArrayList<User>(userIds.length);
-
-        for (int userId : userIds)
-            users.add(UserManager.getUser(userId));
-
-        return users;
-    }
-*/
     public static void saveProjectEmailSettings(Container c, int emailOption) throws SQLException
     {
         Map<String, Object> props = PropertyManager.getWritableProperties(0, c.getId(), "defaultEmailSettings", true);
