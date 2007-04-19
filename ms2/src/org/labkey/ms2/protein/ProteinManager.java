@@ -474,7 +474,7 @@ public class ProteinManager
         }
 
         @Override
-        protected void appendFilterText(StringBuilder sb)
+        protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
         {
             sb.append("Peptide Trypic Termini = ");
             sb.append(_termini);
