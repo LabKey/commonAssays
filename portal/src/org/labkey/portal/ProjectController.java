@@ -388,16 +388,21 @@ public class ProjectController extends ViewController
     @Jpf.Action
     protected Forward search() throws Exception
     {
+        requiresPermission(ACL.PERM_READ);
+
         Container c = getContainer();
         String searchTerm = (String)getViewContext().get("search");
 
+        HttpView search = new SearchWebPart();
+
         String html = Search.search(getUser(), c, searchTerm);
-        HtmlView view = new HtmlView(html);
+        HtmlView results = new HtmlView("Results", html);
 
         NavTrailConfig trailConfig = new NavTrailConfig(getViewContext(), c);
         trailConfig.setTitle("Search Results");
 
-        HttpView template = new HomeTemplate(getViewContext(), c, view, trailConfig);
+        HomeTemplate template = new HomeTemplate(getViewContext(), c, new VBox(search, results), trailConfig);
+        template.getModel().setFocus("forms[0].search");
         return includeView(template);
     }
 

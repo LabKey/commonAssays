@@ -22,6 +22,8 @@ import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
+import org.labkey.api.data.SimpleFilter.*;
+import org.labkey.api.data.CompareType.*;
 import org.labkey.api.issues.IssuesSchema;
 import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.User;
@@ -570,7 +572,25 @@ public class IssueManager
     }
 
 
-    private static String _searchSql;
+//    private static String _searchSql;
+//
+//    static
+//    {
+//        StringBuilder sql = new StringBuilder("SELECT DISTINCT Container, Title, issue.IssueId FROM ");
+//        sql.append(_tinfoIssues);
+//        sql.append(" issue\n    LEFT OUTER JOIN ");
+//        sql.append(_tinfoComments);
+//        sql.append(" comment ON issue.IssueId = comment.IssueId\n    WHERE (Title ");
+//        sql.append(_issuesSchema.getSqlDialect().getCaseInsensitiveLikeOperator());
+//        sql.append(" ? OR Comment ");
+//        sql.append(_issuesSchema.getSqlDialect().getCaseInsensitiveLikeOperator());
+//        sql.append(" ?) AND Container IN ");
+//
+//        _searchSql = sql.toString();
+//    }
+//
+//
+    private static final String SQL_PREFIX;
 
     static
     {
@@ -578,25 +598,32 @@ public class IssueManager
         sql.append(_tinfoIssues);
         sql.append(" issue\n    LEFT OUTER JOIN ");
         sql.append(_tinfoComments);
-        sql.append(" comment ON issue.IssueId = comment.IssueId\n    WHERE (Title ");
-        sql.append(_issuesSchema.getSqlDialect().getCaseInsensitiveLikeOperator());
-        sql.append(" ? OR Comment ");
-        sql.append(_issuesSchema.getSqlDialect().getCaseInsensitiveLikeOperator());
-        sql.append(" ?) AND Container IN ");
+        sql.append(" comment ON issue.IssueId = comment.IssueId\n    ");
 
-        _searchSql = sql.toString();
+        SQL_PREFIX = sql.toString();
     }
 
 
-    @SuppressWarnings({"UNUSED_SYMBOL"})
-    public static MultiMap search(Set<Container> containers, String csvContainerIds, String searchTerm)
+    public static MultiMap search(Collection<String> containerIds, Collection<String> searchTerms)
     {
+        SimpleFilter filter = new SimpleFilter();
+
+        for (String term : searchTerms)
+        {
+            FilterClause titleClause = new ContainsClause("Title", term);
+            FilterClause commentClause = new ContainsClause("Comment", term);
+            filter.addClause(new OrClause(titleClause, commentClause));
+        }
+
+        filter.addClause(new SimpleFilter.InClause("Container", containerIds));
+        SQLFragment searchSql = filter.getSQLFragment(_issuesSchema.getSchema().getSqlDialect());
+        searchSql.insert(0, SQL_PREFIX);
+
         MultiMap map = new MultiValueMap();
-        String likeTerm = "%" + searchTerm + "%";
 
         try
         {
-            ResultSet rs = Table.executeQuery(_issuesSchema.getSchema(), _searchSql + csvContainerIds, new Object[] {likeTerm, likeTerm});
+            ResultSet rs = Table.executeQuery(_issuesSchema.getSchema(), searchSql);
 
             while(rs.next())
             {

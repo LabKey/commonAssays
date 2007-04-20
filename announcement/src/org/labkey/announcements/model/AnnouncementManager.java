@@ -29,6 +29,8 @@ import org.labkey.api.announcements.CommSchema;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.attachments.Attachable;
 import org.labkey.api.data.*;
+import org.labkey.api.data.CompareType.*;
+import org.labkey.api.data.SimpleFilter.*;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.util.ContainerUtil;
@@ -848,7 +850,25 @@ public class AnnouncementManager
         }
     }
 
-    private static String _searchSql;
+//    private static String _searchSql;
+//
+//    static
+//    {
+//        StringBuilder sql = new StringBuilder("SELECT DISTINCT child.Container, CASE WHEN parent.Title IS NULL THEN child.Title ELSE parent.Title END AS Title, CASE WHEN parent.RowId IS NULL THEN child.RowId ELSE parent.RowId END AS RowId FROM ");
+//        sql.append(_comm.getTableInfoAnnouncements());
+//        sql.append(" child\n    LEFT OUTER JOIN ");
+//        sql.append(_comm.getTableInfoAnnouncements());
+//        sql.append(" parent ON child.Parent = parent.EntityId\n    WHERE (child.Body ");
+//        sql.append(_comm.getSqlDialect().getCaseInsensitiveLikeOperator());
+//        sql.append(" ? OR (child.Parent IS NULL AND child.Title ");        // Search title only on original messages, not responses -- TODO: Change this since title can change?
+//        sql.append(_comm.getSqlDialect().getCaseInsensitiveLikeOperator());
+//        sql.append(" ?)) AND child.Container IN ");
+//
+//        _searchSql = sql.toString();
+//    }
+//
+//
+    private static final String SQL_PREFIX;
 
     static
     {
@@ -856,24 +876,32 @@ public class AnnouncementManager
         sql.append(_comm.getTableInfoAnnouncements());
         sql.append(" child\n    LEFT OUTER JOIN ");
         sql.append(_comm.getTableInfoAnnouncements());
-        sql.append(" parent ON child.Parent = parent.EntityId\n    WHERE (child.Body ");
-        sql.append(_comm.getSqlDialect().getCaseInsensitiveLikeOperator());
-        sql.append(" ? OR (child.Parent IS NULL AND child.Title ");        // Search title only on original messages, not responses -- TODO: Change this since title can change?
-        sql.append(_comm.getSqlDialect().getCaseInsensitiveLikeOperator());
-        sql.append(" ?)) AND child.Container IN ");
+        sql.append(" parent ON child.Parent = parent.EntityId\n    ");
 
-        _searchSql = sql.toString();
+        SQL_PREFIX = sql.toString();
     }
 
 
-    public static MultiMap search(Set<Container> containers, String csvContainerIds, String searchTerm)
+    public static MultiMap search(Collection<String> containerIds, Collection<String> searchTerms)
     {
+        SimpleFilter filter = new SimpleFilter();
+
+        for (String term : searchTerms)
+        {
+            FilterClause titleClause = new AndClause(new CompareType.CompareClause("child.Parent", CompareType.ISBLANK, null), new ContainsClause("child.Title", term));
+            FilterClause bodyClause = new ContainsClause("child.Body", term);
+            filter.addClause(new OrClause(titleClause, bodyClause));
+        }
+
+        filter.addClause(new InClause("child.Container", containerIds));
+        SQLFragment searchSql = filter.getSQLFragment(_comm.getSchema().getSqlDialect());
+        searchSql.insert(0, SQL_PREFIX);
+
         MultiMap map = new MultiValueMap();
-        String findTerm = "%" + searchTerm + "%";
 
         try
         {
-            ResultSet rs = Table.executeQuery(_comm.getSchema(), _searchSql + csvContainerIds, new Object[] {findTerm, findTerm});
+            ResultSet rs = Table.executeQuery(_comm.getSchema(), searchSql);
 
             while(rs.next())
             {
@@ -895,7 +923,7 @@ public class AnnouncementManager
         }
         catch(SQLException e)
         {
-            _log.error("announcement search", e);
+            throw new RuntimeSQLException(e);
         }
 
     return map;

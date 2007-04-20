@@ -156,9 +156,9 @@ public class IssuesModule extends DefaultModule implements ContainerManager.Cont
         return url;
     }
 
-    public MultiMap search(Set<Container> containers, String csvContainerIds, String searchTerm)
+    public MultiMap search(Collection<String> containerIds, Collection<String> searchTerms)
     {
-        return IssueManager.search(containers, csvContainerIds, searchTerm);
+        return IssueManager.search(containerIds, searchTerms);
     }
 
 

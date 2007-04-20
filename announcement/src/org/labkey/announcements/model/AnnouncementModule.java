@@ -217,9 +217,9 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
         }
     }
 
-    public MultiMap search(Set<Container> containers, String csvContainerIds, String searchTerm)
+    public MultiMap search(Collection<String> containerIds, Collection<String> searchTerms)
     {
-        return AnnouncementManager.search(containers, csvContainerIds, searchTerm);
+        return AnnouncementManager.search(containerIds, searchTerms);
     }
 
 
