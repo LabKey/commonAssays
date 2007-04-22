@@ -197,7 +197,7 @@ public class FlowSchema extends UserSchema
         }
         catch (Exception e)
         {
-            UnexpectedException.rethrow(e);
+            throw UnexpectedException.wrap(e);
         }
         return new ViewForward(forward);
     }

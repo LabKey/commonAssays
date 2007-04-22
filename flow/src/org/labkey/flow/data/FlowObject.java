@@ -129,16 +129,6 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         }
     }
 
-    public String strHiddenFields()
-    {
-        StringBuilder ret = new StringBuilder();
-        for (Map.Entry<FlowParam, Object> param : getParams().entrySet())
-        {
-            ret.append(PFUtil.strHiddenField(param.getKey().toString(), param.getValue().toString()));
-        }
-        return ret.toString();
-    }
-
     static public <T extends FlowObject> String strSelect(String name, T current, Collection<T> objects)
     {
         return PFUtil.strSelect(name, idLabelsFor(objects, ""), current == null ? null : current.getId());

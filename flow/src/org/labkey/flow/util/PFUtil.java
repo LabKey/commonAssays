@@ -93,36 +93,6 @@ public class PFUtil
         return ret.toString();
     }
 
-    /**
-     * Returns a string with the html for a &lt;select> with a given label.
-     * If the select would contain only 0 or 1 elements, then just outputs
-     * a hidden field to remember the current value. 
-     */
-
-    static public String strChooser(String label, String name, Object current, Collection<? extends Object> values, Collection<String> labels)
-    {
-        if (values.size() < 2)
-        {
-            if (current == null)
-                return "";
-            return strHiddenField(name, current);
-        }
-        StringBuilder ret = new StringBuilder();
-        ret.append(label);
-        ret.append(strSelect(name, values, labels, current));
-        return ret.toString();
-    }
-
-    static public String strChooser(String label, String name, Object current, Map<? extends Object, String> entries)
-    {
-        return strChooser(label, name, current, entries.keySet(), entries.values());
-    }
-
-    static public String strHiddenField(String name, Object value)
-    {
-        return "<input type=\"hidden\" name=\"" + h(name) + "\" value=\"" + h(value) + "\">";
-    }
-
     static public void close(Closeable closeable)
     {
         if (closeable == null)
