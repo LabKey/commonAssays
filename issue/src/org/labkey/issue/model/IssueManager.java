@@ -572,24 +572,6 @@ public class IssueManager
     }
 
 
-//    private static String _searchSql;
-//
-//    static
-//    {
-//        StringBuilder sql = new StringBuilder("SELECT DISTINCT Container, Title, issue.IssueId FROM ");
-//        sql.append(_tinfoIssues);
-//        sql.append(" issue\n    LEFT OUTER JOIN ");
-//        sql.append(_tinfoComments);
-//        sql.append(" comment ON issue.IssueId = comment.IssueId\n    WHERE (Title ");
-//        sql.append(_issuesSchema.getSqlDialect().getCaseInsensitiveLikeOperator());
-//        sql.append(" ? OR Comment ");
-//        sql.append(_issuesSchema.getSqlDialect().getCaseInsensitiveLikeOperator());
-//        sql.append(" ?) AND Container IN ");
-//
-//        _searchSql = sql.toString();
-//    }
-//
-//
     private static final String SQL_PREFIX;
 
     static

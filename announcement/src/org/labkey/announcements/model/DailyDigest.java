@@ -114,20 +114,20 @@ public class DailyDigest
         Announcement[] announcements = getRecentAnnouncementsInContainer(c, min, max);
 
         DailyDigestEmailPrefsSelector sel = new DailyDigestEmailPrefsSelector(c);
-        List<EmailPref> emailPrefs = sel.getEmailPrefs();
 
-        for (EmailPref ep : emailPrefs)
+        for (User user : sel.getUsers())
         {
-            User user = ep.getUser();
             List<Announcement> announcementList = new ArrayList<Announcement>(announcements.length);
 
             for (Announcement ann : announcements)
-                if (sel.shouldSend(ann, ep))
+                if (sel.shouldSend(ann, user))
                     announcementList.add(ann);
 
             if (!announcementList.isEmpty())
             {
                 ViewMessage m = getDailyDigestMessage(request, c, settings, announcementList, user);
+
+                // TODO: try/catch MessagingException here so it's not logged to Mothership... but not until #3217 is resolved so we can test that
                 MailHelper.send(m);
             }
         }

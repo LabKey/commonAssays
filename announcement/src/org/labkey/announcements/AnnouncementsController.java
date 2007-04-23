@@ -86,7 +86,6 @@ public class AnnouncementsController extends ViewController
     }
 
 
-
     public ViewForward getBeginForward() throws ServletException
     {
         return new ViewForward("announcements", "begin", getContainer());    
@@ -460,14 +459,6 @@ public class AnnouncementsController extends ViewController
         includeView(template);
 
         return null;
-    }
-
-
-    // For backward compatibility (pre-2.0 used "removeFromUserList" action).  TODO: Remove this action in LabKey 2.1
-    @Jpf.Action
-    protected Forward removeFromUserList(MemberListRemovalForm form) throws Exception
-    {
-        return removeFromMemberList(form);
     }
 
 
@@ -1202,40 +1193,6 @@ public class AnnouncementsController extends ViewController
         else
         {
             // Send a notification email to everyone on the member list.  This email will include a link that removes the user from the member list.
-/*            Set<String> memberListEmails = new HashSet<String>();
-
-            if (settings.hasMemberList() && null != a.getMemberList() && !a.getMemberList().isEmpty())
-            {
-                for (User user : a.getMemberList())
-                {
-                    memberListEmails.add(user.getEmail());
-
-                    ViewURLHelper removeMeURL = new ViewURLHelper(getRequest(), "announcements", "confirmRemove", c.getPath());
-                    removeMeURL.addParameter("userId", String.valueOf(user.getUserId()));
-                    removeMeURL.addParameter("messageId", String.valueOf(parent.getRowId()));
-//            removeMeURL.addParameter("srcURL", boardURL.getURIString());
-
-                    ViewMessage m = getMessage(c, settings, parent, a, isResponse, removeMeURL.getURIString(), currentRendererType, Reason.memberList);
-                    emailer.addMessage(user.getEmail(), m);
-                }
-            }
-
-            // Now send a notification email to everyone who signed up for them in this container (but remove the member list emails first).
-            //   This email will include a link to the email preferences page.
-            Set<String> prefsEmails = AnnouncementManager.getUserEmailSet(c, a, settings);
-            prefsEmails.removeAll(memberListEmails);
-
-            if (!prefsEmails.isEmpty())
-            {
-                ViewURLHelper changeEmailURL = new ViewURLHelper(getRequest(), "announcements", "showEmailPreferences", c.getPath());
-                changeEmailURL.addParameter("srcURL", new ViewURLHelper(getRequest(), "announcements", "begin", c.getPath()).getURIString());
-                ViewMessage m = getMessage(c, settings, parent, a, isResponse, changeEmailURL.getURIString(), currentRendererType, Reason.signedUp);
-                m.setHeader("References", references);
-                m.setHeader("Message-ID", messageId);
-                emailer.addMessage(prefsEmails, m);
-            }
-*/
-
             IndividualEmailPrefsSelector sel = new IndividualEmailPrefsSelector(c);
 
             List<User> users = sel.getNotificationUsers(a);

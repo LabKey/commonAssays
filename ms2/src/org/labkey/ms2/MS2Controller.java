@@ -24,37 +24,39 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionMapping;
-import org.labkey.common.tools.MS2Modification;
-import org.labkey.common.tools.PeptideProphetSummary;
-import org.labkey.common.util.Pair;
 import org.jfree.chart.imagemap.ImageMapUtilities;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
+import org.labkey.api.exp.ExperimentRun;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.ExperimentRun;
-import org.labkey.ms2.pipeline.SequestClientImpl;
 import org.labkey.api.pipeline.*;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
-import org.labkey.api.query.QueryView;
-import org.labkey.api.query.QuerySettings;
-import org.labkey.api.query.QueryService;
-import org.labkey.api.query.FieldKey;
-import org.labkey.ms2.compare.*;
+import org.labkey.common.tools.MS2Modification;
+import org.labkey.common.tools.PeptideProphetSummary;
+import org.labkey.common.util.Pair;
+import org.labkey.ms2.compare.CompareDataRegion;
+import org.labkey.ms2.compare.CompareExcelWriter;
+import org.labkey.ms2.compare.CompareQuery;
+import org.labkey.ms2.compare.RunColumn;
 import org.labkey.ms2.peptideview.*;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.MascotClientImpl;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
+import org.labkey.ms2.pipeline.SequestClientImpl;
 import org.labkey.ms2.protein.*;
 import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
+import org.labkey.ms2.query.CompareProteinsView;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
 import org.labkey.ms2.query.SequencesTableInfo;
-import org.labkey.ms2.query.CompareProteinsView;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
 import javax.servlet.ServletException;
@@ -143,19 +145,29 @@ public class MS2Controller extends ViewController
             public HttpView createTemplate(ViewContext viewContext, HttpView view, NavTrailConfig navTrail)
             {
                 return new HomeTemplate(viewContext, view, navTrail);
-            }},
+            }
+        },
         fast
         {
             public HttpView createTemplate(ViewContext viewContext, HttpView view, NavTrailConfig navTrail)
             {
                 return new FastTemplate(viewContext, view, navTrail);
-            }},
+            }
+        },
         print
         {
             public HttpView createTemplate(ViewContext viewContext, HttpView view, NavTrailConfig navTrail)
             {
                 return new PrintTemplate(view, navTrail.getTitle());
-            }};
+            }
+        },
+        dialog
+        {
+            public HttpView createTemplate(ViewContext viewContext, HttpView view, NavTrailConfig navTrail)
+            {
+                return new DialogTemplate(view);
+            }
+        };
 
         public abstract HttpView createTemplate(ViewContext viewContext, HttpView view, NavTrailConfig navTrail);
     }
@@ -392,6 +404,8 @@ public class MS2Controller extends ViewController
     @Jpf.Action
     protected Forward showRun(RunForm form) throws Exception
     {
+        requiresPermission(ACL.PERM_READ);
+
         long time = System.currentTimeMillis();
 
         if (form.getErrors().size() > 0)
@@ -400,11 +414,8 @@ public class MS2Controller extends ViewController
         if (!isAuthorized(form.run))
             return null;
 
-        requiresPermission(ACL.PERM_READ);
-
         ViewURLHelper currentUrl = getViewURLHelper();
         MS2Run run = MS2Manager.getRun(form.run);
-
 
         AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
 
@@ -1109,6 +1120,7 @@ public class MS2Controller extends ViewController
     protected Forward peptideCharts(ChartForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
+
         if (!isAuthorized(form.run))
             return null;
 
@@ -2632,10 +2644,10 @@ public class MS2Controller extends ViewController
     @Jpf.Action
     protected Forward exportSelectedProteins(ExportForm form) throws ServletException, SQLException, IOException
     {
+        requiresPermission(ACL.PERM_READ);
+
         if (!isAuthorized(form.run))
             return null;
-
-        requiresPermission(ACL.PERM_READ);
 
         ViewContext ctx = getViewContext();
         List<String> proteins = ctx.getList(DataRegion.SELECT_CHECKBOX_NAME);
@@ -3025,6 +3037,8 @@ public class MS2Controller extends ViewController
     @Jpf.Action
     protected Forward showGZFile(DetailsForm form) throws Exception
     {
+        requiresPermission(ACL.PERM_READ);
+
         if (!isAuthorized(form.run))
             return null;
 
@@ -3131,7 +3145,7 @@ public class MS2Controller extends ViewController
     @Jpf.Action
     protected Forward compare() throws Exception
     {
-        // Don't require any particular permission in current container, since this could be in hierarchy mode
+        requiresPermission(ACL.PERM_READ);
 
         StringBuilder sb = new StringBuilder();
 
@@ -3195,7 +3209,7 @@ public class MS2Controller extends ViewController
 
     private Forward compareRuns(int runListIndex, boolean exportToExcel) throws Exception
     {
-        getContainer(ACL.PERM_READ);
+        requiresPermission(ACL.PERM_READ);
 
         List<String> errors = new ArrayList<String>();
         List<MS2Run> runs = getCachedRuns(runListIndex, errors);
@@ -3431,6 +3445,8 @@ public class MS2Controller extends ViewController
     @Jpf.Action
     protected Forward showProteinGroup(DetailsForm form) throws Exception
     {
+        requiresPermission(ACL.PERM_READ);
+
         // May have a runId, a group number, and an indistinguishableGroupId, or might just have a
         // proteinGroupId
         if (form.getProteinGroupId() != null)

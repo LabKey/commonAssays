@@ -1,16 +1,14 @@
 package org.labkey.announcements.model;
 
-import org.labkey.announcements.model.AnnouncementManager.EmailPref;
 import org.labkey.announcements.AnnouncementsController;
-import org.labkey.api.data.Container;
+import org.labkey.announcements.model.AnnouncementManager.EmailPref;
 import org.labkey.api.announcements.Announcement;
+import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: adam
@@ -56,7 +54,7 @@ public abstract class EmailPrefsSelector
     }
 
 
-    // All users with appropriate preferences -- they have not been authorized!
+    // All users with an email preference -- they have not been authorized!
     // TODO: I don't like exposing the email prefs to callers -- should probably return a list of Users and create a User -> EmailPref map for shouldSend() to use
     public List<EmailPref> getEmailPrefs()
     {
@@ -64,7 +62,19 @@ public abstract class EmailPrefsSelector
     }
 
 
-    public boolean shouldSend(Announcement ann, EmailPref ep) throws ServletException, SQLException
+    // All users with an email preference plus project users who get the default email preference -- they have not been authorized!
+    public Collection<User> getUsers()
+    {
+        Set<User> users = new HashSet<User>(_emailPrefs.size());
+
+        for (EmailPref ep : _emailPrefs)
+            users.add(ep.getUser());
+
+        return users;
+    }
+
+
+    protected boolean shouldSend(Announcement ann, EmailPref ep) throws ServletException, SQLException
     {
         int emailPreference = ep.getEmailOptionId() & AnnouncementManager.EMAIL_PREFERENCE_MASK;
 

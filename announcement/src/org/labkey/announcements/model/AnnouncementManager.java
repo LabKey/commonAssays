@@ -850,24 +850,7 @@ public class AnnouncementManager
         }
     }
 
-//    private static String _searchSql;
-//
-//    static
-//    {
-//        StringBuilder sql = new StringBuilder("SELECT DISTINCT child.Container, CASE WHEN parent.Title IS NULL THEN child.Title ELSE parent.Title END AS Title, CASE WHEN parent.RowId IS NULL THEN child.RowId ELSE parent.RowId END AS RowId FROM ");
-//        sql.append(_comm.getTableInfoAnnouncements());
-//        sql.append(" child\n    LEFT OUTER JOIN ");
-//        sql.append(_comm.getTableInfoAnnouncements());
-//        sql.append(" parent ON child.Parent = parent.EntityId\n    WHERE (child.Body ");
-//        sql.append(_comm.getSqlDialect().getCaseInsensitiveLikeOperator());
-//        sql.append(" ? OR (child.Parent IS NULL AND child.Title ");        // Search title only on original messages, not responses -- TODO: Change this since title can change?
-//        sql.append(_comm.getSqlDialect().getCaseInsensitiveLikeOperator());
-//        sql.append(" ?)) AND child.Container IN ");
-//
-//        _searchSql = sql.toString();
-//    }
-//
-//
+
     private static final String SQL_PREFIX;
 
     static
@@ -888,6 +871,7 @@ public class AnnouncementManager
 
         for (String term : searchTerms)
         {
+            // Search title only on first message, not responses -- TODO: Change this since title can change?
             FilterClause titleClause = new AndClause(new CompareType.CompareClause("child.Parent", CompareType.ISBLANK, null), new ContainsClause("child.Title", term));
             FilterClause bodyClause = new ContainsClause("child.Body", term);
             filter.addClause(new OrClause(titleClause, bodyClause));
