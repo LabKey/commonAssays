@@ -146,7 +146,7 @@ public class MS2Schema extends UserSchema
         ProteinGroupTableInfo result = new ProteinGroupTableInfo(alias, this);
         List<FieldKey> defaultColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
         defaultColumns.add(0, FieldKey.fromParts("ProteinProphet","Run"));
-        defaultColumns.add(0, FieldKey.fromParts("ProteinProphet", "Run", "Container"));
+        defaultColumns.add(0, FieldKey.fromParts("ProteinProphet", "Run", "Folder"));
         result.setDefaultVisibleColumns(defaultColumns);
         return result;
     }

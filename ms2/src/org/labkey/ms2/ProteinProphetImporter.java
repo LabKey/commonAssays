@@ -316,12 +316,14 @@ public class ProteinProphetImporter
         int proteinIndex = 1;
         proteinStmt.setInt(proteinIndex++, groupId);
         proteinStmt.setFloat(proteinIndex++, protein.getProbability());
-        proteinStmt.setString(proteinIndex, protein.getProteinName());
+        org.labkey.common.tools.Protein p = new org.labkey.common.tools.Protein(protein.getProteinName(), new byte[0]);
+        proteinStmt.setString(proteinIndex, p.getLookup());
         proteinStmt.execute();
 
         for (String indistinguishableProteinName : protein.getIndistinguishableProteinNames())
         {
-            proteinStmt.setString(proteinIndex, indistinguishableProteinName);
+            p = new org.labkey.common.tools.Protein(indistinguishableProteinName, new byte[0]);
+            proteinStmt.setString(proteinIndex, p.getLookup());
             proteinStmt.execute();
         }
     }
@@ -367,8 +369,22 @@ public class ProteinProphetImporter
         groupStmt.setInt(groupIndex++, file.getRowId());
         groupStmt.setInt(groupIndex++, protein.getUniquePeptidesCount());
         groupStmt.setInt(groupIndex++, protein.getTotalNumberPeptides());
-        groupStmt.setFloat(groupIndex++, protein.getPctSpectrumIds());
-        groupStmt.setFloat(groupIndex++, protein.getPercentCoverage());
+        if (protein.getPctSpectrumIds() != null)
+        {
+            groupStmt.setFloat(groupIndex++, protein.getPctSpectrumIds().floatValue());
+        }
+        else
+        {
+            groupStmt.setNull(groupIndex++, Types.FLOAT);
+        }
+        if (protein.getPercentCoverage() != null)
+        {
+            groupStmt.setFloat(groupIndex++, protein.getPercentCoverage());
+        }
+        else
+        {
+            groupStmt.setNull(groupIndex++, Types.FLOAT);
+        }
         Float errorRate = file.calculateErrorRate(groupProbability);
         if (errorRate == null)
         {

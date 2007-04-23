@@ -28,13 +28,20 @@ public class RunTableInfo extends FilteredTable
         ViewURLHelper url = new ViewURLHelper("core", "containerRedirect", "");
         url.addParameter("action", "showList.view");
         url.addParameter("pageflow", "MS2");
-        getColumn("Container").setFk(new LookupForeignKey(url, "containerId", "EntityId", "Name")
+        LookupForeignKey containerFK = new LookupForeignKey(url, "containerId", "EntityId", "Name")
         {
             public TableInfo getLookupTableInfo()
             {
                 return new ContainerTable();
             }
-        });
+        };
+        getColumn("Container").setFk(containerFK);
+        getColumn("Container").setIsHidden(true);
+
+        ColumnInfo folderColumn = wrapColumn("Folder", getRealTable().getColumn("Container"));
+        folderColumn.setIsHidden(false);
+        folderColumn.setFk(containerFK);
+        addColumn(folderColumn);
 
         ColumnInfo erLSIDColumn = getColumn("ExperimentRunLSID");
         erLSIDColumn.setCaption("Experiment Run");

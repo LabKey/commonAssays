@@ -784,9 +784,9 @@ public class ProteinManager
             sql.append('\n');
         }
 
+        sql.append(getProteinGroupCombinedOrderBy(currentUrl, MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId"));
         if (maxProteinRows > 0)
         {
-            sql.append(getProteinGroupCombinedOrderBy(currentUrl, MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId"));
             getSqlDialect().limitRows(sql, maxProteinRows + 1);
         }
 
