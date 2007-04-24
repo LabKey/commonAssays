@@ -37,6 +37,16 @@ public class GroupNumberDisplayColumn extends DataColumn
         setURL(urlHelper.toString() + "&groupNumber=${" + _groupNumber + "}&indistinguishableCollectionId=${" + _collectionId + "}");
     }
 
+    public Object getDisplayValue(RenderContext ctx)
+    {
+        return getFormattedValue(ctx);
+    }
+
+    public Class getDisplayValueClass()
+    {
+        return String.class;
+    }
+
     public String getFormattedValue(RenderContext ctx)
     {
         Map row = ctx.getRow();

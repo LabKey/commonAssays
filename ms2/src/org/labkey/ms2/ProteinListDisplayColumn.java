@@ -111,7 +111,8 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         Map row = ctx.getRow();
         try
         {
-            List<ProteinSummary> summaryList = _proteins.getSummaries(((Integer)row.get(_columnName)).intValue(), ctx, _columnName);
+            int groupId = ((Integer) row.get(_columnName)).intValue();
+            List<ProteinSummary> summaryList = _proteins.getSummaries(groupId, ctx, _columnName);
 
             ViewURLHelper url = ctx.getViewContext().cloneViewURLHelper();
             url.setAction("showProtein.view");
@@ -120,7 +121,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
             {
                 for (ProteinSummary summary : summaryList)
                 {
-                    writeInfo(summary, out, url);
+                    writeInfo(summary, out, url, groupId);
                 }
             }
         }
@@ -136,10 +137,11 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         set.add(_columnInfo);
     }
 
-    private void writeInfo(ProteinSummary summary, Writer out, ViewURLHelper url) throws IOException
+    private void writeInfo(ProteinSummary summary, Writer out, ViewURLHelper url, int groupId) throws IOException
     {
         if (_sequenceColumn.equalsIgnoreCase("Protein"))
         {
+                url.replaceParameter("proteinGroupId", Integer.toString(groupId));
             url.replaceParameter("seqId", Integer.toString(summary.getSeqId()));
             out.write("<a href=\"");
             out.write(url.toString());

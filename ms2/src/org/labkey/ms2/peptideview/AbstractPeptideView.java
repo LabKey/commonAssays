@@ -271,7 +271,7 @@ public abstract class AbstractPeptideView
         {
             extraParams = null == seqId ? "seqId=${SeqId}" : "seqId=" + seqId;
         }
-        if ("proteinprophet".equals(_url.getParameter("grouping")))
+        if ("proteinprophet".equals(_url.getParameter("grouping")) && _url.getParameter("proteinGroupId") == null)
         {
             extraParams = "proteinGroupId=${proteinGroupId}";
         }
