@@ -62,6 +62,8 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
                 return url;
             }
         });
+
+        PlateService.get().registerPlateTypeHandler(new NabPlateTypeHandler());
     }
 
 

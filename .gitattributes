@@ -873,6 +873,7 @@ nab/src/org/labkey/nab/Luc5Assay.java -text
 nab/src/org/labkey/nab/NabController.java -text
 nab/src/org/labkey/nab/NabManager.java -text
 nab/src/org/labkey/nab/NabModule.java -text
+nab/src/org/labkey/nab/NabPlateTypeHandler.java -text
 nab/src/org/labkey/nab/RunMetadata.java -text
 nab/src/org/labkey/nab/RunSettings.java -text
 nab/src/org/labkey/nab/SafeTextConverter.java -text

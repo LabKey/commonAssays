@@ -521,16 +521,46 @@ public class NabManager
 
         // metadata properties:
         RunMetadata metadata = new RunMetadata();
-        metadata.setExperimentDateString((String) properties.get("experimentDate"));
-        metadata.setExperimentId((String) properties.get("experimentId"));
-        metadata.setExperimentPerformer((String) properties.get("experimentPerformer"));
-        metadata.setFileId((String) properties.get("fileId"));
-        metadata.setHostCell((String) properties.get("hostCell"));
-        metadata.setIncubationTime((String) properties.get("incubationTime"));
-        metadata.setPlateNumber((String) properties.get("plateNumber"));
-        metadata.setStudyName((String) properties.get("studyName"));
-        metadata.setVirusId((String) properties.get("virusId"));
-        metadata.setVirusName((String) properties.get("virusName"));
+        if (properties.get("experimentDate") != null)
+        {
+            metadata.setExperimentDateString((String) properties.get("experimentDate"));
+        }
+        if (properties.get("experimentId") != null)
+        {
+            metadata.setExperimentId((String) properties.get("experimentId"));
+        }
+        if (properties.get("experimentPerformer") != null)
+        {
+            metadata.setExperimentPerformer((String) properties.get("experimentPerformer"));
+        }
+        if (properties.get("fileId") != null)
+        {
+            metadata.setFileId((String) properties.get("fileId"));
+        }
+        if (properties.get("hostCell") != null)
+        {
+            metadata.setHostCell((String) properties.get("hostCell"));
+        }
+        if (properties.get("incubationTime") != null)
+        {
+            metadata.setIncubationTime((String) properties.get("incubationTime"));
+        }
+        if (properties.get("plateNumber") != null)
+        {
+            metadata.setPlateNumber((String) properties.get("plateNumber"));
+        }
+        if (properties.get("studyName") != null)
+        {
+            metadata.setStudyName((String) properties.get("studyName"));
+        }
+        if (properties.get("virusId") != null)
+        {
+            metadata.setVirusId((String) properties.get("virusId"));
+        }
+        if (properties.get("virusName") != null)
+        {
+            metadata.setVirusName((String) properties.get("virusName"));
+        }
         form.setMetadata(metadata);
 
         // run settings:

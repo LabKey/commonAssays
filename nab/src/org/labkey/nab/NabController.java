@@ -1279,6 +1279,7 @@ public class NabController extends ViewController
         {
             _plateTemplate = request.getParameter("plateTemplate");
             resetSpecimens();
+            resetDefaultProperties();
         }
 
         private void resetSpecimens()
@@ -1339,7 +1340,26 @@ public class NabController extends ViewController
             String previous = _plateTemplate;
             _plateTemplate = plateTemplate;
             if (!plateTemplate.equals(previous))
+            {
                 resetSpecimens();
+                resetDefaultProperties();
+            }
+        }
+
+        private void resetDefaultProperties()
+        {
+            PlateTemplate template = getActivePlateTemplate(getContext().getContainer(), getContext().getUser());
+
+            getMetadata().setExperimentDateString((String)template.getProperty("ExperimentDate"));
+            getMetadata().setExperimentId((String)template.getProperty("ExperimentId"));
+            getMetadata().setExperimentPerformer((String)template.getProperty("ExperimentPerformer"));
+            getMetadata().setFileId((String)template.getProperty("FileId"));
+            getMetadata().setHostCell((String)template.getProperty("HostCell"));
+            getMetadata().setIncubationTime((String)template.getProperty("IncubationTime"));
+            getMetadata().setPlateNumber((String)template.getProperty("PlateNumber"));
+            getMetadata().setStudyName((String)template.getProperty("StudyName"));
+            getMetadata().setVirusId((String)template.getProperty("VirusId"));
+            getMetadata().setVirusName((String)template.getProperty("VirusName"));
         }
 
         public SampleInfo[] getSampleInfos()
