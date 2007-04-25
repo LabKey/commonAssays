@@ -2,6 +2,6 @@
 <form method="post" action="<%=postURL%>">
 Search <%=what%> in this <%=container.isProject() ? "project" : "folder and all subfolders"%>
 <table>
-<tr><td><input type="text" name="search" value="" size="40"></td><td><input type="image" src="<%=PageFlowUtil.buttonSrc("Search")%>"></td></tr>
+<tr><td><input type="text" name="search" value=""<%=width > 0 ? " size=\"" + width + "\"" : ""%>></td><td><input type="image" src="<%=PageFlowUtil.buttonSrc("Search")%>"></td></tr>
 </table>
 </form>

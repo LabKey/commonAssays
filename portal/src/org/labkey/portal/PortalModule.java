@@ -47,13 +47,13 @@ public class PortalModule extends DefaultModule
             new WebPartFactory("Search"){
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws IllegalAccessException, InvocationTargetException
                 {
-                    return new ProjectController.SearchWebPart();
+                    return new ProjectController.SearchWebPart(40);
                 }
             },
             new WebPartFactory("Narrow Search", "right"){
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws IllegalAccessException, InvocationTargetException
                 {
-                    return new ProjectController.SearchWebPart();
+                    return new ProjectController.SearchWebPart(0);
                 }
             });
         addController("Project", ProjectController.class);

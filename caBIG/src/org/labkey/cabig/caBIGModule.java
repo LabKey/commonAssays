@@ -16,11 +16,9 @@ public class caBIGModule extends DefaultModule
     private static final Logger _log = Logger.getLogger(caBIGModule.class);
     public static final String NAME = "caBIG";
 
-    private static final String[] RECOGNIZED_PAGEFLOWS = new String[]{"cabig"};
-
     public caBIGModule()
     {
-        super(NAME, 0.03, null, "/cabig");
+        super(NAME, 0.04, null, "/cabig");
         addController("cabig", caBIGController.class);
     }
 

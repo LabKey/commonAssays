@@ -9,6 +9,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.ACL;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.ContainerTree;
+import org.labkey.api.util.AppProps;
 
 import javax.servlet.ServletException;
 
@@ -91,7 +92,10 @@ public class caBIGController extends ViewController
     {
         public HttpView createView()
         {
-            return new caBIGPermissionsView();
+            if (AppProps.getInstance().isCaBIGEnabled())
+                return new caBIGPermissionsView();
+            else
+                return null;
         }
     }
 

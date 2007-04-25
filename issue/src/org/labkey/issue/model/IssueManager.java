@@ -22,8 +22,6 @@ import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
-import org.labkey.api.data.SimpleFilter.*;
-import org.labkey.api.data.CompareType.*;
 import org.labkey.api.issues.IssuesSchema;
 import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.User;
@@ -31,6 +29,7 @@ import org.labkey.api.security.UserComparator;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.util.*;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.HttpView;
 import org.labkey.issue.IssuesController;
 
 import javax.servlet.ServletException;
@@ -54,7 +53,6 @@ public class IssueManager
     private static TableInfo _tinfoIssues = _issuesSchema.getTableInfoIssues();
     private static TableInfo _tinfoIssueKeywords = _issuesSchema.getTableInfoIssueKeywords();
     private static TableInfo _tinfoComments = _issuesSchema.getTableInfoComments();
-    private static TableInfo _tinfoEmailPrefs = _issuesSchema.getTableInfoEmailPrefs();
     private static Logger _log = Logger.getLogger(IssueManager.class);
 
     public static final int NOTIFY_ASSIGNEDTO_OPEN = 1;     // if a bug is assigned to me
@@ -465,7 +463,7 @@ public class IssueManager
         {
             emailPreference = Table.executeArray(
                     _issuesSchema.getSchema(),
-                    "SELECT EmailOption FROM " + _tinfoEmailPrefs + " WHERE Container=? AND UserId=?",
+                    "SELECT EmailOption FROM " + _issuesSchema.getTableInfoEmailPrefs() + " WHERE Container=? AND UserId=?",
                     new Object[]{c.getId(), userId},
                     Integer.class);
         }
@@ -490,7 +488,7 @@ public class IssueManager
         try
         {
             int ret = Table.execute(_issuesSchema.getSchema(),
-                    "UPDATE " + _tinfoEmailPrefs + " SET EmailOption=? WHERE Container=? AND UserId=?",
+                    "UPDATE " + _issuesSchema.getTableInfoEmailPrefs() + " SET EmailOption=? WHERE Container=? AND UserId=?",
                     new Object[]{emailPrefs, c.getId(), userId});
 
 
@@ -498,7 +496,7 @@ public class IssueManager
             {
                 // record doesn't exist yet...
                 Table.execute(_issuesSchema.getSchema(),
-                        "INSERT INTO " + _tinfoEmailPrefs + " (Container, UserId, EmailOption ) VALUES (?, ?, ?)",
+                        "INSERT INTO " + _issuesSchema.getTableInfoEmailPrefs() + " (Container, UserId, EmailOption ) VALUES (?, ?, ?)",
                         new Object[]{c.getId(), userId, emailPrefs});
             }
         }
@@ -530,7 +528,7 @@ public class IssueManager
             Table.execute(_issuesSchema.getSchema(), deleteComments, new Object[]{c.getId()});
             ContainerUtil.purgeTable(_tinfoIssues, c, null);
             ContainerUtil.purgeTable(_tinfoIssueKeywords, c, null);
-            ContainerUtil.purgeTable(_tinfoEmailPrefs, c, null);
+            ContainerUtil.purgeTable(_issuesSchema.getTableInfoEmailPrefs(), c, null);
             _issuesSchema.getSchema().getScope().commitTransaction();
         }
         catch (SQLException x)
@@ -572,40 +570,17 @@ public class IssueManager
     }
 
 
-    private static final String SQL_PREFIX;
-
-    static
-    {
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT Container, Title, issue.IssueId FROM ");
-        sql.append(_tinfoIssues);
-        sql.append(" issue\n    LEFT OUTER JOIN ");
-        sql.append(_tinfoComments);
-        sql.append(" comment ON issue.IssueId = comment.IssueId\n    ");
-
-        SQL_PREFIX = sql.toString();
-    }
-
-
     public static MultiMap search(Collection<String> containerIds, Collection<String> searchTerms)
     {
-        SimpleFilter filter = new SimpleFilter();
-
-        for (String term : searchTerms)
-        {
-            FilterClause titleClause = new ContainsClause("Title", term);
-            FilterClause commentClause = new ContainsClause("Comment", term);
-            filter.addClause(new OrClause(titleClause, commentClause));
-        }
-
-        filter.addClause(new SimpleFilter.InClause("Container", containerIds));
-        SQLFragment searchSql = filter.getSQLFragment(_issuesSchema.getSchema().getSqlDialect());
-        searchSql.insert(0, SQL_PREFIX);
-
+        SqlDialect dialect = _issuesSchema.getSchema().getSqlDialect();
+        String from = _tinfoIssues + " i LEFT OUTER JOIN " + _tinfoComments + " c ON i.IssueId = c.IssueId";
+        SQLFragment searchSql = Search.getSQLFragment("Container, Title, IssueId", "Container, Title, i.IssueId", from, "Container", containerIds, searchTerms, dialect, "Comment"); // No need to search title since it ends up in the comment
         MultiMap map = new MultiValueMap();
+        ResultSet rs = null;
 
         try
         {
-            ResultSet rs = Table.executeQuery(_issuesSchema.getSchema(), searchSql);
+            rs = Table.executeQuery(_issuesSchema.getSchema(), searchSql);
 
             while(rs.next())
             {
@@ -622,15 +597,17 @@ public class IssueManager
 
                 map.put(rs.getString(1), link.toString());
             }
-
-            rs.close();
         }
         catch(SQLException e)
         {
-            // Logged by table layer... catch here so other modules can search their content
+            ExceptionUtil.logExceptionToMothership(HttpView.currentRequest(), e);
+        }
+        finally
+        {
+            ResultSetUtil.close(rs);
         }
 
-    return map;
+        return map;
     }
 
     public static String getRequiredIssueFields()

@@ -393,7 +393,7 @@ public class ProjectController extends ViewController
         Container c = getContainer();
         String searchTerm = (String)getViewContext().get("search");
 
-        HttpView search = new SearchWebPart();
+        HttpView search = new SearchWebPart(40);
 
         String html = Search.search(getUser(), c, searchTerm);
         HtmlView results = new HtmlView("Results", html);
@@ -441,19 +441,14 @@ public class ProjectController extends ViewController
 
     public static class SearchWebPart extends GroovyView
     {
-        public SearchWebPart()
+        public SearchWebPart(int textBoxWidth)
         {
             super("/org/labkey/portal/search.gm");
-        }
-
-        @Override
-        public void prepareWebPart(Object model) throws ServletException
-        {
-            super.prepareWebPart(model);
             setTitle("Search");
             String path = getViewContext().getViewURLHelper().getExtraPath();
             addObject("postURL", ViewURLHelper.toPathString("Project", "search", path));
             addObject("what", Search.getSearchResultNames());
+            addObject("width", textBoxWidth);
         }
     }
 }

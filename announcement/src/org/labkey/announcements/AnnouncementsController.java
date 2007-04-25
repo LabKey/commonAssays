@@ -46,6 +46,7 @@ import org.labkey.api.view.*;
 import org.labkey.api.wiki.WikiRenderer;
 import org.labkey.api.wiki.WikiRendererType;
 import org.labkey.api.wiki.WikiService;
+import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -1081,11 +1082,11 @@ public class AnnouncementsController extends ViewController
         SimpleFilter filter = getFilter(getSettings(), getPermissions(), true);
 
         // TODO: This only grabs announcements... add responses too?
-        Announcement[] announcements = AnnouncementManager.getAnnouncements(c, filter, getSettings().getSort());
+        Pair<Announcement[], Boolean> pair = AnnouncementManager.getAnnouncements(c, filter, getSettings().getSort(), 100);
 
         WebPartView v = new GroovyView("/org/labkey/announcements/rss.gm");
         v.setFrame(WebPartView.FrameType.NONE);
-        v.addObject("announcements", announcements);
+        v.addObject("announcements", pair.first);
         v.addObject("container", c);
         v.addObject("request", getRequest());
         ViewURLHelper url = cloneViewURLHelper();
@@ -1719,7 +1720,7 @@ public class AnnouncementsController extends ViewController
 
             SimpleFilter urlFilter = new SimpleFilter(url, "Threads");
             boolean isFiltered = !urlFilter.getWhereParamNames().isEmpty();
-            String filterText = getFilterText(settings, displayAll, isFiltered);
+            String filterText = getFilterText(settings, displayAll, isFiltered, 0);
 
             addObject("settings", settings);
             addObject("insertURL", perm.allowInsert() ? getShowInsertUrl(c, url) : null);
@@ -1753,7 +1754,7 @@ public class AnnouncementsController extends ViewController
 
             Permissions perm = getPermissions(c, user, settings);
             SimpleFilter filter = getFilter(settings, perm, displayAll);
-            Announcement[] announcements = AnnouncementManager.getAnnouncements(c, filter, settings.getSort());
+            Pair<Announcement[], Boolean> pair = AnnouncementManager.getAnnouncements(c, filter, settings.getSort(), 100);
 
             addObject("settings", settings);
             addObject("container", c);
@@ -1762,8 +1763,8 @@ public class AnnouncementsController extends ViewController
             addObject("customizeURL", c.hasPermission(user, ACL.PERM_ADMIN) ? getShowCustomizeUrl(c, url) : null);
             addObject("emailPrefsURL", user.isGuest() ? null : ViewURLHelper.toPathString("announcements", "showEmailPreferences", c.getPath()));
             addObject("emailManageURL", c.hasPermission(user, ACL.PERM_ADMIN) ? ViewURLHelper.toPathString("announcements", "adminEmail", c.getPath()) : null);
-            addObject("announcements", announcements);
-            addObject("filterText", getFilterText(settings, displayAll, false));
+            addObject("announcements", pair.first);
+            addObject("filterText", getFilterText(settings, displayAll, false, pair.second ? 100 : 0));
         }
 
         public AnnouncementWebPart(ViewContext ctx) throws SQLException, ServletException
@@ -1791,7 +1792,7 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private static String getFilterText(Settings settings, boolean displayAll, boolean isFiltered)
+    private static String getFilterText(Settings settings, boolean displayAll, boolean isFiltered, int rowLimit)
     {
         StringBuilder sb = new StringBuilder();
 
@@ -1817,6 +1818,14 @@ public class AnnouncementsController extends ViewController
         {
             sb.append(separator);
             sb.append("filtered");
+            separator = ", ";
+        }
+
+        if (rowLimit > 0)
+        {
+            sb.append(separator);
+            sb.append("limited to ");
+            sb.append(rowLimit);
         }
 
         if (sb.length() == 0)

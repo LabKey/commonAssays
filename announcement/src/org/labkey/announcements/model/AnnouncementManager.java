@@ -26,19 +26,16 @@ import org.apache.log4j.Logger;
 import org.apache.struts.upload.FormFile;
 import org.labkey.api.announcements.Announcement;
 import org.labkey.api.announcements.CommSchema;
-import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.attachments.Attachable;
+import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.*;
-import org.labkey.api.data.CompareType.*;
-import org.labkey.api.data.SimpleFilter.*;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
-import org.labkey.api.util.ContainerUtil;
-import org.labkey.api.util.JunitUtil;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.TestContext;
+import org.labkey.api.util.*;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.HttpView;
+import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -102,17 +99,22 @@ public class AnnouncementManager
     }
 
 
-    // Get all threads in this container, filtered using filter
-    public static Announcement[] getAnnouncements(Container c, SimpleFilter filter, Sort sort)
+    // Get first 100 threads in this container, filtered using filter
+    public static Pair<Announcement[], Boolean> getAnnouncements(Container c, SimpleFilter filter, Sort sort, int rowLimit)
     {
         filter.addCondition("Container", c.getId());
 
         try
         {
-            Announcement[] recent = Table.select(_comm.getTableInfoThreads(), Table.ALL_COLUMNS, filter, sort, Announcement.class);
-            recent = (Announcement[])ArrayUtils.subarray(recent, 0, 100);  // Limit to 100 to keep messages page a reasonable size
+            Announcement[] recent = Table.select(_comm.getTableInfoThreads(), Table.ALL_COLUMNS, filter, sort, Announcement.class, rowLimit + 1);
+
+            Boolean limited = (recent.length > rowLimit);
+
+            if (limited)
+                recent = (Announcement[])ArrayUtils.subarray(recent, 0, rowLimit);
+
             attachAttachments(recent);
-            return recent;
+            return new Pair<Announcement[], Boolean>(recent, limited);
         }
         catch (SQLException x)
         {
@@ -857,9 +859,9 @@ public class AnnouncementManager
     {
         StringBuilder sql = new StringBuilder("SELECT DISTINCT child.Container, CASE WHEN parent.Title IS NULL THEN child.Title ELSE parent.Title END AS Title, CASE WHEN parent.RowId IS NULL THEN child.RowId ELSE parent.RowId END AS RowId FROM ");
         sql.append(_comm.getTableInfoAnnouncements());
-        sql.append(" child\n    LEFT OUTER JOIN ");
+        sql.append(" child\n\tLEFT OUTER JOIN ");
         sql.append(_comm.getTableInfoAnnouncements());
-        sql.append(" parent ON child.Parent = parent.EntityId\n    ");
+        sql.append(" parent ON child.Parent = parent.EntityId\n\t");
 
         SQL_PREFIX = sql.toString();
     }
@@ -867,25 +869,15 @@ public class AnnouncementManager
 
     public static MultiMap search(Collection<String> containerIds, Collection<String> searchTerms)
     {
-        SimpleFilter filter = new SimpleFilter();
-
-        for (String term : searchTerms)
-        {
-            // Search title only on first message, not responses -- TODO: Change this since title can change?
-            FilterClause titleClause = new AndClause(new CompareType.CompareClause("child.Parent", CompareType.ISBLANK, null), new ContainsClause("child.Title", term));
-            FilterClause bodyClause = new ContainsClause("child.Body", term);
-            filter.addClause(new OrClause(titleClause, bodyClause));
-        }
-
-        filter.addClause(new InClause("child.Container", containerIds));
-        SQLFragment searchSql = filter.getSQLFragment(_comm.getSchema().getSqlDialect());
-        searchSql.insert(0, SQL_PREFIX);
-
+        SqlDialect dialect = _comm.getSchema().getSqlDialect();
+        String from = _comm.getTableInfoThreads() + " t LEFT OUTER JOIN " + _comm.getTableInfoAnnouncements() + " a ON ((a.parent IS NULL AND t.RowId = a.RowId) OR (t.EntityId = a.Parent))";
+        SQLFragment searchSql = Search.getSQLFragment("Container, Title, RowId", "t.Container, t.Title, t.RowId", from, "t.Container", containerIds, searchTerms, dialect, "a.Title", "a.Body");
         MultiMap map = new MultiValueMap();
+        ResultSet rs = null;
 
         try
         {
-            ResultSet rs = Table.executeQuery(_comm.getSchema(), searchSql);
+            rs = Table.executeQuery(_comm.getSchema(), searchSql);
 
             while(rs.next())
             {
@@ -902,15 +894,17 @@ public class AnnouncementManager
 
                 map.put(rs.getString(1), link.toString());
             }
-
-            rs.close();
         }
         catch(SQLException e)
         {
-            throw new RuntimeSQLException(e);
+            ExceptionUtil.logExceptionToMothership(HttpView.currentRequest(), e);
+        }
+        finally
+        {
+            ResultSetUtil.close(rs);
         }
 
-    return map;
+        return map;
     }
 
     public static class EmailPref
