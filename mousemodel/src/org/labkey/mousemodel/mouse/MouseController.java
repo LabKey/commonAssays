@@ -16,9 +16,6 @@
 
 package org.labkey.mousemodel.mouse;
 
-import org.labkey.mousemodel.MouseModelController;
-import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
-import org.labkey.mousemodel.sample.SampleController;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.commons.beanutils.ConversionException;
@@ -26,19 +23,21 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionError;
 import org.apache.struts.action.ActionErrors;
+import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.attachments.Attachment;
+import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.attachments.DownloadUrlHelper;
-import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.MaterialSource;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.sample.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.common.util.Pair;
 import org.labkey.api.view.*;
-import org.labkey.api.announcements.DiscussionService;
+import org.labkey.common.util.Pair;
+import org.labkey.mousemodel.MouseModelController;
+import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
+import org.labkey.mousemodel.VelocityDataView;
+import org.labkey.mousemodel.sample.SampleController;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -51,7 +50,7 @@ import java.util.*;
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class MouseController extends ViewController
 {
-    private static String _bdiSampleSource = null;
+//    private static String _bdiSampleSource = null;
     private static Logger _log = Logger.getLogger(MouseController.class);
 
     private DataRegion getGridRegion(ViewForm form) throws ServletException
@@ -482,7 +481,7 @@ public class MouseController extends ViewController
             if (mouse.getMouseNo() != null)
             {
                 SimpleFilter filter = new SimpleFilter("mouseNo", mouse.getMouseNo());
-                Mouse[] mice = (Mouse[]) Table.select(MouseSchema.getMouse(), Table.ALL_COLUMNS, filter, null, Mouse.class);
+                Mouse[] mice = Table.select(MouseSchema.getMouse(), Table.ALL_COLUMNS, filter, null, Mouse.class);
                 if (null != mice && mice.length == 1)
                 {
                     mouse = mice[0];
@@ -507,7 +506,7 @@ public class MouseController extends ViewController
         return null;
     }
 
-    @Jpf.Action(validationErrorForward = @Jpf.Forward(path = "showInsertSample.do", name = "validate"))
+/*    @Jpf.Action(validationErrorForward = @Jpf.Forward(path = "showInsertSample.do", name = "validate"))
     protected Forward insertSample(MouseSampleForm form) throws Exception
     {
         requiresPermission(ACL.PERM_INSERT);
@@ -525,7 +524,7 @@ public class MouseController extends ViewController
         Object organismId = form.getTypedValue("organismId");
         return form.getForward("showSamples", new Pair("entityId", organismId), true);
     }
-
+*/
 
 /*    @Jpf.Action
     protected Forward showInsertSample(MouseForm form) throws Exception
@@ -573,7 +572,7 @@ public class MouseController extends ViewController
         return null;
     } */
 
-    @Jpf.Action(validationErrorForward = @Jpf.Forward(path = "showUpdateSample.do", name = "validate"))
+/*    @Jpf.Action(validationErrorForward = @Jpf.Forward(path = "showUpdateSample.do", name = "validate"))
     protected Forward updateSample(MouseSampleForm form) throws Exception
     {
         //redundant, but defensive
@@ -582,7 +581,7 @@ public class MouseController extends ViewController
         form.doUpdate();
         return form.getPkForward("sampleDetails");
     }
-
+*/
 
     private static DisplayColumn[] getCustomColumns(MouseModel model)
     {
@@ -662,11 +661,10 @@ public class MouseController extends ViewController
         {
             Map values = new HashMap();
             Set keys = _stringValues.keySet();
-            Iterator iter = keys.iterator();
-            while (iter.hasNext())
+            for (Object key : keys)
             {
-                String propName = (String) iter.next();
-                String str = (String) _stringValues.get(propName);
+                String propName = (String) key;
+                String str = _stringValues.get(propName);
                 if (null != str && "".equals(str.trim()))
                     str = null;
 

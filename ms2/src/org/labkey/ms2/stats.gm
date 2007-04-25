@@ -1,0 +1,4 @@
+<table class="dataRegion">
+<tr><td>MS2 Runs:</td><td><%=stats.Runs%></td></tr>
+<tr><td>MS2 Peptides:</td><td><%=stats.Peptides%></td></tr>
+</table>

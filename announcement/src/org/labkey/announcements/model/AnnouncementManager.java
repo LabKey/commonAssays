@@ -99,7 +99,7 @@ public class AnnouncementManager
     }
 
 
-    // Get first 100 threads in this container, filtered using filter
+    // Get first rowlimit threads in this container, filtered using filter
     public static Pair<Announcement[], Boolean> getAnnouncements(Container c, SimpleFilter filter, Sort sort, int rowLimit)
     {
         filter.addCondition("Container", c.getId());

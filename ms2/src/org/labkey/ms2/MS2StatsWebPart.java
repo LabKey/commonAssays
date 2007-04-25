@@ -1,21 +1,21 @@
 package org.labkey.ms2;
 
-import org.labkey.api.view.VelocityView;
-import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.view.GroovyView;
+import org.labkey.api.view.ViewURLHelper;
 
-import java.util.Map;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * User: jeckels
 * Date: Feb 6, 2007
 */
-public class MS2StatsWebPart extends VelocityView
+public class MS2StatsWebPart extends GroovyView
 {
     public MS2StatsWebPart()
     {
-        super("/org/labkey/ms2/stats.vm");
+        super("/org/labkey/ms2/stats.gm");
         setTitle("MS2 Statistics");
         Map stats;
         try
