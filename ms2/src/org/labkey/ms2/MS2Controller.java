@@ -1911,7 +1911,14 @@ public class MS2Controller extends ViewController
         {
             ViewBackgroundInfo info = getViewBackgroundInfo();
             info.setContainer(getContainer());
-            ExperimentService.get().moveRuns(info, sourceContainer, expRuns);
+            try
+            {
+                ExperimentService.get().moveRuns(info, sourceContainer, expRuns);
+            }
+            catch (FileNotFoundException e)
+            {
+                HttpView.throwNotFound(e.getMessage());
+            }
         }
 
         currentUrl.setAction("showList");

@@ -228,7 +228,7 @@ public class ProteinManager
 
         _log.error("getProteinsContainingPeptide: Could not find peptide " + peptide + " in FASTA file " + fastaId);
 
-        return null;
+        return proteins;
     }
 
 

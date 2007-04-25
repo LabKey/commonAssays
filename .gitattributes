@@ -754,6 +754,7 @@ ms2/src/org/labkey/ms2/templates/MS2SearchXComet.xml -text
 ms2/src/org/labkey/ms2/templates/MS2SearchXCometXpress.xml -text
 ms2/src/org/labkey/ms2/templates/MS2SearchXpress.xml -text
 ms2/webapp/MS2/externalData/ProtSprotOrgMap.txt -text
+ms2/webapp/MS2/images/runIcon.gif -text
 ms2/webapp/MS2/scripts/postgresql/ms2-0.00-1.00.sql -text
 ms2/webapp/MS2/scripts/postgresql/ms2-1.00-1.10.sql -text
 ms2/webapp/MS2/scripts/postgresql/ms2-1.10-1.20.sql -text
