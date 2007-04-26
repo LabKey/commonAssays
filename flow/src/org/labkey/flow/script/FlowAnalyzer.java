@@ -99,7 +99,11 @@ public class FlowAnalyzer
 
     static public GraphSpec makeGraphSpec(GraphDef graphElement)
     {
-        return new GraphSpec(SubsetSpec.fromString(graphElement.getSubset()), graphElement.getXAxis(), graphElement.getYAxis());
+        SubsetSpec subset = SubsetSpec.fromString(graphElement.getSubset());
+        if (graphElement.getYAxis() != null)
+            return new GraphSpec(subset, graphElement.getXAxis(), graphElement.getYAxis());
+        else
+            return new GraphSpec(subset, graphElement.getXAxis());
     }
 
     static public Analysis makeAnalysis(AnalysisDef analysisElement)

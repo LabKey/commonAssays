@@ -27,11 +27,8 @@ import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.analysis.web.StatisticSpec;
-import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.api.exp.api.SamplesSchema;
-import org.labkey.api.exp.OntologyManager;
-
 
 public class FlowSchema extends UserSchema
 {
@@ -187,21 +184,6 @@ public class FlowSchema extends UserSchema
         return new FlowQueryView(context, new FlowSchema(context), (FlowQuerySettings) settings);
     }
 
-    public Forward delete(ViewURLHelper forward, QueryDefinition queryDef, String[] pks)
-    {
-        if (!(queryDef.getMainTable() instanceof ExpRunTable))
-            throw new UnsupportedOperationException();
-        try
-        {
-            ExperimentService.get().deleteExpRunsByRowIds(pks, getContainer());
-        }
-        catch (Exception e)
-        {
-            throw UnexpectedException.wrap(e);
-        }
-        return new ViewForward(forward);
-    }
-
     private SQLFragment sqlObjectTypeId(SQLFragment sqlDataId)
     {
         SQLFragment ret = new SQLFragment("(SELECT flow.Object.TypeId FROM flow.Object WHERE flow.Object.DataId = (");
@@ -258,6 +240,7 @@ public class FlowSchema extends UserSchema
         ret.addDataCountColumn("WellCount", InputRole.FCSFile.getPropertyDescriptor(getContainer()));
         ret.addColumn(ExpRunTable.Column.Created);
         ret.addColumn(ExpRunTable.Column.CreatedBy);
+        ret.setEditHelper(new RunEditHelper(this));
         return ret;
     }
 

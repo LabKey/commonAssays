@@ -146,6 +146,7 @@
                 </td>
                 <td>
                     <select id="graph_y">
+                        <option value="">[[histogram]]</option>
                         <% for(Map.Entry<String,String> param : params.entrySet()) { %>
                             <option value="<%=h(param.getKey())%>"><%=h(param.getValue())%></option>
                         <% } %>

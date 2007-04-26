@@ -220,6 +220,7 @@ public class FlowModule extends DefaultModule
                             "\nWHERE exp.datainput.dataid = " + dataId + " AND exp.datainput.targetapplicationid = " + targetApplicationid, null);
                 }
             }
+            rs.close();
         }
         catch (Exception e)
         {
