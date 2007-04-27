@@ -403,7 +403,7 @@ public class AnnouncementManager
         Table.delete(_comm.getTableInfoMemberList(), new SimpleFilter("UserId", user.getUserId()).addCondition("MessageId", messageId));
     }
 
-    public static Set<User> getResponderSet(Container c, Announcement a) throws SQLException
+    public static Set<User> getAuthors(Container c, Announcement a) throws SQLException
     {
         Set<User> responderSet = new HashSet<User>();
         boolean isResponse = null != a.getParent();

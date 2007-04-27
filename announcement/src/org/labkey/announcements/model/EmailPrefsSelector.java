@@ -83,9 +83,9 @@ public abstract class EmailPrefsSelector
 
         if (AnnouncementManager.EMAIL_PREFERENCE_MINE == emailPreference)
         {
-            Set<User> responderSet = AnnouncementManager.getResponderSet(_c, ann);
+            Set<User> authors = AnnouncementManager.getAuthors(_c, ann);
 
-            if (!responderSet.contains(user))
+            if (!authors.contains(user))
                 if (!settings.hasMemberList() || !ann.getMemberList().contains(user))
                     return false;
         }
