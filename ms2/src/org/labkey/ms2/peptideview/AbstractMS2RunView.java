@@ -24,12 +24,13 @@ import org.labkey.ms2.MS2Controller;
  * User: jeckels
  * Date: Feb 22, 2006
  */
-public abstract class AbstractPeptideView
+public abstract class AbstractMS2RunView
 {
-    private static Logger _log = Logger.getLogger(AbstractPeptideView.class);
+    private static Logger _log = Logger.getLogger(AbstractMS2RunView.class);
 
     protected static Map<String, Class<? extends DisplayColumn>> _calculatedPeptideColumns = new CaseInsensitiveHashMap<Class<? extends DisplayColumn>>();
-    protected static Map<String, Class<? extends DisplayColumn>> _calculatedProteinColumns = new CaseInsensitiveHashMap<Class<? extends DisplayColumn>>();
+
+    protected static final String AMT_PEPTIDE_COLUMN_NAMES = "Run,Fraction,Mass,Scan,RetentionTime,H,PeptideProphet,Peptide";
 
     static
     {
@@ -38,88 +39,65 @@ public abstract class AbstractPeptideView
 
         // Different renderer to ensure that SeqId is always selected when Protein column is displayed
         MS2Manager.getTableInfoPeptides().getColumn("Protein").setDisplayColumnFactory(ProteinDisplayColumnFactory.INSTANCE);
-
-        _calculatedProteinColumns.put("AACoverage", AACoverageColumn.class);
     }
-
 
     private final Container _container;
     private final User _user;
     protected final ViewURLHelper _url;
+    protected final ViewContext _viewContext;
     protected final MS2Run[] _runs;
     protected int _maxPeptideRows = 1000; // Limit peptides returned to 1,000 rows
     protected int _maxGroupingRows = 250; // Limit proteins returned to 250 rows
 
     private String _columnPropertyName;
 
-    public static AbstractPeptideView getPeptideView(String grouping, Container c, User user, ViewURLHelper url, ViewContext viewContext, MS2Run... runs)
+    public static AbstractMS2RunView getPeptideView(String grouping, ViewContext viewContext, MS2Run... runs)
     {
         if ("protein".equals(grouping))
         {
-            return new StandardProteinPeptideView(c, user, url, runs);
+            return new StandardProteinPeptideView(viewContext, runs);
         }
         else if ("proteinprophet".equals(grouping))
         {
-            return new ProteinProphetPeptideView(c, user, url, runs);
+            return new ProteinProphetPeptideView(viewContext, runs);
         }
         else if ("query".equals(grouping))
         {
-            return new QueryPeptideView(c, user, url, runs, viewContext);
+            return new QueryPeptideMS2RunView(viewContext, runs);
         }
         else if ("queryproteingroups".equals(grouping))
         {
-            return new QueryProteinGroupView(c, user, url, runs, viewContext);
+            return new QueryProteinGroupMS2RunView(viewContext, runs);
         }
         else
         {
-            return new FlatPeptideView(c, user, url, runs);
+            return new FlatPeptideView(viewContext, runs);
         }
     }
 
-    public AbstractPeptideView(Container c, User u, String columnPropertyName, ViewURLHelper url, MS2Run... runs)
+    public AbstractMS2RunView(ViewContext viewContext, String columnPropertyName, MS2Run... runs)
     {
-        _container = c;
-        _user = u;
+        _container = viewContext.getContainer();
+        _user = viewContext.getUser();
         _columnPropertyName = columnPropertyName;
-        _url = url;
+        _url = viewContext.getViewURLHelper();
+        _viewContext = viewContext;
         _runs = runs;
     }
 
     public WebPartView createGridView(MS2Controller.RunForm form) throws ServletException, SQLException
     {
         String peptideColumnNames = getPeptideColumnNames(form.getColumns());
-        return createGridView(form.getExpanded(), peptideColumnNames, form.getProteinColumns());
+        return createGridView(form.getExpanded(), peptideColumnNames, form.getProteinColumns(), true);
     }
 
-    public abstract WebPartView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws ServletException, SQLException;
+    public abstract WebPartView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean forExport) throws ServletException, SQLException;
 
     public abstract AbstractProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException;
 
-    protected abstract List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport) throws SQLException;
-
     public abstract GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException;
 
-    public ProteinTSVGridWriter getTSVProteinGridWriter(String requestedProteinColumnNames, String requestedPeptideColumnNames, boolean expanded) throws SQLException
-    {
-        List<DisplayColumn> proteinDisplayColumns = getProteinDisplayColumns(requestedProteinColumnNames, true);
-        List<DisplayColumn> peptideDisplayColumns = null;
-
-        if (expanded)
-        {
-            peptideDisplayColumns = getPeptideDisplayColumns(getPeptideColumnNames(requestedPeptideColumnNames));
-            changePeptideCaptionsForTsv(peptideDisplayColumns);
-        }
-
-        ProteinTSVGridWriter tw = getTSVProteinGridWriter(proteinDisplayColumns, peptideDisplayColumns);
-        tw.setExpanded(expanded);
-        return tw;
-    }
-
-    public abstract ProteinTSVGridWriter getTSVProteinGridWriter(List<DisplayColumn> proteinDisplayColumns, List<DisplayColumn> peptideDisplayColumns);
-
     public abstract void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException;
-
-    public abstract void exportTSVProteinGrid(ProteinTSVGridWriter tw, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException;
 
     public abstract void addSQLSummaries(List<Pair<String, String>> sqlSummaries);
 
@@ -244,46 +222,6 @@ public abstract class AbstractPeptideView
         result.append(MS2Run.getCommonProteinColumnNames());
         return result.toString();
     }
-
-    public DataRegion getNestedPeptideGrid(MS2Run run, String requestedPeptideColumnNames, boolean selectSeqId) throws SQLException
-    {
-        String columnNames = getPeptideColumnNames(requestedPeptideColumnNames);
-
-        DataRegion rgn = getPeptideGrid(columnNames, _maxPeptideRows);
-
-        if (selectSeqId && null == rgn.getDisplayColumn("SeqId"))
-        {
-            DisplayColumn seqId = MS2Manager.getTableInfoPeptides().getColumn("SeqId").getRenderer();
-            seqId.setVisible(false);
-            rgn.addColumn(seqId);
-        }
-        rgn.setTable(MS2Manager.getTableInfoPeptides());
-        rgn.setName(MS2Manager.getDataRegionNamePeptides());
-
-        rgn.setShowRecordSelectors(false);
-        rgn.setFixedWidthColumns(true);
-
-        ViewURLHelper showUrl = _url.clone();
-        String seqId = showUrl.getParameter("seqId");
-        showUrl.deleteParameter("seqId");
-        String extraParams = "";
-        if (selectSeqId)
-        {
-            extraParams = null == seqId ? "seqId=${SeqId}" : "seqId=" + seqId;
-        }
-        if ("proteinprophet".equals(_url.getParameter("grouping")) && _url.getParameter("proteinGroupId") == null)
-        {
-            extraParams = "proteinGroupId=${proteinGroupId}";
-        }
-        setPeptideUrls(rgn, extraParams);
-
-        ButtonBar bb = new ButtonBar();
-        bb.setVisible(false);  // Don't show button bar on nested region; also ensures no nested <form>...</form>
-        rgn.setButtonBar(bb, DataRegion.MODE_GRID);
-
-        return rgn;
-    }
-
 
     // Pull the URL associated with gene name from the database and cache it for use with the Gene Name column
     static String _geneNameUrl = null;
@@ -494,6 +432,10 @@ public abstract class AbstractPeptideView
 
     public abstract String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException;
 
+    public abstract void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
+
+    public abstract void exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
+
     protected class PeptideColumnNameList extends MS2Run.ColumnNameList
     {
         PeptideColumnNameList(String columnNames) throws SQLException
@@ -550,5 +492,4 @@ public abstract class AbstractPeptideView
 
         return null;
     }
-
 }

@@ -685,7 +685,7 @@ public class ProteinManager
         // SELECT TOP n m AS Run, Protein, etc.
         sql.append("SELECT ");
         sql.append(columnNames);
-        sql.append(" FROM ");
+        sql.append(", Fraction AS Fraction$Fraction FROM ");
         sql.append(MS2Manager.getTableInfoPeptides());
         sql.append(" RIGHT OUTER JOIN\n(");
 
@@ -734,6 +734,8 @@ public class ProteinManager
         sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".RatioNumberPeptides, ");
         sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".Heavy2LightRatioMean, ");
         sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".Heavy2LightRatioStandardDev, ");
+        sql.append(MS2Manager.getTableInfoSimplePeptides());
+        sql.append(".Fraction AS Fraction$Fraction, ");
         sql.append(columnNames);
 
         sql.append(" FROM ");

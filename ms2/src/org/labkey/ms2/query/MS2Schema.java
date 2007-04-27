@@ -45,7 +45,6 @@ public class MS2Schema extends UserSchema
     private static final String SAMPLE_PREP_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.PreSearch.%";
 
     private static final Set<String> HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("PeptideId");
-    private static final Set<String> HIDDEN_PROTEIN_GROUP_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("ProteinGroupId", "SeqId");
 
     private ProteinGroupProteins _proteinGroupProteins = new ProteinGroupProteins();
 
@@ -156,7 +155,7 @@ public class MS2Schema extends UserSchema
         ProteinGroupTableInfo result = new ProteinGroupTableInfo(alias, this);
         result.addProteinsColumn();
         List<FieldKey> defaultColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
-        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "BestName"));
+        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein"));
         defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "BestGeneName"));
         defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "Mass"));
         defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "Description"));
@@ -176,7 +175,7 @@ public class MS2Schema extends UserSchema
                 newColumn.setIsHidden(true);
             }
         }
-        result.getColumn("ProteinGroupId").setFk(new LookupForeignKey("RowId", false)
+        LookupForeignKey fk = new LookupForeignKey("RowId")
         {
             public TableInfo getLookupTableInfo()
             {
@@ -186,7 +185,9 @@ public class MS2Schema extends UserSchema
 
                 return result;
             }
-        });
+        };
+        fk.setPrefixColumnCaption(false);
+        result.getColumn("ProteinGroupId").setFk(fk);
         return result;
     }
 
@@ -292,32 +293,6 @@ public class MS2Schema extends UserSchema
         columns.add(FieldKey.fromParts("Input", "FASTA"));
         columns.add(FieldKey.fromParts("Input", "mzXML"));
         result.setDefaultVisibleColumns(columns);
-        return result;
-    }
-
-    public TableInfo createProteinGroupMembershipsTable()
-    {
-        TableInfo info = MS2Manager.getTableInfoProteinGroupMemberships();
-        FilteredTable result = new FilteredTable(info);
-        for (ColumnInfo col : info.getColumns())
-        {
-            ColumnInfo newColumn = result.addWrapColumn(col);
-            if (HIDDEN_PROTEIN_GROUP_MEMBERSHIPS_COLUMN_NAMES.contains(newColumn.getName()))
-            {
-                newColumn.setIsHidden(true);
-            }
-        }
-        ColumnInfo proteinColumn = result.wrapColumn("Protein", info.getColumn("SeqId"));
-        result.addColumn(proteinColumn);
-        proteinColumn.setFk(new LookupForeignKey("SeqId", false)
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                SequencesTableInfo result = new SequencesTableInfo(null, getContainer());
-
-                return result;
-            }
-        });
         return result;
     }
 

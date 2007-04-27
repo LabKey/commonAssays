@@ -395,7 +395,7 @@ public class MS2Controller extends ViewController
     {
         MS2Run run = MS2Manager.getRun(form.getRun());
 
-        AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
+        AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
         GridView gridView = peptideView.getPeptideViewForProteinGrouping(form.getProteinGroupingId(), form.getColumns());
         return includeView(gridView);
@@ -417,7 +417,7 @@ public class MS2Controller extends ViewController
         ViewURLHelper currentUrl = getViewURLHelper();
         MS2Run run = MS2Manager.getRun(form.run);
 
-        AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
+        AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
         WebPartView grid = peptideView.createGridView(form);
         List<DisplayColumn> displayColumns;
@@ -556,7 +556,7 @@ public class MS2Controller extends ViewController
         return renderInTemplate(view, getContainer(), "Samples for " + run.getDescription());
     }
 
-    private HttpView createHeader(ViewURLHelper currentUrl, RunForm form, MS2Run run, AbstractPeptideView peptideView) throws ServletException, SQLException
+    private HttpView createHeader(ViewURLHelper currentUrl, RunForm form, MS2Run run, AbstractMS2RunView peptideView) throws ServletException, SQLException
     {
         String chargeFilterParamName = run.getChargeFilterParamName();
 
@@ -914,7 +914,7 @@ public class MS2Controller extends ViewController
         ViewURLHelper url = cloneViewURLHelper();
         MS2Run run = MS2Manager.getRun(form.run);
 
-        AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
+        AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
         VelocityView pickColumns = new VelocityView("/org/labkey/ms2/pickPeptideColumns.vm");
         pickColumns.addObject("commonColumns", run.getCommonPeptideColumnNames());
@@ -948,7 +948,7 @@ public class MS2Controller extends ViewController
             return HttpView.throwNotFound("Could not find run " + form.run);
         }
 
-        AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
+        AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
         VelocityView pickColumns = new VelocityView("/org/labkey/ms2/pickProteinColumns.vm");
         pickColumns.addObject("commonColumns", MS2Run.getCommonProteinColumnNames());
@@ -989,7 +989,7 @@ public class MS2Controller extends ViewController
         if (form.getSaveDefault())
         {
             MS2Run run = MS2Manager.getRun(returnUrl.getParameter("run"));
-            AbstractPeptideView view = getPeptideView(returnUrl.getParameter("grouping"), run);
+            AbstractMS2RunView view = getPeptideView(returnUrl.getParameter("grouping"), run);
             view.savePeptideColumnNames(run.getType(), columnNames);
         }
         else
@@ -1017,7 +1017,7 @@ public class MS2Controller extends ViewController
         if (form.getSaveDefault())
         {
             MS2Run run = MS2Manager.getRun(returnUrl.getParameter("run"));
-            AbstractPeptideView view = getPeptideView(returnUrl.getParameter("grouping"), run);
+            AbstractMS2RunView view = getPeptideView(returnUrl.getParameter("grouping"), run);
             view.saveProteinColumnNames(run.getType(), columnNames);
         }
         else
@@ -1027,15 +1027,15 @@ public class MS2Controller extends ViewController
     }
 
 
-    private AbstractPeptideView getPeptideView(String grouping, MS2Run... runs) throws ServletException
+    private AbstractMS2RunView getPeptideView(String grouping, MS2Run... runs) throws ServletException
     {
-        return AbstractPeptideView.getPeptideView(grouping, getContainer(), getUser(), getViewURLHelper(), getViewContext(), runs);
+        return AbstractMS2RunView.getPeptideView(grouping, getViewContext(), runs);
     }
 
 
     public long[] getPeptideIndex(ViewURLHelper currentUrl, MS2Run run) throws SQLException, ServletException
     {
-        AbstractPeptideView view = getPeptideView(currentUrl.getParameter("grouping"), run);
+        AbstractMS2RunView view = getPeptideView(currentUrl.getParameter("grouping"), run);
         return view.getPeptideIndex(currentUrl);
     }
 
@@ -2444,7 +2444,7 @@ public class MS2Controller extends ViewController
         if (!errors.isEmpty())
             return _renderErrors(errors);
 
-        AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), runs.toArray(new MS2Run[]{}));
+        AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), runs.toArray(new MS2Run[]{}));
         ViewURLHelper currentUrl = cloneViewURLHelper();
         SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentUrl, runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
 
@@ -2455,10 +2455,7 @@ public class MS2Controller extends ViewController
 
         if ("TSV".equals(form.getExportFormat()))
         {
-            if (peptideView instanceof FlatPeptideView)
-                exportPeptidesToTSV(runs, peptideFilter, "MS2Runs", null, form.getColumns(), peptideView);
-            else
-                exportProteinsToTSV(runs, null, "MS2Runs", form.getColumns(), form.getProteinColumns(), form.getExpanded(), peptideView, null);
+            peptideView.exportToTSV(form, getResponse(), null);
         }
 
         if ("DTA".equals(form.getExportFormat()) || "PKL".equals(form.getExportFormat()))
@@ -2471,33 +2468,40 @@ public class MS2Controller extends ViewController
 
         if ("AMT".equals(form.getExportFormat()))
         {
-            if (peptideView instanceof FlatPeptideView)
-                exportToAMT(runs, peptideFilter, peptideView);
-            else
-                exportProteinsToAMT(runs, peptideView, null);
+            peptideView.exportToAMT(form, getResponse(), null);
         }
 
         return null;
     }
 
 
-    private void exportToExcel(List<MS2Run> runs, SimpleFilter filter, ExportForm form, AbstractPeptideView peptideView, String which) throws ServletException, SQLException, IOException
+    private void exportToExcel(List<MS2Run> runs, SimpleFilter filter, ExportForm form, AbstractMS2RunView peptideView, String which) throws Exception, SQLException, IOException
     {
         boolean includeHeaders = form.getExportFormat().equals("Excel");
+
+        if (peptideView instanceof QueryProteinGroupMS2RunView)
+        {
+            ((QueryProteinGroupMS2RunView)peptideView).createGridView(form.getExpanded(), "", "", false).exportToExcel(getResponse(), filter);
+            return;
+        }
 
         ServletOutputStream outputStream = ExcelWriter.getOutputStream(getResponse(), "MS2Runs");
         WritableWorkbook workbook = ExcelWriter.getWorkbook(outputStream);
 
         if (peptideView instanceof FlatPeptideView)
+        {
             exportPeptidesToExcel(workbook, runs, filter, form.getColumns(), includeHeaders, peptideView, which);
+        }
         else
+        {
             exportProteinsToExcel(workbook, runs, form.getColumns(), form.getProteinColumns(), includeHeaders, form.getGrouping(), form.getExpanded(), peptideView);
+        }
 
         ExcelWriter.closeWorkbook(workbook, outputStream);
     }
 
 
-    private void exportPeptidesToExcel(WritableWorkbook workbook, List<MS2Run> runs, SimpleFilter filter, String requestedPeptideColumns, boolean includeHeaders, AbstractPeptideView peptideView, String whichPeptides) throws ServletException, SQLException, IOException
+    private void exportPeptidesToExcel(WritableWorkbook workbook, List<MS2Run> runs, SimpleFilter filter, String requestedPeptideColumns, boolean includeHeaders, AbstractMS2RunView peptideView, String whichPeptides) throws ServletException, SQLException, IOException
     {
         ViewURLHelper currentUrl = cloneViewURLHelper();
 
@@ -2557,7 +2561,7 @@ public class MS2Controller extends ViewController
     }
 
 
-    private void setupExcelPeptideGrid(ExcelWriter ew, SimpleFilter filter, String requestedPeptideColumns, MS2Run run, AbstractPeptideView peptideView) throws ServletException, SQLException, IOException
+    private void setupExcelPeptideGrid(ExcelWriter ew, SimpleFilter filter, String requestedPeptideColumns, MS2Run run, AbstractMS2RunView peptideView) throws ServletException, SQLException, IOException
     {
         String columnNames = peptideView.getPeptideColumnNames(requestedPeptideColumns);
         DataRegion rgn = peptideView.getPeptideGrid(columnNames, ExcelWriter.MAX_ROWS);
@@ -2574,24 +2578,9 @@ public class MS2Controller extends ViewController
     }
 
 
-    private void exportProteinsToTSV(List<MS2Run> runs, List<String> fileHeader, String fileNamePrefix, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean expanded, AbstractPeptideView peptideView, String where) throws ServletException, SQLException
-    {
-        ProteinTSVGridWriter tw = peptideView.getTSVProteinGridWriter(requestedProteinColumnNames, requestedPeptideColumnNames, expanded);
-        tw.prepare(getResponse());
-        tw.setFileHeader(fileHeader);
-        tw.setFilenamePrefix(fileNamePrefix);
-        tw.writeFileHeader();
-        tw.writeColumnHeaders();
-
-        for (MS2Run run : runs)
-            peptideView.exportTSVProteinGrid(tw, requestedPeptideColumnNames, run, where);
-
-        tw.close();
-    }
-
 
     // TODO: Move this code to PeptideView
-    private void exportProteinsToExcel(WritableWorkbook workbook, List<MS2Run> runs, String requestedPeptideColumns, String requestedProteinColumns, boolean includeHeaders, String grouping, boolean expanded, AbstractPeptideView peptideView) throws SQLException
+    private void exportProteinsToExcel(WritableWorkbook workbook, List<MS2Run> runs, String requestedPeptideColumns, String requestedProteinColumns, boolean includeHeaders, String grouping, boolean expanded, AbstractMS2RunView peptideView) throws SQLException
     {
         ViewURLHelper currentUrl = cloneViewURLHelper();
 
@@ -2637,19 +2626,19 @@ public class MS2Controller extends ViewController
 
 
     @Jpf.Action
-    protected Forward exportAllProteins(ExportForm form) throws ServletException, IOException, SQLException
+    protected Forward exportAllProteins(ExportForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
 
         if (isAuthorized(form.run))
-            exportProteins(form, "All", null);
+            exportProteins(form, "All", null, null);
 
         return null;
     }
 
 
     @Jpf.Action
-    protected Forward exportSelectedProteins(ExportForm form) throws ServletException, SQLException, IOException
+    protected Forward exportSelectedProteins(ExportForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
 
@@ -2679,17 +2668,17 @@ public class MS2Controller extends ViewController
 
             where.append(")");
 
-            exportProteins(form, "Hand-selected from", where.toString());
+            exportProteins(form, "Hand-selected from", where.toString(), proteins);
         }
 
         return null;
     }
 
 
-    private void exportProteins(ExportForm form, String what, String extraWhere) throws ServletException, SQLException, IOException
+    private void exportProteins(ExportForm form, String what, String extraWhere, List<String> proteins) throws Exception
     {
         MS2Run run = MS2Manager.getRun(form.getRun());
-        AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
+        AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
         if ("Excel".equals(form.getExportFormat()))
         {
@@ -2698,11 +2687,11 @@ public class MS2Controller extends ViewController
         }
         else if ("TSV".equals(form.getExportFormat()))
         {
-            exportProteinsToTSV(Arrays.asList(run), null, "MS2Runs", form.getColumns(), form.getProteinColumns(), form.getExpanded(), peptideView, extraWhere);
+            peptideView.exportToTSV(form, getResponse(), proteins);
         }
         else if ("AMT".equals(form.getExportFormat()))
         {
-            exportProteinsToAMT(Arrays.asList(run), peptideView, extraWhere);
+            peptideView.exportToAMT(form, getResponse(), proteins);
         }
         else if ("DTA".equals(form.getExportFormat()) || "PKL".equals(form.getExportFormat()))
         {
@@ -2712,7 +2701,7 @@ public class MS2Controller extends ViewController
 
 
     @Jpf.Action
-    protected Forward exportSelectedProteinGroups(ExportForm form) throws ServletException, SQLException, IOException
+    protected Forward exportSelectedProteinGroups(ExportForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
 
@@ -2722,35 +2711,13 @@ public class MS2Controller extends ViewController
         ViewContext ctx = getViewContext();
         List<String> proteins = ctx.getList(DataRegion.SELECT_CHECKBOX_NAME);
 
-        if (null != proteins)
-        {
-            StringBuffer where = new StringBuffer();
-            where.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation().toString());
-            where.append(".RowId IN (");
-
-            for (int i = 0; i < Math.min(proteins.size(), ExcelWriter.MAX_ROWS); i++)
-            {
-                // Escape all single quotes in the protein names
-                String protein = proteins.get(i).replaceAll("'", "\\\\'");
-
-                if (i > 0)
-                    where.append(",");
-
-                where.append('\'');
-                where.append(protein);
-                where.append('\'');
-            }
-
-            where.append(")");
-
-            exportProteinGroups(form, "Hand-selected from", where.toString());
-        }
+        exportProteinGroups(form, "Hand-selected from", proteins);
 
         return null;
     }
 
     @Jpf.Action
-    protected Forward exportProteinGroups(ExportForm form) throws ServletException, IOException, SQLException
+    protected Forward exportProteinGroups(ExportForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
 
@@ -2761,10 +2728,26 @@ public class MS2Controller extends ViewController
     }
 
 
-    private void exportProteinGroups(ExportForm form, String what, String where) throws ServletException, SQLException, IOException
+    private void exportProteinGroups(ExportForm form, String what, List<String> proteins) throws Exception
     {
         MS2Run run = MS2Manager.getRun(form.getRun());
-        AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
+        AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
+
+        String where = null;
+        if (proteins != null)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append("RowId IN (");
+            String separator = "";
+            for (String protein : proteins)
+            {
+                sb.append(separator);
+                separator = ", ";
+                sb.append(new Long(protein));
+            }
+            sb.append(")");
+            where = sb.toString();
+        }
 
         if ("Excel".equals(form.getExportFormat()))
         {
@@ -2773,11 +2756,11 @@ public class MS2Controller extends ViewController
         }
         else if ("TSV".equals(form.getExportFormat()))
         {
-            exportProteinsToTSV(Arrays.asList(run), null, "MS2Runs", form.getColumns(), form.getProteinColumns(), form.getExpanded(), peptideView, where);
+            peptideView.exportToTSV(form, getResponse(), proteins);
         }
         else if ("AMT".equals(form.getExportFormat()))
         {
-            exportProteinsToAMT(Arrays.asList(run), peptideView, where);
+            peptideView.exportToAMT(form, getResponse(), proteins);
         }
         else if ("DTA".equals(form.getExportFormat()) || "PKL".equals(form.getExportFormat()))
         {
@@ -2796,7 +2779,7 @@ public class MS2Controller extends ViewController
         addProteinGroupFilterText(headers, currentUrl);
         headers.add("");
 
-        AbstractPeptideView proteinView = new ProteinProphetPeptideView(getContainer(), getUser(), getViewURLHelper(), run);
+        AbstractMS2RunView proteinView = new ProteinProphetPeptideView(getViewContext(), run);
         proteinView.writeExcel(getResponse(), run, form.getExpanded(), form.getColumns(), where, headers, form.getProteinColumns());
     }
 
@@ -2810,7 +2793,7 @@ public class MS2Controller extends ViewController
         addProteinFilterText(headers, currentUrl);
         headers.add("");
 
-        AbstractPeptideView proteinView = new StandardProteinPeptideView(getContainer(), getUser(), getViewURLHelper(), run);
+        AbstractMS2RunView proteinView = new StandardProteinPeptideView(getViewContext(), run);
         proteinView.writeExcel(getResponse(), run, form.getExpanded(), form.getColumns(), where, headers, form.getProteinColumns());
     }
 
@@ -2838,7 +2821,7 @@ public class MS2Controller extends ViewController
 
 
     @Jpf.Action
-    protected Forward exportAllPeptides(ExportForm form) throws ServletException, IOException, SQLException
+    protected Forward exportAllPeptides(ExportForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
 
@@ -2847,7 +2830,7 @@ public class MS2Controller extends ViewController
 
 
     @Jpf.Action
-    protected Forward exportSelectedPeptides(ExportForm form) throws ServletException, IOException, SQLException
+    protected Forward exportSelectedPeptides(ExportForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
 
@@ -2855,7 +2838,7 @@ public class MS2Controller extends ViewController
     }
 
 
-    private Forward exportPeptides(ExportForm form, boolean selected) throws ServletException, IOException, SQLException
+    private Forward exportPeptides(ExportForm form, boolean selected) throws Exception
     {
         if (!isAuthorized(form.run))
             return null;
@@ -2863,23 +2846,43 @@ public class MS2Controller extends ViewController
         MS2Run run = MS2Manager.getRun(form.run);
 
         ViewURLHelper currentUrl = getViewURLHelper();
-        AbstractPeptideView peptideView = getPeptideView(form.getGrouping(), run);
+        AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
         // Need to create a filter for 1) extra filter and 2) selected peptides
         // URL filter is applied automatically (except for DTA/PKL)
         SimpleFilter baseFilter = ProteinManager.getPeptideFilter(currentUrl, run, ProteinManager.EXTRA_FILTER);
 
+        List<String> exportRows = null;
         if (selected)
-            addSelectedPeptides(baseFilter, getViewContext(), ExcelWriter.MAX_ROWS);  // Technically, should only limit this in Excel export case... but there's no way to individually select 65K peptides
+        {
+            exportRows = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
+
+            List<Long> peptideIds = new ArrayList<Long>(exportRows.size());
+
+            // Technically, should only limit this in Excel export case... but there's no way to individually select 65K peptides
+            for (int i = 0; i < Math.min(exportRows.size(), ExcelWriter.MAX_ROWS); i++)
+            {
+                String[] row = exportRows.get(i).split(",");
+                peptideIds.add(Long.parseLong(row[row.length == 1 ? 0 : 1]));
+            }
+
+            baseFilter.addInClause("RowId", peptideIds);
+        }
 
         if ("Excel".equals(form.exportFormat))
             exportToExcel(Arrays.asList(run), baseFilter, form, peptideView, (selected ? "Hand-selected from" : "All"));
 
         if ("TSV".equals(form.exportFormat))
-            return exportPeptidesToTSV(Arrays.asList(run), baseFilter, run.getDescription(), null, form.columns, peptideView);
+        {
+            peptideView.exportToTSV(form, getResponse(), exportRows);
+            return null;
+        }
 
         if ("AMT".equals(form.exportFormat))
-            return exportToAMT(Arrays.asList(run), baseFilter, peptideView);
+        {
+            peptideView.exportToAMT(form, getResponse(), exportRows);
+            return null;
+        }
 
         // Add URL filter manually
         baseFilter.addAllClauses(ProteinManager.getPeptideFilter(currentUrl, run, ProteinManager.URL_FILTER));
@@ -2888,25 +2891,6 @@ public class MS2Controller extends ViewController
             return exportSpectra(Arrays.asList(run), currentUrl, baseFilter, form.exportFormat.toLowerCase());
 
         return null;
-    }
-
-
-    private void addSelectedPeptides(SimpleFilter filter, ViewContext ctx, int maxRows)
-    {
-        List<String> exportRows = ctx.getList(DataRegion.SELECT_CHECKBOX_NAME);
-
-        if (null != exportRows)
-        {
-            List<Long> peptideIds = new ArrayList<Long>(exportRows.size());
-
-            for (int i = 0; i < Math.min(exportRows.size(), maxRows); i++)
-            {
-                String[] row = exportRows.get(i).split(",");
-                peptideIds.add(Long.parseLong(row[1]));
-            }
-
-            filter.addInClause("RowId", peptideIds);
-        }
     }
 
 
@@ -2944,44 +2928,6 @@ public class MS2Controller extends ViewController
     }
 
 
-    private static final String AMT_PEPTIDE_COLUMN_NAMES = "Run,Fraction,Mass,Scan,RetentionTime,H,PeptideProphet,Peptide";
-
-    private Forward exportToAMT(List<MS2Run> runs, SimpleFilter filter, AbstractPeptideView peptideView) throws ServletException, SQLException, IOException
-    {
-        List<String> fileHeader = getAMTFileHeader(runs);
-
-        return exportPeptidesToTSV(runs, filter, "AMT", fileHeader, AMT_PEPTIDE_COLUMN_NAMES, peptideView);
-    }
-
-
-    private void exportProteinsToAMT(List<MS2Run> runs, AbstractPeptideView peptideView, String where) throws ServletException, SQLException
-    {
-        List<String> fileHeader = getAMTFileHeader(runs);
-
-        exportProteinsToTSV(runs, fileHeader, "AMT", AMT_PEPTIDE_COLUMN_NAMES, "" /* No protein columns */, true, peptideView, where);
-    }
-
-
-    private Forward exportPeptidesToTSV(List<MS2Run> runs, SimpleFilter filter, String fileNamePrefix, List<String> fileHeader, String requestedColumnNames, AbstractPeptideView peptideView) throws ServletException, SQLException, IOException
-    {
-        RenderContext ctx = new MultiRunRenderContext(getViewContext(), runs);
-        ctx.setBaseFilter(filter);
-        ctx.setBaseSort(ProteinManager.getPeptideBaseSort());
-        ctx.setCache(false);
-
-        String columnNames = peptideView.getPeptideColumnNames(requestedColumnNames);
-        List<DisplayColumn> displayColumns = peptideView.getPeptideDisplayColumns(columnNames);
-        peptideView.changePeptideCaptionsForTsv(displayColumns);
-
-        TSVGridWriter tw = new TSVGridWriter(ctx, MS2Manager.getTableInfoPeptides(), displayColumns, MS2Manager.getDataRegionNamePeptides());
-        tw.setFilenamePrefix(fileNamePrefix);
-        tw.setFileHeader(fileHeader);   // Used for AMT file export
-        tw.write(getResponse());
-
-        return null;
-    }
-
-
     private Forward exportSpectra(List<MS2Run> runs, ViewURLHelper currentUrl, SimpleFilter filter, String extension) throws IOException
     {
         Sort sort = ProteinManager.getPeptideBaseSort();
@@ -3002,7 +2948,7 @@ public class MS2Controller extends ViewController
     }
 
 
-    private Forward exportProteinsAsSpectra(List<MS2Run> runs, ViewURLHelper currentUrl, String extension, AbstractPeptideView peptideView, String where) throws IOException
+    private Forward exportProteinsAsSpectra(List<MS2Run> runs, ViewURLHelper currentUrl, String extension, AbstractMS2RunView peptideView, String where) throws IOException
     {
         SpectrumIterator iter = new ProteinResultSetSpectrumIterator(runs, currentUrl, peptideView, where);
 
@@ -3495,7 +3441,7 @@ public class MS2Controller extends ViewController
         ProteinGroupWithQuantitation group = proteinProphet.lookupGroup(form.getGroupNumber(), form.getIndistinguishableCollectionId());
         Protein[] proteins = group.lookupProteins();
 
-        AbstractPeptideView peptideView = new ProteinProphetPeptideView(getContainer(), getUser(), getViewURLHelper(), run);
+        AbstractMS2RunView peptideView = new ProteinProphetPeptideView(getViewContext(), run);
         VBox view = getShowProteinsView(getViewURLHelper(), run, form, proteins, null, peptideView);
 
         JspView summaryView = new JspView("/org/labkey/ms2/showProteinGroup.jsp");
@@ -3558,7 +3504,7 @@ public class MS2Controller extends ViewController
                 return HttpView.throwUnauthorized();
             }
 
-            AbstractPeptideView peptideView = new StandardProteinPeptideView(getContainer(), getUser(), getViewURLHelper(), run);
+            AbstractMS2RunView peptideView = new StandardProteinPeptideView(getViewContext(), run);
             proteinView = getShowProteinsView(currentUrl, run, form, new Protein[] {protein}, null, peptideView);
 
             // Set the protein name used in this run's FASTA file; we want to include this in the view.
@@ -3607,7 +3553,7 @@ public class MS2Controller extends ViewController
 
         Protein[] proteins = ProteinManager.getProteinsContainingPeptide(run.getFastaId(), peptide);
         ViewURLHelper currentUrl = getViewURLHelper().clone();
-        AbstractPeptideView peptideView = new StandardProteinPeptideView(getContainer(), getUser(), getViewURLHelper(), run);
+        AbstractMS2RunView peptideView = new StandardProteinPeptideView(getViewContext(), run);
         HttpView proteinView = getShowProteinsView(currentUrl, run, form, proteins, new String[]{peptide.getTrimmedPeptide()}, peptideView);
 
         currentUrl.deleteParameter("peptideId");
@@ -3702,7 +3648,7 @@ public class MS2Controller extends ViewController
     }
 
 
-    private VBox getShowProteinsView(ViewURLHelper currentUrl, MS2Run run, DetailsForm form, Protein[] proteins, String[] peptides, AbstractPeptideView peptideView) throws Exception
+    private VBox getShowProteinsView(ViewURLHelper currentUrl, MS2Run run, DetailsForm form, Protein[] proteins, String[] peptides, AbstractMS2RunView peptideView) throws Exception
     {
         VBox vbox = new VBox();
 

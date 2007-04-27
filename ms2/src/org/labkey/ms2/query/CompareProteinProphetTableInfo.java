@@ -71,13 +71,15 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
                 ExprColumn proteinGroupIdColumn = new ExprColumn(this, "Run" + run.getRun(), sql, Types.INTEGER);
                 proteinGroupIdColumn.setIsUnselectable(true);
                 runColumns.add(proteinGroupIdColumn);
-                proteinGroupIdColumn.setFk(new LookupForeignKey("RowId", false)
+                LookupForeignKey fk = new LookupForeignKey("RowId")
                 {
                     public TableInfo getLookupTableInfo()
                     {
                         return new ProteinGroupTableInfo(null, _schema);
                     }
-                });
+                };
+                fk.setPrefixColumnCaption(false);
+                proteinGroupIdColumn.setFk(fk);
                 addColumn(proteinGroupIdColumn);
             }
         }

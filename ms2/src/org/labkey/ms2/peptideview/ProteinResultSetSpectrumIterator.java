@@ -19,10 +19,10 @@ import java.util.List;
 public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
 {
     private ViewURLHelper _currentUrl;
-    private AbstractPeptideView _peptideView;
+    private AbstractMS2RunView _peptideView;
     private String _extraWhere;
 
-    public ProteinResultSetSpectrumIterator(List<MS2Run> runs, ViewURLHelper currentUrl, AbstractPeptideView peptideView, String extraWhere)
+    public ProteinResultSetSpectrumIterator(List<MS2Run> runs, ViewURLHelper currentUrl, AbstractMS2RunView peptideView, String extraWhere)
     {
         _rs = new ProteinSpectrumResultSet(runs);
         _currentUrl = currentUrl;

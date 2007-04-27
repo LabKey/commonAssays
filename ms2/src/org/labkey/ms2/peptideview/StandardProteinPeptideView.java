@@ -4,15 +4,19 @@ import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.GridView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.api.data.*;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.api.security.User;
 import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.ArrayList;
 
 import org.labkey.ms2.MS2Controller;
 
@@ -20,14 +24,14 @@ import org.labkey.ms2.MS2Controller;
  * User: jeckels
  * Date: Feb 22, 2006
  */
-public class StandardProteinPeptideView extends AbstractPeptideView
+public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 {
-    public StandardProteinPeptideView(Container c, User u, ViewURLHelper url, MS2Run... runs)
+    public StandardProteinPeptideView(ViewContext viewContext, MS2Run... runs)
     {
-        super(c, u, "NestedPeptides", url, runs);
+        super(viewContext, "NestedPeptides", runs);
     }
 
-    public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws ServletException, SQLException
+    public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean forExport) throws ServletException, SQLException
     {
         DataRegion proteinRgn = createProteinDataRegion(expanded, requestedPeptideColumnNames, requestedProteinColumnNames);
         proteinRgn.setTable(MS2Manager.getTableInfoProteins());
@@ -41,7 +45,13 @@ public class StandardProteinPeptideView extends AbstractPeptideView
 
     protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport) throws SQLException
     {
-        return getColumns(_calculatedProteinColumns, new ProteinColumnNameList(requestedProteinColumnNames), MS2Manager.getTableInfoProteins());
+        List<DisplayColumn> result = new ArrayList<DisplayColumn>();
+
+        for (String columnName : new ProteinColumnNameList(requestedProteinColumnNames))
+        {
+            addColumn(_calculatedProteinColumns, columnName, result, MS2Manager.getTableInfoProteins());
+        }
+        return result;
     }
 
 
@@ -198,5 +208,42 @@ public class StandardProteinPeptideView extends AbstractPeptideView
     {
         SimpleFilter coverageFilter = ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.ALL_FILTERS);
         return Table.executeArray(ProteinManager.getSchema(), "SELECT Peptide FROM " + MS2Manager.getTableInfoPeptides() + " " + coverageFilter.getWhereSQL(ProteinManager.getSqlDialect()), coverageFilter.getWhereParams(MS2Manager.getTableInfoPeptides()).toArray(), String.class);
+    }
+
+    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    {
+        String where = null;
+        if (selectedRows != null)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Protein IN (");
+            String separator = "";
+            for (String row : selectedRows)
+            {
+                sb.append(separator);
+                separator = ", ";
+                sb.append("'");
+                sb.append(row.replace("'", "''"));
+                sb.append("'");
+            }
+            sb.append(")");
+            where = sb.toString();
+        }
+
+        String columnNames = getPeptideColumnNames(form.getColumns());
+        List<DisplayColumn> displayColumns = getPeptideDisplayColumns(columnNames);
+        changePeptideCaptionsForTsv(displayColumns);
+
+        ProteinTSVGridWriter tw = getTSVProteinGridWriter(form.getProteinColumns(), form.getColumns(), form.getExpanded());
+        tw.prepare(response);
+        tw.setFileHeader(null);
+        tw.setFilenamePrefix("MS2Runs");
+        tw.writeFileHeader();
+        tw.writeColumnHeaders();
+
+        for (MS2Run run : _runs)
+            exportTSVProteinGrid(tw, form.getColumns(), run, where);
+
+        tw.close();
     }
 }

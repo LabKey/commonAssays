@@ -156,7 +156,7 @@ public class PeptidesTableInfo extends FilteredTable
 
     private void setupProteinColumns(final String showProteinURLString)
     {
-        getColumn("SeqId").setFk(new LookupForeignKey("SeqId", false)
+        LookupForeignKey fk = new LookupForeignKey("SeqId")
         {
             public TableInfo getLookupTableInfo()
             {
@@ -172,7 +172,9 @@ public class PeptidesTableInfo extends FilteredTable
 
                 return sequenceTable;
             }
-        });
+        };
+        fk.setPrefixColumnCaption(false);
+        getColumn("SeqId").setFk(fk);
 
         getColumn("SeqId").setURL(showProteinURLString);
         getColumn("SeqId").setDisplayColumnFactory(ProteinDisplayColumnFactory.INSTANCE);

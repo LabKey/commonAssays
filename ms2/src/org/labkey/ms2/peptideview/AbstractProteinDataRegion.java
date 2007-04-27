@@ -1,16 +1,14 @@
 package org.labkey.ms2.peptideview;
 
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.GroupedResultSet;
-import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.ms2.ProteinGroupProteins;
 
 import java.io.Writer;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.util.List;
+import java.util.Iterator;
 
 /**
  * User: jeckels
@@ -36,6 +34,20 @@ public abstract class AbstractProteinDataRegion extends DataRegion
 
     public void _renderTable(RenderContext ctx, Writer out) throws SQLException, IOException
     {
+        if (_expanded)
+        {
+            List<DisplayColumn> displayColumnList = getDisplayColumnList();
+            for (Iterator<DisplayColumn> i = displayColumnList.iterator(); i.hasNext(); )
+            {
+                DisplayColumn col = i.next();
+                if (col instanceof EmptyDisplayColumn)
+                {
+                    i.remove();
+                }
+            }
+            displayColumnList.add(new EmptyDisplayColumn());
+        }
+
         super._renderTable(ctx, out);
         if (_groupedRS != null)
         {
@@ -82,12 +94,6 @@ public abstract class AbstractProteinDataRegion extends DataRegion
     public void setExpanded(boolean expanded)
     {
         _expanded = expanded;
-    }
-
-
-    public boolean getExpanded()
-    {
-        return _expanded;
     }
 
     public void setNestedRegion(DataRegion nestedRegion)
@@ -144,10 +150,29 @@ public abstract class AbstractProteinDataRegion extends DataRegion
         out.write("-Row");
         String value = getUniqueColumnValue(ctx);
         out.write(value);
-        out.write("\"><td></td><td colspan=\"20\" align=\"left\" id=\"");
+        out.write("\"><td></td><td colspan=\"");
+        int colspan = 0;
+        for (DisplayColumn dc : getDisplayColumnList())
+        {
+            if (dc.getVisible(ctx))
+            {
+                colspan++;
+            }
+        }
+        out.write(Integer.toString(colspan));
+        out.write("\" align=\"left\" id=\"");
         out.write(getName());
         out.write("-Content");
         out.write(value);
         out.write("\">");
+    }
+
+    private static class EmptyDisplayColumn extends SimpleDisplayColumn
+    {
+        public EmptyDisplayColumn()
+        {
+            super("");
+            setWidth(null);
+        }
     }
 }

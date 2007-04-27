@@ -1,17 +1,17 @@
 package org.labkey.ms2.query;
 
-import org.labkey.api.query.FilteredTable;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.*;
 import org.labkey.api.data.*;
 import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
+import org.labkey.api.view.ViewURLHelper;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.GroupNumberDisplayColumn;
 import org.labkey.ms2.ProteinListDisplayColumn;
+import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.protein.ProteinManager;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
 import java.sql.Types;
@@ -23,7 +23,9 @@ import java.sql.Types;
 public class ProteinGroupTableInfo extends FilteredTable
 {
     private static final Set<String> HIDDEN_PROTEIN_GROUP_COLUMN_NAMES = new CaseInsensitiveHashSet(Arrays.asList("RowId", "GroupNumber", "IndistinguishableCollectionId", "Deleted", "HasPeptideProphet"));
+    private static final Set<String> HIDDEN_PROTEIN_GROUP_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("ProteinGroupId", "SeqId");
     private final MS2Schema _schema;
+    private MS2Run[] _runs;
 
     public ProteinGroupTableInfo(String alias, MS2Schema schema)
     {
@@ -68,13 +70,14 @@ public class ProteinGroupTableInfo extends FilteredTable
             }
         }
 
-        LookupForeignKey foreignKey = new LookupForeignKey("RowId", false)
+        LookupForeignKey foreignKey = new LookupForeignKey("RowId")
         {
             public TableInfo getLookupTableInfo()
             {
                 return new ProteinProphetFileTableInfo(_schema);
             }
         };
+        foreignKey.setPrefixColumnCaption(false);
         getColumn("ProteinProphetFileId").setFk(foreignKey);
         getColumn("ProteinProphet").setFk(foreignKey);
 
@@ -122,13 +125,69 @@ public class ProteinGroupTableInfo extends FilteredTable
     public void addProteinsColumn()
     {
         ColumnInfo proteinGroup = wrapColumn("Proteins", getRealTable().getColumn("RowId"));
-        proteinGroup.setFk(new LookupForeignKey("ProteinGroupId")
+        LookupForeignKey fk = new LookupForeignKey("ProteinGroupId")
         {
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createProteinGroupMembershipsTable();
+                TableInfo info = MS2Manager.getTableInfoProteinGroupMemberships();
+                FilteredTable result = new FilteredTable(info);
+                for (ColumnInfo col : info.getColumns())
+                {
+                    ColumnInfo newColumn = result.addWrapColumn(col);
+                    if (HIDDEN_PROTEIN_GROUP_MEMBERSHIPS_COLUMN_NAMES.contains(newColumn.getName()))
+                    {
+                        newColumn.setIsHidden(true);
+                    }
+                }
+
+                ColumnInfo proteinColumn = result.wrapColumn("Protein", info.getColumn("SeqId"));
+                proteinColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+                {
+                    public DisplayColumn createRenderer(ColumnInfo colInfo)
+                    {
+                        DataColumn result = new DataColumn(colInfo);
+                        result.setLinkTarget("prot");
+
+                        ViewURLHelper url = new ViewURLHelper("MS2", "showProtein.view", _schema.getContainer());
+                        if (_runs != null && _runs.length == 1)
+                        {
+                            url.addParameter("run", Integer.toString(_runs[0].getRun()));
+                        }
+                        result.setURL(url.getLocalURIString() + "&proteinGroupId=${RowId}&seqId=${" + colInfo.getAlias() + "}");
+                        return result;
+                    }
+                });
+                result.addColumn(proteinColumn);
+
+                proteinColumn.setFk(new LookupForeignKey("SeqId", "DatabaseSequenceName")
+                {
+                    public TableInfo getLookupTableInfo()
+                    {
+                        SequencesTableInfo result = new SequencesTableInfo(null, _schema.getContainer());
+                        SQLFragment sql = new SQLFragment();
+                        sql.append("(SELECT LookupString FROM ");
+                        sql.append(ProteinManager.getTableInfoFastaSequences());
+                        sql.append(" fs, ");
+                        sql.append(MS2Manager.getTableInfoRuns());
+                        sql.append(" r, ");
+                        sql.append(MS2Manager.getTableInfoProteinProphetFiles());
+                        sql.append(" ppf ");
+                        sql.append("\nWHERE fs.SeqId = ");
+                        sql.append(ExprColumn.STR_TABLE_ALIAS);
+                        sql.append(".SeqId AND fs.FastaId = r.FastaId AND r.Run = ppf.Run AND ppf.RowId = ");
+                        sql.append(ProteinGroupTableInfo.this.getColumn("ProteinProphetFileId").getValueSql());
+                        sql.append(")");
+                        ExprColumn col = new ExprColumn(result, "DatabaseSequenceName", sql, Types.VARCHAR);
+
+                        result.addColumn(col);
+                        return result;
+                    }
+                });
+                return result;
             }
-        });
+        };
+        fk.setPrefixColumnCaption(false);
+        proteinGroup.setFk(fk);
         proteinGroup.setKeyField(false);
         addColumn(proteinGroup);
     }
@@ -235,5 +294,35 @@ public class ProteinGroupTableInfo extends FilteredTable
         sql.append("ErrorRate <= ?");
         sql.add(maxError);
         addCondition(sql);
+    }
+
+    public void setRunFilter(MS2Run[] runs)
+    {
+        _runs = runs;
+        SQLFragment sql = new SQLFragment();
+        sql.append("ProteinProphetFileId IN (SELECT RowId FROM ");
+        sql.append(MS2Manager.getTableInfoProteinProphetFiles());
+        sql.append(" WHERE Run IN (SELECT Run FROM ");
+        sql.append(MS2Manager.getTableInfoRuns());
+        sql.append(" WHERE Container = ? AND Deleted = ?");
+        sql.add(_schema.getContainer().getId());
+        sql.add(Boolean.FALSE);
+        if (runs != null)
+        {
+            List<Integer> params = new ArrayList<Integer>(runs.length);
+            for (MS2Run run : runs)
+            {
+                params.add(run.getRun());
+            }
+
+            assert runs.length > 0 : "Doesn't make sense to filter to no runs";
+            sql.append(" AND Run IN (?");
+            sql.append(StringUtils.repeat(", ?", params.size() - 1));
+            sql.append(")");
+            sql.addAll(params);
+        }
+        sql.append("))");
+        addCondition(sql);
+
     }
 }

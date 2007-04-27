@@ -5,9 +5,9 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.api.data.*;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.api.security.User;
 import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.common.util.Pair;
 
@@ -16,22 +16,24 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.Collections;
 
 import org.labkey.ms2.*;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * User: jeckels
  * Date: Feb 22, 2006
  */
-public class ProteinProphetPeptideView extends AbstractPeptideView
+public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
 {
     private Table.TableResultSet _rs;
 
-    public ProteinProphetPeptideView(Container c, User u, ViewURLHelper url, MS2Run... runs)
+    public ProteinProphetPeptideView(ViewContext viewContext, MS2Run... runs)
     {
-        super(c, u, "NestedPeptides", url, runs);
+        super(viewContext, "NestedPeptides", runs);
     }
 
     protected List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport) throws SQLException
@@ -91,6 +93,38 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
     public List<DisplayColumn> getPeptideDisplayColumns(String peptideColumnNames) throws SQLException
     {
         return getColumns(_calculatedPeptideColumns, new PeptideColumnNameList(peptideColumnNames), MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoPeptideMemberships());
+    }
+
+    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    {
+        String where = null;
+        if (selectedRows != null)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+            sb.append(".RowId IN (");
+            String separator = "";
+            for (String protein : selectedRows)
+            {
+                sb.append(separator);
+                separator = ", ";
+                sb.append(new Long(protein));
+            }
+            sb.append(")");
+            where = sb.toString();
+        }
+
+        ProteinTSVGridWriter tw = getTSVProteinGridWriter(form.getProteinColumns(), form.getColumns(), form.getExpanded());
+        tw.prepare(response);
+        tw.setFileHeader(null);
+        tw.setFilenamePrefix("MS2Runs");
+        tw.writeFileHeader();
+        tw.writeColumnHeaders();
+
+        for (MS2Run run : _runs)
+            exportTSVProteinGrid(tw, form.getColumns(), run, where);
+
+        tw.close();
     }
 
     private ProteinProphetDataRegion createProteinDataRegion(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws SQLException
@@ -243,7 +277,7 @@ public class ProteinProphetPeptideView extends AbstractPeptideView
         return null;
     }
 
-    public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws ServletException, SQLException
+    public GridView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean forExport) throws ServletException, SQLException
     {
         DataRegion proteinRgn = createProteinDataRegion(expanded, requestedPeptideColumnNames, requestedProteinColumnNames);
         GridView proteinView = new GridView(proteinRgn);

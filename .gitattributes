@@ -542,9 +542,11 @@ ms2/src/org/labkey/ms2/modifications.gm -text
 ms2/src/org/labkey/ms2/ms2Admin.vm -text
 ms2/src/org/labkey/ms2/nestedGridScript.gm -text
 ms2/src/org/labkey/ms2/peptideChart.vm -text
-ms2/src/org/labkey/ms2/peptideview/AbstractPeptideView.java -text
+ms2/src/org/labkey/ms2/peptideview/AbstractLegacyProteinMS2RunView.java -text
+ms2/src/org/labkey/ms2/peptideview/AbstractMS2RunView.java -text
 ms2/src/org/labkey/ms2/peptideview/AbstractProteinDataRegion.java -text
 ms2/src/org/labkey/ms2/peptideview/AbstractProteinExcelWriter.java -text
+ms2/src/org/labkey/ms2/peptideview/AbstractQueryMS2RunView.java -text
 ms2/src/org/labkey/ms2/peptideview/FlatPeptideView.java -text
 ms2/src/org/labkey/ms2/peptideview/MS2ResultSet.java -text
 ms2/src/org/labkey/ms2/peptideview/MultiRunRenderContext.java -text
@@ -559,8 +561,8 @@ ms2/src/org/labkey/ms2/peptideview/ProteinStringExpression.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinTSVGridWriter.java -text
 ms2/src/org/labkey/ms2/peptideview/QueryNestingOption.java -text
 ms2/src/org/labkey/ms2/peptideview/QueryPeptideDataRegion.java -text
-ms2/src/org/labkey/ms2/peptideview/QueryPeptideView.java -text
-ms2/src/org/labkey/ms2/peptideview/QueryProteinGroupView.java -text
+ms2/src/org/labkey/ms2/peptideview/QueryPeptideMS2RunView.java -text
+ms2/src/org/labkey/ms2/peptideview/QueryProteinGroupMS2RunView.java -text
 ms2/src/org/labkey/ms2/peptideview/ResultSetSpectrumIterator.java -text
 ms2/src/org/labkey/ms2/peptideview/SortRewriterRenderContext.java -text
 ms2/src/org/labkey/ms2/peptideview/StandardProteinDataRegion.java -text

@@ -35,6 +35,7 @@ public class GroupNumberDisplayColumn extends DataColumn
         ViewURLHelper urlHelper = url.clone();
         urlHelper.setAction("showProteinGroup.view");
         setURL(urlHelper.toString() + "&groupNumber=${" + _groupNumber + "}&indistinguishableCollectionId=${" + _collectionId + "}");
+        setWidth("50");
     }
 
     public Object getDisplayValue(RenderContext ctx)
