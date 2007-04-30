@@ -545,6 +545,7 @@ public class IssuesController extends ViewController
 
         Issue issue = form.getBean();
         issue.Open(c, user);
+        validateNotifyList(issue, form);
 
         if (issue.getTitle() == null)
             return _renderInTemplate(getInsertErrorView(issue, "Error: Issue title cannot be null"), "Insert new issue", null);
@@ -629,11 +630,11 @@ public class IssuesController extends ViewController
         try
         {
             validateRequiredFields(form);
-            validateNotifyList(issue, form);
 
             if ("insert".equals(form.getAction()))
                 return doInsert(form);
 
+            validateNotifyList(issue, form);
             detailsUrl = getForwardURL(issue);
 
             // if assigned to changes, append the new assignee to the notify list
@@ -873,9 +874,10 @@ public class IssuesController extends ViewController
         final String notify = issue.getNotifyList();
         if (notify != null)
         {
-            for (String email : notify.split(";"))
+            StringTokenizer tokenizer = new StringTokenizer(notify, ";\n\r\t");
+            while (tokenizer.hasMoreTokens())
             {
-                emailAddresses.add(email);
+                emailAddresses.add((String)tokenizer.nextElement());
             }
         }
 
