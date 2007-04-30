@@ -208,6 +208,17 @@ public class IssuesController extends ViewController
         box.addView(queryView);
         return box;
     }
+    
+    private ResultSet getIssuesResultSet(ListForm form) throws IOException, SQLException, ServletException
+    {
+        UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), IssuesQuerySchema.SCHEMA_NAME);
+        QuerySettings settings = new QuerySettings(getViewURLHelper(),getRequest(), ISSUES_QUERY);
+        settings.setQueryName(ISSUES_QUERY);
+
+        IssuesQueryView queryView = new IssuesQueryView(getViewContext(), schema, settings);
+
+        return queryView.getResultSet();
+    }
 
     @Jpf.Action @RequiresPermission(ACL.PERM_READ)
     public Forward list(ListForm form) throws Exception
@@ -280,6 +291,59 @@ public class IssuesController extends ViewController
         String title = "" + issue.getIssueId() + " : " + issue.getTitle();
 
         if (form.isPrint())
+        {
+            page.setPrint(true);
+            return includeView(new PrintTemplate(v, title));
+        }
+        else
+            return _renderInTemplate(v, title, null);
+    }
+    
+    
+    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
+    public Forward detailsList(ListForm form) throws Exception
+    {
+        // convert AssignedTo/Email to AssignedTo/DisplayName: old bookmarks
+        // reference Email, which is no longer displayed.
+        ViewURLHelper url = cloneViewURLHelper();
+        String[] emailFilters = url.getKeysByPrefix(ISSUES_QUERY + ".AssignedTo/Email");
+        if (emailFilters != null && emailFilters.length > 0)
+        {
+            for (String emailFilter : emailFilters)
+                url.deleteParameter(emailFilter);
+            return new ViewForward(url);
+        }
+        
+        List<String> issueIds = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
+        Vector<Issue> issueList = new Vector();
+        
+        if (issueIds != null)
+        {
+            for (ListIterator<String> iterator = issueIds.listIterator(); iterator.hasNext(); )
+            {
+                issueList.add(getIssue(getContainer(), Integer.parseInt(iterator.next())));
+            }
+        }
+        else
+        {   
+            ResultSet rs = getIssuesResultSet(form);
+            int issueColumnIndex = rs.findColumn("issueId");
+        
+            while (rs.next())
+            {
+                issueList.add(getIssue(getContainer(), rs.getInt(issueColumnIndex)));
+            }
+        }
+
+        IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "detailList.jsp");
+        JspView v = new JspView(page);
+
+        page.setIssueList(issueList);
+        page.setCustomColumnConfiguration(getCustomColumnConfiguration());
+
+        String title = "Issue Details";
+
+        if (form.getPrint())
         {
             page.setPrint(true);
             return includeView(new PrintTemplate(v, title));

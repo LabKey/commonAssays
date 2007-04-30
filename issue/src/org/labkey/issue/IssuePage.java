@@ -15,9 +15,7 @@ import org.labkey.issue.model.IssueManager;
 import org.labkey.issue.model.IssueManager.*;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 import java.sql.SQLException;
 
 /**
@@ -28,6 +26,7 @@ import java.sql.SQLException;
 abstract public class IssuePage extends JspBase
 {
     private Issue _issue;
+    private List<Issue> _issueList = Collections.emptyList();
     private IssueManager.CustomColumnConfiguration _ccc;
     private Set<String> _editable = Collections.emptySet();
     private String _callbackURL;
@@ -48,6 +47,16 @@ abstract public class IssuePage extends JspBase
     public void setIssue(Issue issue)
     {
         _issue = issue;
+    }
+    
+    public List<Issue> getIssueList()
+    {
+        return _issueList;
+    }
+
+    public void setIssueList(List<Issue> issueList)
+    {
+        _issueList = issueList;
     }
 
     public IssueManager.CustomColumnConfiguration getCustomColumnConfiguration()

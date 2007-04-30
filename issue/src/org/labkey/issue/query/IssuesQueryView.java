@@ -49,6 +49,16 @@ public class IssuesQueryView extends QueryView
         {
             ButtonBar bar = view.getDataRegion().getButtonBar(DataRegion.MODE_GRID);
 
+            String viewDetailsURL = _context.cloneViewURLHelper().setAction("detailsList.view").getEncodedLocalURIString();
+            ActionButton listDetailsButton = new ActionButton("button", "View Selected Details");
+            listDetailsButton.setScript("return verifySelected(this.form, \"" + viewDetailsURL + "\", \"post\", \"rows\")");
+            listDetailsButton.setActionType(ActionButton.Action.GET);
+            listDetailsButton.setDisplayPermission(ACL.PERM_READ);
+            bar.add(listDetailsButton);
+            
+            //bar.add(ActionButton.BUTTON_SELECT_ALL);
+            //bar.add(ActionButton.BUTTON_CLEAR_ALL);
+            
             ActionButton adminButton = new ActionButton(_context.cloneViewURLHelper().setAction("admin.view").getEncodedLocalURIString(), "Admin", DataRegion.MODE_GRID, ActionButton.Action.LINK);
             adminButton.setDisplayPermission(ACL.PERM_ADMIN);
             bar.add(adminButton);
@@ -59,18 +69,15 @@ public class IssuesQueryView extends QueryView
             ActionButton prefsButton = new ActionButton(_context.cloneViewURLHelper().setAction("emailPrefs.view").getEncodedLocalURIString(), "Email Preferences", DataRegion.MODE_GRID, ActionButton.Action.LINK);
             bar.add(prefsButton);
             view.getDataRegion().setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
+            view.getDataRegion().setShowRecordSelectors(true);
+            view.getDataRegion().setRecordSelectorValueColumns(new String[] {"IssueId"} );
         }
         view.getDataRegion().setShadeAlternatingRows(true);
         view.getDataRegion().setShowColumnSeparators(true);
+        view.getRenderContext().setBaseSort(new Sort("-IssueId"));
 
         //ensureDefaultCustomViews();
         return view;
-    }
-
-    protected void setupDataView(DataView ret)
-    {
-        ret.getRenderContext().setBaseSort(new Sort("-IssueId"));
-        super.setupDataView(ret);
     }
 
     private static final String CUSTOM_VIEW_ALL = "all";
