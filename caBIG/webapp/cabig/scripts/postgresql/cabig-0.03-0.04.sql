@@ -15,7 +15,7 @@
  */
 
 -- Start over to reconfigure Containers handling
-DROP SCHEMA cabig CASCADE;
+SELECT core.fn_dropifexists('*', 'cabig', 'SCHEMA', NULL);
 
 CREATE SCHEMA cabig;
 
