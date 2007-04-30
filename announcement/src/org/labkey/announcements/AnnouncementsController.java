@@ -1566,7 +1566,7 @@ public class AnnouncementsController extends ViewController
             if ("HTML".equals(bean.getRendererType()))
             {
                 Collection<String> validateErrors = new LinkedList<String>();
-                PageFlowUtil.validateHtml(bean.getBody(),validateErrors, getContainer().hasPermission(getUser(),ACL.PERM_ADMIN));
+                PageFlowUtil.validateHtml(bean.getBody(),validateErrors, getUser().isAdministrator());
                 for (String err : validateErrors)
                     addActionError(err);
             }
