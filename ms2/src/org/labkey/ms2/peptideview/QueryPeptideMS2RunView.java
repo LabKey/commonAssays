@@ -178,6 +178,11 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
     }
 
+    public MS2RunViewType getViewType()
+    {
+        return MS2RunViewType.QUERY_PEPTIDES;
+    }
+
     public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form)
     {
         throw new UnsupportedOperationException();

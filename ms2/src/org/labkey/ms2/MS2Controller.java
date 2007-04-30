@@ -578,29 +578,13 @@ public class MS2Controller extends ViewController
         cloneUrl.deleteParameter("expanded");
         cloneUrl.deleteParameter("grouping");
         cloneUrl.setAction("showRun");
-        String grouping = form.getGrouping();
-        headerView.addObject("tabPeptide", renderTab(cloneUrl, "&nbsp;None&nbsp;", !"protein".equals(grouping) && !"proteinprophet".equals(grouping) && !"query".equals(grouping) && !"queryproteingroups".equals(grouping)));
-
-        cloneUrl.replaceParameter("grouping", "query");
-        headerView.addObject("tabQuery", renderTab(cloneUrl, "&nbsp;Query&nbsp;(Beta)&nbsp;", "query".equals(grouping)));
-
-        cloneUrl.replaceParameter("grouping", "protein");
-        headerView.addObject("tabCollapsedProtein", renderTab(cloneUrl, "&nbsp;Protein&nbsp;Collapsed&nbsp;", "protein".equals(grouping) && !form.getExpanded()));
-
-        cloneUrl.replaceParameter("expanded", "1");
-        headerView.addObject("tabExpandedProtein", renderTab(cloneUrl, "&nbsp;Protein&nbsp;Expanded&nbsp;", "protein".equals(grouping) && form.getExpanded()));
-
-        if (run.hasProteinProphet())
-        {
-            cloneUrl.deleteParameter("expanded");
-            cloneUrl.replaceParameter("grouping", "proteinprophet");
-            headerView.addObject("tabCollapsedProteinProphet", renderTab(cloneUrl, "&nbsp;Protein&nbsp;Prophet&nbsp;Collapsed&nbsp;", "proteinprophet".equals(grouping) && !form.getExpanded()));
-            cloneUrl.replaceParameter("expanded", "1");
-            headerView.addObject("tabExpandedProteinProphet", renderTab(cloneUrl, "&nbsp;Protein&nbsp;Prophet&nbsp;Expanded&nbsp;", "proteinprophet".equals(grouping) && form.getExpanded()));
-
-            cloneUrl.replaceParameter("grouping", "queryproteingroups");
-            headerView.addObject("tabQueryProteinGroups", renderTab(cloneUrl, "&nbsp;Query&nbsp;Protein&nbsp;Groups&nbsp;(Beta)&nbsp;", "queryproteingroups".equals(grouping)));
-        }
+        headerView.addObject("viewTypes", MS2RunViewType.getTypesForRun(run));
+        headerView.addObject("currentViewType", MS2RunViewType.getViewType(form.getGrouping()));
+        ViewURLHelper baseViewURL = cloneViewURLHelper();
+        baseViewURL.deleteParameter("grouping");
+        baseViewURL.deleteParameter("expanded");
+        headerView.addObject("expanded", form.getExpanded());
+        headerView.addObject("baseViewURL", baseViewURL.getLocalURIString());
 
         ViewURLHelper extraFilterUrl = currentUrl.clone().setAction("addExtraFilter.post");
         extraFilterUrl.deleteParameter(chargeFilterParamName + "1");
@@ -1027,7 +1011,7 @@ public class MS2Controller extends ViewController
 
     private AbstractMS2RunView getPeptideView(String grouping, MS2Run... runs) throws ServletException
     {
-        return AbstractMS2RunView.getPeptideView(grouping, getViewContext(), runs);
+        return MS2RunViewType.getViewType(grouping).createView(getViewContext(), runs);
     }
 
 

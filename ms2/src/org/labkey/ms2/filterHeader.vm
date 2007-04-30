@@ -11,28 +11,34 @@
   </tr></table></form></td>
 </tr>
 
-<tr><td><table class="dataRegion" border="0"><tr>
-    <td>Grouping:</td>
-    <td>$tabPeptide</td>
-    <td>$tabCollapsedProtein</td>
-    <td>$tabExpandedProtein</td>
-    #if ($tabCollapsedProteinProphet)
-        <td>
-            $tabCollapsedProteinProphet
-        </td>
+<script language="JavaScript">
+    var viewTypeInfo = new Object();
+    var count = 0;
+    #foreach ($viewType in $viewTypes)
+        viewTypeInfo[count++] = $viewType.supportsExpansion();
     #end
-    #if ($tabExpandedProteinProphet)
-        <td>
-            $tabExpandedProteinProphet
-        </td>
-    #end
-    <td>$tabQuery</td>
-    #if ($tabQueryProteinGroups)
-        <td>
-            $tabQueryProteinGroups
-        </td>
-    #end
-</tr></table></td></tr>
+</script>
+
+<tr><td><form id="viewTypeForm" method="GET"></form><table class="dataRegion" border="0"><tr>
+    <td valign="center">Grouping:</td>
+    <td><select id="viewTypeGrouping" name="grouping" onchange="javascript:document.getElementById('viewTypeExpanded').disabled = !viewTypeInfo[document.getElementById('viewTypeGrouping').selectedIndex];">
+        #foreach ($viewType in $viewTypes)
+            <option enableExpanded="$viewType.supportsExpansion()" value="$viewType.getURLName()" #if( $viewType == $currentViewType)
+                selected
+            #end
+        >$viewType.getName()</option>
+        #end
+        </select>
+    </td>
+    <td><input id="viewTypeExpanded" type="checkbox" name="expanded" value="1" #if ($expanded)
+        checked
+        #end
+        #if (!$currentViewType.supportsExpansion())
+        disabled
+        #end
+        >Expanded</td>
+    <td><a id="viewTypeSubmitButton" href="nothing" onclick="window.location.href='$baseViewURL' + '&grouping=' + document.getElementById('viewTypeGrouping').value + (document.getElementById('viewTypeExpanded').checked ? '&expanded=1' : ''); return false;"><img border=0 src="$tools.buttonSrc('Change Grouping')"></a>
+</tr></table></form></td></tr>
 
 <tr>
   <td><form method="post" action="$urls.extraFilter">

@@ -381,6 +381,11 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         sqlSummaries.add(new Pair<String, String>("Protein Group Sort", new Sort(_url, MS2Manager.getDataRegionNameProteinGroups()).getSortText()));
     }
 
+    public MS2RunViewType getViewType()
+    {
+        return MS2RunViewType.PROTEIN_PROPHET;
+    }
+
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String requestedPeptideColumns)
             throws SQLException
     {

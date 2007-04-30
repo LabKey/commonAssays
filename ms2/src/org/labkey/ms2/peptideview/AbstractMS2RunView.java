@@ -52,30 +52,6 @@ public abstract class AbstractMS2RunView
 
     private String _columnPropertyName;
 
-    public static AbstractMS2RunView getPeptideView(String grouping, ViewContext viewContext, MS2Run... runs)
-    {
-        if ("protein".equals(grouping))
-        {
-            return new StandardProteinPeptideView(viewContext, runs);
-        }
-        else if ("proteinprophet".equals(grouping))
-        {
-            return new ProteinProphetPeptideView(viewContext, runs);
-        }
-        else if ("query".equals(grouping))
-        {
-            return new QueryPeptideMS2RunView(viewContext, runs);
-        }
-        else if ("queryproteingroups".equals(grouping))
-        {
-            return new QueryProteinGroupMS2RunView(viewContext, runs);
-        }
-        else
-        {
-            return new FlatPeptideView(viewContext, runs);
-        }
-    }
-
     public AbstractMS2RunView(ViewContext viewContext, String columnPropertyName, MS2Run... runs)
     {
         _container = viewContext.getContainer();
@@ -97,6 +73,8 @@ public abstract class AbstractMS2RunView
     public abstract GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException;
 
     public abstract void addSQLSummaries(List<Pair<String, String>> sqlSummaries);
+
+    public abstract MS2RunViewType getViewType();
 
     public Container getContainer()
     {

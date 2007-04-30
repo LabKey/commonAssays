@@ -549,6 +549,7 @@ ms2/src/org/labkey/ms2/peptideview/AbstractProteinExcelWriter.java -text
 ms2/src/org/labkey/ms2/peptideview/AbstractQueryMS2RunView.java -text
 ms2/src/org/labkey/ms2/peptideview/FlatPeptideView.java -text
 ms2/src/org/labkey/ms2/peptideview/MS2ResultSet.java -text
+ms2/src/org/labkey/ms2/peptideview/MS2RunViewType.java -text
 ms2/src/org/labkey/ms2/peptideview/MultiRunRenderContext.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinDisplayColumnFactory.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinGroupQueryNestingOption.java -text
