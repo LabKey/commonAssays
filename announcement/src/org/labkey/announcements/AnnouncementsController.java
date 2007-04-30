@@ -2044,8 +2044,10 @@ public class AnnouncementsController extends ViewController
         {
             if (0 != rowId)
                 return AnnouncementManager.getAnnouncement(c, rowId, AnnouncementManager.INCLUDE_ATTACHMENTS + AnnouncementManager.INCLUDE_RESPONSES + AnnouncementManager.INCLUDE_MEMBERLIST);
-            else
-                return AnnouncementManager.getAnnouncement(c, entityId, true);
+            else if (null == entityId)
+                HttpView.throwNotFound("Message not found");
+
+            return AnnouncementManager.getAnnouncement(c, entityId, true);
         }
         catch (SQLException x)
         {
@@ -2130,30 +2132,6 @@ public class AnnouncementsController extends ViewController
         super.afterAction();
         closeSession();
     }
-
-    /**
-     * Display "Guest" instead of "<0>"
-     */
-    public static class DisplayColumnDisplayName extends DataColumn
-    {
-        public DisplayColumnDisplayName(ColumnInfo col)
-        {
-            super(col);
-        }
-
-
-        @Override
-        public String getFormattedValue(RenderContext ctx)
-        {
-            String value = super.getFormattedValue(ctx);
-
-            if ("&lt;0&gt;".equals(value))
-                return "Guest";
-            else
-                return value;
-        }
-    }
-
 
     public static class GroupMembershipDisplayColumn extends SimpleDisplayColumn
     {
