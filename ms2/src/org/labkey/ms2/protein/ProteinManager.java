@@ -495,28 +495,28 @@ public class ProteinManager
         // 1) verify that no search-engine-specific scores are used in the filter OR
         // 2) ignore filters that don't apply to a particular run, and provide a warning OR
         // 3) allowing picking one filter per run type
-        return getPeptideFilter(currentUrl, runs.get(0), mask);
+        return getPeptideFilter(currentUrl, mask, runs.get(0));
     }
 
-    public static SimpleFilter getPeptideFilter(ViewURLHelper currentUrl, MS2Run run, int mask)
+    public static SimpleFilter getPeptideFilter(ViewURLHelper currentUrl, int mask, MS2Run... runs)
     {
-        return getPeptideFilter(currentUrl, run, mask, null);
+        return getPeptideFilter(currentUrl, mask, null, runs);
     }
 
-    public static SimpleFilter getPeptideFilter(ViewURLHelper currentUrl, MS2Run run, int mask, String runTableName)
+    public static SimpleFilter getPeptideFilter(ViewURLHelper currentUrl, int mask, String runTableName, MS2Run... runs)
     {
         SimpleFilter filter = new SimpleFilter();
 
         if ((mask & RUN_FILTER) != 0)
         {
-            addRunCondition(filter, run, runTableName);
+            addRunCondition(filter, runTableName, runs);
         }
 
         if ((mask & URL_FILTER) != 0)
             filter.addUrlFilters(currentUrl, MS2Manager.getDataRegionNamePeptides());
 
         if ((mask & EXTRA_FILTER) != 0)
-            addExtraFilter(filter, run, currentUrl);
+            addExtraFilter(filter, runs[0], currentUrl);
 
         if ((mask & PROTEIN_FILTER) != 0)
         {
@@ -530,18 +530,29 @@ public class ProteinManager
     }
 
 
-    public static void addRunCondition(SimpleFilter filter, MS2Run run, String runTableName)
+    public static void addRunCondition(SimpleFilter filter, String runTableName, MS2Run... runs)
     {
         String columnName = runTableName == null ? "Run" : runTableName + ".Run";
-        filter.addWhereClause(columnName + " = " + run.getRun(), new Object[0], columnName);
+        StringBuilder sb = new StringBuilder();
+        sb.append(columnName);
+        sb.append(" IN (");
+        String separator = "";
+        for (MS2Run run : runs)
+        {
+            sb.append(separator);
+            separator = ", ";
+            sb.append(run.getRun());
+        }
+        sb.append(")");
+        filter.addWhereClause(sb.toString(), new Object[0], columnName);
     }
 
 
-    public static void replaceRunCondition(SimpleFilter filter, MS2Run run, String runTableName)
+    public static void replaceRunCondition(SimpleFilter filter, String runTableName, MS2Run... runs)
     {
         String columnName = runTableName == null ? "Run" : runTableName + ".Run";
         filter.deleteConditions(columnName);
-        addRunCondition(filter, run, runTableName);
+        addRunCondition(filter, runTableName, runs);
     }
 
 
@@ -562,7 +573,7 @@ public class ProteinManager
         proteinSql.append(' ');
 
         // Construct Peptide WHERE clause (no need to sort by peptide)
-        SimpleFilter peptideFilter = getPeptideFilter(currentUrl, run, RUN_FILTER + URL_FILTER + EXTRA_FILTER);
+        SimpleFilter peptideFilter = getPeptideFilter(currentUrl, RUN_FILTER + URL_FILTER + EXTRA_FILTER, run);
         if (null != extraPeptideWhere)
             peptideFilter.addWhereClause(extraPeptideWhere, new Object[]{});
         proteinSql.append(peptideFilter.getWhereSQL(getSqlDialect()));
@@ -695,7 +706,7 @@ public class ProteinManager
         sql.append(".SeqId = sSeqId\n");
 
         // Have to apply the peptide filter again, otherwise we'll just get all peptides mapping to each protein
-        SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentUrl, run, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
+        SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentUrl, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run);
         sql.append(peptideFilter.getWhereSQL(getSqlDialect()));
         sql.append('\n');
         sql.addAll(peptideFilter.getWhereParams(MS2Manager.getTableInfoPeptides()));
@@ -749,7 +760,7 @@ public class ProteinManager
         sql.append(" ");
 
         // Construct Peptide WHERE clause (no need to sort by peptide)
-        SimpleFilter peptideFilter = getPeptideFilter(currentUrl, run, RUN_FILTER + URL_FILTER + EXTRA_FILTER, MS2Manager.getTableInfoSimplePeptides().toString());
+        SimpleFilter peptideFilter = getPeptideFilter(currentUrl, RUN_FILTER + URL_FILTER + EXTRA_FILTER, MS2Manager.getTableInfoSimplePeptides().toString(), run);
         if (null != extraWhere)
             peptideFilter.addWhereClause(extraWhere, new Object[]{});
         sql.append(peptideFilter.getWhereSQL(getSqlDialect()));

@@ -5,6 +5,8 @@ import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.HydrophobicityColumn;
+import org.labkey.ms2.DeltaScanColumn;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
 import org.apache.commons.lang.StringUtils;
 
@@ -38,6 +40,27 @@ public class PeptidesTableInfo extends FilteredTable
             }
         }
         SqlDialect dialect = MS2Manager.getSqlDialect();
+
+        ColumnInfo hColumn = wrapColumn("H", getRealTable().getColumn("Peptide"));
+        hColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new HydrophobicityColumn(colInfo);
+            }
+        });
+        addColumn(hColumn);
+
+        ColumnInfo deltaScanColumn = wrapColumn("DeltaScan", getRealTable().getColumn("Fraction"));
+        deltaScanColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new DeltaScanColumn(colInfo);
+            }
+        });
+        deltaScanColumn.setFk(null);
+        addColumn(deltaScanColumn);
 
         addMassColumns(dialect);
 
@@ -127,6 +150,18 @@ public class PeptidesTableInfo extends FilteredTable
                 return _schema.createFractionsTable();
             }
         });
+
+        SQLFragment spectrumSQL = new SQLFragment();
+        spectrumSQL.append("(SELECT Spectrum FROM ");
+        spectrumSQL.append(MS2Manager.getTableInfoSpectraData());
+        spectrumSQL.append(" sd WHERE sd.Fraction = ");
+        spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        spectrumSQL.append(".fraction AND sd.Scan = ");
+        spectrumSQL.append(ExprColumn.STR_TABLE_ALIAS);
+        spectrumSQL.append(".Scan)");
+        ExprColumn spectrumColumn = new ExprColumn(this, "Spectrum", spectrumSQL, Types.BLOB);
+        spectrumColumn.setIsHidden(true);
+        addColumn(spectrumColumn);
 
         SQLFragment sql = new SQLFragment();
         sql.append("Fraction IN (SELECT Fraction FROM ");

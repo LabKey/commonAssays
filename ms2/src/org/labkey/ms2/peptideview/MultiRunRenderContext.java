@@ -49,7 +49,7 @@ public class MultiRunRenderContext extends RenderContext
 
         ResultSet getNextResultSet() throws SQLException
         {
-            ProteinManager.replaceRunCondition(_filter, _iter.next(), null);
+            ProteinManager.replaceRunCondition(_filter, null, _iter.next());
             return Table.selectForDisplay(_table, _columns, _filter, _sort, _maxRows, _cache);
         }
     }

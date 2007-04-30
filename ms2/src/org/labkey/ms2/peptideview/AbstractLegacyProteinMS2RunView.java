@@ -2,9 +2,7 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.*;
 import org.labkey.api.util.CaseInsensitiveHashMap;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Controller;
@@ -12,9 +10,11 @@ import org.labkey.ms2.AACoverageColumn;
 import org.labkey.ms2.MS2Manager;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletOutputStream;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import jxl.write.WritableWorkbook;
 
 /**
  * User: jeckels
@@ -39,7 +39,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         form.setColumns(AMT_PEPTIDE_COLUMN_NAMES);
         form.setExpanded(true);
         form.setProteinColumns("");
-        exportToTSV(form, response, selectedRows);
+        exportToTSV(form, response, selectedRows, getAMTFileHeader());
     }
 
     protected abstract List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport) throws SQLException;
@@ -99,5 +99,86 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         rgn.setButtonBar(bb, DataRegion.MODE_GRID);
 
         return rgn;
+    }
+
+    public void exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    {
+        String where = createExtraWhere(selectedRows);
+
+        boolean includeHeaders = form.getExportFormat().equals("Excel");
+
+        ServletOutputStream outputStream = ExcelWriter.getOutputStream(response, "MS2Runs");
+        WritableWorkbook workbook = ExcelWriter.getWorkbook(outputStream);
+
+        ViewURLHelper currentUrl = _url.clone();
+
+        AbstractProteinExcelWriter ew = getExcelProteinGridWriter(form.getProteinColumns());
+        ew.setSheetName("MS2 Runs");
+        List<MS2Run> runs = Arrays.asList(_runs);
+        List<String> headers;
+
+        if (includeHeaders)
+        {
+            headers = new ArrayList<String>();
+            if (_runs.length == 1)
+            {
+                headers.addAll(getRunSummaryHeaders(_runs[0]));
+            }
+            addGroupingFilterText(headers, currentUrl, (selectedRows != null));
+            addPeptideFilterText(headers, runs.get(0), currentUrl);
+
+            headers.add("");
+            ew.setHeaders(headers);
+        }
+
+        ew.renderNewSheet(workbook);
+        ew.setHeaders(Collections.<String>emptyList());
+        ew.setCaptionRowVisible(false);
+
+        for (int i = 0; i < runs.size(); i++)
+        {
+            if (includeHeaders && runs.size() > 1)
+            {
+                headers = new ArrayList<String>();
+
+                if (i > 0)
+                    headers.add("");
+
+                headers.add(runs.get(i).getDescription());
+                ew.setHeaders(headers);
+            }
+
+            setUpExcelProteinGrid(ew, form.getExpanded(), form.getColumns(), runs.get(i), where);
+            ew.renderCurrentSheet(workbook);
+        }
+
+        ExcelWriter.closeWorkbook(workbook, outputStream);
+    }
+
+    protected abstract String createExtraWhere(List<String> selectedRows);
+
+    protected abstract void addGroupingFilterText(List<String> headers, ViewURLHelper currentUrl, boolean handSelected);
+
+    protected abstract void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException;
+
+    public abstract AbstractProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException;
+    
+    public void writeExcel(HttpServletResponse response, MS2Run run, boolean expanded, String columns, String where, List<String> headers, String proteinColumns) throws SQLException
+    {
+        AbstractProteinExcelWriter ewProtein = getExcelProteinGridWriter(proteinColumns);
+        ewProtein.setSheetName(run.getDescription());
+        ewProtein.setFooter(run.getDescription() + " Proteins");
+        ewProtein.setHeaders(headers);
+        setUpExcelProteinGrid(ewProtein, expanded, columns, run, where);
+        ewProtein.write(response);
+    }
+
+    protected void addExportFormats(DropDownList exportFormat)
+    {
+        exportFormat.add("Excel");
+        exportFormat.add("TSV");
+        exportFormat.add("DTA");
+        exportFormat.add("PKL");
+        exportFormat.add("AMT");
     }
 }

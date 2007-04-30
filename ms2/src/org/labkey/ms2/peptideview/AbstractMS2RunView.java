@@ -11,6 +11,7 @@ import org.labkey.api.util.CaseInsensitiveHashMap;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 import org.labkey.common.util.Pair;
+import org.labkey.common.tools.MS2Modification;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletException;
@@ -91,13 +92,9 @@ public abstract class AbstractMS2RunView
         return createGridView(form.getExpanded(), peptideColumnNames, form.getProteinColumns(), true);
     }
 
-    public abstract WebPartView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean forExport) throws ServletException, SQLException;
-
-    public abstract AbstractProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException;
+    public abstract WebPartView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException, SQLException;
 
     public abstract GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException;
-
-    public abstract void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException;
 
     public abstract void addSQLSummaries(List<Pair<String, String>> sqlSummaries);
 
@@ -127,11 +124,7 @@ public abstract class AbstractMS2RunView
         result.add(exportSelected);
 
         DropDownList exportFormat = new DropDownList("exportFormat");
-        exportFormat.add("Excel");
-        exportFormat.add("TSV");
-        exportFormat.add("DTA");
-        exportFormat.add("PKL");
-        exportFormat.add("AMT");
+        addExportFormats(exportFormat);
         result.add(exportFormat);
 
         // TODO: Temp hack -- need to support GO charts in protein views
@@ -148,6 +141,7 @@ public abstract class AbstractMS2RunView
         return result;
     }
 
+    protected abstract void addExportFormats(DropDownList exportFormat);
 
     public void changePeptideCaptionsForTsv(List<DisplayColumn> displayColumns)
     {
@@ -169,16 +163,6 @@ public abstract class AbstractMS2RunView
     protected User getUser()
     {
         return _user;
-    }
-
-    public void writeExcel(HttpServletResponse response, MS2Run run, boolean expanded, String columns, String where, List<String> headers, String proteinColumns) throws SQLException
-    {
-        AbstractProteinExcelWriter ewProtein = getExcelProteinGridWriter(proteinColumns);
-        ewProtein.setSheetName(run.getDescription());
-        ewProtein.setFooter(run.getDescription() + " Proteins");
-        ewProtein.setHeaders(headers);
-        setUpExcelProteinGrid(ewProtein, expanded, columns, run, where);
-        ewProtein.write(response);
     }
 
     public void savePeptideColumnNames(String type, String columnNames) throws SQLException
@@ -401,7 +385,7 @@ public abstract class AbstractMS2RunView
 
     private Filter getPeptideFilter(ViewURLHelper url)
     {
-        return ProteinManager.getPeptideFilter(url, _runs[0], ProteinManager.ALL_FILTERS);
+        return ProteinManager.getPeptideFilter(url, ProteinManager.ALL_FILTERS, _runs[0]);
     }
 
 
@@ -432,9 +416,11 @@ public abstract class AbstractMS2RunView
 
     public abstract String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException;
 
-    public abstract void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
+    public abstract void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception;
 
     public abstract void exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
+
+    public abstract void exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
 
     protected class PeptideColumnNameList extends MS2Run.ColumnNameList
     {
@@ -491,5 +477,62 @@ public abstract class AbstractMS2RunView
             return (String) defaultColumnLists.get(_runs[0].getType() + "Protein");
 
         return null;
+    }
+
+    protected void addPeptideFilterText(List<String> headers, MS2Run run, ViewURLHelper currentUrl)
+    {
+        headers.add("");
+        headers.add("Peptide Filter: " + ProteinManager.getPeptideFilter(currentUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run).getFilterText());
+        headers.add("Peptide Sort: " + new Sort(currentUrl, MS2Manager.getDataRegionNamePeptides()).getSortText());
+    }
+
+    private String naForNull(String s)
+    {
+        return s == null ? "n/a" : s;
+    }
+
+    protected List<String> getRunSummaryHeaders(MS2Run run)
+    {
+        List<String> headers = new ArrayList<String>();
+        headers.add("Run: " + naForNull(run.getDescription()));
+        headers.add("");
+        headers.add("Search Enzyme: " + naForNull(run.getSearchEnzyme()) + "\tFile Name: " + naForNull(run.getFileName()));
+        headers.add("Search Engine: " + naForNull(run.getSearchEngine()) + "\tPath: " + naForNull(run.getPath()));
+        headers.add("Mass Spec Type: " + naForNull(run.getMassSpecType()) + "\tFasta File: " + naForNull(run.getFastaFileName()));
+        headers.add("");
+        return headers;
+    }
+
+    protected List<String> getAMTFileHeader()
+    {
+        List<String> fileHeader = new ArrayList<String>(_runs.length);
+
+        fileHeader.add("#HydrophobicityAlgorithm=" + HydrophobicityColumn.getAlgorithmVersion());
+
+        for (MS2Run run : _runs)
+        {
+            StringBuilder header = new StringBuilder("#Run");
+            header.append(run.getRun()).append("=");
+            header.append(run.getDescription()).append("|");
+            header.append(run.getFileName()).append("|");
+            header.append(run.getLoaded()).append("|");
+
+            MS2Modification[] mods = run.getModifications();
+
+            for (MS2Modification mod : mods)
+            {
+                if (mod != mods[0])
+                    header.append(';');
+                header.append(mod.getAminoAcid());
+                if (mod.getVariable())
+                    header.append(mod.getSymbol());
+                header.append('=');
+                header.append(mod.getMassDiff());
+            }
+
+            fileHeader.add(header.toString());
+        }
+
+        return fileHeader;
     }
 }

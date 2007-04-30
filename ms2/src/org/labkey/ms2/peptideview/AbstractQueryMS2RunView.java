@@ -6,10 +6,8 @@ import org.labkey.api.view.DisplayElement;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.ButtonBar;
-import org.labkey.api.data.TSVGridWriter;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.data.*;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Controller;
 
@@ -30,14 +28,33 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
         super(viewContext, columnPropertyName, runs);
     }
 
-    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
     {
-        createGridView(form.getExpanded(), "", "", false).exportToTSV(response, selectedRows);
+        createGridView(form.getExpanded(), "", "", false).exportToTSV(response, selectedRows, headers);
     }
 
     public void exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
     {
-        exportToTSV(form, response, selectedRows);
+        AbstractQueryMS2RunView.AbstractMS2QueryView ms2QueryView = createGridView(form.getExpanded(), "", "", false);
+
+        List<FieldKey> keys = new ArrayList<FieldKey>();
+        keys.add(FieldKey.fromParts("Fraction", "Run", "Run"));
+        keys.add(FieldKey.fromParts("Fraction", "Fraction"));
+        keys.add(FieldKey.fromParts("Mass"));
+        keys.add(FieldKey.fromParts("Scan"));
+        keys.add(FieldKey.fromParts("RetentionTime"));
+        keys.add(FieldKey.fromParts("H"));
+        keys.add(FieldKey.fromParts("PeptideProphet"));
+        keys.add(FieldKey.fromParts("Peptide"));
+        ms2QueryView.setOverrideColumns(keys);
+
+        ms2QueryView.exportToTSV(response, selectedRows, getAMTFileHeader());
+    }
+
+
+    public void exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    {
+        createGridView(form.getExpanded(), "", "", false).exportToExcel(response, selectedRows);
     }
 
     public abstract AbstractMS2QueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException, SQLException;
@@ -48,8 +65,8 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
 
         protected final boolean _expanded;
         protected final boolean _allowNesting;
-        protected SQLFragment _extraFragment;
         protected List<Integer> _selectedRows;
+        protected List<FieldKey> _overrideColumns;
 
         public AbstractMS2QueryView(ViewContext context, UserSchema schema, QuerySettings settings, boolean expanded, boolean forExport)
         {
@@ -57,8 +74,14 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
             _expanded = expanded;
             _allowNesting = forExport;
             _buttonBarPosition = DataRegion.ButtonBarPosition.BOTTOM;
+            setShowExportButtons(false);
         }
         
+        public void setOverrideColumns(List<FieldKey> fieldKeys)
+        {
+            _overrideColumns = fieldKeys;
+        }
+
         protected void populateButtonBar(DataView view, ButtonBar bar)
         {
             super.populateButtonBar(view, bar);
@@ -73,29 +96,28 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
         {
             if (selectedRows != null)
             {
-                _extraFragment = new SQLFragment();
                 _selectedRows = new ArrayList<Integer>();
-                _extraFragment.append("RowId IN (");
-                String separator = "";
                 for (String selectedRow : selectedRows)
                 {
-                    _extraFragment.append(separator);
-                    separator = ", ";
                     Integer row = new Integer(selectedRow);
-                    _extraFragment.append(row);
                     _selectedRows.add(row);
                 }
-                _extraFragment.append(")");
             }
-            _extraFragment = null;
         }
 
-        public void exportToTSV(HttpServletResponse response, List<String> selectedRows) throws Exception
+        public void exportToTSV(HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
         {
             createRowIdFragment(selectedRows);
             TSVGridWriter tsvWriter = getTsvWriter();
             tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
+            tsvWriter.setFileHeader(headers);
             tsvWriter.write(response);
+        }
+
+        public void exportToExcel(HttpServletResponse response, List<String> selectedRows) throws Exception
+        {
+            createRowIdFragment(selectedRows);
+            exportToExcel(response);
         }
     }
 }

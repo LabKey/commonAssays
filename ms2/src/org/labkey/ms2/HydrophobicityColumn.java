@@ -28,9 +28,17 @@ import java.util.Set;
  */
 public class HydrophobicityColumn extends SimpleDisplayColumn
 {
+    private ColumnInfo _colInfo;
+
     public HydrophobicityColumn()
     {
+        this(null);
+    }
+
+    public HydrophobicityColumn(ColumnInfo colInfo)
+    {
         super();
+        _colInfo = colInfo;
         setCaption("H");
         setName("h");
         setFormatString("0.00");
@@ -40,7 +48,7 @@ public class HydrophobicityColumn extends SimpleDisplayColumn
 
     public Object getValue(RenderContext ctx)
     {
-        String peptide = (String) ctx.get("Peptide");
+        String peptide = (String) ctx.get(_colInfo == null ? "Peptide" : _colInfo.getAlias());
         if (null != peptide)
             return MS2Peptide.hydrophobicity(peptide);
         else
@@ -59,7 +67,13 @@ public class HydrophobicityColumn extends SimpleDisplayColumn
 
     public void addQueryColumns(Set<ColumnInfo> set)
     {
-        set.add(MS2Manager.getTableInfoPeptides().getColumn("Peptide"));
-        super.addQueryColumns(set);
+        if (_colInfo == null)
+        {
+            set.add(MS2Manager.getTableInfoPeptides().getColumn("Peptide"));
+        }
+        else
+        {
+            set.add(_colInfo);
+        }
     }
 }

@@ -21,6 +21,8 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.Table;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.FieldKey;
 import org.labkey.common.tools.DoubleArray;
 import org.labkey.common.tools.MatrixUtil;
 
@@ -40,9 +42,31 @@ public class DeltaScanColumn extends SimpleDisplayColumn
 
     private Map<Integer, MS2Fraction> fractionMap = new HashMap<Integer, MS2Fraction>();
 
+    private ColumnInfo _fractionColInfo;
+    private ColumnInfo _scanColInfo;
+    private ColumnInfo _peptideColInfo;
+
     public DeltaScanColumn()
     {
+        this(null);
+    }
+
+    public DeltaScanColumn(ColumnInfo colInfo)
+    {
         super();
+        if (colInfo != null)
+        {
+            _fractionColInfo = colInfo;
+            List<FieldKey> keys = new ArrayList<FieldKey>();
+            FieldKey scanKey = FieldKey.fromParts("Scan");
+            keys.add(scanKey);
+            FieldKey peptideKey = FieldKey.fromParts("Peptide");
+            keys.add(peptideKey);
+            Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(_fractionColInfo.getParentTable(), keys);
+            _scanColInfo = cols.get(scanKey);
+            _peptideColInfo = cols.get(peptideKey);
+        }
+
         setCaption("dScan");
         setFormatString("0.00");
         setWidth("45");
@@ -52,7 +76,7 @@ public class DeltaScanColumn extends SimpleDisplayColumn
 
     public Object getValue(RenderContext ctx)
     {
-        Integer fractionId = (Integer) ctx.get("Fraction");
+        Integer fractionId = (Integer) ctx.get(_fractionColInfo == null ? "Fraction" : _fractionColInfo.getAlias());
 
         if (null == fractionId)
             return 0;
@@ -74,8 +98,8 @@ public class DeltaScanColumn extends SimpleDisplayColumn
         }
         else
         {
-            Integer scan = (Integer) ctx.get("Scan");
-            String peptide = (String) ctx.get("Peptide");
+            Integer scan = (Integer) ctx.get(_scanColInfo == null ? "Scan" : _scanColInfo.getAlias());
+            String peptide = (String) ctx.get(_peptideColInfo == null ? "Peptide" : _peptideColInfo.getAlias());
 
             if (null != scan && null != peptide)
             {
@@ -178,7 +202,16 @@ public class DeltaScanColumn extends SimpleDisplayColumn
 
     public void addQueryColumns(Set<ColumnInfo> set)
     {
-        set.addAll(_queryColumns);
-        super.addQueryColumns(set);
+        if (_fractionColInfo != null)
+        {
+            set.add(_fractionColInfo);
+            set.add(_scanColInfo);
+            set.add(_peptideColInfo);
+        }
+        else
+        {
+            set.addAll(_queryColumns);
+            super.addQueryColumns(set);
+        }
     }
 }

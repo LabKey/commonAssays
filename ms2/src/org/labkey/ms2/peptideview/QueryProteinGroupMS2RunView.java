@@ -12,9 +12,7 @@ import org.labkey.ms2.query.ProteinGroupTableInfo;
 import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.Collections;
 import java.sql.SQLException;
 
 /**
@@ -72,7 +70,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
             }
 
             DataRegion rgn;
-            if (_selectedNestingOption != null)
+            if (_selectedNestingOption != null && (_allowNesting || !_expanded))
             {
                 rgn = _selectedNestingOption.createDataRegion(originalColumns, _runs, _url, getDataRegionName(), _expanded);
             }
@@ -107,7 +105,12 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
             result.getRenderContext().setBaseSort(sort);
             Filter customViewFilter = result.getRenderContext().getBaseFilter();
             SimpleFilter filter = new SimpleFilter(customViewFilter);
-            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.EXTRA_FILTER));
+            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, _runs));
+            if (_selectedRows != null)
+            {
+                String columnName = _selectedNestingOption == null ? "RowId" : _selectedNestingOption.getRowIdColumnName();
+                filter.addClause(new SimpleFilter.InClause(columnName, _selectedRows));
+            }
             result.getRenderContext().setBaseFilter(filter);
             return result;
         }
@@ -115,47 +118,9 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         protected ProteinGroupTableInfo createTable()
         {
             ProteinGroupTableInfo result = ((MS2Schema)getSchema()).createProteinGroupsForRunTable(null);
-            if (_extraFragment != null)
-            {
-                result.addCondition(_extraFragment);
-            }
             result.setRunFilter(_runs);
             return result;
         }
-
-        public void exportToExcel(HttpServletResponse response, SimpleFilter filter) throws Exception
-        {
-            SQLFragment sql = new SQLFragment();
-            String separator = "";
-            for (SimpleFilter.FilterClause clause : filter.getClauses())
-            {
-                sql.append(separator);
-                separator = " AND ";
-                sql.append(clause.toSQLFragment(Collections.<String, ColumnInfo>emptyMap(), MS2Manager.getSqlDialect()));
-            }
-            _extraFragment = sql;
-            exportToExcel(response);
-        }
-    }
-
-    public AbstractProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    public void exportTSVProteinGrid(ProteinTSVGridWriter tw, String requestedPeptideColumns, MS2Run run, String where) throws SQLException
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    public ProteinTSVGridWriter getTSVProteinGridWriter(String requestedProteinColumnNames, String requestedPeptideColumnNames, boolean expanded) throws SQLException
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException
-    {
-        throw new UnsupportedOperationException();
     }
 
     public void addSQLSummaries(List<Pair<String, String>> sqlSummaries)
@@ -169,11 +134,6 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
     }
 
     public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    public ProteinTSVGridWriter getTSVProteinGridWriter(List<DisplayColumn> proteinDisplayColumns, List<DisplayColumn> peptideDisplayColumns)
     {
         throw new UnsupportedOperationException();
     }
@@ -199,11 +159,16 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
 
         Filter customViewFilter = result.getRenderContext().getBaseFilter();
         SimpleFilter filter = new SimpleFilter(customViewFilter);
-        filter.addAllClauses(ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.EXTRA_FILTER));
+        filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getSingleRun()));
         filter.addCondition(peptideView._selectedNestingOption.getRowIdColumnName(), Integer.parseInt(proteinGroupingId));
         result.getRenderContext().setBaseFilter(filter);
 
         return result;
     }
 
+    protected void addExportFormats(DropDownList exportFormat)
+    {
+        exportFormat.add("Excel");
+        exportFormat.add("TSV");
+    }
 }

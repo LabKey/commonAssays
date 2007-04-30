@@ -14,8 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.util.List;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.ArrayList;
 
 import org.labkey.ms2.MS2Controller;
@@ -198,7 +196,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     {
         DataRegion rgn = getNestedPeptideGrid(getSingleRun(), form.getColumns(), true);
         GridView gridView = new GridView(rgn);
-        SimpleFilter gridFilter = ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.RUN_FILTER + ProteinManager.EXTRA_FILTER + ProteinManager.PROTEIN_FILTER);
+        SimpleFilter gridFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.EXTRA_FILTER + ProteinManager.PROTEIN_FILTER, getSingleRun());
         gridView.setFilter(gridFilter);
         gridView.setSort(ProteinManager.getPeptideBaseSort());
         return gridView;
@@ -206,11 +204,32 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
     public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
     {
-        SimpleFilter coverageFilter = ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.ALL_FILTERS);
+        SimpleFilter coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.ALL_FILTERS, getSingleRun());
         return Table.executeArray(ProteinManager.getSchema(), "SELECT Peptide FROM " + MS2Manager.getTableInfoPeptides() + " " + coverageFilter.getWhereSQL(ProteinManager.getSqlDialect()), coverageFilter.getWhereParams(MS2Manager.getTableInfoPeptides()).toArray(), String.class);
     }
 
-    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+    {
+        String where = createExtraWhere(selectedRows);
+
+        String columnNames = getPeptideColumnNames(form.getColumns());
+        List<DisplayColumn> displayColumns = getPeptideDisplayColumns(columnNames);
+        changePeptideCaptionsForTsv(displayColumns);
+
+        ProteinTSVGridWriter tw = getTSVProteinGridWriter(form.getProteinColumns(), form.getColumns(), form.getExpanded());
+        tw.prepare(response);
+        tw.setFileHeader(headers);
+        tw.setFilenamePrefix("MS2Runs");
+        tw.writeFileHeader();
+        tw.writeColumnHeaders();
+
+        for (MS2Run run : _runs)
+            exportTSVProteinGrid(tw, form.getColumns(), run, where);
+
+        tw.close();
+    }
+
+    protected String createExtraWhere(List<String> selectedRows)
     {
         String where = null;
         if (selectedRows != null)
@@ -229,21 +248,13 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
             sb.append(")");
             where = sb.toString();
         }
+        return where;
+    }
 
-        String columnNames = getPeptideColumnNames(form.getColumns());
-        List<DisplayColumn> displayColumns = getPeptideDisplayColumns(columnNames);
-        changePeptideCaptionsForTsv(displayColumns);
-
-        ProteinTSVGridWriter tw = getTSVProteinGridWriter(form.getProteinColumns(), form.getColumns(), form.getExpanded());
-        tw.prepare(response);
-        tw.setFileHeader(null);
-        tw.setFilenamePrefix("MS2Runs");
-        tw.writeFileHeader();
-        tw.writeColumnHeaders();
-
-        for (MS2Run run : _runs)
-            exportTSVProteinGrid(tw, form.getColumns(), run, where);
-
-        tw.close();
+    protected void addGroupingFilterText(List<String> headers, ViewURLHelper currentUrl, boolean handSelected)
+    {
+        headers.add((_runs.length > 1 ? "Multiple runs" : "One run") + " showing " + (handSelected ? "hand selected" : "all") + " proteins matching the following query:");
+        headers.add("Protein Filter: " + new SimpleFilter(currentUrl, MS2Manager.getDataRegionNameProteins()).getFilterText());
+        headers.add("Protein Sort: " + new Sort(currentUrl, MS2Manager.getDataRegionNameProteins()).getSortText());
     }
 }

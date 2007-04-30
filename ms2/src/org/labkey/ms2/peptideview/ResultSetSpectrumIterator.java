@@ -140,7 +140,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
 
         public ResultSet getNextResultSet() throws SQLException
         {
-            ProteinManager.replaceRunCondition(_filter, _iter.next(), null);
+            ProteinManager.replaceRunCondition(_filter, null, _iter.next());
 
             StringBuilder sql = new StringBuilder();
             sql.append("SELECT Charge, PrecursorMass, MZ, Spectrum FROM (SELECT pep.*, Spectrum FROM ");  // Use sub-SELECT to disambiguate filters/sorts on Scan & Fraction

@@ -8,7 +8,6 @@ import org.labkey.api.query.*;
 import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -83,6 +82,22 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             super(context, schema, settings, expanded, allowNesting);
         }
 
+        public List<DisplayColumn> getDisplayColumns()
+        {
+            if (_overrideColumns != null)
+            {
+                List<DisplayColumn> result = new ArrayList<DisplayColumn>();
+                for (ColumnInfo colInfo : QueryService.get().getColumns(getTable(), _overrideColumns).values())
+                {
+                    result.add(colInfo.getRenderer());
+                }
+                assert result.size() == _overrideColumns.size() : "Got the wrong number of columns back, " + result.size() + " instead of " + _overrideColumns.size();
+                return result;
+            }
+
+            return super.getDisplayColumns();
+        }
+
         protected DataRegion createDataRegion()
         { 
             List<DisplayColumn> originalColumns = getDisplayColumns();
@@ -147,30 +162,15 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
                 String columnName = _selectedNestingOption == null ? "RowId" : _selectedNestingOption.getRowIdColumnName();
                 filter.addClause(new SimpleFilter.InClause(columnName, _selectedRows));
             }
-            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.EXTRA_FILTER));
+            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, _runs));
             result.getRenderContext().setBaseFilter(filter);
             return result;
         }
 
         protected PeptidesTableInfo createTable()
         {
-            PeptidesTableInfo result = new PeptidesTableInfo((MS2Schema) getSchema(), _runs, _url.clone());
-            if (_extraFragment != null)
-            {
-                result.addCondition(_extraFragment);
-            }
-            return result;
+            return new PeptidesTableInfo((MS2Schema) getSchema(), _runs, _url.clone());
         }
-    }
-
-    public AbstractProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException
-    {
-        throw new UnsupportedOperationException();
     }
 
     public void addSQLSummaries(List<Pair<String, String>> sqlSummaries)
@@ -209,10 +209,17 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
         Filter customViewFilter = result.getRenderContext().getBaseFilter();
         SimpleFilter filter = new SimpleFilter(customViewFilter);
-        filter.addAllClauses(ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.EXTRA_FILTER));
+        filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getSingleRun()));
         filter.addCondition(view._selectedNestingOption.getRowIdColumnName(), Integer.parseInt(proteinGroupingId));
         result.getRenderContext().setBaseFilter(filter);
 
         return result;
+    }
+
+    protected void addExportFormats(DropDownList exportFormat)
+    {
+        exportFormat.add("Excel");
+        exportFormat.add("TSV");
+        exportFormat.add("AMT");
     }
 }

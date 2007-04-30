@@ -16,7 +16,6 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.Collections;
 
 import org.labkey.ms2.*;
 
@@ -95,7 +94,24 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         return getColumns(_calculatedPeptideColumns, new PeptideColumnNameList(peptideColumnNames), MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoPeptideMemberships());
     }
 
-    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+    {
+        String where = createExtraWhere(selectedRows);
+
+        ProteinTSVGridWriter tw = getTSVProteinGridWriter(form.getProteinColumns(), form.getColumns(), form.getExpanded());
+        tw.prepare(response);
+        tw.setFileHeader(headers);
+        tw.setFilenamePrefix("MS2Runs");
+        tw.writeFileHeader();
+        tw.writeColumnHeaders();
+
+        for (MS2Run run : _runs)
+            exportTSVProteinGrid(tw, form.getColumns(), run, where);
+
+        tw.close();
+    }
+
+    protected String createExtraWhere(List<String> selectedRows)
     {
         String where = null;
         if (selectedRows != null)
@@ -113,18 +129,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
             sb.append(")");
             where = sb.toString();
         }
-
-        ProteinTSVGridWriter tw = getTSVProteinGridWriter(form.getProteinColumns(), form.getColumns(), form.getExpanded());
-        tw.prepare(response);
-        tw.setFileHeader(null);
-        tw.setFilenamePrefix("MS2Runs");
-        tw.writeFileHeader();
-        tw.writeColumnHeaders();
-
-        for (MS2Run run : _runs)
-            exportTSVProteinGrid(tw, form.getColumns(), run, where);
-
-        tw.close();
+        return where;
     }
 
     private ProteinProphetDataRegion createProteinDataRegion(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws SQLException
@@ -249,12 +254,12 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         SimpleFilter coverageFilter = null;
         if (form.getSeqId() != 0)
         {
-            coverageFilter = ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
+            coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getSingleRun());
             coverageFilter.addCondition("pgm.SeqId", form.getSeqId());
         }
         else if (form.getGroupNumber() != 0)
         {
-            coverageFilter = ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
+            coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getSingleRun());
             coverageFilter.addCondition("pg.GroupNumber", form.getGroupNumber());
             coverageFilter.addCondition("pg.IndistinguishableCollectionId", form.getIndistinguishableCollectionId());
         }
@@ -385,5 +390,12 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         String extraWhere = MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId = " + proteinGroupingId;
         view.setResultSet(createPeptideResultSet(peptideColumns, _maxPeptideRows, extraWhere));
         return view;
+    }
+
+    protected void addGroupingFilterText(List<String> headers, ViewURLHelper currentUrl, boolean handSelected)
+    {
+        headers.add((_runs.length > 1 ? "Multiple runs" : "One run") + " showing " + (handSelected ? "hand selected" : "all") + " protein groups matching the following query:");
+        headers.add("Protein Group Filter: " + new SimpleFilter(currentUrl, MS2Manager.getTableInfoProteinGroupsWithQuantitation().getName()).getFilterText());
+        headers.add("Protein Group Sort: " + new Sort(currentUrl, MS2Manager.getTableInfoProteinGroupsWithQuantitation().getName()).getSortText());
     }
 }

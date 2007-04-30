@@ -6,16 +6,20 @@ import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.ViewURLHelper;
 import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.io.IOException;
 
 import org.labkey.ms2.MS2Controller;
+import jxl.write.WritableWorkbook;
 
 /**
  * User: jeckels
@@ -32,7 +36,7 @@ public class FlatPeptideView extends AbstractMS2RunView
     {
         DataRegion rgn = getPeptideGridForDisplay(requestedPeptideColumnNames);
         GridView peptideView = new GridView(rgn);
-        peptideView.setFilter(ProteinManager.getPeptideFilter(_url, getSingleRun(), ProteinManager.RUN_FILTER + ProteinManager.EXTRA_FILTER));
+        peptideView.setFilter(ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.EXTRA_FILTER, getSingleRun()));
         peptideView.setSort(ProteinManager.getPeptideBaseSort());
         peptideView.setTitle("Peptides");
         return peptideView;
@@ -44,7 +48,122 @@ public class FlatPeptideView extends AbstractMS2RunView
         form.setColumns(AMT_PEPTIDE_COLUMN_NAMES);
         form.setExpanded(true);
         form.setProteinColumns("");
-        exportToTSV(form, response, selectedRows);
+        exportToTSV(form, response, selectedRows, getAMTFileHeader());
+    }
+
+    public void exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    {
+        List<MS2Run> runs = Arrays.asList(_runs);
+        SimpleFilter filter = createFilter(selectedRows);
+
+        boolean includeHeaders = form.getExportFormat().equals("Excel");
+
+        ServletOutputStream outputStream = ExcelWriter.getOutputStream(response, "MS2Runs");
+        WritableWorkbook workbook = ExcelWriter.getWorkbook(outputStream);
+
+        ViewURLHelper currentUrl = _url.clone();
+
+        ExcelWriter ew = new ExcelWriter();
+        ew.setSheetName("MS2 Runs");
+
+        List<String> headers;
+
+        if (includeHeaders)
+        {
+            MS2Run run = runs.get(0);
+
+            if (runs.size() == 1)
+            {
+                headers = getRunSummaryHeaders(run);
+                String whichPeptides;
+                if (selectedRows == null)
+                {
+                    whichPeptides = "All";
+                }
+                else
+                {
+                    whichPeptides = "Hand selected";
+                }
+                headers.add(whichPeptides + " peptides matching the following query:");
+                addPeptideFilterText(headers, run, currentUrl);
+                ew.setSheetName(run.getDescription() + " Peptides");
+            }
+            else
+            {
+                headers = new ArrayList<String>();
+                headers.add("Multiple runs showing " + (selectedRows == null ? "all" : "hand selected") + " peptides matching the following query:");
+                addPeptideFilterText(headers, run, currentUrl);  // TODO: Version that takes runs[]
+            }
+            headers.add("");
+            ew.setHeaders(headers);
+        }
+
+        // Always include column captions at the top
+        ew.setColumns(getPeptideDisplayColumns(getPeptideColumnNames(form.getColumns())));
+        ew.renderNewSheet(workbook);
+        ew.setCaptionRowVisible(false);
+
+        // TODO: Footer?
+
+        for (int i = 0; i < runs.size(); i++)
+        {
+            if (includeHeaders)
+            {
+                headers = new ArrayList<String>();
+
+                if (runs.size() > 1)
+                {
+                    if (i > 0)
+                        headers.add("");
+
+                    headers.add(runs.get(i).getDescription());
+                }
+
+                ew.setHeaders(headers);
+            }
+
+            setupExcelPeptideGrid(ew, filter, form.getColumns(), runs.get(i));
+            ew.renderCurrentSheet(workbook);
+        }
+        
+
+        ExcelWriter.closeWorkbook(workbook, outputStream);
+    }
+
+    private SimpleFilter createFilter(List<String> selectedRows)
+    {
+        SimpleFilter filter = ProteinManager.getPeptideFilter(_url, Arrays.asList(_runs), ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
+
+        if (selectedRows != null)
+        {
+            List<Long> peptideIds = new ArrayList<Long>(selectedRows.size());
+
+            // Technically, should only limit this in Excel export case... but there's no way to individually select 65K peptides
+            for (int i = 0; i < Math.min(selectedRows.size(), ExcelWriter.MAX_ROWS); i++)
+            {
+                String[] row = selectedRows.get(i).split(",");
+                peptideIds.add(Long.parseLong(row[row.length == 1 ? 0 : 1]));
+            }
+
+            filter.addInClause("RowId", peptideIds);
+        }
+        return filter;
+    }
+
+    private void setupExcelPeptideGrid(ExcelWriter ew, SimpleFilter filter, String requestedPeptideColumns, MS2Run run) throws ServletException, SQLException, IOException
+    {
+        String columnNames = getPeptideColumnNames(requestedPeptideColumns);
+        DataRegion rgn = getPeptideGrid(columnNames, ExcelWriter.MAX_ROWS);
+        Container c = getContainer();
+        ProteinManager.replaceRunCondition(filter, null, run);
+
+        RenderContext ctx = new RenderContext(_viewContext);
+        ctx.setContainer(c);
+        ctx.setBaseFilter(filter);
+        ctx.setBaseSort(ProteinManager.getPeptideBaseSort());
+        ew.setResultSet(rgn.getResultSet(ctx));
+        ew.setColumns(rgn.getDisplayColumnList());
+        ew.setAutoSize(true);
     }
 
     private DataRegion getPeptideGridForDisplay(String columnNames) throws SQLException
@@ -67,16 +186,6 @@ public class FlatPeptideView extends AbstractMS2RunView
         return rgn;
     }
 
-    public AbstractProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException
-    {
-        throw new UnsupportedOperationException();
-    }
-
     public void addSQLSummaries(List<Pair<String, String>> sqlSummaries)
     {
 
@@ -97,24 +206,10 @@ public class FlatPeptideView extends AbstractMS2RunView
         throw new UnsupportedOperationException();
     }
 
-    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
     {
         List<MS2Run> runs = Arrays.asList(_runs);
-        SimpleFilter filter = ProteinManager.getPeptideFilter(_url, runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
-
-        if (selectedRows != null)
-        {
-            List<Long> peptideIds = new ArrayList<Long>(selectedRows.size());
-
-            // Technically, should only limit this in Excel export case... but there's no way to individually select 65K peptides
-            for (int i = 0; i < Math.min(selectedRows.size(), ExcelWriter.MAX_ROWS); i++)
-            {
-                String[] row = selectedRows.get(i).split(",");
-                peptideIds.add(Long.parseLong(row[row.length == 1 ? 0 : 1]));
-            }
-
-            filter.addInClause("RowId", peptideIds);
-        }
+        SimpleFilter filter = createFilter(selectedRows);
 
         RenderContext ctx = new MultiRunRenderContext(_viewContext, runs);
         ctx.setBaseFilter(filter);
@@ -127,7 +222,16 @@ public class FlatPeptideView extends AbstractMS2RunView
 
         TSVGridWriter tw = new TSVGridWriter(ctx, MS2Manager.getTableInfoPeptides(), displayColumns, MS2Manager.getDataRegionNamePeptides());
         tw.setFilenamePrefix("MS2Runs");
-        tw.setFileHeader(null);   // Used for AMT file export
+        tw.setFileHeader(headers);   // Used for AMT file export
         tw.write(response);
+    }
+
+    protected void addExportFormats(DropDownList exportFormat)
+    {
+        exportFormat.add("Excel");
+        exportFormat.add("TSV");
+        exportFormat.add("DTA");
+        exportFormat.add("PKL");
+        exportFormat.add("AMT");
     }
 }
