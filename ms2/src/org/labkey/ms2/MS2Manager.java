@@ -450,7 +450,7 @@ public class MS2Manager
             WebPartFactory desc = Portal.getPortalPart("MS2 Runs");
             if (null != desc)
             {
-                Portal.addPart(c, desc, partIndex);
+                Portal.addPart(c, desc, null, partIndex);
             }
         }
     }

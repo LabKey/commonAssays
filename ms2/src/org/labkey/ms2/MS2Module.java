@@ -81,7 +81,7 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
                         WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _ms2SearchRunFilter);
-                        result.setTitle(MS2_RUNS_ENHANCED_NAME);
+                        result.setTitle("MS2 Runs");
                         return result;
                     }
                 },
@@ -99,10 +99,16 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
                         return new MS2StatsWebPart();
                     }
                 },
-                new WebPartFactory(ProteinSearchWebPart.NAME,"right"){
+                new WebPartFactory(ProteinSearchWebPart.NAME, "right"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
-                        return new ProteinSearchWebPart();
+                        return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()));
+                    }
+                },
+                new WebPartFactory(ProteinSearchWebPart.NAME){
+                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                    {
+                        return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()));
                     }
                 });
         addController("MS2", MS2Controller.class);

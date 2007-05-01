@@ -4,6 +4,8 @@ import org.labkey.api.module.DefaultFolderType;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.view.Portal;
 import static org.labkey.api.util.PageFlowUtil.set;
+import org.labkey.ms2.search.ProteinSearchWebPart;
+
 import java.util.Arrays;
 
 public class MS2FolderType extends DefaultFolderType
@@ -17,10 +19,11 @@ public class MS2FolderType extends DefaultFolderType
                 Portal.getPortalPart(MS2Module.MS2_RUNS_ENHANCED_NAME).createWebPart()
             ),
             Arrays.asList(
+                Portal.getPortalPart(ProteinSearchWebPart.NAME).createWebPart(),
                 Portal.getPortalPart(MS2Module.MS2_SAMPLE_PREPARATION_RUNS_NAME).createWebPart(),
-                Portal.getPortalPart("Narrow Experiments").createWebPart(),
-                Portal.getPortalPart("Narrow Sample Sets").createWebPart(),
-                Portal.getPortalPart("Narrow Protocols").createWebPart()
+                Portal.getPortalPart("Experiments").createWebPart(),
+                Portal.getPortalPart("Sample Sets").createWebPart(),
+                Portal.getPortalPart("Protocols").createWebPart()
             ),
             set(module, ModuleLoader.getInstance().getModule("Pipeline"),
                     ModuleLoader.getInstance().getModule("Experiment"),

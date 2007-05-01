@@ -117,7 +117,7 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
             try
             {
                 Container supportContainer = ContainerManager.getDefaultSupportContainer();
-                addWebPart(WEB_PART_NAME, supportContainer);
+                addWebPart(WEB_PART_NAME, supportContainer, null);
 
                 if (_installerUser != null && !_installerUser.isGuest())
                     AnnouncementManager.saveEmailPreference(_installerUser, supportContainer, AnnouncementManager.EMAIL_PREFERENCE_ALL);

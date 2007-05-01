@@ -184,7 +184,7 @@ public class ProjectController extends ViewController
         if (null == desc)
             return beginForward;
 
-        Portal.WebPart newPart = Portal.addPart(getContainer(), desc);
+        Portal.WebPart newPart = Portal.addPart(getContainer(), desc, form.getLocation());
 
         if (desc.isEditable() && desc.showCustomizeOnInsert())
         {
