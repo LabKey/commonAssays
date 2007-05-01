@@ -446,9 +446,9 @@ public class MS2Controller extends ViewController
         boolean exploratoryFeatures = false;
         for (DisplayColumn displayColumn : displayColumns)
         {
-            if (displayColumn.getName().equals("H") ||
-                displayColumn.getName().equals("DeltaScan") ||
-                run instanceof XTandemRun && run.getHasPeptideProphet() && displayColumn.getName().equals("PeptideProphet"))
+            if (displayColumn.getName().equalsIgnoreCase("H") ||
+                displayColumn.getName().equalsIgnoreCase("DeltaScan") ||
+                run instanceof XTandemRun && run.getHasPeptideProphet() && displayColumn.getName().equalsIgnoreCase("PeptideProphet"))
             {
                 exploratoryFeatures = true;
                 break;
@@ -1921,10 +1921,14 @@ public class MS2Controller extends ViewController
         html.append("<script type=\"text/javascript\">\n");
         html.append("LABKEY.requiresScript('filter.js');\n");
         html.append("</script>");
-        html.append("<form method=post action=''><table class=\"dataRegion\" cellspacing=\"0\" cellpadding=\"1\">");
+        html.append("<form method=post action=''>");
+
+        html.append("<table class=\"dataRegion\" cellspacing=\"0\" cellpadding=\"1\">");
         ht.render(html);
+        html.append("</table>");
+
         renderHierarchyButtonBar(html);
-        html.append("</table></form>");
+        html.append("</form>");
 
         return _renderInTemplate(new HtmlView(html.toString()), false, "Hierarchy", "ms2RunsList",
                 new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
@@ -1953,9 +1957,7 @@ public class MS2Controller extends ViewController
         StringWriter s = new StringWriter();
 
         bb.render(new RenderContext(getViewContext()), s);
-        html.append("<tr><td>");
         html.append(s);
-        html.append("</td></tr>");
     }
 
 

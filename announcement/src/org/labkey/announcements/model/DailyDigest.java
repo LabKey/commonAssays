@@ -17,6 +17,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.mail.MessagingException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -127,8 +128,15 @@ public class DailyDigest
             {
                 ViewMessage m = getDailyDigestMessage(request, c, settings, announcementList, user);
 
-                // TODO: try/catch MessagingException here so it's not logged to Mothership... but not until #3217 is resolved so we can test that
-                MailHelper.send(m);
+                try
+                {
+                    MailHelper.send(m);
+                }
+                catch (MessagingException e)
+                {
+                    // Just record these exceptions to the local log (don't send to mothership)
+                    _log.error(e.getMessage());
+                }
             }
         }
     }

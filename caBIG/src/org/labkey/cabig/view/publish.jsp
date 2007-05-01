@@ -8,14 +8,14 @@
 <%
     ViewContext ctx = HttpView.currentContext();
     boolean isPublished = caBIGManager.get().isPublished(ctx.getContainer());
-    ViewURLHelper url = new ViewURLHelper("cabig", isPublished ? "unpublish" : "publish", ctx.getContainer());
+    String publishButton = PageFlowUtil.buttonLink(isPublished ? "Unpublish" : "Publish", new ViewURLHelper("cabig", isPublished ? "unpublish" : "publish", ctx.getContainer()));
+    ViewURLHelper adminUrl = new ViewURLHelper("cabig", "admin.view", ctx.getContainer());
 
     if (isPublished)
     {
 %>
 This folder is published to the caBIG interface.  If your caBIG webapp is running, all experiment data in this folder is visible publicly
 via the caBIG API.<br><br>
-<%=PageFlowUtil.buttonLink("Unpublish", url)%>
 <%
     }
     else
@@ -23,16 +23,16 @@ via the caBIG API.<br><br>
 %>
 This folder is not published to the caBIG interface.  Click the button below to publish this folder to caBIG.  If you do this, and your caBIG webapp
 is running, all experiment data in the folder will be visible publicly via the caBIG API.<br><br>
-<%=PageFlowUtil.buttonLink("Publish", url)%>
 <%  }  %>
 
+<%=publishButton%>&nbsp;<%=PageFlowUtil.buttonLink("Admin", adminUrl)%>
 <br><br>For more information about publishing to caBIG, <a href="<%=h(new HelpTopic("cabig", HelpTopic.Area.CPAS).getHelpTopicLink())%>" target="cabig">click here</a>.
 
 <%
     if (isPublished)
     {
 %>
-<br><br>If you've configured the caBIG webapp on the same server as your LabKey Server (the standard configuration), then <a href="<%=h(ctx.getViewURLHelper().getBaseServerURI())%>/publish/happy.jsp">click here</a> to test the stupid thing.
+<br><br>If you've configured the caBIG webapp on the same server as your LabKey Server (the standard configuration), then <a href="<%=h(ctx.getViewURLHelper().getBaseServerURI())%>/publish/Happy.jsp">click here</a> to test it.
 <%
     }
 %>
