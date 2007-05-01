@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
 import org.apache.struts.upload.FormFile;
 import org.labkey.api.announcements.Announcement;
 import org.labkey.api.announcements.CommSchema;
-import org.labkey.api.attachments.Attachable;
+import org.labkey.api.attachments.AttachmentParent;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.*;
 import org.labkey.api.security.User;
@@ -78,7 +78,7 @@ public class AnnouncementManager
 
     protected static void attachAttachments(Announcement[] announcements) throws SQLException
     {
-        AttachmentService.get().setAttachments(Arrays.<Attachable>asList(announcements));
+        AttachmentService.get().setAttachments(Arrays.<AttachmentParent>asList(announcements));
     }
 
 
