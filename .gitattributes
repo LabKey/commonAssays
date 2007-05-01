@@ -390,6 +390,7 @@ issue/src/org/labkey/issue/EmailPreferencesPage.java -text
 issue/src/org/labkey/issue/IssuePage.java -text
 issue/src/org/labkey/issue/IssuesModule.java -text
 issue/src/org/labkey/issue/UpdateEmailPage.java -text
+issue/src/org/labkey/issue/detailList.jsp -text
 issue/src/org/labkey/issue/detailView.jsp -text
 issue/src/org/labkey/issue/emailPreferences.jsp -text
 issue/src/org/labkey/issue/issues_customize.gm -text
