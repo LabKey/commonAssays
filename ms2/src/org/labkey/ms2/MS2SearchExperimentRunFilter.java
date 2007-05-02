@@ -34,11 +34,9 @@ public class MS2SearchExperimentRunFilter extends ExperimentRunFilter
 
     public void populateButtonBar(ViewContext context, ButtonBar bar)
     {
-        bar.add(new ButtonBarLineBreak());
+        bar.add(createButton(context, "compare", "Compare", ActionButton.Action.POST));
 
-        bar.add(createButton(context, "compare", "Compare Runs", ActionButton.Action.POST));
-
-        ActionButton exportRuns = new ActionButton("button", "Export MS2 Data");
+        ActionButton exportRuns = new ActionButton("button", "MS2 Export");
         ViewURLHelper url = context.getViewURLHelper().clone();
         url.deleteParameters();
         url.setPageFlow("MS2");

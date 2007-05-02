@@ -14,9 +14,15 @@
     url.setPageFlow("MS2");
     url.setAction("doProteinSearch.view");
     url.deleteParameters();
-    String separator = bean.isHorizontal() ? "<td>&nbsp;&nbsp;</td>" : "</tr><tr>";
+
+    ViewURLHelper annotationsURL = ctx.getViewURLHelper().clone();
+    annotationsURL.setPageFlow("protein");
+    annotationsURL.setAction("begin.view");
+    annotationsURL.deleteParameters();
+
+    String separator = bean.isHorizontal() ? "<td>&nbsp;</td>" : "</tr><tr>";
 %>
-<form action="<%= url %>" method="get">
+<form action="<%= annotationsURL %>" method="get">
     <table>
         <tr>
             <td>Name:</td>
@@ -31,11 +37,14 @@
             <td>Subfolders:</td>
             <td><input type="checkbox" name="includeSubfolders" <% if (bean.isIncludeSubfolders()) { %>checked="true" <% } %> /> <%= helpPopup("Protein Search: Subfolders", "If checked, the search will also look in all of this folder's children.") %></td>
         <%= separator %>
-            <td>Exact match:</td>
+            <td>Exact:</td>
             <td><input type="checkbox" name="exactMatch" <% if (bean.isExactMatch()) { %>checked="true" <% } %> /> <%= helpPopup("Protein Search: Exact Match", "If checked, the search will only find proteins with an exact name match. If not checked, proteins that start with the name entered will also match, but the search may be significantly slower.") %></td>
         <%= separator %>
             <td></td>
             <td><labkey:button text="Search" /></td>
+        <%= separator %>
+            <td></td>
+            <td>[<a href="<%= annotationsURL.getLocalURIString() %>">manage annotations</a>]</td>
         </tr>
     </table>
 </form>

@@ -87,9 +87,7 @@ public class MS2Controller extends ViewController
     {
         ButtonBar bb = new ButtonBar();
 
-        addSelectAndClearButtons(bb);
-
-        ActionButton compareRuns = new ActionButton("button", "Compare Runs");
+        ActionButton compareRuns = new ActionButton("button", "Compare");
         compareRuns.setScript("return verifySelected(this.form, \"compare.view\", \"post\", \"runs\")");
         compareRuns.setActionType(ActionButton.Action.GET);
         compareRuns.setDisplayPermission(ACL.PERM_READ);
@@ -102,7 +100,7 @@ public class MS2Controller extends ViewController
         compareScoring.setVisible(false);   // Hidden unless turned on during grid rendering.
         bb.add(compareScoring);
 
-        ActionButton exportRuns = new ActionButton("button", "Export Runs");
+        ActionButton exportRuns = new ActionButton("button", "MS2 Export");
         exportRuns.setScript("return verifySelected(this.form, \"pickExportRunsView.view\", \"post\", \"runs\")");
         exportRuns.setActionType(ActionButton.Action.GET);
         exportRuns.setDisplayPermission(ACL.PERM_READ);
@@ -113,13 +111,13 @@ public class MS2Controller extends ViewController
         showHierarchy.setDisplayPermission(ACL.PERM_READ);
         bb.add(showHierarchy);
 
-        ActionButton moveRuns = new ActionButton("", "Move Runs");
+        ActionButton moveRuns = new ActionButton("", "Move");
         moveRuns.setScript("return verifySelected(this.form, \"selectMoveLocation.view\", \"get\", \"runs\")");
         moveRuns.setActionType(ActionButton.Action.GET);
         moveRuns.setDisplayPermission(ACL.PERM_DELETE);
         bb.add(moveRuns);
 
-        ActionButton deleteRuns = new ActionButton("", "Delete Runs");
+        ActionButton deleteRuns = new ActionButton("", "Delete");
         deleteRuns.setScript("return verifySelected(this.form, \"deleteRuns.view\", \"get\", \"runs\")");
         deleteRuns.setActionType(ActionButton.Action.GET);
         deleteRuns.setDisplayPermission(ACL.PERM_DELETE);
@@ -371,9 +369,7 @@ public class MS2Controller extends ViewController
         url.setPageFlow("protein");
         url.setAction("begin.view");
 
-        HtmlView htmlView = new HtmlView("Protein Annotations", "<a href=\"" + url.getLocalURIString() + "\">Go to protein annotations</a>");
-
-        VBox vbox = new VBox(searchView, htmlView, gridView);
+        VBox vbox = new VBox(searchView, gridView);
 
         return _renderInTemplate(vbox, true, pageName, helpTopic);
     }
@@ -1301,7 +1297,7 @@ public class MS2Controller extends ViewController
         ButtonBar bb = new ButtonBar();
         bb.add(NewAnnot);
         bb.add(ReloadSprotOrgMap);
-        ReloadGO.setScript("alert(\"Note: Gene Ontologies are large.  This takes some time,\\nit will loaded in the background.\");this.form.action=\"reloadGO.post\";this.form.method=\"post\";return true");
+        ReloadGO.setScript("alert(\"Note: Gene Ontologies are large.  This takes some time,\\nit will be loaded in the background.\");this.form.action=\"reloadGO.post\";this.form.method=\"post\";return true");
         ReloadGO.setActionType(ActionButton.Action.GET);
         bb.add(ReloadGO);
         addSelectAndClearButtons(bb);
@@ -1942,13 +1938,13 @@ public class MS2Controller extends ViewController
         bb.add(ActionButton.BUTTON_SELECT_ALL);
         bb.add(ActionButton.BUTTON_CLEAR_ALL);
 
-        ActionButton compareRuns = new ActionButton("button", "Compare Runs");
+        ActionButton compareRuns = new ActionButton("button", "Compare");
         compareRuns.setScript("return verifySelected(this.form, \"compare.view\", \"post\", \"runs\")");
         compareRuns.setActionType(ActionButton.Action.GET);
         compareRuns.setDisplayPermission(ACL.PERM_READ);
         bb.add(compareRuns);
 
-        ActionButton exportRuns = new ActionButton("button", "Export Runs");
+        ActionButton exportRuns = new ActionButton("button", "MS2 Export");
         exportRuns.setScript("return verifySelected(this.form, \"pickExportRunsView.view\", \"post\", \"runs\")");
         exportRuns.setActionType(ActionButton.Action.GET);
         exportRuns.setDisplayPermission(ACL.PERM_READ);
