@@ -33,12 +33,12 @@ public class FlowQueryView extends QueryView
     public FlowQueryView(FlowQueryForm form)
     {
         this(form.getContext(), (FlowSchema) form.getSchema(), (FlowQuerySettings) form.getQuerySettings());
-        setShowChartButton(true);
     }
 
     public FlowQueryView(ViewContext context, FlowSchema schema, FlowQuerySettings settings)
     {
         super(context, schema, settings);
+        setShowChartButton(true);
     }
 
     protected boolean showRecordSelectors()
