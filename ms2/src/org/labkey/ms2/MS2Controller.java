@@ -203,9 +203,9 @@ public class MS2Controller extends ViewController
             message = "Run not found";
         else if (run.isDeleted())
             message = "Run has been deleted.";
-        else if (run.getStatusId() == CometImporter.STATUS_RUNNING)
+        else if (run.getStatusId() == MS2Importer.STATUS_RUNNING)
             message = "Run is still loading.  Current status: " + run.getStatus();
-        else if (run.getStatusId() == CometImporter.STATUS_FAILED)
+        else if (run.getStatusId() == MS2Importer.STATUS_FAILED)
             message = "Run failed loading.  Status: " + run.getStatus();
         else
         {
@@ -223,14 +223,7 @@ public class MS2Controller extends ViewController
 
         if (null != message)
         {
-            try
-            {
-                _renderError(message);
-            }
-            catch (Exception x)
-            {
-                _log.error(null, x);
-            }
+            HttpView.throwNotFound(message);
         }
 
         return success;

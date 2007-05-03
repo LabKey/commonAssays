@@ -2,9 +2,8 @@ package org.labkey.cabig;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.Table;
-import org.labkey.api.data.CoreSchema;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.Table;
 
 import java.sql.SQLException;
 

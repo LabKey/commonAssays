@@ -9,12 +9,16 @@ import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.User;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.ContainerTree;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.*;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.List;
+import java.net.URISyntaxException;
 
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
@@ -32,7 +36,7 @@ public class caBIGController extends ViewController
     @Jpf.Action
     protected Forward publish() throws Exception
     {
-        requiresAdmin();
+        requiresPermission(ACL.PERM_ADMIN);
 
         caBIGManager.get().publish(getContainer());
 
@@ -43,7 +47,7 @@ public class caBIGController extends ViewController
     @Jpf.Action
     protected Forward unpublish() throws Exception
     {
-        requiresAdmin();
+        requiresPermission(ACL.PERM_ADMIN);
 
         caBIGManager.get().unpublish(getContainer());
 
@@ -52,11 +56,56 @@ public class caBIGController extends ViewController
 
 
     @Jpf.Action
-    protected Forward publishSelected() throws Exception
+    protected Forward publishAll() throws Exception
     {
-        requiresAdmin();
+        return setPublishState(State.Publish);
+    }
 
-        return renderInTemplate(new HtmlView("Not yet implemented"), getContainer(), "NYI");
+
+    @Jpf.Action
+    protected Forward unpublishAll() throws Exception
+    {
+        return setPublishState(State.Unpublish);
+    }
+
+
+    private enum State
+    {
+        Publish
+        {
+            void setState(Container c) throws SQLException
+            {
+                caBIGManager.get().publish(c);
+            }
+        },
+        Unpublish
+        {
+            void setState(Container c) throws SQLException
+            {
+                caBIGManager.get().unpublish(c);
+            }
+        };
+
+        abstract void setState(Container c) throws SQLException;
+    }
+
+
+    private Forward setPublishState(State state) throws Exception
+    {
+        requiresPermission(ACL.PERM_ADMIN);
+
+        List<String> containerIds = getViewContext().getList("containerIds");
+
+        for (String id : containerIds)
+        {
+            Container c = ContainerManager.getForId(id);
+            if (!c.hasPermission(getUser(), ACL.PERM_ADMIN))
+                throw new UnauthorizedException();
+
+            state.setState(c);
+        }
+
+        return new ViewForward("cabig", "admin.view", getContainer());
     }
 
 
@@ -72,18 +121,19 @@ public class caBIGController extends ViewController
     @Jpf.Action
     protected Forward admin() throws Exception
     {
-        requiresAdmin();
+        requiresPermission(ACL.PERM_ADMIN);
 
-        caBIGHierarchyTree tree = new caBIGHierarchyTree(getContainer().getPath(), getUser(), ACL.PERM_ADMIN);
+        caBIGHierarchyTree tree = new caBIGHierarchyTree(getContainer().getPath(), getUser(), ACL.PERM_ADMIN, getViewURLHelper());
 
         StringBuilder html = new StringBuilder();
-        html.append("<script type=\"text/javascript\">\n");
-        html.append("LABKEY.requiresScript('filter.js');\n");
-        html.append("</script>");
+        html.append("<script type=\"text/javascript\">\n").append("LABKEY.requiresScript('filter.js');\n").append("</script>");
+        html.append("Click the buttons below to publish or unpublish folders to the caBIG interface.  If your caBIG webapp is running, all experiment data in published folders will be visible publicly via the caBIG API.<br><br>");
+        html.append("For more information about publishing to caBIG, ");
+        html.append("<a href=\"").append(PageFlowUtil.filter(new HelpTopic("cabig", HelpTopic.Area.CPAS).getHelpTopicLink())).append("\">click here</a>.<br><br>\n");
         html.append("<form method=post action=''>");
         html.append("<table class=\"dataRegion\" cellspacing=\"0\" cellpadding=\"1\">");
         tree.render(html);
-        html.append("</table>");
+        html.append("</table><br>");
         renderHierarchyButtonBar(html);
         html.append("</form>");
 
@@ -91,21 +141,22 @@ public class caBIGController extends ViewController
     }
 
 
-    private void renderHierarchyButtonBar(StringBuilder html) throws IOException
+    private void renderHierarchyButtonBar(StringBuilder html) throws IOException, ServletException
     {
         ButtonBar bb = new ButtonBar();
 
-        bb.add(ActionButton.BUTTON_SELECT_ALL);
-        bb.add(ActionButton.BUTTON_CLEAR_ALL);
+        ActionButton publishAll = new ActionButton("publishAll.post", "Publish All");
+        publishAll.setActionType(ActionButton.Action.POST);
+        bb.add(publishAll);
 
-        ActionButton compareRuns = new ActionButton("button", "Publish Selected Folders");
-        compareRuns.setScript("return verifySelected(this.form, \"publishSelected.view\", \"post\", \"folders\")");
-        compareRuns.setActionType(ActionButton.Action.GET);
-        compareRuns.setDisplayPermission(ACL.PERM_READ);
-        bb.add(compareRuns);
+        ActionButton unpublishAll = new ActionButton("unpublishAll.post", "Unpublish All");
+        unpublishAll.setActionType(ActionButton.Action.POST);
+        bb.add(unpublishAll);
+
+        ActionButton done = new ActionButton("Done", new ViewURLHelper("Security", "begin.view", getContainer()));
+        bb.add(done);
 
         StringWriter s = new StringWriter();
-
         bb.render(new RenderContext(getViewContext()), s);
         html.append(s);
     }
@@ -114,6 +165,20 @@ public class caBIGController extends ViewController
     // Always forward to permissions page
     private ViewForward getForward() throws ServletException
     {
+        String returnUrl = getViewURLHelper().getParameter("returnUrl");
+
+        if (null != returnUrl)
+        {
+            try
+            {
+                return new ViewForward(returnUrl);
+            }
+            catch (URISyntaxException e)
+            {
+                // Ignore... just do the default redirect
+            }
+        }
+
         Container c = getContainer();
         return new ViewForward(SecurityManager.getPermissionsUrl(c));
     }
@@ -144,10 +209,13 @@ public class caBIGController extends ViewController
     private static class caBIGHierarchyTree extends ContainerTree
     {
         private static caBIGManager _caBIG = caBIGManager.get();
+        private static String _unauthorizedButton = PageFlowUtil.buttonImg("Not Authorized", "disabled");
+        private String _currentUrl;
 
-        private caBIGHierarchyTree(String rootPath, User user, int perm)
+        private caBIGHierarchyTree(String rootPath, User user, int perm, ViewURLHelper currentUrl)
         {
-            super(rootPath, user, perm);
+            super(rootPath, user, perm, currentUrl);
+            _currentUrl = currentUrl.getEncodedLocalURIString();
         }
 
 
@@ -155,21 +223,33 @@ public class caBIGController extends ViewController
         protected void renderNodeStart(StringBuilder html, Container c, ViewURLHelper url, boolean isAuthorized, int level)
         {
             html.append("<tr><td>");
-            html.append("<input type=checkbox name='container' value='");
-            html.append(c.getId());
-            html.append("'");
-
-            if (isAuthorized)
-            {
-                if (isPublished(c))
-                    html.append(" checked");
-            }
-            else
-                html.append(" disabled");
-
-            html.append("></td><td style=\"padding-left:");
+            appendButton(html, c, isAuthorized, _currentUrl);
+            appendContainerId(html, c, isAuthorized);
+            html.append("</td><td style=\"padding-left:");
             html.append(10 * level);
             html.append("\">");
+        }
+
+
+        private static void appendButton(StringBuilder html, Container c, boolean isAuthorized, String returnUrl)
+        {
+            if (!isAuthorized)
+            {
+                html.append(_unauthorizedButton);
+            }
+            else
+            {
+                boolean isPublished = isPublished(c);
+                ViewURLHelper publishUrl = new ViewURLHelper("cabig", isPublished ? "unpublish" : "publish", c).addParameter("returnUrl", returnUrl);
+                html.append(PageFlowUtil.buttonLink(isPublished ? "Unpublish" : "Publish", publishUrl));
+            }
+        }
+
+
+        private static void appendContainerId(StringBuilder html, Container c, boolean isAuthorized)
+        {
+            if (isAuthorized)
+                html.append("<input type=\"hidden\" name=\"containerIds\" value=\"").append(c.getId()).append("\">");
         }
 
 

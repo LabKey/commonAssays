@@ -41,13 +41,13 @@
         }
 
         if (null == ctx.previousUrl)
-            out.print(PageFlowUtil.buttonImg("<< Prev"));
+            out.print(PageFlowUtil.buttonImg("<< Prev", "disabled"));
         else
             out.print("    <a href=\"" + ctx.previousUrl.getEncodedLocalURIString() + "\">" + PageFlowUtil.buttonImg("<< Prev") + "</a>");
 %>&nbsp;
 <%
     if (null == ctx.nextUrl)
-        out.print(PageFlowUtil.buttonImg("Next >>"));
+        out.print(PageFlowUtil.buttonImg("Next >>", "disabled"));
     else
         out.print("    <a href=\"" + ctx.nextUrl.getEncodedLocalURIString() + "\">" + PageFlowUtil.buttonImg("Next >>") + "</a>");
 %>&nbsp;
