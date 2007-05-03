@@ -36,7 +36,7 @@ public class caBIGController extends ViewController
     @Jpf.Action
     protected Forward publish() throws Exception
     {
-        requiresPermission(ACL.PERM_ADMIN);
+        requiresAdmin();
 
         caBIGManager.get().publish(getContainer());
 
@@ -47,7 +47,7 @@ public class caBIGController extends ViewController
     @Jpf.Action
     protected Forward unpublish() throws Exception
     {
-        requiresPermission(ACL.PERM_ADMIN);
+        requiresAdmin();
 
         caBIGManager.get().unpublish(getContainer());
 
@@ -92,7 +92,7 @@ public class caBIGController extends ViewController
 
     private Forward setPublishState(State state) throws Exception
     {
-        requiresPermission(ACL.PERM_ADMIN);
+        requiresAdmin();
 
         List<String> containerIds = getViewContext().getList("containerIds");
 
@@ -121,7 +121,7 @@ public class caBIGController extends ViewController
     @Jpf.Action
     protected Forward admin() throws Exception
     {
-        requiresPermission(ACL.PERM_ADMIN);
+        requiresAdmin();
 
         caBIGHierarchyTree tree = new caBIGHierarchyTree(getContainer().getPath(), getUser(), ACL.PERM_ADMIN, getViewURLHelper());
 
