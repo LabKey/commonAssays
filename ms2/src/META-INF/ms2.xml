@@ -348,8 +348,9 @@
       <ns:column columnName="Created">
         <ns:columnTitle>Created</ns:columnTitle>
         <ns:inputType>text</ns:inputType>
-        <ns:displayWidth>120</ns:displayWidth>
+        <ns:displayWidth>90</ns:displayWidth>
         <ns:inputLength>23</ns:inputLength>
+        <ns:formatString>Date</ns:formatString>
         <ns:isReadOnly>false</ns:isReadOnly>
       </ns:column>
       <ns:column columnName="ModifiedBy">
@@ -362,6 +363,7 @@
         <ns:columnTitle>Modified</ns:columnTitle>
         <ns:inputType>text</ns:inputType>
         <ns:inputLength>23</ns:inputLength>
+        <ns:formatString>Date</ns:formatString>
         <ns:isReadOnly>false</ns:isReadOnly>
       </ns:column>
       <ns:column columnName="Owner">
@@ -488,7 +490,7 @@
       <ns:column columnName="Created">
         <ns:columnTitle>Created</ns:columnTitle>
         <ns:inputType>text</ns:inputType>
-        <ns:formatString>DateTime</ns:formatString>
+        <ns:formatString>Date</ns:formatString>
         <ns:displayWidth>120</ns:displayWidth>
         <ns:inputLength>23</ns:inputLength>
         <ns:isReadOnly>false</ns:isReadOnly>
@@ -502,6 +504,7 @@
       <ns:column columnName="Modified">
         <ns:columnTitle>Modified</ns:columnTitle>
         <ns:inputType>text</ns:inputType>
+        <ns:formatString>Date</ns:formatString>
         <ns:inputLength>23</ns:inputLength>
         <ns:isReadOnly>false</ns:isReadOnly>
       </ns:column>

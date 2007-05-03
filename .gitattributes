@@ -482,7 +482,6 @@ ms2/src/org/labkey/ms2/DisplayThreadStatusColumn.java -text
 ms2/src/org/labkey/ms2/DtaSpectrumRenderer.java -text
 ms2/src/org/labkey/ms2/EditElutionGraphContext.java -text
 ms2/src/org/labkey/ms2/ElutionGraph.java -text
-ms2/src/org/labkey/ms2/ExperimentInfoColumns.java -text
 ms2/src/org/labkey/ms2/FirstProteinDisplayColumn.java -text
 ms2/src/org/labkey/ms2/FloatParser.java -text
 ms2/src/org/labkey/ms2/GZFileRenderer.java -text
@@ -649,6 +648,7 @@ ms2/src/org/labkey/ms2/pipeline/setTandemDefaults.gm -text
 ms2/src/org/labkey/ms2/protein.vm -text
 ms2/src/org/labkey/ms2/protein/AnnotationLoader.java -text
 ms2/src/org/labkey/ms2/protein/AnnotationUploadManager.java -text
+ms2/src/org/labkey/ms2/protein/CustomAnnotationImportHelper.java -text
 ms2/src/org/labkey/ms2/protein/CustomAnnotationSet.java -text
 ms2/src/org/labkey/ms2/protein/CustomAnnotationType.java -text
 ms2/src/org/labkey/ms2/protein/DefaultAnnotationLoader.java -text

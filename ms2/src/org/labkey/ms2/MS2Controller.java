@@ -336,10 +336,6 @@ public class MS2Controller extends ViewController
         for (int i = 4; i < rgn.getDisplayColumnList().size(); i++)
             rgn.getDisplayColumn(i).setVisible(false);
 
-        ExperimentInfoColumns expColumns = new ExperimentInfoColumns(getContainer());
-        rgn.addColumn(expColumns.getSampleColumn());
-        rgn.addColumn(expColumns.getProtocolColumn());
-
         rgn.addColumn(new HideShowScoringColumn(bb));
 
         currentUrl.setAction("showRun");
@@ -364,7 +360,7 @@ public class MS2Controller extends ViewController
 
         VBox vbox = new VBox(searchView, gridView);
 
-        return _renderInTemplate(vbox, true, pageName, helpTopic);
+        return _renderInTemplate(vbox, false, pageName, helpTopic);
     }
 
     @Jpf.Action
@@ -517,30 +513,6 @@ public class MS2Controller extends ViewController
         ViewURLHelper url = new ViewURLHelper(getRequest(), "MS2-Scoring", "discriminate", getViewURLHelper().getExtraPath());
         url.addParameter("runId", Integer.toString(form.getRun()));
         return new ViewForward(url);
-    }
-
-    @Jpf.Action
-    protected Forward showFullMaterialList(RunForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        final MS2Run run = MS2Manager.getRun(form.getRun());
-        if (run == null)
-        {
-            return HttpView.throwNotFound();
-        }
-        ExperimentInfoColumns cols = new ExperimentInfoColumns(getContainer());
-        final ExperimentInfoColumns.SampleColumn sampleColumn = cols.getSampleColumn();
-
-        HttpView view = new HttpView()
-        {
-            @Override
-            protected void renderInternal(Object model, PrintWriter out) throws Exception
-            {
-                sampleColumn.calculateAndRenderLinks(run.getExperimentRunLSID(), cloneViewURLHelper(), run.getRun(), out, false);
-            }
-        };
-        return renderInTemplate(view, getContainer(), "Samples for " + run.getDescription());
     }
 
     private HttpView createHeader(ViewURLHelper currentUrl, RunForm form, MS2Run run, AbstractMS2RunView peptideView) throws ServletException, SQLException
@@ -3651,6 +3623,7 @@ public class MS2Controller extends ViewController
         QueryView proteinsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), proteinsSettings);
         proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
         proteinsView.setShowExportButtons(true);
+        proteinsView.setShowCustomizeViewLinkInButtonBar(true);
         SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
         sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
         sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
@@ -3671,6 +3644,7 @@ public class MS2Controller extends ViewController
             }
         };
         groupsView.setShowExportButtons(true);
+        groupsView.setShowCustomizeViewLinkInButtonBar(true);
         groupsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
 
         groupsView.setTitle("Protein Group Results");

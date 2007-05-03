@@ -53,13 +53,6 @@ public class MS2WebPart extends WebPartView
         rgn.getDisplayColumn(5).setVisible(false);
         rgn.getDisplayColumn(6).setVisible(false);
 
-        ExperimentInfoColumns experimentCols = new ExperimentInfoColumns(c);
-        DisplayColumn dcSample = experimentCols.getSampleColumn();
-        rgn.addColumn(dcSample);
-
-        DisplayColumn dcProtocol = experimentCols.getProtocolColumn();
-        rgn.addColumn(dcProtocol);
-
         rgn.setButtonBar(ButtonBar.BUTTON_BAR_EMPTY, DataRegion.MODE_GRID);
         return rgn;
     }

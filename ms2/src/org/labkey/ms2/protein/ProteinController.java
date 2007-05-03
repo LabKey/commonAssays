@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 /**
  * User: jeckels
@@ -81,19 +80,6 @@ public class ProteinController extends ViewController
         UserSchema schema = new CustomAnnotationSchema(getUser(), getContainer(), showSequences);
         QuerySettings settings = new QuerySettings(getViewURLHelper(), getRequest(), "CustomAnnotation");
 
-        ViewURLHelper url = cloneViewURLHelper();
-        url.deleteParameters();
-        if (showSequences)
-        {
-            url.setAction("showAnnotationSet.view");
-            url.addParameter("CustomAnnotation.queryName", settings.getQueryName());
-        }
-        else
-        {
-            url.setAction("showAnnotationSetWithSequences.view");
-            url.addParameter("CustomAnnotation.queryName", settings.getQueryName());
-        }
-
         settings.getQueryDef(schema);
         settings.setAllowChooseQuery(true);
         settings.setAllowChooseView(true);
@@ -106,15 +92,49 @@ public class ProteinController extends ViewController
                 result.getRenderContext().setBaseSort(new Sort("LookupString"));
                 return result;
             }
+
+            protected List<QueryPicker> getQueryPickers()
+            {
+                List<QueryPicker> result = super.getQueryPickers();
+                for (QueryPicker picker : result)
+                {
+                    picker.setLabel("Custom Annotation Set: ");
+                }
+                return result;
+            }
         };
+        
         queryView.setShowExportButtons(true);
+        queryView.setShowCustomizeViewLinkInButtonBar(true);
         queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
 
-        HtmlView linkView = new HtmlView("[<a href=\"" + url.getLocalURIString() + "\">show with" + (showSequences ? "out" : "") + " proteins</a>]");
+        ViewURLHelper url = cloneViewURLHelper();
+        url.deleteParameters();
+
+        String header;
+        if (showSequences)
+        {
+            url.setAction("showAnnotationSet.view");
+            url.addParameter("CustomAnnotation.queryName", settings.getQueryName());
+
+            header = "This view shows your annotation set with all the proteins that match. If more than one sequence matches you will get multiple rows. [<a href=\"" + url.getLocalURIString() + "\">show without proteins</a>]";
+        }
+        else
+        {
+            url.setAction("showAnnotationSetWithSequences.view");
+            url.addParameter("CustomAnnotation.queryName", settings.getQueryName());
+            header = "This view shows just the data uploaded as part of the set. [<a href=\"" + url.getLocalURIString() + "\">show with proteins</a>]";
+        }
+
+        HtmlView linkView = new HtmlView(header);
         
         VBox box = new VBox(linkView, queryView);
 
-        return renderInTemplate(box, getContainer(), "Custom Annotation Set");
+        NavTrailConfig config = new NavTrailConfig(getViewContext());
+        ViewURLHelper listURL = new ViewURLHelper("protein", "begin.view", getContainer());
+        config.setExtraChildren(new NavTree("Custom Annotation Sets", listURL));
+        config.setTitle("Custom Annotation Set: " + settings.getQueryName());
+        return renderInTemplate(box, getContainer(), config);
     }
 
     @Jpf.Action @RequiresPermission(ACL.PERM_READ)
@@ -171,6 +191,27 @@ public class ProteinController extends ViewController
             addError("Your annotation set must have at least one annotation, plus the header line");
         }
 
+        TabLoader.ColumnDescriptor[] columns = tabLoader.getColumns();
+        String lookupStringColumnName = columns[0].name;
+
+        Set<String> lookupStrings = new CaseInsensitiveHashSet();
+        for (Map<String, Object> row : rows)
+        {
+            String lookupString = CustomAnnotationImportHelper.convertLookup(row.get(lookupStringColumnName));
+            if (lookupString == null || lookupString.length() == 0)
+            {
+                addError("All rows must contain a protein identifier.");
+                break;
+            }
+
+            if (!lookupStrings.add(lookupString))
+            {
+                addError("The input contains multiple entries for the protein " + lookupString);
+                break;
+            }
+            row.put(lookupStringColumnName, lookupString);
+        }
+
         if (!PageFlowUtil.getActionErrors(getRequest(), true).isEmpty())
         {
             return showUploadCustomProteinAnnotations(form);
@@ -204,9 +245,6 @@ public class ProteinController extends ViewController
             PreparedStatement stmt = connection.prepareStatement(sb.toString());
             stmt.setInt(1, annotationSet.getCustomAnnotationSetId());
 
-            TabLoader.ColumnDescriptor[] columns = tabLoader.getColumns();
-            String lookupStringColumnName = columns[0].name;
-
             List<PropertyDescriptor> descriptors = new ArrayList<PropertyDescriptor>();
 
             for (int i = 1; i < columns.length; i++)
@@ -230,8 +268,10 @@ public class ProteinController extends ViewController
                 descriptors.add(pd);
             }
 
+            rows = (Map<String, Object>[])tabLoader.load();
+
             int ownerObjectId = OntologyManager.ensureObject(getContainer().getId(), annotationSet.getLsid());
-            OntologyManager.ImportHelper helper = new ImportHelper(stmt, connection, annotationSet.getLsid(), lookupStringColumnName);
+            OntologyManager.ImportHelper helper = new CustomAnnotationImportHelper(stmt, connection, annotationSet.getLsid(), lookupStringColumnName);
 
             OntologyManager.insertTabDelimited(getContainer(), ownerObjectId, helper, descriptors.toArray(new PropertyDescriptor[0]), rows, false);
 
@@ -301,48 +341,4 @@ public class ProteinController extends ViewController
         }
     }
 
-    class ImportHelper implements OntologyManager.ImportHelper
-    {
-        private final String _setLsid;
-        private final String _lookupStringColumnName;
-        private final PreparedStatement _stmt;
-        private final Connection _conn;
-        private Set<String> _lookupStrings = new HashSet<String>();
-        private int _count;
-
-        ImportHelper(PreparedStatement stmt, Connection conn, String lsid, String lookupStringColumnName)
-        {
-            _stmt = stmt;
-            _conn = conn;
-            _setLsid = lsid;
-            _lookupStringColumnName = lookupStringColumnName;
-        }
-
-        public String beforeImportObject(Map map) throws SQLException
-        {
-            String lookupString = (String)map.get(_lookupStringColumnName);
-            if (!_lookupStrings.add(lookupString))
-            {
-                throw new SQLException("The input contains multiple entries for the protein " + lookupString);
-            }
-
-            String lsid = new Lsid(_setLsid + "-" + lookupString).toString();
-
-            _stmt.setString(2, lookupString);
-            _stmt.setString(3, lsid);
-            _stmt.addBatch();
-            _count++;
-            if (_count % 5000 == 0)
-            {
-                _stmt.executeBatch();
-                _conn.commit();
-            }
-
-            return lsid;
-        }
-
-        public void afterImportObject(String lsid, ObjectProperty[] props) throws SQLException
-        {
-        }
-    }
 }

@@ -285,13 +285,14 @@ public class MS2Schema extends UserSchema
                 ms2LinksAdded = true;
             }
         }
+        columns.remove(FieldKey.fromParts("Name"));
+        columns.remove(FieldKey.fromParts("Protocol"));
         if (!ms2LinksAdded)
         {
             columns.add(fieldMS2Links);
         }
         columns.add(FieldKey.fromParts("MS2Details", "Path"));
         columns.add(FieldKey.fromParts("Input", "FASTA"));
-        columns.add(FieldKey.fromParts("Input", "mzXML"));
         result.setDefaultVisibleColumns(columns);
         return result;
     }
@@ -322,7 +323,7 @@ public class MS2Schema extends UserSchema
             if (runId != null)
             {
                 graphURL.addParameter("run", runId.toString());
-                out.write("<a href=\"" + graphURL.getLocalURIString() + "\"><img src=\"" + AppProps.getInstance().getContextPath() + "/MS2/images/runIcon.gif\" height=\"18\" width=\"18\"/></a>");
+                out.write("<a href=\"" + graphURL.getLocalURIString() + "\" title=\"MS2 run data\"><img src=\"" + AppProps.getInstance().getContextPath() + "/MS2/images/runIcon.gif\" height=\"18\" width=\"18\"/></a>");
             }
         }
 
