@@ -46,6 +46,26 @@ public class ProjectController extends ViewController
     public Forward start() throws Exception
     {
         Container c = getContainer();
+
+        if (c.isProject())
+        {
+            // This block is to handle the case where a user does not have permissions
+            // to a project folder, but does have access to a subfolder.  In this case, we'd like
+            // to let them see something at the project root (since this is where you land after
+            // selecting the project from the projects menu), so we display an access-denied
+            // message within the frame.  If the user isn't logged on, we simply show an
+            // access-denied error.  This is necessary to force the login prompt to show up
+            // for users with access who simply haven't logged on yet.  (brittp, 5.4.2007)
+            ACL acl = c.getAcl();
+            if (acl.getPermissions(getUser()) == ACL.PERM_NONE)
+            {
+                requiresLogin();
+                HttpView view = new HomeTemplate(getViewContext(),
+                        new HtmlView("You do not have permission to view this folder.<br>" +
+                        "Please select a valid folder from the tree to the left."));
+                return includeView(view);
+            }
+        }
         HttpView.throwRedirect(c.getStartURL(getViewContext()).toString());
         return null;
     }

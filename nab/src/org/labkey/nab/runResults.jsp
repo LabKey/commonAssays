@@ -241,9 +241,9 @@
                             </tr>
                             <tr>
                                 <td style="<%= labelStyle %>">Virus Control</td>
-                                <td class="normal" align="left"><%=Luc5Assay.intString(assay.getVirusControlMean())%> <%=h("±")%> <%=Luc5Assay.percentString(assay.getVirusControlPlusMinus())%></td>
+                                <td class="normal" align="left"><%=Luc5Assay.intString(assay.getVirusControlMean())%> &plusmn; <%=Luc5Assay.percentString(assay.getVirusControlPlusMinus())%></td>
                                 <td style="<%= labelStyle %>">Cell Control</td>
-                                <td class="normal" align=left><%=Luc5Assay.intString(assay.getCellControlMean())%> <%=h("±")%> <%=Luc5Assay.percentString(assay.getCellControlPlusMinus())%></td>
+                                <td class="normal" align=left><%=Luc5Assay.intString(assay.getCellControlMean())%> &plusmn; <%=Luc5Assay.percentString(assay.getCellControlPlusMinus())%></td>
                             </tr>
                         </table>
                     </td>
@@ -287,7 +287,7 @@
                                 <td class=normal align=right><%= shortDecFormat.format(summary.getDilution(data)) %></td>
                                 <td class=normal
                                     align=right><%= Luc5Assay.percentString(summary.getPercent(data)) %></td>
-                                <td class=normal><%= h("±") %></td>
+                                <td class=normal>&plusmn;</td>
                                 <td class=normal
                                     align=right><%= Luc5Assay.percentString(summary.getPlusMinus(data)) %></td>
                             </tr>

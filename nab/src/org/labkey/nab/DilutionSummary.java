@@ -70,9 +70,9 @@ public class DilutionSummary implements Serializable
         if (_dilutionCurve == null)
         {
             if (getFixedSlope() != null)
-                _dilutionCurve = _sampleGroup.getDilutionCurve(_assay, getFixedSlope(), isEndpointsOptional());
+                _dilutionCurve = _sampleGroup.getDilutionCurve(_assay, getMethod() == SampleInfo.Method.Dilution, getFixedSlope(), isEndpointsOptional());
             else
-                _dilutionCurve = _sampleGroup.getDilutionCurve(_assay, isEndpointsOptional());
+                _dilutionCurve = _sampleGroup.getDilutionCurve(_assay, getMethod() == SampleInfo.Method.Dilution, isEndpointsOptional());
         }
         return _dilutionCurve;
     }

@@ -1,4 +1,3 @@
-<%@ page import="org.labkey.nab.Luc5Assay"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="java.text.DecimalFormat"%>
@@ -19,6 +18,16 @@
         out.write("<span class=\"labkey-error\">");
         out.write(errs);
         out.write("</span>");
+    }
+
+    StringBuilder chartURL = new StringBuilder("renderMultiRunChart.view?");
+    DilutionSummary[] summaries = bean.getDilutionSummaries();
+    for (int i = 0; i < summaries.length; i++)
+    {
+        DilutionSummary summary = summaries[i];
+        chartURL.append("wellGroupId=").append(summary.getWellGroup().getRowId());
+        if (i < summaries.length - 1)
+            chartURL.append("&");
     }
 
     String labelStyle = "text-align:left;vertical-align:middle;font-weight:bold";
@@ -129,7 +138,7 @@
     </tr>
     <tr>
         <td colspan="3">
-            <img src="renderMultiRunChart.view">
+            <img src="<%= chartURL %>">
         </td>
     </tr>
 </table><br>
@@ -157,7 +166,7 @@
                     <td class=normal align=right><%= NabController.intString(summary.getDilution(data)) %></td>
                     <td class=normal
                         align=right><%= NabController.percentString(summary.getPercent(data)) %></td>
-                    <td class=normal><%= h("±") %></td>
+                    <td class=normal>&plusmn;</td>
                     <td class=normal
                         align=right><%= NabController.percentString(summary.getPlusMinus(data)) %></td>
                 </tr>

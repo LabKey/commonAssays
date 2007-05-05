@@ -208,7 +208,6 @@ public class NabController extends ViewController
 
     protected Luc5Assay _cachedAssay = null;
     protected DilutionSummary[] _cachedSummaries = null;
-    protected List<Integer> _cachedCutoffs = null;
     private static final Color[] GRAPH_COLORS = {
             ChartColor.BLUE,
             ChartColor.RED,
@@ -368,6 +367,50 @@ public class NabController extends ViewController
         return assay;
     }
 
+    private DilutionSummary[] getDilutionSummaries(int[] wellGroupIds) throws SQLException, ServletException
+    {
+        List<DilutionSummary> summaries = new ArrayList<DilutionSummary>(wellGroupIds.length);
+        Set<Integer> cutoffSet = new HashSet<Integer>();
+        for (int wellgroupId : wellGroupIds)
+        {
+            try
+            {
+                DilutionSummary summary = NabManager.get().getDilutionSummary(getContainer(), wellgroupId);
+                summaries.add(summary);
+                for (int cutoff : summary.getAssay().getCutoffs())
+                    cutoffSet.add(cutoff);
+            }
+            catch (NumberFormatException e)
+            {
+                _log.warn("Bad post to graphSelected", e);
+            }
+        }
+        return summaries.toArray(new DilutionSummary[summaries.size()]);
+    }
+
+    private int[] getCutoffs(DilutionSummary[] summaries)
+    {
+        Set<Integer> cutoffSet = new HashSet<Integer>();
+        for (DilutionSummary summary : summaries)
+        {
+            try
+            {
+                for (int cutoff : summary.getAssay().getCutoffs())
+                    cutoffSet.add(cutoff);
+            }
+            catch (NumberFormatException e)
+            {
+                _log.warn("Bad post to graphSelected", e);
+            }
+        }
+        List<Integer> sortedUniqueCutoffs = new ArrayList<Integer>(cutoffSet);
+        Collections.sort(sortedUniqueCutoffs);
+        int[] cutoffs = new int[sortedUniqueCutoffs.size()];
+        for (int i = 0; i < cutoffs.length; i++)
+            cutoffs[i] = sortedUniqueCutoffs.get(i);
+        return cutoffs;
+    }
+
     @Jpf.Action
     protected Forward graphSelected(GraphSelectedForm form) throws Exception
     {
@@ -386,27 +429,9 @@ public class NabController extends ViewController
                 wellGroupIds[idx++] = Integer.parseInt(wellgroupIdString);
 
         }
-        List<DilutionSummary> summaries = new ArrayList<DilutionSummary>(wellGroupIds.length);
-        Set<Integer> cutoffSet = new HashSet<Integer>();
-        for (int wellgroupId : wellGroupIds)
-        {
-            try
-            {
-                DilutionSummary summary = NabManager.get().getDilutionSummary(getContainer(), wellgroupId);
-                summaries.add(summary);
-                for (int cutoff : summary.getAssay().getCutoffs())
-                    cutoffSet.add(cutoff);
-            }
-            catch (NumberFormatException e)
-            {
-                _log.warn("Bad post to graphSelected", e);
-            }
-        }
-
-        List<Integer> cutoffList = new ArrayList<Integer>(cutoffSet);
-        Collections.sort(cutoffList);
-        _cachedSummaries = summaries.toArray(new DilutionSummary[summaries.size()]);
-        _cachedCutoffs = cutoffList;
+        DilutionSummary[] summaries = getDilutionSummaries(wellGroupIds);
+        int[] cutoffList = getCutoffs(summaries);
+        _cachedSummaries = summaries;
         JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/multiRunGraph.jsp",
                 new GraphSelectedBean(summaries, cutoffList));
 
@@ -433,21 +458,21 @@ public class NabController extends ViewController
 
     public static class GraphSelectedBean
     {
-        private List<DilutionSummary> _dilutionSummaries;
-        private List<Integer> _cutoffs;
+        private DilutionSummary[] _dilutionSummaries;
+        private int[] _cutoffs;
 
-        public GraphSelectedBean(List<DilutionSummary> dilutions, List<Integer> cutoffs)
+        public GraphSelectedBean(DilutionSummary[] dilutions, int[] cutoffs)
         {
             _dilutionSummaries = dilutions;
             _cutoffs = cutoffs;
         }
 
-        public List<DilutionSummary> getDilutionSummaries()
+        public DilutionSummary[] getDilutionSummaries()
         {
             return _dilutionSummaries;
         }
 
-        public List<Integer> getCutoffs()
+        public int[] getCutoffs()
         {
             return _cutoffs;
         }
@@ -527,15 +552,44 @@ public class NabController extends ViewController
         return null;
     }
 
+    public static class RenderMultiChartFrom extends FormData
+    {
+        private int[] _wellGroupId;
+
+        public int[] getWellGroupId()
+        {
+            return _wellGroupId;
+        }
+
+        public void setWellGroupId(int[] wellGroupId)
+        {
+            _wellGroupId = wellGroupId;
+        }
+    }
+
     @Jpf.Action
-    protected Forward renderMultiRunChart() throws Exception
+    protected Forward renderMultiRunChart(RenderMultiChartFrom form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
-        int[] cutoffs = new int[_cachedCutoffs.size()];
-        int i = 0;
-        for (int cutoff : _cachedCutoffs)
-            cutoffs[i++] = cutoff;
-        renderChartPNG(_cachedSummaries, cutoffs);
+        int[] ids = form.getWellGroupId();
+        DilutionSummary[] summaries = _cachedSummaries;
+        boolean cacheValid = true;
+        if (summaries != null && summaries.length == ids.length)
+        {
+            for (int i = 0; i < summaries.length && cacheValid; i++)
+            {
+                if (ids[i] != summaries[i].getWellGroup().getRowId())
+                    cacheValid = false;
+            }
+        }
+        else
+            cacheValid = false;
+
+        if (!cacheValid)
+            summaries = getDilutionSummaries(ids);
+
+        int[] cutoffs = getCutoffs(summaries);
+        renderChartPNG(summaries, cutoffs);
         return null;
     }
 
