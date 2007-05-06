@@ -123,7 +123,7 @@ public class ProteinController extends ViewController
         {
             url.setAction("showAnnotationSetWithSequences.view");
             url.addParameter("CustomAnnotation.queryName", settings.getQueryName());
-            header = "This view shows just the data uploaded as part of the set. [<a href=\"" + url.getLocalURIString() + "\">show with proteins</a>]";
+            header = "This view shows just the data uploaded as part of the set. [<a href=\"" + url.getLocalURIString() + "\">show with matching proteins loaded into this server</a>]";
         }
 
         HtmlView linkView = new HtmlView(header);
@@ -132,7 +132,7 @@ public class ProteinController extends ViewController
 
         NavTrailConfig config = new NavTrailConfig(getViewContext());
         ViewURLHelper listURL = new ViewURLHelper("protein", "begin.view", getContainer());
-        config.setExtraChildren(new NavTree("Custom Annotation Sets", listURL));
+        config.setExtraChildren(new NavTree("MS2", new ViewURLHelper("MS2", "begin.view", getContainer())), new NavTree("Custom Annotation Sets", listURL));
         config.setTitle("Custom Annotation Set: " + settings.getQueryName());
         return renderInTemplate(box, getContainer(), config);
     }
@@ -164,7 +164,13 @@ public class ProteinController extends ViewController
     protected Forward showUploadCustomProteinAnnotations(UploadAnnotationsForm form) throws Exception
     {
         JspView<UploadAnnotationsForm> view = new JspView<UploadAnnotationsForm>("/org/labkey/ms2/protein/uploadCustomProteinAnnotations.jsp", form);
-        return renderInTemplate(view, getContainer(), "Upload Custom Protein Annotations");
+
+        NavTrailConfig config = new NavTrailConfig(getViewContext());
+        ViewURLHelper listURL = new ViewURLHelper("protein", "begin.view", getContainer());
+        config.setExtraChildren(new NavTree("MS2", new ViewURLHelper("MS2", "begin.view", getContainer())), new NavTree("Custom Annotation Sets", listURL));
+        config.setTitle("Upload Custom Protein Annotations");
+
+        return renderInTemplate(view, getContainer(), config);
     }
 
     @Jpf.Action @RequiresPermission(ACL.PERM_INSERT)

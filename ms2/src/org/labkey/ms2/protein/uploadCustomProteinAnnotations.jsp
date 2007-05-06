@@ -19,6 +19,30 @@
     <table>
         <tr>
             <td>
+            </td>
+            <td>
+                <p>
+                    Upload your protein annotation set as tab-separated values (TSV). You can include additional values
+                    associated with each protein, or just upload a list of proteins.
+                </p>
+                <p>
+                    The first line of the file must be the column headings. The value in the first column must be the
+                    name that refers to the protein, based on the type that you select. For example, if you choose IPI
+                    as the type, the first column must be the IPI number (without version information). Each protein
+                    must be on a separate line.
+                </p>
+                <p>
+                    An easy way to copy a TSV to the clipboard is to use Excel or another spreadsheet program to enter
+                    your data, select all the cells, and copy it. You can then paste into the textbox below.
+                </p>
+                <p>
+                    You can download a <a href="http://www.labkey.org/download/ProteinAnnotationSet.tsv">sample file</a>
+                    from the labkey.org server for an example of what a file should look like.<br/>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td>
                 Name:
             </td>
             <td>
@@ -39,11 +63,10 @@
             </td>
         </tr>
         <tr>
-            <td>
+            <td valign="top">
                 Annotations:
             </td>
             <td>
-                The first line of the file should be the column headings. The first column must be the name that refers to the protein.<br/>
                 <textarea rows="10" cols="50" name="annotationsText"><%= h(bean.getAnnotationsText()) %></textarea>
             </td>
         </tr>

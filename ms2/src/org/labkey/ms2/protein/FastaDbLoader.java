@@ -822,11 +822,13 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         String filename = (String)fasta.get("FileName");
 
         FastaDbLoader fdbl = new FastaDbLoader(new File(filename), (String)fasta.get("filechecksum"));
-        fdbl.setAssociatedFastaId(fastaId);
         fdbl.setComment(new java.util.Date() + " " + filename);
         fdbl.setDefaultOrganism(UNKNOWN_ORGANISM);
         fdbl.setOrganismIsToGuessed(true);
         fdbl.parseFile();
+
+        Table.execute(MS2Manager.getSchema(), "UPDATE " + MS2Manager.getTableInfoRuns() + " SET FastaID = ? WHERE FastaID = ?", new Object[] { fdbl.getFastaId(), fastaId } );
+        ProteinManager.deleteFastaFile(fastaId);
     }
 
 

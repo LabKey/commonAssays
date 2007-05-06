@@ -608,14 +608,6 @@ public class PipelineController extends ViewController
             if (newSequenceRoot != null && newSequenceRoot.length() > 0)
             {
                 File file = new File(newSequenceRoot);
-                try
-                {
-                    file = file.getCanonicalFile();
-                }
-                catch (IOException e)
-                {
-                    HttpView.throwNotFound(newSequenceRoot);
-                }
                 root = file.toURI();
             }
 
@@ -1112,7 +1104,7 @@ public class PipelineController extends ViewController
             {
                 ExperimentService.get().deleteExperimentRun(run.getRowId(), c);
             }
-            File annotationFile = MS2PipelineManager.findAnnotationFile(mzXMLFile);
+            File annotationFile = MS2PipelineManager.findAnnotationFile(mzXMLFile, new HashSet<File>(), new HashSet<File>());
             if (annotationFile != null)
             {
                 annotationFile.delete();

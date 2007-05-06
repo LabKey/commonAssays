@@ -68,6 +68,34 @@ public enum CustomAnnotationType
         {
             return getFirstSelectForSeqId("GeneName");
         }
+    },
+    SWISS_PROT("Swiss Prot")
+    {
+        public String getFirstSelectForSeqId()
+        {
+            return getFirstSelectForSeqId("SwissProt");
+        }
+
+        public String getLookupStringSelect(ColumnInfo colSeqId)
+        {
+            StringBuilder sb = new StringBuilder("SELECT Identifier FROM ");
+            sb.append(ProteinManager.getTableInfoIdentifiers());
+            sb.append(" WHERE SeqId = ");
+            sb.append(colSeqId.getValueSql());
+            sb.append(" AND IdentTypeId IN ");
+            sb.append(getIdentTypeIdSelect("SwissProt"));
+            return sb.toString();
+        }
+
+        public String getSeqIdSelect()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append("SELECT SeqId, Identifier AS Ident FROM ");
+            sb.append(ProteinManager.getTableInfoIdentifiers());
+            sb.append(" WHERE IdentTypeId IN ");
+            sb.append(getIdentTypeIdSelect("SwissProt"));
+            return sb.toString();
+        }
     };
 
     protected String getFirstSelectForSeqId(String typeName)

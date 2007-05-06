@@ -3,6 +3,7 @@ package org.labkey.ms2;
 import org.labkey.api.module.DefaultFolderType;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.view.Portal;
+import org.labkey.api.view.ViewContext;
 import static org.labkey.api.util.PageFlowUtil.set;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
@@ -29,5 +30,11 @@ public class MS2FolderType extends DefaultFolderType
                     ModuleLoader.getInstance().getModule("Experiment"),
                     ModuleLoader.getInstance().getModule("Portal")),
             module);
+    }
+
+
+    public String getStartPageLabel(ViewContext ctx)
+    {
+        return super.getStartPageLabel(ctx);
     }
 }

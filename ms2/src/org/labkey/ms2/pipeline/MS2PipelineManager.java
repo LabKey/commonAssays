@@ -705,8 +705,33 @@ public class MS2PipelineManager
         return new File(dirAnalysisRoot, name);
     }
 
+    public static boolean exists(File file, Set<File> knownFiles, Set<File> checkedDirectories)
+    {
+        File parent = file.getParentFile();
+        if (parent != null)
+        {
+            if (!checkedDirectories.contains(parent))
+            {
+                File[] files = parent.listFiles();
+                if (files != null)
+                {
+                    for (File f : files)
+                    {
+                        knownFiles.add(f);
+                    }
+                }
+                checkedDirectories.add(parent);
+            }
+            return knownFiles.contains(file);
+        }
+        return file.exists();
+    }
+
     public static Map<File, FileStatus> getAnalysisFileStatus(URI uriData, String protocolName, Container c, String searchEngine) throws IOException
     {
+        Set<File> knownFiles = new HashSet<File>();
+        Set<File> checkedDirectories = new HashSet<File>();
+        
         File dirData = new File(uriData).getCanonicalFile();
         String dirDataURL = dirData.toURI().toURL().toString();
         File[] mzXMLFiles = dirData.listFiles(getAnalyzeFilter());
@@ -730,8 +755,8 @@ public class MS2PipelineManager
                     dirAnalysis = null;
             }
 
-            boolean all = getLogFile(dirAnalysis, "all").exists();
-            boolean allComplete = all && getSearchExperimentFile(dirAnalysis, "all").exists();
+            boolean all = exists(getLogFile(dirAnalysis, "all"), knownFiles, checkedDirectories);
+            boolean allComplete = all && exists(getSearchExperimentFile(dirAnalysis, "all"), knownFiles, checkedDirectories);
 
             Data[] allContainerDatas = null;
 
@@ -739,17 +764,17 @@ public class MS2PipelineManager
             {
                 FileStatus status = FileStatus.UNKNOWN;
                 String baseName = getBaseName(file);
-                if (dirAnalysis != null && dirAnalysis.exists())
+                if (dirAnalysis != null)
                 {
                     if (allComplete ||
-                            (!all && getSearchExperimentFile(dirAnalysis, baseName).exists()))
+                            (!all && exists(getSearchExperimentFile(dirAnalysis, baseName), knownFiles, checkedDirectories)))
                         status = FileStatus.COMPLETE;
-                    else if (getLogFile(dirAnalysis, baseName).exists())
+                    else if (exists(getLogFile(dirAnalysis, baseName), knownFiles, checkedDirectories))
                         status = FileStatus.RUNNING;
                 }
                 if (status == FileStatus.UNKNOWN)
                 {
-                    if (findAnnotationFile(file, baseName) != null)
+                    if (findAnnotationFile(file, knownFiles, checkedDirectories, baseName) != null)
                     {
                         status = FileStatus.ANNOTATED;
                     }
@@ -798,29 +823,34 @@ public class MS2PipelineManager
 
     public static File findAnnotationFile(File file)
     {
-        return findAnnotationFile(file, getBaseName(file));
+        return findAnnotationFile(file, new HashSet<File>(), new HashSet<File>());
     }
 
-    private static File findAnnotationFile(File file, String baseName)
+    public static File findAnnotationFile(File file, Set<File> knownFiles, Set<File> checkedDirectories)
+    {
+        return findAnnotationFile(file, knownFiles, checkedDirectories, getBaseName(file));
+    }
+
+    private static File findAnnotationFile(File file, Set<File> knownFiles, Set<File> checkedDirectories, String baseName)
     {
         File dirData = file.getParentFile();
         File annotationFile = getAnnotationFile(dirData, baseName);
-        if (annotationFile.exists())
+        if (exists(annotationFile, knownFiles, checkedDirectories))
         {
             return annotationFile;
         }
         annotationFile = getAnnotationFile(dirData, _allFractionsMzXmlFileBase);
-        if (annotationFile.exists())
+        if (exists(annotationFile, knownFiles, checkedDirectories))
         {
             return annotationFile;
         }
         annotationFile =getLegacyAnnotationFile(dirData, baseName);
-        if (annotationFile.exists())
+        if (exists(annotationFile, knownFiles, checkedDirectories))
         {
             return annotationFile;
         }
         annotationFile = getLegacyAnnotationFile(dirData, _allFractionsMzXmlFileBase);
-        if (annotationFile.exists())
+        if (exists(annotationFile, knownFiles, checkedDirectories))
         {
             return annotationFile;
         }
