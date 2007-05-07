@@ -3882,7 +3882,7 @@ public class MS2Controller extends ViewController
         String message;
         if (0 == sequestClient.getErrorCode())
         {
-            message = "Test passed.";
+            message = "Connection test passed.";
             form.setParameters(sequestClient.getEnvironmentConf());
         }
         else

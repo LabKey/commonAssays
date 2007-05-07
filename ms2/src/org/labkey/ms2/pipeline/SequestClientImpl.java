@@ -686,7 +686,7 @@ public class SequestClientImpl implements SearchClient
         // retrieve the the configuation of SequestServer
         Properties parameters = new Properties();
         parameters.setProperty("cmd", "admin");
-        return request(parameters).getProperty("HTTPContent", "ERROR:Evironment configuration not found.");
+        return request(parameters).getProperty("HTTPContent", getErrorString());
     }    
 
     private String requestURL (Properties parameters)
@@ -748,7 +748,7 @@ public class SequestClientImpl implements SearchClient
         {
             _instanceLogger.error("Exception "+x.getClass()+" connect("+ _url + ")=" + sequestRequestURL);
             errorCode = 1;
-            errorString = "Fail to parse Sequest Server URL";
+            errorString = "Fail to parse Sequest Server URL: " + x.getMessage();
             results.setProperty("error", "1");
             results.setProperty("errorstring", errorString);
         }
@@ -756,7 +756,7 @@ public class SequestClientImpl implements SearchClient
         {
             _instanceLogger.error("Exception "+x.getClass()+" connect("+_url+"," + ")=" + sequestRequestURL);
             errorCode = 2;
-            errorString = "Failed to interact with Sequest Server";
+            errorString = "Failed to interact with SequestQueue application: " + x.getMessage();
             results.setProperty("error", "2");
             results.setProperty("errorstring", errorString);
         }

@@ -226,8 +226,8 @@
 		<note> number of auto-detected peaks to try matching (max 5)</note>
 	<note type="input" label="sequest, match_peak_allowed_error">1</note>
 		<note> number of allowed errors in matching auto-detected peaks </note>
-	<note type="input" label="sequest, mass tolerance for matching auto-detected peaks">1.0000</note>
-		<note> mass tolerance for matching auto-detected peaks </note>
+	<note type="input" label="sequest, match_peak_tolerance">1.0000</note>
+        <note> mass tolerance for matching auto-detected peaks </note>
 	<note type="input" label="sequest, maximum parent m+h">3500.0</note>
 		<note> Used to create digest_mass_range</note>
 

@@ -342,6 +342,12 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
                 tgzArchives.add(fileTgz);
             }
         }
+
+        if (!_fileSequestParamsRemote.delete())
+        {
+            error("Failed to delete " + _fileSequestParamsRemote.getAbsolutePath());
+            return;
+        }
         if(!pepProphetInputFiles.isEmpty())
         {
             parserError = xinteract( pepProphetInputFiles, tgzArchives,_dirAnalysis);

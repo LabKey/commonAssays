@@ -204,7 +204,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
             null,
             false
-        ).setInputXmlLabels("potential N-terminus modifications", "potential C-terminus modifications"));
+         ).setInputXmlLabels("refine, potential N-terminus modifications", "refine, potential C-terminus modifications"));
         //No xtandem element created for this property.
         _params.add(new SequestParam(
             170,                                                       //sortOrder
@@ -315,7 +315,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
             ParamsValidatorFactory.getPositiveDoubleParamsValidator(),
             true
-        ).setInputXmlLabels("sequest, mass tolerance for matching auto-detected peaks"));
+        ).setInputXmlLabels("sequest, match_peak_tolerance"));
 
         //needs to be yes
         _params.add(new SequestParam(
