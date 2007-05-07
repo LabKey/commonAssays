@@ -369,6 +369,12 @@ public abstract class MS2Importer
         if (null != spectrumFile)
         {
             HashMap<String, Object> fractionMap = new HashMap<String, Object>();
+
+            Map<String, Object> existingFraction = Table.selectObject(MS2Manager.getTableInfoFractions(), _fractionId, Map.class);
+            if (existingFraction != null && existingFraction.get("mzxmlurl") == null)
+            {
+                fractionMap.put("mzxmlurl", spectrumFile.toURI().toString());
+            }
             fractionMap.put("FileName", spectrumFile.getName());
             Table.update(_user, MS2Manager.getTableInfoFractions(), fractionMap, _fractionId, null);
         }
