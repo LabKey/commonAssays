@@ -6,7 +6,7 @@
         IssuesController.KeywordAdminView.KeywordPicker keywordPicker = kwp;
 %>
     <!--<%=keywordPicker.plural%>-->
-    <td class="normal">
+    <td class="normal" style="vertical-align:top">
     <div class="ms-searchform"><b><%=keywordPicker.plural%></b></div>
     <form id="form<%=keywordPicker.plural%>" method="POST" action="deleteKeyword.post" style="margin:0px;">
 <%

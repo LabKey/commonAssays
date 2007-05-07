@@ -687,7 +687,7 @@ public class IssuesController extends ViewController
 
         if (newFields.containsKey("title"))
             validateRequired("title", newFields.get("title"), requiredFields);
-        if (newFields.containsKey("assignedTo"))
+        if (newFields.containsKey("assignedTo") && !form.getAction().equals("close"))
             validateRequired("assignedto", newFields.get("assignedTo"), requiredFields);
         if (newFields.containsKey("type"))
             validateRequired("type", newFields.get("type"), requiredFields);
@@ -926,7 +926,7 @@ public class IssuesController extends ViewController
     }
 
     public static final String REQUIRED_FIELDS_COLUMNS = "Title,AssignedTo,Type,Area,Priority,Milestone,NotifyList";
-    public static final String DEFAULT_REQUIRED_FIELDS = "title";
+    public static final String DEFAULT_REQUIRED_FIELDS = "title;assignedto";
 
     @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
     protected Forward admin(AdminForm form) throws Exception
