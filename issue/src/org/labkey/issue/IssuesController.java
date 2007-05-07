@@ -109,16 +109,6 @@ public class IssuesController extends ViewController
     }
 
 
-    public static final String ISSUES_COLUMNS_LOOKUP = "IssuesColumns";
-
-    private void setListColumnNames(String columnNames) throws SQLException, ServletException
-    {
-        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(0, getContainer().getId(), ISSUES_COLUMNS_LOOKUP, true);
-        map.put("ListColumns", columnNames);  // NULL will remove this property
-        PropertyManager.saveProperties(map);
-    }
-
-
     private CustomColumnConfiguration getCustomColumnConfiguration() throws SQLException, ServletException
     {
         return IssueManager.getCustomColumnConfiguration(getContainer());
@@ -128,18 +118,6 @@ public class IssuesController extends ViewController
     private Map<String, String> getColumnCaptions() throws SQLException, ServletException
     {
         return getCustomColumnConfiguration().getColumnCaptions();
-    }
-
-
-    // Lame "column picker" for grid... not hooked up to UI yet, but this action can be called to add/remove/reorder columns for this container
-
-    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
-    public Forward setListColumns() throws Exception
-    {
-        String columnNames = (String)getViewContext().get("columns");
-        setListColumnNames(columnNames);
-
-        return new ViewForward(getListUrl(getContainer()));
     }
 
 

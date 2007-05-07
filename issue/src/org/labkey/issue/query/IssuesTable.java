@@ -1,11 +1,13 @@
 package org.labkey.issue.query;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.issues.IssuesSchema;
 import org.labkey.api.query.*;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.issue.IssuesController;
 import org.labkey.issue.model.IssueManager;
 
 import java.util.ArrayList;
@@ -100,37 +102,20 @@ public class IssuesTable extends FilteredTable
         }
     }
 
-    /**
-     * Returns the default list of visible columns for this table.
-     */
+    // Returns the default list of visible columns
     private List<FieldKey> getDefaultColumns()
     {
         List<FieldKey> visibleColumns = new ArrayList<FieldKey>();
 
-        for (String name : getDefaultColumnNames(_schema.getContainer()).split(","))
-        {
+        for (String name : DEFAULT_LIST_COLUMNS.split(","))
             visibleColumns.add(FieldKey.fromString(name));
-        }
-        return visibleColumns;
-    }
 
-    public static String getDefaultColumnNames(Container container)
-    {
-        Map map = PropertyManager.getProperties(container.getId(), IssuesController.ISSUES_COLUMNS_LOOKUP, false);
-        if (null != map)
-        {
-            String listColumns = (String)map.get("ListColumns");
-
-            if (null != listColumns)
-                return listColumns;
-        }
-
-        StringBuffer columnNames = new StringBuffer(DEFAULT_LIST_COLUMNS);
-        Map<String, String> columnCaptions = getCustomColumnCaptions(container);
+        Map<String, String> columnCaptions = getCustomColumnCaptions(_schema.getContainer());
 
         for (String columnName : columnCaptions.values())
-            columnNames.append(',').append(columnName);
-        return columnNames.toString();
+            visibleColumns.add(FieldKey.fromString(columnName));
+
+        return visibleColumns;
     }
 
     public static Map<String, String> getCustomColumnCaptions(Container container)
