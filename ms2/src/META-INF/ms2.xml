@@ -312,7 +312,7 @@
         <ns:column columnName="PeptideProphetErrorRate">
           <ns:columnTitle>PPErrorRate</ns:columnTitle>
           <ns:inputType>text</ns:inputType>
-          <ns:formatString>0.0000</ns:formatString>
+          <ns:formatString>0.00</ns:formatString>
           <ns:displayWidth>70</ns:displayWidth>
           <ns:inputLength>24</ns:inputLength>
           <ns:nullable>false</ns:nullable>
@@ -932,7 +932,7 @@
       <ns:column columnName="PeptideProphetErrorRate">
         <ns:columnTitle>PPErrorRate</ns:columnTitle>
         <ns:inputType>text</ns:inputType>
-        <ns:formatString>0.0000</ns:formatString>
+        <ns:formatString>0.00</ns:formatString>
         <ns:displayWidth>70</ns:displayWidth>
         <ns:inputLength>24</ns:inputLength>
         <ns:nullable>false</ns:nullable>
@@ -1366,7 +1366,7 @@
       <ns:column columnName="PeptideProphetErrorRate">
         <ns:columnTitle>PPErrorRate</ns:columnTitle>
         <ns:inputType>text</ns:inputType>
-        <ns:formatString>0.0000</ns:formatString>
+        <ns:formatString>0.00</ns:formatString>
         <ns:displayWidth>70</ns:displayWidth>
         <ns:inputLength>24</ns:inputLength>
         <ns:nullable>false</ns:nullable>
@@ -1746,6 +1746,7 @@
       </ns:column>
       <ns:column columnName="ErrorRate">
         <ns:columnTitle>Error</ns:columnTitle>
+        <ns:formatString>0.00</ns:formatString>
       </ns:column>
     </ns:columns>
     <ns:tableTitle>MS2ProteinGroups</ns:tableTitle>
@@ -1807,6 +1808,7 @@
       </ns:column>
       <ns:column columnName="ErrorRate">
         <ns:columnTitle>Error</ns:columnTitle>
+        <ns:formatString>0.00</ns:formatString>
       </ns:column>
       <ns:column columnName="ProteinProbability">
         <ns:columnTitle>Prot Prob</ns:columnTitle>
