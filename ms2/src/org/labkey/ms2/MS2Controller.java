@@ -3876,20 +3876,21 @@ public class MS2Controller extends ViewController
 
         String originalSequestServer = form.getSequestServer();
         SequestClientImpl sequestClient = new SequestClientImpl(form.getSequestServer());
-        sequestClient.findWorkableSettings(true);
-        form.setStatus(sequestClient.getErrorCode());
-
+        String html = sequestClient.getEnvironmentConf();
         String message;
-        if (0 == sequestClient.getErrorCode())
+
+        if(sequestClient.getErrorCode() != 0)
         {
-            message = "Connection test passed.";
-            form.setParameters(sequestClient.getEnvironmentConf());
+            form.setStatus(sequestClient.getErrorCode());
+            message = "Test failed.";
+            message = message + "<br>" + html;
         }
         else
         {
-            message = "Test failed.";
-            message = message + "<br>" + sequestClient.getErrorString();
+            message = "Connection test passed.";
+            form.setParameters(html);
         }
+
         form.setMessage(message);
 
         form.setSequestServer(originalSequestServer);

@@ -686,6 +686,13 @@ public class SequestClientImpl implements SearchClient
         // retrieve the the configuation of SequestServer
         Properties parameters = new Properties();
         parameters.setProperty("cmd", "admin");
+        String results = request(parameters).getProperty("HTTPContent", getErrorString());
+
+        if(!results.contains("----DATABASE DIRECTORY----") && getErrorCode()== 0)
+        {
+            errorCode = 3;
+            return "Failed to interact with SequestQueue application: Unexpected content returned.";
+        }
         return request(parameters).getProperty("HTTPContent", getErrorString());
     }    
 
