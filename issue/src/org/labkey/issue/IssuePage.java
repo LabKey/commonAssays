@@ -34,7 +34,7 @@ abstract public class IssuePage extends JspBase
     private String _action;
     private String _body;
     private boolean _hasUpdatePermissions;
-    private String _requiredFields = IssueManager.getRequiredIssueFields();
+    private String _requiredFields;
     private boolean _print = false;
 
     private static Logger _log = Logger.getLogger(IssuePage.class);
@@ -383,4 +383,5 @@ abstract public class IssuePage extends JspBase
     }
 
     public String getRequiredFields() {return _requiredFields;}
+    public void setRequiredFields(String requiredFields){_requiredFields = requiredFields;}
 }

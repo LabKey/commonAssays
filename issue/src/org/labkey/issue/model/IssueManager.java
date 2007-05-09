@@ -610,18 +610,18 @@ public class IssueManager
         return map;
     }
 
-    public static String getRequiredIssueFields()
+    public static String getRequiredIssueFields(Container container)
     {
         String requiredFields = IssuesController.DEFAULT_REQUIRED_FIELDS;
-        Map<String, Object> map = PropertyManager.getProperties(ContainerManager.getRoot().getId(), ISSUES_PREF_MAP, false);
+        Map<String, Object> map = PropertyManager.getProperties(container.getId(), ISSUES_PREF_MAP, false);
         if (map != null)
             requiredFields = (String)map.get(ISSUES_REQUIRED_FIELDS);
         return requiredFields;
     }
 
-    public static void setRequiredIssueFields(String requiredFields) throws SQLException
+    public static void setRequiredIssueFields(Container container, String requiredFields) throws SQLException
     {
-        Map<String, Object> map = PropertyManager.getWritableProperties(0, ContainerManager.getRoot().getId(), ISSUES_PREF_MAP, true);
+        Map<String, Object> map = PropertyManager.getWritableProperties(0, container.getId(), ISSUES_PREF_MAP, true);
 
         if (!StringUtils.isEmpty(requiredFields))
             requiredFields = requiredFields.toLowerCase();

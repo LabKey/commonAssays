@@ -145,7 +145,7 @@ public class IssuesController extends ViewController
                 sep = ";";
             }
         }
-        IssueManager.setRequiredIssueFields(sb.toString());
+        IssueManager.setRequiredIssueFields(getContainer(), sb.toString());
         return adminForward();
     }
 
@@ -265,6 +265,7 @@ public class IssuesController extends ViewController
         page.setCustomColumnConfiguration(getCustomColumnConfiguration());
         //pass user's update perms to jsp page to determine whether to show notify list
         page.setUserHasUpdatePermissions(hasUpdatePermission(getUser(), issue));
+        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
 
         String title = "" + issue.getIssueId() + " : " + issue.getTitle();
 
@@ -318,6 +319,7 @@ public class IssuesController extends ViewController
 
         page.setIssueList(issueList);
         page.setCustomColumnConfiguration(getCustomColumnConfiguration());
+        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
 
         String title = "Issue Details";
 
@@ -363,6 +365,7 @@ public class IssuesController extends ViewController
         page.setBody(form.getBody());
         page.setCallbackURL(form.getCallbackURL());
         page.setEditable(getEditableFields(page.getAction(), ccc));
+        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
 
         return _renderInTemplate(v, "Insert new issue", null);
     }
@@ -399,6 +402,7 @@ public class IssuesController extends ViewController
         page.setIssue(issue);
         page.setCustomColumnConfiguration(ccc);
         page.setEditable(getEditableFields(page.getAction(), ccc));
+        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
 
         return _renderInTemplate(v, "(update) " + issue.getTitle(), null);
     }
@@ -460,6 +464,7 @@ public class IssuesController extends ViewController
         page.setIssue(issue);
         page.setCustomColumnConfiguration(ccc);
         page.setEditable(getEditableFields(page.getAction(), ccc));
+        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
 
         return _renderInTemplate(v, "(resolve) " + issue.getTitle(), null);
     }
@@ -485,6 +490,7 @@ public class IssuesController extends ViewController
         page.setIssue(issue);
         page.setCustomColumnConfiguration(ccc);
         page.setEditable(getEditableFields(page.getAction(), ccc));
+        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
 
         return _renderInTemplate(v, "(close) " + issue.getTitle(), null);
     }
@@ -510,6 +516,7 @@ public class IssuesController extends ViewController
         page.setIssue(issue);
         page.setCustomColumnConfiguration(ccc);
         page.setEditable(getEditableFields(page.getAction(), ccc));
+        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
 
         return _renderInTemplate(v, "(open) " + issue.getTitle(), null);
     }
@@ -567,6 +574,7 @@ public class IssuesController extends ViewController
         page.setError(error);
         page.setCustomColumnConfiguration(ccc);
         page.setEditable(getEditableFields(page.getAction(), ccc));
+        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
 
         return v;
     }
@@ -652,6 +660,7 @@ public class IssuesController extends ViewController
             page.setCustomColumnConfiguration(ccc);
             page.setEditable(getEditableFields(page.getAction(), ccc));
             page.setError(x.getMessage());
+            page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
 
             return _renderInTemplate(v, "(update) " + issue.getTitle(), null);
         }
@@ -680,7 +689,7 @@ public class IssuesController extends ViewController
 
     private void validateRequiredFields(IssuesForm form) throws Exception
     {
-        String requiredFields = IssueManager.getRequiredIssueFields();
+        String requiredFields = IssueManager.getRequiredIssueFields(getContainer());
         final Map<String, String> newFields = form.getStrings();
         if (StringUtils.isEmpty(requiredFields))
             return;
@@ -1244,7 +1253,7 @@ public class IssuesController extends ViewController
             }
             ColumnInfo[] cols = IssuesSchema.getInstance().getTableInfoIssues().getColumns(columnNames.toArray(new String[0]));
 
-            IssuesPreference bean = new IssuesPreference(cols, IssueManager.getRequiredIssueFields());
+            IssuesPreference bean = new IssuesPreference(cols, IssueManager.getRequiredIssueFields(c));
             _requiredFieldsView = new JspView<IssuesPreference>("/org/labkey/issue/requiredFields.jsp", bean);
         }
 
