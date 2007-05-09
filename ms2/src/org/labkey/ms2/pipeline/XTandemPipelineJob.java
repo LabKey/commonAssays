@@ -41,10 +41,6 @@ import java.util.*;
 public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
 {
     private static Logger _log = Logger.getLogger(XTandemPipelineJob.class);
-    // TODO (bug 3166): Mac OS X has a different implementation of ProcessImpl, which cannot handle quoted
-    // arguments.  We need to determine whether or not arguments should be quoted.  Until then, we
-    // allow "labkey.no_quote_arguments" to be passed to us when we start
-    static public boolean NO_QUOTE_ARGUMENTS = Boolean.getBoolean("labkey.no_quote_arguments");
 
     private File _fileTandemXML;
 
@@ -351,8 +347,8 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
 
             // CONSIDER: Try Tandem2XML.exe for back-compat on Linux?
             iReturn = runSubProcess(new ProcessBuilder("Tandem2XML",
-                    fileOutputXML.getPath(),
-                    filePepXMLRaw.getPath()),
+                    fileOutputXML.getName(),
+                    filePepXMLRaw.getName()),
                     dirWork);
 
             if (iReturn != 0 || !filePepXMLRaw.exists())
@@ -379,28 +375,25 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
             else
             {
                 fileProtXML = MS2PipelineManager.getProtXMLIntermediatFile(dirWork, _baseName);
-                interactCmd.add("-Opt");
+                if ("yes".equalsIgnoreCase(parser.getInputParameter("pipeline prophet, accurate mass")))
+                    interactCmd.add("-OptA");
+                else
+                    interactCmd.add("-Opt");
                 interactCmd.add("-nR");
-            }
+                interactCmd.add("-x20");
 
-            String paramMinProb = parser.getInputParameter("pipeline prophet, min probability");
-            if (paramMinProb != null && paramMinProb.length() > 0)
-                interactCmd.add("-p" + paramMinProb);
+                String paramMinProb = parser.getInputParameter("pipeline prophet, min probability");
+                if (paramMinProb != null && paramMinProb.length() > 0)
+                    interactCmd.add("-p" + paramMinProb);
+            }
 
             String quantParam = getQuantitationCmd(parser, fileMzXML.getParentFile());
             if (quantParam != null)
                 interactCmd.add(quantParam);          
 
-            if (NO_QUOTE_ARGUMENTS)
-            {
-                interactCmd.add("-N" + filePepXML.getName());
-                interactCmd.add(filePepXMLRaw.getPath());
-            }
-            else
-            {
-                interactCmd.add("\"-N" + filePepXML.getName() + "\"");
-                interactCmd.add("\"" + filePepXMLRaw.getPath() + "\"");
-            }
+            interactCmd.add("-N" + filePepXML.getName());
+            interactCmd.add(filePepXMLRaw.getName());
+
             header("xinteract output");
 
             iReturn = runSubProcess(new ProcessBuilder(interactCmd),

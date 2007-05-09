@@ -459,10 +459,14 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
             */
             List<String> interactCmd = new ArrayList<String>();
             interactCmd.add("xinteract");
-            interactCmd.add("-nR"); // do not run Database/RefreshParser
 
             fileProtXML = MS2PipelineManager.getProtXMLIntermediatFile(dirWork, _baseName);
-            interactCmd.add("-Opt");
+            if ("yes".equalsIgnoreCase(parser.getInputParameter("pipeline prophet, accurate mass")))
+                interactCmd.add("-OptA");
+            else
+                interactCmd.add("-Opt");
+            interactCmd.add("-nR"); // do not run Database/RefreshParser
+            interactCmd.add("-x20");
 
             String paramMinProb = parser.getInputParameter("pipeline prophet, min probability");
             if (paramMinProb != null && paramMinProb.length() > 0)
@@ -473,7 +477,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
                 interactCmd.add(quantParam);
 
             interactCmd.add("-N" + filePepXML.getName());
-            interactCmd.add(filePepXMLBeforeProphet.getPath());
+            interactCmd.add(filePepXMLBeforeProphet.getName());
 
             header("xinteract output");
 

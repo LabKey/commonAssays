@@ -377,7 +377,11 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
             */
             List<String> interactCmd = new ArrayList<String>();
             interactCmd.add("xinteract");
-            interactCmd.add("-Opt");
+            if ("yes".equalsIgnoreCase(_parser.getInputParameter("pipeline prophet, accurate mass")))
+                interactCmd.add("-OptA");
+            else
+                interactCmd.add("-Opt");
+            interactCmd.add("-x20");
 
             String paramMinProb = _parser.getInputParameter("pipeline prophet, min probability");
             if (paramMinProb != null && paramMinProb.length() > 0)
@@ -463,7 +467,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
             interactCmd.add("-N" + filePepXML.getName());
             for (File summaryXml : pepProphetInputFiles)
             {
-                interactCmd.add(summaryXml.getPath());
+                interactCmd.add(summaryXml.getName());
             }
             header("xinteract output");
 
