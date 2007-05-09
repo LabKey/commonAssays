@@ -325,7 +325,7 @@ public class MouseModelController extends ViewController
     private static DataRegion getGridRegion(ViewContext context)
     {
         DataRegion dr = new DataRegion();
-        dr.addColumns(MouseSchema.getMouseModel().getColumns("name,mouseStrainId,targetGeneId,location,investigator"));
+        dr.addColumns(MouseSchema.getMouseModel().getColumns("name,mouseStrainId,targetGeneId,tumorType,location,investigator"));
 
         ViewURLHelper urlhelp = context.cloneViewURLHelper();
         urlhelp.deleteParameters();
@@ -509,7 +509,7 @@ public class MouseModelController extends ViewController
         private static DataRegion getGridRegion(ViewContext context)
         {
             DataRegion dr = new DataRegion();
-            dr.addColumns(MouseSchema.getMouseModel().getColumns("name,mouseStrainId,targetGeneId,location,investigator"));
+            dr.addColumns(MouseSchema.getMouseModel().getColumns("name,mouseStrainId,targetGeneId,tumorType,location,investigator"));
 
             ViewURLHelper urlhelp = context.cloneViewURLHelper();
             urlhelp.deleteParameters();
