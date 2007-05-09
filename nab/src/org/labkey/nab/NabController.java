@@ -682,7 +682,9 @@ public class NabController extends ViewController
                     {
                         plates.add(sample.getPlate());
                         String ptid = form.getParticipantIds()[i];
-                        double visitId = form.getSequenceNums()[i];
+                        String visitIdString = form.getSequenceNums()[i];
+                        // parse the double here: we've already verified that it's convertable in 'validate'.
+                        Double visitId = Double.parseDouble(visitIdString);
                         Map<String, Object> samplePropertyMap = new HashMap<String, Object>();
                         for (String property : sample.getPropertyNames())
                             samplePropertyMap.put(property, sample.getProperty(property));
@@ -837,10 +839,49 @@ public class NabController extends ViewController
         }
     }
 
+    public static class PublishSampleInfo implements GenericAssayService.SampleInfo
+    {
+        private String _ptid;
+        private String _sampleId;
+        private String _sequenceNum;
+        public PublishSampleInfo(String ptid, String sampleId, String sequenceNum)
+        {
+            _sequenceNum = sequenceNum;
+            _sampleId = sampleId;
+            _ptid = ptid;
+        }
+
+        public String getParticipantId()
+        {
+            return _ptid;
+        }
+
+        public String getSampleId()
+        {
+            return _sampleId;
+        }
+
+        public String getSequenceNumString()
+        {
+            return _sequenceNum;
+        }
+
+        public Double getSequenceNum()
+        {
+            try
+            {
+                return Double.parseDouble(_sequenceNum);
+            }
+            catch (NumberFormatException e)
+            {
+                return null;
+            }
+        }
+    }
     public static class PublishForm extends FormData
     {
         private String[] _includedSampleIds;
-        private Double[] _sequenceNums;
+        private String[] _sequenceNums;
         private String[] _sampleIds;
         private String[] _participantIds;
         private int[] _id;
@@ -877,12 +918,12 @@ public class NabController extends ViewController
             _sampleIds = sampleIds;
         }
 
-        public Double[] getSequenceNums()
+        public String[] getSequenceNums()
         {
             return _sequenceNums;
         }
 
-        public void setSequenceNums(Double[] sequenceNums)
+        public void setSequenceNums(String[] sequenceNums)
         {
             _sequenceNums = sequenceNums;
         }
@@ -925,27 +966,7 @@ public class NabController extends ViewController
             for (int index = 0; index < _sampleIds.length; index++)
             {
                 if (_sampleIds[index].equals(sampleId))
-                {
-                    final String ptid = _participantIds[index];
-                    final Double sequenceNum = _sequenceNums[index];
-                    return new GenericAssayService.SampleInfo() {
-
-                        public String getParticipantId()
-                        {
-                            return ptid;
-                        }
-
-                        public String getSampleId()
-                        {
-                            return sampleId;
-                        }
-
-                        public Double getSequenceNum()
-                        {
-                            return sequenceNum;
-                        }
-                    };
-                }
+                    return new PublishSampleInfo(_participantIds[index], sampleId, _sequenceNums[index]);
             }
             return null;
         }
@@ -969,6 +990,17 @@ public class NabController extends ViewController
                         errors.add("main", new ActionMessage("Error", "Participant ID is required for sample " + _sampleIds[i]));
                     if (_sequenceNums[i] == null)
                         errors.add("main", new ActionMessage("Error", "Visit Sequence number is required for sample " + _sampleIds[i]));
+                    else
+                    {
+                        try
+                        {
+                            double d = Double.parseDouble(_sequenceNums[i]);
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            errors.add("main", new ActionMessage("Error", "Visit Sequence numbers should be decimal values.  The following is invalid: " + _sequenceNums[i]));
+                        }
+                    }
                 }
             }
             return errors;
