@@ -304,6 +304,64 @@ public class ScoringController extends ViewController
     }
 
 
+    @Jpf.Action
+    protected Forward chartCompareProt(ChartForm form) throws ServletException, URISyntaxException, IOException
+    {
+        requiresPermission(ACL.PERM_READ);
+
+        Container c = getContainer();
+        ViewURLHelper currentUrl = cloneViewURLHelper();
+
+        /* @todo: error handling. */
+
+        String[] markStrs = new String[0];
+
+        String markParam = form.getMarks();
+        if (markParam != null && markParam.length() > 0)
+            markStrs = markParam.split(",");
+
+        int[] marks = new int[markStrs.length];
+        for (int i = 0; i < marks.length; i++)
+            marks[i] = Integer.parseInt(markStrs[i]);
+
+        XYSeriesCollection collection =
+                MS2Manager.getROCDataProt(form.getRunIds(),
+                        form.getIncrement(),
+                        form.getDiscriminates(),
+                        form.getLimit(),
+                        marks,
+                        c);
+
+        JFreeChart chart = ChartFactory.createXYLineChart(form.getTitle(),
+                "False Positives",
+                "Correct IDs",
+                collection,
+                PlotOrientation.VERTICAL,
+                true,
+                true,
+                false);
+        chart.getTitle().setFont(chart.getTitle().getFont().deriveFont(16.0f));
+        chart.setBackgroundPaint(Color.white);
+
+        XYPlot plot = chart.getXYPlot();
+        for (int i = 0; i < collection.getSeriesCount(); i++)
+        {
+            final Paint paint = plot.getRenderer().getSeriesPaint(i);
+            MS2Manager.XYSeriesROC series = (MS2Manager.XYSeriesROC) collection.getSeries(i);
+            series.plotAnnotations(plot, paint);
+        }
+
+        getResponse().setContentType("image/png");
+        ChartUtilities.writeChartAsPNG(getResponse().getOutputStream(),
+                chart,
+                form.getWidth(),
+                form.getHeight(),
+                new ChartRenderingInfo(new StandardEntityCollection()));
+
+        return null;
+    }
+
+
     public static class ChartDiscForm extends ViewForm
     {
         private String title;

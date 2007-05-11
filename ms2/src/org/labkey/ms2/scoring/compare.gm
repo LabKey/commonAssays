@@ -114,7 +114,10 @@ for (run in runs)
     if (hasData)
     { %>
 
-    <td valign="top"><img src="chartCompare.view?<%=params%>"></td>
+    <td valign="top">
+        <img src="chartCompare.view?<%=params%>"><br><br>
+        <img src="chartCompareProt.view?<%=params%>">
+    </td>
 
 <%  } %>
 

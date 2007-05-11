@@ -1295,10 +1295,11 @@ public class MS2Manager
                     try
                     {
                         rs = Table.executeQuery(getSchema(),
-                                                    "SELECT Protein, " + discriminate + " as Expression " +
+                                                    "SELECT Protein, " + discriminate + " as Expression, " +
+                                                            " CASE substring(Protein, 1, 4) WHEN 'rev_' THEN 1 ELSE 0 END as FP " +
                                                     "FROM " + getTableInfoPeptides().getFromSQL() + " " +
                                                     "WHERE Run = ? " +
-                                                    "ORDER BY Expression",
+                                                    "ORDER BY Expression, FP",
                                                     new Object[] { run.getRun() });
 
                         int rows = 0;
@@ -1351,6 +1352,120 @@ public class MS2Manager
 
                 collection.addSeries(series);
             }
+        }
+
+        return collection;
+    }
+
+    public static XYSeriesCollection getROCDataProt(int[] runIds, double increment,
+                                                    boolean[][] discriminateFlags,
+                                                    int limitFalsePs, int[] marks, Container c)
+    {
+        String negHitPrefix = getNegativeHitPrefix(c);
+
+        XYSeriesCollection collection = new XYSeriesCollection();
+        for (int i = 0; i < runIds.length; i++)
+        {
+            MS2Run run = getRun(runIds[i]);
+            if (run == null)
+                continue;
+
+            // Only show runs for which at least one discriminate flag is showing.
+            boolean showRun = false;
+            for (boolean discriminateFlag : discriminateFlags[i])
+                showRun = showRun || discriminateFlag;
+            if (!showRun)
+                continue;
+
+            long runRows = 0;
+            try
+            {
+                runRows = Table.executeSingleton(getSchema(),
+                                "SELECT count(*) " +
+                                    "FROM " + getTableInfoRuns().getFromSQL("r") + " " +
+                                        "inner join " + getTableInfoProteinProphetFiles().getFromSQL("f") + " on r.Run = f.Run " +
+                                        "inner join " + getTableInfoProteinGroups().getFromSQL("g") + " on f.RowId = g.ProteinProphetFileId " +
+                                    "WHERE r.Run = ? ",
+                                    new Object[] { run.getRun() },
+                                    Integer.class).longValue();
+            }
+            catch (SQLException e)
+            {
+                continue;
+            }
+
+            String key = run.getDescription();
+            XYSeriesROC series = new XYSeriesROC(key);
+
+            if (run.statusId == 0)
+                series.setKey(series.getKey() + " (Loading)");
+            else
+            {
+                ResultSet rs = null;
+                try
+                {
+                    rs = Table.executeQuery(getSchema(),
+                                "SELECT GroupNumber, -max(GroupProbability) as Expression, min(BestName) as Protein, " +
+                                        " CASE substring(min(BestName), 1, 4) WHEN 'rev_' THEN 1 ELSE 0 END as FP " +
+                                "FROM " + getTableInfoRuns().getFromSQL("r") + " " +
+                                    "inner join " + getTableInfoProteinProphetFiles().getFromSQL("f") + " on r.Run = f.Run " +
+                                    "inner join " + getTableInfoProteinGroups().getFromSQL("g") + " on f.RowId = g.ProteinProphetFileId " +
+                                    "inner join " + getTableInfoProteinGroupMemberships().getFromSQL("m") + " on g.RowId = m.ProteinGroupId " +
+                                    "inner join " + ProteinManager.getTableInfoSequences().getFromSQL("s") + " on m.SeqId = s.SeqId " +
+                                "WHERE r.Run = ? " +
+                                "GROUP BY GroupNumber " +
+                                "ORDER BY Expression, FP",
+                                new Object[] { run.getRun() });
+
+                    int rows = 0;
+                    int falsePositives = 0;
+                    int iMark = 0;
+
+                    series.add(0.0, 0.0);
+
+                    points_loop:
+                    for (int k = 1; falsePositives < limitFalsePs; k++)
+                    {
+                        double cutoff = k * increment / 100.0;
+                        while ((((double) rows) / (double) runRows) < cutoff &&
+                                falsePositives < limitFalsePs)
+                        {
+                            if (!rs.next())
+                                break points_loop;
+                            if (rs.getString("Protein").startsWith(negHitPrefix))
+                            {
+                                // If this is the first false positive, create a point
+                                // with an annotation for it.
+                                if (iMark < marks.length && falsePositives == marks[iMark])
+                                {
+                                    series.addFirstFalseAnnotation(rs.getString("Expression"),
+                                            falsePositives, rows - falsePositives);
+
+                                    iMark++;
+                                }
+                                falsePositives++;
+                            }
+                            rows++;
+                        }
+                        series.add(falsePositives, rows - falsePositives);
+                    }
+                }
+                catch (SQLException e)
+                {
+                    series.setKey(series.getKey() + " (Error)");
+                    series.clear();
+                    _log.error("Error getting ROC data.", e);
+                }
+                finally
+                {
+                    if (rs != null)
+                    {
+                        try { rs.close(); } catch(SQLException e) { _log.error("Error closing ResultSet", e); }
+                    }
+                }
+            }
+
+            collection.addSeries(series);
         }
 
         return collection;
