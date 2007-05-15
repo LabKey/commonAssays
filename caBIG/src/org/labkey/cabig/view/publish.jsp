@@ -14,25 +14,25 @@
     if (isPublished)
     {
 %>
-This folder is published to the caBIG interface.  If your caBIG webapp is running, all experiment data in this folder is visible publicly
-via the caBIG API.<br><br>
+This folder is published to the caBIG&trade; (cancer Biomedical Informatics Grid&trade;) interface.  If your caBIG&trade;
+web application is running then all experiment data in this folder is publicly visible.<br><br>
 <%
     }
     else
     {
 %>
-This folder is not published to the caBIG interface.  Click the button below to publish this folder to caBIG.  If you do this, and your caBIG webapp
-is running, all experiment data in the folder will be visible publicly via the caBIG API.<br><br>
+This folder is not published to the caBIG&trade; (cancer Biomedical Informatics Grid&trade;) interface.  Click the button below to publish
+this folder to caBIG&trade;.  If you do this then all experiment data in this folder will be publicly visible via the caBIG&trade; web application.<br><br>
 <%  }  %>
 
 <%=publishButton%>&nbsp;<%=PageFlowUtil.buttonLink("Admin", adminUrl)%>
-<br><br>For more information about publishing to caBIG, <a href="<%=h(new HelpTopic("cabig", HelpTopic.Area.CPAS).getHelpTopicLink())%>" target="cabig">click here</a>.
+<br><br>For more information about publishing to caBIG&trade;, <a href="<%=h(new HelpTopic("cabig", HelpTopic.Area.CPAS).getHelpTopicLink())%>" target="cabig">click here</a>.
 
 <%
     if (isPublished)
     {
 %>
-<br><br>If you've configured the caBIG webapp on the same server as your LabKey Server (the standard configuration), then <a href="<%=h(ctx.getViewURLHelper().getBaseServerURI())%>/publish/Happy.jsp">click here</a> to test it.
+<br><br>If you've followed the default configuration and installed the caBIG&trade; web application (named "publish") on the same server as LabKey, then you can <a href="<%=h(ctx.getViewURLHelper().getBaseServerURI())%>/publish/Happy.jsp">click here</a> to test it.
 <%
     }
 %>

@@ -59,8 +59,6 @@ public class SequestLocalPipelineProvider extends PipelineProvider
     {
         if (!AppProps.getInstance().hasSequest())
             return null;
-        if (AppProps.getInstance().hasPipelineCluster())
-            return null;
         return new SetupWebPart();
     }
 

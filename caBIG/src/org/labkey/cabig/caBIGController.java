@@ -127,8 +127,9 @@ public class caBIGController extends ViewController
 
         StringBuilder html = new StringBuilder();
         html.append("<script type=\"text/javascript\">\n").append("LABKEY.requiresScript('filter.js');\n").append("</script>");
-        html.append("Click the buttons below to publish or unpublish folders to the caBIG interface.  If your caBIG webapp is running, all experiment data in published folders will be visible publicly via the caBIG API.<br><br>");
-        html.append("For more information about publishing to caBIG, ");
+        html.append("Click the buttons below to publish or unpublish folders to the caBIG&trade; interface.  If your caBIG&trade; web application ");
+        html.append("is running then all experiment data in published folders is publicly visible via the caBIG&trade; interface.<br><br>");
+        html.append("For more information about publishing to caBIG&trade;, ");
         html.append("<a href=\"").append(PageFlowUtil.filter(new HelpTopic("cabig", HelpTopic.Area.CPAS).getHelpTopicLink())).append("\">click here</a>.<br><br>\n");
         html.append("<form method=post action=''>");
         html.append("<table class=\"dataRegion\" cellspacing=\"0\" cellpadding=\"1\">");

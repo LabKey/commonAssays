@@ -218,7 +218,7 @@ else
 if("mascot".equalsIgnoreCase(form.searchEngine))
 {
 //TODO: need to provide our URL for the mapping of search parameter to XML
-%><a href="<%=(new HelpTopic("MascotAPI", HelpTopic.Area.CPAS)).getHelpTopicLink()%>" target="_api">Mascot API Documentation</a> <%
+%><a href="<%=(new HelpTopic("pipelineMascot", HelpTopic.Area.CPAS)).getHelpTopicLink()%>" target="_api">Mascot API Documentation</a> <%
 }
 else if("sequest".equalsIgnoreCase(form.searchEngine))
 {

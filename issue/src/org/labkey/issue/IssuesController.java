@@ -696,7 +696,7 @@ public class IssuesController extends ViewController
 
         if (newFields.containsKey("title"))
             validateRequired("title", newFields.get("title"), requiredFields);
-        if (newFields.containsKey("assignedTo") && !form.getAction().equals("close"))
+        if (newFields.containsKey("assignedTo") && !(form.getBean().getStatus().equals(Issue.statusCLOSED)))
             validateRequired("assignedto", newFields.get("assignedTo"), requiredFields);
         if (newFields.containsKey("type"))
             validateRequired("type", newFields.get("type"), requiredFields);

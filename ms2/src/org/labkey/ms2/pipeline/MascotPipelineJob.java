@@ -435,7 +435,10 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
                     "-xml"
                     ,"-notgz"
                     ,"-desc"
-                    ,"-shortid"
+                    //wch: 2007-05-11
+                    //     expand the protein id to match X!Tandem output or user who run X! Tandem first 
+                    //     will fail to access protein associated information in mascot run
+                    //,"-shortid"
                     ),
                     dirWork);
             if (iReturn != 0 || !filePepXMLRaw.exists())
