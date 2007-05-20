@@ -2812,9 +2812,10 @@ public class MS2Controller extends ViewController
         sb.append("</div></div><br/>");
 
         sb.append("<input type=\"radio\" name=\"column\" value=\"Peptide\" /><b>Peptide</b><br/>");
-
+        sb.append("<hr>");
         sb.append("<input type=\"radio\" name=\"column\" value=\"Query\" /><b>Query (beta)</b><br/>");
-
+        sb.append("<div style=\"padding-left: 20px;\">The query-based comparison does not use the view selected above. Instead, please follow the instructions at the top of the comparison page to customize the results. It is based on ProteinProphet protein groups, so the runs must be associated with ProteinProphet data.</div>");
+        sb.append("<hr>");
         sb.append("</td></tr>\n");
 
         ViewURLHelper nextUrl = cloneViewURLHelper().setAction("applyCompareView");
@@ -2879,7 +2880,9 @@ public class MS2Controller extends ViewController
             settings.setQueryName(MS2Schema.COMPARE_PROTEIN_PROPHET_TABLE_NAME);
             settings.setAllowChooseQuery(false);
             CompareProteinsView view = new CompareProteinsView(getViewContext(), new MS2Schema(getUser(), getContainer()), settings, runs);
-            return _renderInTemplate(view, false, "Compare ProteinProphet", null);
+            HtmlView helpView = new HtmlView("<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein-specific columns, or expand <em>Run</em> to see the run-specific columns, like quantitation, amino acid coverage, and so forth. To set a filter on something like the group's probability, select the Filter tab, add the <em>Run->Prob</em> column, and filter it based on the desired threshold.</p></div>");
+            VBox vbox = new VBox(helpView, view);
+            return _renderInTemplate(vbox, false, "Compare Runs", null);
         }
 
         CompareQuery query = CompareQuery.getCompareQuery(column, currentUrl, runs);

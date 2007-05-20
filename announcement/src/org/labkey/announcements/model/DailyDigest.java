@@ -224,7 +224,7 @@ public class DailyDigest
         request.setContextPath(appProps.getContextPath());
         request.setServerPort(appProps.getServerPort());
         request.setServerName(appProps.getServerName());
-        request.setProtocol(appProps.getScheme());
+        request.setScheme(appProps.getScheme());
 
         return request;
     }

@@ -24,12 +24,27 @@ public enum MS2RunViewType
         {
             return false;
         }
+
+        public boolean supportsPeptideColumnPicker()
+        {
+            return true;
+        }
     },
     PROTEIN("Protein", "protein")
     {
         public AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs)
         {
             return new StandardProteinPeptideView(viewContext, runs);
+        }
+
+        public boolean supportsPeptideColumnPicker()
+        {
+            return true;
+        }
+
+        public boolean supportsProteinColumnPicker()
+        {
+            return true;
         }
     },
     PROTEIN_PROPHET("Protein Prophet", "proteinprophet")
@@ -42,6 +57,16 @@ public enum MS2RunViewType
         public boolean supportsRun(MS2Run run) throws SQLException
         {
             return run.hasProteinProphet();
+        }
+
+        public boolean supportsPeptideColumnPicker()
+        {
+            return true;
+        }
+
+        public boolean supportsProteinColumnPicker()
+        {
+            return true;
         }
     },
     QUERY_PEPTIDES("Query - Peptides", "query")
@@ -92,6 +117,16 @@ public enum MS2RunViewType
     public boolean supportsExpansion()
     {
         return true;
+    }
+
+    public boolean supportsPeptideColumnPicker()
+    {
+        return false;
+    }
+
+    public boolean supportsProteinColumnPicker()
+    {
+        return false;
     }
 
     public abstract AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs);

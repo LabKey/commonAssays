@@ -1,15 +1,81 @@
 <table class="dataRegion">
-<tr>
-  <td><form method="post" action="$urls.applyView"><table class="dataRegion" border="0"><tr>
-      <td valign=bottom>$applyView</td>
-      <td valign=bottom><input type="image" value="Go" src="$tools.buttonSrc('Go')"></td>
-      <td>&nbsp;</td>
-      <td valign=bottom><a href="$urls.saveView"><img border=0 src="$tools.buttonSrc('Save View')"></a></td>
-      <td valign=bottom><a href="$urls.manageViews"><img border=0 src="$tools.buttonSrc('Manage Views')"></a></td>
-      <td valign=bottom><a href="$urls.pickPeptideColumns"><img border=0 src="$tools.buttonSrc('Pick Peptide Columns')"></a></td>
-      <td valign=bottom><a href="$urls.pickProteinColumns"><img border=0 src="$tools.buttonSrc('Pick Protein Columns')"></a></td>
-  </tr></table></form></td>
-</tr>
+    <tr>
+        <td colspan="3">
+            <form method="post" action="$urls.applyView">
+                <table class="dataRegion" border="0">
+                    <tr>
+                        <td valign=bottom>$applyView</td>
+                        <td valign=bottom><input type="image" value="Go" src="$tools.buttonSrc('Go')"></td>
+                        <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                        <td valign=bottom><a href="$urls.saveView"><img border=0 src="$tools.buttonSrc('Save View')"></a></td>
+                        <td valign=bottom><a href="$urls.manageViews"><img border=0 src="$tools.buttonSrc('Manage Views')"></a></td>
+                        #if ($currentViewType.supportsPeptideColumnPicker())
+                            <td valign=bottom><a href="$urls.pickPeptideColumns" id="pickPeptideColumns"><img border=0 src="$tools.buttonSrc('Pick Peptide Columns')"></a></td>
+                        #end
+                        #if ($currentViewType.supportsProteinColumnPicker())
+                            <td valign=bottom><a href="$urls.pickProteinColumns" id="pickProteinColumns"><img border=0 src="$tools.buttonSrc('Pick Protein Columns')"></a></td>
+                        #end
+                    </tr>
+                </table>
+            </form>
+        </td>
+    </tr>
+    <tr>
+        <form id="viewTypeForm" method="GET">
+            <td height="100%" width="10">
+                <fieldset>
+                    <legend>Grouping</legend>
+                    <table class="dataRegion">
+                        <tr>
+                            <td style="vertical-align: middle;" nowrap>
+                                <select id="viewTypeGrouping" name="grouping" onchange="document.getElementById('viewTypeExpanded').disabled = !viewTypeInfo[document.getElementById('viewTypeGrouping').selectedIndex];">
+                                    #foreach ($viewType in $viewTypes)
+                                        <option value="$viewType.getURLName()" #if( $viewType == $currentViewType) selected #end>$viewType.getName()</option>
+                                    #end
+                                </select>$tools.getPageFlowUtil().helpPopup("Grouping", "<table><tr><td style='vertical-align: top;'><b>None</b></td><td>Shows peptides without nesting them.</td></tr><tr><td style='vertical-align: top;'><b>Protein</b></td><td>Shows peptides, grouped by their search engine assigned protein.</td></tr><tr><td style='vertical-align: top;'><b>Protein Prophet</b></td><td>Shows peptides, grouped by their ProteinProphet protein groups.</td></tr><tr><td style='vertical-align: top;'><b>Query - Peptides</b></td><td>Shows peptides. If you choose columns from ProteinProphet or the search engine assigned protein, the peptides will be grouped under those columns. Use the Customize View link to change the column list.</td></tr><tr><td style='vertical-align: top;'><b>Query - Protein Groups</b></td><td>Shows proteins, grouped under the ProteinProphet assigned groups. Use the Customize View link to change the column list.</td></tr></table>", true)
+                            </td>
+                            <td style="vertical-align: middle;" nowrap><input id="viewTypeExpanded" style="margin-right: 0px;" type="checkbox" name="expanded" value="1" #if ($expanded) checked #end #if (!$currentViewType.supportsExpansion()) disabled #end> Expanded$tools.getPageFlowUtil().helpPopup("Expanded", "If selected, the groups will all be expanded. If not, the groups will be collapsed but can be expanded")</td>
+                            <td style="vertical-align: middle;" nowrap><a id="viewTypeSubmitButton" href="nothing" onclick="window.location.href='$baseViewURL' + '&grouping=' + document.getElementById('viewTypeGrouping').value + (document.getElementById('viewTypeExpanded').checked ? '&expanded=1' : ''); return false;"><img border=0 src="$tools.buttonSrc('Go')"></a>
+                        </tr>
+                    </table>
+                </fieldset>
+            </td>
+        </form>
+        <form method="post" action="$urls.extraFilter">
+            <td height="100%" width="10">
+                <fieldset>
+                    <legend>${run.chargeFilterColumnName} score</legend>
+                    <table class="dataRegion" border="0">
+                        <tr>
+                            <td nowrap style="vertical-align: middle;">1+&nbsp;<input id="Charge1" type="text" name=charge1 value="$charge1" size="2">$tools.getPageFlowUtil().helpPopup("1+ ${run.chargeFilterColumnName} Score", "The minimum ${run.chargeFilterColumnName} score for peptides in the 1+ charge state.")</td>
+                            <td nowrap style="vertical-align: middle;">2+&nbsp;<input id="Charge2" type="text" name=charge2 value="$charge2" size="2">$tools.getPageFlowUtil().helpPopup("2+ ${run.chargeFilterColumnName} Score", "The minimum ${run.chargeFilterColumnName} score for peptides in the 2+ charge state.")</td>
+                            <td nowrap style="vertical-align: middle;">3+&nbsp;<input id="Charge3" type="text" name=charge3 value="$charge3" size="2">$tools.getPageFlowUtil().helpPopup("3+ ${run.chargeFilterColumnName} Score", "The minimum ${run.chargeFilterColumnName} score for peptides in the 3+ charge state.")</td>
+                            <td norwap style="vertical-align: middle;"><input type="image" id="AddChargeScoreFilterButton" value="Add Filter" src="$tools.buttonSrc('Go')" name=""></td>
+                        </tr>
+                    </table>
+                </fieldset>
+            </td>
+            <td height="100%" width="10">
+                <fieldset>
+                    <legend>Tryptic&nbsp;ends</legend>
+                    <table>
+                        <tr>
+                            <td nowrap style="vertical-align: middle;"><input type="radio" name="tryptic" #if($tryptic == 0)checked#end value="0">0$tools.getPageFlowUtil().helpPopup("0 tryptic ends", "All peptides will be shown, regardless of tryptic ends")
+                                                <input type="radio" name="tryptic" #if($tryptic == 1)checked#end value="1">1$tools.getPageFlowUtil().helpPopup("1 tryptic end", "At least one end of the peptide must be tryptic")
+                                                <input type="radio" name="tryptic" #if($tryptic == 2)checked#end value="2">2$tools.getPageFlowUtil().helpPopup("2 tryptic ends", "Both ends of the peptide must be tryptic")</td>
+                            <td nowrap style="vertical-align: middle;"><input type="image" id="AddTrypticEndsFilterButton" value="Add Filter" src="$tools.buttonSrc('Go')" name=""></td>
+                        </tr>
+                    </table>
+                </fieldset>
+            </td>
+        </form>
+    </tr>
+    <tr>
+        <td colspan="3">
+            #parse("/org/labkey/ms2/renderFilter.vm")
+        </td>
+    </tr>
+</table>
 
 <script language="JavaScript">
     var viewTypeInfo = new Object();
@@ -17,43 +83,21 @@
     #foreach ($viewType in $viewTypes)
         viewTypeInfo[count++] = $viewType.supportsExpansion();
     #end
+
+
+    // Horrible hack to get Firefox to correctly size the Grouping box
+    // Without this to force to it to refresh, it sometimes overlays the scoring
+    // box over the right part fo the grouping box.
+    var originalIndex = document.getElementById('viewTypeGrouping').selectedIndex;
+    var tempIndex;
+    if (originalIndex == 0)
+    {
+        tempIndex = 1;
+    }
+    else
+    {
+        tempIndex = 0;
+    }
+    document.getElementById('viewTypeGrouping').selectedIndex = tempIndex;
+    document.getElementById('viewTypeGrouping').selectedIndex = originalIndex;
 </script>
-
-<tr><td><form id="viewTypeForm" method="GET"></form><table class="dataRegion" border="0"><tr>
-    <td valign="center">Grouping:</td>
-    <td><select id="viewTypeGrouping" name="grouping" onchange="javascript:document.getElementById('viewTypeExpanded').disabled = !viewTypeInfo[document.getElementById('viewTypeGrouping').selectedIndex];">
-        #foreach ($viewType in $viewTypes)
-            <option enableExpanded="$viewType.supportsExpansion()" value="$viewType.getURLName()" #if( $viewType == $currentViewType)
-                selected
-            #end
-        >$viewType.getName()</option>
-        #end
-        </select>
-    </td>
-    <td><input id="viewTypeExpanded" type="checkbox" name="expanded" value="1" #if ($expanded)
-        checked
-        #end
-        #if (!$currentViewType.supportsExpansion())
-        disabled
-        #end
-        >Expanded</td>
-    <td><a id="viewTypeSubmitButton" href="nothing" onclick="window.location.href='$baseViewURL' + '&grouping=' + document.getElementById('viewTypeGrouping').value + (document.getElementById('viewTypeExpanded').checked ? '&expanded=1' : ''); return false;"><img border=0 src="$tools.buttonSrc('Change Grouping')"></a>
-</tr></table></form></td></tr>
-
-<tr>
-  <td><form method="post" action="$urls.extraFilter">
-    <table class="dataRegion" border="0"><tr>
-      <td>${run.chargeFilterColumnName}:&nbsp;1+&nbsp;<input id="Charge1" type="text" name=charge1 value="$charge1" style="width:50;"></td>
-      <td>               2+&nbsp;<input id="Charge2" type="text" name=charge2 value="$charge2" style="width:50;"></td>
-      <td>               3+&nbsp;<input id="Charge3" type="text" name=charge3 value="$charge3" style="width:50;"></td>
-      <td>Tryptic&nbsp;ends:&nbsp;<input type="radio" name="tryptic" #if($tryptic == 0)checked#end value="0">0
-                                  <input type="radio" name="tryptic" #if($tryptic == 1)checked#end value="1">1
-                                  <input type="radio" name="tryptic" #if($tryptic == 2)checked#end value="2">2
-                                  <input type="image" value="Add Filter" src="$tools.buttonSrc('Add Filter')" name=""></td>
-    </tr></table>
-  </form></td>
-</tr>
-<tr><td>
-#parse("/org/labkey/ms2/renderFilter.vm")
-</td></tr>
-</table>

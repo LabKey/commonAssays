@@ -57,17 +57,9 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
             for (MS2Run run : runs)
             {
                 SQLFragment sql = new SQLFragment();
-                sql.append("(SELECT MIN(ProteinGroupId) FROM ");
-                sql.append(MS2Manager.getTableInfoProteinGroupMemberships());
-                sql.append(" pgm, ");
-                sql.append(MS2Manager.getTableInfoProteinGroups());
-                sql.append(" pg, ");
-                sql.append(MS2Manager.getTableInfoProteinProphetFiles());
-                sql.append(" ppf\nWHERE ppf.Run = ");
+                sql.append("Run");
                 sql.append(run.getRun());
-                sql.append(" AND pgm.ProteinGroupId = pg.RowId AND ppf.RowId = pg.ProteinProphetFileId AND pgm.SeqId = ");
-                sql.append(ExprColumn.STR_TABLE_ALIAS);
-                sql.append(".SeqId)");
+                sql.append("ProteinGroupId");
                 ExprColumn proteinGroupIdColumn = new ExprColumn(this, "Run" + run.getRun(), sql, Types.INTEGER);
                 proteinGroupIdColumn.setIsUnselectable(true);
                 runColumns.add(proteinGroupIdColumn);
@@ -133,5 +125,44 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
         defaultCols.add(FieldKey.fromParts("Pattern"));
 
         setDefaultVisibleColumns(defaultCols);
+    }
+
+
+    public SQLFragment getFromSQL(String alias)
+    {
+        String innerAlias = "Inner" + alias;
+        SQLFragment result = new SQLFragment();
+        result.append("(SELECT * FROM ");
+        result.append(super.getFromSQL(innerAlias));
+        result.append(", (SELECT Run, SeqId AS InnerSeqId");
+        for (MS2Run run : _runs)
+        {
+            result.append(",\n");
+            result.append("\tCASE WHEN Run=");
+            result.append(run.getRun());
+            result.append(" THEN MAX(pg.RowId) ELSE NULL END AS Run");
+            result.append(run.getRun());
+            result.append("ProteinGroupId");
+        }
+        result.append( "\nFROM ");
+        result.append(MS2Manager.getTableInfoProteinProphetFiles());
+        result.append(" ppf, ");
+        result.append(MS2Manager.getTableInfoProteinGroups());
+        result.append(" pg, ");
+        result.append(MS2Manager.getTableInfoProteinGroupMemberships());
+        result.append(" pgm WHERE ppf.Run IN(");
+        String separator = "";
+        for (MS2Run run : _runs)
+        {
+            result.append(separator);
+            separator = ", ";
+            result.append(run.getRun());
+        }
+        result.append(") AND ppf.RowId = pg.ProteinProphetFileId AND pg.RowId = pgm.ProteinGroupId GROUP BY Run, SeqId)\n");
+        result.append(" AS RunProteinGroups WHERE RunProteinGroups.InnerSeqId = ");
+        result.append(innerAlias);
+        result.append(".SeqId) AS ");
+        result.append(alias);
+        return result;
     }
 }
