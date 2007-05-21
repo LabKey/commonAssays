@@ -55,7 +55,7 @@ public class FCSCache
 
     static class FCSCacheMap extends AbstractCacheMap<URI, FCS>
         {
-        static final int CACHE_SIZE = 5;
+        static final int CACHE_SIZE = 4;
         public FCSCacheMap()
             {
             super(CACHE_SIZE);

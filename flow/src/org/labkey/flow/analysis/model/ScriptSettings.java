@@ -35,6 +35,27 @@ public class ScriptSettings implements Serializable
         {
             _minValue = value;
         }
+
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ParameterInfo that = (ParameterInfo) o;
+
+            if (_minValue != null ? !_minValue.equals(that._minValue) : that._minValue != null) return false;
+            if (!_name.equals(that._name)) return false;
+
+            return true;
+        }
+
+        public int hashCode()
+        {
+            int result;
+            result = _name.hashCode();
+            result = 31 * result + (_minValue != null ? _minValue.hashCode() : 0);
+            return result;
+        }
     }
 
     public ParameterInfo getParameterInfo(String name, boolean create)
@@ -88,5 +109,22 @@ public class ScriptSettings implements Serializable
             }
         }
         return ret;
+    }
+
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ScriptSettings that = (ScriptSettings) o;
+
+        if (!_parameters.equals(that._parameters)) return false;
+
+        return true;
+    }
+
+    public int hashCode()
+    {
+        return _parameters.hashCode();
     }
 }
