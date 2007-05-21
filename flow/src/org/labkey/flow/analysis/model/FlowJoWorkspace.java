@@ -17,24 +17,12 @@ import org.labkey.flow.persist.AttributeSet;
 
 abstract public class FlowJoWorkspace implements Serializable
 {
-    public enum StatisticSet
-    {
-        count,
-        frequency,
-        frequencyOfParent,
-        frequencyOfGrandparent,
-        medianGated,
-        medianAll,
-        meanAll,
-        stdDevAll,
-    }
-
     protected Map<String, Analysis> _groupAnalyses = new HashMap();
     protected Map<String, Analysis> _sampleAnalyses = new HashMap();
     protected Map<String, AttributeSet> _sampleAnalysisResults = new HashMap();
     protected Map<String, SampleInfo> _sampleInfos = new HashMap();
     protected Map<String, ParameterInfo> _parameters = new LinkedHashMap();
-    protected Set<StatisticSet> _statisticSets;
+    protected ScriptSettings _settings = new ScriptSettings();
     protected List<String> _warnings;
 
     public static class SampleInfo implements Serializable
@@ -71,27 +59,27 @@ abstract public class FlowJoWorkspace implements Serializable
         // they actually range much higher.
         // This multiplier maps to the range that we actually use.
         public double multiplier;
+        public double minValue;
     }
 
-    static public FlowJoWorkspace readWorkspace(InputStream stream, Set<StatisticSet> statisticSets) throws Exception
+    static public FlowJoWorkspace readWorkspace(InputStream stream) throws Exception
     {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document doc = builder.parse(stream);
         Element elDoc = doc.getDocumentElement();
         if ("1.4".equals(elDoc.getAttribute("version")))
         {
-            return new PCWorkspace(elDoc, statisticSets);
+            return new PCWorkspace(elDoc);
         }
         if ("2.0".equals(elDoc.getAttribute("version")))
         {
-            return new FJ8Workspace(elDoc, statisticSets);
+            return new FJ8Workspace(elDoc);
         }
-        return new MacWorkspace(elDoc, statisticSets);
+        return new MacWorkspace(elDoc);
     }
 
-    protected FlowJoWorkspace(Set<StatisticSet> statisiticSets)
+    protected FlowJoWorkspace()
     {
-        _statisticSets = statisiticSets;
     }
 
 
@@ -409,6 +397,7 @@ abstract public class FlowJoWorkspace implements Serializable
             }
         }
         CompensationCalculation ret = new CompensationCalculation();
+        ret.setSettings(calc.getSettings());
         for (Map.Entry<SubsetSpec, SubsetSpec> entry : subsetMap.entrySet())
         {
             SubsetSpec oldSubset = entry.getKey();
@@ -449,6 +438,7 @@ abstract public class FlowJoWorkspace implements Serializable
     public CompensationCalculation makeCompensationCalculation(Map<String, CompensationChannelData> channelDataMap, List<String> errors)
     {
         CompensationCalculation ret = new CompensationCalculation();
+        ret.setSettings(_settings);
         boolean isUniversalNegative = isUniversalNegative(channelDataMap);
 
         for (Map.Entry<String, CompensationChannelData> entry : channelDataMap.entrySet())

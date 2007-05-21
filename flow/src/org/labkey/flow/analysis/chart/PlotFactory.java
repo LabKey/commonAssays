@@ -19,24 +19,14 @@ public class PlotFactory
     public static int MAX_HISTOGRAM_BUCKETS = Integer.getInteger("flow.maxchannels", 512).intValue();
     public static final Color COLOR_GATE = Color.RED;
 
-    static public double adjustedPow(double base, double exponent)
+    static public double adjustedLog10(double value)
     {
-        boolean neg = false;
-        if (exponent < 0)
-        {
-            neg = true;
-            exponent = - exponent;
-            }
-        double ret = Math.pow(base, exponent);
-        if (ret < 10)
-        {
-            ret = 10 * (ret - 1) / 9;
-        }
-        if (neg)
-        {
-            ret = -ret;
-        }
-        return ret;        
+        return FlowLogarithmicAxis.s_adjustedLog10(value);
+    }
+
+    static public double adjustedPow10(double value)
+    {
+        return FlowLogarithmicAxis.s_adjustedPow10(value);
     }
 
     /**
@@ -48,35 +38,23 @@ public class PlotFactory
      */
     static public double[] getPossibleValues(DataFrame.Field field, boolean fLogarithmic, int bucketCount)
     {
-        int range = field.getRange();
-        int cBuckets = Math.min(field.getRange(), bucketCount);
-        double offset = 0;
-        ScalingFunction scalingFunction = field.getScalingFunction();
-        boolean fLogRawValues = fLogarithmic && (scalingFunction == null || !scalingFunction.isLogarithmic());
+        double maxValue = field.getMaxValue();
+        double minValue = field.getMinValue();
+        int cBuckets = (int) Math.min(maxValue - minValue, bucketCount);
         double[] ret = new double[cBuckets];
 
         int i = 0;
 
         for (; i < cBuckets; i ++)
         {
-            if (fLogRawValues)
+            if (fLogarithmic)
             {
-                ret[i] = Math.pow(range, ((double) i + offset) / (cBuckets + offset));
+                double x = (adjustedLog10(maxValue) - adjustedLog10(minValue)) * i / cBuckets + adjustedLog10(minValue);
+                ret[i] = adjustedPow10(x);
             }
             else
             {
-                ret[i] = (i * range) / cBuckets;
-            }
-
-            if (scalingFunction != null)
-            {
-                ret[i] = scalingFunction.translate(ret[i]);
-                if (fLogRawValues && ret[i] < 10)
-                {
-                    // This compensates for the adjustedLog10 in LogarithmicAxis:
-                    // buckets will be evenly spaced along axis.
-                    ret[i] = 10 * (ret[i] - 1) / 9;
-                }
+                ret[i] = minValue + (i * (maxValue - minValue)) / cBuckets;
             }
         }
         return ret;
@@ -84,10 +62,10 @@ public class PlotFactory
 
     static double[] getPossibleValues(Subset subset, DataFrame.Field field, int maxCount)
     {
-        return getPossibleValues(field, displayLogarthmic(subset, field), maxCount);
+        return getPossibleValues(field, displayLogarithmic(subset, field), maxCount);
     }
 
-    static protected boolean displayLogarthmic(Subset subset, DataFrame.Field field)
+    static protected boolean displayLogarithmic(Subset subset, DataFrame.Field field)
     {
         String strDisplay = subset.getFCSHeader().getKeyword("P" + (field.getOrigIndex() + 1) + "DISPLAY");
         if (strDisplay != null)
@@ -105,7 +83,7 @@ public class PlotFactory
 
     static protected ValueAxis getValueAxis(Subset subset, String name, DataFrame.Field field)
     {
-        if (!displayLogarthmic(subset, field))
+        if (!displayLogarithmic(subset, field))
             return new NumberAxis(name);
         return new FlowLogarithmicAxis(name);
     }
@@ -202,7 +180,7 @@ public class PlotFactory
 
         NumberAxis xAxis;
 
-        if (displayLogarthmic(subset, field))
+        if (displayLogarithmic(subset, field))
         {
             xAxis = new FlowLogarithmicAxis(getLabel(subset, axis));
         }

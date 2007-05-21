@@ -5,7 +5,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,7 +21,6 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 
 import Jama.Matrix;
-import Jama.LUDecomposition;
 
 import org.labkey.flow.analysis.data.NumberArray;
 
@@ -218,24 +216,20 @@ public class CompensationMatrix
         return _rows[irow];
     }
 
-    public DataFrame getCompensatedData(DataFrame data, boolean dither, boolean coerceToBuckets)
+    public DataFrame getCompensatedData(DataFrame data, boolean dither)
     {
         Matrix matrix = getMatrix(data);
         matrix = matrix.inverse();
         if (dither)
             data = data.dither();
-        data = data.Multiply(matrix);
-        if (coerceToBuckets)
-        {
-            data = data.coerceToBuckets();
-        }
+        data = data.multiply(matrix);
         return data;
     }
 
     public DataFrame getCompensatedData(DataFrame data)
     {
-        DataFrame comp = getCompensatedData(data, false, false);
-        DataFrame compDithered = getCompensatedData(data, true, false);
+        DataFrame comp = getCompensatedData(data, false);
+        DataFrame compDithered = getCompensatedData(data, true);
         int newFieldCount = data.getColCount() + _channelNames.length * 2;
         DataFrame.Field[] fields = new DataFrame.Field[newFieldCount];
         NumberArray[] cols = new NumberArray[newFieldCount];

@@ -23,32 +23,74 @@ package org.labkey.flow.analysis.model;
  * Date: May 2, 2005
  * Time: 3:08:10 PM
  */
-public interface ScalingFunction
-	{
-	double untranslate(double x);
-    double translate(double x);
-    boolean isLogarithmic();
-    double dither(double x);
+public class ScalingFunction
+{
+	double _minValue;
+    double _range;
+    double _decade;
+    double _scale;
+    double _exp;
 
-    static ScalingFunction IDENTITY = new ScalingFunction()
+    public ScalingFunction(double decade, double scale, double range)
+    {
+        _decade = decade;
+        _scale = scale;
+        _range = range;
+        if (_decade != 0)
         {
-        public double untranslate(double x)
-            {
-            return x;
-            }
+            if (_scale == 0)
+                _scale = 1;
+            _exp = Math.log(Math.pow(10, _decade)) / _range;
+        }
 
-        public double translate(double x)
-            {
-            return x;
-            }
+    }
 
-        public boolean isLogarithmic()
-            {
-            return false;
-            }
-        public double dither(double x)
-            {
-            return x;
-            }
-        };
-	}
+    public ScalingFunction(ScalingFunction that, double minValue)
+    {
+        this(that._decade, that._scale, that._range);
+        this._minValue = minValue;
+    }
+
+    public double getMinValue()
+    {
+        return _minValue;
+    }
+    public double getMaxValue()
+    {
+        return translate(_range);
+    }
+    public double constrain(double value)
+    {
+        if (value < _minValue)
+            return _minValue;
+        return value;
+    }
+
+    public double dither(double value)
+    {
+        if (_decade == 0)
+            return -1;
+        double rand = Math.random() - .5;
+        return value * Math.exp(rand * _exp) * _scale;
+    }
+
+    public boolean isLogarithmic()
+    {
+        return _decade != 0;
+    }
+    public double translate(double value)
+    {
+        if (_decade == 0)
+        {
+            if (_scale == 0)
+                return value;
+            return value * _scale;
+        }
+        else
+        {
+            return _scale * Math.exp(value * _exp);
+        }
+    }
+
+
+}

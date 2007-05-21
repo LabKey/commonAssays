@@ -1,9 +1,6 @@
 package org.labkey.flow.analysis.web;
 
-import org.labkey.flow.analysis.model.FCS;
-import org.labkey.flow.analysis.model.Subset;
-import org.labkey.flow.analysis.model.CompensationMatrix;
-import org.labkey.flow.analysis.model.DataFrame;
+import org.labkey.flow.analysis.model.*;
 
 import java.net.URI;
 import java.io.File;
@@ -21,12 +18,12 @@ public class FCSViewer
     public FCSViewer(URI uriFCSFile) throws IOException
         {
         _fcs = new FCS(new File(uriFCSFile));
-        _subset = new Subset(_fcs);
+        _subset = new Subset(_fcs, new ScriptSettings());
         }
     public void applyCompensationMatrix(URI uriCompensationMatrix) throws Exception
         {
         CompensationMatrix comp = new CompensationMatrix(new File(uriCompensationMatrix));
-        DataFrame data = comp.getCompensatedData(_subset.getDataFrame(), false, false);
+        DataFrame data = comp.getCompensatedData(_subset.getDataFrame(), false);
         _subset = new Subset(_subset.getParent(), _subset.getName(), _subset.getFCSHeader(), data);
         }
     public void writeValues(Writer writer) throws IOException

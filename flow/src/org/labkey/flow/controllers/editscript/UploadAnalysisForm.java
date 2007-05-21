@@ -7,11 +7,10 @@ import org.apache.log4j.Logger;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.Analysis;
-import org.labkey.flow.analysis.model.FlowJoWorkspace.StatisticSet;
+import org.labkey.flow.analysis.model.StatisticSet;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Set;
-import java.util.EnumSet;
+import java.util.*;
 
 public class UploadAnalysisForm extends EditScriptForm
 {
@@ -30,7 +29,7 @@ public class UploadAnalysisForm extends EditScriptForm
             Analysis analysis = (Analysis) getAnalysis();
             if (analysis == null || analysis.getStatistics().size() == 0)
             {
-                ff_statisticSet = EnumSet.of(StatisticSet.count, StatisticSet.frequencyOfParent);
+                EnumSet.of(StatisticSet.count, StatisticSet.frequencyOfParent);
             }
         }
         catch (Exception e)

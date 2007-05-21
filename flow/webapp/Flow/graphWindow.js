@@ -3,6 +3,13 @@ var g_ptCapture;
 var g_polygon;
 var g_fAddingPoints;
 
+if (!Math.log10)
+{
+    Math.log10 = function(x)
+    {
+        return Math.log(x) / Math.log(10);        
+    }
+}
 
 function captureMouse(o, event)
 {
@@ -411,16 +418,18 @@ function adjustedLog10(val)
         neg = true;
         val = -val;
     }
-    if (val < 10.0)
-    {
-        val += (10.0 - val) / 10.0;
-    }
+
     var ret = Math.log(val) / Math.log(10);
-    if (neg)
+    if (val < LOG_LIN_SWITCH)
     {
-        ret = -ret;
+        ret = val / LOG_LIN_SWITCH / Math.log(10);
     }
-    return ret;
+    else
+    {
+        ret = Math.log10(val) + (1 - Math.log(LOG_LIN_SWITCH)) / Math.log(10);
+
+    }
+    return neg ? -ret : ret;
 }
 
 function adjustedPow10(val)
@@ -432,21 +441,22 @@ function adjustedPow10(val)
         val = - val;
     }
     
-    var ret = Math.pow(10, val);
-    if (ret < 10)
+    var ret;
+    if (val < 1 / Math.log(10))
     {
-        ret = 10 * (ret - 1) / 9;
+        ret = val * LOG_LIN_SWITCH * Math.log(10);
     }
-    if (neg)
+    else
     {
-        ret = -ret;
+        ret = Math.pow(10, val - (1 - Math.log(LOG_LIN_SWITCH)) / Math.log(10));
     }
-    return ret;
+
+    return neg ? -ret : ret;
 }
 
 function roundValue(value)
 {
-    if (value > 10)
+    if (Math.abs(value) > 10)
         return Math.round(value);
     return Math.round(value * 10) / 10;
 }
@@ -454,7 +464,7 @@ function roundValue(value)
 function translate(coor, width, min, max, log)
 {
     if (coor < 0)
-        return - 1;
+        return roundValue(min - 1);
     if (!log)
     {
         return roundValue(min + (max - min) * coor / width);

@@ -1,12 +1,13 @@
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
-<%@ page import="java.util.List"%>
 <%@ page import="java.util.Map"%>
+<%@ page import="java.util.Collection" %>
+<%@ page import="org.labkey.flow.analysis.web.SubsetSpec" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%=pageHeader(ScriptController.Action.editAnalysis)%>
 <% ScriptController.AnalysisForm bean = (ScriptController.AnalysisForm) form; %>
-<%Map<String,String> params = form.getParameters();
-  List<String> subsets = form.analysisScript.getSubsets();
+<%Map<String, String> params = form.getParameters();
+    Collection<SubsetSpec> subsets = form.analysisScript.getSubsets();
 %>
 <script src="<%=request.getContextPath()%>/Flow/editScript.js"></script>
 <script>
@@ -86,14 +87,17 @@
 </script>
 
 <form method="post" action="<%=formAction(ScriptController.Action.editAnalysis)%>">
-    <p class="normal">Which statistics do you want to calculate? Enter one statistic per line.<br>
+    <p class="normal">
+        <b>Statistics</b><br>
+        Which statistics do you want to calculate? Enter one statistic per line.<br>
         <textarea name="statistics" rows="10" cols="60" wrap="off"><%=h(bean.statistics)%></textarea><br>
         <table>
             <tr><th>Subset</th><th>Statistic</th><th>Parameter</th><th>Percentile</th></tr>
             <tr><td>
                 <select id="stat_subset">
+                    <option value="*">[[All]]</option>
                     <option value="">Ungated</option>
-                    <% for (String subset : subsets)
+                    <% for (SubsetSpec subset : subsets)
                     { %>
                     <option value="<%=h(subset)%>"><%=h(subset)%></option>
                     <% } %>
@@ -112,6 +116,7 @@
                 </td>
                 <td>
                     <select id="stat_parameter">
+                        <option value="*">[[All]]</option>
                         <% for(Map.Entry<String,String> param : params.entrySet()) { %>
                             <option value="<%=h(param.getKey())%>"><%=h(param.getValue())%></option>
                         <% } %>
@@ -125,14 +130,16 @@
         </table>
 
     </p>
-    <p class="normal">Which graphs do you want to calculate? Enter one graph per line.<br>
+    <p class="normal">
+        <b>Graphs</b><br>
+        Which graphs do you want to have drawn? Enter one graph per line.<br>
         <textarea name="graphs" rows="10" cols="60" wrap="off"><%=h(bean.graphs)%></textarea><br>
         <table>
             <tr><th>Subset</th><th>X Axis</th><th>Y Axis</th></tr>
             <tr><td>
                 <select id="graph_subset">
                     <option value="">Ungated</option>
-                    <% for (String subset : subsets)
+                    <% for (SubsetSpec subset : subsets)
                     { %>
                     <option value="<%=h(subset)%>"><%=h(subset)%></option>
                     <% } %>
@@ -155,8 +162,16 @@
                 <td><input type="button" onclick="addGraph()" value="Add Graph"></td>
             </tr>
         </table>
-
     </p>
+    <p class="normal">
+        <b>Additional Subsets</b><br>
+        Use this textbox to specify boolean expressions involving subsets that you want to calculate statistics for.
+        A boolean subset expression has parentheses around it, and uses the operators '&' (and), '|' (or), and '!' (not).
+        Example:<br>
+        Lymph/CD4/CD8/(IFNg+&!IL2+)<br>
+        <textarea rows="10" cols="60" wrap="off"><%=h(bean.subsets)%></textarea>
+    </p>
+
     <input type="submit" value="Submit">
 
 </form>

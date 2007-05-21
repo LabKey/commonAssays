@@ -61,70 +61,6 @@ public class FCSHeader
         return Collections.unmodifiableMap(keywords);
     }
 
-    public class TranslationFunction implements ScalingFunction
-    {
-        double _decade;
-        double _scale;
-        double _range;
-        double _exp;
-
-        public TranslationFunction(double decade, double scale, double range)
-        {
-            _decade = decade;
-            _scale = scale;
-            _range = range;
-            if (_decade != 0)
-            {
-                if (_scale == 0)
-                    _scale = 1;
-                _exp = Math.log(Math.pow(10, _decade)) / _range;
-            }
-        }
-
-        public boolean isLogarithmic()
-        {
-            return _decade != 0;
-        }
-
-        public double translate(double value)
-        {
-            if (_decade == 0)
-            {
-                if (_scale == 0)
-                    return value;
-                return value * _scale;
-            }
-            else
-            {
-                return _scale * Math.exp(value * _exp);
-            }
-        }
-
-        public double untranslate(double value)
-        {
-            if (value <= 0)
-                return -1;
-            if (_decade == 0)
-            {
-                if (_scale == 0)
-                    return value;
-                return value / _scale;
-            }
-            else
-            {
-                return Math.log(value / _scale) / _exp;
-            }
-        }
-
-        public double dither(double value)
-        {
-            if (_decade == 0)
-                return -1;
-            double rand = Math.random() - .5;
-            return value * Math.exp(rand * _exp) * _scale;
-        }
-    }
-
     protected void load(InputStream is) throws IOException
     {
         textOffset = 0;
@@ -203,7 +139,7 @@ public class FCSHeader
             final double scale = Double.parseDouble(E.substring(E.indexOf(',') + 1));
             DataFrame.Field f = new DataFrame.Field(i, name, (int) range);
             f.setDescription(getKeyword(key + "S"));
-            f.setScalingFunction(new TranslationFunction(decade, scale, range));
+            f.setScalingFunction(new ScalingFunction(decade, scale, range));
             fields[i] = f;
         }
         return new DataFrame(fields, data);

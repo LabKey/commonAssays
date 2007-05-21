@@ -300,7 +300,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         workspaceData.setName(workspaceFile.getName());
         workspaceData.save(getUser());
 
-        FlowJoWorkspace workspace = FlowJoWorkspace.readWorkspace(new FileInputStream(workspaceFile), Collections.EMPTY_SET);
+        FlowJoWorkspace workspace = FlowJoWorkspace.readWorkspace(new FileInputStream(workspaceFile));
         ExpProtocolApplication startingInputs = run.addProtocolApplication(getUser(), null, ExpProtocol.ApplicationType.ExperimentRun);
         startingInputs.addDataInput(getUser(), workspaceData, InputRole.Workspace.toString(), InputRole.Workspace.getPropertyDescriptor(getContainer()));
         Map<FlowJoWorkspace.SampleInfo, ExpData> fcsFiles = new HashMap();

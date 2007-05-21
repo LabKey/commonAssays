@@ -9,9 +9,6 @@
     </p>
     <p>
         Which sections of the '<%=form.analysisScript.getName()%>' script do you want to copy?<br>
-<% if (form.analysisScript.hasStep(FlowProtocolStep.keywords)) { %>
-        <input type="checkbox" name="copyRunDefinitions" value="true"<%=form.copyRunDefinition ? " checked" : ""%>>Run Definition<br>
-<% } %>
 <% if (form.analysisScript.hasStep(FlowProtocolStep.calculateCompensation)) { %>
         <input type="checkbox" name="copyCompensationCalculation" value="true"<%=form.copyCompensationCalculation ? " checked" : ""%>>Compensation Calculation<br>
 <% } %>

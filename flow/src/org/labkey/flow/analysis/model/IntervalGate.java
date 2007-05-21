@@ -101,11 +101,11 @@ public class IntervalGate extends Gate
         }
         if (X == null)
         {
-            X = new double[]{Double.MIN_VALUE, Double.MIN_VALUE, Double.MAX_VALUE, Double.MAX_VALUE};
+            X = new double[]{-Double.MAX_VALUE, -Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE};
         }
         if (Y == null)
         {
-            Y = new double[]{Double.MIN_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MIN_VALUE};
+            Y = new double[]{-Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE};
         }
         polys.add(new Polygon(X, Y));
     }

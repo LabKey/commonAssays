@@ -13,10 +13,7 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.labkey.flow.analysis.model.PopulationSet;
-import org.labkey.flow.analysis.model.Population;
-import org.labkey.flow.analysis.model.CompensationCalculation;
-import org.labkey.flow.analysis.model.FCSKeywordData;
+import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.FCSRef;
@@ -76,7 +73,7 @@ public class EditScriptForm extends ViewForm
 
         }
     }
-    public PopulationSet getAnalysis() throws Exception
+    public ScriptComponent getAnalysis() throws Exception
     {
         return analysisScript.getCompensationCalcOrAnalysis(step);
     }
@@ -180,25 +177,39 @@ public class EditScriptForm extends ViewForm
         }
     }
 
-    private Map<String, String> getParameterNames(FlowRun run, String[] compChannels) throws Exception
+    protected Map<String, String> getParameterNames(FlowRun run, String[] compChannels)
     {
         Map<String, String> ret = new LinkedHashMap();
-        FlowWell[] wells = run.getWells();
-        for (int i = 0; i < wells.length && i < MAX_WELLS_TO_POLL; i ++)
+        try
         {
-            Map<String, String> wellParams = FCSAnalyzer.get().getParameterNames(wells[i].getFCSURI(), compChannels);
-            for (Map.Entry<String, String> entry : wellParams.entrySet())
+            FlowWell[] wells = run.getWells();
+            for (int i = 0; i < wells.length && i < MAX_WELLS_TO_POLL; i ++)
             {
-                String previous = ret.get(entry.getKey());
-                if (previous == null)
+                try
                 {
-                    ret.put(entry.getKey(), entry.getValue());
+                    Map<String, String> wellParams = FCSAnalyzer.get().getParameterNames(wells[i].getFCSURI(), compChannels);
+                    for (Map.Entry<String, String> entry : wellParams.entrySet())
+                    {
+                        String previous = ret.get(entry.getKey());
+                        if (previous == null)
+                        {
+                            ret.put(entry.getKey(), entry.getValue());
+                        }
+                        else if (previous.length() < entry.getValue().length())
+                        {
+                            ret.put(entry.getKey(), entry.getValue());
+                        }
+                    }
                 }
-                else if (previous.length() < entry.getValue().length())
+                catch(Exception e)
                 {
-                    ret.put(entry.getKey(), entry.getValue());
+                    _log.error("Error", e);
                 }
             }
+        }
+        catch (SQLException sqlE)
+        {
+            _log.error("Error", sqlE);
         }
         return ret;
     }

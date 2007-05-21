@@ -20,10 +20,6 @@ import org.labkey.flow.analysis.model.FCSKeywordData;
 
 public class KeywordsHandler extends BaseHandler
 {
-    RunDef _runElement;
-    WellDef _wellElement;
-    KeywordDef[] _keywordElements;
-
     Pattern _fcsFilePattern;
 
     protected boolean shouldUploadKeyword(String name)
@@ -48,24 +44,9 @@ public class KeywordsHandler extends BaseHandler
         return true;
     }
 
-    public KeywordsHandler(ScriptJob job, RunDef runElement) throws Exception
+    public KeywordsHandler(ScriptJob job) throws Exception
     {
         super(job, FlowProtocolStep.keywords);
-        if (runElement != null)
-        {
-            _runElement = runElement;
-            _wellElement = _runElement.getWell();
-            _keywordElements = _wellElement.getKeywordArray();
-        }
-        else
-        {
-            _runElement = RunDef.Factory.newInstance();
-            _wellElement = WellDef.Factory.newInstance();
-        }
-
-        String strFilePattern = _wellElement.getFilePattern();
-        if (strFilePattern != null)
-            _fcsFilePattern = Pattern.compile(strFilePattern);
     }
 
     protected boolean isFCSFile(File file)
@@ -94,19 +75,7 @@ public class KeywordsHandler extends BaseHandler
         String runName = null;
         File runDirectory = _job.createAnalysisDirectory(directory, FlowProtocolStep.keywords);
 
-        if (isEmpty(_runElement.getNameKeyword()))
-        {
-            runName = directory.getName();
-        }
-        else
-        {
-            for (FCSKeywordData fileData : data)
-            {
-                runName = fileData.getKeyword(_runElement.getNameKeyword());
-                if (runName != null)
-                    break;
-            }
-        }
+        runName = directory.getName();
 
         ExperimentRunType run = _job.addExperimentRun(xar, runName);
 
@@ -120,22 +89,7 @@ public class KeywordsHandler extends BaseHandler
             app.getInputRefs().addNewDataLSID().setStringValue(lsidFile);
 
             DataBaseType well = outputs.addNewData();
-            if (isEmpty(_wellElement.getNameKeyword()))
-            {
-                well.setName(filename);
-            }
-            else
-            {
-                String name = fileData.getKeyword(_wellElement.getNameKeyword());
-                if (isEmpty(name))
-                {
-                    well.setName(filename);
-                }
-                else
-                {
-                    well.setName(name);
-                }
-            }
+            well.setName(filename);
             well.setAbout(FlowDataObject.generateDataLSID(_job.getContainer(), FlowDataType.FCSFile));
             well.setCpasType("Data");
             well.setSourceProtocolLSID(_step.getLSID(getContainer()));

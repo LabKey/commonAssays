@@ -48,7 +48,7 @@ public class DataFrame
 {
     protected NumberArray[] data;
     protected Field[] fields;
-    protected HashMap fieldsMap = new HashMap();
+    protected HashMap<String, Field> fieldsMap = new HashMap();
     protected String version = "";
 
 
@@ -83,14 +83,20 @@ public class DataFrame
     }
 
 
-    public DataFrame translate()
+    public DataFrame translate(ScriptSettings settings)
     {
         Field[] fields = new Field[getColCount()];
         NumberArray[] out = new NumberArray[data.length];
 
         for (int p = 0; p < getColCount(); p++)
         {
-            ScalingFunction fn = getField(p).getScalingFunction();
+            Field field = getField(p);
+            ScalingFunction fn = field.getScalingFunction();
+            ScriptSettings.ParameterInfo paramInfo = settings.getParameterInfo(field.getName(), false);
+            if (paramInfo != null && paramInfo.getMinValue() != null)
+            {
+                fn = new ScalingFunction(fn, paramInfo.getMinValue());
+            }
             NumberArray from = data[p];
 
             if (null == fn)
@@ -111,7 +117,7 @@ public class DataFrame
         return new DataFrame(fields, out);
     }
 
-    public DataFrame Multiply(Matrix mul)
+    public DataFrame multiply(Matrix mul)
     {
         int rows = getRowCount();
         int cols = getColCount();
@@ -127,7 +133,8 @@ public class DataFrame
             Matrix b = mul.times(a);
             for (int i = 0; i < cols; i ++)
             {
-                out.data[i].set(r, b.get(i, 0));
+                ScalingFunction fn = fields[i].getScalingFunction();
+                out.data[i].set(r, fn.constrain(b.get(i, 0)));
             }
         }
         return out;
@@ -166,53 +173,7 @@ public class DataFrame
         return out;
     }
 
-    /**
-     * Round the data off to the nearest value that maps to a scaling of an
-     * integer value.  This is what FlowJo does with data after applying
-     * a compensation matrix.
-     */
-    public DataFrame coerceToBuckets()
-    {
-        int cRow = getRowCount();
-        int cCol = getColCount();
-
-        NumberArray[] cols = new NumberArray[fields.length];
-
-        for (int c = 0; c < cCol; c ++)
-        {
-            Field field = getField(c);
-            ScalingFunction function = field.getScalingFunction();
-            if (function == null || !function.isLogarithmic())
-            {
-                cols[c] = getColumn(c);
-                continue;
-            }
-            cols[c] = new FloatArray(new float[getRowCount()]);
-            for (int r = 0; r < cRow; r++)
-            {
-                double value = getColumn(c).getDouble(r);
-                double rawVal = function.untranslate(value);
-                rawVal = Math.min(rawVal, field._range);
-                rawVal = Math.max(rawVal, 0);
-                double minVal = Math.floor(rawVal);
-                double maxVal = Math.ceil(rawVal);
-
-                double scaledMin = function.translate(minVal);
-                double scaledMax = function.translate(maxVal);
-                double newVal;
-                if (value - scaledMin < scaledMax - value)
-                    newVal = scaledMin;
-                else
-                    newVal = scaledMax;
-
-                cols[c].set(r, newVal);
-            }
-        }
-        DataFrame out = new DataFrame(fields, cols);
-        return out;
-    }
-
-    public DataFrame Filter(BitSet bs)
+    public DataFrame filter(BitSet bs)
     {
         int cCol = getColCount();
         NumberArray[] cols = new NumberArray[cCol];
@@ -296,7 +257,7 @@ public class DataFrame
         data[col].set(row, f);
     }
 
-    public void SaveTSV(File fSave) throws IOException
+    public void saveTSV(File fSave) throws IOException
     {
         java.io.PrintStream out = new PrintStream(new FileOutputStream(fSave));
         int rows = getRowCount();
@@ -410,9 +371,14 @@ public class DataFrame
             _scalingFunction = function;
         }
 
-        public int getRange()
+        public double getMinValue()
         {
-            return _range;
+            return _scalingFunction.getMinValue();
+        }
+
+        public double getMaxValue()
+        {
+            return _scalingFunction.getMaxValue();
         }
     }
 

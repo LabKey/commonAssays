@@ -124,16 +124,16 @@ abstract public class ScriptJob extends PipelineJob
         {
             scriptDoc = script.getAnalysisScriptDocument();
         }
-        _runHandler = new KeywordsHandler(this, scriptDoc == null ? null : scriptDoc.getScript().getRun());
+        _runHandler = new KeywordsHandler(this);
         if (scriptDoc != null)
         {
             if (scriptDoc.getScript().getCompensationCalculation() != null)
             {
-                _compensationCalculationHandler = new CompensationCalculationHandler(this, scriptDoc.getScript().getCompensationCalculation());
+                _compensationCalculationHandler = new CompensationCalculationHandler(this, scriptDoc.getScript().getSettings(), scriptDoc.getScript().getCompensationCalculation());
             }
             if (scriptDoc.getScript().getAnalysis() != null)
             {
-                _analysisHandler = new AnalysisHandler(this, scriptDoc.getScript().getAnalysis());
+                _analysisHandler = new AnalysisHandler(this, scriptDoc.getScript().getSettings(), scriptDoc.getScript().getAnalysis());
             }
         }
         initStatus();

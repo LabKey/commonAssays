@@ -25,8 +25,12 @@ public class SampleKey
             }
             catch (NumberFormatException nfe)
             {
-                //
+                // do nothing
             }
+        }
+        else if (value instanceof Number)
+        {
+            value = ((Number) value).doubleValue();
         }
         _values.add(value);
     }

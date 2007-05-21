@@ -158,7 +158,7 @@ public class FCSAnalyzer
         return ret;
     }
 
-    public List<GraphResult> generateGraphs(URI uri, CompensationMatrix comp, PopulationSet group, Collection<GraphSpec> graphs) throws IOException
+    public List<GraphResult> generateGraphs(URI uri, CompensationMatrix comp, ScriptComponent group, Collection<GraphSpec> graphs) throws IOException
     {
         if (graphs.size() == 0)
         {
@@ -166,7 +166,7 @@ public class FCSAnalyzer
         }
         List<GraphResult> ret = new ArrayList(graphs.size());
         Map<SubsetSpec, Subset> subsetMap = new HashMap();
-        subsetMap.put(null, getSubset(uri, comp));
+        subsetMap.put(null, getSubset(uri, group.getSettings(), comp));
         for (GraphSpec graph : graphs)
         {
             ret.add(generateGraph(subsetMap, group, graph));
@@ -174,16 +174,16 @@ public class FCSAnalyzer
         return ret;
     }
 
-    public PlotInfo generateDesignGraph(URI uri, CompensationMatrix comp, PopulationSet group, GraphSpec spec, int width, int height, boolean useEmptyDataset) throws IOException
+    public PlotInfo generateDesignGraph(URI uri, CompensationMatrix comp, ScriptComponent group, GraphSpec spec, int width, int height, boolean useEmptyDataset) throws IOException
     {
         Map<SubsetSpec, Subset> subsetMap = new HashMap();
         if (useEmptyDataset)
         {
-            subsetMap.put(null, getEmptySubset(uri, comp));
+            subsetMap.put(null, getEmptySubset(uri, group.getSettings(), comp));
         }
         else
         {
-            subsetMap.put(null, getSubset(uri, comp));
+            subsetMap.put(null, getSubset(uri, group.getSettings(), comp));
         }
         Subset subset = getSubset(subsetMap, group, spec.getSubset());
         ValueAxis domainAxis, rangeAxis;
@@ -210,13 +210,10 @@ public class FCSAnalyzer
         return new PlotInfo(subset, img, info, domainAxis, rangeAxis);
     }
 
-    public List<StatResult> calculateStatistics(URI uri, CompensationMatrix comp, PopulationSet group, Collection<StatisticSpec> stats) throws IOException
+    private List<StatResult> calculateStatistics(Map<SubsetSpec, Subset> subsetMap, ScriptComponent group, Collection<StatisticSpec> stats) throws IOException
     {
-        if (stats.size() == 0) return Collections.EMPTY_LIST;
         List<StatResult> ret = new ArrayList(stats.size());
-        Map<SubsetSpec, Subset> subsetMap = new HashMap();
         Map<SubsetSpec, Map<String, Stats.DoubleStats>> subsetStatsMap = new HashMap();
-        subsetMap.put(null, getSubset(uri, comp));
         for (StatisticSpec stat : stats)
         {
             StatResult result = new StatResult(stat);
@@ -241,10 +238,27 @@ public class FCSAnalyzer
         return ret;
     }
 
-    protected Subset getSubset(URI uri, CompensationMatrix comp) throws IOException
+    public List<StatResult> calculateStatistics(URI uri, CompensationMatrix comp, Analysis analysis) throws IOException
+    {
+        Map<SubsetSpec, Subset> subsetMap = new HashMap();
+        Subset root = getSubset(uri, analysis.getSettings(), comp);
+        subsetMap.put(null, root);
+        Collection<StatisticSpec> stats = analysis.materializeStatistics(root);
+        return calculateStatistics(subsetMap, analysis, stats);
+    }
+
+    public List<StatResult> calculateStatistics(URI uri, CompensationMatrix comp, ScriptComponent group, Collection<StatisticSpec> stats) throws IOException
+    {
+        Map<SubsetSpec, Subset> subsetMap = new HashMap();
+        subsetMap.put(null, getSubset(uri, group.getSettings(), comp));
+
+        return calculateStatistics(subsetMap, group, stats);
+    }
+
+    protected Subset getSubset(URI uri, ScriptSettings settings, CompensationMatrix comp) throws IOException
     {
         FCS fcs = _cache.readFCS(uri);
-        Subset subset = new Subset(fcs);
+        Subset subset = new Subset(fcs, settings);
         if (comp != null && !comp.isSingular())
         {
             subset = subset.apply(comp);
@@ -252,10 +266,12 @@ public class FCSAnalyzer
         return subset;
     }
 
-    protected Subset getEmptySubset(URI uri, CompensationMatrix comp) throws IOException
+    protected Subset getEmptySubset(URI uri, ScriptSettings settings, CompensationMatrix comp) throws IOException
     {
         FCSHeader header = _cache.readFCSHeader(uri);
-        Subset subset = new Subset(null, null, header, header.createEmptyDataFrame());
+        DataFrame data = header.createEmptyDataFrame();
+        data = data.translate(settings);
+        Subset subset = new Subset(null, null, header, data);
         if (comp != null && !comp.isSingular())
         {
             subset = subset.apply(comp);
@@ -311,10 +327,10 @@ public class FCSAnalyzer
         return header;
     }
 
-    protected Subset findSubset(FCSKeywordData header, PopulationSet group, SubsetSpec subsetSpec) throws Exception
+    protected Subset findSubset(FCSKeywordData header, ScriptComponent group, SubsetSpec subsetSpec) throws Exception
     {
         Map<SubsetSpec, Subset> map = new HashMap();
-        map.put(null, getSubset(header.getURI(), null));
+        map.put(null, getSubset(header.getURI(), group.getSettings(), null));
         return getSubset(map, group, subsetSpec);
     }
 

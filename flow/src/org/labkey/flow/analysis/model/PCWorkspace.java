@@ -8,9 +8,8 @@ import java.util.Set;
 
 public class PCWorkspace extends FlowJoWorkspace
 {
-    public PCWorkspace(Element elDoc, Set<StatisticSet> stats)
+    public PCWorkspace(Element elDoc)
     {
-        super(stats);
         for (Element elSampleList : getElementsByTagName(elDoc, "SampleList"))
         {
             readSamples(elSampleList);

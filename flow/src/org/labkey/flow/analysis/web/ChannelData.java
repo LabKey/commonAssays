@@ -120,8 +120,8 @@ class ChannelData
         if (polys.size() > 0)
         {
             double xMin = Double.MAX_VALUE;
-            double xMax = Double.MIN_VALUE;
-            double yMin = Double.MIN_VALUE;
+            double xMax = -Double.MAX_VALUE;
+            double yMin = -Double.MAX_VALUE;
             double yMax = Double.MAX_VALUE;
             for (Polygon poly : polys)
             {

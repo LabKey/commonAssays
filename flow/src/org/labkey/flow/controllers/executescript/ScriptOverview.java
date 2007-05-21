@@ -70,6 +70,9 @@ public class ScriptOverview extends Overview
             Action action = new Action("Delete this analysis script", _script.urlFor(ScriptController.Action.delete));
             addAction(action);
         }
+        Action actionSettings = new Action("Edit Settings", _script.urlFor(ScriptController.Action.editSettings));
+        actionSettings.setExplanatoryHTML("The script has settings that affect the way that graphs are drawn and statistics are calculated.");
+        addAction(actionSettings);
         Action actionSource = new Action("View Source", _script.urlFor(ScriptController.Action.editScript));
         actionSource.setExplanatoryHTML("Advanced: Analysis scripts are XML documents that can be edited by hand");
         addAction(actionSource);

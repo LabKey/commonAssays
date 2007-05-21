@@ -184,6 +184,7 @@ flow/src/org/labkey/flow/analysis/model/Gate.java -text
 flow/src/org/labkey/flow/analysis/model/GateList.java -text
 flow/src/org/labkey/flow/analysis/model/IntervalGate.java -text
 flow/src/org/labkey/flow/analysis/model/MacWorkspace.java -text
+flow/src/org/labkey/flow/analysis/model/MinMaxConstraint.java -text
 flow/src/org/labkey/flow/analysis/model/NotGate.java -text
 flow/src/org/labkey/flow/analysis/model/OrGate.java -text
 flow/src/org/labkey/flow/analysis/model/PCWorkspace.java -text
@@ -193,8 +194,12 @@ flow/src/org/labkey/flow/analysis/model/Population.java -text
 flow/src/org/labkey/flow/analysis/model/PopulationSet.java -text
 flow/src/org/labkey/flow/analysis/model/SampleCriteria.java -text
 flow/src/org/labkey/flow/analysis/model/ScalingFunction.java -text
+flow/src/org/labkey/flow/analysis/model/ScriptComponent.java -text
+flow/src/org/labkey/flow/analysis/model/ScriptSettings.java -text
+flow/src/org/labkey/flow/analysis/model/StatisticSet.java -text
 flow/src/org/labkey/flow/analysis/model/StatsTable.java -text
 flow/src/org/labkey/flow/analysis/model/Subset.java -text
+flow/src/org/labkey/flow/analysis/model/ValueConstraint.java -text
 flow/src/org/labkey/flow/analysis/web/ChannelData.java -text
 flow/src/org/labkey/flow/analysis/web/ChannelKey.java -text
 flow/src/org/labkey/flow/analysis/web/CompHandler.java -text
@@ -230,6 +235,7 @@ flow/src/org/labkey/flow/controllers/editscript/EditGatesForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/EditGatesPage.java -text
 flow/src/org/labkey/flow/controllers/editscript/EditPropertiesForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/EditScriptForm.java -text
+flow/src/org/labkey/flow/controllers/editscript/EditSettingsForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/NewProtocolForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/ScriptController.java -text
 flow/src/org/labkey/flow/controllers/editscript/TemplatePage.java -text
@@ -243,8 +249,8 @@ flow/src/org/labkey/flow/controllers/editscript/editCompensationCalculation.jsp 
 flow/src/org/labkey/flow/controllers/editscript/editGateTree.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/editGates.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/editProperties.jsp -text
-flow/src/org/labkey/flow/controllers/editscript/editRun.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/editScript.jsp -text
+flow/src/org/labkey/flow/controllers/editscript/editSettings.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/graphWindow.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/newProtocol.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/showCompensationCalculation.jsp -text

@@ -6,7 +6,7 @@ import org.labkey.flow.analysis.web.SubsetSpec;
 
 /**
  */
-public class CompensationCalculation extends PopulationSet
+public class CompensationCalculation extends ScriptComponent
 {
     List<ChannelInfo> _lstChannelInfo = new ArrayList();
 

@@ -106,15 +106,21 @@ public class FlowAnalyzer
             return new GraphSpec(subset, graphElement.getXAxis());
     }
 
-    static public Analysis makeAnalysis(AnalysisDef analysisElement)
+    static public Analysis makeAnalysis(SettingsDef settings, AnalysisDef analysisElement)
     {
         Analysis ret = new Analysis();
+        ret.setSettings(new ScriptSettings());
+        ret.getSettings().merge(settings);
         if (analysisElement == null)
             return ret;
         Map<String, Gate> gates = getParentGates(analysisElement.getDomNode());
         for (PopulationDef child : analysisElement.getPopulationArray())
         {
             ret.addPopulation(makePopulation(gates, child));
+        }
+        for (SubsetDef subset : analysisElement.getSubsetArray())
+        {
+            ret.addSubset(SubsetSpec.fromString(subset.getSubset()));
         }
         for (StatisticDef statElement : analysisElement.getStatisticArray())
         {
@@ -151,9 +157,11 @@ public class FlowAnalyzer
     }
 
 
-    static public CompensationCalculation makeCompensationCalculation(CompensationCalculationDef compensationCalculationElement)
+    static public CompensationCalculation makeCompensationCalculation(SettingsDef settings, CompensationCalculationDef compensationCalculationElement)
     {
         org.labkey.flow.analysis.model.CompensationCalculation ret = new org.labkey.flow.analysis.model.CompensationCalculation();
+        ret.setSettings(new ScriptSettings());
+        ret.getSettings().merge(settings);
         if (compensationCalculationElement == null)
             return ret;
         Map<String, Gate> gates = getParentGates(compensationCalculationElement.getDomNode());
@@ -252,15 +260,13 @@ public class FlowAnalyzer
         }
     }
 
-    static public void makeAnalysis(ScriptDef script, CompensationCalculation compensationCalculation, PopulationSet analysis)
+    static public void makeAnalysis(ScriptDef script, CompensationCalculation compensationCalculation, Analysis analysis)
     {
-        while (script.getGateArray().length > 0)
-        {
-            script.removeGate(0);
-        }
-
+        ScriptSettings settings = new ScriptSettings();
+        settings.merge(script.getSettings());
         if (compensationCalculation != null)
         {
+            settings.merge(compensationCalculation.getSettings());
             CompensationCalculationDef compensationCalculationElement = script.getCompensationCalculation();
             if (compensationCalculationElement == null)
             {
@@ -279,7 +285,7 @@ public class FlowAnalyzer
             {
                 compensationCalculationElement.removeChannel(0);
             }
-            for (org.labkey.flow.analysis.model.CompensationCalculation.ChannelInfo info : compensationCalculation.getChannels())
+            for (CompensationCalculation.ChannelInfo info : compensationCalculation.getChannels())
             {
                 ChannelDef def = compensationCalculationElement.addNewChannel();
                 def.setName(info.getName());
@@ -289,6 +295,7 @@ public class FlowAnalyzer
         }
         if (analysis != null)
         {
+            settings.merge(analysis.getSettings());
             AnalysisDef analysisElement = script.getAnalysis();
             if (analysisElement == null)
             {
@@ -298,12 +305,21 @@ public class FlowAnalyzer
             {
                 analysisElement.removePopulation(0);
             }
+            while (analysisElement.getSubsetArray().length > 0)
+            {
+                analysisElement.removeSubset(0);
+            }
             for (Population population : analysis.getPopulations())
             {
                 PopulationDef populationDef = analysisElement.addNewPopulation();
                 fillPopulation(populationDef, population);
             }
+            for (SubsetSpec subset : analysis.getSubsets())
+            {
+                analysisElement.addNewSubset().setSubset(subset.toString());
+            }
         }
+        script.setSettings(settings.toSettingsDef());
     }
 
     static public URI getFCSUri(FlowWell well) throws Exception
@@ -320,17 +336,17 @@ public class FlowAnalyzer
 
     static public FCSAnalyzer.GraphResult generateGraph(FlowWell well, FlowScript script, FlowProtocolStep step, FlowCompensationMatrix comp, GraphSpec graph) throws Exception
     {
-        PopulationSet group = null;
+        ScriptComponent group = null;
         if (script != null)
         {
             ScriptDef scriptElement= script.getAnalysisScriptDocument().getScript();
             if (step == FlowProtocolStep.calculateCompensation)
             {
-                group = makeCompensationCalculation(scriptElement.getCompensationCalculation());
+                group = makeCompensationCalculation(scriptElement.getSettings(), scriptElement.getCompensationCalculation());
             }
             if (step == FlowProtocolStep.analysis)
             {
-                group = makeAnalysis(scriptElement.getAnalysis());
+                group = makeAnalysis(scriptElement.getSettings(), scriptElement.getAnalysis());
             }
         }
         else
@@ -358,28 +374,17 @@ public class FlowAnalyzer
         return FCSAnalyzer.get().getParameterNames(getFCSUri(well), comp);
     }
 
-    static public List<String> getKeywords(ScriptDef scriptElement) throws Exception
+    static private void addSubsets(Collection<SubsetSpec> list, SubsetSpec parent, PopulationDef pop)
     {
-        KeywordDef[] el = scriptElement.getRun().getWell().getKeywordArray();
-        List<String> ret = new ArrayList();
-        for (KeywordDef keyword : el)
-        {
-            ret.add(keyword.getName());
-        }
-        return ret;
-    }
-
-    static private void addSubsets(List<String> list, String cur, PopulationDef pop)
-    {
-        list.add(cur + pop.getName());
-        cur = cur + pop.getName() + "/";
+        SubsetSpec cur = new SubsetSpec(parent, pop.getName());
+        list.add(cur);
         for (PopulationDef childPop : pop.getPopulationArray())
         {
             addSubsets(list, cur, childPop);
         }
     }
 
-    static public List<String> getSubsets(FlowScript script) throws Exception
+    static public Collection<SubsetSpec> getSubsets(FlowScript script) throws Exception
     {
         if (script == null)
         {
@@ -388,12 +393,12 @@ public class FlowAnalyzer
         return getSubsets(script.getAnalysisScript(), FlowProtocolStep.analysis);
     }
 
-    static public List<String> getSubsets(String script, FlowProtocolStep step)
+    static public Collection<SubsetSpec> getSubsets(String script, FlowProtocolStep step)
     {
         try
         {
             ScriptDef scriptElement = parseScript(script);
-            List<String> ret = new ArrayList();
+            Set<SubsetSpec> ret = new TreeSet<SubsetSpec>(SubsetSpec.COMPARATOR);
             PopulationDef[] pops = null;
             if (step == FlowProtocolStep.calculateCompensation)
             {
@@ -406,6 +411,10 @@ public class FlowAnalyzer
             {
                 if (scriptElement.getAnalysis() != null)
                 {
+                    for (SubsetDef subsetDef : scriptElement.getAnalysis().getSubsetArray())
+                    {
+                        ret.add(SubsetSpec.fromString(subsetDef.getSubset()));
+                    }
                     pops = scriptElement.getAnalysis().getPopulationArray();
                 }
             }
@@ -413,9 +422,10 @@ public class FlowAnalyzer
             {
                 for (PopulationDef pop : pops)
                 {
-                    addSubsets(ret, "", pop);
+                    addSubsets(ret, null, pop);
                 }
             }
+
             return ret;
         }
         catch (XmlException e)

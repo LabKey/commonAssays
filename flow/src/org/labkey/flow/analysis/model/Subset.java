@@ -19,9 +19,9 @@ public class Subset
         _data = data;
     }
 
-    public Subset(FCS fcs)
+    public Subset(FCS fcs, ScriptSettings settings)
     {
-        this(null, null, fcs, fcs.getScaledData());
+        this(null, null, fcs, fcs.getScaledData(settings));
     }
 
     public Subset apply(CompensationMatrix matrix)
@@ -43,7 +43,7 @@ public class Subset
         else
             newName = _name + "/" + name;
         assert bits.length() <= getDataFrame().getRowCount();
-        DataFrame data = _data.Filter(bits);
+        DataFrame data = _data.filter(bits);
         return new Subset(this, newName, _fcs, data);
     }
 

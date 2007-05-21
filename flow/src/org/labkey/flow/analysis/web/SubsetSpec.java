@@ -4,6 +4,7 @@ import org.labkey.flow.analysis.model.FlowException;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Comparator;
 
 public class SubsetSpec implements Serializable
 {
@@ -156,15 +157,24 @@ public class SubsetSpec implements Serializable
         return new SubsetSpec(_parent.addRoot(root), _subset);
     }
 
+    static public Comparator<SubsetSpec> COMPARATOR = new Comparator<SubsetSpec>()
+    {
+        public int compare(SubsetSpec spec1, SubsetSpec spec2)
+        {
+            if (spec1 == spec2)
+                return 0;
+            if (spec1 == null)
+                return -1;
+            if (spec2 == null)
+                return 1;
+            return spec1.toString().compareTo(spec2.toString());
+        }
+    };
+
+
     static public int compare(SubsetSpec spec1, SubsetSpec spec2)
     {
-        if (spec1 == spec2)
-            return 0;
-        if (spec1 == null)
-            return -1;
-        if (spec2 == null)
-            return 1;
-        return spec1.toString().compareTo(spec2.toString());
+        return COMPARATOR.compare(spec1, spec2);
     }
 
     public int getDepth()

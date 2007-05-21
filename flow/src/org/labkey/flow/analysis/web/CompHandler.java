@@ -15,7 +15,7 @@ public class CompHandler
             this.header = header;
             this.subsetMap = new HashMap();
             FCS fcs = _analyzer.readFCS(header.getURI());
-            this.subsetMap.put(null, new Subset(fcs));
+            this.subsetMap.put(null, new Subset(fcs, _calc.getSettings()));
         }
         final FCSKeywordData header;
         Map<SubsetSpec,Subset> subsetMap;

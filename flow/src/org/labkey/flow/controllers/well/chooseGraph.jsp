@@ -96,7 +96,7 @@
 </form>
 
 <%
-    List<String> subsets = Collections.EMPTY_LIST;
+    Collection<SubsetSpec> subsets = Collections.EMPTY_LIST;
     if (script != null)
     {
         subsets = FlowAnalyzer.getSubsets(script.getAnalysisScript(), step);
@@ -113,7 +113,7 @@
         <tr>
             <td><select name="subset">
                 <option value="">Ungated</option>
-                <% for (String subset : subsets)
+                <% for (SubsetSpec subset : subsets)
                 { %>
                 <option value="<%=h(subset)%>" <%=subset.equals(form.getSubset()) ? " selected" : ""%>><%=h(subset)%></option>
                 <% } %>

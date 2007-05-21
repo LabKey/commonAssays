@@ -19,6 +19,7 @@ import org.labkey.flow.analysis.model.DataFrame;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.Subset;
 import org.labkey.flow.analysis.model.Gate;
+import org.labkey.flow.analysis.chart.FlowLogarithmicAxis;
 import org.labkey.flow.analysis.chart.DensityPlot;
 
 public class PlotInfo

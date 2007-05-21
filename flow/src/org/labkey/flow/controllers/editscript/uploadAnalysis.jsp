@@ -1,7 +1,7 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
-<%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace.StatisticSet" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.flow.analysis.model.StatisticSet" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.UploadAnalysisPage" %>
 <%!
@@ -73,7 +73,6 @@
         <%=statOption(StatisticSet.frequency)%> Frequency of Total<br>
         <%=statOption(StatisticSet.frequencyOfParent)%> Frequency of Parent<br>
         <%=statOption(StatisticSet.frequencyOfGrandparent)%> Frequency of Grandparent<br>
-        <%=statOption(StatisticSet.medianGated)%> Median value of parameters used in gates<br>
         <%=statOption(StatisticSet.medianAll)%> Median value of all parameters<br>
         <%=statOption(StatisticSet.meanAll)%> Mean value of all parameters<br>
         <%=statOption(StatisticSet.stdDevAll)%> Standard deviation of all parameters<br>
@@ -81,10 +80,11 @@
     <% }
     else
     {
-
+        for (StatisticSet statset : form.ff_statisticSet)
+        {
     %>
-
-    <% } %>
+        <input type="hidden" name="ff_statisticSet" value="<%=h(statset)%>">
+    <% }} %>
 
     <input type="Submit" value="Submit"/>
 </form>

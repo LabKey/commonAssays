@@ -39,9 +39,8 @@ public class MacWorkspace extends FlowJoWorkspace
         }
     }
 
-    public MacWorkspace(Element elDoc, Set<StatisticSet> statisticSets) throws Exception
+    public MacWorkspace(Element elDoc) throws Exception
     {
-        super(statisticSets);
         readSamples(elDoc);
         readSampleAnalyses(elDoc);
         readGroupAnalyses(elDoc);
@@ -130,62 +129,6 @@ public class MacWorkspace extends FlowJoWorkspace
         return strExpr.toString();
     }
 
-    protected void addStats(SubsetSpec subset, Set<String> gatedParams, List<StatisticSpec> allStats)
-    {
-        LinkedHashSet<StatisticSpec> stats = new LinkedHashSet();
-        if (_statisticSets.contains(StatisticSet.count))
-        {
-            stats.add(new StatisticSpec(subset, StatisticSpec.STAT.Count, null));
-        }
-        if (subset != null)
-        {
-            if (_statisticSets.contains(StatisticSet.frequency))
-            {
-                stats.add(new StatisticSpec(subset, StatisticSpec.STAT.Frequency, null));
-            }
-            if (_statisticSets.contains(StatisticSet.frequencyOfParent))
-            {
-                stats.add(new StatisticSpec(subset, StatisticSpec.STAT.Freq_Of_Parent, null));
-            }
-            if (subset.getParent() != null)
-            {
-                if (_statisticSets.contains(StatisticSet.frequencyOfGrandparent))
-                {
-                    stats.add(new StatisticSpec(subset, StatisticSpec.STAT.Freq_Of_Grandparent, null));
-                }
-            }
-        }
-        if (_statisticSets.contains(StatisticSet.medianGated))
-        {
-            for (String param : gatedParams)
-            {
-                stats.add(new StatisticSpec(subset, StatisticSpec.STAT.Median, param));
-            }
-        }
-        if (_statisticSets.contains(StatisticSet.medianAll))
-        {
-            for (String param : _parameters.keySet())
-            {
-                stats.add(new StatisticSpec(subset, StatisticSpec.STAT.Median, param));
-            }
-        }
-        if (_statisticSets.contains(StatisticSet.meanAll))
-        {
-            for (String param : _parameters.keySet())
-            {
-                stats.add(new StatisticSpec(subset, StatisticSpec.STAT.Mean, param));
-            }
-        }
-        if (_statisticSets.contains(StatisticSet.stdDevAll))
-        {
-            for (String param : _parameters.keySet())
-            {
-                stats.add(new StatisticSpec(subset, StatisticSpec.STAT.Std_Dev, param));
-            }
-        }
-        allStats.addAll(stats);
-    }
-
     protected void readStats(SubsetSpec subset, Element elPopulation, AttributeSet results)
     {
         for (Element elStat : getElementsByTagName(elPopulation, "Statistic"))
@@ -227,14 +170,14 @@ public class MacWorkspace extends FlowJoWorkspace
         }
     }
 
-    protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, List<StatisticSpec> stats, AttributeSet results)
+    protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, Analysis analysis, AttributeSet results)
     {
         String booleanExpr = toBooleanExpression(elPopulation);
         if (booleanExpr != null)
         {
             SubsetSpec subset = new SubsetSpec(parentSubset, "(" + booleanExpr + ")");
+            analysis.addSubset(subset);
             readStats(subset, elPopulation, results);
-            addStats(subset, Collections.EMPTY_SET, stats);
             return null;
         }
 
@@ -292,14 +235,11 @@ public class MacWorkspace extends FlowJoWorkspace
             }
         }
 
-
-
         readStats(subset, elPopulation, results);
-        addStats(subset, gatedParams, stats);
 
         for (Element elChild: getElementsByTagName(elPopulation, "Population"))
         {
-            Population child = readPopulation(elChild, subset, stats, results);
+            Population child = readPopulation(elChild, subset, analysis, results);
             if (child != null)
             {
                 ret.addPopulation(child);
@@ -312,10 +252,11 @@ public class MacWorkspace extends FlowJoWorkspace
     protected Analysis readAnalysis(Element elAnalysis, AttributeSet results)
     {
         Analysis ret = new Analysis();
+        ret.setSettings(_settings);
         ret.getStatistics().add(new StatisticSpec(null, StatisticSpec.STAT.Count, null));
         for (Element elPopulation : getElementsByTagName(elAnalysis, "Population"))
         {
-            Population child = readPopulation(elPopulation, null, ret.getStatistics(), results);
+            Population child = readPopulation(elPopulation, null, ret, results);
             ret.addPopulation(child);
         }
 
@@ -341,27 +282,43 @@ public class MacWorkspace extends FlowJoWorkspace
         }
     }
 
+    protected void readKeywords(SampleInfo sample, Element el)
+    {
+        for (Element elKeyword : getElementsByTagName(el, "Keyword"))
+        {
+            sample._keywords.put(elKeyword.getAttribute("name"), elKeyword.getAttribute("value"));
+        }
+    }
+
+    protected void readParameterInfo(Element el)
+    {
+        for (Element elParameter : getElementsByTagName(el, "Parameter"))
+        {
+            String name = elParameter.getAttribute("name");
+            if (!_parameters.containsKey(name))
+            {
+                ParameterInfo pi = new ParameterInfo();
+                pi.name = name;
+                pi.multiplier = findMultiplier(elParameter);
+                _parameters.put(name, pi);
+            }
+            String lowValue = elParameter.getAttribute("lowValue");
+            if (lowValue != null)
+            {
+                _settings.getParameterInfo(name, true).setMinValue(Double.valueOf(lowValue));
+            }
+        }
+    }
+
     protected SampleInfo readSample(Element elSample)
     {
         SampleInfo ret = new SampleInfo();
         ret._sampleId = elSample.getAttribute("sampleID");
         for (Element elFCSHeader : getElementsByTagName(elSample, "FCSHeader"))
         {
-            for (Element elKeyword : getElementsByTagName(elFCSHeader, "Keyword"))
-            {
-                ret._keywords.put(elKeyword.getAttribute("name"), elKeyword.getAttribute("value"));
-            }
-            for (Element elParameter : getElementsByTagName(elSample, "Parameter"))
-            {
-                String name = elParameter.getAttribute("name");
-                if (_parameters.containsKey(name))
-                    continue;
-                ParameterInfo pi = new ParameterInfo();
-                pi.name = name;
-                pi.multiplier = findMultiplier(elParameter);
-                _parameters.put(name, pi);
-            }
+            readKeywords(ret, elFCSHeader);
         }
+        readParameterInfo(elSample);
         _sampleInfos.put(ret._sampleId, ret);
         return ret;
     }

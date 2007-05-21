@@ -32,7 +32,7 @@ public class FCS extends FCSHeader
 {
     static private final Logger _log = Logger.getLogger(FCS.class);
     boolean bigEndian;
-    DataFrame data;
+    DataFrame rawData;
 
     public FCS(File f) throws IOException
     {
@@ -133,7 +133,7 @@ public class FCS extends FCSHeader
             {
                 throw new java.lang.UnsupportedOperationException("only supports ListMode");
             }
-            this.data = frame.translate();
+            this.rawData = frame;
         }
     }
 
@@ -258,9 +258,9 @@ public class FCS extends FCSHeader
         return ((int) b) & 0x000000ff;
     }
 
-    public DataFrame getScaledData()
+    public DataFrame getScaledData(ScriptSettings settings)
     {
-        return data;
+        return rawData.translate(settings);
     }
 
     static public boolean isFCSFile(File file)
@@ -321,7 +321,7 @@ public class FCS extends FCSHeader
 
     public byte[] getFCSBytes(File file, int maxEventCount) throws Exception
     {
-        int oldEventCount = data.getRowCount();
+        int oldEventCount = rawData.getRowCount();
         int newEventCount = Math.min(maxEventCount, oldEventCount);
         int oldByteCount = (dataLast - dataOffset + 1);
         int newSize = dataOffset + ((oldByteCount * newEventCount) + oldEventCount - 1) / oldEventCount;

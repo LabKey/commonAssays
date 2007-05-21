@@ -6,6 +6,7 @@ import org.labkey.flow.analysis.web.CompensationResult;
 import org.labkey.flow.analysis.web.*;
 import org.labkey.flow.analysis.web.CompSign;
 import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
+import org.fhcrc.cpas.flow.script.xml.SettingsDef;
 import org.labkey.flow.data.*;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.FlowDataHandler;
@@ -19,11 +20,13 @@ import java.io.File;
 
 public class CompensationCalculationHandler extends BaseHandler
 {
+    SettingsDef _settings;
     CompensationCalculationDef _compensationCalculationElement;
 
-    public CompensationCalculationHandler(ScriptJob job, CompensationCalculationDef calc) throws Exception
+    public CompensationCalculationHandler(ScriptJob job, SettingsDef settings, CompensationCalculationDef calc) throws Exception
     {
         super(job, FlowProtocolStep.calculateCompensation);
+        _settings = settings;
         _compensationCalculationElement = calc;
     }
 
@@ -31,7 +34,7 @@ public class CompensationCalculationHandler extends BaseHandler
     {
         _job.addStatus("Calculating compensation matrix for " + run.getName());
         List<FCSRef> uris = FlowAnalyzer.getFCSRefs(run);
-        CompensationCalculation calc = FlowAnalyzer.makeCompensationCalculation(_compensationCalculationElement);
+        CompensationCalculation calc = FlowAnalyzer.makeCompensationCalculation(_settings, _compensationCalculationElement);
         List<CompensationResult> results = new ArrayList();
         CompensationMatrix matrix = FCSAnalyzer.get().calculateCompensationMatrix(uris, calc, results);
         ProtocolApplicationBaseType appComp = addProtocolApplication(runElement);

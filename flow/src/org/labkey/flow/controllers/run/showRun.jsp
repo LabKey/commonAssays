@@ -1,3 +1,4 @@
+<%@ page buffer="none" %>
 <%@ page import="org.labkey.flow.data.FlowLog" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page import="org.labkey.flow.controllers.run.RunForm"%>

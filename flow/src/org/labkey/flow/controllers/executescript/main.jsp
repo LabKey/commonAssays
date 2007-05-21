@@ -8,22 +8,6 @@
 <%
     FlowScript analysisScript = getScript();
 %>
-<% if (analysisScript.hasStep(FlowProtocolStep.keywords))
-{ %>
-<h4>Experiment run upload settings: '<%=h(analysisScript.getName())%>'</h4>
-
-<p>The upload settings tells the flow module which keywords to read from FCS files when they are uploaded. In the
-    future,
-    the upload specification may describe additional processing to be performed on the files at upload time.</p>
-<a href="<%=analysisScript.urlFor(ScriptController.Action.editRun)%>">Edit the upload settings</a><br>
-
-<%
-    if (getContainer().hasPermission(getUser(), ACL.PERM_UPDATE))
-    { %>
-<% }
-    return;
-}
-%>
 <h4>Analysis script: '<%=h(analysisScript.getName())%>'</h4>
 <p>Analysis scripts tell the Flow Module how to calculate the compensation matrix, what gates to apply, what statistics
 to calculate, and what graphs to generate.</p>

@@ -24,6 +24,8 @@ import java.io.File;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.analysis.model.PopulationSet;
+import org.labkey.flow.analysis.model.ScriptComponent;
+import org.labkey.flow.analysis.web.SubsetSpec;
 
 public class FlowScript extends FlowDataObject
 {
@@ -156,40 +158,7 @@ public class FlowScript extends FlowDataObject
         return null;
     }
 
-    public RunDef getRunElement()
-    {
-        try
-        {
-            ScriptDocument doc = getAnalysisScriptDocument();
-            if (doc == null)
-                return null;
-            if (doc.getScript() == null)
-                return null;
-            return doc.getScript().getRun();
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
-    }
-
-    public String[] getDeclaredKeywords()
-    {
-        RunDef run = getRunElement();
-        if (run == null)
-            return new String[0];
-        WellDef well = run.getWell();
-        if (well == null)
-            return new String[0];
-        List<String> ret = new ArrayList();
-        for (KeywordDef keyword : well.getKeywordArray())
-        {
-            ret.add(keyword.getName());
-        }
-        return ret.toArray(new String[0]);
-    }
-
-    public List<String> getSubsets() throws Exception
+    public Collection<SubsetSpec> getSubsets() throws Exception
     {
         return FlowAnalyzer.getSubsets(this);
     }
@@ -228,10 +197,6 @@ public class FlowScript extends FlowDataObject
         ScriptDef script = doc.getScript();
         if (script == null)
             return false;
-        if (step == FlowProtocolStep.keywords)
-        {
-            return script.getRun() != null;
-        }
         if (step == FlowProtocolStep.calculateCompensation)
         {
             return script.getCompensationCalculation() != null;
@@ -257,13 +222,14 @@ public class FlowScript extends FlowDataObject
         return ret;
     }
 
-    public PopulationSet getCompensationCalcOrAnalysis(FlowProtocolStep step) throws Exception
+    public ScriptComponent getCompensationCalcOrAnalysis(FlowProtocolStep step) throws Exception
     {
+        ScriptDef script = getAnalysisScriptDocument().getScript();
         if (step == FlowProtocolStep.calculateCompensation)
         {
-            return FlowAnalyzer.makeCompensationCalculation(getAnalysisScriptDocument().getScript().getCompensationCalculation());
+            return FlowAnalyzer.makeCompensationCalculation(script.getSettings(), script.getCompensationCalculation());
         }
-        return FlowAnalyzer.makeAnalysis(getAnalysisScriptDocument().getScript().getAnalysis());
+        return FlowAnalyzer.makeAnalysis(script.getSettings(), script.getAnalysis());
     }
 
     public String getProtocolType()

@@ -1,5 +1,6 @@
 <%@ page import="org.labkey.api.view.ViewURLHelper"%>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
+<%@ page import="org.labkey.flow.analysis.chart.FlowLogarithmicAxis" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.GraphWindowPage" %>
 <% ViewURLHelper urlGraph = getPageFlow().cloneViewURLHelper();
     urlGraph.setAction(ScriptController.Action.graphImage.toString());
@@ -7,6 +8,7 @@
 <script src="<%=resourceURL("util.js")%>"></script>
 <script src="<%=resourceURL("graphWindow.js")%>"></script>
 <script type="text/javascript">
+    var LOG_LIN_SWITCH = <%=FlowLogarithmicAxis.LOG_LIN_SWITCH%>;
     var rcChart = <%=jscriptRect(plotInfo.getChartArea())%>;
     var rcData = <%=jscriptRect(plotInfo.getDataArea())%>;
     var rangeX = <%=jscriptRange(plotInfo.getRangeX())%>;

@@ -11,7 +11,6 @@ public class FlowRunWorkspace extends FlowJoWorkspace
 {
     public FlowRunWorkspace(FlowScript analysisScript, FlowProtocolStep step, FlowRun run) throws Exception
     {
-        super(EnumSet.noneOf(StatisticSet.class));
         Analysis analysis;
         PopulationSet compCalcOrAnalysis = analysisScript.getCompensationCalcOrAnalysis(step);
         if (compCalcOrAnalysis instanceof Analysis)

@@ -6,9 +6,9 @@ import java.util.Set;
 
 public class FJ8Workspace extends MacWorkspace
 {
-    public FJ8Workspace(Element elDoc, Set<StatisticSet> statisticSets) throws Exception
+    public FJ8Workspace(Element elDoc) throws Exception
     {
-        super(elDoc, statisticSets);
+        super(elDoc);
     }
 
     protected void readSamples(Element elDoc)
@@ -22,27 +22,18 @@ public class FJ8Workspace extends MacWorkspace
         }
     }
 
+
+
     protected SampleInfo readSample(Element elSample)
     {
         SampleInfo ret = new SampleInfo();
         ret._sampleId = elSample.getAttribute("sampleID");
         for (Element elFCSHeader : getElementsByTagName(elSample, "Keywords"))
         {
-            for (Element elKeyword : getElementsByTagName(elFCSHeader, "Keyword"))
-            {
-                ret._keywords.put(elKeyword.getAttribute("name"), elKeyword.getAttribute("value"));
-            }
-            for (Element elParameter : getElementsByTagName(elSample, "Parameter"))
-            {
-                String name = elParameter.getAttribute("name");
-                if (_parameters.containsKey(name))
-                    continue;
-                ParameterInfo pi = new ParameterInfo();
-                pi.name = name;
-                pi.multiplier = findMultiplier(elParameter);
-                _parameters.put(name, pi);
-            }
+            readKeywords(ret, elFCSHeader);
         }
+
+        readParameterInfo(elSample);
         _sampleInfos.put(ret._sampleId, ret);
         return ret;
     }

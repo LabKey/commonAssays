@@ -1,5 +1,7 @@
 package org.labkey.flow.analysis.model;
 
+import org.labkey.flow.analysis.web.SubsetSpec;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.io.Serializable;

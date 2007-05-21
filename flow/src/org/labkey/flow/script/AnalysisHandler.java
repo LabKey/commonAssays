@@ -3,6 +3,7 @@ package org.labkey.flow.script;
 import org.labkey.flow.data.*;
 import org.labkey.flow.data.FlowDataType;
 import org.fhcrc.cpas.flow.script.xml.AnalysisDef;
+import org.fhcrc.cpas.flow.script.xml.SettingsDef;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.persist.FlowDataHandler;
@@ -40,11 +41,11 @@ public class AnalysisHandler extends BaseHandler
     SampleCriteria _sampleCriteria;
     int _wellIndex;
 
-    public AnalysisHandler(ScriptJob job, AnalysisDef analysis) throws Exception
+    public AnalysisHandler(ScriptJob job, SettingsDef settings, AnalysisDef analysis) throws Exception
     {
         super(job, FlowProtocolStep.analysis);
         _analysis = analysis;
-        _groupAnalysis = FlowAnalyzer.makeAnalysis(_analysis);
+        _groupAnalysis = FlowAnalyzer.makeAnalysis(settings, _analysis);
         _sampleCriteria = SampleCriteria.readChildCriteria((Element) _analysis.getDomNode());
     }
 
@@ -152,9 +153,8 @@ public class AnalysisHandler extends BaseHandler
 
                 String description = "well " + iWell + "/" + _wellCount + ":" + _run.getName() + ":" + _well.getName();
                 _job.addStatus("Starting " + description);
-                Set<StatisticSpec> statistics = new LinkedHashSet(_groupAnalysis.getStatistics());
                 Set<GraphSpec> graphs = new LinkedHashSet(_groupAnalysis.getGraphs());
-                List<FCSAnalyzer.StatResult> stats = FCSAnalyzer.get().calculateStatistics(uri, _comp, _groupAnalysis, statistics);
+                List<FCSAnalyzer.StatResult> stats = FCSAnalyzer.get().calculateStatistics(uri, _comp, _groupAnalysis);
                 DataBaseType dbt = addWell(_runElement, _well, _flowComp);
                 AttributeSet attrs = new AttributeSet(ObjectType.fcsAnalysis, uri);
                 addResults(dbt, attrs, stats);

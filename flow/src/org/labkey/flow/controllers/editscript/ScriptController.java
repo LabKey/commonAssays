@@ -54,7 +54,7 @@ public class ScriptController extends BaseFlowController
         begin,
         editScript,
         newProtocol,
-        editRun,
+        editSettings,
         editProperties,
         editCompensationCalculation,
         showCompensationCalulation,
@@ -151,7 +151,7 @@ public class ScriptController extends BaseFlowController
         {
             ScriptDocument doc = analysisScript.getAnalysisScriptDocument();
             ScriptDef script = doc.getScript();
-            return script.getRun() == null && script.getCompensationCalculation() == null && script.getAnalysis() == null;
+            return script.getCompensationCalculation() == null && script.getAnalysis() == null;
         }
         catch (Exception e)
         {
@@ -228,62 +228,6 @@ public class ScriptController extends BaseFlowController
     }
 
     @Jpf.Action
-    protected Forward editRun(RunForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        ScriptDocument scriptDoc = ensureScript(form.analysisScript);
-        Page page = getPage("editRun.jsp", form);
-        if (isPost())
-        {
-            ScriptDef script = scriptDoc.getScript();
-            if (script == null)
-            {
-                script = scriptDoc.addNewScript();
-            }
-            RunDef run = script.getRun();
-            if (run == null)
-            {
-                run = script.addNewRun();
-            }
-
-            setAttribute(run, "directoryPattern", form.runDirectoryPattern);
-            setAttribute(run, "nameKeyword", form.runNameKeyword);
-            WellDef well = run.getWell();
-            if (well == null)
-            {
-                well = run.addNewWell();
-            }
-            setAttribute(well, "nameKeyword", form.wellNameKeyword);
-            setAttribute(well, "filePattern", form.fcsFilePattern);
-            while(well.getKeywordArray().length > 0)
-            {
-                well.removeKeyword(0);
-            }
-            Set<String> keywords = new LinkedHashSet();
-            StringTokenizer st = new StringTokenizer(StringUtils.trimToEmpty(form.keywords), "\r\n");
-            while (st.hasMoreTokens())
-            {
-                String token = StringUtils.trimToNull(st.nextToken());
-
-                if (token != null)
-                {
-                    keywords.add(token);
-                }
-            }
-            for (String keyword : keywords)
-            {
-                KeywordDef keywordElement = well.addNewKeyword();
-                keywordElement.setName(keyword);
-            }
-            if (!safeSetAnalysisScript(form.analysisScript, scriptDoc.toString()))
-            {
-                return null;
-            }
-        }
-        return renderInTemplate(page, "Experiment Run Upload Settings Editor", Action.editRun);
-    }
-
-    @Jpf.Action
     protected Forward editAnalysis(AnalysisForm form) throws Exception
     {
         requiresPermission(ACL.PERM_UPDATE);
@@ -352,10 +296,6 @@ public class ScriptController extends BaseFlowController
             {
                 addGraph(analysis, graph);
             }
-            if (analysis.getCriteriaArray().length > 0)
-            {
-                analysis.removeCriteria(analysis.getCriteriaArray().length - 1);
-            }
             if (!safeSetAnalysisScript(form.analysisScript, doc.toString()))
                 return null;
             return new ViewForward(form.analysisScript.urlShow());
@@ -382,66 +322,9 @@ public class ScriptController extends BaseFlowController
         throw new UnsupportedOperationException();
     }
 
-    public static class RunForm extends EditScriptForm
-    {
-        public String runDirectoryPattern;
-        public String runNameKeyword;
-        public String wellNameKeyword;
-        public String fcsFilePattern;
-        public String keywords;
-
-        public void reset(ActionMapping mapping, HttpServletRequest request)
-        {
-            super.reset(mapping, request);
-            if (analysisDocument == null)
-                return;
-            ScriptDef script = analysisDocument.getScript();
-            if (script == null)
-            {
-                return;
-            }
-            RunDef run = script.getRun();
-            if (run == null)
-                return;
-            runDirectoryPattern = run.getDirectoryPattern();
-            runNameKeyword = run.getNameKeyword();
-            WellDef well = run.getWell();
-            if (well != null)
-            {
-                wellNameKeyword = well.getNameKeyword();
-                fcsFilePattern = well.getFilePattern();
-                List<String> keywords = new ArrayList();
-                for (KeywordDef keyword : well.getKeywordArray())
-                {
-                    keywords.add(keyword.getName());
-                }
-                this.keywords = StringUtils.join(keywords.iterator(), "\n");
-            }
-        }
-        public void setRunDirectoryPattern(String runDirectoryPattern)
-        {
-            this.runDirectoryPattern = runDirectoryPattern;
-        }
-        public void setRunNameKeyword(String runNameKeyword)
-        {
-            this.runNameKeyword = runNameKeyword;
-        }
-        public void setWellNameKeyword(String wellNameKeyword)
-        {
-            this.wellNameKeyword = wellNameKeyword;
-        }
-        public void setFcsFilePattern(String fcsFilePattern)
-        {
-            this.fcsFilePattern = fcsFilePattern;
-        }
-        public void setKeywords(String keywords)
-        {
-            this.keywords = keywords;
-        }
-    }
-
     public static class AnalysisForm extends EditScriptForm
     {
+        public String subsets;
         public String statistics;
         public String graphs;
 
@@ -456,6 +339,12 @@ public class ScriptController extends BaseFlowController
             AnalysisDef analysis = script.getAnalysis();
             if (analysis == null)
                 return;
+            List<SubsetSpec> subsets = new ArrayList();
+            for (SubsetDef subset : analysis.getSubsetArray())
+            {
+                subsets.add(SubsetSpec.fromString(subset.getSubset()));
+            }
+            this.subsets = StringUtils.join(subsets.iterator(), "\n");
             List<StatisticSpec> stats = new ArrayList();
             for (StatisticDef stat : analysis.getStatisticArray())
             {
@@ -469,6 +358,12 @@ public class ScriptController extends BaseFlowController
             }
             this.graphs = StringUtils.join(graphs.iterator(), "\n");
         }
+
+        public void setSubsets(String subsets)
+        {
+            this.subsets = subsets;
+        }
+        
         public void setGraphs(String graphs)
         {
             this.graphs = graphs;
@@ -478,6 +373,8 @@ public class ScriptController extends BaseFlowController
         {
             this.statistics = statistics;
         }
+
+
     }
 
     abstract static public class EditPage extends Page
@@ -584,13 +481,13 @@ public class ScriptController extends BaseFlowController
         return true;
     }
 
-    protected FlowJoWorkspace handleWorkspaceUpload(FormFile file, Set<FlowJoWorkspace.StatisticSet> statisticSets)
+    protected FlowJoWorkspace handleWorkspaceUpload(FormFile file)
     {
         if (file != null && file.getFileSize() > 0)
         {
             try
             {
-                return FlowJoWorkspace.readWorkspace(file.getInputStream(), statisticSets);
+                return FlowJoWorkspace.readWorkspace(file.getInputStream());
             }
             catch (Exception e)
             {
@@ -614,7 +511,7 @@ public class ScriptController extends BaseFlowController
                 addError("Exception reading run:" + e);
             }
         }
-        return handleWorkspaceUpload(form.workspaceFile, EnumSet.noneOf(FlowJoWorkspace.StatisticSet.class));
+        return handleWorkspaceUpload(form.workspaceFile);
     }
 
     @Jpf.Action
@@ -641,7 +538,7 @@ public class ScriptController extends BaseFlowController
 
     protected Forward doUploadAnalysis(UploadAnalysisForm form) throws Exception
     {
-        FlowJoWorkspace newWorkspace = handleWorkspaceUpload(form.workspaceFile, form.ff_statisticSet);
+        FlowJoWorkspace newWorkspace = handleWorkspaceUpload(form.workspaceFile);
         if (newWorkspace != null)
         {
             form.workspaceObject = newWorkspace;
@@ -732,28 +629,16 @@ public class ScriptController extends BaseFlowController
         {
             while (analysisElement.getStatisticArray().length > 0)
                 analysisElement.removeStatistic(0);
-            addStatistics(analysisElement, analysis);
+            for (StatisticSet spec : form.ff_statisticSet)
+            {
+                addStatistic(analysisElement, spec.getStat());
+            }
         }
 
-        FlowAnalyzer.makeAnalysis(doc.getScript(), null, makePopulationSet(analysis));
+        FlowAnalyzer.makeAnalysis(doc.getScript(), null, analysis);
         if (!safeSetAnalysisScript(analysisScript, doc.toString()))
             return null;
         return new ViewForward(analysisScript.urlShow());
-    }
-
-    /**
-     * Turn an Analysis into a PopulationSet so FlowAnalyzer.makeAnalysis doesn't think we've specified to delete
-     * the graphs and statistics.
-     */
-    protected PopulationSet makePopulationSet(PopulationSet popset)
-    {
-        PopulationSet ret = new PopulationSet();
-        ret.setName(popset.getName());
-        for (Population pop : popset.getPopulations())
-        {
-            ret.addPopulation(pop);
-        }
-        return ret;
     }
 
     protected void addGraphs(LinkedHashSet<GraphSpec> graphs, SubsetSpec parent, Population population)
@@ -1104,7 +989,7 @@ public class ScriptController extends BaseFlowController
         {
             graphSpec = new GraphSpec(SubsetSpec.fromString(form.subset).getParent(), form.xAxis, form.yAxis);
         }
-        PopulationSet group = form.getAnalysis();
+        ScriptComponent group = form.getAnalysis();
         FlowWell well = form.getWell();
         GraphCacheKey key = new GraphCacheKey(graphSpec, well, group, form.width, form.height, useEmptySubset);
         if (key.isCompatibleWith(_cacheKey))
@@ -1327,8 +1212,8 @@ public class ScriptController extends BaseFlowController
             {
                 newNames.put(form.subsets[i], form.populationNames[i]);
             }
-            PopulationSet oldAnalysis = form.getAnalysis();
-            PopulationSet newAnalysis = form.getAnalysis();
+            ScriptComponent oldAnalysis = form.getAnalysis();
+            ScriptComponent newAnalysis = form.getAnalysis();
             // form.getAnalysis should create a new copy each time it's called.
             assert oldAnalysis != newAnalysis;
             newAnalysis.getPopulations().clear();
@@ -1350,7 +1235,7 @@ public class ScriptController extends BaseFlowController
         return renderInTemplate(page, "Population Names Editor", Action.editGateTree);
     }
 
-    protected boolean saveAnalysisOrComp(FlowScript analysisScript, ScriptDocument doc, PopulationSet popset) throws SQLException
+    protected boolean saveAnalysisOrComp(FlowScript analysisScript, ScriptDocument doc, ScriptComponent popset) throws SQLException
     {
         if (popset instanceof CompensationCalculation)
         {
@@ -1358,7 +1243,7 @@ public class ScriptController extends BaseFlowController
         }
         else
         {
-            FlowAnalyzer.makeAnalysis(doc.getScript(), null, popset);
+            FlowAnalyzer.makeAnalysis(doc.getScript(), null, (Analysis) popset);
         }
         return safeSetAnalysisScript(analysisScript, doc.toString());
     }
@@ -1366,17 +1251,12 @@ public class ScriptController extends BaseFlowController
     static public class CopyProtocolForm extends EditScriptForm
     {
         public String name;
-        public boolean copyRunDefinition;
         public boolean copyCompensationCalculation;
         public boolean copyAnalysis;
 
         public void setName(String name)
         {
             this.name = name;
-        }
-        public void setCopyRunDefinition(boolean b)
-        {
-            this.copyRunDefinition = b;
         }
         public void setCopyCompensationCalculation(boolean b)
         {
@@ -1424,10 +1304,7 @@ public class ScriptController extends BaseFlowController
         ScriptDef src = form.analysisScript.getAnalysisScriptDocument().getScript();
         ScriptDocument doc = ScriptDocument.Factory.newInstance();
         ScriptDef script = doc.addNewScript();
-        if (form.copyRunDefinition)
-        {
-            addChild(script, src.getRun());
-        }
+        addChild(script, src.getSettings());
         if (form.copyCompensationCalculation)
         {
             addChild(script, src.getCompensationCalculation());
@@ -1452,6 +1329,61 @@ public class ScriptController extends BaseFlowController
             return new ViewForward(form.urlFor(Action.begin));
         }
         return renderInTemplate(getPage("editProperties.jsp", form), "Edit Properties", Action.editProperties);
+    }
+
+    @Jpf.Action
+    protected Forward editSettings(EditSettingsForm form) throws Exception
+    {
+        requiresPermission(ACL.PERM_UPDATE);
+        if (isPost())
+        {
+            Forward fwd = updateSettings(form);
+            if (fwd != null)
+                return fwd;
+        }
+        return renderInTemplate(getPage("editSettings.jsp", form), "Edit Settings", Action.editSettings);
+    }
+
+    protected Forward updateSettings(EditSettingsForm form) throws Exception
+    {
+        boolean errors = false;
+        ScriptDocument doc = form.analysisScript.getAnalysisScriptDocument();
+        SettingsDef settingsDef = doc.getScript().getSettings();
+        if (settingsDef == null)
+        {
+            settingsDef = doc.getScript().addNewSettings();
+        }
+        while (settingsDef.getParameterArray().length > 0)
+        {
+            settingsDef.removeParameter(0);
+        }
+        for (int i = 0; i < form.ff_parameter.length; i ++)
+        {
+            String value = form.ff_minValue[i];
+            if (value != null)
+            {
+                double val;
+                try
+                {
+                    val = Double.valueOf(value);
+                }
+                catch (Exception e)
+                {
+                    errors = addError("Error converting '" + value + "' to a number.");
+                    continue;
+                }
+                String name = form.ff_parameter[i];
+                ParameterDef param = settingsDef.addNewParameter();
+                param.setName(name);
+                param.setMinValue(val);
+            }
+        }
+        if (errors)
+        {
+            return null;
+        }
+        safeSetAnalysisScript(form.analysisScript, doc.toString());
+        return new ViewForward(form.urlFor(Action.begin));
     }
 
     @Jpf.Action
