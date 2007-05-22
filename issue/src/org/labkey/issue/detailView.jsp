@@ -54,7 +54,7 @@
 %>
 <script language="javascript" TYPE="text/javascript" src="<%=context.getContextPath()%>/select.js"></script>
 <table width=640>
-    <tr><td class="wpTitle" colspan="3"><%=issueId + " : " + issue.getTitle()%></td></tr>
+    <tr><td class="wpTitle" colspan="3"><%=issueId + " : " + h(issue.getTitle())%></td></tr>
     <tr>
         <td valign="top" width="34%"><table>
             <tr><td class="ms-searchform">Status</td><td class="normal"><%=h(issue.getStatus())%></td></tr>

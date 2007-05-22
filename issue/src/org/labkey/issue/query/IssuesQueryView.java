@@ -74,10 +74,17 @@ public class IssuesQueryView extends QueryView
         }
         view.getDataRegion().setShadeAlternatingRows(true);
         view.getDataRegion().setShowColumnSeparators(true);
-        view.getRenderContext().setBaseSort(new Sort("-IssueId"));
 
         //ensureDefaultCustomViews();
         return view;
+    }
+
+    protected void setupDataView(DataView view)
+    {
+        // We need to set the base sort _before_ calling super.setupDataView.  If the user
+        // has set a sort on their custom view, we want their sort to take precedence.
+        view.getRenderContext().setBaseSort(new Sort("-IssueId"));
+        super.setupDataView(view);
     }
 
     private static final String CUSTOM_VIEW_ALL = "all";
