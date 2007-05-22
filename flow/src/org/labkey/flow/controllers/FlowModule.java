@@ -65,7 +65,7 @@ public class FlowModule extends DefaultModule
 
     public FlowModule()
     {
-        super(NAME, 2.0, null, "/Flow",
+        super(NAME, 2.09, null, "/Flow",
                 OverviewWebPart.FACTORY,
                 AnalysesWebPart.FACTORY,
                 AnalysisScriptsWebPart.FACTORY);

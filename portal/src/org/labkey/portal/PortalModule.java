@@ -43,7 +43,7 @@ public class PortalModule extends DefaultModule
     {
         // NOTE:  the version number of the portal module does not govern the scripts run for the
         // portal schema.  Bump the core module version number to cause a portal-xxx.sql script to run
-        super(NAME, 2.0, "/org/labkey/portal", null,
+        super(NAME, 2.09, "/org/labkey/portal", null,
             new WebPartFactory("Search"){
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws IllegalAccessException, InvocationTargetException
                 {
