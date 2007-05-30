@@ -1,0 +1,365 @@
+package org.labkey.ms2.protein.tools;
+
+import com.ice.tar.TarInputStream;
+import com.ice.tar.TarEntry;
+import org.apache.log4j.Logger;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.JobRunner;
+import org.labkey.api.util.FTPUtil;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.WebPartView;
+import org.labkey.common.tools.TabLoader;
+import org.labkey.ms2.protein.ProteinManager;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
+
+/**
+ * User: adam
+ * Date: May 28, 2007
+ * Time: 2:56:10 PM
+ */
+public abstract class GoLoader
+{
+    private static Logger _log = Logger.getLogger(GoLoader.class);
+
+    private static final String GOTERM_FILE = "term.txt";
+    private static final String GOTERM2TERM_FILE = "term2term.txt";
+    private static final String GOTERMDEFINITION_FILE = "term_definition.txt";
+    private static final String GOTERMSYNONYM_FILE = "term_synonym.txt";
+    private static final String GOGRAPHPATH_FILE = "graph_path.txt";
+
+    private static Boolean _goLoaded = null;
+    private static GoLoader _currentLoader = null;
+
+    private HttpServletRequest _request;
+    private TarInputStream _tis = null;
+    private StringBuffer _status = new StringBuffer();  // Can't use StringBuilder -- needs to be synchronized
+    private boolean _complete = false;
+
+    public static WebPartView getCurrentStatus(String message)
+    {
+        StringBuilder html = new StringBuilder(null == message ? "" : message + "<br>");
+
+        if (null == _currentLoader)
+            html.append("No GO annotation loads have been attempted during this server session");
+        else
+            html.append(_currentLoader.getStatus());
+
+        return new HtmlView("GO Annotation Load Status", html.toString());
+    }
+
+
+    public static synchronized GoLoader getGoLoader() throws IOException, ServletException
+    {
+        if (null == _currentLoader || _currentLoader.isComplete())
+            return _currentLoader = new FtpGoLoader();
+        else
+            return null;
+    }
+
+
+    private GoLoader() throws IOException, ServletException
+    {
+        _request = HttpView.getRootContext().getRequest();
+    }
+
+
+    protected abstract InputStream getInputStream() throws IOException, ServletException;
+
+    public void load()
+    {
+        if (isComplete())
+            return;
+
+        JobRunner.getDefault().execute(new Runnable()
+        {
+            public void run()
+            {
+                try
+                {
+                    loadGoFromGz();
+                }
+                catch (Exception e)
+                {
+                    logException(e);
+                }
+                finally
+                {
+                    complete();
+                }
+            }
+        }
+        );
+    }
+
+
+    private void loadGoFromGz() throws SQLException, IOException, ServletException
+    {
+        clearGoLoaded();
+
+        InputStream is = getInputStream();
+        _tis = new TarInputStream(new GZIPInputStream(is));
+        TarEntry te = _tis.getNextEntry();
+
+        Map<String, GoLoadBean> map = getGoLoadMap();
+
+        logStatus("Starting to load GO annotation files");
+        logStatus("");
+
+        while (te != null)
+        {
+            String filename = te.getName();
+            int index = filename.lastIndexOf('/');
+            String shortFilename = filename.substring(index + 1);
+
+            GoLoadBean bean = map.get(shortFilename);
+
+            if (null != bean)
+                loadSingleGoFile(bean, shortFilename, _tis);
+
+            te = _tis.getNextEntry();
+        }
+
+        logStatus("Successfully loaded all GO annotation files");
+    }
+
+
+    private static final int GO_BATCH_SIZE = 5000;
+
+    private void loadSingleGoFile(GoLoadBean bean, String filename, InputStream is) throws SQLException, IOException, ServletException
+    {
+        int orgLineCount = 0;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        TabLoader.TabLoaderIterator it = null;
+        String[] cols = bean.cols;
+        TableInfo ti = bean.tinfo;
+
+        logStatus("Starting to load " + filename);
+
+        try
+        {
+            logStatus("Clearing table " + bean.tinfo);
+            Table.execute(ProteinManager.getSchema(), "TRUNCATE TABLE " + bean.tinfo, null);
+
+            InputStreamReader isr = new InputStreamReader(is);
+            TabLoader t = new TabLoader(isr);
+            conn = ProteinManager.getSchema().getScope().getConnection();
+            String SQLCommand = "INSERT INTO " + ti + "(";
+            String QMarkPart = "VALUES (";
+            String typeList = "SELECT ";
+            for (int i = 0; i < cols.length; i++)
+            {
+                SQLCommand += cols[i];
+                typeList += cols[i];
+                QMarkPart += "?";
+                if (i < (cols.length - 1))
+                {
+                    SQLCommand += ",";
+                    QMarkPart += ",";
+                    typeList += ",";
+                }
+                else
+                {
+                    SQLCommand += ") ";
+                    QMarkPart += ") ";
+                    typeList += " FROM " + ti + " WHERE 1=0";
+                }
+            }
+            ResultSetMetaData rsmd = conn.createStatement().executeQuery(typeList).getMetaData();
+            HashMap<String, Integer> typeMap = new HashMap<String, Integer>();
+            for (int i = 1; i <= rsmd.getColumnCount(); i++)
+            {
+                String key = rsmd.getColumnName(i).toUpperCase();
+                Integer val = new Integer(rsmd.getColumnType(i));
+                typeMap.put(key, val);
+            }
+
+            ps = conn.prepareStatement(SQLCommand + QMarkPart);
+            for (it = t.iterator(); it.hasNext();)
+            {
+                Map curRec = (Map)it.next();
+                for (int i = 1; i <= cols.length; i++) ps.setNull(i, typeMap.get(cols[i - 1].toUpperCase()).intValue());
+                for (Object key : curRec.keySet())
+                {
+                    String k = (String) key;
+                    int kindex = Integer.parseInt(k.substring(6)) + 1;
+                    Object val = curRec.get(key);
+                    if (val instanceof String && val.equals("\\N")) continue;
+                    if (val != null)
+                    {
+                        ps.setObject(kindex, val);
+                    }
+                }
+                ps.addBatch();
+                orgLineCount++;
+                if (orgLineCount % GO_BATCH_SIZE == 0)
+                {
+                    logStatus(orgLineCount + " rows loaded");
+                    ps.executeBatch();
+                    ps.clearBatch();
+                }
+            }
+        }
+        finally
+        {
+            if (null != ps)
+            {
+                ps.executeBatch();
+                ps.close();
+            }
+            if (null != conn)
+            {
+                ProteinManager.getSchema().getScope().releaseConnection(conn);
+            }
+            if (null != it)
+                it.close();
+        }
+
+        logStatus("Completed loading " + filename);
+        logStatus("");
+    }
+
+
+    private void logException(Exception e)
+    {
+        logStatus("Loading GO annotations failed with the following exception:");
+        _status.append(ExceptionUtil.renderException(e));
+        _log.debug("GoLoader", e);
+    }
+
+
+    private void complete()
+    {
+        // Make sure stream is closed
+        if (null != _tis)
+        {
+            try
+            {
+                _tis.close();
+            }
+            catch (IOException e)
+            {
+                ExceptionUtil.logExceptionToMothership(_request, e);
+            }
+        }
+
+        _complete = true;
+    }
+
+
+    private CharSequence getStatus()
+    {
+        return _status;
+    }
+
+
+    private boolean isComplete()
+    {
+        return _complete;
+    }
+
+
+    protected void logStatus(String message)
+    {
+        if (message.length() > 0)
+            _log.debug(message);
+
+        _status.append(message + "<br>");  // Use concatenation to keep this append atomic
+    }
+
+
+    private static class GoLoadBean
+    {
+        TableInfo tinfo;
+        String[] cols;
+
+        private GoLoadBean(TableInfo tinfo, String[] cols)
+        {
+            this.tinfo = tinfo;
+            this.cols = cols;
+        }
+    }
+
+
+    private static Map<String, GoLoadBean> getGoLoadMap()
+    {
+        Map<String, GoLoadBean> map = new HashMap<String, GoLoadBean>(10);
+
+        map.put(GOTERM_FILE, new GoLoadBean(ProteinManager.getTableInfoGoTerm(), new String[]{"Id", "Name", "TermType", "Acc", "IsObsolete", "IsRoot"}));
+        map.put(GOTERM2TERM_FILE, new GoLoadBean(ProteinManager.getTableInfoGoTerm2Term(), new String[]{"Id", "RelationshipTypeId", "Term1Id", "Term2Id", "Complete"}));
+        map.put(GOTERMDEFINITION_FILE, new GoLoadBean(ProteinManager.getTableInfoGoTermDefinition(), new String[]{"TermId", "TermDefinition", "DbXrefId", "TermComment", "Reference"}));
+        map.put(GOTERMSYNONYM_FILE, new GoLoadBean(ProteinManager.getTableInfoGoTermSynonym(), new String[]{"TermId", "TermSynonym", "AccSynonym", "SynonymTypeId"}));
+        map.put(GOGRAPHPATH_FILE, new GoLoadBean(ProteinManager.getTableInfoGoGraphPath(), new String[]{"Id", "Term1Id", "Term2Id", "Distance"}));
+
+        return map;
+    }
+
+
+    public static void clearGoLoaded()
+    {
+        _goLoaded = null;
+    }
+
+
+    public static Boolean isGoLoaded()
+    {
+        if (null == _goLoaded)
+        {
+            try
+            {
+                _goLoaded = !Table.isEmpty(ProteinManager.getTableInfoGoTerm());
+            }
+            catch(SQLException e)
+            {
+                _log.error("isGoLoaded", e);
+                _goLoaded = false;    // Don't try this again if there's a SQL error
+            }
+        }
+
+        return _goLoaded;
+    }
+
+
+    private static class FtpGoLoader extends GoLoader
+    {
+        private final static String SERVER = "ftp.godatabase.org";
+        private final static String PATH = "godatabase/archive/latest-full";
+        private final static String PATTERN = "go_[0-9]{6}-termdb-tables.tar.gz";
+
+        FtpGoLoader() throws IOException, ServletException
+        {
+            super();
+        }
+
+
+        protected InputStream getInputStream() throws IOException, ServletException
+        {
+            logStatus("Searching for latest GO annotation files on " + SERVER);
+            List<String> filenames = FTPUtil.listFiles("anonymous", "anonymous", SERVER, PATH, PATTERN);
+
+            if (filenames.size() != 1)
+                throw new ServletException("Expected to find one file matching pattern \"" + PATTERN + "\" but found " + filenames.size());
+
+            logStatus("Starting to download " + filenames.get(0) + " from " + SERVER);
+            File file = FTPUtil.downloadFile("anonymous", "anonymous", SERVER, PATH, filenames.get(0));
+            file.deleteOnExit();
+            logStatus("Finished downloading " + filenames.get(0));
+
+            return new FileInputStream(file);
+        }
+    }
+}

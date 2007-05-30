@@ -15,21 +15,19 @@
  */
 package org.labkey.ms2.protein.tools;
 
-import org.labkey.api.data.*;
-import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.common.tools.TabLoader;
-import org.labkey.api.view.ViewServlet;
-import org.labkey.ms2.MS2Manager;
 import org.apache.log4j.Logger;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.Table;
+import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.view.ViewServlet;
+import org.labkey.common.tools.TabLoader;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.protein.ProteinManager;
 
-import javax.servlet.ServletException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.*;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.io.InputStreamReader;
-import java.io.InputStream;
-import java.io.IOException;
 
 /**
  * User: tholzman
@@ -38,37 +36,27 @@ import java.io.IOException;
  */
 public class ProteinDictionaryHelpers
 {
-    private static final String DEFAULT_PROTSPROTORGMAP_FILE =
-            "MS2/externalData/ProtSprotOrgMap.txt";
-    private static final String DEFAULT_GOTERM_FILE =
-            "MS2/externalData/term.txt";
-    private static final String DEFAULT_GOTERM2TERM_FILE =
-            "MS2/externalData/term2term.txt";
-    private static final String DEFAULT_GOTERMDEFINITION_FILE =
-            "MS2/externalData/term_definition.txt";
-    private static final String DEFAULT_GOTERMSYNONYM_FILE =
-            "MS2/externalData/term_synonym.txt";
-    private static final String DEFAULT_GOGRAPHPATH_FILE =
-            "MS2/externalData/graph_path.txt";
+    private static Logger _log = Logger.getLogger(ProteinDictionaryHelpers.class);
 
+    public static final String WEBAPP_ROOT = "MS2/externalData/";
+    private static final String PROTSPROTORGMAP_FILE = ProteinDictionaryHelpers.WEBAPP_ROOT + "ProtSprotOrgMap.txt";
+    private static final int SPOM_BATCH_SIZE = 1000;
 
-    private static final DbSchema _schema = ProteinManager.getSchema();
-    private static Logger _log = Logger.getLogger(ProteinManager.class);
-
-
-    public static boolean loadProtSprotOrgMap(String fname)
+    public static boolean loadProtSprotOrgMap(String fname) throws SQLException, IOException
     {
         int orgLineCount = 0;
         TabLoader t;
         PreparedStatement ps = null;
         Connection conn = null;
         TabLoader.TabLoaderIterator it = null;
+        DbScope scope = null;
         try
         {
-            Table.execute(_schema, "DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap(), null);
+            Table.execute(ProteinManager.getSchema(), "DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap(), null);
 
             t = new TabLoader(new InputStreamReader(ViewServlet.getViewServletContext().getResourceAsStream(fname)));
-            conn = _schema.getScope().getConnection();
+            scope = ProteinManager.getSchema().getScope();
+            conn = scope.getConnection();
             ps = conn.prepareStatement(
                     "INSERT INTO " + ProteinManager.getTableInfoSprotOrgMap() +
                             " (SprotSuffix,SuperKingdomCode,TaxonId,FullName,Genus,Species,CommonName,Synonym) " +
@@ -78,7 +66,13 @@ public class ProteinDictionaryHelpers
             for (it = t.iterator(); it.hasNext();)
             {
                 Map curRec = (Map)it.next();
-                for (int i = 1; i <= 8; i++) ps.setNull(i, Types.VARCHAR);
+
+                // Set nullable parameters to NULL, using correct types
+                ps.setNull(2, Types.CHAR);
+                ps.setNull(3, Types.INTEGER);
+                ps.setNull(7, Types.VARCHAR);
+                ps.setNull(8, Types.VARCHAR);
+
                 for (Object key : curRec.keySet())
                 {
                     String k = (String) key;
@@ -91,126 +85,41 @@ public class ProteinDictionaryHelpers
                 }
                 ps.addBatch();
                 orgLineCount++;
-            }
-            ps.executeBatch();
 
+                if (0 == orgLineCount % SPOM_BATCH_SIZE)
+                {
+                    ps.executeBatch();
+                    ps.clearBatch();
+                    _log.debug("SprotOrgMap: " + orgLineCount + " lines loaded");
+                }
+            }
+
+            ps.executeBatch();
         }
-        catch (Exception e)
+        catch (SQLException e)
         {
             _log.debug("Problem loading ProtSprotOrgMap from " + fname + " on line " + orgLineCount + ": " + e);
-            return false;
-        } finally {
+            throw e;
+        }
+        finally
+        {
             try{ps.close();}catch(Exception e){}
-            try{_schema.getScope().releaseConnection(conn);}catch(Exception e){}
+            try{scope.releaseConnection(conn);}catch(Exception e){}
             try{it.close();}catch(Exception e){}
         }
         return true;
     }
 
-    public static boolean loadProtSprotOrgMap()
+    public static boolean loadProtSprotOrgMap() throws SQLException
     {
-        return loadProtSprotOrgMap(DEFAULT_PROTSPROTORGMAP_FILE);
-    }
-
-    private static final int GO_BATCH_SIZE = 5000;
-
-    public static void loadAGoFile(TableInfo ti, String cols[], String fname) throws SQLException, IOException, ServletException
-    {
-        int orgLineCount = 0;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        TabLoader.TabLoaderIterator it = null;
-
         try
         {
-            Table.execute(_schema, "DELETE FROM " + ti, null);
-
-            InputStream is = ViewServlet.getViewServletContext().getResourceAsStream(fname);
-
-            if (null == is)
-                throw new ServletException("File not found: " + fname);
-
-            InputStreamReader isr = new InputStreamReader(is);
-            TabLoader t = new TabLoader(isr);
-            conn = _schema.getScope().getConnection();
-            String SQLCommand = "INSERT INTO " + ti + "(";
-            String QMarkPart = "VALUES (";
-            String typeList = "SELECT ";
-            for (int i = 0; i < cols.length; i++)
-            {
-                SQLCommand += cols[i];
-                typeList += cols[i];
-                QMarkPart += "?";
-                if (i < (cols.length - 1))
-                {
-                    SQLCommand += ",";
-                    QMarkPart += ",";
-                    typeList += ",";
-                }
-                else
-                {
-                    SQLCommand += ") ";
-                    QMarkPart += ") ";
-                    typeList += " FROM " + ti + " WHERE 1=0";
-                }
-            }
-            ResultSetMetaData rsmd = conn.createStatement().executeQuery(typeList).getMetaData();
-            HashMap<String, Integer> typeMap = new HashMap<String, Integer>();
-            for (int i = 1; i <= rsmd.getColumnCount(); i++)
-            {
-                String key = rsmd.getColumnName(i).toUpperCase();
-                Integer val = new Integer(rsmd.getColumnType(i));
-                typeMap.put(key, val);
-            }
-
-            ps = conn.prepareStatement(SQLCommand + QMarkPart);
-            for (it = t.iterator(); it.hasNext();)
-            {
-                Map curRec = (Map)it.next();
-                for (int i = 1; i <= cols.length; i++) ps.setNull(i, typeMap.get(cols[i - 1].toUpperCase()).intValue());
-                for (Object key : curRec.keySet())
-                {
-                    String k = (String) key;
-                    int kindex = Integer.parseInt(k.substring(6)) + 1;
-                    Object val = curRec.get(key);
-                    if (val instanceof String && val.equals("\\N")) continue;
-                    if (val != null)
-                    {
-                        ps.setObject(kindex, val);
-                    }
-                }
-                ps.addBatch();
-                orgLineCount++;
-                if (orgLineCount % GO_BATCH_SIZE == 0)
-                {
-                    ps.executeBatch();
-                    ps.clearBatch();
-                }
-            }
+            return loadProtSprotOrgMap(PROTSPROTORGMAP_FILE);
         }
-        finally
+        catch(IOException e)
         {
-            if (null != ps)
-            {
-                ps.executeBatch();
-                ps.close();
-            }
-            if (null != conn)
-            {
-                _schema.getScope().releaseConnection(conn);
-            }
-            if (null != it)
-                it.close();
+            throw new RuntimeException(e);
         }
-    }
-
-    public static void loadGo() throws SQLException, IOException, ServletException
-    {
-        loadAGoFile(ProteinManager.getTableInfoGoTerm(), new String[]{"Id", "Name", "TermType", "Acc", "IsObsolete", "IsRoot"}, DEFAULT_GOTERM_FILE);
-        loadAGoFile(ProteinManager.getTableInfoGoTerm2Term(), new String[]{"Id", "RelationshipTypeId", "Term1Id", "Term2Id", "Complete"}, DEFAULT_GOTERM2TERM_FILE);
-        loadAGoFile(ProteinManager.getTableInfoGoTermDefinition(), new String[]{"TermId", "TermDefinition", "DbXrefId", "TermComment", "Reference"}, DEFAULT_GOTERMDEFINITION_FILE);
-        loadAGoFile(ProteinManager.getTableInfoGoTermSynonym(), new String[]{"TermId", "TermSynonym", "AccSynonym", "SynonymTypeId"}, DEFAULT_GOTERMSYNONYM_FILE);
-        loadAGoFile(ProteinManager.getTableInfoGoGraphPath(), new String[]{"Id", "Term1Id", "Term2Id", "Distance"}, DEFAULT_GOGRAPHPATH_FILE);
     }
 
     public static String getGONameFromId(int id) throws SQLException
@@ -305,72 +214,36 @@ public class ProteinDictionaryHelpers
         {
             if (gTypeC == 0 || gTypeF == 0 || gTypeP == 0)
             {
-                ResultSet rs = Table.executeQuery(ProteinManager.getSchema(), "SELECT annottypeid,name FROM " + ProteinManager.getTableInfoAnnotationTypes() + " WHERE name in ('GO_C','GO_F','GO_P')", null);
+                ResultSet rs = null;
 
-                while (rs.next())
+                try
                 {
-                    int antypeid = rs.getInt(1);
-                    String gt = rs.getString(2);
-                    if (gt.equals("GO_C"))
+                    rs = Table.executeQuery(ProteinManager.getSchema(), "SELECT annottypeid,name FROM " + ProteinManager.getTableInfoAnnotationTypes() + " WHERE name in ('GO_C','GO_F','GO_P')", null);
+
+                    while (rs.next())
                     {
-                        gTypeC = antypeid;
-                    }
-                    if (gt.equals("GO_F"))
-                    {
-                        gTypeF = antypeid;
-                    }
-                    if (gt.equals("GO_P"))
-                    {
-                        gTypeP = antypeid;
+                        int antypeid = rs.getInt(1);
+                        String gt = rs.getString(2);
+                        if (gt.equals("GO_C"))
+                        {
+                            gTypeC = antypeid;
+                        }
+                        if (gt.equals("GO_F"))
+                        {
+                            gTypeF = antypeid;
+                        }
+                        if (gt.equals("GO_P"))
+                        {
+                            gTypeP = antypeid;
+                        }
                     }
                 }
-                rs.close();
+                finally
+                {
+                    ResultSetUtil.close(rs);
+                }
             }
         }
-    }
-
-
-    public static HashSet<String> OLDgetGOAccsFromSeqid(int seqid, GoTypes kind) throws SQLException
-    {
-        String gTypes = "";
-        ResultSet rs = null;
-        HashSet<String> retVal = new HashSet<String>();
-
-        switch (kind)
-        {
-            case CELL_LOCATION:
-                gTypes = "annotTypeId=" + getgTypeC();
-                break;
-            case FUNCTION:
-                gTypes = "annotTypeId=" + getgTypeF();
-                break;
-            case PROCESS:
-                gTypes = "annotTypeId=" + getgTypeP();
-                break;
-            case ALL:
-                gTypes = "annotTypeId in (" + getgTypeC() + "," + getgTypeF() + "," + getgTypeC() + ")";
-                break;
-        }
-
-        String command = "SELECT annotval FROM " + ProteinManager.getTableInfoAnnotations() + " WHERE seqid=" + seqid + " AND " + gTypes;
-
-        try
-        {
-            rs = Table.executeQuery(ProteinManager.getSchema(), command, null);
-
-            while (rs.next())
-            {
-                String val = rs.getString(1);
-                retVal.add(val.substring(0, 10).trim());
-            }
-        }
-        finally
-        {
-            if (null != rs)
-                rs.close();
-        }
-
-        return retVal;
     }
 
 
@@ -411,33 +284,6 @@ public class ProteinDictionaryHelpers
             if (!test.equals(retVal))
                 _log.error(myLevId + " " + retVal + " " + test);
 
-        return retVal;
-    }
-
-    public static String OLDgetThirdLevGoAccFromAcc(String myLev) throws SQLException
-    {
-        String retVal = null;
-        int myLevId = getGOIdFromAcc(myLev);
-        Connection conn = _schema.getScope().getConnection();
-        Statement s = conn.createStatement();
-        ResultSet rs = s.executeQuery(
-                    "SELECT a.acc FROM " +
-                            ProteinManager.getTableInfoGoTerm() + " a " +
-                            " WHERE a.id IN (SELECT term2id FROM " + ProteinManager.getTableInfoGoGraphPath() +
-                            " c WHERE c.term1id=1 AND c.distance=3 AND EXISTS(SELECT * FROM " + ProteinManager.getTableInfoGoGraphPath() +
-                            " d WHERE d.term1id=c.term2id AND d.term2id=" + myLevId + "))"
-                );
-        if (rs.next())
-        {
-            retVal = rs.getString(1);
-        }
-        else
-        {
-            if (myLevId != 0) retVal = myLev;
-        }
-        rs.close();
-        s.close();
-        _schema.getScope().releaseConnection(conn);
         return retVal;
     }
 }

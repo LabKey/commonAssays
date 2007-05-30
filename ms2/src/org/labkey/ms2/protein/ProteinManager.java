@@ -40,8 +40,6 @@ public class ProteinManager
     private static Logger _log = Logger.getLogger(ProteinManager.class);
     private static final String SCHEMA_NAME = "prot";
 
-    private static Boolean _goLoaded = null;
-
     public static final int RUN_FILTER = 1;
     public static final int URL_FILTER = 2;
     public static final int EXTRA_FILTER = 4;
@@ -950,30 +948,6 @@ public class ProteinManager
         return retVal;
     }
 
-
-    public static void clearGoLoaded()
-    {
-        _goLoaded = null;
-    }
-
-
-    public static Boolean isGoLoaded()
-    {
-        if (null == _goLoaded)
-        {
-            try
-            {
-                _goLoaded = !Table.isEmpty(ProteinManager.getTableInfoGoTerm());
-            }
-            catch(SQLException e)
-            {
-                _log.error("isGoLoaded", e);
-                _goLoaded = false;    // Don't try this again if there's a SQL error
-            }
-        }
-
-        return _goLoaded;
-    }
 
     /** Deletes all ProteinSequences, and the FastaFile record as well */
     public static void deleteFastaFile(int fastaId) throws SQLException

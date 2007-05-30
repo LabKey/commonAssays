@@ -686,6 +686,7 @@ ms2/src/org/labkey/ms2/protein/query/CustomAnnotationTable.java -text
 ms2/src/org/labkey/ms2/protein/tools/GOPieSectionLabelGenerator.java -text
 ms2/src/org/labkey/ms2/protein/tools/GOPieToolTipGenerator.java -text
 ms2/src/org/labkey/ms2/protein/tools/GOPieURLGenerator.java -text
+ms2/src/org/labkey/ms2/protein/tools/GoLoader.java -text
 ms2/src/org/labkey/ms2/protein/tools/JChartHelper.java -text
 ms2/src/org/labkey/ms2/protein/tools/NullOutputStream.java -text
 ms2/src/org/labkey/ms2/protein/tools/PieJChartHelper.java -text

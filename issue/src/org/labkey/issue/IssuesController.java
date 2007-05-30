@@ -30,8 +30,9 @@ import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.*;
 import org.labkey.api.security.*;
-import org.labkey.api.util.MailHelper.ViewMessage;
 import org.labkey.api.util.*;
+import org.labkey.api.util.MailHelper.ViewMessage;
+import org.labkey.api.util.Search.SearchResultsView;
 import org.labkey.api.view.*;
 import org.labkey.api.wiki.WikiRenderer;
 import org.labkey.api.wiki.WikiRendererType;
@@ -187,7 +188,7 @@ public class IssuesController extends ViewController
         return box;
     }
     
-    private ResultSet getIssuesResultSet(ListForm form) throws IOException, SQLException, ServletException
+    private ResultSet getIssuesResultSet() throws IOException, SQLException, ServletException
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), IssuesQuerySchema.SCHEMA_NAME);
         QuerySettings settings = new QuerySettings(getViewURLHelper(),getRequest(), ISSUES_QUERY);
@@ -305,7 +306,7 @@ public class IssuesController extends ViewController
         }
         else
         {   
-            ResultSet rs = getIssuesResultSet(form);
+            ResultSet rs = getIssuesResultSet();
             int issueColumnIndex = rs.findColumn("issueId");
         
             while (rs.next())
@@ -1086,13 +1087,12 @@ public class IssuesController extends ViewController
         List<Search.Searchable> l = new ArrayList<Search.Searchable>();
         l.add((Search.Searchable)module);
 
-        String html = Search.search(getUser(), c, searchTerm, l);
-        HtmlView view = new HtmlView(html);
+        HttpView results = new SearchResultsView(c, searchTerm, l, getUser(), new ViewURLHelper("Issues", "search", c));
 
         NavTrailConfig trailConfig = new NavTrailConfig(getViewContext(), c);
         trailConfig.setTitle("Search Results");
 
-        HttpView template = new HomeTemplate(getViewContext(), c, view, trailConfig);
+        HttpView template = new HomeTemplate(getViewContext(), c, results, trailConfig);
         return includeView(template);
     }
 

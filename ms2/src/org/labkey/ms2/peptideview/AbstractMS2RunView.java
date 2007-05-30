@@ -10,6 +10,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.CaseInsensitiveHashMap;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
+import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.common.util.Pair;
 import org.labkey.common.tools.MS2Modification;
 import org.apache.log4j.Logger;
@@ -106,7 +107,7 @@ public abstract class AbstractMS2RunView
         result.add(exportFormat);
 
         // TODO: Temp hack -- need to support GO charts in protein views
-        if ("peptides".equals(whatWeAreSelecting) && ProteinManager.isGoLoaded())
+        if ("peptides".equals(whatWeAreSelecting) && GoLoader.isGoLoaded())
         {
             result.add(new ActionButton("peptideCharts.post", "GO Piechart"));
             DropDownList chartType = new DropDownList("chartType");

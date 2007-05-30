@@ -71,7 +71,7 @@
     %>
     <td width=100%>&nbsp;</td>
     <td nowrap><form action="jumpToIssue.view" method="get">Jump&nbsp;to&nbsp;issue:<input type="text" size="5" name="issueId"/></form></td>
-    <td align="right" nowrap><form action="search.view" method="get"><input type="image" align="top" vspace="2" src="<%=PageFlowUtil.buttonSrc("Search")%>">&nbsp;&nbsp;<input type="text" size="30" name="search" value="">&nbsp;&nbsp;&nbsp;</form></td>
+    <td align="right" nowrap><form action="search.post" method="post"><input type="image" align="top" vspace="2" src="<%=PageFlowUtil.buttonSrc("Search")%>">&nbsp;&nbsp;<input type="text" size="30" name="search" value="">&nbsp;&nbsp;&nbsp;</form></td>
 </tr></table>
 
 <%!

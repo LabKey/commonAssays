@@ -15,19 +15,21 @@
  */
 package org.labkey.portal;
 
-import org.labkey.api.module.Module;
-import org.labkey.api.module.DefaultModule;
-import org.labkey.api.module.ModuleContext;
-import org.labkey.api.view.*;
-import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.security.User;
 import org.apache.log4j.Logger;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleContext;
+import org.labkey.api.view.Portal;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.view.WebPartView;
+import org.labkey.api.util.Search.*;
+import org.labkey.api.util.Search;
 
-import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.InvocationTargetException;
 import java.beans.PropertyChangeEvent;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * User: migra
@@ -47,13 +49,13 @@ public class PortalModule extends DefaultModule
             new WebPartFactory("Search"){
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws IllegalAccessException, InvocationTargetException
                 {
-                    return new ProjectController.SearchWebPart(40);
+                    return new SearchWebPart(Search.ALL_MODULES, ProjectController.getSearchUrl(portalCtx.getContainer()), "");
                 }
             },
             new WebPartFactory("Narrow Search", "right"){
                 public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws IllegalAccessException, InvocationTargetException
                 {
-                    return new ProjectController.SearchWebPart(0);
+                    return new SearchWebPart(Search.ALL_MODULES, ProjectController.getSearchUrl(portalCtx.getContainer()), "", 0);
                 }
             });
         addController("Project", ProjectController.class);

@@ -22,12 +22,13 @@ import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.module.FolderType;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
-import org.labkey.common.util.Pair;
 import org.labkey.api.util.Search;
+import org.labkey.api.util.Search.SearchResultsView;
 import org.labkey.api.view.*;
-import org.labkey.api.module.FolderType;
+import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,8 +36,8 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
-import java.util.Enumeration;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 
 @Jpf.Controller
@@ -405,6 +406,12 @@ public class ProjectController extends ViewController
     }
 
 
+    public static ViewURLHelper getSearchUrl(Container c)
+    {
+        return new ViewURLHelper("Project", "search", c);
+    }
+
+
     @Jpf.Action
     protected Forward search() throws Exception
     {
@@ -413,15 +420,12 @@ public class ProjectController extends ViewController
         Container c = getContainer();
         String searchTerm = (String)getViewContext().get("search");
 
-        HttpView search = new SearchWebPart(40);
-
-        String html = Search.search(getUser(), c, searchTerm);
-        HtmlView results = new HtmlView("Results", html);
+        HttpView results = new SearchResultsView(c, searchTerm, Search.ALL_MODULES, getUser(), getSearchUrl(c));
 
         NavTrailConfig trailConfig = new NavTrailConfig(getViewContext(), c);
         trailConfig.setTitle("Search Results");
 
-        HomeTemplate template = new HomeTemplate(getViewContext(), c, new VBox(search, results), trailConfig);
+        HomeTemplate template = new HomeTemplate(getViewContext(), c, results, trailConfig);
         template.getModel().setFocus("forms[0].search");
         return includeView(template);
     }
@@ -455,20 +459,6 @@ public class ProjectController extends ViewController
         public void setText(String text)
         {
             this.text = text;
-        }
-    }
-
-
-    public static class SearchWebPart extends GroovyView
-    {
-        public SearchWebPart(int textBoxWidth)
-        {
-            super("/org/labkey/portal/search.gm");
-            setTitle("Search");
-            String path = getViewContext().getViewURLHelper().getExtraPath();
-            addObject("postURL", ViewURLHelper.toPathString("Project", "search", path));
-            addObject("what", Search.getSearchResultNames());
-            addObject("width", textBoxWidth);
         }
     }
 }

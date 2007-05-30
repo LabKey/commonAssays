@@ -52,6 +52,7 @@ import org.labkey.ms2.protein.*;
 import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
+import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.query.CompareProteinsView;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
@@ -1024,10 +1025,8 @@ public class MS2Controller extends ViewController
                 }
             }
         }
-        ViewURLHelper url = cloneViewURLHelper();
-        url.setAction("showProteinAdmin");
-        url.deleteParameters();
-        return new ViewForward(url);
+
+        return new ViewForward(getShowProteinAdminUrl());
     }
 
     @Jpf.Action
@@ -1231,10 +1230,7 @@ public class MS2Controller extends ViewController
             }
         }
 
-        ViewURLHelper url = cloneViewURLHelper();
-        url.setAction("showProteinAdmin");
-        url.deleteParameters();
-        return new ViewForward(url);
+        return new ViewForward(getShowProteinAdminUrl());
     }
 
 
@@ -1260,17 +1256,17 @@ public class MS2Controller extends ViewController
         rgn.setShowRecordSelectors(true);
 
         ButtonBar bb = new ButtonBar();
-        bb.add(NewAnnot);
-        bb.add(ReloadSprotOrgMap);
-        ReloadGO.setScript("alert(\"Note: Gene Ontologies are large.  This takes some time,\\nit will be loaded in the background.\");this.form.action=\"reloadGO.post\";this.form.method=\"post\";return true");
-        ReloadGO.setActionType(ActionButton.Action.GET);
-        bb.add(ReloadGO);
-        addSelectAndClearButtons(bb);
 
         ActionButton delete = new ActionButton("", "Delete Selected");
         delete.setScript("alert(\"Note: this will not delete actual annotations,\\njust the entries on this list.\"); return verifySelected(this.form, \"deleteAnnotInsertEntries.post\", \"post\", \"annotations\")");
         delete.setActionType(ActionButton.Action.GET);
         bb.add(delete);
+
+        bb.add(NewAnnot);
+        bb.add(ReloadSprotOrgMap);
+        ReloadGO.setScript("alert(\"Note: Gene Ontologies are large.  This takes some time,\\nit will be loaded in the background.\");this.form.action=\"reloadGO.post\";this.form.method=\"post\";return true");
+        ReloadGO.setActionType(ActionButton.Action.GET);
+        bb.add(ReloadGO);
 
         rgn.setButtonBar(bb);
         return rgn;
@@ -1283,38 +1279,43 @@ public class MS2Controller extends ViewController
         requiresGlobalAdmin();
 
         ProteinDictionaryHelpers.loadProtSprotOrgMap();
-        ViewURLHelper currentUrl = cloneViewURLHelper();
-        currentUrl.deleteParameters();
-        currentUrl.setAction("showProteinAdmin");
-        return new ViewForward(currentUrl);
+
+        return new ViewForward(getShowProteinAdminUrl());
     }
 
 
     @Jpf.Action
     protected Forward reloadGO() throws Exception
     {
-        _log.debug("Entering reloadGO");
         requiresGlobalAdmin();
-        JobRunner.getDefault().execute(new Runnable()
+
+// ViewServlet.getViewServletContext().getResourceAsStream(ProteinDictionaryHelpers.WEBAPP_ROOT + "go_200705-termdb-tables.tar.gz"))
+
+        GoLoader loader = GoLoader.getGoLoader();
+
+        ViewURLHelper forwardUrl = new ViewURLHelper("MS2", "showGoStatus.view", "");
+
+        if (null != loader)
         {
-            public void run()
-            {
-                try
-                {
-                    ProteinManager.clearGoLoaded();
-                    ProteinDictionaryHelpers.loadGo();
-                }
-                catch (Exception e)
-                {
-                    _log.error("Couldn't load Gene Ontology", e);
-                }
-            }
+            loader.load();
+            Thread.sleep(2000);
         }
-        );
-        ViewURLHelper currentUrl = cloneViewURLHelper();
-        currentUrl.deleteParameters();
-        currentUrl.setAction("showProteinAdmin");
-        return new ViewForward(currentUrl);
+        else
+        {
+            forwardUrl.addParameter("message", "<b>Can't load GO annotations, a GO annotation load is already in progress.  See below for details.</b><br>");
+        }
+
+        return new ViewForward(forwardUrl);
+    }
+
+
+    @Jpf.Action
+    protected Forward showGoStatus() throws Exception
+    {
+        requiresGlobalAdmin();
+
+        HttpView view = GoLoader.getCurrentStatus(getViewURLHelper().getParameter("message"));
+        return _renderInTemplate(view, Template.home, "GO Load Status", null, false);
     }
 
 
@@ -1323,14 +1324,11 @@ public class MS2Controller extends ViewController
     {
         requiresGlobalAdmin();
 
-        ViewURLHelper currentUrl = cloneViewURLHelper();
-        HttpServletRequest request = getRequest();
-        String[] deleteAIEs = request.getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
+        String[] deleteAIEs = getRequest().getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
         String idList = StringUtils.join(deleteAIEs, ',');
         Table.execute(ProteinManager.getSchema(), "DELETE FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId in (" + idList + ")", null);
-        currentUrl.deleteParameters();
-        currentUrl.setAction("showProteinAdmin");
-        return new ViewForward(currentUrl);
+
+        return new ViewForward(getShowProteinAdminUrl());
     }
 
 
@@ -1341,9 +1339,6 @@ public class MS2Controller extends ViewController
         if (!c.hasPermission(getUser(), ACL.PERM_READ))
             HttpView.throwUnauthorized();
 
-        ViewURLHelper urlhelp = cloneViewURLHelper();
-        urlhelp.deleteParameters();
-        urlhelp.setPageFlow("MS2").setAction("showProteinAdmin");
         DataRegion dr = getAnnotInsertsGrid();
         GridView grid = new GridView(dr);
 
@@ -3492,6 +3487,12 @@ public class MS2Controller extends ViewController
     }
 
 
+    private static ViewURLHelper getShowProteinAdminUrl()
+    {
+        return new ViewURLHelper("MS2", "showProteinAdmin.view", "");
+    }
+
+
     @Jpf.Action
     protected Forward showProteinAdmin() throws Exception
     {
@@ -3507,7 +3508,7 @@ public class MS2Controller extends ViewController
 
         annots.getViewContext().setPermissions(ACL.PERM_READ);
 
-        return _renderInTemplate(new VBox(grid, annots), false, null, null);
+        return _renderInTemplate(new VBox(grid, annots), false, "Protein Database Admin", null);
     }
 
 
@@ -3542,7 +3543,7 @@ public class MS2Controller extends ViewController
         for (int id : validIds)
             ProteinManager.deleteFastaFile(id);
 
-        return new ViewForward("MS2", "showProteinAdmin", "");
+        return new ViewForward(getShowProteinAdminUrl());
     }
 
 
@@ -3565,7 +3566,7 @@ public class MS2Controller extends ViewController
 
         FastaDbLoader.updateSeqIds(ids);
 
-        return new ViewForward("MS2", "showProteinAdmin", "");
+        return new ViewForward(getShowProteinAdminUrl());
     }
 
 

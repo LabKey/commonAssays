@@ -4,7 +4,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.labkey.announcements.AnnouncementsController;
 import org.labkey.announcements.DailyDigestPage;
-import org.labkey.announcements.model.AnnouncementManager.*;
+import org.labkey.announcements.model.AnnouncementManager.Settings;
 import org.labkey.api.announcements.Announcement;
 import org.labkey.api.announcements.CommSchema;
 import org.labkey.api.data.*;
@@ -12,12 +12,13 @@ import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.util.*;
 import org.labkey.api.util.MailHelper.ViewMessage;
-import org.labkey.api.view.*;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.WebPartView;
 
+import javax.mail.MessagingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.mail.MessagingException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -40,7 +41,7 @@ public class DailyDigest
     // Used only for AnnouncementsController test action -- remove when test action is removed
     public static void sendDailyDigest() throws Exception
     {
-        sendDailyDigest(createMockRequest());
+        sendDailyDigest(AppProps.getInstance().createMockRequest());
     }
 
 
@@ -216,20 +217,6 @@ public class DailyDigest
     }
 
 
-    // Don't have a current request, so create a mock request to generate jsp messages and links in the message content
-    private static HttpServletRequest createMockRequest()
-    {
-        MockHttpServletRequest request = new MockHttpServletRequest(ViewServlet.getViewServletContext());
-        AppProps appProps = AppProps.getInstance();
-        request.setContextPath(appProps.getContextPath());
-        request.setServerPort(appProps.getServerPort());
-        request.setServerName(appProps.getServerName());
-        request.setScheme(appProps.getScheme());
-
-        return request;
-    }
-
-
     private static class DailyDigestTask extends TimerTask implements ShutdownListener
     {
         public void run()
@@ -240,7 +227,7 @@ public class DailyDigest
 
             try
             {
-                request = createMockRequest();
+                request = AppProps.getInstance().createMockRequest();
             }
             catch(IllegalStateException e)
             {
