@@ -17,10 +17,7 @@
  */
 package org.labkey.flow.analysis.model;
 
-import org.labkey.flow.analysis.data.NumberArray;
-import org.labkey.flow.analysis.data.FloatArray;
-import org.labkey.flow.analysis.data.IntArray;
-import org.labkey.flow.analysis.data.SubsetNumberArray;
+import org.labkey.flow.analysis.data.*;
 import org.labkey.flow.analysis.web.StatisticSpec;
 
 import java.io.File;
@@ -92,7 +89,11 @@ public class DataFrame
         {
             Field field = getField(p);
             ScalingFunction fn = field.getScalingFunction();
-            ScriptSettings.ParameterInfo paramInfo = settings.getParameterInfo(field.getName(), false);
+            ScriptSettings.ParameterInfo paramInfo = null;
+            if (settings != null)
+            {
+                paramInfo = settings.getParameterInfo(field.getName(), false);
+            }
             if (paramInfo != null && paramInfo.getMinValue() != null)
             {
                 fn = new ScalingFunction(fn, paramInfo.getMinValue());
@@ -107,11 +108,18 @@ public class DataFrame
             else
             {
                 fields[p] = new Field(p, getField(p), fn);
-                int len = from.size();
-                float[] to = new float[len];
-                out[p] = new FloatArray(to);
-                for (int e = 0; e < len; e++)
-                    to[e] = (float) fn.translate(from.getDouble(e));
+                if (fn.isIdentity())
+                {
+                    out[p] = new ConstrainedNumberArray(from, fn.getMinValue(), fn.getMaxValue());
+                }
+                else
+                {
+                    int len = from.size();
+                    float[] to = new float[len];
+                    out[p] = new FloatArray(to);
+                    for (int e = 0; e < len; e++)
+                        to[e] = (float) fn.translate(from.getDouble(e));
+                }
             }
         }
         return new DataFrame(fields, out);

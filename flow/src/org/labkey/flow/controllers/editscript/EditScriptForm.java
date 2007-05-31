@@ -177,9 +177,11 @@ public class EditScriptForm extends ViewForm
         }
     }
 
-    protected Map<String, String> getParameterNames(FlowRun run, String[] compChannels)
+    static public Map<String, String> getParameterNames(FlowRun run, String[] compChannels)
     {
         Map<String, String> ret = new LinkedHashMap();
+        if (run == null)
+            return ret;
         try
         {
             FlowWell[] wells = run.getWells();

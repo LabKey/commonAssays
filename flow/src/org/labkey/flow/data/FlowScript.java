@@ -5,6 +5,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.labkey.api.data.*;
 import org.fhcrc.cpas.flow.script.xml.*;
@@ -33,6 +34,7 @@ public class FlowScript extends FlowDataObject
     public static final String STAT_COLUMN_PREFIX = "statistic.";
     public static final String KEYWORD_COLUMN_PREFIX = "keyword.";
     public static final String DEFAULT_UPLOAD_PROTOCOL_NAME = "Default Upload Settings";
+    public static final String PRIVATE_SCRIPT_SUFFIX = "_modified";
 
 
     static public FlowScript fromScriptId(int id)
@@ -73,12 +75,15 @@ public class FlowScript extends FlowDataObject
     static public FlowScript[] getScripts(Container container)
     {
         ExpData[] datas = ExperimentService.get().getExpDatas(container, FlowDataType.Script);
-        FlowScript[] ret = new FlowScript[datas.length];
+        List<FlowScript> ret = new ArrayList();
         for (int i = 0; i < datas.length; i ++)
         {
-            ret[i] = new FlowScript(datas[i]);
+            FlowScript script = new FlowScript(datas[i]);
+            if (script.isPrivate())
+                continue;
+            ret.add(script);
         }
-        return ret;
+        return ret.toArray(new FlowScript[0]);
     }
 
     static public FlowScript[] getUploadRunProtocols(Container container) throws SQLException
@@ -128,19 +133,45 @@ public class FlowScript extends FlowDataObject
         return generateLSID(container, "Protocol", name);
     }
 
+    static private void initScript(ExpData data)
+    {
+        data.setDataFileURI(new File("script." + FlowDataHandler.EXT_SCRIPT).toURI());
+    }
+
     static public FlowScript create(User user, Container container, String name, String analysisScript) throws Exception
     {
         ExpData data = ExperimentService.get().createData(container, FlowDataType.Script, name);
-        data.setDataFileURI(new File("script." + FlowDataHandler.EXT_SCRIPT).toURI());
+        initScript(data);
         data.save(user);
         FlowScript ret = new FlowScript(data);
         ret.setAnalysisScript(user, analysisScript);
         return ret;
     }
 
+    static public FlowWell createScriptForWell(User user, FlowWell well, String analysisScript) throws Exception
+    {
+        Container container = well.getContainer();
+        FlowRun run = well.getRun();
+        ExpData data = ExperimentService.get().createData(container, FlowDataType.Script);
+        data.setName(run.getScript().getName() + PRIVATE_SCRIPT_SUFFIX);
+        initScript(data);
+        data.save(user);
+        ExpProtocolApplication app = run.getExperimentRun().addProtocolApplication(user, FlowProtocolStep.analysis.getAction(run.getExperimentRun().getProtocol()), FlowProtocolStep.analysis.applicationType);
+        data.setSourceApplication(app);
+        FlowScript ret = new FlowScript(data);
+        ret.setAnalysisScript(user, analysisScript);
+        well.getData().getSourceApplication().addDataInput(user, data, InputRole.AnalysisScript.toString(), InputRole.AnalysisScript.getPropertyDescriptor(container));
+        return well;
+    }
+
     public void addParams(Map<FlowParam, Object> map)
     {
         map.put(FlowParam.scriptId, getScriptId());
+    }
+
+    public boolean isPrivate()
+    {
+        return getRun() != null;
     }
 
     public ViewURLHelper urlShow()
@@ -267,6 +298,10 @@ public class FlowScript extends FlowDataObject
     public int getRunCount()
     {
         return getExpObject().getTargetRuns().length;
+    }
+    public int getTargetApplicationCount()
+    {
+        return getExpObject().getTargetApplications().length;
     }
 
     public boolean requiresCompensationMatrix(FlowProtocolStep step)

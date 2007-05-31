@@ -25,6 +25,7 @@
     </orderEntry>
     <orderEntry type="module" module-name="API" />
     <orderEntry type="module" module-name="API" />
+    <orderEntry type="module" module-name="FlowGWT" />
     <orderEntryProperties />
   </component>
 </module>

@@ -25,7 +25,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
 {
     static private final Logger _log = Logger.getLogger(FlowExperiment.class);
     static public String FlowExperimentRunExperimentName = "Flow Experiment Runs";
-    static public final String PROP_PRIMARY_ANALYSIS = "PrimaryAnalysis";
+    static public String FlowWorkspaceExperimentName = "Flow Workspace";
 
     public FlowExperiment(ExpExperiment experiment)
     {
@@ -75,25 +75,25 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return ret.toArray(new FlowExperiment[0]);
     }
 
+    static public FlowExperiment[] getAnalysesAndWorkspace(Container container)
+    {
+        List<FlowExperiment> ret = new ArrayList();
+        for (FlowExperiment experiment : getExperiments(container))
+        {
+            if (experiment.isAnalysis() || experiment.isWorkspace())
+            {
+                ret.add(experiment);
+            }
+        }
+        return ret.toArray(new FlowExperiment[0]);
+    }
+
     static public FlowExperiment getDefaultAnalysis(Container container)
     {
         FlowExperiment[] experiments = getAnalyses(container);
         if (experiments.length == 0)
             return null;
         return experiments[0];
-    }
-
-    static public FlowExperiment getPrimaryAnalysis(User user, Container container)
-    {
-        Map<String, Object> props = PropertyManager.getProperties(user.getUserId(), container.getId(), PROP_CATEGORY, false);
-        if (props != null)
-        {
-            Object lsid = props.get(PROP_PRIMARY_ANALYSIS);
-            FlowExperiment ret = fromLSID(ObjectUtils.toString(lsid));
-            if (ret != null)
-                return ret;
-        }
-        return getDefaultAnalysis(container);
     }
 
     static public String getExperimentRunExperimentLSID(Container container)
@@ -104,6 +104,16 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     static public String getExperimentRunExperimentName(Container container)
     {
         return FlowExperimentRunExperimentName;
+    }
+
+    static public String getWorkspaceLSID(Container container)
+    {
+        return FlowObject.generateLSID(container, "Experiment", FlowWorkspaceExperimentName);
+    }
+
+    static public String getWorkspaceRunExperimentName(Container container)
+    {
+        return FlowWorkspaceExperimentName;
     }
 
     static public FlowExperiment fromURL(ViewURLHelper url) throws ServletException
@@ -209,15 +219,14 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return FlowRun.fromRuns(getExperiment().getRuns(null, protocol));
     }
 
-    public void setPrimaryAnalysis(User user) throws SQLException
-    {
-        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(user.getUserId(), getContainer().getId(), PROP_CATEGORY, true);
-        map.put(PROP_PRIMARY_ANALYSIS, getLSID());
-    }
-
     public boolean isAnalysis()
     {
-        return !FlowExperimentRunExperimentName.equals(getName());
+        return !FlowExperimentRunExperimentName.equals(getName()) && !isWorkspace();
+    }
+
+    public boolean isWorkspace()
+    {
+        return FlowWorkspaceExperimentName.equals(getName());
     }
 
     public FlowRun getMostRecentRun()
@@ -254,5 +263,20 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
             }
         }
         return ret;
+    }
+
+    static public FlowExperiment getWorkspace(Container container)
+    {
+        return FlowExperiment.fromLSID(getWorkspaceLSID(container));
+    }
+
+    static public FlowExperiment ensureWorkspace(User user, Container container) throws Exception
+    {
+        FlowExperiment ret = getWorkspace(container);
+        if (ret != null)
+            return ret;
+        ExpExperiment exp = ExperimentService.get().createExpExperiment(container, FlowWorkspaceExperimentName);
+        exp.save(user);
+        return new FlowExperiment(exp);
     }
 }

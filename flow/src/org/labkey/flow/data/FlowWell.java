@@ -57,15 +57,15 @@ public class FlowWell extends FlowDataObject
         super(data);
     }
 
-    public FlowWell getFCSFile()
+    public FlowFCSFile getFCSFile()
     {
         if (getDataType() == FlowDataType.FCSFile)
-            return null;
+            return (FlowFCSFile) this;
         ExpData[] inputs = getProtocolApplication().getInputDatas();
         for (ExpData input : inputs)
         {
             if (input.getDataType() == FlowDataType.FCSFile)
-                return (FlowWell) FlowDataObject.fromData(input);
+                return (FlowFCSFile) FlowDataObject.fromData(input);
         }
         return null;
     }

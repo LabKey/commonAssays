@@ -70,6 +70,7 @@ public class ScriptController extends BaseFlowController
         saveGate,
         copy,
         delete,
+        gateEditor,
     }
 
     @Jpf.Action
@@ -1397,5 +1398,34 @@ public class ScriptController extends BaseFlowController
             return new ViewForward(PFUtil.urlFor(FlowController.Action.begin, getContainer()));
         }
         return renderInTemplate(getPage("delete.jsp", form), "Confirm Delete", Action.delete);
+    }
+
+    @Jpf.Action
+    protected Forward gateEditor(GateEditorForm form) throws Exception
+    {
+        requiresPermission(ACL.PERM_READ);
+        Map<String, String> props = new HashMap();
+        int scriptId = form.getScriptId();
+        if (scriptId != 0)
+        {
+            props.put("scriptId", Integer.toString(scriptId));
+        }
+        int runId = form.getRunId();
+        if (runId != 0)
+        {
+            props.put("runId", Integer.toString(runId));
+        }
+        props.put("editingMode", form.getEditingMode().toString());
+        GWTView view = new GWTView("org.labkey.flow.gateeditor.GateEditor", props);
+        return renderInTemplate(view, form.getFlowObject(), "New Gate Editor", Action.gateEditor);
+    }
+
+    @Jpf.Action
+    protected Forward gateEditorService() throws Exception
+    {
+        requiresPermission(ACL.PERM_READ);
+        GateEditorServiceImpl service = new GateEditorServiceImpl(getViewContext());
+        service.doPost(getRequest(), getResponse());
+        return null;
     }
 }

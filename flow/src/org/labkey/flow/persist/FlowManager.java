@@ -233,6 +233,44 @@ public class FlowManager
         return Table.insert(null, getTinfoObject(), newObject);
     }
 
+    private void deleteAttributes(String sqlObjectIds) throws SQLException
+    {
+        boolean transaction = false;
+        DbScope scope = getSchema().getScope();
+        try
+        {
+            if (!scope.isTransactionActive())
+            {
+                scope.beginTransaction();
+                transaction = true;
+            }
+            Table.execute(getSchema(), "DELETE FROM flow.Statistic WHERE ObjectId IN " + sqlObjectIds, null);
+            Table.execute(getSchema(), "DELETE FROM flow.Keyword WHERE ObjectId IN " + sqlObjectIds, null);
+            Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN " + sqlObjectIds, null);
+            Table.execute(getSchema(), "DELETE FROM flow.Script WHERE ObjectId IN " + sqlObjectIds, null);
+            if (transaction)
+            {
+                scope.commitTransaction();
+                transaction = false;
+            }
+        }
+        finally
+        {
+            if (transaction)
+            {
+                scope.rollbackTransaction();
+            }
+        }
+    }
+
+    public void deleteAttributes(ExpData data) throws SQLException
+    {
+        AttrObject obj = getAttrObject(data);
+        if (obj == null)
+            return;
+        deleteAttributes("(" + obj.getRowId() + ")");
+    }
+
     public void deleteData(List<Data> datas) throws SQLException
     {
         if (datas.size() == 0)
@@ -262,10 +300,7 @@ public class FlowManager
                 scope.beginTransaction();
                 fTrans = true;
             }
-            Table.execute(getSchema(), "DELETE FROM flow.Statistic WHERE ObjectId IN " + sqlOIDs, null);
-            Table.execute(getSchema(), "DELETE FROM flow.Keyword WHERE ObjectId IN " + sqlOIDs, null);
-            Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN " + sqlOIDs, null);
-            Table.execute(getSchema(), "DELETE FROM flow.Script WHERE ObjectId IN " + sqlOIDs, null);
+            deleteAttributes(sqlOIDs);
             Table.execute(getSchema(), "DELETE FROM flow.Object WHERE RowId IN " + sqlOIDs, null);
             if (fTrans)
             {

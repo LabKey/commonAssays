@@ -14,9 +14,12 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.script.FlowAnalyzer;
+import org.labkey.flow.script.MoveRunFromWorkspaceJob;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
 import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.Map;
@@ -26,7 +29,7 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.net.URI;
 
-@Jpf.Controller
+@Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class RunController extends BaseFlowController<RunController.Action>
 {
     static private final Logger _log = Logger.getLogger(RunController.class);
@@ -38,6 +41,8 @@ public class RunController extends BaseFlowController<RunController.Action>
         export,
         details,
         download,
+        moveToWorkspace,
+        moveToAnalysis
     }
 
     @Jpf.Action
@@ -162,5 +167,87 @@ public class RunController extends BaseFlowController<RunController.Action>
         }
         stream.close();
         return null;
+    }
+
+    @Jpf.Action
+    protected Forward moveToWorkspace(RunForm form) throws Exception
+    {
+        requiresPermission(ACL.PERM_UPDATE);
+        if (isPost())
+        {
+            Forward forward = doMoveToWorkspace(form);
+            if (forward != null)
+                return forward;
+        }
+        NavTrailConfig ntc = getNavTrailConfig(form.getRun(),
+                "Move '" + form.getRun().getName() + "' to the workspace", Action.moveToWorkspace);
+        return includeView(new HomeTemplate(getViewContext(),
+                FormPage.getView(RunController.class, form, "moveToWorkspace.jsp"), ntc));
+    }
+
+    protected Forward doMoveToWorkspace(RunForm form)
+    {
+        try
+        {
+            FlowRun run = form.getRun();
+            if (run.getStep() != FlowProtocolStep.analysis)
+            {
+                addError("This run cannot be moved to the workspace because it is not the analysis step.");
+                return null;
+            }
+            FlowExperiment workspace = FlowExperiment.ensureWorkspace(getUser(), getContainer());
+            FlowRun[] existing = workspace.findRun(new File(run.getPath()), FlowProtocolStep.analysis);
+            if (existing.length != 0)
+            {
+                addError("This run cannot be moved to the workspace because the workspace already contains a run from this directory.");
+                return null;
+            }
+            run.moveToWorkspace(getUser());
+            return new ViewForward(run.urlFor(ScriptController.Action.gateEditor));
+        }
+        catch (Exception e)
+        {
+            addError("An exception occurred: " + e);
+            _log.error("Error", e);
+            return null;
+        }
+    }
+
+    @Jpf.Action
+    protected Forward moveToAnalysis(MoveToAnalysisForm form) throws Exception
+    {
+        requiresPermission(ACL.PERM_UPDATE);
+        if (isPost())
+        {
+            Forward forward = doMoveToAnalysis(form);
+            if (forward != null)
+            {
+                return forward;
+            }
+        }
+        NavTrailConfig ntc = getNavTrailConfig(form.getRun(),
+                "Move '" + form.getRun().getName() + "' to an analysis", Action.moveToWorkspace);
+        return includeView(new HomeTemplate(getViewContext(),
+                FormPage.getView(RunController.class, form, "moveToAnalysis.jsp"), ntc));
+
+    }
+
+    protected Forward doMoveToAnalysis(MoveToAnalysisForm form) throws Exception
+    {
+        FlowRun run = form.getRun();
+        if (!run.isInWorkspace())
+        {
+            addError("This run is not in the workspace");
+            return null;
+        }
+
+        FlowExperiment experiment = FlowExperiment.fromExperimentId(form.getExperimentId());
+        if (experiment.findRun(new File(run.getPath()), FlowProtocolStep.analysis).length != 0)
+        {
+            addError("This run cannot be moved to this analysis because there is already a run there.");
+            return null;
+        }
+        MoveRunFromWorkspaceJob job = new MoveRunFromWorkspaceJob(getViewBackgroundInfo(), experiment, run);
+        return executeScript(job, run.getScript());
     }
 }

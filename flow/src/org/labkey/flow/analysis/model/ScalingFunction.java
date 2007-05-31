@@ -92,5 +92,9 @@ public class ScalingFunction
         }
     }
 
+    public boolean isIdentity()
+    {
+        return _decade == 0 && _scale == 0;
+    }
 
 }

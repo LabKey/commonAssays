@@ -9,6 +9,9 @@ public enum ObjectType
     fcsAnalysis(3, null),
     compensationMatrix(4, InputRole.CompensationMatrix),
     script(5, InputRole.AnalysisScript),
+
+    workspace_fcsAnalysis(6, null),
+    workspace_script(7, InputRole.AnalysisScript)
     ;
 
     final int _typeId;

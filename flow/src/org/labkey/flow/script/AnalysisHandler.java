@@ -4,9 +4,9 @@ import org.labkey.flow.data.*;
 import org.labkey.flow.data.FlowDataType;
 import org.fhcrc.cpas.flow.script.xml.AnalysisDef;
 import org.fhcrc.cpas.flow.script.xml.SettingsDef;
-import org.labkey.flow.persist.AttributeSet;
-import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.persist.FlowDataHandler;
+import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.fhcrc.cpas.flow.script.xml.ScriptDef;
+import org.labkey.flow.persist.*;
 import org.fhcrc.cpas.exp.xml.*;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.data.TableInfo;
@@ -14,6 +14,7 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.exp.api.ExperimentService;
 import org.w3c.dom.Element;
 
 import java.util.List;
@@ -24,6 +25,7 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.io.File;
+import java.io.FileWriter;
 
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.Analysis;
@@ -40,6 +42,7 @@ public class AnalysisHandler extends BaseHandler
     Analysis _groupAnalysis;
     SampleCriteria _sampleCriteria;
     int _wellIndex;
+    boolean _getScriptFromWells;
 
     public AnalysisHandler(ScriptJob job, SettingsDef settings, AnalysisDef analysis) throws Exception
     {
@@ -54,9 +57,9 @@ public class AnalysisHandler extends BaseHandler
         return FCSAnalyzer.get().matchesCriteria(_sampleCriteria, ref);
     }
 
-    synchronized public DataBaseType addWell(ExperimentRunType runElement, FlowWell src, FlowCompensationMatrix flowComp) throws SQLException
+    synchronized public DataBaseType addWell(ExperimentRunType runElement, FlowFCSFile src, FlowCompensationMatrix flowComp, String scriptLSID) throws SQLException
     {
-        ProtocolApplicationBaseType app = addProtocolApplication(runElement);
+        ProtocolApplicationBaseType app = addProtocolApplication(runElement, scriptLSID);
         DataBaseType ret = duplicateWell(app, src, FlowDataType.FCSAnalysis);
         ret.setName(_job.getProtocol().getFCSAnalysisName(src));
         if (flowComp != null)
@@ -69,7 +72,16 @@ public class AnalysisHandler extends BaseHandler
 
     public void processRun(FlowRun run, ExperimentRunType runElement, File workingDirectory) throws Exception
     {
-        FlowCompensationMatrix flowComp = _job.findCompensationMatrix(run);
+        FlowCompensationMatrix flowComp;
+
+        if (_getScriptFromWells)
+        {
+            flowComp = run.getCompensationMatrix();
+        }
+        else
+        {
+            flowComp = _job.findCompensationMatrix(run);
+        }
         CompensationMatrix comp = null;
         if (flowComp != null)
         {
@@ -86,7 +98,15 @@ public class AnalysisHandler extends BaseHandler
         ColumnInfo colRowId = tblFCSFiles.getColumn("RowId");
         try
         {
-            FlowWell[] wells = run.getWellsToBeAnalyzed(_job.getProtocol());
+            FlowWell[] wells;
+            if (_getScriptFromWells)
+            {
+                wells = run.getWells();
+            }
+            else
+            {
+                wells = run.getWellsToBeAnalyzed(_job.getProtocol());
+            }
             if (wells.length == 0)
             {
                 FlowWell[] allWells = run.getWells();
@@ -104,7 +124,47 @@ public class AnalysisHandler extends BaseHandler
             Runnable[] tasks = new Runnable[wells.length];
             for (int iWell = 0; iWell < wells.length; iWell ++)
             {
-                Runnable task = new AnalyzeTask(workingDirectory, run, runElement, wells[iWell], wells.length, flowComp, comp);
+                String scriptLSID;
+                FlowWell srcWell = wells[iWell];
+                Analysis wellAnalysis;
+                FlowCompensationMatrix wellFlowComp;
+                CompensationMatrix wellComp;
+                if (_getScriptFromWells)
+                {
+                    FlowScript script = wells[iWell].getScript();
+                    if (script.getScriptId() != _job._runAnalysisScript.getScriptId())
+                    {
+                        File file = _job.decideFileName(workingDirectory, URIUtil.getFilename(srcWell.getFCSURI()), FlowDataHandler.EXT_SCRIPT);
+                        FileWriter writer = new FileWriter(file);
+                        writer.write(script.getAnalysisScript());
+                        writer.close();
+                        ProtocolApplicationBaseType app = addProtocolApplication(runElement, null);
+                        scriptLSID = ExperimentService.get().generateGuidLSID(getContainer(), FlowDataType.Script);
+                        DataBaseType dbtScript = app.getOutputDataObjects().addNewData();
+                        dbtScript.setAbout(scriptLSID);
+                        dbtScript.setDataFileUrl(file.toURI().toString());
+                        dbtScript.setName(script.getName());
+                        dbtScript.setSourceProtocolLSID(_step.getLSID(getContainer()));
+                        ScriptDocument doc = script.getAnalysisScriptDocument();
+                        ScriptDef scriptDef = doc.getScript();
+                        wellAnalysis = FlowAnalyzer.makeAnalysis(scriptDef.getSettings(), scriptDef.getAnalysis());
+                    }
+                    else
+                    {
+                        scriptLSID = script.getLSID();
+                        wellAnalysis = _groupAnalysis;
+                    }
+                    wellFlowComp = srcWell.getCompensationMatrix();
+                    wellComp = wellFlowComp == null ? null : wellFlowComp.getCompensationMatrix();
+                }
+                else
+                {
+                    scriptLSID = _job._runAnalysisScript.getLSID();
+                    wellAnalysis = _groupAnalysis;
+                    wellFlowComp = flowComp;
+                    wellComp = comp;
+                }
+                Runnable task = new AnalyzeTask(workingDirectory, run, runElement, srcWell, wells.length, scriptLSID, wellAnalysis, wellFlowComp, wellComp);
                 tasks[iWell] = task;
             }
             FlowThreadPool.runTaskSet(new FlowTaskSet(tasks));
@@ -129,7 +189,9 @@ public class AnalysisHandler extends BaseHandler
         CompensationMatrix _comp;
         FlowCompensationMatrix _flowComp;
         ExperimentRunType _runElement;
-        AnalyzeTask(File workingDirectory, FlowRun run, ExperimentRunType runElement, FlowWell well, int wellCount, FlowCompensationMatrix flowComp, CompensationMatrix comp)
+        Analysis _groupAnalysis;
+        String _scriptLSID;
+        AnalyzeTask(File workingDirectory, FlowRun run, ExperimentRunType runElement, FlowWell well, int wellCount, String scriptLSID, Analysis groupAnalysis, FlowCompensationMatrix flowComp, CompensationMatrix comp)
         {
             _workingDirectory = workingDirectory;
             _run = run;
@@ -138,6 +200,20 @@ public class AnalysisHandler extends BaseHandler
             _wellCount = wellCount;
             _flowComp = flowComp;
             _comp = comp;
+            _groupAnalysis = groupAnalysis;
+            _scriptLSID = scriptLSID;
+        }
+
+        private AttributeSet tryCopyAttributes()
+        {
+            if (!_getScriptFromWells)
+                return null;
+            AttributeSet attrSet = AttributeSet.fromData(_well.getData(), true);
+            if (attrSet.getStatistics().isEmpty() && attrSet.getGraphNames().isEmpty())
+            {
+                return null;
+            }
+            return attrSet;
         }
         public void run()
         {
@@ -152,14 +228,22 @@ public class AnalysisHandler extends BaseHandler
                     return;
 
                 String description = "well " + iWell + "/" + _wellCount + ":" + _run.getName() + ":" + _well.getName();
-                _job.addStatus("Starting " + description);
-                Set<GraphSpec> graphs = new LinkedHashSet(_groupAnalysis.getGraphs());
-                List<FCSAnalyzer.StatResult> stats = FCSAnalyzer.get().calculateStatistics(uri, _comp, _groupAnalysis);
-                DataBaseType dbt = addWell(_runElement, _well, _flowComp);
-                AttributeSet attrs = new AttributeSet(ObjectType.fcsAnalysis, uri);
-                addResults(dbt, attrs, stats);
-                List<FCSAnalyzer.GraphResult> graphResults = FCSAnalyzer.get().generateGraphs(_well.getFCSURI(), _comp, _groupAnalysis, graphs);
-                addResults(dbt, attrs, graphResults);
+                AttributeSet attrs = tryCopyAttributes();
+                DataBaseType dbt = addWell(_runElement, _well.getFCSFile(), _flowComp, _scriptLSID);
+                if (attrs != null)
+                {
+                    _job.addStatus("Copying " + description);
+                }
+                else
+                {
+                    attrs = new AttributeSet(ObjectType.fcsAnalysis, uri);
+                    _job.addStatus("Starting " + description);
+                    Set<GraphSpec> graphs = new LinkedHashSet(_groupAnalysis.getGraphs());
+                    List<FCSAnalyzer.StatResult> stats = FCSAnalyzer.get().calculateStatistics(uri, _comp, _groupAnalysis);
+                    addResults(dbt, attrs, stats);
+                    List<FCSAnalyzer.GraphResult> graphResults = FCSAnalyzer.get().generateGraphs(_well.getFCSURI(), _comp, _groupAnalysis, graphs);
+                    addResults(dbt, attrs, graphResults);
+                }
                 attrs.save(_job.decideFileName(_workingDirectory, URIUtil.getFilename(uri), FlowDataHandler.EXT_DATA), dbt);
                 _job.addStatus("Completed " + description);
             }

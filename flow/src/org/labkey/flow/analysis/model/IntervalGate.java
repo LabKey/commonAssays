@@ -36,20 +36,9 @@ public class IntervalGate extends Gate
         return ret;
     }
 
-    public void setInterval(double min, double max)
-    {
-        _min = min;
-        _max = max;
-    }
-
     public String getAxis()
     {
         return _axis;
-    }
-
-    public void setAxis(String axis)
-    {
-        _axis = axis;
     }
 
     public double getMin()

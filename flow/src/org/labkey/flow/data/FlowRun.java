@@ -362,4 +362,46 @@ public class FlowRun extends FlowObject<ExpRun>
         }
         return ret;
     }
+
+    public void moveToWorkspace(User user) throws Exception
+    {
+        boolean transaction = false;
+        try
+        {
+            if (!ExperimentService.get().isTransactionActive())
+            {
+                ExperimentService.get().beginTransaction();
+                transaction = true;
+            }
+            ExpRun run = getExperimentRun();
+            ExpExperiment[] experiments = run.getExperiments();
+            for (ExpExperiment experiment : experiments)
+            {
+                experiment.removeRun(user, getExperimentRun());
+            }
+            FlowExperiment workspace = FlowExperiment.ensureWorkspace(user, getContainer());
+            workspace.getExperiment().addRun(user, run);
+            if (transaction)
+            {
+                ExperimentService.get().commitTransaction();
+                transaction = false;
+            }
+        }
+        finally
+        {
+            if (transaction)
+            {
+                ExperimentService.get().rollbackTransaction();
+            }
+        }
+    }
+
+    public boolean isInWorkspace()
+    {
+        ExpExperiment[] experiments = getExperimentRun().getExperiments();
+        if (experiments.length != 1)
+            return false;
+        FlowExperiment flowExperiment = new FlowExperiment(experiments[0]);
+        return flowExperiment.isWorkspace();
+    }
 }

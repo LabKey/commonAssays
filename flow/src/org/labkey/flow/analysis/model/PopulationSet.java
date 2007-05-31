@@ -9,7 +9,7 @@ import java.io.Serializable;
 /**
  * Class corresponding to a <groupanalysis> element in a FlowJo workspace.
  */
-public class PopulationSet implements Serializable
+public class PopulationSet implements Serializable, Cloneable
 {
     List<Population> _populations = new ArrayList<Population>();
     String _name;

@@ -18,7 +18,7 @@
     <tr><td>Run Name:</td><td><%=h(getRun().getName())%></td></tr>
     <% } %>
     <tr><td>Well Name:</td><td><%=h(well.getName())%></td></tr>
-    <% if (fcsFile != null)
+    <% if (fcsFile != null && fcsFile != well)
     { %>
     <tr><td>FCS File:</td><td><a href="<%=h(fcsFile.urlShow())%>"><%=h(fcsFile.getName())%></a></td></tr>
     <% } %>

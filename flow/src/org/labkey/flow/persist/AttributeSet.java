@@ -26,6 +26,11 @@ public class AttributeSet
 {
     static public AttributeSet fromData(ExpData data)
     {
+        return fromData(data, false);
+    }
+
+    static public AttributeSet fromData(ExpData data, boolean includeGraphBytes)
+    {
         AttrObject obj = FlowManager.get().getAttrObject(data);
         if (obj == null)
             return null;
@@ -37,7 +42,7 @@ public class AttributeSet
                 uri = new URI(obj.getUri());
             }
             AttributeSet ret = new AttributeSet(ObjectType.fromTypeId(obj.getTypeId()), uri);
-            ret.loadFromDb(obj);
+            ret.loadFromDb(obj, includeGraphBytes);
             return ret;
         }
         catch (URISyntaxException use)
@@ -49,6 +54,8 @@ public class AttributeSet
             throw UnexpectedException.wrap(e);
         }
     }
+
+
 
     ObjectType _type;
     URI _uri;
@@ -307,7 +314,7 @@ public class AttributeSet
         os.write(str.getBytes("UTF-8")); 
     }
 
-    private void loadFromDb(AttrObject obj) throws SQLException
+    private void loadFromDb(AttrObject obj, boolean includeGraphBytes) throws SQLException
     {
         FlowManager mgr = FlowManager.get();
         Object[] params = new Object[] { obj.getRowId() };
@@ -327,15 +334,30 @@ public class AttributeSet
             _statistics.put(new StatisticSpec(rsStatistics.getString(1)), rsStatistics.getDouble(2));
         }
         rsStatistics.close();
-        String sqlGraphs = "SELECT flow.attribute.name FROM flow.graph INNER JOIN flow.attribute on flow.graph.graphid = flow.attribute.rowid WHERE flow.graph.objectid = ?";
         ResultSet rsGraphs = null;
         try
         {
-            rsGraphs = Table.executeQuery(mgr.getSchema(), sqlGraphs, params);
+            if (!includeGraphBytes)
+            {
+                String sqlGraphs = "SELECT flow.attribute.name FROM flow.graph INNER JOIN flow.attribute on flow.graph.graphid = flow.attribute.rowid WHERE flow.graph.objectid = ?";
+                rsGraphs = Table.executeQuery(mgr.getSchema(), sqlGraphs, params);
+            }
+            else
+            {
+                String sqlGraphs = "SELECT flow.attribute.name, flow.graph.data FROM flow.graph INNER JOIN flow.attribute ON flow.graph.graphid = flow.attribute.rowid WHERE flow.graph.objectid = ?";
+                rsGraphs = Table.executeQuery(mgr.getSchema(), sqlGraphs, params);
+            }
             _graphs = new TreeMap();
             while (rsGraphs.next())
             {
-                _graphs.put(new GraphSpec(rsGraphs.getString(1)), null);
+                if (!includeGraphBytes)
+                {
+                    _graphs.put(new GraphSpec(rsGraphs.getString(1)), null);
+                }
+                else
+                {
+                    _graphs.put(new GraphSpec(rsGraphs.getString(1)), rsGraphs.getBytes(2));
+                }
             }
         }
         finally

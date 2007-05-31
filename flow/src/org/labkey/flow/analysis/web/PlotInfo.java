@@ -110,4 +110,14 @@ public class PlotInfo
         String ret = fmt.format(fraction * 100) + "% (" + rowCount + " events)";
         return ret;
     }
+
+    public ValueAxis getDomainAxis()
+    {
+        return _domainAxis;
+    }
+
+    public ValueAxis getRangeAxis()
+    {
+        return _rangeAxis;
+    }
 }

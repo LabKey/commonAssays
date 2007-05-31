@@ -26,21 +26,26 @@ abstract public class BaseHandler
         _step = step;
     }
 
-    public ProtocolApplicationBaseType addProtocolApplication(ExperimentRunType run)
+    public ProtocolApplicationBaseType addProtocolApplication(ExperimentRunType run, String scriptLSID)
     {
         ProtocolApplicationBaseType app = _job.addProtocolApplication(run);
         app.setName(_step.getName());
         app.setProtocolLSID(_step.getLSID(_job.getContainer()));
         app.setActionSequence(_step.getDefaultActionSequence());
         app.setCpasType("ProtocolApplication");
-        if (_job._runAnalysisScript != null)
+        if (scriptLSID != null)
         {
             InputOutputRefsType.DataLSID dataLSID = app.getInputRefs().addNewDataLSID();
-            dataLSID.setStringValue(_job._runAnalysisScript.getLSID());
+            dataLSID.setStringValue(scriptLSID);
             dataLSID.setRoleName(InputRole.AnalysisScript.toString());
 
         }
         return app;
+    }
+
+    public ProtocolApplicationBaseType addProtocolApplication(ExperimentRunType run)
+    {
+        return addProtocolApplication(run, _job._runAnalysisScript == null ? null : _job._runAnalysisScript.getLSID());
     }
 
     public Container getContainer()

@@ -75,7 +75,7 @@ public class FlowSchema extends UserSchema
                 case CompensationMatrices:
                     return createCompensationMatrixTable(alias);
                 case AnalysisScripts:
-                    return createAnalysisScriptTable(alias);
+                    return createAnalysisScriptTable(alias, false);
                 case Analyses:
                     return createAnalysesTable(alias);
             }
@@ -222,7 +222,7 @@ public class FlowSchema extends UserSchema
                     FlowParam.scriptId.toString(), "RowId", "Name"){
                 public TableInfo getLookupTableInfo()
                 {
-                    return createAnalysisScriptTable("Lookup");
+                    return createAnalysisScriptTable("Lookup", true);
                 }
             });
         }
@@ -365,6 +365,14 @@ public class FlowSchema extends UserSchema
     public ExpDataTable createFCSAnalysisTable(String alias, FlowDataType type)
     {
         ExpDataTable ret = createDataTable(alias, type);
+        ColumnInfo colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.getPropertyDescriptor(getContainer()));
+        colAnalysisScript.setFk(new LookupForeignKey(PFUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()),
+                FlowParam.scriptId.toString(), "RowId", "Name"){
+            public TableInfo getLookupTableInfo()
+            {
+                return createAnalysisScriptTable("Lookup", true);
+            }
+        });
         FlowPropertySet fps = new FlowPropertySet(ret);
         ret.setDetailsURL(new DetailsURL(PFUtil.urlFor(WellController.Action.showWell, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         if (getExperiment() != null)
@@ -405,9 +413,14 @@ public class FlowSchema extends UserSchema
         return ret;
     }
 
-    public ExpDataTable createAnalysisScriptTable(String alias)
+    public ExpDataTable createAnalysisScriptTable(String alias, boolean includePrivate)
     {
         ExpDataTable ret = createDataTable(alias, FlowDataType.Script);
+        if (!includePrivate)
+        {
+            SQLFragment runIdCondition = new SQLFragment("RunId IS NULL");
+            ret.addCondition(runIdCondition);
+        }
         ret.getColumn(ExpDataTable.Column.Run.toString()).setIsHidden(true);
         ret.setDetailsURL(new DetailsURL(PFUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()), Collections.singletonMap(FlowParam.scriptId.toString(), "RowId")));
         return ret;

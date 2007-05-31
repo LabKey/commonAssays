@@ -6,10 +6,12 @@ import org.labkey.api.data.Container;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
 import org.labkey.flow.data.FlowDataObject;
+import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.flowdata.xml.FlowdataDocument;
 import org.labkey.flow.flowdata.xml.FlowData;
 
@@ -89,9 +91,10 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
                 AttributeSet attrSet = new AttributeSet(doc.getFlowdata(), uriFile);
                 attrSet.save(job.getUser(), data);
             }
-            else
+            else if (dataFile.getName().endsWith("." + EXT_SCRIPT))
             {
-
+                FlowScript script = new FlowScript(data);
+                script.setAnalysisScript(job.getUser(), PageFlowUtil.getFileContentsAsString(dataFile));
             }
         }
         catch (Exception e)

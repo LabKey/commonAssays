@@ -121,7 +121,7 @@ public class FlowQueryView extends QueryView
         List<QueryPicker> ret = super.getChangeViewPickers();
         if (getSchema().getRun() == null)
         {
-            FlowExperiment[] experiments = FlowExperiment.getAnalyses(getContainer());
+            FlowExperiment[] experiments = FlowExperiment.getAnalysesAndWorkspace(getContainer());
             Map<Object, String> availableExperiments = new LinkedHashMap();
             availableExperiments.put(0, "<All Analyses>");
             for (FlowExperiment experiment : experiments)

@@ -19,8 +19,6 @@ public class AnalyzeJob extends ScriptJob
     public AnalyzeJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript analysis, FlowProtocolStep step, int[] runIds) throws Exception
     {
         super(info, experimentName, experimentLSID, protocol, analysis, step);
-        _experimentLSID = experimentLSID;
-        _experimentName = experimentName;
         _runIds = runIds;
     }
 
