@@ -51,7 +51,7 @@ public class MouseModelModule extends DefaultModule implements LsidManager.LsidH
 
     public MouseModelModule()
     {
-        super(NAME, 2.09, "/org/labkey/mousemodel", "/MouseModel",
+        super(NAME, 2.10, "/org/labkey/mousemodel", "/MouseModel",
                 new WebPartFactory("Mouse Models"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {

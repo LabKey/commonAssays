@@ -29,6 +29,11 @@ public class ProteinGroupTableInfo extends FilteredTable
 
     public ProteinGroupTableInfo(String alias, MS2Schema schema)
     {
+        this(alias, schema, true);
+    }
+
+    public ProteinGroupTableInfo(String alias, MS2Schema schema, boolean includeFirstProteinColumn)
+    {
         super(MS2Manager.getTableInfoProteinGroups());
         _schema = schema;
         if (alias != null)
@@ -81,27 +86,30 @@ public class ProteinGroupTableInfo extends FilteredTable
         getColumn("ProteinProphetFileId").setFk(foreignKey);
         getColumn("ProteinProphet").setFk(foreignKey);
 
-        SQLFragment firstProteinSQL = new SQLFragment();
-        firstProteinSQL.append("SELECT s.SeqId FROM ");
-        firstProteinSQL.append(MS2Manager.getTableInfoProteinGroupMemberships());
-        firstProteinSQL.append(" pgm, ");
-        firstProteinSQL.append(ProteinManager.getTableInfoSequences());
-        firstProteinSQL.append(" s WHERE s.SeqId = pgm.SeqId AND pgm.ProteinGroupId = ");
-        firstProteinSQL.append(ExprColumn.STR_TABLE_ALIAS);
-        firstProteinSQL.append(".RowId ORDER BY s.Length, s.BestName");
-        ProteinManager.getSqlDialect().limitRows(firstProteinSQL, 1);
-        firstProteinSQL.insert(0, "(");
-        firstProteinSQL.append(")");
-
-        ExprColumn firstProteinColumn = new ExprColumn(this, "FirstProtein", firstProteinSQL, Types.INTEGER);
-        firstProteinColumn.setFk(new LookupForeignKey("SeqId")
+        if (includeFirstProteinColumn)
         {
-            public TableInfo getLookupTableInfo()
+            SQLFragment firstProteinSQL = new SQLFragment();
+            firstProteinSQL.append("SELECT s.SeqId FROM ");
+            firstProteinSQL.append(MS2Manager.getTableInfoProteinGroupMemberships());
+            firstProteinSQL.append(" pgm, ");
+            firstProteinSQL.append(ProteinManager.getTableInfoSequences());
+            firstProteinSQL.append(" s WHERE s.SeqId = pgm.SeqId AND pgm.ProteinGroupId = ");
+            firstProteinSQL.append(ExprColumn.STR_TABLE_ALIAS);
+            firstProteinSQL.append(".RowId ORDER BY s.Length, s.BestName");
+            ProteinManager.getSqlDialect().limitRows(firstProteinSQL, 1);
+            firstProteinSQL.insert(0, "(");
+            firstProteinSQL.append(")");
+
+            ExprColumn firstProteinColumn = new ExprColumn(this, "FirstProtein", firstProteinSQL, Types.INTEGER);
+            firstProteinColumn.setFk(new LookupForeignKey("SeqId")
             {
-                return new SequencesTableInfo(null, _schema.getContainer());
-            }
-        });
-        addColumn(firstProteinColumn);
+                public TableInfo getLookupTableInfo()
+                {
+                    return new SequencesTableInfo(null, _schema.getContainer());
+                }
+            });
+            addColumn(firstProteinColumn);
+        }
 
         SQLFragment proteinCountSQL = new SQLFragment();
         proteinCountSQL.append("(SELECT COUNT(SeqId) FROM ");
@@ -165,7 +173,7 @@ public class ProteinGroupTableInfo extends FilteredTable
                     {
                         SequencesTableInfo result = new SequencesTableInfo(null, _schema.getContainer());
                         SQLFragment sql = new SQLFragment();
-                        sql.append("(SELECT LookupString FROM ");
+                        sql.append("(SELECT Min(LookupString) FROM ");
                         sql.append(ProteinManager.getTableInfoFastaSequences());
                         sql.append(" fs, ");
                         sql.append(MS2Manager.getTableInfoRuns());

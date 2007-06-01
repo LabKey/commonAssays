@@ -117,7 +117,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
 
         protected ProteinGroupTableInfo createTable()
         {
-            ProteinGroupTableInfo result = ((MS2Schema)getSchema()).createProteinGroupsForRunTable(null);
+            ProteinGroupTableInfo result = ((MS2Schema)getSchema()).createProteinGroupsForRunTable(null, false);
             result.setRunFilter(_runs);
             return result;
         }
@@ -156,7 +156,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         {
             throw new RuntimeException(e);
         }
-        ProteinGroupQueryView peptideView = new ProteinGroupQueryView(_viewContext, schema, settings, true, false);
+        ProteinGroupQueryView peptideView = new ProteinGroupQueryView(_viewContext, schema, settings, true, true);
         QueryPeptideDataRegion rgn = (QueryPeptideDataRegion)peptideView.createDataRegion();
 
         DataRegion nestedRegion = rgn.getNestedRegion();

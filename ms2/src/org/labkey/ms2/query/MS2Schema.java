@@ -124,7 +124,7 @@ public class MS2Schema extends UserSchema
         }
         else if (PROTEIN_GROUPS_FOR_RUN_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createProteinGroupsForRunTable(alias);
+            return createProteinGroupsForRunTable(alias, false);
         }
         else if (SEQUENCES_TABLE_NAME.equalsIgnoreCase(name))
         {
@@ -152,7 +152,12 @@ public class MS2Schema extends UserSchema
 
     public ProteinGroupTableInfo createProteinGroupsForRunTable(String alias)
     {
-        ProteinGroupTableInfo result = new ProteinGroupTableInfo(alias, this);
+        return createProteinGroupsForRunTable(alias, true);
+    }
+
+    public ProteinGroupTableInfo createProteinGroupsForRunTable(String alias, boolean includeFirstProteinColumn)
+    {
+        ProteinGroupTableInfo result = new ProteinGroupTableInfo(alias, this, includeFirstProteinColumn);
         result.addProteinsColumn();
         List<FieldKey> defaultColumns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
         defaultColumns.add(FieldKey.fromParts("Proteins", "Protein"));

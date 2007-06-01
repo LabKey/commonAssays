@@ -542,17 +542,15 @@ public class MS2Controller extends ViewController
         cloneUrl.setAction("showRun");
         headerView.addObject("viewTypes", MS2RunViewType.getTypesForRun(run));
         headerView.addObject("currentViewType", MS2RunViewType.getViewType(form.getGrouping()));
-        ViewURLHelper baseViewURL = cloneViewURLHelper();
-        baseViewURL.deleteParameter("grouping");
-        baseViewURL.deleteParameter("expanded");
         headerView.addObject("expanded", form.getExpanded());
-        headerView.addObject("baseViewURL", baseViewURL.getLocalURIString());
 
         ViewURLHelper extraFilterUrl = currentUrl.clone().setAction("addExtraFilter.post");
         extraFilterUrl.deleteParameter(chargeFilterParamName + "1");
         extraFilterUrl.deleteParameter(chargeFilterParamName + "2");
         extraFilterUrl.deleteParameter(chargeFilterParamName + "3");
         extraFilterUrl.deleteParameter("tryptic");
+        extraFilterUrl.deleteParameter("grouping");
+        extraFilterUrl.deleteParameter("expanded");
         urlMap.put("extraFilter", extraFilterUrl.getEncodedLocalURIString());
 
         headerView.addObject("charge1", defaultIfNull(currentUrl.getParameter(chargeFilterParamName + "1"), "0"));
@@ -2538,6 +2536,48 @@ public class MS2Controller extends ViewController
     }
 
     @Jpf.Action
+    protected Forward exportProteinSearchToExcel(final ProteinSearchForm form) throws Exception
+    {
+        QueryView view = createProteinSearchView(form);
+        ExcelWriter excelWriter = view.getExcelWriter();
+        excelWriter.setFilenamePrefix("ProteinSearchResults");
+        excelWriter.write(getResponse());
+        return null;
+    }
+
+    @Jpf.Action
+    protected Forward exportProteinSearchToTSV(final ProteinSearchForm form) throws Exception
+    {
+        QueryView view = createProteinSearchView(form);
+        TSVGridWriter tsvWriter = view.getTsvWriter();
+        tsvWriter.setFilenamePrefix("ProteinSearchResults");
+        tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
+        tsvWriter.write(getResponse());
+        return null;
+    }
+
+    @Jpf.Action
+    protected Forward exportProteinGroupSearchToExcel(final ProteinSearchForm form) throws Exception
+    {
+        QueryView view = createProteinGroupSearchView(form);
+        ExcelWriter excelWriter = view.getExcelWriter();
+        excelWriter.setFilenamePrefix("ProteinGroupSearchResults");
+        excelWriter.write(getResponse());
+        return null;
+    }
+
+    @Jpf.Action
+    protected Forward exportProteinGroupSearchToTSV(final ProteinSearchForm form) throws Exception
+    {
+        QueryView view = createProteinGroupSearchView(form);
+        TSVGridWriter tsvWriter = view.getTsvWriter();
+        tsvWriter.setFilenamePrefix("ProteinGroupSearchResults");
+        tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
+        tsvWriter.write(getResponse());
+        return null;
+    }
+
+    @Jpf.Action
     protected Forward exportAllPeptides(ExportForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
@@ -2730,6 +2770,16 @@ public class MS2Controller extends ViewController
 
         if (!"0".equals(tryptic))
             url.addParameter("tryptic", tryptic);
+
+        if (getRequest().getParameter("grouping") != null)
+        {
+            url.addParameter("grouping", getRequest().getParameter("grouping"));
+        }
+
+        if (getRequest().getParameter("expanded") != null)
+        {
+            url.addParameter("expanded", "1");
+        }
 
         return new ViewForward(url);
     }
@@ -3621,37 +3671,8 @@ public class MS2Controller extends ViewController
             HttpView.throwRedirect(url + "&" + filter.toQueryString("ProteinSearchResults"));
         }
 
-        QuerySettings proteinsSettings = new QuerySettings(getViewURLHelper(), getRequest(), "PotentialProteins");
-        proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);
-        proteinsSettings.setAllowChooseQuery(false);
-        QueryView proteinsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), proteinsSettings);
-        proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
-        proteinsView.setShowExportButtons(true);
-        proteinsView.setShowCustomizeViewLinkInButtonBar(true);
-        SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
-        sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
-        sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
-        proteinsView.setTitle("Matching Proteins");
-
-        QuerySettings groupsSettings = new QuerySettings(getViewURLHelper(), getRequest(), "ProteinSearchResults");
-        groupsSettings.setQueryName(MS2Schema.PROTEIN_GROUPS_FOR_SEARCH_TABLE_NAME);
-        groupsSettings.setAllowChooseQuery(false);
-        QueryView groupsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), groupsSettings)
-        {
-            protected TableInfo createTable()
-            {
-                ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable(null);
-                table.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
-                table.addContainerCondition(getContainer(), getUser(), form.isIncludeSubfolders());
-
-                return table;
-            }
-        };
-        groupsView.setShowExportButtons(true);
-        groupsView.setShowCustomizeViewLinkInButtonBar(true);
-        groupsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
-
-        groupsView.setTitle("Protein Group Results");
+        QueryView proteinsView = createProteinSearchView(form);
+        QueryView groupsView = createProteinGroupSearchView(form);
 
         ProteinSearchWebPart searchView = new ProteinSearchWebPart(true);
         searchView.getModel().setIdentifier(form.getIdentifier());
@@ -3677,6 +3698,79 @@ public class MS2Controller extends ViewController
         VBox vbox = new VBox(searchView, proteinsView, groupsView);
 
         return renderInTemplate(vbox, getContainer(), "Protein Search Results");
+    }
+
+    private QueryView createProteinGroupSearchView(final ProteinSearchForm form) throws ServletException
+    {
+        QuerySettings groupsSettings = new QuerySettings(getViewURLHelper(), getRequest(), "ProteinSearchResults");
+        groupsSettings.setQueryName(MS2Schema.PROTEIN_GROUPS_FOR_SEARCH_TABLE_NAME);
+        groupsSettings.setAllowChooseQuery(false);
+        QueryView groupsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), groupsSettings)
+        {
+            protected TableInfo createTable()
+            {
+                ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable(null);
+                table.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
+                table.addContainerCondition(getContainer(), getUser(), form.isIncludeSubfolders());
+
+                return table;
+            }
+            
+            protected void populateButtonBar(DataView view, ButtonBar bar)
+            {
+                super.populateButtonBar(view, bar);
+
+                ViewURLHelper excelURL = cloneViewURLHelper();
+                excelURL.setAction("exportProteinGroupSearchToExcel.view");
+                ActionButton excelButton = new ActionButton("Export to Excel", excelURL);
+                bar.add(excelButton);
+
+                ViewURLHelper tsvURL = cloneViewURLHelper();
+                tsvURL.setAction("exportProteinGroupSearchToTSV.view");
+                ActionButton tsvButton = new ActionButton("Export to TSV", tsvURL);
+                bar.add(tsvButton);
+            }
+        };
+        groupsView.setShowExportButtons(false);
+        groupsView.setShowCustomizeViewLinkInButtonBar(true);
+        groupsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
+
+        groupsView.setTitle("Protein Group Results");
+        return groupsView;
+    }
+
+    private QueryView createProteinSearchView(ProteinSearchForm form)
+        throws ServletException
+    {
+        QuerySettings proteinsSettings = new QuerySettings(getViewURLHelper(), getRequest(), "PotentialProteins");
+        proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);
+        proteinsSettings.setAllowChooseQuery(false);
+        QueryView proteinsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), proteinsSettings)
+        {
+            protected void populateButtonBar(DataView view, ButtonBar bar)
+            {
+                super.populateButtonBar(view, bar);
+
+                ViewURLHelper excelURL = cloneViewURLHelper();
+                excelURL.setAction("exportProteinSearchToExcel.view");
+                ActionButton excelButton = new ActionButton("Export to Excel", excelURL);
+                bar.add(excelButton);
+
+                ViewURLHelper tsvURL = cloneViewURLHelper();
+                tsvURL.setAction("exportProteinSearchToTSV.view");
+                ActionButton tsvButton = new ActionButton("Export to TSV", tsvURL);
+                bar.add(tsvButton);
+            }
+        };
+
+        proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
+        proteinsView.setShowExportButtons(false);
+        proteinsView.setShowCustomizeViewLinkInButtonBar(true);
+        SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
+        sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
+        sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
+        proteinsView.setTitle("Matching Proteins");
+        return proteinsView;
     }
 
     public static class ProteinSearchForm extends FormData

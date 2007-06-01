@@ -193,7 +193,13 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         DataRegion peptideRegion = getNestedPeptideGrid(_runs[0], peptideColumns, true);
         GridView view = new GridView(peptideRegion);
         String extraWhere = MS2Manager.getTableInfoPeptides() + ".Protein= '" + proteinGroupingId + "'";
-        view.setResultSet(createPeptideResultSet(peptideColumns, _runs[0], _maxGroupingRows, extraWhere));
+        GroupedResultSet groupedResultSet = createPeptideResultSet(peptideColumns, _runs[0], _maxGroupingRows, extraWhere);
+        // Shouldn't really close it here, but this prevents us from getting errors logged about not closing the result set
+        // The problem is that nobody cares about the outer GroupedResultSet - we only care about the inner ResultSet,
+        // and there's nobody to close the outer when we're done. Since the ResultSet continues to work after it's closed,
+        // this is good enough for now.
+        groupedResultSet.close();
+        view.setResultSet(groupedResultSet.getNextResultSet());
         return view;
     }
 

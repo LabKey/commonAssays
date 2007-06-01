@@ -31,7 +31,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
 
     public MS1Module()
     {
-        super(NAME, 2.09, null, "/ms1");
+        super(NAME, 2.10, null, "/ms1");
         addController("ms1", MS1Controller.class);
 
         // Tell the pipeline that we know how to handle msInspect files
