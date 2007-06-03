@@ -87,7 +87,7 @@ public class FlowModule extends DefaultModule
         addController("Flow-Protocol", ProtocolController.class);
         FlowDataType.register();
         FlowProperty.register();
-        _handlers = Collections.singleton((ExperimentDataHandler) new FlowDataHandler());
+        _handlers = Collections.singleton((ExperimentDataHandler) FlowDataHandler.instance);
     }
 
 

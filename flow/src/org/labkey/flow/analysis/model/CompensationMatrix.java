@@ -5,6 +5,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ObjectUtils;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -15,10 +16,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.dom.DOMSource;
 import java.util.*;
 import java.text.DecimalFormat;
-import java.io.File;
-import java.io.OutputStream;
-import java.io.InputStream;
-import java.io.FileInputStream;
+import java.io.*;
 
 import Jama.Matrix;
 
@@ -29,7 +27,7 @@ import org.labkey.flow.analysis.data.NumberArray;
  * The compensation matrix contains the list of the amount which each fluorescene contributes to a channel value.
  * It is necessary to invert this matrix to obtain the compensated data.
  */
-public class CompensationMatrix
+public class CompensationMatrix implements Serializable
 {
     public static String PREFIX = "<";
     public static String SUFFIX = ">";
@@ -43,6 +41,11 @@ public class CompensationMatrix
     public CompensationMatrix(String name)
     {
         this(name, PREFIX, SUFFIX);
+    }
+
+    public void setName(String name)
+    {
+        _name = name;
     }
 
     public void setPrefix(String prefix)
@@ -343,15 +346,6 @@ public class CompensationMatrix
         return ret;
     }
 
-    private boolean equalsObject(Object o1, Object o2)
-    {
-        if (o1 == null && o2 == null)
-            return true;
-        if (o1 == null || o2 == null)
-            return false;
-        return o1.equals(o2);
-    }
-
     public boolean equals(Object other)
     {
         if (!(other instanceof CompensationMatrix))
@@ -364,9 +358,9 @@ public class CompensationMatrix
             if (!Arrays.equals(_rows[i], comp._rows[i]))
                 return false;
         }
-        if (!equalsObject(_name, comp._name))
+        if (!ObjectUtils.equals(_name, comp._name))
             return false;
-        if (!equalsObject(_prefix, comp._prefix))
+        if (!ObjectUtils.equals(_prefix, comp._prefix))
             return false;
         return true;
     }

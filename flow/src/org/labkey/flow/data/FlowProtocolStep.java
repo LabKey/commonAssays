@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.labkey.flow.controllers.FlowParam;
 
@@ -20,6 +21,7 @@ public class FlowProtocolStep
 {
     static public FlowProtocolStep keywords = new FlowProtocolStep("Keywords", "Read a directory containing FCS files", ExpProtocol.ApplicationType.ProtocolApplication, 10);
     static public FlowProtocolStep calculateCompensation = new FlowProtocolStep("Compensation", "Calculate the compensation matrix", ExpProtocol.ApplicationType.ProtocolApplication, 20);
+    static public FlowProtocolStep defineGates = new FlowProtocolStep("DefineGates", "Define Gates", ExpProtocol.ApplicationType.ProtocolApplication, 25);
     static public FlowProtocolStep analysis = new FlowProtocolStep("Analysis", "Calculate statistics and generate graphs for Flow Data", ExpProtocol.ApplicationType.ProtocolApplication, 30);
     static public FlowProtocolStep markRunOutputs = new FlowProtocolStep("MarkRunOutputData", "", ExpProtocol.ApplicationType.ExperimentRunOutput, 1000, keywords, calculateCompensation, analysis);
 
@@ -166,18 +168,31 @@ public class FlowProtocolStep
     static public void initProtocol(User user, FlowProtocol flowProtocol) throws Exception
     {
         ExpProtocol protocol = flowProtocol.getExpObject();
-        ExpProtocolAction stepRun = protocol.addStep(user, protocol, 0);
-        stepRun.addSuccessor(user, stepRun);
-        List<ExpProtocolAction> steps = new ArrayList();
-        steps.add(keywords.addAction(user, protocol));
-        steps.add(calculateCompensation.addAction(user, protocol));
-        steps.add(analysis.addAction(user, protocol));
-
-        ExpProtocolAction stepMarkRunOutputs = markRunOutputs.addAction(user, protocol);
-        for (ExpProtocolAction step : steps)
+        Map<Integer, ExpProtocolAction> existingSteps = new HashMap();
+        for (ExpProtocolAction existingStep : protocol.getSteps())
         {
-            stepRun.addSuccessor(user, step);
-            step.addSuccessor(user, stepMarkRunOutputs);
+            existingSteps.put(existingStep.getActionSequence(), existingStep);
+        }
+
+
+        ExpProtocolAction stepRun = existingSteps.get(0);
+        if (stepRun == null)
+        {
+            stepRun = protocol.addStep(user, protocol, 0);
+            stepRun.addSuccessor(user, stepRun);
+        }
+        ExpProtocolAction stepMarkRunOutputs = existingSteps.get(markRunOutputs.getDefaultActionSequence());
+        if (stepMarkRunOutputs == null)
+        {
+            stepMarkRunOutputs = markRunOutputs.addAction(user, protocol);
+        }
+        for (FlowProtocolStep step : new FlowProtocolStep[] { keywords, calculateCompensation, defineGates, analysis })
+        {
+            if (existingSteps.containsKey(step.getDefaultActionSequence()))
+                continue;
+            ExpProtocolAction action = step.addAction(user, protocol);
+            stepRun.addSuccessor(user, action);
+            action.addSuccessor(user, stepMarkRunOutputs);
         }
     }
 

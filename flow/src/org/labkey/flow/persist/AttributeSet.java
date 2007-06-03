@@ -214,6 +214,12 @@ public class AttributeSet
         _graphs.put(graph, data);
     }
 
+    /**
+     * Called outside of any transaction, ensures that the necessary entries have been added to the flow.attribute
+     * table.  That way, we never have to deal with transactions being rolled back and having to remove attribute
+     * names from the cache, or two threads each trying to insert the same attribute name.
+     * @throws SQLException
+     */
     public void prepareForSave() throws SQLException
     {
         if (_keywords != null)
@@ -293,6 +299,11 @@ public class AttributeSet
             AttributeCache.invalidateCache(data.getContainer());
         }
 
+    }
+
+    public void setURI(URI uri)
+    {
+        _uri = uri;
     }
 
     public void save(User user, ExpData data) throws SQLException

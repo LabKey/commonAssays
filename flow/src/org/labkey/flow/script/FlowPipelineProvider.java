@@ -66,6 +66,8 @@ public class FlowPipelineProvider extends PipelineProvider
         {
             if (pathname.getName().endsWith(".wsp"))
                 return true;
+            if (!pathname.getName().endsWith(".xml"))
+                return false;
             if (pathname.isDirectory())
                 return false;
             WorkspaceRecognizer recognizer = new WorkspaceRecognizer();
@@ -113,20 +115,17 @@ public class FlowPipelineProvider extends PipelineProvider
             entry.addAction(action);
         }
 
-        if (false)
+        for (FileEntry entry : entries)
         {
-            for (FileEntry entry : entries)
+            if (!entry.isDirectory())
+                continue;
+            for (File file : entry.listFiles(new IsFlowJoWorkspaceFilter()))
             {
-                if (!entry.isDirectory())
-                    continue;
-                for (File file : entry.listFiles(new IsFlowJoWorkspaceFilter()))
-                {
-                    ViewURLHelper urlUploadWorkspace = PFUtil.urlFor(AnalysisScriptController.Action.uploadWorkspace, context.getContainer());
-                    urlUploadWorkspace.addParameter("path", root.relativePath(file));
-                    urlUploadWorkspace.addParameter("srcURL", context.getViewURLHelper().toString());
-                    FileAction wspAction = new FileAction("Upload FlowJo Workspace Analysis", urlUploadWorkspace, new File[] { file });
-                    entry.addAction(wspAction);
-                }
+                ViewURLHelper urlUploadWorkspace = PFUtil.urlFor(AnalysisScriptController.Action.uploadWorkspace, context.getContainer());
+                urlUploadWorkspace.addParameter("path", root.relativePath(file));
+                urlUploadWorkspace.addParameter("srcURL", context.getViewURLHelper().toString());
+                FileAction wspAction = new FileAction("Upload FlowJo Workspace Analysis", urlUploadWorkspace, new File[] { file });
+                entry.addAction(wspAction);
             }
         }
     }

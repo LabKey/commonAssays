@@ -42,6 +42,7 @@ public class MacWorkspace extends FlowJoWorkspace
     public MacWorkspace(Element elDoc) throws Exception
     {
         readSamples(elDoc);
+        readCompensationMatrices(elDoc);
         readSampleAnalyses(elDoc);
         readGroupAnalyses(elDoc);
     }
@@ -55,6 +56,17 @@ public class MacWorkspace extends FlowJoWorkspace
             for (Element elSampleAnalysis : getElementsByTagName(elSampleAnalyses, "Sample"))
             {
                 readSampleAnalysis(elSampleAnalysis);
+            }
+        }
+    }
+
+    public void readCompensationMatrices(Element elDoc)
+    {
+        for (Element elCompensationMatrices : getElementsByTagName(elDoc, "CompensationMatrices"))
+        {
+            for (Element elCompensationMatrix : getElementsByTagName(elCompensationMatrices, "CompensationMatrix"))
+            {
+                _compensationMatrices.add(new CompensationMatrix(elCompensationMatrix));
             }
         }
     }
@@ -131,6 +143,12 @@ public class MacWorkspace extends FlowJoWorkspace
 
     protected void readStats(SubsetSpec subset, Element elPopulation, AttributeSet results)
     {
+        String strCount = elPopulation.getAttribute("count");
+        if (!StringUtils.isEmpty(strCount))
+        {
+            StatisticSpec statCount = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
+            results.setStatistic(statCount, Double.valueOf(strCount));
+        }
         for (Element elStat : getElementsByTagName(elPopulation, "Statistic"))
         {
             String statistic = elStat.getAttribute("statistic");
@@ -259,6 +277,13 @@ public class MacWorkspace extends FlowJoWorkspace
             Population child = readPopulation(elPopulation, null, ret, results);
             ret.addPopulation(child);
         }
+        if (results != null)
+        {
+            for (StatisticSpec stat : results.getStatistics().keySet())
+            {
+                ret.addStatistic(stat);
+            }
+        }
 
         return ret;
     }
@@ -314,6 +339,7 @@ public class MacWorkspace extends FlowJoWorkspace
     {
         SampleInfo ret = new SampleInfo();
         ret._sampleId = elSample.getAttribute("sampleID");
+        ret._compensationId = elSample.getAttribute("compensationID");
         for (Element elFCSHeader : getElementsByTagName(elSample, "FCSHeader"))
         {
             readKeywords(ret, elFCSHeader);

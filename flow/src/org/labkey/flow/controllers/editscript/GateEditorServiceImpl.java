@@ -516,6 +516,10 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
     private ScriptDocument makeScriptDocument(FlowWell well, GWTScript gwtScript) throws Exception
     {
         FlowScript baseScript = well.getRun().getScript();
+        if (baseScript == null)
+        {
+            baseScript = well.getScript();
+        }
         ScriptDocument doc = baseScript.getAnalysisScriptDocument();
         doc.getScript().setCompensationCalculation(null);
         AnalysisDef analysisDef = doc.getScript().getAnalysis();
@@ -581,7 +585,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             if (script != null)
             {
                 ScriptDocument doc = makeScriptDocument(flowWell, script);
-                flowWell = FlowScript.createScriptForWell(getUser(), flowWell, doc.toString());
+                flowWell = FlowScript.createScriptForWell(getUser(), flowWell, script.getName() + "_modified", doc, flowWell.getRun().getScript().getData(), InputRole.AnalysisScript);
             }
             FlowManager.get().deleteAttributes(flowWell.getExpObject());
             if (transaction)

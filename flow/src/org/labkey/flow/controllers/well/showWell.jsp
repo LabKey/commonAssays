@@ -67,10 +67,13 @@
 <table class="normal"><tr><th colspan="3">Analyses performed on this file:</th></tr>
     <tr><th>FCS Analysis Name</th><th>Run Analysis Name</th><th>Analysis Name</th></tr>
     <% for (FlowWell analysis : analyses)
-    { %>
+    {
+        FlowRun run = analysis.getRun();
+        FlowExperiment experiment = run.getExperiment();
+    %>
     <tr><td><a href="<%=h(analysis.urlShow())%>"><%=h(analysis.getLabel())%></a></td>
-        <td><%=h(analysis.getRun().getLabel())%></td>
-        <td><%=h(analysis.getRun().getExperiment().getLabel())%></td>
+        <td><%=h(run.getLabel())%></td>
+        <td><%=experiment == null ? "" : h(experiment.getLabel())%></td>
     </tr>
     <% } %>
 </table>

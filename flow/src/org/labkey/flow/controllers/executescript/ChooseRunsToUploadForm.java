@@ -11,8 +11,6 @@ import java.io.File;
 
 public class ChooseRunsToUploadForm extends ViewForm
 {
-    FlowExperiment[] experiments;
-
     public int ff_protocolId;
     public String[] ff_path;
     public String path;

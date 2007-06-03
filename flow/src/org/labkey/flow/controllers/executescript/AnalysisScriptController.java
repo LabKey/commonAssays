@@ -1,30 +1,27 @@
 package org.labkey.flow.controllers.executescript;
 
-import org.labkey.flow.controllers.BaseFlowController;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
-import org.apache.struts.action.ActionError;
 import org.apache.commons.lang.StringUtils;
-import org.labkey.flow.data.*;
-import org.labkey.flow.script.*;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
-import org.labkey.flow.analysis.model.FCSKeywordData;
-import org.labkey.flow.persist.AttributeSet;
-import org.labkey.flow.persist.ObjectType;
-import org.labkey.api.pipeline.PipelineService;
+import org.apache.struts.action.ActionError;
+import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.URIUtil;
+import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.jsp.FormPage;
-import org.labkey.api.exp.api.*;
-import org.labkey.api.study.GenericAssayService;
+import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.labkey.flow.controllers.BaseFlowController;
+import org.labkey.flow.data.*;
+import org.labkey.flow.script.AddRunsJob;
+import org.labkey.flow.script.AnalyzeJob;
+import org.labkey.flow.script.FlowAnalyzer;
+import org.labkey.flow.script.FlowPipelineProvider;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.*;
-import java.net.URI;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class AnalysisScriptController extends BaseFlowController<AnalysisScriptController.Action>
@@ -111,6 +108,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         template.getModel().setFocus("forms[0].ff_analysisName");
         return includeView(template);
     }
+
 
     protected Map<String, String> getNewPaths(ChooseRunsToUploadForm form) throws Exception
     {
@@ -282,60 +280,65 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
     }
 
     @Jpf.Action
-    protected Forward uploadWorkspace() throws Exception
+    protected Forward uploadWorkspace(UploadWorkspaceResultsForm form) throws Exception
     {
-        requiresPermission(ACL.PERM_INSERT);
-        String path = getRequest().getParameter("path");
-        PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-        File workspaceFile = root.resolvePath(path);
-        URI dataFileURI = new File(workspaceFile.getParent(), "attributes.flowdata.xml").toURI();
-        ExperimentService.Interface svc = ExperimentService.get();
-        ExpRun run = svc.createExperimentRun(getContainer(), workspaceFile.getName());
-        FlowProtocol flowProtocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
-        ExpProtocol protocol = flowProtocol.getProtocol();
-        run.setProtocol(protocol);
-        run.save(getUser());
-        ExpData workspaceData = svc.createData(getContainer(), new DataType("Flow-Workspace"));
-        workspaceData.setDataFileURI(workspaceFile.toURI());
-        workspaceData.setName(workspaceFile.getName());
-        workspaceData.save(getUser());
-
-        FlowJoWorkspace workspace = FlowJoWorkspace.readWorkspace(new FileInputStream(workspaceFile));
-        ExpProtocolApplication startingInputs = run.addProtocolApplication(getUser(), null, ExpProtocol.ApplicationType.ExperimentRun);
-        startingInputs.addDataInput(getUser(), workspaceData, InputRole.Workspace.toString(), InputRole.Workspace.getPropertyDescriptor(getContainer()));
-        Map<FlowJoWorkspace.SampleInfo, ExpData> fcsFiles = new HashMap();
-        for (FlowJoWorkspace.SampleInfo sample : workspace.getSamples())
+        requiresPermission(ACL.PERM_UPDATE);
+        if (isPost())
         {
-            ExpProtocolApplication paSample = run.addProtocolApplication(getUser(), FlowProtocolStep.keywords.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
-            paSample.addDataInput(getUser(), workspaceData, InputRole.Workspace.toString(), InputRole.Workspace.getPropertyDescriptor(getContainer()));
-            ExpData fcsFile = svc.createData(getContainer(), FlowDataType.FCSFile);
-            fcsFile.setName(sample.getLabel());
-            fcsFile.setDataFileURI(dataFileURI);
-
-            File dataFile = new File(workspaceFile.getParent(), sample.getLabel());
-            fcsFile.setSourceApplication(paSample);
-            fcsFile.save(getUser());
-            fcsFiles.put(sample, fcsFile);
-            AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, dataFile.toURI());
-            attrs.setKeywords(sample.getKeywords());
-            attrs.save(getUser(), fcsFile);
-        }
-        for (Map.Entry<FlowJoWorkspace.SampleInfo, ExpData> entry : fcsFiles.entrySet())
-        {
-            AttributeSet results = workspace.getSampleAnalysisResults(entry.getKey());
-            if (results != null)
+            try
             {
-                ExpProtocolApplication paAnalysis = run.addProtocolApplication(getUser(),
-                        FlowProtocolStep.analysis.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
-                paAnalysis.addDataInput(getUser(), entry.getValue(), InputRole.FCSFile.toString(), InputRole.FCSFile.getPropertyDescriptor(getContainer()));
-                ExpData fcsAnalysis = svc.createData(getContainer(), FlowDataType.FCSAnalysis);
-                fcsAnalysis.setName(flowProtocol.getFCSAnalysisName(new FlowFCSFile(entry.getValue())));
-                fcsAnalysis.setSourceApplication(paAnalysis);
-                fcsAnalysis.setDataFileURI(dataFileURI);
-                fcsAnalysis.save(getUser());
-                results.save(getUser(), fcsAnalysis);
+                Forward forward = doUploadWorkspace(form);
+                if (forward != null)
+                    return forward;
+            }
+            catch (Throwable t)
+            {
+                ExceptionUtil.logExceptionToMothership(getRequest(), t);
+                addError(t);
             }
         }
-        return new ViewForward(new FlowRun(run).urlShow());
+        return renderInTemplate(FormPage.getView(AnalysisScriptController.class, form, "uploadWorkspace.jsp"), getContainer(), getNavTrailConfig(null, "Upload Flow Jo Workspace Analysis Results", Action.uploadWorkspace));
+    }
+
+
+    protected Forward doUploadWorkspace(UploadWorkspaceResultsForm form) throws Exception
+    {
+        String path = form.getPath();
+        PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+        File workspaceFile = root.resolvePath(path);
+        FlowJoWorkspace workspace = FlowJoWorkspace.readWorkspace(new FileInputStream(workspaceFile));
+        File runFilePathRoot = workspaceFile;
+        for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
+        {
+            File sampleFile = new File(workspaceFile.getParent(), sampleInfo.getLabel());
+            if (sampleFile.exists())
+            {
+                runFilePathRoot = workspaceFile.getParentFile();
+                break;
+            }
+        }
+        FlowExperiment experiment;
+        if (StringUtils.isEmpty(form.ff_newAnalysisName))
+        {
+            experiment = FlowExperiment.fromExperimentId(form.ff_existingAnalysisId);
+        }
+        else
+        {
+            experiment = FlowExperiment.createForName(getUser(), getContainer(), form.ff_newAnalysisName);
+        }
+        if (!experiment.getContainer().equals(getContainer()))
+        {
+            throw new IllegalArgumentException("Wrong container");
+        }
+
+        FlowRun[] existing = experiment.findRun(runFilePathRoot, null);
+        if (existing.length != 0)
+        {
+            addError("This analysis already contains this path.");
+            return null;
+        }
+
+        FlowRun run = workspace.createExperimentRun(getUser(), getContainer(), experiment, workspaceFile, runFilePathRoot);
+        return new ViewForward(run.urlShow());
     }
 }

@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.Data;
+import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.security.User;
 import org.labkey.api.util.LimitedCacheMap;
@@ -223,6 +224,12 @@ public class FlowManager
 
     public AttrObject createAttrObject(ExpData data, ObjectType type, URI uri) throws SQLException
     {
+        if (FlowDataHandler.instance.getPriority(data.getDataFile()) != Handler.Priority.HIGH)
+        {
+            // Need to make sure the right ExperimentDataHandler is associated with this data file, otherwise, you
+            // won't be able to delete it because of the foreign key constraint from the flow.object table.
+            throw new IllegalStateException("FlowDataHandler must be associated with data file");
+        }
         AttrObject newObject = new AttrObject();
         newObject.setDataId(data.getRowId());
         newObject.setTypeId(type.getTypeId());

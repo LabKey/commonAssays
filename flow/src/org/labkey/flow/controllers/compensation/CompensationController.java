@@ -94,10 +94,7 @@ public class CompensationController extends BaseFlowController<CompensationContr
                 svc.beginTransaction();
                 fTrans = true;
             }
-            ExpData data = svc.createData(getContainer(), FlowDataType.CompensationMatrix, form.ff_compensationMatrixName);
-            data.save(getUser());
-            attrs.doSave(getUser(), data);
-            flowComp = (FlowCompensationMatrix) FlowDataObject.fromData(data);
+            flowComp = FlowCompensationMatrix.create(getUser(), getContainer(), form.ff_compensationMatrixName, attrs);
             if (fTrans)
             {
                 svc.commitTransaction();

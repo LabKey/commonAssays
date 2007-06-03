@@ -1,17 +1,23 @@
 package org.labkey.flow.data;
 
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.data.Container;
+import org.labkey.api.security.User;
 import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.web.StatisticSpec;
 
 import java.util.*;
 import java.sql.SQLException;
+import java.net.URI;
+import java.io.File;
 
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.compensation.CompensationController;
+import org.labkey.flow.FlowSettings;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -33,6 +39,49 @@ public class FlowCompensationMatrix extends FlowDataObject
         if (ret != null)
             ret.checkContainer(url);
         return ret;
+    }
+
+    static public FlowCompensationMatrix create(User user, Container container, String name, AttributeSet attrs) throws Exception
+    {
+        boolean fTrans = false;
+        ExperimentService.Interface svc = ExperimentService.get();
+
+        FlowCompensationMatrix flowComp;
+        try
+        {
+            if (!svc.isTransactionActive())
+            {
+                svc.beginTransaction();
+                fTrans = true;
+            }
+            ExpData data;
+            if (name == null)
+            {
+                data = svc.createData(container, FlowDataType.CompensationMatrix);
+            }
+            else
+            {
+                data = svc.createData(container, FlowDataType.CompensationMatrix, name);
+            }
+            data.setDataFileURI(new File(FlowSettings.getWorkingDirectory(), "compensation." + FlowDataHandler.EXT_DATA).toURI());
+            data.save(user);
+            attrs.doSave(user, data);
+            flowComp = (FlowCompensationMatrix) FlowDataObject.fromData(data);
+            if (fTrans)
+            {
+                svc.commitTransaction();
+                fTrans = false;
+            }
+            return flowComp;
+        }
+        finally
+        {
+            if (fTrans)
+            {
+                svc.rollbackTransaction();
+            }
+        }
+
     }
 
     public CompensationMatrix getCompensationMatrix() throws SQLException

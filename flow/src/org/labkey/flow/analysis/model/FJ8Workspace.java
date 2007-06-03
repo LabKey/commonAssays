@@ -28,6 +28,7 @@ public class FJ8Workspace extends MacWorkspace
     {
         SampleInfo ret = new SampleInfo();
         ret._sampleId = elSample.getAttribute("sampleID");
+        ret._compensationId = elSample.getAttribute("compensationID");
         for (Element elFCSHeader : getElementsByTagName(elSample, "Keywords"))
         {
             readKeywords(ret, elFCSHeader);

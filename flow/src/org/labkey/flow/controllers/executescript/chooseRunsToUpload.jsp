@@ -9,17 +9,11 @@
     ChooseRunsToUploadForm form = (ChooseRunsToUploadForm) __form;
 %>
 <labkey:errors/>
+<%   Map<String, String> paths = form.getNewPaths();
+    if (paths.size() != 0) { %>
 <form method="POST" action="<%=PFUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, getContainer())%>"
       class="normal">
     <input type="hidden" name="path" value="<%=h(form.path)%>">
-    <%
-        Map<String, String> paths = form.getNewPaths();
-        if (paths.size() == 0)
-        {%>
-    <labkey:button text="Browse for more runs" href="<%=form.srcURL%>"/>
-    <% }
-    else
-    {%>
     <p>
         Choose which directories in '<%=h(form.path)%>' contain the FCS files for your experiment runs.
         <%=FlowModule.getLongProductName()%> will read the keywords from these FCS files into the database.  The FCS files
@@ -37,3 +31,4 @@
             <labkey:button text="Upload Selected Runs" action="<%=AnalysisScriptController.Action.uploadRuns%>"/>
     <% } %>
 </form>
+<labkey:button text="Browse for more runs" href="<%=form.srcURL%>"/>

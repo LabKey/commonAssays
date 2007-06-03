@@ -136,7 +136,10 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         FlowRun run = getRun();
         if (run == null)
             return null;
-        return getRun().getExperiment().getLSID();
+        FlowExperiment experiment = getRun().getExperiment();
+        if (experiment == null)
+            return null;
+        return experiment.getLSID();
     }
 
     static public List<FlowDataObject> getForContainer(Container container, FlowDataType type)

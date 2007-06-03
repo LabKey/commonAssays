@@ -26,6 +26,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     static private final Logger _log = Logger.getLogger(FlowExperiment.class);
     static public String FlowExperimentRunExperimentName = "Flow Experiment Runs";
     static public String FlowWorkspaceExperimentName = "Flow Workspace";
+    static public String DEFAULT_ANALYSIS_NAME = "Analysis";
 
     public FlowExperiment(ExpExperiment experiment)
     {
@@ -73,6 +74,19 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
             }
         }
         return ret.toArray(new FlowExperiment[0]);
+    }
+
+    static public FlowExperiment createForName(User user, Container container, String name) throws Exception
+    {
+        String lsid = ExperimentService.get().generateLSID(container, ExpExperiment.class, name);
+        FlowExperiment ret = FlowExperiment.fromLSID(lsid);
+        if (ret != null)
+        {
+            return ret;
+        }
+        ExpExperiment exp = ExperimentService.get().createExpExperiment(container, name);
+        exp.save(user);
+        return new FlowExperiment(exp);
     }
 
     static public FlowExperiment[] getAnalysesAndWorkspace(Container container)
@@ -249,7 +263,8 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     {
         FlowExperiment ret = null;
         Date bestDate = null;
-        for (FlowExperiment experiment : getAnalyses(container))
+        FlowExperiment[] analyses = getAnalyses(container);
+        for (FlowExperiment experiment : analyses)
         {
             FlowRun run = experiment.getMostRecentRun();
             if (run == null)
@@ -262,7 +277,11 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
                 ret = experiment;
             }
         }
-        return ret;
+        if (ret != null)
+            return ret;
+        if (analyses.length == 0)
+            return null;
+        return analyses[0];
     }
 
     static public FlowExperiment getWorkspace(Container container)

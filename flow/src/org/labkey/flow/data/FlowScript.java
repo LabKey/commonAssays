@@ -148,18 +148,23 @@ public class FlowScript extends FlowDataObject
         return ret;
     }
 
-    static public FlowWell createScriptForWell(User user, FlowWell well, String analysisScript) throws Exception
+    static public FlowWell createScriptForWell(User user, FlowWell well, String name, ScriptDocument analysisScript, ExpData input, InputRole inputRole) throws Exception
     {
         Container container = well.getContainer();
         FlowRun run = well.getRun();
         ExpData data = ExperimentService.get().createData(container, FlowDataType.Script);
-        data.setName(run.getScript().getName() + PRIVATE_SCRIPT_SUFFIX);
+        data.setName(name);
         initScript(data);
         data.save(user);
-        ExpProtocolApplication app = run.getExperimentRun().addProtocolApplication(user, FlowProtocolStep.analysis.getAction(run.getExperimentRun().getProtocol()), FlowProtocolStep.analysis.applicationType);
+        ExpProtocolApplication app = run.getExperimentRun().addProtocolApplication(user, FlowProtocolStep.defineGates.getAction(run.getExperimentRun().getProtocol()), FlowProtocolStep.defineGates.applicationType);
+        if (input != null)
+        {
+            app.addDataInput(user, input, inputRole.toString(), null);
+        }
         data.setSourceApplication(app);
+        data.save(user);
         FlowScript ret = new FlowScript(data);
-        ret.setAnalysisScript(user, analysisScript);
+        ret.setAnalysisScript(user, analysisScript.toString());
         well.getData().getSourceApplication().addDataInput(user, data, InputRole.AnalysisScript.toString(), InputRole.AnalysisScript.getPropertyDescriptor(container));
         return well;
     }

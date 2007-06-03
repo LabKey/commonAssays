@@ -26,6 +26,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
 {
     static public final String EXT_DATA = "flowdata.xml";
     static public final String EXT_SCRIPT = "flowscript.xml";
+    static public final FlowDataHandler instance = new FlowDataHandler();
     public void beforeDeleteData(List<Data> datas) throws ExperimentException
     {
         try

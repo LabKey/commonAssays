@@ -222,7 +222,7 @@ public class FlowSchema extends UserSchema
                     FlowParam.scriptId.toString(), "RowId", "Name"){
                 public TableInfo getLookupTableInfo()
                 {
-                    return createAnalysisScriptTable("Lookup", true);
+                    return detach().createAnalysisScriptTable("Lookup", true);
                 }
             });
         }
@@ -284,7 +284,7 @@ public class FlowSchema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                return FlowSchema.this.detach().createRunTable("run", type);
+                return detach().createRunTable("run", type);
             }
         });
         if (_run != null)
@@ -370,7 +370,7 @@ public class FlowSchema extends UserSchema
                 FlowParam.scriptId.toString(), "RowId", "Name"){
             public TableInfo getLookupTableInfo()
             {
-                return createAnalysisScriptTable("Lookup", true);
+                return detach().createAnalysisScriptTable("Lookup", true);
             }
         });
         FlowPropertySet fps = new FlowPropertySet(ret);
@@ -389,7 +389,7 @@ public class FlowSchema extends UserSchema
                 "RowId", "Name") {
                 public TableInfo getLookupTableInfo()
                 {
-                    return FlowSchema.this.detach().createFCSFileTable("FCSFile");
+                    return detach().createFCSFileTable("FCSFile");
                 }
             });
         return ret;

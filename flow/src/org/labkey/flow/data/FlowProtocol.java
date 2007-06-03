@@ -39,6 +39,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             {
                 ret.setProperty(user, ExperimentProperty.PROTOCOLIMPLEMENTATION.getPropertyDescriptor(), FlowProtocolImplementation.NAME);
             }
+            FlowProtocolStep.initProtocol(user, ret);
             return ret;
         }
         ExpProtocol protocol = ExperimentService.get().createExpProtocol(container, DEFAULT_PROTOCOL_NAME, ExpProtocol.ApplicationType.ExperimentRun);

@@ -8,12 +8,31 @@ import org.apache.commons.lang.StringUtils;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.*;
+import java.net.URI;
 
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.ObjectType;
+import org.labkey.flow.persist.FlowDataHandler;
+import org.labkey.flow.data.*;
+import org.labkey.flow.script.FlowAnalyzer;
+import org.labkey.api.security.User;
+import org.labkey.api.data.Container;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.exp.api.*;
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 
 abstract public class FlowJoWorkspace implements Serializable
 {
@@ -24,11 +43,13 @@ abstract public class FlowJoWorkspace implements Serializable
     protected Map<String, ParameterInfo> _parameters = new LinkedHashMap();
     protected ScriptSettings _settings = new ScriptSettings();
     protected List<String> _warnings;
+    protected List<CompensationMatrix> _compensationMatrices = new ArrayList();
 
-    public static class SampleInfo implements Serializable
+    public class SampleInfo implements Serializable
     {
         Map<String, String> _keywords = new HashMap();
         String _sampleId;
+        String _compensationId;
 
         public void setSampleId(String id)
         {
@@ -43,6 +64,16 @@ abstract public class FlowJoWorkspace implements Serializable
             return _sampleId;
         }
 
+        public String getCompensationId()
+        {
+            return _compensationId;
+        }
+
+        public void setCompensationId(String id)
+        {
+            _compensationId = id;
+        }
+
         public String getLabel()
         {
             String ret = getKeywords().get("$FIL");
@@ -50,6 +81,67 @@ abstract public class FlowJoWorkspace implements Serializable
                 return _sampleId;
             return ret;
         }
+
+        public CompensationMatrix getCompensationMatrix()
+        {
+            if (_compensationId == null)
+            {
+                return null;
+            }
+            if (_compensationMatrices.size() == 0)
+            {
+                return null;
+            }
+            if (_compensationMatrices.size() == 1)
+            {
+                return _compensationMatrices.get(0);
+            }
+            int index = Integer.parseInt(_compensationId) - 1;
+            return _compensationMatrices.get(index);
+        }
+    }
+
+    static private class WorkspaceRecognizer extends DefaultHandler
+    {
+        boolean _isWorkspace = false;
+
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
+        {
+            if ("Workspace".equals(qName))
+            {
+                _isWorkspace = true;
+            }
+            else
+            {
+                _isWorkspace = false;
+            }
+            throw new SAXException("Stop parsing");
+        }
+        boolean isWorkspace()
+        {
+            return _isWorkspace;
+        }
+    }
+
+
+    static public boolean isFlowJoWorkspace(File file)
+    {
+        if (file.getName().endsWith(".wsp"))
+            return true;
+        if (file.isDirectory())
+            return false;
+        WorkspaceRecognizer recognizer = new WorkspaceRecognizer();
+        try
+        {
+            SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+
+            parser.parse(file, recognizer);
+        }
+        catch (Exception e)
+        {
+            // suppress
+        }
+        return recognizer.isWorkspace();
     }
 
     public class ParameterInfo implements Serializable
@@ -82,6 +174,11 @@ abstract public class FlowJoWorkspace implements Serializable
     {
     }
 
+
+    public List<CompensationMatrix> getCompensationMatrices()
+    {
+        return _compensationMatrices;
+    }
 
     static List<Element> getElementsByTagName(Element parent, String tagName)
     {
@@ -481,5 +578,130 @@ abstract public class FlowJoWorkspace implements Serializable
     protected void warning(String str)
     {
         _warnings.add(str);
+    }
+
+    public FlowRun createExperimentRun(User user, Container container, FlowExperiment experiment, File workspaceFile, File runFilePathRoot) throws Exception
+    {
+        URI dataFileURI = new File(workspaceFile.getParent(), "attributes.flowdata.xml").toURI();
+        ExperimentService.Interface svc = ExperimentService.get();
+        Map<SampleInfo, AttributeSet> keywordsMap = new LinkedHashMap();
+        Map<CompensationMatrix, AttributeSet> compMatrixMap = new LinkedHashMap();
+        Map<SampleInfo, AttributeSet> analysisMap = new LinkedHashMap();
+        for (FlowJoWorkspace.SampleInfo sample : getSamples())
+        {
+            File dataFile = new File(workspaceFile.getParent(), sample.getLabel());
+            AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, dataFile.toURI());
+            attrs.setKeywords(sample.getKeywords());
+            attrs.prepareForSave();
+            keywordsMap.put(sample, attrs);
+            AttributeSet results = getSampleAnalysisResults(sample);
+            if (results != null)
+            {
+                results.prepareForSave();
+                analysisMap.put(sample, results);
+            }
+        }
+        for (CompensationMatrix compMatrix : getCompensationMatrices())
+        {
+            AttributeSet attrs = new AttributeSet(compMatrix);
+            attrs.prepareForSave();
+            compMatrixMap.put(compMatrix, attrs);
+        }
+
+        boolean transaction = false;
+        try
+        {
+            svc.beginTransaction();
+            transaction = true;
+            ExpRun run = svc.createExperimentRun(container, workspaceFile.getName());
+            FlowProtocol flowProtocol = FlowProtocol.ensureForContainer(user, container);
+            ExpProtocol protocol = flowProtocol.getProtocol();
+            run.setProtocol(protocol);
+            run.save(user);
+
+            ExpData workspaceData = svc.createData(container, new DataType("Flow-Workspace"));
+            workspaceData.setDataFileURI(workspaceFile.toURI());
+            workspaceData.setName(workspaceFile.getName());
+            workspaceData.save(user);
+
+            ExpProtocolApplication startingInputs = run.addProtocolApplication(user, null, ExpProtocol.ApplicationType.ExperimentRun);
+            startingInputs.addDataInput(user, workspaceData, InputRole.Workspace.toString(), null);
+            Map<FlowJoWorkspace.SampleInfo, FlowFCSFile> fcsFiles = new HashMap();
+            for (FlowJoWorkspace.SampleInfo sample : getSamples())
+            {
+                ExpProtocolApplication paSample = run.addProtocolApplication(user, FlowProtocolStep.keywords.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
+                paSample.addDataInput(user, workspaceData, InputRole.Workspace.toString(), InputRole.Workspace.getPropertyDescriptor(container));
+                ExpData fcsFile = svc.createData(container, FlowDataType.FCSFile);
+                fcsFile.setName(sample.getLabel());
+                fcsFile.setDataFileURI(dataFileURI);
+
+                fcsFile.setSourceApplication(paSample);
+                fcsFile.save(user);
+                fcsFiles.put(sample, new FlowFCSFile(fcsFile));
+                AttributeSet attrs = keywordsMap.get(sample);
+                attrs.doSave(user, fcsFile);
+            }
+            Map<CompensationMatrix, FlowCompensationMatrix> compMatrices = new IdentityHashMap();
+            for (CompensationMatrix compMatrix : getCompensationMatrices())
+            {
+                FlowCompensationMatrix flowComp = FlowCompensationMatrix.create(user, container, null, compMatrixMap.get(compMatrix));
+                ExpProtocolApplication paComp = run.addProtocolApplication(user, FlowProtocolStep.calculateCompensation.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
+                paComp.addDataInput(user, workspaceData, InputRole.Workspace.toString(), null);
+                flowComp.getData().setSourceApplication(paComp);
+                flowComp.getData().setName(compMatrix.getName());
+                flowComp.getData().save(user);
+                compMatrices.put(compMatrix, flowComp);
+            }
+            for (Map.Entry<FlowJoWorkspace.SampleInfo, FlowFCSFile> entry : fcsFiles.entrySet())
+            {
+                AttributeSet results = analysisMap.get(entry.getKey());
+                if (results != null)
+                {
+                    ExpProtocolApplication paAnalysis = run.addProtocolApplication(user,
+                            FlowProtocolStep.analysis.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
+                    FlowFCSFile fcsFile = entry.getValue();
+                    results.setURI(fcsFile.getFCSURI());
+                    paAnalysis.addDataInput(user, fcsFile.getData(), InputRole.FCSFile.toString(), InputRole.FCSFile.getPropertyDescriptor(container));
+                    ExpData fcsAnalysis = svc.createData(container, FlowDataType.FCSAnalysis);
+                    fcsAnalysis.setName(flowProtocol.getFCSAnalysisName(fcsFile));
+                    fcsAnalysis.setSourceApplication(paAnalysis);
+                    fcsAnalysis.setDataFileURI(dataFileURI);
+                    fcsAnalysis.save(user);
+                    results.doSave(user, fcsAnalysis);
+                    Analysis analysis = getSampleAnalysis(entry.getKey());
+                    if (analysis != null)
+                    {
+                        ScriptDocument scriptDoc = ScriptDocument.Factory.newInstance();
+                        ScriptDef scriptDef = scriptDoc.addNewScript();
+                        FlowAnalyzer.makeAnalysis(scriptDef, null, analysis);
+                        FlowScript.createScriptForWell(user, new FlowFCSAnalysis(fcsAnalysis), fcsAnalysis.getName() + "_script", scriptDoc, workspaceData, InputRole.Workspace);
+                    }
+                    CompensationMatrix comp = entry.getKey().getCompensationMatrix();
+                    if (comp != null)
+                    {
+                        FlowCompensationMatrix flowComp = compMatrices.get(comp);
+                        paAnalysis.addDataInput(user, flowComp.getData(), InputRole.CompensationMatrix.toString(), null);
+                    }
+                }
+            }
+            if (experiment != null)
+            {
+                experiment.getExperiment().addRun(user, run);
+            }
+
+            svc.commitTransaction();
+            transaction = false;
+            return new FlowRun(run);
+        }
+        finally
+        {
+            if (transaction)
+            {
+                svc.rollbackTransaction();
+            }
+        }
+
+
+
     }
 }

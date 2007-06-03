@@ -58,13 +58,6 @@ public class FlowRun extends FlowObject<ExpRun>
         return FlowDataObject.fromDatas(getExperimentRun().getOutputDatas(type));
     }
 
-    public List<? extends FlowObject> getInputDatas(FlowDataType type) throws SQLException
-    {
-        List<FlowObject> ret = new ArrayList();
-        FlowDataObject.addDataOfType(getExpObject().getInputDatas(type), type, ret);
-        return ret;
-    }
-
     public FlowWell[] getWells() throws SQLException
     {
         List<? extends FlowDataObject> all = getDatas(null);
@@ -99,16 +92,18 @@ public class FlowRun extends FlowObject<ExpRun>
 
     public FlowCompensationMatrix getCompensationMatrix() throws SQLException
     {
-        List datas = getDatas(FlowDataType.CompensationMatrix);
-        if (datas.size() == 0)
+        ExpData[] outputs = getExperimentRun().getOutputDatas(FlowDataType.CompensationMatrix);
+        if (outputs.length > 0)
         {
-            datas = getInputDatas(FlowDataType.CompensationMatrix);
+            return new FlowCompensationMatrix(outputs[0]);
         }
-        if (datas.size() == 0)
-        {
+        PropertyDescriptor inputRole = InputRole.CompensationMatrix.getPropertyDescriptor(getContainer());
+        if (inputRole == null)
             return null;
-        }
-        return (FlowCompensationMatrix) datas.get(0);
+        ExpData[] datas = getExperimentRun().getInputDatas(inputRole, ExpProtocol.ApplicationType.ExperimentRun);
+        if (datas.length == 0)
+            return null;
+        return new FlowCompensationMatrix(datas[0]);
     }
     
     public int getRunId()
@@ -187,7 +182,10 @@ public class FlowRun extends FlowObject<ExpRun>
 
     public FlowScript getScript()
     {
-        ExpData[] datas = getExperimentRun().getInputDatas(FlowDataType.Script);
+        PropertyDescriptor pd = InputRole.AnalysisScript.getPropertyDescriptor(getContainer());
+        if (pd == null)
+            return null;
+        ExpData[] datas = getExperimentRun().getInputDatas(pd, ExpProtocol.ApplicationType.ExperimentRun);
         if (datas.length == 0)
             return null;
         return (FlowScript) FlowDataObject.fromData(datas[0]);

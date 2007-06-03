@@ -19,7 +19,7 @@
                 {
                     namesInUse.add(experiment.getName().toLowerCase());
                 }
-                String baseName = "Analysis";
+                String baseName = FlowExperiment.DEFAULT_ANALYSIS_NAME;
                 name = baseName;
                 int i = 0;
                 while (namesInUse.contains(name.toLowerCase()))
