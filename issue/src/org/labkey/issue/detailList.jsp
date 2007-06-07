@@ -37,10 +37,7 @@
 
 <%
     }
-%>
-<script language="javascript" TYPE="text/javascript" src="<%=context.getContextPath()%>/select.js"></script>
 
-<%
     for (ListIterator<Issue> iterator = issueList.listIterator(); iterator.hasNext(); )
     {
         issue = iterator.next();

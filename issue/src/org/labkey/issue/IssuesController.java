@@ -534,7 +534,7 @@ public class IssuesController extends ViewController
         validateNotifyList(issue, form);
 
         if (issue.getTitle() == null)
-            return _renderInTemplate(getInsertErrorView(issue, "Error: Issue title cannot be null"), "Insert new issue", null);
+            return _renderInTemplate(getInsertErrorView(issue, form.getComment(), "Error: Issue title cannot be null"), "Insert new issue", null);
 
         try
         {
@@ -548,7 +548,7 @@ public class IssuesController extends ViewController
             _log.debug("IssuesContoller.doInsert", x);
             issue.Open(c, user);
 
-            return _renderInTemplate(getInsertErrorView(issue, error), "Insert new issue", null);
+            return _renderInTemplate(getInsertErrorView(issue, form.getComment(), error), "Insert new issue", null);
         }
 
         ViewURLHelper url = getDetailsForwardURL(issue);
@@ -563,7 +563,7 @@ public class IssuesController extends ViewController
         return new ViewForward(forwardURL);
     }
 
-    private JspView getInsertErrorView(Issue issue, String error) throws ServletException, SQLException
+    private JspView getInsertErrorView(Issue issue, String comment, String error) throws ServletException, SQLException
     {
         IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "updateView.jsp");
         JspView v = new JspView(page);
@@ -573,6 +573,7 @@ public class IssuesController extends ViewController
         page.setAction("insert");
         page.setIssue(issue);
         page.setError(error);
+        page.setBody(comment);
         page.setCustomColumnConfiguration(ccc);
         page.setEditable(getEditableFields(page.getAction(), ccc));
         page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
@@ -658,6 +659,7 @@ public class IssuesController extends ViewController
 
             page.setAction(form.getAction());
             page.setIssue(issue);
+            page.setBody(form.getComment());
             page.setCustomColumnConfiguration(ccc);
             page.setEditable(getEditableFields(page.getAction(), ccc));
             page.setError(x.getMessage());

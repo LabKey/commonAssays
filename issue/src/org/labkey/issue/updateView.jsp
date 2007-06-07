@@ -40,8 +40,6 @@
         <td><%= buttonLink("View Grid", new ViewURLHelper("Issues", "list", context.getContainer()).addParameter(DataRegion.LAST_FILTER_PARAM, "true"))%></td>
     </tr></table>
 
-    <script language="javascript" type="text/javascript" src="<%=context.getContextPath()%>/select.js"></script>
-    <script language="javascript" type="text/javascript" src="<%=context.getContextPath()%>/completion.js"></script>
     <table width=640>
         <tr><td colspan=3><table><tr>
 <%

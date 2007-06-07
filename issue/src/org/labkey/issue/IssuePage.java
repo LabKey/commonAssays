@@ -213,7 +213,7 @@ abstract public class IssuePage extends JspBase
         sb.append(field);
         sb.append("\" name=\"");
         sb.append(field);
-        sb.append("\" onkeypress=\"return selectKeyPress()\" onkeydown=\"return selectKeyDown()\">");
+        sb.append("\" >");
 
         if (null != display && 0 != display.length())
         {

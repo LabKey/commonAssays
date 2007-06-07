@@ -52,7 +52,6 @@
 <%
     }
 %>
-<script language="javascript" TYPE="text/javascript" src="<%=context.getContextPath()%>/select.js"></script>
 <table width=640>
     <tr><td class="wpTitle" colspan="3"><%=issueId + " : " + h(issue.getTitle())%></td></tr>
     <tr>
