@@ -15,7 +15,7 @@ import java.sql.ResultSet;
 public class ProteinGroupProteins
 {
     private Map<Integer, List<ProteinSummary>> _summaries;
-    private final MS2Run[] _runs;
+    private MS2Run[] _runs;
 
     public ProteinGroupProteins(MS2Run... runs)
     {
@@ -138,4 +138,18 @@ public class ProteinGroupProteins
     }
 
 
+    public void setRuns(MS2Run[] runs)
+    {
+        assert runsMatch(runs);
+        _runs = runs;
+    }
+
+    private boolean runsMatch(MS2Run[] runs)
+    {
+        if (_runs != null && _runs.length != 0)
+        {
+            return _runs == runs || new HashSet(Arrays.asList(runs)).equals(new HashSet(Arrays.asList(_runs)));
+        }
+        return true;
+    }
 }

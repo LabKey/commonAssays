@@ -56,12 +56,12 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
     public Object getValue(RenderContext ctx)
     {
         Map row = ctx.getRow();
-        String columnName = "RowId";
-        Integer id = (Integer)row.get(columnName);
+        String columnName = _columnName;
+        Number id = (Number)row.get(columnName);
         if (id == null)
         {
-            columnName = _columnName;
-            id = (Integer)row.get(columnName);
+            columnName = "RowId";
+            id = (Number)row.get(columnName);
         }
         try
         {

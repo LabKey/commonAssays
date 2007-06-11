@@ -168,7 +168,7 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    protected TableInfo createPeptideMembershipsTable()
+    protected TableInfo createPeptideMembershipsTable(final MS2Run... runs)
     {
         TableInfo info = MS2Manager.getTableInfoPeptideMemberships();
         FilteredTable result = new FilteredTable(info);
@@ -186,7 +186,7 @@ public class MS2Schema extends UserSchema
             {
                 ProteinGroupTableInfo result = new ProteinGroupTableInfo(null, MS2Schema.this);
                 result.getColumn("ProteinProphet").setIsHidden(true);
-                result.addProteinDetailColumns();
+                result.addProteinDetailColumns(runs);
 
                 return result;
             }

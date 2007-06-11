@@ -19,14 +19,17 @@ import java.net.URISyntaxException;
 public class CompareProteinsView extends QueryView
 {
     private final List<MS2Run> _runs;
+    private final int _runListIndex;
     private SimpleFilter _runFilter = new SimpleFilter();
 
-    public CompareProteinsView(ViewContext context, UserSchema schema, QuerySettings settings, List<MS2Run> runs)
+    public CompareProteinsView(ViewContext context, UserSchema schema, QuerySettings settings, List<MS2Run> runs, int runListIndex)
     {
         super(new ViewContext(context), schema, settings);
         _runs = runs;
+        _runListIndex = runListIndex;
 
         setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
+        setShowExportButtons(false);
 /*
         ViewURLHelper url = getViewContext().cloneViewURLHelper();
         SimpleFilter filter = new SimpleFilter(url, getSettings().getDataRegionName());
@@ -71,6 +74,24 @@ public class CompareProteinsView extends QueryView
         }
 
         getViewContext().setViewURLHelper(url);*/
+    }
+
+
+    protected void populateButtonBar(DataView view, ButtonBar bar)
+    {
+        super.populateButtonBar(view, bar);
+
+        ViewURLHelper excelURL = getViewContext().cloneViewURLHelper();
+        excelURL.setAction("exportQueryCompareToExcel.view");
+        excelURL.addParameter("runList", Integer.toString(_runListIndex));
+        ActionButton excelButton = new ActionButton("Export to Excel", excelURL);
+        bar.add(excelButton);
+
+        ViewURLHelper tsvURL = getViewContext().cloneViewURLHelper();
+        tsvURL.setAction("exportQueryCompareToTSV.view");
+        excelURL.addParameter("runList", Integer.toString(_runListIndex));
+        ActionButton tsvButton = new ActionButton("Export to TSV", tsvURL);
+        bar.add(tsvButton);
     }
 
     protected DataView createDataView()

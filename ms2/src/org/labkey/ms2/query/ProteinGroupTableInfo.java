@@ -200,7 +200,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         addColumn(proteinGroup);
     }
 
-    public void addProteinDetailColumns()
+    public void addProteinDetailColumns(final MS2Run... runs)
     {
         ColumnInfo rowIdColumn = _rootTable.getColumn("RowId");
 
@@ -208,6 +208,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
+                _schema.getProteinGroupProteins().setRuns(runs);
                 ProteinListDisplayColumn result = new ProteinListDisplayColumn(colInfo.getColumnName(), _schema.getProteinGroupProteins());
                 result.setColumnInfo(colInfo);
                 return result;

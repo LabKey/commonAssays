@@ -134,7 +134,17 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
         SQLFragment result = new SQLFragment();
         result.append("(SELECT * FROM ");
         result.append(super.getFromSQL(innerAlias));
-        result.append(", (SELECT Run, SeqId AS InnerSeqId");
+        result.append(", (SELECT InnerSeqId ");
+        for (MS2Run run : _runs)
+        {
+            result.append(",\n");
+            result.append("MAX(Run");
+            result.append(run.getRun());
+            result.append("ProteinGroupId) AS Run");
+            result.append(run.getRun());
+            result.append("ProteinGroupId");
+        }
+        result.append("\nFROM (SELECT SeqId AS InnerSeqId");
         for (MS2Run run : _runs)
         {
             result.append(",\n");
@@ -158,7 +168,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
             separator = ", ";
             result.append(run.getRun());
         }
-        result.append(") AND ppf.RowId = pg.ProteinProphetFileId AND pg.RowId = pgm.ProteinGroupId GROUP BY Run, SeqId)\n");
+        result.append(") AND ppf.RowId = pg.ProteinProphetFileId AND pg.RowId = pgm.ProteinGroupId GROUP BY Run, SeqId) x GROUP BY InnerSeqId)\n");
         result.append(" AS RunProteinGroups WHERE RunProteinGroups.InnerSeqId = ");
         result.append(innerAlias);
         result.append(".SeqId) AS ");

@@ -27,7 +27,7 @@ public class PeptidesTableInfo extends FilteredTable
         this(schema, null, new ViewURLHelper("MS2", "someAction.view", schema.getContainer()));
     }
 
-    public PeptidesTableInfo(MS2Schema schema, MS2Run[] runs, ViewURLHelper url)
+    public PeptidesTableInfo(MS2Schema schema, final MS2Run[] runs, ViewURLHelper url)
     {
         super(MS2Manager.getTableInfoPeptidesData());
         _schema = schema;
@@ -94,7 +94,7 @@ public class PeptidesTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createPeptideMembershipsTable();
+                return _schema.createPeptideMembershipsTable(runs);
             }
         });
         proteinGroup.setKeyField(false);

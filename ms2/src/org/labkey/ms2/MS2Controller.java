@@ -2557,6 +2557,57 @@ public class MS2Controller extends ViewController
     }
 
     @Jpf.Action
+    protected Forward exportQueryCompareToExcel(final ExportForm form) throws Exception
+    {
+        List<String> errors = new ArrayList<String>();
+        List<MS2Run> runs = getCachedRuns(form.getRunList(), errors);
+
+        if (!errors.isEmpty())
+            return _renderErrors(errors);
+
+        for (MS2Run run : runs)
+        {
+            Container c = ContainerManager.getForId(run.getContainer());
+            if (c == null || !c.hasPermission(getUser(), ACL.PERM_READ))
+            {
+                return HttpView.throwUnauthorized();
+            }
+        }
+
+        QueryView view = createCompareQueryView(runs, form.getRunList());
+        ExcelWriter excelWriter = view.getExcelWriter();
+        excelWriter.setFilenamePrefix("CompareRuns");
+        excelWriter.write(getResponse());
+        return null;
+    }
+
+    @Jpf.Action
+    protected Forward exportQueryCompareToTSV(final ExportForm form) throws Exception
+    {
+        List<String> errors = new ArrayList<String>();
+        List<MS2Run> runs = getCachedRuns(form.getRunList(), errors);
+
+        if (!errors.isEmpty())
+            return _renderErrors(errors);
+
+        for (MS2Run run : runs)
+        {
+            Container c = ContainerManager.getForId(run.getContainer());
+            if (c == null || !c.hasPermission(getUser(), ACL.PERM_READ))
+            {
+                return HttpView.throwUnauthorized();
+            }
+        }
+
+        QueryView view = createCompareQueryView(runs, form.getRunList());
+        TSVGridWriter tsvWriter = view.getTsvWriter();
+        tsvWriter.setFilenamePrefix("CompareRuns");
+        tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
+        tsvWriter.write(getResponse());
+        return null;
+    }
+
+    @Jpf.Action
     protected Forward exportProteinGroupSearchToExcel(final ProteinSearchForm form) throws Exception
     {
         QueryView view = createProteinGroupSearchView(form);
@@ -2921,10 +2972,7 @@ public class MS2Controller extends ViewController
 
         if ("query".equalsIgnoreCase(column))
         {
-            QuerySettings settings = new QuerySettings(cloneViewURLHelper(), getRequest(), "Compare");
-            settings.setQueryName(MS2Schema.COMPARE_PROTEIN_PROPHET_TABLE_NAME);
-            settings.setAllowChooseQuery(false);
-            CompareProteinsView view = new CompareProteinsView(getViewContext(), new MS2Schema(getUser(), getContainer()), settings, runs);
+            CompareProteinsView view = createCompareQueryView(runs, runListIndex);
             HtmlView helpView = new HtmlView("<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein-specific columns, or expand <em>Run</em> to see the run-specific columns, like quantitation, amino acid coverage, and so forth. To set a filter on something like the group's probability, select the Filter tab, add the <em>Run->Prob</em> column, and filter it based on the desired threshold.</p></div>");
             VBox vbox = new VBox(helpView, view);
             return _renderInTemplate(vbox, false, "Compare Runs", null);
@@ -2991,6 +3039,16 @@ public class MS2Controller extends ViewController
         }
 
         return null;
+    }
+
+    private CompareProteinsView createCompareQueryView(List<MS2Run> runs, int runListIndex)
+        throws ServletException
+    {
+        QuerySettings settings = new QuerySettings(cloneViewURLHelper(), getRequest(), "Compare");
+        settings.setQueryName(MS2Schema.COMPARE_PROTEIN_PROPHET_TABLE_NAME);
+        settings.setAllowChooseQuery(false);
+        CompareProteinsView view = new CompareProteinsView(getViewContext(), new MS2Schema(getUser(), getContainer()), settings, runs, runListIndex);
+        return view;
     }
 
     private List<MS2Run> getSelectedRuns(List<String> errors) throws ServletException

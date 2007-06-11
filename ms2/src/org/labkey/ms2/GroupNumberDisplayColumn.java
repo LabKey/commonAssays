@@ -55,11 +55,19 @@ public class GroupNumberDisplayColumn extends DataColumn
         long groupNumber;
         if (_fromQuery)
         {
+            if (row.get(_collectionIdColumn.getAlias()) == null)
+            {
+                return "";
+            }
             collectionId = ((Number)row.get(_collectionIdColumn.getAlias())).longValue();
             groupNumber = ((Number)row.get(getColumnInfo().getAlias())).longValue();
         }
         else
         {
+            if (row.get(_collectionId) == null)
+            {
+                return "";
+            }
             collectionId = ((Number)row.get(_collectionId)).longValue();
             groupNumber = ((Number)row.get(_groupNumber)).longValue();
         }
