@@ -16,6 +16,8 @@
 
 package org.labkey.ms2;
 
+import java.util.Map;
+
 /**
  * User: arauch
  * Date: Jul 21, 2005
@@ -23,6 +25,14 @@ package org.labkey.ms2;
  */
 public class MascotRun extends MS2Run
 {
+    @Override
+    public void adjustScores(Map<String, String> map)
+    {
+        // Mascot exported pepXML can exclude "homologyscore"
+        if (null == map.get("homologyscore"))
+            map.put("homologyscore", "-1");
+    }
+
     public String getScoreColumnNames()
     {
         return "Ion, Identity, Homology, Expect, ";

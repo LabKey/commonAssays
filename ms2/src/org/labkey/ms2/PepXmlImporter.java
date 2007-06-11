@@ -43,10 +43,10 @@ import java.util.*;
 public class PepXmlImporter extends MS2Importer
 {
     protected String _gzFileName = null;
-    private String _type = null;
-    private Map<String, Integer> _scoreMap;
+    private Collection<String> _scoreColumnNames;
     private List<RelativeQuantAnalysisSummary> _quantSummaries;
     private boolean _scoringAnalysis;
+    private MS2Run _run = null;
 
     private static final int BATCH_SIZE = 100;
 
@@ -59,7 +59,7 @@ public class PepXmlImporter extends MS2Importer
 
     public String getType()
     {
-        return _type;
+        return _run != null ? _run.getType() : null;
     }
 
 
@@ -181,13 +181,11 @@ public class PepXmlImporter extends MS2Importer
     {
         String databaseLocalPath = fraction.getDatabaseLocalPath();
 
-        MS2Run ms2run = MS2Run.getRunFromTypeString(fraction.getSearchEngine());
-
-        _type = ms2run.getType();
-        _scoreMap = ms2run.getPepXmlScoreMap();
+        _run = MS2Run.getRunFromTypeString(fraction.getSearchEngine());
+        _scoreColumnNames = _run.getPepXmlScoreColumnNames();
 
         Map<String, Object> m = new HashMap<String, Object>();
-        m.put("Type", _type);
+        m.put("Type", _run.getType());
         m.put("SearchEngine", fraction.getSearchEngine());
         m.put("MassSpecType", fraction.getMassSpecType());
         m.put("SearchEnzyme", fraction.getSearchEnzyme());
@@ -294,7 +292,7 @@ public class PepXmlImporter extends MS2Importer
     protected void processSpectrumFile(PepXmlFraction fraction, HashSet<Integer> scans, MS2Progress progress, boolean shouldLoadSpectra, boolean shouldLoadRetentionTimes) throws SQLException
     {
         String mzXmlFileName = getMzXMLFileName(fraction);
-        if ((_type.equalsIgnoreCase("mascot")||_type.equalsIgnoreCase("sequest"))
+        if ((_run.getType().equalsIgnoreCase("mascot")||_run.getType().equalsIgnoreCase("sequest"))   // TODO: Move this check (perhaps all the code) into the appropriate run classes
                 && null == mzXmlFileName)
         {
             // we attempt to load spectra from .mzXML rather than .pep.tgz
@@ -314,7 +312,7 @@ public class PepXmlImporter extends MS2Importer
             gzFileName = gzFile.toString();
         }
         //sequest spectra are loaded from the tgz but are deleted after they are loaded.
-        if(_type.equalsIgnoreCase("sequest") && mzXmlFileName != null)
+        if(_run.getType().equalsIgnoreCase("sequest") && mzXmlFileName != null)   // TODO: Move this check (perhaps all the code) into the appropriate run classes
         {
             if (NetworkDrive.exists(new File(mzXmlFileName)))
             {
@@ -349,7 +347,7 @@ public class PepXmlImporter extends MS2Importer
     {
         StringBuffer columnNames = new StringBuffer();
 
-        for (int i = 0; i < _scoreMap.size(); i++)
+        for (int i = 0; i < _scoreColumnNames.size(); i++)
         {
             columnNames.append(", Score");
             columnNames.append(i + 1);
@@ -405,29 +403,17 @@ public class PepXmlImporter extends MS2Importer
         stmt.setInt(n++, peptide.getProteinHits());
         stmt.setString(n++, peptide.getProtein());
 
-        Set<Map.Entry<String, Integer>> requiredScores = _scoreMap.entrySet();
         Map<String, String> scores = peptide.getScores();
+        _run.adjustScores(scores);
 
-        for (Map.Entry<String, Integer> score : requiredScores)
+        for (String scoreColumnName : _scoreColumnNames)
         {
-            String key = score.getKey();     // Get next desired score
-            String value = scores.get(key);  // Get value from the scores parsed from XML
-//wch: mascotdev
-            // Mascot exported pepXML can exclude "homologyscore"
-            if (null == value)
-            {
-                if (key.equalsIgnoreCase("homologyscore"))
-                {
-                    value = "-1";
-                }
-            }
-//END-wch: mascotdev
-            setAsFloat(stmt, n + score.getValue(), value);
+            String value = scores.get(scoreColumnName);  // Get value from the scores parsed from XML
+            setAsFloat(stmt, n++, value);
         }
     }
 
 
-    // TODO: Change this?
     private void setAsFloat(PreparedStatement stmt, int n, String v) throws SQLException
     {
         if (v == null)

@@ -26,6 +26,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.CsvSet;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.common.tools.Rounder;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -586,17 +587,7 @@ public abstract class MS2Importer
         double seconds = (double) (System.currentTimeMillis() - startTime) / 1000;
         double minutes = seconds / 60;
 
-        log.info(round(seconds, 2) + " seconds " + ((minutes > 1) ? ("(" + round(seconds / 60, 2) + " minutes) ") : "") + "to " + action);
-    }
-
-
-    private static final double FACTORS[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
-
-    protected static double round(double n, int places)
-    {
-        if (places < 0 || places > 8) places = 8;
-
-        return Math.round(n * FACTORS[places]) / FACTORS[places];
+        log.info(Rounder.round(seconds, 2) + " seconds " + ((minutes > 1) ? ("(" + Rounder.round(seconds / 60, 2) + " minutes) ") : "") + "to " + action);
     }
 
 

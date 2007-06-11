@@ -5,6 +5,7 @@ import com.ice.tar.TarEntry;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.FTPUtil;
@@ -142,22 +143,23 @@ public abstract class GoLoader
     private void loadSingleGoFile(GoLoadBean bean, String filename, InputStream is) throws SQLException, IOException, ServletException
     {
         int orgLineCount = 0;
-        Connection conn = null;
-        PreparedStatement ps = null;
         TabLoader.TabLoaderIterator it = null;
         String[] cols = bean.cols;
         TableInfo ti = bean.tinfo;
-
-        logStatus("Starting to load " + filename);
+        Connection conn = null;
+        DbScope scope = null;
+        PreparedStatement ps = null;
 
         try
         {
             logStatus("Clearing table " + bean.tinfo);
             Table.execute(ProteinManager.getSchema(), "TRUNCATE TABLE " + bean.tinfo, null);
 
+            logStatus("Starting to load " + filename);
             InputStreamReader isr = new InputStreamReader(is);
             TabLoader t = new TabLoader(isr);
-            conn = ProteinManager.getSchema().getScope().getConnection();
+            scope = ProteinManager.getSchema().getScope();
+            conn = scope.getConnection();
             String SQLCommand = "INSERT INTO " + ti + "(";
             String QMarkPart = "VALUES (";
             String typeList = "SELECT ";
@@ -188,6 +190,7 @@ public abstract class GoLoader
                 typeMap.put(key, val);
             }
 
+            conn.setAutoCommit(false);
             ps = conn.prepareStatement(SQLCommand + QMarkPart);
             for (it = t.iterator(); it.hasNext();)
             {
@@ -210,6 +213,7 @@ public abstract class GoLoader
                 {
                     logStatus(orgLineCount + " rows loaded");
                     ps.executeBatch();
+                    conn.commit();
                     ps.clearBatch();
                 }
             }
@@ -223,7 +227,9 @@ public abstract class GoLoader
             }
             if (null != conn)
             {
-                ProteinManager.getSchema().getScope().releaseConnection(conn);
+                conn.commit();
+                conn.setAutoCommit(true);
+                scope.releaseConnection(conn);
             }
             if (null != it)
                 it.close();
@@ -358,6 +364,7 @@ public abstract class GoLoader
             File file = FTPUtil.downloadFile("anonymous", "anonymous", SERVER, PATH, filenames.get(0));
             file.deleteOnExit();
             logStatus("Finished downloading " + filenames.get(0));
+            logStatus("");
 
             return new FileInputStream(file);
         }

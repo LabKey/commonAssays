@@ -1287,10 +1287,7 @@ public class MS2Controller extends ViewController
     {
         requiresGlobalAdmin();
 
-// ViewServlet.getViewServletContext().getResourceAsStream(ProteinDictionaryHelpers.WEBAPP_ROOT + "go_200705-termdb-tables.tar.gz"))
-
         GoLoader loader = GoLoader.getGoLoader();
-
         ViewURLHelper forwardUrl = new ViewURLHelper("MS2", "showGoStatus.view", "");
 
         if (null != loader)

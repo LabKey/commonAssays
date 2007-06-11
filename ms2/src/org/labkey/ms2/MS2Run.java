@@ -231,16 +231,22 @@ public abstract class MS2Run implements Serializable
 
     public abstract String[] getGZFileExtensions();
 
-
-    public Map<String, Integer> getPepXmlScoreMap()
+    // Database column names in order
+    public Collection<String> getPepXmlScoreColumnNames()
     {
-        String[] scoreNames = getPepXmlScoreNames().split(",");
-        Map<String, Integer> scoreMap = new HashMap<String, Integer>();
+        String[] scoreNameArray = getPepXmlScoreNames().split(",");
+        Collection<String> scoreNames = new ArrayList<String>(scoreNameArray.length);
 
-        for (int i = 0; i < scoreNames.length; i++)
-            scoreMap.put(scoreNames[i].trim(), i);
+        for (String scoreName : scoreNameArray)
+            scoreNames.add(scoreName.trim());
 
-        return scoreMap;
+        return scoreNames;
+    }
+
+
+    // Override this to check for missing scores and add default values.
+    public void adjustScores(Map<String, String> map)
+    {
     }
 
 

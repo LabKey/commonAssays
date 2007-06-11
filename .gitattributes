@@ -578,6 +578,7 @@ ms2/src/org/labkey/ms2/MascotRun.java -text
 ms2/src/org/labkey/ms2/PepXmlExperimentDataHandler.java -text
 ms2/src/org/labkey/ms2/PepXmlImporter.java -text
 ms2/src/org/labkey/ms2/PeptideProphetGraphs.java -text
+ms2/src/org/labkey/ms2/PhenyxRun.java -text
 ms2/src/org/labkey/ms2/PiesliceDetailListHeader.vm -text
 ms2/src/org/labkey/ms2/PklSpectrumRenderer.java -text
 ms2/src/org/labkey/ms2/PlainTextRenderer.java -text
