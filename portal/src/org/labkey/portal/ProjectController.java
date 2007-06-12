@@ -426,7 +426,7 @@ public class ProjectController extends ViewController
         trailConfig.setTitle("Search Results");
 
         HomeTemplate template = new HomeTemplate(getViewContext(), c, results, trailConfig);
-        template.getModel().setFocus("forms[0].search");
+        template.getModelBean().setFocus("forms[0].search");
         return includeView(template);
     }
 

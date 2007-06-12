@@ -1,14 +1,14 @@
-<%import org.labkey.api.util.PageFlowUtil;%><rss version="2.0">
+<rss version="2.0">
 <channel>
-    <title>${app.systemShortName}: ${app.systemDescription}</title>
-    <link>${homePageUrl}</link>
-    <description>${app.systemShortName}: ${app.systemDescription}</description>
+    <title>${filter(app.systemShortName)}: ${filter(app.systemDescription)}</title>
+    <link>${filter(homePageUrl)}</link>
+    <description>${filter(app.systemShortName)}: ${filter(app.systemDescription)}</description>
 <%
 for (ann in announcements)
     {%>
     <item>
         <title>${PageFlowUtil.filter(ann.title)}</title>
-        <link>${url}${ann.rowId}&amp;print=1</link>
+        <link>${filter(url)}${ann.rowId}&amp;print=1</link>
         <description>${PageFlowUtil.filter(ann.body)}</description>
         <pubDate>${ann.created}</pubDate>
     </item><%

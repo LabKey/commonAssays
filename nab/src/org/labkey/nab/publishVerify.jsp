@@ -8,7 +8,7 @@
 <script type="text/javascript">LABKEY.requiresScript('completion.js');</script>
 <%
     JspView<NabController.PublishVerifyBean> me = (JspView<NabController.PublishVerifyBean>) HttpView.currentView();
-    NabController.PublishVerifyBean bean = me.getModel();
+    NabController.PublishVerifyBean bean = me.getModelBean();
     String errors = PageFlowUtil.getStrutsError(request, "main");
 %>
 Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All data must be associated with a participant/visit within the target study.<br><br>

@@ -1353,9 +1353,9 @@ public class AnnouncementsController extends ViewController
         HomeTemplate template = new HomeTemplate(getViewContext(), c, view, trailConfig);
 
         if (null != focus)
-            template.getModel().setFocus(focus);
+            template.getModelBean().setFocus(focus);
 
-        template.getModel().setAnchor(anchor);
+        template.getModelBean().setAnchor(anchor);
 
         return includeView(template);
     }
@@ -2004,7 +2004,7 @@ public class AnnouncementsController extends ViewController
             if (ann instanceof AnnouncementManager.BareAnnouncement)
                 throw new IllegalArgumentException("can't use getBareAnnoucements() with this view");
 
-            ThreadViewBean bean = getModel();
+            ThreadViewBean bean = getModelBean();
             bean.announcement = ann;
             bean.settings = getSettings(c);
             bean.message = null;
@@ -2020,7 +2020,7 @@ public class AnnouncementsController extends ViewController
 
         public Announcement getAnnouncement()
         {
-            return getModel().announcement;
+            return getModelBean().announcement;
         }
     }
 

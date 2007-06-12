@@ -13,11 +13,11 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.UploadAssayForm> me = (JspView<NabController.UploadAssayForm>) HttpView.currentView();
-    org.labkey.nab.NabController.UploadAssayForm form = me.getModel();
+    org.labkey.nab.NabController.UploadAssayForm form = me.getModelBean();
     String headerTDStyle = "text-align:left;background-color:#EEEEEE;border-top:solid 1px";
     String dataTDStyle = "padding-left:20px";
-    PlateTemplate activeTemplate = me.getModel().getActivePlateTemplate(me.getViewContext().getContainer(), me.getViewContext().getUser());
-    PlateTemplate[] templates = me.getModel().getPlateTemplates(me.getViewContext().getContainer(), me.getViewContext().getUser());
+    PlateTemplate activeTemplate = me.getModelBean().getActivePlateTemplate(me.getViewContext().getContainer(), me.getViewContext().getUser());
+    PlateTemplate[] templates = me.getModelBean().getPlateTemplates(me.getViewContext().getContainer(), me.getViewContext().getUser());
     int specimenCount = activeTemplate.getWellGroupCount(WellGroup.Type.SPECIMEN);
     List<? extends WellGroupTemplate> wellGroupTemplates = activeTemplate.getWellGroups();
     List<WellGroupTemplate> specimenWellGroups = new ArrayList<WellGroupTemplate>();

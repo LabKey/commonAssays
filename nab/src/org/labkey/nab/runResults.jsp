@@ -18,7 +18,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<org.labkey.nab.NabController.RenderAssayBean> me = (JspView<NabController.RenderAssayBean>) HttpView.currentView();
-    NabController.RenderAssayBean bean = me.getModel();
+    NabController.RenderAssayBean bean = me.getModelBean();
     Luc5Assay assay = bean.getAssay();
     ViewContext context = me.getViewContext();
     boolean writer = context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT);

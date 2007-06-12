@@ -3730,14 +3730,14 @@ public class MS2Controller extends ViewController
         QueryView groupsView = createProteinGroupSearchView(form);
 
         ProteinSearchWebPart searchView = new ProteinSearchWebPart(true);
-        searchView.getModel().setIdentifier(form.getIdentifier());
-        searchView.getModel().setIncludeSubfolders(form.isIncludeSubfolders());
-        searchView.getModel().setExactMatch(form.isExactMatch());
+        searchView.getModelBean().setIdentifier(form.getIdentifier());
+        searchView.getModelBean().setIncludeSubfolders(form.isIncludeSubfolders());
+        searchView.getModelBean().setExactMatch(form.isExactMatch());
         if (getRequest().getParameter("ProteinSearchResults.GroupProbability~gte") != null)
         {
             try
             {
-                searchView.getModel().setMinProbability(Float.parseFloat(getRequest().getParameter("ProteinSearchResults.GroupProbability~gte")));
+                searchView.getModelBean().setMinProbability(Float.parseFloat(getRequest().getParameter("ProteinSearchResults.GroupProbability~gte")));
             }
             catch (NumberFormatException e) {}
         }
@@ -3745,7 +3745,7 @@ public class MS2Controller extends ViewController
         {
             try
             {
-                searchView.getModel().setMaxErrorRate(Float.parseFloat(getRequest().getParameter("ProteinSearchResults.ErrorRate~lte")));
+                searchView.getModelBean().setMaxErrorRate(Float.parseFloat(getRequest().getParameter("ProteinSearchResults.ErrorRate~lte")));
             }
             catch (NumberFormatException e) {}
         }

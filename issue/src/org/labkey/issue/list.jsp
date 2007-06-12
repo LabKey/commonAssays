@@ -10,10 +10,10 @@
 
 <%
     JspView<IssuesController.ListForm> me = (JspView<IssuesController.ListForm>) HttpView.currentView();
-    IssuesController.ListForm bean = me.getModel();
+    IssuesController.ListForm bean = me.getModelBean();
     ViewContext context = HttpView.getRootContext();
 
-    String viewName = me.getModel().getQuerySettings().getViewName();
+    String viewName = me.getModelBean().getQuerySettings().getViewName();
     boolean isHidden = bean.getViews().get(viewName) != null ? bean.getViews().get(viewName).isHidden() : false;
 
     final String OPEN_FILTER = "Issues.Status~eq=open&Issues.sort=Milestone%2CAssignedTo/DisplayName";

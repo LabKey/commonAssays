@@ -19,8 +19,6 @@ public class ProteinSearchWebPart extends JspView<ProteinSearchBean>
     {
         super("/org/labkey/ms2/search/searchProteins.jsp");
         setTitle(NAME);
-        setModel(new ProteinSearchBean(horizontal));
+        setModelBean(new ProteinSearchBean(horizontal));
     }
-
-
 }

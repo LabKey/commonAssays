@@ -10,7 +10,7 @@
 <%@ page import="org.labkey.ms2.EditElutionGraphContext" %>
 <%
     JspView<EditElutionGraphContext> me = (JspView<EditElutionGraphContext>) HttpView.currentView();
-    org.labkey.ms2.EditElutionGraphContext ctx = me.getModel();
+    org.labkey.ms2.EditElutionGraphContext ctx = me.getModelBean();
     String contextPath = request.getContextPath();
     MS2Peptide p = ctx.getPeptide();
     Quantitation quant = ctx.getQuantitation();

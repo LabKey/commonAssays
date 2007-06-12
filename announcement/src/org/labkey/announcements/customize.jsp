@@ -4,10 +4,10 @@
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page import="org.labkey.announcements.model.AnnouncementManager.Settings.SortOrder" %>
 <% HttpView<AnnouncementManager.Settings> me = (HttpView<AnnouncementManager.Settings>) HttpView.currentView();
-    AnnouncementManager.Settings settings = me.getModel();
-    ViewURLHelper returnUrl = (ViewURLHelper)me.getViewContext().get("returnUrl");
-    String assignedToSelect = (String)me.getViewContext().get("assignedToSelect");
-    String securityWarning = (String)me.getViewContext().get("securityWarning");
+    AnnouncementManager.Settings settings = me.getModelBean();
+    ViewURLHelper returnUrl = (ViewURLHelper) me.getViewContext().get("returnUrl");
+    String assignedToSelect = (String) me.getViewContext().get("assignedToSelect");
+    String securityWarning = (String) me.getViewContext().get("securityWarning");
 %><form action="customize.post" method="post">
 <input type="hidden" name="returnUrl" value="<%=returnUrl.getEncodedLocalURIString()%>">
 <table>

@@ -8,7 +8,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<IssuesController.IssuesPreference> me = (JspView<IssuesController.IssuesPreference>) HttpView.currentView();
-    IssuesController.IssuesPreference bean = me.getModel();
+    IssuesController.IssuesPreference bean = me.getModelBean();
 %>
 <form action="updateRequiredFields.view" method="post" name="requiredFieldsForm">
     <table class="normal">

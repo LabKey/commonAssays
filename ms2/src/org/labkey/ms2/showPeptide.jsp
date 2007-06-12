@@ -10,7 +10,7 @@
 <%@ page import="org.labkey.api.util.Formats"%>
 <%
     JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
-    ShowPeptideContext ctx = me.getModel();
+    ShowPeptideContext ctx = me.getModelBean();
     MS2Peptide p = ctx.peptide;
     MS2Fraction fraction = MS2Manager.getFraction(p.getFraction());
 %>

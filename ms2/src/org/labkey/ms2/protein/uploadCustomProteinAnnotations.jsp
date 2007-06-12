@@ -8,7 +8,7 @@
 
 <%
     JspView<ProteinController.UploadAnnotationsForm> me = (JspView<ProteinController.UploadAnnotationsForm>) HttpView.currentView();
-    ProteinController.UploadAnnotationsForm bean = me.getModel();
+    ProteinController.UploadAnnotationsForm bean = me.getModelBean();
 
     String errors = PageFlowUtil.getStrutsError(request, "main");
 %>

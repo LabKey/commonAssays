@@ -7,7 +7,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.PublishBean> me = (JspView<org.labkey.nab.NabController.PublishBean>) HttpView.currentView();
-    NabController.PublishBean bean = me.getModel();
+    NabController.PublishBean bean = me.getModelBean();
 %>
 <form action="publishVerify.post" method="POST">
     <input type="hidden" name="plateIds" value="<%= bean.isPlateIds() %>">

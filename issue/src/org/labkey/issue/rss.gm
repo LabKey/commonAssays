@@ -1,4 +1,4 @@
-<rss version="2.0">
+<% context.getResponse().setContentType("text/xml");%><rss version="2.0">
 <channel>
     <title>${app.systemShortName}: Issues - ${PageFlowUtil.filter(container.path)} </title>
     <link>${homePageUrl}</link>

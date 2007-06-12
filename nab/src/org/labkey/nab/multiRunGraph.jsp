@@ -10,7 +10,7 @@
 
 <%
     JspView<NabController.GraphSelectedBean> me = (JspView<NabController.GraphSelectedBean>) HttpView.currentView();
-    org.labkey.nab.NabController.GraphSelectedBean bean = me.getModel();
+    org.labkey.nab.NabController.GraphSelectedBean bean = me.getModelBean();
 
     String errs = PageFlowUtil.getStrutsError(request, "main");
     if (null != StringUtils.trimToNull(errs))

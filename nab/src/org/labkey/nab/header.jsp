@@ -5,7 +5,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabController.HeaderBean> me = (JspView<org.labkey.nab.NabController.HeaderBean>) HttpView.currentView();
-    NabController.HeaderBean bean = me.getModel();
+    NabController.HeaderBean bean = me.getModelBean();
 %>
 <%
     if (bean.showNewRunLink())

@@ -153,7 +153,7 @@ public class DiscussionServiceImpl implements DiscussionService.Service
                     discussionView.setFrame(WebPartView.FrameType.NONE);
                     if (params.get("reply") != null)
                     {
-                        ((AnnouncementsController.ThreadView)discussionView).getModel().isResponse = true;
+                        ((AnnouncementsController.ThreadView)discussionView).getModelBean().isResponse = true;
                         respondView = new AnnouncementsController.RespondView(c, selected, returnUrl);
                     }
                 }

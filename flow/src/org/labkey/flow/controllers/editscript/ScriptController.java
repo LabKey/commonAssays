@@ -136,7 +136,7 @@ public class ScriptController extends BaseFlowController
         HomeTemplate template = new HomeTemplate(getViewContext(),
                 FormPage.getView(ScriptController.class, form, "newProtocol.jsp"),
                 getNavTrailConfig(null, "New Analysis Script", Action.newProtocol));
-        template.getModel().setFocus("forms[0].ff_name");
+        template.getModelBean().setFocus("forms[0].ff_name");
 
         return includeView(template);
     }

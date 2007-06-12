@@ -8,7 +8,7 @@
 
 <%
     JspView<ProteinSearchBean> me = (JspView<ProteinSearchBean>) HttpView.currentView();
-    ProteinSearchBean bean = me.getModel();
+    ProteinSearchBean bean = me.getModelBean();
     ViewContext ctx = me.getViewContext();
     ViewURLHelper url = ctx.getViewURLHelper().clone();
     url.setPageFlow("MS2");

@@ -201,7 +201,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
             }
         }
         HomeTemplate template = new HomeTemplate(getViewContext(), getContainer(), FormPage.getView(FlowController.class, form, "newFolder.jsp"), getNavTrailConfig(null, "New Folder", Action.newFolder));
-        template.getModel().setFocus("forms[0].ff_folderName");
+        template.getModelBean().setFocus("forms[0].ff_folderName");
         return includeView(template);
     }
 

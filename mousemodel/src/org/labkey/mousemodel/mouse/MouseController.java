@@ -657,7 +657,7 @@ public class MouseController extends ViewController
     public static class BulkMouseForm extends MouseForm
     {
         //Validation needs to be done differently since we ignore nulls
-        protected void populateValues(ActionErrors errors)
+        public void populateValues(ActionErrors errors)
         {
             Map values = new HashMap();
             Set keys = _stringValues.keySet();

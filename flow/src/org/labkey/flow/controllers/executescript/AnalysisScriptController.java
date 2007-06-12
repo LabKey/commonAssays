@@ -8,8 +8,8 @@ import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.controllers.BaseFlowController;
@@ -105,7 +105,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         HttpView view = FormPage.getView(AnalysisScriptController.class, form, "chooseAnalysisName.jsp");
         NavTrailConfig ntc = getNavTrailConfig(form.getProtocol(), "Choose new analysis name", Action.chooseRunsToAnalyze);
         HomeTemplate template = new HomeTemplate(getViewContext(), view, ntc);
-        template.getModel().setFocus("forms[0].ff_analysisName");
+        template.getModelBean().setFocus("forms[0].ff_analysisName");
         return includeView(template);
     }
 

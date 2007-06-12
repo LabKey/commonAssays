@@ -15,14 +15,14 @@
 <%
     AnnouncementsController.ThreadView me = (AnnouncementsController.ThreadView) HttpView.currentView();
     ViewContext context = me.getViewContext();
-    AnnouncementsController.ThreadViewBean bean = me.getModel();
+    AnnouncementsController.ThreadViewBean bean = me.getModelBean();
     Announcement announcement = bean.announcement;
     AnnouncementManager.Settings settings = bean.settings;
     String contextPath = context.getContextPath();
 
-if (null == announcement)
-{
-    %><span class=normal><%=h(settings.getConversationName())%> not found</span><%
+    if (null == announcement)
+    {
+%><span class=normal><%=h(settings.getConversationName())%> not found</span><%
     return;
 }
 
