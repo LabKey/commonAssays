@@ -18,7 +18,7 @@
     {
 %>
 
-<form action="jumpToIssue.view" method="get">
+<form name="jumpToIssue" action="jumpToIssue.view" method="get">
 <table border=0 cellspacing=2 cellpadding=2><tr>
 <td><%= textLink("new issue", new ViewURLHelper("Issues", "insert", context.getContainer()).addParameter(DataRegion.LAST_FILTER_PARAM, "true"))%></td>
     <td><%= textLink("view grid", new ViewURLHelper("Issues", "list", context.getContainer()).addParameter(DataRegion.LAST_FILTER_PARAM, "true"))%></td>
