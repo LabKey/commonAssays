@@ -22,6 +22,8 @@ public class CompareDataRegion extends DataRegion
     {
         _rs = rs;
         setName(MS2Manager.getDataRegionNameCompare());
+        setShadeAlternatingRows(true);
+        setShowColumnSeparators(true);
     }
     
     public ResultSet getResultSet()
@@ -56,7 +58,12 @@ public class CompareDataRegion extends DataRegion
         int columnIndex = 0;
         for (int i = 0; i < _offset; i++)
         {
-            out.write("<td></td>");
+            out.write("<td style=\"border-bottom: 1px solid rgb(170, 170, 170);");
+            if (i == _offset - 1)
+            {
+                out.write("border-right: 1px solid rgb(170, 170, 170);");
+            }
+            out.write("\">&nbsp;</td>");
             if (shade)
             {
                 renderers[columnIndex].setBackgroundColor("#EEEEEE");
@@ -67,7 +74,7 @@ public class CompareDataRegion extends DataRegion
 
         for (String caption : _multiColumnCaptions)
         {
-            out.write("<td align=\"center\" colspan=" + _colSpan + " style='white-space:nowrap'");
+            out.write("<td align=\"center\" colspan=\"" + _colSpan + "\" style=\"" + COLUMN_SEPARATOR_STYLE_ARRIBS + "; border-bottom: 1px solid rgb(170, 170, 170);\"");
             if (shade)
             {
                 out.write(" bgcolor=\"#EEEEEE\"");
@@ -81,7 +88,7 @@ public class CompareDataRegion extends DataRegion
                 columnIndex += _colSpan;
             }
 
-            out.write("><div style=\"text-align: center; writing-mode: tb-rl;filter: flipv fliph;\">" + caption + "</div></td>");
+            out.write(">" + caption + "</td>");
             shade = !shade;
         }
 

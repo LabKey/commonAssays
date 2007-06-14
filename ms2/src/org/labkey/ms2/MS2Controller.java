@@ -578,28 +578,6 @@ public class MS2Controller extends ViewController
     }
 
 
-    private StringBuffer renderTab(ViewURLHelper currentUrl, String text, boolean selected)
-    {
-        StringBuffer tab = new StringBuffer();
-
-        tab.append("<a href=\"");
-        tab.append(currentUrl.getEncodedLocalURIString());
-        tab.append("\">");
-
-        if (selected)
-        {
-            tab.append("<font style=\"background-color: #e1ecfc\">");  // #003399??
-            tab.append(text);
-            tab.append("</font>");
-        }
-        else
-            tab.append(text);
-
-        tab.append("</a>\n");
-
-        return tab;
-    }
-
     // Render current user's MS2Views in a list box with a submit button beside.  Size == 0 is a dropdown, Size > 0 is a
     // multi-select normal list box.  postValue determines whether to post the value or the name of selected view(s)
     //
@@ -814,37 +792,6 @@ public class MS2Controller extends ViewController
         }
 
         return new ViewForward(cloneViewURLHelper().setAction("manageViews"));
-    }
-
-
-    /**
-     * Ensure there are at least some shared views in a folder.
-     * Do this by copying from root folder
-     * If there are none in the root folder, load from properties file
-     */
-    public static void ensureViews(Container c) throws SQLException, IOException
-    {
-        PropertyManager.PropertyMap m = PropertyManager.getWritableProperties(0, c.getId(), MS2_VIEWS_CATEGORY, true);
-        if (0 == m.size())
-        {
-            PropertyManager.PropertyMap mGlobal = PropertyManager.getWritableProperties(0, ContainerManager.getRoot().getId(), MS2_VIEWS_CATEGORY, true);
-            if (mGlobal.size() == 0)
-            {
-                Properties p = new Properties();
-                InputStream is = MS2Controller.class.getResourceAsStream("/cpasProperties/defaultViews.properties");
-                p.load(is);
-                is.close();
-                for (Object prop : p.keySet())
-                    mGlobal.put((String) prop, p.get(prop));
-
-                PropertyManager.saveProperties(mGlobal);
-            }
-
-            for (Map.Entry<String, Object> entry : mGlobal.entrySet())
-                m.put(entry.getKey(), entry.getValue());
-
-            PropertyManager.saveProperties(m);
-        }
     }
 
 
@@ -2077,9 +2024,6 @@ public class MS2Controller extends ViewController
 
         ViewURLHelper currentUrl = getViewURLHelper();
 
-        if (null == peptide)
-            return _renderError("Peptide was not found");
-
         int sqlRowIndex = form.getRowIndex();
         int rowIndex = sqlRowIndex - 1;  // Switch 1-based, JDBC row index to 0-based row index for array lookup
 
@@ -2396,7 +2340,7 @@ public class MS2Controller extends ViewController
         requiresPermission(ACL.PERM_READ);
 
         if (isAuthorized(form.run))
-            exportProteins(form, "All", null, null);
+            exportProteins(form, null, null);
 
         return null;
     }
@@ -2433,14 +2377,14 @@ public class MS2Controller extends ViewController
 
             where.append(")");
 
-            exportProteins(form, "Hand-selected from", where.toString(), proteins);
+            exportProteins(form, where.toString(), proteins);
         }
 
         return null;
     }
 
 
-    private void exportProteins(ExportForm form, String what, String extraWhere, List<String> proteins) throws Exception
+    private void exportProteins(ExportForm form, String extraWhere, List<String> proteins) throws Exception
     {
         MS2Run run = MS2Manager.getRun(form.getRun());
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
@@ -2475,7 +2419,7 @@ public class MS2Controller extends ViewController
         ViewContext ctx = getViewContext();
         List<String> proteins = ctx.getList(DataRegion.SELECT_CHECKBOX_NAME);
 
-        exportProteinGroups(form, "Hand-selected from", proteins);
+        exportProteinGroups(form, proteins);
 
         return null;
     }
@@ -2486,13 +2430,13 @@ public class MS2Controller extends ViewController
         requiresPermission(ACL.PERM_READ);
 
         if (isAuthorized(form.run))
-            exportProteinGroups(form, "All", null);
+            exportProteinGroups(form, null);
 
         return null;
     }
 
 
-    private void exportProteinGroups(ExportForm form, String what, List<String> proteins) throws Exception
+    private void exportProteinGroups(ExportForm form, List<String> proteins) throws Exception
     {
         MS2Run run = MS2Manager.getRun(form.getRun());
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
@@ -2944,6 +2888,15 @@ public class MS2Controller extends ViewController
         return compareRuns(form.getRunList(), true);
     }
 
+    @Jpf.Action
+    protected Forward compareService() throws Exception
+    {
+        requiresPermission(ACL.PERM_READ);
+        List<String> errors = new ArrayList<String>();
+        CompareServiceImpl service = new CompareServiceImpl(getViewContext(), this);
+        service.doPost(getRequest(), getResponse());
+        return null;
+    }
 
     private Forward compareRuns(int runListIndex, boolean exportToExcel) throws Exception
     {
@@ -2970,8 +2923,13 @@ public class MS2Controller extends ViewController
         if ("query".equalsIgnoreCase(column))
         {
             CompareProteinsView view = createCompareQueryView(runs, runListIndex);
-            HtmlView helpView = new HtmlView("<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein-specific columns, or expand <em>Run</em> to see the run-specific columns, like quantitation, amino acid coverage, and so forth. To set a filter on something like the group's probability, select the Filter tab, add the <em>Run->Prob</em> column, and filter it based on the desired threshold.</p></div>");
-            VBox vbox = new VBox(helpView, view);
+            HtmlView helpView = new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein-specific columns, or expand <em>Run</em> to see the run-specific columns, like quantitation, amino acid coverage, and so forth. To set a filter on something like the group's probability, select the Filter tab, add the <em>Run->Prob</em> column, and filter it based on the desired threshold.</p></div>");
+
+            Map<String, String> props = new HashMap<String, String>();
+            props.put("originalURL", getViewURLHelper().toString());
+            GWTView gwtView = new GWTView("org.labkey.ms2.RunComparator", props);
+            VBox vbox = new VBox(gwtView, helpView, view);
+
             return _renderInTemplate(vbox, false, "Compare Runs", null);
         }
 
@@ -3176,7 +3134,7 @@ public class MS2Controller extends ViewController
 
     private static final String NO_RUNS_MESSAGE = "Run list is empty; session may have timed out.  Please reselect the runs.";
 
-    private List<MS2Run> getCachedRuns(int index, List<String> errors) throws ServletException
+    protected List<MS2Run> getCachedRuns(int index, List<String> errors) throws ServletException
     {
         List<Integer> runIds = _runListCache.get(index);
 

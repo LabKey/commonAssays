@@ -21,6 +21,7 @@ public class CompareProteinsView extends QueryView
     private final List<MS2Run> _runs;
     private final int _runListIndex;
     private SimpleFilter _runFilter = new SimpleFilter();
+    private List<FieldKey> _columns;
 
     public CompareProteinsView(ViewContext context, UserSchema schema, QuerySettings settings, List<MS2Run> runs, int runListIndex)
     {
@@ -76,6 +77,10 @@ public class CompareProteinsView extends QueryView
         getViewContext().setViewURLHelper(url);*/
     }
 
+    public void setViewContext(ViewContext context)
+    {
+        _viewContext = context;
+    }
 
     protected void populateButtonBar(DataView view, ButtonBar bar)
     {
@@ -97,6 +102,7 @@ public class CompareProteinsView extends QueryView
     protected DataView createDataView()
     {
         DataView result = super.createDataView();
+        result.getRenderContext().setViewContext(getViewContext());
         SimpleFilter filter = new SimpleFilter(result.getRenderContext().getBaseFilter());
 
         for (SimpleFilter.FilterClause clause : new ArrayList<SimpleFilter.FilterClause>(filter.getClauses()))
@@ -177,6 +183,11 @@ public class CompareProteinsView extends QueryView
         return new CompareProteinProphetTableInfo(null, (MS2Schema)getSchema(), _runs);
     }
 
+    public void setColumns(List<FieldKey> columns)
+    {
+        _columns = columns;
+    }
+
     public List<DisplayColumn> getDisplayColumns()
     {
         List<DisplayColumn> ret = new ArrayList();
@@ -188,7 +199,11 @@ public class CompareProteinsView extends QueryView
         CustomView view = getCustomView();
         List<FieldKey> cols;
 
-        if (view != null)
+        if (_columns != null)
+        {
+            cols = _columns;
+        }
+        else if (view != null)
         {
             cols = view.getColumns();
         }
