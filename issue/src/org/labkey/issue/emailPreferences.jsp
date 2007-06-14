@@ -11,7 +11,7 @@
 
 <%=_message == null ? "" : "<b>" + _message + "</b><p/>"%>
 
-<form action="updateEmailPrefs.post" method="post">
+<form action="emailPrefs.post" method="post">
     <input type="checkbox" value="1" name="emailPreference" <%=(emailPrefs & IssueManager.NOTIFY_ASSIGNEDTO_OPEN) != 0 ? " checked" : ""%>>
     Send me email when an issue is opened and assigned to me<br>
     <input type="checkbox" value="2" name="emailPreference" <%=(emailPrefs & IssueManager.NOTIFY_ASSIGNEDTO_UPDATE) != 0 ? " checked" : ""%>>

@@ -17,7 +17,7 @@
     
     if (!isPrint())
     {
-        ViewURLHelper printLink = context.cloneViewURLHelper().replaceParameter("print", "1");
+        ViewURLHelper printLink = context.cloneViewURLHelper().replaceParameter("_print", "1");
         
         for (ListIterator<Issue> iterator = issueList.listIterator(); iterator.hasNext(); )
         {

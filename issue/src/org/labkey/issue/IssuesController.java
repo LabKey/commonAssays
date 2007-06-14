@@ -1,63 +1,51 @@
-/*
- * Copyright (c) 2003-2005 Fred Hutchinson Cancer Research Center
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.labkey.issue;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.beehive.netui.pageflow.FormData;
-import org.apache.beehive.netui.pageflow.Forward;
-import org.apache.beehive.netui.pageflow.annotations.Jpf;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.commons.lang.StringUtils;
+import org.labkey.api.view.*;
 import org.labkey.api.data.*;
-import org.labkey.api.issues.IssuesSchema;
+import org.labkey.api.security.*;
+import org.labkey.api.query.*;
 import org.labkey.api.jsp.JspLoader;
+import org.labkey.api.issues.IssuesSchema;
+import org.labkey.api.util.*;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.query.*;
-import org.labkey.api.security.*;
-import org.labkey.api.util.*;
-import org.labkey.api.util.MailHelper.ViewMessage;
-import org.labkey.api.util.Search.SearchResultsView;
-import org.labkey.api.view.*;
 import org.labkey.api.wiki.WikiRenderer;
-import org.labkey.api.wiki.WikiRendererType;
 import org.labkey.api.wiki.WikiService;
+import org.labkey.api.wiki.WikiRendererType;
+import org.labkey.api.action.SpringActionController;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.BaseViewAction;
+import org.labkey.api.action.FormViewAction;
 import org.labkey.issue.model.Issue;
 import org.labkey.issue.model.IssueManager;
-import org.labkey.issue.model.IssueManager.CustomColumnConfiguration;
-import org.labkey.issue.model.IssueManager.Keyword;
 import org.labkey.issue.query.IssuesQuerySchema;
 import org.labkey.issue.query.IssuesQueryView;
 import org.labkey.issue.query.IssuesTable;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.ResultSet;
+import java.io.IOException;
 import java.util.*;
+import java.net.URISyntaxException;
 
-@Jpf.Controller
-public class IssuesController extends ViewController
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+public class IssuesController extends SpringActionController
 {
     private static Logger _log = Logger.getLogger(IssuesController.class);
+
+    private static String helpTopic = "issues";
 
     // keywords enum
     public static final int ISSUE_NONE = 0;
@@ -75,42 +63,58 @@ public class IssuesController extends ViewController
     }
 
 
-    private Issue getIssue(Container c, int issueId) throws SQLException
+    public PageConfig defaultPageConfig()
     {
-        return IssueManager.getIssue(openSession(), c, issueId);
+        PageConfig config = super.defaultPageConfig();
+        config.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.SERVER));
+        return config;
     }
 
 
-    int getIssueId() throws ServletException, IOException
+    User getUser()
     {
-        try
-        {
-            String param = getRequest().getParameter("issueId");
-            if (null == param)
-                param = getRequest().getParameter("pk");
-            return Integer.parseInt(param);
-        }
-        catch (Exception x)
-        {
-            HttpView.throwNotFound();
-        }
-        return 0;
+        return getViewContext().getUser();
+    }
+
+
+    Container getContainer()
+    {
+        return getViewContext().getContainer();
+    }
+
+
+    private Issue getIssue(int issueId) throws SQLException
+    {
+        return IssueManager.getIssue(openSession(), getContainer(), issueId);
+    }
+
+
+    private ViewURLHelper issueURL(String action)
+    {
+        return new ViewURLHelper("Issues", action, getContainer());
     }
 
 
     /**
      * This method represents the point of entry into the pageflow
      */
-    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
-    public Forward begin() throws Exception
+    @RequiresPermission(ACL.PERM_READ)
+    public class BeginAction extends BaseViewAction
     {
-        ViewURLHelper url = new ViewURLHelper("Issues", "list", getContainer());
-        url.addParameter("Issues.Status~neq","closed");
-        return new ViewForward(url);
+        public ModelAndView handleRequest() throws Exception
+        {
+            ViewURLHelper url = issueURL("list").addParameter("Issues.Status~neq","closed");
+            return HttpView.redirect(url);
+        }
+
+        NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Issues", getListUrl(getContainer()));
+        }
     }
 
 
-    private CustomColumnConfiguration getCustomColumnConfiguration() throws SQLException, ServletException
+    private IssueManager.CustomColumnConfiguration getCustomColumnConfiguration() throws SQLException, ServletException
     {
         return IssueManager.getCustomColumnConfiguration(getContainer());
     }
@@ -122,32 +126,75 @@ public class IssuesController extends ViewController
     }
 
 
-    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
-    public Forward setCustomColumnConfiguration() throws Exception
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class SetCustomColumnConfigurationAction extends FormViewAction
     {
-        CustomColumnConfiguration ccc = new CustomColumnConfiguration(getViewContext());
-        IssueManager.saveCustomColumnConfiguration(getContainer(), ccc);
+        public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
+        {
+            return null;
+        }
 
-        return adminForward();
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+
+        public boolean handlePost(Object o, BindException errors) throws Exception
+        {
+            IssueManager.CustomColumnConfiguration ccc = new IssueManager.CustomColumnConfiguration(getViewContext());
+            IssueManager.saveCustomColumnConfiguration(getContainer(), ccc);
+            return true;
+        }
+
+        public void validate(Object o, BindException errors)
+        {
+        }
+
+        public ViewURLHelper getSuccessURL(Object o)
+        {
+            return (new AdminAction()).getUrl();
+        }
     }
 
 
-    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
-    public Forward updateRequiredFields(IssuePreferenceForm form) throws Exception
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class UpdateRequiredFieldsAction extends FormViewAction<IssuePreferenceForm>
     {
-        final StringBuffer sb = new StringBuffer();
-        if (form.getRequiredFields().length > 0)
+        public ModelAndView getView(IssuePreferenceForm issuePreferenceForm, boolean reshow, BindException errors) throws Exception
         {
-            String sep = "";
-            for (String field : form.getRequiredFields())
-            {
-                sb.append(sep);
-                sb.append(field);
-                sep = ";";
-            }
+            return null;
         }
-        IssueManager.setRequiredIssueFields(getContainer(), sb.toString());
-        return adminForward();
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+        
+        public boolean handlePost(IssuePreferenceForm form, BindException errors) throws Exception
+        {
+            final StringBuffer sb = new StringBuffer();
+            if (form.getRequiredFields().length > 0)
+            {
+                String sep = "";
+                for (String field : form.getRequiredFields())
+                {
+                    sb.append(sep);
+                    sb.append(field);
+                    sep = ";";
+                }
+            }
+            IssueManager.setRequiredIssueFields(getContainer(), sb.toString());
+            return true;
+        }
+
+        public void validate(IssuePreferenceForm issuePreferenceForm, BindException errors)
+        {
+        }
+
+        public ViewURLHelper getSuccessURL(IssuePreferenceForm issuePreferenceForm)
+        {
+            return (new AdminAction()).getUrl();
+        }
     }
 
 
@@ -160,17 +207,17 @@ public class IssuesController extends ViewController
 
 
     private static final String ISSUES_QUERY = "Issues";
-    private HttpView getIssuesView(ListForm form) throws SQLException, ServletException
+    private HttpView getIssuesView(IssuesController.ListForm form, boolean print) throws SQLException, ServletException
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), IssuesQuerySchema.SCHEMA_NAME);
-        QuerySettings settings = new QuerySettings(getViewURLHelper(), getRequest(), ISSUES_QUERY);
+        QuerySettings settings = new QuerySettings(getViewContext().getViewURLHelper(), getViewContext().getRequest(), ISSUES_QUERY);
         settings.setQueryName(ISSUES_QUERY);
         form.setQuerySettings(settings);
         IssuesQueryView queryView = new IssuesQueryView(getViewContext(), schema, settings);
 
         // add the header for buttons and views
         QueryDefinition qd = schema.getQueryDefForTable(ISSUES_QUERY);
-        Map<String, CustomView> views = qd.getCustomViews(getUser(), getRequest());
+        Map<String, CustomView> views = qd.getCustomViews(getUser(), getViewContext().getRequest());
         // don't include a customized default view in the list
         if (views.containsKey(null))
             views.remove(null);
@@ -179,19 +226,20 @@ public class IssuesController extends ViewController
         form.setViews(views);
         VBox box = new VBox();
 
-        if (form.getPrint())
+        if (print)
             queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.NONE);
         else
-            box.addView(new JspView<ListForm>("/org/labkey/issue/list.jsp", form));
+            box.addView(new JspView<IssuesController.ListForm>("/org/labkey/issue/list.jsp", form));
 
         box.addView(queryView);
         return box;
     }
-    
+
+
     private ResultSet getIssuesResultSet() throws IOException, SQLException, ServletException
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), IssuesQuerySchema.SCHEMA_NAME);
-        QuerySettings settings = new QuerySettings(getViewURLHelper(),getRequest(), ISSUES_QUERY);
+        QuerySettings settings = new QuerySettings(getViewContext().getViewURLHelper(), getViewContext().getRequest(), ISSUES_QUERY);
         settings.setQueryName(ISSUES_QUERY);
 
         IssuesQueryView queryView = new IssuesQueryView(getViewContext(), schema, settings);
@@ -199,177 +247,265 @@ public class IssuesController extends ViewController
         return queryView.getResultSet();
     }
 
-    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
-    public Forward list(ListForm form) throws Exception
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ListAction extends SimpleIssueAction<IssuesController.ListForm>
     {
-        // convert AssignedTo/Email to AssignedTo/DisplayName: old bookmarks
-        // reference Email, which is no longer displayed.
-        ViewURLHelper url = cloneViewURLHelper();
-        String[] emailFilters = url.getKeysByPrefix(ISSUES_QUERY + ".AssignedTo/Email");
-        if (emailFilters != null && emailFilters.length > 0)
+        public ModelAndView getView(IssuesController.ListForm form, BindException errors) throws Exception
         {
-            for (String emailFilter : emailFilters)
-                url.deleteParameter(emailFilter);
-            return new ViewForward(url);
+            // convert AssignedTo/Email to AssignedTo/DisplayName: old bookmarks
+            // reference Email, which is no longer displayed.
+            ViewURLHelper url = getViewContext().cloneViewURLHelper();
+            String[] emailFilters = url.getKeysByPrefix(ISSUES_QUERY + ".AssignedTo/Email");
+            if (emailFilters != null && emailFilters.length > 0)
+            {
+                for (String emailFilter : emailFilters)
+                    url.deleteParameter(emailFilter);
+                return HttpView.redirect(url);
+            }
+
+            HttpView view = getIssuesView(form, getPrint());
+            return view;
         }
 
-        HttpView view = getIssuesView(form);
-        if (view != null)
+        public NavTree appendNavTrail(NavTree root)
         {
-            // Use export=1, print=1 parameters on list() action so .lastFilter=true works in export & print cases
-            if (form.getPrint())
+            return root.addChild("Issues List", getURL());
+        }
+
+        public ViewURLHelper getURL()
+        {
+            return issueURL("list").addParameter(".lastFilter","true");
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ExportTsvAction extends SimpleIssueAction<QueryForm>
+    {
+        public ModelAndView getView(QueryForm form, BindException errors) throws Exception
+        {
+            getPageConfig().setUseTemplate(false);
+            QueryView view = QueryView.create(form);
+            final TSVGridWriter writer = view.getTsvWriter();
+            return new HttpView()
             {
-                includeView(new PrintTemplate(view, "Issues List"));
+                protected void renderInternal(Object model, HttpServletRequest request, HttpServletResponse response) throws Exception
+                {
+                    writer.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
+                    writer.write(getViewContext().getResponse());
+                }
+            };
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class DetailsAction extends SimpleIssueAction<IssueIdForm>
+    {
+        Issue _issue = null;
+
+        public DetailsAction()
+        {
+        }
+
+        public DetailsAction(Issue issue)
+        {
+            _issue = issue;
+        }
+
+        public ModelAndView getView(IssueIdForm form, BindException errors) throws Exception
+        {
+            int issueId = form.getIssueId();
+            _issue = getIssue(issueId);
+
+            if (null == _issue)
+            {
+                HttpView.throwNotFound("Unable to find issue " + form.getIssueId());
+                return null;
+            }
+
+            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext().getRequest(), IssuesController.class, "detailView.jsp");
+            JspView v = new JspView(page);
+
+            page.setIssue(_issue);
+            page.setCustomColumnConfiguration(getCustomColumnConfiguration());
+            //pass user's update perms to jsp page to determine whether to show notify list
+            page.setUserHasUpdatePermissions(hasUpdatePermission(getUser(), _issue));
+            page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
+            page.setPrint(getPrint());
+
+            getPageConfig().setTitle("" + _issue.getIssueId() + " : " + _issue.getTitle());
+            return v;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return new ListAction().appendNavTrail(root)
+                    .addChild("Detail -- " + _issue.getIssueId(), getURL());
+        }
+
+        public ViewURLHelper getURL()
+        {
+            return issueURL("details").addParameter("issueId", _issue.getIssueId());
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class DetailsListAction extends SimpleIssueAction<ListForm>
+    {
+        public ModelAndView getView(IssuesController.ListForm listForm, BindException errors) throws Exception
+        {
+            // convert AssignedTo/Email to AssignedTo/DisplayName: old bookmarks
+            // reference Email, which is no longer displayed.
+            ViewURLHelper url = getViewContext().cloneViewURLHelper();
+            String[] emailFilters = url.getKeysByPrefix(ISSUES_QUERY + ".AssignedTo/Email");
+            if (emailFilters != null && emailFilters.length > 0)
+            {
+                for (String emailFilter : emailFilters)
+                    url.deleteParameter(emailFilter);
+                return HttpView.redirect(url);
+            }
+
+            List<String> issueIds = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
+            ArrayList<Issue> issueList = new ArrayList<Issue>();
+
+            if (issueIds != null)
+            {
+                for (ListIterator<String> iterator = issueIds.listIterator(); iterator.hasNext(); )
+                {
+                    issueList.add(getIssue(Integer.parseInt(iterator.next())));
+                }
             }
             else
             {
-                _includeFastView(view, "Issues List");
+                ResultSet rs = getIssuesResultSet();
+                int issueColumnIndex = rs.findColumn("issueId");
+
+                while (rs.next())
+                {
+                    issueList.add(getIssue(rs.getInt(issueColumnIndex)));
+                }
             }
+
+            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext().getRequest(), IssuesController.class, "detailList.jsp");
+            JspView v = new JspView(page);
+
+            page.setIssueList(issueList);
+            page.setCustomColumnConfiguration(getCustomColumnConfiguration());
+            page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
+
+            page.setPrint(getPrint());
+            return v;
         }
-        return null;
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return new ListAction().appendNavTrail(root).addChild("Issue Details");
+        }
     }
 
-    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
-    protected Forward exportTsv(QueryForm form) throws Exception
+
+    @RequiresPermission(ACL.PERM_INSERT)
+    public class InsertAction extends FormViewAction<IssuesForm>
     {
-        QueryView view = QueryView.create(form);
+        Issue _issue = null;
 
-        final TSVGridWriter writer = view.getTsvWriter();
-        writer.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
-        writer.write(getResponse());
-
-        return null;
-    }
-
-    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
-    public Forward details(DetailsForm form) throws Exception
-    {
-        Integer issueId = null;
-        Issue issue = null;
-
-        try
+        public ModelAndView getView(IssuesForm form, boolean reshow, BindException errors) throws Exception
         {
-            issueId = Integer.parseInt(form.getIssueId());
-        }
-        catch(NumberFormatException e)
-        {
-            // Fall through
-        }
+            _issue = reshow ? form.getBean() : new Issue();
 
-        if (issueId == null || (issue = getIssue(getContainer(), issueId)) == null)
-            HttpView.throwNotFound("Unable to find issue " + form.getIssueId());
-
-        IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "detailView.jsp");
-        JspView v = new JspView(page);
-
-        page.setIssue(issue);
-        page.setCustomColumnConfiguration(getCustomColumnConfiguration());
-        //pass user's update perms to jsp page to determine whether to show notify list
-        page.setUserHasUpdatePermissions(hasUpdatePermission(getUser(), issue));
-        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
-
-        String title = "" + issue.getIssueId() + " : " + issue.getTitle();
-
-        if (form.isPrint())
-        {
-            page.setPrint(true);
-            return includeView(new PrintTemplate(v, title));
-        }
-        else
-            return _renderInTemplate(v, title, null);
-    }
-    
-    
-    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
-    public Forward detailsList(ListForm form) throws Exception
-    {
-        // convert AssignedTo/Email to AssignedTo/DisplayName: old bookmarks
-        // reference Email, which is no longer displayed.
-        ViewURLHelper url = cloneViewURLHelper();
-        String[] emailFilters = url.getKeysByPrefix(ISSUES_QUERY + ".AssignedTo/Email");
-        if (emailFilters != null && emailFilters.length > 0)
-        {
-            for (String emailFilter : emailFilters)
-                url.deleteParameter(emailFilter);
-            return new ViewForward(url);
-        }
-        
-        List<String> issueIds = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
-        Vector<Issue> issueList = new Vector();
-        
-        if (issueIds != null)
-        {
-            for (ListIterator<String> iterator = issueIds.listIterator(); iterator.hasNext(); )
+            if (_issue.getAssignedTo() != null)
             {
-                issueList.add(getIssue(getContainer(), Integer.parseInt(iterator.next())));
+                User user = UserManager.getUser(_issue.getAssignedTo());
+                if (user != null)
+                {
+                    _issue.setAssignedTo(user.getUserId());
+                }
             }
+
+            _issue.Open(getContainer(), getUser());
+            setNewIssueDefaults(_issue);
+
+            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext().getRequest(), IssuesController.class, "updateView.jsp");
+            JspView updateView = new JspView(page);
+
+            IssueManager.CustomColumnConfiguration ccc = getCustomColumnConfiguration();
+
+            page.setAction("insert");
+            page.setIssue(_issue);
+            page.setCustomColumnConfiguration(ccc);
+            page.setBody(form.getComment());
+            page.setCallbackURL(form.getCallbackURL());
+            page.setEditable(getEditableFields(page.getAction(), ccc));
+            page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
+            page.setErrors(errors);
+
+            return updateView;
         }
-        else
-        {   
-            ResultSet rs = getIssuesResultSet();
-            int issueColumnIndex = rs.findColumn("issueId");
-        
-            while (rs.next())
-            {
-                issueList.add(getIssue(getContainer(), rs.getInt(issueColumnIndex)));
-            }
-        }
 
-        IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "detailList.jsp");
-        JspView v = new JspView(page);
-
-        page.setIssueList(issueList);
-        page.setCustomColumnConfiguration(getCustomColumnConfiguration());
-        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
-
-        String title = "Issue Details";
-
-        if (form.getPrint())
+        public void validate(IssuesForm form, BindException errors) throws Exception
         {
-            page.setPrint(true);
-            return includeView(new PrintTemplate(v, title));
+            validateRequiredFields(form, errors);
+            validateNotifyList(form.getBean(), form, errors);
         }
-        else
-            return _renderInTemplate(v, title, null);
+
+        public boolean handlePost(IssuesForm form, BindException errors) throws Exception
+        {
+            Container c = getContainer();
+            User user = getUser();
+
+            _issue = form.getBean();
+            _issue.Open(c, user);
+            validateNotifyList(_issue, form, errors);
+
+            try
+            {
+                addComment(_issue, (Issue)form.getOldValues(), user, form.getAction(), form.getComment(), getColumnCaptions());
+                IssueManager.saveIssue(openSession(), user, c, _issue);
+            }
+            catch (Exception x)
+            {
+                Throwable ex = x.getCause() == null ? x : x.getCause();
+                String error = ex.getMessage();
+                _log.debug("IssuesContoller.doInsert", x);
+                _issue.Open(c, user);
+
+                errors.addError(new ObjectError("form", null, null, error));
+                return false;
+            }
+
+            ViewURLHelper url = new DetailsAction(_issue).getURL();
+
+            final String assignedTo = UserManager.getDisplayName(_issue.getAssignedTo());
+            if (assignedTo != null)
+                sendUpdateEmail(_issue, url, "opened and assigned to " + assignedTo, form.getAction());
+            else
+                sendUpdateEmail(_issue, url, "opened", form.getAction());
+
+            return true;
+        }
+
+
+        public ViewURLHelper getSuccessURL(IssuesForm issuesForm)
+        {
+            ViewURLHelper forwardURL = new DetailsAction(_issue).getURL();
+            return forwardURL;
+        }
+
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return new ListAction().appendNavTrail(root).addChild("Insert New Issue");
+        }
     }
 
-
-    @Jpf.Action @RequiresPermission(ACL.PERM_INSERT)
-    public Forward insert(InsertForm form) throws Exception
-    {
-        Issue issue = new Issue();
-
-        if (form.getAssignedto() != null)
-        {
-            User user = UserManager.getUser(form.getAssignedto());
-            if (user != null)
-            {
-                issue.setAssignedTo(user.getUserId());
-            }
-        }
-
-        if (form.getTitle() != null && !form.getTitle().equals(""))
-        {
-            issue.setTitle(form.getTitle());
-        }
-        issue.Open(getContainer(), getUser());
-        setNewIssueDefaults(issue);
-
-        IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "updateView.jsp");
-        JspView v = new JspView(page);
-
-        CustomColumnConfiguration ccc = getCustomColumnConfiguration();
-
-        page.setAction("insert");
-        page.setIssue(issue);
-        page.setCustomColumnConfiguration(ccc);
-        page.setBody(form.getBody());
-        page.setCallbackURL(form.getCallbackURL());
-        page.setEditable(getEditableFields(page.getAction(), ccc));
-        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
-
-        return _renderInTemplate(v, "Insert new issue", null);
-    }
 
     private void setNewIssueDefaults(Issue issue) throws SQLException, ServletException
     {
@@ -385,30 +521,107 @@ public class IssuesController extends ViewController
         issue.setPriority(null != priority ? Integer.parseInt(defaults.get(ISSUE_PRIORITY)) : 3);
     }
 
-    @Jpf.Action @RequiresPermission(ACL.PERM_UPDATEOWN)
-    public Forward update() throws Exception
+
+    protected abstract class IssueUpdateAction extends FormViewAction<IssuesForm>
     {
-        int issueId = getIssueId();
-        Issue issue = getIssue(getContainer(), issueId);
+        Issue _issue = null;
 
-        User user = getUser();
-        requiresUpdatePermission(user, issue);
+        public boolean handlePost(IssuesForm form, BindException errors) throws Exception
+        {
+            Container c = getContainer();
+            User user = getUser();
 
-        IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "updateView.jsp");
-        JspView v = new JspView(page);
+            Issue issue = form.getBean();
+            requiresUpdatePermission(user, issue);
+            ViewURLHelper detailsUrl;
 
-        CustomColumnConfiguration ccc = getCustomColumnConfiguration();
+            try
+            {
+                detailsUrl = form.getForwardURL();
 
-        page.setAction("update");
-        page.setIssue(issue);
-        page.setCustomColumnConfiguration(ccc);
-        page.setEditable(getEditableFields(page.getAction(), ccc));
-        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
+                if ("resolve".equals(form.getAction()))
+                    issue.Resolve(user);
+                else if ("open".equals(form.getAction()) || "reopen".equals(form.getAction()))
+                    issue.Open(c, user, true);
+                else if ("close".equals(form.getAction()))
+                    issue.Close(user);
+                else
+                    issue.Change(user);
 
-        return _renderInTemplate(v, "(update) " + issue.getTitle(), null);
+                addComment(issue, (Issue)form.getOldValues(), user, form.getAction(), form.getComment(), getColumnCaptions());
+                IssueManager.saveIssue(openSession(), user, c, issue);
+            }
+            catch (Exception x)
+            {
+                errors.addError(new ObjectError("main", new String[] {"Error"}, new Object[] {x}, x.getMessage()));
+                return false;
+            }
+
+            // Send update email...
+            //    ...if someone other than "created by" is closing a bug
+            //    ...if someone other than "assigned to" is updating, reopening, or resolving a bug
+            if ("close".equals(form.getAction()))
+            {
+                sendUpdateEmail(issue, detailsUrl, "closed", form.getAction());
+            }
+            else
+            {
+                String change = ("open".equals(form.getAction()) ? "reopened" : form.getAction() + "d");
+                sendUpdateEmail(issue, detailsUrl, change, form.getAction());
+            }
+            return true;
+        }
+
+        public void validate(IssuesForm form, BindException errors) throws Exception
+        {
+            validateRequiredFields(form, errors);
+            validateNotifyList(form.getBean(), form, errors);
+        }
+
+        public ViewURLHelper getSuccessURL(IssuesForm form)
+        {
+            return form.getForwardURL();
+        }
     }
 
-    private Set<String> getEditableFields(String action, CustomColumnConfiguration ccc)
+
+    @RequiresPermission(ACL.PERM_UPDATEOWN)
+    public class UpdateAction extends IssueUpdateAction
+    {
+        public ModelAndView getView(IssuesForm form, boolean reshow, BindException errors) throws Exception
+        {
+            int issueId = form.getBean().getIssueId();
+            _issue = getIssue(issueId);
+            if (_issue == null)
+                HttpView.throwNotFound();
+
+            User user = getUser();
+            requiresUpdatePermission(user, _issue);
+
+            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext(), IssuesController.class, "updateView.jsp");
+            JspView v = new JspView(page);
+
+            IssueManager.CustomColumnConfiguration ccc = getCustomColumnConfiguration();
+
+            page.setAction("update");
+            page.setIssue(_issue);
+            page.setCustomColumnConfiguration(ccc);
+            page.setEditable(getEditableFields(page.getAction(), ccc));
+            page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
+            page.setErrors(errors);
+
+            return v;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return new DetailsAction(_issue).appendNavTrail(root)
+                    .addChild("(update) " + _issue.getTitle());
+        }
+    }
+
+
+    private Set<String> getEditableFields(String action, IssueManager.CustomColumnConfiguration ccc)
     {
         final Set<String> editable = new HashSet<String>(20);
 
@@ -435,262 +648,137 @@ public class IssuesController extends ViewController
         return editable;
     }
 
-    @Jpf.Action @RequiresPermission(ACL.PERM_UPDATEOWN)
-    public Forward resolve() throws Exception
+
+    @RequiresPermission(ACL.PERM_UPDATEOWN)
+    public class ResolveAction extends IssueUpdateAction
     {
-        int issueId = getIssueId();
-        Issue issue = getIssue(getContainer(), issueId);
-
-        User user = getUser();
-        requiresUpdatePermission(user, issue);
-
-        issue.beforeResolve(user);
-
-        if (null == issue.getResolution())
+        public ModelAndView getView(IssuesForm form, boolean reshow, BindException errors) throws Exception
         {
-            Map<Integer, String> defaults = IssueManager.getAllDefaults(getContainer());
+            int issueId = form.getBean().getIssueId();
+            _issue = getIssue(issueId);
+            if (null == _issue)
+                HttpView.throwNotFound();
 
-            String resolution = defaults.get(ISSUE_RESOLUTION);
+            User user = getUser();
+            requiresUpdatePermission(user, _issue);
 
-            if (null != resolution)
-                issue.setResolution(resolution);
+            _issue.beforeResolve(user);
+
+            if (null == _issue.getResolution())
+            {
+                Map<Integer, String> defaults = IssueManager.getAllDefaults(getContainer());
+
+                String resolution = defaults.get(ISSUE_RESOLUTION);
+
+                if (null != resolution)
+                    _issue.setResolution(resolution);
+            }
+
+            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext(), IssuesController.class, "updateView.jsp");
+            JspView v = new JspView(page);
+
+            IssueManager.CustomColumnConfiguration ccc = getCustomColumnConfiguration();
+
+            page.setAction("resolve");
+            page.setIssue(_issue);
+            page.setCustomColumnConfiguration(ccc);
+            page.setEditable(getEditableFields(page.getAction(), ccc));
+            page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
+            page.setErrors(errors);
+
+            return v;
         }
 
-        IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "updateView.jsp");
-        JspView v = new JspView(page);
-
-        CustomColumnConfiguration ccc = getCustomColumnConfiguration();
-
-        page.setAction("resolve");
-        page.setIssue(issue);
-        page.setCustomColumnConfiguration(ccc);
-        page.setEditable(getEditableFields(page.getAction(), ccc));
-        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
-
-        return _renderInTemplate(v, "(resolve) " + issue.getTitle(), null);
-    }
-
-
-    @Jpf.Action @RequiresPermission(ACL.PERM_UPDATEOWN)
-    public Forward close() throws Exception
-    {
-        int issueId = getIssueId();
-        Issue issue = getIssue(getContainer(), issueId);
-
-        User user = getUser();
-        requiresUpdatePermission(user, issue);
-
-        issue.Close(user);
-
-        IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "updateView.jsp");
-        JspView v = new JspView(page);
-
-        CustomColumnConfiguration ccc = getCustomColumnConfiguration();
-
-        page.setAction("close");
-        page.setIssue(issue);
-        page.setCustomColumnConfiguration(ccc);
-        page.setEditable(getEditableFields(page.getAction(), ccc));
-        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
-
-        return _renderInTemplate(v, "(close) " + issue.getTitle(), null);
-    }
-
-
-    @Jpf.Action @RequiresPermission(ACL.PERM_UPDATEOWN)
-    public Forward reopen() throws Exception
-    {
-        int issueId = getIssueId();
-        Issue issue = getIssue(getContainer(), issueId);
-
-        User user = getUser();
-        requiresUpdatePermission(user, issue);
-
-        issue.Open(getContainer(), user);
-
-        IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "updateView.jsp");
-        JspView v = new JspView(page);
-
-        CustomColumnConfiguration ccc = getCustomColumnConfiguration();
-
-        page.setAction("open");
-        page.setIssue(issue);
-        page.setCustomColumnConfiguration(ccc);
-        page.setEditable(getEditableFields(page.getAction(), ccc));
-        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
-
-        return _renderInTemplate(v, "(open) " + issue.getTitle(), null);
-    }
-
-
-    @Jpf.Action @RequiresPermission(ACL.PERM_INSERT)
-    protected Forward doInsert(IssuesForm form) throws Exception
-    {
-        Container c = getContainer();
-        User user = getUser();
-
-        Issue issue = form.getBean();
-        issue.Open(c, user);
-        validateNotifyList(issue, form);
-
-        if (issue.getTitle() == null)
-            return _renderInTemplate(getInsertErrorView(issue, form.getComment(), "Error: Issue title cannot be null"), "Insert new issue", null);
-
-        try
+        public NavTree appendNavTrail(NavTree root)
         {
-            addComment(issue, (Issue)form.getOldValues(), user, form.getAction(), form.getComment(), getColumnCaptions());
-            IssueManager.saveIssue(openSession(), user, c, issue);
+            return (new DetailsAction(_issue).appendNavTrail(root)).addChild("Resolve Issue");
         }
-        catch (Exception x)
-        {
-            Throwable ex = x.getCause() == null ? x : x.getCause();
-            String error = ex.getMessage();
-            _log.debug("IssuesContoller.doInsert", x);
-            issue.Open(c, user);
+    }
 
-            return _renderInTemplate(getInsertErrorView(issue, form.getComment(), error), "Insert new issue", null);
+
+    @RequiresPermission(ACL.PERM_UPDATEOWN)
+    public class CloseAction extends IssueUpdateAction
+    {
+        public ModelAndView getView(IssuesForm form, boolean reshow, BindException errors) throws Exception
+        {
+            int issueId = form.getBean().getIssueId();
+            _issue = getIssue(issueId);
+            if (null == _issue)
+                HttpView.throwNotFound();
+
+            User user = getUser();
+            requiresUpdatePermission(user, _issue);
+
+            _issue.Close(user);
+
+            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext(), IssuesController.class, "updateView.jsp");
+            JspView v = new JspView(page);
+
+            IssueManager.CustomColumnConfiguration ccc = getCustomColumnConfiguration();
+
+            page.setAction("close");
+            page.setIssue(_issue);
+            page.setCustomColumnConfiguration(ccc);
+            page.setEditable(getEditableFields(page.getAction(), ccc));
+            page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
+            page.setErrors(errors);
+
+            return v;
         }
 
-        ViewURLHelper url = getDetailsForwardURL(issue);
-
-        final String assignedTo = UserManager.getDisplayName(issue.getAssignedTo());
-        if (assignedTo != null)
-            sendUpdateEmail(issue, url, "opened and assigned to " + assignedTo, form.getAction());
-        else
-            sendUpdateEmail(issue, url, "opened", form.getAction());
-
-        ViewURLHelper forwardURL = getForwardURL(issue);
-        return new ViewForward(forwardURL);
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return (new DetailsAction(_issue).appendNavTrail(root)).addChild("Close Issue");
+        }
     }
 
-    private JspView getInsertErrorView(Issue issue, String comment, String error) throws ServletException, SQLException
+
+    @RequiresPermission(ACL.PERM_UPDATEOWN)
+    public class ReopenAction extends IssueUpdateAction
     {
-        IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "updateView.jsp");
-        JspView v = new JspView(page);
+        public ModelAndView getView(IssuesForm form, boolean reshow, BindException errors) throws Exception
+        {
+            int issueId = form.getBean().getIssueId();
+            _issue = getIssue(issueId);
 
-        CustomColumnConfiguration ccc = getCustomColumnConfiguration();
+            User user = getUser();
+            requiresUpdatePermission(user, _issue);
 
-        page.setAction("insert");
-        page.setIssue(issue);
-        page.setError(error);
-        page.setBody(comment);
-        page.setCustomColumnConfiguration(ccc);
-        page.setEditable(getEditableFields(page.getAction(), ccc));
-        page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
+            _issue.Open(getContainer(), user);
 
-        return v;
+            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext(), IssuesController.class, "updateView.jsp");
+            JspView v = new JspView(page);
+
+            IssueManager.CustomColumnConfiguration ccc = getCustomColumnConfiguration();
+
+            page.setAction("reopen");
+            page.setIssue(_issue);
+            page.setCustomColumnConfiguration(ccc);
+            page.setEditable(getEditableFields(page.getAction(), ccc));
+            page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
+            page.setErrors(errors);
+
+            return v;
+            //return _renderInTemplate(v, "(open) " + issue.getTitle(), null);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return (new DetailsAction(_issue).appendNavTrail(root)).addChild("Reopen Issue");
+        }
     }
 
-    private ViewURLHelper getDetailsForwardURL(Issue issue)
+
+    private static ViewURLHelper getDetailsForwardURL(ViewContext context, Issue issue)
     {
-        ViewURLHelper url = cloneViewURLHelper();
+        ViewURLHelper url = context.cloneViewURLHelper();
         url.setAction("details");
         url.addParameter("issueId", "" + issue.getIssueId());
         return url;
     }
 
-    private ViewURLHelper getForwardURL(Issue issue) throws URISyntaxException
-    {
-        ViewURLHelper url;
-        String callbackURL = getRequest().getParameter("callbackURL");
-        if (callbackURL != null)
-        {
-            url = new ViewURLHelper(callbackURL);
-            url.addParameter("issueId", "" + issue.getIssueId());
-            return url;
-        }
-        else
-        {
-            return getDetailsForwardURL(issue);
-        }
-    }
 
-    @Jpf.Action @RequiresPermission(ACL.PERM_UPDATEOWN)
-    protected Forward doUpdate(IssuesForm form) throws Exception
-    {
-        Container c = getContainer();
-        User user = getUser();
-
-        Issue issue = form.getBean();
-        requiresUpdatePermission(user, issue);
-        ViewURLHelper detailsUrl;
-
-        try
-        {
-            validateRequiredFields(form);
-
-            if ("insert".equals(form.getAction()))
-                return doInsert(form);
-
-            validateNotifyList(issue, form);
-            detailsUrl = getForwardURL(issue);
-
-            // if assigned to changes, append the new assignee to the notify list
-            /*
-            if (issue.getAssignedTo() != null && !issue.getAssignedTo().equals(((Issue)form.getOldValues()).getAssignedTo()))
-            {
-                final String notify = issue.getNotifyList();
-                final String newName = UserManager.getEmailForId(issue.getAssignedTo());
-                if (notify.indexOf(newName) == -1)
-                {
-                    issue.setNotifyList(notify + ';' + newName);
-                }
-            }
-            */
-
-            if ("resolve".equals(form.getAction()))
-                issue.Resolve(user);
-            else if ("open".equals(form.getAction()))
-                issue.Open(c, user, true);
-            else if ("close".equals(form.getAction()))
-                issue.Close(user);
-            else
-                issue.Change(user);
-
-            addComment(issue, (Issue)form.getOldValues(), user, form.getAction(), form.getComment(), getColumnCaptions());
-            IssueManager.saveIssue(openSession(), user, c, issue);
-        }
-        catch (Exception x)
-        {
-            IssuePage page = (IssuePage) JspLoader.createPage(getRequest(), IssuesController.class, "updateView.jsp");
-            JspView v = new JspView(page);
-
-            CustomColumnConfiguration ccc = getCustomColumnConfiguration();
-
-            page.setAction(form.getAction());
-            page.setIssue(issue);
-            page.setBody(form.getComment());
-            page.setCustomColumnConfiguration(ccc);
-            page.setEditable(getEditableFields(page.getAction(), ccc));
-            page.setError(x.getMessage());
-            page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
-
-            return _renderInTemplate(v, "(update) " + issue.getTitle(), null);
-        }
-
-        // Send update email...
-        //    ...if someone other than "created by" is closing a bug
-        //    ...if someone other than "assigned to" is updating, reopening, or resolving a bug
-        if ("close".equals(form.getAction()))
-        {
-            //if (issue.getCreatedBy() != user.getUserId())
-                sendUpdateEmail(issue, detailsUrl, "closed", form.getAction());
-        }
-        else
-        {
-            String change = ("open".equals(form.getAction()) ? "reopened" : form.getAction() + "d");
-
-            // Add "and assigned to you" in all cases except an update where "assigned to" hasn't changed
-            //if (!"update".equals(form.getAction()))
-            //    change = change + " and assigned to you";
-
-            sendUpdateEmail(issue, detailsUrl, change, form.getAction());
-        }
-
-        return new ViewForward(detailsUrl);
-    }
-
-    private void validateRequiredFields(IssuesForm form) throws Exception
+    private void validateRequiredFields(IssuesController.IssuesForm form, BindException errors) throws Exception
     {
         String requiredFields = IssueManager.getRequiredIssueFields(getContainer());
         final Map<String, String> newFields = form.getStrings();
@@ -698,30 +786,31 @@ public class IssuesController extends ViewController
             return;
 
         if (newFields.containsKey("title"))
-            validateRequired("title", newFields.get("title"), requiredFields);
+            validateRequired("title", newFields.get("title"), requiredFields, errors);
         if (newFields.containsKey("assignedTo") && !(form.getBean().getStatus().equals(Issue.statusCLOSED)))
-            validateRequired("assignedto", newFields.get("assignedTo"), requiredFields);
+            validateRequired("assignedto", newFields.get("assignedTo"), requiredFields, errors);
         if (newFields.containsKey("type"))
-            validateRequired("type", newFields.get("type"), requiredFields);
+            validateRequired("type", newFields.get("type"), requiredFields, errors);
         if (newFields.containsKey("area"))
-            validateRequired("area", newFields.get("area"), requiredFields);
+            validateRequired("area", newFields.get("area"), requiredFields, errors);
         if (newFields.containsKey("priority"))
-            validateRequired("priority", newFields.get("priority"), requiredFields);
+            validateRequired("priority", newFields.get("priority"), requiredFields, errors);
         if (newFields.containsKey("milestone"))
-            validateRequired("milestone", newFields.get("milestone"), requiredFields);
+            validateRequired("milestone", newFields.get("milestone"), requiredFields, errors);
         if (newFields.containsKey("notifyList"))
-            validateRequired("notifylist", newFields.get("notifyList"), requiredFields);
+            validateRequired("notifylist", newFields.get("notifyList"), requiredFields, errors);
         if (newFields.containsKey("int1"))
-            validateRequired("int1", newFields.get("int1"), requiredFields);
+            validateRequired("int1", newFields.get("int1"), requiredFields, errors);
         if (newFields.containsKey("int2"))
-            validateRequired("int2", newFields.get("int2"), requiredFields);
+            validateRequired("int2", newFields.get("int2"), requiredFields, errors);
         if (newFields.containsKey("string1"))
-            validateRequired("string1", newFields.get("string1"), requiredFields);
+            validateRequired("string1", newFields.get("string1"), requiredFields, errors);
         if (newFields.containsKey("string2"))
-            validateRequired("string2", newFields.get("string2"), requiredFields);
+            validateRequired("string2", newFields.get("string2"), requiredFields, errors);
     }
 
-    private void validateRequired(String columnName, String value, String requiredFields) throws Exception
+
+    private void validateRequired(String columnName, String value, String requiredFields, BindException errors) throws Exception
     {
         if (requiredFields != null)
         {
@@ -729,7 +818,7 @@ public class IssuesController extends ViewController
             {
                 if (StringUtils.isEmpty(value))
                 {
-                    final CustomColumnConfiguration ccc = IssueManager.getCustomColumnConfiguration(getContainer());
+                    final IssueManager.CustomColumnConfiguration ccc = IssueManager.getCustomColumnConfiguration(getContainer());
                     String name = null;
                     if (ccc.getColumnCaptions().containsKey(columnName))
                         name = ccc.getColumnCaptions().get(columnName);
@@ -739,13 +828,14 @@ public class IssuesController extends ViewController
                         if (column != null)
                             name = column.getName();
                     }
-                    throw new ServletException("Error: The field: " + (name != null ? name : columnName) + " is required");
+                    errors.addError(new RequiredError(columnName, name != null ? name : columnName));
                 }
             }
         }
     }
+    
 
-    private void validateNotifyList(Issue issue, IssuesForm form) throws Exception
+    private void validateNotifyList(Issue issue, IssuesController.IssuesForm form, BindException errors) throws Exception
     {
         String[] rawEmails = _toString(form.getNotifyList()).split("\n");
         List<String> invalidEmails = new ArrayList<String>();
@@ -755,11 +845,15 @@ public class IssuesController extends ViewController
 
         for (String rawEmail : invalidEmails)
         {
+            rawEmail = rawEmail.trim();
             // Ignore lines of all whitespace, otherwise show an error.
-            if (!"".equals(rawEmail.trim()))
+            if (!"".equals(rawEmail))
             {
-                message.append("Failed to add user ").append(rawEmail.trim()).append(": Invalid email address");
-                throw new ServletException(message.toString());
+                message.append("Failed to add user ").append(rawEmail).append(": Invalid email address");
+                FieldError fieldError = new FieldError(
+                        "issue", "notifyList", rawEmail.trim(), true, new String[] {"Error"}, new Object[] {message.toString()},
+                        message.toString());
+                errors.addError(fieldError);
             }
         }
 
@@ -788,21 +882,37 @@ public class IssuesController extends ViewController
         public void setIssueId(String issueId){_issueId = issueId;}
     }
 
-    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
-    protected Forward completeUser(CompleteUserForm form) throws Exception
-    {
-        Container c = getContainer();
 
-        final int issueId = Integer.valueOf(form.getIssueId());
-        Issue issue = getIssue(getContainer(), issueId);
-        if (issue == null)
+    @RequiresPermission(ACL.PERM_READ)
+    public class CompleteUserAction extends SimpleViewAction<CompleteUserForm>
+    {
+        public ModelAndView getView(CompleteUserForm form, BindException errors) throws Exception
         {
-            issue = new Issue();
-            issue.Open(c, getUser());
+            getPageConfig().setUseTemplate(false);
+            Container c = getContainer();
+
+            final int issueId = Integer.valueOf(form.getIssueId());
+            Issue issue = getIssue(issueId);
+            if (issue == null)
+            {
+                issue = new Issue();
+                issue.Open(c, getUser());
+            }
+            User[] users = IssueManager.getAssignedToList(c, issue);
+            final List<ViewController.AjaxCompletion> completions = UserManager.getAjaxCompletions(form.getPrefix(), users);
+            return new HttpView()
+            {
+                protected void renderInternal(Object model, HttpServletRequest request, HttpServletResponse response) throws Exception
+                {
+                    PageFlowUtil.sendAjaxCompletions(getViewContext().getResponse(), completions);
+                }
+            };
         }
-        User[] users = IssueManager.getAssignedToList(c, issue);
-        List<AjaxCompletion> completions = UserManager.getAjaxCompletions(form.getPrefix(), users);
-        return sendAjaxCompletions(completions);
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
     }
 
 
@@ -816,18 +926,18 @@ public class IssuesController extends ViewController
                 Issue.Comment lastComment = issue.getLastComment();
                 String messageId = "<" + issue.getEntityId() + "." + lastComment.getCommentId() + "@" + AppProps.getInstance().getDefaultDomain() + ">";
                 String references = messageId + " <" + issue.getEntityId() + "@" + AppProps.getInstance().getDefaultDomain() + ">";
-                ViewMessage m = MailHelper.createMessage(AppProps.getInstance().getSystemEmailAddress(), to);
+                MailHelper.ViewMessage m = MailHelper.createMessage(AppProps.getInstance().getSystemEmailAddress(), to);
                 if (m.getAllRecipients().length > 0)
                 {
-                    UpdateEmailPage page = (UpdateEmailPage) JspLoader.createPage(getRequest(), IssuesController.class, "updateEmail.jsp");
+                    UpdateEmailPage page = (UpdateEmailPage) JspLoader.createPage(getViewContext(), IssuesController.class, "updateEmail.jsp");
                     m.setSubject("Issue #" + issue.getIssueId() + ", \"" + issue.getTitle() + ",\" has been " + change);
                     page.url = detailsUrl.getURIString();
                     page.issue = issue;
                     page.isPlain = true;
                     final JspView view = new JspView(page);
-                    m.setTemplateContent(getRequest(), view, "text/plain");
+                    m.setTemplateContent(getViewContext().getRequest(), view, "text/plain");
                     page.isPlain = false;
-                    m.setTemplateContent(getRequest(), view, "text/html");
+                    m.setTemplateContent(getViewContext().getRequest(), view, "text/html");
                     m.setHeader("References", references);
 
                     MailHelper.send(m);
@@ -898,205 +1008,282 @@ public class IssuesController extends ViewController
             return IssueManager.NOTIFY_ASSIGNEDTO_UPDATE | IssueManager.NOTIFY_CREATED_UPDATE;
     }
 
-    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
-    protected Forward emailPrefs(EmailPrefsForm form) throws Exception
+    @RequiresPermission(ACL.PERM_READ)
+    public class EmailPrefsAction extends FormViewAction<EmailPrefsForm>
     {
-        return emailPrefs((String)null);
-    }
-
-
-    private Forward emailPrefs(String message) throws Exception
-    {
-        requiresLogin();
-
-        EmailPreferencesPage page = (EmailPreferencesPage)JspLoader.createPage(getRequest(), IssuesController.class, "emailPreferences.jsp");
-        JspView v = new JspView(page);
-
-        if (message != null)
-            page._message = message;
-        return _renderInTemplate(v, "Email preferences for issues in: " + getContainer().getPath(), null);
-    }
-
-
-    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
-    protected Forward updateEmailPrefs(EmailPrefsForm form) throws Exception
-    {
-        int emailPref = 0;
-        for (int pref : form.getEmailPreference())
+        String _message = null;
+        
+        public ModelAndView getView(EmailPrefsForm emailPrefsForm, boolean reshow, BindException errors) throws Exception
         {
-            emailPref |= pref;
+            if (getViewContext().getUser().isGuest())
+                HttpView.throwUnauthorized();
+
+            EmailPreferencesPage page = (EmailPreferencesPage)JspLoader.createPage(getViewContext().getRequest(), IssuesController.class, "emailPreferences.jsp");
+            JspView v = new JspView(page);
+
+            if (_message != null)
+                page._message = _message;
+            return v;
         }
-        IssueManager.setUserEmailPreferences(getContainer(), getUser().getUserId(),
-                emailPref, getUser().getUserId());
-        return emailPrefs("Settings updated successfully");
-    }
+
+        public boolean handlePost(EmailPrefsForm form, BindException errors) throws Exception
+        {
+            int emailPref = 0;
+            for (int pref : form.getEmailPreference())
+            {
+                emailPref |= pref;
+            }
+            IssueManager.setUserEmailPreferences(getContainer(), getUser().getUserId(),
+                    emailPref, getUser().getUserId());
+            _message = "Settings updated successfully";
+            return true;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return (new BeginAction()).appendNavTrail(root).addChild("Email preferences");
+        }
 
 
-    private ViewForward adminForward() throws URISyntaxException, ServletException
-    {
-        return new ViewForward("Issues", "admin", getContainer());
+        public void validate(EmailPrefsForm emailPrefsForm, BindException errors)
+        {
+        }
+
+        public ViewURLHelper getSuccessURL(EmailPrefsForm emailPrefsForm)
+        {
+            return null;
+        }
     }
+
 
     public static final String REQUIRED_FIELDS_COLUMNS = "Title,AssignedTo,Type,Area,Priority,Milestone,NotifyList";
     public static final String DEFAULT_REQUIRED_FIELDS = "title;assignedto";
 
-    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
-    protected Forward admin(AdminForm form) throws Exception
+
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class AdminAction extends SimpleIssueAction
     {
-        // TODO: This hack ensures that priority & resolution option defaults get populated if first reference is the admin page.  Fix this.
-        IssuePage page = new IssuePage()
+        public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            public void _jspService(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
+            // TODO: This hack ensures that priority & resolution option defaults get populated if first reference is the admin page.  Fix this.
+            IssuePage page = new IssuePage()
             {
-            }
-        };
-        page.getPriorityOptions(getContainer());
-        page.getResolutionOptions(getContainer());
+                public void _jspService(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
+                {
+                }
+            };
+            page.getPriorityOptions(getContainer());
+            page.getResolutionOptions(getContainer());
+            // </HACK>
 
-        AdminView adminView = new AdminView(getContainer(), getCustomColumnConfiguration());
-
-        _includeView(adminView, "Issues Admin Page");
-        return null;
-    }
-
-    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
-    protected Forward addKeyword(AdminForm form) throws Exception
-    {
-        IssueManager.addKeyword(getContainer(), form.getType(), form.getKeyword());
-        return adminForward();
-    }
-
-
-    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
-    protected Forward deleteKeyword(AdminForm form) throws Exception
-    {
-        IssueManager.deleteKeyword(getContainer(), form.getType(), form.getKeyword());
-        return adminForward();
-    }
-
-
-    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
-    protected Forward setKeywordDefault(AdminForm form) throws Exception
-    {
-        IssueManager.setKeywordDefault(getContainer(), form.getType(), form.getKeyword());
-        return adminForward();
-    }
-
-
-    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
-    protected Forward clearKeywordDefault(AdminForm form) throws Exception
-    {
-        IssueManager.clearKeywordDefault(getContainer(), form.getType());
-        return adminForward();
-    }
-
-
-    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
-    protected Forward rss() throws Exception
-    {
-        ResultSet rs = null;
-        try
-        {
-            DataRegion r = new DataRegion();
-            TableInfo tinfo = IssuesSchema.getInstance().getTableInfoIssues();
-            ColumnInfo[] cols = tinfo.getColumns("IssueId,Created,Area,Title,AssignedTo,Priority,Status,Milestone");
-            r.addColumns(cols);
-
-            rs = r.getResultSet(new RenderContext(getViewContext()));
-            ObjectFactory f = ObjectFactory.Registry.getFactory(Issue.class);
-            Issue[] issues = (Issue[]) f.handleArray(rs);
-
-            WebPartView v = new GroovyView("/org/labkey/issue/rss.gm");
-            v.setFrame(WebPartView.FrameType.NONE);
-            v.addObject("issues", issues);
-            ViewURLHelper url = cloneViewURLHelper();
-            url.deleteParameters();
-            url.setAction("details.view");
-            v.addObject("url", url.getURIString() + "issueId=");
-            v.addObject("homePageUrl", ViewURLHelper.getBaseServerURL(getRequest()));
-
-            getResponse().setContentType("text/xml");
-            includeView(v);
+            IssuesController.AdminView adminView = new IssuesController.AdminView(getContainer(), getCustomColumnConfiguration());
+            return adminView;
         }
-        catch (SQLException x)
+
+        public NavTree appendNavTrail(NavTree root)
         {
-            x.printStackTrace();
-            throw new ServletException(x);
+            return (new BeginAction()).appendNavTrail(root).addChild("Issues Admin Page", getUrl());
         }
-        finally
+
+        public ViewURLHelper getUrl()
         {
-            ResultSetUtil.close(rs);
+            return issueURL("admin");
         }
-        return null;
     }
 
 
-    @Jpf.Action @RequiresPermission(ACL.PERM_ADMIN)
-    protected Forward purge() throws ServletException, SQLException, IOException
+    public abstract class AdminFormAction extends FormViewAction<AdminForm>
     {
-        requiresGlobalAdmin();
+        public ModelAndView getView(AdminForm adminForm, boolean reshow, BindException errors) throws Exception
+        {
+            return null;
+        }
 
-        String message = IssueManager.purge();
-        getResponse().getWriter().println(message);
+        public void validate(AdminForm adminForm, BindException errors)
+        {
+        }
 
-        return null;
+        public ViewURLHelper getSuccessURL(AdminForm adminForm)
+        {
+            return issueURL("admin");
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
     }
 
 
-    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
-    public Forward jumpToIssue(DetailsForm form) throws Exception
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class AddKeywordAction extends AdminFormAction
     {
-        Container c = getContainer();
-
-        String issueId = form.getIssueId();
-        if (issueId != null)
+        public boolean handlePost(AdminForm form, BindException errors) throws Exception
         {
-            issueId = issueId.trim();
+            IssueManager.addKeyword(getContainer(), form.getType(), form.getKeyword());
+            return true;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class DeleteKeywordAction extends AdminFormAction
+    {
+        public boolean handlePost(AdminForm form, BindException errors) throws Exception
+        {
+            IssueManager.deleteKeyword(getContainer(), form.getType(), form.getKeyword());
+            return true;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class SetKeywordDefaultAction extends AdminFormAction
+    {
+        public boolean handlePost(AdminForm form, BindException errors) throws Exception
+        {
+            IssueManager.setKeywordDefault(getContainer(), form.getType(), form.getKeyword());
+            return true;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class ClearKeywordDefaultAction extends AdminFormAction
+    {
+        public boolean handlePost(AdminForm form, BindException errors) throws Exception
+        {
+            IssueManager.clearKeywordDefault(getContainer(), form.getType());
+            return true;
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class RssAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            getPageConfig().setUseTemplate(false);
+            ResultSet rs = null;
             try
             {
-                int id = Integer.parseInt(issueId);
-                Issue issue = IssueManager.getIssue(null, c, id);
-                if (issue != null)
-                {
-                    ViewURLHelper urlHelper = getViewURLHelper().clone();
-                    urlHelper.deleteParameters();
-                    urlHelper.addParameter("issueId", Integer.toString(id));
-                    urlHelper.setAction("details.view");
-                    return new ViewForward(urlHelper);
-                }
+                DataRegion r = new DataRegion();
+                TableInfo tinfo = IssuesSchema.getInstance().getTableInfoIssues();
+                ColumnInfo[] cols = tinfo.getColumns("IssueId,Created,Area,Title,AssignedTo,Priority,Status,Milestone");
+                r.addColumns(cols);
+
+                rs = r.getResultSet(new RenderContext(getViewContext()));
+                ObjectFactory f = ObjectFactory.Registry.getFactory(Issue.class);
+                Issue[] issues = (Issue[]) f.handleArray(rs);
+
+                WebPartView v = new GroovyView("/org/labkey/issue/rss.gm");
+                v.setFrame(WebPartView.FrameType.NONE);
+                v.addObject("issues", issues);
+                ViewURLHelper url = getViewContext().cloneViewURLHelper();
+                url.deleteParameters();
+                url.setAction("details.view");
+                v.addObject("url", url.getURIString() + "issueId=");
+                v.addObject("homePageUrl", ViewURLHelper.getBaseServerURL(getViewContext().getRequest()));
+                return v;
             }
-            catch (NumberFormatException e)
+            catch (SQLException x)
             {
-                // fall through
+                x.printStackTrace();
+                throw new ServletException(x);
+            }
+            finally
+            {
+                ResultSetUtil.close(rs);
             }
         }
-        ViewURLHelper urlHelper = getViewURLHelper().clone();
-        urlHelper.deleteParameters();
-        urlHelper.addParameter("error", "Invalid issue id '" + issueId + "'");
-        urlHelper.setAction("list.view");
-        urlHelper.addParameter(".lastFilter", "true");
-        return new ViewForward(urlHelper);
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
     }
 
 
-    @Jpf.Action @RequiresPermission(ACL.PERM_READ)
-    protected Forward search() throws Exception
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class PurgeAction extends SimpleIssueAction
     {
-        Container c = getContainer();
-        String searchTerm = (String)getViewContext().get("search");
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            if (!getUser().isAdministrator())   // GLOBAL
+                HttpView.throwUnauthorized();
+            String message = IssueManager.purge();
+            return new HtmlView(message);
+        }
 
-        Module module = ModuleLoader.getInstance().getCurrentModule();
-        List<Search.Searchable> l = new ArrayList<Search.Searchable>();
-        l.add((Search.Searchable)module);
-
-        HttpView results = new SearchResultsView(c, searchTerm, l, getUser(), new ViewURLHelper("Issues", "search", c));
-
-        NavTrailConfig trailConfig = new NavTrailConfig(getViewContext(), c);
-        trailConfig.setTitle("Search Results");
-
-        HttpView template = new HomeTemplate(getViewContext(), c, results, trailConfig);
-        return includeView(template);
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
     }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class JumpToIssueAction extends SimpleIssueAction
+    {
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            String issueId = (String)getProperty("issueId");
+            if (issueId != null)
+            {
+                issueId = issueId.trim();
+                try
+                {
+                    int id = Integer.parseInt(issueId);
+                    Issue issue = getIssue(id);
+                    if (issue != null)
+                    {
+                        ViewURLHelper urlHelper = getViewContext().cloneViewURLHelper();
+                        urlHelper.deleteParameters();
+                        urlHelper.addParameter("issueId", Integer.toString(id));
+                        urlHelper.setAction("details.view");
+                        return HttpView.redirect(urlHelper);
+                    }
+                }
+                catch (NumberFormatException e)
+                {
+                    // fall through
+                }
+            }
+            ViewURLHelper urlHelper = getViewContext().cloneViewURLHelper();
+            urlHelper.deleteParameters();
+            urlHelper.addParameter("error", "Invalid issue id '" + issueId + "'");
+            urlHelper.setAction("list.view");
+            urlHelper.addParameter(".lastFilter", "true");
+            return HttpView.redirect(urlHelper);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class SearchAction extends SimpleIssueAction
+    {
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            Container c = getContainer();
+            String searchTerm = (String)getProperty("search","");
+
+            Module module = ModuleLoader.getInstance().getCurrentModule();
+            List<Search.Searchable> l = new ArrayList<Search.Searchable>();
+            l.add((Search.Searchable)module);
+
+            HttpView results = new Search.SearchResultsView(c, searchTerm, l, getUser(), new ViewURLHelper("Issues", "search", c));
+            return results;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return new ListAction().appendNavTrail(root).addChild("Search Results");
+        }
+    }
+
 
     static boolean _equal(String a, String b)
     {
@@ -1165,23 +1352,6 @@ public class IssuesController extends ViewController
     }
 
 
-    private Forward _renderInTemplate(HttpView view, String title, String helpTopic) throws Exception
-    {
-        if (helpTopic == null)
-            helpTopic = "issues";
-
-        Container navTrailContainer = getViewContext().getContainer();
-        NavTrailConfig trailConfig = new NavTrailConfig(getViewContext(), navTrailContainer);
-        if (title != null)
-            trailConfig.setTitle(title);
-        trailConfig.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.SERVER));
-
-        HomeTemplate template = new HomeTemplate(getViewContext(), getContainer(), view, trailConfig);
-        includeView(template);
-        return null;
-    }
-
-
     private static void _appendCustomColumnChange(StringBuffer sb, String field, String from, String to, Map<String, String> columnCaptions)
     {
         String caption = columnCaptions.get(field);
@@ -1194,47 +1364,20 @@ public class IssuesController extends ViewController
     //
     // VIEWS
     //
-    private static String helpTopic = "issues";
-
-    private void _includeView(HttpView v, String title)
-            throws Exception
-    {
-        NavTrailConfig navtrail = new NavTrailConfig(getViewContext());
-        navtrail.setTitle(title);
-        navtrail.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.SERVER));
-
-        HttpView template = new HomeTemplate(getViewContext(), v, navtrail);
-        template.addObject("pageTitle", title);
-        includeView(template);
-    }
-
-
-    private void _includeFastView(HttpView v, String title)
-            throws Exception
-    {
-        NavTrailConfig navtrail = new NavTrailConfig(getViewContext());
-        navtrail.setTitle(title);
-        navtrail.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.SERVER));
-
-        HttpView template = new HomeTemplate(getViewContext(), v, navtrail);
-
-        includeView(template);
-    }
-
     public static class AdminView extends GroovyView
     {
         Container _c;
-        CustomColumnConfiguration _ccc;
-        KeywordAdminView _keywordAdminView;
-        JspView<IssuesPreference> _requiredFieldsView;
+        IssueManager.CustomColumnConfiguration _ccc;
+        IssuesController.KeywordAdminView _keywordAdminView;
+        JspView<IssuesController.IssuesPreference> _requiredFieldsView;
 
-        public AdminView(Container c, CustomColumnConfiguration ccc)
+        public AdminView(Container c, IssueManager.CustomColumnConfiguration ccc)
         {
             super("/org/labkey/issue/admin.gm");
 
             _ccc = ccc;
 
-            _keywordAdminView = new KeywordAdminView(c);
+            _keywordAdminView = new IssuesController.KeywordAdminView(c);
             _keywordAdminView.addKeyword("Type", ISSUE_TYPE);
             _keywordAdminView.addKeyword("Area", ISSUE_AREA);
             _keywordAdminView.addKeyword("Priority", ISSUE_PRIORITY);
@@ -1255,8 +1398,8 @@ public class IssuesController extends ViewController
             }
             ColumnInfo[] cols = IssuesSchema.getInstance().getTableInfoIssues().getColumns(columnNames.toArray(new String[0]));
 
-            IssuesPreference bean = new IssuesPreference(cols, IssueManager.getRequiredIssueFields(c));
-            _requiredFieldsView = new JspView<IssuesPreference>("/org/labkey/issue/requiredFields.jsp", bean);
+            IssuesController.IssuesPreference bean = new IssuesController.IssuesPreference(cols, IssueManager.getRequiredIssueFields(c));
+            _requiredFieldsView = new JspView<IssuesController.IssuesPreference>("/org/labkey/issue/requiredFields.jsp", bean);
         }
 
 
@@ -1279,7 +1422,7 @@ public class IssuesController extends ViewController
 
             addObject("captions", _ccc.getColumnCaptions());
             addObject("pickLists", _ccc.getPickListColumns());
-            addObject("pickListName", CustomColumnConfiguration.PICK_LIST_NAME);
+            addObject("pickListName", IssueManager.CustomColumnConfiguration.PICK_LIST_NAME);
 
             super.prepareWebPart(model);
         }
@@ -1291,7 +1434,7 @@ public class IssuesController extends ViewController
     public static class KeywordAdminView extends GroovyView
     {
         private Container _c;
-        private List<KeywordPicker> _keywordPickers = new ArrayList<KeywordPicker>(5);
+        private List<IssuesController.KeywordAdminView.KeywordPicker> _keywordPickers = new ArrayList<IssuesController.KeywordAdminView.KeywordPicker>(5);
 
         public KeywordAdminView(Container c)
         {
@@ -1301,7 +1444,7 @@ public class IssuesController extends ViewController
 
         public void addKeyword(String name, int type)
         {
-            _keywordPickers.add(new KeywordPicker(_c, name, type));
+            _keywordPickers.add(new IssuesController.KeywordAdminView.KeywordPicker(_c, name, type));
         }
 
         protected void prepareWebPart(Object context) throws ServletException
@@ -1314,7 +1457,7 @@ public class IssuesController extends ViewController
             public String name;
             public String plural;
             public int type;
-            public Keyword[] keywords;
+            public IssueManager.Keyword[] keywords;
 
             KeywordPicker(Container c, String name, int type)
             {
@@ -1375,7 +1518,7 @@ public class IssuesController extends ViewController
     {
         public IssuesForm()
         {
-            super(Issue.class, IssuesSchema.getInstance().getTableInfoIssues(), new String[]{"action", "comment"});
+            super(Issue.class, IssuesSchema.getInstance().getTableInfoIssues(), new String[]{"action", "comment", "callbackURL"});
         }
 
         public String getAction()
@@ -1391,6 +1534,34 @@ public class IssuesController extends ViewController
         public String getNotifyList()
         {
             return _stringValues.get("notifyList");
+        }
+
+        public String getCallbackURL()
+        {
+            return _stringValues.get("callbackURL");
+        }
+
+        public ViewURLHelper getForwardURL()
+        {
+            try
+            {
+                ViewURLHelper url;
+                String callbackURL = getCallbackURL();
+                if (callbackURL != null)
+                {
+                    url = new ViewURLHelper(callbackURL).addParameter("issueId", "" + getBean().getIssueId());
+                    return url;
+                }
+                else
+                {
+                    return getDetailsForwardURL(getViewContext(), getBean());
+                }
+            }
+            catch (URISyntaxException x)
+            {
+                throw new RuntimeException(x);
+            }
+
         }
     }
 
@@ -1467,15 +1638,10 @@ public class IssuesController extends ViewController
 
         public static Test suite()
         {
-            return new TestSuite(TestCase.class);
+            return new TestSuite(IssuesController.TestCase.class);
         }
     }
 
-    //
-    // Hibernate session handling
-    //
-
-//    Object _s = null;
 
     Object openSession()
     {
@@ -1494,9 +1660,9 @@ public class IssuesController extends ViewController
     }
 
 
-    protected synchronized void afterAction() throws Exception
+    protected synchronized void afterAction(Throwable t)
     {
-        super.afterAction();
+        super.afterAction(t);
         closeSession();
     }
 
@@ -1583,7 +1749,6 @@ public class IssuesController extends ViewController
     {
         private QuerySettings _settings;
         private boolean _export;
-        private boolean _print;
         private ViewURLHelper _customizeURL;
         private Map<String, CustomView> _views;
 
@@ -1597,16 +1762,6 @@ public class IssuesController extends ViewController
             _export = export;
         }
 
-        public boolean getPrint()
-        {
-            return _print;
-        }
-
-        public void setPrint(boolean print)
-        {
-            _print = print;
-        }
-
         public ViewURLHelper getCustomizeURL() {return _customizeURL;}
         public void setCustomizeURL(ViewURLHelper url) {_customizeURL = url;}
         public Map<String, CustomView> getViews() {return _views;}
@@ -1618,33 +1773,6 @@ public class IssuesController extends ViewController
         public void setQuerySettings(QuerySettings settings)
         {
             _settings = settings;
-        }
-    }
-
-
-    public static class DetailsForm extends ViewForm
-    {
-        private String _issueId;
-        private boolean _print;
-
-        public String getIssueId()
-        {
-            return _issueId;
-        }
-
-        public void setIssueId(String issueId)
-        {
-            _issueId = issueId;
-        }
-
-        public boolean isPrint()
-        {
-            return _print;
-        }
-
-        public void setPrint(boolean print)
-        {
-            _print = print;
         }
     }
 
@@ -1687,5 +1815,46 @@ public class IssuesController extends ViewController
 
         public void setRequiredFields(String[] requiredFields){_requiredFields = requiredFields;}
         public String[] getRequiredFields(){return _requiredFields;}
+    }
+
+
+    public static class IssueIdForm
+    {
+        private int issueId = -1;
+
+        public int getIssueId()
+        {
+            return issueId;
+        }
+
+        public void setIssueId(int issueId)
+        {
+            this.issueId = issueId;
+        }
+    }
+
+
+    public abstract static class SimpleIssueAction<FORM> extends SimpleViewAction<FORM>
+    {
+        boolean _print = false;
+
+        protected boolean getPrint()
+        {
+            return _print;
+        }
+
+        public ModelAndView getPrintView(FORM form, BindException errors) throws Exception
+        {
+            _print = true;
+            return getView(form, errors);
+        }
+    }
+
+    public static class RequiredError extends FieldError
+    {
+        RequiredError(String field, String display)
+        {
+            super("issue", field, "", true, new String[] {"NullError"}, new Object[] {display}, "Error: The field: " + display + " is required");
+        }
     }
 }

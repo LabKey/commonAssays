@@ -44,7 +44,7 @@
 <%
     }
 %>
-    <td><%= textLink("print", context.cloneViewURLHelper().replaceParameter("print", "1"))%></td>
+    <td><%= textLink("print", context.cloneViewURLHelper().replaceParameter("_print", "1"))%></td>
     <td>&nbsp;&nbsp;&nbsp;Jump to issue: <input type="text" size="5" name="issueId"/></td>
 </tr></table>
 </form>

@@ -63,7 +63,7 @@ public class IssuesQueryView extends QueryView
             adminButton.setDisplayPermission(ACL.PERM_ADMIN);
             bar.add(adminButton);
 
-            ActionButton printButton = new ActionButton(_context.cloneViewURLHelper().addParameter("print", "1").getEncodedLocalURIString(), "Print", DataRegion.MODE_GRID, ActionButton.Action.LINK);
+            ActionButton printButton = new ActionButton(_context.cloneViewURLHelper().addParameter("_print", "1").getEncodedLocalURIString(), "Print", DataRegion.MODE_GRID, ActionButton.Action.LINK);
             bar.add(printButton);
 
             ActionButton prefsButton = new ActionButton(_context.cloneViewURLHelper().setAction("emailPrefs.view").getEncodedLocalURIString(), "Email Preferences", DataRegion.MODE_GRID, ActionButton.Action.LINK);

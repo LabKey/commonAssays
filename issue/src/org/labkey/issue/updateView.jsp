@@ -9,6 +9,8 @@
 <%@ page import="org.labkey.api.view.ViewContext"%>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page import="org.labkey.issue.model.IssueManager" %>
+<%@ page import="org.springframework.validation.ObjectError" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.issue.IssuePage" %>
 <%
     ViewContext context = HttpView.getRootContext();
@@ -19,18 +21,17 @@
     final String popup = getNotifyHelpPopup(emailPrefs);
 %>
 
-<form style="margin:0" method="POST" action="<%=ViewURLHelper.toPathString("Issues", "doUpdate.post", context.getContainer().getPath())%>">
+<form style="margin:0" method="POST" action="<%=ViewURLHelper.toPathString("Issues", getAction()+".post", context.getContainer().getPath())%>">
 
     <table border=0 cellspacing=2 cellpadding=0>
     <%
-    if (null != getError() && 0 != getError().length())
-    {
-    %>
-        <tr>
-            <td colspan=3><font color="red" class="error"><%=h(getError())%></font></td>
-        </tr>
-    <%
-    }
+        if (null != getErrors() && 0 != getErrors().getErrorCount())
+        {
+            for (ObjectError e : (List<ObjectError>) getErrors().getAllErrors())
+            {
+                %><tr><td colspan=3><font color="red" class="error"><%=h(context.getMessage(e))%></font></td></tr><%
+            }
+        }
     if (!StringUtils.isEmpty(getRequiredFields()))
         out.print("<tr><td>Fields marked with an asterisk <span class=\"labkey-error\">*</span> are required.</td></tr>");
     %>

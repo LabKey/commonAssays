@@ -86,7 +86,6 @@ public class IssuesModule extends DefaultModule implements ContainerManager.Cont
             v.addObject("webPart", webPart);
             return v;
         }
-
     }
 
 

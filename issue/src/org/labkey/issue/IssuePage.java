@@ -13,6 +13,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.issue.model.Issue;
 import org.labkey.issue.model.IssueManager;
 import org.labkey.issue.model.IssueManager.*;
+import org.springframework.validation.BindException;
 
 import java.io.IOException;
 import java.util.*;
@@ -30,7 +31,7 @@ abstract public class IssuePage extends JspBase
     private IssueManager.CustomColumnConfiguration _ccc;
     private Set<String> _editable = Collections.emptySet();
     private String _callbackURL;
-    private String _error;
+    private BindException _errors;
     private String _action;
     private String _body;
     private boolean _hasUpdatePermissions;
@@ -89,14 +90,14 @@ abstract public class IssuePage extends JspBase
         _callbackURL = callbackURL;
     }
 
-    public String getError()
+    public BindException getErrors()
     {
-        return _error;
+        return _errors;
     }
 
-    public void setError(String error)
+    public void setErrors(BindException errors)
     {
-        _error = error;
+        _errors = errors;
     }
 
     public String getAction()
