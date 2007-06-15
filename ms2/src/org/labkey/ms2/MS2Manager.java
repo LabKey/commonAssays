@@ -463,7 +463,7 @@ public class MS2Manager
         if (fileName.endsWith(".xml") || fileName.endsWith(".pepXML"))
             return new PepXmlImporter(info.getUser(), c, description, fileName, log, context);
         else
-            return new CometReader(info.getUser(), c, description, fileName, log, context);
+            return null;  // We only support pepXML now
     }
 
 

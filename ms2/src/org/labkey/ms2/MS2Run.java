@@ -231,7 +231,7 @@ public abstract class MS2Run implements Serializable
 
     public abstract String[] getGZFileExtensions();
 
-    // Database column names in order
+    // PepXml score names in the order they get written to the database
     public Collection<String> getPepXmlScoreColumnNames()
     {
         String[] scoreNameArray = getPepXmlScoreNames().split(",");

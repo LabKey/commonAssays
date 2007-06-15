@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.DbScope;
+import org.labkey.api.data.DbSchema;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.FTPUtil;
@@ -115,6 +116,9 @@ public abstract class GoLoader
         _tis = new TarInputStream(new GZIPInputStream(is));
         TarEntry te = _tis.getNextEntry();
 
+        DbSchema schema = ProteinManager.getSchema();
+        Table.execute(schema, schema.getSqlDialect().execute(schema, "drop_go_indexes", ""), null);
+
         Map<String, GoLoadBean> map = getGoLoadMap();
 
         logStatus("Starting to load GO annotation files");
@@ -133,6 +137,8 @@ public abstract class GoLoader
 
             te = _tis.getNextEntry();
         }
+
+        Table.execute(schema, schema.getSqlDialect().execute(schema, "create_go_indexes", ""), null);
 
         logStatus("Successfully loaded all GO annotation files");
     }

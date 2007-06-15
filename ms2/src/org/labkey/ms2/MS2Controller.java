@@ -128,13 +128,6 @@ public class MS2Controller extends ViewController
     }
 
 
-    private void addSelectAndClearButtons(ButtonBar bb)
-    {
-        bb.add(ActionButton.BUTTON_SELECT_ALL);
-        bb.add(ActionButton.BUTTON_CLEAR_ALL);
-    }
-
-
     private enum Template
     {
         home

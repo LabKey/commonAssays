@@ -828,6 +828,18 @@
         <ns:isUserEditable>true</ns:isUserEditable>
         <ns:sortDescending>true</ns:sortDescending>
       </ns:column>
+      <ns:column columnName="OrigScore">
+        <ns:columnTitle>OrigScore</ns:columnTitle>
+        <ns:inputType>text</ns:inputType>
+        <ns:formatString>0.00</ns:formatString>
+        <ns:displayWidth>75</ns:displayWidth>
+        <ns:scale>10</ns:scale>
+        <ns:inputLength>10</ns:inputLength>
+        <ns:nullable>false</ns:nullable>
+        <ns:isReadOnly>false</ns:isReadOnly>
+        <ns:isUserEditable>true</ns:isUserEditable>
+        <ns:sortDescending>true</ns:sortDescending>
+      </ns:column>
       <ns:column columnName="IonPercent">
         <ns:columnTitle>Ion%</ns:columnTitle>
         <ns:inputType>text</ns:inputType>
@@ -1256,6 +1268,17 @@
       </ns:column>
       <ns:column columnName="Homology">
         <ns:columnTitle>Homology</ns:columnTitle>
+        <ns:inputType>text</ns:inputType>
+        <ns:formatString>0</ns:formatString>
+        <ns:displayWidth>55</ns:displayWidth>
+        <ns:scale>10</ns:scale>
+        <ns:inputLength>10</ns:inputLength>
+        <ns:nullable>false</ns:nullable>
+        <ns:isReadOnly>false</ns:isReadOnly>
+        <ns:isUserEditable>true</ns:isUserEditable>
+      </ns:column>
+      <ns:column columnName="OrigScore">
+        <ns:columnTitle>OrigScore</ns:columnTitle>
         <ns:inputType>text</ns:inputType>
         <ns:formatString>0</ns:formatString>
         <ns:displayWidth>55</ns:displayWidth>

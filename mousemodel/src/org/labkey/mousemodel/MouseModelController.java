@@ -173,7 +173,6 @@ public class MouseModelController extends ViewController
         locateSampleView.setTitle("Locate Sample");
 
         HBox hbox = new HBox(new HttpView[]{dashboardView, startNecropsyView, locateSampleView});
-        //NotesView notesView = new NotesView(form.getContainer(), (form.getBean()).getEntityId());
         HttpView discussionView = DiscussionService.get().getDisussionArea(
                 getViewContext(), getContainer(), getUser(),
                 model.getEntityId(), getViewContext().cloneViewURLHelper(), model.getName());

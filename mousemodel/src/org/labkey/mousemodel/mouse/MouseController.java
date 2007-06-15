@@ -244,7 +244,6 @@ public class MouseController extends ViewController
         DetailsView detailsView = new DetailsView(getDetailsRegion(form), form);
         detailsView.setTitle("Mouse Details");
 
-//        NotesView notesView = new NotesView(c, form.getEntityId());
         HttpView discussionView = DiscussionService.get().getDisussionArea(
                 getViewContext(), getContainer(), getUser(),
                 mouse.getEntityId(), getViewContext().cloneViewURLHelper(), mouse.getMouseNo());
@@ -373,100 +372,9 @@ public class MouseController extends ViewController
         urlhelp.setAction("details");
         rgn.getDisplayColumn(2).setURL(urlhelp.getLocalURIString() + "&LSID=${LSID}&modelId=" + mouse.getModelId());
 
-        /*
-        urlhelp.setPageFlow("MouseModel-Necropsy");
-        urlhelp.setAction("locateSample");
-        urlhelp.replaceParameter("modelId", String.valueOf(mouse.getModelId()));
-        rgn.addColumn(new SimpleDisplayColumn("<a href='"
-                    + urlhelp.getLocalURIString()
-                    + "&sampleId=${sampleId}&sourceId=${sourceId}'>Locate</a>")
-                    {
-                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-                        {
-                        Boolean frozenUsed = (Boolean) ctx.get("FrozenUsed");
-                        if (frozenUsed != null && frozenUsed.booleanValue())
-                            out.write("(Used)");
-                        else
-                            super.renderGridCellContents(ctx, out);
-                        }
-                    });
-        */
-
         rgn.setButtonBar(ButtonBar.BUTTON_BAR_EMPTY, DataRegion.MODE_GRID);
         return rgn;
     }
-
-/*    private DataRegion getSamplesDefaultRegion(String organismId)
-    {
-        DataRegion rgn = new DataRegion();
-        rgn.setColumns(getSampleTable().getUserEditableColumns());
-
-        ButtonBar bb = new ButtonBar();
-        ActionButton buttonSubmitInsert = new ActionButton("insertSample.post", "Insert Sample");
-        bb.add(buttonSubmitInsert);
-        rgn.setButtonBar(bb, DataRegion.MODE_INSERT);
-
-        ButtonBar bbDetails = new ButtonBar();
-        ActionButton buttonEdit = new ActionButton("showUpdateSample.view", "Edit");
-        buttonEdit.setActionType(ActionButton.Action.GET);
-        bbDetails.add(buttonEdit);
-        ViewURLHelper urlhelp = cloneViewURLHelper();
-        if (null != organismId)
-        {
-            urlhelp.replaceParameter("entityId", organismId);
-            urlhelp.setAction("showSamples");
-
-            ActionButton buttonShowGrid = new ActionButton("Show Samples");
-            buttonShowGrid.setActionType(ActionButton.Action.LINK);
-            buttonShowGrid.setURL(urlhelp.getLocalURIString());
-            bb.add(buttonShowGrid);
-        }
-
-        rgn.setButtonBar(bbDetails, DataRegion.MODE_DETAILS);
-
-        ButtonBar bbUpdate = new ButtonBar();
-        ActionButton buttonSubmit = new ActionButton("updateSample.post", "Submit");
-        buttonSubmit.setActionType(ActionButton.Action.POST);
-        bbUpdate.add(buttonSubmit);
-        rgn.setButtonBar(bbUpdate, DataRegion.MODE_UPDATE);
-
-        return rgn;
-    } */
-
-
-/*    @Jpf.Action
-    protected Forward sampleDetails(MouseSampleForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        form.refreshFromDb(false);
-        MouseForm mouseForm = new MouseForm();
-        mouseForm.reset(null, getRequest());
-        mouseForm.setEntityId((String) form.get("organismId"));
-        DetailsView detailsView = new DetailsView(getSamplesDefaultRegion(mouseForm.getEntityId()), form);
-
-        VelocityDataView mouseView = new VelocityDataView(getDefaultRegion(mouseForm), mouseForm, "mousedetails.vm");
-        mouseView.setMode(DataRegion.MODE_DETAILS);
-        mouseView.addObject("caption", "Sample Details");
-        mouseView.setView("child", detailsView);
-
-        JspView slidesView = new JspView("/org/labkey/mousemodel/sample/slides.jsp");
-        slidesView.setTitle("Slides");
-        SimpleFilter filter = new SimpleFilter("sampleId", form.getTypedValue("sampleId"));
-        Map[] slides = Table.select(MouseSchema.getMouseSlide(), Table.ALL_COLUMNS, filter, null, Map.class);
-        slidesView.addObject("slides", slides);
-
-//        NotesView notesView = new NotesView(form.getContainer(), form.getBean().getEntityId());
-        Sample sample = form.getBean();
-        HttpView discussionView = DiscussionService.get().getDisussionArea(
-            getViewContext(), getContainer(), getUser(), sample.getLSID(), getViewContext().cloneViewURLHelper(), sample.getSampleId());
-        VBox box = new VBox(mouseView, slidesView, discussionView);
-
-        //InsertView insertView = new InsertView(getDefaultRegion());
-        _renderInTemplate(box, form);
-        return null;
-    } */
-
 
     @Jpf.Action
     protected Forward showSamples(MouseForm form) throws Exception

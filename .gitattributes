@@ -503,7 +503,6 @@ issue/webapp/Issues/scripts/sql[!!-~]server/obsolete/issues-1.60-1.61.sql -text
 issue/webapp/Issues/scripts/sql[!!-~]server/obsolete/issues-1.70-1.71.sql -text
 mousemodel/module.properties -text
 mousemodel/src/org/labkey/mousemodel/MouseModelModule.java -text
-mousemodel/src/org/labkey/mousemodel/NotesView.java -text
 mousemodel/src/org/labkey/mousemodel/details.gm -text
 mousemodel/src/org/labkey/mousemodel/insert.vm -text
 mousemodel/src/org/labkey/mousemodel/mouse/bulkUpdate.vm -text
@@ -559,7 +558,6 @@ ms2/src/META-INF/ms2.xml -text
 ms2/src/META-INF/prot.xml -text
 ms2/src/org/labkey/ms2/AACoverageColumn.java -text
 ms2/src/org/labkey/ms2/BeanXMLStreamReader.java -text
-ms2/src/org/labkey/ms2/CometDefLoader.java -text
 ms2/src/org/labkey/ms2/CometRun.java -text
 ms2/src/org/labkey/ms2/CompareServiceImpl.java -text
 ms2/src/org/labkey/ms2/DeltaScanColumn.java -text
@@ -861,6 +859,7 @@ ms2/webapp/MS2/scripts/postgresql/ms2-1.70-2.00.sql -text
 ms2/webapp/MS2/scripts/postgresql/ms2-2.00-2.01.sql -text
 ms2/webapp/MS2/scripts/postgresql/ms2-2.00-2.10.sql -text
 ms2/webapp/MS2/scripts/postgresql/ms2-2.01-2.02.sql -text
+ms2/webapp/MS2/scripts/postgresql/ms2-2.10-2.11.sql -text
 ms2/webapp/MS2/scripts/postgresql/obsolete/ms2-1.00-1.01.sql -text
 ms2/webapp/MS2/scripts/postgresql/obsolete/ms2-1.01-1.02.sql -text
 ms2/webapp/MS2/scripts/postgresql/obsolete/ms2-1.10-1.11.sql -text
@@ -912,6 +911,7 @@ ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-1.70-2.00.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-2.00-2.01.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-2.00-2.10.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-2.01-2.02.sql -text
+ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-2.10-2.11.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/ms2-drop.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.62.sql -text
 ms2/webapp/MS2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.63.sql -text

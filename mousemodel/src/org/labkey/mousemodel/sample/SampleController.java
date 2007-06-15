@@ -245,8 +245,6 @@ public class SampleController extends ViewController
         locationView.setTitle("Location");
 
         SlidesView slidesView = new SlidesView(model, sample, getViewContext());
-
-//        NotesView notesView = new NotesView(form.getContainer(), (String) form.getTypedValue("entityId"));
         HttpView discussionView = DiscussionService.get().getDisussionArea(getViewContext(), getContainer(), getUser(), sample.getLSID(), getViewContext().cloneViewURLHelper(), sample.getSampleId());
 
         VBox vbox = new VBox(new HBox(new HttpView[]{detailsView, locationView}), slidesView, discussionView);

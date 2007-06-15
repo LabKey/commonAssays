@@ -9,10 +9,7 @@ import java.util.Map;
  */
 public class PhenyxRun extends MS2Run
 {
-    public PhenyxRun()
-    {
-    }
-
+    @Override
     public void adjustScores(Map<String, String> map)
     {
         if (null == map.get("bogus"))
