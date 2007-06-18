@@ -88,6 +88,8 @@ public class PCWorkspace extends FlowJoWorkspace
             lstX.add(x);
             lstY.add(y);
         }
+        scaleValues(xAxis, lstX);
+        scaleValues(yAxis, lstY);
         double[] X = toDoubleArray(lstX);
         double[] Y = toDoubleArray(lstY);
         Polygon poly = new Polygon(X, Y);

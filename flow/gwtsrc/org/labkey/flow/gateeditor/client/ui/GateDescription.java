@@ -10,6 +10,7 @@ public class GateDescription extends GateComponent
 {
     FlexTable widget;
 
+    Map labelMap = new HashMap();
     ListBox xAxis;
     ListBox yAxis;
     Button btnClearAllPoints = new Button("Clear All Points", new ClickListener() {
@@ -115,7 +116,7 @@ public class GateDescription extends GateComponent
         {
             GWTIntervalGate interval = (GWTIntervalGate) gate;
             widget.setText(++row, 0, "Axis:");
-            widget.setText(row, 1, interval.getAxis());
+            widget.setText(row, 1, getLabel(interval.getAxis()));
             widget.setText(++row, 0, "Plotted Against:");
             widget.setWidget(row, 1, yAxis);
             setValue(yAxis, editor.getState().getYAxis());
@@ -138,8 +139,8 @@ public class GateDescription extends GateComponent
             }
             else
             {
-                widget.setText(++row, 0, polygon.getXAxis());
-                widget.setText(row, 1, polygon.getYAxis());
+                widget.setText(++row, 0, getLabel(polygon.getXAxis()));
+                widget.setText(row, 1, getLabel(polygon.getYAxis()));
                 double[] arrX = polygon.getArrX();
                 double[] arrY = polygon.getArrY();
                 for (int i = 0; i < arrX.length; i ++)
@@ -192,7 +193,7 @@ public class GateDescription extends GateComponent
     {
         List parameters = new ArrayList();
         List labels = new ArrayList();
-        Map labelMap = new HashMap();
+        labelMap = new HashMap();
         GWTWorkspace workspace = getWorkspace();
         if (workspace != null)
         {
@@ -224,6 +225,16 @@ public class GateDescription extends GateComponent
         parameters.add(0, "");
         labels.add(0, "[[histogram]]");
         updateDropdown(yAxis, parameters, labels);
+    }
+
+    protected String getLabel(String axis)
+    {
+        if (axis == null || axis.length() == 0)
+            return "[[histogram]]";
+        String ret = (String) labelMap.get(axis);
+        if (ret == null)
+            return axis;
+        return ret;
     }
 
     private void updateDropdown(ListBox listbox, List values, List labels)

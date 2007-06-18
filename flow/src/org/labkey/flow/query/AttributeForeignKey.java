@@ -21,7 +21,14 @@ abstract public class AttributeForeignKey<T> implements ForeignKey
 
     public TableInfo getLookupTableInfo()
     {
-        VirtualTable ret = new VirtualTable(FlowManager.get().getSchema());
+        VirtualTable ret = new VirtualTable(FlowManager.get().getSchema())
+        {
+            protected boolean isCaseSensitive()
+            {
+                return true;
+            }
+        };
+
         for (T attrName : getAttributes())
         {
             ColumnInfo column = new ColumnInfo(attrName.toString(), ret);

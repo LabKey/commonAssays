@@ -169,7 +169,8 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
             FlowScript analysisScript = getProtocol();
             if (analysisScript == null)
             {
-                setProtocol(availableProtocols.iterator().next());
+                analysisScript = availableProtocols.iterator().next();
+                setProtocol(analysisScript);
             }
             FlowProtocolStep step = getProtocolStep();
             if (step == null || !analysisScript.hasStep(step))
@@ -204,64 +205,6 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
         return null;
     }
 
-    private void addInClause(SimpleFilter filter, ColumnInfo column, boolean in, Collection< ? extends Object> objects)
-    {
-        if (objects.size() == 0)
-        {
-            if (in)
-            {
-                filter.addWhereClause("(1 = 0)", null);
-            }
-            return;
-        }
-
-        SQLFragment ret = new SQLFragment("(");
-        ret.append(column.getAlias());
-        if (!in)
-            ret.append(" NOT ");
-        ret.append(" IN ( ? ");
-        ret.append(StringUtils.repeat(",?", objects.size() - 1));
-        ret.append("))");
-        ret.addAll(objects);
-        filter.addWhereClause(ret.getSQL(), ret.getParams().toArray(), column.getName());
-    }
-
-    private void addUnanalyzedRunFilter(TableInfo table, SimpleFilter filter) throws Exception
-    {
-        FlowExperiment experiment = getTargetExperiment();
-        if (experiment == null)
-            return;
-        String[] paths = experiment.getAnalyzedRunPaths(getUser(), getProtocolStep());
-        addInClause(filter, table.getColumn("FilePathRoot"), false, Arrays.asList(paths));
-    }
-
-    /**
-     * If this analysis requires a compensation matrix, and does not define a compensation calculation,
-     * and the user has not yet chosen a compensation matrix, then only allow them to analyze runs for which
-     * a compensation matrix has already been calculated.
-     */
-    private void addHasCompensationMatrixFilter(TableInfo table, SimpleFilter filter) throws Exception
-    {
-        FlowScript analysisScript = getProtocol();
-        if (!analysisScript.requiresCompensationMatrix(getProtocolStep()))
-            return;
-        if (getCompensationMatrixId() != 0)
-            return;
-        Set<String> paths = new HashSet();
-        FlowExperiment experiment = FlowExperiment.fromLSID(getCompensationExperimentLSID());
-        if (experiment != null)
-        {
-            paths.addAll(Arrays.asList(experiment.getAnalyzedRunPaths(getUser(), FlowProtocolStep.calculateCompensation)));
-            paths.addAll(Arrays.asList(experiment.getAnalyzedRunPaths(getUser(), FlowProtocolStep.analysis)));
-        }
-        else if (analysisScript.hasStep(FlowProtocolStep.calculateCompensation))
-        {
-            return;
-        }
-
-        addInClause(filter, table.getColumn("FilePathRoot"), true, paths);
-    }
-
     public SimpleFilter getBaseFilter(TableInfo table, Filter filter)
     {
         try
@@ -279,6 +222,8 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
                 String comma = "";
                 for (FlowRun run : runs)
                 {
+                    if (run.getPath() == null)
+                        continue;
                     sql.append(comma);
                     comma = ",";
                     sql.append(run.getRunId());
@@ -286,8 +231,6 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
                 sql.append(")");
                 ret.addWhereClause(sql.toString(), new Object[0], "RowId");
             }
-            addUnanalyzedRunFilter(table, ret);
-            addHasCompensationMatrixFilter(table, ret);
             return ret;
         }
         catch (Exception e)

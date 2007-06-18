@@ -69,6 +69,12 @@
     </p>
 
     <p>Which statistics should be calculated?<br>
+
+        <% if (form.getExistingStatCount() != 0)
+        {%>
+            <%=statOption(StatisticSet.existing)%> The <%=form.getExistingStatCount()%> statistics that are already specified in this analysis script.<br>
+        <%}%>
+        <%=statOption(StatisticSet.workspace)%> Statistics in the FlowJo workspace<br>
         <%=statOption(StatisticSet.count)%> Count<br>
         <%=statOption(StatisticSet.frequency)%> Frequency of Total<br>
         <%=statOption(StatisticSet.frequencyOfParent)%> Frequency of Parent<br>

@@ -62,7 +62,7 @@ public class EditScriptForm extends ViewForm
         }
         catch (Exception e)
         {
-            throw new UnexpectedException(e);
+            throw UnexpectedException.wrap(e);
         }
         try
         {
@@ -73,6 +73,7 @@ public class EditScriptForm extends ViewForm
 
         }
     }
+    
     public ScriptComponent getAnalysis() throws Exception
     {
         return analysisScript.getCompensationCalcOrAnalysis(step);

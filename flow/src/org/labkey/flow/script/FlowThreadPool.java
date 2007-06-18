@@ -14,7 +14,7 @@ public class FlowThreadPool
     {
         _taskSets.add(taskSet);
         int processorCount = Runtime.getRuntime().availableProcessors();
-        int threadCount = Math.min(processorCount - 1, 1);
+        int threadCount = Math.min(processorCount - 1, 3);
 
         _threads = new Thread[threadCount];
         for (int i = 0; i < threadCount; i ++)

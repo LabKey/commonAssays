@@ -8,6 +8,12 @@
 <%@ page import="org.labkey.flow.analysis.model.PopulationSet"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
+<style type="text/css">
+    .disabledRow td, .disabledRow td a, .disabledRow td a:link
+    {
+        color: gray;
+    }
+</style>
 <%!
     String select(String name, Object curVal, Collection<? extends FlowObject> objs, String nullLabel)
     {
@@ -49,5 +55,5 @@
         </tr>
         <% } %>
     </table>
+    <%include(view, out);%>
 </form>
-<%include(view, out);%>

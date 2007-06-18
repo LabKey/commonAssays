@@ -134,6 +134,19 @@ public class FlowAnalyzer
         return ret;
     }
 
+    static public StatisticDef addStatistic(AnalysisDef analysis, StatisticSpec stat)
+    {
+        StatisticDef statElement = analysis.addNewStatistic();
+        statElement.setName(stat.getStatistic().toString());
+        if (stat.getSubset() != null)
+            statElement.setSubset(stat.getSubset().toString());
+        if (stat.getParameter() != null)
+            statElement.setParameter(stat.getParameter());
+        return statElement;
+    }
+
+
+
     static private CompensationCalculation.ChannelSubset readSubsetDef(ChannelSubsetDef subsetDef)
     {
         SampleCriteria criteria = SampleCriteria.readChildCriteria((Element) subsetDef.getDomNode());
@@ -260,7 +273,7 @@ public class FlowAnalyzer
         }
     }
 
-    static public void makeAnalysis(ScriptDef script, CompensationCalculation compensationCalculation, Analysis analysis)
+    static public void makeCompensationCalculationDef(ScriptDef script, CompensationCalculation compensationCalculation)
     {
         ScriptSettings settings = new ScriptSettings();
         settings.merge(script.getSettings());
@@ -293,6 +306,20 @@ public class FlowAnalyzer
                 fillSubsetDef(def.addNewNegative(), info.getNegative());
             }
         }
+    }
+
+    static public void makeAnalysisDef(ScriptDef script, Analysis analysis, Set<StatisticSet> statisticSets)
+    {
+        if (statisticSets == null)
+        {
+            statisticSets = EnumSet.of(StatisticSet.existing); 
+        }
+        else
+        {
+            statisticSets = EnumSet.copyOf(statisticSets);
+        }
+        ScriptSettings settings = new ScriptSettings();
+        settings.merge(script.getSettings());
         if (analysis != null)
         {
             settings.merge(analysis.getSettings());
@@ -317,6 +344,51 @@ public class FlowAnalyzer
             for (SubsetSpec subset : analysis.getSubsets())
             {
                 analysisElement.addNewSubset().setSubset(subset.toString());
+            }
+
+            if (!statisticSets.equals(EnumSet.of(StatisticSet.existing)))
+            {
+                Set<StatisticSpec> statisticSpecs = new TreeSet();
+                if (statisticSets.contains(StatisticSet.existing))
+                {
+                    for (StatisticDef stat : analysisElement.getStatisticArray())
+                    {
+                        StatisticSpec spec = makeStatisticSpec(stat);
+                        StatisticSet set = StatisticSet.fromStatisticSpec(spec);
+                        if (set != null)
+                        {
+                            statisticSets.add(set);
+                        }
+                        statisticSpecs.add(spec);
+                    }
+                }
+                if (statisticSets.contains(StatisticSet.workspace))
+                {
+                    for (StatisticSpec spec : analysis.getStatistics())
+                    {
+                        if (StatisticSet.isRedundant(statisticSets, spec))
+                        {
+                            continue;
+                        }
+                        statisticSpecs.add(spec);
+                    }
+                }
+                for (StatisticSet statisticSet : statisticSets)
+                {
+                    StatisticSpec spec = statisticSet.getStat();
+                    if (spec != null)
+                    {
+                        statisticSpecs.add(spec);
+                    }
+                }
+                while (analysisElement.getStatisticArray().length != 0)
+                {
+                    analysisElement.removeStatistic(0);
+                }
+                for (StatisticSpec spec : statisticSpecs)
+                {
+                    addStatistic(analysisElement, spec);
+                }
             }
         }
         script.setSettings(settings.toSettingsDef());

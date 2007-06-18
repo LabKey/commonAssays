@@ -97,7 +97,9 @@ public class PopulationTree extends GateComponent
     private void addLabels(GWTPopulation population, int depth)
     {
         Label label = new Label(population.getName());
+        label.setStyleName("normal");
         DOM.setStyleAttribute(label.getElement(), "paddingLeft", (depth * 10) + "px");
+        DOM.setStyleAttribute(label.getElement(), "cursor", "default");
         tree.add(label);
         label.addClickListener(clickListener);
         makeBold(population, label);

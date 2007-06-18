@@ -29,6 +29,7 @@
             <labkey:selectAll/>
             <labkey:clearAll/>
             <labkey:button text="Upload Selected Runs" action="<%=AnalysisScriptController.Action.uploadRuns%>"/>
-    <% } %>
 </form>
+    <% } else { %>
 <labkey:button text="Browse for more runs" href="<%=form.srcURL%>"/>
+<% } %>

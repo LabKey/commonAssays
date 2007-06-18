@@ -224,7 +224,15 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         List<String> skippedPaths = new ArrayList();
         for (String path : form.ff_path)
         {
-            File file = root.resolvePath(path);
+            File file;
+            if (path == null)
+            {
+                file = root.getRootPath();
+            }
+            else
+            {
+                file = root.resolvePath(path);
+            }
             if (file == null)
             {
                 skippedPaths.add(path);

@@ -33,7 +33,7 @@
         if (getRun().isInWorkspace()) { %>
             <p>
                 This run is in the workspace.<br>
-                <labkey:link href="<%=getRun().urlFor(ScriptController.Action.editGates)%>" text="Edit Gates on Individual Wells" /><br>
+                <labkey:link href="<%=getRun().urlFor(ScriptController.Action.gateEditor)%>" text="Edit Gates on Individual Wells" /><br>
                 When you are finished editing the gates, you can recalculate the statistics and move this run back into an analysis.<br>
                 <labkey:link href="<%=getRun().urlFor(RunController.Action.moveToAnalysis)%>" text="Finish editing gates" />
             </p>

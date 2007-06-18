@@ -141,7 +141,7 @@ public class MacWorkspace extends FlowJoWorkspace
         return strExpr.toString();
     }
 
-    protected void readStats(SubsetSpec subset, Element elPopulation, AttributeSet results)
+    protected void readStats(SubsetSpec subset, Element elPopulation, AttributeSet results, Analysis analysis)
     {
         String strCount = elPopulation.getAttribute("count");
         if (!StringUtils.isEmpty(strCount))
@@ -185,6 +185,7 @@ public class MacWorkspace extends FlowJoWorkspace
                 spec = new StatisticSpec(subset, stat, parameter + ":" + percentile);
             }
             results.setStatistic(spec, value);
+            analysis.addStatistic(spec);
         }
     }
 
@@ -195,7 +196,7 @@ public class MacWorkspace extends FlowJoWorkspace
         {
             SubsetSpec subset = new SubsetSpec(parentSubset, "(" + booleanExpr + ")");
             analysis.addSubset(subset);
-            readStats(subset, elPopulation, results);
+            readStats(subset, elPopulation, results, analysis);
             return null;
         }
 
@@ -230,6 +231,8 @@ public class MacWorkspace extends FlowJoWorkspace
                             lstY.add(parseParamValue(yAxis, elVertex, "y"));
                         }
                     }
+                    scaleValues(xAxis, lstX);
+                    scaleValues(yAxis, lstY);
                     double[] X = toDoubleArray(lstX);
                     double[] Y = toDoubleArray(lstY);
                     PolygonGate gate = new PolygonGate(xAxis, yAxis, new Polygon(X, Y));
@@ -247,13 +250,14 @@ public class MacWorkspace extends FlowJoWorkspace
                             lstValues.add(parseParamValue(axis, elVertex, "x"));
                         }
                     }
+                    scaleValues(axis, lstValues);
                     IntervalGate gate = new IntervalGate(axis, lstValues.get(0), lstValues.get(1));
                     ret.addGate(gate);
                 }
             }
         }
 
-        readStats(subset, elPopulation, results);
+        readStats(subset, elPopulation, results, analysis);
 
         for (Element elChild: getElementsByTagName(elPopulation, "Population"))
         {

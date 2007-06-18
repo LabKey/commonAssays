@@ -22,7 +22,7 @@ import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.query.AttributeCache;
 
-public class AttributeSet
+public class AttributeSet implements Serializable
 {
     static public AttributeSet fromData(ExpData data)
     {

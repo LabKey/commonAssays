@@ -39,7 +39,17 @@ public class GateWidget extends GraphWidget
             return;
         graphWindow.image.setUrl(urlGraphWindow(graphWindow.graphInfo));
         graphWindow.image.setVisible(true);
-        for (int i = 0; i < handles.length; i++)
+        int newSize = 0;
+        if (getGate() instanceof GWTIntervalGate)
+        {
+            newSize = 2;
+        }
+        if (getGate() instanceof GWTPolygonGate)
+        {
+            newSize = ((GWTPolygonGate) getGate()).getArrX().length;
+        }
+        resizeHandleArray(newSize);
+        for (int i = 0; i < handles.length; i ++)
         {
             handles[i].updateDisplay();
         }
@@ -101,7 +111,7 @@ public class GateWidget extends GraphWidget
             maxPt.x += ptOffset.x;
             minPt = graphWindow.screenToValue(minPt);
             maxPt = graphWindow.screenToValue(maxPt);
-            interval = new GWTIntervalGate(interval.getAxis(), minPt.x, minPt.y);
+            interval = new GWTIntervalGate(interval.getAxis(), minPt.x, maxPt.x);
             gate = interval;
         }
         else if (gate instanceof GWTPolygonGate)
@@ -178,30 +188,16 @@ public class GateWidget extends GraphWidget
         handles = newHandles;
     }
 
-    public void updateGate()
-    {
-        int newSize = 0;
-        if (getGate() instanceof GWTIntervalGate)
-        {
-            newSize = 2;
-        }
-        if (getGate() instanceof GWTPolygonGate)
-        {
-            newSize = ((GWTPolygonGate) getGate()).getArrX().length;
-        }
-        resizeHandleArray(newSize);
-        updateDisplay();
-    }
-
     public GWTRectangle getBoundingRect()
     {
         GWTGate gate = getGate();
         if (gate instanceof GWTIntervalGate)
         {
             GWTIntervalGate interval = (GWTIntervalGate) gate;
-            GWTRectangle ret = new GWTRectangle(graphWindow.valueToScreen(new GWTPoint(interval.getMinValue(), 0)), new GWTPoint(interval.getMaxValue(), 0));
-            ret.y = graphWindow.graphInfo.rcChart.y + graphWindow.image.getAbsoluteTop();
-            ret.height = graphWindow.graphInfo.rcChart.height;
+            GWTRectangle ret = new GWTRectangle(graphWindow.valueToScreen(new GWTPoint(interval.getMinValue(), 0)),
+                    graphWindow.valueToScreen(new GWTPoint(interval.getMaxValue(), 0)));
+            ret.y = graphWindow.graphInfo.rcData.y + graphWindow.image.getAbsoluteTop();
+            ret.height = graphWindow.graphInfo.rcData.height;
             return ret;
         }
         if (gate instanceof GWTPolygonGate)

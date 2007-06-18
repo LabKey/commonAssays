@@ -92,6 +92,16 @@ public class Handle extends GraphWidget
         this.index = index;
     }
 
+    private boolean isHistogram()
+    {
+        if (getGate() instanceof GWTIntervalGate)
+            return true;
+        GWTGraphInfo info = graphWindow.getGraphInfo();
+        if (info != null && info.graphOptions.isHistogram())
+            return true;
+        return false;
+    }
+
     public GWTRectangle getPosition()
     {
         GWTPoint pt = getPoint();
@@ -101,12 +111,12 @@ public class Handle extends GraphWidget
         GWTGraphInfo info = graphWindow.getGraphInfo();
         if (info == null)
             return null;
-        if (info.graphOptions.isHistogram())
+        if (isHistogram())
         {
             ret.x = pt.x;
             ret.width = 1;
-            ret.y = graphWindow.image.getAbsoluteTop() + info.rcChart.y;
-            ret.height = info.rcChart.height;
+            ret.y = graphWindow.image.getAbsoluteTop() + info.rcData.y;
+            ret.height = info.rcData.height;
         }
         else
         {

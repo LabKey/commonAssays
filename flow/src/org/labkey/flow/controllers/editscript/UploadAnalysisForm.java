@@ -16,20 +16,26 @@ public class UploadAnalysisForm extends EditScriptForm
 {
     private static final Logger _log = Logger.getLogger(UploadAnalysisForm.class);
 
+    private int existingStatCount = 0;
     public FormFile workspaceFile;
     public FlowJoWorkspace workspaceObject;
     public Set<StatisticSet> ff_statisticSet;
 
+
     public void reset(ActionMapping actionMapping, HttpServletRequest servletRequest)
     {
         super.reset(actionMapping, servletRequest);
-        ff_statisticSet = EnumSet.noneOf(StatisticSet.class);
+        ff_statisticSet = EnumSet.of(StatisticSet.existing, StatisticSet.workspace, StatisticSet.count, StatisticSet.frequencyOfParent);
         try
         {
             Analysis analysis = (Analysis) getAnalysis();
-            if (analysis == null || analysis.getStatistics().size() == 0)
+            if (analysis != null)
             {
-                EnumSet.of(StatisticSet.count, StatisticSet.frequencyOfParent);
+                existingStatCount = analysis.getStatistics().size();
+                if (existingStatCount != 0)
+                {
+                    ff_statisticSet = EnumSet.of(StatisticSet.existing);
+                }
             }
         }
         catch (Exception e)
@@ -63,9 +69,15 @@ public class UploadAnalysisForm extends EditScriptForm
         ff_statisticSet = EnumSet.noneOf(StatisticSet.class);
         for (String value : values)
         {
+
             if (StringUtils.isEmpty(value))
                 continue;
             ff_statisticSet.add(StatisticSet.valueOf(value));
         }
+    }
+
+    public int getExistingStatCount()
+    {
+        return existingStatCount;
     }
 }

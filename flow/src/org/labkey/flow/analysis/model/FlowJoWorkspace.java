@@ -13,20 +13,16 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.*;
 import java.net.URI;
 
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.api.security.User;
 import org.labkey.api.data.Container;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.exp.api.*;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.Attributes;
@@ -570,14 +566,36 @@ abstract public class FlowJoWorkspace implements Serializable
 
     protected double parseParamValue(String param, Element el, String attribute)
     {
-        double ret = Double.valueOf(el.getAttribute(attribute));
-        ret *= getMultiplier(param);
-        return ret;
+        return Double.valueOf(el.getAttribute(attribute));
     }
 
     protected void warning(String str)
     {
         _warnings.add(str);
+    }
+
+    /**
+     * There are some 
+     * @param axis
+     * @param values
+     */
+    protected void scaleValues(String axis, List<Double> values)
+    {
+        double multiplier = getMultiplier(axis);
+        if (multiplier == 1)
+        {
+            return;
+        }
+        assert multiplier == 64;
+        for (int i = 0; i < values.size(); i++)
+        {
+            if (values.get(i) > 4096)
+                return;
+        }
+        for (int i = 0; i < values.size(); i ++)
+        {
+            values.set(i, values.get(i) * multiplier);
+        }
     }
 
     public FlowRun createExperimentRun(User user, Container container, FlowExperiment experiment, File workspaceFile, File runFilePathRoot) throws Exception
@@ -673,7 +691,7 @@ abstract public class FlowJoWorkspace implements Serializable
                     {
                         ScriptDocument scriptDoc = ScriptDocument.Factory.newInstance();
                         ScriptDef scriptDef = scriptDoc.addNewScript();
-                        FlowAnalyzer.makeAnalysis(scriptDef, null, analysis);
+                        FlowAnalyzer.makeAnalysisDef(scriptDef, analysis, EnumSet.of(StatisticSet.workspace));
                         FlowScript.createScriptForWell(user, new FlowFCSAnalysis(fcsAnalysis), fcsAnalysis.getName() + "_script", scriptDoc, workspaceData, InputRole.Workspace);
                     }
                     CompensationMatrix comp = entry.getKey().getCompensationMatrix();

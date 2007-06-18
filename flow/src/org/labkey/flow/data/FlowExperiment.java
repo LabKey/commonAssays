@@ -183,12 +183,14 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     public String[] getAnalyzedRunPaths(User user, FlowProtocolStep step) throws Exception
     {
         FlowRun[] runs = getRuns(step);
-        String[] ret = new String[runs.length];
+        List<String> ret = new ArrayList();
         for (int i = 0; i < runs.length; i ++)
         {
-            ret[i] = runs[i].getExpObject().getFilePathRoot();
+            String str = runs[i].getExpObject().getFilePathRoot();
+            if (str != null)
+                ret.add(str);
         }
-        return ret;
+        return ret.toArray(new String[0]);
     }
 
     public FlowRun[] findRun(File filePath, FlowProtocolStep step) throws SQLException
@@ -297,5 +299,20 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         ExpExperiment exp = ExperimentService.get().createExpExperiment(container, FlowWorkspaceExperimentName);
         exp.save(user);
         return new FlowExperiment(exp);
+    }
+
+    public FlowCompensationMatrix findCompensationMatrix(FlowRun run) throws SQLException
+    {
+        List<FlowRun> runs = new ArrayList();
+        runs.addAll(Arrays.asList(findRun(new File(run.getPath()), FlowProtocolStep.analysis)));
+        runs.addAll(Arrays.asList(findRun(new File(run.getPath()), FlowProtocolStep.calculateCompensation)));
+        for (FlowRun runComp : runs)
+        {
+            FlowCompensationMatrix comp = runComp.getCompensationMatrix();
+            if (comp != null)
+                return comp;
+        }
+        return null;
+
     }
 }

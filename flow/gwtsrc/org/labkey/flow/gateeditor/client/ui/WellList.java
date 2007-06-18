@@ -48,6 +48,7 @@ public class WellList extends GateComponent
     {
         super(editor);
         basePanel = new VerticalPanel();
+        basePanel.setStyleName("normal");
         Image spacer = new Image();
         spacer.setUrl(FlowUtil._gif());
         spacer.setHeight("1px");
@@ -80,6 +81,8 @@ public class WellList extends GateComponent
         {
             GWTWell well = wells[i];
             Label label = new Label(well.getLabel());
+            label.setStyleName("normal");
+            DOM.setStyleAttribute(label.getElement(), "cursor", "default");
             if (well.getScript() != null)
             {
                 DOM.setStyleAttribute(label.getElement(), "fontWeight", "bold");

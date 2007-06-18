@@ -320,6 +320,7 @@ flow/src/org/labkey/flow/controllers/editscript/template.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/uploadAnalysis.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/uploadCompensationCalculation.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/AnalysisScriptController.java -text
+flow/src/org/labkey/flow/controllers/executescript/ChooseRunsRegion.java -text
 flow/src/org/labkey/flow/controllers/executescript/ChooseRunsToAnalyzeForm.java -text
 flow/src/org/labkey/flow/controllers/executescript/ChooseRunsToUploadForm.java -text
 flow/src/org/labkey/flow/controllers/executescript/ChooseRunsView.java -text

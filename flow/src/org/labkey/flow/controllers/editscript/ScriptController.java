@@ -626,17 +626,8 @@ public class ScriptController extends BaseFlowController
         {
             addGraphs(analysisElement, analysis);
         }
-        if (!form.ff_statisticSet.isEmpty())
-        {
-            while (analysisElement.getStatisticArray().length > 0)
-                analysisElement.removeStatistic(0);
-            for (StatisticSet spec : form.ff_statisticSet)
-            {
-                addStatistic(analysisElement, spec.getStat());
-            }
-        }
 
-        FlowAnalyzer.makeAnalysis(doc.getScript(), null, analysis);
+        FlowAnalyzer.makeAnalysisDef(doc.getScript(), analysis, form.ff_statisticSet);
         if (!safeSetAnalysisScript(analysisScript, doc.toString()))
             return null;
         return new ViewForward(analysisScript.urlShow());
@@ -680,25 +671,6 @@ public class ScriptController extends BaseFlowController
         {
             addGraph(analysisElement, graph);
         }
-    }
-
-    protected void addStatistics(AnalysisDef analysisElement, Analysis analysis)
-    {
-        for (StatisticSpec stat : analysis.getStatistics())
-        {
-            addStatistic(analysisElement, stat);
-        }
-    }
-
-    protected StatisticDef addStatistic(AnalysisDef analysis, StatisticSpec stat)
-    {
-        StatisticDef statElement = analysis.addNewStatistic();
-        statElement.setName(stat.getStatistic().toString());
-        if (stat.getSubset() != null)
-            statElement.setSubset(stat.getSubset().toString());
-        if (stat.getParameter() != null)
-            statElement.setParameter(stat.getParameter());
-        return statElement;
     }
 
     public GraphDef addGraph(AnalysisDef analysis, GraphSpec graph)
@@ -767,7 +739,7 @@ public class ScriptController extends BaseFlowController
             return null;
         }
         ScriptDef script = form.analysisDocument.getScript();
-        FlowAnalyzer.makeAnalysis(script, calc, null);
+        FlowAnalyzer.makeCompensationCalculationDef(script, calc);
         if (!safeSetAnalysisScript(form.analysisScript, form.analysisDocument.toString()))
             return null;
         return new ViewForward(form.urlFor(Action.editCompensationCalculation));
@@ -1108,11 +1080,11 @@ public class ScriptController extends BaseFlowController
         ScriptDocument doc = getScript().getAnalysisScriptDocument();
         if (root instanceof Analysis)
         {
-            FlowAnalyzer.makeAnalysis(doc.getScript(), null, (Analysis) root);
+            FlowAnalyzer.makeAnalysisDef(doc.getScript(), (Analysis) root, null);
         }
         else if (root instanceof CompensationCalculation)
         {
-            FlowAnalyzer.makeAnalysis(doc.getScript(), (CompensationCalculation) root, null);
+            FlowAnalyzer.makeCompensationCalculationDef(doc.getScript(), (CompensationCalculation) root);
         }
         if (!safeSetAnalysisScript(form.analysisScript, doc.toString()))
         {
@@ -1240,11 +1212,11 @@ public class ScriptController extends BaseFlowController
     {
         if (popset instanceof CompensationCalculation)
         {
-            FlowAnalyzer.makeAnalysis(doc.getScript(), (CompensationCalculation) popset, null);
+            FlowAnalyzer.makeCompensationCalculationDef(doc.getScript(), (CompensationCalculation) popset);
         }
         else
         {
-            FlowAnalyzer.makeAnalysis(doc.getScript(), null, (Analysis) popset);
+            FlowAnalyzer.makeAnalysisDef(doc.getScript(), (Analysis) popset, null);
         }
         return safeSetAnalysisScript(analysisScript, doc.toString());
     }

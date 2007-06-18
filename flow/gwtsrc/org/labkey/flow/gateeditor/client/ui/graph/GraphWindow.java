@@ -1,6 +1,8 @@
 package org.labkey.flow.gateeditor.client.ui.graph;
 
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import org.labkey.flow.gateeditor.client.GateEditor;
 import org.labkey.flow.gateeditor.client.GateCallback;
 import org.labkey.flow.gateeditor.client.FlowUtil;
@@ -11,12 +13,14 @@ import org.labkey.flow.gateeditor.client.model.*;
 
 public class GraphWindow extends GateComponent
 {
+    static final private String loadingText = "Loading graph...";
     VerticalPanel widget;
     GraphImage image;
     Label status;
     GWTGraphInfo graphInfo;
     GateWidget gateWidget;
     GraphWidget capture;
+    UpdateGraphTimer timer = new UpdateGraphTimer();
 
     public void capture(GraphWidget o)
     {
@@ -44,7 +48,7 @@ public class GraphWindow extends GateComponent
             this.image.setVisible(false);
             return;
         }
-        this.image.setUrl(this.graphInfo.graphURL);
+        status.setText(loadingText);
         gateWidget.updateDisplay();
     }
 
@@ -52,17 +56,22 @@ public class GraphWindow extends GateComponent
     {
         public void onWellChanged()
         {
-            updateWell();
+            updateGraph();
         }
 
         public void onGateChanged()
         {
-            updateGate();
+            updateGraph();
         }
 
         public void onYAxisChanged()
         {
-            updateGate();
+            updateGraph();
+        }
+
+        public void onCompMatrixChanged()
+        {
+            updateGraph();
         }
     };
     LoadListener imageLoadListener = new LoadListener()
@@ -92,6 +101,7 @@ public class GraphWindow extends GateComponent
         widget.add(spacer);
         image = new GraphImage();
         image.addMouseListener(mouseListener);
+        image.setVisible(false);
         status = new Label();
 
         widget.add(image);
@@ -105,11 +115,6 @@ public class GraphWindow extends GateComponent
     public Widget getWidget()
     {
         return widget;
-    }
-
-    public void updateWell()
-    {
-        updateGraph();
     }
 
     GWTGraphOptions getGraphOptions()
@@ -152,6 +157,12 @@ public class GraphWindow extends GateComponent
 
     private void updateGraph()
     {
+        if (timer.isScheduled())
+            return;
+        timer.schedule(10);
+    }
+    private void doUpdateGraph()
+    {
         GWTGraphOptions options = getGraphOptions();
         if (options == null)
         {
@@ -166,7 +177,7 @@ public class GraphWindow extends GateComponent
                 return;
             }
         }
-        status.setText("Loading graph...");
+        status.setText(loadingText);
         editor.getService().getGraphInfo(options, new GateCallback() {
 
             public void onSuccess(Object result)
@@ -178,12 +189,6 @@ public class GraphWindow extends GateComponent
                 }
             }
         });
-    }
-
-    private void updateGate()
-    {
-        gateWidget.updateGate();
-        updateGraph();
     }
 
     public GWTRectangle getBoundingRectangle(GWTGate gate)
@@ -350,6 +355,40 @@ public class GraphWindow extends GateComponent
             {
                 hitTest.mouseUp(ptScreen);
             }
+        }
+    }
+
+    class UpdateGraphTimer extends Timer
+    {
+        boolean scheduled;
+        public void schedule(int delayMillis)
+        {
+            super.schedule(delayMillis);
+            scheduled = true;
+        }
+
+
+        public void cancel()
+        {
+            super.cancel();
+            scheduled = false;
+        }
+
+        public boolean isScheduled()
+        {
+            return scheduled;
+        }
+
+
+        public void scheduleRepeating(int periodMillis)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        public void run()
+        {
+            scheduled = false;
+            doUpdateGraph();
         }
     }
 }

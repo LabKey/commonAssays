@@ -38,20 +38,22 @@ public class ChooseRunsView extends FlowQueryView
         return;
     }
 
+    protected DataRegion createDataRegion()
+    {
+        List<DisplayColumn> displayColumns = getDisplayColumns();
+        DataRegion rgn = new ChooseRunsRegion(_form);
+        rgn.setMaxRows(getMaxRows());
+        rgn.setShowRecordSelectors(showRecordSelectors());
+        rgn.setName(getDataRegionName());
+        rgn.setDisplayColumnList(displayColumns);
+        return rgn;
+
+    }
+
     protected DataView createDataView()
     {
         DataView ret = super.createDataView();
         DataRegion rgn = ret.getDataRegion();
-        rgn.addHiddenFormField("ff_compensationMatrixOption", _form.ff_compensationMatrixOption);
-        if (_form.getProtocolStep() != null)
-        {
-            rgn.addHiddenFormField("actionSequence", Integer.toString(_form.getProtocolStep().getDefaultActionSequence()));
-        }
-        if (_form.getProtocol() != null)
-        {
-            rgn.addHiddenFormField("scriptId", Integer.toString(_form.getProtocol().getScriptId()));
-        }
-        rgn.addHiddenFormField("ff_targetExperimentId", StringUtils.trimToEmpty(_form.ff_targetExperimentId));
         RenderContext ctx = ret.getRenderContext();
         Filter filter = ctx.getBaseFilter();
         if (!(filter instanceof SimpleFilter))

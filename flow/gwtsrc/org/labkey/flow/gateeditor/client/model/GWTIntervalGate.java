@@ -58,7 +58,7 @@ public class GWTIntervalGate extends GWTGate
         return new GWTIntervalGate(getAxis(), getMinValue(), getMaxValue());
     }
 
-    public boolean equals(GWTGate other)
+    public boolean equals(Object other)
     {
         if (!(other instanceof GWTIntervalGate))
             return false;

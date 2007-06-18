@@ -199,17 +199,7 @@ abstract public class ScriptJob extends PipelineJob
         FlowExperiment experiment = FlowExperiment.fromLSID(_compensationExperimentLSID != null ? _compensationExperimentLSID : _experimentLSID);
         if (experiment == null)
             return null;
-
-        List<FlowRun> runs = new ArrayList();
-        runs.addAll(Arrays.asList(experiment.findRun(new File(run.getPath()), FlowProtocolStep.analysis)));
-        runs.addAll(Arrays.asList(experiment.findRun(new File(run.getPath()), FlowProtocolStep.calculateCompensation)));
-        for (FlowRun runComp : runs)
-        {
-            FlowCompensationMatrix comp = runComp.getCompensationMatrix();
-            if (comp != null)
-                return comp;
-        }
-        return null;
+        return experiment.findCompensationMatrix(run);
     }
 
     public FlowRun executeHandler(FlowRun srcRun, BaseHandler handler) throws Exception

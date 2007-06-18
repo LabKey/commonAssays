@@ -15,7 +15,7 @@ public class EditorState
     private GWTWell well;
     private GWTGate gate;
     private GWTCompensationMatrix comp;
-    private String yAxis;
+    private String yAxis = "";
     private GWTRun[] runs = new GWTRun[0];
 
 
