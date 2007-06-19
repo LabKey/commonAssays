@@ -7,7 +7,6 @@ import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.security.*;
 import org.labkey.api.query.*;
-import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.issues.IssuesSchema;
 import org.labkey.api.util.*;
 import org.labkey.api.module.Module;
@@ -58,8 +57,12 @@ public class IssuesController extends SpringActionController
     public static final int ISSUE_RESOLUTION = 7;
 
 
+    static DefaultActionResolver _actionResolver = new DefaultActionResolver(IssuesController.class);
+
     public IssuesController() throws Exception
     {
+        super();
+        setActionResolver(_actionResolver.getInstance(this));
     }
 
 
@@ -91,7 +94,7 @@ public class IssuesController extends SpringActionController
 
     private ViewURLHelper issueURL(String action)
     {
-        return new ViewURLHelper("Issues", action, getContainer());
+        return new ViewURLHelper("issues", action, getContainer());
     }
 
 
@@ -330,8 +333,8 @@ public class IssuesController extends SpringActionController
                 return null;
             }
 
-            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext().getRequest(), IssuesController.class, "detailView.jsp");
-            JspView v = new JspView(page);
+            IssuePage page = new IssuePage();
+            JspView v = new JspView<IssuePage>(IssuesController.class, "detailView.jsp",page);
 
             page.setIssue(_issue);
             page.setCustomColumnConfiguration(getCustomColumnConfiguration());
@@ -394,8 +397,8 @@ public class IssuesController extends SpringActionController
                 }
             }
 
-            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext().getRequest(), IssuesController.class, "detailList.jsp");
-            JspView v = new JspView(page);
+            IssuePage page = new IssuePage();
+            JspView v = new JspView<IssuePage>(IssuesController.class, "detailView.jsp",page);
 
             page.setIssueList(issueList);
             page.setCustomColumnConfiguration(getCustomColumnConfiguration());
@@ -433,8 +436,8 @@ public class IssuesController extends SpringActionController
             _issue.Open(getContainer(), getUser());
             setNewIssueDefaults(_issue);
 
-            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext().getRequest(), IssuesController.class, "updateView.jsp");
-            JspView updateView = new JspView(page);
+            IssuePage page = new IssuePage();
+            JspView v = new JspView<IssuePage>(IssuesController.class, "updateView.jsp",page);
 
             IssueManager.CustomColumnConfiguration ccc = getCustomColumnConfiguration();
 
@@ -447,7 +450,7 @@ public class IssuesController extends SpringActionController
             page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
             page.setErrors(errors);
 
-            return updateView;
+            return v;
         }
 
         public void validate(IssuesForm form, BindException errors) throws Exception
@@ -598,8 +601,8 @@ public class IssuesController extends SpringActionController
             User user = getUser();
             requiresUpdatePermission(user, _issue);
 
-            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext(), IssuesController.class, "updateView.jsp");
-            JspView v = new JspView(page);
+            IssuePage page = new IssuePage();
+            JspView v = new JspView<IssuePage>(IssuesController.class, "updateView.jsp",page);
 
             IssueManager.CustomColumnConfiguration ccc = getCustomColumnConfiguration();
 
@@ -674,8 +677,8 @@ public class IssuesController extends SpringActionController
                     _issue.setResolution(resolution);
             }
 
-            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext(), IssuesController.class, "updateView.jsp");
-            JspView v = new JspView(page);
+            IssuePage page = new IssuePage();
+            JspView v = new JspView<IssuePage>(IssuesController.class, "updateView.jsp",page);
 
             IssueManager.CustomColumnConfiguration ccc = getCustomColumnConfiguration();
 
@@ -711,8 +714,8 @@ public class IssuesController extends SpringActionController
 
             _issue.Close(user);
 
-            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext(), IssuesController.class, "updateView.jsp");
-            JspView v = new JspView(page);
+            IssuePage page = new IssuePage();
+            JspView v = new JspView<IssuePage>(IssuesController.class, "updateView.jsp",page);
 
             IssueManager.CustomColumnConfiguration ccc = getCustomColumnConfiguration();
 
@@ -746,8 +749,8 @@ public class IssuesController extends SpringActionController
 
             _issue.Open(getContainer(), user);
 
-            IssuePage page = (IssuePage) JspLoader.createPage(getViewContext(), IssuesController.class, "updateView.jsp");
-            JspView v = new JspView(page);
+            IssuePage page = new IssuePage();
+            JspView v = new JspView<IssuePage>(IssuesController.class, "updateView.jsp",page);
 
             IssueManager.CustomColumnConfiguration ccc = getCustomColumnConfiguration();
 
@@ -915,6 +918,19 @@ public class IssuesController extends SpringActionController
         }
     }
 
+    public class UpdateEmailPage
+    {
+        public UpdateEmailPage(String url, Issue issue, boolean isPlain)
+        {
+            this.url = url;
+            this.issue = issue;
+            this.isPlain = isPlain;
+        }
+        public String url;
+        public Issue issue;
+        public boolean isPlain;
+    }
+
 
     private void sendUpdateEmail(Issue issue, ViewURLHelper detailsUrl, String change, String action)
     {
@@ -929,16 +945,15 @@ public class IssuesController extends SpringActionController
                 MailHelper.ViewMessage m = MailHelper.createMessage(AppProps.getInstance().getSystemEmailAddress(), to);
                 if (m.getAllRecipients().length > 0)
                 {
-                    UpdateEmailPage page = (UpdateEmailPage) JspLoader.createPage(getViewContext(), IssuesController.class, "updateEmail.jsp");
+                    m.setMultipart(true);
                     m.setSubject("Issue #" + issue.getIssueId() + ", \"" + issue.getTitle() + ",\" has been " + change);
-                    page.url = detailsUrl.getURIString();
-                    page.issue = issue;
-                    page.isPlain = true;
-                    final JspView view = new JspView(page);
-                    m.setTemplateContent(getViewContext().getRequest(), view, "text/plain");
-                    page.isPlain = false;
-                    m.setTemplateContent(getViewContext().getRequest(), view, "text/html");
                     m.setHeader("References", references);
+
+                    JspView viewPlain = new JspView<UpdateEmailPage>(IssuesController.class,"updateEmail.jsp",new UpdateEmailPage(detailsUrl.getURIString(),issue,true));
+                    m.setTemplateContent(getViewContext().getRequest(), viewPlain, "text/plain");
+
+                    JspView viewHtml = new JspView<UpdateEmailPage>(IssuesController.class,"updateEmail.jsp",new UpdateEmailPage(detailsUrl.getURIString(),issue,false));
+                    m.setTemplateContent(getViewContext().getRequest(), viewHtml, "text/html");
 
                     MailHelper.send(m);
                 }
@@ -946,7 +961,7 @@ public class IssuesController extends SpringActionController
         }
         catch (Exception e)
         {
-            _log.error("sendUpdateEmail: " + e);
+            _log.error("sendUpdateEmail", e);
         }
     }
 
@@ -1018,11 +1033,9 @@ public class IssuesController extends SpringActionController
             if (getViewContext().getUser().isGuest())
                 HttpView.throwUnauthorized();
 
-            EmailPreferencesPage page = (EmailPreferencesPage)JspLoader.createPage(getViewContext().getRequest(), IssuesController.class, "emailPreferences.jsp");
-            JspView v = new JspView(page);
-
-            if (_message != null)
-                page._message = _message;
+            JspView v = new JspView<Object>(IssuesController.class, "emailPreferences.jsp", null);
+            v.addObject("errors", errors);
+            v.addObject("message", _message);
             return v;
         }
 

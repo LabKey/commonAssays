@@ -4,9 +4,7 @@
 <tr><td><a href="list.view?.lastFilter=true"><img border=0 src="<%=PageFlowUtil.buttonSrc("Back to Issues")%>"></a></td></tr>
 <tr><td>&nbsp;</td></tr>
 </table>
-
 <% currentView.include(currentView.getView("keywordView")); %>
-
 <br>
 
 <table width=100% cellspacing=2 cellpadding=0 border=0><tr>

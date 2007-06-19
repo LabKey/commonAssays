@@ -1,20 +1,18 @@
 package org.labkey.issue;
 
-import org.apache.log4j.Logger;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbCache;
 import org.labkey.api.issues.IssuesSchema;
-import org.labkey.api.jsp.JspBase;
 import org.labkey.api.security.User;
 import org.labkey.api.util.Cache;
-import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.DateUtil;
+import static org.labkey.api.util.PageFlowUtil.filter;
 import org.labkey.issue.model.Issue;
 import org.labkey.issue.model.IssueManager;
 import org.labkey.issue.model.IssueManager.*;
 import org.springframework.validation.BindException;
-
 import java.io.IOException;
 import java.util.*;
 import java.sql.SQLException;
@@ -24,7 +22,7 @@ import java.sql.SQLException;
  * Date: Aug 31, 2006
  * Time: 1:07:36 PM
  */
-abstract public class IssuePage extends JspBase
+public class IssuePage
 {
     private Issue _issue;
     private List<Issue> _issueList = Collections.emptyList();
@@ -37,8 +35,6 @@ abstract public class IssuePage extends JspBase
     private boolean _hasUpdatePermissions;
     private String _requiredFields;
     private boolean _print = false;
-
-    private static Logger _log = Logger.getLogger(IssuePage.class);
 
     public Issue getIssue()
     {
@@ -130,17 +126,27 @@ abstract public class IssuePage extends JspBase
         _print = print;
     }
 
-    public String _toString(Object a)
+    public void setUserHasUpdatePermissions(boolean hasUpdatePermissions)
     {
-        return null == a ? "" : a.toString();
+        _hasUpdatePermissions = hasUpdatePermissions;
     }
 
-    public String writeDate(Date d)
+    public boolean getHasUpdatePermissions()
     {
-        if (null == d) return "";
-        return DateUtil.formatDate(d);
+        return _hasUpdatePermissions;
     }
 
+    public String getRequiredFields()
+    {
+        return _requiredFields;
+    }
+
+    public void setRequiredFields(String requiredFields)
+    {
+        _requiredFields = requiredFields;
+    }
+
+    
     public String writeCustomColumn(String container, String tableColumnName, String value, int keywordType) throws IOException
     {
         final String caption = _ccc.getColumnCaptions().get(tableColumnName);
@@ -173,14 +179,14 @@ abstract public class IssuePage extends JspBase
     {
         if (!isEditable(field))
         {
-            return h(value);
+            return filter(value);
         }
         final StringBuffer sb = new StringBuffer();
 
         sb.append("<input name=\"");
         sb.append(field);
         sb.append("\" value=\"");
-        sb.append(h(value));
+        sb.append(filter(value));
         if (null == extra)
             sb.append("\">");
         else
@@ -207,7 +213,7 @@ abstract public class IssuePage extends JspBase
     {
         if (!isEditable(field))
         {
-            return h(display);
+            return filter(display);
         }
         final StringBuffer sb = new StringBuffer();
         sb.append("<select id=\"");
@@ -329,14 +335,14 @@ abstract public class IssuePage extends JspBase
         final String notify = _issue.getNotifyList();
         if (notify != null)
             return notify.replace(';', '\n');
-        return notify == null ? "" : notify;
+        return "";
     }
 
     public String getNotifyList(Container c, Issue issue)
     {
         if (!isEditable("notifyList"))
         {
-            return h(getNotifyListString());
+            return filter(getNotifyListString());
         }
         final StringBuilder sb = new StringBuilder();
 
@@ -353,16 +359,6 @@ abstract public class IssuePage extends JspBase
         sb.append("</textarea>");
 
         return sb.toString();
-    }
-
-    public void setUserHasUpdatePermissions(boolean hasUpdatePermissions)
-    {
-        _hasUpdatePermissions = hasUpdatePermissions;
-    }
-
-    public boolean getHasUpdatePermissions()
-    {
-        return _hasUpdatePermissions;
     }
 
     public String getLabel(String columnName)
@@ -383,6 +379,14 @@ abstract public class IssuePage extends JspBase
         return columnName;
     }
 
-    public String getRequiredFields() {return _requiredFields;}
-    public void setRequiredFields(String requiredFields){_requiredFields = requiredFields;}
+    public String _toString(Object a)
+    {
+        return null == a ? "" : a.toString();
+    }
+
+    public String writeDate(Date d)
+    {
+        if (null == d) return "";
+        return DateUtil.formatDate(d);
+    }
 }

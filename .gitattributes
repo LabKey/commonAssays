@@ -463,10 +463,8 @@ flow/webapp/Flow/unflagFCSFile.gif -text
 flow/webapp/Flow/unflagSample.gif -text
 flow/webapp/Flow/util.js -text
 issue/module.properties -text
-issue/src/org/labkey/issue/EmailPreferencesPage.java -text
 issue/src/org/labkey/issue/IssuePage.java -text
 issue/src/org/labkey/issue/IssuesModule.java -text
-issue/src/org/labkey/issue/UpdateEmailPage.java -text
 issue/src/org/labkey/issue/detailList.jsp -text
 issue/src/org/labkey/issue/detailView.jsp -text
 issue/src/org/labkey/issue/emailPreferences.jsp -text

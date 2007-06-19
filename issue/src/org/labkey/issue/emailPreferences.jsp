@@ -2,15 +2,29 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.ViewContext"%>
-<%@ page extends="org.labkey.issue.EmailPreferencesPage" %>
-
+<%@ page import="org.springframework.validation.BindException" %>
+<%@ page import="org.springframework.validation.ObjectError" %>
+<%@ page import="java.util.List" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ViewContext context = HttpView.currentContext();
     int emailPrefs = IssueManager.getUserEmailPreferences(context.getContainer(), context.getUser().getUserId());
+    BindException errors = (BindException) request.getAttribute("errors");
+    String message = (String)request.getAttribute("message");
+
+    if (message != null)
+    {
+        %><b><%=h(message)%></b><p/><%
+    }
+
+    if (null != errors && errors.getErrorCount() > 0)
+    {
+        for (ObjectError e : (List<ObjectError>) errors.getAllErrors())
+        {
+            %><span color=red><%=h(context.getMessage(e))%></span><br><%
+        }
+    }
 %>
-
-<%=_message == null ? "" : "<b>" + _message + "</b><p/>"%>
-
 <form action="emailPrefs.post" method="post">
     <input type="checkbox" value="1" name="emailPreference" <%=(emailPrefs & IssueManager.NOTIFY_ASSIGNEDTO_OPEN) != 0 ? " checked" : ""%>>
     Send me email when an issue is opened and assigned to me<br>
