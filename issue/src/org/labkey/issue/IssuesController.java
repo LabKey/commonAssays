@@ -16,7 +16,6 @@ import org.labkey.api.wiki.WikiService;
 import org.labkey.api.wiki.WikiRendererType;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.action.BaseViewAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.issue.model.Issue;
 import org.labkey.issue.model.IssueManager;
@@ -24,9 +23,7 @@ import org.labkey.issue.query.IssuesQuerySchema;
 import org.labkey.issue.query.IssuesQueryView;
 import org.labkey.issue.query.IssuesTable;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.validation.BindException;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
+import org.springframework.validation.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -102,15 +99,14 @@ public class IssuesController extends SpringActionController
      * This method represents the point of entry into the pageflow
      */
     @RequiresPermission(ACL.PERM_READ)
-    public class BeginAction extends BaseViewAction
+    public class BeginAction extends SimpleViewAction
     {
-        public ModelAndView handleRequest() throws Exception
+        public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            ViewURLHelper url = issueURL("list").addParameter("Issues.Status~neq","closed");
-            return HttpView.redirect(url);
+            return HttpView.redirect(getListUrl(getContainer()));
         }
 
-        NavTree appendNavTrail(NavTree root)
+        public NavTree appendNavTrail(NavTree root)
         {
             return root.addChild("Issues", getListUrl(getContainer()));
         }
@@ -149,7 +145,7 @@ public class IssuesController extends SpringActionController
             return true;
         }
 
-        public void validate(Object o, BindException errors)
+        public void validateCommand(Object o, Errors errors)
         {
         }
 
@@ -190,7 +186,7 @@ public class IssuesController extends SpringActionController
             return true;
         }
 
-        public void validate(IssuePreferenceForm issuePreferenceForm, BindException errors)
+        public void validateCommand(IssuePreferenceForm issuePreferenceForm, Errors errors)
         {
         }
 
@@ -252,7 +248,7 @@ public class IssuesController extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ListAction extends SimpleIssueAction<IssuesController.ListForm>
+    public class ListAction extends SimpleViewAction<IssuesController.ListForm>
     {
         public ModelAndView getView(IssuesController.ListForm form, BindException errors) throws Exception
         {
@@ -267,7 +263,7 @@ public class IssuesController extends SpringActionController
                 return HttpView.redirect(url);
             }
 
-            HttpView view = getIssuesView(form, getPrint());
+            HttpView view = getIssuesView(form, isPrint());
             return view;
         }
 
@@ -284,7 +280,7 @@ public class IssuesController extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ExportTsvAction extends SimpleIssueAction<QueryForm>
+    public class ExportTsvAction extends SimpleViewAction<QueryForm>
     {
         public ModelAndView getView(QueryForm form, BindException errors) throws Exception
         {
@@ -309,7 +305,7 @@ public class IssuesController extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class DetailsAction extends SimpleIssueAction<IssueIdForm>
+    public class DetailsAction extends SimpleViewAction<IssueIdForm>
     {
         Issue _issue = null;
 
@@ -341,7 +337,7 @@ public class IssuesController extends SpringActionController
             //pass user's update perms to jsp page to determine whether to show notify list
             page.setUserHasUpdatePermissions(hasUpdatePermission(getUser(), _issue));
             page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
-            page.setPrint(getPrint());
+            page.setPrint(isPrint());
 
             getPageConfig().setTitle("" + _issue.getIssueId() + " : " + _issue.getTitle());
             return v;
@@ -361,7 +357,7 @@ public class IssuesController extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class DetailsListAction extends SimpleIssueAction<ListForm>
+    public class DetailsListAction extends SimpleViewAction<ListForm>
     {
         public ModelAndView getView(IssuesController.ListForm listForm, BindException errors) throws Exception
         {
@@ -404,7 +400,7 @@ public class IssuesController extends SpringActionController
             page.setCustomColumnConfiguration(getCustomColumnConfiguration());
             page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
 
-            page.setPrint(getPrint());
+            page.setPrint(isPrint());
             return v;
         }
 
@@ -453,7 +449,7 @@ public class IssuesController extends SpringActionController
             return v;
         }
 
-        public void validate(IssuesForm form, BindException errors) throws Exception
+        public void validateCommand(IssuesForm form, Errors errors)
         {
             validateRequiredFields(form, errors);
             validateNotifyList(form.getBean(), form, errors);
@@ -575,7 +571,7 @@ public class IssuesController extends SpringActionController
             return true;
         }
 
-        public void validate(IssuesForm form, BindException errors) throws Exception
+        public void validateCommand(IssuesForm form, Errors errors)
         {
             validateRequiredFields(form, errors);
             validateNotifyList(form.getBean(), form, errors);
@@ -781,39 +777,42 @@ public class IssuesController extends SpringActionController
     }
 
 
-    private void validateRequiredFields(IssuesController.IssuesForm form, BindException errors) throws Exception
+    private void validateRequiredFields(IssuesController.IssuesForm form, Errors errors)
     {
         String requiredFields = IssueManager.getRequiredIssueFields(getContainer());
         final Map<String, String> newFields = form.getStrings();
         if (StringUtils.isEmpty(requiredFields))
             return;
 
+        MapBindingResult requiredErrors = new MapBindingResult(newFields, errors.getObjectName());
         if (newFields.containsKey("title"))
-            validateRequired("title", newFields.get("title"), requiredFields, errors);
+            validateRequired("title", newFields.get("title"), requiredFields, requiredErrors);
         if (newFields.containsKey("assignedTo") && !(form.getBean().getStatus().equals(Issue.statusCLOSED)))
-            validateRequired("assignedto", newFields.get("assignedTo"), requiredFields, errors);
+            validateRequired("assignedto", newFields.get("assignedTo"), requiredFields, requiredErrors);
         if (newFields.containsKey("type"))
-            validateRequired("type", newFields.get("type"), requiredFields, errors);
+            validateRequired("type", newFields.get("type"), requiredFields, requiredErrors);
         if (newFields.containsKey("area"))
-            validateRequired("area", newFields.get("area"), requiredFields, errors);
+            validateRequired("area", newFields.get("area"), requiredFields, requiredErrors);
         if (newFields.containsKey("priority"))
-            validateRequired("priority", newFields.get("priority"), requiredFields, errors);
+            validateRequired("priority", newFields.get("priority"), requiredFields, requiredErrors);
         if (newFields.containsKey("milestone"))
-            validateRequired("milestone", newFields.get("milestone"), requiredFields, errors);
+            validateRequired("milestone", newFields.get("milestone"), requiredFields, requiredErrors);
         if (newFields.containsKey("notifyList"))
-            validateRequired("notifylist", newFields.get("notifyList"), requiredFields, errors);
+            validateRequired("notifylist", newFields.get("notifyList"), requiredFields, requiredErrors);
         if (newFields.containsKey("int1"))
-            validateRequired("int1", newFields.get("int1"), requiredFields, errors);
+            validateRequired("int1", newFields.get("int1"), requiredFields, requiredErrors);
         if (newFields.containsKey("int2"))
-            validateRequired("int2", newFields.get("int2"), requiredFields, errors);
+            validateRequired("int2", newFields.get("int2"), requiredFields, requiredErrors);
         if (newFields.containsKey("string1"))
-            validateRequired("string1", newFields.get("string1"), requiredFields, errors);
+            validateRequired("string1", newFields.get("string1"), requiredFields, requiredErrors);
         if (newFields.containsKey("string2"))
-            validateRequired("string2", newFields.get("string2"), requiredFields, errors);
+            validateRequired("string2", newFields.get("string2"), requiredFields, requiredErrors);
+
+        errors.addAllErrors(requiredErrors);
     }
 
 
-    private void validateRequired(String columnName, String value, String requiredFields, BindException errors) throws Exception
+    private void validateRequired(String columnName, String value, String requiredFields, Errors errors)
     {
         if (requiredFields != null)
         {
@@ -831,14 +830,15 @@ public class IssuesController extends SpringActionController
                         if (column != null)
                             name = column.getName();
                     }
-                    errors.addError(new RequiredError(columnName, name != null ? name : columnName));
+                    String display = name == null ? columnName : name;
+                    errors.rejectValue(columnName, "NullError", new Object[] {display}, display + " is required.");
                 }
             }
         }
     }
     
 
-    private void validateNotifyList(Issue issue, IssuesController.IssuesForm form, BindException errors) throws Exception
+    private void validateNotifyList(Issue issue, IssuesController.IssuesForm form, Errors errors)
     {
         String[] rawEmails = _toString(form.getNotifyList()).split("\n");
         List<String> invalidEmails = new ArrayList<String>();
@@ -853,10 +853,7 @@ public class IssuesController extends SpringActionController
             if (!"".equals(rawEmail))
             {
                 message.append("Failed to add user ").append(rawEmail).append(": Invalid email address");
-                FieldError fieldError = new FieldError(
-                        "issue", "notifyList", rawEmail.trim(), true, new String[] {"Error"}, new Object[] {message.toString()},
-                        message.toString());
-                errors.addError(fieldError);
+                errors.rejectValue("notifyList","Error",new Object[] {message.toString()}, message.toString());
             }
         }
 
@@ -1058,7 +1055,7 @@ public class IssuesController extends SpringActionController
         }
 
 
-        public void validate(EmailPrefsForm emailPrefsForm, BindException errors)
+        public void validateCommand(EmailPrefsForm emailPrefsForm, Errors errors)
         {
         }
 
@@ -1074,7 +1071,7 @@ public class IssuesController extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_ADMIN)
-    public class AdminAction extends SimpleIssueAction
+    public class AdminAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
@@ -1112,7 +1109,7 @@ public class IssuesController extends SpringActionController
             return null;
         }
 
-        public void validate(AdminForm adminForm, BindException errors)
+        public void validateCommand(AdminForm adminForm, Errors errors)
         {
         }
 
@@ -1216,7 +1213,7 @@ public class IssuesController extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_ADMIN)
-    public class PurgeAction extends SimpleIssueAction
+    public class PurgeAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
@@ -1234,7 +1231,7 @@ public class IssuesController extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class JumpToIssueAction extends SimpleIssueAction
+    public class JumpToIssueAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
@@ -1276,7 +1273,7 @@ public class IssuesController extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class SearchAction extends SimpleIssueAction
+    public class SearchAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
@@ -1574,7 +1571,6 @@ public class IssuesController extends SpringActionController
             {
                 throw new RuntimeException(x);
             }
-
         }
     }
 
@@ -1846,22 +1842,6 @@ public class IssuesController extends SpringActionController
         }
     }
 
-
-    public abstract static class SimpleIssueAction<FORM> extends SimpleViewAction<FORM>
-    {
-        boolean _print = false;
-
-        protected boolean getPrint()
-        {
-            return _print;
-        }
-
-        public ModelAndView getPrintView(FORM form, BindException errors) throws Exception
-        {
-            _print = true;
-            return getView(form, errors);
-        }
-    }
 
     public static class RequiredError extends FieldError
     {

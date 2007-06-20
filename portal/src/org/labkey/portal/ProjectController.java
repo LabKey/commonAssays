@@ -61,9 +61,10 @@ public class ProjectController extends ViewController
             if (acl.getPermissions(getUser()) == ACL.PERM_NONE)
             {
                 requiresLogin();
-                HttpView view = new HomeTemplate(getViewContext(),
-                        new HtmlView("You do not have permission to view this folder.<br>" +
-                        "Please select a valid folder from the tree to the left."));
+                HtmlView htmlView = new HtmlView("You do not have permission to view this folder.<br>" +
+                        "Please select another folder from the tree to the left.");
+                HttpView view = new HomeTemplate(getViewContext(),htmlView,
+                    new PageConfig(getViewURLHelper().getPageFlow()), new NavTree[0]);
                 return includeView(view);
             }
         }

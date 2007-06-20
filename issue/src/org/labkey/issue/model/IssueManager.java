@@ -334,7 +334,7 @@ public class IssueManager
 
     private static final String CUSTOM_COLUMN_CONFIGURATION = "IssuesCaptions";
 
-    public static CustomColumnConfiguration getCustomColumnConfiguration(Container c) throws SQLException
+    public static CustomColumnConfiguration getCustomColumnConfiguration(Container c)
     {
         Map<String, Object> map = PropertyManager.getProperties(c.getId(), CUSTOM_COLUMN_CONFIGURATION, false);
 
