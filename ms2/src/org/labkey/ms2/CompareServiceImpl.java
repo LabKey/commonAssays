@@ -1,6 +1,5 @@
 package org.labkey.ms2;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.labkey.ms2.client.CompareService;
 import org.labkey.ms2.client.CompareResult;
 import org.labkey.ms2.query.MS2Schema;
@@ -11,8 +10,8 @@ import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.TSVGridWriter;
+import org.labkey.api.data.ContainerManager;
 
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -39,11 +38,13 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         settings.setAllowChooseQuery(false);
         List<String> errors = new ArrayList<String>();
         int runList = Integer.parseInt(url.getParameter("runList"));
-        List<MS2Run> runs = _controller.getCachedRuns(runList, errors);
+        List<MS2Run> runs = _controller.getCachedRuns(runList, errors, false);
         ViewContext queryContext = new ViewContext(_context);
         queryContext.setViewURLHelper(url);
-        CompareProteinsView view = new CompareProteinsView(queryContext, new MS2Schema(getUser(), getContainer()), settings, runs, runList);
-        view.setViewContext((ViewContext)view.getModel());
+        MS2Schema schema = new MS2Schema(getUser(), getContainer());
+        schema.setRuns(runs.toArray(new MS2Run[runs.size()]));
+        CompareProteinsView view = new CompareProteinsView(queryContext, schema, settings, runs, runList, false);
+        view.setViewContext(view.getViewContext());
         List<FieldKey> cols = new ArrayList<FieldKey>();
         cols.add(FieldKey.fromParts("SeqId"));
         cols.add(FieldKey.fromParts("Run", "RowId"));
@@ -58,11 +59,15 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         int proteinCount = lines.countTokens();
         String[] proteins = new String[proteinCount];
         String[] runNames = new String[runs.size()];
+        String[] runURLs = new String[runs.size()];
         boolean[][] hits = new boolean[proteinCount][];
 
         int runIndex = 0;
         for (MS2Run run : runs)
         {
+            ViewURLHelper runURL = new ViewURLHelper("MS2", "showRun.view", ContainerManager.getForId(run.getContainer()));
+            runURL.addParameter("run", run.getRun());
+            runURLs[runIndex] = runURL.getLocalURIString();
             runNames[runIndex++] = run.getDescription();
         }
 
@@ -79,6 +84,6 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
             }
             index++;
         }
-        return new CompareResult(proteins, runNames, hits);
+        return new CompareResult(proteins, runNames, runURLs, hits);
     }
 }

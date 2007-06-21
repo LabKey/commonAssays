@@ -576,6 +576,7 @@ ms2/src/org/labkey/ms2/MS2Importer.java -text
 ms2/src/org/labkey/ms2/MS2Manager.java -text
 ms2/src/org/labkey/ms2/MS2Module.java -text
 ms2/src/org/labkey/ms2/MS2RunHierarchyTree.java -text
+ms2/src/org/labkey/ms2/MS2RunType.java -text
 ms2/src/org/labkey/ms2/MS2SearchExperimentRunFilter.java -text
 ms2/src/org/labkey/ms2/MS2ServiceImpl.java -text
 ms2/src/org/labkey/ms2/MS2StatsWebPart.java -text

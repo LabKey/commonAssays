@@ -17,10 +17,17 @@ public class CompareDataRegion extends DataRegion
     int _offset = 0;
     int _colSpan;
     private final ResultSet _rs;
+    private final String _columnHeader;
 
     public CompareDataRegion(ResultSet rs)
     {
+        this(rs, "&nbsp;");
+    }
+
+    public CompareDataRegion(ResultSet rs, String columnHeader)
+    {
         _rs = rs;
+        _columnHeader = columnHeader;
         setName(MS2Manager.getDataRegionNameCompare());
         setShadeAlternatingRows(true);
         setShowColumnSeparators(true);
@@ -58,18 +65,22 @@ public class CompareDataRegion extends DataRegion
         int columnIndex = 0;
         for (int i = 0; i < _offset; i++)
         {
-            out.write("<td style=\"border-bottom: 1px solid rgb(170, 170, 170);");
-            if (i == _offset - 1)
-            {
-                out.write("border-right: 1px solid rgb(170, 170, 170);");
-            }
-            out.write("\">&nbsp;</td>");
             if (shade)
             {
                 renderers[columnIndex].setBackgroundColor("#EEEEEE");
             }
             shade = !shade;
             columnIndex++;
+        }
+        if (_offset > 0)
+        {
+            out.write("<td colspan=\"");
+            out.write(Integer.toString(_offset));
+            out.write("\" style=\"text-align: center; vertical-align: bottom; border-bottom: 1px solid rgb(170, 170, 170);");
+            out.write("border-right: 1px solid rgb(170, 170, 170);");
+            out.write("\">");
+            out.write(_columnHeader);
+            out.write("</td>");
         }
 
         for (String caption : _multiColumnCaptions)
@@ -91,7 +102,12 @@ public class CompareDataRegion extends DataRegion
             out.write(">" + caption + "</td>");
             shade = !shade;
         }
-
+        if (_colSpan * _multiColumnCaptions.size() + _offset < renderers.length)
+        {
+            out.write("<td colspan=\"");
+            out.write(Integer.toString(renderers.length - _colSpan * _multiColumnCaptions.size() + _offset));
+            out.write("\" style=\"border-right: 1px solid rgb(170, 170, 170); border-bottom: 1px solid rgb(170, 170, 170)\">&nbsp;</td>");
+        }
         out.write("</tr>\n");
 
         super.renderGridHeaders(ctx, out, renderers);

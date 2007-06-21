@@ -146,6 +146,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
+        schema.setRuns(_runs);
 
         QuerySettings settings;
         try

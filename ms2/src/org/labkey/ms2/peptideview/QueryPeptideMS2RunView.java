@@ -66,6 +66,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
     public PeptideQueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException, SQLException
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
+        schema.setRuns(_runs);
 
         QuerySettings settings = createQuerySettings(DATA_REGION_NAME, schema, _maxPeptideRows);
 
@@ -196,6 +197,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
+        schema.setRuns(_runs);
 
         QuerySettings settings;
         try

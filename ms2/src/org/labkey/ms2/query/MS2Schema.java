@@ -47,6 +47,7 @@ public class MS2Schema extends UserSchema
     private static final Set<String> HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("PeptideId");
 
     private ProteinGroupProteins _proteinGroupProteins = new ProteinGroupProteins();
+    private MS2Run[] _runs;
 
     static public void register()
     {
@@ -132,7 +133,7 @@ public class MS2Schema extends UserSchema
         }
         else if (COMPARE_PROTEIN_PROPHET_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return new CompareProteinProphetTableInfo(alias, this, null);
+            return new CompareProteinProphetTableInfo(alias, this, null, false);
         }
         else
         {
@@ -300,6 +301,16 @@ public class MS2Schema extends UserSchema
         columns.add(FieldKey.fromParts("Input", "FASTA"));
         result.setDefaultVisibleColumns(columns);
         return result;
+    }
+
+    public void setRuns(MS2Run[] runs)
+    {
+        _runs = runs;
+    }
+    
+    public MS2Run[] getRuns()
+    {
+        return _runs;
     }
 
     public static class IconLinksDisplayColumn extends DataColumn

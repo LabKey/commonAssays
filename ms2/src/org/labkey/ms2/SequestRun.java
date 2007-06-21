@@ -23,11 +23,10 @@ package org.labkey.ms2;
  */
 public class SequestRun extends MS2Run
 {
-    public String getScoreColumnNames()
+    public MS2RunType getRunType()
     {
-        return "SpRank, SpScore, DeltaCn, XCorr, ";
+        return MS2RunType.Sequest;
     }
-
 
     public String getParamsFileName()
     {

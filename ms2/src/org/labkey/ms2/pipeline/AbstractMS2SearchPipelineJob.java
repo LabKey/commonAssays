@@ -188,16 +188,15 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
                 quantOpts.add("-N");
         }
 
-        String esc = getCommandEscapeChar();
         String dirMzXMLPathName = dirMzXML.toString();
         // Strip trailing file separater, since on Windows this might be a \, which will
         // cause escaping difficulties.
         if (dirMzXMLPathName.endsWith(File.separator))
             dirMzXMLPathName = dirMzXMLPathName.substring(0, dirMzXMLPathName.length() - 1);
-        quantOpts.add("-d" + esc + "\"" + dirMzXML + esc + "\"");
+        quantOpts.add("\"-d" + dirMzXML + "\"");
 
         if ("xpress".equals(paramAlgorithm))
-            return ("\"-X" + StringUtils.join(quantOpts.iterator(), ' ') + "\"");
+            return ("-X" + StringUtils.join(quantOpts.iterator(), ' '));
 
         String paramMinPP = parser.getInputParameter("pipeline quantitation, min peptide prophet");
         if (paramMinPP != null)
@@ -209,9 +208,9 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         if ("yes".equalsIgnoreCase(paramCompatQ3))
             quantOpts.add("--compat");
 
-        return ("\"-C1java -client -Xmx256M -jar "
-                + esc + "\"" /* + path to bin */ + "msInspect/viewerApp.jar" + esc + "\""
-                + " --q3 " + StringUtils.join(quantOpts.iterator(), ' ') + "\""
+        return ("-C1java -client -Xmx256M -jar "
+                + "\"" /* + path to bin */ + "msInspect/viewerApp.jar" + "\""
+                + " --q3 " + StringUtils.join(quantOpts.iterator(), ' ')
                 + " -C2Q3ProteinRatioParser");
     }
 

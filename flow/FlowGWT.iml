@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module version="4" relativePaths="true" type="JAVA_MODULE">
   <component name="ModuleRootManager" />
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_4" inherit-compiler-output="true">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_4" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/../../../intellijBuild/modules/flowGWT" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/gwtsrc">
       <sourceFolder url="file://$MODULE_DIR$/gwtsrc" isTestSource="false" />

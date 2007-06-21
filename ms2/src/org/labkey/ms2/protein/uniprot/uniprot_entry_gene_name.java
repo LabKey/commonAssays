@@ -31,18 +31,13 @@ public class uniprot_entry_gene_name extends ParseActions
         accumulated = null;
         uniprot root = (uniprot) tables.get("UniprotRoot");
         if (root.getSkipEntries() > 0) return true;
-        try
-        {
-            String nameType = attrs.getValue("type");
-            if (nameType == null) return false;
-            curType = new String(nameType);
-            accumulated = new String("");
-            this.clearCurItems();
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
+
+        String nameType = attrs.getValue("type");
+        if (nameType == null) return false;
+        curType = nameType;
+        accumulated = "";
+        this.clearCurItems();
+
         return true;
     }
 
@@ -50,25 +45,21 @@ public class uniprot_entry_gene_name extends ParseActions
     {
         uniprot root = (uniprot) tables.get("UniprotRoot");
         if (root.getSkipEntries() > 0) return true;
-        try
+
+        Map<String, Object> curSeq = tables.get("ProtSequences").getCurItem();
+        if (curSeq == null) return false;
+        accumulated = accumulated.trim();
+        if (curType.equalsIgnoreCase("primary") && accumulated.length() > 0)
         {
-            Map curSeq = (Map) ((ParseActions) tables.get("ProtSequences")).getCurItem();
-            if (curSeq == null) return false;
-            if (curType.equalsIgnoreCase("primary"))
-            {
-                Vector idents = (Vector) (((ParseActions) tables.get("ProtIdentifiers")).getCurItem().get("Identifiers"));
-                idents.add(this.getCurItem());
-                this.getCurItem().put("identType", "GeneName");
-                this.getCurItem().put("identifier", accumulated);
-                this.getCurItem().put("sequence", curSeq);
-                curSeq.put("best_name", accumulated);
-                curSeq.put("best_gene_name", accumulated);
-            }
+            Vector idents = (Vector) tables.get("ProtIdentifiers").getCurItem().get("Identifiers");
+            idents.add(this.getCurItem());
+            this.getCurItem().put("identType", "GeneName");
+            this.getCurItem().put("identifier", accumulated);
+            this.getCurItem().put("sequence", curSeq);
+            curSeq.put("best_name", accumulated);
+            curSeq.put("best_gene_name", accumulated);
         }
-        catch (Exception e)
-        {
-            return false;
-        }
+
         return true;
     }
 

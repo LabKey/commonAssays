@@ -23,11 +23,10 @@ package org.labkey.ms2;
  */
 public class CometRun extends MS2Run
 {
-    public String getScoreColumnNames()
+    public MS2RunType getRunType()
     {
-        return "RawScore, DiffScore, ZScore, ";
+        return MS2RunType.Comet;
     }
-
 
     public String getParamsFileName()
     {

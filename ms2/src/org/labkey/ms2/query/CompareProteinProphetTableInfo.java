@@ -21,13 +21,15 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
 {
     private final MS2Schema _schema;
     private final List<MS2Run> _runs;
+    private final boolean _forExport;
 
-    public CompareProteinProphetTableInfo(String alias, MS2Schema schema, List<MS2Run> runs)
+    public CompareProteinProphetTableInfo(String alias, MS2Schema schema, List<MS2Run> runs, boolean forExport)
     {
         super(alias, schema.getContainer());
 
         _schema = schema;
         _runs = runs;
+        _forExport = forExport;
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("BestName"));
@@ -61,16 +63,20 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
                 sql.append(run.getRun());
                 sql.append("ProteinGroupId");
                 ExprColumn proteinGroupIdColumn = new ExprColumn(this, "Run" + run.getRun(), sql, Types.INTEGER);
+                proteinGroupIdColumn.setCaption(run.getDescription());
                 proteinGroupIdColumn.setIsUnselectable(true);
                 runColumns.add(proteinGroupIdColumn);
                 LookupForeignKey fk = new LookupForeignKey("RowId")
                 {
                     public TableInfo getLookupTableInfo()
                     {
-                        return new ProteinGroupTableInfo(null, _schema);
+                        return new ProteinGroupTableInfo(null, _schema, false);
                     }
                 };
-                fk.setPrefixColumnCaption(false);
+                if (!_forExport)
+                {
+                    fk.setPrefixColumnCaption(false);
+                }
                 proteinGroupIdColumn.setFk(fk);
                 addColumn(proteinGroupIdColumn);
             }
@@ -84,7 +90,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
         {
             public TableInfo getLookupTableInfo()
             {
-                return new ProteinGroupTableInfo(null, _schema);
+                return new ProteinGroupTableInfo(null, _schema, false);
             }
         });
         addColumn(proteinGroupIdColumn);
@@ -122,7 +128,6 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
         addColumn(patternColumn);
 
         defaultCols.add(FieldKey.fromParts("RunCount"));
-        defaultCols.add(FieldKey.fromParts("Pattern"));
 
         setDefaultVisibleColumns(defaultCols);
     }

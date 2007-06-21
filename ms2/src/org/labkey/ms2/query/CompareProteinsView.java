@@ -20,61 +20,19 @@ public class CompareProteinsView extends QueryView
 {
     private final List<MS2Run> _runs;
     private final int _runListIndex;
+    private final boolean _forExport;
     private SimpleFilter _runFilter = new SimpleFilter();
     private List<FieldKey> _columns;
 
-    public CompareProteinsView(ViewContext context, UserSchema schema, QuerySettings settings, List<MS2Run> runs, int runListIndex)
+    public CompareProteinsView(ViewContext context, UserSchema schema, QuerySettings settings, List<MS2Run> runs, int runListIndex, boolean forExport)
     {
         super(new ViewContext(context), schema, settings);
         _runs = runs;
         _runListIndex = runListIndex;
+        _forExport = forExport;
 
         setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
         setShowExportButtons(false);
-/*
-        ViewURLHelper url = getViewContext().cloneViewURLHelper();
-        SimpleFilter filter = new SimpleFilter(url, getSettings().getDataRegionName());
-
-        for (SimpleFilter.FilterClause clause : new ArrayList<SimpleFilter.FilterClause>(filter.getClauses()))
-        {
-            for (String colName : clause.getColumnNames())
-            {
-                if (colName.startsWith("Run/"))
-                {
-                    SimpleFilter filterToRemove = new SimpleFilter();
-                    filterToRemove.addClause(clause);
-                    String urlParam = filterToRemove.toQueryString(getSettings().getDataRegionName());
-                    if (urlParam != null && urlParam.indexOf('=') != -1)
-                    {
-                        url.deleteParameter(PageFlowUtil.decode(urlParam.substring(0, urlParam.indexOf('='))));
-
-                        SimpleFilter.OrClause orClause = new SimpleFilter.OrClause();
-                        for (MS2Run run : _runs)
-                        {
-                            String newParam = urlParam.replace("Run%2F", "Run" + run.getRun() + "%2F");
-                            ViewURLHelper newURL = url.clone();
-                            newURL.deleteParameters();
-                            try
-                            {
-                                newURL = new ViewURLHelper(newURL + newParam);
-                            }
-                            catch (URISyntaxException e)
-                            {
-                                throw new RuntimeException(e);
-                            }
-                            SimpleFilter newFilter = new SimpleFilter(newURL, getSettings().getDataRegionName());
-                            for (SimpleFilter.FilterClause newClause : newFilter.getClauses())
-                            {
-                                orClause.addClause(newClause);
-                            }
-                        }
-                        _runFilter.addClause(orClause);
-                    }
-                }
-            }
-        }
-
-        getViewContext().setViewURLHelper(url);*/
     }
 
     public void setViewContext(ViewContext context)
@@ -102,6 +60,14 @@ public class CompareProteinsView extends QueryView
     protected DataView createDataView()
     {
         DataView result = super.createDataView();
+        Sort sort = result.getRenderContext().getBaseSort();
+        if (sort == null)
+        {
+            sort = new Sort();
+        }
+        sort.insertSortColumn("-Pattern", false);
+        sort.insertSortColumn("-RunCount", false);
+        result.getRenderContext().setBaseSort(sort);
         result.getRenderContext().setViewContext(getViewContext());
         SimpleFilter filter = new SimpleFilter(result.getRenderContext().getBaseFilter());
 
@@ -154,7 +120,7 @@ public class CompareProteinsView extends QueryView
     protected DataRegion createDataRegion()
     {
         List<DisplayColumn> displayColumns = getDisplayColumns();
-        CompareDataRegion rgn = new CompareDataRegion(null);
+        CompareDataRegion rgn = new CompareDataRegion(null, "Protein Information");
         int offset = 0;
         for (DisplayColumn col : displayColumns)
         {
@@ -167,7 +133,9 @@ public class CompareProteinsView extends QueryView
         List<String> headings = new ArrayList<String>();
         for (MS2Run run : _runs)
         {
-            headings.add(run.getDescription());
+            ViewURLHelper url = new ViewURLHelper("MS2", "showRun.view", ContainerManager.getForId(run.getContainer()));
+            url.addParameter("run", run.getRun());
+            headings.add("<a href=\"" + url.getLocalURIString() + "\">" + PageFlowUtil.filter(run.getDescription()) + "</a>");
         }
         rgn.setMultiColumnCaptions(headings);
         rgn.setColSpan((displayColumns.size() - offset) / _runs.size());
@@ -180,7 +148,7 @@ public class CompareProteinsView extends QueryView
 
     protected TableInfo createTable()
     {
-        return new CompareProteinProphetTableInfo(null, (MS2Schema)getSchema(), _runs);
+        return new CompareProteinProphetTableInfo(null, (MS2Schema)getSchema(), _runs, _forExport);
     }
 
     public void setColumns(List<FieldKey> columns)

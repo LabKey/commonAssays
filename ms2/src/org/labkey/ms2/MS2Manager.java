@@ -334,20 +334,23 @@ public class MS2Manager
             while (rs.next())
             {
                 String type = rs.getString("Type");
-                Class<MS2Run> c;
-
-                try
+                if (type == null)
                 {
-                    c = (Class<MS2Run>)Class.forName(_ms2RunPackage + type + "Run");
-                }
-                catch (ClassNotFoundException e)
-                {
-                    _log.debug("Class not found (" + type + "Run) in MS2Manager.getRuns()");
+                    _log.debug("MS2RunType \"" + type + "\" not found");
                     return null;
                 }
+                try
+                {
+                    MS2RunType runType = MS2RunType.valueOf(type);
 
-                BeanObjectFactory<MS2Run> bof = new BeanObjectFactory<MS2Run>(c);
-                runs.add(bof.handle(rs));
+                    BeanObjectFactory<MS2Run> bof = new BeanObjectFactory<MS2Run>((Class<MS2Run>)runType.getRunClass());
+                    runs.add(bof.handle(rs));
+                }
+                catch (IllegalArgumentException e)
+                {
+                    _log.debug("MS2RunType \"" + type + "\" not found");
+                    return null;
+                }
             }
 
             return runs.toArray(new MS2Run[runs.size()]);

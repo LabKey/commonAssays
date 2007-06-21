@@ -22,11 +22,10 @@ package org.labkey.ms2;
  */
 public class XCometRun extends MS2Run
 {
-    public String getScoreColumnNames()
+    public MS2RunType getRunType()
     {
-        return "RawScore, DiffScore, Expect, ";
+        return MS2RunType.XComet;
     }
-
 
     public String getParamsFileName()
     {

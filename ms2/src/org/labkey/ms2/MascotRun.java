@@ -33,11 +33,10 @@ public class MascotRun extends MS2Run
             map.put("homologyscore", "-1");
     }
 
-    public String getScoreColumnNames()
+    public MS2RunType getRunType()
     {
-        return "Ion, Identity, Homology, Expect, ";
+        return MS2RunType.Mascot;
     }
-
 
     public String getParamsFileName()
     {

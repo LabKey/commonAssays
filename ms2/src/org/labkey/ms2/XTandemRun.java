@@ -23,9 +23,9 @@ package org.labkey.ms2;
  */
 public class XTandemRun extends MS2Run
 {
-    public String getScoreColumnNames()
+    public MS2RunType getRunType()
     {
-        return "Hyper, Next, B, Y, Expect, ";
+        return MS2RunType.XTandem;
     }
 
     public String getParamsFileName()

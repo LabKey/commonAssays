@@ -25,6 +25,7 @@ public class RunComparatorView extends HorizontalPanel
     private List _runGroups = new ArrayList();
     private boolean[][] _hits;
     private String[] _runNames;
+    private String[] _runURLs;
 
     private CompareServiceAsync _service;
     private CompareServiceAsync getService()
@@ -72,6 +73,7 @@ public class RunComparatorView extends HorizontalPanel
     private void setupTable(CompareResult compareResult)
     {
         _runNames = compareResult.getRunNames();
+        _runURLs = compareResult.getRunURLs();
         _hits = compareResult.getHits();
 
         _runGroups.clear();
@@ -123,10 +125,12 @@ public class RunComparatorView extends HorizontalPanel
             _groupGrid.setWidget(x + 1, 0, new Label(Integer.toString(x + 1)));
             RunGroup runGroup = (RunGroup)_runGroups.get(x);
             int[] runIndices = runGroup.getRunIndices();
-            String name = _runNames[runIndices[0]];
-            for (int i = 1; i < runIndices.length; i++)
+            String separator = "";
+            String name = "";
+            for (int i = 0; i < runIndices.length; i++)
             {
-                name = name + "<br/>" + _runNames[runIndices[i]];
+                name = name + separator + "<a href=\"" + _runURLs[runIndices[i]] + "\">" + _runNames[runIndices[i]] + "</a>";
+                separator = "<br/>";
             }
             _groupGrid.setWidget(x + 1, 1, new HTML(name));
 

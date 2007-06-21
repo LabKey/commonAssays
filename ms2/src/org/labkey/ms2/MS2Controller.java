@@ -2271,7 +2271,7 @@ public class MS2Controller extends ViewController
             "<tr><td><input type=\"radio\" name=\"exportFormat\" value=\"PKL\">Spectra as PKL</td></tr>\n" +
             "<tr><td><input type=\"radio\" name=\"exportFormat\" value=\"AMT\">AMT (Accurate Mass & Time) file</td></tr>\n";
 
-        return pickView(cloneViewURLHelper().setAction("applyExportRunsView"), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraFormHtml, "Export Runs", "ms2RunsList");
+        return pickView(cloneViewURLHelper().setAction("applyExportRunsView"), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraFormHtml, "Export Runs", "ms2RunsList", true);
     }
 
 
@@ -2291,7 +2291,7 @@ public class MS2Controller extends ViewController
         requiresPermission(ACL.PERM_READ);
 
         List<String> errors = new ArrayList<String>();
-        List<MS2Run> runs = getCachedRuns(form.getRunList(), errors);
+        List<MS2Run> runs = getCachedRuns(form.getRunList(), errors, true);
 
         if (!errors.isEmpty())
             return _renderErrors(errors);
@@ -2494,7 +2494,7 @@ public class MS2Controller extends ViewController
     protected Forward exportQueryCompareToExcel(final ExportForm form) throws Exception
     {
         List<String> errors = new ArrayList<String>();
-        List<MS2Run> runs = getCachedRuns(form.getRunList(), errors);
+        List<MS2Run> runs = getCachedRuns(form.getRunList(), errors, false);
 
         if (!errors.isEmpty())
             return _renderErrors(errors);
@@ -2508,7 +2508,7 @@ public class MS2Controller extends ViewController
             }
         }
 
-        QueryView view = createCompareQueryView(runs, form.getRunList());
+        QueryView view = createCompareQueryView(runs, form.getRunList(), true);
         ExcelWriter excelWriter = view.getExcelWriter();
         excelWriter.setFilenamePrefix("CompareRuns");
         excelWriter.write(getResponse());
@@ -2519,7 +2519,7 @@ public class MS2Controller extends ViewController
     protected Forward exportQueryCompareToTSV(final ExportForm form) throws Exception
     {
         List<String> errors = new ArrayList<String>();
-        List<MS2Run> runs = getCachedRuns(form.getRunList(), errors);
+        List<MS2Run> runs = getCachedRuns(form.getRunList(), errors, false);
 
         if (!errors.isEmpty())
             return _renderErrors(errors);
@@ -2533,7 +2533,7 @@ public class MS2Controller extends ViewController
             }
         }
 
-        QueryView view = createCompareQueryView(runs, form.getRunList());
+        QueryView view = createCompareQueryView(runs, form.getRunList(), true);
         TSVGridWriter tsvWriter = view.getTsvWriter();
         tsvWriter.setFilenamePrefix("CompareRuns");
         tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
@@ -2791,10 +2791,10 @@ public class MS2Controller extends ViewController
 
 
     // extraFormHtml gets inserted between the view dropdown and the button.
-    private Forward pickView(ViewURLHelper nextUrl, String viewInstructions, String extraFormHtml, String navTreeName, String helpTopic) throws Exception
+    private Forward pickView(ViewURLHelper nextUrl, String viewInstructions, String extraFormHtml, String navTreeName, String helpTopic, boolean requireSameType) throws Exception
     {
         List<String> errors = new ArrayList<String>();
-        int runListIndex = cacheSelectedRuns(errors);
+        int runListIndex = cacheSelectedRuns(errors, requireSameType);
 
         if (!errors.isEmpty())
             return _renderErrors(errors);
@@ -2849,7 +2849,7 @@ public class MS2Controller extends ViewController
         sb.append("</td></tr>\n");
 
         ViewURLHelper nextUrl = cloneViewURLHelper().setAction("applyCompareView");
-        return pickView(nextUrl, "Select a view to apply a filter to all the runs.", sb.toString(), "Compare Runs", "ms2RunsList");
+        return pickView(nextUrl, "Select a view to apply a filter to all the runs.", sb.toString(), "Compare Runs", "ms2RunsList", false);
     }
 
     @Jpf.Action
@@ -2895,8 +2895,12 @@ public class MS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
+        ViewURLHelper currentUrl = getViewURLHelper();
+        String column = currentUrl.getParameter("column");
+        boolean isQuery = "query".equalsIgnoreCase(column);
+
         List<String> errors = new ArrayList<String>();
-        List<MS2Run> runs = getCachedRuns(runListIndex, errors);
+        List<MS2Run> runs = getCachedRuns(runListIndex, errors, !isQuery);
 
         if (!errors.isEmpty())
             return _renderErrors(errors);
@@ -2910,12 +2914,9 @@ public class MS2Controller extends ViewController
             }
         }
 
-        ViewURLHelper currentUrl = getViewURLHelper();
-        String column = currentUrl.getParameter("column");
-
-        if ("query".equalsIgnoreCase(column))
+        if (isQuery)
         {
-            CompareProteinsView view = createCompareQueryView(runs, runListIndex);
+            CompareProteinsView view = createCompareQueryView(runs, runListIndex, false);
             HtmlView helpView = new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein-specific columns, or expand <em>Run</em> to see the run-specific columns, like quantitation, amino acid coverage, and so forth. To set a filter on something like the group's probability, select the Filter tab, add the <em>Run->Prob</em> column, and filter it based on the desired threshold.</p></div>");
 
             Map<String, String> props = new HashMap<String, String>();
@@ -2989,17 +2990,16 @@ public class MS2Controller extends ViewController
         return null;
     }
 
-    private CompareProteinsView createCompareQueryView(List<MS2Run> runs, int runListIndex)
+    private CompareProteinsView createCompareQueryView(List<MS2Run> runs, int runListIndex, boolean forExport)
         throws ServletException
     {
         QuerySettings settings = new QuerySettings(cloneViewURLHelper(), getRequest(), "Compare");
         settings.setQueryName(MS2Schema.COMPARE_PROTEIN_PROPHET_TABLE_NAME);
         settings.setAllowChooseQuery(false);
-        CompareProteinsView view = new CompareProteinsView(getViewContext(), new MS2Schema(getUser(), getContainer()), settings, runs, runListIndex);
-        return view;
+        return new CompareProteinsView(getViewContext(), new MS2Schema(getUser(), getContainer()), settings, runs, runListIndex, forExport);
     }
 
-    private List<MS2Run> getSelectedRuns(List<String> errors) throws ServletException
+    private List<MS2Run> getSelectedRuns(List<String> errors, boolean requireSameType) throws ServletException
     {
         ViewContext ctx = getViewContext();
         List<String> stringIds = ctx.getList(DataRegion.SELECT_CHECKBOX_NAME);
@@ -3025,7 +3025,7 @@ public class MS2Controller extends ViewController
             }
         }
 
-        return getRuns(runIds, errors, true);
+        return getRuns(runIds, errors, requireSameType);
     }
 
 
@@ -3107,9 +3107,9 @@ public class MS2Controller extends ViewController
 
     // We cache just the list of run IDs, not the runs themselves.  This keeps things small and eases mem tracking.  Even though we're
     // just caching the list, we do all error & security checks upfront to alert the user early.
-    private int cacheSelectedRuns(List<String> errors) throws ServletException
+    private int cacheSelectedRuns(List<String> errors, boolean requireSameType) throws ServletException
     {
-        List<MS2Run> runs = getSelectedRuns(errors);
+        List<MS2Run> runs = getSelectedRuns(errors, requireSameType);
 
         if (errors.size() > 0)
             return 0;
@@ -3127,7 +3127,7 @@ public class MS2Controller extends ViewController
 
     private static final String NO_RUNS_MESSAGE = "Run list is empty; session may have timed out.  Please reselect the runs.";
 
-    protected List<MS2Run> getCachedRuns(int index, List<String> errors) throws ServletException
+    protected List<MS2Run> getCachedRuns(int index, List<String> errors, boolean requireSameType) throws ServletException
     {
         List<Integer> runIds = _runListCache.get(index);
 
@@ -3137,7 +3137,7 @@ public class MS2Controller extends ViewController
             return null;
         }
 
-        return getRuns(runIds, errors, true);
+        return getRuns(runIds, errors, requireSameType);
     }
 
     @Jpf.Action

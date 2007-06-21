@@ -3,15 +3,12 @@ package org.labkey.ms2.query;
 import org.labkey.api.query.*;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.HydrophobicityColumn;
-import org.labkey.ms2.DeltaScanColumn;
+import org.labkey.ms2.*;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
+import org.labkey.common.util.Pair;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 import java.sql.Types;
 
 /**
@@ -139,10 +136,6 @@ public class PeptidesTableInfo extends FilteredTable
 
         addScoreColumns(info);
 
-        addColumn(wrapColumn("Ion", info.getColumn("score1")));
-        addColumn(wrapColumn("Identity", info.getColumn("score2")));
-        addColumn(wrapColumn("Homology", info.getColumn("score3")));
-
         getColumn("Fraction").setFk(new LookupForeignKey("Fraction")
         {
             public TableInfo getLookupTableInfo()
@@ -220,7 +213,61 @@ public class PeptidesTableInfo extends FilteredTable
 
     private void addScoreColumns(TableInfo info)
     {
-        addColumn(wrapColumn("RawScore", info.getColumn("score1"))).setCaption("Raw");
+        Map<String, List<Pair<MS2RunType,Integer>>> columnMap = new HashMap<String, List<Pair<MS2RunType, Integer>>>();
+        MS2Run[] runs = _schema.getRuns();
+
+        Collection<MS2RunType> runTypes;
+        if (runs != null && runs.length > 0)
+        {
+            runTypes = new HashSet<MS2RunType>();
+            for (MS2Run run : runs)
+            {
+                runTypes.add(run.getRunType());
+            }
+        }
+        else
+        {
+            runTypes = Arrays.asList(MS2RunType.values());
+        }
+        for (MS2RunType runType : runTypes)
+        {
+            StringTokenizer st = new StringTokenizer(runType.getScoreColumnNames(), " ,", false);
+            int index = 1;
+            while (st.hasMoreTokens())
+            {
+                String name = st.nextToken();
+                List<Pair<MS2RunType, Integer>> l = columnMap.get(name);
+                if (l == null)
+                {
+                    l = new ArrayList<Pair<MS2RunType, Integer>>();
+                    columnMap.put(name, l);
+                }
+                l.add(new Pair<MS2RunType, Integer>(runType, index++));
+            }
+        }
+
+        for (Map.Entry<String, List<Pair<MS2RunType, Integer>>> entry : columnMap.entrySet())
+        {
+            SQLFragment sql = new SQLFragment("CASE (SELECT r.Type FROM ");
+            sql.append(MS2Manager.getTableInfoRuns());
+            sql.append(" r, ");
+            sql.append(MS2Manager.getTableInfoFractions());
+            sql.append(" f WHERE r.Run = f.Run AND f.Fraction = ");
+            sql.append(ExprColumn.STR_TABLE_ALIAS);
+            sql.append(".Fraction) ");
+            for (Pair<MS2RunType, Integer> typeInfo : entry.getValue())
+            {
+                sql.append(" WHEN '");
+                sql.append(typeInfo.getKey().toString());
+                sql.append("' THEN score");
+                sql.append(typeInfo.getValue());
+            }
+            sql.append(" ELSE NULL END");
+
+            addColumn(new ExprColumn(this, entry.getKey(), sql, Types.DOUBLE));
+        }
+
+/*        addColumn(wrapColumn("RawScore", info.getColumn("score1"))).setCaption("Raw");
         addColumn(wrapColumn("DiffScore", info.getColumn("score2"))).setCaption("dScore");
         addColumn(wrapColumn("ZScore", info.getColumn("score3")));
 
@@ -234,6 +281,11 @@ public class PeptidesTableInfo extends FilteredTable
         addColumn(wrapColumn("B", info.getColumn("score3")));
         addColumn(wrapColumn("Y", info.getColumn("score4")));
         addColumn(wrapColumn("Expect", info.getColumn("score5")));
+
+        addColumn(wrapColumn("Ion", info.getColumn("score1")));
+        addColumn(wrapColumn("Identity", info.getColumn("score2")));
+        addColumn(wrapColumn("Homology", info.getColumn("score3")));
+        */
     }
 
     private void addMassColumns(SqlDialect dialect)
@@ -278,9 +330,21 @@ public class PeptidesTableInfo extends FilteredTable
         List<FieldKey> result = new ArrayList<FieldKey>();
         result.add(FieldKey.fromParts("Scan"));
         result.add(FieldKey.fromParts("Charge"));
-        result.add(FieldKey.fromParts("RawScore"));
-        result.add(FieldKey.fromParts("DiffScore"));
-        result.add(FieldKey.fromParts("Expect"));
+        MS2Run[] runs = _schema.getRuns();
+        if (runs != null && runs.length > 0)
+        {
+            StringTokenizer st = new StringTokenizer(runs[0].getRunType().getScoreColumnNames(), ", ", false);
+            while (st.hasMoreTokens())
+            {
+                result.add(FieldKey.fromParts(st.nextToken()));
+            }
+        }
+        else
+        {
+            result.add(FieldKey.fromParts("RawScore"));
+            result.add(FieldKey.fromParts("DiffScore"));
+            result.add(FieldKey.fromParts("Expect"));
+        }
         result.add(FieldKey.fromParts("IonPercent"));
         result.add(FieldKey.fromParts("Mass"));
         result.add(FieldKey.fromParts("DeltaMass"));

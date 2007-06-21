@@ -24,4 +24,8 @@ package org.labkey.ms2;
  */
 public class XTandemcometRun extends XCometRun
 {
+    public MS2RunType getRunType()
+    {
+        return MS2RunType.XTandemcomet;
+    }
 }

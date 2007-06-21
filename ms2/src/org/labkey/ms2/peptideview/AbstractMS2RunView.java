@@ -172,8 +172,8 @@ public abstract class AbstractMS2RunView
     {
         StringBuilder result = new StringBuilder();
         result.append("Scan, Charge, ");
-        result.append(_runs[0].getScoreColumnNames());
-        result.append("IonPercent, Mass, DeltaMass, PeptideProphet, Peptide, ProteinHits, Protein");
+        result.append(_runs[0].getRunType().getScoreColumnNames());
+        result.append(", IonPercent, Mass, DeltaMass, PeptideProphet, Peptide, ProteinHits, Protein");
         return result.toString();
     }
 

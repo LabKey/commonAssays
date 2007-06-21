@@ -151,7 +151,7 @@ public abstract class MS2Run implements Serializable
 
     public String getCommonPeptideColumnNames()
     {
-        return "Scan, RetentionTime, Run, RunDescription, Fraction, FractionName, Charge, " + getScoreColumnNames() + "IonPercent, Mass, DeltaMass, DeltaMassPPM, FractionalDeltaMass, FractionalDeltaMassPPM, PrecursorMass, MZ, PeptideProphet, PeptideProphetErrorRate, Peptide, StrippedPeptide, PrevAA, TrimmedPeptide, NextAA, ProteinHits, SequencePosition, H, DeltaScan, Protein, Description, GeneName, SeqId";
+        return "Scan, RetentionTime, Run, RunDescription, Fraction, FractionName, Charge, " + getRunType().getScoreColumnNames() + ", IonPercent, Mass, DeltaMass, DeltaMassPPM, FractionalDeltaMass, FractionalDeltaMassPPM, PrecursorMass, MZ, PeptideProphet, PeptideProphetErrorRate, Peptide, StrippedPeptide, PrevAA, TrimmedPeptide, NextAA, ProteinHits, SequencePosition, H, DeltaScan, Protein, Description, GeneName, SeqId";
     }
 
     public String getProteinProphetPeptideColumnNames()
@@ -215,7 +215,7 @@ public abstract class MS2Run implements Serializable
     }
 
 
-    public abstract String getScoreColumnNames();
+    public abstract MS2RunType getRunType();
 
     public abstract String getParamsFileName();
 

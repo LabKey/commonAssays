@@ -28,7 +28,6 @@ public class OrganismTableInfo extends FilteredTable
         ExprColumn descriptionColumn = new ExprColumn(this, "Description", sql, Types.VARCHAR);
         addColumn(descriptionColumn);
 
-        addColumn(wrapColumn("Identifier", getRealTable().getColumn("IdentId")));
-        getColumn("IdentId").setIsHidden(true);
+        removeColumn(getColumn("IdentId"));
     }
 }

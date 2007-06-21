@@ -16,9 +16,9 @@ public class PhenyxRun extends MS2Run
             map.put("bogus", "87");  // TODO: Get rid of this
     }
 
-    public String getScoreColumnNames()
+    public MS2RunType getRunType()
     {
-        return "OrigScore, Bogus, ZScore, ";
+        return MS2RunType.Phenyx;
     }
 
     public String getParamsFileName()
