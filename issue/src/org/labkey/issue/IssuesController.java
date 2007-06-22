@@ -17,6 +17,7 @@ import org.labkey.api.wiki.WikiRendererType;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.FormHandlerAction;
 import org.labkey.issue.model.Issue;
 import org.labkey.issue.model.IssueManager;
 import org.labkey.issue.query.IssuesQuerySchema;
@@ -126,18 +127,8 @@ public class IssuesController extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_ADMIN)
-    public class SetCustomColumnConfigurationAction extends FormViewAction
+    public class SetCustomColumnConfigurationAction extends FormHandlerAction
     {
-        public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
-        {
-            return null;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return null;
-        }
-
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
             IssueManager.CustomColumnConfiguration ccc = new IssueManager.CustomColumnConfiguration(getViewContext());
@@ -157,18 +148,8 @@ public class IssuesController extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_ADMIN)
-    public class UpdateRequiredFieldsAction extends FormViewAction<IssuePreferenceForm>
+    public class UpdateRequiredFieldsAction extends FormHandlerAction<IssuePreferenceForm>
     {
-        public ModelAndView getView(IssuePreferenceForm issuePreferenceForm, boolean reshow, BindException errors) throws Exception
-        {
-            return null;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return null;
-        }
-        
         public boolean handlePost(IssuePreferenceForm form, BindException errors) throws Exception
         {
             final StringBuffer sb = new StringBuffer();
@@ -1102,13 +1083,8 @@ public class IssuesController extends SpringActionController
     }
 
 
-    public abstract class AdminFormAction extends FormViewAction<AdminForm>
+    public abstract class AdminFormAction extends FormHandlerAction<AdminForm>
     {
-        public ModelAndView getView(AdminForm adminForm, boolean reshow, BindException errors) throws Exception
-        {
-            return null;
-        }
-
         public void validateCommand(AdminForm adminForm, Errors errors)
         {
         }
@@ -1116,11 +1092,6 @@ public class IssuesController extends SpringActionController
         public ViewURLHelper getSuccessURL(AdminForm adminForm)
         {
             return issueURL("admin");
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return null;
         }
     }
 

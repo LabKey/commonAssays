@@ -17,74 +17,111 @@
 package org.labkey.portal;
 
 import org.apache.beehive.netui.pageflow.FormData;
-import org.apache.beehive.netui.pageflow.Forward;
-import org.apache.beehive.netui.pageflow.annotations.Jpf;
+import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.module.FolderType;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresSiteAdmin;
+import org.labkey.api.security.User;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.Search;
 import org.labkey.api.util.Search.SearchResultsView;
 import org.labkey.api.view.*;
-import org.labkey.common.util.Pair;
+import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
+import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.beans.PropertyDescriptor;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
 
-@Jpf.Controller
-public class ProjectController extends ViewController
+public class ProjectController extends SpringActionController
 {
-    @Jpf.Action
-    public Forward start() throws Exception
-    {
-        Container c = getContainer();
+    static DefaultActionResolver _actionResolver = new DefaultActionResolver(ProjectController.class);
 
-        if (c.isProject())
-        {
-            // This block is to handle the case where a user does not have permissions
-            // to a project folder, but does have access to a subfolder.  In this case, we'd like
-            // to let them see something at the project root (since this is where you land after
-            // selecting the project from the projects menu), so we display an access-denied
-            // message within the frame.  If the user isn't logged on, we simply show an
-            // access-denied error.  This is necessary to force the login prompt to show up
-            // for users with access who simply haven't logged on yet.  (brittp, 5.4.2007)
-            ACL acl = c.getAcl();
-            if (acl.getPermissions(getUser()) == ACL.PERM_NONE)
-            {
-                requiresLogin();
-                HtmlView htmlView = new HtmlView("You do not have permission to view this folder.<br>" +
-                        "Please select another folder from the tree to the left.");
-                HttpView view = new HomeTemplate(getViewContext(),htmlView,
-                    new PageConfig(getViewURLHelper().getPageFlow()), new NavTree[0]);
-                return includeView(view);
-            }
-        }
-        HttpView.throwRedirect(c.getStartURL(getViewContext()).toString());
-        return null;
+    public ProjectController() throws Exception
+    {
+        super();
+        setActionResolver(_actionResolver.getInstance(this));
     }
 
-    @Jpf.Action
-    /**
-     * Default portal page used for any project folder.
-     */
-    protected Forward begin() throws Exception
+    Container getContainer()
     {
-        requiresPermission(ACL.PERM_READ);        
-        String title = null;
-        Container c = getContainer(0);
-        boolean appendPath = true;
-        
-        if (c != null)
+        return getViewContext().getContainer();
+    }
+
+    User getUser()
+    {
+        return getViewContext().getUser();
+    }
+
+    ViewURLHelper homeUrl()
+    {
+        return new ViewURLHelper("Project", "begin", ContainerManager.HOME_PROJECT_PATH);
+    }
+
+    ViewURLHelper projectUrl(String action)
+    {
+        return new ViewURLHelper("Project", action, getContainer());
+
+    }
+
+    @RequiresPermission(ACL.PERM_NONE)
+    public class StartAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors) throws Exception
         {
+            Container c = getContainer();
+
+            if (c.isProject())
+            {
+                // This block is to handle the case where a user does not have permissions
+                // to a project folder, but does have access to a subfolder.  In this case, we'd like
+                // to let them see something at the project root (since this is where you land after
+                // selecting the project from the projects menu), so we display an access-denied
+                // message within the frame.  If the user isn't logged on, we simply show an
+                // access-denied error.  This is necessary to force the login prompt to show up
+                // for users with access who simply haven't logged on yet.  (brittp, 5.4.2007)
+                if (!c.hasPermission(getUser(), ACL.PERM_READ))
+                {
+                    if (getUser().isGuest())
+                        HttpView.throwUnauthorized();
+                    HtmlView htmlView = new HtmlView("You do not have permission to view this folder.<br>" +
+                            "Please select another folder from the tree to the left.");
+                    return htmlView;
+                }
+            }
+            return HttpView.redirect(c.getStartURL(getViewContext()));
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild(getContainer().getName());
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class BeginAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            Container c = getContainer();
+            if (null == c)
+            {
+                HttpView.throwNotFound();
+                return null;
+            }
+            
+            boolean appendPath = true;
+            String title;
             FolderType folderType = c.getFolderType();
             if (!FolderType.NONE.equals(c.getFolderType()))
             {
@@ -99,159 +136,227 @@ public class ProjectController extends ViewController
                 title = "Project " + c.getName();
             else
                 title = c.getName();
+
+            ViewURLHelper url = getViewContext().getViewURLHelper();
+            if (null == url || url.getExtraPath().equals("/"))
+                return HttpView.redirect(homeUrl());
+
+            PageConfig page = getPageConfig();
+            if (title != null)
+                page.setTitle(title, appendPath);
+            HttpView template = new HomeTemplate(getViewContext(), c, new VBox(), page, new NavTree[0]);
+
+            Portal.populatePortalView(getViewContext(), c.getId(), template, getViewContext().getContextPath());
+            
+            getPageConfig().setUseTemplate(false);
+            return template;
         }
 
-        return begin(title, appendPath);
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root;
+        }
     }
+    
 
-
-    private Forward begin(String title, boolean appendPath) throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-        
-        HttpServletRequest request = getRequest();
-        ViewURLHelper url = getViewURLHelper();
-        if (null == url || url.getExtraPath().equals("/")) 
-            return new ViewForward("Project", "begin.view", ContainerManager.HOME_PROJECT_PATH);
-
-        Container c = getContainer(0);
-
-        NavTrailConfig trailConfig = new NavTrailConfig(getViewContext(), c);
-        if (title != null)
-            trailConfig.setTitle(title, appendPath);
-
-        HttpView template = new HomeTemplate(getViewContext(), c, new VBox(), trailConfig);
-
-        Portal.populatePortalView(getViewContext(), c.getId(), template, request.getContextPath());
-
-        includeView(template);
-        return null;
-    }
-
-    @Jpf.Action
     /**
      * Same as begin, but used for our home page. We retain the action
      * for compatibility with old bookmarks, but redirect so doesn't show
      * up any more...
      */
-    protected Forward home() throws Exception
+    @RequiresPermission(ACL.PERM_NONE)
+    public class HomeAction extends SimpleViewAction
     {
-        return new ViewForward("Project", "begin.view", ContainerManager.getHomeContainer());
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            return HttpView.redirect(projectUrl("begin"));
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
     }
 
 
-    @Jpf.Action
-    protected Forward moveWebPart(MovePortletForm form) throws Exception
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class MoveWebPartAction extends FormViewAction<MovePortletForm>
     {
-        requiresPermission(ACL.PERM_ADMIN);
-
-        Forward forward = form.getForward("begin", (Pair[]) null, true);
-
-        Portal.WebPart[] parts = Portal.getParts(form.getPageId());
-        if (null == parts)
-            return forward;
-
-        //Find the portlet. Theoretically index should be 1-based & consecutive, but
-        //code defensively.
-        int i;
-        int index = form.getIndex();
-        for (i = 0; i < parts.length; i++)
-            if (parts[i].getIndex() == index)
-                break;
-
-        if (i == parts.length)
-            return forward;
-
-        Portal.WebPart part = parts[i];
-        String location = part.getLocation();
-        if (form.getDirection() == Portal.MOVE_UP)
+        public void validateCommand(MovePortletForm target, Errors errors)
         {
-            for (int j = i - 1; j >= 0; j--)
-            {
-                if (location.equals(parts[j].getLocation()))
-                {
-                    int newIndex = parts[j].getIndex();
-                    part.setIndex(newIndex);
-                    parts[j].setIndex(index);
+        }
+
+        public ModelAndView getView(MovePortletForm movePortletForm, boolean reshow, BindException errors) throws Exception
+        {
+            // UNDONE: this seems to be used a link, fix to make POST
+            handlePost(movePortletForm,errors);
+            return HttpView.redirect(getSuccessURL(movePortletForm));
+        }
+
+        public boolean handlePost(MovePortletForm form, BindException errors) throws Exception
+        {
+            Portal.WebPart[] parts = Portal.getParts(form.getPageId());
+            if (null == parts)
+                return true;
+
+            //Find the portlet. Theoretically index should be 1-based & consecutive, but
+            //code defensively.
+            int i;
+            int index = form.getIndex();
+            for (i = 0; i < parts.length; i++)
+                if (parts[i].getIndex() == index)
                     break;
+
+            if (i == parts.length)
+                return true;
+
+            Portal.WebPart part = parts[i];
+            String location = part.getLocation();
+            if (form.getDirection() == Portal.MOVE_UP)
+            {
+                for (int j = i - 1; j >= 0; j--)
+                {
+                    if (location.equals(parts[j].getLocation()))
+                    {
+                        int newIndex = parts[j].getIndex();
+                        part.setIndex(newIndex);
+                        parts[j].setIndex(index);
+                        break;
+                    }
                 }
             }
-        }
-        else
-        {
-            for (int j = i + 1; j < parts.length; j++)
+            else
             {
-                if (location.equals(parts[j].getLocation()))
+                for (int j = i + 1; j < parts.length; j++)
                 {
-                    int newIndex = parts[j].getIndex();
-                    part.setIndex(newIndex);
-                    parts[j].setIndex(index);
-                    break;
+                    if (location.equals(parts[j].getLocation()))
+                    {
+                        int newIndex = parts[j].getIndex();
+                        part.setIndex(newIndex);
+                        parts[j].setIndex(index);
+                        break;
+                    }
                 }
             }
+
+            Portal.saveParts(form.getPageId(), parts);
+            return true;
         }
 
-        Portal.saveParts(form.getPageId(), parts);
-        return forward;
-    }
-
-    @Jpf.Action
-    protected Forward addWebPart(AddWebPartForm form) throws ServletException, URISyntaxException, SQLException
-    {
-        requiresPermission(ACL.PERM_ADMIN);
-
-        Forward beginForward = form.getForward("begin", (Pair[]) null, true);
-
-        WebPartFactory desc = Portal.getPortalPart(form.getName());
-        if (null == desc)
-            return beginForward;
-
-        Portal.WebPart newPart = Portal.addPart(getContainer(), desc, form.getLocation());
-
-        if (desc.isEditable() && desc.showCustomizeOnInsert())
+        public ViewURLHelper getSuccessURL(MovePortletForm movePortletForm)
         {
-            return form.getForward("showCustomizeWebPart",
-                    new Pair[]{
-                            new Pair("pageId", form.getPageId()),
-                            new Pair("index", newPart.getIndex())
-                    },
-                    true);
+            return projectUrl("begin");
         }
-        else
-            return beginForward;
-    }
 
-    @Jpf.Action
-    protected Forward deleteWebPart(CustomizePortletForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_ADMIN);
-
-        Forward forward = form.getForward("begin", (Pair[]) null, true);
-
-        Portal.WebPart[] parts = Portal.getParts(form.getPageId());
-        //Changed on us..
-        if (null == parts || parts.length == 0)
-            return forward;
-
-        ArrayList<Portal.WebPart> newParts = new ArrayList<Portal.WebPart>();
-        int index = form.getIndex();
-        for (Portal.WebPart part : parts)
-            if (part.getIndex() != index)
-                newParts.add(part);
-
-        Portal.saveParts(form.getPageId(), newParts.toArray(new Portal.WebPart[0]));
-        return forward;
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
     }
 
 
-    @Jpf.Action
-    protected Forward purge() throws ServletException, SQLException, IOException
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class AddWebPartAction extends FormViewAction<AddWebPartForm>
     {
-        requiresGlobalAdmin();
+        WebPartFactory _desc = null;
+        Portal.WebPart _newPart = null;
+        
+        public void validateCommand(AddWebPartForm target, Errors errors)
+        {
+        }
 
-        int rows = Portal.purge();
-        getResponse().getWriter().println("deleted " + rows + " portlets<br>");
-        return null;
+        public ModelAndView getView(AddWebPartForm addWebPartForm, boolean reshow, BindException errors) throws Exception
+        {
+            // UNDONE: this seems to be used a link, fix to make POST
+            handlePost(addWebPartForm,errors);
+            return HttpView.redirect(getSuccessURL(addWebPartForm));
+        }
+
+        public boolean handlePost(AddWebPartForm form, BindException errors) throws Exception
+        {
+            _desc = Portal.getPortalPart(form.getName());
+            if (null == _desc)
+                return true;
+
+            _newPart = Portal.addPart(getContainer(), _desc, form.getLocation());
+            return true;
+        }
+
+        public ViewURLHelper getSuccessURL(AddWebPartForm form)
+        {
+            if (null != _desc && _desc.isEditable() && _desc.showCustomizeOnInsert())
+            {
+                return projectUrl("customizeWebPart")
+                        .addParameter("pageId", form.getPageId())
+                        .addParameter("index", ""+_newPart.getIndex());
+            }
+            else
+                return projectUrl("begin");
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class DeleteWebPartAction extends FormViewAction<CustomizePortletForm>
+    {
+        public void validateCommand(CustomizePortletForm target, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(CustomizePortletForm customizePortletForm, boolean reshow, BindException errors) throws Exception
+        {
+            // UNDONE: this seems to be used a link, fix to make POST
+            handlePost(customizePortletForm,errors);
+            return HttpView.redirect(getSuccessURL(customizePortletForm));
+        }
+
+        public boolean handlePost(CustomizePortletForm form, BindException errors) throws Exception
+        {
+            Portal.WebPart[] parts = Portal.getParts(form.getPageId());
+            //Changed on us..
+            if (null == parts || parts.length == 0)
+                return true;
+
+            ArrayList<Portal.WebPart> newParts = new ArrayList<Portal.WebPart>();
+            int index = form.getIndex();
+            for (Portal.WebPart part : parts)
+                if (part.getIndex() != index)
+                    newParts.add(part);
+
+            Portal.saveParts(form.getPageId(), newParts.toArray(new Portal.WebPart[0]));
+            return true;
+        }
+
+        public ViewURLHelper getSuccessURL(CustomizePortletForm customizePortletForm)
+        {
+            return projectUrl("begin");
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+
+    @RequiresSiteAdmin()
+    public class PurgeAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            int rows = Portal.purge();
+            return new HtmlView("deleted " + rows + " portlets<br>");
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
     }
 
     public static class CustomizeWebPartView extends AbstractCustomizeWebPartView
@@ -284,7 +389,7 @@ public class ProjectController extends ViewController
     /**
      * FormData get and set methods may be overwritten by the Form Bean editor.
      */
-    public static class CreateForm extends ViewForm
+    public static class CreateForm
     {
         private String name;
 
@@ -354,56 +459,70 @@ public class ProjectController extends ViewController
         }
     }
 
-    @Jpf.Action
-    protected Forward showCustomizeWebPart(CustomizePortletForm form) throws Exception
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class CustomizeWebPartAction extends FormViewAction<CustomizePortletForm>
     {
-        requiresPermission(ACL.PERM_ADMIN);
+        Portal.WebPart _webPart;
 
-        Portal.WebPart webPart = Portal.getPart(form.getPageId(), form.getIndex());
-        if (null == webPart)
-            return form.getForward("begin", (Pair[]) null, true);
-
-        WebPartFactory desc = Portal.getPortalPart(webPart.getName());
-        assert (null != desc);
-        if (null == desc)
-            return form.getForward("begin", (Pair[]) null, true);
-
-        HttpView v = desc.getEditView(webPart);
-        assert(null != v);
-        if (null == v)
-            return form.getForward("begin", (Pair[]) null, true);
-
-        HttpView template = new HomeTemplate(getViewContext(), getContainer(), v);
-        includeView(template);
-        return null;
-    }
-
-
-    @Jpf.Action
-    protected Forward saveCustomizeWebPart(CustomizePortletForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_ADMIN);
-
-        Portal.WebPart webPart = Portal.getPart(form.getPageId(), form.getIndex());
-
-        Enumeration params = getRequest().getParameterNames();
-        // TODO: Clean this up. Type checking... (though type conversion also must be done by the webpart)
-        while (params.hasMoreElements())
+        public void validateCommand(CustomizePortletForm target, Errors errors)
         {
-            String s = (String) params.nextElement();
-            if (!"index".equals(s) && !"pageId".equals(s) && !"x".equals(s) && !"y".equals(s))
-            {
-                String value = getRequest().getParameter(s);
-                if ("".equals(value.trim()))
-                    webPart.getPropertyMap().remove(s);
-                else
-                    webPart.getPropertyMap().put(s, getRequest().getParameter(s));
-            }
         }
 
-        Portal.updatePart(getUser(), webPart);
+        public ModelAndView getView(CustomizePortletForm form, boolean reshow, BindException errors) throws Exception
+        {
+            _webPart = Portal.getPart(form.getPageId(), form.getIndex());
+            if (null == _webPart)
+                return HttpView.redirect(projectUrl("begin"));
 
-        return form.getForward("begin", (Pair[]) null, true);
+            WebPartFactory desc = Portal.getPortalPart(_webPart.getName());
+            assert (null != desc);
+            if (null == desc)
+                return HttpView.redirect(projectUrl("begin"));
+
+            HttpView v = desc.getEditView(_webPart);
+            assert(null != v);
+            if (null == v)
+                return HttpView.redirect(projectUrl("begin"));
+
+            return v;
+        }
+
+        public boolean handlePost(CustomizePortletForm form, BindException errors) throws Exception
+        {
+            Portal.WebPart webPart = Portal.getPart(form.getPageId(), form.getIndex());
+
+            // UNDONE: use getPropertyValues()
+            HttpServletRequest request = getViewContext().getRequest();
+            Enumeration params = request.getParameterNames();
+
+            // TODO: Clean this up. Type checking... (though type conversion also must be done by the webpart)
+            while (params.hasMoreElements())
+            {
+                String s = (String) params.nextElement();
+                if (!"index".equals(s) && !"pageId".equals(s) && !"x".equals(s) && !"y".equals(s))
+                {
+                    String value = request.getParameter(s);
+                    if ("".equals(value.trim()))
+                        webPart.getPropertyMap().remove(s);
+                    else
+                        webPart.getPropertyMap().put(s, request.getParameter(s));
+                }
+            }
+
+            Portal.updatePart(getUser(), webPart);
+            return true;
+        }
+
+        public ViewURLHelper getSuccessURL(CustomizePortletForm customizePortletForm)
+        {
+            return projectUrl("begin");
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return (new BeginAction()).appendNavTrail(root)
+                    .addChild("Customize " + _webPart.getName());
+        }
     }
 
 
@@ -413,22 +532,25 @@ public class ProjectController extends ViewController
     }
 
 
-    @Jpf.Action
-    protected Forward search() throws Exception
+    @RequiresPermission(ACL.PERM_READ)
+    public class SearchAction extends SimpleViewAction
     {
-        requiresPermission(ACL.PERM_READ);
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            Container c = getContainer();
+            String searchTerm = (String)getProperty("search","");
 
-        Container c = getContainer();
-        String searchTerm = (String)getViewContext().get("search");
+            HttpView results = new SearchResultsView(c, searchTerm, Search.ALL_MODULES, getUser(), getSearchUrl(c));
 
-        HttpView results = new SearchResultsView(c, searchTerm, Search.ALL_MODULES, getUser(), getSearchUrl(c));
+            getPageConfig().setFocus("forms[0].search");
+            getPageConfig().setTitle("Search Results");
+            return results;
+        }
 
-        NavTrailConfig trailConfig = new NavTrailConfig(getViewContext(), c);
-        trailConfig.setTitle("Search Results");
-
-        HomeTemplate template = new HomeTemplate(getViewContext(), c, results, trailConfig);
-        template.getModelBean().setFocus("forms[0].search");
-        return includeView(template);
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
     }
 
 
