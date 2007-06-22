@@ -246,6 +246,8 @@ public class PeptidesTableInfo extends FilteredTable
             }
         }
 
+        ColumnInfo realScoreCol = MS2Manager.getTableInfoPeptidesData().getColumn("Score2");
+
         for (Map.Entry<String, List<Pair<MS2RunType, Integer>>> entry : columnMap.entrySet())
         {
             SQLFragment sql = new SQLFragment("CASE (SELECT r.Type FROM ");
@@ -259,33 +261,17 @@ public class PeptidesTableInfo extends FilteredTable
             {
                 sql.append(" WHEN '");
                 sql.append(typeInfo.getKey().toString());
-                sql.append("' THEN score");
+                sql.append("' THEN ");
+                sql.append(ExprColumn.STR_TABLE_ALIAS);
+                sql.append(".score");
                 sql.append(typeInfo.getValue());
             }
             sql.append(" ELSE NULL END");
 
-            addColumn(new ExprColumn(this, entry.getKey(), sql, Types.DOUBLE));
+            ColumnInfo newCol = addColumn(new ExprColumn(this, entry.getKey(), sql, Types.DOUBLE));
+            newCol.setFormatString(realScoreCol.getFormatString());
+            newCol.setWidth(realScoreCol.getWidth());
         }
-
-/*        addColumn(wrapColumn("RawScore", info.getColumn("score1"))).setCaption("Raw");
-        addColumn(wrapColumn("DiffScore", info.getColumn("score2"))).setCaption("dScore");
-        addColumn(wrapColumn("ZScore", info.getColumn("score3")));
-
-        addColumn(wrapColumn("SpScore", info.getColumn("score1")));
-        addColumn(wrapColumn("DeltaCN", info.getColumn("score2")));
-        addColumn(wrapColumn("XCorr", info.getColumn("score3")));
-        addColumn(wrapColumn("SpRank", info.getColumn("score4")));
-
-        addColumn(wrapColumn("Hyper", info.getColumn("score1")));
-        addColumn(wrapColumn("Next", info.getColumn("score2")));
-        addColumn(wrapColumn("B", info.getColumn("score3")));
-        addColumn(wrapColumn("Y", info.getColumn("score4")));
-        addColumn(wrapColumn("Expect", info.getColumn("score5")));
-
-        addColumn(wrapColumn("Ion", info.getColumn("score1")));
-        addColumn(wrapColumn("Identity", info.getColumn("score2")));
-        addColumn(wrapColumn("Homology", info.getColumn("score3")));
-        */
     }
 
     private void addMassColumns(SqlDialect dialect)

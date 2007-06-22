@@ -53,10 +53,7 @@ import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 import org.labkey.ms2.protein.tools.GoLoader;
-import org.labkey.ms2.query.CompareProteinsView;
-import org.labkey.ms2.query.MS2Schema;
-import org.labkey.ms2.query.ProteinGroupTableInfo;
-import org.labkey.ms2.query.SequencesTableInfo;
+import org.labkey.ms2.query.*;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
 import javax.servlet.ServletException;
@@ -2491,49 +2488,45 @@ public class MS2Controller extends ViewController
     }
 
     @Jpf.Action
-    protected Forward exportQueryCompareToExcel(final ExportForm form) throws Exception
+    protected Forward exportQueryProteinProphetCompareToExcel(final ExportForm form) throws Exception
     {
-        List<String> errors = new ArrayList<String>();
-        List<MS2Run> runs = getCachedRuns(form.getRunList(), errors, false);
+        return exportQueryCompareToExcel(new CompareProteinsView(getViewContext(), this, form.getRunList(), true));
+    }
 
-        if (!errors.isEmpty())
-            return _renderErrors(errors);
+    @Jpf.Action
+    protected Forward exportQueryProteinProphetCompareToTSV(final ExportForm form) throws Exception
+    {
+        return exportQueryCompareToTSV(new CompareProteinsView(getViewContext(), this, form.getRunList(), true));
+    }
 
-        for (MS2Run run : runs)
-        {
-            Container c = ContainerManager.getForId(run.getContainer());
-            if (c == null || !c.hasPermission(getUser(), ACL.PERM_READ))
-            {
-                return HttpView.throwUnauthorized();
-            }
-        }
+    @Jpf.Action
+    protected Forward exportQueryPeptideCompareToExcel(final ExportForm form) throws Exception
+    {
+        return exportQueryCompareToExcel(new ComparePeptidesView(getViewContext(), this, form.getRunList(), true));
+    }
 
-        QueryView view = createCompareQueryView(runs, form.getRunList(), true);
+    @Jpf.Action
+    protected Forward exportQueryPeptideCompareToTSV(final ExportForm form) throws Exception
+    {
+        return exportQueryCompareToTSV(new ComparePeptidesView(getViewContext(), this, form.getRunList(), true));
+    }
+
+    private Forward exportQueryCompareToExcel(AbstractRunCompareView view) throws Exception
+    {
+        if (!view.getErrors().isEmpty())
+            return _renderErrors(view.getErrors());
+
         ExcelWriter excelWriter = view.getExcelWriter();
         excelWriter.setFilenamePrefix("CompareRuns");
         excelWriter.write(getResponse());
         return null;
     }
 
-    @Jpf.Action
-    protected Forward exportQueryCompareToTSV(final ExportForm form) throws Exception
+    private Forward exportQueryCompareToTSV(AbstractRunCompareView view) throws Exception
     {
-        List<String> errors = new ArrayList<String>();
-        List<MS2Run> runs = getCachedRuns(form.getRunList(), errors, false);
+        if (!view.getErrors().isEmpty())
+            return _renderErrors(view.getErrors());
 
-        if (!errors.isEmpty())
-            return _renderErrors(errors);
-
-        for (MS2Run run : runs)
-        {
-            Container c = ContainerManager.getForId(run.getContainer());
-            if (c == null || !c.hasPermission(getUser(), ACL.PERM_READ))
-            {
-                return HttpView.throwUnauthorized();
-            }
-        }
-
-        QueryView view = createCompareQueryView(runs, form.getRunList(), true);
         TSVGridWriter tsvWriter = view.getTsvWriter();
         tsvWriter.setFilenamePrefix("CompareRuns");
         tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
@@ -2846,6 +2839,9 @@ public class MS2Controller extends ViewController
         sb.append("<input type=\"radio\" name=\"column\" value=\"Query\" /><b>Query (beta)</b><br/>");
         sb.append("<div style=\"padding-left: 20px;\">The query-based comparison does not use the view selected above. Instead, please follow the instructions at the top of the comparison page to customize the results. It is based on ProteinProphet protein groups, so the runs must be associated with ProteinProphet data.</div>");
         sb.append("<hr>");
+
+        sb.append("<input type=\"radio\" name=\"column\" value=\"QueryPeptides\" /><b>Query Peptides (beta)</b><br/>");
+        sb.append("<hr>");
         sb.append("</td></tr>\n");
 
         ViewURLHelper nextUrl = cloneViewURLHelper().setAction("applyCompareView");
@@ -2885,7 +2881,6 @@ public class MS2Controller extends ViewController
     protected Forward compareService() throws Exception
     {
         requiresPermission(ACL.PERM_READ);
-        List<String> errors = new ArrayList<String>();
         CompareServiceImpl service = new CompareServiceImpl(getViewContext(), this);
         service.doPost(getRequest(), getResponse());
         return null;
@@ -2897,10 +2892,29 @@ public class MS2Controller extends ViewController
 
         ViewURLHelper currentUrl = getViewURLHelper();
         String column = currentUrl.getParameter("column");
-        boolean isQuery = "query".equalsIgnoreCase(column);
+        boolean isQueryProteinProphet = "query".equalsIgnoreCase(column);
+        boolean isQueryPeptides = "querypeptides".equalsIgnoreCase(column);
+
+        if (isQueryProteinProphet || isQueryPeptides)
+        {
+            AbstractRunCompareView view = isQueryPeptides ? new ComparePeptidesView(getViewContext(), this, runListIndex, false) : new CompareProteinsView(getViewContext(), this, runListIndex, false);
+
+            if (!view.getErrors().isEmpty())
+                return _renderErrors(view.getErrors());
+
+            HtmlView helpView = new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein-specific columns, or expand <em>Run</em> to see the values associated with individual runs, like probability. To set a filter, select the Filter tab, add column, and filter it based on the desired threshold.</p></div>");
+
+            Map<String, String> props = new HashMap<String, String>();
+            props.put("originalURL", getViewURLHelper().toString());
+            props.put("comparisonName", view.getComparisonName());
+            GWTView gwtView = new GWTView("org.labkey.ms2.RunComparator", props);
+            VBox vbox = new VBox(gwtView, helpView, view);
+
+            return _renderInTemplate(vbox, false, "Compare Runs", null);
+        }
 
         List<String> errors = new ArrayList<String>();
-        List<MS2Run> runs = getCachedRuns(runListIndex, errors, !isQuery);
+        List<MS2Run> runs = getCachedRuns(runListIndex, errors, true);
 
         if (!errors.isEmpty())
             return _renderErrors(errors);
@@ -2912,19 +2926,6 @@ public class MS2Controller extends ViewController
             {
                 return HttpView.throwUnauthorized();
             }
-        }
-
-        if (isQuery)
-        {
-            CompareProteinsView view = createCompareQueryView(runs, runListIndex, false);
-            HtmlView helpView = new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein-specific columns, or expand <em>Run</em> to see the run-specific columns, like quantitation, amino acid coverage, and so forth. To set a filter on something like the group's probability, select the Filter tab, add the <em>Run->Prob</em> column, and filter it based on the desired threshold.</p></div>");
-
-            Map<String, String> props = new HashMap<String, String>();
-            props.put("originalURL", getViewURLHelper().toString());
-            GWTView gwtView = new GWTView("org.labkey.ms2.RunComparator", props);
-            VBox vbox = new VBox(gwtView, helpView, view);
-
-            return _renderInTemplate(vbox, false, "Compare Runs", null);
         }
 
         CompareQuery query = CompareQuery.getCompareQuery(column, currentUrl, runs);
@@ -2988,15 +2989,6 @@ public class MS2Controller extends ViewController
         }
 
         return null;
-    }
-
-    private CompareProteinsView createCompareQueryView(List<MS2Run> runs, int runListIndex, boolean forExport)
-        throws ServletException
-    {
-        QuerySettings settings = new QuerySettings(cloneViewURLHelper(), getRequest(), "Compare");
-        settings.setQueryName(MS2Schema.COMPARE_PROTEIN_PROPHET_TABLE_NAME);
-        settings.setAllowChooseQuery(false);
-        return new CompareProteinsView(getViewContext(), new MS2Schema(getUser(), getContainer()), settings, runs, runListIndex, forExport);
     }
 
     private List<MS2Run> getSelectedRuns(List<String> errors, boolean requireSameType) throws ServletException
@@ -3127,7 +3119,7 @@ public class MS2Controller extends ViewController
 
     private static final String NO_RUNS_MESSAGE = "Run list is empty; session may have timed out.  Please reselect the runs.";
 
-    protected List<MS2Run> getCachedRuns(int index, List<String> errors, boolean requireSameType) throws ServletException
+    public List<MS2Run> getCachedRuns(int index, List<String> errors, boolean requireSameType) throws ServletException
     {
         List<Integer> runIds = _runListCache.get(index);
 

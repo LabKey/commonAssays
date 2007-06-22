@@ -1,0 +1,161 @@
+package org.labkey.ms2.query;
+
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.VirtualTable;
+import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.LookupForeignKey;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.sql.Types;
+
+/**
+ * User: jeckels
+ * Date: Jun 21, 2007
+ */
+public class ComparePeptideTableInfo extends VirtualTable
+{
+    private final MS2Schema _schema;
+    private final List<MS2Run> _runs;
+    private final boolean _forExport;
+
+    public ComparePeptideTableInfo(MS2Schema schema, List<MS2Run> runs, boolean forExport)
+    {
+        super(MS2Manager.getSchema());
+
+        _schema = schema;
+        _runs = runs;
+        _forExport = forExport;
+
+        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        defaultCols.add(FieldKey.fromParts("PeptideSequence"));
+
+        List<ColumnInfo> runColumns = new ArrayList<ColumnInfo>();
+
+        if (runs != null)
+        {
+            for (MS2Run run : runs)
+            {
+                SQLFragment sql = new SQLFragment();
+                sql.append("Run");
+                sql.append(run.getRun());
+                sql.append("PeptideId");
+                ExprColumn peptideIdColumn = new ExprColumn(this, "Run" + run.getRun(), sql, Types.INTEGER);
+                peptideIdColumn.setCaption(run.getDescription());
+                peptideIdColumn.setIsUnselectable(true);
+                runColumns.add(peptideIdColumn);
+                LookupForeignKey fk = new LookupForeignKey("RowId")
+                {
+                    public TableInfo getLookupTableInfo()
+                    {
+                        return new PeptidesTableInfo(_schema);
+                    }
+                };
+                if (!_forExport)
+                {
+                    fk.setPrefixColumnCaption(false);
+                }
+                peptideIdColumn.setFk(fk);
+                addColumn(peptideIdColumn);
+            }
+        }
+
+        addColumn(new ExprColumn(this, "PeptideSequence", new SQLFragment("InnerPeptide"), Types.VARCHAR));
+
+        ExprColumn peptideIdColumn = new ExprColumn(this, "Run", new SQLFragment("<ILLEGAL STATE>"), Types.INTEGER);
+        peptideIdColumn.setIsUnselectable(true);
+        defaultCols.add(FieldKey.fromParts("Run", "PeptideProphet"));
+        peptideIdColumn.setFk(new LookupForeignKey("RowId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return new PeptidesTableInfo(_schema);
+            }
+        });
+        addColumn(peptideIdColumn);
+
+        SQLFragment runCountSQL = new SQLFragment("(");
+        String separator = "";
+        for (ColumnInfo runCol : runColumns)
+        {
+            runCountSQL.append(separator);
+            separator = " + ";
+            runCountSQL.append("CASE WHEN " + runCol.getAlias() + "$.RowId IS NULL THEN 0 ELSE 1 END ");
+        }
+        runCountSQL.append(")");
+        ExprColumn runCount = new ExprColumn(this, "RunCount", runCountSQL, Types.INTEGER, runColumns.toArray(new ColumnInfo[runColumns.size()]));
+        addColumn(runCount);
+
+        SQLFragment patternSQL = new SQLFragment("(");
+        separator = "";
+        int offset = 0;
+        for (ColumnInfo runCol : runColumns)
+        {
+            patternSQL.append(separator);
+            separator = " + ";
+            patternSQL.append("CASE WHEN " + runCol.getAlias() + "$.RowId IS NULL THEN 0 ELSE ");
+            patternSQL.append(1 << offset);
+            patternSQL.append(" END ");
+            offset++;
+            if (offset >= 64)
+            {
+                break;
+            }
+        }
+        patternSQL.append(")");
+        ExprColumn patternColumn = new ExprColumn(this, "Pattern", patternSQL, Types.INTEGER, runColumns.toArray(new ColumnInfo[runColumns.size()]));
+        addColumn(patternColumn);
+
+        defaultCols.add(FieldKey.fromParts("RunCount"));
+
+        setDefaultVisibleColumns(defaultCols);
+    }
+
+
+    public SQLFragment getFromSQL(String alias)
+    {
+        SQLFragment result = new SQLFragment();
+        result.append("(SELECT InnerPeptide");
+        for (MS2Run run : _runs)
+        {
+            result.append(",\n");
+            result.append("MAX(Run");
+            result.append(run.getRun());
+            result.append("PeptideId) AS Run");
+            result.append(run.getRun());
+            result.append("PeptideId");
+        }
+        result.append("\nFROM (SELECT Peptide AS InnerPeptide");
+        for (MS2Run run : _runs)
+        {
+            result.append(",\n");
+            result.append("\tCASE WHEN Run=");
+            result.append(run.getRun());
+            result.append(" THEN MAX(p.RowId) ELSE NULL END AS Run");
+            result.append(run.getRun());
+            result.append("PeptideId");
+        }
+        result.append( "\nFROM ");
+        result.append(MS2Manager.getTableInfoFractions());
+        result.append(" f, ");
+        result.append(MS2Manager.getTableInfoPeptidesData());
+        result.append(" p WHERE f.Run IN(");
+        String separator = "";
+        for (MS2Run run : _runs)
+        {
+            result.append(separator);
+            separator = ", ";
+            result.append(run.getRun());
+        }
+        result.append(") AND p.Fraction = f.Fraction GROUP BY f.Run, p.Peptide, p.RowId) x GROUP BY InnerPeptide)\n");
+        result.append(" AS ");
+        result.append(alias);
+        return result;
+    }
+}

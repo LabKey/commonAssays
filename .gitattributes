@@ -795,6 +795,9 @@ ms2/src/org/labkey/ms2/protocol/SequestSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/protocol/XTandemSearchProtocol.java -text
 ms2/src/org/labkey/ms2/protocol/XTandemSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/protocol/XarTemplate.java -text
+ms2/src/org/labkey/ms2/query/AbstractRunCompareView.java -text
+ms2/src/org/labkey/ms2/query/ComparePeptideTableInfo.java -text
+ms2/src/org/labkey/ms2/query/ComparePeptidesView.java -text
 ms2/src/org/labkey/ms2/query/CompareProteinProphetTableInfo.java -text
 ms2/src/org/labkey/ms2/query/CompareProteinsView.java -text
 ms2/src/org/labkey/ms2/query/MS2Schema.java -text

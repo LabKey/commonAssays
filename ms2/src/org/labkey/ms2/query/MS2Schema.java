@@ -38,6 +38,7 @@ public class MS2Schema extends UserSchema
     public static final String PROTEIN_GROUPS_FOR_SEARCH_TABLE_NAME = "ProteinGroupsForSearch";
     public static final String SEQUENCES_TABLE_NAME = "Sequences";
     public static final String COMPARE_PROTEIN_PROPHET_TABLE_NAME = "CompareProteinProphet";
+    public static final String COMPARE_PEPTIDES_TABLE_NAME = "ComparePeptides";
 
     private static final String MASCOT_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.Mascot%";
     private static final String SEQUEST_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.Sequest%";
@@ -134,6 +135,10 @@ public class MS2Schema extends UserSchema
         else if (COMPARE_PROTEIN_PROPHET_TABLE_NAME.equalsIgnoreCase(name))
         {
             return new CompareProteinProphetTableInfo(alias, this, null, false);
+        }
+        else if (COMPARE_PEPTIDES_TABLE_NAME.equalsIgnoreCase(name))
+        {
+            return new ComparePeptideTableInfo(this, null, false);
         }
         else
         {

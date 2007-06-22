@@ -30,5 +30,9 @@ public interface CompareService extends RemoteService
 
     }
 
-    public CompareResult getComparison(String originalURL) throws Exception;
+    public CompareResult getProteinProphetComparison(String originalURL) throws Exception;
+
+    public CompareResult getPeptideComparison(String originalURL) throws Exception;
+
+
 }

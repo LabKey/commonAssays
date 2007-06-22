@@ -48,7 +48,7 @@ public class RunComparatorView extends HorizontalPanel
         _groupWebPart = new WebPartPanel("Run Groups", new Label("Loading..."));
         panel.add(_groupWebPart);
 
-        _overlapWebPart = new WebPartPanel("Number of Overlapping Proteins", new Label("Loading..."));
+        _overlapWebPart = new WebPartPanel("Number of Overlapping " + PropertyUtil.getServerProperty("comparisonName"), new Label("Loading..."));
         panel.add(_overlapWebPart);
 
         rootPanel.add(panel);
@@ -57,7 +57,8 @@ public class RunComparatorView extends HorizontalPanel
     public void requestComparison()
     {
         String originalURL = PropertyUtil.getServerProperty("originalURL");
-        getService().getComparison(originalURL, new AsyncCallback()
+        String comparisonGroup = PropertyUtil.getServerProperty("comparisonName");
+        AsyncCallback callbackHandler = new AsyncCallback()
         {
             public void onFailure(Throwable caught)
             {
@@ -65,9 +66,21 @@ public class RunComparatorView extends HorizontalPanel
 
             public void onSuccess(Object result)
             {
-                setupTable((CompareResult)result);
+                setupTable((CompareResult) result);
             }
-        });
+        };
+        if ("Peptides".equalsIgnoreCase(comparisonGroup))
+        {
+            getService().getPeptideComparison(originalURL, callbackHandler);
+        }
+        else if ("Proteins".equalsIgnoreCase(comparisonGroup))
+        {
+            getService().getProteinProphetComparison(originalURL, callbackHandler);
+        }
+        else
+        {
+            throw new IllegalArgumentException("Unknown comparison group: " + comparisonGroup);
+        }
     }
 
     private void setupTable(CompareResult compareResult)
