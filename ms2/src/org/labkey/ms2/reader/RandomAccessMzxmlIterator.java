@@ -15,7 +15,10 @@
  */
 package org.labkey.ms2.reader;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.AppProps;
 import org.systemsbiology.jrap.MSXMLParser;
 import org.systemsbiology.jrap.ScanHeader;
 import org.systemsbiology.jrap.Scan;
@@ -145,7 +148,59 @@ public class RandomAccessMzxmlIterator extends AbstractMzxmlIterator
         {
             if (null == _scan)
                 _scan = _parser.rap(_scanIndex);
-            return _scan.getMassIntensityList();
+            return _scan.getMassIntensityList(); // casts mass/intens pairs to floats if they were read as doubles
+        }
+    }
+
+    //JUnit TestCase
+    public static class TestCase extends junit.framework.TestCase
+    {
+
+        TestCase(String name)
+        {
+            super(name);
+        }
+
+        public static Test suite()
+        {
+            TestSuite suite = new TestSuite();
+            suite.addTest(new TestCase("testMzxml"));
+            return suite;
+        }
+
+        public void testMzxml()
+        {
+            String projectRoot = AppProps.getInstance().getProjectRoot();
+            if (projectRoot == null || projectRoot.equals("")) projectRoot = "C:/Labkey";
+            String mzxml2Fname = projectRoot + "/sampledata/mzxml/test_nocompression.mzXML";
+            String mzxml3Fname = projectRoot + "/sampledata/mzxml/test_zlibcompression.mzXML";
+            try
+            {
+                RandomAccessMzxmlIterator mzxml2 = new RandomAccessMzxmlIterator(mzxml2Fname, 1);
+                RandomAccessMzxmlIterator mzxml3 = new RandomAccessMzxmlIterator(mzxml3Fname, 1);
+                while (mzxml2.hasNext() && mzxml3.hasNext())
+                {
+                    SimpleScan scan2 = mzxml2.next();
+                    SimpleScan scan3 = mzxml3.next();
+                    assertEquals(scan2.getScan(),scan3.getScan());
+                    float [][]data2 = scan2.getData();
+                    float [][]data3 = scan3.getData();
+                    assertEquals(data2[0].length,data3[1].length);
+                    assertEquals(data2[1].length,data3[0].length);
+                    for (int i=0;i < data2[0].length; i++)
+                    {
+                        assertEquals(data2[0][i],data3[0][i]);
+                        assertEquals(data2[1][i],data3[1][i]);
+                    }
+                }
+                assertEquals("files should have same scan counts",mzxml2.hasNext(), mzxml3.hasNext());
+            }
+            catch (IOException e)
+            {
+                fail(e.toString());
+            }
+            finally {
+            }
         }
     }
 }

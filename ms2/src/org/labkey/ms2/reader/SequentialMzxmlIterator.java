@@ -110,6 +110,9 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
                 // Grab the required attributes
                 num = Integer.parseInt(getAttributeValue("num"));
                 retentionTime = getAttributeValue("retentionTime");
+                String compressionType = getAttributeValue("compressionType");
+                String byteOrder = getAttributeValue("byteOrder");
+                int peaksCount = Integer.parseInt(getAttributeValue("peaksCount"));
 
                 if (!_parser.skipToStart("peaks"))
                     return false;
@@ -124,7 +127,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
                         sb.append(_parser.getText());
                     }
                 }
-                data = Scan.parseRawIntensityData(sb.toString(), precision);
+                data = Scan.parseRawIntensityData(sb.toString(), peaksCount, precision, compressionType, byteOrder);
             }
             catch (XMLStreamException e)
             {
