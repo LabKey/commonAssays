@@ -30,7 +30,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
 
     public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
     {
-        createGridView(form.getExpanded(), "", "", false).exportToTSV(response, selectedRows, headers);
+        createGridView(form.getExpanded(), "", "", false).exportToTSV(form, response, selectedRows, headers);
     }
 
     public void exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
@@ -48,7 +48,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
         keys.add(FieldKey.fromParts("Peptide"));
         ms2QueryView.setOverrideColumns(keys);
 
-        ms2QueryView.exportToTSV(response, selectedRows, getAMTFileHeader());
+        ms2QueryView.exportToTSV(form, response, selectedRows, getAMTFileHeader());
     }
 
 
@@ -105,10 +105,12 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
             }
         }
 
-        public void exportToTSV(HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+        public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
         {
             createRowIdFragment(selectedRows);
             TSVGridWriter tsvWriter = getTsvWriter();
+            if (form.isExportAsWebPage())
+                tsvWriter.setExportAsWebPage(true);
             tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
             tsvWriter.setFileHeader(headers);
             tsvWriter.write(response);

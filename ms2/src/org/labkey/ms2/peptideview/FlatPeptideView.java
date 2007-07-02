@@ -226,6 +226,8 @@ public class FlatPeptideView extends AbstractMS2RunView
         changePeptideCaptionsForTsv(displayColumns);
 
         TSVGridWriter tw = new TSVGridWriter(ctx, MS2Manager.getTableInfoPeptides(), displayColumns, MS2Manager.getDataRegionNamePeptides());
+        if (form.isExportAsWebPage())
+                tw.setExportAsWebPage(true);
         tw.setFilenamePrefix("MS2Runs");
         tw.setFileHeader(headers);   // Used for AMT file export
         tw.write(response);

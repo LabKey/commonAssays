@@ -405,6 +405,8 @@ public class MS2Controller extends ViewController
         {
             displayColumns = ((GridView)grid).getDataRegion().getDisplayColumnList();
             dataRegionName = ((GridView)grid).getDataRegion().getName();
+            if (form.isExportAsWebPage())
+                ((GridView)grid).getDataRegion().addHiddenFormField("exportAsWebPage", "true");
         }
 
         VBox vBox = new VBox();
@@ -4153,6 +4155,7 @@ public class MS2Controller extends ViewController
         int run;
         int tryptic;
         boolean expanded;
+        boolean exportAsWebPage;
         String grouping;
         String columns;
         String proteinColumns;
@@ -4225,6 +4228,16 @@ public class MS2Controller extends ViewController
         public String getGrouping()
         {
             return grouping;
+        }
+
+        public void setExportAsWebPage(boolean exportAsWebPage)
+        {
+            this.exportAsWebPage = exportAsWebPage;
+        }
+
+        public boolean isExportAsWebPage()
+        {
+            return exportAsWebPage;
         }
 
         public String getColumns()
