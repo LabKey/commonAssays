@@ -1524,23 +1524,16 @@ public class IssuesController extends SpringActionController
 
         public ViewURLHelper getForwardURL()
         {
-            try
+            ViewURLHelper url;
+            String callbackURL = getCallbackURL();
+            if (callbackURL != null)
             {
-                ViewURLHelper url;
-                String callbackURL = getCallbackURL();
-                if (callbackURL != null)
-                {
-                    url = new ViewURLHelper(callbackURL).addParameter("issueId", "" + getBean().getIssueId());
-                    return url;
-                }
-                else
-                {
-                    return getDetailsForwardURL(getViewContext(), getBean());
-                }
+                url = new ViewURLHelper(callbackURL).addParameter("issueId", "" + getBean().getIssueId());
+                return url;
             }
-            catch (URISyntaxException x)
+            else
             {
-                throw new RuntimeException(x);
+                return getDetailsForwardURL(getViewContext(), getBean());
             }
         }
     }

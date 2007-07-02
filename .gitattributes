@@ -194,6 +194,7 @@ flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/GateEditorPanel.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/GraphWindowMouseListener.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/LeftSidebar.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/ListComponent.java -text
+flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/NewPopulationDialog.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/PopulationItem.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/PopulationTree.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/RunList.java -text
@@ -448,10 +449,12 @@ flow/webapp/Flow/handle.gif -text
 flow/webapp/Flow/keywordColumn.gif -text
 flow/webapp/Flow/scripts/postgresql/flow-1.50-1.60.sql -text
 flow/webapp/Flow/scripts/postgresql/flow-1.70-2.00.sql -text
+flow/webapp/Flow/scripts/postgresql/flow-2.10-2.11.sql -text
 flow/webapp/Flow/scripts/postgresql/obsolete/flow-1.53-1.54.sql -text
 flow/webapp/Flow/scripts/postgresql/obsolete/flow-1.70-1.71.sql -text
 flow/webapp/Flow/scripts/sql[!!-~]server/flow-1.50-1.60.sql -text
 flow/webapp/Flow/scripts/sql[!!-~]server/flow-1.70-2.00.sql -text
+flow/webapp/Flow/scripts/sql[!!-~]server/flow-2.10-2.11.sql -text
 flow/webapp/Flow/scripts/sql[!!-~]server/obsolete/flow-1.53-1.54.sql -text
 flow/webapp/Flow/scripts/sql[!!-~]server/obsolete/flow-1.70-1.71.sql -text
 flow/webapp/Flow/statisticColumn.png -text

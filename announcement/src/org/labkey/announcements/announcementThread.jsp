@@ -37,11 +37,8 @@ ViewURLHelper discussionSrc = null;
 
 if (!embedded && null != announcement.getDiscussionSrcURL())
 {
-    try
-    {
-        discussionSrc = DiscussionServiceImpl.fromSaved(announcement.getDiscussionSrcURL());
-        discussionSrc.replaceParameter("discussion.id", "" + announcement.getRowId());
-    } catch (URISyntaxException x){}
+    discussionSrc = DiscussionServiceImpl.fromSaved(announcement.getDiscussionSrcURL());
+    discussionSrc.replaceParameter("discussion.id", "" + announcement.getRowId());
 }
 
 if (!bean.print && !embedded)

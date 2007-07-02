@@ -6,6 +6,7 @@ import org.labkey.flow.gateeditor.client.GateCallback;
 import org.labkey.flow.gateeditor.client.model.GWTRun;
 import org.labkey.flow.gateeditor.client.model.GWTWorkspaceOptions;
 import org.labkey.flow.gateeditor.client.model.GWTWorkspace;
+import org.labkey.flow.gateeditor.client.model.GWTScript;
 
 public class RunList extends GateComponent
 {
@@ -14,20 +15,22 @@ public class RunList extends GateComponent
     GateCallback currentRequest;
     GateEditorListener listener = new GateEditorListener()
     {
-        public void onRunChanged()
+        public void onScriptChanged()
+        {
+            updateWorkspace();
+        }
+
+        public void updateWorkspace()
         {
             GWTRun run = getRun();
-            GWTRun[] runs = getRuns();
-            for (int i = 0; i < runs.length; i ++)
+            GWTScript script = getScript();
+            if (run == null || script == null)
             {
-                if (runs[i].equals(run))
-                {
-                    listBox.setSelectedIndex(i);
-                }
+                return;
             }
             GWTWorkspaceOptions options = new GWTWorkspaceOptions();
             options.runId = run.getRunId();
-            options.scriptId = getScript().getScriptId();
+            options.scriptId = script.getScriptId();
             options.editingMode = getEditor().getState().getEditingMode();
             currentRequest = new GateCallback()
             {
@@ -41,6 +44,21 @@ public class RunList extends GateComponent
             };
 
             editor.getService().getWorkspace(options, currentRequest);
+
+        }
+
+        public void onRunChanged()
+        {
+            GWTRun run = getRun();
+            GWTRun[] runs = getRuns();
+            for (int i = 0; i < runs.length; i ++)
+            {
+                if (runs[i].equals(run))
+                {
+                    listBox.setSelectedIndex(i);
+                }
+            }
+            updateWorkspace();
         }
 
         public void onRunsChanged()

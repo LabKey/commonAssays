@@ -54,7 +54,7 @@ public class DiscussionServiceImpl implements DiscussionService.Service
     }
 
 
-    public static ViewURLHelper fromSaved(String saved) throws URISyntaxException
+    public static ViewURLHelper fromSaved(String saved)
     {
         if (saved.startsWith("~/"))
             saved = AppProps.getInstance().getContextPath() + saved.substring(1);

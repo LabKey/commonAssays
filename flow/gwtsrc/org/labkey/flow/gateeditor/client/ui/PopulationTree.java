@@ -16,6 +16,7 @@ public class PopulationTree extends GateComponent
     VerticalPanel widget;
     ScrollPanel scrollPanel;
     VerticalPanel tree;
+    Button newPopulationButton;
     Map populationNameLabelMap = new HashMap();
     Map labelPopulationMap = new HashMap();
     Label currentLabel;
@@ -44,6 +45,7 @@ public class PopulationTree extends GateComponent
             }
         }
     };
+
     public Widget getWidget()
     {
         return widget;
@@ -65,7 +67,20 @@ public class PopulationTree extends GateComponent
         scrollPanel.add(tree);
         widget.add(scrollPanel);
         editor.addListener(listener);
+        if (!editor.getState().isRunMode())
+        {
+            newPopulationButton = new Button("New");
+            newPopulationButton.addClickListener(new ClickListener() {
+                public void onClick(Widget sender)
+                {
+                    new NewPopulationDialog(getEditor());
+                }
+            });
+            widget.add(newPopulationButton);
+        }
     }
+
+
 
 
     private boolean isBold(GWTPopulation population)

@@ -14,7 +14,17 @@ public class FlowThreadPool
     {
         _taskSets.add(taskSet);
         int processorCount = Runtime.getRuntime().availableProcessors();
-        int threadCount = Math.min(processorCount - 1, 3);
+        int threadCount = processorCount - 1;
+        if (threadCount > 4)
+            threadCount = 4;
+
+        // As a rule of thumb, we assume each thread may take up to 200MB of RAM.
+        // Restrict the number of threads to that value
+        long memoryCount = Runtime.getRuntime().maxMemory() / (200 * ( 1 << 20));
+        if (threadCount > memoryCount && memoryCount >= 0)
+        {
+            threadCount = (int) memoryCount;
+        }
 
         _threads = new Thread[threadCount];
         for (int i = 0; i < threadCount; i ++)

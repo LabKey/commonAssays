@@ -399,7 +399,7 @@ public class AnnouncementsController extends ViewController
         String redirect = StringUtils.trimToNull(form.getRedirect());
         if (null != redirect)
         {
-            try { url = new ViewURLHelper(redirect); } catch (URISyntaxException x) {/* */}
+            url = new ViewURLHelper(redirect);
         }
 
         if (null == url)
@@ -582,15 +582,8 @@ public class AnnouncementsController extends ViewController
     private ViewURLHelper getReturnUrl()
     {
         String url = StringUtils.trimToNull((String)getViewContext().get("returnUrl"));
-        try
-        {
-            if (null != url)
-                return new ViewURLHelper(url);
-        }
-        catch (URISyntaxException e)
-        {
-            return null;
-        }
+        if (null != url)
+            return new ViewURLHelper(url);
         return null;
     }
 

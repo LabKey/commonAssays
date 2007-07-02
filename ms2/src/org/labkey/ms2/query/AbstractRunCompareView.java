@@ -173,14 +173,7 @@ public abstract class AbstractRunCompareView  extends QueryView
                             String newParam = urlParam.replace("Run%2F", "Run" + run.getRun() + "%2F");
                             ViewURLHelper newURL = result.getRenderContext().getViewContext().cloneViewURLHelper();
                             newURL.deleteParameters();
-                            try
-                            {
-                                newURL = new ViewURLHelper(newURL + newParam);
-                            }
-                            catch (URISyntaxException e)
-                            {
-                                throw new RuntimeException(e);
-                            }
+                            newURL = new ViewURLHelper(newURL + newParam);
                             SimpleFilter newFilter = new SimpleFilter(newURL, getSettings().getDataRegionName());
                             for (SimpleFilter.FilterClause newClause : newFilter.getClauses())
                             {

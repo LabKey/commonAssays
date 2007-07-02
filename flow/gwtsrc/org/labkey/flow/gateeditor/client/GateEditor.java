@@ -115,5 +115,8 @@ public class GateEditor implements EntryPoint
             }
         });
     }
-
+    public RootPanel getRootPanel()
+    {
+        return _root;
+    }
 }

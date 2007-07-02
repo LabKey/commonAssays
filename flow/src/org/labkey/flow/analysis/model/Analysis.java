@@ -108,11 +108,11 @@ public class Analysis extends ScriptComponent
                             continue;
                         break;
                     case Freq_Of_Parent:
-                        if (sSpec == null || sSpec.getParent() == null)
+                        if (sSpec == null)
                             continue;
                         break;
                     case Freq_Of_Grandparent:
-                        if (sSpec == null || sSpec.getParent() == null || sSpec.getParent().getParent() == null)
+                        if (sSpec == null || sSpec.getParent() == null)
                             continue;
                         break;
                 }
