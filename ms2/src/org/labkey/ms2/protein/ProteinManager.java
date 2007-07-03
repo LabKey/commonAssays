@@ -294,7 +294,7 @@ public class ProteinManager
         if (includeProject)
         {
             Container project = container.getProject();
-            if (project != null && project.equals(container))
+            if (project != null && !project.equals(container))
             {
                 sql.append(" OR Container = ? ");
                 sql.add(project.getId());
