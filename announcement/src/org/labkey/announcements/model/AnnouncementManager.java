@@ -547,17 +547,17 @@ public class AnnouncementManager
 
     public static void saveProjectEmailSettings(Container c, int emailOption) throws SQLException
     {
-        Map<String, Object> props = PropertyManager.getWritableProperties(0, c.getId(), "defaultEmailSettings", true);
-        props.put("defaultEmailOption", emailOption);
+        Map<String, String> props = PropertyManager.getWritableProperties(0, c.getId(), "defaultEmailSettings", true);
+        props.put("defaultEmailOption", Integer.toString(emailOption));
         PropertyManager.saveProperties(props);
     }
 
     public static int getProjectEmailOption(Container c) throws SQLException
     {
-        Map<String, Object> props = PropertyManager.getWritableProperties(0, c.getId(), "defaultEmailSettings", false);
+        Map<String, String> props = PropertyManager.getWritableProperties(0, c.getId(), "defaultEmailSettings", false);
         if (props != null && props.size() > 0)
         {
-            String option = (String) props.get("defaultEmailOption");
+            String option = props.get("defaultEmailOption");
             if (option != null)
                 return new Integer(option);
             else
@@ -813,24 +813,24 @@ public class AnnouncementManager
 
     public static void saveMessageBoardSettings(Container c, Settings settings) throws SQLException, IllegalAccessException, InvocationTargetException
     {
-        Map<String, Object> props = PropertyManager.getWritableProperties(0, c.getId(), MESSAGE_BOARD_SETTINGS, true);
+        Map<String, String> props = PropertyManager.getWritableProperties(0, c.getId(), MESSAGE_BOARD_SETTINGS, true);
         props.put("boardName", settings.getBoardName());
         props.put("conversationName", settings.getConversationName());
-        props.put("secure", settings.isSecure());
-        props.put("status", settings.hasStatus());
-        props.put("expires", settings.hasExpires());
-        props.put("assignedTo", settings.hasAssignedTo());
-        props.put("formatPicker", settings.hasFormatPicker());
-        props.put("memberList", settings.hasMemberList());
-        props.put("sortOrderIndex", settings.getSortOrderIndex());
-        props.put("defaultAssignedTo", settings.getDefaultAssignedTo());
-        props.put("titleEditable", settings.isTitleEditable());
+        props.put("secure", String.valueOf(settings.isSecure()));
+        props.put("status", String.valueOf(settings.hasStatus()));
+        props.put("expires", String.valueOf(settings.hasExpires()));
+        props.put("assignedTo", String.valueOf(settings.hasAssignedTo()));
+        props.put("formatPicker", String.valueOf(settings.hasFormatPicker()));
+        props.put("memberList", String.valueOf(settings.hasMemberList()));
+        props.put("sortOrderIndex", String.valueOf(settings.getSortOrderIndex()));
+        props.put("defaultAssignedTo", null == settings.getDefaultAssignedTo() ? null : settings.getDefaultAssignedTo().toString());
+        props.put("titleEditable", String.valueOf(settings.isTitleEditable()));
         PropertyManager.saveProperties(props);
     }
 
     public static Settings getMessageBoardSettings(Container c) throws SQLException, IllegalAccessException, InvocationTargetException
     {
-        Map<String, Object> props = PropertyManager.getProperties(0, c.getId(), MESSAGE_BOARD_SETTINGS, false);
+        Map<String, String> props = PropertyManager.getProperties(0, c.getId(), MESSAGE_BOARD_SETTINGS, false);
         Settings settings = new Settings();
         settings.setDefaults();
         BeanUtils.populate(settings, props);

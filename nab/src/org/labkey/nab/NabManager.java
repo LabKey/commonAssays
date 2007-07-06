@@ -377,7 +377,7 @@ public class NabManager
     {
         try
         {
-            Map<String, Object> properties =
+            Map<String, String> properties =
                     PropertyManager.getWritableProperties(context.getUser().getUserId(),
                             context.getContainer().getId(), Luc5Assay.class.getName(), true);
             if (form != null)
@@ -396,7 +396,7 @@ public class NabManager
 
     public NabController.UploadAssayForm getLastInputs(ViewContext context)
     {
-        Map<String, Object> properties = PropertyManager.getProperties(context.getUser().getUserId(),
+        Map<String, String> properties = PropertyManager.getProperties(context.getUser().getUserId(),
                 context.getContainer().getId(), Luc5Assay.class.getName(), false);
         if (properties != null && !properties.isEmpty())
         {
@@ -432,7 +432,7 @@ public class NabManager
         return Collections.unmodifiableMap(types);
     }
 
-    private void settingsToMap(NabController.UploadAssayForm form, Map<String, Object> targetMap)
+    private void settingsToMap(NabController.UploadAssayForm form, Map<String, String> targetMap)
     {
         targetMap.put("plateTemplateName", form.getPlateTemplate());
         for (int i = 0; i < form.getSampleInfos().length; i++)
@@ -440,13 +440,13 @@ public class NabManager
             String prefix = "sampleInfo" + i + ".";
             SampleInfo info = form.getSampleInfos()[i];
             targetMap.put(prefix + "factorText", info.getFactorText() != null ? info.getFactorText() : "" + info.getFactor());
-            targetMap.put(prefix + "fixedSlope", info.getFixedSlope());
+            targetMap.put(prefix + "fixedSlope", null == info.getFixedSlope() ? null : info.toString());
             targetMap.put(prefix + "initialDilution", info.getInitialDilutionText() != null ?
                     info.getInitialDilutionText() : "" + info.getInitialDilution());
             targetMap.put(prefix + "method", info.getMethodName());
             targetMap.put(prefix + "sampleDescription", info.getSampleDescription());
             targetMap.put(prefix + "sampleId", info.getSampleId());
-            targetMap.put(prefix + "endpointsOptional", info.isEndpointsOptional());
+            targetMap.put(prefix + "endpointsOptional", String.valueOf(info.isEndpointsOptional()));
         }
         // file property:
         targetMap.put("fileName", form.getFileName());
@@ -476,16 +476,16 @@ public class NabManager
         }
         targetMap.put("cutoffs", cutoffs.toString());
         targetMap.put("slope", form.getRunSettings().getSlopeText() != null ?
-                form.getRunSettings().getSlopeText() : form.getRunSettings().getSlope());
-        targetMap.put("autoSlope", form.getRunSettings().isAutoSlope());
-        targetMap.put("endpointsOptional", form.getRunSettings().isEndpointsOptional());
-        targetMap.put("inferFromFile", form.getRunSettings().isInferFromFile());
-        targetMap.put("sameFactor", form.getRunSettings().isSameFactor());
-        targetMap.put("sameInitialValue", form.getRunSettings().isSameInitialValue());
-        targetMap.put("sameMethod", form.getRunSettings().isSameMethod());
+                form.getRunSettings().getSlopeText() : form.getRunSettings().getSlope().toString());
+        targetMap.put("autoSlope", String.valueOf(form.getRunSettings().isAutoSlope()));
+        targetMap.put("endpointsOptional", String.valueOf(form.getRunSettings().isEndpointsOptional()));
+        targetMap.put("inferFromFile", String.valueOf(form.getRunSettings().isInferFromFile()));
+        targetMap.put("sameFactor", String.valueOf(form.getRunSettings().isSameFactor()));
+        targetMap.put("sameInitialValue", String.valueOf(form.getRunSettings().isSameInitialValue()));
+        targetMap.put("sameMethod", String.valueOf(form.getRunSettings().isSameMethod()));
     }
 
-    private NabController.UploadAssayForm settingsFromMap(Map<String, Object> properties)
+    private NabController.UploadAssayForm settingsFromMap(Map<String, String> properties)
     {
         int sampleCount = 0;
         while (properties.get("sampleInfo" + sampleCount + ".sampleId") != null)
@@ -497,11 +497,11 @@ public class NabManager
         for (int i = 0; i < sampleInfos.length; i++)
         {
             String prefix = "sampleInfo" + i + ".";
-            SampleInfo info = new SampleInfo((String) properties.get(prefix + "sampleId"));
-            info.setFactorText((String) properties.get(prefix + "factorText"));
+            SampleInfo info = new SampleInfo(properties.get(prefix + "sampleId"));
+            info.setFactorText(properties.get(prefix + "factorText"));
             try
             {
-                String slopeString = (String) properties.get(prefix + "fixedSlope");
+                String slopeString = properties.get(prefix + "fixedSlope");
                 if (slopeString != null)
                     info.setFixedSlope(Double.parseDouble(slopeString));
             }
@@ -509,63 +509,63 @@ public class NabManager
             {
                 // fall through and continue: we'll fail to populate the fixed slope, but that's okay.
             }
-            info.setInitialDilutionText((String) properties.get(prefix + "initialDilution"));
-            info.setMethodName((String) properties.get(prefix + "method"));
-            info.setSampleDescription((String) properties.get(prefix + "sampleDescription"));
-            info.setEndpointsOptional(Boolean.valueOf((String) properties.get(prefix + "endpointsOptional")));
+            info.setInitialDilutionText(properties.get(prefix + "initialDilution"));
+            info.setMethodName(properties.get(prefix + "method"));
+            info.setSampleDescription(properties.get(prefix + "sampleDescription"));
+            info.setEndpointsOptional(Boolean.valueOf(properties.get(prefix + "endpointsOptional")));
             sampleInfos[i] = info;
         }
         form.setSampleInfos(sampleInfos);
         // file property:
-        form.setFileName((String) properties.get("fileName"));
+        form.setFileName(properties.get("fileName"));
 
         // metadata properties:
         RunMetadata metadata = new RunMetadata();
         if (properties.get("experimentDate") != null)
         {
-            metadata.setExperimentDateString((String) properties.get("experimentDate"));
+            metadata.setExperimentDateString(properties.get("experimentDate"));
         }
         if (properties.get("experimentId") != null)
         {
-            metadata.setExperimentId((String) properties.get("experimentId"));
+            metadata.setExperimentId(properties.get("experimentId"));
         }
         if (properties.get("experimentPerformer") != null)
         {
-            metadata.setExperimentPerformer((String) properties.get("experimentPerformer"));
+            metadata.setExperimentPerformer(properties.get("experimentPerformer"));
         }
         if (properties.get("fileId") != null)
         {
-            metadata.setFileId((String) properties.get("fileId"));
+            metadata.setFileId(properties.get("fileId"));
         }
         if (properties.get("hostCell") != null)
         {
-            metadata.setHostCell((String) properties.get("hostCell"));
+            metadata.setHostCell(properties.get("hostCell"));
         }
         if (properties.get("incubationTime") != null)
         {
-            metadata.setIncubationTime((String) properties.get("incubationTime"));
+            metadata.setIncubationTime(properties.get("incubationTime"));
         }
         if (properties.get("plateNumber") != null)
         {
-            metadata.setPlateNumber((String) properties.get("plateNumber"));
+            metadata.setPlateNumber(properties.get("plateNumber"));
         }
         if (properties.get("studyName") != null)
         {
-            metadata.setStudyName((String) properties.get("studyName"));
+            metadata.setStudyName(properties.get("studyName"));
         }
         if (properties.get("virusId") != null)
         {
-            metadata.setVirusId((String) properties.get("virusId"));
+            metadata.setVirusId(properties.get("virusId"));
         }
         if (properties.get("virusName") != null)
         {
-            metadata.setVirusName((String) properties.get("virusName"));
+            metadata.setVirusName(properties.get("virusName"));
         }
         form.setMetadata(metadata);
 
         // run settings:
         RunSettings settings = form.getRunSettings();
-        String cutoffString = (String) properties.get("cutoffs");
+        String cutoffString = properties.get("cutoffs");
         String[] cutoffStrings = cutoffString.split(",");
         SafeTextConverter.PercentConverter[] cutoffConverters = new SafeTextConverter.PercentConverter[RunSettings.MAX_CUTOFF_OPTIONS];
         for (int i = 0; i < RunSettings.MAX_CUTOFF_OPTIONS; i++)
@@ -575,13 +575,13 @@ public class NabManager
                 cutoffConverters[i].setText(cutoffStrings[i]);
         }
         settings.setCutoffs(cutoffConverters);
-        settings.setSlopeText((String) properties.get("slope"));
-        settings.setAutoSlope(Boolean.valueOf((String) properties.get("autoSlope")));
-        settings.setEndpointsOptional(Boolean.valueOf((String) properties.get("endpointsOptional")));
-        settings.setInferFromFile(Boolean.valueOf((String) properties.get("inferFromFile")));
-        settings.setSameFactor(Boolean.valueOf((String) properties.get("sameFactor")));
-        settings.setSameInitialValue(Boolean.valueOf((String) properties.get("sameInitialValue")));
-        settings.setSameMethod(Boolean.valueOf((String) properties.get("sameMethod")));
+        settings.setSlopeText(properties.get("slope"));
+        settings.setAutoSlope(Boolean.valueOf(properties.get("autoSlope")));
+        settings.setEndpointsOptional(Boolean.valueOf(properties.get("endpointsOptional")));
+        settings.setInferFromFile(Boolean.valueOf(properties.get("inferFromFile")));
+        settings.setSameFactor(Boolean.valueOf(properties.get("sameFactor")));
+        settings.setSameInitialValue(Boolean.valueOf(properties.get("sameInitialValue")));
+        settings.setSameMethod(Boolean.valueOf(properties.get("sameMethod")));
         return form;
     }
 }

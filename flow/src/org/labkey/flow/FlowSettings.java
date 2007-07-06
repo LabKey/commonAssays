@@ -41,9 +41,9 @@ public class FlowSettings
     static public String getWorkingDirectoryPath()
     {
         Container container = ContainerManager.getRoot();
-        Map<String, Object> map = PropertyManager.getProperties(container.getId(), PROPCAT_FLOW, false);
+        Map<String, String> map = PropertyManager.getProperties(container.getId(), PROPCAT_FLOW, false);
         if (map != null)
-            return (String) map.get(PROPNAME_WORKINGDIRECTORY);
+            return map.get(PROPNAME_WORKINGDIRECTORY);
         return null;
     }
 

@@ -624,9 +624,9 @@ public class MS2Controller extends ViewController
 
         if (includeUser)
         {
-            Map<String, Object> properties = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_VIEWS_CATEGORY, true);
+            Map<String, String> properties = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_VIEWS_CATEGORY, true);
 
-            for (Map.Entry<String, Object> entry : properties.entrySet())
+            for (Map.Entry<String, String> entry : properties.entrySet())
             {
                 if (mapValue)
                     m.put(entry.getKey(), entry.getValue());
@@ -638,8 +638,8 @@ public class MS2Controller extends ViewController
         //In addition to the user views, get shared views attached to this folder
         if (includeShared)
         {
-            Map<String, Object> mShared = PropertyManager.getProperties(0, getContainer().getId(), MS2_VIEWS_CATEGORY, true);
-            for (Map.Entry<String, Object> entry : mShared.entrySet())
+            Map<String, String> mShared = PropertyManager.getProperties(0, getContainer().getId(), MS2_VIEWS_CATEGORY, true);
+            for (Map.Entry<String, String> entry : mShared.entrySet())
             {
                 String name = entry.getKey();
                 if (includeUser)

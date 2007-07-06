@@ -82,15 +82,15 @@ public class DailyDigest
 
     private static Date getLastSuccessful()
     {
-        Map<String, Object> props = PropertyManager.getProperties(ContainerManager.getRoot().getId(), SET_KEY, true);
-        String value = (String)props.get(LAST_KEY);
+        Map<String, String> props = PropertyManager.getProperties(ContainerManager.getRoot().getId(), SET_KEY, true);
+        String value = props.get(LAST_KEY);
         return null != value ? new Date(Long.parseLong(value)) : null;
     }
 
 
     private static void setLastSuccessful(Date last)
     {
-        Map<String, Object> props = PropertyManager.getWritableProperties(0, ContainerManager.getRoot().getId(), SET_KEY, true);
+        Map<String, String> props = PropertyManager.getWritableProperties(0, ContainerManager.getRoot().getId(), SET_KEY, true);
         props.put(LAST_KEY, String.valueOf(last.getTime()));
         PropertyManager.saveProperties(props);
     }

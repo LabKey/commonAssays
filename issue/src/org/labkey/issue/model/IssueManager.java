@@ -336,7 +336,7 @@ public class IssueManager
 
     public static CustomColumnConfiguration getCustomColumnConfiguration(Container c)
     {
-        Map<String, Object> map = PropertyManager.getProperties(c.getId(), CUSTOM_COLUMN_CONFIGURATION, false);
+        Map<String, String> map = PropertyManager.getProperties(c.getId(), CUSTOM_COLUMN_CONFIGURATION, false);
 
         return new CustomColumnConfiguration(map);
     }
@@ -361,7 +361,7 @@ public class IssueManager
         private Map<String, String> _columnCaptions = new CaseInsensitiveHashMap<String>(5);
         private Set<String> _pickListColumns = new HashSet<String>(2);
 
-        public CustomColumnConfiguration(Map<String, Object> map)
+        public CustomColumnConfiguration(Map<String, ? extends Object> map)
         {
             if (null == map)
                 return;
@@ -370,7 +370,7 @@ public class IssueManager
             setPickListColumns(map);
         }
 
-        private void setColumnCaptions(Map<String, Object> map)
+        private void setColumnCaptions(Map<String, ? extends Object> map)
         {
             for (String tableColumn : _tableColumns)
             {
@@ -386,7 +386,7 @@ public class IssueManager
             return _columnCaptions;
         }
 
-        private void setPickListColumns(Map<String, Object> map)
+        private void setPickListColumns(Map<String, ? extends Object> map)
         {
             Object pickListColumnNames = map.get(PICK_LIST_NAME);
 
@@ -613,7 +613,7 @@ public class IssueManager
     public static String getRequiredIssueFields(Container container)
     {
         String requiredFields = IssuesController.DEFAULT_REQUIRED_FIELDS;
-        Map<String, Object> map = PropertyManager.getProperties(container.getId(), ISSUES_PREF_MAP, false);
+        Map<String, String> map = PropertyManager.getProperties(container.getId(), ISSUES_PREF_MAP, false);
         if (map != null)
             requiredFields = (String)map.get(ISSUES_REQUIRED_FIELDS);
         return requiredFields;
@@ -621,7 +621,7 @@ public class IssueManager
 
     public static void setRequiredIssueFields(Container container, String requiredFields) throws SQLException
     {
-        Map<String, Object> map = PropertyManager.getWritableProperties(0, container.getId(), ISSUES_PREF_MAP, true);
+        Map<String, String> map = PropertyManager.getWritableProperties(0, container.getId(), ISSUES_PREF_MAP, true);
 
         if (!StringUtils.isEmpty(requiredFields))
             requiredFields = requiredFields.toLowerCase();
