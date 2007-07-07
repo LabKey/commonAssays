@@ -16,7 +16,7 @@ public class FlowQueryForm extends QueryForm
     {
         try
         {
-            return new FlowSchema(getContext());
+            return new FlowSchema(getViewContext());
         }
         catch (Exception e)
         {

@@ -75,4 +75,20 @@ public class GWTScript implements IsSerializable
         GWTScript that = (GWTScript) other;
         return this.getScriptId() == that.getScriptId();
     }
+
+    public GWTScript duplicate()
+    {
+        GWTScript ret = new GWTScript();
+        ret.scriptId = scriptId;
+        ret.settings = settings;
+        if (compensationCalculation != null)
+        {
+            ret.compensationCalculation = (GWTCompensationCalculation) compensationCalculation.duplicate();
+        }
+        if (analysis != null)
+        {
+            ret.analysis = (GWTAnalysis) analysis.duplicate();
+        }
+        return ret;
+    }
 }

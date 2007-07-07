@@ -6,6 +6,7 @@ import org.labkey.flow.gateeditor.client.model.*;
 import org.labkey.flow.gateeditor.client.ui.PopulationItem;
 import org.labkey.flow.gateeditor.client.GateEditor;
 import org.labkey.flow.gateeditor.client.FlowUtil;
+import org.labkey.api.gwt.client.ui.WindowUtil;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -69,11 +70,14 @@ public class PopulationTree extends GateComponent
         editor.addListener(listener);
         if (!editor.getState().isRunMode())
         {
-            newPopulationButton = new Button("New");
+            newPopulationButton = new Button("New Population");
             newPopulationButton.addClickListener(new ClickListener() {
                 public void onClick(Widget sender)
                 {
-                    new NewPopulationDialog(getEditor());
+                    NewPopulationDialog dlg = new NewPopulationDialog(getEditor());
+                    dlg.getDialog().setPopupPosition(widget.getAbsoluteLeft(), widget.getAbsoluteTop());
+                    dlg.getDialog().show();
+                    WindowUtil.scrollIntoView(dlg.getDialog());
                 }
             });
             widget.add(newPopulationButton);
@@ -85,6 +89,10 @@ public class PopulationTree extends GateComponent
 
     private boolean isBold(GWTPopulation population)
     {
+        if (!editor.getState().getEditingMode().isRunMode())
+        {
+            return population.isIncomplete();
+        }
         GWTScript baseScript = editor.getState().getWorkspace().getScript();
         GWTPopulation basePopulation = editor.getState().getEditingMode().getScriptComponent(baseScript).findPopulation(population.getFullName());
         if (basePopulation == null)

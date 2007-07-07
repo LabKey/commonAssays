@@ -32,6 +32,15 @@ public class RunList extends GateComponent
             options.runId = run.getRunId();
             options.scriptId = script.getScriptId();
             options.editingMode = getEditor().getState().getEditingMode();
+            GWTWorkspace cur = editor.getState().getWorkspace();
+            if (cur != null)
+            {
+                if (cur.getRun() != null && cur.getRun().getRunId() == run.getRunId() &&
+                        cur.getScript() != null && cur.getScript().getScriptId() == script.getScriptId())
+                {
+                    return;
+                }
+            }
             currentRequest = new GateCallback()
             {
                 public void onSuccess(Object result)

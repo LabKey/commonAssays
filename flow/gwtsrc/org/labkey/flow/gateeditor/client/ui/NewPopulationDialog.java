@@ -1,67 +1,93 @@
 package org.labkey.flow.gateeditor.client.ui;
 
 import org.labkey.flow.gateeditor.client.GateEditor;
-import org.labkey.flow.gateeditor.client.model.GWTPopulation;
-import org.labkey.flow.gateeditor.client.model.GWTPopulationSet;
+import org.labkey.flow.gateeditor.client.model.*;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.Window;
 
 public class NewPopulationDialog extends GateComponent
 {
     DialogBox dialog;
-    VerticalPanel verticalPanel;
     TextBox nameBox;
     ListBox populationListBox;
+    KeyboardListener keyboardListener = new KeyboardListener()
+    {
+        public void onKeyDown(Widget sender, char keyCode, int modifiers)
+        {
+        }
 
+        public void onKeyPress(Widget sender, char keyCode, int modifiers)
+        {
+            if (keyCode == KeyboardListener.KEY_ESCAPE)
+            {
+                cancel();
+                return;
+            }
+            if (keyCode == KeyboardListener.KEY_ENTER)
+            {
+                createPopulation();
+                return;
+            }
+        }
 
+        public void onKeyUp(Widget sender, char keyCode, int modifiers)
+        {
+        }
+    };
 
     public NewPopulationDialog(GateEditor editor)
     {
         super(editor);
-        dialog = new DialogBox(true);
-        verticalPanel = new VerticalPanel();
+        dialog = new DialogBox(true)
+        {
+            public void show()
+            {
+                super.show();
+                nameBox.setFocus(true);
+            }
+        };
+        dialog.setText("New Population");
+        VerticalPanel verticalPanel = new VerticalPanel();
         verticalPanel.add(new Label("What do you want to call the new population?"));
         nameBox = new TextBox();
+        nameBox.addKeyboardListener(keyboardListener);
         verticalPanel.add(nameBox);
         verticalPanel.add(new Label("What should be the parent of this new population?"));
         populationListBox = new ListBox();
         populationListBox.addItem("Ungated", "");
         addPopulations(populationListBox, editor.getState().getScriptComponent().getPopulations(), 0);
+        if (getPopulation() != null)
+        {
+            String fullName = getPopulation().getFullName();
+            for (int i = 0; i < populationListBox.getItemCount(); i ++)
+            {
+                if (fullName.equals(populationListBox.getValue(i)))
+                {
+                    populationListBox.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+        populationListBox.addKeyboardListener(keyboardListener);
         verticalPanel.add(populationListBox);
-        verticalPanel.add(new Button("Create", new ClickListener()
+        HorizontalPanel horizontalPanel = new HorizontalPanel();
+        Button createButton = new Button("Create", new ClickListener()
         {
             public void onClick(Widget sender)
             {
-                GWTPopulationSet parent;
-                String parentName = populationListBox.getValue(populationListBox.getSelectedIndex());
-                if (parentName != null && parentName.length() > 0)
-                {
-                    parent = getEditor().getState().getScriptComponent().findPopulation(parentName);
-                }
-                else
-                {
-                    parent = getEditor().getState().getScriptComponent();
-                }
-                GWTPopulation[] populations = parent.getPopulations();
-                GWTPopulation[] newPopulations = new GWTPopulation[populations.length + 1];
-                for (int i = 0; i < populations.length; i ++)
-                {
-                    newPopulations[i] = populations[i];
-                }
-                GWTPopulation newPopulation = new GWTPopulation();
-                newPopulation.setName(nameBox.getText());
-                newPopulations[newPopulations.length - 1] = newPopulation;
-                getEditor().save(getEditor().getState().getScript());
-            }
-        }));
-        dialog.setWidget(verticalPanel);
-        dialog.addPopupListener(new PopupListener() {
-
-            public void onPopupClosed(PopupPanel sender, boolean autoClosed)
-            {
-                getEditor().getRootPanel().remove(dialog);
+                createPopulation();
             }
         });
-        dialog.show();
+        createButton.addKeyboardListener(keyboardListener);
+        horizontalPanel.add(createButton);
+        horizontalPanel.add(new Button("Cancel", new ClickListener() {
+            public void onClick(Widget sender)
+            {
+                cancel();
+            }
+        }));
+        verticalPanel.add(horizontalPanel);
+        dialog.setWidget(verticalPanel);
     }
 
     private void addPopulations(ListBox listBox, GWTPopulation[] populations, int depth)
@@ -69,6 +95,8 @@ public class NewPopulationDialog extends GateComponent
         for (int i = 0; i < populations.length; i ++)
         {
             GWTPopulation population = populations[i];
+            if (population.isIncomplete())
+                continue;
             StringBuffer display = new StringBuffer();
             for (int indent = 0; indent < depth; indent ++)
             {
@@ -83,5 +111,62 @@ public class NewPopulationDialog extends GateComponent
     public Widget getWidget()
     {
         return dialog;
+    }
+
+    public DialogBox getDialog()
+    {
+        return dialog;
+    }
+
+    public boolean createPopulation()
+    {
+        GWTPopulationSet parent;
+        GWTScript script = getEditor().getState().getScript().duplicate();
+        GWTScriptComponent scriptComponent = getEditor().getState().getEditingMode().getScriptComponent(script);
+        String parentName = populationListBox.getValue(populationListBox.getSelectedIndex());
+        String name = nameBox.getText();
+        String fullName;
+        if (parentName != null && parentName.length() > 0)
+        {
+            parent = scriptComponent.findPopulation(parentName);
+            fullName = parentName + "/" + name;
+        }
+        else
+        {
+            parent = scriptComponent;
+            fullName = name;
+        }
+        GWTPopulation[] populations = parent.getPopulations();
+        GWTPopulation[] newPopulations = new GWTPopulation[populations.length + 1];
+        for (int i = 0; i < populations.length; i ++)
+        {
+            if (populations[i].getName().equals(name))
+            {
+                Window.alert("There is already a population named '" + name + "'.");
+                return false;
+            }
+            newPopulations[i] = populations[i];
+        }
+        GWTPopulation newPopulation = new GWTPopulation();
+        GWTPolygonGate gate = new GWTPolygonGate();
+        gate.setOpen(true);
+        gate.setXAxis(getEditor().getState().getWorkspace().getParameterNames()[0]);
+        gate.setArrX(new double[0]);
+        gate.setArrY(new double[0]);
+        newPopulation.setGate(gate);
+        newPopulation.setName(name);
+        newPopulation.setFullName(fullName);
+        newPopulation.setGate(gate);
+        newPopulations[newPopulations.length - 1] = newPopulation;
+        parent.setPopulations(newPopulations);
+        getEditor().getState().setScript(script);
+        getEditor().getState().setPopulation(newPopulation);
+        dialog.hide();
+        return true;
+    }
+
+    public void cancel()
+    {
+        dialog.hide();
     }
 }

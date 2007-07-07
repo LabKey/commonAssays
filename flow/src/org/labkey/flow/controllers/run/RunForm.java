@@ -5,6 +5,7 @@ import org.labkey.flow.query.FlowQueryForm;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.UserSchema;
 
 public class RunForm extends FlowQueryForm
 {
@@ -26,9 +27,9 @@ public class RunForm extends FlowQueryForm
         return _run;
     }
 
-    public QuerySettings createQuerySettings()
+    public QuerySettings createQuerySettings(UserSchema schema)
     {
-        QuerySettings ret = super.createQuerySettings();
+        QuerySettings ret = super.createQuerySettings(schema);
         if (ret.getQueryName() == null)
         {
             String queryName = null;

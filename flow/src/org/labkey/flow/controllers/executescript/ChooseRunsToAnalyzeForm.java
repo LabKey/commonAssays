@@ -8,6 +8,7 @@ import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.data.*;
 import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.UserSchema;
 import org.apache.struts.action.ActionError;
 import org.apache.struts.action.ActionMapping;
 import org.apache.commons.lang.StringUtils;
@@ -37,9 +38,9 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
         return new FlowSchema(getUser(), getContainer());
     }
 
-    protected QuerySettings createQuerySettings()
+    protected QuerySettings createQuerySettings(UserSchema schema)
     {
-        QuerySettings ret = super.createQuerySettings();
+        QuerySettings ret = super.createQuerySettings(schema);
         ret.setQueryName(FlowTableType.Runs.toString());
         return ret;
     }

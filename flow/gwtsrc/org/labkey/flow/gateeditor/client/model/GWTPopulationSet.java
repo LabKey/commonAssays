@@ -4,7 +4,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class GWTPopulationSet implements IsSerializable
 {
+    static private final GWTPopulation[] EMPTY_LIST = new GWTPopulation[0];
     GWTPopulation[] populations;
+
+    public GWTPopulationSet()
+    {
+        populations = EMPTY_LIST;
+    }
 
     public GWTPopulation[] getPopulations()
     {

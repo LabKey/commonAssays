@@ -36,6 +36,14 @@ public class GWTPopulation extends GWTPopulationSet
         this.fullName = fullName;
     }
 
+    public String getParentFullName()
+    {
+        int ichLastSlash = getFullName().lastIndexOf("/");
+        if (ichLastSlash < 0)
+            return null;
+        return getFullName().substring(0, ichLastSlash);
+    }
+
 
     public GWTPopulation findPopulation(String fullName)
     {
@@ -52,5 +60,15 @@ public class GWTPopulation extends GWTPopulationSet
         that.gate = this.gate;
         that.populations = clonePopulations();
         return that;
+    }
+
+    public boolean isIncomplete()
+    {
+        if (gate instanceof GWTPolygonGate)
+        {
+            GWTPolygonGate polyGate = (GWTPolygonGate) gate;
+            return polyGate.length() == 0;
+        }
+        return false;
     }
 }

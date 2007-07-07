@@ -300,6 +300,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
                 }
             }
             ret.setScript(makeGWTScript(script));
+            ret.setRun(makeRun(run));
             ret.setWells(getWells(run, script, workspaceOptions.editingMode));
             Map<String, String> parameters = EditScriptForm.getParameterNames(run, new String[0]);
             ret.setParameterNames(parameters.keySet().toArray(new String[0]));

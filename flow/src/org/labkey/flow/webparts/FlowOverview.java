@@ -306,7 +306,7 @@ public class FlowOverview extends Overview
             statusHTML.append("There are no analysis scripts.");
             stepStatus = Step.Status.disabled;
         }
-        else if (!_scriptAnalysis.hasStep(FlowProtocolStep.calculateCompensation))
+        else if (!_scriptAnalysis.hasStep(FlowProtocolStep.calculateCompensation) && _scriptAnalysis.requiresCompensationMatrix(FlowProtocolStep.analysis))
         {
             if (_compensationMatrixCount == 0)
             {

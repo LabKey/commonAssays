@@ -37,11 +37,6 @@ public class IssuesQueryView extends QueryView
         return rs;
     }
     
-    public UserSchema getSchema()
-    {
-        return super.getSchema();
-    }
-
     protected DataView createDataView()
     {
         DataView view = super.createDataView();

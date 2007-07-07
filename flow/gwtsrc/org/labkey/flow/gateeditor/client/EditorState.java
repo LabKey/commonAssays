@@ -96,12 +96,60 @@ public class EditorState
 
     public void setPopulation(GWTPopulation population)
     {
+        GWTPopulation populationDelete = null;
+        if (this.population != null && this.population.isIncomplete())
+        {
+            populationDelete = this.population;
+        }
         this.population = population;
         for (int i = 0; i < listeners.size(); i ++)
         {
             ((GateEditorListener) listeners.get(i)).onPopulationChanged();
         }
         setGate(population.getGate());
+        if (populationDelete != null)
+        {
+            deletePopulation(populationDelete);
+        }
+    }
+
+    private void deletePopulation(GWTPopulation population)
+    {
+        if (population == null)
+            return;
+        GWTScript script = getScript();
+        GWTScriptComponent scriptComponent = getScriptComponent();
+        GWTPopulation popCompare = scriptComponent.findPopulation(population.getFullName());
+        if (popCompare != population)
+            return;
+        GWTScript newScript = script.duplicate();
+        scriptComponent = getEditingMode().getScriptComponent(newScript);
+        String parentName = population.getParentFullName();
+        GWTPopulationSet parent;
+        if (parentName == null)
+        {
+            parent = scriptComponent;
+        }
+        else
+        {
+            parent = scriptComponent.findPopulation(parentName);
+        }
+        List lstPopulations = new ArrayList();
+        for (int i = 0; i < parent.getPopulations().length; i ++)
+        {
+            GWTPopulation child = parent.getPopulations()[i];
+            if (!child.getName().equals(population.getName()))
+            {
+                lstPopulations.add(child);
+            }
+        }
+        GWTPopulation[] arrPopulation = new GWTPopulation[lstPopulations.size()];
+        for (int i = 0; i < arrPopulation.length; i ++)
+        {
+            arrPopulation[i] = (GWTPopulation) lstPopulations.get(i);
+        }
+        parent.setPopulations(arrPopulation);
+        setScript(newScript);
     }
 
     public GWTRun getRun()

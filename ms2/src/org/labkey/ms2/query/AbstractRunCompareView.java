@@ -80,7 +80,7 @@ public abstract class AbstractRunCompareView  extends QueryView
         return settings;
     }
 
-    protected MS2Schema getSchema()
+    public MS2Schema getSchema()
     {
         return (MS2Schema)super.getSchema();
     }

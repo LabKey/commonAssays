@@ -50,7 +50,6 @@ public class GateDescription extends GateComponent
             {
                 gate = new GWTPolygonGate(xAxis.getValue(xAxis.getSelectedIndex()), new double[0], yAxis.getValue(yAxis.getSelectedIndex()), new double[0]);
                 gate.setOpen(true);
-                gate.setDirty(true);
                 editor.getState().setGate(gate);
             }
             else if (gate instanceof GWTIntervalGate)
