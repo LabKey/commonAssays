@@ -35,9 +35,6 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
         addController("ms1", MS1Controller.class);
 
         // Tell the pipeline that we know how to handle msInspect files
-        PipelineService service = PipelineService.get();
-        service.registerPipelineProvider(new MSInspectPipelineProvider());
-
         Set<ExperimentDataHandler> dataHandlers = new HashSet<ExperimentDataHandler>();
         dataHandlers.add(new MSInspectFeaturesDataHandler());
         _dataHandlers = Collections.unmodifiableSet(dataHandlers);
@@ -67,6 +64,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
         super.startup(moduleContext);
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(this);
+        PipelineService.get().registerPipelineProvider(new MSInspectPipelineProvider());
     }
 
 

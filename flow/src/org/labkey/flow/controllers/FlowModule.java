@@ -69,7 +69,6 @@ public class FlowModule extends DefaultModule
                 OverviewWebPart.FACTORY,
                 AnalysesWebPart.FACTORY,
                 AnalysisScriptsWebPart.FACTORY);
-        PipelineService.get().registerPipelineProvider(new FlowPipelineProvider());
         DefaultSchema.registerProvider(FlowSchema.SCHEMANAME, new DefaultSchema.SchemaProvider()
         {
             public QuerySchema getSchema(DefaultSchema schema)
@@ -148,6 +147,7 @@ public class FlowModule extends DefaultModule
     @Override
     public void startup(ModuleContext moduleContext)
     {
+        PipelineService.get().registerPipelineProvider(new FlowPipelineProvider());
         FlowProtocolImplementation.register();
         super.startup(moduleContext);
         ModuleLoader.getInstance().registerFolderType(new FlowFolderType(this));

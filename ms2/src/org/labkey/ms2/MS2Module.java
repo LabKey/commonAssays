@@ -121,17 +121,6 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
         dataHandlers.add(new ProteinProphetExperimentDataHandler());
         _dataHandlers = Collections.unmodifiableSet(dataHandlers);
 
-        PipelineService service = PipelineService.get();
-        service.registerPipelineProvider(new MS2PipelineProvider());
-        service.registerPipelineProvider(new XTandemLocalPipelineProvider());
-        service.registerPipelineProvider(new XTandemCPipelineProvider());
-        service.registerPipelineProvider(new CometCPipelineProvider());
-        service.registerPipelineProvider(new SequestLocalPipelineProvider());
-        service.registerPipelineProvider(new MascotLocalPipelineProvider());
-        service.registerPipelineProvider(new MascotCPipelineProvider());
-
-        service.registerPipelineProvider(new InspectCPipelineProvider());
-        service.registerPipelineProvider(new ProteinProphetPipelineProvider());
 
         MS2Schema.register();
         CustomAnnotationSchema.register();
@@ -149,6 +138,17 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
     @Override
     public void startup(ModuleContext context)
     {
+        PipelineService service = PipelineService.get();
+        service.registerPipelineProvider(new MS2PipelineProvider());
+        service.registerPipelineProvider(new XTandemLocalPipelineProvider());
+        service.registerPipelineProvider(new XTandemCPipelineProvider());
+        service.registerPipelineProvider(new CometCPipelineProvider());
+        service.registerPipelineProvider(new SequestLocalPipelineProvider());
+        service.registerPipelineProvider(new MascotLocalPipelineProvider());
+        service.registerPipelineProvider(new MascotCPipelineProvider());
+
+        service.registerPipelineProvider(new InspectCPipelineProvider());
+        service.registerPipelineProvider(new ProteinProphetPipelineProvider());
         //We are the first creator of this...
         ContainerManager.addContainerListener(this);
         ModuleLoader.getInstance().registerFolderType(new MS2FolderType(this));

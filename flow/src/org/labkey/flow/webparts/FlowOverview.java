@@ -4,7 +4,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.ACL;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineQueue;
+import org.labkey.api.pipeline.PipelineJobData;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.Overview;
@@ -101,7 +101,7 @@ public class FlowOverview extends Overview
         addStep(getSamplesStep());
         if (_canUpdate)
         {
-            PipelineQueue.JobData jobData = PipelineService.get().getPipelineQueue().getJobData(getContainer());
+            PipelineJobData jobData = PipelineService.get().getPipelineQueue().getJobData(getContainer());
             int jobCount = jobData.getPendingJobs().size() + jobData.getRunningJobs().size();
             if (jobCount != 0)
             {

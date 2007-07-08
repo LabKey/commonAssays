@@ -1,25 +1,25 @@
-<%@ page import="org.labkey.api.pipeline.PipelineQueue"%>
 <%@ page import="org.labkey.api.pipeline.PipelineService"%>
 <%@ page import="org.labkey.api.pipeline.PipelineJob"%>
 <%@ page import="org.labkey.flow.script.ScriptJob"%>
 <%@ page import="java.util.List"%>
 <%@ page import="java.util.ArrayList"%>
 <%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.pipeline.PipelineJobData" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-PipelineQueue.JobData data = PipelineService.get().getPipelineQueue().getJobData(null);
-List<ScriptJob> jobs = new ArrayList();
-for (PipelineJob job : data.getPendingJobs())
-{
-    if (job instanceof ScriptJob)
-        jobs.add((ScriptJob) job);
-}
-for (PipelineJob job : data.getRunningJobs())
-{
-    if (job instanceof ScriptJob)
-        jobs.add((ScriptJob) job);
-}
+    PipelineJobData data = PipelineService.get().getPipelineQueue().getJobData(null);
+    List<ScriptJob> jobs = new ArrayList();
+    for (PipelineJob job : data.getPendingJobs())
+    {
+        if (job instanceof ScriptJob)
+            jobs.add((ScriptJob) job);
+    }
+    for (PipelineJob job : data.getRunningJobs())
+    {
+        if (job instanceof ScriptJob)
+            jobs.add((ScriptJob) job);
+    }
 %>
 <% if (jobs.size() == 0) { %>
 <p>There are no running or pending flow jobs.</p>
