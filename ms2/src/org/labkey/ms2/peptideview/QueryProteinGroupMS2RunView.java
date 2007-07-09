@@ -4,7 +4,6 @@ import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.query.*;
 import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
@@ -28,13 +27,12 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         super(viewContext, "Peptides", runs);
     }
 
-    protected QuerySettings createQuerySettings(String tableName, UserSchema schema, int maxRows) throws RedirectException
+    protected QuerySettings createQuerySettings(UserSchema schema, int maxRows) throws RedirectException
     {
         QuerySettings settings = new QuerySettings(_url, _viewContext.getRequest(), DATA_REGION_NAME);
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
         settings.setQueryName(MS2Schema.PROTEIN_GROUPS_FOR_RUN_TABLE_NAME);
-        settings.setDataRegionName(MS2Manager.getDataRegionNamePeptides());
         settings.setMaxRows(maxRows);
 
         return settings;
@@ -44,7 +42,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
 
-        QuerySettings settings = createQuerySettings(DATA_REGION_NAME, schema, _maxPeptideRows);
+        QuerySettings settings = createQuerySettings(schema, _maxPeptideRows);
 
         ProteinGroupQueryView peptideView = new ProteinGroupQueryView(_viewContext, schema, settings, expanded, allowNesting);
 
@@ -151,7 +149,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         QuerySettings settings;
         try
         {
-            settings = createQuerySettings(DATA_REGION_NAME, schema, _maxPeptideRows);
+            settings = createQuerySettings(schema, _maxPeptideRows);
         }
         catch (RedirectException e)
         {
