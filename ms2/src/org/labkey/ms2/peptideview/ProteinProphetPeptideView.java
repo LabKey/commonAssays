@@ -377,8 +377,11 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         }
     }
 
-    public void addSQLSummaries(List<Pair<String, String>> sqlSummaries)
+    public void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries)
     {
+        sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilter.getFilterText()));
+        sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(_url, MS2Manager.getDataRegionNamePeptides()).getSortText()));
+
         sqlSummaries.add(new Pair<String, String>("Protein Group Filter", new SimpleFilter(_url, MS2Manager.getDataRegionNameProteinGroups()).getFilterText()));
         sqlSummaries.add(new Pair<String, String>("Protein Group Sort", new Sort(_url, MS2Manager.getDataRegionNameProteinGroups()).getSortText()));
     }

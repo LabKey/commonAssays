@@ -186,9 +186,10 @@ public class FlatPeptideView extends AbstractMS2RunView
         return rgn;
     }
 
-    public void addSQLSummaries(List<Pair<String, String>> sqlSummaries)
+    public void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries)
     {
-
+        sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilter.getFilterText()));
+        sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(_url, MS2Manager.getDataRegionNamePeptides()).getSortText()));
     }
 
     public MS2RunViewType getViewType()

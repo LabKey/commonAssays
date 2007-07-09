@@ -73,7 +73,7 @@ public abstract class AbstractMS2RunView
 
     public abstract GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException;
 
-    public abstract void addSQLSummaries(List<Pair<String, String>> sqlSummaries);
+    public abstract void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries);
 
     public abstract MS2RunViewType getViewType();
 

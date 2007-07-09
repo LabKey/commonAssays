@@ -553,10 +553,7 @@ public class MS2Controller extends ViewController
         SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run);
 
         List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
-        sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilter.getFilterText()));
-        sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(currentUrl, MS2Manager.getDataRegionNamePeptides()).getSortText()));
-
-        peptideView.addSQLSummaries(sqlSummaries);
+        peptideView.addSQLSummaries(peptideFilter, sqlSummaries);
 
         headerView.addObject("sqlSummaries", sqlSummaries);
         headerView.addObject("urls", urlMap);

@@ -87,6 +87,11 @@ public enum MS2RunViewType
         {
             return run.hasProteinProphet();
         }
+
+        public boolean supportsExtraFilters()
+        {
+            return false;
+        }
     };
 
     private final String _name;
@@ -127,6 +132,11 @@ public enum MS2RunViewType
     public boolean supportsProteinColumnPicker()
     {
         return false;
+    }
+
+    public boolean supportsExtraFilters()
+    {
+        return true;
     }
 
     public abstract AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs);

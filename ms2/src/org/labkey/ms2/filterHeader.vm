@@ -28,7 +28,7 @@
                                     #foreach ($viewType in $viewTypes)
                                         <option value="$viewType.getURLName()" #if( $viewType == $currentViewType) selected #end>$viewType.getName()</option>
                                     #end
-                                </select>$tools.getPageFlowUtil().helpPopup("Grouping", "<table><tr><td style='vertical-align: top;'><b>None</b></td><td>Shows peptides without nesting them.</td></tr><tr><td style='vertical-align: top;'><b>Protein</b></td><td>Shows peptides, grouped by their search engine assigned protein.</td></tr><tr><td style='vertical-align: top;'><b>Protein Prophet</b></td><td>Shows peptides, grouped by their ProteinProphet protein groups.</td></tr><tr><td style='vertical-align: top;'><b>Query - Peptides</b></td><td>Shows peptides. If you choose columns from ProteinProphet or the search engine assigned protein, the peptides will be grouped under those columns. Use the Customize View link to change the column list.</td></tr><tr><td style='vertical-align: top;'><b>Query - Protein Groups</b></td><td>Shows proteins, grouped under the ProteinProphet assigned groups. Use the Customize View link to change the column list.</td></tr></table>", true)
+                                </select>$tools.getPageFlowUtil().helpPopup("Grouping", "<table><tr><td style=\"vertical-align: top;\"><b>None</b></td><td>Shows peptides without nesting them.</td></tr><tr><td style=\"vertical-align: top;\"><b>Protein</b></td><td>Shows peptides, grouped by their search engine assigned protein.</td></tr><tr><td style=\"vertical-align: top;\"><b>Protein Prophet</b></td><td>Shows peptides, grouped by their ProteinProphet protein groups.</td></tr><tr><td style=\"vertical-align: top;\"><b>Query - Peptides</b></td><td>Shows peptides. If you choose columns from ProteinProphet or the search engine assigned protein, the peptides will be grouped under those columns. Use the Customize View link to change the column list.</td></tr><tr><td style=\"vertical-align: top;\"><b>Query - Protein Groups</b></td><td>Shows proteins, grouped under the ProteinProphet assigned groups. Use the Customize View link to change the column list.</td></tr></table>", true)
                             </td>
                             <td style="vertical-align: middle;" nowrap><input id="viewTypeExpanded" style="margin-right: 0px;" type="checkbox" name="expanded" value="1" #if ($expanded) checked #end #if (!$currentViewType.supportsExpansion()) disabled #end> Expanded$tools.getPageFlowUtil().helpPopup("Expanded", "If selected, the groups will all be expanded. If not, the groups will be collapsed but can be expanded individually")</td>
                             <td style="vertical-align: middle;" nowrap><input type="image" id="viewTypeSubmitButton" src="$tools.buttonSrc('Go')" />
@@ -36,32 +36,39 @@
                     </table>
                 </fieldset>
             </td>
-            <td style="height: 100%; padding-right: 1em">
-                <fieldset>
-                    <legend>${run.chargeFilterColumnName} charge filter</legend>
-                    <table class="dataRegion" border="0">
-                        <tr>
-                            <td nowrap style="vertical-align: middle;">1+&nbsp;<input id="Charge1" type="text" name=charge1 value="$charge1" size="2">$tools.getPageFlowUtil().helpPopup("1+ ${run.chargeFilterColumnName} charge filter", "The minimum ${run.chargeFilterColumnName} value for peptides in the 1+ charge state.")</td>
-                            <td nowrap style="vertical-align: middle;">2+&nbsp;<input id="Charge2" type="text" name=charge2 value="$charge2" size="2">$tools.getPageFlowUtil().helpPopup("2+ ${run.chargeFilterColumnName} charge filter", "The minimum ${run.chargeFilterColumnName} value for peptides in the 2+ charge state.")</td>
-                            <td nowrap style="vertical-align: middle;">3+&nbsp;<input id="Charge3" type="text" name=charge3 value="$charge3" size="2">$tools.getPageFlowUtil().helpPopup("3+ ${run.chargeFilterColumnName} charge filter", "The minimum ${run.chargeFilterColumnName} value for peptides in the 3+ charge state.")</td>
-                            <td nowrap style="vertical-align: middle;"><input type="image" id="AddChargeScoreFilterButton" value="Add Filter" src="$tools.buttonSrc('Go')" name=""></td>
-                        </tr>
-                    </table>
-                </fieldset>
-            </td>
-            <td style="height: 100%">
-                <fieldset>
-                    <legend>Tryptic&nbsp;ends</legend>
-                    <table>
-                        <tr>
-                            <td nowrap style="vertical-align: middle;"><input type="radio" name="tryptic" #if($tryptic == 0)checked#end value="0">0$tools.getPageFlowUtil().helpPopup("0 tryptic ends", "All peptides will be shown, regardless of tryptic ends")
-                                                <input type="radio" name="tryptic" #if($tryptic == 1)checked#end value="1">1$tools.getPageFlowUtil().helpPopup("1 tryptic end", "At least one end of the peptide must be tryptic")
-                                                <input type="radio" name="tryptic" #if($tryptic == 2)checked#end value="2">2$tools.getPageFlowUtil().helpPopup("2 tryptic ends", "Both ends of the peptide must be tryptic")</td>
-                            <td nowrap style="vertical-align: middle;"><input type="image" id="AddTrypticEndsFilterButton" value="Add Filter" src="$tools.buttonSrc('Go')" name=""></td>
-                        </tr>
-                    </table>
-                </fieldset>
-            </td>
+            #if ($currentViewType.supportsExtraFilters())
+                <td style="height: 100%; padding-right: 1em">
+                    <fieldset>
+                        <legend>${run.chargeFilterColumnName} charge filter</legend>
+                        <table class="dataRegion" border="0">
+                            <tr>
+                                <td nowrap style="vertical-align: middle;">1+&nbsp;<input id="Charge1" type="text" name=charge1 value="$charge1" size="2">$tools.getPageFlowUtil().helpPopup("1+ ${run.chargeFilterColumnName} charge filter", "The minimum ${run.chargeFilterColumnName} value for peptides in the 1+ charge state.")</td>
+                                <td nowrap style="vertical-align: middle;">2+&nbsp;<input id="Charge2" type="text" name=charge2 value="$charge2" size="2">$tools.getPageFlowUtil().helpPopup("2+ ${run.chargeFilterColumnName} charge filter", "The minimum ${run.chargeFilterColumnName} value for peptides in the 2+ charge state.")</td>
+                                <td nowrap style="vertical-align: middle;">3+&nbsp;<input id="Charge3" type="text" name=charge3 value="$charge3" size="2">$tools.getPageFlowUtil().helpPopup("3+ ${run.chargeFilterColumnName} charge filter", "The minimum ${run.chargeFilterColumnName} value for peptides in the 3+ charge state.")</td>
+                                <td nowrap style="vertical-align: middle;"><input type="image" id="AddChargeScoreFilterButton" value="Add Filter" src="$tools.buttonSrc('Go')" name=""></td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                </td>
+                <td style="height: 100%">
+                    <fieldset>
+                        <legend>Tryptic&nbsp;ends</legend>
+                        <table>
+                            <tr>
+                                <td nowrap style="vertical-align: middle;"><input type="radio" name="tryptic" #if($tryptic == 0)checked#end value="0">0$tools.getPageFlowUtil().helpPopup("0 tryptic ends", "All peptides will be shown, regardless of tryptic ends")
+                                                    <input type="radio" name="tryptic" #if($tryptic == 1)checked#end value="1">1$tools.getPageFlowUtil().helpPopup("1 tryptic end", "At least one end of the peptide must be tryptic")
+                                                    <input type="radio" name="tryptic" #if($tryptic == 2)checked#end value="2">2$tools.getPageFlowUtil().helpPopup("2 tryptic ends", "Both ends of the peptide must be tryptic")</td>
+                                <td nowrap style="vertical-align: middle;"><input type="image" id="AddTrypticEndsFilterButton" value="Add Filter" src="$tools.buttonSrc('Go')" name=""></td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                </td>
+            #else
+                <input id="Charge1" type="hidden" name=charge1 value="$charge1">
+                <input id="Charge2" type="hidden" name=charge2 value="$charge2">
+                <input id="Charge3" type="hidden" name=charge3 value="$charge3">
+                <input type="hidden" name="tryptic" value="$tryptic">
+            #end
         </tr>
     </table>
 </form>

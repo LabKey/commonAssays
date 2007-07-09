@@ -176,8 +176,11 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     }
 
 
-    public void addSQLSummaries(List<Pair<String, String>> sqlSummaries)
+    public void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries)
     {
+        sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilter.getFilterText()));
+        sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(_url, MS2Manager.getDataRegionNamePeptides()).getSortText()));
+
         sqlSummaries.add(new Pair<String, String>("Protein Filter", new SimpleFilter(_url, MS2Manager.getDataRegionNameProteins()).getFilterText()));
         sqlSummaries.add(new Pair<String, String>("Protein Sort", new Sort(_url, MS2Manager.getDataRegionNameProteins()).getSortText()));
     }
