@@ -62,7 +62,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
             List<DisplayColumn> originalColumns = getDisplayColumns();
             ProteinGroupQueryNestingOption proteinGroupNesting = new ProteinGroupQueryNestingOption();
 
-            if (_allowNesting && proteinGroupNesting.isNested(originalColumns))
+            if (proteinGroupNesting.isNested(originalColumns))
             {
                 _selectedNestingOption = proteinGroupNesting;
             }

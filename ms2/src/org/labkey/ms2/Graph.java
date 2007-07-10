@@ -25,6 +25,7 @@ import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.StringTokenizer;
 
 public abstract class Graph
 {
@@ -193,7 +194,15 @@ public abstract class Graph
 
         if (0 == _plotCount)
         {
-            g.drawString(_noDataErrorMessage, (_width - g.getFontMetrics().stringWidth(_noDataErrorMessage)) / 2, (_height - g.getFontMetrics().getHeight()) / 2);
+            StringTokenizer st = new StringTokenizer(_noDataErrorMessage, "\n", false);
+            int lineCount = st.countTokens();
+            int lineHeight = g.getFontMetrics().getHeight();
+            int lineIndex = 1;
+            while (st.hasMoreTokens())
+            {
+                String line = st.nextToken();
+                g.drawString(line, (_width - g.getFontMetrics().stringWidth(line)) / 2, (_height - lineHeight) / 2 - (lineCount - lineIndex++) * lineHeight);
+            }
             ImageIO.write(bi, imageType, outputStream);
             outputStream.flush();
             return;

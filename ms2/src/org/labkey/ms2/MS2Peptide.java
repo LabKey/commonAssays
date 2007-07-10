@@ -139,7 +139,7 @@ public class MS2Peptide
                 }
                 else
                 {
-                    _spectrumErrorMessage = "Could not " + f.getAbsolutePath() + " from which to load spectra";
+                    _spectrumErrorMessage = "Spectra file not found.\n" + f.getAbsolutePath();
                 }
             }
         }

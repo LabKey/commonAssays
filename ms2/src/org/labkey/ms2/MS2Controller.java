@@ -681,9 +681,15 @@ public class MS2Controller extends ViewController
         newUrl.deleteParameter("run");
         pickName.addObject("viewParams", PageFlowUtil.filter(newUrl.getRawQuery()));
 
+        if (!isAuthorized(form.run))
+        {
+            return null;
+        }
+
+        MS2Run run = MS2Manager.getRun(form.run);
         return _renderInTemplate(pickName, true, "Save View", "viewRun",
                 new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
-                new NavTree(MS2Manager.getRun(form.run).getDescription(), returnUrl));
+                new NavTree(run.getDescription(), returnUrl));
     }
 
 
@@ -867,6 +873,10 @@ public class MS2Controller extends ViewController
         if (form.getSaveDefault())
         {
             MS2Run run = MS2Manager.getRun(returnUrl.getParameter("run"));
+            if (run == null)
+            {
+                return HttpView.throwNotFound("Could not find run with id " + returnUrl.getParameter("run"));
+            }
             AbstractMS2RunView view = getPeptideView(returnUrl.getParameter("grouping"), run);
             view.savePeptideColumnNames(run.getType(), columnNames);
         }
@@ -1929,7 +1939,6 @@ public class MS2Controller extends ViewController
         MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
 
         HttpServletResponse response = getResponse();
-        String errorMessage = null;
         if (null != peptide)
         {
             Quantitation quantitation = peptide.getQuantitation();
@@ -1941,6 +1950,10 @@ public class MS2Controller extends ViewController
             {
                 ElutionGraph g = new ElutionGraph();
                 int charge = form.getQuantitationCharge() == Integer.MIN_VALUE ? peptide.getCharge() : form.getQuantitationCharge();
+                if (charge < 1 || charge > 3)
+                {
+                    return renderErrorImage("Invalid charge state: " + charge, response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
+                }
                 if (showLight)
                 {
                     g.addInfo(quantitation.getLightElutionProfile(charge), quantitation.getLightFirstScan(), quantitation.getLightLastScan(), quantitation.getMinDisplayScan(), quantitation.getMaxDisplayScan(), Color.RED);
@@ -1951,7 +1964,7 @@ public class MS2Controller extends ViewController
                 }
                 if (quantitation.isNoScansFound())
                 {
-                    errorMessage = "No relevant MS1 scans found in spectra file";
+                    return renderErrorImage("No relevant MS1 scans found in spectra file", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
                 }
                 else
                 {
@@ -1961,11 +1974,19 @@ public class MS2Controller extends ViewController
             }
             else
             {
-                errorMessage = "Could not open spectra file to get MS1 scans";
+                return renderErrorImage("Could not open spectra file to get MS1 scans", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
             }
         }
+        else
+        {
+            return HttpView.throwNotFound("Could not find peptide with id " + form.getPeptideId());
+        }
+    }
 
-        Graph g = new Graph(new float[0], new float[0], ElutionGraph.WIDTH, ElutionGraph.HEIGHT)
+    private Forward renderErrorImage(String errorMessage, HttpServletResponse response, int width, int height)
+            throws IOException
+    {
+        Graph g = new Graph(new float[0], new float[0], width, height)
         {
             protected void initializeDataPoints(Graphics2D g) {}
             protected void renderDataPoint(Graphics2D g, double x, double y) {}
@@ -2771,7 +2792,10 @@ public class MS2Controller extends ViewController
 
         try
         {
-            value = Float.parseFloat(score);
+            if (score != null)
+            {
+                value = Float.parseFloat(score);
+            }
         }
         catch(NumberFormatException e)
         {

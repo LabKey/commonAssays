@@ -48,8 +48,8 @@ public class ElutionGraph
 
     public void addInfo(List<Quantitation.ScanInfo> scanInfos, int firstSelectedScan, int lastSelectedScan, int minScan, int maxScan, Color color)
     {
-        XYSeries selectedSeries = new XYSeries("Selected", false, false);
-        XYSeries surroundingSeries = new XYSeries("Surrounding", false, false);
+        XYSeries selectedSeries = new XYSeries("Selected", false, true);
+        XYSeries surroundingSeries = new XYSeries("Surrounding", false, true);
 
         float area = 0;
         boolean addedMinScan = false;
@@ -85,6 +85,7 @@ public class ElutionGraph
         _dataset.addSeries(selectedSeries);
         _chart.getXYPlot().getRenderer().setSeriesPaint(_dataset.getSeriesCount() - 1, color);
         _dataset.addSeries(surroundingSeries);
+        _chart.getXYPlot().getRangeAxis().setLowerBound(0);
         _chart.getXYPlot().getRenderer().setSeriesPaint(_dataset.getSeriesCount() - 1, Color.LIGHT_GRAY);
     }
 
