@@ -2495,7 +2495,7 @@ public class MS2Controller extends ViewController
     @Jpf.Action
     protected Forward exportQueryProteinProphetCompareToTSV(final ExportForm form) throws Exception
     {
-        return exportQueryCompareToTSV(new CompareProteinsView(getViewContext(), this, form.getRunList(), true));
+        return exportQueryCompareToTSV(new CompareProteinsView(getViewContext(), this, form.getRunList(), true), form.isExportAsWebPage());
     }
 
     @Jpf.Action
@@ -2507,7 +2507,7 @@ public class MS2Controller extends ViewController
     @Jpf.Action
     protected Forward exportQueryPeptideCompareToTSV(final ExportForm form) throws Exception
     {
-        return exportQueryCompareToTSV(new ComparePeptidesView(getViewContext(), this, form.getRunList(), true));
+        return exportQueryCompareToTSV(new ComparePeptidesView(getViewContext(), this, form.getRunList(), true), form.isExportAsWebPage());
     }
 
     private Forward exportQueryCompareToExcel(AbstractRunCompareView view) throws Exception
@@ -2521,12 +2521,13 @@ public class MS2Controller extends ViewController
         return null;
     }
 
-    private Forward exportQueryCompareToTSV(AbstractRunCompareView view) throws Exception
+    private Forward exportQueryCompareToTSV(AbstractRunCompareView view, boolean exportAsWebPage) throws Exception
     {
         if (!view.getErrors().isEmpty())
             return _renderErrors(view.getErrors());
 
         TSVGridWriter tsvWriter = view.getTsvWriter();
+        tsvWriter.setExportAsWebPage(exportAsWebPage);
         tsvWriter.setFilenamePrefix("CompareRuns");
         tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
         tsvWriter.write(getResponse());
