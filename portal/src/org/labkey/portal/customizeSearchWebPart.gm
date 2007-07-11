@@ -5,7 +5,7 @@
 <table>
 
 <tr>
-    <td><input type="checkbox" name="includeSubfolders" <%="off".equals(webPart.propertyMap.includeSubfolders) ? "" : "checked"%>"></td>
+    <td><input type="checkbox" name="includeSubfolders" <%="off".equals(webPart.propertyMap.includeSubfolders) ? "" : "checked"%>></td>
     <td>Search subfolders</td>
 </tr>
 
