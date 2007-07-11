@@ -2,18 +2,20 @@ package org.labkey.flow.persist;
 
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.flowdata.xml.FlowdataDocument;
 import org.labkey.flow.flowdata.xml.FlowData;
+import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -64,14 +66,15 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
-    public Priority getPriority(File object)
+    public Priority getPriority(Data data)
     {
-        if (object.getName().endsWith("." + EXT_DATA)|| object.getName().endsWith("." + EXT_SCRIPT))
+        File object = data.getFile();
+        if (object != null && (object.getName().endsWith("." + EXT_DATA)|| object.getName().endsWith("." + EXT_SCRIPT)))
             return Priority.HIGH;
         return null;
     }
 
-    public void importFile(ExpData data, File dataFile, PipelineJob job, XarContext context) throws ExperimentException
+    public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         try
         {
@@ -85,17 +88,17 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
                     uriFile = new URI(flowdata.getUri());
                     if (!uriFile.isAbsolute())
                     {
-                        URI uriPipelineRoot = PipelineService.get().findPipelineRoot(job.getContainer()).getUri(job.getContainer());
+                        URI uriPipelineRoot = PipelineService.get().findPipelineRoot(info.getContainer()).getUri(info.getContainer());
                         uriFile = URIUtil.resolve(uriPipelineRoot, uriPipelineRoot, flowdata.getUri());
                     }
                 }
                 AttributeSet attrSet = new AttributeSet(doc.getFlowdata(), uriFile);
-                attrSet.save(job.getUser(), data);
+                attrSet.save(info.getUser(), data);
             }
             else if (dataFile.getName().endsWith("." + EXT_SCRIPT))
             {
                 FlowScript script = new FlowScript(data);
-                script.setAnalysisScript(job.getUser(), PageFlowUtil.getFileContentsAsString(dataFile));
+                script.setAnalysisScript(info.getUser(), PageFlowUtil.getFileContentsAsString(dataFile));
             }
         }
         catch (Exception e)

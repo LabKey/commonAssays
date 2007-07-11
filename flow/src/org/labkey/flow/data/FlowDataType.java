@@ -66,11 +66,11 @@ abstract public class FlowDataType extends DataType
 
     static public void register()
     {
-        ExperimentService.registerDataType(FCSFile);
-        ExperimentService.registerDataType(FCSAnalysis);
-        ExperimentService.registerDataType(CompensationControl);
-        ExperimentService.registerDataType(CompensationMatrix);
-        ExperimentService.registerDataType(Script);
+        ExperimentService.get().registerDataType(FCSFile);
+        ExperimentService.get().registerDataType(FCSAnalysis);
+        ExperimentService.get().registerDataType(CompensationControl);
+        ExperimentService.get().registerDataType(CompensationMatrix);
+        ExperimentService.get().registerDataType(Script);
     }
 
     public ObjectType getObjectType()

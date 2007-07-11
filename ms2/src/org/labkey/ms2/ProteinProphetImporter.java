@@ -41,21 +41,21 @@ public class ProteinProphetImporter
         _context = context;
     }
 
-    public void importFile(PipelineJob job) throws SQLException, XMLStreamException, IOException, ExperimentException
+    public void importFile(ViewBackgroundInfo info, Logger log) throws SQLException, XMLStreamException, IOException, ExperimentException
     {
         long startTime = System.currentTimeMillis();
-        job.getLogger().info("Starting to load ProteinProphet file " + _file.getPath());
+        log.info("Starting to load ProteinProphet file " + _file.getPath());
 
-        if (!shouldImportFile(job.getLogger(), job.getContainer()))
+        if (!shouldImportFile(log, info.getContainer()))
         {
             return;
         }
 
-        MS2Run run = importRun(job);
+        MS2Run run = importRun(info, log);
 
         if (run == null)
         {
-            job.getLogger().error("Failed to import MS2 run " + getPepXMLFileName());
+            log.error("Failed to import MS2 run " + getPepXMLFileName());
             return;
         }
 
@@ -130,7 +130,7 @@ public class ProteinProphetImporter
 
             iterator = reader.iterator();
 
-            ProteinProphetFile file = insertProteinProphetFile(job.getInfo(), run, iterator.getReader());
+            ProteinProphetFile file = insertProteinProphetFile(info, run, iterator.getReader());
 
             while (iterator.hasNext())
             {
@@ -145,7 +145,7 @@ public class ProteinProphetImporter
                 int collectionId = proteins.size() == 1 ? 0 : 1;
                 for (ProtXmlReader.Protein protein : proteins)
                 {
-                    loadProtein(protein, groupNumber, groupProbability, collectionId++, file, job.getInfo(), groupStmt, peptideStmt, proteinStmt);
+                    loadProtein(protein, groupNumber, groupProbability, collectionId++, file, info, groupStmt, peptideStmt, proteinStmt);
                 }
                 if (proteinGroupIndex % 50 == 0)
                 {
@@ -156,7 +156,7 @@ public class ProteinProphetImporter
                 }
                 if (proteinGroupIndex % 10000 == 0)
                 {
-                    job.getLogger().info("Loaded " + proteinGroupIndex + " protein groups...");
+                    log.info("Loaded " + proteinGroupIndex + " protein groups...");
                 }
             }
 
@@ -182,11 +182,11 @@ public class ProteinProphetImporter
             mergeProteinStmt.executeUpdate();
 
             file.setUploadCompleted(true);
-            Table.update(job.getInfo().getUser(), MS2Manager.getTableInfoProteinProphetFiles(), file, file.getRowId(), null);
+            Table.update(info.getUser(), MS2Manager.getTableInfoProteinProphetFiles(), file, file.getRowId(), null);
             success = true;
             connection.commit();
 
-            job.getLogger().info("ProteinProphet file import finished successfully, " + proteinGroupIndex + " protein groups loaded");
+            log.info("ProteinProphet file import finished successfully, " + proteinGroupIndex + " protein groups loaded");
         }
         finally
         {
@@ -200,7 +200,7 @@ public class ProteinProphetImporter
                 {
                     connection.rollback();
                 }
-                catch (SQLException e) { job.getLogger().error("Failed to rollback to clear any potential error state", e); }
+                catch (SQLException e) { log.error("Failed to rollback to clear any potential error state", e); }
             }
             if (stmt != null && createdTempTables)
             {
@@ -208,12 +208,12 @@ public class ProteinProphetImporter
                 {
                     stmt.execute("DROP TABLE " + peptidesTempTableName);
                 }
-                catch (SQLException e) { job.getLogger().error("Failed to drop temporary peptides table", e); }
+                catch (SQLException e) { log.error("Failed to drop temporary peptides table", e); }
                 try
                 {
                     stmt.execute("DROP TABLE " + proteinsTempTableName);
                 }
-                catch (SQLException e) { job.getLogger().error("Failed to drop temporary proteins table", e); }
+                catch (SQLException e) { log.error("Failed to drop temporary proteins table", e); }
                 try { stmt.close(); } catch (SQLException e) {}
             }
             if (mergePeptideStmt != null) { try { mergePeptideStmt.close(); } catch (SQLException e) {} }
@@ -225,11 +225,11 @@ public class ProteinProphetImporter
 
             if (!success)
             {
-                job.getLogger().error("Failed when importing group " + proteinGroupIndex);
+                log.error("Failed when importing group " + proteinGroupIndex);
             }
         }
         long endTime = System.currentTimeMillis();
-        job.getLogger().info("ProteinProphet import took " + ((endTime - startTime) / 1000) + " seconds.");
+        log.info("ProteinProphet import took " + ((endTime - startTime) / 1000) + " seconds.");
     }
 
     private boolean shouldImportFile(Logger logger, Container c) throws SQLException, IOException
@@ -262,7 +262,7 @@ public class ProteinProphetImporter
         return file;
     }
 
-    private MS2Run importRun(PipelineJob job)
+    private MS2Run importRun(ViewBackgroundInfo info, Logger log)
         throws IOException, XMLStreamException, SQLException, ExperimentException
     {
         String pepXMLFileName = getPepXMLFileName();
@@ -288,13 +288,13 @@ public class ProteinProphetImporter
             }
         }
 
-        job.getLogger().info("Resolved referenced PepXML file to " + pepXMLFile.getPath());
-        int runId = MS2Manager.addRun(job, pepXMLFile, false, _context);
+        log.info("Resolved referenced PepXML file to " + pepXMLFile.getPath());
+        int runId = MS2Manager.addRun(info, log, pepXMLFile, false, _context);
         MS2Run run = MS2Manager.getRun(runId);
         if (_experimentRunLSID != null && run.getExperimentRunLSID() == null)
         {
             run.setExperimentRunLSID(_experimentRunLSID);
-            MS2Manager.updateRun(run, job.getUser());
+            MS2Manager.updateRun(run, info.getUser());
         }
         return run;
     }

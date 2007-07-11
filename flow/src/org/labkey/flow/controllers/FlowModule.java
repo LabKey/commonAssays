@@ -61,8 +61,6 @@ public class FlowModule extends DefaultModule
     static final private Logger _log = Logger.getLogger(FlowModule.class);
     public static final String NAME = "Flow";
 
-    private Set<ExperimentDataHandler> _handlers;
-
     public FlowModule()
     {
         super(NAME, 2.11, null, "/Flow",
@@ -84,9 +82,7 @@ public class FlowModule extends DefaultModule
         addController("Flow-Log", LogController.class);
         addController("Flow-Compensation", CompensationController.class);
         addController("Flow-Protocol", ProtocolController.class);
-        FlowDataType.register();
         FlowProperty.register();
-        _handlers = Collections.singleton((ExperimentDataHandler) FlowDataHandler.instance);
     }
 
 
@@ -139,15 +135,11 @@ public class FlowModule extends DefaultModule
     }
 
     @Override
-    public Set<ExperimentDataHandler> getDataHandlers()
-    {
-        return _handlers;
-    }
-
-    @Override
     public void startup(ModuleContext moduleContext)
     {
         PipelineService.get().registerPipelineProvider(new FlowPipelineProvider());
+        FlowDataType.register();
+        ExperimentService.get().registerExperimentDataHandler(FlowDataHandler.instance);
         FlowProtocolImplementation.register();
         super.startup(moduleContext);
         ModuleLoader.getInstance().registerFolderType(new FlowFolderType(this));

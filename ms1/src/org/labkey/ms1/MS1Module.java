@@ -7,6 +7,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.exp.ExperimentDataHandler;
 import org.labkey.api.exp.ExperimentRunFilter;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms1.pipeline.MSInspectPipelineProvider;
 import org.apache.log4j.Logger;
 
@@ -27,17 +28,11 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
     public static final String NAME = "MS1";
 
     private Set<ExperimentDataHandler> _dataHandlers;
-    private Set<ExperimentRunFilter> _filters;
 
     public MS1Module()
     {
         super(NAME, 2.10, null, "/ms1");
         addController("ms1", MS1Controller.class);
-
-        // Tell the pipeline that we know how to handle msInspect files
-        Set<ExperimentDataHandler> dataHandlers = new HashSet<ExperimentDataHandler>();
-        dataHandlers.add(new MSInspectFeaturesDataHandler());
-        _dataHandlers = Collections.unmodifiableSet(dataHandlers);
 
         MS1Schema.register();
     }
@@ -65,6 +60,11 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(this);
         PipelineService.get().registerPipelineProvider(new MSInspectPipelineProvider());
+
+        // Tell the pipeline that we know how to handle msInspect files
+        ExperimentService.get().registerExperimentDataHandler(new MSInspectFeaturesDataHandler());
+
+        ExperimentService.get().registerExperimentRunFilter(new ExperimentRunFilter("msInspect Feature Finding", MS1Schema.SCHEMA_NAME, MS1Schema.MSINSPECT_FEATURE_EXPERIMENT_RUNS_TABLE_NAME));
     }
 
 
@@ -79,26 +79,5 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
     public Set<DbSchema> getSchemasToTest()
     {
         return PageFlowUtil.set(MS1Manager.get().getSchema());
-    }
-
-
-    @Override
-    public Set<ExperimentDataHandler> getDataHandlers()
-    {
-        return _dataHandlers;
-    }
-
-
-    @Override
-    public synchronized Set<ExperimentRunFilter> getExperimentRunFilters()
-    {
-        if (_filters == null)
-        {
-            Set<ExperimentRunFilter> filters = new HashSet<ExperimentRunFilter>();
-
-            filters.add(new ExperimentRunFilter("msInspect Feature Finding", MS1Schema.SCHEMA_NAME, MS1Schema.MSINSPECT_FEATURE_EXPERIMENT_RUNS_TABLE_NAME));
-            _filters = Collections.unmodifiableSet(filters);
-        }
-        return _filters;
     }
 }

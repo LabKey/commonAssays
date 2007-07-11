@@ -2,11 +2,13 @@ package org.labkey.ms1;
 
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.Container;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
+import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -20,7 +22,7 @@ import java.io.File;
  */
 public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 {
-    public void importFile(ExpData data, File dataFile, PipelineJob job, XarContext context) throws ExperimentException
+    public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         // Implement loading the contents of the file into the database here
     }
@@ -42,9 +44,10 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
     }
 
-    public Priority getPriority(File f)
+    public Priority getPriority(Data data)
     {
-        if (f.getName().toLowerCase().endsWith(".tsv"))
+        File file = data.getFile();
+        if (file != null && file.getName().toLowerCase().endsWith(".tsv"))
         {
             return Priority.HIGH;
         }

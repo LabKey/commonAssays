@@ -21,11 +21,13 @@ import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.UnauthorizedException;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
+import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.stream.XMLStreamException;
@@ -43,7 +45,7 @@ import java.util.Collections;
  */
 public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
 {
-    public void importFile(ExpData data, File dataFile, PipelineJob job, XarContext context) throws ExperimentException
+    public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         ExpRun expRun = data.getRun();
         // We need to no-op if this file is one of the intermediate pep.xml files
@@ -69,7 +71,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         {
             boolean restart = false;
 
-            MS2Run existingRun = MS2Manager.getRunByFileName(dataFile.getParent(), dataFile.getName(), job.getContainer());
+            MS2Run existingRun = MS2Manager.getRunByFileName(dataFile.getParent(), dataFile.getName(), info.getContainer());
             if (existingRun != null)
             {
                 if (existingRun.getExperimentRunLSID() != null && !existingRun.getExperimentRunLSID().equals(expRun.getLSID()))
@@ -96,7 +98,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
                 return;
             }
 
-            int runId = MS2Manager.addRun(job, dataFile, restart, context);
+            int runId = MS2Manager.addRun(info, log, dataFile, restart, context);
 
             MS2Run run = MS2Manager.getRun(runId);
 
@@ -106,7 +108,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
             }
 
             run.setExperimentRunLSID(expRun.getLSID());
-            MS2Manager.updateRun(run, job.getUser());
+            MS2Manager.updateRun(run, info.getUser());
         }
         catch (SQLException e)
         {
@@ -189,9 +191,10 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public Priority getPriority(File f)
+    public Priority getPriority(Data data)
     {
-        if (f.getName().toLowerCase().endsWith(".pep.xml"))
+        File f = data.getFile();
+        if (f != null && f.getName().toLowerCase().endsWith(".pep.xml"))
         {
             return Priority.HIGH;
         }

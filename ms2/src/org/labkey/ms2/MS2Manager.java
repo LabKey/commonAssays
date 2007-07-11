@@ -25,7 +25,6 @@ import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
 //wch: mascotdev
 import org.labkey.ms2.pipeline.MascotImportPipelineJob;
 //END-wch: mascotdev
-import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.security.ACL;
@@ -35,10 +34,8 @@ import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.RelativeQuantAnalysisSummary;
 import org.labkey.api.util.Cache;
 import org.labkey.api.util.Formats;
-import org.labkey.api.view.Portal;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.WebPartFactory;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.plot.XYPlot;
@@ -375,7 +372,7 @@ public class MS2Manager
                                                     String description,
                                                     boolean appendLog) throws SQLException, IOException
     {
-        MS2Importer importer = createImporter(file, info, description, null, new XarContext());
+        MS2Importer importer = createImporter(file, info, description, null, new XarContext(description));
         MS2Importer.RunInfo runInfo = importer.prepareRun(false);
         MascotImportPipelineJob job = new MascotImportPipelineJob(info, file, description, runInfo, appendLog);
         PipelineService.get().queueJob(job);
@@ -388,74 +385,30 @@ public class MS2Manager
                                                     String description,
                                                     boolean appendLog) throws SQLException, IOException
     {
-        MS2Importer importer = createImporter(file, info, description, null, new XarContext());
+        MS2Importer importer = createImporter(file, info, description, null, new XarContext(description));
         MS2Importer.RunInfo runInfo = importer.prepareRun(false);
         MS2ImportPipelineJob job = new MS2ImportPipelineJob(info, file, description, runInfo, appendLog);
         PipelineService.get().queueJob(job);
         return runInfo;
     }
 
-    public static int addRun(PipelineJob job,
+    public static int addRun(ViewBackgroundInfo info, Logger log,
                              File file,
                              boolean restart, XarContext context) throws SQLException, IOException, XMLStreamException
     {
-        MS2Importer importer = createImporter(file, job.getInfo(), file.getName() + " (" + job.getDescription() + ")", job.getLogger(), context);
+        MS2Importer importer = createImporter(file, info, file.getName() + context.getJobDescription() != null ? file.getName() + " (" + context.getJobDescription() + ")" : "", log, context);
         MS2Importer.RunInfo runInfo = importer.prepareRun(restart);
 
-        return addRun(job, file, runInfo, context);
+        return uploadRun(info, log, file, runInfo, context);
     }
 
-    public static int addRun(PipelineJob job,
+    public static int uploadRun(ViewBackgroundInfo info, Logger log,
                              File file,
                              MS2Importer.RunInfo runInfo,
                              XarContext context) throws SQLException, IOException, XMLStreamException
     {
-        ViewBackgroundInfo info = job.getInfo();
-//        ensureWebParts(info);
-
-        MS2Importer importer = createImporter(file, info, file.getName() + " (" + job.getDescription() + ")", job.getLogger(), context);
+        MS2Importer importer = createImporter(file, info, file.getName() + context.getJobDescription() != null ? file.getName() + " (" + context.getJobDescription() + ")" : "", log, context);
         return importer.upload(runInfo);
-    }
-
-    private static void ensureWebParts(ViewBackgroundInfo info)
-            throws SQLException
-    {
-        Container c = info.getContainer();
-        String path = info.getUrlHelper().getExtraPath();
-
-        Portal.WebPart[] parts;
-        Portal.WebPart partRuns = null;
-        String partName = "MS2 Runs";
-        int partIndex = 0;
-
-        if (null == c)
-        {
-            // Try creating the container.
-            c = ContainerManager.ensureContainer(path);
-            if (null == c)
-                throw new IllegalArgumentException("Unable to create container " + c);
-        }
-        else
-        {
-            parts = Portal.getParts(c.getId());
-            for (final Portal.WebPart part : parts)
-            {
-                if (partName.equals(part.getName()))
-                    partRuns = part;
-                else if ("Pipeline Status".equals(part.getName()))
-                    partIndex = 1;
-            }
-        }
-
-        if (partRuns == null)
-        {
-            // Try to put MS2 Runs on the portal page.
-            WebPartFactory desc = Portal.getPortalPart("MS2 Runs");
-            if (null != desc)
-            {
-                Portal.addPart(c, desc, null, partIndex);
-            }
-        }
     }
 
     private static MS2Importer createImporter(File file, ViewBackgroundInfo info, String description, Logger log, XarContext context)

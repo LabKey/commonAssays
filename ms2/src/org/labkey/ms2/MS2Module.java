@@ -59,8 +59,6 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
     private static final Logger _log = Logger.getLogger(MS2Module.class);
 
     public static final String NAME = "MS2";
-    private final Set<ExperimentDataHandler> _dataHandlers;
-    private Set<ExperimentRunFilter> _filters;
 
     private static MS2SearchExperimentRunFilter _ms2SearchRunFilter = new MS2SearchExperimentRunFilter("MS2 Searches", MS2Schema.GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME);
     private static ExperimentRunFilter _samplePrepRunFilter = new ExperimentRunFilter("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.SAMPLE_PREP_EXPERIMENT_RUNS_TABLE_NAME);
@@ -116,22 +114,10 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
         addController("MS2-Pipeline", PipelineController.class);
         addController("MS2-Scoring", ScoringController.class);
 
-        Set<ExperimentDataHandler> dataHandlers = new HashSet<ExperimentDataHandler>();
-        dataHandlers.add(new PepXmlExperimentDataHandler());
-        dataHandlers.add(new ProteinProphetExperimentDataHandler());
-        _dataHandlers = Collections.unmodifiableSet(dataHandlers);
-
-
         MS2Schema.register();
         CustomAnnotationSchema.register();
 
         MS2Service.register(new MS2ServiceImpl());
-    }
-
-
-    public Set<ExperimentDataHandler> getDataHandlers()
-    {
-        return _dataHandlers;
     }
 
 
@@ -149,6 +135,16 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
 
         service.registerPipelineProvider(new InspectCPipelineProvider());
         service.registerPipelineProvider(new ProteinProphetPipelineProvider());
+
+        ExperimentService.get().registerExperimentRunFilter(_samplePrepRunFilter);
+        ExperimentService.get().registerExperimentRunFilter(_ms2SearchRunFilter);
+        ExperimentService.get().registerExperimentRunFilter(new MS2SearchExperimentRunFilter("X!Tandem Searches", MS2Schema.XTANDEM_SEARCH_EXPERIMENT_RUNS_TABLE_NAME));
+        ExperimentService.get().registerExperimentRunFilter(new MS2SearchExperimentRunFilter("Mascot Searches", MS2Schema.MASCOT_SEARCH_EXPERIMENT_RUNS_TABLE_NAME));
+        ExperimentService.get().registerExperimentRunFilter(new MS2SearchExperimentRunFilter("Sequest Searches", MS2Schema.SEQUEST_SEARCH_EXPERIMENT_RUNS_TABLE_NAME));
+
+        ExperimentService.get().registerExperimentDataHandler(new PepXmlExperimentDataHandler());
+        ExperimentService.get().registerExperimentDataHandler(new ProteinProphetExperimentDataHandler());
+
         //We are the first creator of this...
         ContainerManager.addContainerListener(this);
         ModuleLoader.getInstance().registerFolderType(new MS2FolderType(this));
@@ -299,22 +295,5 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
             org.labkey.ms2.pipeline.PositiveIntegerParamsValidator.TestCase.class,
             org.labkey.ms2.pipeline.ListParamsValidator.TestCase.class,
             org.labkey.ms2.reader.RandomAccessMzxmlIterator.TestCase.class));
-    }
-
-
-    @Override
-    public synchronized Set<ExperimentRunFilter> getExperimentRunFilters()
-    {
-        if (_filters == null)
-        {
-            Set<ExperimentRunFilter> filters = new HashSet<ExperimentRunFilter>();
-            filters.add(_samplePrepRunFilter);
-            filters.add(_ms2SearchRunFilter);
-            filters.add(new MS2SearchExperimentRunFilter("X!Tandem Searches", MS2Schema.XTANDEM_SEARCH_EXPERIMENT_RUNS_TABLE_NAME));
-            filters.add(new MS2SearchExperimentRunFilter("Mascot Searches", MS2Schema.MASCOT_SEARCH_EXPERIMENT_RUNS_TABLE_NAME));
-            filters.add(new MS2SearchExperimentRunFilter("Sequest Searches", MS2Schema.SEQUEST_SEARCH_EXPERIMENT_RUNS_TABLE_NAME));
-            _filters = Collections.unmodifiableSet(filters);
-        }
-        return _filters;
     }
 }

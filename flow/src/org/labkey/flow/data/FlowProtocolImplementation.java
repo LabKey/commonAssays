@@ -13,7 +13,7 @@ public class FlowProtocolImplementation extends ProtocolImplementation
     static public final String NAME = "flow";
     static public void register()
     {
-        ExperimentService.registerProtocolImplementation(new FlowProtocolImplementation());
+        ExperimentService.get().registerProtocolImplementation(new FlowProtocolImplementation());
     }
     public FlowProtocolImplementation()
     {

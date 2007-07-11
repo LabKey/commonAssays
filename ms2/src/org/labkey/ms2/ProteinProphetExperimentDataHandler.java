@@ -2,12 +2,14 @@ package org.labkey.ms2;
 
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.Container;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
+import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.stream.XMLStreamException;
@@ -21,12 +23,12 @@ import java.sql.SQLException;
  */
 public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataHandler
 {
-    public void importFile(ExpData data, File dataFile, PipelineJob job, XarContext context) throws ExperimentException
+    public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         try
         {
             ProteinProphetImporter importer = new ProteinProphetImporter(dataFile, data.getRun().getLSID(), context);
-            importer.importFile(job);
+            importer.importFile(info, log);
         }
         catch (SQLException e)
         {
@@ -83,9 +85,10 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         // For now, let the PepXML file control when the data is moved
     }
 
-    public Priority getPriority(File f)
+    public Priority getPriority(Data data)
     {
-        if (MS2PipelineManager.isProtXMLFile(f))
+        File f = data.getFile();
+        if (f != null && MS2PipelineManager.isProtXMLFile(f))
         {
             return Priority.HIGH;
         }

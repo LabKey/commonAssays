@@ -7,6 +7,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.exp.Data;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.LimitedCacheMap;
 import org.labkey.api.util.UnexpectedException;
@@ -224,7 +225,7 @@ public class FlowManager
 
     public AttrObject createAttrObject(ExpData data, ObjectType type, URI uri) throws SQLException
     {
-        if (FlowDataHandler.instance.getPriority(data.getDataFile()) != Handler.Priority.HIGH)
+        if (FlowDataHandler.instance.getPriority(ExperimentService.get().getData(data.getRowId())) != Handler.Priority.HIGH)
         {
             // Need to make sure the right ExperimentDataHandler is associated with this data file, otherwise, you
             // won't be able to delete it because of the foreign key constraint from the flow.object table.
