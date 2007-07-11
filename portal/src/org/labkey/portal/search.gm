@@ -1,7 +1,30 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <form method="post" action="<%=postURL%>">
-Search <%=what%> in this <%=container.isProject() ? "project" : "folder and all subfolders"%>
+Search <%=what%> in this <%=(container.isProject() ? "project" : "folder") + (includeSubfolders ? " and all subfolders" : "")%>
 <table>
-<tr><td><input type="text" name="search" value="<%=searchTerm%>"<%=width > 0 ? " size=\"" + width + "\"" : ""%>></td><td><input type="image" src="<%=PageFlowUtil.buttonSrc("Search")%>"></td></tr>
+<tr>
+    <td colspan=2><input type="text" name="search" value="<%=searchTerm%>"<%=width > 0 ? " size=\"" + width + "\"" : ""%>></td><%
+
+    if (showSettings)
+    { %>
+</tr>
+<tr>
+    <td width="1"><input type="checkbox" name="includeSubfolders" <%=includeSubfolders ? "checked" : ""%>></td><td>Search subfolders</td>
+</tr>
+<tr>
+    <td colspan=2>&nbsp;</td>
+</tr>
+<tr>
+    <td colspan=2><input type="image" src="<%=PageFlowUtil.buttonSrc("Search")%>"></td>
+    <%
+    }
+    else
+    { %>
+    <td><input type="hidden" name="includeSubfolders" value="<%=includeSubfolders ? "on" : "off"%>"></td>
+    <td colspan=2><input type="image" src="<%=PageFlowUtil.buttonSrc("Search")%>"></td>
+    <%
+    }
+    %>
+</tr>
 </table>
 </form>

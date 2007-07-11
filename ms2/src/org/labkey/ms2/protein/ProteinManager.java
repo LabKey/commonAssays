@@ -237,45 +237,32 @@ public class ProteinManager
         String columnName = run.getChargeFilterColumnName();
         String paramName = run.getChargeFilterParamName();
 
-        StringBuffer where = new StringBuffer();
-        int count = 0;
+        boolean includeChargeFilter = false;
+        Float[] values = new Float[3];
 
-        for (int i = 1; i <= 3; i++)
+        for (int i = 0; i < values.length; i++)
         {
-            String threshold = currentUrl.getParameter(paramName + i);
+            String threshold = currentUrl.getParameter(paramName + (i + 1));
 
             if (null != threshold && !"".equals(threshold))
             {
                 try
                 {
-                    float f = Float.parseFloat(threshold);  // Make sure this parses to a float
-
-                    if (0 == count)
-                    {
-                        where.append(columnName);
-                        where.append(" >= CASE Charge");
-                    }
-                    where.append(" WHEN ");
-                    where.append(i);
-                    where.append(" THEN ");
-                    where.append(generalFormat.format(f));
-                    count++;
+                    values[i] = Float.parseFloat(threshold);  // Make sure this parses to a float
+                    includeChargeFilter = true;
                 }
                 catch(NumberFormatException e)
                 {
-                    // Ignore any numbers that can't be converted to float
+                    // Ignore any values that can't be converted to float -- leave them null
                 }
             }
         }
 
-        if (count > 0)
-        {
-            where.append(" ELSE 0 END");
-            filter.addWhereClause(where.toString(), new Object[]{}, columnName);
-        }
+        // Add charge filter only if there's one or more valid values
+        if (includeChargeFilter)
+            filter.addClause(new ChargeFilter(columnName, values));
 
         String tryptic = currentUrl.getParameter("tryptic");
-
 
         // Add tryptic filter
         if ("1".equals(tryptic))
@@ -423,6 +410,68 @@ public class ProteinManager
 
     }
 
+
+    public static class ChargeFilter extends SimpleFilter.FilterClause
+    {
+        private String _columnName;
+        private Float[] _values;
+
+        // At least one value must be non-null
+        public ChargeFilter(String columnName, Float[] values)
+        {
+            _columnName = columnName;
+            _values = values;
+        }
+
+
+        public List<String> getColumnNames()
+        {
+            return Arrays.asList(_columnName);
+        }
+
+
+        public SQLFragment toSQLFragment(Map<String, ? extends ColumnInfo> columnMap, SqlDialect dialect)
+        {
+            SQLFragment sql = new SQLFragment();
+
+            sql.append(_columnName);
+            sql.append(" >= CASE Charge");
+
+            for (int i = 0; i < _values.length; i++)
+            {
+                if (null != _values[i])
+                {
+                    sql.append(" WHEN ");
+                    sql.append(i + 1);
+                    sql.append(" THEN ");
+                    sql.append(generalFormat.format(_values[i]));
+                }
+            }
+
+            return sql.append(" ELSE 0 END");
+        }
+
+
+        @Override
+        protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
+        {
+            String sep = "";
+
+            for (int i = 0; i < _values.length; i++)
+            {
+                if (null != _values[i])
+                {
+                    sb.append(sep);
+                    sep = ", ";
+                    sb.append('+').append(i + 1).append(':');
+                    sb.append(formatter.format(_columnName));
+                    sb.append(" >= ").append(generalFormat.format(_values[i]));
+                }
+            }
+        }
+    }
+
+
     public static class TrypticFilter extends SimpleFilter.FilterClause
     {
         private int _termini;
@@ -474,7 +523,8 @@ public class ProteinManager
         @Override
         protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
         {
-            sb.append("Peptide Trypic Termini = ");
+            sb.append("Trypic Ends ");
+            sb.append(1 == _termini ? ">= " : "= ");
             sb.append(_termini);
         }
     }
@@ -482,7 +532,7 @@ public class ProteinManager
     public static Sort getPeptideBaseSort()
     {
         Sort baseSort = new Sort("Fraction,Scan,Charge");     // Always sort peptide lists by Fraction, Scan, Charge
-        baseSort.setMaxClauses(6);                                              // Need room for base sort plus three clauses from URL
+        baseSort.setMaxClauses(6);                            // Need room for base sort plus three clauses from URL
         return baseSort;
     }
 

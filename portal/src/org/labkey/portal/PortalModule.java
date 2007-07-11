@@ -21,12 +21,9 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.view.Portal;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.WebPartFactory;
-import org.labkey.api.view.WebPartView;
-import org.labkey.api.util.Search.*;
 import org.labkey.api.util.Search;
+import org.labkey.api.util.Search.SearchWebPart;
+import org.labkey.api.view.*;
 
 import java.beans.PropertyChangeEvent;
 import java.lang.reflect.InvocationTargetException;
@@ -46,19 +43,37 @@ public class PortalModule extends DefaultModule
         // NOTE:  the version number of the portal module does not govern the scripts run for the
         // portal schema.  Bump the core module version number to cause a portal-xxx.sql script to run
         super(NAME, 2.10, "/org/labkey/portal", null,
-            new WebPartFactory("Search"){
-                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws IllegalAccessException, InvocationTargetException
-                {
-                    return new SearchWebPart(Search.ALL_MODULES, ProjectController.getSearchUrl(portalCtx.getContainer()), "");
-                }
-            },
-            new WebPartFactory("Narrow Search", "right"){
-                public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws IllegalAccessException, InvocationTargetException
-                {
-                    return new SearchWebPart(Search.ALL_MODULES, ProjectController.getSearchUrl(portalCtx.getContainer()), "", 0);
-                }
-            });
+            new SearchWebPartFactory("Search", null, 40),
+            new SearchWebPartFactory("Narrow Search", "right", 0)
+        );
         addController("Project", ProjectController.class);
+    }
+
+
+    public static class SearchWebPartFactory extends WebPartFactory
+    {
+        private int _width;
+
+        public SearchWebPartFactory(String name, String location, int width)
+        {
+            super(name, location, true, false);
+            _width = width;
+        }
+
+        public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws IllegalAccessException, InvocationTargetException
+        {
+            boolean includeSubfolders = !"off".equals(webPart.getPropertyMap().get("includeSubfolders"));
+            return new SearchWebPart(Search.ALL_MODULES, "", ProjectController.getSearchUrl(portalCtx.getContainer()), includeSubfolders, false, _width);
+        }
+
+
+        @Override
+        public HttpView getEditView(Portal.WebPart webPart)
+        {
+            HttpView view = new ProjectController.CustomizeSearchPartView();
+            view.addObject("webPart", webPart);
+            return view;
+        }
     }
 
 

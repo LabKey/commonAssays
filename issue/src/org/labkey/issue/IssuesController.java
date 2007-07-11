@@ -33,7 +33,6 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.io.IOException;
 import java.util.*;
-import java.net.URISyntaxException;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -1255,7 +1254,7 @@ public class IssuesController extends SpringActionController
             List<Search.Searchable> l = new ArrayList<Search.Searchable>();
             l.add((Search.Searchable)module);
 
-            HttpView results = new Search.SearchResultsView(c, searchTerm, l, getUser(), new ViewURLHelper("Issues", "search", c));
+            HttpView results = new Search.SearchResultsView(c, l, searchTerm, new ViewURLHelper("Issues", "search", c), getUser(), false, false);
             return results;
         }
 

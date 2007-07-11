@@ -36,6 +36,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
@@ -490,9 +491,14 @@ public class ProjectController extends SpringActionController
         public boolean handlePost(CustomizePortletForm form, BindException errors) throws Exception
         {
             Portal.WebPart webPart = Portal.getPart(form.getPageId(), form.getIndex());
+            populatePropertyMap(getViewContext().getRequest(), webPart);
+            Portal.updatePart(getUser(), webPart);
+            return true;
+        }
 
+        protected void populatePropertyMap(HttpServletRequest request, Portal.WebPart webPart)
+        {
             // UNDONE: use getPropertyValues()
-            HttpServletRequest request = getViewContext().getRequest();
             Enumeration params = request.getParameterNames();
 
             // TODO: Clean this up. Type checking... (though type conversion also must be done by the webpart)
@@ -508,9 +514,6 @@ public class ProjectController extends SpringActionController
                         webPart.getPropertyMap().put(s, request.getParameter(s));
                 }
             }
-
-            Portal.updatePart(getUser(), webPart);
-            return true;
         }
 
         public ViewURLHelper getSuccessURL(CustomizePortletForm customizePortletForm)
@@ -522,6 +525,23 @@ public class ProjectController extends SpringActionController
         {
             return (new BeginAction()).appendNavTrail(root)
                     .addChild("Customize " + _webPart.getName());
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class CustomizeSearchWebPartAction extends CustomizeWebPartAction
+    {
+        private static final String PARAM = "includeSubfolders";
+
+        @Override
+        protected void populatePropertyMap(HttpServletRequest request, Portal.WebPart webPart)
+        {
+            String value = request.getParameter(PARAM);     // This is the only param we care about right now -- need special handling to for "uncheck" case
+            if (null == value || "".equals(value.trim()))
+                webPart.getPropertyMap().put(PARAM, "off");
+            else
+                webPart.getPropertyMap().put(PARAM, value);
         }
     }
 
@@ -538,9 +558,11 @@ public class ProjectController extends SpringActionController
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             Container c = getContainer();
-            String searchTerm = (String)getProperty("search","");
+            String searchTerm = (String)getProperty("search", "");
 
-            HttpView results = new SearchResultsView(c, searchTerm, Search.ALL_MODULES, getUser(), getSearchUrl(c));
+            boolean includeSubfolders = "on".equals(getProperty("includeSubfolders", null));
+
+            HttpView results = new SearchResultsView(c, Search.ALL_MODULES, searchTerm, getSearchUrl(c), getUser(), includeSubfolders, true);
 
             getPageConfig().setFocus("forms[0].search");
             getPageConfig().setTitle("Search Results");
@@ -550,6 +572,24 @@ public class ProjectController extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             return null;
+        }
+    }
+
+
+    public static class CustomizeSearchPartView extends AbstractCustomizeWebPartView<Object>
+    {
+        public CustomizeSearchPartView()
+        {
+            super("/org/labkey/portal/customizeSearchWebPart.gm");
+        }
+
+
+        @Override
+        public void prepareWebPart(Object model) throws ServletException
+        {
+            super.prepareWebPart(model);
+            Container c = getViewContext().getContainer(ACL.PERM_UPDATE);
+            addObject("postURL", ViewURLHelper.toPathString("Project", "customizeSearchWebPart", c.getPath()));  // TODO: Change to custom post action once subclassing of actions works
         }
     }
 
