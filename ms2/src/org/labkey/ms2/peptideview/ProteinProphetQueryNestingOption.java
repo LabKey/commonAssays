@@ -9,19 +9,19 @@ public class ProteinProphetQueryNestingOption extends QueryNestingOption
     private static final String PREFIX = "ProteinProphetData/ProteinGroupId/";
     private static final String PROTEIN_GROUP_ROWID = PREFIX + "RowId";
 
-    public ProteinProphetQueryNestingOption()
+    public ProteinProphetQueryNestingOption(boolean allowNesting)
     {
-        super(PROTEIN_GROUP_ROWID);
+        super(PROTEIN_GROUP_ROWID, allowNesting);
     }
 
     public int getOuterGroupLimit()
     {
-        return 1000;
+        return _allowNesting ? 1000 : 0;
     }
 
     public int getResultSetRowLimit()
     {
-        return 10000;
+        return _allowNesting ? 10000 : 0;
     }
 
     public boolean isOuter(String columnName)

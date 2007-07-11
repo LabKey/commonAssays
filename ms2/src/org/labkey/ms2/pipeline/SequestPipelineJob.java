@@ -467,7 +467,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
             interactCmd.add("-N" + filePepXML.getName());
             for (File summaryXml : pepProphetInputFiles)
             {
-                interactCmd.add(summaryXml.getName());
+                interactCmd.add(summaryXml.getPath());
             }
             header("xinteract output");
 

@@ -68,11 +68,11 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
         protected List<Integer> _selectedRows;
         protected List<FieldKey> _overrideColumns;
 
-        public AbstractMS2QueryView(ViewContext context, UserSchema schema, QuerySettings settings, boolean expanded, boolean forExport)
+        public AbstractMS2QueryView(ViewContext context, UserSchema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
         {
             super(context, schema, settings);
             _expanded = expanded;
-            _allowNesting = forExport;
+            _allowNesting = allowNesting;
             _buttonBarPosition = DataRegion.ButtonBarPosition.BOTTOM;
             setShowExportButtons(false);
         }

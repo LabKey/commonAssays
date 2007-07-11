@@ -19,10 +19,12 @@ public abstract class QueryNestingOption
 {
     private String _rowIdColumnName;
     private DataColumn _groupIdColumn;
+    protected boolean _allowNesting;
 
-    public QueryNestingOption(String rowIdColumnName)
+    public QueryNestingOption(String rowIdColumnName, boolean allowNesting)
     {
         _rowIdColumnName = rowIdColumnName;
+        _allowNesting = allowNesting;
     }
 
     public abstract int getResultSetRowLimit();

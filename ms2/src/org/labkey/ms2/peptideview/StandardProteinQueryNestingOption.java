@@ -9,19 +9,19 @@ public class StandardProteinQueryNestingOption extends QueryNestingOption
     private static final String PREFIX = "SeqId/";
     private static final String PROTEIN_ROWID = PREFIX + "SeqId";
 
-    public StandardProteinQueryNestingOption()
+    public StandardProteinQueryNestingOption(boolean allowNesting)
     {
-        super(PROTEIN_ROWID);
+        super(PROTEIN_ROWID, allowNesting);
     }
 
     public int getOuterGroupLimit()
     {
-        return 250;
+        return _allowNesting ? 250 : 0;
     }
 
     public int getResultSetRowLimit()
     {
-        return 15000;
+        return _allowNesting ? 15000 : 0;
     }
 
     public boolean isOuter(String columnName)

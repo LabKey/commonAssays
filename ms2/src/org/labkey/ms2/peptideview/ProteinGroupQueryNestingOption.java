@@ -6,19 +6,19 @@ package org.labkey.ms2.peptideview;
  */
 public class ProteinGroupQueryNestingOption extends QueryNestingOption
 {
-    public ProteinGroupQueryNestingOption()
+    public ProteinGroupQueryNestingOption(boolean allowNesting)
     {
-        super("RowId");
+        super("RowId", allowNesting);
     }
     
     public int getOuterGroupLimit()
     {
-        return 250;
+        return _allowNesting ? 250 : 0;
     }
 
     public int getResultSetRowLimit()
     {
-        return 15000;
+        return _allowNesting ? 15000 : 0;
     }
 
     public boolean isOuter(String columnName)

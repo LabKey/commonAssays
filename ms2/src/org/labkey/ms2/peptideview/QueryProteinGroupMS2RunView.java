@@ -60,7 +60,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         protected DataRegion createDataRegion()
         {
             List<DisplayColumn> originalColumns = getDisplayColumns();
-            ProteinGroupQueryNestingOption proteinGroupNesting = new ProteinGroupQueryNestingOption();
+            ProteinGroupQueryNestingOption proteinGroupNesting = new ProteinGroupQueryNestingOption(_allowNesting);
 
             if (proteinGroupNesting.isNested(originalColumns))
             {
