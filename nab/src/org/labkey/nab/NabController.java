@@ -608,15 +608,6 @@ public class NabController extends ViewController
         }
     }
 
-    @Jpf.Action
-    protected Forward displayByLSID(LSIDForm form) throws Exception
-    {
-        Integer rowid = AssayService.get().getRunIdFromDataLSID(getContainer(), form.getLsid());
-        if (rowid == null)
-            HttpView.throwNotFound();
-        return new ViewForward(getViewURLHelper().relativeUrl("display", "rowId=" + rowid));
-    }
-
     public static class RunIdForm extends FormData
     {
         private Integer _runId;
@@ -694,6 +685,12 @@ public class NabController extends ViewController
                         samplePropertyMap.put("participantid", ptid);
                         samplePropertyMap.put("sequencenum", visitId);
                         samplePropertyMap.put("sourceLsid", sample.getLSID());
+                        String virusName = (String) samplePropertyMap.get(NabManager.PlateProperty.VirusName.name());
+                        String virusId = (String) samplePropertyMap.get(NabManager.PlateProperty.VirusId.name());
+                        String virusKey = (virusId != null && virusId.length() > 0) ? virusId : "Unknown";
+                        if (virusName != null && virusName.length() > 0)
+                            virusKey +=  " (" + virusName + ")";
+                        samplePropertyMap.put(NabManager.PlateProperty.VirusId.name(), virusKey);
                         sampleProperties.add(samplePropertyMap);
                     }
                 }
