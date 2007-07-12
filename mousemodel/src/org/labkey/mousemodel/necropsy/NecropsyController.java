@@ -313,7 +313,7 @@ public class NecropsyController extends ViewController
                     //Deal with that...
                     Material mat = ExperimentService.get().getMaterial(sample.getLSID());
                     if (null != mat)
-                        ExperimentService.get().deleteMaterialByRowIds(new String[] {String.valueOf(mat.getRowId())}, getContainer());
+                        ExperimentService.get().deleteMaterialByRowIds(getContainer(), mat.getRowId());
                     SampleManager.insert(form.getUser(), sample);
 
                     Location location = form.getLocations()[i];
@@ -490,7 +490,7 @@ public class NecropsyController extends ViewController
                     //Deal with that...
                     Material mat = ExperimentService.get().getMaterial(sample.getLSID());
                     if (null != mat)
-                        ExperimentService.get().deleteMaterialByRowIds(new String[] {String.valueOf(mat.getRowId())}, getContainer());
+                        ExperimentService.get().deleteMaterialByRowIds(getContainer(), mat.getRowId());
                     SampleManager.insert(getUser(), sample);
 
 

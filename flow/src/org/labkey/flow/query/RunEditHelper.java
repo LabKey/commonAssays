@@ -8,6 +8,7 @@ import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.ViewForward;
 import org.labkey.api.query.QueryUpdateForm;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.util.PageFlowUtil;
 import org.apache.beehive.netui.pageflow.Forward;
 
 public class RunEditHelper extends TableEditHelper
@@ -21,7 +22,7 @@ public class RunEditHelper extends TableEditHelper
     public Forward delete(User user, ViewURLHelper srcURL, QueryUpdateForm form) throws Exception
     {
         String[] pks = form.getRequest().getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
-        ExperimentService.get().deleteExpRunsByRowIds(pks, _schema.getContainer());
+        ExperimentService.get().deleteExperimentRunsByRowIds(_schema.getContainer(), PageFlowUtil.toInts(pks));
         return new ViewForward(srcURL);
     }
 

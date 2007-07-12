@@ -64,7 +64,7 @@ public class MS2ImportPipelineJob extends PipelineJob
         boolean completeStatus = false;
         try
         {
-            MS2Manager.uploadRun(getInfo(), getLogger(), _file, _runInfo, new XarContext(getDescription()));
+            MS2Manager.uploadRun(getInfo(), getLogger(), _file, _runInfo, new XarContext(getDescription(), getContainer(), getUser()));
             setStatus(PipelineJob.COMPLETE_STATUS);
             completeStatus = true;
         }

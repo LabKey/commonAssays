@@ -372,7 +372,7 @@ public class MS2Manager
                                                     String description,
                                                     boolean appendLog) throws SQLException, IOException
     {
-        MS2Importer importer = createImporter(file, info, description, null, new XarContext(description));
+        MS2Importer importer = createImporter(file, info, description, null, new XarContext(description, info.getContainer(), info.getUser()));
         MS2Importer.RunInfo runInfo = importer.prepareRun(false);
         MascotImportPipelineJob job = new MascotImportPipelineJob(info, file, description, runInfo, appendLog);
         PipelineService.get().queueJob(job);
@@ -385,7 +385,7 @@ public class MS2Manager
                                                     String description,
                                                     boolean appendLog) throws SQLException, IOException
     {
-        MS2Importer importer = createImporter(file, info, description, null, new XarContext(description));
+        MS2Importer importer = createImporter(file, info, description, null, new XarContext(description, info.getContainer(), info.getUser()));
         MS2Importer.RunInfo runInfo = importer.prepareRun(false);
         MS2ImportPipelineJob job = new MS2ImportPipelineJob(info, file, description, runInfo, appendLog);
         PipelineService.get().queueJob(job);
@@ -628,7 +628,7 @@ public class MS2Manager
         {
             try
             {
-                ExperimentService.get().deleteExperimentRun(experimentRunId, c);
+                ExperimentService.get().deleteExperimentRunsByRowIds(c, experimentRunId);
             }
             catch (SQLException e)
             {

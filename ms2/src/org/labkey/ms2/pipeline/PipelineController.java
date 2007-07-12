@@ -1102,7 +1102,7 @@ public class PipelineController extends ViewController
             ExperimentRun run = ExperimentService.get().getCreatingRun(mzXMLFile, c);
             if (run != null)
             {
-                ExperimentService.get().deleteExperimentRun(run.getRowId(), c);
+                ExperimentService.get().deleteExperimentRunsByRowIds(c, run.getRowId());
             }
             File annotationFile = MS2PipelineManager.findAnnotationFile(mzXMLFile, new HashSet<File>(), new HashSet<File>());
             if (annotationFile != null)
@@ -1710,7 +1710,7 @@ public class PipelineController extends ViewController
             MaterialSource[] sources = ExperimentService.get().getMaterialSources();
             if (sources.length == 0)
             {
-                ExperimentService.get().insertMaterialSource(getUser(), getContainer(), "Default");
+                ExperimentService.get().insertMaterialSource(getUser(), getContainer(), "Default", "Default samples for " + getContainer().getPath().substring(1));
                 sources = ExperimentService.get().getMaterialSources();
             }
 
