@@ -507,6 +507,7 @@ luminex/Luminex.iml -text
 luminex/module.properties -text
 luminex/src/META-INF/luminex.xml -text
 luminex/src/org/labkey/luminex/AnalyteInfo.java -text
+luminex/src/org/labkey/luminex/LuminexAssayProvider.java -text
 luminex/src/org/labkey/luminex/LuminexColorGenerator.java -text
 luminex/src/org/labkey/luminex/LuminexController.java -text
 luminex/src/org/labkey/luminex/LuminexDataRow.java -text

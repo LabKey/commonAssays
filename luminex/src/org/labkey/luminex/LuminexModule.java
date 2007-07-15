@@ -5,11 +5,8 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.view.WebPartFactory;
-import org.labkey.api.view.WebPartView;
-import org.labkey.api.view.Portal;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.AssayService;
 import org.apache.log4j.Logger;
 
 import java.beans.PropertyChangeEvent;
@@ -50,6 +47,8 @@ public class LuminexModule extends DefaultModule implements ContainerManager.Con
         super.startup(moduleContext);
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(this);
+
+        AssayService.get().registerAssayProvider(new LuminexAssayProvider());
     }
 
     public Set<String> getSchemaNames()
