@@ -36,6 +36,8 @@ public class FlowScript extends FlowDataObject
     public static final String DEFAULT_UPLOAD_PROTOCOL_NAME = "Default Upload Settings";
     public static final String PRIVATE_SCRIPT_SUFFIX = "_modified";
 
+    private String strScript;
+
 
     static public FlowScript fromScriptId(int id)
     {
@@ -108,9 +110,20 @@ public class FlowScript extends FlowDataObject
         super(data);
     }
 
-    public String getAnalysisScript() throws SQLException
+    public String getAnalysisScript()
     {
-        return FlowManager.get().getScript(getData());
+        if (strScript == null)
+        {
+            try
+            {
+                strScript = FlowManager.get().getScript(getData());
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+        return strScript;
     }
 
     public ScriptDocument getAnalysisScriptDocument() throws Exception

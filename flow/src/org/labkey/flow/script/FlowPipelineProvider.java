@@ -113,20 +113,6 @@ public class FlowPipelineProvider extends PipelineProvider
             action.setDescription("<p><b>Flow Instructions:</b><br>Navigate to the directories containing FCS files.  Click the button to upload FCS files in the directories shown.</p>");
             entry.addAction(action);
         }
-
-        for (FileEntry entry : entries)
-        {
-            if (!entry.isDirectory())
-                continue;
-            for (File file : entry.listFiles(new IsFlowJoWorkspaceFilter()))
-            {
-                ViewURLHelper urlUploadWorkspace = PFUtil.urlFor(AnalysisScriptController.Action.uploadWorkspace, context.getContainer());
-                urlUploadWorkspace.addParameter("path", root.relativePath(file));
-                urlUploadWorkspace.addParameter("srcURL", context.getViewURLHelper().toString());
-                FileAction wspAction = new FileAction("Upload FlowJo Workspace Analysis", urlUploadWorkspace, new File[] { file });
-                entry.addAction(wspAction);
-            }
-        }
     }
 
     public boolean suppressOverlappingRootsWarning(ViewContext context)

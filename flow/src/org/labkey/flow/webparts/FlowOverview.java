@@ -153,6 +153,14 @@ public class FlowOverview extends Overview
         return new Action(_fcsFileCount == 0 ? "Browse for FCS files to be loaded" : "Browse for more FCS files to be loaded", urlUploadFCSFiles);
     }
 
+    private Action getUploadFlowJoAnalysisAction()
+    {
+        ViewURLHelper urlUploadFlowJoAnalysis = getContainer().urlFor(AnalysisScriptController.Action.showUploadWorkspace);
+        Action ret = new Action("Upload Flow Jo Workspace", urlUploadFlowJoAnalysis);
+        ret.setExplanatoryHTML("You can also upload results that have been calculated in Flow Jo");
+        return ret;
+    }
+
     private Step getFCSFileStep()
     {
         Step ret = new Step("Load FCS Files", _fcsFileCount == 0 ? Step.Status.required : Step.Status.normal);
@@ -173,6 +181,7 @@ public class FlowOverview extends Overview
             ret.setStatusHTML(status.toString());
         }
         ret.addAction(getBrowseForFCSFilesAction());
+        ret.addAction(getUploadFlowJoAnalysisAction());
         ret.addAction(getPipelineRootAction());
         return ret;
     }

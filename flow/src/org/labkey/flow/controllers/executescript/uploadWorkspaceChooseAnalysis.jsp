@@ -15,13 +15,13 @@
 
 %>
 <labkey:errors />
-<form action="<%=h(getContainer().urlFor(AnalysisScriptController.Action.uploadWorkspace))%>" method="POST">
-    <input type="hidden" name="path" value="<%=h(form.getPath())%>">
-    <p>The statistics in this workspace that have been calculated will be uploaded to <%=FlowModule.getLongProductName()%>.
-        If the workspace is in the same directory as the FCS files in it, then <%=FlowModule.getLongProductName()%> will
-    be able to find them, and you will be able to perform additional analysis on these files.  If the FCS files are somewhere
-    else, <%=FlowModule.getLongProductName()%> will not be able to find them, but you will still be able to browse and
-    query the results that have been uploaded.</p>
+<form action="<%=h(getContainer().urlFor(AnalysisScriptController.Action.uploadWorkspaceChooseAnalysis))%>" method="POST" enctype="multipart/form-data">
+    <% for (Map.Entry<String, String> entry : form.getWorkspace().getHiddenFields().entrySet())
+    {%>
+    <input type="hidden" name="workspace.<%=entry.getKey()%>" value="<%=h(entry.getValue())%>">
+    <% } %>
+    <input type="hidden" name="ff_confirm" value="true" />
+    <p>The statistics in this workspace that have been calculated will be uploaded to <%=FlowModule.getLongProductName()%>.</p>
     <% if (analyses.size() == 0) { %>
     <p><%=FlowModule.getLongProductName()%> organizes results into different "analyses".  The same FCS file should only
     be analyzed once in a given analysis.  If you want to analyze the same FCS file in two different ways, those results

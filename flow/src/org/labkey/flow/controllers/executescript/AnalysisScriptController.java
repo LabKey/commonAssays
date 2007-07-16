@@ -7,20 +7,22 @@ import org.apache.struts.action.ActionError;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.browse.DefaultBrowseView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.controllers.BaseFlowController;
+import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.AddRunsJob;
 import org.labkey.flow.script.AnalyzeJob;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.script.FlowPipelineProvider;
+import org.labkey.flow.FlowSettings;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.*;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
@@ -38,10 +40,11 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         chooseAnalysisName,
         analyzeSelectedRuns,
 
-        uploadWorkspace,
-
-        showRefreshKeywords,
-        refreshKeywords,
+        showUploadWorkspace,
+        chooseAnalysis,
+        uploadWorkspaceChooseAnalysis,
+        uploadWorkspaceBrowse,
+        browseForWorkspace,
     }
 
     @Jpf.Action
@@ -288,10 +291,10 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
     }
 
     @Jpf.Action
-    protected Forward uploadWorkspace(UploadWorkspaceResultsForm form) throws Exception
+    protected Forward uploadWorkspaceChooseAnalysis(UploadWorkspaceResultsForm form) throws Exception
     {
         requiresPermission(ACL.PERM_UPDATE);
-        if (isPost())
+        if (isPost() && form.ff_confirm)
         {
             try
             {
@@ -305,26 +308,27 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                 addError(t);
             }
         }
-        return renderInTemplate(FormPage.getView(AnalysisScriptController.class, form, "uploadWorkspace.jsp"), getContainer(), getNavTrailConfig(null, "Upload Flow Jo Workspace Analysis Results", Action.uploadWorkspace));
+        return renderInTemplate(FormPage.getView(AnalysisScriptController.class, form, "uploadWorkspaceChooseAnalysis.jsp"), getContainer(), getNavTrailConfig(null, "Upload Flow Jo Workspace Analysis Results", Action.uploadWorkspaceChooseAnalysis));
     }
-
 
     protected Forward doUploadWorkspace(UploadWorkspaceResultsForm form) throws Exception
     {
-        String path = form.getPath();
-        PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-        File workspaceFile = root.resolvePath(path);
-        FlowJoWorkspace workspace = FlowJoWorkspace.readWorkspace(new FileInputStream(workspaceFile));
-        File runFilePathRoot = workspaceFile;
-        for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
+        if (!form.validate())
         {
-            File sampleFile = new File(workspaceFile.getParent(), sampleInfo.getLabel());
-            if (sampleFile.exists())
-            {
-                runFilePathRoot = workspaceFile.getParentFile();
-                break;
-            }
+            return null;
         }
+        WorkspaceData workspaceData = form.getWorkspace();
+
+
+        String path = workspaceData.getPath();
+        File workspaceFile = null;
+        if (path != null)
+        {
+            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+            workspaceFile = root.resolvePath(path);
+        }
+        FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
+        File runFilePathRoot;
         FlowExperiment experiment;
         if (StringUtils.isEmpty(form.ff_newAnalysisName))
         {
@@ -339,14 +343,77 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             throw new IllegalArgumentException("Wrong container");
         }
 
-        FlowRun[] existing = experiment.findRun(runFilePathRoot, null);
-        if (existing.length != 0)
+        if (workspaceFile != null)
         {
-            addError("This analysis already contains this path.");
-            return null;
+            runFilePathRoot = workspaceFile;
+            for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
+            {
+                File sampleFile = new File(workspaceFile.getParent(), sampleInfo.getLabel());
+                if (sampleFile.exists())
+                {
+                    runFilePathRoot = workspaceFile.getParentFile();
+                    break;
+                }
+            }
+            FlowRun[] existing = experiment.findRun(runFilePathRoot, null);
+            if (existing.length != 0)
+            {
+                addError("This analysis already contains this path.");
+                return null;
+            }
+        }
+        else
+        {
+            workspaceFile = new File(FlowSettings.getWorkingDirectory(), form.getWorkspace().getName());
+            runFilePathRoot = workspaceFile;
         }
 
         FlowRun run = workspace.createExperimentRun(getUser(), getContainer(), experiment, workspaceFile, runFilePathRoot);
         return new ViewForward(run.urlShow());
+    }
+
+    @Jpf.Action
+    protected Forward browseForWorkspace(BrowsePipelineForm form) throws Exception
+    {
+        requiresPermission(ACL.PERM_UPDATE);
+        DefaultBrowseView view = new DefaultBrowseView(form);
+        return renderInTemplate(view, getContainer(), "Browse for Workspace");
+    }
+
+    @Jpf.Action
+    protected Forward uploadWorkspaceBrowse(BrowsePipelineForm form) throws Exception
+    {
+        requiresPermission(ACL.PERM_UPDATE);
+        String[] files = form.getFile();
+        if (files.length == 0)
+        {
+            addError("You must select at least one file.");
+            return browseForWorkspace(form);
+        }
+        WorkspaceData wsData = new WorkspaceData();
+        wsData.setPath(files[0]);
+        wsData.validate(form);
+        if (form.getActionErrors() != null && form.getActionErrors().size() > 0)
+        {
+            PageFlowUtil.getActionErrors(getRequest(), true).add(form.getActionErrors());
+            return browseForWorkspace(form);
+        }
+        ViewURLHelper url = getContainer().urlFor(Action.uploadWorkspaceChooseAnalysis);
+        url.addParameter("workspace.path", files[0]);
+        return new ViewForward(url);
+    }
+
+    @Jpf.Action
+    protected Forward showUploadWorkspace(UploadWorkspaceResultsForm form) throws Exception
+    {
+        requiresPermission(ACL.PERM_UPDATE);
+        if (isPost())
+        {
+            if (form.validate())
+            {
+                return uploadWorkspaceChooseAnalysis(form);
+            }
+        }
+        return renderInTemplate(FormPage.getView(AnalysisScriptController.class, form, "showUploadWorkspace.jsp"), getContainer(), "Upload Flow Jo Results");
     }
 }

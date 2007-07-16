@@ -1,17 +1,38 @@
 package org.labkey.flow.controllers.executescript;
 
-import org.labkey.api.view.ViewForm;
-import org.labkey.flow.data.FlowExperiment;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.Globals;
+import org.labkey.api.view.ViewForm;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.flow.controllers.WorkspaceData;
+import org.labkey.flow.data.FlowExperiment;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class UploadWorkspaceResultsForm extends ViewForm
 {
     private FlowExperiment[] availableAnalyses;
-    private String path;
+    private WorkspaceData workspace = new WorkspaceData();
+
+    public boolean validate()
+    {
+        workspace.validate(this);
+        if (getActionErrors() != null && !getActionErrors().isEmpty())
+        {
+            PageFlowUtil.getActionErrors(getRequest(), true).add(getActionErrors());
+            return false;
+        }
+        return true;
+    }
+
+    public WorkspaceData getWorkspace()
+    {
+        return workspace;
+    }
+
     public String ff_newAnalysisName;
     public int ff_existingAnalysisId;
+    public boolean ff_confirm;
 
 
     public void reset(ActionMapping actionMapping, HttpServletRequest request)
@@ -28,14 +49,9 @@ public class UploadWorkspaceResultsForm extends ViewForm
         }
     }
 
-    public String getPath()
+    public void setFf_confirm(boolean b)
     {
-        return path;
-    }
-
-    public void setPath(String path)
-    {
-        this.path = path;
+        ff_confirm = b;
     }
 
     public void setFf_newAnalysisName(String ff_newAnalysisName)
