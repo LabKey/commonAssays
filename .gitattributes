@@ -560,6 +560,10 @@ mousemodel/webapp/MouseModel/scripts/sql[!!-~]server/obsolete/sample-drop.sql -t
 ms1/MS1.iml -text
 ms1/module.properties -text
 ms1/src/META-INF/ms1.xml -text
+ms1/src/META-INF/scripts/postgresql/ms1-0.00-0.01.sql -text
+ms1/src/META-INF/scripts/postgresql/ms1-0.00-2.10.sql -text
+ms1/src/META-INF/scripts/sql[!!-~]server/ms1-0.00-0.01.sql -text
+ms1/src/META-INF/scripts/sql[!!-~]server/ms1-0.00-2.10.sql -text
 ms1/src/org/labkey/ms1/MS1Controller.java -text
 ms1/src/org/labkey/ms1/MS1Manager.java -text
 ms1/src/org/labkey/ms1/MS1Module.java -text
