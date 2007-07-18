@@ -46,11 +46,6 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
     public Priority getPriority(Data data)
     {
-        File file = data.getFile();
-        if (file != null && file.getName().toLowerCase().endsWith(".tsv"))
-        {
-            return Priority.HIGH;
-        }
         return null;
     }
 }
