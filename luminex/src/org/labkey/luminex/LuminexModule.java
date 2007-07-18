@@ -6,7 +6,8 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.AssayService;
+import org.labkey.api.study.AssayService;
+import org.labkey.api.exp.api.ExperimentService;
 import org.apache.log4j.Logger;
 
 import java.beans.PropertyChangeEvent;
@@ -49,6 +50,7 @@ public class LuminexModule extends DefaultModule implements ContainerManager.Con
         ContainerManager.addContainerListener(this);
 
         AssayService.get().registerAssayProvider(new LuminexAssayProvider());
+        ExperimentService.get().registerExperimentDataHandler(new LuminexExcelDataHandler());
     }
 
     public Set<String> getSchemaNames()
