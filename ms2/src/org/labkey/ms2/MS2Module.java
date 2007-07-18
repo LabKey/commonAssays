@@ -15,27 +15,31 @@
  */
 package org.labkey.ms2;
 
-import org.labkey.ms2.pipeline.ProteinProphetPipelineProvider;
+import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.ExperimentDataHandler;
 import org.labkey.api.exp.ExperimentRunFilter;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.ms2.MS2Service;
-import org.labkey.ms2.query.MS2Schema;
-import org.labkey.ms2.pipeline.*;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.ms2.protein.ProteinController;
-import org.labkey.ms2.protein.query.CustomAnnotationSchema;
-import org.labkey.api.util.HashHelpers;
 import org.labkey.api.security.User;
+import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.*;
+import org.labkey.api.view.Portal;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.view.WebPartView;
+import org.labkey.ms2.pipeline.*;
+import org.labkey.ms2.protein.ProteinController;
+import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.query.CustomAnnotationSchema;
+import org.labkey.ms2.query.MS2Schema;
+import org.labkey.ms2.scoring.ScoringController;
+import org.labkey.ms2.search.ProteinSearchWebPart;
 
 import java.beans.PropertyChangeEvent;
 import java.io.File;
@@ -43,11 +47,6 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-
-import junit.framework.TestCase;
-import org.labkey.ms2.pipeline.PipelineController;
-import org.labkey.ms2.scoring.ScoringController;
-import org.labkey.ms2.search.ProteinSearchWebPart;
 
 /**
  * User: migra
@@ -68,7 +67,7 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
 
     public MS2Module()
     {
-        super(NAME, 2.11, "/org/labkey/ms2", "/MS2",
+        super(NAME, 2.11, "/org/labkey/ms2", "/ms2",
                 new WebPartFactory("MS2 Runs"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
