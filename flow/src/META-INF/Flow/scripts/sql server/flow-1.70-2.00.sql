@@ -1,1 +1,0 @@
-ALTER TABLE flow.object ADD CONSTRAINT UQ_Object UNIQUE(DataId);
