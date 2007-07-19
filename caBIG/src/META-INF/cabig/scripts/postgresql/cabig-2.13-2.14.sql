@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
--- old name to cleanup
-select core.fn_dropifexists('PeptideMemberships', 'cabig','VIEW', NULL);
-
-
 select core.fn_dropifexists('ProtSequences', 'cabig','VIEW', NULL);
 
 select core.fn_dropifexists('PeptideMembers', 'cabig','VIEW', NULL);
@@ -36,13 +32,13 @@ select core.fn_dropifexists('FastaFiles', 'cabig','VIEW', NULL);
 
 select core.fn_dropifexists('Modifications', 'cabig','VIEW', NULL);
 
-select core.fn_dropifexists('XTandemScores', 'cabig','VIEW', NULL);
-
-select core.fn_dropifexists('MascotScores', 'cabig','VIEW', NULL);
+select core.fn_dropifexists('CometScores', 'cabig','VIEW', NULL);
 
 select core.fn_dropifexists('SequestScores', 'cabig','VIEW', NULL);
 
-select core.fn_dropifexists('CometScores', 'cabig','VIEW', NULL);
+select core.fn_dropifexists('MascotScores', 'cabig','VIEW', NULL);
+
+select core.fn_dropifexists('XTandemScores', 'cabig','VIEW', NULL);
 
 select core.fn_dropifexists('PeptidesView', 'cabig','VIEW', NULL);
 

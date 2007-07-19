@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-select core.fn_dropifexists('ProtSequences', 'cabig','VIEW', NULL);
-
-select core.fn_dropifexists('PeptideMembers', 'cabig','VIEW', NULL);
+-- Cleanup old name
+select core.fn_dropifexists('PeptideMemberships', 'cabig','VIEW', NULL);
 
 select core.fn_dropifexists('ProteinGroupMembers', 'cabig','VIEW', NULL);
 
 select core.fn_dropifexists('ProteinGroups', 'cabig','VIEW', NULL);
 
 select core.fn_dropifexists('ProteinProphetFiles', 'cabig','VIEW', NULL);
+
+select core.fn_dropifexists('ProtSequences', 'cabig','VIEW', NULL);
 
 select core.fn_dropifexists('QuantSummaries', 'cabig','VIEW', NULL);
 
@@ -32,13 +33,13 @@ select core.fn_dropifexists('FastaFiles', 'cabig','VIEW', NULL);
 
 select core.fn_dropifexists('Modifications', 'cabig','VIEW', NULL);
 
-select core.fn_dropifexists('XTandemScores', 'cabig','VIEW', NULL);
-
-select core.fn_dropifexists('MascotScores', 'cabig','VIEW', NULL);
+select core.fn_dropifexists('CometScores', 'cabig','VIEW', NULL);
 
 select core.fn_dropifexists('SequestScores', 'cabig','VIEW', NULL);
 
-select core.fn_dropifexists('CometScores', 'cabig','VIEW', NULL);
+select core.fn_dropifexists('MascotScores', 'cabig','VIEW', NULL);
+
+select core.fn_dropifexists('XTandemScores', 'cabig','VIEW', NULL);
 
 select core.fn_dropifexists('PeptidesView', 'cabig','VIEW', NULL);
 
@@ -47,8 +48,6 @@ select core.fn_dropifexists('SpectraData', 'cabig','VIEW', NULL);
 select core.fn_dropifexists('Fractions', 'cabig','VIEW', NULL);
 
 select core.fn_dropifexists('MS2Runs', 'cabig','VIEW', NULL);
-
-select core.fn_dropifexists('MS2RunsFilter', 'cabig','VIEW', NULL);
 
 
 CREATE VIEW cabig.MS2RunsFilter AS
