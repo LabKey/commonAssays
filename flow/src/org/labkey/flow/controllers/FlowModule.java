@@ -18,7 +18,6 @@ package org.labkey.flow.controllers;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.ExperimentDataHandler;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
@@ -28,8 +27,8 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ViewContext;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -42,8 +41,8 @@ import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocolImplementation;
 import org.labkey.flow.data.InputRole;
 import org.labkey.flow.persist.FlowDataHandler;
-import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.webparts.AnalysesWebPart;
@@ -52,7 +51,6 @@ import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
 
 import java.sql.ResultSet;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -63,7 +61,7 @@ public class FlowModule extends DefaultModule
 
     public FlowModule()
     {
-        super(NAME, 2.11, null, "/Flow",
+        super(NAME, 2.11, null, "/flow",
                 OverviewWebPart.FACTORY,
                 AnalysesWebPart.FACTORY,
                 AnalysisScriptsWebPart.FACTORY);
