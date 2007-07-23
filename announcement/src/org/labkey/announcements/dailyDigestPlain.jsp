@@ -1,4 +1,6 @@
-<%@ page import="org.labkey.announcements.AnnouncementsController" %><%@ page import="org.labkey.api.announcements.Announcement" %><%@ page import="org.labkey.api.util.DateUtil" %><%@ page extends="org.labkey.announcements.DailyDigestPage" %>The following new posts were made yesterday in folder: <%=c.getPath()%>
+<%@ page import="org.labkey.announcements.AnnouncementsController" %><%@ page import="org.labkey.api.announcements.Announcement" %><%@ page import="org.labkey.api.util.DateUtil" %>
+<%@ page import="org.labkey.api.util.AppProps" %>
+<%@ page extends="org.labkey.announcements.DailyDigestPage" %>The following new posts were made yesterday in folder: <%=c.getPath()%>
 
 <%
     String previousThread = null;
@@ -21,10 +23,10 @@ View this <%=conversationName%> here:
 
 
 <%
-            }
+    }
 
-            threadUrl = AnnouncementsController.getThreadUrl(request, c, previousThread, String.valueOf(ann.getRowId())).getURIString();
-            %><%=ann.getTitle()%>
+    threadUrl = AnnouncementsController.getThreadUrl(AppProps.getInstance().createMockRequest(), c, previousThread, String.valueOf(ann.getRowId())).getURIString();
+%><%=ann.getTitle()%>
 
 <%
         }

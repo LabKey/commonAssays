@@ -53,7 +53,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -1070,6 +1069,7 @@ public class AnnouncementsController extends ViewController
     {
         // First level of permission checking... must at least be able to read.
         Container c = getContainer(ACL.PERM_READ);
+        HttpServletRequest request = AppProps.getInstance().createMockRequest();
 
         // getFilter performs further permission checking on secure board (e.g., non-Editors only see threads where they're on the member list)
         SimpleFilter filter = getFilter(getSettings(), getPermissions(), true);
@@ -1081,12 +1081,10 @@ public class AnnouncementsController extends ViewController
         v.setFrame(WebPartView.FrameType.NONE);
         v.addObject("announcements", pair.first);
         v.addObject("container", c);
-        v.addObject("request", getRequest());
-        ViewURLHelper url = cloneViewURLHelper();
-        url.deleteParameters();
-        url.setAction("thread.view");
+        v.addObject("request", request);
+        ViewURLHelper url = new ViewURLHelper(request, "announcements", "thread.view", c);
         v.addObject("url", url.getURIString() + "rowId=");
-        v.addObject("homePageUrl", ViewURLHelper.getBaseServerURL(getRequest()));
+        v.addObject("homePageUrl", ViewURLHelper.getBaseServerURL(request));
 
         getResponse().setContentType("text/xml");
         includeView(v);
@@ -1159,6 +1157,7 @@ public class AnnouncementsController extends ViewController
     private void sendNotificationEmails(Announcement a, WikiRendererType currentRendererType) throws Exception
     {
         Container c = getContainer();
+        HttpServletRequest request = AppProps.getInstance().createMockRequest();
         Settings settings = getSettings();
 
         boolean isResponse = null != a.getParent();
@@ -1206,7 +1205,7 @@ public class AnnouncementsController extends ViewController
                 {
                     if (memberList.contains(user))
                     {
-                        ViewURLHelper removeMeURL = new ViewURLHelper(getRequest(), "announcements", "confirmRemove", c.getPath());
+                        ViewURLHelper removeMeURL = new ViewURLHelper(request, "announcements", "confirmRemove", c.getPath());
                         removeMeURL.addParameter("userId", String.valueOf(user.getUserId()));
                         removeMeURL.addParameter("messageId", String.valueOf(parent.getRowId()));
 
@@ -1223,8 +1222,8 @@ public class AnnouncementsController extends ViewController
 
                 if (!noMemberListEmails.isEmpty())
                 {
-                    ViewURLHelper changeEmailURL = new ViewURLHelper(getRequest(), "announcements", "showEmailPreferences", c.getPath());
-                    changeEmailURL.addParameter("srcURL", new ViewURLHelper(getRequest(), "announcements", "begin", c.getPath()).getURIString());
+                    ViewURLHelper changeEmailURL = new ViewURLHelper(request, "announcements", "showEmailPreferences", c.getPath());
+                    changeEmailURL.addParameter("srcURL", new ViewURLHelper(request, "announcements", "begin", c.getPath()).getURIString());
                     ViewMessage m = getMessage(c, settings, parent, a, isResponse, changeEmailURL.getURIString(), currentRendererType, Reason.signedUp);
                     m.setHeader("References", references);
                     m.setHeader("Message-ID", messageId);
@@ -1241,16 +1240,17 @@ public class AnnouncementsController extends ViewController
     {
         ViewMessage m = MailHelper.createMultipartViewMessage(AppProps.getInstance().getSystemEmailAddress(), null);
         m.setSubject(StringUtils.trimToEmpty(isResponse ? "RE: " + parent.getTitle() : a.getTitle()));
+        HttpServletRequest request = AppProps.getInstance().createMockRequest();
 
         EmailResponsePage page = createResponseTemplate("emailResponsePlain.jsp", false, c, settings, parent, a, removeUrl, currentRendererType, reason);
         JspView view = new JspView(page);
         view.setFrame(WebPartView.FrameType.NONE);
-        m.setTemplateContent(getRequest(), view, "text/plain");
+        m.setTemplateContent(request, view, "text/plain");
 
         page = createResponseTemplate("emailResponse.jsp", true, c, settings, parent, a, removeUrl, currentRendererType, reason);
         view = new JspView(page);
         view.setFrame(WebPartView.FrameType.NONE);
-        m.setTemplateContent(getRequest(), view, "text/html");
+        m.setTemplateContent(request, view, "text/html");
 
         return m;
     }
@@ -1258,21 +1258,23 @@ public class AnnouncementsController extends ViewController
     private EmailResponsePage createResponseTemplate(String templateName, boolean includeBody, Container c, Settings settings, Announcement parent,
             Announcement a, String removeUrl, WikiRendererType currentRendererType, Reason reason)
     {
-        EmailResponsePage page = (EmailResponsePage) JspLoader.createPage(getRequest(), AnnouncementsController.class, templateName);
+        HttpServletRequest request = AppProps.getInstance().createMockRequest();
+
+        EmailResponsePage page = (EmailResponsePage) JspLoader.createPage(request, AnnouncementsController.class, templateName);
 
         page.settings = settings;
-        page.threadURL = getThreadUrl(getRequest(), c, parent.getEntityId(), String.valueOf(a.getRowId())).getURIString();
+        page.threadURL = getThreadUrl(request, c, parent.getEntityId(), String.valueOf(a.getRowId())).getURIString();
         page.boardPath = c.getPath();
-        ViewURLHelper boardURL = new ViewURLHelper(getRequest(), "announcements", "begin", c.getPath());
+        ViewURLHelper boardURL = new ViewURLHelper(request, "announcements", "begin", c.getPath());
         page.boardURL = boardURL.getURIString();
 
-        URLHelper cssURL = new URLHelper(getRequest());
+        URLHelper cssURL = new URLHelper(request);
         cssURL.setPath("/core/stylesheet.view");
         cssURL.setRawQuery(null);
         page.cssURL = cssURL.getURIString();
 
         page.removeUrl = removeUrl;
-        page.siteURL = ViewURLHelper.getBaseServerURL(getRequest());
+        page.siteURL = ViewURLHelper.getBaseServerURL(request);
         page.responseAnnouncement = a;
         page.reason = reason;
 

@@ -95,6 +95,12 @@ public class IssuesController extends SpringActionController
     }
 
 
+    private ViewURLHelper issueURL(HttpServletRequest request, String action)
+    {
+        return new ViewURLHelper(request, "issues", action, getContainer());
+    }
+
+
     /**
      * This method represents the point of entry into the pageflow
      */
@@ -333,6 +339,11 @@ public class IssuesController extends SpringActionController
         {
             return issueURL("details").addParameter("issueId", _issue.getIssueId());
         }
+
+        public ViewURLHelper getURL(HttpServletRequest request)
+        {
+            return issueURL(request, "details").addParameter("issueId", _issue.getIssueId());
+        }
     }
 
 
@@ -460,7 +471,7 @@ public class IssuesController extends SpringActionController
                 return false;
             }
 
-            ViewURLHelper url = new DetailsAction(_issue).getURL();
+            ViewURLHelper url = new DetailsAction(_issue).getURL(AppProps.getInstance().createMockRequest());
 
             final String assignedTo = UserManager.getDisplayName(_issue.getAssignedTo());
             if (assignedTo != null)
@@ -516,7 +527,7 @@ public class IssuesController extends SpringActionController
 
             try
             {
-                detailsUrl = form.getForwardURL();
+                detailsUrl = new DetailsAction(issue).getURL(AppProps.getInstance().createMockRequest());
 
                 if ("resolve".equals(form.getAction()))
                     issue.Resolve(user);
@@ -920,6 +931,7 @@ public class IssuesController extends SpringActionController
                 String messageId = "<" + issue.getEntityId() + "." + lastComment.getCommentId() + "@" + AppProps.getInstance().getDefaultDomain() + ">";
                 String references = messageId + " <" + issue.getEntityId() + "@" + AppProps.getInstance().getDefaultDomain() + ">";
                 MailHelper.ViewMessage m = MailHelper.createMessage(AppProps.getInstance().getSystemEmailAddress(), to);
+                HttpServletRequest request = AppProps.getInstance().createMockRequest();  // Use base server url for root of links in email
                 if (m.getAllRecipients().length > 0)
                 {
                     m.setMultipart(true);
@@ -927,10 +939,10 @@ public class IssuesController extends SpringActionController
                     m.setHeader("References", references);
 
                     JspView viewPlain = new JspView<UpdateEmailPage>(IssuesController.class,"updateEmail.jsp",new UpdateEmailPage(detailsUrl.getURIString(),issue,true));
-                    m.setTemplateContent(getViewContext().getRequest(), viewPlain, "text/plain");
+                    m.setTemplateContent(request, viewPlain, "text/plain");
 
                     JspView viewHtml = new JspView<UpdateEmailPage>(IssuesController.class,"updateEmail.jsp",new UpdateEmailPage(detailsUrl.getURIString(),issue,false));
-                    m.setTemplateContent(getViewContext().getRequest(), viewHtml, "text/html");
+                    m.setTemplateContent(request, viewHtml, "text/html");
 
                     MailHelper.send(m);
                 }
@@ -1157,11 +1169,11 @@ public class IssuesController extends SpringActionController
                 WebPartView v = new GroovyView("/org/labkey/issue/rss.gm");
                 v.setFrame(WebPartView.FrameType.NONE);
                 v.addObject("issues", issues);
-                ViewURLHelper url = getViewContext().cloneViewURLHelper();
-                url.deleteParameters();
-                url.setAction("details.view");
+
+                HttpServletRequest request = AppProps.getInstance().createMockRequest();
+                ViewURLHelper url = new ViewURLHelper(request, "Issues", "details.view", getContainer());
                 v.addObject("url", url.getURIString() + "issueId=");
-                v.addObject("homePageUrl", ViewURLHelper.getBaseServerURL(getViewContext().getRequest()));
+                v.addObject("homePageUrl", ViewURLHelper.getBaseServerURL(request));
                 return v;
             }
             catch (SQLException x)

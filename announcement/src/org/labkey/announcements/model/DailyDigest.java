@@ -38,14 +38,7 @@ public class DailyDigest
 
     private static final Logger _log = Logger.getLogger(DailyDigest.class);
 
-    // Used only for AnnouncementsController test action -- remove when test action is removed
     public static void sendDailyDigest() throws Exception
-    {
-        sendDailyDigest(AppProps.getInstance().createMockRequest());
-    }
-
-
-    private static void sendDailyDigest(HttpServletRequest request) throws Exception
     {
         Date min = getLastSuccessful();
         Date current = new Date();
@@ -58,7 +51,7 @@ public class DailyDigest
         List<Container> containers = getContainersWithNewMessages(min, max);
 
         for (Container c : containers)
-            sendDailyDigest(request, c, min, max);
+            sendDailyDigest(c, min, max);
 
         setLastSuccessful(max);
     }
@@ -110,7 +103,7 @@ public class DailyDigest
     }
 
 
-    private static void sendDailyDigest(HttpServletRequest request, Container c, Date min, Date max) throws Exception
+    private static void sendDailyDigest(Container c, Date min, Date max) throws Exception
     {
         Settings settings = AnnouncementManager.getMessageBoardSettings(c);
         Announcement[] announcements = getRecentAnnouncementsInContainer(c, min, max);
@@ -127,7 +120,7 @@ public class DailyDigest
 
             if (!announcementList.isEmpty())
             {
-                ViewMessage m = getDailyDigestMessage(request, c, settings, announcementList, user);
+                ViewMessage m = getDailyDigestMessage(c, settings, announcementList, user);
 
                 try
                 {
@@ -143,10 +136,11 @@ public class DailyDigest
     }
 
 
-    private static MailHelper.ViewMessage getDailyDigestMessage(HttpServletRequest request, Container c, Settings settings, List<Announcement> announcements, User user) throws Exception
+    private static MailHelper.ViewMessage getDailyDigestMessage(Container c, Settings settings, List<Announcement> announcements, User user) throws Exception
     {
         MailHelper.ViewMessage m = MailHelper.createMultipartViewMessage(AppProps.getInstance().getSystemEmailAddress(), user.getEmail());
         m.setSubject("New posts to " + c.getPath());
+        HttpServletRequest request = AppProps.getInstance().createMockRequest();
 
         DailyDigestPage page = createPage("dailyDigestPlain.jsp", request, c, settings, announcements);
         JspView view = new JspView(page);
@@ -223,28 +217,13 @@ public class DailyDigest
         {
             _log.debug("Sending daily digest");
 
-            HttpServletRequest request;
-
             try
             {
-                request = AppProps.getInstance().createMockRequest();
-            }
-            catch(IllegalStateException e)
-            {
-                // Exception could occur if this code is run before the first request.  But that should never happen
-                // since timer is created after the first request is handled.  Just log and return... can't send to
-                // mothership without a request.
-                _log.error("DailyDigestTask couldn't create mock request", e);
-                return;
-            }
-
-            try
-            {
-                sendDailyDigest(request);
+                sendDailyDigest();
             }
             catch(Exception e)
             {
-                ExceptionUtil.logExceptionToMothership(request, e);
+                ExceptionUtil.logExceptionToMothership(AppProps.getInstance().createMockRequest(), e);
             }
         }
 

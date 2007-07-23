@@ -2,6 +2,7 @@
 <%@ page import="org.labkey.api.announcements.Announcement" %>
 <%@ page import="org.labkey.api.util.DateUtil" %>
 <%@ page import="org.labkey.api.wiki.WikiRenderer" %>
+<%@ page import="org.labkey.api.util.AppProps" %>
 <%@ page extends="org.labkey.announcements.DailyDigestPage" %>
 <html>
 <head>
@@ -27,9 +28,9 @@
             if (null != threadUrl)
             {
                 %><tr><td><a href="<%=threadUrl%>">View this <%=conversationName%></a></td></tr><%
-            }
+    }
 
-            threadUrl = h(AnnouncementsController.getThreadUrl(request, c, previousThread, String.valueOf(ann.getRowId())).getURIString());%>
+            threadUrl = h(AnnouncementsController.getThreadUrl(AppProps.getInstance().createMockRequest(), c, previousThread, String.valueOf(ann.getRowId())).getURIString());%>
             <tr><td>&nbsp;</td></tr><tr><td class="normal" colspan="2" style="background-color: #dddddd"><%=ann.getTitle()%></td></tr><%
         } %>
             <tr><td><%=ann.getCreatedByName()%><% if (null == ann.getParent()) { %> created this <%=conversationName%><% } else { %> responded <% } %> at <%=DateUtil.formatDateTime(ann.getCreated())%></td></tr><%
