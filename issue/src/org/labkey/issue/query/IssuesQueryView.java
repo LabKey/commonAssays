@@ -70,6 +70,8 @@ public class IssuesQueryView extends QueryView
         }
         view.getDataRegion().setShadeAlternatingRows(true);
         view.getDataRegion().setShowColumnSeparators(true);
+        ColumnInfo ci = view.getDataRegion().getTable().getColumn("IssueId");
+        view.getDataRegion().setAggregates(new Aggregate(ci, Aggregate.Type.COUNT));
 
         //ensureDefaultCustomViews();
         return view;

@@ -596,6 +596,7 @@ public class IssuesController extends SpringActionController
             page.setAction("update");
             page.setIssue(_issue);
             page.setCustomColumnConfiguration(ccc);
+            page.setBody(form.getComment());
             page.setEditable(getEditableFields(page.getAction(), ccc));
             page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
             page.setErrors(errors);
@@ -672,6 +673,7 @@ public class IssuesController extends SpringActionController
             page.setAction("resolve");
             page.setIssue(_issue);
             page.setCustomColumnConfiguration(ccc);
+            page.setBody(form.getComment());
             page.setEditable(getEditableFields(page.getAction(), ccc));
             page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
             page.setErrors(errors);
@@ -709,6 +711,7 @@ public class IssuesController extends SpringActionController
             page.setAction("close");
             page.setIssue(_issue);
             page.setCustomColumnConfiguration(ccc);
+            page.setBody(form.getComment());
             page.setEditable(getEditableFields(page.getAction(), ccc));
             page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
             page.setErrors(errors);
@@ -744,6 +747,7 @@ public class IssuesController extends SpringActionController
             page.setAction("reopen");
             page.setIssue(_issue);
             page.setCustomColumnConfiguration(ccc);
+            page.setBody(form.getComment());
             page.setEditable(getEditableFields(page.getAction(), ccc));
             page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
             page.setErrors(errors);
