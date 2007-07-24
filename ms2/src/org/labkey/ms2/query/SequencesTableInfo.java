@@ -23,11 +23,13 @@ import java.sql.Types;
 public class SequencesTableInfo extends FilteredTable
 {
     private final Container _container;
+    private final QuerySchema _schema;
 
-    public SequencesTableInfo(String alias, Container container)
+    public SequencesTableInfo(String alias, QuerySchema schema)
     {
         super(ProteinManager.getTableInfoSequences());
-        _container = container;
+        _schema = schema;
+        _container = schema.getContainer();
         if (alias != null)
         {
             setAlias(alias);
@@ -83,7 +85,7 @@ public class SequencesTableInfo extends FilteredTable
                         {
                             public TableInfo getLookupTableInfo()
                             {
-                                return new CustomAnnotationTable(annotationSet);
+                                return new CustomAnnotationTable(annotationSet, _schema);
                             }
                         });
                         return ret;
@@ -95,7 +97,7 @@ public class SequencesTableInfo extends FilteredTable
 
             public TableInfo getLookupTableInfo()
             {
-                return new CustomAnnotationSetsTable(SequencesTableInfo.this, _container);
+                return new CustomAnnotationSetsTable(SequencesTableInfo.this, _schema, _container);
             }
         });
         addColumn(annotationColumn);

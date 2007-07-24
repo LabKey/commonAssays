@@ -229,7 +229,7 @@ public class MS2Schema extends UserSchema
 
     private SequencesTableInfo createSequencesTable(String aliasName)
     {
-        return new SequencesTableInfo(aliasName, getContainer());
+        return new SequencesTableInfo(aliasName, this);
     }
 
     private TableInfo createPeptidesTable(final String alias)

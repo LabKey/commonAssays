@@ -64,6 +64,6 @@ public class CustomAnnotationSchema extends UserSchema
         if (annotationSet == null)
             return super.getTable(name, alias);
 
-        return new CustomAnnotationTable(annotationSet, _includeSequences);
+        return new CustomAnnotationTable(annotationSet, this, _includeSequences);
     }
 }

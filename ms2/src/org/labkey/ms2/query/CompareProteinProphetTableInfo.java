@@ -25,7 +25,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
 
     public CompareProteinProphetTableInfo(String alias, MS2Schema schema, List<MS2Run> runs, boolean forExport)
     {
-        super(alias, schema.getContainer());
+        super(alias, schema);
 
         _schema = schema;
         _runs = runs;

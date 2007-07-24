@@ -23,20 +23,23 @@ public class CustomAnnotationTable extends FilteredTable
     private final CustomAnnotationSet _annotationSet;
     private final boolean _includeSeqId;
 
-    public CustomAnnotationTable(CustomAnnotationSet annotationSet)
+    private final QuerySchema _schema;
+
+    public CustomAnnotationTable(CustomAnnotationSet annotationSet, QuerySchema schema)
     {
-        this(annotationSet, false);
+        this(annotationSet, schema, false);
     }
 
-    public CustomAnnotationTable(CustomAnnotationSet annotationSet, boolean includeSeqId)
+    public CustomAnnotationTable(CustomAnnotationSet annotationSet, QuerySchema schema, boolean includeSeqId)
     {
         super(ProteinManager.getTableInfoCustomAnnotation());
+        _schema = schema;
         _includeSeqId = includeSeqId;
         wrapAllColumns(true);
         _annotationSet = annotationSet;
 
         ColumnInfo propertyCol = addColumn(createPropertyColumn("Property"));
-        propertyCol.setFk(new DomainForeignKey(_annotationSet.lookupContainer(), _annotationSet.getLsid()));
+        propertyCol.setFk(new DomainForeignKey(_annotationSet.lookupContainer(), _annotationSet.getLsid(), schema));
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("LookupString"));
@@ -68,7 +71,7 @@ public class CustomAnnotationTable extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return new SequencesTableInfo(null, _annotationSet.lookupContainer());
+                return new SequencesTableInfo(null, _schema);
             }
         });
         addColumn(col);

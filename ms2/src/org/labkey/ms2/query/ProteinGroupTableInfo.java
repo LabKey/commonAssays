@@ -105,7 +105,7 @@ public class ProteinGroupTableInfo extends FilteredTable
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return new SequencesTableInfo(null, _schema.getContainer());
+                    return new SequencesTableInfo(null, _schema);
                 }
             });
             addColumn(firstProteinColumn);
@@ -171,7 +171,7 @@ public class ProteinGroupTableInfo extends FilteredTable
                 {
                     public TableInfo getLookupTableInfo()
                     {
-                        SequencesTableInfo result = new SequencesTableInfo(null, _schema.getContainer());
+                        SequencesTableInfo result = new SequencesTableInfo(null, _schema);
                         SQLFragment sql = new SQLFragment();
                         sql.append("(SELECT Min(LookupString) FROM ");
                         sql.append(ProteinManager.getTableInfoFastaSequences());
