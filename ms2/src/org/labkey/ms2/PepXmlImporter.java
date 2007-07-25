@@ -52,8 +52,7 @@ public class PepXmlImporter extends MS2Importer
 
     public PepXmlImporter(User user, Container c, String description, String fullFileName, Logger log, XarContext context)
     {
-        super(context);
-        initFileUpload(user, c, description, fullFileName, log);
+        super(context, user, c, description, fullFileName, log);
     }
 
 
@@ -168,7 +167,7 @@ public class PepXmlImporter extends MS2Importer
 
         // For now, we only support one set of quantitation results per run
         if (quantSummaries.size() > 1)
-            throw new RuntimeException("Can not currently upload runs that contain more than one set of quantitation results");
+            throw new RuntimeException("Cannot currently upload runs that contain more than one set of quantitation results");
 
         for (RelativeQuantAnalysisSummary summary : quantSummaries)
         {

@@ -22,20 +22,20 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.upload.FormFile;
+import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExperimentService;
-import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.labkey.api.jsp.JspLoader;
-import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.RunForm;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MS2Fraction;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
-import org.labkey.ms2.protocol.*;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
+import org.labkey.ms2.MS2Fraction;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.RunForm;
+import org.labkey.ms2.protocol.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -44,11 +44,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.*;
-
-import org.labkey.ms2.pipeline.FileStatus;
-
-import org.labkey.ms2.pipeline.MascotClientImpl;
-import org.labkey.api.pipeline.*;
 
 /**
  *

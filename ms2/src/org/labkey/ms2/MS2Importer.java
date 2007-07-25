@@ -73,18 +73,15 @@ public abstract class MS2Importer
     protected static Logger _systemLog = Logger.getLogger(MS2Importer.class);
     protected final XarContext _context;
 
-    public MS2Importer(XarContext context)
+    public MS2Importer(XarContext context, User user, Container c, String description, String fullFileName, Logger log)
     {
         _context = context;
-    }
+        _user = user;
+        _container = c;
 
-    protected void initFileUpload(User user, Container c, String description, String fullFileName, Logger log)
-    {
         String pathFile = fullFileName.replace('\\', '/');
         int index = pathFile.lastIndexOf('/');
 
-        _container = c;
-        _user = user;
         _path = (-1 == index ? "" : pathFile.substring(0, index));
         _fileName = (-1 == index ? pathFile : pathFile.substring(index + 1));
 

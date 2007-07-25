@@ -418,8 +418,10 @@ public class MS2Manager
         String fileName = file.getPath();
         if (fileName.endsWith(".xml") || fileName.endsWith(".pepXML"))
             return new PepXmlImporter(info.getUser(), c, description, fileName, log, context);
+        else if (fileName.endsWith(".dat"))
+            return new MascotDatImporter(info.getUser(), c, description, fileName, log, context);
         else
-            return null;  // We only support pepXML now
+            return null;
     }
 
 

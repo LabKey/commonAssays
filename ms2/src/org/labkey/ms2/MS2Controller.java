@@ -1424,7 +1424,6 @@ public class MS2Controller extends ViewController
     @Jpf.Action
     protected Forward addRun(AddRunForm form) throws Exception
     {
-        HttpServletRequest request = getRequest();
         Container c = null;
         ViewURLHelper url;
         File f = null;
@@ -1443,7 +1442,7 @@ public class MS2Controller extends ViewController
             if (c == null)
                 return HttpView.throwNotFound();
 
-            return new ViewForward(new ViewURLHelper(request, "MS2", "showList", c.getPath()));
+            return new ViewForward(new ViewURLHelper("MS2", "showList", c.getPath()));
         }
 
         if (null != form.getFileName())
@@ -1478,7 +1477,7 @@ public class MS2Controller extends ViewController
                 if (run == -1)
                     return HttpView.throwNotFound();
 
-                url = new ViewURLHelper(request, "MS2", "showList", c.getPath());
+                url = new ViewURLHelper("MS2", "showList", c.getPath());
                 url.addParameter(MS2Manager.getDataRegionNameExperimentRuns() + ".Run~eq", Integer.toString(run));
             }
             else if (!form.isExperiment())
@@ -1491,7 +1490,7 @@ public class MS2Controller extends ViewController
                 if (run == -1)
                     HttpView.throwNotFound();
 
-                url = new ViewURLHelper(request, "MS2", "addFileRunStatus", "");
+                url = new ViewURLHelper("MS2", "addFileRunStatus", "");
                 url.addParameter("run", Integer.toString(run));
             }
             else
@@ -1519,7 +1518,7 @@ public class MS2Controller extends ViewController
                 if (job == null)
                     return HttpView.throwNotFound();
 
-                url = new ViewURLHelper(request, "MS2", "addFileRunStatus", "");
+                url = new ViewURLHelper("MS2", "addFileRunStatus", "");
                 url.addParameter("path", job.getLogFile().getAbsolutePath());
             }
         }
@@ -1531,7 +1530,7 @@ public class MS2Controller extends ViewController
         }
         else
         {
-            url = new ViewURLHelper(request, "MS2", "addFileRunStatus", "");
+            url = new ViewURLHelper("MS2", "addFileRunStatus", "");
         }
 
         return new ViewForward(url);
