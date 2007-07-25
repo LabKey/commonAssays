@@ -170,9 +170,14 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
 
         Map<String, Object> excelRunProps = new HashMap<String, Object>();
         
-        for (int sheetIndex = 1; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
+        for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
         {
             Sheet analyteSheet = workbook.getSheet(sheetIndex);
+
+            if ("Row #".equals(analyteSheet.getCell(0, 0).getContents()))
+            {
+                continue;
+            }
 
             String analyteName = analyteSheet.getName();
             String analyteLsid = new Lsid(data.getLSID() + ".Analyte" + analyteName).toString();
