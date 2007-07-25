@@ -10,6 +10,8 @@ import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.study.SimpleAssayDataImportHelper;
+import org.labkey.api.study.AssayService;
+import org.labkey.api.study.DefaultAssayProvider;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,6 +51,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             Protocol protocol = ExperimentService.get().getProtocol(expProtocol.getRowId());
             Domain dataDomain = null;
             Domain analyteDomain = null;
+            Domain excelRunDomain = null;
             for (String uri : protocol.retrieveObjectProperties().keySet())
             {
                 Lsid lsid = new Lsid(uri);
@@ -60,6 +63,10 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                 {
                     analyteDomain = PropertyService.get().getDomain(info.getContainer(), uri);
                 }
+                else if (lsid.getNamespacePrefix() != null && lsid.getNamespacePrefix().startsWith(LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN))
+                {
+                    excelRunDomain = PropertyService.get().getDomain(info.getContainer(), uri);
+                }
             }
             if (dataDomain == null)
             {
@@ -68,6 +75,10 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             if (analyteDomain == null)
             {
                 throw new ExperimentException("Could not find analyte domain for protocol with LSID " + protocol.getLSID());
+            }
+            if (excelRunDomain == null)
+            {
+                throw new ExperimentException("Could not find Excel run domain for protocol with LSID " + protocol.getLSID());
             }
 
             FileInputStream fIn = new FileInputStream(dataFile);
@@ -78,7 +89,8 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
 
             PropertyDescriptor[] dataColumns = OntologyManager.getPropertiesForType(dataDomain.getTypeURI(), info.getContainer());
             PropertyDescriptor[] analyteColumns = OntologyManager.getPropertiesForType(analyteDomain.getTypeURI(), info.getContainer());
-            Map<String, Object>[] dataRows = parseFile(dataColumns, analyteColumns, workbook, unknownColumns, expRun, info.getContainer(), data, id);
+            PropertyDescriptor[] excelRunColumns = OntologyManager.getPropertiesForType(excelRunDomain.getTypeURI(), info.getContainer());
+            Map<String, Object>[] dataRows = parseFile(dataColumns, analyteColumns, excelRunColumns, workbook, unknownColumns, expRun, info.getContainer(), data, id);
             OntologyManager.insertTabDelimited(info.getContainer(), id,
                     new SimpleAssayDataImportHelper(data.getLSID()), dataColumns, dataRows, true);
         }
@@ -144,7 +156,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
-    private Map<String, Object>[] parseFile(PropertyDescriptor[] columns, PropertyDescriptor[] analyteColumns, Workbook workbook, Set<String> unknownColumns, ExpRun expRun, Container container, ExpData data, Integer id) throws SQLException, ExperimentException
+    private Map<String, Object>[] parseFile(PropertyDescriptor[] dataColumns, PropertyDescriptor[] analyteColumns, PropertyDescriptor[] excelRunColumns, Workbook workbook, Set<String> unknownColumns, final ExpRun expRun, Container container, ExpData data, Integer id) throws SQLException, ExperimentException
     {
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         
@@ -156,6 +168,8 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             throw new ExperimentException("Could not find Name property on Analyte domain");
         }
 
+        Map<String, Object> excelRunProps = new HashMap<String, Object>();
+        
         for (int sheetIndex = 1; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
         {
             Sheet analyteSheet = workbook.getSheet(sheetIndex);
@@ -175,10 +189,15 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                 if (index != -1)
                 {
                     String propName = cellValue.substring(0, index);
-                    String propURI = getPropertyDescriptorURI(propName, analyteColumns);
-                    if (propURI != null)
+                    String analytePropURI = getPropertyDescriptorURI(propName, analyteColumns);
+                    if (analytePropURI != null)
                     {
-                        analyteProps.put(propURI, cellValue.substring((propName + ":").length()).trim());
+                        analyteProps.put(analytePropURI, cellValue.substring((propName + ":").length()).trim());
+                    }
+                    String excelRunPropURI = getPropertyDescriptorURI(propName, excelRunColumns);
+                    if (excelRunPropURI != null)
+                    {
+                        excelRunProps.put(excelRunPropURI, cellValue.substring((propName + ":").length()).trim());
                     }
                 }
             }
@@ -198,7 +217,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             row++;
 
             Map<String, String> namesToURIs = new HashMap<String, String>();
-            for (PropertyDescriptor pd : columns)
+            for (PropertyDescriptor pd : dataColumns)
             {
                 namesToURIs.put(pd.getName(), pd.getPropertyURI());
             }
@@ -240,6 +259,17 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         {
             analyteRows[index++] = analyte._properties;
         }
+        OntologyManager.insertTabDelimited(container, OntologyManager.ensureObject(container.getId(), expRun.getLSID()), new OntologyManager.ImportHelper()
+        {
+            public String beforeImportObject(Map map) throws SQLException
+            {
+                return expRun.getLSID();
+            }
+
+            public void afterImportObject(String lsid, ObjectProperty[] props) throws SQLException
+            {
+            }
+        }, excelRunColumns, new Map[] { excelRunProps }, true);
         OntologyManager.insertTabDelimited(container, id,
                 new AnalyteImportHelper(analytes.values(), analyteNamePropURI), analyteColumns, analyteRows, true);
 

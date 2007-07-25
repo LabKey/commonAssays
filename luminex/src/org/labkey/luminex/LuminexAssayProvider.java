@@ -17,6 +17,7 @@ import org.labkey.api.query.PropertyForeignKey;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * User: jeckels
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 public class LuminexAssayProvider extends DefaultAssayProvider
 {
     public static final String ASSAY_DOMAIN_ANALYTE = Protocol.ASSAY_DOMAIN_PREFIX + "Analyte";
+    public static final String ASSAY_DOMAIN_EXCEL_RUN = Protocol.ASSAY_DOMAIN_PREFIX + "ExcelRun";
 
     public LuminexAssayProvider()
     {
@@ -41,14 +43,30 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         return new AssayDataCollector[] { new FileUploadDataCollector() };
     }
 
+    public PropertyDescriptor[] getRunPropertyColumns(Protocol protocol)
+    {
+        List<PropertyDescriptor> result = new ArrayList<PropertyDescriptor>(Arrays.asList(super.getRunPropertyColumns(protocol)));
+        result.addAll(Arrays.asList(getPropertiesForDomainPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN)));
+
+        return result.toArray(new PropertyDescriptor[result.size()]);
+    }
+
     public List<Domain> createDefaultDomains(Container c)
     {
         List<Domain> result = super.createDefaultDomains(c);
 
         Domain analyteDomain = PropertyService.get().createDomain(c, "urn:lsid:${LSIDAuthority}:" + ASSAY_DOMAIN_ANALYTE + ".Folder-${Container.RowId}:${AssayName}", "Analyte Properties");
         addProperty(analyteDomain, "Name", PropertyType.STRING);
-        addProperty(analyteDomain, "Plate ID", PropertyType.STRING);
         result.add(analyteDomain);
+
+        Domain excelRunDomain = PropertyService.get().createDomain(c, "urn:lsid:${LSIDAuthority}:" + ASSAY_DOMAIN_EXCEL_RUN + ".Folder-${Container.RowId}:${AssayName}", "Excel File Run Properties");
+        addProperty(excelRunDomain, "File Name", PropertyType.STRING);
+        addProperty(excelRunDomain, "Acquisition Date", PropertyType.DATE_TIME);
+        addProperty(excelRunDomain, "Reader Serial Number", PropertyType.STRING);
+        addProperty(excelRunDomain, "Plate ID", PropertyType.STRING);
+        addProperty(excelRunDomain, "RP1 PMT (Volts)", PropertyType.DOUBLE);
+        addProperty(excelRunDomain, "RP1 Target", PropertyType.STRING);
+        result.add(excelRunDomain);
 
         return result;
     }
@@ -107,5 +125,10 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         }
 
         return result;
+    }
+
+    public boolean shouldShowDataDescription(Protocol protocol)
+    {
+        return false;
     }
 }
