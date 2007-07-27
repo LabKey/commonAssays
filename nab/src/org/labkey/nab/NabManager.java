@@ -158,39 +158,17 @@ public class NabManager
 
     public synchronized PlateTemplate ensurePlateTemplate(Container container, User user) throws SQLException
     {
-        PlateTemplate template = PlateService.get().getPlateTemplate(container, user, DEFAULT_TEMPLATE_NAME);
-        if (template == null)
+        NabPlateTypeHandler nabHandler = new NabPlateTypeHandler();
+        PlateTemplate template;
+        PlateTemplate[] templates = PlateService.get().getPlateTemplates(container, user);
+        if (templates == null || templates.length == 0)
         {
-            template = PlateService.get().createPlateTemplate(container, user, DEFAULT_TEMPLATE_NAME);
-            for (PlateProperty prop : PlateProperty.values())
-                template.setProperty(prop.name(), "");
-
-            template.addWellGroup(CELL_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
-                    PlateService.get().createPosition(container, 0, 0),
-                    PlateService.get().createPosition(container, template.getRows() - 1, 0));
-            template.addWellGroup(VIRUS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
-                    PlateService.get().createPosition(container, 0, 1),
-                    PlateService.get().createPosition(container, template.getRows() - 1, 1));
-            for (int sample = 0; sample < 5; sample++)
-            {
-                int firstCol = (sample * 2) + 2;
-                // create the overall specimen group, consisting of two adjacent columns:
-                WellGroupTemplate sampleGroup = template.addWellGroup("Specimen " + (sample + 1), WellGroup.Type.SPECIMEN,
-                        PlateService.get().createPosition(container, 0, firstCol),
-                        PlateService.get().createPosition(container, 7, firstCol + 1));
-                for (SampleProperty prop : SampleProperty.values())
-                    sampleGroup.setProperty(prop.name(), "");
-                for (int replicate = 0; replicate < template.getRows(); replicate++)
-                {
-                    template.addWellGroup("Specimen " + (sample + 1) + ", Replicate " + (replicate + 1), WellGroup.Type.REPLICATE,
-                            PlateService.get().createPosition(container, replicate, firstCol),
-                            PlateService.get().createPosition(container, replicate, firstCol + 1));
-                }
-            }
-
+            template = nabHandler.createPlate("Default", container, user);
+            template.setName(DEFAULT_TEMPLATE_NAME);
             PlateService.get().save(container, user, template);
-            template = PlateService.get().getPlateTemplate(container, user, DEFAULT_TEMPLATE_NAME);
         }
+        else
+            template = templates[0];
         return template;
     }
 

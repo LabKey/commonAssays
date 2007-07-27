@@ -63,7 +63,7 @@ public class PipelineController extends ViewController
         NavTrailConfig trailConfig = new NavTrailConfig(getViewContext());
         if (title != null)
             trailConfig.setTitle(title);
-        trailConfig.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.SERVER));
+        trailConfig.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.CPAS));
 
         return includeView(new HomeTemplate(getViewContext(), view, trailConfig));
     }
@@ -557,21 +557,29 @@ public class PipelineController extends ViewController
 
         Set<ExperimentRun> creatingRuns = new HashSet<ExperimentRun>();
         Set<File> annotationFiles = new HashSet<File>();
-        File[] mzXMLFiles = new File(uriData).listFiles(MS2PipelineManager.getAnalyzeFilter());
-        for (File mzXMLFile : mzXMLFiles)
+        try
         {
-            ExperimentRun run = ExperimentService.get().getCreatingRun(mzXMLFile, c);
-            if (run != null)
+            File[] mzXMLFiles = new File(uriData).listFiles(MS2PipelineManager.getAnalyzeFilter());
+            for (File mzXMLFile : mzXMLFiles)
             {
-                creatingRuns.add(run);
-            }
-            File annotationFile = MS2PipelineManager.findAnnotationFile(mzXMLFile);
-            if (annotationFile != null)
-            {
-                annotationFiles.add(annotationFile);
+                ExperimentRun run = ExperimentService.get().getCreatingRun(mzXMLFile, c);
+                if (run != null)
+                {
+                    creatingRuns.add(run);
+                }
+                File annotationFile = MS2PipelineManager.findAnnotationFile(mzXMLFile);
+                if (annotationFile != null)
+                {
+                    annotationFiles.add(annotationFile);
+                }
             }
         }
-
+        catch (IOException e)
+        {
+            String errorMessage = "While attempting to initiate the search on the mzXML file there was an " +
+                "error interacting with the file system. " + ((e.getMessage() != null) ? "Details: " + e.getMessage() : "");
+            HttpView.throwNotFound(errorMessage);
+        }
         if (form.getConfigureXml().length() == 0)
         {
             form.setConfigureXml("<?xml version=\"1.0\"?>\n" +
@@ -588,7 +596,16 @@ public class PipelineController extends ViewController
         v.addObject("annotationFiles", annotationFiles);
         v.addObject("creatingRuns", creatingRuns);
         v.addObject("container", c);
-        return _renderInTemplate(v, "Search MS2 Data", "MS2-Pipeline/search");
+
+        String searchEngine;
+        if ("sequest".equalsIgnoreCase(form.getSearchEngine()))
+            searchEngine = "Sequest";
+        else if("mascot".equalsIgnoreCase(form.getSearchEngine()))
+            searchEngine = "Mascot";
+        else
+            searchEngine = "XTandem";
+
+        return _renderInTemplate(v, "Search MS2 Data", "pipeline" + searchEngine);
     }
 
     @Jpf.Action

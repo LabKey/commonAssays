@@ -1,13 +1,13 @@
 package org.labkey.nab;
 
-import org.labkey.api.study.PlateTypeHandler;
-import org.labkey.api.study.WellGroup;
-import org.labkey.common.util.Pair;
+import org.labkey.api.study.*;
+import org.labkey.api.security.User;
+import org.labkey.api.data.Container;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.sql.SQLException;
+
 
 /**
  * User: jeckels
@@ -15,26 +15,50 @@ import java.util.ArrayList;
  */
 public class NabPlateTypeHandler implements PlateTypeHandler
 {
-    public Map<String, Object> getDefaultProperties()
-    {
-        Map<String, Object> result = new HashMap<String, Object>();
-        for (NabManager.PlateProperty prop : NabManager.PlateProperty.values())
-        {
-            result.put(prop.toString(), null);
-        }
-        return result;
-    }
-
-    public List<Pair<WellGroup.Type, String>> getDefaultWellGroups()
-    {
-        List<Pair<WellGroup.Type, String>> result = new ArrayList<Pair<WellGroup.Type, String>>();
-        result.add(new Pair<WellGroup.Type, String>(WellGroup.Type.CONTROL, NabManager.VIRUS_CONTROL_SAMPLE));
-        result.add(new Pair<WellGroup.Type, String>(WellGroup.Type.CONTROL, NabManager.CELL_CONTROL_SAMPLE));
-        return result;
-    }
-
-    public String getTypeName()
+    public String getAssayType()
     {
         return "NAb";
+    }
+
+    public List<String> getTemplateTypes()
+    {
+        List<String> names = new ArrayList<String>();
+        names.add("Default");
+        return names;
+    }
+
+    public PlateTemplate createPlate(String templateTypeName, Container container, User user) throws SQLException
+    {
+        PlateTemplate template = PlateService.get().createPlateTemplate(container, user);
+        for (NabManager.PlateProperty prop : NabManager.PlateProperty.values())
+            template.setProperty(prop.name(), "");
+
+        template.addWellGroup(NabManager.CELL_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
+                PlateService.get().createPosition(container, 0, 0),
+                PlateService.get().createPosition(container, template.getRows() - 1, 0));
+        template.addWellGroup(NabManager.VIRUS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
+                PlateService.get().createPosition(container, 0, 1),
+                PlateService.get().createPosition(container, template.getRows() - 1, 1));
+
+        if (templateTypeName != null && templateTypeName.equalsIgnoreCase("Default"))
+        {
+            for (int sample = 0; sample < 5; sample++)
+            {
+                int firstCol = (sample * 2) + 2;
+                // create the overall specimen group, consisting of two adjacent columns:
+                WellGroupTemplate sampleGroup = template.addWellGroup("Specimen " + (sample + 1), WellGroup.Type.SPECIMEN,
+                        PlateService.get().createPosition(container, 0, firstCol),
+                        PlateService.get().createPosition(container, 7, firstCol + 1));
+                for (NabManager.SampleProperty prop : NabManager.SampleProperty.values())
+                    sampleGroup.setProperty(prop.name(), "");
+                for (int replicate = 0; replicate < template.getRows(); replicate++)
+                {
+                    template.addWellGroup("Specimen " + (sample + 1) + ", Replicate " + (replicate + 1), WellGroup.Type.REPLICATE,
+                            PlateService.get().createPosition(container, replicate, firstCol),
+                            PlateService.get().createPosition(container, replicate, firstCol + 1));
+                }
+            }
+        }
+        return template;
     }
 }
