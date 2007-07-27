@@ -197,7 +197,7 @@ public class caBIGController extends ViewController
 
     public static class caBIGPermissionsViewFactory implements SecurityManager.ViewFactory
     {
-        public HttpView createView()
+        public HttpView createView(ViewContext context)
         {
             if (AppProps.getInstance().isCaBIGEnabled())
                 return new caBIGPermissionsView();
