@@ -312,7 +312,6 @@ flow/src/org/labkey/flow/controllers/compensation/upload.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/CompensationCalculationPage.java -text
 flow/src/org/labkey/flow/controllers/editscript/EditCompensationCalculationForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/EditGatesForm.java -text
-flow/src/org/labkey/flow/controllers/editscript/EditGatesPage.java -text
 flow/src/org/labkey/flow/controllers/editscript/EditPropertiesForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/EditScriptForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/EditSettingsForm.java -text
@@ -323,18 +322,15 @@ flow/src/org/labkey/flow/controllers/editscript/NewProtocolForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/ScriptController.java -text
 flow/src/org/labkey/flow/controllers/editscript/TemplatePage.java -text
 flow/src/org/labkey/flow/controllers/editscript/UploadAnalysisForm.java -text
-flow/src/org/labkey/flow/controllers/editscript/analysisJS.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/chooseCompensationRun.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/copy.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/delete.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/editAnalysis.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/editCompensationCalculation.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/editGateTree.jsp -text
-flow/src/org/labkey/flow/controllers/editscript/editGates.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/editProperties.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/editScript.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/editSettings.jsp -text
-flow/src/org/labkey/flow/controllers/editscript/graphWindow.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/newProtocol.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/showCompensationCalculation.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/template.jsp -text

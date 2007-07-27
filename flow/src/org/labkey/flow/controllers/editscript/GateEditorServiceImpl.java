@@ -15,7 +15,7 @@ import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.PlotInfo;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
-import org.labkey.flow.analysis.model.ScriptComponent;
+import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.chart.FlowLogarithmicAxis;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.persist.FlowManager;
@@ -302,6 +302,10 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             ret.setScript(makeGWTScript(script));
             ret.setRun(makeRun(run));
             ret.setWells(getWells(run, script, workspaceOptions.editingMode));
+            if (workspaceOptions.editingMode.isCompensation())
+            {
+                ret.setSubsetReleventWellMap(getSubsetReleventWellMap((CompensationCalculation) script.getCompensationCalcOrAnalysis(FlowProtocolStep.calculateCompensation), ret.getWells()));
+            }
             Map<String, String> parameters = EditScriptForm.getParameterNames(run, new String[0]);
             ret.setParameterNames(parameters.keySet().toArray(new String[0]));
             ret.setParameterLabels(parameters.values().toArray(new String[0]));
@@ -607,6 +611,93 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             {
                 ExperimentService.get().rollbackTransaction();
             }
+        }
+    }
+
+    private boolean isRelevent(SubsetSpec subset, CompensationCalculation.ChannelSubset channelSubset)
+    {
+        SubsetSpec subsetCompare = channelSubset.getSubset();
+        if (subsetCompare == null)
+        {
+            return false;
+        }
+        return subsetCompare.toString().startsWith(subset.toString());
+    }
+
+    private List<CompensationCalculation.ChannelSubset> getReleventSubsets(SubsetSpec subset, CompensationCalculation calc)
+    {
+        List<CompensationCalculation.ChannelSubset> matches = new ArrayList();
+        for (CompensationCalculation.ChannelInfo channel : calc.getChannels())
+        {
+            CompensationCalculation.ChannelSubset positiveSubset = channel.getPositive();
+            CompensationCalculation.ChannelSubset negativeSubset = channel.getNegative();
+            if (isRelevent(subset, positiveSubset))
+            {
+                matches.add(positiveSubset);
+            }
+            if (isRelevent(subset, negativeSubset))
+            {
+                matches.add(negativeSubset);
+            }
+        }
+        return matches;
+    }
+
+    public int findReleventWell(SubsetSpec subset, CompensationCalculation calc, FCSKeywordData[] headers)
+    {
+        List<FCSKeywordData> lstHeaders = Arrays.asList(headers);
+        List<CompensationCalculation.ChannelSubset> matches = getReleventSubsets(subset, calc);
+        if (matches.size() != 1)
+            return -1;
+        try
+        {
+            FCSKeywordData match = FCSAnalyzer.get().findHeader(lstHeaders, matches.get(0).getCriteria());
+            if (match != null)
+            {
+                return lstHeaders.indexOf(match);
+            }
+            return -1;
+        }
+        catch (FlowException e)
+        {
+            return -1;
+        }
+    }
+
+
+    private void fillSubsetReleventWellMap(Map<String, GWTWell> map, CompensationCalculation comp, FCSKeywordData[] data, GWTWell[] wells, Population population, SubsetSpec parent)
+    {
+        SubsetSpec subset = new SubsetSpec(parent, population.getName());
+        int index = findReleventWell(subset, comp, data);
+        if (index >= 0)
+        {
+            map.put(subset.toString(), wells[index]);
+        }
+        for (int i = 0; i < population.getPopulations().size(); i ++)
+        {
+            fillSubsetReleventWellMap(map, comp, data, wells, population.getPopulations().get(i), subset);
+        }
+    }
+
+    public Map<String, GWTWell> getSubsetReleventWellMap(CompensationCalculation comp, GWTWell[] wells)
+    {
+        try
+        {
+            FCSKeywordData[] data = new FCSKeywordData[wells.length];
+            for (int i = 0; i < wells.length; i ++)
+            {
+                data[i] = FCSAnalyzer.get().readAllKeywords(FlowAnalyzer.getFCSRef(FlowWell.fromWellId(wells[i].getWellId())));
+            }
+            Map<String, GWTWell> ret = new HashMap();
+            for (int i = 0; i < comp.getPopulations().size(); i ++)
+            {
+                fillSubsetReleventWellMap(ret, comp, data, wells, comp.getPopulations().get(i), null);
+            }
+            return ret;
+        }
+        catch (Exception e)
+        {
+            return Collections.EMPTY_MAP;
         }
     }
 }

@@ -421,6 +421,7 @@ public class FlowSchema extends UserSchema
             SQLFragment runIdCondition = new SQLFragment("RunId IS NULL");
             ret.addCondition(runIdCondition);
         }
+        ret.addInputRunCountColumn("RunCount");
         ret.getColumn(ExpDataTable.Column.Run.toString()).setIsHidden(true);
         ret.setDetailsURL(new DetailsURL(PFUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()), Collections.singletonMap(FlowParam.scriptId.toString(), "RowId")));
         return ret;

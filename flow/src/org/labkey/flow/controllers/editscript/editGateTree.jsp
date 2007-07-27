@@ -12,7 +12,7 @@
 <% ScriptController.EditGateTreeForm form = (ScriptController.EditGateTreeForm) getForm(); %>
 <p>
     Use this page to rename populations.  To delete a population, delete its name.<br>
-    Use the <a href="<%=urlFor(ScriptController.Action.editGates)%>">edit gates</a> page to define new populations.
+    Use the <a href="<%=urlFor(ScriptController.Action.gateEditor)%>">edit gates</a> page to define new populations.
 </p>
 <form class="normal" action="<%=formAction(ScriptController.Action.editGateTree)%>" method="POST">
     <%

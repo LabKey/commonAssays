@@ -10,6 +10,7 @@ public class EditorState
 {
     private GWTEditingMode editingMode;
     private GWTScript script;
+    private String subsetName;
     private GWTPopulation population;
     private GWTRun run;
     private GWTWell well;
@@ -76,6 +77,11 @@ public class EditorState
         return script;
     }
 
+    public void setSubsetName(String subsetName)
+    {
+        this.subsetName = subsetName;
+    }
+
     public void setScript(GWTScript script)
     {
         this.script = script;
@@ -83,9 +89,9 @@ public class EditorState
         {
             ((GateEditorListener) listeners.get(i)).onScriptChanged();
         }
-        if (population != null)
+        if (subsetName != null)
         {
-            setPopulation(getScriptComponent().findPopulation(population.getFullName()));
+            setPopulation(getScriptComponent().findPopulation(subsetName));
         }
     }
 
@@ -110,6 +116,19 @@ public class EditorState
         if (populationDelete != null)
         {
             deletePopulation(populationDelete);
+        }
+        if (population != null)
+        {
+            subsetName = population.getFullName();
+            GWTWell well = (GWTWell) getWorkspace().getSubsetReleventWellMap().get(population.getFullName());
+            if (well != null)
+            {
+                setWell(well);
+            }
+        }
+        else
+        {
+            subsetName = null;
         }
     }
 

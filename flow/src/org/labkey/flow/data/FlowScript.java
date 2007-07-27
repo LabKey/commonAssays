@@ -134,6 +134,7 @@ public class FlowScript extends FlowDataObject
     public void setAnalysisScript(User user, String script) throws SQLException
     {
         FlowManager.get().setScript(user, getData(), script);
+        strScript = script;
     }
 
     public int getScriptId()

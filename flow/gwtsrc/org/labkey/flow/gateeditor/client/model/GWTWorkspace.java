@@ -2,6 +2,9 @@ package org.labkey.flow.gateeditor.client.model;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.util.Map;
+import java.util.HashMap;
+
 public class GWTWorkspace implements IsSerializable
 {
     boolean readOnly;
@@ -11,6 +14,11 @@ public class GWTWorkspace implements IsSerializable
     GWTWell[] wells = new GWTWell[0];
     String[] parameterNames = new String[0];
     String[] parameterLabels = new String[0];
+    /**
+     * For compensation calculation, selecting a specific subset (e.g. "L/FITC+") should result in the UI automatically
+     * selecting the FITC+ FCS file.
+     */
+    Map subsetReleventWellMap = new HashMap();
 
     public boolean isReadOnly()
     {
@@ -80,5 +88,16 @@ public class GWTWorkspace implements IsSerializable
     public void setParameterLabels(String[] parameterLabels)
     {
         this.parameterLabels = parameterLabels;
+    }
+
+
+    public Map getSubsetReleventWellMap()
+    {
+        return subsetReleventWellMap;
+    }
+
+    public void setSubsetReleventWellMap(Map subsetReleventWellMap)
+    {
+        this.subsetReleventWellMap = subsetReleventWellMap;
     }
 }

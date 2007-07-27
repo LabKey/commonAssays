@@ -62,12 +62,9 @@ public class ScriptController extends BaseFlowController
         chooseCompensationRun,
         editAnalysis,
         editGateTree,
-        editGates,
         uploadAnalysis,
-        graphWindow,
         graphImage,
         analysisJS,
-        saveGate,
         copy,
         delete,
         gateEditor,
@@ -785,16 +782,6 @@ public class ScriptController extends BaseFlowController
         }
     }
 
-    @Jpf.Action
-    protected Forward graphWindow(GraphForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-        GraphWindowPage page = (GraphWindowPage) getPage("graphWindow.jsp", form);
-        page.plotInfo = getPlotInfo(form, true);
-        getView().include(new JspView(page));
-        return null;
-    }
-
     protected Forward streamImage(BufferedImage image) throws Exception
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -983,19 +970,6 @@ public class ScriptController extends BaseFlowController
         return ret;
     }
 
-    abstract static public class GraphWindowPage extends Page<EditScriptForm>
-    {
-        public PlotInfo plotInfo;
-        public String jscriptRect(Rectangle rc)
-        {
-            return "{ x : " + rc.x + ",y:" + rc.y + ",width:" + rc.width + ",height:" + rc.height + "}";
-        }
-        public String jscriptRange(PlotInfo.Range range)
-        {
-            return "{ min: " + range.min + ",max:" + range.max + ",log:" + range.log + "}";
-        }
-    }
-
     @Jpf.Action
     protected Forward analysisJS(EditGatesForm form) throws Exception
     {
@@ -1024,14 +998,6 @@ public class ScriptController extends BaseFlowController
         return parent.getPopulation(subset.getSubset());
     }
 
-    @Jpf.Action
-    protected Forward editGates(EditGatesForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        EditGatesPage page = (EditGatesPage) getPage("editGates.jsp", form);
-        return renderInTemplate(page, "Gate Editor", Action.editGates);
-    }
-
     protected Gate gateFromPoints(String xAxis, String yAxis, double[] arrX, double[] arrY, boolean unfinishedGate)
     {
         if (arrX == null || arrX.length < 2)
@@ -1046,53 +1012,6 @@ public class ScriptController extends BaseFlowController
         }
         PolygonGate poly = new PolygonGate(xAxis, yAxis, new Polygon(arrX, arrY));
         return poly;
-    }
-
-    @Jpf.Action
-    protected Forward saveGate(EditGatesForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        PopulationSet root = form.getAnalysis();
-        SubsetSpec subset = SubsetSpec.fromString(form.subset);
-        Population pop = findPopulation(root, subset);
-        if (pop == null)
-        {
-            PopulationSet parent;
-            if (subset.getParent() == null)
-            {
-                parent = root;
-            }
-            else
-            {
-                parent = findPopulation(root, subset.getParent());
-            }
-            pop = new Population();
-            pop.setName(subset.getSubset());
-            parent.addPopulation(pop);
-        }
-        Gate gate = gateFromPoints(form.xAxis, form.yAxis, form.ptX, form.ptY, false);
-        if (gate == null)
-        {
-            return null;
-        }
-        pop.getGates().clear();
-        pop.addGate(gate);
-        ScriptDocument doc = getScript().getAnalysisScriptDocument();
-        if (root instanceof Analysis)
-        {
-            FlowAnalyzer.makeAnalysisDef(doc.getScript(), (Analysis) root, null);
-        }
-        else if (root instanceof CompensationCalculation)
-        {
-            FlowAnalyzer.makeCompensationCalculationDef(doc.getScript(), (CompensationCalculation) root);
-        }
-        if (!safeSetAnalysisScript(form.analysisScript, doc.toString()))
-        {
-            return null;
-        }
-        ViewURLHelper forward = form.urlFor(Action.editGates);
-        forward.addParameter("subset", subset.toString());
-        return new ViewForward(forward);
     }
 
     String checkValidPopulationName(String name)
@@ -1388,6 +1307,10 @@ public class ScriptController extends BaseFlowController
             props.put("runId", Integer.toString(runId));
         }
         props.put("editingMode", form.getEditingMode().toString());
+        if (form.getSubset() != null)
+        {
+            props.put("subset", form.getSubset());
+        }
         GWTView view = new GWTView("org.labkey.flow.gateeditor.GateEditor", props);
         return renderInTemplate(view, form.getFlowObject(), "New Gate Editor", Action.gateEditor);
     }

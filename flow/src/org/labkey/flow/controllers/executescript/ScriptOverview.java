@@ -201,7 +201,7 @@ public class ScriptOverview extends Overview
             ret.addAction(action);
         }
         Action actionEditGates = new Action(_canEdit ? "Edit gate definitions" :
-                "View gate definitions", _script.urlFor(ScriptController.Action.editGates, FlowProtocolStep.analysis));
+                "View gate definitions", _script.urlFor(ScriptController.Action.gateEditor, FlowProtocolStep.analysis));
         if (hasStep)
         {
             actionEditGates.setExplanatoryHTML("You can use the online gate editor");

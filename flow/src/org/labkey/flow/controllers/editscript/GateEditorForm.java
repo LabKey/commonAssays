@@ -17,6 +17,17 @@ public class GateEditorForm extends ViewForm
     int scriptId;
     int actionSequence;
     String editingMode;
+    String subset;
+
+    public int getActionSequence()
+    {
+        return actionSequence;
+    }
+
+    public void setActionSequence(int actionSequence)
+    {
+        this.actionSequence = actionSequence;
+    }
 
     public int getRunId()
     {
@@ -96,5 +107,16 @@ public class GateEditorForm extends ViewForm
             return FlowRun.fromRunId(runId);
         }
         return null;
+    }
+
+
+    public String getSubset()
+    {
+        return subset;
+    }
+
+    public void setSubset(String subset)
+    {
+        this.subset = subset;
     }
 }

@@ -14,7 +14,7 @@
         {
             return "Ungated";
         }
-        ViewURLHelper ret = form.analysisScript.urlFor(ScriptController.Action.editGates, FlowProtocolStep.calculateCompensation);
+        ViewURLHelper ret = form.analysisScript.urlFor(ScriptController.Action.gateEditor, FlowProtocolStep.calculateCompensation);
         ret.addParameter("subset", subset);
         return "<a href=\"" + h(ret) + "\">" + h(subset) + "</a>";
     }
@@ -49,7 +49,7 @@
         This compensation calculation may be edited in a number of ways:<br>
         <labkey:link text="Upload a Flow Jo workspace" href="<%=form.analysisScript.urlFor(ScriptController.Action.uploadCompensationCalculation)%>" /><br>
         <labkey:link text="Switch keywords or gates" href="<%=form.analysisScript.urlFor(ScriptController.Action.chooseCompensationRun)%>" /><br>
-        <labkey:link text="Move or define gates" href="<%=form.analysisScript.urlFor(ScriptController.Action.editGates, FlowProtocolStep.calculateCompensation)%>" /><br>
+        <labkey:link text="Move or define gates" href="<%=form.analysisScript.urlFor(ScriptController.Action.gateEditor, FlowProtocolStep.calculateCompensation)%>" /><br>
         <labkey:link href="<%=form.analysisScript.urlFor(ScriptController.Action.editGateTree, FlowProtocolStep.calculateCompensation)%>" text="Rename gates" /><br>
     </p>
 <% } %>

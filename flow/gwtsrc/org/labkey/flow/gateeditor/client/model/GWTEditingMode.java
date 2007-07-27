@@ -10,6 +10,7 @@ abstract public class GWTEditingMode implements IsSerializable
     abstract public String name();
     abstract public int getActionSequence();
     abstract public boolean isRunMode();
+    abstract public boolean isCompensation();
     static public class Compensation extends GWTEditingMode
     {
         public String name()
@@ -25,6 +26,10 @@ abstract public class GWTEditingMode implements IsSerializable
         {
             return false;
         }
+        public boolean isCompensation()
+        {
+            return true;
+        }
     }
     static public class Analysis extends GWTEditingMode
     {
@@ -37,6 +42,10 @@ abstract public class GWTEditingMode implements IsSerializable
             return 30;
         }
         public boolean isRunMode()
+        {
+            return false;
+        }
+        public boolean isCompensation()
         {
             return false;
         }
@@ -55,6 +64,10 @@ abstract public class GWTEditingMode implements IsSerializable
         public boolean isRunMode()
         {
             return true;
+        }
+        public boolean isCompensation()
+        {
+            return false;
         }
     }
 
