@@ -1090,7 +1090,7 @@ public class NabController extends ViewController
             _plateIds = plateIds;
         }
 
-        public Map<String, Container> getValidTargets()
+        public Map<Container, String> getValidTargets()
         {
             return GenericAssayService.get().getValidPublishTargets(_user);
         }

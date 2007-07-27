@@ -25,10 +25,10 @@
             <td>
                 <select name="targetContainerId">
                 <%
-                    for (Map.Entry<String,Container> entry : bean.getValidTargets().entrySet())
+                    for (Map.Entry<Container, String> entry : bean.getValidTargets().entrySet())
                     {
                 %>
-                    <option value="<%= h(entry.getValue().getId()) %>"><%= h(entry.getValue().getPath()) %> (<%= h(entry.getKey()) %>)</option>
+                    <option value="<%= h(entry.getKey().getId()) %>"><%= h(entry.getKey().getPath()) %> (<%= h(entry.getValue()) %>)</option>
                 <%
                     }
                 %>
