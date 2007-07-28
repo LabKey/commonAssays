@@ -330,6 +330,53 @@ public class FlowSchema extends UserSchema
         }
     }
 
+    static private class DeferredFCSAnalysisVisibleColumns implements Iterable<FieldKey>
+    {
+        final private ExpDataTable _table;
+        final private ColumnInfo _colStatistic;
+        final private ColumnInfo _colGraph;
+
+        public DeferredFCSAnalysisVisibleColumns(ExpDataTable table, ColumnInfo colStatistic, ColumnInfo colGraph)
+        {
+            _table = table;
+            _colStatistic = colStatistic;
+            _colGraph = colGraph;
+        }
+
+        public Iterator<FieldKey> iterator()
+        {
+            Collection<FieldKey> ret = new LinkedHashSet();
+            ret.addAll(QueryService.get().getDefaultVisibleColumns(_table.getColumns()));
+            ret.remove(FieldKey.fromParts("AnalysisScript"));
+            ret.remove(FieldKey.fromParts("FCSFile"));
+            TableInfo lookup = _colStatistic.getFk().getLookupTableInfo();
+            if (lookup != null)
+            {
+                int count = 0;
+                FieldKey keyStatistic = new FieldKey(null, _colStatistic.getName());
+                for (FieldKey key : lookup.getDefaultVisibleColumns())
+                {
+                    ret.add(FieldKey.fromParts(keyStatistic, key));
+                    if (++count > 3)
+                        break;
+                }
+            }
+            lookup = _colGraph.getFk().getLookupTableInfo();
+            if (lookup != null)
+            {
+                int count = 0;
+                FieldKey keyGraph = new FieldKey(null, _colGraph.getName());
+                for (FieldKey key : lookup.getDefaultVisibleColumns())
+                {
+                    ret.add(FieldKey.fromParts(keyGraph, key));
+                    if (++count > 3)
+                        break;
+                }
+            }
+            return ret.iterator();
+        }
+    }
+
     public ExpDataTable createFCSFileTable(String alias)
     {
         final ExpDataTable ret = createDataTable(alias, FlowDataType.FCSFile);
@@ -379,7 +426,7 @@ public class FlowSchema extends UserSchema
         {
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
         }
-        addStatisticColumn(ret, "Statistic");
+        ColumnInfo colStatistic = addStatisticColumn(ret, "Statistic");
         ColumnInfo colGraph = addObjectIdColumn(ret, "Graph");
         colGraph.setFk(new GraphForeignKey(fps));
         colGraph.setIsUnselectable(true);
@@ -392,6 +439,7 @@ public class FlowSchema extends UserSchema
                     return detach().createFCSFileTable("FCSFile");
                 }
             });
+        ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph));
         return ret;
     }
 

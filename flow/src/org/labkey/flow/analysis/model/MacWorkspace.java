@@ -343,7 +343,10 @@ public class MacWorkspace extends FlowJoWorkspace
     {
         SampleInfo ret = new SampleInfo();
         ret._sampleId = elSample.getAttribute("sampleID");
-        ret._compensationId = elSample.getAttribute("compensationID");
+        if (elSample.hasAttribute("compensationID"))
+        {
+            ret._compensationId = elSample.getAttribute("compensationID");
+        }
         for (Element elFCSHeader : getElementsByTagName(elSample, "FCSHeader"))
         {
             readKeywords(ret, elFCSHeader);

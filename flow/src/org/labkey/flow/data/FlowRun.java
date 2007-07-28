@@ -18,6 +18,7 @@ import java.io.File;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.analysis.model.FCSKeywordData;
 import org.labkey.flow.analysis.model.PopulationSet;
 import org.labkey.flow.analysis.model.CompensationCalculation;
@@ -25,6 +26,7 @@ import org.labkey.flow.analysis.model.SampleCriteria;
 import org.labkey.flow.analysis.web.FCSRef;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.script.FlowAnalyzer;
+import org.labkey.flow.persist.FlowManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -401,5 +403,29 @@ public class FlowRun extends FlowObject<ExpRun>
             return false;
         FlowExperiment flowExperiment = new FlowExperiment(experiments[0]);
         return flowExperiment.isWorkspace();
+    }
+
+    public FlowTableType getDefaultQuery()
+    {
+        try
+        {
+            FlowWell[] wells = getWells();
+            for (FlowWell well : wells)
+            {
+                if (well.getDataType() == FlowDataType.FCSAnalysis)
+                {
+                    return FlowTableType.FCSAnalyses;
+                }
+                if (well.getDataType() == FlowDataType.CompensationControl)
+                {
+                    return FlowTableType.CompensationControls;
+                }
+            }
+        }
+        catch (SQLException e)
+        {
+            _log.error("Error", e);
+        }
+        return FlowTableType.FCSFiles;
     }
 }

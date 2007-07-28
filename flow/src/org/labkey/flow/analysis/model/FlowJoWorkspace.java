@@ -84,6 +84,11 @@ abstract public class FlowJoWorkspace implements Serializable
             {
                 return null;
             }
+            int id = Integer.parseInt(_compensationId);
+            if (id < 0)
+            {
+                return CompensationMatrix.fromSpillKeyword(_keywords.get("SPILL"));
+            }
             if (_compensationMatrices.size() == 0)
             {
                 return null;
@@ -92,8 +97,7 @@ abstract public class FlowJoWorkspace implements Serializable
             {
                 return _compensationMatrices.get(0);
             }
-            int index = Integer.parseInt(_compensationId) - 1;
-            return _compensationMatrices.get(index);
+            return _compensationMatrices.get(id - 1);
         }
     }
 
@@ -174,6 +178,19 @@ abstract public class FlowJoWorkspace implements Serializable
     public List<CompensationMatrix> getCompensationMatrices()
     {
         return _compensationMatrices;
+    }
+
+    public Set<CompensationMatrix> getUsedCompensationMatrices()
+    {
+        Set<CompensationMatrix> ret = new LinkedHashSet();
+        for (SampleInfo sample : getSamples())
+        {
+            CompensationMatrix comp = sample.getCompensationMatrix();
+            if (comp == null)
+                continue;
+            ret.add(comp);
+        }
+        return ret;
     }
 
     static List<Element> getElementsByTagName(Element parent, String tagName)
@@ -619,7 +636,8 @@ abstract public class FlowJoWorkspace implements Serializable
                 analysisMap.put(sample, results);
             }
         }
-        for (CompensationMatrix compMatrix : getCompensationMatrices())
+        Set<CompensationMatrix> compMatrices = getUsedCompensationMatrices();
+        for (CompensationMatrix compMatrix : compMatrices)
         {
             AttributeSet attrs = new AttributeSet(compMatrix);
             attrs.prepareForSave();
@@ -659,8 +677,8 @@ abstract public class FlowJoWorkspace implements Serializable
                 AttributeSet attrs = keywordsMap.get(sample);
                 attrs.doSave(user, fcsFile);
             }
-            Map<CompensationMatrix, FlowCompensationMatrix> compMatrices = new IdentityHashMap();
-            for (CompensationMatrix compMatrix : getCompensationMatrices())
+            Map<CompensationMatrix, FlowCompensationMatrix> flowCompMatrices = new HashMap();
+            for (CompensationMatrix compMatrix : compMatrices)
             {
                 FlowCompensationMatrix flowComp = FlowCompensationMatrix.create(user, container, null, compMatrixMap.get(compMatrix));
                 ExpProtocolApplication paComp = run.addProtocolApplication(user, FlowProtocolStep.calculateCompensation.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
@@ -668,7 +686,7 @@ abstract public class FlowJoWorkspace implements Serializable
                 flowComp.getData().setSourceApplication(paComp);
                 flowComp.getData().setName(compMatrix.getName());
                 flowComp.getData().save(user);
-                compMatrices.put(compMatrix, flowComp);
+                flowCompMatrices.put(compMatrix, flowComp);
             }
             for (Map.Entry<FlowJoWorkspace.SampleInfo, FlowFCSFile> entry : fcsFiles.entrySet())
             {
@@ -697,7 +715,7 @@ abstract public class FlowJoWorkspace implements Serializable
                     CompensationMatrix comp = entry.getKey().getCompensationMatrix();
                     if (comp != null)
                     {
-                        FlowCompensationMatrix flowComp = compMatrices.get(comp);
+                        FlowCompensationMatrix flowComp = flowCompMatrices.get(comp);
                         paAnalysis.addDataInput(user, flowComp.getData(), InputRole.CompensationMatrix.toString(), null);
                     }
                 }

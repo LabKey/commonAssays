@@ -308,7 +308,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                 addError(t);
             }
         }
-        return renderInTemplate(FormPage.getView(AnalysisScriptController.class, form, "uploadWorkspaceChooseAnalysis.jsp"), getContainer(), getNavTrailConfig(null, "Upload Flow Jo Workspace Analysis Results", Action.uploadWorkspaceChooseAnalysis));
+        return renderInTemplate(FormPage.getView(AnalysisScriptController.class, form, "uploadWorkspaceChooseAnalysis.jsp"), getContainer(), getNavTrailConfig(null, "Upload FlowJo Workspace Analysis Results", Action.uploadWorkspaceChooseAnalysis));
     }
 
     protected Forward doUploadWorkspace(UploadWorkspaceResultsForm form) throws Exception
@@ -414,6 +414,6 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                 return uploadWorkspaceChooseAnalysis(form);
             }
         }
-        return renderInTemplate(FormPage.getView(AnalysisScriptController.class, form, "showUploadWorkspace.jsp"), getContainer(), "Upload Flow Jo Results");
+        return renderInTemplate(FormPage.getView(AnalysisScriptController.class, form, "showUploadWorkspace.jsp"), getContainer(), "Upload FlowJo Results");
     }
 }

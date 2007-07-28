@@ -156,8 +156,8 @@ public class FlowOverview extends Overview
     private Action getUploadFlowJoAnalysisAction()
     {
         ViewURLHelper urlUploadFlowJoAnalysis = getContainer().urlFor(AnalysisScriptController.Action.showUploadWorkspace);
-        Action ret = new Action("Upload Flow Jo Workspace", urlUploadFlowJoAnalysis);
-        ret.setExplanatoryHTML("You can also upload results that have been calculated in Flow Jo");
+        Action ret = new Action("Upload FlowJo Workspace", urlUploadFlowJoAnalysis);
+        ret.setExplanatoryHTML("You can also upload results that have been calculated in FlowJo");
         return ret;
     }
 
@@ -282,7 +282,7 @@ public class FlowOverview extends Overview
             }
             else if (_scriptCompensation == null)
             {
-                statusHTML.append("None of the analysis scripts define a compensation calculation.  Compensation matrices may be exported from Flow Jo and uploaded.");
+                statusHTML.append("None of the analysis scripts define a compensation calculation.  Compensation matrices may be exported from FlowJo and uploaded.");
             }
         }
         if (_compensationMatrixCount != 0)
@@ -312,14 +312,14 @@ public class FlowOverview extends Overview
         StringBuilder statusHTML = new StringBuilder();
         if (_scriptAnalysis == null)
         {
-            statusHTML.append("There are no analysis scripts.");
+            statusHTML.append("There are no analysis scripts.<br>");
             stepStatus = Step.Status.disabled;
         }
         else if (!_scriptAnalysis.hasStep(FlowProtocolStep.calculateCompensation) && _scriptAnalysis.requiresCompensationMatrix(FlowProtocolStep.analysis))
         {
             if (_compensationMatrixCount == 0)
             {
-                statusHTML.append("There are no compensation matrices to be used.");
+                statusHTML.append("There are no compensation matrices to be used.<br>");
                 stepStatus = Step.Status.disabled;
             }
         }
@@ -329,10 +329,10 @@ public class FlowOverview extends Overview
             {
                 stepStatus = Step.Status.required;
             }
-            else
-            {
-                stepStatus = Step.Status.normal;
-            }
+        }
+        if (_fcsAnalysisCount != 0)
+        {
+            stepStatus = Step.Status.normal;
         }
         
         Step ret = new Step("Calculate statistics and generate graphs", stepStatus);

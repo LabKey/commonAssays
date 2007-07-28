@@ -27,7 +27,7 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
         {
             return new StatisticSpec(field);
         }
-        catch (IllegalArgumentException e)
+        catch (Exception e)
         {
             return null;
         }

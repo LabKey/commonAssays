@@ -56,7 +56,10 @@ public class PCWorkspace extends FlowJoWorkspace
         for (Element elSampleNode : getElementsByTagName(elSample, "SampleNode"))
         {
             sampleInfo._sampleId = elSampleNode.getAttribute("sampleID");
-            sampleInfo._compensationId = elSampleNode.getAttribute("compensationID");
+            if (elSampleNode.hasAttribute("compensationID"))
+            {
+                sampleInfo._compensationId = elSampleNode.getAttribute("compensationID");
+            }
             readSampleAnalysis(elSampleNode);
         }
         _sampleInfos.put(sampleInfo.getSampleId(), sampleInfo);

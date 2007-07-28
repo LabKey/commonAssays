@@ -4,6 +4,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 public class KeywordForeignKey extends AttributeForeignKey<String>
 {
@@ -46,12 +47,27 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
         return ret;
     }
 
+    static private Pattern[] patHidden = new Pattern[] {
+            Pattern.compile("\\$.*"),
+            Pattern.compile("P[0-9]+DISPLAY"),
+            Pattern.compile("P[0-9]+BS"),
+            Pattern.compile("P[0-9]+MS"),
+            Pattern.compile("SPILL"),
+            Pattern.compile("LASER[0-9]+DELAY"),
+            Pattern.compile("LASER[0-9]+ASF"),
+            Pattern.compile("LASER[0-9]+NAME"),
+            Pattern.compile("FJ_\\$.*")
+    };
+
     static public boolean isHidden(String keyword)
     {
-        if (keyword.startsWith("$"))
-            return true;
-        if (keyword.startsWith("P") && keyword.endsWith("DISPLAY"))
-            return true;
+        for (Pattern pat : patHidden)
+        {
+            if (pat.matcher(keyword).matches())
+            {
+                return true;
+            }
+        }
         return false;
     }
 }

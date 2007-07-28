@@ -32,20 +32,7 @@ public class RunForm extends FlowQueryForm
         QuerySettings ret = super.createQuerySettings(schema);
         if (ret.getQueryName() == null)
         {
-            String queryName = null;
-            FlowProtocolStep step = _run.getStep();
-            if (step == FlowProtocolStep.calculateCompensation)
-            {
-                queryName = FlowTableType.CompensationControls.toString();
-            }
-            else if (step == FlowProtocolStep.analysis)
-            {
-                queryName =  FlowTableType.FCSAnalyses.toString();
-            }
-            else
-            {
-                queryName =  FlowTableType.FCSFiles.toString();
-            }
+            String queryName = _run.getDefaultQuery().toString();
             ret.setQueryName(queryName);
         }
         return ret;

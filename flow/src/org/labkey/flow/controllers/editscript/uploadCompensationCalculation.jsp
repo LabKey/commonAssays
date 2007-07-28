@@ -13,7 +13,7 @@
     </p>
 
     <p>
-        You can define the compensation calculation by uploading a Flow Jo XML workspace<br>
+        You can define the compensation calculation by uploading a FlowJo XML workspace<br>
         <input type="file" name="workspaceFile"><br>
         Important: This workspace must contain only one set of compensation controls, or you will not be able to select
         the keywords that you want to.

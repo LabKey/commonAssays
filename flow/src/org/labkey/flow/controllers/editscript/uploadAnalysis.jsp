@@ -64,7 +64,7 @@
     none of the checkboxes are checked --%>
     <% if (form.workspaceObject == null)
     { %>
-    <p>Upload a new Flow Jo workspace XML file<br>
+    <p>Upload a new FlowJo workspace XML file<br>
         <input type="file" name="workspaceFile">
     </p>
 

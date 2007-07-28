@@ -469,7 +469,7 @@ public class ScriptController extends BaseFlowController
         }
         UploadAnalysisPage page = (UploadAnalysisPage) getPage("uploadAnalysis.jsp", form);
         page.form = form;
-        return renderInTemplate(page, "Upload Flow Jo Analysis", Action.uploadAnalysis);
+        return renderInTemplate(page, "Upload FlowJo Analysis", Action.uploadAnalysis);
 
     }
 
@@ -520,7 +520,7 @@ public class ScriptController extends BaseFlowController
         {
             return editCompensationCalculation(form);
         }
-        return renderInTemplate(getPage("uploadCompensationCalculation.jsp", form), "Upload Flow Jo Workspace compensation", Action.uploadCompensationCalculation);
+        return renderInTemplate(getPage("uploadCompensationCalculation.jsp", form), "Upload FlowJo Workspace compensation", Action.uploadCompensationCalculation);
     }
 
     @Jpf.Action

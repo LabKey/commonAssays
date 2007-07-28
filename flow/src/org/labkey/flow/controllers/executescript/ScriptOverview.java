@@ -132,7 +132,7 @@ public class ScriptOverview extends Overview
             ret.setStatusHTML("This script does not have a compensation calculation section.");
             if (_canEdit)
             {
-                Action actionUpload = new Action("Upload a Flow Jo workspace", _script.urlFor(ScriptController.Action.uploadCompensationCalculation));
+                Action actionUpload = new Action("Upload a FlowJo workspace", _script.urlFor(ScriptController.Action.uploadCompensationCalculation));
                 actionUpload.setExplanatoryHTML("You can upload a FlowJo workspace to define the compensation calculation.");
                 ret.addAction(actionUpload);
                 Action actionFromScratch = new Action("Define compensation calculation from scratch", _script.urlFor(ScriptController.Action.chooseCompensationRun));
@@ -189,14 +189,14 @@ public class ScriptOverview extends Overview
 
         if (_canEdit)
         {
-            Action action = new Action("Upload a Flow Jo workspace", _script.urlFor(ScriptController.Action.uploadAnalysis));
+            Action action = new Action("Upload a FlowJo workspace", _script.urlFor(ScriptController.Action.uploadAnalysis));
             if (hasStep)
             {
-                action.setExplanatoryHTML("You can modify the gate definitions by uploading a Flow Jo workspace");
+                action.setExplanatoryHTML("You can modify the gate definitions by uploading a FlowJo workspace");
             }
             else
             {
-                action.setExplanatoryHTML("You can specify the gate definitions by uploading a Flow Jo workspace");
+                action.setExplanatoryHTML("You can specify the gate definitions by uploading a FlowJo workspace");
             }
             ret.addAction(action);
         }
