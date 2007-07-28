@@ -382,12 +382,12 @@ public class AnnouncementsController extends ViewController
 
         Announcement message = null;
         if (null != form.getEntityId())
-            message = AnnouncementManager.getAnnouncement(getContainer(), form.getEntityId());
+            message = AnnouncementManager.getAnnouncement(c, form.getEntityId());
         if (null == message)
-            message = AnnouncementManager.getAnnouncement(getContainer(), form.getRowId());
+            message = AnnouncementManager.getAnnouncement(c, form.getRowId());
 
         if (message == null)
-            return HttpView.throwNotFound("Message not found");
+            return throwResponseNotFound();
         if (!perm.allowDeleteMessage(message))
             HttpView.throwUnauthorized();
 
@@ -483,7 +483,7 @@ public class AnnouncementsController extends ViewController
         Announcement ann = AnnouncementManager.getAnnouncement(getContainer(), form.getEntityId(), true);  // Force member list to be selected
 
         if (null == ann)
-            HttpView.throwNotFound("Couldn't find " + getSettings().getConversationName());
+            throwThreadNotFound(getContainer());
 
         return ann;
     }
@@ -783,6 +783,12 @@ public class AnnouncementsController extends ViewController
     }
 
 
+    private static ViewURLHelper getCompleteUserUrl(Container c)
+    {
+        return new ViewURLHelper("announcements", "completeUser", c);
+    }
+
+
     @Jpf.Action
     protected Forward completeUser(CompletionForm form) throws Exception
     {
@@ -810,15 +816,19 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private static String getMemberListTextArea(User user, Announcement ann, String emailList)
+    private static String getMemberListTextArea(User user, Container c, Announcement ann, String emailList)
     {
+        String completeUserUrl = getCompleteUserUrl(c).getLocalURIString();
+
         StringBuilder sb = new StringBuilder();
         sb.append("<script type=\"text/javascript\">LABKEY.requiresScript('completion.js');</script>");
         sb.append("<textarea name=\"emailList\" id=\"emailList\" cols=\"30\" rows=\"5\"" );
         sb.append(" onKeyDown=\"return ctrlKeyCheck(event);\"");
         sb.append(" onBlur=\"hideCompletionDiv();\"");
         sb.append(" autocomplete=\"off\"");
-        sb.append(" onKeyUp=\"return handleChange(this, event, 'completeUser.view?prefix=');\"");
+        sb.append(" onKeyUp=\"return handleChange(this, event, '");
+        sb.append(completeUserUrl);
+        sb.append("prefix=');\"");
         sb.append(">");
 
         if (emailList != null)
@@ -957,7 +967,7 @@ public class AnnouncementsController extends ViewController
         view.addObject("assignedToSelect", getAssignedToSelect(c, assignedTo, "assignedTo"));
         view.addObject("settings", settings);
         view.addObject("statusSelect", getStatusSelect(settings, (String)form.get("status")));
-        view.addObject("memberList", getMemberListTextArea(form.getUser(), mostRecent, (String)(reshow ? form.get("emailList") : null)));
+        view.addObject("memberList", getMemberListTextArea(form.getUser(), c, mostRecent, (String)(reshow ? form.get("emailList") : null)));
         view.addObject("currentRendererType", currentRendererType);
         view.addObject("renderers", WikiRendererType.values());
 
@@ -1020,17 +1030,17 @@ public class AnnouncementsController extends ViewController
     {
         Permissions perm = getPermissions();
         Announcement parent = null;
+        Container c = getContainer();
 
         if (null != form.getParentId())
-            parent = AnnouncementManager.getAnnouncement(getContainer(), form.getParentId(), true);
+            parent = AnnouncementManager.getAnnouncement(c, form.getParentId(), true);
 
         if (null == parent)
-            HttpView.throwNotFound("Could not find " + getSettings().getConversationName().toLowerCase());
+            return throwThreadNotFound(c);
 
         if (!perm.allowResponse(parent))
             HttpView.throwUnauthorized();
 
-        Container c = getContainer();
         ThreadView threadView = new ThreadView(c, getViewURLHelper(), parent, perm);
         threadView.setFrame(WebPartView.FrameType.DIV);
 
@@ -1098,7 +1108,7 @@ public class AnnouncementsController extends ViewController
         if (!getUser().isAdministrator())
             HttpView.throwUnauthorized();
         int rows = ContainerUtil.purgeTable(_comm.getTableInfoAnnouncements(), null);
-        getResponse().getWriter().println("deleted " + rows + " messages<br>");
+        getResponse().getWriter().println("deleted " + rows + " rows<br>");
         return null;
     }
 
@@ -1323,6 +1333,18 @@ public class AnnouncementsController extends ViewController
         {
             throw new RuntimeException(e);  // Not great... but this method is called from all over (webpart constructors, etc.)
         }
+    }
+
+
+    private static Forward throwThreadNotFound(Container c)
+    {
+        return HttpView.throwNotFound("Could not find " + getSettings(c).getConversationName().toLowerCase());
+    }
+
+
+    private Forward throwResponseNotFound() throws ServletException
+    {
+        return HttpView.throwNotFound("Could not find response");
     }
 
 
@@ -1973,7 +1995,7 @@ public class AnnouncementsController extends ViewController
         public ThreadView(Container c, User user, String rowId, String entityId) throws ServletException
         {
             this();
-            init(c, findAnnouncement(c, rowId, entityId), null, getPermissions(c, user, getSettings(c)), false, false);
+            init(c, findThread(c, rowId, entityId), null, getPermissions(c, user, getSettings(c)), false, false);
         }
 
         public ThreadView(Container c, ViewURLHelper url, Announcement ann, Permissions perm) throws ServletException
@@ -1986,7 +2008,7 @@ public class AnnouncementsController extends ViewController
                 throws ServletException
         {
             this();
-            Announcement ann = findAnnouncement(c, (String)form.get("rowId"), (String)form.get("entityId"));
+            Announcement ann = findThread(c, (String)form.get("rowId"), (String)form.get("entityId"));
             init(c, ann, url, perm, false, print);
         }
 
@@ -2020,7 +2042,7 @@ public class AnnouncementsController extends ViewController
     }
 
 
-    private static Announcement findAnnouncement(Container c, String rowIdVal, String entityId)
+    private static Announcement findThread(Container c, String rowIdVal, String entityId)
     {
         int rowId = 0;
         if (rowIdVal != null)
@@ -2031,7 +2053,7 @@ public class AnnouncementsController extends ViewController
             }
             catch(NumberFormatException e)
             {
-                throw new NotFoundException("Cannot find message with id '" + rowIdVal + "'");
+                throwThreadNotFound(c);
             }
         }
 
@@ -2040,7 +2062,7 @@ public class AnnouncementsController extends ViewController
             if (0 != rowId)
                 return AnnouncementManager.getAnnouncement(c, rowId, AnnouncementManager.INCLUDE_ATTACHMENTS + AnnouncementManager.INCLUDE_RESPONSES + AnnouncementManager.INCLUDE_MEMBERLIST);
             else if (null == entityId)
-                HttpView.throwNotFound("Message not found");
+                throwThreadNotFound(c);
 
             return AnnouncementManager.getAnnouncement(c, entityId, true);
         }
@@ -2066,18 +2088,18 @@ public class AnnouncementsController extends ViewController
 
             if (ann.getParent() == null)
             {
-                setTitle("Edit Message");  // TODO
+                setTitle("Edit Message");
             }
             else
             {
-                setTitle("Edit Response"); // TODO
+                setTitle("Edit Response");
             }
             _announcement = ann;
             addObject("announcement", _announcement);
             addObject("form", form);
 
             String reshowEmailList = (String)form.get("emailList");
-            addObject("memberList", getMemberListTextArea(form.getUser(), _announcement, null != reshowEmailList ? reshowEmailList : null));
+            addObject("memberList", getMemberListTextArea(form.getUser(), form.getContainer(), _announcement, null != reshowEmailList ? reshowEmailList : null));
 
         }
 
