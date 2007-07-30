@@ -3,9 +3,7 @@ package org.labkey.luminex;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.ObjectProperty;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Collection;
 import java.sql.SQLException;
 
@@ -15,10 +13,10 @@ import java.sql.SQLException;
  */
 public class AnalyteImportHelper implements OntologyManager.ImportHelper
 {
-    private final Collection<LuminexExcelDataHandler.Analyte> _analytes;
+    private final Collection<Analyte> _analytes;
     private final String _namePropertyURI;
 
-    public AnalyteImportHelper(Collection<LuminexExcelDataHandler.Analyte> analytes, String namePropertyURI)
+    public AnalyteImportHelper(Collection<Analyte> analytes, String namePropertyURI)
     {
         _analytes = analytes;
         _namePropertyURI = namePropertyURI;
@@ -27,11 +25,11 @@ public class AnalyteImportHelper implements OntologyManager.ImportHelper
     public String beforeImportObject(Map map) throws SQLException
     {
         String name = (String)map.get(_namePropertyURI);
-        for (LuminexExcelDataHandler.Analyte analyte : _analytes)
+        for (Analyte analyte : _analytes)
         {
             if (analyte.getName().equals(name))
             {
-                return analyte.getLSID();
+//                return analyte.getLSID();
             }
         }
         throw new IllegalStateException("Could not find LSID for Analyte with name " + name);

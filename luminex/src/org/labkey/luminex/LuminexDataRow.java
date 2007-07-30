@@ -1,80 +1,212 @@
 package org.labkey.luminex;
 
-import org.labkey.api.study.Well;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
-
 /**
  * User: jeckels
  * Date: Jun 26, 2007
  */
 public class LuminexDataRow
 {
-    private AnalyteInfo _analyteInfo;
-    private final Map<String, String> _values;
+    private int _analyteId;
 
-    private String _sampleId;
-    private Set<Well> _wells = new HashSet<Well>();
-    private double _concInRange;
-    private SpecimenInfo _specimen;
+    private String _type;
+    private String _well;
+    private boolean _outlier;
+    private String _description;
+    private Double _fi;
+    private Double _fiBackground;
+    private Double _stdDev;
+    private Double _percentCV;
+    private String _obsConcString;
+    private Double _obsConc;
+    private String _obsConcOORIndicator;
+    private Double _expConc;
+    private Double _obsOverExp;
+    private String _concInRangeString;
+    private Double _concInRange;
+    private String _concInRangeOORIndicator;
+    private int _dataId;
 
-    public LuminexDataRow(AnalyteInfo analyteInfo, Map<String, String> values)
+    public LuminexDataRow()
     {
-        _analyteInfo = analyteInfo;
-        _values = values;
-
-        _sampleId = values.get("SpecimenID");
-        for (String wellName : values.get("Well").split(","))
-        {
-            int row = wellName.charAt(0) - 'A' + 1;
-            int col = Integer.parseInt(wellName.substring(1));
-            _wells.add(new LuminexWell(row, col));
-        }
-        try
-        {
-            _concInRange = Double.parseDouble(values.get("Conc in Range"));
-        }
-        catch (NumberFormatException e)
-        {
-            _concInRange = Double.NaN;
-        }
-    }
-    
-    public AnalyteInfo getAnalyteInfo()
-    {
-        return _analyteInfo;
     }
 
-    public Map<String, String> getValues()
+    public int getAnalyteId()
     {
-        return _values;
+        return _analyteId;
     }
 
-    public String getSampleId()
+    public void setAnalyteId(int analyteId)
     {
-        return _sampleId;
+        _analyteId = analyteId;
     }
 
-    public Set<Well> getWells()
+    public String getType()
     {
-        return _wells;
+        return _type;
     }
-    
-    public double getConcInRange()
+
+    public void setType(String type)
+    {
+        _type = type;
+    }
+
+    public String getWell()
+    {
+        return _well;
+    }
+
+    public void setWell(String well)
+    {
+        _well = well;
+    }
+
+    public boolean isOutlier()
+    {
+        return _outlier;
+    }
+
+    public void setOutlier(boolean outlier)
+    {
+        _outlier = outlier;
+    }
+
+    public String getDescription()
+    {
+        return _description;
+    }
+
+    public void setDescription(String description)
+    {
+        _description = description;
+    }
+
+    public Double getFi()
+    {
+        return _fi;
+    }
+
+    public void setFi(Double fi)
+    {
+        _fi = fi;
+    }
+
+    public Double getFiBackground()
+    {
+        return _fiBackground;
+    }
+
+    public void setFiBackground(Double fiBackground)
+    {
+        _fiBackground = fiBackground;
+    }
+
+    public Double getStdDev()
+    {
+        return _stdDev;
+    }
+
+    public void setStdDev(Double stdDev)
+    {
+        _stdDev = stdDev;
+    }
+
+    public Double getPercentCV()
+    {
+        return _percentCV;
+    }
+
+    public void setPercentCV(Double percentCV)
+    {
+        _percentCV = percentCV;
+    }
+
+    public String getObsConcString()
+    {
+        return _obsConcString;
+    }
+
+    public void setObsConcString(String obsConcString)
+    {
+        _obsConcString = obsConcString;
+    }
+
+    public Double getObsConc()
+    {
+        return _obsConc;
+    }
+
+    public void setObsConc(Double obsConc)
+    {
+        _obsConc = obsConc;
+    }
+
+    public String getObsConcOORIndicator()
+    {
+        return _obsConcOORIndicator;
+    }
+
+    public void setObsConcOORIndicator(String obsConcOORIndicator)
+    {
+        _obsConcOORIndicator = obsConcOORIndicator;
+    }
+
+    public Double getExpConc()
+    {
+        return _expConc;
+    }
+
+    public void setExpConc(Double expConc)
+    {
+        _expConc = expConc;
+    }
+
+    public Double getObsOverExp()
+    {
+        return _obsOverExp;
+    }
+
+    public void setObsOverExp(Double obsOverExp)
+    {
+        _obsOverExp = obsOverExp;
+    }
+
+    public String getConcInRangeString()
+    {
+        return _concInRangeString;
+    }
+
+    public void setConcInRangeString(String concInRangeString)
+    {
+        _concInRangeString = concInRangeString;
+    }
+
+    public Double getConcInRange()
     {
         return _concInRange;
     }
 
-    public void setSpecimen(SpecimenInfo specimen)
+    public void setConcInRange(Double concInRange)
     {
-        _specimen = specimen;
+        _concInRange = concInRange;
     }
-    
-    public SpecimenInfo getSpecimen()
+
+    public String getConcInRangeOORIndicator()
     {
-        return _specimen;
+        return _concInRangeOORIndicator;
+    }
+
+    public void setConcInRangeOORIndicator(String concInRangeOORIndicator)
+    {
+        _concInRangeOORIndicator = concInRangeOORIndicator;
+    }
+
+    public void setDataId(int dataId)
+    {
+        _dataId = dataId;
+    }
+
+    public int getDataId()
+    {
+        return _dataId;
     }
 }

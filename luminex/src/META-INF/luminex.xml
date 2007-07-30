@@ -17,4 +17,61 @@
 
  -->
 <ns:tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <ns:table tableName="Analyte" tableDbType="TABLE">
+        <ns:columns>
+            <ns:column columnName="RowId"/>
+            <ns:column columnName="Name"/>
+            <ns:column columnName="DataId"/>
+            <ns:column columnName="FitProb"/>
+            <ns:column columnName="ResVar"/>
+            <ns:column columnName="RegressionType"/>
+            <ns:column columnName="StdCurve"/>
+        </ns:columns>
+    </ns:table>
+
+    <ns:table tableName="DataRow" tableDbType="TABLE">
+        <ns:columns>
+            <ns:column columnName="RowId"/>
+            <ns:column columnName="DataId"/>
+            <ns:column columnName="AnalyteId"/>
+            <ns:column columnName="Type"/>
+            <ns:column columnName="Well"/>
+            <ns:column columnName="Outlier"/>
+            <ns:column columnName="Description"/>
+            <ns:column columnName="FI">
+                <ns:formatString>0.0</ns:formatString>
+            </ns:column>
+            <ns:column columnName="FIBackground">
+                <ns:formatString>0.0</ns:formatString>
+                <ns:columnTitle>FI - Bkgd</ns:columnTitle>
+            </ns:column>
+            <ns:column columnName="StdDev">
+                <ns:formatString>0.00</ns:formatString>
+            </ns:column>
+            <ns:column columnName="PercentCV">
+                <ns:formatString>0.00</ns:formatString>
+                <ns:columnTitle>%CV</ns:columnTitle>
+            </ns:column>
+            <ns:column columnName="ObsConcString"/>
+            <ns:column columnName="ObsConc">
+                <ns:formatString>0.00</ns:formatString>
+            </ns:column>
+            <ns:column columnName="ObsConcOORIndicator"/>
+            <ns:column columnName="ExpConc">
+                <ns:formatString>0.00</ns:formatString>
+            </ns:column>
+            <ns:column columnName="ObsOverExp">
+                <ns:formatString>0</ns:formatString>
+                <ns:columnTitle>(Obs/Exp) * 100</ns:columnTitle>
+            </ns:column>
+            <ns:column columnName="ConcInRangeString"/>
+            <ns:column columnName="ConcInRange">
+                <ns:formatString>0.00</ns:formatString>
+            </ns:column>
+            <ns:column columnName="ConcInRangeOORIndicator"/>
+        </ns:columns>
+    </ns:table>
+
+
 </ns:tables>

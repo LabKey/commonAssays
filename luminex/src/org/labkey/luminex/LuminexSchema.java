@@ -1,35 +1,179 @@
 package org.labkey.luminex;
 
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.SqlDialect;
-import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.*;
+import org.labkey.api.query.*;
+import org.labkey.api.security.User;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpDataTable;
 
-public class LuminexSchema
+import java.util.*;
+
+public class LuminexSchema extends UserSchema
 {
-    private static LuminexSchema _instance = null;
+    private static final String ANALYTE_TABLE_NAME = "Analyte";
+    private static final String DATA_ROW_TABLE_NAME = "DataRow";
 
-    public static LuminexSchema getInstance()
+    public LuminexSchema(User user, Container container)
     {
-        if (null == _instance)
-            _instance = new LuminexSchema();
-
-        return _instance;
+        super("Luminex", user, container, getSchema());
+    }
+    
+    public Set<String> getTableNames()
+    {
+        return new HashSet<String>(Arrays.asList(ANALYTE_TABLE_NAME, DATA_ROW_TABLE_NAME));
+    }
+    
+    public TableInfo getTable(String name, String alias)
+    {
+        if (ANALYTE_TABLE_NAME.equalsIgnoreCase(name))
+        {
+            return createAnalyteTable(alias);
+        }
+        else if (DATA_ROW_TABLE_NAME.equalsIgnoreCase(name))
+        {
+            return createDataRowTable(alias);
+        }
+        return super.getTable(name, alias);
     }
 
-    private LuminexSchema()
+    private TableInfo createAnalyteTable(String alias)
     {
-        // private contructor to prevent instantiation from
-        // outside this class: this singleton should only be
-        // accessed via cpas.luminex.LuminexSchema.getInstance()
+        FilteredTable result = new FilteredTable(getTableInfoAnalytes());
+        result.wrapAllColumns(true);
+        SQLFragment containerFilter = new SQLFragment("DataId IN (SELECT RowId FROM exp.Data WHERE Container = ?)");
+        containerFilter.add(getContainer().getId());
+        result.addCondition(containerFilter);
+        result.setAlias(alias);
+        return result;
     }
 
-    public DbSchema getSchema()
+    public ExpDataTable createDataTable(String alias)
+    {
+        ExpDataTable ret = ExperimentService.get().createDataTable(alias);
+        ret.setContainer(getContainer());
+        ret.addColumn(ExpDataTable.Column.RowId);
+        ret.addColumn(ExpDataTable.Column.Name);
+        ret.addColumn(ExpDataTable.Column.Flag);
+        ret.addColumn(ExpDataTable.Column.Created);
+        ret.setTitleColumn("Name");
+        ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
+        protocol.setIsHidden(true);
+
+        ret.addColumn(ExpDataTable.Column.Run);
+
+        return ret;
+    }
+
+    public FilteredTable createDataRowTable(String alias)
+    {
+        final FilteredTable result = new FilteredTable(getTableInfoDataRow());
+        result.addColumn(result.wrapColumn("Analyte", result.getRealTable().getColumn("AnalyteId")));
+        ColumnInfo dataColumn = result.addColumn(result.wrapColumn("Data", result.getRealTable().getColumn("DataId")));
+        dataColumn.setFk(new LookupForeignKey("RowId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return createDataTable(null);
+            }
+        });
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RowId"))).setIsHidden(true);
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Type")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Well")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Outlier")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Description")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FI")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FIBackground"))).setCaption("FI-Bkgd");
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("StdDev")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("PercentCV"))).setCaption("%CV");
+        addOORColumns(result, result.getRealTable().getColumn("ObsConc"), result.getRealTable().getColumn("ObsConcOORIndicator"));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ObsConcString")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ExpConc")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ObsOverExp"))).setCaption("(Obs/Exp)*100");
+        addOORColumns(result, result.getRealTable().getColumn("ConcInRange"), result.getRealTable().getColumn("ConcInRangeOORIndicator"));
+        result.addColumn(result.wrapColumn("ConcInRangeString", result.getRealTable().getColumn("ConcInRangeString")));
+
+        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        defaultCols.add(FieldKey.fromParts("Analyte"));
+        defaultCols.add(FieldKey.fromParts("Type"));
+        defaultCols.add(FieldKey.fromParts("Well"));
+        defaultCols.add(FieldKey.fromParts("Description"));
+        defaultCols.add(FieldKey.fromParts("FI"));
+        defaultCols.add(FieldKey.fromParts("FIBackground"));
+        defaultCols.add(FieldKey.fromParts("StdDev"));
+        defaultCols.add(FieldKey.fromParts("PercentCV"));
+        defaultCols.add(FieldKey.fromParts("ObsConc"));
+        defaultCols.add(FieldKey.fromParts("ExpConc"));
+        defaultCols.add(FieldKey.fromParts("ObsOverExp"));
+        defaultCols.add(FieldKey.fromParts("ConcInRange"));
+        result.setDefaultVisibleColumns(defaultCols);
+
+        result.getColumn("Analyte").setFk(new LookupForeignKey("RowId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return createAnalyteTable(null);
+            }
+        });
+        SQLFragment containerFilter = new SQLFragment("DataId IN (SELECT RowId FROM exp.Data WHERE Container = ?)");
+        containerFilter.add(getContainer().getId());
+        result.addCondition(containerFilter);
+        result.setAlias(alias);
+        return result;
+    }
+
+    private void addOORColumns(FilteredTable table, ColumnInfo numberColumn, ColumnInfo oorIndicatorColumn)
+    {
+        ColumnInfo combinedCol = table.wrapColumn(numberColumn);
+        ColumnInfo wrappedOORIndicatorCol = table.wrapColumn(oorIndicatorColumn);
+        combinedCol.setDisplayColumnFactory(new OORDisplayColumnFactory(wrappedOORIndicatorCol));
+
+        SQLFragment inRangeSQL = new SQLFragment("CASE WHEN ");
+        inRangeSQL.append(oorIndicatorColumn.getName());
+        inRangeSQL.append(" IS NULL THEN ");
+        inRangeSQL.append(numberColumn.getName());
+        inRangeSQL.append(" ELSE NULL END");
+        table.addColumn(new ExprColumn(table, numberColumn.getName() + "InRange", inRangeSQL, numberColumn.getSqlTypeInt()));
+
+        table.addColumn(table.wrapColumn(numberColumn.getName() + "Number", numberColumn));
+        table.addColumn(wrappedOORIndicatorCol);
+
+        table.addColumn(combinedCol);
+    }
+
+    private static class OORDisplayColumnFactory implements DisplayColumnFactory
+    {
+        private ColumnInfo _oorColumnInfo;
+        
+        public OORDisplayColumnFactory(ColumnInfo oorColumnInfo)
+        {
+            _oorColumnInfo = oorColumnInfo;
+        }
+
+        public DisplayColumn createRenderer(ColumnInfo colInfo)
+        {
+            return new OutOfRangeDisplayColumn(colInfo, _oorColumnInfo);
+        }
+    }
+
+    public static DbSchema getSchema()
     {
         return DbSchema.get("luminex");
     }
 
-    public SqlDialect getSqlDialect()
+    public static SqlDialect getSqlDialect()
     {
         return getSchema().getSqlDialect();
     }
+
+    public static TableInfo getTableInfoAnalytes()
+    {
+        return getSchema().getTable(ANALYTE_TABLE_NAME);
+    }
+
+    public static TableInfo getTableInfoDataRow()
+    {
+        return getSchema().getTable(DATA_ROW_TABLE_NAME);
+    }
+
+
 }

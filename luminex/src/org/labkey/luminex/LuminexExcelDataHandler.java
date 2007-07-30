@@ -8,10 +8,9 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
 import org.labkey.api.study.SimpleAssayDataImportHelper;
-import org.labkey.api.study.AssayService;
-import org.labkey.api.study.DefaultAssayProvider;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -83,16 +82,13 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
 
             FileInputStream fIn = new FileInputStream(dataFile);
             Workbook workbook = Workbook.getWorkbook(fIn);
-            Set<String> unknownColumns = new HashSet<String>();
 
             Integer id = OntologyManager.ensureObject(info.getContainer().getId(), data.getLSID());
 
             PropertyDescriptor[] dataColumns = OntologyManager.getPropertiesForType(dataDomain.getTypeURI(), info.getContainer());
             PropertyDescriptor[] analyteColumns = OntologyManager.getPropertiesForType(analyteDomain.getTypeURI(), info.getContainer());
             PropertyDescriptor[] excelRunColumns = OntologyManager.getPropertiesForType(excelRunDomain.getTypeURI(), info.getContainer());
-            Map<String, Object>[] dataRows = parseFile(dataColumns, analyteColumns, excelRunColumns, workbook, unknownColumns, expRun, info.getContainer(), data, id);
-            OntologyManager.insertTabDelimited(info.getContainer(), id,
-                    new SimpleAssayDataImportHelper(data.getLSID()), dataColumns, dataRows, true);
+            parseFile(dataColumns, analyteColumns, excelRunColumns, workbook, expRun, info.getContainer(), data, info.getUser());
         }
         catch (IOException e)
         {
@@ -108,47 +104,11 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public static class Analyte
-    {
-        private int _analyteId;
-        private String _name;
-        private final String _lsid;
-        private Map<String, Object> _properties;
-
-        public Analyte(int analyteId, String name, String lsid, Map<String, Object> properties)
-        {
-            _analyteId = analyteId;
-            _name = name;
-            _lsid = lsid;
-            _properties = properties;
-        }
-
-        public String getLSID()
-        {
-            return _lsid;
-        }
-
-        public int getAnalyteId()
-        {
-            return _analyteId;
-        }
-
-        public String getName()
-        {
-            return _name;
-        }
-
-        public Map<String, Object> getProperties()
-        {
-            return _properties;
-        }
-    }
-
     private String getPropertyDescriptorURI(String name, PropertyDescriptor[] props)
     {
         for (PropertyDescriptor prop : props)
         {
-            if (prop.getName().equals(name))
+            if (prop.getName().equalsIgnoreCase(name))
             {
                 return prop.getPropertyURI();
             }
@@ -156,114 +116,296 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
-    private Map<String, Object>[] parseFile(PropertyDescriptor[] dataColumns, PropertyDescriptor[] analyteColumns, PropertyDescriptor[] excelRunColumns, Workbook workbook, Set<String> unknownColumns, final ExpRun expRun, Container container, ExpData data, Integer id) throws SQLException, ExperimentException
+    private static Double parseDouble(String value)
     {
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-        
-        Map<String, Analyte> analytes = new HashMap<String, Analyte>();
-
-        String analyteNamePropURI = getPropertyDescriptorURI("Name", analyteColumns);
-        if (analyteNamePropURI == null)
+        if (value == null || "".equals(value))
         {
-            throw new ExperimentException("Could not find Name property on Analyte domain");
+            return null;
+        }
+        else return Double.parseDouble(value);
+    }
+
+    private enum OORIndicator
+    {
+        IN_RANGE
+        {
+            public String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter)
+            {
+                return null;
+            }
+            public Double getValue(String value)
+            {
+                return parseDouble(value);
+            }
+            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter)
+            {
+                return getValue(value);
+            }
+        },
+        NOT_AVAILABLE
+        {
+            public String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter)
+            {
+                return "NA";
+            }
+            public Double getValue(String value)
+            {
+                return null;
+            }
+            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter)
+            {
+                return null;
+            }
+        },
+        OUT_OF_RANGE_ABOVE
+        {
+            public String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter)
+            {
+                return ">>";
+            }
+            public Double getValue(String value)
+            {
+                return null;
+            }
+            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter)
+            {
+                return calcOORValue(value, dataRows, getter, false);
+            }
+        },
+        OUT_OF_RANGE_BELOW
+        {
+            public String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter)
+            {
+                return "<<";
+            }
+            public Double getValue(String value)
+            {
+                return null;
+            }
+            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter)
+            {
+                return calcOORValue(value, dataRows, getter, true);
+            }
+        },
+        BEYOND_RANGE
+        {
+            public String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter)
+            {
+                int lowerCount = 0;
+                int higherCount = 0;
+                double thisValue = Double.parseDouble(value.substring(1));
+                for (LuminexDataRow dataRow : dataRows)
+                {
+                    Double otherValue = getter.getValue(dataRow);
+                    if (otherValue != null)
+                    {
+                        if (otherValue.doubleValue() < thisValue)
+                        {
+                            lowerCount++;
+                        }
+                        else if (otherValue.doubleValue() > thisValue)
+                        {
+                            higherCount++;
+                        }
+                    }
+                }
+                if (lowerCount > higherCount)
+                {
+                    return ">";
+                }
+                else if (lowerCount < higherCount)
+                {
+                    return "<";
+                }
+                else
+                {
+                    return "?";
+                }
+            }
+            public Double getValue(String value)
+            {
+                return Double.parseDouble(value.substring(1));
+            }
+            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter)
+            {
+                return getValue(value);
+            }
+        },
+        ERROR
+        {
+            public String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter)
+            {
+                return "ParseError";
+            }
+            public Double getValue(String value)
+            {
+                return null;
+            }
+            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter)
+            {
+                return null;
+            }
+        };
+
+
+        public abstract String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter);
+        public abstract Double getValue(String value);
+        public abstract Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter);
+
+        private static Double calcOORValue(String value, List<LuminexDataRow> dataRows, Getter getter, boolean min)
+        {
+            double startValue = min ? Double.MAX_VALUE : Double.MIN_VALUE;
+            double result = startValue;
+            for (LuminexDataRow dataRow : dataRows)
+            {
+                if (dataRow.getType() != null)
+                {
+                    String type = dataRow.getType().trim().toLowerCase();
+                    Double rowValue = getter.getValue(dataRow);
+                    if ((type.startsWith("s") || type.startsWith("es")) && dataRow.getObsOverExp() != null && rowValue != null)
+                    {
+                        double obsOverExp = dataRow.getObsOverExp().doubleValue();
+                        if (obsOverExp > 70 && obsOverExp < 130)
+                        {
+                            if (min)
+                            {
+                                result = Math.min(result, rowValue.doubleValue());
+                            }
+                            else
+                            {
+                                result = Math.max(result, rowValue.doubleValue());
+                            }
+                        }
+                    }
+                }
+            }
+            return result == startValue ? null : result;
+        }
+    }
+
+    private interface Getter
+    {
+        public Double getValue(LuminexDataRow dataRow);
+    }
+
+    private OORIndicator determineOutOfRange(String value)
+    {
+        if (value == null || "".equals(value))
+        {
+            return OORIndicator.IN_RANGE;
+        }
+        if ("***".equals(value))
+        {
+            return OORIndicator.NOT_AVAILABLE;
+        }
+        if (value.startsWith("*"))
+        {
+            return OORIndicator.BEYOND_RANGE;
+        }
+        if (value.toLowerCase().contains("oor") && value.contains(">"))
+        {
+            return OORIndicator.OUT_OF_RANGE_ABOVE;
+        }
+        if (value.toLowerCase().contains("oor") && value.contains("<"))
+        {
+            return OORIndicator.OUT_OF_RANGE_ABOVE;
         }
 
-        Map<String, Object> excelRunProps = new HashMap<String, Object>();
+        try
+        {
+            parseDouble(value);
+            return OORIndicator.IN_RANGE;
+        }
+        catch (NumberFormatException e)
+        {
+            return OORIndicator.ERROR;
+        }
+    }
+
+    private void parseFile(PropertyDescriptor[] dataColumns, PropertyDescriptor[] analyteColumns, PropertyDescriptor[] excelRunColumns, Workbook workbook, final ExpRun expRun, Container container, ExpData data, User user) throws SQLException, ExperimentException
+    {
+        List<Map<String, Object>> dataRowsProps = new ArrayList<Map<String, Object>>();
         
+        Map<String, Object> excelRunProps = new HashMap<String, Object>();
+
         for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
         {
-            Sheet analyteSheet = workbook.getSheet(sheetIndex);
+            Sheet sheet = workbook.getSheet(sheetIndex);
 
-            if ("Row #".equals(analyteSheet.getCell(0, 0).getContents()))
+            if ("Row #".equals(sheet.getCell(0, 0).getContents()))
             {
                 continue;
             }
 
-            String analyteName = analyteSheet.getName();
-            String analyteLsid = new Lsid(data.getLSID() + ".Analyte" + analyteName).toString();
-            Integer analyteId = OntologyManager.ensureObject(container.getId(), analyteLsid, data.getLSID());
+            Analyte analyte = new Analyte(sheet.getName(), data.getRowId());
+
             Map<String, Object> analyteProps = new HashMap<String, Object>();
 
-            analyteProps.put(analyteNamePropURI, analyteName);
-
-            int row = 0;
-            do
-            {
-                String cellValue = analyteSheet.getCell(0, row).getContents();
-                int index = cellValue.indexOf(":");
-                if (index != -1)
-                {
-                    String propName = cellValue.substring(0, index);
-                    String analytePropURI = getPropertyDescriptorURI(propName, analyteColumns);
-                    if (analytePropURI != null)
-                    {
-                        analyteProps.put(analytePropURI, cellValue.substring((propName + ":").length()).trim());
-                    }
-                    String excelRunPropURI = getPropertyDescriptorURI(propName, excelRunColumns);
-                    if (excelRunPropURI != null)
-                    {
-                        excelRunProps.put(excelRunPropURI, cellValue.substring((propName + ":").length()).trim());
-                    }
-                }
-            }
-            while ((row + 1) <= analyteSheet.getRows() && !"".equals(analyteSheet.getCell(0, ++row).getContents()));
+            int row = handleHeaderOrFooterRow(sheet, 0, analyte, analyteColumns, analyteProps, excelRunColumns, excelRunProps);
 
             // Skip over the blank line
             row++;
             
-            Analyte analyte = new Analyte(analyteId, analyteName, analyteLsid.toString(), analyteProps);
-            analytes.put(analyte._name, analyte);
-
             List<String> colNames = new ArrayList<String>();
-            for (int col = 0; col < analyteSheet.getColumns(); col++)
+            for (int col = 0; col < sheet.getColumns(); col++)
             {
-                colNames.add(analyteSheet.getCell(col, row).getContents());
+                colNames.add(sheet.getCell(col, row).getContents());
             }
             row++;
 
-            Map<String, String> namesToURIs = new HashMap<String, String>();
-            for (PropertyDescriptor pd : dataColumns)
-            {
-                namesToURIs.put(pd.getName(), pd.getPropertyURI());
-            }
+            List<LuminexDataRow> dataRows = new ArrayList<LuminexDataRow>();
 
             do
             {
-                Map<String, Object> rowValues = new LinkedHashMap<String, Object>();
-                for (int col = 0; col < analyteSheet.getColumns(); col++)
-                {
-                    String columnName = colNames.get(col);
-                    String propertyURI = namesToURIs.get(columnName);
-                    if (propertyURI != null)
-                    {
-                        String value = analyteSheet.getCell(col, row).getContents();
-                        if ("***".equals(value) || "---".equals(value))
-                        {
-                            value = "";
-                        }
-                        if (columnName.equals("Analyte"))
-                        {
-                            value = Integer.toString(analytes.get(value)._analyteId);
-                        }
-                        rowValues.put(propertyURI, value);
-                    }
-                    else
-                    {
-                        unknownColumns.add(columnName);
-                    }
-                }
-
-                result.add(rowValues);
+                Map<String, Object> dataRowProps = new LinkedHashMap<String, Object>();
+                LuminexDataRow dataRow = createDataRow(data, sheet, colNames, row, dataColumns, dataRowProps);
+                dataRows.add(dataRow);
+                dataRowsProps.add(dataRowProps);
             }
-            while (row++ < analyteSheet.getRows() && !"".equals(analyteSheet.getCell(0, row).getContents()));
+            while (row++ < sheet.getRows() && !"".equals(sheet.getCell(0, row).getContents()));
+
+            // Skip over the blank line
+            row++;
+
+            row = handleHeaderOrFooterRow(sheet, row, analyte, analyteColumns, analyteProps, excelRunColumns, excelRunProps);
+
+            analyte = Table.insert(user, LuminexSchema.getTableInfoAnalytes(), analyte);
+
+            for (LuminexDataRow dataRow : dataRows)
+            {
+                Getter obsConcGetter = new Getter()
+                {
+                    public Double getValue(LuminexDataRow dataRow)
+                    {
+                        if (determineOutOfRange(dataRow.getObsConcString()) == OORIndicator.IN_RANGE)
+                        {
+                            return dataRow.getObsConc();
+                        }
+                        return null;
+                    }
+                };
+                Getter concInRangeGetter = new Getter()
+                {
+                    public Double getValue(LuminexDataRow dataRow)
+                    {
+                        if (determineOutOfRange(dataRow.getConcInRangeString()) == OORIndicator.IN_RANGE)
+                        {
+                            return dataRow.getConcInRange();
+                        }
+                        return null;
+                    }
+                };
+                dataRow.setObsConcOORIndicator(determineOutOfRange(dataRow.getObsConcString()).getOORIndicator(dataRow.getObsConcString(), dataRows, obsConcGetter));
+                dataRow.setObsConc(determineOutOfRange(dataRow.getObsConcString()).getValue(dataRow.getObsConcString(), dataRows, obsConcGetter));
+                dataRow.setConcInRangeOORIndicator(determineOutOfRange(dataRow.getConcInRangeString()).getOORIndicator(dataRow.getConcInRangeString(), dataRows, concInRangeGetter));
+                dataRow.setConcInRange(determineOutOfRange(dataRow.getConcInRangeString()).getValue(dataRow.getConcInRangeString(), dataRows, concInRangeGetter));
+
+                dataRow.setAnalyteId(analyte.getRowId());
+
+                Table.insert(user, LuminexSchema.getTableInfoDataRow(), dataRow);
+            }
         }
 
-        Map<String, Object>[] analyteRows = new HashMap[analytes.size()];
-        int index = 0;
-        for (Analyte analyte : analytes.values())
-        {
-            analyteRows[index++] = analyte._properties;
-        }
         OntologyManager.insertTabDelimited(container, OntologyManager.ensureObject(container.getId(), expRun.getLSID()), new OntologyManager.ImportHelper()
         {
             public String beforeImportObject(Map map) throws SQLException
@@ -275,10 +417,136 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             {
             }
         }, excelRunColumns, new Map[] { excelRunProps }, true);
-        OntologyManager.insertTabDelimited(container, id,
-                new AnalyteImportHelper(analytes.values(), analyteNamePropURI), analyteColumns, analyteRows, true);
+    }
 
-        return (Map<String, Object>[])result.toArray(new Map[0]);
+    private LuminexDataRow createDataRow(ExpData data, Sheet sheet, List<String> colNames, int row, PropertyDescriptor[] dataColumns, Map<String, Object> rowValues)
+    {
+        LuminexDataRow dataRow = new LuminexDataRow();
+        dataRow.setDataId(data.getRowId());
+        for (int col = 0; col < sheet.getColumns(); col++)
+        {
+            String columnName = colNames.get(col);
+
+            String value = sheet.getCell(col, row).getContents().trim();
+            if ("FI".equalsIgnoreCase(columnName))
+            {
+                if (!value.equals("---"))
+                {
+                    dataRow.setFi(Double.parseDouble(value));
+                }
+            }
+            else if ("FI - Bkgd".equalsIgnoreCase(columnName))
+            {
+                if (!value.equals("---"))
+                {
+                    dataRow.setFiBackground(Double.parseDouble(value));
+                }
+            }
+            else if ("Type".equalsIgnoreCase(columnName))
+            {
+                dataRow.setType(value);
+            }
+            else if ("Well".equalsIgnoreCase(columnName))
+            {
+                dataRow.setWell(value);
+            }
+            else if ("Outlier".equalsIgnoreCase(columnName))
+            {
+                dataRow.setOutlier(!"0".equals(value));
+            }
+            else if ("Description".equalsIgnoreCase(columnName))
+            {
+                dataRow.setDescription(value);
+            }
+            else if ("Std Dev".equalsIgnoreCase(columnName))
+            {
+                dataRow.setStdDev(parseDouble(value));
+            }
+            else if ("%CV".equalsIgnoreCase(columnName))
+            {
+                dataRow.setPercentCV(parseDouble(value));
+            }
+            else if ("Exp Conc".equalsIgnoreCase(columnName))
+            {
+                dataRow.setExpConc(parseDouble(value));
+            }
+            else if ("Obs Conc".equalsIgnoreCase(columnName))
+            {
+                dataRow.setObsConcString(value);
+                dataRow.setObsConc(determineOutOfRange(value).getValue(value));
+            }
+            else if ("(Obs/Exp) * 100".equalsIgnoreCase(columnName))
+            {
+                if (!value.equals("***"))
+                {
+                    dataRow.setObsOverExp(parseDouble(value));
+                }
+            }
+            else if ("Conc in Range".equalsIgnoreCase(columnName))
+            {
+                dataRow.setConcInRangeString(value);
+                dataRow.setConcInRange(determineOutOfRange(value).getValue(value));
+            }
+            else
+            {
+                storePropertyValue(columnName, value, dataColumns, rowValues);
+            }
+        }
+        return dataRow;
+    }
+
+    private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, PropertyDescriptor[] analyteColumns, Map<String, Object> analyteProps, PropertyDescriptor[] excelRunColumns, Map<String, Object> excelRunProps)
+    {
+        do
+        {
+            String cellContents = analyteSheet.getCell(0, row).getContents();
+            int index = cellContents.indexOf(":");
+            if (index != -1)
+            {
+                String propName = cellContents.substring(0, index);
+                String value = cellContents.substring((propName + ":").length()).trim();
+
+                if ("Regression Type".equalsIgnoreCase(propName))
+                {
+                    analyte.setRegressionType(value);
+                }
+                else if ("Std. Curve".equalsIgnoreCase(propName))
+                {
+                    analyte.setStdCurve(value);
+                }
+
+                storePropertyValue(propName, value, analyteColumns, analyteProps);
+                storePropertyValue(propName, value, excelRunColumns, excelRunProps);
+            }
+
+            if (cellContents.toLowerCase().startsWith("fitprob. "))
+            {
+                int startIndex = cellContents.indexOf("=");
+                int endIndex = cellContents.indexOf(",");
+                if (startIndex >= 0 && endIndex >= 0 && endIndex > startIndex)
+                {
+                    String fitProbValue = cellContents.substring(startIndex + 1, endIndex).trim();
+                    analyte.setFitProb(Double.parseDouble(fitProbValue));
+                }
+                startIndex = cellContents.lastIndexOf("=");
+                if (startIndex >= 0)
+                {
+                    String resVarValue = cellContents.substring(startIndex + 1).trim();
+                    analyte.setResVar(Double.parseDouble(resVarValue));
+                }
+            }
+        }
+        while (++row < analyteSheet.getRows() && !"".equals(analyteSheet.getCell(0, row).getContents()));
+        return row;
+    }
+
+    private void storePropertyValue(String propName, String value, PropertyDescriptor[] columns, Map<String, Object> props)
+    {
+        String analytePropURI = getPropertyDescriptorURI(propName, columns);
+        if (analytePropURI != null)
+        {
+            props.put(analytePropURI, value);
+        }
     }
 
     public URLHelper getContentURL(HttpServletRequest request, Container container, ExpData data) throws ExperimentException
@@ -296,7 +564,26 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
-        public void deleteData(Data data, Container container) throws ExperimentException
+
+    public void beforeDeleteData(List<Data> data) throws ExperimentException
+    {
+        try
+        {
+            Object[] ids = new Object[data.size()];
+            for (int i = 0; i < data.size(); i++)
+            {
+                ids[i] = data.get(0).getRowId();
+            }
+            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoDataRow() + " WHERE DataId = ?", ids);
+            Table.execute(LuminexSchema.getSchema(), "DELETE FROM " + LuminexSchema.getTableInfoAnalytes() + " WHERE DataId = ?", ids);
+        }
+        catch (SQLException e)
+        {
+            throw new ExperimentException(e);
+        }
+    }
+
+    public void deleteData(Data data, Container container) throws ExperimentException
     {
         try
         {
