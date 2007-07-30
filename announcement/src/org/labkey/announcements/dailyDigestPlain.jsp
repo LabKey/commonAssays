@@ -19,6 +19,7 @@
             {
                 %>
 View this <%=conversationName%> here:
+
 <%=threadUrl%>
 
 

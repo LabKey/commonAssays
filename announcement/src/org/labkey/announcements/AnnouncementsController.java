@@ -106,7 +106,7 @@ public class AnnouncementsController extends ViewController
         WebPartView v = new AnnouncementWebPart(getContainer(), getViewURLHelper(), getUser(), displayAll);
         v.setFrame(WebPartView.FrameType.DIV);
 
-        NavTrailConfig nav = new NavTrailConfig(getViewContext(), getContainer());
+        NavTrailConfig nav = new NavTrailConfig(getViewContext());
         nav.setTitle(getSettings().getBoardName());
         _renderInTemplate(v, getContainer(), nav, null, null);
 
@@ -749,7 +749,16 @@ public class AnnouncementsController extends ViewController
     // AssignedTo == null => assigned to no one.
     private static String getAssignedToSelect(Container c, Integer assignedTo, String name)
     {
-        List<User> possibleAssignedTo = SecurityManager.getProjectMembers(c.getProject());
+        List<User> possibleAssignedTo;
+
+        try
+        {
+            possibleAssignedTo = SecurityManager.getUsersWithPermissions(c, ACL.PERM_INSERT);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
 
         Collections.sort(possibleAssignedTo, new Comparator<User>()
         {
@@ -794,7 +803,9 @@ public class AnnouncementsController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
 
-        List<AjaxCompletion> completions = UserManager.getAjaxCompletions(form.getPrefix());
+        // Limit member list lookup to those with read permissions in this container.
+        List<User> completionUsers = SecurityManager.getUsersWithPermissions(getContainer(), ACL.PERM_READ);
+        List<AjaxCompletion> completions = UserManager.getAjaxCompletions(form.getPrefix(), completionUsers.toArray(new User[completionUsers.size()]));
 
         return sendAjaxCompletions(completions);
     }
@@ -1350,7 +1361,7 @@ public class AnnouncementsController extends ViewController
 
     private NavTrailConfig getDefaultNavTrail() throws ServletException
     {
-        NavTrailConfig trailConfig = new NavTrailConfig(getViewContext(), getContainer());
+        NavTrailConfig trailConfig = new NavTrailConfig(getViewContext());
         trailConfig.add(new NavTree(getSettings().getBoardName().toLowerCase() + " home", getBeginForward()));
         return trailConfig;
     }

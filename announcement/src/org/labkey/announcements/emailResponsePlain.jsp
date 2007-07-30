@@ -8,8 +8,8 @@ if (null != responseBody)
     <%=responseBody%><%
 }  %>
 View this <%=settings.getConversationName().toLowerCase()%> here:
-<%=threadURL%>
 
+<%=threadURL%>
 
 
 You have received this email because <%
