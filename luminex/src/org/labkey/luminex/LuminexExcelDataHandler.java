@@ -11,6 +11,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
 import org.labkey.api.study.SimpleAssayDataImportHelper;
+import org.labkey.api.study.AssayViewType;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -556,7 +557,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         {
             ExpProtocol protocol = run.getProtocol();
             ViewURLHelper url = new ViewURLHelper("GenericAssay", "assaySummary.view", container);
-            url.addParameter("activeView", "RUN_DATA");
+            url.addParameter("activeView", AssayViewType.RUN_DATA.toString());
             url.addParameter("runId", run.getRowId());
             url.addParameter("rowId", protocol.getRowId());
             return url;

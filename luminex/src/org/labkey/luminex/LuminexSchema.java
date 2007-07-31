@@ -5,6 +5,8 @@ import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpDataTable;
+import org.labkey.api.exp.Protocol;
+import org.labkey.api.study.AssayService;
 
 import java.util.*;
 
@@ -12,10 +14,17 @@ public class LuminexSchema extends UserSchema
 {
     private static final String ANALYTE_TABLE_NAME = "Analyte";
     private static final String DATA_ROW_TABLE_NAME = "DataRow";
+    private final Protocol _protocol;
 
     public LuminexSchema(User user, Container container)
     {
+        this(user, container, null);
+    }
+
+    public LuminexSchema(User user, Container container, Protocol protocol)
+    {
         super("Luminex", user, container, getSchema());
+        _protocol = protocol;
     }
     
     public Set<String> getTableNames()
@@ -39,10 +48,22 @@ public class LuminexSchema extends UserSchema
     private TableInfo createAnalyteTable(String alias)
     {
         FilteredTable result = new FilteredTable(getTableInfoAnalytes());
-        result.wrapAllColumns(true);
-        SQLFragment containerFilter = new SQLFragment("DataId IN (SELECT RowId FROM exp.Data WHERE Container = ?)");
-        containerFilter.add(getContainer().getId());
-        result.addCondition(containerFilter);
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Name")));
+        result.addColumn(result.wrapColumn("Data", result.getRealTable().getColumn("DataId"))).setFk(new LookupForeignKey("RowId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return createDataTable(null);
+            }
+        });
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RowId"))).setIsHidden(true);
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FitProb")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ResVar")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RegressionType")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("StdCurve")));
+
+        addDataFilter(result);
+        result.setTitleColumn("Name");
         result.setAlias(alias);
         return result;
     }
@@ -59,7 +80,17 @@ public class LuminexSchema extends UserSchema
         ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
         protocol.setIsHidden(true);
 
-        ret.addColumn(ExpDataTable.Column.Run);
+        ColumnInfo runCol = ret.addColumn(ExpDataTable.Column.Run);
+        if (_protocol != null)
+        {
+            runCol.setFk(new LookupForeignKey("RowId")
+            {
+                public TableInfo getLookupTableInfo()
+                {
+                    return AssayService.get().createRunTable(null, _protocol, AssayService.get().getProvider(_protocol), _user, _container);
+                }
+            });
+        }
 
         return ret;
     }
@@ -77,6 +108,7 @@ public class LuminexSchema extends UserSchema
             }
         });
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RowId"))).setIsHidden(true);
+        result.getColumn("RowId").setKeyField(true);
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Type")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Well")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Outlier")));
@@ -114,11 +146,22 @@ public class LuminexSchema extends UserSchema
                 return createAnalyteTable(null);
             }
         });
-        SQLFragment containerFilter = new SQLFragment("DataId IN (SELECT RowId FROM exp.Data WHERE Container = ?)");
-        containerFilter.add(getContainer().getId());
-        result.addCondition(containerFilter);
+        addDataFilter(result);
         result.setAlias(alias);
         return result;
+    }
+
+    private void addDataFilter(FilteredTable result)
+    {
+        SQLFragment filter = new SQLFragment("DataId IN (SELECT d.RowId FROM " + ExperimentService.get().getTinfoData() + " d, " + ExperimentService.get().getTinfoExperimentRun() + " r WHERE d.RunId = r.RowId AND d.Container = ?");
+        filter.add(getContainer().getId());
+        if (_protocol != null)
+        {
+            filter.append(" AND r.ProtocolLSID = ?");
+            filter.add(_protocol.getLSID());
+        }
+        filter.append(")");
+        result.addCondition(filter);
     }
 
     private void addOORColumns(FilteredTable table, ColumnInfo numberColumn, ColumnInfo oorIndicatorColumn)

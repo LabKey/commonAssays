@@ -4,14 +4,17 @@ import org.labkey.api.study.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.*;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.query.QuerySchema;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.view.ViewURLHelper;
 
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
+import java.sql.SQLException;
 
 /**
  * User: jeckels
@@ -47,7 +50,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
 
     public TableInfo createDataTable(QuerySchema schema, String alias, Protocol protocol)
     {
-        return new LuminexSchema(schema.getUser(), schema.getContainer()).createDataRowTable(alias);
+        return new LuminexSchema(schema.getUser(), schema.getContainer(), protocol).createDataRowTable(alias);
     }
 
     public PropertyDescriptor[] getRunDataColumns(Protocol protocol)
@@ -78,7 +81,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
     {
         Map<String, TableInfo> result = super.getTableInfos(protocol, schema);
 
-        LuminexSchema luminexSchema = new LuminexSchema(schema.getUser(), schema.getContainer());
+        LuminexSchema luminexSchema = new LuminexSchema(schema.getUser(), schema.getContainer(), protocol);
         for (String tableName : luminexSchema.getTableNames())
         {
             result.put(tableName, luminexSchema.getTable(tableName, null));
@@ -91,6 +94,33 @@ public class LuminexAssayProvider extends DefaultAssayProvider
     {
         return false;
     }
+    
+    public ViewURLHelper getUploadWizardURL(Container container, Protocol protocol)
+    {
+        ViewURLHelper url = new ViewURLHelper("Luminex", "luminexUploadWizard.view", container);
+        url.addParameter("rowId", protocol.getRowId());
+        return url;
+    }
 
+    public Data getDataForDataRow(Object dataRowId)
+    {
+        LuminexDataRow dataRow = Table.selectObject(LuminexSchema.getTableInfoDataRow(), dataRowId, LuminexDataRow.class);
+        if (dataRow == null)
+        {
+            return null;
+        }
+        try
+        {
+            return ExperimentService.get().getData(dataRow.getDataId());
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+    }
 
+    public FieldKey getRunIdFieldKeyFromDataRow()
+    {
+        return FieldKey.fromParts("Data", "Run", "RowId");
+    }
 }
