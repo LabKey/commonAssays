@@ -1,4 +1,4 @@
-CREATE SCHEMA luminex
+EXEC sp_addapprole 'luminex', 'password'
 GO
 
 CREATE TABLE luminex.Analyte
