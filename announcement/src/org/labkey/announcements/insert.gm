@@ -1,9 +1,8 @@
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
-<%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.api.util.HelpTopic"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.api.util.HelpTopic" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%
 String userAgent = request.getHeader("user-agent");
 boolean unsupported = userAgent.contains("MSIE") && userAgent.contains("Mac");
@@ -88,13 +87,15 @@ if(allowBroadcast)
 		</td>
 	</tr>
 	<tr><td class="normal">
-        <table>
-        <tr><td>File 1: <input type="file" name="formFiles[0]" size="60" onChange="showPathname(this, 'filename1')"></td><td><label class="normal" id="filename1"></label></td></tr>
-		<tr><td>File 2: <input type="file" name="formFiles[1]" size="60" onChange="showPathname(this, 'filename2')"></td><td><label class="normal" id="filename2"></label></td></tr>
-		<tr><td>File 3: <input type="file" name="formFiles[2]" size="60" onChange="showPathname(this, 'filename3')"></td><td><label class="normal" id="filename3"></label></td></tr>
+        <table id="filePickerTable">
         </table>
 	</td>
 	</tr>
+    <tr><td>
+      <table>
+        <tr><td class="normal" colspan=2><a href="javascript:addFilePicker('filePickerTable', 'filePickerLink')" id="filePickerLink"><img src="<%=request.getContextPath()%>/_images/paperclip.gif">Attach a file</a></td></tr>
+      </table>
+    </td></tr>
 </table>
 <br>&nbsp;<input type=image src="<%=PageFlowUtil.submitSrc()%>" value="Insert">&nbsp;<%
 if (returnUrl)
