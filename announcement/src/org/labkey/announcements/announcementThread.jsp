@@ -1,15 +1,14 @@
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
-<%@ page import="org.labkey.api.util.DateUtil" %>
+<%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="org.labkey.announcements.AnnouncementsController" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.announcements.model.AnnouncementManager" %>
+<%@ page import="org.labkey.announcements.model.DiscussionServiceImpl" %>
 <%@ page import="org.labkey.api.announcements.Announcement" %>
 <%@ page import="org.labkey.api.attachments.Attachment" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.labkey.api.util.DateUtil" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
-<%@ page import="org.labkey.announcements.model.DiscussionServiceImpl" %>
-<%@ page import="java.net.URISyntaxException" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <!--ANNOUNCEMENTS-->
 <%
@@ -79,22 +78,22 @@ if (bean.perm.allowUpdate(announcement) && !bean.print)
     ViewURLHelper showUpdate = announcementURL(context, "showUpdate", "entityId", announcement.getEntityId());
     %>[<a href="<%=showUpdate.getLocalURIString()%>">edit</a>]<%
 }
-%>&nbsp;<%=DateUtil.formatDateTime(announcement.getCreated())%></td>
+%>&nbsp;<%=h(DateUtil.formatDateTime(announcement.getCreated()))%></td>
 </tr>
 <tr style="height:1px;"><td colspan=3 class=ms-titlearealine><img alt="" height=1 width=1 src="<%=request.getContextPath()%>/_.gif"></td></tr><%
 if (settings.hasMemberList() && null != announcement.getEmailList())
 {
-    %><tr><td colspan="3">Members: <%=announcement.getEmailList()%></td></tr><%
+    %><tr><td colspan="3">Members: <%=h(announcement.getEmailList())%></td></tr><%
 }
 
 if (settings.hasStatus() && null != announcement.getStatus())
 {
-    %><tr><td>Status: <%=announcement.getStatus()%></td></tr><%
+    %><tr><td>Status: <%=h(announcement.getStatus())%></td></tr><%
 }
 
 if (settings.hasExpires() && null != announcement.getExpires())
 {
-    %><tr><td align=left>Expires: <%=DateUtil.formatDate(announcement.getExpires())%>&nbsp;</td></tr><%
+    %><tr><td align=left>Expires: <%=h(DateUtil.formatDate(announcement.getExpires()))%>&nbsp;</td></tr><%
 }
 
 if (settings.hasAssignedTo() && null != announcement.getAssignedTo())
@@ -154,13 +153,13 @@ if(0 < announcement.getResponses().size())
             }
             if (settings.hasStatus() && !StringUtils.equals(r.getStatus(),prev.getStatus()))
             {
-                %><tr><td>Status: <%=r.getStatus()%></td></tr><%
+                %><tr><td>Status: <%=h(r.getStatus())%></td></tr><%
             }
-            if (settings.hasExpires() && r.getExpires() != prev.getExpires())
+            if (settings.hasExpires() && !PageFlowUtil.nullSafeEquals(r.getExpires(), prev.getExpires()))
             {
-                %><tr><td>Expires: <%=DateUtil.formatDate(r.getExpires())%></td></tr><%
+        %><tr><td>Expires: <%=h(DateUtil.formatDate(r.getExpires()))%></td></tr><%
             }
-            if (settings.hasAssignedTo() && r.getAssignedTo() != prev.getAssignedTo()) { %>
+            if (settings.hasAssignedTo() && !PageFlowUtil.nullSafeEquals(r.getAssignedTo(), prev.getAssignedTo())) { %>
             <tr><td>Assigned&nbsp;To: <%=h(r.getAssignedToName())%></td></tr><% }
             if (null != r.getTitle() && !StringUtils.equals(r.getTitle(), prev.getTitle()))
             {
