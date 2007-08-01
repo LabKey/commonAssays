@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.HashMap;
 
 import org.labkey.ms2.*;
 
@@ -165,6 +166,8 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         ButtonBar bb = createButtonBar("exportProteinGroups", "exportSelectedProteinGroups", "protein groups");
 
         proteinRgn.addHiddenFormField("queryString", _url.getRawQuery());
+        proteinRgn.addHiddenFormField("run", _url.getParameter("run"));
+        proteinRgn.addHiddenFormField("grouping", _url.getParameter("grouping"));
 
         proteinRgn.setButtonBar(bb, DataRegion.MODE_GRID);
 
@@ -389,6 +392,24 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     public MS2RunViewType getViewType()
     {
         return MS2RunViewType.PROTEIN_PROPHET;
+    }
+
+    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form)
+    {
+        SQLFragment fragment = new SQLFragment();
+        fragment.append("SELECT DISTINCT PGM.SeqId FROM ");
+        fragment.append(MS2Manager.getTableInfoProteinGroupMemberships() + " PGM, ( ");
+        fragment.append(ProteinManager.getProteinProphetPeptideSql(queryUrl, run, null, -1, "ms2.ProteinGroupsWithQuantitation.ProteinGroupId AS GroupId", false));
+        fragment.append(" ) x WHERE x.ProteinGroupId = PGM.ProteinGroupId");
+        return fragment;
+    }
+
+    public HashMap<String, SimpleFilter> getFilter(ViewURLHelper queryUrl, MS2Run run)
+    {
+        HashMap<String, SimpleFilter> map = new HashMap<String, SimpleFilter>();
+        map.put("peptideFilter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run));
+        map.put("proteinGroupFilter", ProteinManager.getProteinGroupFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, null, run));
+        return map;
     }
 
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String requestedPeptideColumns)

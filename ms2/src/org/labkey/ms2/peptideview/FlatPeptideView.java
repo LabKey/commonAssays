@@ -13,9 +13,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
+import java.util.*;
 import java.io.IOException;
 
 import org.labkey.ms2.MS2Controller;
@@ -195,6 +193,25 @@ public class FlatPeptideView extends AbstractMS2RunView
     public MS2RunViewType getViewType()
     {
         return MS2RunViewType.NONE;
+    }
+
+    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form)
+    {
+        SQLFragment fragment = new SQLFragment();
+        fragment.append("SELECT DISTINCT SeqId FROM ");
+        fragment.append(MS2Manager.getTableInfoPeptides());
+        fragment.append(" ");
+        SimpleFilter filter = ProteinManager.getPeptideFilter(queryUrl, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run);
+        fragment.append(filter.getWhereSQL(ProteinManager.getSqlDialect()));
+        fragment.addAll(filter.getWhereParams(MS2Manager.getTableInfoPeptides()));
+        return fragment;
+    }
+
+    public HashMap<String, SimpleFilter> getFilter(ViewURLHelper queryUrl, MS2Run run)
+    {
+        HashMap<String, SimpleFilter> map = new HashMap<String, SimpleFilter>();
+        map.put("peptideFilter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run));
+        return map;
     }
 
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException

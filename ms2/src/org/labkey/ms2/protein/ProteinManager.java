@@ -553,6 +553,21 @@ public class ProteinManager
 
     public static SimpleFilter getPeptideFilter(ViewURLHelper currentUrl, int mask, String runTableName, MS2Run... runs)
     {
+        return getTableFilter(currentUrl, mask, runTableName, MS2Manager.getDataRegionNamePeptides(), runs);
+    }
+
+    public static SimpleFilter getProteinFilter(ViewURLHelper currentUrl, int mask, String runTableName, MS2Run... runs)
+    {
+        return getTableFilter(currentUrl, mask, runTableName, MS2Manager.getDataRegionNameProteins(), runs);
+    }
+
+    public static SimpleFilter getProteinGroupFilter(ViewURLHelper currentUrl, int mask, String runTableName, MS2Run... runs)
+    {
+        return getTableFilter(currentUrl, mask, runTableName, MS2Manager.getDataRegionNameProteinGroups(), runs);
+    }
+
+    public static SimpleFilter getTableFilter(ViewURLHelper currentUrl, int mask, String runTableName, String dataRegionName, MS2Run... runs)
+    {
         SimpleFilter filter = new SimpleFilter();
 
         if ((mask & RUN_FILTER) != 0)
@@ -561,7 +576,7 @@ public class ProteinManager
         }
 
         if ((mask & URL_FILTER) != 0)
-            filter.addUrlFilters(currentUrl, MS2Manager.getDataRegionNamePeptides());
+            filter.addUrlFilters(currentUrl, dataRegionName);
 
         if ((mask & EXTRA_FILTER) != 0)
             addExtraFilter(filter, runs[0], currentUrl);
@@ -576,7 +591,6 @@ public class ProteinManager
 
         return filter;
     }
-
 
     public static void addRunCondition(SimpleFilter filter, String runTableName, MS2Run... runs)
     {
@@ -736,8 +750,13 @@ public class ProteinManager
         return new GroupedResultSet(rs, "Protein");
     }
 
-    // extraWhere is used to insert an IN clause when exporting selected proteins
     public static SQLFragment getPeptideSql(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames)
+    {
+        return getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, true);
+    }
+
+    // extraWhere is used to insert an IN clause when exporting selected proteins
+    public static SQLFragment getPeptideSql(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, boolean addOrderBy)
     {
         SQLFragment sql = new SQLFragment();
 
@@ -758,8 +777,8 @@ public class ProteinManager
         sql.append(peptideFilter.getWhereSQL(getSqlDialect()));
         sql.append('\n');
         sql.addAll(peptideFilter.getWhereParams(MS2Manager.getTableInfoPeptides()));
-
-        sql.append(getCombinedOrderBy(currentUrl, "Protein"));
+        if (addOrderBy)
+            sql.append(getCombinedOrderBy(currentUrl, "Protein"));
 
         return sql;
     }
@@ -772,9 +791,13 @@ public class ProteinManager
         return Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray());
     }
 
+    public static SQLFragment getProteinProphetPeptideSql(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames)
+    {
+        return getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, true);
+    }
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static SQLFragment getProteinProphetPeptideSql(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames)
+    public static SQLFragment getProteinProphetPeptideSql(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, boolean addOrderBy)
     {
         SQLFragment sql = new SQLFragment("SELECT ");
         sql.append(MS2Manager.getTableInfoPeptideMemberships());
@@ -844,8 +867,8 @@ public class ProteinManager
             sql.append(proteinWhere);
             sql.append('\n');
         }
-
-        sql.append(getProteinGroupCombinedOrderBy(currentUrl, MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId"));
+        if (addOrderBy)
+            sql.append(getProteinGroupCombinedOrderBy(currentUrl, MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId"));
         if (maxProteinRows > 0)
         {
             getSqlDialect().limitRows(sql, maxProteinRows + 1);

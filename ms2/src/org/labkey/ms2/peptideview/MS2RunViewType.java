@@ -29,6 +29,11 @@ public enum MS2RunViewType
         {
             return true;
         }
+
+        public boolean supportsGOPiechart()
+        {
+            return true;
+        }
     },
     PROTEIN("Protein", "protein")
     {
@@ -43,6 +48,11 @@ public enum MS2RunViewType
         }
 
         public boolean supportsProteinColumnPicker()
+        {
+            return true;
+        }
+
+        public boolean supportsGOPiechart()
         {
             return true;
         }
@@ -65,6 +75,11 @@ public enum MS2RunViewType
         }
 
         public boolean supportsProteinColumnPicker()
+        {
+            return true;
+        }
+
+        public boolean supportsGOPiechart()
         {
             return true;
         }
@@ -137,6 +152,11 @@ public enum MS2RunViewType
     public boolean supportsExtraFilters()
     {
         return true;
+    }
+
+    public boolean supportsGOPiechart()
+    {
+        return false;
     }
 
     public abstract AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs);

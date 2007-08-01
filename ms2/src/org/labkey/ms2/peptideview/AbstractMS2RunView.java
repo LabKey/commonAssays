@@ -77,6 +77,10 @@ public abstract class AbstractMS2RunView
 
     public abstract MS2RunViewType getViewType();
 
+    public abstract SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form);
+
+    public abstract Map<String, SimpleFilter> getFilter(ViewURLHelper queryUrl, MS2Run run);
+
     public Container getContainer()
     {
         return _container;
@@ -107,7 +111,7 @@ public abstract class AbstractMS2RunView
         result.add(exportFormat);
 
         // TODO: Temp hack -- need to support GO charts in protein views
-        if ("peptides".equals(whatWeAreSelecting) && GoLoader.isGoLoaded())
+        if (getViewType().supportsGOPiechart() && GoLoader.isGoLoaded())
         {
             result.add(new ActionButton("peptideCharts.post", "GO Piechart"));
             DropDownList chartType = new DropDownList("chartType");

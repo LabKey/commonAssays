@@ -1019,29 +1019,39 @@ public class MS2Controller extends ViewController
         ViewContext ctx = getViewContext();
         String queryString = (String) ctx.get("queryString");
         queryUrl.setRawQuery(queryString);
-        SimpleFilter filter = ProteinManager.getPeptideFilter(queryUrl, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run);
-
-        SQLFragment fragment = new SQLFragment();
-        fragment.append("SELECT DISTINCT SeqId FROM ");
-        fragment.append(MS2Manager.getTableInfoPeptides());
-        fragment.append(" ");
-        fragment.append(filter.getWhereSQL(ProteinManager.getSqlDialect()));
-
-        fragment.addAll(filter.getWhereParams(MS2Manager.getTableInfoPeptides()));
-
-        PieJChartHelper pjch = PieJChartHelper.prepareGOPie(chartTitle, fragment, goChartType);
 
         HttpView v = new VelocityView("/org/labkey/ms2/peptideChart.vm");
 
+        AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
+
+        Map<String, SimpleFilter> filters = peptideView.getFilter(queryUrl, run);
+        String peptideFilterInfo = "";
+        String proteinFilterInfo = "";
+        String proteinGroupFilterInfo = "";
+        if (filters != null)
+        {
+            if (filters.containsKey("peptideFilter"))
+                peptideFilterInfo = "Peptide Filter: " + filters.get("peptideFilter").getFilterText();
+            if (filters.containsKey("proteinFilter"))
+                proteinFilterInfo = "Protein Filter: " + filters.get("proteinFilter").getFilterText();
+            if (filters.containsKey("proteinGroupFilter"))
+                proteinFilterInfo = "Protein Group Filter: " + filters.get("proteinGroupFilter").getFilterText();
+        }
+        v.addObject("peptideFilterInfo", peptideFilterInfo);
+        v.addObject("proteinFilterInfo", proteinFilterInfo);
+        v.addObject("proteinGroupFilterInfo", proteinGroupFilterInfo);
+
+        SQLFragment fragment = peptideView.getProteins(queryUrl, run, form);
+        PieJChartHelper pjch = PieJChartHelper.prepareGOPie(chartTitle, fragment, goChartType);
+        pjch.renderAsPNG(new NullOutputStream());
+
         String runInfo = "Run: " + run;
         v.addObject("runInfo", runInfo);
-        String filterInfo = "Filter: " + filter.getFilterText();
-        v.addObject("filterInfo", filterInfo);
-        pjch.renderAsPNG(new NullOutputStream());
 
         v.addObject("imageMap", ImageMapUtilities.getImageMap("pie1", pjch.getChartRenderingInfo()));
         v.addObject("queryString", queryString);
         v.addObject("run", run.getRun());
+        v.addObject("grouping", form.getGrouping());
 
         String pieHelperObjName = "piechart-" + (new Random().nextInt(1000000000));
         String listOfSlices = "?ctype=" + goChartType.toString().replace(' ', '+') + "&helpername=" + pieHelperObjName;
@@ -1049,8 +1059,11 @@ public class MS2Controller extends ViewController
         v.addObject("PiechartHelperObj", pieHelperObjName);
         v.addObject("ChartTitle", chartTitle);
         v.addObject("GOC", ProteinDictionaryHelpers.GoTypes.CELL_LOCATION);
+        v.addObject("GOCSelected", goChartType == ProteinDictionaryHelpers.GoTypes.CELL_LOCATION ? "selected" : "");
         v.addObject("GOF", ProteinDictionaryHelpers.GoTypes.FUNCTION);
+        v.addObject("GOFSelected", goChartType == ProteinDictionaryHelpers.GoTypes.FUNCTION ? "selected" : "");
         v.addObject("GOP", ProteinDictionaryHelpers.GoTypes.PROCESS);
+        v.addObject("GOPSelected", goChartType == ProteinDictionaryHelpers.GoTypes.PROCESS ? "selected" : "");
         Cache.getShared().put(pieHelperObjName, pjch, Cache.HOUR * 2);
 
         return _renderInTemplate(v, true, "GO " + goChartType + " Chart", null);

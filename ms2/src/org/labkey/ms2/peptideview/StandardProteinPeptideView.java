@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.labkey.ms2.MS2Controller;
 
@@ -81,6 +82,8 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
         ButtonBar bb = createButtonBar("exportAllProteins", "exportSelectedProteins", "proteins");
         proteinRgn.addHiddenFormField("queryString", _url.getRawQuery());
+        proteinRgn.addHiddenFormField("run", _url.getParameter("run"));
+        proteinRgn.addHiddenFormField("grouping", _url.getParameter("grouping"));
 
         proteinRgn.setButtonBar(bb, DataRegion.MODE_GRID);
 
@@ -188,6 +191,23 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     public MS2RunViewType getViewType()
     {
         return MS2RunViewType.PROTEIN;
+    }
+
+    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form)
+    {
+        SQLFragment fragment = new SQLFragment();
+        fragment.append("SELECT DISTINCT SeqId FROM ( ");
+        fragment.append(ProteinManager.getPeptideSql(queryUrl, run, null, -1, "SeqId", false));
+        fragment.append(" ) x");
+        return fragment;
+    }
+
+    public HashMap<String, SimpleFilter> getFilter(ViewURLHelper queryUrl, MS2Run run)
+    {
+        HashMap<String, SimpleFilter> map = new HashMap<String, SimpleFilter>();
+        map.put("peptideFilter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run));
+        map.put("proteinFilter", ProteinManager.getProteinFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, null, run));
+        return map;
     }
 
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException

@@ -3,6 +3,7 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.DisplayElement;
+import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
@@ -10,11 +11,13 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.*;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.sql.SQLException;
 
 /**
@@ -51,6 +54,15 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
         ms2QueryView.exportToTSV(form, response, selectedRows, getAMTFileHeader());
     }
 
+    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    public HashMap<String, SimpleFilter> getFilter(ViewURLHelper queryUrl, MS2Run run)
+    {
+        throw new UnsupportedOperationException();
+    }
 
     public void exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
     {
