@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.awt.*;
+import java.awt.geom.Point2D;
 
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.web.*;
@@ -211,6 +212,19 @@ public class FlowAnalyzer
         intervalDef.setMax(intervalGate.getMax());
     }
 
+    static public void fillEllipseGate(EllipseDef ellipseDef, EllipseGate ellipseGate)
+    {
+        ellipseDef.setXAxis(ellipseGate.getXAxis());
+        ellipseDef.setYAxis(ellipseGate.getYAxis());
+        ellipseDef.setDistance(ellipseGate.getDistance());
+        for (Point2D.Double point : ellipseGate.getFoci())
+        {
+            PointDef pointDef = ellipseDef.addNewFocus();
+            pointDef.setX(point.getX());
+            pointDef.setY(point.getY());
+        }
+    }
+
     static public void fillGateList(GateListDef gateListDef, GateList gateList)
     {
         for (Gate gate : gateList.getGates())
@@ -222,6 +236,10 @@ public class FlowAnalyzer
             else if (gate instanceof IntervalGate)
             {
                 fillIntervalGate(gateListDef.addNewInterval(), (IntervalGate) gate);
+            }
+            else if (gate instanceof EllipseGate)
+            {
+                fillEllipseGate(gateListDef.addNewEllipse(), (EllipseGate) gate);
             }
             else if (gate instanceof NotGate)
             {
@@ -248,6 +266,12 @@ public class FlowAnalyzer
             IntervalDef intervalDef = gateDef.addNewInterval();
             fillIntervalGate(intervalDef, intervalGate);
         }
+        else if (gate instanceof EllipseGate)
+        {
+            EllipseGate ellipseGate = (EllipseGate) gate;
+            EllipseDef ellipseDef = gateDef.addNewEllipse();
+            fillEllipseGate(ellipseDef, ellipseGate);
+        }
         else if (gate instanceof AndGate)
         {
             fillGateList(gateDef.addNewAnd(), (AndGate) gate);
@@ -256,6 +280,7 @@ public class FlowAnalyzer
         {
             fillGate(gateDef.addNewNot(), ((NotGate) gate).getGate());
         }
+
     }
 
     static public void fillPopulation(PopulationDef populationDef, Population population)

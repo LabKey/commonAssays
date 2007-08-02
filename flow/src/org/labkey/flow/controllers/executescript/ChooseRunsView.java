@@ -38,6 +38,12 @@ public class ChooseRunsView extends FlowQueryView
         return;
     }
 
+
+    protected boolean canDelete()
+    {
+        return false;
+    }
+
     protected DataRegion createDataRegion()
     {
         List<DisplayColumn> displayColumns = getDisplayColumns();
@@ -47,8 +53,9 @@ public class ChooseRunsView extends FlowQueryView
         rgn.setName(getDataRegionName());
         rgn.setDisplayColumnList(displayColumns);
         return rgn;
-
     }
+
+
 
     protected DataView createDataView()
     {

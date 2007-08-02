@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
 import java.net.URI;
+import java.awt.geom.Point2D;
 
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
@@ -189,6 +190,29 @@ public class MacWorkspace extends FlowJoWorkspace
         }
     }
 
+    protected PolygonGate readPolygon(Element el)
+    {
+        String xAxis = cleanName(el.getAttribute("xAxisName"));
+        String yAxis = cleanName(el.getAttribute("yAxisName"));
+
+        List<Double> lstX = new ArrayList();
+        List<Double> lstY = new ArrayList();
+        for (Element elPolygon : getElementsByTagName(el, "Polygon"))
+        {
+            for (Element elVertex : getElementsByTagName(elPolygon, "Vertex"))
+            {
+                lstX.add(parseParamValue(xAxis, elVertex, "x"));
+                lstY.add(parseParamValue(yAxis, elVertex, "y"));
+            }
+        }
+        scaleValues(xAxis, lstX);
+        scaleValues(yAxis, lstY);
+        double[] X = toDoubleArray(lstX);
+        double[] Y = toDoubleArray(lstY);
+        PolygonGate gate = new PolygonGate(xAxis, yAxis, new Polygon(X, Y));
+        return gate;
+    }
+
     protected Population readPopulation(Element elPopulation, SubsetSpec parentSubset, Analysis analysis, AttributeSet results)
     {
         String booleanExpr = toBooleanExpression(elPopulation);
@@ -216,27 +240,7 @@ public class MacWorkspace extends FlowJoWorkspace
                 Element el = (Element) node;
                 if ("Polygon".equals(el.getTagName()) || "PolyRect".equals(el.getTagName()))
                 {
-                    String xAxis = cleanName(el.getAttribute("xAxisName"));
-                    String yAxis = cleanName(el.getAttribute("yAxisName"));
-                    gatedParams.add(xAxis);
-                    gatedParams.add(yAxis);
-
-                    List<Double> lstX = new ArrayList();
-                    List<Double> lstY = new ArrayList();
-                    for (Element elPolygon : getElementsByTagName(el, "Polygon"))
-                    {
-                        for (Element elVertex : getElementsByTagName(elPolygon, "Vertex"))
-                        {
-                            lstX.add(parseParamValue(xAxis, elVertex, "x"));
-                            lstY.add(parseParamValue(yAxis, elVertex, "y"));
-                        }
-                    }
-                    scaleValues(xAxis, lstX);
-                    scaleValues(yAxis, lstY);
-                    double[] X = toDoubleArray(lstX);
-                    double[] Y = toDoubleArray(lstY);
-                    PolygonGate gate = new PolygonGate(xAxis, yAxis, new Polygon(X, Y));
-                    ret.addGate(gate);
+                    ret.addGate(readPolygon(el));
                 }
                 else if ("Range".equals(el.getTagName()))
                 {
@@ -252,6 +256,17 @@ public class MacWorkspace extends FlowJoWorkspace
                     }
                     scaleValues(axis, lstValues);
                     IntervalGate gate = new IntervalGate(axis, lstValues.get(0), lstValues.get(1));
+                    ret.addGate(gate);
+                }
+                else if ("Ellipse".equals(el.getTagName()))
+                {
+                    PolygonGate polygon = readPolygon(el);
+                    Point2D.Double[] vertices = new Point2D.Double[4];
+                    for (int i = 0; i < vertices.length; i ++)
+                    {
+                        vertices[i] = new Point2D.Double(polygon.getPolygon().X[i], polygon.getPolygon().Y[i]);
+                    }
+                    EllipseGate gate = EllipseGate.fromVertices(polygon.getX(), polygon.getY(), vertices);
                     ret.addGate(gate);
                 }
             }

@@ -10,7 +10,7 @@
 <% ChooseRunsToAnalyzeForm form = (ChooseRunsToAnalyzeForm) __form; %>
 <form method="POST" action="analyzeSelectedRuns.post">
     <%=errors()%>
-    <p>What do you want to call the new analysis?<br>
+    <p>What do you want to call the new analysis folder?<br>
         <% String name = form.ff_analysisName;
             if (StringUtils.isEmpty(name))
             {

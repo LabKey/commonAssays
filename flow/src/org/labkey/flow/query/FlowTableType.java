@@ -10,6 +10,7 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.util.PageFlowUtil;
 
 import java.util.Map;
@@ -74,6 +75,13 @@ public enum FlowTableType
     public ViewURLHelper urlFor(Container container, String colName, Object value)
     {
         SimpleFilter filter = new SimpleFilter(colName, value);
+        return urlFor(container, filter);
+    }
+
+    public ViewURLHelper urlFor(Container container, String colName, CompareType compare, Object value)
+    {
+        SimpleFilter filter = new SimpleFilter();
+        filter.addCondition(colName, value, compare);
         return urlFor(container, filter);
     }
 }

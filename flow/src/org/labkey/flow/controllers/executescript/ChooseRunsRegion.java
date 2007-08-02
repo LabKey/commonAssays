@@ -77,7 +77,7 @@ public class ChooseRunsRegion extends DataRegion
             }
             if (experiment != null && experiment.findRun(new File(run.getPath()), _form.getProtocolStep()).length > 0)
             {
-                return "The '" + experiment.getName() + "' analysis already contains this run.";
+                return "The '" + experiment.getName() + "' analysis folder already contains this run.";
             }
             if (_form.getProtocol().requiresCompensationMatrix(_form.getProtocolStep()))
             {
@@ -86,7 +86,7 @@ public class ChooseRunsRegion extends DataRegion
                     FlowExperiment expComp = FlowExperiment.fromLSID(_form.getCompensationExperimentLSID());
                     if (expComp.findCompensationMatrix(run) == null)
                     {
-                        return "There is no compensation matrix for this run in the '" + expComp.getName() + "' analysis";
+                        return "There is no compensation matrix for this run in the '" + expComp.getName() + "' analysis folder";
                     }
                 }
             }

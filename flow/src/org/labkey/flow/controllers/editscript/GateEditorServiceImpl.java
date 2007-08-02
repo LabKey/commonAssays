@@ -91,6 +91,8 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
 
     protected GWTCompensationCalculation makeCompensationCalculation(CompensationCalculationDef calc)
     {
+        if (calc == null)
+            return null;
         GWTCompensationCalculation ret = new GWTCompensationCalculation();
         populatePopulationSet(null, ret, calc.getPopulationArray());
         return ret;
@@ -98,6 +100,8 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
 
     protected GWTAnalysis makeAnalysis(AnalysisDef analysis)
     {
+        if (analysis == null)
+            return null;
         GWTAnalysis ret = new GWTAnalysis();
         populatePopulationSet(null, ret, analysis.getPopulationArray());
         return ret;

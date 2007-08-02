@@ -35,7 +35,7 @@ public class AnalysesWebPart extends FlowQueryView
     public AnalysesWebPart(ViewContext context, FlowSchema schema, FlowQuerySettings settings)
     {
         super(context, schema, settings);
-        setTitle("Flow Analyses");
+        setTitle("Flow Analysis Folders");
         setShowExportButtons(false);
         setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
     }

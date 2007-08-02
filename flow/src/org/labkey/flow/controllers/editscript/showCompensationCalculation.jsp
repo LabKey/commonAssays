@@ -5,6 +5,7 @@
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -51,5 +52,6 @@
         <labkey:link text="Switch keywords or gates" href="<%=form.analysisScript.urlFor(ScriptController.Action.chooseCompensationRun)%>" /><br>
         <labkey:link text="Move or define gates" href="<%=form.analysisScript.urlFor(ScriptController.Action.gateEditor, FlowProtocolStep.calculateCompensation)%>" /><br>
         <labkey:link href="<%=form.analysisScript.urlFor(ScriptController.Action.editGateTree, FlowProtocolStep.calculateCompensation)%>" text="Rename gates" /><br>
+        <labkey:link href="<%=form.analysisScript.urlFor(AnalysisScriptController.Action.begin)%>" text="Script main page" />
     </p>
 <% } %>

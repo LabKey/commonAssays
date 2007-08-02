@@ -264,6 +264,16 @@ public class ScriptController extends BaseFlowController
                     graphs.add(new GraphSpec(strGraph));
                 }
             }
+            Set<SubsetSpec> subsets = new LinkedHashSet();
+            StringTokenizer stSubsets = new StringTokenizer(StringUtils.trimToEmpty(form.subsets), "\n");
+            while (stSubsets.hasMoreElements())
+            {
+                String strSubset = StringUtils.trimToNull(stSubsets.nextToken());
+                if (strSubset != null)
+                {
+                    subsets.add(SubsetSpec.fromString(strSubset));
+                }
+            }
             ScriptDocument doc = form.analysisScript.getAnalysisScriptDocument();
             ScriptDef script = doc.getScript();
             AnalysisDef analysis = script.getAnalysis();
@@ -279,6 +289,10 @@ public class ScriptController extends BaseFlowController
             {
                 analysis.removeGraph(0);
             }
+            while (analysis.getSubsetArray().length > 0)
+            {
+                analysis.removeSubset(0);
+            }
             for (StatisticSpec stat : stats)
             {
                 StatisticDef statDef = analysis.addNewStatistic();
@@ -293,6 +307,11 @@ public class ScriptController extends BaseFlowController
             for (GraphSpec graph : graphs)
             {
                 addGraph(analysis, graph);
+            }
+            for (SubsetSpec subset : subsets)
+            {
+                SubsetDef subsetDef = analysis.addNewSubset();
+                subsetDef.setSubset(subset.toString());
             }
             if (!safeSetAnalysisScript(form.analysisScript, doc.toString()))
                 return null;
@@ -1312,7 +1331,7 @@ public class ScriptController extends BaseFlowController
             props.put("subset", form.getSubset());
         }
         GWTView view = new GWTView("org.labkey.flow.gateeditor.GateEditor", props);
-        return renderInTemplate(view, form.getFlowObject(), "New Gate Editor", Action.gateEditor);
+        return renderInTemplate(view, form.getFlowObject(), "Gate Editor", Action.gateEditor);
     }
 
     @Jpf.Action

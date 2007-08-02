@@ -82,6 +82,10 @@ public abstract class Gate implements Serializable
             {
                 ret.add(OrGate.readOr(elChild));
             }
+            else if ("ellipse".equals(elChild.getTagName()))
+            {
+                ret.add(EllipseGate.readEllipse(elChild));
+            }
         }
         return ret;
     }

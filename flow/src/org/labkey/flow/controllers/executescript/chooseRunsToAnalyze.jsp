@@ -40,7 +40,7 @@
                 <labkey:options value="<%=form.getProtocolStep().getDefaultActionSequence()%>"
                               map="<%=form.getAvailableSteps(form.getProtocol())%>"/>
             </select></td></tr>
-        <tr><td>Analysis to put results in:</td>
+        <tr><td>Analysis folder to put results in:</td>
             <td><select name="ff_targetExperimentId" onchange="this.form.submit()">
                 <labkey:options value="<%=form.ff_targetExperimentId == null ? null : Integer.valueOf(form.ff_targetExperimentId)%>"
                               map="<%=FlowObject.idLabelsFor(targetExperiments, "<create new>")%>"/>

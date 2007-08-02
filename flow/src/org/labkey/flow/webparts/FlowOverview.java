@@ -3,6 +3,7 @@ package org.labkey.flow.webparts;
 import org.labkey.api.security.User;
 import org.labkey.api.security.ACL;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineJobData;
 import org.labkey.api.pipeline.PipeRoot;
@@ -169,7 +170,7 @@ public class FlowOverview extends Overview
             StringBuilder status = new StringBuilder();
             ViewURLHelper urlShowFCSFiles = FlowTableType.FCSFiles.urlFor(getContainer(), QueryAction.executeQuery);
             status.append("<a href=\"" + h(urlShowFCSFiles) + "\">" + _fcsFileCount + " FCS files</a> have been loaded.");
-            ViewURLHelper urlShowRuns = FlowTableType.Runs.urlFor(getContainer(), "ProtocolStep", FlowProtocolStep.keywords.getName());
+            ViewURLHelper urlShowRuns = FlowTableType.Runs.urlFor(getContainer(), "FCSFileCount", CompareType.NEQ, 0);
             if (_fcsRunCount == 1)
             {
                 status.append(" These are in <a href=\"" + h(urlShowRuns) + "\">1 run</a>");
@@ -294,7 +295,7 @@ public class FlowOverview extends Overview
             statusHTML.append("There are <a href=\"" + h(FlowTableType.CompensationMatrices.urlFor(getContainer(), QueryAction.executeQuery)) + "\">" + _compensationMatrixCount + " compensation matrices</a>.");
             if (_compensationRunCount != 0)
             {
-                statusHTML.append(" These have been calculated in <a href=\"" + h(FlowTableType.Runs.urlFor(getContainer(), "ProtocolStep", FlowProtocolStep.calculateCompensation.getName())) + "\">" + _compensationRunCount + " runs</a>.");
+                statusHTML.append(" These have been calculated in <a href=\"" + h(FlowTableType.Runs.urlFor(getContainer(), "CompensationControlCount", CompareType.NEQ, 0)) + "\">" + _compensationRunCount + " runs</a>.");
             }
         }
         ret.setStatusHTML(statusHTML.toString());
@@ -345,7 +346,7 @@ public class FlowOverview extends Overview
             }
             else
             {
-                ViewURLHelper urlShowRuns = FlowTableType.Runs.urlFor(getContainer(), "ProtocolStep", FlowProtocolStep.analysis.getName());
+                ViewURLHelper urlShowRuns = FlowTableType.Runs.urlFor(getContainer(), "FCSAnalysisCount", CompareType.NEQ, 0);
                 statusHTML.append("<a href=\"" + h(FlowTableType.FCSAnalyses.urlFor(getContainer(), QueryAction.executeQuery)) + "\">" + _fcsAnalysisCount + " FCS files</a> have been analyzed in " + "<a href=\"" + h(urlShowRuns) + "\">" + _fcsAnalysisRunCount + " runs</a>.");
             }
         }

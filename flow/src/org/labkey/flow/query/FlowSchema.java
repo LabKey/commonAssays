@@ -240,6 +240,9 @@ public class FlowSchema extends UserSchema
         ret.addDataCountColumn("WellCount", InputRole.FCSFile.getPropertyDescriptor(getContainer()));
         ret.addColumn(ExpRunTable.Column.Created);
         ret.addColumn(ExpRunTable.Column.CreatedBy);
+        addDataCountColumn(ret, "FCSFileCount", ObjectType.fcsKeywords);
+        addDataCountColumn(ret, "CompensationControlCount", ObjectType.compensationControl);
+        addDataCountColumn(ret, "FCSAnalysisCount", ObjectType.fcsAnalysis);
         ret.setEditHelper(new RunEditHelper(this));
         return ret;
     }
@@ -420,6 +423,15 @@ public class FlowSchema extends UserSchema
                 return detach().createAnalysisScriptTable("Lookup", true);
             }
         });
+        ColumnInfo colCompensationMatrix = ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.getPropertyDescriptor(getContainer()));
+        colCompensationMatrix.setFk(new LookupForeignKey(PFUtil.urlFor(CompensationController.Action.showCompensation, getContainer()), FlowParam.compId.toString(),
+                "RowId", "Name"){
+            public TableInfo getLookupTableInfo()
+            {
+                return detach().createCompensationMatrixTable("Lookup");
+            }
+        });
+
         FlowPropertySet fps = new FlowPropertySet(ret);
         ret.setDetailsURL(new DetailsURL(PFUtil.urlFor(WellController.Action.showWell, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         if (getExperiment() != null)
@@ -526,6 +538,16 @@ public class FlowSchema extends UserSchema
         {
             // ignore
         }
+        return ret;
+    }
+
+    private ColumnInfo addDataCountColumn(ExpRunTable runTable, String name, ObjectType type)
+    {
+        SQLFragment sql = new SQLFragment("(SELECT COUNT(exp.data.rowid) FROM exp.data WHERE (SELECT flow.object.typeid FROM flow.object WHERE flow.object.dataid = exp.data.rowid) = "
+                + type.getTypeId() + " AND exp.data.runid = " + ExprColumn.STR_TABLE_ALIAS + ".RowId)");
+        ExprColumn ret = new ExprColumn(runTable, name, sql, Types.INTEGER);
+        ret.setIsHidden(true);
+        runTable.addColumn(ret);
         return ret;
     }
 }

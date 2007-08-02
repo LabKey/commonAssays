@@ -23,19 +23,19 @@
     <input type="hidden" name="ff_confirm" value="true" />
     <p>The statistics in this workspace that have been calculated will be uploaded to <%=FlowModule.getLongProductName()%>.</p>
     <% if (analyses.size() == 0) { %>
-    <p><%=FlowModule.getLongProductName()%> organizes results into different "analyses".  The same FCS file should only
-    be analyzed once in a given analysis.  If you want to analyze the same FCS file in two different ways, those results
-    should be put into different analyses.<br>
+    <p><%=FlowModule.getLongProductName()%> organizes results into different "analysis folders".  The same FCS file should only
+    be analyzed once in a given analysis folder.  If you want to analyze the same FCS file in two different ways, those results
+    should be put into different analysis folders.<br>
 
-    What do you want to call the new Analysis?  You will be able to use this name for multiple uploaded workspaces.<br>
+    What do you want to call the new analysis folder?  You will be able to use this name for multiple uploaded workspaces.<br>
     <input type="text" name="ff_newAnalysisName" value="<%=h(form.ff_newAnalysisName)%>">
     </p>
     <% } else { %>
-    <p>Which analysis do you want to put the results into?<br>
+    <p>Which analysis folder do you want to put the results into?<br>
         <select name="ff_existingAnalysisId">
             <labkey:options value="<%=form.ff_existingAnalysisId%>" map="<%=analyses%>" />
         </select><br>
-        or create a new analysis named:<br>
+        or create a new analysis folder named:<br>
         <input type="text" name="ff_newAnalysisName" value="<%=h(form.ff_newAnalysisName)%>">
     </p>
     <% } %>

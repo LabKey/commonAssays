@@ -213,23 +213,25 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
             SimpleFilter ret = new SimpleFilter(filter);
 
             FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-            if (runs.length == 0)
+            int runCount = 0;
+            StringBuilder sql = new StringBuilder("RowId IN (");
+            String comma = "";
+            for (FlowRun run : runs)
+            {
+                if (run.getPath() == null)
+                    continue;
+                sql.append(comma);
+                comma = ",";
+                sql.append(run.getRunId());
+                runCount ++;
+            }
+            sql.append(")");
+            if (runCount == 0)
             {
                 ret.addWhereClause("1 = 0", null);
             }
             else
             {
-                StringBuilder sql = new StringBuilder("RowId IN (");
-                String comma = "";
-                for (FlowRun run : runs)
-                {
-                    if (run.getPath() == null)
-                        continue;
-                    sql.append(comma);
-                    comma = ",";
-                    sql.append(run.getRunId());
-                }
-                sql.append(")");
                 ret.addWhereClause(sql.toString(), new Object[0], "RowId");
             }
             return ret;

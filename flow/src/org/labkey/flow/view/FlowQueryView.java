@@ -123,7 +123,7 @@ public class FlowQueryView extends QueryView
         {
             FlowExperiment[] experiments = FlowExperiment.getAnalysesAndWorkspace(getContainer());
             Map<Object, String> availableExperiments = new LinkedHashMap();
-            availableExperiments.put(0, "<All Analyses>");
+            availableExperiments.put(0, "<All Analysis Folders>");
             for (FlowExperiment experiment : experiments)
             {
                 availableExperiments.put(experiment.getExperimentId(), experiment.getName());
@@ -135,7 +135,7 @@ public class FlowQueryView extends QueryView
             {
                 availableExperiments.put(current.getExperimentId(), current.getName());
             }
-            ret.add(new QueryPicker("Analysis:", FlowParam.experimentId.toString(), currentId, availableExperiments));
+            ret.add(new QueryPicker("Analysis Folder:", FlowParam.experimentId.toString(), currentId, availableExperiments));
         }
         return ret;
     }

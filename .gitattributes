@@ -251,6 +251,7 @@ flow/src/org/labkey/flow/analysis/model/AndGate.java -text
 flow/src/org/labkey/flow/analysis/model/CompensationCalculation.java -text
 flow/src/org/labkey/flow/analysis/model/CompensationMatrix.java -text
 flow/src/org/labkey/flow/analysis/model/DataFrame.java -text
+flow/src/org/labkey/flow/analysis/model/EllipseGate.java -text
 flow/src/org/labkey/flow/analysis/model/FCS.java -text
 flow/src/org/labkey/flow/analysis/model/FCSCache.java -text
 flow/src/org/labkey/flow/analysis/model/FCSHeader.java -text

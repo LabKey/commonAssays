@@ -615,7 +615,7 @@ abstract public class FlowJoWorkspace implements Serializable
         }
     }
 
-    public FlowRun createExperimentRun(User user, Container container, FlowExperiment experiment, File workspaceFile, File runFilePathRoot) throws Exception
+    public FlowRun createExperimentRun(User user, Container container, FlowExperiment experiment, File workspaceFile, File runFilePathRoot, boolean searchForFCSFiles) throws Exception
     {
         URI dataFileURI = new File(workspaceFile.getParent(), "attributes.flowdata.xml").toURI();
         ExperimentService.Interface svc = ExperimentService.get();
@@ -653,6 +653,10 @@ abstract public class FlowJoWorkspace implements Serializable
             FlowProtocol flowProtocol = FlowProtocol.ensureForContainer(user, container);
             ExpProtocol protocol = flowProtocol.getProtocol();
             run.setProtocol(protocol);
+            if (searchForFCSFiles)
+            {
+                run.setFilePathRoot(runFilePathRoot);
+            }
             run.save(user);
 
             ExpData workspaceData = svc.createData(container, new DataType("Flow-Workspace"));
