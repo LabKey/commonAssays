@@ -82,13 +82,16 @@ public class FlowSchema extends UserSchema
                     return createAnalysesTable(alias);
                 case Statistics:
                     return createStatisticsTable(alias);
+                case Keywords:
+                    return createKeywordsTable(alias);
             }
             return null;
         }
         catch (IllegalArgumentException iae)
         {
-            return super.getTable(name, alias);
+            // ignore
         }
+        return super.getTable(name, alias);
     }
 
     public Set<String> getVisibleTableNames()
@@ -562,18 +565,34 @@ public class FlowSchema extends UserSchema
         ret.addWrapColumn(ret.getRealTable().getColumn("Name"));
         ExpDataTable fcsAnalysisTable = createFCSAnalysisTable("fcsAnalysis", FlowDataType.FCSAnalysis);
         FlowPropertySet fps = new FlowPropertySet(fcsAnalysisTable);
-        Map<StatisticSpec, Integer> map = fps.getStatistics();
+        filterTable(ret, fps.getStatistics());
+        return ret;
+    }
+
+    private TableInfo createKeywordsTable(String alias)
+    {
+        FilteredTable ret = new FilteredTable(FlowManager.get().getTinfoAttribute());
+        ret.setAlias(alias);
+        ret.addWrapColumn(ret.getRealTable().getColumn("Name"));
+        ExpDataTable fcsFilesTable = createFCSFileTable("fcsFiles");
+        FlowPropertySet fps = new FlowPropertySet(fcsFilesTable);
+        filterTable(ret, fps.getKeywordProperties());
+        return ret;
+    }
+
+    private void filterTable(FilteredTable table, Map<? extends Object, Integer> map)
+    {
         if (map.isEmpty())
         {
-            ret.addCondition(new SQLFragment("1 = 0"));
+            table.addCondition(new SQLFragment("1 = 0"));
         }
         else
         {
             SQLFragment sqlCondition = new SQLFragment("RowId IN (");
             sqlCondition.append(StringUtils.join(map.values().iterator(), ","));
             sqlCondition.append(")");
-            ret.addCondition(sqlCondition);
+            table.addCondition(sqlCondition);
         }
-        return ret;
+
     }
 }

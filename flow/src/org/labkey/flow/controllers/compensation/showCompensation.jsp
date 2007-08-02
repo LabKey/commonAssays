@@ -114,7 +114,11 @@
         FlowWell well = wellMap.get(channelNames[iChannel] + "+");
     %>
     <tr>
+        <%if (well == null) { %>
+        <td>N/A</td>
+        <% } else { %>
         <td><a href="<%=h(well.urlShow())%>"><%=channelNames[iChannel]%></a></td>
+        <% } %>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         { %>
         <td><%=callback.render(iChannel, iChannelValue)%></td>
