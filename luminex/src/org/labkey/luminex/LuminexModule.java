@@ -22,7 +22,7 @@ public class LuminexModule extends DefaultModule implements ContainerManager.Con
 
     public LuminexModule()
     {
-        super(NAME, 0.02, null, "/luminex");
+        super(NAME, 0.03, null, "/luminex");
 
         addController("Luminex", LuminexController.class);
     }
@@ -62,5 +62,10 @@ public class LuminexModule extends DefaultModule implements ContainerManager.Con
     public Set<DbSchema> getSchemasToTest()
     {
         return PageFlowUtil.set(LuminexSchema.getSchema());
+    }
+
+    public Set<String> getModuleDependencies()
+    {
+        return Collections.singleton("Experiment");
     }
 }

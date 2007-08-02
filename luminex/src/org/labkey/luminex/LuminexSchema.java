@@ -7,8 +7,10 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpDataTable;
 import org.labkey.api.exp.Protocol;
 import org.labkey.api.study.AssayService;
+import org.labkey.api.study.DefaultAssayProvider;
 
 import java.util.*;
+import java.sql.Types;
 
 public class LuminexSchema extends UserSchema
 {
@@ -117,12 +119,35 @@ public class LuminexSchema extends UserSchema
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FIBackground"))).setCaption("FI-Bkgd");
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("StdDev")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("PercentCV"))).setCaption("%CV");
-        addOORColumns(result, result.getRealTable().getColumn("ObsConc"), result.getRealTable().getColumn("ObsConcOORIndicator"));
+        OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("ObsConc"), result.getRealTable().getColumn("ObsConcOORIndicator"));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ObsConcString")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ExpConc")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ObsOverExp"))).setCaption("(Obs/Exp)*100");
-        addOORColumns(result, result.getRealTable().getColumn("ConcInRange"), result.getRealTable().getColumn("ConcInRangeOORIndicator"));
+        OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("ConcInRange"), result.getRealTable().getColumn("ConcInRangeOORIndicator"));
         result.addColumn(result.wrapColumn("ConcInRangeString", result.getRealTable().getColumn("ConcInRangeString")));
+
+        FieldKey studyFieldKey = FieldKey.fromParts("Data", "Run", "Run Properties", DefaultAssayProvider.TARGET_STUDY_PROPERTY_NAME);
+        ColumnInfo studyColumn = QueryService.get().getColumns(result, Collections.singleton(studyFieldKey)).get(studyFieldKey);
+
+        ExprColumn participantCol;
+        ExprColumn visitCol;
+
+        if (studyColumn != null)
+        {
+            SQLFragment participantSQL = new SQLFragment("(SELECT ptid FROM study.specimen s WHERE s.GlobalUniqueId = " + ExprColumn.STR_TABLE_ALIAS + ".Description AND s.container = " + studyColumn.getValueSql() +  ")");
+            participantCol = new ExprColumn(result, "ParticipantID", participantSQL, Types.VARCHAR, studyColumn);
+
+            SQLFragment visitSQL = new SQLFragment("(SELECT visitvalue FROM study.specimen s WHERE s.GlobalUniqueId = " + ExprColumn.STR_TABLE_ALIAS + ".Description AND s.container = " + studyColumn.getValueSql() +  ")");
+            visitCol = new ExprColumn(result, "VisitID", visitSQL, Types.REAL, studyColumn);
+        }
+        else
+        {
+            participantCol = new ExprColumn(result, "ParticipantID", new SQLFragment("NULL"), Types.VARCHAR);
+            visitCol = new ExprColumn(result, "VisitID", new SQLFragment("NULL"), Types.REAL);
+        }
+
+        result.addColumn(participantCol);
+        result.addColumn(visitCol);
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("Analyte"));
@@ -162,40 +187,6 @@ public class LuminexSchema extends UserSchema
         }
         filter.append(")");
         result.addCondition(filter);
-    }
-
-    private void addOORColumns(FilteredTable table, ColumnInfo numberColumn, ColumnInfo oorIndicatorColumn)
-    {
-        ColumnInfo combinedCol = table.wrapColumn(numberColumn);
-        ColumnInfo wrappedOORIndicatorCol = table.wrapColumn(oorIndicatorColumn);
-        combinedCol.setDisplayColumnFactory(new OORDisplayColumnFactory(wrappedOORIndicatorCol));
-
-        SQLFragment inRangeSQL = new SQLFragment("CASE WHEN ");
-        inRangeSQL.append(oorIndicatorColumn.getName());
-        inRangeSQL.append(" IS NULL THEN ");
-        inRangeSQL.append(numberColumn.getName());
-        inRangeSQL.append(" ELSE NULL END");
-        table.addColumn(new ExprColumn(table, numberColumn.getName() + "InRange", inRangeSQL, numberColumn.getSqlTypeInt()));
-
-        table.addColumn(table.wrapColumn(numberColumn.getName() + "Number", numberColumn));
-        table.addColumn(wrappedOORIndicatorCol);
-
-        table.addColumn(combinedCol);
-    }
-
-    private static class OORDisplayColumnFactory implements DisplayColumnFactory
-    {
-        private ColumnInfo _oorColumnInfo;
-        
-        public OORDisplayColumnFactory(ColumnInfo oorColumnInfo)
-        {
-            _oorColumnInfo = oorColumnInfo;
-        }
-
-        public DisplayColumn createRenderer(ColumnInfo colInfo)
-        {
-            return new OutOfRangeDisplayColumn(colInfo, _oorColumnInfo);
-        }
     }
 
     public static DbSchema getSchema()

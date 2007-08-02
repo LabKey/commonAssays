@@ -7,6 +7,7 @@ package org.labkey.luminex;
 public class LuminexDataRow
 {
     private int _analyteId;
+    private int _rowId;
 
     private String _type;
     private String _well;
@@ -208,5 +209,15 @@ public class LuminexDataRow
     public int getDataId()
     {
         return _dataId;
+    }
+
+    public int getRowId()
+    {
+        return _rowId;
+    }
+
+    public void setRowId(int rowId)
+    {
+        _rowId = rowId;
     }
 }

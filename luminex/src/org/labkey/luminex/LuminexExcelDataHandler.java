@@ -10,7 +10,6 @@ import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
-import org.labkey.api.study.SimpleAssayDataImportHelper;
 import org.labkey.api.study.AssayViewType;
 import org.apache.log4j.Logger;
 
@@ -138,7 +137,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             {
                 return parseDouble(value);
             }
-            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter)
+            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
             {
                 return getValue(value);
             }
@@ -153,7 +152,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             {
                 return null;
             }
-            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter)
+            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
             {
                 return null;
             }
@@ -168,9 +167,9 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             {
                 return null;
             }
-            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter)
+            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
             {
-                return calcOORValue(value, dataRows, getter, false);
+                return calcOORValue(dataRows, getter, false, analyte);
             }
         },
         OUT_OF_RANGE_BELOW
@@ -183,9 +182,9 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             {
                 return null;
             }
-            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter)
+            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
             {
-                return calcOORValue(value, dataRows, getter, true);
+                return calcOORValue(dataRows, getter, true, analyte);
             }
         },
         BEYOND_RANGE
@@ -227,7 +226,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             {
                 return Double.parseDouble(value.substring(1));
             }
-            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter)
+            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
             {
                 return getValue(value);
             }
@@ -242,7 +241,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             {
                 return null;
             }
-            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter)
+            public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
             {
                 return null;
             }
@@ -251,9 +250,9 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
 
         public abstract String getOORIndicator(String value, List<LuminexDataRow> dataRows, Getter getter);
         public abstract Double getValue(String value);
-        public abstract Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter);
+        public abstract Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte);
 
-        private static Double calcOORValue(String value, List<LuminexDataRow> dataRows, Getter getter, boolean min)
+        private static Double calcOORValue(List<LuminexDataRow> dataRows, Getter getter, boolean min, Analyte analyte)
         {
             double startValue = min ? Double.MAX_VALUE : Double.MIN_VALUE;
             double result = startValue;
@@ -266,7 +265,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                     if ((type.startsWith("s") || type.startsWith("es")) && dataRow.getObsOverExp() != null && rowValue != null)
                     {
                         double obsOverExp = dataRow.getObsOverExp().doubleValue();
-                        if (obsOverExp > 70 && obsOverExp < 130)
+                        if (obsOverExp >= analyte.getMinStandardRecovery() && obsOverExp <= analyte.getMaxStandardRecovery())
                         {
                             if (min)
                             {
@@ -397,9 +396,9 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                     }
                 };
                 dataRow.setObsConcOORIndicator(determineOutOfRange(dataRow.getObsConcString()).getOORIndicator(dataRow.getObsConcString(), dataRows, obsConcGetter));
-                dataRow.setObsConc(determineOutOfRange(dataRow.getObsConcString()).getValue(dataRow.getObsConcString(), dataRows, obsConcGetter));
+                dataRow.setObsConc(determineOutOfRange(dataRow.getObsConcString()).getValue(dataRow.getObsConcString(), dataRows, obsConcGetter, analyte));
                 dataRow.setConcInRangeOORIndicator(determineOutOfRange(dataRow.getConcInRangeString()).getOORIndicator(dataRow.getConcInRangeString(), dataRows, concInRangeGetter));
-                dataRow.setConcInRange(determineOutOfRange(dataRow.getConcInRangeString()).getValue(dataRow.getConcInRangeString(), dataRows, concInRangeGetter));
+                dataRow.setConcInRange(determineOutOfRange(dataRow.getConcInRangeString()).getValue(dataRow.getConcInRangeString(), dataRows, concInRangeGetter, analyte));
 
                 dataRow.setAnalyteId(analyte.getRowId());
 
@@ -518,6 +517,35 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
 
                 storePropertyValue(propName, value, analyteColumns, analyteProps);
                 storePropertyValue(propName, value, excelRunColumns, excelRunProps);
+            }
+
+            String recoveryPrefix = "conc in range = unknown sample concentrations within range where standards recovery is ";
+            if (cellContents.toLowerCase().startsWith(recoveryPrefix))
+            {
+                String recoveryString = cellContents.substring(recoveryPrefix.length()).trim();
+                int charIndex = 0;
+
+                StringBuilder minSB = new StringBuilder();
+                while (charIndex < recoveryString.length() && Character.isDigit(recoveryString.charAt(charIndex)))
+                {
+                    minSB.append(recoveryString.charAt(charIndex));
+                    charIndex++;
+                }
+
+                while (charIndex < recoveryString.length() && !Character.isDigit(recoveryString.charAt(charIndex)))
+                {
+                    charIndex++;
+                }
+
+                StringBuilder maxSB = new StringBuilder();
+                while (charIndex < recoveryString.length() && Character.isDigit(recoveryString.charAt(charIndex)))
+                {
+                    maxSB.append(recoveryString.charAt(charIndex));
+                    charIndex++;
+                }
+
+                analyte.setMinStandardRecovery(Integer.parseInt(minSB.toString()));
+                analyte.setMaxStandardRecovery(Integer.parseInt(maxSB.toString()));
             }
 
             if (cellContents.toLowerCase().startsWith("fitprob. "))

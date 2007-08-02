@@ -13,6 +13,8 @@ public class Analyte
     private String _regressionType;
     private String _stdCurve;
     private int _rowId;
+    private int _minStandardRecovery;
+    private int _maxStandardRecovery;
 
     public Analyte()
     {
@@ -92,5 +94,25 @@ public class Analyte
     public void setRowId(int rowId)
     {
         _rowId = rowId;
+    }
+
+    public int getMinStandardRecovery()
+    {
+        return _minStandardRecovery;
+    }
+
+    public void setMinStandardRecovery(int minStandardRecovery)
+    {
+        _minStandardRecovery = minStandardRecovery;
+    }
+
+    public int getMaxStandardRecovery()
+    {
+        return _maxStandardRecovery;
+    }
+
+    public void setMaxStandardRecovery(int maxStandardRecovery)
+    {
+        _maxStandardRecovery = maxStandardRecovery;
     }
 }

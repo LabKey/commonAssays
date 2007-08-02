@@ -27,6 +27,8 @@
             <ns:column columnName="ResVar"/>
             <ns:column columnName="RegressionType"/>
             <ns:column columnName="StdCurve"/>
+            <ns:column columnName="MinStandardRecovery"/>
+            <ns:column columnName="MaxStandardRecovery"/>
         </ns:columns>
     </ns:table>
 
