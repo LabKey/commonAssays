@@ -149,32 +149,6 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         return pd;
     }
 
-    private void addProperty(String name, Integer value, Map<String, Object> dataMap, Map<String, PropertyType> types)
-    {
-        addProperty(name, value, PropertyType.INTEGER, dataMap, types);
-    }
-
-    private void addProperty(String name, Double value, Map<String, Object> dataMap, Map<String, PropertyType> types)
-    {
-        addProperty(name, value, PropertyType.DOUBLE, dataMap, types);
-    }
-
-    private void addProperty(String name, Date value, Map<String, Object> dataMap, Map<String, PropertyType> types)
-    {
-        addProperty(name, value, PropertyType.DATE_TIME, dataMap, types);
-    }
-
-    private void addProperty(String name, String value, Map<String, Object> dataMap, Map<String, PropertyType> types)
-    {
-        addProperty(name, value, PropertyType.STRING, dataMap, types);
-    }
-
-    private void addProperty(String name, Object value, PropertyType type, Map<String, Object> dataMap, Map<String, PropertyType> types)
-    {
-        dataMap.put(name, value);
-        types.put(name, type);
-    }
-
     public List<String> publish(User user, Protocol protocol, Container study, Set<AssayPublishKey> dataKeys)
     {
         try
