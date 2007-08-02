@@ -9,12 +9,14 @@ import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.util.PFUtil;
 import org.labkey.flow.view.FlowQueryView;
 import org.labkey.flow.persist.ObjectType;
+import org.labkey.flow.persist.FlowManager;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewForward;
 import org.labkey.api.view.Portal;
 import org.labkey.api.util.UnexpectedException;
 import org.apache.beehive.netui.pageflow.Forward;
+import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -78,6 +80,8 @@ public class FlowSchema extends UserSchema
                     return createAnalysisScriptTable(alias, false);
                 case Analyses:
                     return createAnalysesTable(alias);
+                case Statistics:
+                    return createStatisticsTable(alias);
             }
             return null;
         }
@@ -548,6 +552,28 @@ public class FlowSchema extends UserSchema
         ExprColumn ret = new ExprColumn(runTable, name, sql, Types.INTEGER);
         ret.setIsHidden(true);
         runTable.addColumn(ret);
+        return ret;
+    }
+
+    private TableInfo createStatisticsTable(String alias)
+    {
+        FilteredTable ret = new FilteredTable(FlowManager.get().getTinfoAttribute());
+        ret.setAlias(alias);
+        ret.addWrapColumn(ret.getRealTable().getColumn("Name"));
+        ExpDataTable fcsAnalysisTable = createFCSAnalysisTable("fcsAnalysis", FlowDataType.FCSAnalysis);
+        FlowPropertySet fps = new FlowPropertySet(fcsAnalysisTable);
+        Map<StatisticSpec, Integer> map = fps.getStatistics();
+        if (map.isEmpty())
+        {
+            ret.addCondition(new SQLFragment("1 = 0"));
+        }
+        else
+        {
+            SQLFragment sqlCondition = new SQLFragment("RowId IN (");
+            sqlCondition.append(StringUtils.join(map.values().iterator(), ","));
+            sqlCondition.append(")");
+            ret.addCondition(sqlCondition);
+        }
         return ret;
     }
 }

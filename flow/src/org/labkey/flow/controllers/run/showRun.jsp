@@ -6,8 +6,8 @@
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix"%>
 <%@ page import="org.labkey.flow.controllers.compensation.CompensationController"%>
 <%@ page import="org.labkey.flow.controllers.run.RunController" %>
-<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page import="org.labkey.api.security.ACL" %>
+<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page extends="org.labkey.flow.controllers.run.RunController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
