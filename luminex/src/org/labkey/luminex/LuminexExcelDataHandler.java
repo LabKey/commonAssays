@@ -5,12 +5,12 @@ import org.labkey.api.exp.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
-import org.labkey.api.study.AssayViewType;
+import org.labkey.api.study.AssayProvider;
+import org.labkey.api.study.AssayService;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -584,11 +584,12 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         if (run != null)
         {
             ExpProtocol protocol = run.getProtocol();
-            ViewURLHelper url = new ViewURLHelper("GenericAssay", "assaySummary.view", container);
-            url.addParameter("activeView", AssayViewType.RUN_DATA.toString());
-            url.addParameter("runId", run.getRowId());
-            url.addParameter("rowId", protocol.getRowId());
-            return url;
+            Protocol p = ExperimentService.get().getProtocol(protocol.getRowId());
+            AssayProvider provider = AssayService.get().getProvider(p);
+            if (provider != null)
+            {
+                return provider.getAssayDataURL(container, p, run.getRowId());
+            }
         }
         return null;
     }
