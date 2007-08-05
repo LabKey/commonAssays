@@ -313,9 +313,7 @@ public class AnnouncementsController extends ViewController
     @Jpf.Action
     protected Forward delete() throws Exception
     {
-        Permissions perm = getPermissions();
-
-        if (!perm.allowDeleteThread())
+        if (!getPermissions().allowDeleteThread())
             HttpView.throwUnauthorized();
 
         Container c = getContainer();
@@ -323,11 +321,13 @@ public class AnnouncementsController extends ViewController
         String[] deleteRows = getRequest().getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
 
         if (deleteRows != null)
+        {
             for (String deleteRow : deleteRows)
             {
                 int rowId = Integer.parseInt(deleteRow);
                 AnnouncementManager.deleteAnnouncement(c, rowId);
             }
+        }
 
         return new ViewForward(getListUrl(c), true);
     }
@@ -449,13 +449,13 @@ public class AnnouncementsController extends ViewController
         }
 
         String postUrl = cloneViewURLHelper().setAction("removeFromMemberList").getEncodedLocalURIString();
-        GroovyView confirmDeleteView = new GroovyView("/org/labkey/announcements/confirmRemoveUser.gm");
-        confirmDeleteView.addObject("message", message);
-        confirmDeleteView.addObject("email", user.getEmail());
-        confirmDeleteView.addObject("settings", getSettings());
-        confirmDeleteView.addObject("thread", thread);
-        confirmDeleteView.addObject("action", postUrl);
-        HttpView template = new DialogTemplate(confirmDeleteView);
+        GroovyView confirmRemoveUserView = new GroovyView("/org/labkey/announcements/confirmRemoveUser.gm");
+        confirmRemoveUserView.addObject("message", message);
+        confirmRemoveUserView.addObject("email", user.getEmail());
+        confirmRemoveUserView.addObject("settings", getSettings());
+        confirmRemoveUserView.addObject("thread", thread);
+        confirmRemoveUserView.addObject("action", postUrl);
+        HttpView template = new DialogTemplate(confirmRemoveUserView);
         includeView(template);
 
         return null;

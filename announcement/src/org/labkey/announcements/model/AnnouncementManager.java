@@ -370,7 +370,7 @@ public class AnnouncementManager
             {
                 deleteAnnouncement(ann);
 
-                // Delete the member list associated witth this thread
+                // Delete the member list associated with this thread
                 Table.delete(_comm.getTableInfoMemberList(), new SimpleFilter("MessageId", ann.getRowId()));
 
                 Collection<Announcement> responses = ann.getResponses();
