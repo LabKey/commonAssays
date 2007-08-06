@@ -10,7 +10,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="API" />
-    <orderEntry type="library" name="Groovy from GroovyJ 0.1.6 (Irida)" level="application" />
     <orderEntryProperties />
   </component>
 </module>
