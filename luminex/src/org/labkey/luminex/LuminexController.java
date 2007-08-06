@@ -1,11 +1,17 @@
 package org.labkey.luminex;
 
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.ACL;
 import org.labkey.api.exp.Protocol;
 import org.labkey.api.view.InsertView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewURLHelper;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.validation.BindException;
 
 /**
  * User: jeckels
@@ -25,6 +31,21 @@ public class LuminexController extends SpringActionController
         super();
         setActionResolver(_resolver.getInstance(this));
     }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class BeginAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            return HttpView.redirect(new ViewURLHelper("GenericAssay", "begin.view", getViewContext().getContainer()));
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            throw new UnsupportedOperationException();
+        }
+    }
+
 
     @RequiresPermission(ACL.PERM_READ)
     public class LuminexUploadWizardAction extends UploadWizardAction

@@ -17,6 +17,7 @@ import javax.servlet.ServletException;
 import java.util.*;
 import java.sql.SQLException;
 import java.io.IOException;
+import java.io.File;
 
 /**
  * User: jeckels
@@ -37,9 +38,12 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         return "Luminex";
     }
 
-    public AssayDataCollector[] getDataCollectors()
+    public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles)
     {
-        return new AssayDataCollector[] { new FileUploadDataCollector() };
+        List<AssayDataCollector> result = new ArrayList<AssayDataCollector>();
+        result.add(new PreviouslyUploadedDataCollector(uploadedFiles));
+        result.add(new FileUploadDataCollector());
+        return result;
     }
 
     public PropertyDescriptor[] getRunPropertyColumns(Protocol protocol)
@@ -58,6 +62,24 @@ public class LuminexAssayProvider extends DefaultAssayProvider
     public PropertyDescriptor[] getRunDataColumns(Protocol protocol)
     {
         throw new UnsupportedOperationException();
+    }
+
+
+    protected Domain createRunDomain(Container c)
+    {
+        Domain runDomain = super.createRunDomain(c);
+        addProperty(runDomain, "Species", PropertyType.STRING);
+        addProperty(runDomain, "Lab ID", PropertyType.STRING);
+        addProperty(runDomain, "Isotype", PropertyType.STRING);
+        addProperty(runDomain, "Units of Concentration", PropertyType.STRING);
+        addProperty(runDomain, "Assay Type", PropertyType.STRING);
+        addProperty(runDomain, "Analyte Type", PropertyType.STRING);
+        addProperty(runDomain, "Instrument Type", PropertyType.STRING);
+        addProperty(runDomain, "Analysis Software", PropertyType.STRING);
+        addProperty(runDomain, "Weighting Method", PropertyType.STRING);
+        addProperty(runDomain, "Replaces Previous File", PropertyType.BOOLEAN);
+
+        return runDomain;
     }
 
     public List<Domain> createDefaultDomains(Container c)
