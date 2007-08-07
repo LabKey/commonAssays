@@ -205,6 +205,13 @@ public abstract class CompareQuery extends SQLFragment
         // ORDER BY RunCount DESC, Pattern DESC, Protein ASC (plus apply any URL sort)
         Sort sort = new Sort("-RunCount,-Pattern," + getLabelColumn());
         sort.applyURLSort(_currentUrl, MS2Manager.getDataRegionNameCompare());
+        // TODO: If there are more than three columns in the sort list, then it may be that "BestName" and "Protein"
+        // are in the list, in which case SQL server will fail to execute the query.  Therefore, we restrict the number
+        // of columns you can sort on to 3.
+        while (sort.getSortList().size() > 3)
+        {
+            sort.getSortList().remove(sort.getSortList().size() - 1);
+        }
         append(sort.getOrderByClause(MS2Manager.getSqlDialect()));
     }
 
