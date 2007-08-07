@@ -169,7 +169,7 @@
         A boolean subset expression has parentheses around it, and uses the operators '&' (and), '|' (or), and '!' (not).
         Example:<br>
         Lymph/CD4/CD8/(IFNg+&!IL2+)<br>
-        <textarea rows="10" cols="60" wrap="off"><%=h(bean.subsets)%></textarea>
+        <textarea rows="10" cols="60" wrap="off" name="subsets"><%=h(bean.subsets)%></textarea>
     </p>
 
     <input type="submit" value="Submit">

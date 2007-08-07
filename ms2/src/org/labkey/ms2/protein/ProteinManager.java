@@ -532,7 +532,6 @@ public class ProteinManager
     public static Sort getPeptideBaseSort()
     {
         Sort baseSort = new Sort("Fraction,Scan,Charge");     // Always sort peptide lists by Fraction, Scan, Charge
-        baseSort.setMaxClauses(6);                            // Need room for base sort plus three clauses from URL
         return baseSort;
     }
 
@@ -717,7 +716,6 @@ public class ProteinManager
         peptideSort.applyURLSort(currentUrl, MS2Manager.getDataRegionNamePeptides());
         Sort proteinSort = new Sort(currentUrl, MS2Manager.getDataRegionNameProteins());
         Sort combinedSort = new Sort();
-        combinedSort.setMaxClauses(peptideSort.getMaxClauses() + 1 + proteinSort.getMaxClauses());
         combinedSort.insertSort(peptideSort);
         combinedSort.insertSortColumn(orderByColumnName, false);
         combinedSort.insertSort(proteinSort);
@@ -733,7 +731,6 @@ public class ProteinManager
         peptideSort.applyURLSort(currentUrl, MS2Manager.getDataRegionNamePeptides());
         Sort proteinSort = new Sort(currentUrl, MS2Manager.getDataRegionNameProteinGroups());
         Sort combinedSort = new Sort();
-        combinedSort.setMaxClauses(peptideSort.getMaxClauses() + 1 + proteinSort.getMaxClauses());
         combinedSort.insertSort(peptideSort);
         combinedSort.insertSortColumn(orderByColumnName, false);
         combinedSort.insertSort(proteinSort);

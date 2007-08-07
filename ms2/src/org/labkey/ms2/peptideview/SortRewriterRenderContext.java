@@ -27,7 +27,6 @@ public class SortRewriterRenderContext extends RenderContext
             boolean foundGroupId = false;
             standardSort.getSortList();
             Sort sort = new Sort();
-            sort.setMaxClauses(standardSort.getMaxClauses());
 
             int totalIndex = 0;
             int outerIndex = 0;

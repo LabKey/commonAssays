@@ -95,7 +95,6 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
 
             Sort customViewSort = result.getRenderContext().getBaseSort();
             Sort sort = new Sort("RowId");     // Always sort peptide lists by RowId
-            sort.setMaxClauses(4);             // Need room for base sort plus three clauses from URL
             if (customViewSort != null)
             {
                 sort.insertSort(customViewSort);
