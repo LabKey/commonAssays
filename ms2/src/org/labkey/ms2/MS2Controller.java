@@ -797,6 +797,10 @@ public class MS2Controller extends ViewController
 
         ViewURLHelper url = cloneViewURLHelper();
         MS2Run run = MS2Manager.getRun(form.run);
+        if (run == null)
+        {
+            return HttpView.throwNotFound("Could not find run");
+        }
 
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
@@ -2876,8 +2880,8 @@ public class MS2Controller extends ViewController
         sb.append("<div style=\"padding-left: 20px;\">The query-based comparison does not use the view selected above. Instead, please follow the instructions at the top of the comparison page to customize the results. It is based on ProteinProphet protein groups, so the runs must be associated with ProteinProphet data.</div>");
         sb.append("<hr>");
 
-        sb.append("<input type=\"radio\" name=\"column\" value=\"QueryPeptides\" /><b>Query Peptides (beta)</b><br/>");
-        sb.append("<hr>");
+//        sb.append("<input type=\"radio\" name=\"column\" value=\"QueryPeptides\" /><b>Query Peptides (beta)</b><br/>");
+//        sb.append("<hr>");
         sb.append("</td></tr>\n");
 
         ViewURLHelper nextUrl = cloneViewURLHelper().setAction("applyCompareView");

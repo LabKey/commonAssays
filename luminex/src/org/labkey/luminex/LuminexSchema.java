@@ -115,16 +115,18 @@ public class LuminexSchema extends UserSchema
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Well")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Outlier")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Description")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FI")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FIBackground"))).setCaption("FI-Bkgd");
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("StdDev")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("PercentCV"))).setCaption("%CV");
-        OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("ObsConc"), result.getRealTable().getColumn("ObsConcOORIndicator"));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FIString")));
+        OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("FI"), result.getRealTable().getColumn("FIOORIndicator"));
+        result.addColumn(result.wrapColumn("FI-BkgdString", result.getRealTable().getColumn("FIBackgroundString")));
+        OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("FIBackground"), result.getRealTable().getColumn("FIBackgroundOORIndicator"), "FI-Bkgd");
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("StdDevString")));
+        OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("StdDev"), result.getRealTable().getColumn("StdDevOORIndicator"));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ObsConcString")));
+        OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("ObsConc"), result.getRealTable().getColumn("ObsConcOORIndicator"));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ExpConc")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ObsOverExp"))).setCaption("(Obs/Exp)*100");
         OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("ConcInRange"), result.getRealTable().getColumn("ConcInRangeOORIndicator"));
-        result.addColumn(result.wrapColumn("ConcInRangeString", result.getRealTable().getColumn("ConcInRangeString")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ConcInRangeString")));
 
         FieldKey studyFieldKey = FieldKey.fromParts("Data", "Run", "Run Properties", DefaultAssayProvider.TARGET_STUDY_PROPERTY_NAME);
         ColumnInfo studyColumn = QueryService.get().getColumns(result, Collections.singleton(studyFieldKey)).get(studyFieldKey);

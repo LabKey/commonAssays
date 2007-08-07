@@ -41,20 +41,22 @@
             <ns:column columnName="Well"/>
             <ns:column columnName="Outlier"/>
             <ns:column columnName="Description"/>
+            <ns:column columnName="FIString"/>
             <ns:column columnName="FI">
                 <ns:formatString>0.0</ns:formatString>
             </ns:column>
+            <ns:column columnName="FIOORIndicator"/>
+            <ns:column columnName="FIBackgroundString"/>
             <ns:column columnName="FIBackground">
                 <ns:formatString>0.0</ns:formatString>
                 <ns:columnTitle>FI - Bkgd</ns:columnTitle>
             </ns:column>
+            <ns:column columnName="FIBackgroundOORIndicator"/>
+            <ns:column columnName="StdDevString"/>
             <ns:column columnName="StdDev">
                 <ns:formatString>0.00</ns:formatString>
             </ns:column>
-            <ns:column columnName="PercentCV">
-                <ns:formatString>0.00</ns:formatString>
-                <ns:columnTitle>%CV</ns:columnTitle>
-            </ns:column>
+            <ns:column columnName="StdDevOORIndicator"/>
             <ns:column columnName="ObsConcString"/>
             <ns:column columnName="ObsConc">
                 <ns:formatString>0.00</ns:formatString>

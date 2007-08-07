@@ -65,19 +65,30 @@ public class LuminexAssayProvider extends DefaultAssayProvider
     }
 
 
+    protected Domain createUploadSetDomain(Container c)
+    {
+        Domain uploadSetDomain = super.createUploadSetDomain(c);
+        addProperty(uploadSetDomain, "Species", PropertyType.STRING);
+        addProperty(uploadSetDomain, "Lab ID", PropertyType.STRING);
+        addProperty(uploadSetDomain, "Units of Concentration", PropertyType.STRING);
+        addProperty(uploadSetDomain, "Analyte Type", PropertyType.STRING);
+        addProperty(uploadSetDomain, "Analysis Software", PropertyType.STRING);
+        addProperty(uploadSetDomain, "Weighting Method", PropertyType.STRING);
+        addProperty(uploadSetDomain, "Bead Manufacturer", PropertyType.STRING);
+        addProperty(uploadSetDomain, "Bead Catalog Number", PropertyType.STRING);
+
+        return uploadSetDomain;
+    }
+
     protected Domain createRunDomain(Container c)
     {
         Domain runDomain = super.createRunDomain(c);
-        addProperty(runDomain, "Species", PropertyType.STRING);
-        addProperty(runDomain, "Lab ID", PropertyType.STRING);
         addProperty(runDomain, "Isotype", PropertyType.STRING);
-        addProperty(runDomain, "Units of Concentration", PropertyType.STRING);
-        addProperty(runDomain, "Assay Type", PropertyType.STRING);
-        addProperty(runDomain, "Analyte Type", PropertyType.STRING);
-        addProperty(runDomain, "Instrument Type", PropertyType.STRING);
-        addProperty(runDomain, "Analysis Software", PropertyType.STRING);
-        addProperty(runDomain, "Weighting Method", PropertyType.STRING);
         addProperty(runDomain, "Replaces Previous File", PropertyType.BOOLEAN);
+        addProperty(runDomain, "Date file was modified", PropertyType.DATE_TIME);
+        addProperty(runDomain, "Specimen Type", PropertyType.STRING);
+        addProperty(runDomain, "Additive", PropertyType.STRING);
+        addProperty(runDomain, "Derivative", PropertyType.STRING);
 
         return runDomain;
     }
@@ -211,7 +222,6 @@ public class LuminexAssayProvider extends DefaultAssayProvider
                 addProperty("ObsConc", luminexDataRow.getObsConc(), dataMap, types);
                 addProperty("ObsConcOORIndicator", luminexDataRow.getObsConcOORIndicator(), dataMap, types);
                 addProperty("ObsOverExp", luminexDataRow.getObsOverExp(), dataMap, types);
-                addProperty("PercentCV", luminexDataRow.getPercentCV(), dataMap, types);
                 addProperty("StdDev", luminexDataRow.getStdDev(), dataMap, types);
                 addProperty("Type", luminexDataRow.getType(), dataMap, types);
                 addProperty("Well", luminexDataRow.getWell(), dataMap, types);

@@ -13,10 +13,15 @@ public class LuminexDataRow
     private String _well;
     private boolean _outlier;
     private String _description;
+    private String _fiString;
     private Double _fi;
+    private String _fiOORIndicator;
+    private String _fiBackgroundString;
     private Double _fiBackground;
+    private String _fiBackgroundOORIndicator;
+    private String _stdDevString;
     private Double _stdDev;
-    private Double _percentCV;
+    private String _stdDevOORIndicator;
     private String _obsConcString;
     private Double _obsConc;
     private String _obsConcOORIndicator;
@@ -109,16 +114,6 @@ public class LuminexDataRow
     public void setStdDev(Double stdDev)
     {
         _stdDev = stdDev;
-    }
-
-    public Double getPercentCV()
-    {
-        return _percentCV;
-    }
-
-    public void setPercentCV(Double percentCV)
-    {
-        _percentCV = percentCV;
     }
 
     public String getObsConcString()
@@ -219,5 +214,65 @@ public class LuminexDataRow
     public void setRowId(int rowId)
     {
         _rowId = rowId;
+    }
+    
+    public String getFiString()
+    {
+        return _fiString;
+    }
+
+    public void setFiString(String fiString)
+    {
+        _fiString = fiString;
+    }
+
+    public String getFiOORIndicator()
+    {
+        return _fiOORIndicator;
+    }
+
+    public void setFiOORIndicator(String fiOORIndicator)
+    {
+        _fiOORIndicator = fiOORIndicator;
+    }
+
+    public String getFiBackgroundString()
+    {
+        return _fiBackgroundString;
+    }
+
+    public void setFiBackgroundString(String fiBackgroundString)
+    {
+        _fiBackgroundString = fiBackgroundString;
+    }
+
+    public String getFiBackgroundOORIndicator()
+    {
+        return _fiBackgroundOORIndicator;
+    }
+
+    public void setFiBackgroundOORIndicator(String fiBackgroundOORIndicator)
+    {
+        _fiBackgroundOORIndicator = fiBackgroundOORIndicator;
+    }
+
+    public String getStdDevString()
+    {
+        return _stdDevString;
+    }
+
+    public void setStdDevString(String stdDevString)
+    {
+        _stdDevString = stdDevString;
+    }
+
+    public String getStdDevOORIndicator()
+    {
+        return _stdDevOORIndicator;
+    }
+
+    public void setStdDevOORIndicator(String stdDevOORIndicator)
+    {
+        _stdDevOORIndicator = stdDevOORIndicator;
     }
 }
