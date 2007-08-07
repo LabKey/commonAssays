@@ -1306,7 +1306,7 @@ public class AnnouncementsController extends ViewController
             //format email using same renderer chosen for message
             //note that we still send all messages, including plain text, as html-formatted messages; only the inserted body text differs between renderers.
             WikiRenderer w = WikiService.get().getRenderer(currentRendererType);
-            page.responseBody = w.format(a.getBody());
+            page.responseBody = w.format(a.getBody()).getHtml();
         }
         return page;
     }

@@ -21,19 +21,19 @@
     if (bean.showPrintView())
     {
 %>
-[<a href="<%= bean.getPrintURL().getLocalURIString() %>" target="_blank">Print View</a>]
+[<a href="<%= bean.getPrintURL().getEncodedLocalURIString() %>" target="_blank">Print View</a>]
 <%
     }
     if (bean.getDatafileURL() != null)
     {
 %>
-[<a href="<%= bean.getDatafileURL().getLocalURIString() %>">Download Datafile</a>]
+[<a href="<%= bean.getDatafileURL().getEncodedLocalURIString() %>">Download Datafile</a>]
 <%
     }
     if (bean.getCustomizeURL() != null)
     {
 %>
-[<a href="<%= bean.getCustomizeURL().getLocalURIString() %>">Customize View</a>]
+[<a href="<%= bean.getCustomizeURL().getEncodedLocalURIString() %>">Customize View</a>]
 <%
     }
 %>

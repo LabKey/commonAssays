@@ -38,7 +38,7 @@
         if (!settings.isSecure())
         {
             WikiRenderer w = ann.getRenderer();
-            String body = w.format(ann.getBody());
+            String body = w.format(ann.getBody()).getHtml();
             %>
             <tr><td style="padding-left:35px;"><%=body%></td></tr><%
         }

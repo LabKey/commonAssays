@@ -73,7 +73,7 @@ else
 {
     if (c.hasPermission(context.getUser(), ACL.PERM_INSERT))
     {
-        %>[<a href="<%=filter(pageURL.getLocalURIString())%>&discussion.start=true#discussionArea">discuss this</a>]<%
+        %>[<a href="<%=filter(pageURL.getLocalURIString())%>&amp;discussion.start=true#discussionArea">discuss this</a>]<%
     }
 }
 %>
