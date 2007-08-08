@@ -11,7 +11,19 @@
     ViewURLHelper respond = new ViewURLHelper("announcements", "respond.post", c);
     ViewURLHelper returnUrl = (ViewURLHelper) context.get("returnUrl");
 %><%=PageFlowUtil.getStrutsError(request, "main")%>
-<form method=post enctype="multipart/form-data" action="<%=filter(respond.getLocalURIString())%>">
+<script type="text/javascript">
+function validateForm(form)
+{
+    var trimmedTitle = form.title.value.trim();
+
+    if (trimmedTitle.length > 0)
+        return true;
+
+    alert("Title must not be blank");
+    return false;
+}
+</script>
+<form method=post enctype="multipart/form-data" action="<%=filter(respond.getLocalURIString())%>" onSubmit="return validateForm(this)">
 <input type=hidden name=returnUrl value="<%=filter(returnUrl?returnUrl.getLocalURIString():"")%>">
 <table><%
 

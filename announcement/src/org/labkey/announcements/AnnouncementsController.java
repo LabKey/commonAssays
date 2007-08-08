@@ -687,9 +687,6 @@ public class AnnouncementsController extends ViewController
         else
             insert.setMemberList(form.getMemberList());  // TODO: Do this in validate()?
 
-        //NOTE: title should not be null if validate() is working
-//        assert insert.getTitle() != null;
-
         AnnouncementManager.insertAnnouncement(c, u, insert, formFiles);
 
         // Don't send email for notes.  For messages, send email if there's body text or an attachment.
@@ -1884,7 +1881,7 @@ public class AnnouncementsController extends ViewController
 
             Settings settings = getSettings(c);
             Permissions perm = getPermissions(c, user, settings);
-            DataRegion rgn = getDataRegion(perm);
+            DataRegion rgn = getDataRegion(perm, settings);
 
             setTitle(settings.getBoardName() + " List");
 
@@ -1930,7 +1927,7 @@ public class AnnouncementsController extends ViewController
             _vbox = new VBox(new AnnouncementListLinkBar(c, url, user, settings, perm, displayAll), gridView);
         }
 
-        protected DataRegion getDataRegion(Permissions perm)
+        protected DataRegion getDataRegion(Permissions perm, Settings settings)
         {
             DataRegion rgn = new DataRegion();
             rgn.setButtonBar(ButtonBar.BUTTON_BAR_EMPTY);
@@ -1954,9 +1951,9 @@ public class AnnouncementsController extends ViewController
         }
 
         @Override
-        protected DataRegion getDataRegion(Permissions perm)
+        protected DataRegion getDataRegion(Permissions perm, Settings settings)
         {
-            DataRegion rgn = super.getDataRegion(perm);
+            DataRegion rgn = super.getDataRegion(perm, settings);
 
             if (perm.allowDeleteThread())
             {
@@ -1966,8 +1963,9 @@ public class AnnouncementsController extends ViewController
                 bb.add(ActionButton.BUTTON_SELECT_ALL);
                 bb.add(ActionButton.BUTTON_CLEAR_ALL);
 
+                String conversations = settings.getConversationName().toLowerCase() + "s";
                 ActionButton delete = new ActionButton("button", "Delete");
-                delete.setScript("return verifySelected(this.form, \"delete.post\", \"post\", \"checkboxes\")");
+                delete.setScript("return verifySelected(this.form, \"delete.post\", \"post\", \"" + conversations + "\", \"Are you sure you want to delete these " + conversations + "?\")");
                 delete.setActionType(ActionButton.Action.GET);
                 delete.setDisplayPermission(ACL.PERM_DELETE);
                 bb.add(delete);

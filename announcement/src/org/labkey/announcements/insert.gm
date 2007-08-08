@@ -20,7 +20,19 @@ ViewURLHelper insertAction = new ViewURLHelper("announcements", "insert.post", c
     
 %>
 <%=PageFlowUtil.getStrutsError(request, "main")%>
-<form method=post enctype="multipart/form-data" action="<%=filter(insertAction.getLocalURIString())%>">
+<script type="text/javascript">
+function validateForm(form)
+{
+    var trimmedTitle = form.title.value.trim();
+
+    if (trimmedTitle.length > 0)
+        return true;
+
+    alert("Title must not be blank");
+    return false;
+}
+</script>
+<form method=post enctype="multipart/form-data" action="<%=filter(insertAction.getLocalURIString())%>" onSubmit="return validateForm(this)">
 <input type=hidden name=returnUrl value="<%=filter(returnUrl?returnUrl.getLocalURIString():null)%>">
 <table>
   <tr><td class='ms-searchform'>Title</td><td class='ms-vb' colspan="2"><input type='text' size='60' name='title' value="<%=filter(form.get("title"))%>"></td></tr><%
