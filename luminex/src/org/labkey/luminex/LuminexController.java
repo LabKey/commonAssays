@@ -2,11 +2,8 @@ package org.labkey.luminex;
 
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.ACL;
-import org.labkey.api.exp.Protocol;
-import org.labkey.api.view.InsertView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewURLHelper;
@@ -45,16 +42,4 @@ public class LuminexController extends SpringActionController
             throw new UnsupportedOperationException();
         }
     }
-
-
-    @RequiresPermission(ACL.PERM_READ)
-    public class LuminexUploadWizardAction extends UploadWizardAction
-    {
-        protected void addSampleInputColumns(Protocol protocol, InsertView insertView)
-        {
-            // Don't add any columns - they're part of the uploaded spreadsheet
-        }
-    }
-
-
 }

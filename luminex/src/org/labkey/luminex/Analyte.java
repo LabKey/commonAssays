@@ -7,6 +7,7 @@ package org.labkey.luminex;
 public class Analyte
 {
     private int _dataId;
+    private String _lsid;
     private String _name;
     private double _fitProb;
     private double _resVar;
@@ -114,5 +115,15 @@ public class Analyte
     public void setMaxStandardRecovery(int maxStandardRecovery)
     {
         _maxStandardRecovery = maxStandardRecovery;
+    }
+    
+    public String getLsid()
+    {
+        return _lsid;
+    }
+
+    public void setLsid(String lsid)
+    {
+        _lsid = lsid;
     }
 }

@@ -400,6 +400,8 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
 
             row = handleHeaderOrFooterRow(sheet, row, analyte, analyteColumns, analyteProps, excelRunColumns, excelRunProps);
 
+            analyte.setLsid(new Lsid("LuminexAnalyte", "Data-" + data.getRowId() + "." + analyte.getName()).toString());
+
             if (analyte.getMaxStandardRecovery() == 0 && analyte.getMinStandardRecovery() == 0)
             {
                 throw new ExperimentException("Unable to find max and min standard recovery values for analyte " + analyte.getName()); 

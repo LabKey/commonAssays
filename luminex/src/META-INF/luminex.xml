@@ -21,6 +21,7 @@
     <ns:table tableName="Analyte" tableDbType="TABLE">
         <ns:columns>
             <ns:column columnName="RowId"/>
+            <ns:column columnName="LSID"/>
             <ns:column columnName="Name"/>
             <ns:column columnName="DataId"/>
             <ns:column columnName="FitProb"/>

@@ -6,6 +6,8 @@ import org.labkey.api.security.User;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpDataTable;
 import org.labkey.api.exp.Protocol;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.study.AssayService;
 import org.labkey.api.study.DefaultAssayProvider;
 
@@ -63,6 +65,22 @@ public class LuminexSchema extends UserSchema
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ResVar")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("RegressionType")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("StdCurve")));
+        ColumnInfo lsidColumn = result.addColumn(result.wrapColumn(result.getRealTable().getColumn("LSID")));
+        lsidColumn.setIsHidden(true);
+
+        String sqlObjectId = "(SELECT objectid FROM " + OntologyManager.getTinfoObject() + " o WHERE o.objecturi = " +
+                ExprColumn.STR_TABLE_ALIAS + ".lsid)";
+
+        ColumnInfo colProperty = new ExprColumn(result, "Properties", new SQLFragment(sqlObjectId), Types.INTEGER);
+        PropertyDescriptor[] pds = DefaultAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Map<String, PropertyDescriptor> map = new TreeMap<String, PropertyDescriptor>();
+        for(PropertyDescriptor pd : pds)
+        {
+            map.put(pd.getName(), pd);
+        }
+        colProperty.setFk(new PropertyForeignKey(map, this));
+        colProperty.setIsUnselectable(true);
+        result.addColumn(colProperty);
 
         addDataFilter(result);
         result.setTitleColumn("Name");
@@ -159,7 +177,6 @@ public class LuminexSchema extends UserSchema
         defaultCols.add(FieldKey.fromParts("FI"));
         defaultCols.add(FieldKey.fromParts("FIBackground"));
         defaultCols.add(FieldKey.fromParts("StdDev"));
-        defaultCols.add(FieldKey.fromParts("PercentCV"));
         defaultCols.add(FieldKey.fromParts("ObsConc"));
         defaultCols.add(FieldKey.fromParts("ExpConc"));
         defaultCols.add(FieldKey.fromParts("ObsOverExp"));
