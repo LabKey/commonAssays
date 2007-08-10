@@ -1154,22 +1154,24 @@ public class MS2Controller extends ViewController
         String commandType = req.getParameter("button");
         int threadId = Integer.parseInt(req.getParameter("id"));
 
-        if (commandType.equalsIgnoreCase("kill"))
-        {
-            AnnotationLoader annotLoader = AnnotationUploadManager.getInstance().getActiveLoader(threadId);
-            annotLoader.requestThreadState(AnnotationLoader.Status.KILLED);
-        }
+        AnnotationLoader annotLoader = AnnotationUploadManager.getInstance().getActiveLoader(threadId);
 
-        if (commandType.equalsIgnoreCase("pause"))
+        if (annotLoader != null)
         {
-            AnnotationLoader annotLoader = AnnotationUploadManager.getInstance().getActiveLoader(threadId);
-            annotLoader.requestThreadState(AnnotationLoader.Status.PAUSED);
-        }
+            if (commandType.equalsIgnoreCase("kill"))
+            {
+                annotLoader.requestThreadState(AnnotationLoader.Status.KILLED);
+            }
 
-        if (commandType.equalsIgnoreCase("continue"))
-        {
-            AnnotationLoader annotLoader = AnnotationUploadManager.getInstance().getActiveLoader(threadId);
-            annotLoader.requestThreadState(AnnotationLoader.Status.RUNNING);
+            if (commandType.equalsIgnoreCase("pause"))
+            {
+                annotLoader.requestThreadState(AnnotationLoader.Status.PAUSED);
+            }
+
+            if (commandType.equalsIgnoreCase("continue"))
+            {
+                annotLoader.requestThreadState(AnnotationLoader.Status.RUNNING);
+            }
         }
 
         if (commandType.equalsIgnoreCase("recover"))

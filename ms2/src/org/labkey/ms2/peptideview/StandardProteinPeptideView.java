@@ -239,7 +239,8 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
     {
         SimpleFilter coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.ALL_FILTERS, getSingleRun());
-        return Table.executeArray(ProteinManager.getSchema(), "SELECT Peptide FROM " + MS2Manager.getTableInfoPeptides() + " " + coverageFilter.getWhereSQL(ProteinManager.getSqlDialect()), coverageFilter.getWhereParams(MS2Manager.getTableInfoPeptides()).toArray(), String.class);
+        SimpleFilter validFilter = ProteinManager.reduceToValidColumns(coverageFilter, MS2Manager.getTableInfoPeptides());
+        return Table.executeArray(ProteinManager.getSchema(), "SELECT Peptide FROM " + MS2Manager.getTableInfoPeptides() + " " + validFilter.getWhereSQL(ProteinManager.getSqlDialect()), validFilter.getWhereParams(MS2Manager.getTableInfoPeptides()).toArray(), String.class);
     }
 
     public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception

@@ -240,12 +240,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         String columnNames = getPeptideColumnNames(form.getColumns());
         String sqlColumnNames = getSingleRun().getSQLPeptideColumnNames(columnNames, false, MS2Manager.getTableInfoSimplePeptides(), MS2Manager.getTableInfoPeptideMemberships());
         String extraWhere;
-        if (form.getSeqId() != 0)
-        {
-            extraWhere = MS2Manager.getTableInfoProteinGroupMemberships() + ".SeqId = " + form.getSeqId();
-            peptidesGridView.setResultSet(ProteinManager.getProteinProphetPeptideRS(_url, getSingleRun(), extraWhere, 250, sqlColumnNames));
-        }
-        else if (form.getGroupNumber() != 0)
+        if (form.getGroupNumber() != 0)
         {
             extraWhere = MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".GroupNumber = " + form.getGroupNumber() + " AND " +
                 MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".IndistinguishableCollectionId = " + form.getIndistinguishableCollectionId();

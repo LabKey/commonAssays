@@ -173,7 +173,7 @@ public abstract class CompareQuery extends SQLFragment
         addWhereClauses(filter);
 
         append(filter.getWhereSQL(MS2Manager.getSqlDialect()));
-        addAll(filter.getWhereParams(MS2Manager.getTableInfoRuns()));
+        addAll(filter.getWhereParams(MS2Manager.getTableInfoPeptides()));
         
         appendNewLine();
         append("GROUP BY Run, ");

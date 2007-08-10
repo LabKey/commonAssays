@@ -545,6 +545,31 @@ public class ProteinManager
         return getPeptideFilter(currentUrl, mask, runs.get(0));
     }
 
+    public static SimpleFilter reduceToValidColumns(SimpleFilter fullFilter, TableInfo table)
+    {
+        SimpleFilter validFilter = new SimpleFilter();
+        for (SimpleFilter.FilterClause clause : fullFilter.getClauses())
+        {
+            boolean validClause = true;
+            for (String columnName : clause.getColumnNames())
+            {
+                if (table.getColumn(columnName) == null)
+                {
+                    int index = columnName.lastIndexOf('.');
+                    if (index == -1 || table.getColumn(columnName.substring(index + 1)) == null)
+                    {
+                        validClause = false;
+                    }
+                }
+            }
+            if (validClause)
+            {
+                validFilter.addClause(clause);
+            }
+        }
+        return validFilter;
+    }
+
     public static SimpleFilter getPeptideFilter(ViewURLHelper currentUrl, int mask, MS2Run... runs)
     {
         return getPeptideFilter(currentUrl, mask, null, runs);
@@ -635,6 +660,7 @@ public class ProteinManager
 
         // Construct Peptide WHERE clause (no need to sort by peptide)
         SimpleFilter peptideFilter = getPeptideFilter(currentUrl, RUN_FILTER + URL_FILTER + EXTRA_FILTER, run);
+        peptideFilter = ProteinManager.reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoPeptides());
         if (null != extraPeptideWhere)
             peptideFilter.addWhereClause(extraPeptideWhere, new Object[]{});
         proteinSql.append(peptideFilter.getWhereSQL(getSqlDialect()));
@@ -647,6 +673,7 @@ public class ProteinManager
 
         // Construct Protein HAVING clause
         SimpleFilter proteinFilter = new SimpleFilter(currentUrl, MS2Manager.getDataRegionNameProteins());
+        proteinFilter = ProteinManager.reduceToValidColumns(proteinFilter, MS2Manager.getTableInfoProteins());
         String proteinHaving = proteinFilter.getWhereSQL(getSqlDialect()).replaceFirst("WHERE", "HAVING");
 
         // Can't use SELECT aliases in HAVING clause, so replace names with aggregate functions & disambiguate Mass
@@ -856,6 +883,7 @@ public class ProteinManager
         sql.append("\n");
 
         SimpleFilter proteinFilter = new SimpleFilter(currentUrl, MS2Manager.getDataRegionNameProteinGroups());
+        proteinFilter = reduceToValidColumns(proteinFilter, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
         String proteinWhere = proteinFilter.getWhereSQL(getSqlDialect());
         if (proteinWhere != null && !"".equals(proteinWhere))
         {
