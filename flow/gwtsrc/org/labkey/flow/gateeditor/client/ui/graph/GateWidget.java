@@ -30,6 +30,12 @@ public class GateWidget extends GraphWidget
                 ret += "&open=true";
             }
         }
+        else if (getGate() instanceof GWTIntervalGate)
+        {
+            GWTIntervalGate interval = (GWTIntervalGate) getGate();
+            ret += "&ptX=" + interval.getMinValue();
+            ret += "&ptX=" + interval.getMaxValue();
+        }
         return ret;
     }
 

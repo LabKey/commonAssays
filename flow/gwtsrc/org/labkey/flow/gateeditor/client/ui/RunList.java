@@ -3,16 +3,14 @@ package org.labkey.flow.gateeditor.client.ui;
 import com.google.gwt.user.client.ui.*;
 import org.labkey.flow.gateeditor.client.GateEditor;
 import org.labkey.flow.gateeditor.client.GateCallback;
-import org.labkey.flow.gateeditor.client.model.GWTRun;
-import org.labkey.flow.gateeditor.client.model.GWTWorkspaceOptions;
-import org.labkey.flow.gateeditor.client.model.GWTWorkspace;
-import org.labkey.flow.gateeditor.client.model.GWTScript;
+import org.labkey.flow.gateeditor.client.model.*;
 
 public class RunList extends GateComponent
 {
     HorizontalPanel widget;
     ListBox listBox;
     GateCallback currentRequest;
+    GWTRun[] runs;
     GateEditorListener listener = new GateEditorListener()
     {
         public void onScriptChanged()
@@ -69,11 +67,6 @@ public class RunList extends GateComponent
             }
             updateWorkspace();
         }
-
-        public void onRunsChanged()
-        {
-            setRuns(getRuns());
-        }
     };
     ChangeListener changeListener = new ChangeListener()
     {
@@ -82,6 +75,11 @@ public class RunList extends GateComponent
             editor.getState().setRun(getRuns()[listBox.getSelectedIndex()]);
         }
     };
+
+    private GWTRun[] getRuns()
+    {
+        return runs;
+    }
 
     public RunList(GateEditor editor)
     {
@@ -96,7 +94,8 @@ public class RunList extends GateComponent
 
             public void onSuccess(Object result)
             {
-                setRuns((GWTRun[]) result);
+                runs = (GWTRun[]) result;
+                updateRuns();
             }
         });
 
@@ -107,7 +106,7 @@ public class RunList extends GateComponent
         return widget;
     }
 
-    public void setRuns(GWTRun[] runs)
+    public void updateRuns()
     {
         GWTRun run = getRun();
         listBox.clear();

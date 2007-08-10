@@ -40,20 +40,6 @@ public class EditorState
         return editingMode.getScriptComponent(script);
     }
 
-    public GWTRun[] getRuns()
-    {
-        return runs;
-    }
-
-    public void setRuns(GWTRun[] runs)
-    {
-        this.runs = runs;
-        for (int i = 0; i < listeners.size(); i ++)
-        {
-            ((GateEditorListener) listeners.get(i)).onRunsChanged();
-        }
-    }
-
     public GWTWorkspace getWorkspace()
     {
         return workspace;

@@ -475,6 +475,10 @@ public class FlowSchema extends UserSchema
     public ExpDataTable createCompensationMatrixTable(String alias)
     {
         ExpDataTable ret = createDataTable(alias, FlowDataType.CompensationMatrix);
+        if (getExperiment() != null)
+        {
+            ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
+        }
         ret.setDetailsURL(new DetailsURL(PFUtil.urlFor(CompensationController.Action.showCompensation, getContainer()), Collections.singletonMap(FlowParam.compId.toString(), ExpDataTable.Column.RowId.toString())));
         addStatisticColumn(ret, "Value");
         return ret;

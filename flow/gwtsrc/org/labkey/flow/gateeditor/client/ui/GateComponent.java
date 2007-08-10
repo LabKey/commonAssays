@@ -81,11 +81,6 @@ abstract public class GateComponent
         return editor.getState().getCompensationMatrix();
     }
 
-    public GWTRun[] getRuns()
-    {
-        return editor.getState().getRuns();
-    }
-
     public boolean isReadOnly()
     {
         GWTWorkspace workspace = editor.getState().getWorkspace();

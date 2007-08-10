@@ -63,6 +63,7 @@ public class CompensationMatrixList extends GateComponent
 
     public void setCompensationMatrices(GWTCompensationMatrix[] comps)
     {
+        matrices = comps;
         listBox.clear();
         for (int i = 0; i < comps.length; i++)
         {
