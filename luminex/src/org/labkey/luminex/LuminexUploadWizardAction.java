@@ -37,16 +37,32 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     protected void addRunActionButtons(InsertView insertView, ButtonBar bbar)
     {
-        ActionButton nextButton = new ActionButton(getViewContext().getViewURLHelper().getAction() + ".view", "Next");
-        nextButton.setActionType(ActionButton.Action.POST);
-        bbar.add(nextButton);
+        PropertyDescriptor[] analyteColumns = DefaultAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        if (analyteColumns.length == 0)
+        {
+            super.addRunActionButtons(insertView, bbar);
+        }
+        else
+        {
+            ActionButton nextButton = new ActionButton(getViewContext().getViewURLHelper().getAction() + ".view", "Next");
+            nextButton.setActionType(ActionButton.Action.POST);
+            bbar.add(nextButton);
+        }
     }
 
     protected ModelAndView afterRunCreation(LuminexRunUploadForm form, ExperimentRun run) throws ServletException, SQLException
     {
-        List<Data> outputs = run.retrieveOutputDataList();
-        assert outputs.size() == 1;
-        return getAnalytesView(outputs.get(0).getRowId(), form, false);
+        PropertyDescriptor[] analyteColumns = DefaultAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        if (analyteColumns.length == 0)
+        {
+            return super.afterRunCreation(form, run);
+        }
+        else
+        {
+            List<Data> outputs = run.retrieveOutputDataList();
+            assert outputs.size() == 1;
+            return getAnalytesView(outputs.get(0).getRowId(), form, false);
+        }
     }
 
     private ModelAndView getAnalytesView(int dataRowId, LuminexRunUploadForm form, boolean reshow)
