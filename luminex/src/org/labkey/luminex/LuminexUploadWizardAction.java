@@ -13,9 +13,7 @@ import org.springframework.validation.BindException;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 /**
  * User: jeckels
@@ -44,9 +42,52 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
         else
         {
-            ActionButton nextButton = new ActionButton(getViewContext().getViewURLHelper().getAction() + ".view", "Next");
-            nextButton.setActionType(ActionButton.Action.POST);
-            bbar.add(nextButton);
+            addNextButton(bbar);
+            addResetButton(insertView, bbar);
+            addCancelButton(bbar);
+        }
+    }
+
+
+    protected Map<String, String> getDefaultValues(String suffix, LuminexRunUploadForm form)
+    {
+        if (!form.isResetDefaultValues() && AnalyteStepHandler.NAME.equals(suffix))
+        {
+            Map<String, String> result = new HashMap<String, String>();
+            Analyte[] analytes = getAnalytes(form.getDataId());
+            PropertyDescriptor[] analyteColumns = DefaultAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+
+            try
+            {
+                for (Analyte analyte : analytes)
+                {
+                    SQLFragment sql = new SQLFragment("SELECT ObjectURI FROM " + OntologyManager.getTinfoObject() + " WHERE ObjectId = (SELECT MAX(ObjectId) FROM " + OntologyManager.getTinfoObject() + " o, " + LuminexSchema.getTableInfoAnalytes() + " a WHERE o.ObjectURI = a.LSID AND a.Name = ?)");
+                    sql.add(analyte.getName());
+                    String objectURI = Table.executeSingleton(LuminexSchema.getSchema(), sql.getSQL(), sql.getParamsArray(), String.class, true);
+                    if (objectURI != null)
+                    {
+                        Map<String, ObjectProperty> values = OntologyManager.getPropertyObjects(getContainer().getId(), objectURI);
+                        for (PropertyDescriptor analytePD : analyteColumns)
+                        {
+                            String name = getAnalytePropertyName(analyte, analytePD);
+                            ObjectProperty objectProp = values.get(analytePD.getPropertyURI());
+                            if (objectProp != null && objectProp.value() != null)
+                            {
+                                result.put(name, objectProp.value().toString());
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+            return result;
+        }
+        else
+        {
+            return super.getDefaultValues(suffix, form);
         }
     }
 
@@ -71,13 +112,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         Map<PropertyDescriptor, String> map = new LinkedHashMap<PropertyDescriptor, String>();
 
         String lsidColumn = "RowId";
-        InsertView view = createInsertView(LuminexSchema.getTableInfoAnalytes(), lsidColumn, map, false, AnalyteStepHandler.NAME);
+        form.setDataId(dataRowId);
+        InsertView view = createInsertView(LuminexSchema.getTableInfoAnalytes(), lsidColumn, map, reshow, form.isResetDefaultValues(), AnalyteStepHandler.NAME, form);
 
         view.getDataRegion().addHiddenFormField("dataId", Integer.toString(dataRowId));
 
         Analyte[] analytes = getAnalytes(dataRowId);
         PropertyDescriptor[] pds = DefaultAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
-        if (reshow)
+        if (reshow && !form.isResetDefaultValues())
         {
             view.setInitialValues(getViewContext().getRequest().getParameterMap());
         }
@@ -86,7 +128,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             for (PropertyDescriptor pd : pds)
             {
                 ColumnInfo info = createColumnInfo(pd, view.getDataRegion().getTable(), lsidColumn);
-                info.setName("_analyte_" + analyte.getRowId() + "_" + ColumnInfo.propNameFromName(pd.getName()));
+                info.setName(getAnalytePropertyName(analyte, pd));
                 info.setCaption(analyte.getName() + " " + pd.getName());
                 view.getDataRegion().addColumn(info);
             }
@@ -96,6 +138,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
         ButtonBar bbar = new ButtonBar();
         addFinishButtons(view, bbar);
+        addResetButton(view, bbar);
 
         ActionButton cancelButton = new ActionButton("Cancel", getSummaryLink(_protocol));
         bbar.add(cancelButton);
@@ -105,10 +148,21 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return view;
     }
 
-    private Analyte[] getAnalytes(int dataRowId)
-            throws SQLException
+    private String getAnalytePropertyName(Analyte analyte, PropertyDescriptor pd)
     {
-        return Table.select(LuminexSchema.getTableInfoAnalytes(), Table.ALL_COLUMNS, new SimpleFilter("DataId", dataRowId), new Sort("RowId"), Analyte.class);
+        return "_analyte_" + analyte.getRowId() + "_" + ColumnInfo.propNameFromName(pd.getName());
+    }
+
+    private Analyte[] getAnalytes(int dataRowId)
+    {
+        try
+        {
+            return Table.select(LuminexSchema.getTableInfoAnalytes(), Table.ALL_COLUMNS, new SimpleFilter("DataId", dataRowId), new Sort("RowId"), Analyte.class);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
     }
 
     protected void addSampleInputColumns(Protocol protocol, InsertView insertView)
@@ -125,13 +179,16 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             try
             {
                 LuminexSchema.getSchema().getScope().beginTransaction();
-                for (Analyte analyte : getAnalytes(form.getDataId()))
+                if (!form.isResetDefaultValues())
                 {
-                    Map<PropertyDescriptor, String> properties = form.getAnalyteProperties(analyte.getRowId());
+                    for (Analyte analyte : getAnalytes(form.getDataId()))
+                    {
+                        Map<PropertyDescriptor, String> properties = form.getAnalyteProperties(analyte.getRowId());
 
-                    validatePost(properties);
+                        validatePost(properties);
+                    }
                 }
-                if (PageFlowUtil.getActionErrors(getViewContext().getRequest(), true).isEmpty())
+                if (!form.isResetDefaultValues() && PageFlowUtil.getActionErrors(getViewContext().getRequest(), true).isEmpty())
                 {
                     for (Analyte analyte : getAnalytes(form.getDataId()))
                     {
