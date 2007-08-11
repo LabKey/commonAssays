@@ -312,7 +312,6 @@ flow/src/org/labkey/flow/controllers/compensation/showCompensation.jsp -text
 flow/src/org/labkey/flow/controllers/compensation/upload.jsp -text
 flow/src/org/labkey/flow/controllers/editscript/CompensationCalculationPage.java -text
 flow/src/org/labkey/flow/controllers/editscript/EditCompensationCalculationForm.java -text
-flow/src/org/labkey/flow/controllers/editscript/EditGatesForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/EditPropertiesForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/EditScriptForm.java -text
 flow/src/org/labkey/flow/controllers/editscript/EditSettingsForm.java -text

@@ -380,10 +380,11 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             url.addParameter("xaxis", graphOptions.xAxis);
             url.addParameter("yaxis", graphOptions.yAxis);
             step.addParams(url);
+            url.addParameter("editingMode", graphOptions.editingMode.toString());
             url.addParameter("width", Integer.toString(graphOptions.width));
             url.addParameter("height", Integer.toString(graphOptions.height));
             url.addParameter("subset", graphOptions.subset);
-            cache.setGraphInfo(graphOptions, graphInfo, plotInfo.getBytes());
+            cache.setGraphInfo(graphOptions, graphInfo, plotInfo);
             graphInfo.graphURL = url.toString();
             graphInfo.graphOptions = graphOptions;
             return graphInfo;

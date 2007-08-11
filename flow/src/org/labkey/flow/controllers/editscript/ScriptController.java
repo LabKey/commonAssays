@@ -18,6 +18,9 @@ import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.*;
 import org.labkey.flow.ScriptParser;
+import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
+import org.labkey.flow.gateeditor.client.model.GWTEditingMode;
+import org.labkey.flow.gateeditor.client.model.GWTGraphInfo;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.model.Polygon;
 import org.labkey.flow.analysis.web.*;
@@ -64,7 +67,6 @@ public class ScriptController extends BaseFlowController
         editGateTree,
         uploadAnalysis,
         graphImage,
-        analysisJS,
         copy,
         delete,
         gateEditor,
@@ -782,11 +784,23 @@ public class ScriptController extends BaseFlowController
         return true;
     }
 
-    static public class GraphForm extends EditGatesForm
+    static public class GraphForm extends EditScriptForm
     {
+        public GWTEditingMode editingMode;
         public int height = 300;
         public int width = 300;
         public boolean open;
+        public String subset;
+        public String xAxis;
+        public String yAxis;
+        public double[] ptX;
+        public double[] ptY;
+
+        public void setEditingMode(String editingMode)
+        {
+            this.editingMode = GWTEditingMode.valueOf(editingMode);
+        }
+
         public void setWidth(int width)
         {
             this.width = width;
@@ -798,6 +812,52 @@ public class ScriptController extends BaseFlowController
         public void setOpen(boolean open)
         {
             this.open = open;
+        }
+        public GWTGraphOptions getGraphOptions() throws Exception
+        {
+            GWTGraphOptions ret = new GWTGraphOptions();
+            GateEditorServiceImpl service = new GateEditorServiceImpl(getViewContext());
+            ret.script = service.makeGWTScript(analysisScript);
+            ret.compensation = editingMode.isCompensation();
+            ret.editingMode = editingMode;
+            ret.compensationMatrix = service.makeCompensationMatrix(getCompensationMatrix(), false);
+            ret.well = service.makeWell(getWell());
+            ret.width = width;
+            ret.height = height;
+            ret.xAxis = xAxis;
+            ret.yAxis = yAxis;
+            ret.subset = subset;
+            return ret;
+        }
+
+        public void setSubset(String subset)
+        {
+            this.subset = subset;
+        }
+
+        public void setXaxis(String axis)
+        {
+            this.xAxis = axis;
+        }
+
+        public void setYaxis(String axis)
+        {
+            this.yAxis = axis;
+        }
+
+        public void setPtX(double[] ptX)
+        {
+            this.ptX = ptX;
+        }
+
+        public void setPtY(double[] ptY)
+        {
+            this.ptY = ptY;
+        }
+
+        public FlowWell getWell() throws Exception
+        {
+            return FlowWell.fromURL(getContext().getViewURLHelper(), getRequest());
         }
     }
 
@@ -827,7 +887,19 @@ public class ScriptController extends BaseFlowController
     protected Forward graphImage(GraphForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
-        PlotInfo info = getPlotInfo(form, false);
+        GateEditorServiceImpl service = new GateEditorServiceImpl(getViewContext());
+        GraphCache cache = GraphCache.get(getRequest());
+        GWTGraphOptions options = form.getGraphOptions();
+        service.getGraphInfo(options);
+        cache.getGraphInfo(options);
+
+        service.getGraphInfo(form.getGraphOptions());
+        PlotInfo info = cache.getPlotInfo(options);
+        if (info == null)
+        {
+            // unexpected
+            return null;
+        }
         BufferedImage image = info.getImage();
         Gate gate = gateFromPoints(form.xAxis, form.yAxis, form.ptX, form.ptY, form.open);
         image = addSelection(image, info, gate, !form.open, true);
@@ -954,53 +1026,6 @@ public class ScriptController extends BaseFlowController
             return result;
         }
     }
-    transient GraphCacheKey _cacheKey;
-    transient PlotInfo _plotCache;
-
-    protected PlotInfo getPlotInfo(GraphForm form, boolean useEmptySubset) throws Exception
-    {
-        GraphSpec graphSpec;
-        if (StringUtils.isEmpty(form.yAxis))
-        {
-            graphSpec = new GraphSpec(SubsetSpec.fromString(form.subset).getParent(), form.xAxis);
-        }
-        else
-        {
-            graphSpec = new GraphSpec(SubsetSpec.fromString(form.subset).getParent(), form.xAxis, form.yAxis);
-        }
-        ScriptComponent group = form.getAnalysis();
-        FlowWell well = form.getWell();
-        GraphCacheKey key = new GraphCacheKey(graphSpec, well, group, form.width, form.height, useEmptySubset);
-        if (key.isCompatibleWith(_cacheKey))
-        {
-            return _plotCache;
-        }
-        CompensationMatrix comp = null;
-        if (form.getCompensationMatrix() != null)
-        {
-            comp = form.getCompensationMatrix().getCompensationMatrix();
-        }
-        PlotInfo ret = FCSAnalyzer.get().generateDesignGraph(FlowAnalyzer.getFCSUri(well), comp, group, graphSpec, form.width, form.height, useEmptySubset);
-        if (ret != null)
-        {
-            _cacheKey = key;
-            _plotCache = ret;
-        }
-        return ret;
-    }
-
-    @Jpf.Action
-    protected Forward analysisJS(EditGatesForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        Page page = getPage("analysisJS.jsp", form);
-        getResponse().setContentType("text/javascript");
-        JspView view = new JspView(page);
-        view.setFrame(WebPartView.FrameType.NONE);
-        getView().include(view);
-        return null;
-    }
-
     protected Population findPopulation(PopulationSet root, SubsetSpec subset)
     {
         PopulationSet parent;

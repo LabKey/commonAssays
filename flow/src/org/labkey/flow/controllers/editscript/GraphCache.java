@@ -2,6 +2,7 @@ package org.labkey.flow.controllers.editscript;
 
 import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
 import org.labkey.flow.gateeditor.client.model.GWTGraphInfo;
+import org.labkey.flow.analysis.web.PlotInfo;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -11,7 +12,7 @@ public class GraphCache
     static final private String key = GraphCache.class.getName();
     transient private GWTGraphOptions graphOptions;
     transient private GWTGraphInfo graphInfo;
-    transient private byte[] graphBytes;
+    transient private PlotInfo plotInfo;
 
     static public GraphCache get(HttpServletRequest request)
     {
@@ -35,19 +36,19 @@ public class GraphCache
         return graphInfo;
     }
 
-    public byte[] getGraphBytes(GWTGraphOptions options)
+    public PlotInfo getPlotInfo(GWTGraphOptions options)
     {
         if (!options.equals(this.graphOptions))
         {
             return null;
         }
-        return graphBytes;
+        return plotInfo;
     }
 
-    public void setGraphInfo(GWTGraphOptions options, GWTGraphInfo info, byte[] bytes)
+    public void setGraphInfo(GWTGraphOptions options, GWTGraphInfo info, PlotInfo plotInfo)
     {
         this.graphOptions = options;
         this.graphInfo = info;
-        this.graphBytes = bytes;
+        this.plotInfo = plotInfo;
     }
 }
