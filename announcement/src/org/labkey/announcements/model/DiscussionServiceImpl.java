@@ -1,21 +1,20 @@
 package org.labkey.announcements.model;
 
-import org.labkey.api.announcements.DiscussionService;
+import org.apache.commons.lang.StringUtils;
+import org.labkey.announcements.AnnouncementsController;
 import org.labkey.api.announcements.Announcement;
-import org.labkey.api.view.*;
+import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.data.*;
 import org.labkey.api.security.User;
 import org.labkey.api.util.AppProps;
-import org.labkey.announcements.AnnouncementsController;
-import org.apache.commons.lang.StringUtils;
+import org.labkey.api.view.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.net.URISyntaxException;
 import java.io.PrintWriter;
-import java.util.Map;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -163,7 +162,7 @@ public class DiscussionServiceImpl implements DiscussionService.Service
                 discussionBox = new ThreadWrapper(context, "Discussion", discussionView, respondView); 
         }
 
-        HttpView pickerView = new PickerView(pageURL, announcements);
+        HttpView pickerView = new PickerView(c, pageURL, announcements);
         if (discussionBox == null)
             return pickerView;
 
@@ -261,13 +260,19 @@ public class DiscussionServiceImpl implements DiscussionService.Service
     public static class PickerView extends GroovyView
     {
         public ViewURLHelper pageURL;
+        public ViewURLHelper emailPreferencesURL;
+        public ViewURLHelper adminEmailURL;
+        public ViewURLHelper customizeURL;
         public Announcement[] announcements;
 
-        PickerView(ViewURLHelper pageURL, Announcement[] announcements)
+        PickerView(Container c, ViewURLHelper pageURL, Announcement[] announcements)
         {
             super("/org/labkey/announcements/discussionMenu.gm");
             setFrame(FrameType.NONE);
             this.pageURL = pageURL.clone();
+            this.emailPreferencesURL = AnnouncementsController.getShowEmailPreferencesUrl(c, pageURL);
+            this.adminEmailURL = AnnouncementsController.getAdminEmailUrl(c);
+            this.customizeURL = AnnouncementsController.getShowCustomizeUrl(c, pageURL);
             this.announcements = announcements;
         }
     }

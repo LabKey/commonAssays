@@ -35,7 +35,10 @@ LABKEY.requiresMenu();
 var discussionMenu = {};
 (function(){
     discussionMenu.pageUrl = <%=PageFlowUtil.jsString(pageURL.getLocalURIString())%>;
-    discussionMenu.model = [<%
+    discussionMenu.emailPreferencesUrl = <%=PageFlowUtil.jsString(me.emailPreferencesURL.getLocalURIString())%>;
+    discussionMenu.adminEmailUrl = <%=PageFlowUtil.jsString(me.adminEmailURL.getLocalURIString())%>;
+    discussionMenu.customizeUrl = <%=PageFlowUtil.jsString(me.customizeURL.getLocalURIString())%>;
+    discussionMenu.model = [[<%
         for (Announcement a : announcements)
         {
             String title = a.getTitle();
@@ -44,9 +47,17 @@ var discussionMenu = {};
         }
         if (c.hasPermission(context.getUser(), ACL.PERM_INSERT))
         {
-            %>{text:'Start new discussion',url:discussionMenu.pageUrl+'&discussion.start=true#discussionArea'}<%
+            %>{text:'Start new discussion',url:discussionMenu.pageUrl+'&discussion.start=true#discussionArea'},
+            <%
         }
-        %>];
+        %>],[{text:'Email preferences',url:discussionMenu.emailPreferencesUrl}<%
+        if (c.hasPermission(context.getUser(), ACL.PERM_ADMIN))
+        {
+            %>,
+    {text:'Email admin',url:discussionMenu.adminEmailUrl},
+    {text:'Customize',url:discussionMenu.customizeUrl}<%
+        }
+        %>]];
 
     discussionMenu.showEvent = function(event)
     {

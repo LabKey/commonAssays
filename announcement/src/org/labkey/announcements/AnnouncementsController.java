@@ -88,7 +88,13 @@ public class AnnouncementsController extends ViewController
 
     public ViewForward getBeginForward() throws ServletException
     {
-        return new ViewForward("announcements", "begin", getContainer());    
+        return new ViewForward(getBeginUrl(getContainer()));
+    }
+
+
+    private static ViewURLHelper getBeginUrl(Container c)
+    {
+        return new ViewURLHelper("announcements", "begin", c);
     }
 
 
@@ -130,6 +136,12 @@ public class AnnouncementsController extends ViewController
         _renderInTemplate(view, getContainer(), getSettings().getBoardName() + " List", null, null);
 
         return null;
+    }
+
+
+    public static ViewURLHelper getAdminEmailUrl(Container c)
+    {
+        return new ViewURLHelper("announcements", "adminEmail", c);
     }
 
 
@@ -294,7 +306,7 @@ public class AnnouncementsController extends ViewController
             }
         }
 
-        return new ViewForward(cloneViewURLHelper().setAction("adminEmail"));
+        return new ViewForward(getAdminEmailUrl(c));
     }
 
 
@@ -587,7 +599,7 @@ public class AnnouncementsController extends ViewController
     }
 
     
-    private static ViewURLHelper getShowCustomizeUrl(Container c, ViewURLHelper returnUrl)
+    public static ViewURLHelper getShowCustomizeUrl(Container c, ViewURLHelper returnUrl)
     {
         ViewURLHelper url = new ViewURLHelper("announcements", "showCustomize", c);
         url.addParameter("returnUrl", returnUrl.getLocalURIString());
@@ -1121,6 +1133,21 @@ public class AnnouncementsController extends ViewController
     }
 
 
+    public static ViewURLHelper getShowEmailPreferencesUrl(Container c, ViewURLHelper srcUrl)
+    {
+        return new ViewURLHelper("announcements", "showEmailPreferences", c).addParameter("srcUrl", srcUrl.getLocalURIString());
+    }
+
+
+    // Used by daily digest & response emails, which uses mock request and returns to the home page
+    private static ViewURLHelper getShowEmailPreferencesUrl(HttpServletRequest request, Container c)
+    {
+        ViewURLHelper url = new ViewURLHelper(request, "announcements", "showEmailPreferences", c);
+        url.addParameter("srcUrl", new ViewURLHelper(request, "announcements", "begin", c.getPath()).getURIString());
+        return url;
+    }
+
+
     @Jpf.Action
     protected Forward showEmailPreferences(EmailOptionsForm form) throws Exception
     {
@@ -1164,11 +1191,8 @@ public class AnnouncementsController extends ViewController
         //save the default settings
         AnnouncementManager.saveProjectEmailSettings(getContainer(), form.getDefaultEmailOption());
 
-        //redirect to current page
-        ViewURLHelper url = cloneViewURLHelper();
-        url.deleteParameters();
-        url.setAction("adminEmail");
-        return new ViewForward(url);
+        //redirect to admin email page
+        return new ViewForward(getAdminEmailUrl(getContainer()));
     }
 
 
@@ -1240,8 +1264,7 @@ public class AnnouncementsController extends ViewController
 
                 if (!noMemberListEmails.isEmpty())
                 {
-                    ViewURLHelper changeEmailURL = new ViewURLHelper(request, "announcements", "showEmailPreferences", c.getPath());
-                    changeEmailURL.addParameter("srcURL", new ViewURLHelper(request, "announcements", "begin", c.getPath()).getURIString());
+                    ViewURLHelper changeEmailURL = getShowEmailPreferencesUrl(request, c);
                     ViewMessage m = getMessage(c, settings, parent, a, isResponse, changeEmailURL.getURIString(), currentRendererType, Reason.signedUp);
                     m.setHeader("References", references);
                     m.setHeader("Message-ID", messageId);
@@ -1318,7 +1341,7 @@ public class AnnouncementsController extends ViewController
         Settings settings = getSettings();
         page.emailPreference = form.getEmailPreference();
         page.notificationType = form.getNotificationType();
-        page.srcURL = cloneViewURLHelper().setAction("begin").toString();
+        page.srcURL = form.getSrcUrl();
         page.message = message;
         page.hasMemberList = settings.hasMemberList();
         page.conversationName = settings.getConversationName().toLowerCase();
@@ -1631,6 +1654,7 @@ public class AnnouncementsController extends ViewController
     {
         private int _emailPreference = AnnouncementManager.EMAIL_PREFERENCE_NONE;
         private int _notificationType = 0;
+        private String _srcUrl = null;
 
         // Email option is a single int that contains the conversation preference AND a bit for digest vs. individual
         // This method splits them apart
@@ -1668,6 +1692,16 @@ public class AnnouncementsController extends ViewController
         public void setNotificationType(int notificationType)
         {
             _notificationType = notificationType;
+        }
+
+        public String getSrcUrl()
+        {
+            return _srcUrl;
+        }
+
+        public void setSrcUrl(String srcUrl)
+        {
+            _srcUrl = srcUrl;
         }
     }
 
@@ -1749,10 +1783,10 @@ public class AnnouncementsController extends ViewController
 
             addObject("settings", settings);
             addObject("insertURL", perm.allowInsert() ? getShowInsertUrl(c, url) : null);
-            addObject("messagesURL", ViewURLHelper.toPathString("announcements", "begin", c.getPath()));
+            addObject("messagesURL", getBeginUrl(c));
             addObject("customizeURL", c.hasPermission(user, ACL.PERM_ADMIN) ? getShowCustomizeUrl(c, url) : null);
-            addObject("emailPrefsURL", user.isGuest() ? null : ViewURLHelper.toPathString("announcements", "showEmailPreferences", c.getPath()));
-            addObject("emailManageURL", c.hasPermission(user, ACL.PERM_ADMIN) ? ViewURLHelper.toPathString("announcements", "adminEmail", c.getPath()) : null);
+            addObject("emailPrefsURL", user.isGuest() ? null : getShowEmailPreferencesUrl(c, url));
+            addObject("emailManageURL", c.hasPermission(user, ACL.PERM_ADMIN) ? getAdminEmailUrl(c) : null);
             addObject("filterText", filterText);
             addObject("urlFilterText", isFiltered ? urlFilter.getFilterText(
                 new SimpleFilter.ColumnNameFormatter()
@@ -1775,7 +1809,7 @@ public class AnnouncementsController extends ViewController
 
             Settings settings = getSettings(c);
             setTitle(settings.getBoardName());
-            setTitleHref(ViewURLHelper.toPathString("announcements", "begin", c.getPath()));
+            setTitleHref(getBeginUrl(c).getEncodedLocalURIString());
 
             Permissions perm = getPermissions(c, user, settings);
             SimpleFilter filter = getFilter(settings, perm, displayAll);
@@ -1786,8 +1820,8 @@ public class AnnouncementsController extends ViewController
             addObject("insertURL", perm.allowInsert() ? getShowInsertUrl(c, url) : null);
             addObject("listURL", getListUrl(c));
             addObject("customizeURL", c.hasPermission(user, ACL.PERM_ADMIN) ? getShowCustomizeUrl(c, url) : null);
-            addObject("emailPrefsURL", user.isGuest() ? null : ViewURLHelper.toPathString("announcements", "showEmailPreferences", c.getPath()));
-            addObject("emailManageURL", c.hasPermission(user, ACL.PERM_ADMIN) ? ViewURLHelper.toPathString("announcements", "adminEmail", c.getPath()) : null);
+            addObject("emailPrefsURL", user.isGuest() ? null : getShowEmailPreferencesUrl(c, url).getEncodedLocalURIString());
+            addObject("emailManageURL", c.hasPermission(user, ACL.PERM_ADMIN) ? getAdminEmailUrl(c) : null);
             addObject("announcements", pair.first);
             addObject("filterText", getFilterText(settings, displayAll, false, pair.second ? 100 : 0));
         }
@@ -1884,6 +1918,7 @@ public class AnnouncementsController extends ViewController
             DataRegion rgn = getDataRegion(perm, settings);
 
             setTitle(settings.getBoardName() + " List");
+            setTitleHref(getListUrl(c).getEncodedLocalURIString());            
 
             TableInfo tinfo = _comm.getTableInfoThreads();
             DisplayColumn title = new DataColumn(tinfo.getColumn("Title"));
@@ -2036,7 +2071,7 @@ public class AnnouncementsController extends ViewController
             bean.message = null;
             bean.perm = perm;
             bean.isResponse = isResponse;
-            bean.messagesURL = ViewURLHelper.toPathString("announcements", "begin", c);
+            bean.messagesURL = getBeginUrl(c).getEncodedLocalURIString();
             bean.listURL = getListUrl(c);
             bean.printURL = null == url ? null : url.clone().replaceParameter("print", "1").getEncodedLocalURIString();
             bean.print = print;

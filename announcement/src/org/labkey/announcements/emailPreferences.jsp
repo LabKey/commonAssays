@@ -19,5 +19,5 @@
 
     <br><input type=hidden name="srcUrl"value="<%=PageFlowUtil.filter(srcURL)%>"/>
     <input type=image src="<%=PageFlowUtil.buttonSrc("Update")%>"/>
-    <a href="<%=srcURL%>"><img src="<%=PageFlowUtil.buttonSrc("Return to Messages")%>" border=0/></a>
+    <a href="<%=srcURL%>"><img src="<%=PageFlowUtil.buttonSrc(message == null ? "Cancel" : "Done")%>" border=0/></a>
 </form>
