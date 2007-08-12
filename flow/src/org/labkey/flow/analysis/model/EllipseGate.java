@@ -50,7 +50,6 @@ public class EllipseGate extends Gate
         BitSet ret = new BitSet(data.getRowCount());
         NumberArray xValues = data.getColumn(xAxis);
         NumberArray yValues = data.getColumn(yAxis);
-        double dSquared = distance * distance;
         for (int i = 0; i < data.getRowCount(); i ++)
         {
             double dCompare = 0;
@@ -58,9 +57,9 @@ public class EllipseGate extends Gate
             {
                 double dx = xValues.getDouble(i) - foci[f].getX();
                 double dy = yValues.getDouble(i) - foci[f].getY();
-                dCompare += dx * dx + dy * dy;
+                dCompare += Math.sqrt(dx * dx + dy * dy);
             }
-            if (dCompare <= dSquared)
+            if (dCompare <= distance)
             {
                 ret.set(i, true);
             }
@@ -85,14 +84,14 @@ public class EllipseGate extends Gate
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    static private double dSquared(Point2D.Double point, Point2D.Double[] foci)
+    static private double distance(Point2D.Double point, Point2D.Double[] foci)
     {
         double ret = 0;
         for (Point2D.Double focus : foci)
         {
             double dx = point.x - focus.x;
             double dy = point.y - focus.y;
-            ret += dx * dx + dy * dy;
+            ret += Math.sqrt(dx * dx + dy * dy);
         }
         return ret;
     }
@@ -142,12 +141,8 @@ public class EllipseGate extends Gate
         double dSquared = majorAxisLength * majorAxisLength;
         for (Point2D.Double vertex : vertices)
         {
-            double dCompare = dSquared(vertex, ret.getFoci());
+            double dCompare = distance(vertex, ret.getFoci());
             double difference = dCompare - dSquared;
-            if (difference * difference > .01)
-            {
-                _log.error("Difference is too large");
-            }
         }
         return ret;
     }

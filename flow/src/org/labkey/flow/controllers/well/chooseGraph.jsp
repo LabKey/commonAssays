@@ -115,7 +115,7 @@
                 <option value="">Ungated</option>
                 <% for (SubsetSpec subset : subsets)
                 { %>
-                <option value="<%=h(subset)%>" <%=subset.equals(form.getSubset()) ? " selected" : ""%>><%=h(subset)%></option>
+                <option value="<%=h(subset)%>" <%=subset.toString().equals(form.getSubset()) ? " selected" : ""%>><%=h(subset)%></option>
                 <% } %>
             </select>
             </td>
