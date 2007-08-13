@@ -15,6 +15,7 @@ import org.labkey.api.view.*;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.WorkspaceData;
+import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.AddRunsJob;
 import org.labkey.flow.script.AnalyzeJob;
@@ -52,6 +53,10 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
     {
         requiresPermission(ACL.PERM_READ);
         FlowScript script = FlowScript.fromURL(getViewURLHelper(), getRequest());
+        if (script == null)
+        {
+            return new ViewForward(getContainer().urlFor(FlowController.Action.begin));
+        }
         ScriptOverview overview = new ScriptOverview(getUser(), getContainer(), script);
         return includeView(new HomeTemplate(getViewContext(), new HtmlView(overview.toString()), getNavTrailConfig(script, null, Action.begin)));
     }
