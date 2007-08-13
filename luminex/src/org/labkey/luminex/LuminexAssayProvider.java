@@ -199,7 +199,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
             Map<String, Object>[] dataMaps = new Map[luminexDataRows.length];
 
             Map<Integer, Analyte> analytes = new HashMap<Integer, Analyte>();
-            Map<String, PropertyType> types = new HashMap<String, PropertyType>();
+            List<PropertyDescriptor> types = new ArrayList<PropertyDescriptor>();
 
             // Map from data id to experiment run source
             Map<Integer, ExpRun> runs = new HashMap<Integer, ExpRun>();
@@ -213,19 +213,19 @@ public class LuminexAssayProvider extends DefaultAssayProvider
             for (LuminexDataRow luminexDataRow : luminexDataRows)
             {
                 Map<String, Object> dataMap = new HashMap<String, Object>();
-                addProperty("RowId", luminexDataRow.getRowId(), dataMap, types);
-                addProperty("ConcInRange", luminexDataRow.getConcInRange(), dataMap, types);
-                addProperty("ConcInRangeOORIndicator", luminexDataRow.getConcInRangeOORIndicator(), dataMap, types);
-                addProperty("ExpConc", luminexDataRow.getExpConc(), dataMap, types);
-                addProperty("FI", luminexDataRow.getFi(), dataMap, types);
-                addProperty("FIBackground", luminexDataRow.getFiBackground(), dataMap, types);
-                addProperty("ObsConc", luminexDataRow.getObsConc(), dataMap, types);
-                addProperty("ObsConcOORIndicator", luminexDataRow.getObsConcOORIndicator(), dataMap, types);
-                addProperty("ObsOverExp", luminexDataRow.getObsOverExp(), dataMap, types);
-                addProperty("StdDev", luminexDataRow.getStdDev(), dataMap, types);
-                addProperty("Type", luminexDataRow.getType(), dataMap, types);
-                addProperty("Well", luminexDataRow.getWell(), dataMap, types);
-                addProperty("SourceLSID", new Lsid("LuminexDataRow", Integer.toString(luminexDataRow.getRowId())).toString(), dataMap, types);
+                addProperty(study, "RowId", luminexDataRow.getRowId(), dataMap, types);
+                addProperty(study, "ConcInRange", luminexDataRow.getConcInRange(), dataMap, types);
+                addProperty(study, "ConcInRangeOORIndicator", luminexDataRow.getConcInRangeOORIndicator(), dataMap, types);
+                addProperty(study, "ExpConc", luminexDataRow.getExpConc(), dataMap, types);
+                addProperty(study, "FI", luminexDataRow.getFi(), dataMap, types);
+                addProperty(study, "FIBackground", luminexDataRow.getFiBackground(), dataMap, types);
+                addProperty(study, "ObsConc", luminexDataRow.getObsConc(), dataMap, types);
+                addProperty(study, "ObsConcOORIndicator", luminexDataRow.getObsConcOORIndicator(), dataMap, types);
+                addProperty(study, "ObsOverExp", luminexDataRow.getObsOverExp(), dataMap, types);
+                addProperty(study, "StdDev", luminexDataRow.getStdDev(), dataMap, types);
+                addProperty(study, "Type", luminexDataRow.getType(), dataMap, types);
+                addProperty(study, "Well", luminexDataRow.getWell(), dataMap, types);
+                addProperty(study, "SourceLSID", new Lsid("LuminexDataRow", Integer.toString(luminexDataRow.getRowId())).toString(), dataMap, types);
 
                 Analyte analyte = analytes.get(luminexDataRow.getAnalyteId());
                 if (analyte == null)
@@ -233,13 +233,13 @@ public class LuminexAssayProvider extends DefaultAssayProvider
                     analyte = Table.selectObject(LuminexSchema.getTableInfoAnalytes(), luminexDataRow.getAnalyteId(), Analyte.class);
                     analytes.put(analyte.getRowId(), analyte);
                 }
-                addProperty("Analyte Name", analyte.getName(), dataMap, types);
-                addProperty("Analyte FitProb", analyte.getFitProb(), dataMap, types);
-                addProperty("Analyte RegressionType", analyte.getRegressionType(), dataMap, types);
-                addProperty("Analyte ResVar", analyte.getResVar(), dataMap, types);
-                addProperty("Analyte StdCurve", analyte.getStdCurve(), dataMap, types);
-                addProperty("Analyte MinStandardRecovery", analyte.getMinStandardRecovery(), dataMap, types);
-                addProperty("Analyte MaxStandardRecovery", analyte.getMaxStandardRecovery(), dataMap, types);
+                addProperty(study, "Analyte Name", analyte.getName(), dataMap, types);
+                addProperty(study, "Analyte FitProb", analyte.getFitProb(), dataMap, types);
+                addProperty(study, "Analyte RegressionType", analyte.getRegressionType(), dataMap, types);
+                addProperty(study, "Analyte ResVar", analyte.getResVar(), dataMap, types);
+                addProperty(study, "Analyte StdCurve", analyte.getStdCurve(), dataMap, types);
+                addProperty(study, "Analyte MinStandardRecovery", analyte.getMinStandardRecovery(), dataMap, types);
+                addProperty(study, "Analyte MaxStandardRecovery", analyte.getMaxStandardRecovery(), dataMap, types);
 
                 ExpRun run = runs.get(luminexDataRow.getDataId());
                 if (run == null)
@@ -247,11 +247,11 @@ public class LuminexAssayProvider extends DefaultAssayProvider
                     ExpData data = ExperimentService.get().getExpData(luminexDataRow.getDataId());
                     run = data.getRun();
                 }
-                addProperty("Run Name", run.getName(), dataMap, types);
-                addProperty("Run Comments", run.getComment(), dataMap, types);
-                addProperty("Run CreatedOn", run.getCreated(), dataMap, types);
+                addProperty(study, "Run Name", run.getName(), dataMap, types);
+                addProperty(study, "Run Comments", run.getComment(), dataMap, types);
+                addProperty(study, "Run CreatedOn", run.getCreated(), dataMap, types);
                 User createdBy = run.getCreatedBy();
-                addProperty("Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(), dataMap, types);
+                addProperty(study, "Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(), dataMap, types);
 
                 Map<String, ObjectProperty> props = runProperties.get(run);
                 if (props == null)
@@ -261,10 +261,9 @@ public class LuminexAssayProvider extends DefaultAssayProvider
                 for (PropertyDescriptor runPD : runPDs)
                 {
                     ObjectProperty prop = props.get(runPD.getPropertyURI());
-                    if (prop != null)
-                    {
-                        addProperty("Run " + prop.getName(), prop.value(), prop.getPropertyType(), dataMap, types);
-                    }
+                    PropertyDescriptor publishPD = runPD.clone();
+                    publishPD.setName("Run " + runPD.getName());
+                    addProperty(publishPD, prop.value(), dataMap, types);
                 }
 
                 for (AssayPublishKey dataKey : dataKeys)
