@@ -31,11 +31,11 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
     }
 
 
-    public ResultSet getResultSet(RenderContext ctx) throws SQLException, IOException
+    public ResultSet getResultSet(RenderContext ctx, boolean async) throws SQLException, IOException
     {
         List<DisplayColumn> realColumns = getDisplayColumnList();
         setDisplayColumnList(_allColumns);
-        ResultSet rs = super.getResultSet(ctx);
+        ResultSet rs = super.getResultSet(ctx, async);
         setDisplayColumnList(realColumns);
 
         _groupedRS = new GroupedResultSet(rs, _uniqueColumnName, _resultSetRowLimit, _outerGroupLimit);

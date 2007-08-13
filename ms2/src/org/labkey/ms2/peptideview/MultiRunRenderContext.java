@@ -24,7 +24,7 @@ public class MultiRunRenderContext extends RenderContext
         _runs = runs;
     }
 
-    protected ResultSet selectForDisplay(TableInfo table, ColumnInfo[] columns, SimpleFilter filter, Sort sort, int maxRows) throws SQLException
+    protected ResultSet selectForDisplay(TableInfo table, ColumnInfo[] columns, SimpleFilter filter, Sort sort, int maxRows, boolean async) throws SQLException
     {
         return new MultiRunResultSet(_runs, table, columns, filter, sort, maxRows, getCache());
     }
