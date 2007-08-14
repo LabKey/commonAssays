@@ -15,6 +15,7 @@ import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.script.MoveRunFromWorkspaceJob;
+import org.labkey.flow.analysis.model.FCS;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.zip.ZipOutputStream;
@@ -24,6 +25,7 @@ import java.util.TreeMap;
 import java.io.File;
 import java.io.InputStream;
 import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.net.URI;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
@@ -133,6 +135,7 @@ public class RunController extends BaseFlowController<RunController.Action>
         HttpServletResponse response = getResponse();
 
         FlowRun run = getRun();
+        String strEventCount = getRequest().getParameter("eventCount");
         Map<String, File> files = new TreeMap();
         FlowWell[] wells = run.getWells();
         if (wells.length == 0)
@@ -155,7 +158,15 @@ public class RunController extends BaseFlowController<RunController.Action>
         {
             ZipEntry entry = new ZipEntry(file.getName());
             stream.putNextEntry(entry);
-            InputStream is = new FileInputStream(file);
+            InputStream is;
+            if (strEventCount == null)
+            {
+                is = new FileInputStream(file);
+            }
+            else
+            {
+                is = new ByteArrayInputStream(new FCS(file).getFCSBytes(file, Integer.valueOf(strEventCount)));
+            }
             int cb;
             while((cb = is.read(buffer)) > 0)
             {

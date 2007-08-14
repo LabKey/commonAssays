@@ -55,5 +55,7 @@
         urlShowRunGraph.addParameter("rowId", Integer.toString(getRun().getRunId()));
     %>
     <labkey:link href="<%=h(urlShowRunGraph)%>" text="Experiment Run Graph"/><br>
+    <%if (getRun().getPath() != null) {%>
     <labkey:link href="<%=getRun().urlFor(RunController.Action.download)%>" text="Download FCS Files" /><br>
+    <% } %>
 </p>
