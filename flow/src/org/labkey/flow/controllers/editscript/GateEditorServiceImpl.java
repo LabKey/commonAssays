@@ -19,6 +19,7 @@ import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.chart.FlowLogarithmicAxis;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.FlowPreference;
 import org.fhcrc.cpas.flow.script.xml.*;
 import org.jfree.chart.axis.ValueAxis;
 import org.apache.log4j.Logger;
@@ -313,6 +314,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             Map<String, String> parameters = EditScriptForm.getParameterNames(run, new String[0]);
             ret.setParameterNames(parameters.keySet().toArray(new String[0]));
             ret.setParameterLabels(parameters.values().toArray(new String[0]));
+            FlowPreference.editScriptRunId.setValue(_context.getRequest(), Integer.toString(run.getRunId()));
             return ret;
         }
         catch (Exception e)
@@ -339,6 +341,10 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
         try
         {
             GraphCache cache = GraphCache.get(_request);
+            if (graphOptions.compensationMatrix != null)
+            {
+                FlowPreference.editScriptCompId.setValue(_request, Integer.toString(graphOptions.compensationMatrix.getCompId()));
+            }
             GWTGraphInfo ret = cache.getGraphInfo(graphOptions);
             if (ret != null)
                 return ret;

@@ -4,6 +4,7 @@ import org.labkey.api.view.Overview;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowCompensationMatrix;
+import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.analysis.model.CompensationCalculation;
 import org.labkey.flow.analysis.model.PopulationSet;
@@ -230,13 +231,15 @@ public class ScriptOverview extends Overview
         boolean hasAnalysis = hasStep(FlowProtocolStep.analysis);
         boolean hasComp = hasStep(FlowProtocolStep.calculateCompensation);
         Step.Status stepStatus;
-        if (hasAnalysis || hasComp)
+        FlowRun run = _script.getRun();
+
+        if (run != null || !hasAnalysis && !hasComp)
         {
-            stepStatus = Step.Status.normal;
+            stepStatus = Step.Status.disabled;
         }
         else
         {
-            stepStatus = Step.Status.disabled;
+            stepStatus = Step.Status.normal;
         }
         Step ret = new Step("Execute the analysis script", stepStatus);
         if (hasAnalysis && !hasComp && _script.requiresCompensationMatrix(FlowProtocolStep.analysis))
@@ -245,7 +248,11 @@ public class ScriptOverview extends Overview
             if (comps.size() == 0)
                 ret.setStatusHTML("<b>Important: This analysis script requires a compensation matrix, but there are no compensation matrices in this folder.</b>");
         }
-        if (hasAnalysis || hasComp)
+        if (_script.getRun() != null)
+        {
+            ret.setExplanatoryHTML("This script is part of the run '" + _script.getRun().getName() + "'.  It cannot be used to analyze another run, but you can make a copy of it.");
+        }
+        else if (hasAnalysis || hasComp)
         {
             Action action = new Action(hasAnalysis ? "Analyze some runs" : "Calculate some compensation matrices", _script.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze));
             ret.addAction(action);

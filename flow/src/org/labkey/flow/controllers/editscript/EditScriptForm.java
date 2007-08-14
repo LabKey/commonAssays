@@ -23,6 +23,7 @@ import org.labkey.flow.controllers.FlowParam;
 
 import java.util.*;
 import java.sql.SQLException;
+import java.io.FileNotFoundException;
 
 public class EditScriptForm extends ViewForm
 {
@@ -114,9 +115,13 @@ public class EditScriptForm extends ViewForm
         try
         {
             FlowRun[] available = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-            if (available.length != 0)
+            for (FlowRun runTry : available)
             {
-                _run = available[0];
+                if (runTry.getPath() != null)
+                {
+                    _run = runTry;
+                    break;
+                }
             }
         }
         catch (Throwable t)
@@ -186,22 +191,31 @@ public class EditScriptForm extends ViewForm
         try
         {
             FlowWell[] wells = run.getWells();
-            for (int i = 0; i < wells.length && i < MAX_WELLS_TO_POLL; i ++)
+            int cWellsCounted = 0;
+            for (int i = 0; i < wells.length && cWellsCounted < MAX_WELLS_TO_POLL; i ++)
             {
                 try
                 {
-                    Map<String, String> wellParams = FCSAnalyzer.get().getParameterNames(wells[i].getFCSURI(), compChannels);
-                    for (Map.Entry<String, String> entry : wellParams.entrySet())
+                    try
                     {
-                        String previous = ret.get(entry.getKey());
-                        if (previous == null)
+                        Map<String, String> wellParams = FCSAnalyzer.get().getParameterNames(wells[i].getFCSURI(), compChannels);
+                        for (Map.Entry<String, String> entry : wellParams.entrySet())
                         {
-                            ret.put(entry.getKey(), entry.getValue());
+                            String previous = ret.get(entry.getKey());
+                            if (previous == null)
+                            {
+                                ret.put(entry.getKey(), entry.getValue());
+                            }
+                            else if (previous.length() < entry.getValue().length())
+                            {
+                                ret.put(entry.getKey(), entry.getValue());
+                            }
                         }
-                        else if (previous.length() < entry.getValue().length())
-                        {
-                            ret.put(entry.getKey(), entry.getValue());
-                        }
+                        cWellsCounted ++;
+                    }
+                    catch(FileNotFoundException e)
+                    {
+                        _log.warn("Error opening file " + wells[i].getFCSURI(), e);
                     }
                 }
                 catch(Exception e)

@@ -333,7 +333,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             workspaceFile = root.resolvePath(path);
         }
         FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
-        File runFilePathRoot;
+        File runFilePathRoot = null;
         FlowExperiment experiment;
         if (StringUtils.isEmpty(form.ff_newAnalysisName))
         {
@@ -348,10 +348,8 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             throw new IllegalArgumentException("Wrong container");
         }
 
-        boolean searchForFCSFiles;
         if (workspaceFile != null)
         {
-            runFilePathRoot = workspaceFile;
             for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
             {
                 File sampleFile = new File(workspaceFile.getParent(), sampleInfo.getLabel());
@@ -367,16 +365,13 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                 addError("This analysis folder already contains this path.");
                 return null;
             }
-            searchForFCSFiles = true;
         }
         else
         {
             workspaceFile = new File(FlowSettings.getWorkingDirectory(), form.getWorkspace().getName());
-            runFilePathRoot = workspaceFile;
-            searchForFCSFiles = false;
         }
 
-        FlowRun run = workspace.createExperimentRun(getUser(), getContainer(), experiment, workspaceFile, runFilePathRoot, searchForFCSFiles);
+        FlowRun run = workspace.createExperimentRun(getUser(), getContainer(), experiment, workspaceFile, runFilePathRoot);
         return new ViewForward(run.urlShow());
     }
 

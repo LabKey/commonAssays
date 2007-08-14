@@ -363,8 +363,15 @@ public class FCSAnalyzer
     public Map<String, String> getParameterNames(URI uriFCS, String[] compChannelNames) throws Exception
     {
         LinkedHashMap<String, String> ret = new LinkedHashMap();
+        if (uriFCS == null)
+        {
+            return ret;
+        }
         FCSHeader fcs = _cache.readFCSHeader(uriFCS);
-        if (fcs == null) return ret;
+        if (fcs == null)
+        {
+            return ret;
+        }
         List<String> names = getFieldNames(fcs);
         for (int i = 0; i < names.size(); i++)
         {

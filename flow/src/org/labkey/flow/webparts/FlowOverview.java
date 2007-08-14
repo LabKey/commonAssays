@@ -34,6 +34,7 @@ public class FlowOverview extends Overview
     boolean _canCreateFolder;
     int _fcsFileCount;
     int _fcsRunCount;
+    int _fcsRealRunCount;
     int _fcsAnalysisCount;
     int _fcsAnalysisRunCount;
     int _compensationMatrixCount;
@@ -59,6 +60,7 @@ public class FlowOverview extends Overview
 
         _fcsFileCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.fcsKeywords);
         _fcsRunCount = FlowManager.get().getRunCount(getContainer(), ObjectType.fcsKeywords);
+        _fcsRealRunCount = FlowManager.get().getFCSRunCount(getContainer());
         _fcsAnalysisCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.fcsAnalysis);
         _fcsAnalysisRunCount = FlowManager.get().getRunCount(getContainer(), ObjectType.fcsAnalysis);
         _compensationMatrixCount = FlowManager.get().getObjectCount(getContainer(), ObjectType.compensationMatrix);
@@ -196,7 +198,7 @@ public class FlowOverview extends Overview
         }
         else
         {
-            if (_fcsFileCount == 0)
+            if (_fcsRealRunCount == 0)
             {
                 status = Step.Status.disabled;
             }

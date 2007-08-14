@@ -615,7 +615,7 @@ abstract public class FlowJoWorkspace implements Serializable
         }
     }
 
-    public FlowRun createExperimentRun(User user, Container container, FlowExperiment experiment, File workspaceFile, File runFilePathRoot, boolean searchForFCSFiles) throws Exception
+    public FlowRun createExperimentRun(User user, Container container, FlowExperiment experiment, File workspaceFile, File runFilePathRoot) throws Exception
     {
         URI dataFileURI = new File(workspaceFile.getParent(), "attributes.flowdata.xml").toURI();
         ExperimentService.Interface svc = ExperimentService.get();
@@ -624,8 +624,11 @@ abstract public class FlowJoWorkspace implements Serializable
         Map<SampleInfo, AttributeSet> analysisMap = new LinkedHashMap();
         for (FlowJoWorkspace.SampleInfo sample : getSamples())
         {
-            File dataFile = new File(workspaceFile.getParent(), sample.getLabel());
-            AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, dataFile.toURI());
+            AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, null);
+            if (runFilePathRoot != null)
+            {
+                attrs.setURI(new File(runFilePathRoot, sample.getLabel()).toURI());
+            }
             attrs.setKeywords(sample.getKeywords());
             attrs.prepareForSave();
             keywordsMap.put(sample, attrs);
@@ -653,7 +656,7 @@ abstract public class FlowJoWorkspace implements Serializable
             FlowProtocol flowProtocol = FlowProtocol.ensureForContainer(user, container);
             ExpProtocol protocol = flowProtocol.getProtocol();
             run.setProtocol(protocol);
-            if (searchForFCSFiles)
+            if (runFilePathRoot != null)
             {
                 run.setFilePathRoot(runFilePathRoot);
             }

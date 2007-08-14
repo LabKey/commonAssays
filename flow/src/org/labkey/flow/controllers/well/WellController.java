@@ -18,6 +18,7 @@ import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 
 import java.util.*;
+import java.io.FileNotFoundException;
 
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
@@ -192,33 +193,40 @@ public class WellController extends BaseFlowController
         String mode = getViewURLHelper().getParameter("mode");
         FlowWell well = getWell();
 
-        if (mode.equals("raw"))
+        try
         {
-            String strEventCount = getViewURLHelper().getParameter("eventCount");
-            int maxEventCount = Integer.MAX_VALUE;
-            if (strEventCount != null)
+            if (mode.equals("raw"))
             {
-                maxEventCount = Integer.valueOf(strEventCount);
+                String strEventCount = getViewURLHelper().getParameter("eventCount");
+                int maxEventCount = Integer.MAX_VALUE;
+                if (strEventCount != null)
+                {
+                    maxEventCount = Integer.valueOf(strEventCount);
+                }
+                byte[] bytes = FCSAnalyzer.get().getFCSBytes(well.getFCSURI(), maxEventCount);
+                PageFlowUtil.streamFileBytes(getResponse(), URIUtil.getFilename(well.getFCSURI()), bytes, true);
+                return null;
             }
-            byte[] bytes = FCSAnalyzer.get().getFCSBytes(well.getFCSURI(), maxEventCount);
-            PageFlowUtil.streamFileBytes(getResponse(), URIUtil.getFilename(well.getFCSURI()), bytes, true);
-            return null;
-        }
 
-        getResponse().setContentType("text/plain");
-        FCSViewer viewer = new FCSViewer(FlowAnalyzer.getFCSUri(well));
-        if ("compensated".equals(mode))
-        {
-            FlowCompensationMatrix comp = well.getRun().getCompensationMatrix();
-            // viewer.applyCompensationMatrix(URIUtil.resolve(base, compFiles[0].getPath()));
+            getResponse().setContentType("text/plain");
+            FCSViewer viewer = new FCSViewer(FlowAnalyzer.getFCSUri(well));
+            if ("compensated".equals(mode))
+            {
+                FlowCompensationMatrix comp = well.getRun().getCompensationMatrix();
+                // viewer.applyCompensationMatrix(URIUtil.resolve(base, compFiles[0].getPath()));
+            }
+            if ("keywords".equals(mode))
+            {
+                viewer.writeKeywords(getResponse().getWriter());
+            }
+            else
+            {
+                viewer.writeValues(getResponse().getWriter());
+            }
         }
-        if ("keywords".equals(mode))
+        catch (FileNotFoundException fnfe)
         {
-            viewer.writeKeywords(getResponse().getWriter());
-        }
-        else
-        {
-            viewer.writeValues(getResponse().getWriter());
+            return renderInTemplate(new HtmlView("The specified FCS file could not be found."), well, "File Not Found", Action.showFCS);
         }
         return null;
     }
