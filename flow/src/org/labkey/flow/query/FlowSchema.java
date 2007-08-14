@@ -396,14 +396,15 @@ public class FlowSchema extends UserSchema
         colKeyword.setFk(new KeywordForeignKey(fps));
         colKeyword.setIsUnselectable(true);
         ret.addMethod("Keyword", new KeywordMethod(colKeyword));
+        ExpSampleSet ss = null;
         if (_protocol != null)
         {
-            ExpSampleSet ss = _protocol.getSampleSet();
-            ColumnInfo colMaterialInput = ret.addMaterialInputColumn("Sample", new SamplesSchema(getUser(), getContainer()), null, ss);
-            if (ss == null)
-            {
-                colMaterialInput.setIsHidden(true);
-            }
+            ss = _protocol.getSampleSet();
+        }
+        ColumnInfo colMaterialInput = ret.addMaterialInputColumn("Sample", new SamplesSchema(getUser(), getContainer()), null, ss);
+        if (ss == null)
+        {
+            colMaterialInput.setIsHidden(true);
         }
 
         ret.setDefaultVisibleColumns(new DeferredFCSFileVisibleColumns(ret, colKeyword));

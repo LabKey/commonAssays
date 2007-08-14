@@ -324,7 +324,7 @@ public class FCS extends FCSHeader
         int oldEventCount = rawData.getRowCount();
         int newEventCount = Math.min(maxEventCount, oldEventCount);
         int oldByteCount = (dataLast - dataOffset + 1);
-        int newSize = dataOffset + ((oldByteCount * newEventCount) + oldEventCount - 1) / oldEventCount;
+        int newSize = (int) (dataOffset + (((long) oldByteCount * (long) newEventCount) + oldEventCount - 1) / oldEventCount);
         byte[] bytes = new byte[newSize];
         InputStream is = new FileInputStream(file);
         is.read(bytes);
