@@ -133,7 +133,7 @@ public class NabController extends ViewController
         deleteButton.setDisplayPermission(ACL.PERM_DELETE);
         buttons.add(deleteButton);
 
-        if (!GenericAssayService.get().getValidPublishTargets(getUser()).isEmpty())
+        if (!GenericAssayService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
         {
             ActionButton publishButton = new ActionButton("publishPlatesChooseStudy.view", "Publish Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
             publishButton.setDisplayPermission(ACL.PERM_INSERT);
@@ -1092,7 +1092,7 @@ public class NabController extends ViewController
 
         public Map<Container, String> getValidTargets()
         {
-            return GenericAssayService.get().getValidPublishTargets(_user);
+            return GenericAssayService.get().getValidPublishTargets(_user, ACL.PERM_INSERT);
         }
 
         public List<Integer> getIds()
@@ -1134,7 +1134,7 @@ public class NabController extends ViewController
         graphSelectedButton.setActionType(ActionButton.Action.GET);
         buttons.add(graphSelectedButton);
 
-        if (!GenericAssayService.get().getValidPublishTargets(getUser()).isEmpty())
+        if (!GenericAssayService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
         {
             ActionButton publishButton = new ActionButton("publishWellGroupsChooseStudy.view", "Publish Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
             publishButton.setDisplayPermission(ACL.PERM_INSERT);

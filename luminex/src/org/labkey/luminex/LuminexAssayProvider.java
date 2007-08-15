@@ -41,7 +41,8 @@ public class LuminexAssayProvider extends DefaultAssayProvider
     public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles)
     {
         List<AssayDataCollector> result = new ArrayList<AssayDataCollector>();
-        result.add(new PreviouslyUploadedDataCollector(uploadedFiles));
+        if (uploadedFiles != null)
+            result.add(new PreviouslyUploadedDataCollector(uploadedFiles));
         result.add(new FileUploadDataCollector());
         return result;
     }
