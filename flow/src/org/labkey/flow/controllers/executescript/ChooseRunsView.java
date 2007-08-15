@@ -76,7 +76,6 @@ public class ChooseRunsView extends FlowQueryView
     protected void populateButtonBar(DataView view, ButtonBar bb)
     {
         view.getDataRegion().setShowRecordSelectors(true);
-        super.populateButtonBar(view, bb);
         ActionButton btnRunAnalysis = new ActionButton("analyzeSelectedRuns.post", "Analyze selected runs");
         bb.add(btnRunAnalysis);
     }

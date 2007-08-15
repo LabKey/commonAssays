@@ -16,19 +16,58 @@
 <%
     ChooseGraphForm form = (ChooseGraphForm) __form;
 
-    List<FlowScript> scripts = new ArrayList();
-    for (FlowScript script : FlowScript.getScripts(getContainer()))
+    boolean hasScripts = false;
+    boolean hasComps = false;
+    FlowWell well = form.getWell();
+    Map<Integer, String> scriptOptions = new LinkedHashMap();
+    if (form.getScript() == null)
     {
+        scriptOptions.put(0, "None");
+    }
+    FlowScript wellScript = well.getScript();
+    if (wellScript != null)
+    {
+        scriptOptions.put(wellScript.getScriptId(), wellScript.getName());
+        hasScripts = true;
+    }
+    FlowScript[] scripts = FlowScript.getScripts(getContainer());
+    Arrays.sort(scripts);
+    for (FlowScript script : scripts)
+    {
+        if (scriptOptions.containsKey(script.getScriptId()))
+        {
+            continue;
+        }
         if (script.hasStep(FlowProtocolStep.analysis) || script.hasStep(FlowProtocolStep.calculateCompensation))
         {
-            scripts.add(script);
+            scriptOptions.put(script.getScriptId(), script.getName());
+            hasScripts = true;
         }
     }
-    List<FlowCompensationMatrix> comps = FlowCompensationMatrix.getCompensationMatrices(getContainer());
 
-    FlowWell well = form.getWell();
+    Map<Integer, String> compOptions = new LinkedHashMap();
+    if (form.getCompensationMatrix() == null)
+    {
+        compOptions.put(0, "None");
+    }
+    FlowCompensationMatrix wellCompensationMatrix = well.getCompensationMatrix();
+    if (wellCompensationMatrix != null)
+    {
+        compOptions.put(wellCompensationMatrix.getCompId(), wellCompensationMatrix.getLabel());
+        hasComps = true;
+    }
+    List<FlowCompensationMatrix> comps = FlowCompensationMatrix.getCompensationMatrices(getContainer());
+    Collections.sort(comps);
+    for (FlowCompensationMatrix comp : comps)
+    {
+        if (compOptions.containsKey(comp.getCompId()))
+            continue;
+        compOptions.put(comp.getCompId(), comp.getLabel(true));
+        hasComps = true;
+    }
     FlowScript script = form.getScript();
     FlowCompensationMatrix matrix = form.getCompensationMatrix();
+
     FlowProtocolStep step = FlowProtocolStep.fromActionSequence(form.getActionSequence());
     List<FlowProtocolStep> steps = new ArrayList();
     if (script != null)
@@ -50,17 +89,9 @@
 <form>
     <input type="hidden" name="wellId" value="<%=form.getWellId()%>">
     <table>
-        <% if (scripts.size() != 0)
+        <% if (hasScripts)
         {
-            Map<Integer, String> scriptOptions = new LinkedHashMap();
-            if (script == null)
-            {
-                scriptOptions.put(0, "None");
-            }
-            for (FlowScript s : scripts)
-            {
-                scriptOptions.put(s.getScriptId(), s.getLabel());
-            }%>
+        %>
         <tr><td>Analysis Script:</td><td><select name="<%=FlowParam.scriptId%>" onchange="this.form.submit()">
             <labkey:options value="<%=form.getScriptId()%>" map="<%=scriptOptions%>"/>
         </select></td></tr>
@@ -76,17 +107,8 @@
             <% } %>
         </select></td></tr>
         <% } %>
-        <% if (comps.size() != 0)
+        <% if (hasComps)
         {
-            Map<Integer, String> compOptions = new LinkedHashMap();
-            if (matrix == null)
-            {
-                compOptions.put(0, "None");
-            }
-            for (FlowCompensationMatrix comp : comps)
-            {
-                compOptions.put(comp.getCompId(), comp.getLabel(true));
-            }
         %>
         <tr><td>Compensation Matrix:</td><td><select name="compId" onchange="this.form.submit()">
             <labkey:options value="<%=form.getCompId()%>" map="<%=compOptions%>"/>
@@ -99,7 +121,7 @@
     Collection<SubsetSpec> subsets = Collections.EMPTY_LIST;
     if (script != null)
     {
-        subsets = FlowAnalyzer.getSubsets(script.getAnalysisScript(), step);
+        subsets = FlowAnalyzer.getSubsets(script.getAnalysisScript(), step, false);
     }
     Map<String, String> parameters = FlowAnalyzer.getParameters(well, matrix == null ? null : matrix.getCompensationMatrix());
 %>

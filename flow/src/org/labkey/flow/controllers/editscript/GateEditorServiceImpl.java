@@ -23,12 +23,14 @@ import org.labkey.flow.FlowPreference;
 import org.fhcrc.cpas.flow.script.xml.*;
 import org.jfree.chart.axis.ValueAxis;
 import org.apache.log4j.Logger;
+import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.List;
 import java.sql.SQLException;
 import java.awt.*;
+
 
 public class GateEditorServiceImpl extends BaseRemoteService implements GateEditorService
 {
@@ -304,7 +306,15 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
                     ret.setReadOnly(true);
                 }
             }
-            ret.setScript(makeGWTScript(script));
+            GWTScript gwtScript = makeGWTScript(script);
+            if (!workspaceOptions.editingMode.isRunMode() && !workspaceOptions.editingMode.isCompensation())
+            {
+                if (gwtScript.getAnalysis() == null)
+                {
+                    gwtScript.setAnalysis(new GWTAnalysis());
+                }
+            }
+            ret.setScript(gwtScript);
             ret.setRun(makeRun(run));
             ret.setWells(getWells(run, script, workspaceOptions.editingMode));
             if (workspaceOptions.editingMode.isCompensation())
@@ -349,7 +359,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             if (ret != null)
                 return ret;
             GraphSpec graphSpec;
-            if (graphOptions.yAxis == null)
+            if (StringUtils.isEmpty(graphOptions.yAxis))
             {
                 graphSpec = new GraphSpec(SubsetSpec.fromString(graphOptions.subset).getParent(), graphOptions.xAxis);
             }
@@ -422,6 +432,10 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
                 if (script.getAnalysis() != null)
                 {
                     AnalysisDef analysisDef = scriptDef.getAnalysis();
+                    if (analysisDef == null)
+                    {
+                        analysisDef = scriptDef.addNewAnalysis();
+                    }
                     analysisDef.setPopulationArray(updatePopulationDefs(analysisDef.getPopulationArray(), script.getAnalysis()));
                 }
                 flowScript.setAnalysisScript(getUser(), doc.toString());

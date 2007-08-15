@@ -7,13 +7,11 @@ import org.labkey.api.security.User;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.query.QueryService;
 import org.apache.log4j.Logger;
-import org.apache.commons.lang.StringUtils;
 
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.util.*;
 import java.net.URI;
-import java.io.File;
 
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.FlowParam;
@@ -23,10 +21,8 @@ import org.labkey.flow.analysis.model.FCSKeywordData;
 import org.labkey.flow.analysis.model.PopulationSet;
 import org.labkey.flow.analysis.model.CompensationCalculation;
 import org.labkey.flow.analysis.model.SampleCriteria;
-import org.labkey.flow.analysis.web.FCSRef;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.script.FlowAnalyzer;
-import org.labkey.flow.persist.FlowManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -76,15 +72,20 @@ public class FlowRun extends FlowObject<ExpRun>
         return ret;
     }
 
+    public FlowFCSFile[] getFCSFiles() throws SQLException
+    {
+        return getDatas(FlowDataType.FCSFile).toArray(new FlowFCSFile[0]);
+    }
+
     public FlowLog[] getLogs() throws SQLException
     {
         return getDatas(FlowDataType.Log).toArray(new FlowLog[0]);
     }
 
-    public FlowWell findWell(URI uri) throws Exception
+    public FlowFCSFile findFCSFile(URI uri) throws Exception
     {
-        FlowWell[] wells = getWells();
-        for (FlowWell well : wells)
+        FlowFCSFile[] wells = getFCSFiles();
+        for (FlowFCSFile well : wells)
         {
             if (uri.equals(well.getFCSURI()))
                 return well;
@@ -276,26 +277,26 @@ public class FlowRun extends FlowObject<ExpRun>
         return null;
     }
 
-    public FlowWell[] getWellsToBeAnalyzed(FlowProtocol protocol) throws SQLException
+    public FlowFCSFile[] getFCSFilesToBeAnalyzed(FlowProtocol protocol) throws SQLException
     {
         if (protocol == null)
-            return getWells();
+            return getFCSFiles();
         FlowSchema schema = new FlowSchema(null, getContainer());
         schema.setRun(this);
         TableInfo table = schema.createFCSFileTable("FCSFiles");
         ColumnInfo colRowId = table.getColumn("RowId");
-        List<FlowWell> ret = new ArrayList();
+        List<FlowFCSFile> ret = new ArrayList();
         ResultSet rs = QueryService.get().select(table, new ColumnInfo[] { colRowId }, protocol.getFCSAnalysisFilter(), null);
         while (rs.next())
         {
             FlowWell well = FlowWell.fromWellId(colRowId.getIntValue(rs));
-            if (well != null)
+            if (well instanceof FlowFCSFile)
             {
-                ret.add(well);
+                ret.add((FlowFCSFile) well);
             }
         }
         rs.close();
-        return ret.toArray(new FlowWell[0]);
+        return ret.toArray(new FlowFCSFile[0]);
     }
 
     private void addMatchingWell(Map<Integer, String> map, String label, SampleCriteria criteria, FlowWell[] wells, FCSKeywordData[] datas)
@@ -347,7 +348,7 @@ public class FlowRun extends FlowObject<ExpRun>
         {
             if (protocol != null)
             {
-                FlowWell[] wellsToBeAnalyzed = getWellsToBeAnalyzed(protocol);
+                FlowWell[] wellsToBeAnalyzed = getFCSFilesToBeAnalyzed(protocol);
                 for (FlowWell well : wellsToBeAnalyzed)
                 {
                     ret.put(well.getRowId(), protocol.getFCSAnalysisName(well));

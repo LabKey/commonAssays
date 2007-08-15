@@ -49,7 +49,7 @@ public class CompensationCalculationHandler extends BaseHandler
         for (CompensationResult result : results)
         {
             ProtocolApplicationBaseType app = addProtocolApplication(runElement);
-            FlowWell well = run.findWell(result.getURI());
+            FlowWell well = run.findFCSFile(result.getURI());
             AttributeSet attrs = new AttributeSet(ObjectType.compensationControl, result.getURI());
             if (well != null)
             {

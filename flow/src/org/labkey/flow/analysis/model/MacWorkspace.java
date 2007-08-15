@@ -261,10 +261,10 @@ public class MacWorkspace extends FlowJoWorkspace
                 else if ("Ellipse".equals(el.getTagName()))
                 {
                     PolygonGate polygon = readPolygon(el);
-                    Point2D.Double[] vertices = new Point2D.Double[4];
+                    EllipseGate.Point[] vertices = new EllipseGate.Point[4];
                     for (int i = 0; i < vertices.length; i ++)
                     {
-                        vertices[i] = new Point2D.Double(polygon.getPolygon().X[i], polygon.getPolygon().Y[i]);
+                        vertices[i] = new EllipseGate.Point(polygon.getPolygon().X[i], polygon.getPolygon().Y[i]);
                     }
                     EllipseGate gate = EllipseGate.fromVertices(polygon.getX(), polygon.getY(), vertices);
                     ret.addGate(gate);

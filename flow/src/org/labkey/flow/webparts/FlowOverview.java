@@ -303,7 +303,7 @@ public class FlowOverview extends Overview
         ret.setStatusHTML(statusHTML.toString());
         if (_scriptCompensation != null)
         {
-            ret.addAction(new Action("Calculate compensation matrices", _scriptCompensation.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze)));
+            ret.addAction(new Action("Calculate compensation matrices", _scriptCompensation.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.calculateCompensation)));
         }
         ret.addAction(new Action("Upload a compensation matrix", PFUtil.urlFor(CompensationController.Action.begin, getContainer())));
         return ret;

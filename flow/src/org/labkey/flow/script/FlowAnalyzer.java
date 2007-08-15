@@ -41,7 +41,10 @@ public class FlowAnalyzer
         List<FCSRef> refs = new ArrayList();
         for (FlowWell well : wells)
         {
-            refs.add(getFCSRef(well));
+            if (well instanceof FlowFCSFile)
+            {
+                refs.add(getFCSRef(well));
+            }
         }
         return refs;
     }
@@ -217,11 +220,11 @@ public class FlowAnalyzer
         ellipseDef.setXAxis(ellipseGate.getXAxis());
         ellipseDef.setYAxis(ellipseGate.getYAxis());
         ellipseDef.setDistance(ellipseGate.getDistance());
-        for (Point2D.Double point : ellipseGate.getFoci())
+        for (EllipseGate.Point point : ellipseGate.getFoci())
         {
             PointDef pointDef = ellipseDef.addNewFocus();
-            pointDef.setX(point.getX());
-            pointDef.setY(point.getY());
+            pointDef.setX(point.x);
+            pointDef.setY(point.y);
         }
     }
 
@@ -487,10 +490,10 @@ public class FlowAnalyzer
         {
             return Collections.EMPTY_LIST;
         }
-        return getSubsets(script.getAnalysisScript(), FlowProtocolStep.analysis);
+        return getSubsets(script.getAnalysisScript(), FlowProtocolStep.analysis, true);
     }
 
-    static public Collection<SubsetSpec> getSubsets(String script, FlowProtocolStep step)
+    static public Collection<SubsetSpec> getSubsets(String script, FlowProtocolStep step, boolean includeBooleans)
     {
         try
         {
@@ -508,9 +511,12 @@ public class FlowAnalyzer
             {
                 if (scriptElement.getAnalysis() != null)
                 {
-                    for (SubsetDef subsetDef : scriptElement.getAnalysis().getSubsetArray())
+                    if (includeBooleans)
                     {
-                        ret.add(SubsetSpec.fromString(subsetDef.getSubset()));
+                        for (SubsetDef subsetDef : scriptElement.getAnalysis().getSubsetArray())
+                        {
+                            ret.add(SubsetSpec.fromString(subsetDef.getSubset()));
+                        }
                     }
                     pops = scriptElement.getAnalysis().getPopulationArray();
                 }

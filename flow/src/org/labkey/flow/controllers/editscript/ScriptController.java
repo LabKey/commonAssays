@@ -825,7 +825,8 @@ public class ScriptController extends BaseFlowController
             ret.width = width;
             ret.height = height;
             ret.xAxis = xAxis;
-            ret.yAxis = yAxis;
+            if (!StringUtils.isEmpty(yAxis))
+                ret.yAxis = yAxis;
             ret.subset = subset;
             return ret;
         }

@@ -26,7 +26,7 @@ public class FlowRunWorkspace extends FlowJoWorkspace
             }
         }
         _groupAnalyses.put("analysis", analysis);
-        for (FlowWell well : run.getWells())
+        for (FlowFCSFile well : run.getFCSFiles())
         {
             String key = Integer.toString(well.getWellId());
             SampleInfo info = new SampleInfo();

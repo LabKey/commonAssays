@@ -10,20 +10,15 @@ import org.labkey.flow.persist.*;
 import org.fhcrc.cpas.exp.xml.*;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.query.QueryService;
 import org.labkey.api.exp.api.ExperimentService;
 import org.w3c.dom.Element;
 
 import java.util.List;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.ArrayList;
 import java.net.URI;
 import java.sql.SQLException;
-import java.sql.ResultSet;
 import java.io.File;
 import java.io.FileWriter;
 
@@ -31,7 +26,6 @@ import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.SampleCriteria;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
-import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.FCSRef;
 import org.labkey.flow.query.FlowSchema;
@@ -105,7 +99,7 @@ public class AnalysisHandler extends BaseHandler
             }
             else
             {
-                wells = run.getWellsToBeAnalyzed(_job.getProtocol());
+                wells = run.getFCSFilesToBeAnalyzed(_job.getProtocol());
             }
             if (wells.length == 0)
             {

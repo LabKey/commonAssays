@@ -8,21 +8,32 @@ import org.apache.log4j.Logger;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
+import java.io.Serializable;
 
 public class EllipseGate extends Gate
 {
     static final private Logger _log = Logger.getLogger(EllipseGate.class);
     String xAxis;
     String yAxis;
-    Point2D.Double[] foci;
+    static public class Point implements Serializable
+    {
+        final public double x;
+        final public double y;
+        public Point(double x, double y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+    }
+    Point[] foci;
     double distance;
 
-    public EllipseGate(String xAxis, String yAxis, double distance, Point2D.Double focus1, Point2D.Double focus2)
+    public EllipseGate(String xAxis, String yAxis, double distance, Point focus1, Point focus2)
     {
         this.xAxis = xAxis;
         this.yAxis = yAxis;
         this.distance = distance;
-        this.foci = new Point2D.Double[] { focus1, focus2 };
+        this.foci = new Point[] { focus1, focus2 };
     }
 
     public double getDistance()
@@ -30,7 +41,7 @@ public class EllipseGate extends Gate
         return distance;
     }
 
-    public Point2D.Double[] getFoci()
+    public Point[] getFoci()
     {
         return foci;
     }
@@ -55,8 +66,8 @@ public class EllipseGate extends Gate
             double dCompare = 0;
             for (int f = 0; f < 2; f ++)
             {
-                double dx = xValues.getDouble(i) - foci[f].getX();
-                double dy = yValues.getDouble(i) - foci[f].getY();
+                double dx = xValues.getDouble(i) - foci[f].x;
+                double dy = yValues.getDouble(i) - foci[f].y;
                 dCompare += Math.sqrt(dx * dx + dy * dy);
             }
             if (dCompare <= distance)
@@ -77,17 +88,17 @@ public class EllipseGate extends Gate
     {
     }
 
-    static private double length(Point2D.Double[] points)
+    static private double length(Point[] points)
     {
         double dx = points[0].x - points[1].x;
         double dy = points[0].y - points[1].y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    static private double distance(Point2D.Double point, Point2D.Double[] foci)
+    static private double distance(Point point, Point[] foci)
     {
         double ret = 0;
-        for (Point2D.Double focus : foci)
+        for (Point focus : foci)
         {
             double dx = point.x - focus.x;
             double dy = point.y - focus.y;
@@ -96,14 +107,14 @@ public class EllipseGate extends Gate
         return ret;
     }
 
-    static public EllipseGate fromVertices(String xAxis, String yAxis, Point2D.Double[] vertices)
+    static public EllipseGate fromVertices(String xAxis, String yAxis, Point[] vertices)
     {
-        Point2D.Double[] axis1 = new Point2D.Double[] { vertices[0], vertices[1] };
-        Point2D.Double[] axis2 = new Point2D.Double[] { vertices[2], vertices[3] };
+        Point[] axis1 = new Point[] { vertices[0], vertices[1] };
+        Point[] axis2 = new Point[] { vertices[2], vertices[3] };
         double d1 = length(axis1);
         double d2 = length(axis2);
-        Point2D.Double[] majorAxis;
-        Point2D.Double[] minorAxis;
+        Point[] majorAxis;
+        Point[] minorAxis;
         double majorAxisLength;
         double minorAxisLength;
         if (d1 >= d2)
@@ -120,18 +131,18 @@ public class EllipseGate extends Gate
             majorAxisLength = d2;
             minorAxisLength = d1;
         }
-        Point2D.Double center = new Point2D.Double((majorAxis[0].x + majorAxis[1].x)/2, (majorAxis[0].y + majorAxis[1].y)/2);
-        Point2D.Double center2 = new Point2D.Double((minorAxis[0].x + minorAxis[1].x) / 2, (minorAxis[0].y + minorAxis[1].y) / 2);
+        Point center = new Point((majorAxis[0].x + majorAxis[1].x)/2, (majorAxis[0].y + majorAxis[1].y)/2);
+        Point center2 = new Point((minorAxis[0].x + minorAxis[1].x) / 2, (minorAxis[0].y + minorAxis[1].y) / 2);
 
         double dotProduct = (majorAxis[1].x - majorAxis[0].x) * (minorAxis[1].x - minorAxis[0].x) +
                 (majorAxis[1].y - majorAxis[0].y) * (minorAxis[1].y - minorAxis[0].y);
 
         double focalAxisLength = Math.sqrt(majorAxisLength * majorAxisLength - minorAxisLength * minorAxisLength);
         double focalRatio = focalAxisLength / majorAxisLength;
-        Point2D.Double[] foci = new Point2D.Double[2];
+        Point[] foci = new Point[2];
         for (int i = 0; i < 2; i ++)
         {
-            foci[i] = new Point2D.Double(
+            foci[i] = new Point(
                     majorAxis[i].x * focalRatio + center.x * (1-focalRatio),
                     majorAxis[i].y * focalRatio + center.y * (1-focalRatio)
             );
@@ -139,7 +150,7 @@ public class EllipseGate extends Gate
         EllipseGate ret = new EllipseGate(xAxis, yAxis, majorAxisLength, foci[0], foci[1]);
 
         double dSquared = majorAxisLength * majorAxisLength;
-        for (Point2D.Double vertex : vertices)
+        for (Point vertex : vertices)
         {
             double dCompare = distance(vertex, ret.getFoci());
             double difference = dCompare - dSquared;
@@ -147,17 +158,17 @@ public class EllipseGate extends Gate
         return ret;
     }
 
-    static private Point2D.Double toPoint(Element elPoint)
+    static private Point toPoint(Element elPoint)
     {
-        return new Point2D.Double(Double.parseDouble(elPoint.getAttribute("x")), Double.parseDouble(elPoint.getAttribute("y")));
+        return new Point(Double.parseDouble(elPoint.getAttribute("x")), Double.parseDouble(elPoint.getAttribute("y")));
     }
 
     static public EllipseGate readEllipse(Element el)
     {
         NodeList nlFoci = el.getElementsByTagName("focus");
 
-        Point2D.Double focus0 = toPoint((Element) nlFoci.item(0));
-        Point2D.Double focus1 = toPoint((Element) nlFoci.item(1));
+        Point focus0 = toPoint((Element) nlFoci.item(0));
+        Point focus1 = toPoint((Element) nlFoci.item(1));
 
         return new EllipseGate(el.getAttribute("xAxis"),
                 el.getAttribute("yAxis"),

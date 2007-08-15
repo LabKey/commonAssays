@@ -171,4 +171,28 @@ public class Analysis extends ScriptComponent
         }
         return ret;
     }
+
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        Analysis analysis = (Analysis) o;
+
+        if (!_graphs.equals(analysis._graphs)) return false;
+        if (!_statistics.equals(analysis._statistics)) return false;
+        if (!_subsets.equals(analysis._subsets)) return false;
+
+        return true;
+    }
+
+    public int hashCode()
+    {
+        int result = super.hashCode();
+        result = 31 * result + _subsets.hashCode();
+        result = 31 * result + _statistics.hashCode();
+        result = 31 * result + _graphs.hashCode();
+        return result;
+    }
 }

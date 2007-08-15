@@ -6,10 +6,14 @@
 <%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.api.exp.api.ExpMaterial"%>
+<%@ page import="java.text.DecimalFormat" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%
     FlowWell well = getWell();
     FlowWell fcsFile = well.getFCSFile();
+    FlowScript script = well.getScript();
+    FlowCompensationMatrix matrix = well.getCompensationMatrix();
+
 %>
 <table class="normal">
     <% if (getRun() == null) { %>
@@ -23,23 +27,33 @@
     <tr><td>FCS File:</td><td><a href="<%=h(fcsFile.urlShow())%>"><%=h(fcsFile.getName())%></a></td></tr>
     <% } %>
     <tr><td>Comment:</td><td><%=h(well.getComment())%></tr>
-    <%
-        if (getKeywords().size() > 0)
-        {
-    %>
+    <% if (script != null) { %>
+    <tr><td>Analysis Script:</td><td><a href="<%=h(script.urlShow())%>"><%=h(script.getName())%></a></td></tr>
+    <% } %>
+    <% if (matrix != null) { %>
+    <tr><td>Compensation Matrix:</td><td><a href="<%=h(matrix.urlShow())%>"><%=h(matrix.getName())%></a></td></tr>
+    <% } %>
     <% for (ExpMaterial sample : well.getSamples())
     { %>
     <tr><td><%=h(sample.getSampleSet().getName())%></td>
         <td><a href="<%=h(sample.detailsURL())%>"><%=h(sample.getName())%></a></td>
     </tr>
     <% } %>
+</table>
+    <%
+    if (getKeywords().size() > 0)
+    {
+    %>
+<div style="overflow:auto;height:400px">
+    <table>
     <tr><th colspan="2">Keywords</th></tr>
     <% for (Map.Entry<String, String> keyword : getKeywords().entrySet())
     { %>
     <tr><td><%=h(keyword.getKey())%></td><td><%=h(keyword.getValue())%></td></tr>
-    <% }
-    } %>
+    <% } %>
 </table>
+    </div>
+<% } %>
 <%
     if (getContainer().hasPermission(getUser(), ACL.PERM_UPDATE))
     {
@@ -47,14 +61,18 @@
 <%=buttonLink("edit", well.urlFor(WellController.Action.editWell))%><br>
 <% } %>
 <% if (getStatistics().size() > 0)
-{ %>
+{
+    DecimalFormat fmt = new DecimalFormat("#,##0.####");
+%>
+<div style="overflow:auto;height:400px">
 <table class="normal">
     <tr><th colspan="2">Statistics</th></tr>
     <% for (Map.Entry<StatisticSpec, Double> statistic : getStatistics().entrySet())
     { %>
-    <tr><td><%=h(statistic.getKey().toString())%></td><td><%=statistic.getValue()%></td></tr>
+    <tr><td><%=h(statistic.getKey().toString())%></td><td><%=fmt.format(statistic.getValue())%></td></tr>
     <% } %>
 </table>
+    </div>
 <% } %>
 
 <% for (GraphSpec graph : getGraphs())

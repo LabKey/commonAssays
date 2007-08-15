@@ -7,6 +7,8 @@ import java.util.BitSet;
 import java.util.List;
 
 import org.labkey.flow.analysis.data.NumberArray;
+import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.MothershipReport;
 
 /**
  */
@@ -28,12 +30,19 @@ public class PolygonGate extends Gate
         BitSet ret = new BitSet(data.getRowCount());
         NumberArray xValues = data.getColumn(_strX);
         NumberArray yValues = data.getColumn(_strY);
+        int count = 0;
         for (int i = 0; i < data.getRowCount(); i ++)
         {
             if (_poly.contains(xValues.getDouble(i), yValues.getDouble(i)))
             {
                 ret.set(i);
+                count ++;
             }
+        }
+        // nicksh: Add this check in here because I have been seeing strange behavior of statistics being wrong.
+        if (count != ret.cardinality())
+        {
+            throw new IllegalStateException("Internal error computing polygon gate.  BitSet cardinality " + ret.cardinality() + " does not equal expected value " + count);
         }
         return ret;
     }

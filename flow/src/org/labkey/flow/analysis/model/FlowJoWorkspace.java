@@ -622,6 +622,7 @@ abstract public class FlowJoWorkspace implements Serializable
         Map<SampleInfo, AttributeSet> keywordsMap = new LinkedHashMap();
         Map<CompensationMatrix, AttributeSet> compMatrixMap = new LinkedHashMap();
         Map<SampleInfo, AttributeSet> analysisMap = new LinkedHashMap();
+        Map<Analysis, FlowScript> scripts = new HashMap();
         for (FlowJoWorkspace.SampleInfo sample : getSamples())
         {
             AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, null);
@@ -716,8 +717,18 @@ abstract public class FlowJoWorkspace implements Serializable
                     {
                         ScriptDocument scriptDoc = ScriptDocument.Factory.newInstance();
                         ScriptDef scriptDef = scriptDoc.addNewScript();
-                        FlowAnalyzer.makeAnalysisDef(scriptDef, analysis, EnumSet.of(StatisticSet.workspace));
-                        FlowScript.createScriptForWell(user, new FlowFCSAnalysis(fcsAnalysis), fcsAnalysis.getName() + "_script", scriptDoc, workspaceData, InputRole.Workspace);
+                        FlowScript script = scripts.get(analysis);
+                        FlowWell well = new FlowFCSAnalysis(fcsAnalysis);
+                        if (script == null)
+                        {
+                            FlowAnalyzer.makeAnalysisDef(scriptDef, analysis, EnumSet.of(StatisticSet.workspace, StatisticSet.count));
+                            well = FlowScript.createScriptForWell(user, well, "workspaceScript" + (scripts.size() + 1), scriptDoc, workspaceData, InputRole.Workspace);
+                            scripts.put(analysis, well.getScript());
+                        }
+                        else
+                        {
+                            well.getProtocolApplication().addDataInput(user, script.getData(), InputRole.AnalysisScript.toString(), null);
+                        }
                     }
                     CompensationMatrix comp = entry.getKey().getCompensationMatrix();
                     if (comp != null)
