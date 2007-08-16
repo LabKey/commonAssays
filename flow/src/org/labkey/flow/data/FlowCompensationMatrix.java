@@ -144,7 +144,7 @@ public class FlowCompensationMatrix extends FlowDataObject
         FlowRun run = getRun();
         if (run != null)
         {
-            String strLabel = run.getLabel();
+            String strLabel = getName();
             if (includeExperiment)
             {
                 FlowExperiment experiment = run.getExperiment();

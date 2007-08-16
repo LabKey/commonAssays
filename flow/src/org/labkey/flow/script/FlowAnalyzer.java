@@ -149,6 +149,19 @@ public class FlowAnalyzer
         return statElement;
     }
 
+    static public GraphDef addGraph(AnalysisDef analysis, GraphSpec graph)
+    {
+        GraphDef graphElement = analysis.addNewGraph();
+        if (graph.getSubset() != null)
+            graphElement.setSubset(graph.getSubset().toString());
+        graphElement.setXAxis(graph.getParameters()[0]);
+        if (graph.getParameters().length > 1)
+        {
+            graphElement.setYAxis(graph.getParameters()[1]);
+        }
+        return graphElement;
+    }
+
 
 
     static private CompensationCalculation.ChannelSubset readSubsetDef(ChannelSubsetDef subsetDef)
@@ -417,6 +430,14 @@ public class FlowAnalyzer
                 {
                     addStatistic(analysisElement, spec);
                 }
+            }
+            while (analysisElement.getGraphArray().length != 0)
+            {
+                analysisElement.removeGraph(0);
+            }
+            for (GraphSpec graph : new TreeSet<GraphSpec>(analysis.getGraphs()))
+            {
+                addGraph(analysisElement, graph);
             }
         }
         script.setSettings(settings.toSettingsDef());

@@ -241,7 +241,7 @@ public class FlowManager
         return Table.insert(null, getTinfoObject(), newObject);
     }
 
-    private void deleteAttributes(String sqlObjectIds) throws SQLException
+    private void deleteAttributes(SQLFragment sqlObjectIds) throws SQLException
     {
         boolean transaction = false;
         DbScope scope = getSchema().getScope();
@@ -252,10 +252,10 @@ public class FlowManager
                 scope.beginTransaction();
                 transaction = true;
             }
-            Table.execute(getSchema(), "DELETE FROM flow.Statistic WHERE ObjectId IN " + sqlObjectIds, null);
-            Table.execute(getSchema(), "DELETE FROM flow.Keyword WHERE ObjectId IN " + sqlObjectIds, null);
-            Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN " + sqlObjectIds, null);
-            Table.execute(getSchema(), "DELETE FROM flow.Script WHERE ObjectId IN " + sqlObjectIds, null);
+            Table.execute(getSchema(), "DELETE FROM flow.Statistic WHERE ObjectId IN " + sqlObjectIds, sqlObjectIds.getParamsArray());
+            Table.execute(getSchema(), "DELETE FROM flow.Keyword WHERE ObjectId IN " + sqlObjectIds, sqlObjectIds.getParamsArray());
+            Table.execute(getSchema(), "DELETE FROM flow.Graph WHERE ObjectId IN " + sqlObjectIds, sqlObjectIds.getParamsArray());
+            Table.execute(getSchema(), "DELETE FROM flow.Script WHERE ObjectId IN " + sqlObjectIds, sqlObjectIds.getParamsArray());
             if (transaction)
             {
                 scope.commitTransaction();
@@ -276,7 +276,40 @@ public class FlowManager
         AttrObject obj = getAttrObject(data);
         if (obj == null)
             return;
-        deleteAttributes("(" + obj.getRowId() + ")");
+        deleteAttributes(new SQLFragment("(" + obj.getRowId() + ")"));
+    }
+
+    private void deleteObjectIds(SQLFragment sqlOIDs, Set<Container> containers) throws SQLException
+    {
+        DbScope scope = getSchema().getScope();
+        boolean fTrans = false;
+        try
+        {
+            if (!scope.isTransactionActive())
+            {
+                scope.beginTransaction();
+                fTrans = true;
+            }
+            deleteAttributes(sqlOIDs);
+            Table.execute(getSchema(), "DELETE FROM flow.Object WHERE RowId IN " + sqlOIDs, sqlOIDs.getParamsArray());
+            if (fTrans)
+            {
+                scope.commitTransaction();
+                fTrans = false;
+            }
+        }
+        finally
+        {
+            if (fTrans)
+            {
+                getSchema().getScope().rollbackTransaction();
+            }
+            for (Container container : containers)
+            {
+                AttributeCache.invalidateCache(container);
+            }
+        }
+
     }
 
     public void deleteData(List<Data> datas) throws SQLException
@@ -297,36 +330,10 @@ public class FlowManager
         Integer[] objectIds = Table.executeArray(getSchema(), sqlGetOIDs.toString(), null, Integer.class);
         if (objectIds.length == 0)
             return;
-        String sqlOIDs = "(" + StringUtils.join(objectIds, ",") + ")";
-
-        DbScope scope = getSchema().getScope();
-        boolean fTrans = false;
-        try
-        {
-            if (!scope.isTransactionActive())
-            {
-                scope.beginTransaction();
-                fTrans = true;
-            }
-            deleteAttributes(sqlOIDs);
-            Table.execute(getSchema(), "DELETE FROM flow.Object WHERE RowId IN " + sqlOIDs, null);
-            if (fTrans)
-            {
-                scope.commitTransaction();
-                fTrans = false;
-            }
-        }
-        finally
-        {
-            if (fTrans)
-            {
-                getSchema().getScope().rollbackTransaction();
-            }
-            for (Container container : containers)
-            {
-                AttributeCache.invalidateCache(container);
-            }
-        }
+        SQLFragment sqlOIDs = new SQLFragment("(");
+        sqlOIDs.append(StringUtils.join(objectIds, ","));
+        sqlOIDs.append(")");
+        deleteObjectIds(sqlOIDs, containers);
     }
 
     static private String sqlSelectKeyword = "SELECT flow.keyword.value FROM flow.object" +
@@ -461,5 +468,11 @@ public class FlowManager
                 "AND exp.data.container = ?\n" +
                 "AND flow.object.typeid = ? AND exp.ExperimentRun.FilePathRoot IS NOT NULL)";
         return Table.executeSingleton(getSchema(), sqlFCSRunCount, new Object[] { container.getId(), ObjectType.fcsKeywords.getTypeId() }, Integer.class);
+    }
+
+    public void deleteContainer(Container container) throws SQLException
+    {
+        SQLFragment sqlOIDs = new SQLFragment("(SELECT flow.object.rowid FROM flow.object INNER JOIN exp.data ON flow.object.dataid = exp.data.rowid AND exp.data.container = ?)", container.getId());
+        deleteObjectIds(sqlOIDs, Collections.singleton(container));
     }
 }

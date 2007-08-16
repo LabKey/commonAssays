@@ -11,6 +11,7 @@ import java.awt.geom.Point2D;
 
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.ObjectType;
 
@@ -81,6 +82,50 @@ public class MacWorkspace extends FlowJoWorkspace
         _sampleAnalyses.put(sampleId, ret);
         if (results.getStatistics().size() > 0)
         {
+            StatisticSpec count = new StatisticSpec(null, StatisticSpec.STAT.Count, null);
+            // If the statistic "count" is unavailable, try to get it from the '$TOT" keyword.
+            if (!results.getStatistics().containsKey(count))
+            {
+                SampleInfo sampleInfo = _sampleInfos.get(sampleId);
+                if (sampleInfo != null)
+                {
+                    String strTot = sampleInfo.getKeywords().get("$TOT");
+                    if (strTot != null)
+                    {
+                        results.setStatistic(count, Double.valueOf(strTot));
+                    }
+                }
+            }
+            // Fill in the Freq Of Parents that can be determined from the existing stats
+            for (Map.Entry<StatisticSpec, Double> entry : results.getStatistics().entrySet().toArray(new Map.Entry[0]))
+            {
+                if (entry.getKey().getStatistic() != StatisticSpec.STAT.Count)
+                {
+                    continue;
+                }
+                if (entry.getKey().getSubset() == null)
+                {
+                    continue;
+                }
+                StatisticSpec freqStat = new StatisticSpec(entry.getKey().getSubset(), StatisticSpec.STAT.Freq_Of_Parent, null);
+                if (results.getStatistics().containsKey(freqStat))
+                {
+                    continue;
+                }
+                Double denominator = results.getStatistics().get(new StatisticSpec(entry.getKey().getSubset().getParent(), StatisticSpec.STAT.Count, null));
+                if (denominator == null)
+                {
+                    continue;
+                }
+                if (entry.getValue().equals(0.0))
+                {
+                    results.setStatistic(freqStat, 0.0);
+                }
+                else if (!denominator.equals(0.0))
+                {
+                    results.setStatistic(freqStat, entry.getValue() / denominator * 100);
+                }
+            }
             _sampleAnalysisResults.put(sampleId, results);
         }
         return ret;
@@ -240,7 +285,9 @@ public class MacWorkspace extends FlowJoWorkspace
                 Element el = (Element) node;
                 if ("Polygon".equals(el.getTagName()) || "PolyRect".equals(el.getTagName()))
                 {
-                    ret.addGate(readPolygon(el));
+                    PolygonGate gate = readPolygon(el);
+                    ret.addGate(gate);
+                    analysis.addGraph(new GraphSpec(parentSubset, gate.getX(), gate.getY()));
                 }
                 else if ("Range".equals(el.getTagName()))
                 {
@@ -257,6 +304,7 @@ public class MacWorkspace extends FlowJoWorkspace
                     scaleValues(axis, lstValues);
                     IntervalGate gate = new IntervalGate(axis, lstValues.get(0), lstValues.get(1));
                     ret.addGate(gate);
+                    analysis.addGraph(new GraphSpec(parentSubset, gate.getAxis()));
                 }
                 else if ("Ellipse".equals(el.getTagName()))
                 {
@@ -268,6 +316,7 @@ public class MacWorkspace extends FlowJoWorkspace
                     }
                     EllipseGate gate = EllipseGate.fromVertices(polygon.getX(), polygon.getY(), vertices);
                     ret.addGate(gate);
+                    analysis.addGraph(new GraphSpec(parentSubset, polygon.getX(), polygon.getY()));
                 }
             }
         }
@@ -295,6 +344,7 @@ public class MacWorkspace extends FlowJoWorkspace
         {
             Population child = readPopulation(elPopulation, null, ret, results);
             ret.addPopulation(child);
+
         }
         if (results != null)
         {

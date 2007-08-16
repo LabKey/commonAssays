@@ -643,6 +643,7 @@ abstract public class FlowJoWorkspace implements Serializable
         Set<CompensationMatrix> compMatrices = getUsedCompensationMatrices();
         for (CompensationMatrix compMatrix : compMatrices)
         {
+            compMatrix.setName(compMatrix.getName() + " " + workspaceFile.getName());
             AttributeSet attrs = new AttributeSet(compMatrix);
             attrs.prepareForSave();
             compMatrixMap.put(compMatrix, attrs);
@@ -721,7 +722,7 @@ abstract public class FlowJoWorkspace implements Serializable
                         FlowWell well = new FlowFCSAnalysis(fcsAnalysis);
                         if (script == null)
                         {
-                            FlowAnalyzer.makeAnalysisDef(scriptDef, analysis, EnumSet.of(StatisticSet.workspace, StatisticSet.count));
+                            FlowAnalyzer.makeAnalysisDef(scriptDef, analysis, EnumSet.of(StatisticSet.workspace, StatisticSet.count, StatisticSet.frequencyOfParent));
                             well = FlowScript.createScriptForWell(user, well, "workspaceScript" + (scripts.size() + 1), scriptDoc, workspaceData, InputRole.Workspace);
                             scripts.put(analysis, well.getScript());
                         }

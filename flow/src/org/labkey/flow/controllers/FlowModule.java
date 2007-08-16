@@ -43,6 +43,7 @@ import org.labkey.flow.data.InputRole;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
+import org.labkey.flow.persist.FlowContainerListener;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.webparts.AnalysesWebPart;
@@ -81,6 +82,7 @@ public class FlowModule extends DefaultModule
         addController("Flow-Compensation", CompensationController.class);
         addController("Flow-Protocol", ProtocolController.class);
         FlowProperty.register();
+        ContainerManager.addContainerListener(new FlowContainerListener());
     }
 
 

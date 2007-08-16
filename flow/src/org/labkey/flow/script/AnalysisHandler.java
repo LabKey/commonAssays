@@ -232,10 +232,9 @@ public class AnalysisHandler extends BaseHandler
                 {
                     attrs = new AttributeSet(ObjectType.fcsAnalysis, uri);
                     _job.addStatus("Starting " + description);
-                    Set<GraphSpec> graphs = new LinkedHashSet(_groupAnalysis.getGraphs());
                     List<FCSAnalyzer.StatResult> stats = FCSAnalyzer.get().calculateStatistics(uri, _comp, _groupAnalysis);
                     addResults(dbt, attrs, stats);
-                    List<FCSAnalyzer.GraphResult> graphResults = FCSAnalyzer.get().generateGraphs(_well.getFCSURI(), _comp, _groupAnalysis, graphs);
+                    List<FCSAnalyzer.GraphResult> graphResults = FCSAnalyzer.get().generateGraphs(_well.getFCSURI(), _comp, _groupAnalysis, _groupAnalysis.getGraphs());
                     addResults(dbt, attrs, graphResults);
                 }
                 attrs.save(_job.decideFileName(_workingDirectory, URIUtil.getFilename(uri), FlowDataHandler.EXT_DATA), dbt);
@@ -247,5 +246,10 @@ public class AnalysisHandler extends BaseHandler
             }
 
         }
+    }
+
+    public String getRunName(FlowRun srcRun)
+    {
+        return srcRun.getName() + " analysis";
     }
 }

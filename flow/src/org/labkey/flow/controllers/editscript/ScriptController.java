@@ -640,55 +640,11 @@ public class ScriptController extends BaseFlowController
         {
             analysisElement = doc.getScript().addNewAnalysis();
         }
-        if (analysisElement.getGraphArray().length == 0)
-        {
-            addGraphs(analysisElement, analysis);
-        }
 
         FlowAnalyzer.makeAnalysisDef(doc.getScript(), analysis, form.ff_statisticSet);
         if (!safeSetAnalysisScript(analysisScript, doc.toString()))
             return null;
         return new ViewForward(analysisScript.urlShow());
-    }
-
-    protected void addGraphs(LinkedHashSet<GraphSpec> graphs, SubsetSpec parent, Population population)
-    {
-        if (population.getGates().size() == 1)
-        {
-            Gate gate = population.getGates().get(0);
-            if (gate instanceof PolygonGate)
-            {
-                PolygonGate poly = (PolygonGate) gate;
-                GraphSpec graph = new GraphSpec(parent, poly.getX(), poly.getY());
-                graphs.add(graph);
-            }
-            else if (gate instanceof IntervalGate)
-            {
-                IntervalGate interval = (IntervalGate) gate;
-                GraphSpec graph = new GraphSpec(parent, interval.getAxis());
-                graphs.add(graph);
-            }
-        }
-        SubsetSpec subset = new SubsetSpec(parent, population.getName());
-        for (Population child : population.getPopulations())
-        {
-            addGraphs(graphs, subset, child);
-        }
-
-    }
-
-    protected void addGraphs(AnalysisDef analysisElement, Analysis analysis)
-    {
-        LinkedHashSet<GraphSpec> graphs = new LinkedHashSet();
-
-        for (Population pop : analysis.getPopulations())
-        {
-            addGraphs(graphs, null, pop);
-        }
-        for (GraphSpec graph : graphs)
-        {
-            addGraph(analysisElement, graph);
-        }
     }
 
     public GraphDef addGraph(AnalysisDef analysis, GraphSpec graph)

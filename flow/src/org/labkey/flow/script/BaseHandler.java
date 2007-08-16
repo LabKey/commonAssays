@@ -102,4 +102,6 @@ abstract public class BaseHandler
             dataLSID.setRoleName(role.toString());
         }
     }
+
+    abstract public String getRunName(FlowRun srcRun);
 }

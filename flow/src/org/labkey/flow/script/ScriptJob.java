@@ -205,7 +205,7 @@ abstract public class ScriptJob extends PipelineJob
     public FlowRun executeHandler(FlowRun srcRun, BaseHandler handler) throws Exception
     {
         ExperimentArchiveDocument doc = createExperimentArchive();
-        ExperimentRunType runElement = addExperimentRun(doc.getExperimentArchive(), srcRun.getName());
+        ExperimentRunType runElement = addExperimentRun(doc.getExperimentArchive(), handler.getRunName(srcRun));
         File workingDirectory = createAnalysisDirectory(new File(srcRun.getPath()), handler._step);
         try
         {

@@ -40,7 +40,7 @@ public class CompensationCalculationHandler extends BaseHandler
         ProtocolApplicationBaseType appComp = addProtocolApplication(runElement);
         AttributeSet attrsComp = new AttributeSet(matrix);
         DataBaseType dbtComp = appComp.getOutputDataObjects().addNewData();
-        dbtComp.setName(run.getName());
+        dbtComp.setName(run.getName() + " comp matrix");
         dbtComp.setAbout(FlowDataObject.generateDataLSID(getContainer(), FlowDataType.CompensationMatrix));
         dbtComp.setSourceProtocolLSID(_step.getLSID(_job.getContainer()));
         attrsComp.save(_job.decideFileName(outputDirectory, "Compensation", FlowDataHandler.EXT_DATA), dbtComp);
@@ -75,6 +75,11 @@ public class CompensationCalculationHandler extends BaseHandler
                 attrs.save(_job.decideFileName(outputDirectory, "control", FlowDataHandler.EXT_DATA), dbtWell);
             }
         }
+    }
 
+
+    public String getRunName(FlowRun srcRun)
+    {
+        return srcRun.getName() + " comp";
     }
 }
