@@ -1697,7 +1697,7 @@ public class MS2Controller extends ViewController
 
         if (null != deleteRuns)
         {
-            MS2Manager.markAsDeleted(deleteRuns, c);
+            MS2Manager.markAsDeleted(deleteRuns, c, getUser());
         }
 
         currentUrl.setAction("showList");

@@ -1114,7 +1114,7 @@ public class PipelineController extends ViewController
             ExperimentRun run = ExperimentService.get().getCreatingRun(mzXMLFile, c);
             if (run != null)
             {
-                ExperimentService.get().deleteExperimentRunsByRowIds(c, run.getRowId());
+                ExperimentService.get().deleteExperimentRunsByRowIds(c, getUser(), run.getRowId());
             }
             File annotationFile = MS2PipelineManager.findAnnotationFile(mzXMLFile, new HashSet<File>(), new HashSet<File>());
             if (annotationFile != null)

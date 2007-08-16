@@ -3,7 +3,12 @@ package org.labkey.luminex;
 import org.labkey.api.study.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.*;
+import org.labkey.api.exp.list.ListService;
+import org.labkey.api.exp.list.ListDefinition;
+import org.labkey.api.exp.list.ListItem;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpData;
@@ -71,12 +76,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         Domain uploadSetDomain = super.createUploadSetDomain(c);
         addProperty(uploadSetDomain, "Species", PropertyType.STRING);
         addProperty(uploadSetDomain, "Lab ID", PropertyType.STRING);
-        addProperty(uploadSetDomain, "Units of Concentration", PropertyType.STRING);
-        addProperty(uploadSetDomain, "Analyte Type", PropertyType.STRING);
         addProperty(uploadSetDomain, "Analysis Software", PropertyType.STRING);
-        addProperty(uploadSetDomain, "Weighting Method", PropertyType.STRING);
-        addProperty(uploadSetDomain, "Bead Manufacturer", PropertyType.STRING);
-        addProperty(uploadSetDomain, "Bead Catalog Number", PropertyType.STRING);
 
         return uploadSetDomain;
     }
@@ -84,7 +84,6 @@ public class LuminexAssayProvider extends DefaultAssayProvider
     protected Domain createRunDomain(Container c)
     {
         Domain runDomain = super.createRunDomain(c);
-        addProperty(runDomain, "Isotype", PropertyType.STRING);
         addProperty(runDomain, "Replaces Previous File", PropertyType.BOOLEAN);
         addProperty(runDomain, "Date file was modified", PropertyType.DATE_TIME);
         addProperty(runDomain, "Specimen Type", PropertyType.STRING);
@@ -94,11 +93,42 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         return runDomain;
     }
 
-    public List<Domain> createDefaultDomains(Container c)
+    public List<Domain> createDefaultDomains(Container c, User user)
     {
-        List<Domain> result = super.createDefaultDomains(c);
+        List<Domain> result = super.createDefaultDomains(c, user);
 
         Domain analyteDomain = PropertyService.get().createDomain(c, "urn:lsid:${LSIDAuthority}:" + ASSAY_DOMAIN_ANALYTE + ".Folder-${Container.RowId}:${AssayName}", "Analyte Properties");
+        DomainProperty standardNameProp = addProperty(analyteDomain, "Standard Name", PropertyType.STRING);
+        standardNameProp.setLookup(new Lookup(c.getProject(), "lists", "StandardAnalytes"));
+
+        addProperty(analyteDomain, "Isotype", PropertyType.STRING);
+        addProperty(analyteDomain, "Units of Concentration", PropertyType.STRING);
+        addProperty(analyteDomain, "Analyte Type", PropertyType.STRING);
+        addProperty(analyteDomain, "Weighting Method", PropertyType.STRING);
+        
+        Map<String, ListDefinition> lists = ListService.get().getLists(c.getProject());
+        ListDefinition standardList = lists.get("StandardAnalytes");
+        if (standardList == null)
+        {
+            standardList = ListService.get().createList(c.getProject(), "StandardAnalytes");
+            standardList.setKeyName("Name");
+            standardList.setKeyType(ListDefinition.KeyType.Varchar);
+            standardList.setDescription("Standard data about analytes, including a standard name");
+            standardList.setTitleColumn("Name");
+            try
+            {
+                standardList.save(user);
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+
+        addProperty(analyteDomain, "Bead Manufacturer", PropertyType.STRING);
+        addProperty(analyteDomain, "Bead Dist", PropertyType.STRING);
+        addProperty(analyteDomain, "Bead Catalog Number", PropertyType.STRING);
+
         result.add(analyteDomain);
 
         Domain excelRunDomain = PropertyService.get().createDomain(c, "urn:lsid:${LSIDAuthority}:" + ASSAY_DOMAIN_EXCEL_RUN + ".Folder-${Container.RowId}:${AssayName}", "Excel File Run Properties");

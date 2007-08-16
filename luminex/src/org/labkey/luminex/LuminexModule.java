@@ -8,6 +8,7 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.study.AssayService;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.security.User;
 import org.apache.log4j.Logger;
 
 import java.beans.PropertyChangeEvent;
@@ -31,7 +32,7 @@ public class LuminexModule extends DefaultModule implements ContainerManager.Con
     {
     }
 
-    public void containerDeleted(Container c)
+    public void containerDeleted(Container c, User user)
     {
     }
 

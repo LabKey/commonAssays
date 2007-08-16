@@ -34,7 +34,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         return url;
     }
 
-    public void deleteData(Data data, Container container) throws ExperimentException
+    public void deleteData(Data data, Container container, User user) throws ExperimentException
     {
         // Delete the database records for this features file here
     }

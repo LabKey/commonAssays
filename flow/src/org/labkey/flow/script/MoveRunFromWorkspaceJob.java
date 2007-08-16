@@ -23,7 +23,7 @@ public class MoveRunFromWorkspaceJob extends ScriptJob
         executeHandler(_run, _analysisHandler);
         if (!_errors)
         {
-            ExperimentService.get().deleteExperimentRunsByRowIds(getContainer(), _run.getRunId());
+            ExperimentService.get().deleteExperimentRunsByRowIds(getContainer(), getUser(), _run.getRunId());
         }
     }
 }

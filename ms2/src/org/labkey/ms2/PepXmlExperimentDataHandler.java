@@ -140,7 +140,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         return new ViewURLHelper(request, "MS2", "showRun", container.getPath()).addParameter("run", Integer.toString(run.getRun()));
     }
 
-    public void deleteData(Data data, Container container) throws ExperimentException
+    public void deleteData(Data data, Container container, User user) throws ExperimentException
     {
         try
         {
@@ -149,7 +149,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
             {
                 run.setExperimentRunLSID(null);
                 MS2Manager.updateRun(run, null);
-                MS2Manager.markAsDeleted( new Integer[]{ run.getRun() }, container );
+                MS2Manager.markAsDeleted( new Integer[]{ run.getRun() }, container, user);
             }
         }
         catch (URISyntaxException e)

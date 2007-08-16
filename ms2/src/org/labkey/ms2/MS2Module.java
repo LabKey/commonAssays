@@ -176,9 +176,9 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
     }
 
 
-    public void containerDeleted(Container c)
+    public void containerDeleted(Container c, User user)
     {
-        MS2Manager.markAsDeleted(c);
+        MS2Manager.markAsDeleted(c, user);
     }
 
 

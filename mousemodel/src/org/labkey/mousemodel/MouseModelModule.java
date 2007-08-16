@@ -25,6 +25,7 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.sample.*;
 import org.labkey.api.security.Group;
 import org.labkey.api.security.SecurityManager;
+import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.mousemodel.mouse.MouseController;
@@ -162,7 +163,7 @@ public class MouseModelModule extends DefaultModule implements LsidManager.LsidH
             catch (SQLException e)
             {
                 if (null != c)
-                    ContainerManager.delete(c);
+                    ContainerManager.delete(c, viewContext.getUser());
                 _log.error("SQL Error while creating ensuring mouse lookup container", e);
                 throw new RuntimeSQLException(e);
             }
@@ -188,7 +189,7 @@ public class MouseModelModule extends DefaultModule implements LsidManager.LsidH
 
     }
 
-    public void containerDeleted(Container c)
+    public void containerDeleted(Container c, User user)
     {
         try
         {

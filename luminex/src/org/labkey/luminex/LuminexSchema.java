@@ -154,10 +154,10 @@ public class LuminexSchema extends UserSchema
 
         if (studyColumn != null)
         {
-            SQLFragment participantSQL = new SQLFragment("(SELECT ptid FROM study.specimen s WHERE s.GlobalUniqueId = " + ExprColumn.STR_TABLE_ALIAS + ".Description AND s.container = " + studyColumn.getValueSql() +  ")");
+            SQLFragment participantSQL = new SQLFragment("(SELECT ptid FROM study.specimen s WHERE s.GlobalUniqueId = " + ExprColumn.STR_TABLE_ALIAS + ".Description AND CAST(s.container AS VARCHAR) = " + studyColumn.getValueSql() +  ")");
             participantCol = new ExprColumn(result, "ParticipantID", participantSQL, Types.VARCHAR, studyColumn);
 
-            SQLFragment visitSQL = new SQLFragment("(SELECT visitvalue FROM study.specimen s WHERE s.GlobalUniqueId = " + ExprColumn.STR_TABLE_ALIAS + ".Description AND s.container = " + studyColumn.getValueSql() +  ")");
+            SQLFragment visitSQL = new SQLFragment("(SELECT visitvalue FROM study.specimen s WHERE s.GlobalUniqueId = " + ExprColumn.STR_TABLE_ALIAS + ".Description AND CAST(s.container AS VARCHAR) = " + studyColumn.getValueSql() +  ")");
             visitCol = new ExprColumn(result, "VisitID", visitSQL, Types.REAL, studyColumn);
         }
         else

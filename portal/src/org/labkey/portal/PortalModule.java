@@ -24,6 +24,7 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.util.Search;
 import org.labkey.api.util.Search.SearchWebPart;
 import org.labkey.api.view.*;
+import org.labkey.api.security.User;
 
 import java.beans.PropertyChangeEvent;
 import java.lang.reflect.InvocationTargetException;
@@ -93,7 +94,7 @@ public class PortalModule extends DefaultModule
             {
             }
 
-            public void containerDeleted(Container c)
+            public void containerDeleted(Container c, User user)
             {
                 try
                 {

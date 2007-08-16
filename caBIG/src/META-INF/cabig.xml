@@ -147,7 +147,6 @@
       <ns:column columnName="name"/>
       <ns:column columnName="lsid"/>
       <ns:column columnName="materiallsidprefix"/>
-      <ns:column columnName="urlpattern"/>
       <ns:column columnName="description"/>
       <ns:column columnName="containerid"/>
       <ns:column columnName="domainid"/>

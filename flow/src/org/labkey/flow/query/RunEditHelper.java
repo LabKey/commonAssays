@@ -22,7 +22,7 @@ public class RunEditHelper extends TableEditHelper
     public Forward delete(User user, ViewURLHelper srcURL, QueryUpdateForm form) throws Exception
     {
         String[] pks = form.getRequest().getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
-        ExperimentService.get().deleteExperimentRunsByRowIds(_schema.getContainer(), PageFlowUtil.toInts(pks));
+        ExperimentService.get().deleteExperimentRunsByRowIds(_schema.getContainer(), user, PageFlowUtil.toInts(pks));
         return new ViewForward(srcURL);
     }
 

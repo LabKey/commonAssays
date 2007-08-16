@@ -8,13 +8,12 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.exp.ExperimentDataHandler;
 import org.labkey.api.exp.ExperimentRunFilter;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.security.User;
 import org.labkey.ms1.pipeline.MSInspectPipelineProvider;
 import org.apache.log4j.Logger;
 
 import java.beans.PropertyChangeEvent;
-import java.util.Collections;
 import java.util.Set;
-import java.util.HashSet;
 
 
 /**
@@ -41,7 +40,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
     {
     }
 
-    public void containerDeleted(Container c)
+    public void containerDeleted(Container c, User user)
     {
         // If the module starts loading data into its own database tables,
         // it needs to clean up the relevant rows when a container

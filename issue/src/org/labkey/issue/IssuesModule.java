@@ -104,7 +104,7 @@ public class IssuesModule extends DefaultModule implements ContainerManager.Cont
     {
     }
 
-    public void containerDeleted(Container c)
+    public void containerDeleted(Container c, User user)
     {
         IssueManager.purgeContainer(c);
     }

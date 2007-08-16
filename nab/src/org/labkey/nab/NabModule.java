@@ -8,6 +8,7 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.Plate;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.security.User;
 
 import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
@@ -32,7 +33,7 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
     {
     }
 
-    public void containerDeleted(Container c)
+    public void containerDeleted(Container c, User user)
     {
         try
         {

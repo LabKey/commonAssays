@@ -44,6 +44,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         {
             throw new ExperimentException("Could not load Luminex file " + dataFile.getAbsolutePath() + " because it is not owned by an experiment run");
         }
+        FileInputStream fIn = null;
         try
         {
             ExpProtocol expProtocol = expRun.getProtocol();
@@ -80,7 +81,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                 throw new ExperimentException("Could not find Excel run domain for protocol with LSID " + protocol.getLSID());
             }
 
-            FileInputStream fIn = new FileInputStream(dataFile);
+            fIn = new FileInputStream(dataFile);
             Workbook workbook = Workbook.getWorkbook(fIn);
 
             Integer id = OntologyManager.ensureObject(info.getContainer().getId(), data.getLSID());
@@ -101,6 +102,13 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         catch (BiffException e)
         {
             throw new XarFormatException("Failed to parse Excel file " + dataFile.getAbsolutePath(), e);
+        }
+        finally
+        {
+            if (fIn != null)
+            {
+                try { fIn.close(); } catch (IOException e) {}
+            }
         }
     }
 
@@ -169,7 +177,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             }
             public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
             {
-                return calcOORValue(dataRows, getter, false, analyte);
+                return getValidStandard(dataRows, getter, false, analyte);
             }
         },
         OUT_OF_RANGE_BELOW
@@ -184,7 +192,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             }
             public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
             {
-                return calcOORValue(dataRows, getter, true, analyte);
+                return getValidStandard(dataRows, getter, true, analyte);
             }
         },
         BEYOND_RANGE
@@ -229,13 +237,30 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             public Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte)
             {
                 String oorIndicator = getOORIndicator(value, dataRows, getter);
+                double thisValue = Double.parseDouble(value.substring(1));
                 if ("<".equals(oorIndicator))
                 {
-                    return OUT_OF_RANGE_BELOW.getValue(value, dataRows, getter, analyte);
+                    Double standardValue = OUT_OF_RANGE_BELOW.getValue(value, dataRows, getter, analyte);
+                    if (standardValue != null && standardValue.doubleValue() > thisValue)
+                    {
+                        return standardValue;
+                    }
+                    else
+                    {
+                        return thisValue;
+                    }
                 }
                 else if (">".equals(oorIndicator))
                 {
-                    return OUT_OF_RANGE_ABOVE.getValue(value, dataRows, getter, analyte);
+                    Double standardValue = OUT_OF_RANGE_ABOVE.getValue(value, dataRows, getter, analyte);
+                    if (standardValue != null && standardValue.doubleValue() < thisValue)
+                    {
+                        return standardValue;
+                    }
+                    else
+                    {
+                        return thisValue;
+                    }
                 }
                 else
                 {
@@ -279,7 +304,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         public abstract Double getValue(String value);
         public abstract Double getValue(String value, List<LuminexDataRow> dataRows, Getter getter, Analyte analyte);
 
-        private static Double calcOORValue(List<LuminexDataRow> dataRows, Getter getter, boolean min, Analyte analyte)
+        private static Double getValidStandard(List<LuminexDataRow> dataRows, Getter getter, boolean min, Analyte analyte)
         {
             double startValue = min ? Double.MAX_VALUE : Double.MIN_VALUE;
             double result = startValue;
@@ -692,7 +717,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public void deleteData(Data data, Container container) throws ExperimentException
+    public void deleteData(Data data, Container container, User user) throws ExperimentException
     {
         try
         {

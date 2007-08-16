@@ -2,6 +2,7 @@ package org.labkey.flow.persist;
 
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Container;
+import org.labkey.api.security.User;
 import org.apache.log4j.Logger;
 
 import java.beans.PropertyChangeEvent;
@@ -24,7 +25,7 @@ public class FlowContainerListener implements ContainerManager.ContainerListener
      *
      * For this reason, the FlowContainerListener should be registered before the ExperimentContainerListener.
      */
-    public void containerDeleted(Container c)
+    public void containerDeleted(Container c, User user)
     {
         try
         {

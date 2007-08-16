@@ -153,7 +153,7 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
     }
 
     // Note: Attachments are purged by AttachmentServiceImpl.containerDeleted()
-    public void containerDeleted(Container c)
+    public void containerDeleted(Container c, User user)
     {
         try
         {

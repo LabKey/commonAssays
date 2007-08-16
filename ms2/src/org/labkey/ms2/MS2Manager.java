@@ -571,7 +571,7 @@ public class MS2Manager
     }
 
     // For safety, simply mark runs as deleted.  This allows them to be (manually) restored.
-    public static void markAsDeleted(Integer[] runIds, Container c)
+    public static void markAsDeleted(Integer[] runIds, Container c, User user)
     {
         if (runIds.length == 0)
             return;
@@ -630,7 +630,7 @@ public class MS2Manager
         {
             try
             {
-                ExperimentService.get().deleteExperimentRunsByRowIds(c, experimentRunId);
+                ExperimentService.get().deleteExperimentRunsByRowIds(c, user, experimentRunId);
             }
             catch (SQLException e)
             {
@@ -644,12 +644,12 @@ public class MS2Manager
     }
 
 
-    public static void markAsDeleted(Container c)
+    public static void markAsDeleted(Container c, User user)
     {
         try
         {
             Integer[] runIds = Table.executeArray(getSchema(), "SELECT Run FROM " + getTableInfoRuns() + " WHERE Container=?", new Object[]{c.getId()}, Integer.class);
-            markAsDeleted(runIds, c);
+            markAsDeleted(runIds, c, user);
         }
         catch (SQLException e)
         {
@@ -658,14 +658,14 @@ public class MS2Manager
     }
 
 
-    public static void markAsDeleted(String[] runIds, Container c)
+    public static void markAsDeleted(String[] runIds, Container c, User user)
     {
         Integer[] deleteRunIds = new Integer[runIds.length];
         for (int i = 0; i < runIds.length; i++)
         {
             deleteRunIds[i] = Integer.parseInt(runIds[i]);
         }
-        markAsDeleted(deleteRunIds, c);
+        markAsDeleted(deleteRunIds, c, user);
     }
 
 
