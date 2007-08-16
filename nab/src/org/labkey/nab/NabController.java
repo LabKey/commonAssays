@@ -697,10 +697,12 @@ public class NabController extends ViewController
             }
             if (!sampleProperties.isEmpty())
             {
-                List<String> errors = GenericAssayService.get().publishAssayData(getUser(), targetContainer,
+                List<String> errors = new ArrayList<String>();
+                ViewURLHelper helper = GenericAssayService.get().publishAssayData(getUser(), targetContainer,
                         "NAB", sampleProperties.toArray(new Map[sampleProperties.size()]),
                         NabManager.get().getPropertyTypes(plates),
-                        NabManager.PlateProperty.VirusId.name());
+                        NabManager.PlateProperty.VirusId.name(), errors);
+
                 if (errors != null && !errors.isEmpty())
                 {
                     ActionErrors actionErrors = PageFlowUtil.getActionErrors(getRequest(), true);
@@ -708,11 +710,13 @@ public class NabController extends ViewController
                         actionErrors.add("main", new ActionMessage("Error", error));
                     return publishVerify(form);
                 }
+                else
+                    return new ViewForward(helper);
             }
         }
-        ViewURLHelper helper = new ViewURLHelper("Study", "begin", targetContainer);
-        return new ViewForward(helper);
-
+        ActionErrors actionErrors = PageFlowUtil.getActionErrors(getRequest(), true);
+        actionErrors.add("main", new ActionMessage("Error", "At least one sample must be selected to publish."));
+        return publishVerify(form);
     }
 
     @Jpf.Action
@@ -825,7 +829,7 @@ public class NabController extends ViewController
         if (plateIds.isEmpty())
         {
             ActionErrors actionErrors = PageFlowUtil.getActionErrors(getRequest(), true);
-            actionErrors.add("main", new ActionMessage("Error", "You must select at least one run to publish."));
+            actionErrors.add("main", new ActionMessage("Error", "You must select at least one row to publish."));
             return runs();
         }
         else
@@ -867,7 +871,10 @@ public class NabController extends ViewController
         {
             try
             {
-                return Double.parseDouble(_sequenceNum);
+                if (_sequenceNum == null)
+                    return null;
+                else
+                    return Double.parseDouble(_sequenceNum);
             }
             catch (NumberFormatException e)
             {

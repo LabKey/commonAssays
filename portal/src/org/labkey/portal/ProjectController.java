@@ -133,8 +133,6 @@ public class ProjectController extends SpringActionController
                 title = AppProps.getInstance().getSystemShortName();
                 appendPath = false;
             }
-            else if (c.isProject())
-                title = "Project " + c.getName();
             else
                 title = c.getName();
 

@@ -183,7 +183,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         return pd;
     }
 
-    public List<String> publish(User user, Protocol protocol, Container study, Set<AssayPublishKey> dataKeys)
+    public ViewURLHelper publish(User user, Protocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
     {
         try
         {
@@ -262,9 +262,12 @@ public class LuminexAssayProvider extends DefaultAssayProvider
                 for (PropertyDescriptor runPD : runPDs)
                 {
                     ObjectProperty prop = props.get(runPD.getPropertyURI());
-                    PropertyDescriptor publishPD = runPD.clone();
-                    publishPD.setName("Run " + runPD.getName());
-                    addProperty(publishPD, prop.value(), dataMap, types);
+                    if (prop != null)
+                    {
+                        PropertyDescriptor publishPD = runPD.clone();
+                        publishPD.setName("Run " + runPD.getName());
+                        addProperty(publishPD, prop.value(), dataMap, types);
+                    }
                 }
 
                 for (AssayPublishKey dataKey : dataKeys)
@@ -279,8 +282,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
 
                 dataMaps[index++] = dataMap;
             }
-
-            GenericAssayService.get().publishAssayData(user, study, protocol.getName(), dataMaps, types);
+            return GenericAssayService.get().publishAssayData(user, study, protocol.getName(), dataMaps, types, errors);
         }
         catch (SQLException e)
         {
@@ -294,8 +296,5 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         {
             throw new RuntimeException(e);
         }
-
-        return Collections.emptyList();
-
     }
 }
