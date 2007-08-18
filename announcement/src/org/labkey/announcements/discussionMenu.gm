@@ -18,12 +18,10 @@
         announcements = new Announcement[0];
     ViewURLHelper pageURL = me.pageURL;
 
-    if (announcements.length > 0)
-    {
-        boolean longFormat = false;
-        Set menuItems = new HashSet();
-        for (Announcement a : announcements)
-            longFormat |= !menuItems.add(a.getCreatedByName() + "|" + DateUtil.formatDate(a.getCreated()));
+    boolean longFormat = false;
+    Set menuItems = new HashSet();
+    for (Announcement a : announcements)
+        longFormat |= !menuItems.add(a.getCreatedByName() + "|" + DateUtil.formatDate(a.getCreated()));
 %>
 
 <script type="text/javascript">
@@ -78,13 +76,4 @@ var discussionMenu = {};
 })();
 
 </script>
-<span id=discussionMenuToggle>[<a href="#" onclick="return false;">see discussions (<%=announcements.length%>)</a>]</span><%
-}
-else
-{
-    if (c.hasPermission(context.getUser(), ACL.PERM_INSERT))
-    {
-        %>[<a href="<%=filter(pageURL.getLocalURIString())%>&amp;discussion.start=true#discussionArea">discuss this</a>]<%
-    }
-}
-%>
+<span id=discussionMenuToggle>[<a href="#" onclick="return false;"><% if (announcements.length > 0) { %>see discussions (<%=announcements.length%>)<% } else { %>discuss this<% } %></a>]</span>
