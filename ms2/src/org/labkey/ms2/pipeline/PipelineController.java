@@ -91,6 +91,9 @@ public class PipelineController extends ViewController
             HttpView.throwNotFound();
 
         URI uriUpload = URIUtil.resolve(pr.getUri(c), path);
+        if (uriUpload == null)
+            HttpView.throwNotFound();
+        
         File fileUpload = new File(uriUpload);
         File[] files = new File[] { fileUpload };
         if (fileUpload.isDirectory())

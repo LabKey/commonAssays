@@ -943,7 +943,7 @@ public class MS2Controller extends ViewController
             String comment = form.getComment();
 
             //TODO: this style of dealing with different file types must be repaired.
-            if (form.getFileType().equalsIgnoreCase("uniprot"))
+            if ("uniprot".equalsIgnoreCase(form.getFileType()))
             {
                 try
                 {
@@ -957,7 +957,7 @@ public class MS2Controller extends ViewController
                     throw e;
                 }
             }
-            if (form.getFileType().equalsIgnoreCase("fasta"))
+            if ("fasta".equalsIgnoreCase(form.getFileType()))
             {
                 try
                 {
