@@ -1184,6 +1184,9 @@ public class MS2Manager
 
         public void addFirstFalseAnnotation(String text, double x, double y)
         {
+            if (text == null)
+                return;
+            
             XYPointerAnnotation pointer = new XYPointerAnnotation(
                 text, x, y, 9.0 * Math.PI / 4.0
             );

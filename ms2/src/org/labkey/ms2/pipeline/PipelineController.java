@@ -330,10 +330,10 @@ public class PipelineController extends ViewController
         URI uriData = URIUtil.resolve(pr.getUri(c), form.getPath());
         if (uriData == null)
             HttpView.throwNotFound();
+        ViewBackgroundInfo info =
+                service.getJobBackgroundInfo(getViewBackgroundInfo(), new File(uriData));
 
-        Map<String, String[]> sequenceDBs = MS2PipelineManager.getSequenceDBNames(sequenceRoot, form.getSearchEngine());
         PipelineProtocolFactory searchProtocol = MS2PipelineManager.getSearchProtocolInstance(form.getSearchEngine());
-        String[] protocolNames = searchProtocol.getProtocolNames(uriRoot);
 
         String error = null;
         PipelineProtocol protocol = null;
@@ -387,32 +387,6 @@ public class PipelineController extends ViewController
             }
         }
 
-        if (0 == sequenceDBs.size())
-        {
-            if (null == error && "mascot".equalsIgnoreCase(form.getSearchEngine()))
-            {
-                AppProps appProps = AppProps.getInstance();
-                if (appProps.hasMascotServer())
-                {
-                    MascotClientImpl mascotClient = new MascotClientImpl(appProps.getMascotServer(), null);
-                    mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
-                    String connectivityResult = mascotClient.testConnectivity(false);
-                    if ("".equals(connectivityResult))
-                        error = "Mascot server has no databases available for searching.";
-                    else
-                        error = connectivityResult;
-                }
-                else
-                {
-                    error = "Mascot server has not been specified in site customization.";
-                }
-            }
-            if (null == error && "sequest".equalsIgnoreCase(form.getSearchEngine()))
-            {
-                error = "Sequest server has no databases available for searching.";
-            }
-        }
-        
         if (error == null && "POST".equalsIgnoreCase(getRequest().getMethod()))
         {
             try
@@ -511,8 +485,6 @@ public class PipelineController extends ViewController
                     }
                 }
 
-                ViewBackgroundInfo info =
-                        service.getJobBackgroundInfo(getViewBackgroundInfo(), new File(uriData));
                 MS2PipelineManager.runAnalysis(info,
                         uriRoot,
                         uriData,
@@ -542,8 +514,6 @@ public class PipelineController extends ViewController
             }
         }
 
-        ViewBackgroundInfo info =
-                service.getJobBackgroundInfo(getViewBackgroundInfo(), new File(uriData));
         Map<File, FileStatus> mzXmlFileStatus =
                 MS2PipelineManager.getAnalysisFileStatus(uriData, protocolName, info.getContainer(), form.getSearchEngine());
         for (FileStatus status : mzXmlFileStatus.values())
@@ -557,14 +527,16 @@ public class PipelineController extends ViewController
                 HttpView.throwRedirect(redirectUrl.getLocalURIString());
             }
         }
-
+        
         Set<ExperimentRun> creatingRuns = new HashSet<ExperimentRun>();
         Set<File> annotationFiles = new HashSet<File>();
         try
         {
-            File[] mzXMLFiles = new File(uriData).listFiles(MS2PipelineManager.getAnalyzeFilter());
-            for (File mzXMLFile : mzXMLFiles)
+            for (File mzXMLFile : mzXmlFileStatus.keySet())
             {
+                if (mzXmlFileStatus.get(mzXMLFile) == FileStatus.UNKNOWN)
+                    continue;
+                
                 ExperimentRun run = ExperimentService.get().getCreatingRun(mzXMLFile, c);
                 if (run != null)
                 {
@@ -580,7 +552,7 @@ public class PipelineController extends ViewController
         catch (IOException e)
         {
             String errorMessage = "While attempting to initiate the search on the mzXML file there was an " +
-                "error interacting with the file system. " + ((e.getMessage() != null) ? "Details: " + e.getMessage() : "");
+                "error interacting with the file system. " + ((e.getMessage() != null) ? "<br>\nDetails: " + e.getMessage() : "");
             HttpView.throwNotFound(errorMessage);
         }
         if (form.getConfigureXml().length() == 0)
@@ -590,6 +562,44 @@ public class PipelineController extends ViewController
                     "<!-- Override default parameters here. -->\n" +
                     "</bioml>");
         }
+
+        Map<String, String[]> sequenceDBs = new HashMap<String, String[]>();
+        // If the protocol is being loaded, then the user doesn't neet to pick a FASTA file,
+        // it will be part of the protocol.
+        // CONSIDER: Should we check for the existence of the protocol's FASTA file, since
+        //           it may have been deleted?
+        if ("".equals(form.getProtocol()))
+        {
+            sequenceDBs = MS2PipelineManager.getSequenceDBNames(sequenceRoot, form.getSearchEngine());
+            if (0 == sequenceDBs.size())
+            {
+                if (null == error && "mascot".equalsIgnoreCase(form.getSearchEngine()))
+                {
+                    AppProps appProps = AppProps.getInstance();
+                    if (appProps.hasMascotServer())
+                    {
+                        MascotClientImpl mascotClient = new MascotClientImpl(appProps.getMascotServer(), null);
+                        mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
+                        String connectivityResult = mascotClient.testConnectivity(false);
+                        if ("".equals(connectivityResult))
+                            error = "Mascot server has no databases available for searching.";
+                        else
+                            error = connectivityResult;
+                    }
+                    else
+                    {
+                        error = "Mascot server has not been specified in site customization.";
+                    }
+                }
+                if (null == error && "sequest".equalsIgnoreCase(form.getSearchEngine()))
+                {
+                    error = "Sequest server has no databases available for searching.";
+                }
+            }
+        }
+
+        String[] protocolNames = searchProtocol.getProtocolNames(uriRoot);
+
         HttpView v = new GroovyView("/org/labkey/ms2/pipeline/search.gm");
         v.addObject("error", error);
         v.addObject("form", form);

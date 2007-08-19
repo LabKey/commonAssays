@@ -3927,12 +3927,17 @@ public class MS2Controller extends ViewController
             private String parameters;
             private String message;
 
+            private String trimSafe(String s)
+            {
+                return (s == null ? "" : s.trim());
+            }
+
             public void reset(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
             {
-                setMascotServer(httpServletRequest.getParameter("mascotServer").trim());
-                setUserAccount(httpServletRequest.getParameter("mascotUserAccount").trim());
-                setPassword(httpServletRequest.getParameter("mascotUserPassword").trim());
-                setHTTPProxyServer(httpServletRequest.getParameter("mascotHTTPProxy").trim());
+                setMascotServer(trimSafe(httpServletRequest.getParameter("mascotServer")));
+                setUserAccount(trimSafe(httpServletRequest.getParameter("mascotUserAccount")));
+                setPassword(trimSafe(httpServletRequest.getParameter("mascotUserPassword")));
+                setHTTPProxyServer(trimSafe(httpServletRequest.getParameter("mascotHTTPProxy")));
                 super.reset(actionMapping, httpServletRequest);
             }
 

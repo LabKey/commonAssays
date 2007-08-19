@@ -17,7 +17,7 @@ if (null != error)
 %>
 <span style="font-size:<%=ThemeFont.getThemeFont().getHeader_1Size()%>">An MS2 search protocol is defined by a set of options for the search engine and a set of protein databases to search.</span>
 <br><br>
-<%if (sequenceDBs.size () == 0)
+<%if (form.protocol == "" && sequenceDBs.size () == 0)
     {
         if ("mascot".equalsIgnoreCase(form.searchEngine))
         {
