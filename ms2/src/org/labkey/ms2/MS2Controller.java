@@ -1499,53 +1499,55 @@ public class MS2Controller extends ViewController
                 url = new ViewURLHelper("MS2", "showList", c.getPath());
                 url.addParameter(MS2Manager.getDataRegionNameExperimentRuns() + ".Run~eq", Integer.toString(run));
             }
-            else if (!form.isExperiment())
+            else if (!AppProps.getInstance().hasPipelineCluster())
             {
-                PipelineService service = PipelineService.get();
-                ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), f);
-
-                int run = MS2Manager.addRunToQueue(info,
-                        f, form.getDescription(), true).getRunId();
-                if (run == -1)
-                    HttpView.throwNotFound();
-
                 url = new ViewURLHelper("MS2", "addFileRunStatus", "");
-                url.addParameter("run", Integer.toString(run));
+                url.addParameter("error", "Automated upload disabled.");
             }
             else
             {
-                // Make sure container exists.
-                c = ContainerManager.ensureContainer(getViewURLHelper().getExtraPath());
-                if (null == c)
-                    HttpView.throwNotFound();
+                if (!form.isExperiment())
+                {
+                    PipelineService service = PipelineService.get();
+                    ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), f);
 
-                PipelineService service = PipelineService.get();
-                PipeRoot pr = service.findPipelineRoot(c);
-                if (pr == null)
-                    return HttpView.throwUnauthorized();
+                    int run = MS2Manager.addRunToQueue(info,
+                            f, form.getDescription(), true).getRunId();
+                    if (run == -1)
+                        HttpView.throwNotFound();
 
-                ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), f);
-//wch:mascotdev
-                PipelineJob job = MS2PipelineManager.runUpload(info,
-//END-wch:mascotdev
-                        pr.getUri(c),
-                        new File(form.getDataDir()).toURI(),
-                        MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer()),
-                        form.getProtocol(),
-                        f);
+                    url = new ViewURLHelper("MS2", "addFileRunStatus", "");
+                    url.addParameter("run", Integer.toString(run));
+                }
+                else
+                {
+                    // Make sure container exists.
+                    c = ContainerManager.ensureContainer(getViewURLHelper().getExtraPath());
+                    if (null == c)
+                        HttpView.throwNotFound();
 
-                if (job == null)
-                    return HttpView.throwNotFound();
+                    PipelineService service = PipelineService.get();
+                    PipeRoot pr = service.findPipelineRoot(c);
+                    if (pr == null)
+                        return HttpView.throwUnauthorized();
 
-                url = new ViewURLHelper("MS2", "addFileRunStatus", "");
-                url.addParameter("path", job.getLogFile().getAbsolutePath());
+                    ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), f);
+    //wch:mascotdev
+                    PipelineJob job = MS2PipelineManager.runUpload(info,
+    //END-wch:mascotdev
+                            pr.getUri(c),
+                            new File(form.getDataDir()).toURI(),
+                            MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer()),
+                            form.getProtocol(),
+                            f);
+
+                    if (job == null)
+                        return HttpView.throwNotFound();
+
+                    url = new ViewURLHelper("MS2", "addFileRunStatus", "");
+                    url.addParameter("path", job.getLogFile().getAbsolutePath());
+                }
             }
-        }
-        else if (!form.isAuto())
-        {
-            url = cloneViewURLHelper();
-            url.setAction("showAddRun");
-            url.addParameter("error", "File not found.<br>");
         }
         else
         {
@@ -1635,6 +1637,10 @@ public class MS2Controller extends ViewController
 
                 status = sb.toString();
             }
+        }
+        else if (getViewURLHelper().getParameter("error") != null)
+        {
+            status = "ERROR->message=" + getViewURLHelper().getParameter("error");            
         }
         else
         {
