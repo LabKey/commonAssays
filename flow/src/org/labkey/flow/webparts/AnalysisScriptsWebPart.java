@@ -40,11 +40,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
     {
         List<DisplayColumn> ret = new ArrayList();
         TableInfo table = getTable();
-        List<ColumnInfo> columns = getQueryDef().getColumns(null, table);
-        for (ColumnInfo col : columns)
-        {
-            ret.add(col.getRenderer());
-        }
+        ret.addAll(getQueryDef().getDisplayColumns(null, table));
         ColumnInfo colScriptType = new AliasedColumn("Type", table.getColumn("RowId"));
         ret.add(new AnalysisScriptTypeColumn(colScriptType));
         return ret;

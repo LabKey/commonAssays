@@ -3,6 +3,7 @@ package org.labkey.flow.view;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TSVGridWriter;
 import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.query.QueryPicker;
@@ -200,5 +201,10 @@ public class FlowQueryView extends QueryView
         }
         ntc.setModuleOwner(ModuleLoader.getInstance().getModule(FlowModule.NAME));
         return ntc;
+    }
+
+    protected TSVGridWriter.ColumnHeaderType getColumnHeaderType()
+    {
+        return TSVGridWriter.ColumnHeaderType.queryColumnName;
     }
 }

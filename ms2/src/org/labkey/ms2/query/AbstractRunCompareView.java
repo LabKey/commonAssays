@@ -280,18 +280,17 @@ public abstract class AbstractRunCompareView  extends QueryView
         if (view != null)
         {
             view.setColumns(newCols);
-            columns = getQueryDef().getColumns(view, table);
+            ret.addAll(getQueryDef().getDisplayColumns(view, table));
         }
         else
         {
-            columns = QueryService.get().getColumns(table, newCols).values();
+            for (ColumnInfo col : QueryService.get().getColumns(table, newCols).values())
+            {
+                DisplayColumn renderer = col.getRenderer();
+                ret.add(renderer);
+            }
         }
 
-        for (ColumnInfo col : columns)
-        {
-            DisplayColumn renderer = col.getRenderer();
-            ret.add(renderer);
-        }
         return ret;
     }
 

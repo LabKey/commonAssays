@@ -40,18 +40,6 @@ public class AnalysesWebPart extends FlowQueryView
         setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
     }
 
-    public List<DisplayColumn> getDisplayColumns()
-    {
-        List<DisplayColumn> ret = new ArrayList();
-        TableInfo table = getTable();
-        List<ColumnInfo> columns = getQueryDef().getColumns(null, table);
-        for (ColumnInfo col : columns)
-        {
-            ret.add(col.getRenderer());
-        }
-        return ret;
-    }
-
     protected void populateButtonBar(DataView view, ButtonBar bar)
     {
         if (!getViewContext().hasPermission(ACL.PERM_INSERT))
