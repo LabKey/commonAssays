@@ -298,6 +298,7 @@ public class MS2Schema extends UserSchema
         }
         columns.remove(FieldKey.fromParts("Name"));
         columns.remove(FieldKey.fromParts("Protocol"));
+        columns.remove(FieldKey.fromParts("CreatedBy"));
         if (!ms2LinksAdded)
         {
             columns.add(fieldMS2Links);

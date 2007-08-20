@@ -77,7 +77,7 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
                 new WebPartFactory(MS2_RUNS_ENHANCED_NAME){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
-                        WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _ms2SearchRunFilter);
+                        WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _ms2SearchRunFilter, true);
                         result.setTitle("MS2 Runs");
                         return result;
                     }
@@ -85,7 +85,7 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
                 new WebPartFactory(MS2_SAMPLE_PREPARATION_RUNS_NAME){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
-                        WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _samplePrepRunFilter);
+                        WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), _samplePrepRunFilter, true);
                         result.setTitle(MS2_SAMPLE_PREPARATION_RUNS_NAME);
                         return result;
                     }
