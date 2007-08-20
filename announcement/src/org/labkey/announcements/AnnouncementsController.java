@@ -710,24 +710,33 @@ public class AnnouncementsController extends ViewController
         }
 
         ViewURLHelper returnUrl = getReturnUrl();
-        if (null != returnUrl)
-            HttpView.throwRedirect(returnUrl);
 
-        // if this is a discussion, redirect back to originating page
-        Announcement thread = insert;
-        if (null != insert.getParent())
-            thread = AnnouncementManager.getAnnouncement(getContainer(), insert.getParent(), true);
-
-        if (null != thread.getDiscussionSrcURL())
+        if (null == returnUrl)
         {
-            ViewURLHelper src = DiscussionServiceImpl.fromSaved(thread.getDiscussionSrcURL());
-            src.addParameter("discussion.id", "" + thread.getRowId());
-            src.addParameter("_anchor", "discussionArea");
-            HttpView.throwRedirect(src.getLocalURIString());
+            // if this is a discussion, redirect back to originating page
+            Announcement thread = insert;
+            if (null != insert.getParent())
+                thread = AnnouncementManager.getAnnouncement(getContainer(), insert.getParent(), true);
+
+            if (null != thread.getDiscussionSrcURL())
+            {
+                returnUrl = DiscussionServiceImpl.fromSaved(thread.getDiscussionSrcURL());
+                returnUrl.addParameter("discussion.id", "" + thread.getRowId());
+                returnUrl.addParameter("_anchor", "discussionArea");
+            }
+            else
+            {
+                String threadId = thread.getEntityId();
+                returnUrl = getThreadUrl(getRequest(), c, threadId, String.valueOf(insert.getRowId()));
+            }
         }
 
-        String threadId = thread.getEntityId();
-        return new ViewForward(getThreadUrl(getRequest(), c, threadId, String.valueOf(insert.getRowId())), true);
+        HttpView errorView = AttachmentService.get().getErrorView(formFiles, returnUrl);
+
+        if (null == errorView)
+            return new ViewForward(returnUrl);
+        else
+            return includeView(errorView);
     }
 
 
