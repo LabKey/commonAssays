@@ -643,7 +643,6 @@ abstract public class FlowJoWorkspace implements Serializable
         Set<CompensationMatrix> compMatrices = getUsedCompensationMatrices();
         for (CompensationMatrix compMatrix : compMatrices)
         {
-            compMatrix.setName(compMatrix.getName() + " " + workspaceFile.getName());
             AttributeSet attrs = new AttributeSet(compMatrix);
             attrs.prepareForSave();
             compMatrixMap.put(compMatrix, attrs);
@@ -693,7 +692,7 @@ abstract public class FlowJoWorkspace implements Serializable
                 ExpProtocolApplication paComp = run.addProtocolApplication(user, FlowProtocolStep.calculateCompensation.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
                 paComp.addDataInput(user, workspaceData, InputRole.Workspace.toString(), null);
                 flowComp.getData().setSourceApplication(paComp);
-                flowComp.getData().setName(compMatrix.getName());
+                flowComp.getData().setName(compMatrix.getName() + " " + workspaceFile.getName());
                 flowComp.getData().save(user);
                 flowCompMatrices.put(compMatrix, flowComp);
             }
