@@ -143,6 +143,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         ActionButton cancelButton = new ActionButton("Cancel", getSummaryLink(_protocol));
         bbar.add(cancelButton);
 
+        _stepDescription = "Analyte Properties";
+
         view.getDataRegion().setButtonBar(bbar, DataRegion.MODE_INSERT);
 
         return view;

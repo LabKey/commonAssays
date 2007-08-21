@@ -82,18 +82,21 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
             }
         }
 
-        ExprColumn proteinGroupIdColumn = new ExprColumn(this, "Run", new SQLFragment("<ILLEGAL STATE>"), Types.INTEGER);
-        proteinGroupIdColumn.setIsUnselectable(true);
-        defaultCols.add(FieldKey.fromParts("Run", "Group"));
-        defaultCols.add(FieldKey.fromParts("Run", "GroupProbability"));
-        proteinGroupIdColumn.setFk(new LookupForeignKey("RowId")
+        if (runColumns.isEmpty())
         {
-            public TableInfo getLookupTableInfo()
+            ExprColumn proteinGroupIdColumn = new ExprColumn(this, "Run", new SQLFragment("<ILLEGAL STATE>"), Types.INTEGER);
+            proteinGroupIdColumn.setIsUnselectable(true);
+            defaultCols.add(FieldKey.fromParts("Run", "Group"));
+            defaultCols.add(FieldKey.fromParts("Run", "GroupProbability"));
+            proteinGroupIdColumn.setFk(new LookupForeignKey("RowId")
             {
-                return new ProteinGroupTableInfo(null, _schema, false);
-            }
-        });
-        addColumn(proteinGroupIdColumn);
+                public TableInfo getLookupTableInfo()
+                {
+                    return new ProteinGroupTableInfo(null, _schema, false);
+                }
+            });
+            addColumn(proteinGroupIdColumn);
+        }
 
         SQLFragment runCountSQL = new SQLFragment("(");
         String separator = "";
@@ -178,6 +181,16 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
         result.append(innerAlias);
         result.append(".SeqId) AS ");
         result.append(alias);
+        return result;
+    }
+    
+    protected ColumnInfo resolveColumn(String name)
+    {
+        ColumnInfo result = super.resolveColumn(name);
+        if (result == null && "Run".equalsIgnoreCase(name) && !_runs.isEmpty())
+        {
+            result = getColumn("Run" + _runs.get(0).getRun());
+        }
         return result;
     }
 }

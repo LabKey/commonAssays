@@ -149,6 +149,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
 
 
         Domain analyteDomain = PropertyService.get().createDomain(c, "urn:lsid:${LSIDAuthority}:" + ASSAY_DOMAIN_ANALYTE + ".Folder-${Container.RowId}:${AssayName}", "Analyte Properties");
+        analyteDomain.setDescription("The user will be prompted to enter these properties for each of the analytes in the file they upload. This is the third and final step of the upload process.");
         DomainProperty standardNameProp = addProperty(analyteDomain, "Standard Name", PropertyType.STRING);
 
         ListDefinition standardList = lists.get("LuminexStandardAnalytes");
@@ -214,6 +215,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         result.add(analyteDomain);
 
         Domain excelRunDomain = PropertyService.get().createDomain(c, "urn:lsid:${LSIDAuthority}:" + ASSAY_DOMAIN_EXCEL_RUN + ".Folder-${Container.RowId}:${AssayName}", "Excel File Run Properties");
+        excelRunDomain.setDescription("When the user uploads a Luminex data file, the server will try to find these properties in the header and footer of the spreadsheet, and does not prompt the user to enter them. This is part of the second step of the upload process.");
         addProperty(excelRunDomain, "File Name", PropertyType.STRING);
         addProperty(excelRunDomain, "Acquisition Date", PropertyType.DATE_TIME);
         addProperty(excelRunDomain, "Reader Serial Number", PropertyType.STRING);
