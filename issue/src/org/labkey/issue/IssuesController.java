@@ -457,7 +457,11 @@ public class IssuesController extends SpringActionController
 
             try
             {
-                addComment(_issue, (Issue)form.getOldValues(), user, form.getAction(), form.getComment(), getColumnCaptions());
+                // for new issues, the original is always the default.
+                Issue orig = new Issue();
+                orig.Open(getContainer(), getUser());
+
+                addComment(_issue, setNewIssueDefaults(orig), user, form.getAction(), form.getComment(), getColumnCaptions());
                 IssueManager.saveIssue(openSession(), user, c, _issue);
             }
             catch (Exception x)
@@ -497,7 +501,7 @@ public class IssuesController extends SpringActionController
     }
 
 
-    private void setNewIssueDefaults(Issue issue) throws SQLException, ServletException
+    private Issue setNewIssueDefaults(Issue issue) throws SQLException, ServletException
     {
         Map<Integer, String> defaults = IssueManager.getAllDefaults(getContainer());
 
@@ -509,6 +513,8 @@ public class IssuesController extends SpringActionController
 
         String priority = defaults.get(ISSUE_PRIORITY);
         issue.setPriority(null != priority ? Integer.parseInt(defaults.get(ISSUE_PRIORITY)) : 3);
+
+        return issue;
     }
 
 
