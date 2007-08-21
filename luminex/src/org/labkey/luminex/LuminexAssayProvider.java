@@ -71,19 +71,66 @@ public class LuminexAssayProvider extends DefaultAssayProvider
     }
 
 
-    protected Domain createUploadSetDomain(Container c)
+    protected Domain createUploadSetDomain(Container c, User user)
     {
-        Domain uploadSetDomain = super.createUploadSetDomain(c);
-        addProperty(uploadSetDomain, "Species", PropertyType.STRING);
-        addProperty(uploadSetDomain, "Lab ID", PropertyType.STRING);
+        Domain uploadSetDomain = super.createUploadSetDomain(c, user);
+        Container lookupContainer = c.getProject();
+        Map<String, ListDefinition> lists = ListService.get().getLists(lookupContainer);
+
+        ListDefinition speciesList = lists.get("LuminexSpecies");
+        if (speciesList == null)
+        {
+            speciesList = ListService.get().createList(lookupContainer, "LuminexSpecies");
+            DomainProperty nameProperty = addProperty(speciesList.getDomain(), "Name", PropertyType.STRING);
+            speciesList.setKeyName("SpeciesID");
+            speciesList.setTitleColumn(nameProperty.getName());
+            speciesList.setKeyType(ListDefinition.KeyType.Varchar);
+            speciesList.setDescription("Species for Luminex assays");
+            try
+            {
+                speciesList.save(user);
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+
+        DomainProperty speciesProperty = addProperty(uploadSetDomain, "Species", PropertyType.STRING);
+//        speciesProperty.setRequired(true);
+        speciesProperty.setLookup(new Lookup(lookupContainer, "lists", speciesList.getName()));
+
+        ListDefinition labList = lists.get("LuminexLabs");
+        if (labList == null)
+        {
+            labList = ListService.get().createList(lookupContainer, "LuminexLabs");
+            DomainProperty nameProperty = addProperty(labList.getDomain(), "Name", PropertyType.STRING);
+            labList.setKeyName("LabID");
+            labList.setTitleColumn(nameProperty.getName());
+            labList.setKeyType(ListDefinition.KeyType.Varchar);
+            labList.setDescription("Labs performing Luminex assays");
+            try
+            {
+                labList.save(user);
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+
+        DomainProperty labProperty = addProperty(uploadSetDomain, "Lab ID", PropertyType.STRING);
+//        labProperty.setRequired(true);
+        labProperty.setLookup(new Lookup(lookupContainer, "lists", labList.getName()));
+
         addProperty(uploadSetDomain, "Analysis Software", PropertyType.STRING);
 
         return uploadSetDomain;
     }
 
-    protected Domain createRunDomain(Container c)
+    protected Domain createRunDomain(Container c, User user)
     {
-        Domain runDomain = super.createRunDomain(c);
+        Domain runDomain = super.createRunDomain(c, user);
         addProperty(runDomain, "Replaces Previous File", PropertyType.BOOLEAN);
         addProperty(runDomain, "Date file was modified", PropertyType.DATE_TIME);
         addProperty(runDomain, "Specimen Type", PropertyType.STRING);
@@ -97,21 +144,19 @@ public class LuminexAssayProvider extends DefaultAssayProvider
     {
         List<Domain> result = super.createDefaultDomains(c, user);
 
+        Container lookupContainer = c.getProject();
+        Map<String, ListDefinition> lists = ListService.get().getLists(lookupContainer);
+
+
         Domain analyteDomain = PropertyService.get().createDomain(c, "urn:lsid:${LSIDAuthority}:" + ASSAY_DOMAIN_ANALYTE + ".Folder-${Container.RowId}:${AssayName}", "Analyte Properties");
         DomainProperty standardNameProp = addProperty(analyteDomain, "Standard Name", PropertyType.STRING);
-        standardNameProp.setLookup(new Lookup(c.getProject(), "lists", "StandardAnalytes"));
 
-        addProperty(analyteDomain, "Isotype", PropertyType.STRING);
-        addProperty(analyteDomain, "Units of Concentration", PropertyType.STRING);
-        addProperty(analyteDomain, "Analyte Type", PropertyType.STRING);
-        addProperty(analyteDomain, "Weighting Method", PropertyType.STRING);
-        
-        Map<String, ListDefinition> lists = ListService.get().getLists(c.getProject());
-        ListDefinition standardList = lists.get("StandardAnalytes");
+        ListDefinition standardList = lists.get("LuminexStandardAnalytes");
         if (standardList == null)
         {
-            standardList = ListService.get().createList(c.getProject(), "StandardAnalytes");
-            standardList.setKeyName("Name");
+            standardList = ListService.get().createList(lookupContainer, "LuminexStandardAnalytes");
+            DomainProperty nameProperty = addProperty(standardList.getDomain(), "Name", PropertyType.STRING);
+            standardList.setKeyName(nameProperty.getName());
             standardList.setKeyType(ListDefinition.KeyType.Varchar);
             standardList.setDescription("Standard data about analytes, including a standard name");
             standardList.setTitleColumn("Name");
@@ -125,10 +170,47 @@ public class LuminexAssayProvider extends DefaultAssayProvider
             }
         }
 
+        standardNameProp.setLookup(new Lookup(c.getProject(), "lists", standardList.getName()));
+
+        addProperty(analyteDomain, "Units of Concentration", PropertyType.STRING);
+
+        ListDefinition isotypeList = lists.get("LuminexIsotypes");
+        if (isotypeList == null)
+        {
+            isotypeList = ListService.get().createList(lookupContainer, "LuminexIsotypes");
+            DomainProperty nameProperty = addProperty(isotypeList.getDomain(), "Name", PropertyType.STRING);
+            isotypeList.setKeyName("IsotypeID");
+            isotypeList.setTitleColumn(nameProperty.getName());
+            isotypeList.setKeyType(ListDefinition.KeyType.Varchar);
+            isotypeList.setDescription("Isotypes for Luminex assays");
+            try
+            {
+                isotypeList.save(user);
+
+                ListItem agItem = isotypeList.createListItem();
+                agItem.setKey("Ag");
+                agItem.setProperty(nameProperty, "Antigen");
+                agItem.save(user);
+
+                ListItem abItem = isotypeList.createListItem();
+                abItem.setKey("Ab");
+                abItem.setProperty(nameProperty, "Antibody");
+                abItem.save(user);
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+        addProperty(analyteDomain, "Isotype", PropertyType.STRING).setLookup(new Lookup(lookupContainer, "lists", isotypeList.getName()));
+
+        addProperty(analyteDomain, "Analyte Type", PropertyType.STRING);
+        addProperty(analyteDomain, "Weighting Method", PropertyType.STRING);
+        
         addProperty(analyteDomain, "Bead Manufacturer", PropertyType.STRING);
         addProperty(analyteDomain, "Bead Dist", PropertyType.STRING);
         addProperty(analyteDomain, "Bead Catalog Number", PropertyType.STRING);
-
+        
         result.add(analyteDomain);
 
         Domain excelRunDomain = PropertyService.get().createDomain(c, "urn:lsid:${LSIDAuthority}:" + ASSAY_DOMAIN_EXCEL_RUN + ".Folder-${Container.RowId}:${AssayName}", "Excel File Run Properties");

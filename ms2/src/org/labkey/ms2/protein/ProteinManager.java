@@ -570,6 +570,38 @@ public class ProteinManager
         return validFilter;
     }
 
+    public static Sort reduceToValidColumns(Sort fullSort, TableInfo... tables)
+    {
+        Sort validSort = new Sort();
+        List<Sort.SortField> sortList = fullSort.getSortList();
+        for (int i = sortList.size() - 1; i >=0; i--)
+        {
+            Sort.SortField field = sortList.get(i);
+            boolean validClause = false;
+            String columnName = field.getColumnName();
+            for (TableInfo table : tables)
+            {
+                if (table.getColumn(columnName) != null)
+                {
+                    validClause = true;
+                }
+                else
+                {
+                    int index = columnName.lastIndexOf('.');
+                    if (index != -1 && table.getColumn(columnName.substring(index + 1)) != null)
+                    {
+                        validClause = true;
+                    }
+                }
+            }
+            if (validClause)
+            {
+                validSort.insertSort(new Sort(field.getSortDirection().getDir() + field.getColumnName()));
+            }
+        }
+        return validSort;
+    }
+
     public static SimpleFilter getPeptideFilter(ViewURLHelper currentUrl, int mask, MS2Run... runs)
     {
         return getPeptideFilter(currentUrl, mask, null, runs);
@@ -746,6 +778,7 @@ public class ProteinManager
         combinedSort.insertSort(peptideSort);
         combinedSort.insertSortColumn(orderByColumnName, false);
         combinedSort.insertSort(proteinSort);
+        combinedSort = reduceToValidColumns(combinedSort, MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoProteins());
         return combinedSort.getOrderByClause(ProteinManager.getSqlDialect());
     }
 
@@ -761,6 +794,7 @@ public class ProteinManager
         combinedSort.insertSort(peptideSort);
         combinedSort.insertSortColumn(orderByColumnName, false);
         combinedSort.insertSort(proteinSort);
+        combinedSort = reduceToValidColumns(combinedSort, MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoProteinGroupsWithQuantitation());
         return combinedSort.getOrderByClause(ProteinManager.getSqlDialect());
     }
 
@@ -798,6 +832,7 @@ public class ProteinManager
 
         // Have to apply the peptide filter again, otherwise we'll just get all peptides mapping to each protein
         SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentUrl, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run);
+        peptideFilter = reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoPeptides());
         sql.append(peptideFilter.getWhereSQL(getSqlDialect()));
         sql.append('\n');
         sql.addAll(peptideFilter.getWhereParams(MS2Manager.getTableInfoPeptides()));
@@ -856,6 +891,7 @@ public class ProteinManager
 
         // Construct Peptide WHERE clause (no need to sort by peptide)
         SimpleFilter peptideFilter = getPeptideFilter(currentUrl, RUN_FILTER + URL_FILTER + EXTRA_FILTER, MS2Manager.getTableInfoSimplePeptides().toString(), run);
+        peptideFilter = reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoSimplePeptides());
         if (null != extraWhere)
             peptideFilter.addWhereClause(extraWhere, new Object[]{});
         sql.append(peptideFilter.getWhereSQL(getSqlDialect()));

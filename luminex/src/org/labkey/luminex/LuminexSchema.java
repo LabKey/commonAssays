@@ -10,7 +10,10 @@ import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.study.AssayService;
 import org.labkey.api.study.DefaultAssayProvider;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.DataView;
 
+import javax.servlet.ServletException;
 import java.util.*;
 import java.sql.Types;
 
@@ -145,6 +148,10 @@ public class LuminexSchema extends UserSchema
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ObsOverExp"))).setCaption("(Obs/Exp)*100");
         OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("ConcInRange"), result.getRealTable().getColumn("ConcInRangeOORIndicator"));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ConcInRangeString")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Dilution")));
+        result.addColumn(result.wrapColumn("Group", result.getRealTable().getColumn("DataRowGroup")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Ratio")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("SamplingErrors")));
 
         FieldKey studyFieldKey = FieldKey.fromParts("Data", "Run", "Run Properties", DefaultAssayProvider.TARGET_STUDY_PROPERTY_NAME);
         ColumnInfo studyColumn = QueryService.get().getColumns(result, Collections.singleton(studyFieldKey)).get(studyFieldKey);
@@ -181,6 +188,7 @@ public class LuminexSchema extends UserSchema
         defaultCols.add(FieldKey.fromParts("ExpConc"));
         defaultCols.add(FieldKey.fromParts("ObsOverExp"));
         defaultCols.add(FieldKey.fromParts("ConcInRange"));
+        defaultCols.add(FieldKey.fromParts("Dilution"));
         result.setDefaultVisibleColumns(defaultCols);
 
         result.getColumn("Analyte").setFk(new LookupForeignKey("RowId")
@@ -227,6 +235,4 @@ public class LuminexSchema extends UserSchema
     {
         return getSchema().getTable(DATA_ROW_TABLE_NAME);
     }
-
-
 }

@@ -1129,7 +1129,7 @@ public class MS2Controller extends ViewController
 
     private static ActionButton NewAnnot = new ActionButton("insertAnnots.post", "Load New Annot File");
     private static ActionButton ReloadSprotOrgMap = new ActionButton("reloadSPOM.post", "Reload SWP Org Map");
-    private static ActionButton ReloadGO = new ActionButton("reloadGO.post", "Load/Reload GO");
+    private static ActionButton ReloadGO = new ActionButton("reloadGO.post", "Load or Reload GO");
     private static ButtonBar annotLoadButtons = new ButtonBar();
 
 

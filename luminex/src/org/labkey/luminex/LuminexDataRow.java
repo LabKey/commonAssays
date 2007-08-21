@@ -31,6 +31,10 @@ public class LuminexDataRow
     private Double _concInRange;
     private String _concInRangeOORIndicator;
     private int _dataId;
+    private Double _dilution;
+    private String _dataRowGroup;
+    private String _ratio;
+    private String _samplingErrors;
 
     public LuminexDataRow()
     {
@@ -274,5 +278,45 @@ public class LuminexDataRow
     public void setStdDevOORIndicator(String stdDevOORIndicator)
     {
         _stdDevOORIndicator = stdDevOORIndicator;
+    }
+
+    public Double getDilution()
+    {
+        return _dilution;
+    }
+
+    public void setDilution(Double dilution)
+    {
+        _dilution = dilution;
+    }
+
+    public String getDataRowGroup()
+    {
+        return _dataRowGroup;
+    }
+
+    public void setDataRowGroup(String dataRowGroup)
+    {
+        _dataRowGroup = dataRowGroup;
+    }
+
+    public String getRatio()
+    {
+        return _ratio;
+    }
+
+    public void setRatio(String ratio)
+    {
+        _ratio = ratio;
+    }
+
+    public String getSamplingErrors()
+    {
+        return _samplingErrors;
+    }
+
+    public void setSamplingErrors(String samplingErrors)
+    {
+        _samplingErrors = samplingErrors;
     }
 }

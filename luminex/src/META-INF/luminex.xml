@@ -75,6 +75,10 @@
                 <ns:formatString>0.00</ns:formatString>
             </ns:column>
             <ns:column columnName="ConcInRangeOORIndicator"/>
+            <ns:column columnName="Dilution"/>
+            <ns:column columnName="DataRowGroup"/>
+            <ns:column columnName="Ratio"/>
+            <ns:column columnName="SamplingErrors"/>
         </ns:columns>
     </ns:table>
 
