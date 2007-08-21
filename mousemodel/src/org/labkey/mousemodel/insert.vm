@@ -1,3 +1,4 @@
+$!tools.pageFlowUtil.getStrutsError($request, "main")
 $dr.formHeader
 #foreach($row in $dr.rows)
 <table>

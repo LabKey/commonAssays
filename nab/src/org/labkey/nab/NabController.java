@@ -1439,8 +1439,8 @@ public class NabController extends ViewController
         private void resetDefaultProperties()
         {
             PlateTemplate template = getActivePlateTemplate(getContext().getContainer(), getContext().getUser());
-
-            getMetadata().setExperimentDateString((String)template.getProperty("ExperimentDate"));
+            Date experimentDate = (Date) template.getProperty("ExperimentDate");
+            getMetadata().setExperimentDateString(experimentDate != null ? experimentDate.toString() : null);
             getMetadata().setExperimentId((String)template.getProperty("ExperimentId"));
             getMetadata().setExperimentPerformer((String)template.getProperty("ExperimentPerformer"));
             getMetadata().setFileId((String)template.getProperty("FileId"));

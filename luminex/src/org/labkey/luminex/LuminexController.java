@@ -34,7 +34,7 @@ public class LuminexController extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return HttpView.redirect(new ViewURLHelper("GenericAssay", "begin.view", getViewContext().getContainer()));
+            return HttpView.redirect(new ViewURLHelper("assay", "begin.view", getViewContext().getContainer()));
         }
 
         public NavTree appendNavTrail(NavTree root)

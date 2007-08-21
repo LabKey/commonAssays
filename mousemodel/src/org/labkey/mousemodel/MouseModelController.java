@@ -83,6 +83,13 @@ public class MouseModelController extends ViewController
 
         VelocityDataView v = new VelocityDataView(getDefaultRegion(), form, "/org/labkey/mousemodel/insert.vm");
         v.setMode(DataRegion.MODE_INSERT);
+
+        for (DisplayColumn col : v.getDataRegion().getDisplayColumnList())
+        {
+            if (col.getColumnInfo().getFk() != null)
+                col.getColumnInfo().setNullable(false);
+        }
+
         _renderInTemplate(v, form.getContainer());
         return null;
     }
