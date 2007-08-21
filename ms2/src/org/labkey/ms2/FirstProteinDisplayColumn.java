@@ -35,6 +35,10 @@ public class FirstProteinDisplayColumn extends SimpleDisplayColumn
         try
         {
             List<ProteinSummary> summaries = _proteins.getSummaries(id.intValue(), ctx, columnName);
+            if (summaries == null)
+            {
+                return "ERROR - No matching proteins found";
+            }
             ProteinSummary firstSummary = summaries.get(0);
             return _type.getValue(firstSummary);
         }

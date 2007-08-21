@@ -67,35 +67,42 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         {
             List<ProteinSummary> summaryList = _proteins.getSummaries(id.intValue(), ctx, columnName);
             StringBuilder sb = new StringBuilder();
-            String proteinSeparator = "";
-            for (ProteinSummary summary : summaryList)
+            if (summaryList == null)
             {
-                sb.append(proteinSeparator);
-                proteinSeparator = ", ";
+                sb.append("ERROR - No matching proteins found");
+            }
+            else
+            {
+                String proteinSeparator = "";
+                for (ProteinSummary summary : summaryList)
+                {
+                    sb.append(proteinSeparator);
+                    proteinSeparator = ", ";
 
-                if (_sequenceColumn.equalsIgnoreCase("Protein"))
-                {
-                    sb.append(summary.getName());
-                }
-                else if (_sequenceColumn.equalsIgnoreCase("Description"))
-                {
-                    sb.append(summary.getDescription());
-                }
-                else if (_sequenceColumn.equalsIgnoreCase("BestName"))
-                {
-                    sb.append(summary.getBestName());
-                }
-                else if (_sequenceColumn.equalsIgnoreCase("BestGeneName"))
-                {
-                    String geneName = summary.getBestGeneName();
-                    if (geneName != null)
+                    if (_sequenceColumn.equalsIgnoreCase("Protein"))
                     {
-                        sb.append(geneName);
+                        sb.append(summary.getName());
                     }
-                }
-                else if (_sequenceColumn.equalsIgnoreCase("SequenceMass"))
-                {
-                    sb.append(summary.getSequenceMass());
+                    else if (_sequenceColumn.equalsIgnoreCase("Description"))
+                    {
+                        sb.append(summary.getDescription());
+                    }
+                    else if (_sequenceColumn.equalsIgnoreCase("BestName"))
+                    {
+                        sb.append(summary.getBestName());
+                    }
+                    else if (_sequenceColumn.equalsIgnoreCase("BestGeneName"))
+                    {
+                        String geneName = summary.getBestGeneName();
+                        if (geneName != null)
+                        {
+                            sb.append(geneName);
+                        }
+                    }
+                    else if (_sequenceColumn.equalsIgnoreCase("SequenceMass"))
+                    {
+                        sb.append(summary.getSequenceMass());
+                    }
                 }
             }
             return sb.toString();

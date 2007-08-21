@@ -86,8 +86,6 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
         {
             ExprColumn proteinGroupIdColumn = new ExprColumn(this, "Run", new SQLFragment("<ILLEGAL STATE>"), Types.INTEGER);
             proteinGroupIdColumn.setIsUnselectable(true);
-            defaultCols.add(FieldKey.fromParts("Run", "Group"));
-            defaultCols.add(FieldKey.fromParts("Run", "GroupProbability"));
             proteinGroupIdColumn.setFk(new LookupForeignKey("RowId")
             {
                 public TableInfo getLookupTableInfo()
@@ -97,6 +95,9 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
             });
             addColumn(proteinGroupIdColumn);
         }
+
+        defaultCols.add(FieldKey.fromParts("Run", "Group"));
+        defaultCols.add(FieldKey.fromParts("Run", "GroupProbability"));
 
         SQLFragment runCountSQL = new SQLFragment("(");
         String separator = "";
