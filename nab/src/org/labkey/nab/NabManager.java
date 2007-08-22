@@ -3,6 +3,7 @@ package org.labkey.nab;
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
+import jxl.WorkbookSettings;
 import jxl.read.biff.BiffException;
 import org.apache.log4j.Logger;
 import org.apache.struts.upload.FormFile;
@@ -213,7 +214,9 @@ public class NabManager
     {
         PlateTemplate nabTemplate = PlateService.get().getPlateTemplate(container, user, plateTemplate);
 
-        Workbook workbook = Workbook.getWorkbook(attachmentStream);
+        WorkbookSettings settings = new WorkbookSettings();
+        settings.setGCDisabled(true);
+        Workbook workbook = Workbook.getWorkbook(attachmentStream, settings);
         double[][] cellValues = new double[nabTemplate.getRows()][nabTemplate.getColumns()];
 
         Sheet plateSheet = workbook.getSheet(1);

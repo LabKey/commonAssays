@@ -19,9 +19,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.sql.Types;
 
 import jxl.Workbook;
 import jxl.Sheet;
+import jxl.WorkbookSettings;
 import jxl.read.biff.BiffException;
 
 /**
@@ -82,7 +85,9 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             }
 
             fIn = new FileInputStream(dataFile);
-            Workbook workbook = Workbook.getWorkbook(fIn);
+            WorkbookSettings settings = new WorkbookSettings();
+            settings.setGCDisabled(true);
+            Workbook workbook = Workbook.getWorkbook(fIn, settings);
 
             Integer id = OntologyManager.ensureObject(info.getContainer().getId(), data.getLSID());
 
@@ -93,14 +98,17 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }
         catch (IOException e)
         {
+            log.error("Failed to read from data file " + dataFile.getAbsolutePath(), e);
             throw new ExperimentException("Failed to read from data file " + dataFile.getAbsolutePath(), e);
         }
         catch (SQLException e)
         {
-            throw new ExperimentException("Failed to load from data file " + dataFile.getAbsolutePath(), e);
+            log.error("Failed to load from data file " + dataFile.getAbsolutePath(), e);
+            throw new ExperimentException("Failed to load from data file " + dataFile.getAbsolutePath() + "(" + e.toString() + ")", e);
         }
         catch (BiffException e)
         {
+            log.error("Failed to parse Excel data file" + dataFile.getAbsolutePath(), e);
             throw new XarFormatException("Failed to parse Excel file " + dataFile.getAbsolutePath(), e);
         }
         finally
