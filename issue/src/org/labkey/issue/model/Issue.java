@@ -427,7 +427,8 @@ public class Issue extends Entity implements Serializable, Cloneable
 
     public void setComments(Collection<Issue.Comment> comments)
     {
-        this.comments = comments;
+        if (comments != null)
+            this.comments = comments;
     }
 
 

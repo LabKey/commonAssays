@@ -3,6 +3,7 @@ package org.labkey.issue;
 import org.apache.beehive.netui.pageflow.FormData;
 import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.security.*;
@@ -431,7 +432,7 @@ public class IssuesController extends SpringActionController
             page.setAction("insert");
             page.setIssue(_issue);
             page.setCustomColumnConfiguration(ccc);
-            page.setBody(form.getComment());
+            page.setBody(form.getComment() == null ? form.getBody() : form.getComment());
             page.setCallbackURL(form.getCallbackURL());
             page.setEditable(getEditableFields(page.getAction(), ccc));
             page.setRequiredFields(IssueManager.getRequiredIssueFields(getContainer()));
@@ -442,12 +443,18 @@ public class IssuesController extends SpringActionController
 
         public void validateCommand(IssuesForm form, Errors errors)
         {
-            validateRequiredFields(form, errors);
-            validateNotifyList(form.getBean(), form, errors);
+            if (!form.getSkipPost())
+            {
+                validateRequiredFields(form, errors);
+                validateNotifyList(form.getBean(), form, errors);
+            }
         }
 
         public boolean handlePost(IssuesForm form, BindException errors) throws Exception
         {
+            if (form.getSkipPost())
+                return false;
+
             Container c = getContainer();
             User user = getUser();
 
@@ -461,7 +468,7 @@ public class IssuesController extends SpringActionController
                 Issue orig = new Issue();
                 orig.Open(getContainer(), getUser());
 
-                addComment(_issue, setNewIssueDefaults(orig), user, form.getAction(), form.getComment(), getColumnCaptions());
+                addComment(_issue, orig, user, form.getAction(), form.getComment(), getColumnCaptions());
                 IssueManager.saveIssue(openSession(), user, c, _issue);
             }
             catch (Exception x)
@@ -489,6 +496,9 @@ public class IssuesController extends SpringActionController
 
         public ViewURLHelper getSuccessURL(IssuesForm issuesForm)
         {
+            if (!StringUtils.isEmpty(issuesForm.getCallbackURL()))
+                return new ViewURLHelper(issuesForm.getCallbackURL());
+            
             ViewURLHelper forwardURL = new DetailsAction(_issue).getURL();
             return forwardURL;
         }
@@ -788,7 +798,7 @@ public class IssuesController extends SpringActionController
         MapBindingResult requiredErrors = new MapBindingResult(newFields, errors.getObjectName());
         if (newFields.containsKey("title"))
             validateRequired("title", newFields.get("title"), requiredFields, requiredErrors);
-        if (newFields.containsKey("assignedTo") && !(form.getBean().getStatus().equals(Issue.statusCLOSED)))
+        if (newFields.containsKey("assignedTo") && !(StringUtils.equals(form.getBean().getStatus(), Issue.statusCLOSED)))
             validateRequired("assignedto", newFields.get("assignedTo"), requiredFields, requiredErrors);
         if (newFields.containsKey("type"))
             validateRequired("type", newFields.get("type"), requiredFields, requiredErrors);
@@ -1541,6 +1551,22 @@ public class IssuesController extends SpringActionController
         public String getCallbackURL()
         {
             return _stringValues.get("callbackURL");
+        }
+
+        public String getBody()
+        {
+            return _stringValues.get("body");
+        }
+
+        /**
+         * A bit of a hack but to allow the mothership controller to continue to create issues
+         * in the way that it previously did, we need to be able to tell the issues controller
+         * to not handle the post, and just get the view.
+         * @return
+         */
+        public boolean getSkipPost()
+        {
+            return BooleanUtils.toBoolean(_stringValues.get("skipPost"));
         }
 
         public ViewURLHelper getForwardURL()
