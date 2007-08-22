@@ -5,6 +5,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.DefaultAssayProvider;
 import org.labkey.api.view.InsertView;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.*;
 import org.labkey.api.util.PageFlowUtil;
@@ -190,6 +191,12 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         validatePost(properties);
                     }
                 }
+
+                if (getCompletedUploadAttemptIDs().contains(form.getUploadAttemptID()))
+                {
+                    HttpView.throwRedirect(form.getProvider().getUploadWizardURL(getContainer(), _protocol));
+                }
+
                 if (!form.isResetDefaultValues() && PageFlowUtil.getActionErrors(getViewContext().getRequest(), true).isEmpty())
                 {
                     for (Analyte analyte : getAnalytes(form.getDataId()))
@@ -209,6 +216,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     }
 
                     LuminexSchema.getSchema().getScope().commitTransaction();
+                    getCompletedUploadAttemptIDs().add(form.getUploadAttemptID());
+                    form.resetUploadAttemptID();
                     return runUploadComplete(form);
                 }
                 else

@@ -38,7 +38,7 @@ public class LuminexSchema extends UserSchema
     {
         return new HashSet<String>(Arrays.asList(ANALYTE_TABLE_NAME, DATA_ROW_TABLE_NAME));
     }
-    
+
     public TableInfo getTable(String name, String alias)
     {
         if (ANALYTE_TABLE_NAME.equalsIgnoreCase(name))
