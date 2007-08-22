@@ -43,6 +43,32 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         return "Luminex";
     }
 
+    protected void registerLsidHandler()
+    {
+        LsidManager.get().registerHandler("LuminexDataRow", new LsidManager.LsidHandler()
+        {
+            public Identifiable getObject(Lsid lsid)
+            {
+                throw new UnsupportedOperationException();
+            }
+
+            public String getDisplayURL(Lsid lsid)
+            {
+                Data data = getDataForDataRow(lsid.getObjectId());
+                if (data == null)
+                    return null;
+                ExperimentRun run = ExperimentService.get().getExperimentRun(data.getRunId());
+                if (run == null)
+                    return null;
+                Protocol protocol = ExperimentService.get().getProtocol(run.getProtocolLSID());
+                if (protocol == null)
+                    return null;
+                ViewURLHelper dataURL = getAssayDataURL(ContainerManager.getForId(run.getContainer()), protocol, run.getRowId());
+                return dataURL.getLocalURIString();
+            }
+        });
+    }
+
     public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles)
     {
         List<AssayDataCollector> result = new ArrayList<AssayDataCollector>();
