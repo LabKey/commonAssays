@@ -196,7 +196,7 @@ go
 
 create view cabig.materialsource
 as
-SELECT ms.rowid, ms.name, ms.lsid, ms.materiallsidprefix, ms.urlpattern, ms.description
+SELECT ms.rowid, ms.name, ms.lsid, ms.materiallsidprefix, ms.description
 	,c.rowid as containerid, dd.domainid
 FROM exp.materialsource ms
 	INNER JOIN cabig.containers c ON ms.container = c.entityid
