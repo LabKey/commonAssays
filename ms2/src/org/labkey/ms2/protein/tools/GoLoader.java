@@ -348,7 +348,7 @@ public abstract class GoLoader
 
     private static class FtpGoLoader extends GoLoader
     {
-        private final static String SERVER = "ftp.godatabase.org";
+        private final static String SERVER = "ftp.geneontology.org";
         private final static String PATH = "godatabase/archive/latest-full";
         private final static String PATTERN = "go_[0-9]{6}-termdb-tables.tar.gz";
 
@@ -360,7 +360,7 @@ public abstract class GoLoader
 
         protected InputStream getInputStream() throws IOException, ServletException
         {
-            logStatus("Searching for latest GO annotation files on " + SERVER);
+            logStatus("Searching for latest GO annotation files at " + SERVER);
             List<String> filenames = FTPUtil.listFiles("anonymous", "anonymous", SERVER, PATH, PATTERN);
 
             if (filenames.size() != 1)

@@ -108,6 +108,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         {
             speciesList = ListService.get().createList(lookupContainer, "LuminexSpecies");
             DomainProperty nameProperty = addProperty(speciesList.getDomain(), "Name", PropertyType.STRING);
+            nameProperty.setPropertyURI(speciesList.getDomain().getTypeURI() + "#Name");
             speciesList.setKeyName("SpeciesID");
             speciesList.setTitleColumn(nameProperty.getName());
             speciesList.setKeyType(ListDefinition.KeyType.Varchar);
@@ -131,6 +132,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         {
             labList = ListService.get().createList(lookupContainer, "LuminexLabs");
             DomainProperty nameProperty = addProperty(labList.getDomain(), "Name", PropertyType.STRING);
+            nameProperty.setPropertyURI(labList.getDomain().getTypeURI() + "#Name");
             labList.setKeyName("LabID");
             labList.setTitleColumn(nameProperty.getName());
             labList.setKeyType(ListDefinition.KeyType.Varchar);
@@ -183,6 +185,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         {
             standardList = ListService.get().createList(lookupContainer, "LuminexStandardAnalytes");
             DomainProperty nameProperty = addProperty(standardList.getDomain(), "Name", PropertyType.STRING);
+            nameProperty.setPropertyURI(standardList.getDomain().getTypeURI() + "#Name");
             standardList.setKeyName(nameProperty.getName());
             standardList.setKeyType(ListDefinition.KeyType.Varchar);
             standardList.setDescription("Standard data about analytes, including a standard name");
@@ -206,6 +209,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         {
             isotypeList = ListService.get().createList(lookupContainer, "LuminexIsotypes");
             DomainProperty nameProperty = addProperty(isotypeList.getDomain(), "Name", PropertyType.STRING);
+            nameProperty.setPropertyURI(isotypeList.getDomain().getTypeURI() + "#Name");
             isotypeList.setKeyName("IsotypeID");
             isotypeList.setTitleColumn(nameProperty.getName());
             isotypeList.setKeyType(ListDefinition.KeyType.Varchar);
@@ -327,7 +331,6 @@ public class LuminexAssayProvider extends DefaultAssayProvider
     {
         try
         {
-            AssayProvider provider = AssayService.get().getProvider(protocol);
             SimpleFilter filter = new SimpleFilter();
             List<Object> ids = new ArrayList<Object>();
             for (AssayPublishKey dataKey : dataKeys)
@@ -348,24 +351,42 @@ public class LuminexAssayProvider extends DefaultAssayProvider
             // Map from run to run properties
             Map<ExpRun, Map<String, ObjectProperty>> runProperties = new HashMap<ExpRun, Map<String, ObjectProperty>>();
 
-            PropertyDescriptor[] runPDs = provider.getRunPropertyColumns(protocol);
+            PropertyDescriptor[] runPDs = getRunPropertyColumns(protocol);
+            PropertyDescriptor[] uploadSetPDs = getUploadSetColumns(protocol);
+
+            List<PropertyDescriptor> pds = new ArrayList();
+            pds.addAll(Arrays.asList(runPDs));
+            pds.addAll(Arrays.asList(uploadSetPDs));
 
             int index = 0;
             for (LuminexDataRow luminexDataRow : luminexDataRows)
             {
                 Map<String, Object> dataMap = new HashMap<String, Object>();
                 addProperty(study, "RowId", luminexDataRow.getRowId(), dataMap, types);
+                addProperty(study, "ConcInRangeString", luminexDataRow.getConcInRangeString(), dataMap, types);
                 addProperty(study, "ConcInRange", luminexDataRow.getConcInRange(), dataMap, types);
                 addProperty(study, "ConcInRangeOORIndicator", luminexDataRow.getConcInRangeOORIndicator(), dataMap, types);
                 addProperty(study, "ExpConc", luminexDataRow.getExpConc(), dataMap, types);
                 addProperty(study, "FI", luminexDataRow.getFi(), dataMap, types);
+                addProperty(study, "FIString", luminexDataRow.getFiString(), dataMap, types);
+                addProperty(study, "FIOORIndicator", luminexDataRow.getFiOORIndicator(), dataMap, types);
                 addProperty(study, "FIBackground", luminexDataRow.getFiBackground(), dataMap, types);
+                addProperty(study, "FIBackgroundString", luminexDataRow.getFiBackgroundString(), dataMap, types);
+                addProperty(study, "FIBackgroundOORIndicator", luminexDataRow.getFiBackgroundOORIndicator(), dataMap, types);
+                addProperty(study, "ObsConcString", luminexDataRow.getObsConcString(), dataMap, types);
                 addProperty(study, "ObsConc", luminexDataRow.getObsConc(), dataMap, types);
                 addProperty(study, "ObsConcOORIndicator", luminexDataRow.getObsConcOORIndicator(), dataMap, types);
                 addProperty(study, "ObsOverExp", luminexDataRow.getObsOverExp(), dataMap, types);
                 addProperty(study, "StdDev", luminexDataRow.getStdDev(), dataMap, types);
+                addProperty(study, "StdDevString", luminexDataRow.getStdDevString(), dataMap, types);
+                addProperty(study, "StdDevOORIndicator", luminexDataRow.getStdDevOORIndicator(), dataMap, types);
                 addProperty(study, "Type", luminexDataRow.getType(), dataMap, types);
                 addProperty(study, "Well", luminexDataRow.getWell(), dataMap, types);
+                addProperty(study, "Dilution", luminexDataRow.getDilution(), dataMap, types);
+                addProperty(study, "DataRowGroup", luminexDataRow.getDataRowGroup(), dataMap, types);
+                addProperty(study, "Ratio", luminexDataRow.getRatio(), dataMap, types);
+                addProperty(study, "SamplingErrors", luminexDataRow.getSamplingErrors(), dataMap, types);
+                addProperty(study, "Outlier", luminexDataRow.isOutlier(), dataMap, types);
                 addProperty(study, "SourceLSID", new Lsid("LuminexDataRow", Integer.toString(luminexDataRow.getRowId())).toString(), dataMap, types);
 
                 Analyte analyte = analytes.get(luminexDataRow.getAnalyteId());
@@ -399,13 +420,13 @@ public class LuminexAssayProvider extends DefaultAssayProvider
                 {
                     props = OntologyManager.getPropertyObjects(run.getContainer().getId(), run.getLSID());
                 }
-                for (PropertyDescriptor runPD : runPDs)
+                for (PropertyDescriptor pd : pds)
                 {
-                    ObjectProperty prop = props.get(runPD.getPropertyURI());
-                    if (prop != null)
+                    ObjectProperty prop = props.get(pd.getPropertyURI());
+                    if (prop != null && !TARGET_STUDY_PROPERTY_NAME.equals(pd.getName()))
                     {
-                        PropertyDescriptor publishPD = runPD.clone();
-                        publishPD.setName("Run " + runPD.getName());
+                        PropertyDescriptor publishPD = pd.clone();
+                        publishPD.setName("Run " + pd.getName());
                         addProperty(publishPD, prop.value(), dataMap, types);
                     }
                 }

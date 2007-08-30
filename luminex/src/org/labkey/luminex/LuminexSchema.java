@@ -136,9 +136,9 @@ public class LuminexSchema extends UserSchema
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Well")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Outlier")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Description")));
-        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FIString")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FIString"))).setCaption("FI String");
         OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("FI"), result.getRealTable().getColumn("FIOORIndicator"));
-        result.addColumn(result.wrapColumn("FI-BkgdString", result.getRealTable().getColumn("FIBackgroundString")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FIBackgroundString"))).setCaption("FI-Bkgd String");
         OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("FIBackground"), result.getRealTable().getColumn("FIBackgroundOORIndicator"), "FI-Bkgd");
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("StdDevString")));
         OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("StdDev"), result.getRealTable().getColumn("StdDevOORIndicator"));

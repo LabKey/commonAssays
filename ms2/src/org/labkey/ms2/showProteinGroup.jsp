@@ -30,11 +30,11 @@
         <td><%= group.getUniquePeptidesCount() %></td>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
         <td>Percent spectrum ids:</td>
-        <td><%= Formats.percent.format(group.getPctSpectrumIds()) %></td>
+        <td><%= group.getPctSpectrumIds() == null ? "" : Formats.percentExtra.format(group.getPctSpectrumIds()) %></td>
     </tr>
     <tr>
         <td>Percent coverage:</td>
-        <td><%= Formats.percent.format(group.getPercentCoverage()) %></td>
+        <td><%= group.getPercentCoverage() == null ? "" : Formats.percentExtra.format(group.getPercentCoverage()) %></td>
     </tr>
 
     <% if (group.getRatioMean() != null) { %>

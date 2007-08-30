@@ -376,17 +376,26 @@ public class IssuesController extends SpringActionController
             }
             else
             {
-                ResultSet rs = getIssuesResultSet();
-                int issueColumnIndex = rs.findColumn("issueId");
+                ResultSet rs = null;
 
-                while (rs.next())
+                try
                 {
-                    issueList.add(getIssue(rs.getInt(issueColumnIndex)));
+                    rs = getIssuesResultSet();
+                    int issueColumnIndex = rs.findColumn("issueId");
+
+                    while (rs.next())
+                    {
+                        issueList.add(getIssue(rs.getInt(issueColumnIndex)));
+                    }
+                }
+                finally
+                {
+                    ResultSetUtil.close(rs);
                 }
             }
 
             IssuePage page = new IssuePage();
-            JspView v = new JspView<IssuePage>(IssuesController.class, "detailView.jsp",page);
+            JspView v = new JspView<IssuePage>(IssuesController.class, "detailList.jsp",page);
 
             page.setIssueList(issueList);
             page.setCustomColumnConfiguration(getCustomColumnConfiguration());

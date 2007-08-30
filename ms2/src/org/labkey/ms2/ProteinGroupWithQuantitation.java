@@ -15,8 +15,8 @@ public class ProteinGroupWithQuantitation
     private int _indistinguishableCollectionId;
     private int _uniquePeptidesCount;
     private int _totalNumberPeptides;
-    private float _pctSpectrumIds;
-    private float _percentCoverage;
+    private Float _pctSpectrumIds;
+    private Float _percentCoverage;
     private float _proteinProbability;
 
     private Float _ratioMean;
@@ -78,22 +78,22 @@ public class ProteinGroupWithQuantitation
         _indistinguishableCollectionId = indistinguishableCollectionId;
     }
 
-    public float getPctSpectrumIds()
+    public Float getPctSpectrumIds()
     {
         return _pctSpectrumIds;
     }
 
-    public void setPctSpectrumIds(float pctSpectrumIds)
+    public void setPctSpectrumIds(Float pctSpectrumIds)
     {
         _pctSpectrumIds = pctSpectrumIds;
     }
 
-    public float getPercentCoverage()
+    public Float getPercentCoverage()
     {
         return _percentCoverage;
     }
 
-    public void setPercentCoverage(float percentCoverage)
+    public void setPercentCoverage(Float percentCoverage)
     {
         _percentCoverage = percentCoverage;
     }
