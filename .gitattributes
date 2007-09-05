@@ -84,12 +84,12 @@ announcement/src/org/labkey/announcements/rss.gm -text
 biotrue/biotrue.iml -text
 biotrue/module.properties -text
 biotrue/src/META-INF/biotrue.xml -text
-biotrue/src/META-INF/biotrue/scripts/postgresql/biotrue-0.00-0.01.sql -text
 biotrue/src/META-INF/biotrue/scripts/postgresql/biotrue-0.00-2.10.sql -text
-biotrue/src/META-INF/biotrue/scripts/postgresql/biotrue-0.01-0.02.sql -text
-biotrue/src/META-INF/biotrue/scripts/sql[!!-~]server/biotrue-0.00-0.01.sql -text
+biotrue/src/META-INF/biotrue/scripts/postgresql/obsolete/biotrue-0.00-0.01.sql -text
+biotrue/src/META-INF/biotrue/scripts/postgresql/obsolete/biotrue-0.01-0.02.sql -text
 biotrue/src/META-INF/biotrue/scripts/sql[!!-~]server/biotrue-0.00-2.10.sql -text
-biotrue/src/META-INF/biotrue/scripts/sql[!!-~]server/biotrue-0.01-0.03.sql -text
+biotrue/src/META-INF/biotrue/scripts/sql[!!-~]server/obsolete/biotrue-0.00-0.01.sql -text
+biotrue/src/META-INF/biotrue/scripts/sql[!!-~]server/obsolete/biotrue-0.01-0.03.sql -text
 biotrue/src/org/labkey/biotrue/BtModule.java -text
 biotrue/src/org/labkey/biotrue/controllers/BtController.java -text
 biotrue/src/org/labkey/biotrue/controllers/BtOverview.java -text
@@ -135,7 +135,6 @@ caBIG/caBIG.iml -text
 caBIG/module.properties -text
 caBIG/src/META-INF/cabig.xml -text
 caBIG/src/META-INF/cabig/scripts/postgresql/cabig-0.00-2.10.sql -text
-caBIG/src/META-INF/cabig/scripts/postgresql/cabig-0.04-0.05.sql -text
 caBIG/src/META-INF/cabig/scripts/postgresql/cabig-2.10-2.11.sql -text
 caBIG/src/META-INF/cabig/scripts/postgresql/cabig-2.11-2.12.sql -text
 caBIG/src/META-INF/cabig/scripts/postgresql/cabig-2.12-2.13.sql -text
@@ -145,8 +144,8 @@ caBIG/src/META-INF/cabig/scripts/postgresql/obsolete/cabig-0.00-0.01.sql -text
 caBIG/src/META-INF/cabig/scripts/postgresql/obsolete/cabig-0.01-0.02.sql -text
 caBIG/src/META-INF/cabig/scripts/postgresql/obsolete/cabig-0.02-0.03.sql -text
 caBIG/src/META-INF/cabig/scripts/postgresql/obsolete/cabig-0.03-0.04.sql -text
+caBIG/src/META-INF/cabig/scripts/postgresql/obsolete/cabig-0.04-0.05.sql -text
 caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/cabig-0.00-2.10.sql -text
-caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/cabig-0.04-0.05.sql -text
 caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/cabig-2.10-2.11.sql -text
 caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/cabig-2.11-2.12.sql -text
 caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/cabig-2.12-2.13.sql -text
@@ -156,6 +155,7 @@ caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/obsolete/cabig-0.00-0.01.sql -t
 caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/obsolete/cabig-0.01-0.02.sql -text
 caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/obsolete/cabig-0.02-0.03.sql -text
 caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/obsolete/cabig-0.03-0.04.sql -text
+caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/obsolete/cabig-0.04-0.05.sql -text
 caBIG/src/org/labkey/cabig/caBIGController.java -text
 caBIG/src/org/labkey/cabig/caBIGManager.java -text
 caBIG/src/org/labkey/cabig/caBIGModule.java -text
@@ -571,10 +571,10 @@ mousemodel/src/org/labkey/mousemodel/sample/slides.jsp -text
 ms1/MS1.iml -text
 ms1/module.properties -text
 ms1/src/META-INF/ms1.xml -text
-ms1/src/META-INF/ms1/scripts/postgresql/ms1-0.00-0.01.sql -text
 ms1/src/META-INF/ms1/scripts/postgresql/ms1-0.00-2.10.sql -text
-ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-0.00-0.01.sql -text
+ms1/src/META-INF/ms1/scripts/postgresql/obsolete/ms1-0.00-0.01.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-0.00-2.10.sql -text
+ms1/src/META-INF/ms1/scripts/sql[!!-~]server/obsolete/ms1-0.00-0.01.sql -text
 ms1/src/org/labkey/ms1/MS1Controller.java -text
 ms1/src/org/labkey/ms1/MS1Manager.java -text
 ms1/src/org/labkey/ms1/MS1Module.java -text
@@ -604,9 +604,7 @@ ms2/src/META-INF/ms2/scripts/postgresql/ms2-1.40-1.50.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-1.50-1.60.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-1.60-1.70.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-1.70-2.00.sql -text
-ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.00-2.01.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.00-2.10.sql -text
-ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.01-2.02.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.10-2.11.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-1.00-1.01.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-1.01-1.02.sql -text
@@ -647,6 +645,8 @@ ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-1.72-1.73.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-1.73-1.74.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-1.74-1.75.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-1.75-1.76.sql -text
+ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-2.00-2.01.sql -text
+ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-2.01-2.02.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-0.00-1.00.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-1.00-1.10.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-1.10-1.20.sql -text
@@ -656,9 +656,7 @@ ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-1.40-1.50.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-1.50-1.60.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-1.60-1.70.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-1.70-2.00.sql -text
-ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.00-2.01.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.00-2.10.sql -text
-ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.01-2.02.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.10-2.11.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-drop.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.62.sql -text
@@ -712,6 +710,8 @@ ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-1.72-1.73.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-1.73-1.74.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-1.74-1.75.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-1.75-1.76.sql -text
+ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-2.00-2.01.sql -text
+ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-2.01-2.02.sql -text
 ms2/src/META-INF/prot.xml -text
 ms2/src/org/labkey/ms2/AACoverageColumn.java -text
 ms2/src/org/labkey/ms2/BeanXMLStreamReader.java -text

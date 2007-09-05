@@ -466,7 +466,7 @@ public class FlowManager
                 "WHERE exp.ExperimentRun.RowId IN (" +
                 "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
                 "AND exp.data.container = ?\n" +
-                "AND flow.object.typeid = ? AND exp.ExperimentRun.FilePathRoot IS NOT NULL)";
+                "AND flow.object.typeid = ?) AND exp.ExperimentRun.FilePathRoot IS NOT NULL";
         return Table.executeSingleton(getSchema(), sqlFCSRunCount, new Object[] { container.getId(), ObjectType.fcsKeywords.getTypeId() }, Integer.class);
     }
 

@@ -196,9 +196,9 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
         SQLFragment fragment = new SQLFragment();
-        fragment.append("SELECT DISTINCT SeqId FROM ( ");
-        fragment.append(ProteinManager.getPeptideSql(queryUrl, run, null, -1, "SeqId", false));
-        fragment.append(" ) x");
+        fragment.append("SELECT DISTINCT sSeqId AS SeqId FROM ( ");
+        ProteinManager.addProteinQuery(fragment, run, queryUrl, null, 0, false);
+        fragment.append(" ) seqids");
         return fragment;
     }
 
