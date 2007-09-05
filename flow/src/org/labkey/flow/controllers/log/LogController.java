@@ -1,20 +1,21 @@
 package org.labkey.flow.controllers.log;
 
-import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
-import org.apache.beehive.netui.pageflow.annotations.Jpf;
-import org.apache.beehive.netui.pageflow.Forward;
+import org.labkey.flow.controllers.SpringFlowController;
 import org.apache.commons.lang.StringUtils;
-import org.labkey.api.view.ViewForward;
-import org.labkey.api.view.HomeTemplate;
-import org.labkey.api.view.JspView;
+import org.apache.log4j.Logger;
+import org.labkey.api.view.*;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.ACL;
 import org.labkey.flow.data.*;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.validation.BindException;
 
 import java.sql.SQLException;
 
-@Jpf.Controller
-public class LogController extends BaseFlowController<LogController.Action>
+public class LogController extends SpringFlowController<LogController.Action, FlowParam>
 {
     public enum Action
     {
@@ -22,30 +23,57 @@ public class LogController extends BaseFlowController<LogController.Action>
         showLog,
     }
 
-    @Jpf.Action
-    protected Forward begin() throws Exception
+
+    static DefaultActionResolver _actionResolver = new DefaultActionResolver(LogController.class);
+
+    public LogController() throws Exception
     {
-        return new ViewForward(urlFor(FlowController.Action.begin));
+        super();
+        setActionResolver(_actionResolver.getInstance(this));
     }
 
-    @Jpf.Action
-    protected Forward showLog() throws Exception
+
+    @RequiresPermission(ACL.PERM_NONE)
+    public class BeginAction extends SimpleViewAction
     {
-        Page page = getPage("showLog.jsp");
-        return includeView(new HomeTemplate(getViewContext(), new JspView(page), getNavTrailConfig(page.log, "Log " + page.log.getName(), Action.showLog)));
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            return HttpView.redirect(urlFor(FlowController.Action.begin));
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
     }
 
-    protected Page getPage(String name) throws Exception
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowLogAction extends SimpleViewAction
     {
-        Page ret = (Page) getFlowPage(name);
-        ret.log = getLog();
-        return ret;
+        Page _page;
+
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            _page = (Page)getFlowPage("showLog.jsp");
+            _page.log = getLog();
+            if (_page.log == null)
+                HttpView.throwNotFound();
+            return new JspView(_page);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(root, _page.log, "Log " + _page.log.getName(), Action.showLog);
+        }
     }
+
 
     public FlowLog getLog() throws SQLException
     {
         return FlowLog.fromLogId(getIntParam(FlowParam.logId));
     }
+
 
     static public abstract class Page extends FlowPage<LogController>
     {
@@ -87,7 +115,7 @@ public class LogController extends BaseFlowController<LogController.Action>
             }
             catch (Exception e)
             {
-                e = e;
+                Logger.getLogger(LogController.class).error("unexpected exception", e);
             }
             return h(value);
         }

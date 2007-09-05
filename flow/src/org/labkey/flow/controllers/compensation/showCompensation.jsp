@@ -11,6 +11,7 @@
 <%@ page import="org.labkey.api.jsp.JspLoader"%>
 <%@ page import="org.labkey.flow.view.GraphView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
+<%@ page import="org.labkey.flow.util.PFUtil" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%!
     String compImg(FlowWell well, String param) throws Exception
@@ -33,27 +34,33 @@
     final int channelCount = channelNames.length;
     DecimalFormat format = new DecimalFormat();
     format.setMaximumFractionDigits(3);
+    format.setMinimumFractionDigits(3);
 %>
 
     <p>Compensation Matrix: <%=h(comp.getName())%></p>
-<table class="normal">
-    <tr><td>&nbsp;</td>
+<table class="normal" cellspacing=0 cellpadding=2>
+    <tr><td style="border-right:solid 1px #AAAAAA;">&nbsp;</td>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         { %>
-        <td><%=h(channelNames[iChannelValue])%></td>
+        <th style="border-right:solid 1px #AAAAAA;"><%=h(channelNames[iChannelValue])%></th>
         <% } %>
     </tr>
     <% for (int iChannel = 0; iChannel < channelCount; iChannel ++)
     {
+        String color = 0==(iChannel%2)?"#EEEEEE":"#FFFFFF";
     %>
     <tr>
-        <td><%=h(channelNames[iChannel])%></td>
+        <th style="border-right:solid 1px #AAAAAA; text-align:right; background-color:<%=color%>;"><%=h(channelNames[iChannel])%></th>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
-        { %>
-        <td><%=format.format(comp.getRow(iChannel)[iChannelValue])%></td>
-        <%}%>
+        {
+        %><td style="border-right:solid 1px #AAAAAA; text-align:right; background-color:<%=color%>;"><%=format.format(comp.getRow(iChannel)[iChannelValue])%></td><%
+        }%>
     </tr>
     <%}%>
+    <% for (int iChannel = 0; iChannel <= channelCount; iChannel ++)
+    {
+        %><td style="border-top:solid 1px #AAAAAA;"><%=PFUtil._gif(1,80)%></td><%
+    }%>
 </table>
 
 

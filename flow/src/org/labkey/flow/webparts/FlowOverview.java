@@ -294,7 +294,8 @@ public class FlowOverview extends Overview
             {
                 statusHTML.append("<br>");
             }
-            statusHTML.append("There are <a href=\"" + h(FlowTableType.CompensationMatrices.urlFor(getContainer(), QueryAction.executeQuery)) + "\">" + _compensationMatrixCount + " compensation matrices</a>.");
+            ViewURLHelper urlFlowComp = PFUtil.urlFor(CompensationController.Action.begin, getContainer());
+            statusHTML.append("There are <a href=\"" + h(urlFlowComp.getLocalURIString()) + "\">" + _compensationMatrixCount + " compensation matrices</a>.");
             if (_compensationRunCount != 0)
             {
                 statusHTML.append(" These have been calculated in <a href=\"" + h(FlowTableType.Runs.urlFor(getContainer(), "CompensationControlCount", CompareType.NEQ, 0)) + "\">" + _compensationRunCount + " runs</a>.");
@@ -305,7 +306,7 @@ public class FlowOverview extends Overview
         {
             ret.addAction(new Action("Calculate compensation matrices", _scriptCompensation.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.calculateCompensation)));
         }
-        ret.addAction(new Action("Upload a compensation matrix", PFUtil.urlFor(CompensationController.Action.begin, getContainer())));
+        ret.addAction(new Action("Upload a compensation matrix", PFUtil.urlFor(CompensationController.Action.upload, getContainer())));
         return ret;
     }
 

@@ -15,7 +15,10 @@ public class FlowLog extends FlowDataObject
 {
     static public FlowLog fromLogId(int id) throws SQLException
     {
-        return (FlowLog) FlowDataObject.fromRowId(id);
+        FlowObject o = FlowDataObject.fromRowId(id);
+        if (o instanceof FlowLog)
+            return (FlowLog)o;
+        return null;
     }
 
     public FlowLog(ExpData data)
