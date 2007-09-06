@@ -847,7 +847,7 @@ public class ProteinManager
     {
         SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames);
 
-        return Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray());
+        return (Table.TableResultSet)Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray(), 0, maxProteinRows != 0);
     }
 
     public static SQLFragment getProteinProphetPeptideSql(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames)

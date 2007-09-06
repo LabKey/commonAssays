@@ -30,7 +30,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
 
     public MS1Module()
     {
-        super(NAME, 2.10, null, "/ms1");
+        super(NAME, 2.19, null, "/ms1");
         addController("ms1", MS1Controller.class);
 
         MS1Schema.register();

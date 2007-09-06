@@ -341,12 +341,13 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     // TODO: Put in base class?
     public void exportTSVProteinGrid(ProteinTSVGridWriter tw, String requestedPeptideColumns, MS2Run run, String where) throws SQLException
     {
+        GroupedResultSet peptideRS = null;
         if (tw.getExpanded())
         {
             String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumns);
             String peptideSqlColumnNames = run.getSQLPeptideColumnNames(peptideColumnNames, false, MS2Manager.getTableInfoSimplePeptides(), MS2Manager.getTableInfoPeptideMemberships());
 
-            GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, 0, peptideSqlColumnNames), "ProteinGroupId");
+            peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, 0, peptideSqlColumnNames), "ProteinGroupId", false);
 
             TSVGridWriter twPeptide = new TSVGridWriter(peptideRS, getPeptideDisplayColumns(peptideColumnNames))
             {
@@ -372,6 +373,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         finally
         {
             if (proteinRS != null) try { proteinRS.close(); } catch (SQLException e) {}
+            if (peptideRS != null) try { peptideRS.close(); } catch (SQLException e) {}
         }
     }
 

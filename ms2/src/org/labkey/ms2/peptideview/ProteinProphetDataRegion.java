@@ -28,7 +28,7 @@ public class ProteinProphetDataRegion extends AbstractProteinDataRegion
         _groupedRS.previous();
         ResultSet nestedRS = _groupedRS.getNextResultSet();
 
-        // Validate that the inner and outer result sets are sorted the same
+/*        // Validate that the inner and outer result sets are sorted the same
         while (nestedRS.next())
         {
             if (!ctx.getRow().get("ProteinGroupId").equals(nestedRS.getInt("ProteinGroupId")))
@@ -37,7 +37,7 @@ public class ProteinProphetDataRegion extends AbstractProteinDataRegion
             }
         }
         nestedRS.beforeFirst();
-
+*/
         renderNestedGrid(out, ctx, nestedRS, rowIndex);
         nestedRS.close();
     }

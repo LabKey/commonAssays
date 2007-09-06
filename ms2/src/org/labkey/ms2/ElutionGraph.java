@@ -26,6 +26,8 @@ import org.jfree.data.xy.XYSeries;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.awt.*;
 
 public class ElutionGraph
@@ -48,25 +50,17 @@ public class ElutionGraph
 
     public void addInfo(List<Quantitation.ScanInfo> scanInfos, int firstSelectedScan, int lastSelectedScan, int minScan, int maxScan, Color color)
     {
-        XYSeries selectedSeries = new XYSeries("Selected", false, true);
-        XYSeries surroundingSeries = new XYSeries("Surrounding", false, true);
+        XYSeries selectedSeries = new XYSeries("Selected", false, false);
+        XYSeries surroundingSeries = new XYSeries("Surrounding", false, false);
 
         float area = 0;
-        boolean addedMinScan = false;
-        boolean addedMaxScan = false;
+        Set<Integer> scans = new HashSet<Integer>();
         for (Quantitation.ScanInfo scanInfo : scanInfos)
         {
-            if (scanInfo.getScan() == minScan)
-            {
-                addedMinScan = true;
-            }
-            else if (scanInfo.getScan() == maxScan)
-            {
-                addedMaxScan = true;
-            }
-            if (scanInfo.getScan() >= firstSelectedScan && scanInfo.getScan() <= lastSelectedScan)
+            if (scanInfo.getScan() >= firstSelectedScan && scanInfo.getScan() <= lastSelectedScan && !scans.contains(scanInfo.getScan()))
             {
                 selectedSeries.add(scanInfo.getScan(), scanInfo.getIntensity());
+                scans.add(scanInfo.getScan());
                 area += scanInfo.getIntensity();
             }
             else
@@ -74,11 +68,11 @@ public class ElutionGraph
                 surroundingSeries.add(scanInfo.getScan(), scanInfo.getIntensity());
             }
         }
-        if (!addedMinScan)
+        if (!scans.contains(minScan))
         {
             surroundingSeries.add(minScan, 0);
         }
-        if (!addedMaxScan)
+        if (!scans.contains(maxScan))
         {
             surroundingSeries.add(maxScan, 0);
         }
