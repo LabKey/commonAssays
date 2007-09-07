@@ -15,11 +15,14 @@
  */
 package org.labkey.ms2.protein.fasta;
 
+import org.labkey.api.data.CoreSchema;
 import org.labkey.api.data.SqlDialect;
-import org.labkey.api.data.SqlScriptManager;
 import org.labkey.ms2.protein.ProteinManager;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Random;
 
 /**
@@ -28,7 +31,7 @@ import java.util.Random;
  */
 public class FastaDbHelper
 {
-    private static final SqlDialect _dialect = SqlScriptManager.getSqlDialect();
+    private static final SqlDialect _dialect = CoreSchema.getInstance().getSqlDialect();
     private static final String CONCAT = _dialect.getConcatenationOperator();
 
     private static final String INITIAL_INSERTION_COMMAND =

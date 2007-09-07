@@ -63,7 +63,7 @@ public class AnnouncementModule extends DefaultModule implements Search.Searchab
 
     public AnnouncementModule()
     {
-        super(NAME, 2.19, "/org/labkey/announcements", "/announcement",
+        super(NAME, 2.19, "/org/labkey/announcements", true,
             new WebPartFactory(WEB_PART_NAME)
             {
                 public WebPartView getWebPartView(ViewContext parentCtx, Portal.WebPart webPart)

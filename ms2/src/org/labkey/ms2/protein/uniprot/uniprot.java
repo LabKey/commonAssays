@@ -17,13 +17,13 @@
 package org.labkey.ms2.protein.uniprot;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.data.CoreSchema;
 import org.labkey.api.data.SqlDialect;
-import org.labkey.api.data.SqlScriptManager;
+import org.labkey.api.util.DateUtil;
 import org.labkey.ms2.protein.ParseActions;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.XMLProteinHandler;
 import org.labkey.ms2.protein.XMLProteinLoader;
-import org.labkey.api.util.DateUtil;
 import org.xml.sax.Attributes;
 
 import java.sql.*;
@@ -37,7 +37,7 @@ public class uniprot extends ParseActions
 {
 
     private static Logger _log = Logger.getLogger(XMLProteinLoader.class);
-    private static SqlDialect _dialect = SqlScriptManager.getSqlDialect();
+    private static SqlDialect _dialect = CoreSchema.getInstance().getSqlDialect();
     private long _startTime;
 
     private static final int TRANSACTION_ROW_COUNT = 100;

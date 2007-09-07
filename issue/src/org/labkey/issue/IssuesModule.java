@@ -54,7 +54,7 @@ public class IssuesModule extends DefaultModule implements ContainerManager.Cont
 
     public IssuesModule()
     {
-        super(NAME, 2.19, "/org/labkey/issue", "/issue", new IssuesWebPartFactory());
+        super(NAME, 2.19, "/org/labkey/issue", true, new IssuesWebPartFactory());
         addController("Issues", IssuesController.class);
 
         IssuesQuerySchema.register();

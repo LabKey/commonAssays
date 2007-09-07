@@ -67,7 +67,7 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
 
     public MS2Module()
     {
-        super(NAME, 2.19, "/org/labkey/ms2", "/ms2",
+        super(NAME, 2.19, "/org/labkey/ms2", true,
                 new WebPartFactory("MS2 Runs"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
