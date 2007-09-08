@@ -26,6 +26,7 @@ import org.labkey.issue.query.IssuesQueryView;
 import org.labkey.issue.query.IssuesTable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.*;
+import org.springframework.beans.PropertyValues;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -1540,6 +1541,7 @@ public class IssuesController extends SpringActionController
         public IssuesForm()
         {
             super(Issue.class, IssuesSchema.getInstance().getTableInfoIssues(), new String[]{"action", "comment", "callbackURL"});
+            setValidateRequired(false);
         }
 
         public String getAction()

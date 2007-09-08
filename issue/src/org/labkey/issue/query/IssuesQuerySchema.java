@@ -52,15 +52,18 @@ public class IssuesQuerySchema extends UserSchema
 
     public TableInfo getTable(String name, String alias)
     {
-        try
+        if (name != null)
         {
-            switch(TableType.valueOf(name))
+            try
             {
-                case Issues:
-                    return createIssuesTable(alias);
+                switch(TableType.valueOf(name))
+                {
+                    case Issues:
+                        return createIssuesTable(alias);
+                }
             }
+            catch (IllegalArgumentException e){}
         }
-        catch (IllegalArgumentException e){}
         return super.getTable(name, alias);
     }
 
