@@ -2636,17 +2636,21 @@ public class MS2Controller extends ViewController
         if (selected)
         {
             exportRows = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
-
-            List<Long> peptideIds = new ArrayList<Long>(exportRows.size());
-
-            // Technically, should only limit this in Excel export case... but there's no way to individually select 65K peptides
-            for (int i = 0; i < Math.min(exportRows.size(), ExcelWriter.MAX_ROWS); i++)
+            if (exportRows != null)
             {
-                String[] row = exportRows.get(i).split(",");
-                peptideIds.add(Long.parseLong(row[row.length == 1 ? 0 : 1]));
-            }
+                exportRows = new ArrayList<String>();
 
-            baseFilter.addInClause("RowId", peptideIds);
+                List<Long> peptideIds = new ArrayList<Long>(exportRows.size());
+
+                // Technically, should only limit this in Excel export case... but there's no way to individually select 65K peptides
+                for (int i = 0; i < Math.min(exportRows.size(), ExcelWriter.MAX_ROWS); i++)
+                {
+                    String[] row = exportRows.get(i).split(",");
+                    peptideIds.add(Long.parseLong(row[row.length == 1 ? 0 : 1]));
+                }
+
+                baseFilter.addInClause("RowId", peptideIds);
+            }
         }
 
         if ("Excel".equals(form.exportFormat))

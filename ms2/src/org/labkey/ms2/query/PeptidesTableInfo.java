@@ -76,17 +76,23 @@ public class PeptidesTableInfo extends FilteredTable
         TableInfo info = getRealTable();
 
         ColumnInfo quantitation = wrapColumn("Quantitation", info.getColumn("RowId"));
+        quantitation.setIsUnselectable(true);
         quantitation.setFk(new LookupForeignKey("PeptideId")
         {
             public TableInfo getLookupTableInfo()
             {
-                return MS2Manager.getTableInfoQuantitation();
+                FilteredTable result = new FilteredTable(MS2Manager.getTableInfoQuantitation());
+                result.wrapAllColumns(true);
+                result.getColumn("PeptideId").setIsHidden(true);
+                result.getColumn("QuantId").setIsHidden(true);
+                return result;
             }
         });
         quantitation.setKeyField(false);
         addColumn(quantitation);
 
         ColumnInfo proteinGroup = wrapColumn("ProteinProphetData", info.getColumn("RowId"));
+        proteinGroup.setIsUnselectable(true);
         proteinGroup.setFk(new LookupForeignKey("PeptideId")
         {
             public TableInfo getLookupTableInfo()
@@ -98,11 +104,15 @@ public class PeptidesTableInfo extends FilteredTable
         addColumn(proteinGroup);
 
         ColumnInfo peptideProphetData = wrapColumn("PeptideProphetDetails", info.getColumn("RowId"));
+        peptideProphetData.setIsUnselectable(true);
         peptideProphetData.setFk(new LookupForeignKey("PeptideId")
         {
             public TableInfo getLookupTableInfo()
             {
-                return MS2Manager.getTableInfoPeptideProphetData();
+                FilteredTable table = new FilteredTable(MS2Manager.getTableInfoPeptideProphetData());
+                table.wrapAllColumns(true);
+                table.getColumn("PeptideId").setIsHidden(true);
+                return table;
             }
         });
         peptideProphetData.setKeyField(false);

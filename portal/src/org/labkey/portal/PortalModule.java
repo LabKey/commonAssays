@@ -44,8 +44,8 @@ public class PortalModule extends DefaultModule
         // NOTE:  the version number of the portal module does not govern the scripts run for the
         // portal schema.  Bump the core module version number to cause a portal-xxx.sql script to run
         super(NAME, 2.19, "/org/labkey/portal", false,
-            new SearchWebPartFactory("Search", null, 40),
-            new SearchWebPartFactory("Narrow Search", "right", 0)
+            new SearchWebPartFactory("Search", null),
+            new SearchWebPartFactory("Search", "right")
         );
         addController("Project", ProjectController.class);
     }
@@ -53,18 +53,21 @@ public class PortalModule extends DefaultModule
 
     public static class SearchWebPartFactory extends WebPartFactory
     {
-        private int _width;
-
-        public SearchWebPartFactory(String name, String location, int width)
+        public SearchWebPartFactory(String name, String location)
         {
             super(name, location, true, false);
-            _width = width;
+            addLegacyNames("Narrow Search");
         }
 
         public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws IllegalAccessException, InvocationTargetException
         {
+            int width = 40;
+            if ("right".equals(webPart.getLocation()))
+            {
+                width = 0;
+            }
             boolean includeSubfolders = !"off".equals(webPart.getPropertyMap().get("includeSubfolders"));
-            return new SearchWebPart(Search.ALL_MODULES, "", ProjectController.getSearchUrl(portalCtx.getContainer()), includeSubfolders, false, _width);
+            return new SearchWebPart(Search.ALL_MODULES, "", ProjectController.getSearchUrl(portalCtx.getContainer()), includeSubfolders, false, width);
         }
 
 

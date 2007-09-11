@@ -366,7 +366,7 @@ public abstract class AbstractMS2RunView
     }
 
 
-    private Filter getPeptideFilter(ViewURLHelper url)
+    private SimpleFilter getPeptideFilter(ViewURLHelper url)
     {
         return ProteinManager.getPeptideFilter(url, ProteinManager.ALL_FILTERS, _runs[0]);
     }
@@ -376,8 +376,10 @@ public abstract class AbstractMS2RunView
     {
         Sort sort = ProteinManager.getPeptideBaseSort();
         sort.insertSort(getPeptideSort());
+        sort = ProteinManager.reduceToValidColumns(sort, MS2Manager.getTableInfoPeptides());
 
-        Filter filter = getPeptideFilter(url);
+        SimpleFilter filter = getPeptideFilter(url);
+        filter = ProteinManager.reduceToValidColumns(filter, MS2Manager.getTableInfoPeptides());
 
         return Table.executeArray(MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoPeptides().getColumn("RowId"), filter, sort, Long.class);
     }

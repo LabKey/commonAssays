@@ -57,6 +57,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         getColumn("ProteinProphetFileId").setIsHidden(true);
 
         ColumnInfo quantitation = wrapColumn("Quantitation", getRealTable().getColumn("RowId"));
+        quantitation.setIsUnselectable(true);
         quantitation.setFk(new LookupForeignKey("ProteinGroupId")
         {
             public TableInfo getLookupTableInfo()
