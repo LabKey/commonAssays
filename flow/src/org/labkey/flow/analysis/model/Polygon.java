@@ -43,8 +43,8 @@ public class Polygon implements Serializable
     {
         assert X.length == Y.length;
         this.len = X.length;
-        this.X = (double[]) X.clone();
-        this.Y = (double[]) Y.clone();
+        this.X = X.clone();
+        this.Y = Y.clone();
         computeBoundingRectangle();
     }
 
@@ -53,10 +53,11 @@ public class Polygon implements Serializable
         double[] ret = new double[lst.size()];
         for (int i = 0; i < ret.length; i ++)
         {
-            ret[i] = lst.get(i);
+            ret[i] = lst.get(i).doubleValue();
         }
         return ret;
     }
+
     public Polygon(List<Double> lstX, List<Double> lstY)
     {
         this(toDoubleArray(lstX), toDoubleArray(lstY));
@@ -118,31 +119,19 @@ public class Polygon implements Serializable
     }
 
 
-    public static void main(String[] args)
-    {
-        Polygon diamond = new Polygon(new double[]{0, -1, 0, 1}, new double[]{1, 0, -1, 0});
-        System.out.println(diamond.contains(0.0, 0.0));
-        System.out.println(diamond.contains(0.4, 0.4));
-        System.out.println(diamond.contains(0.499, 0.499));
-        System.out.println(diamond.contains(0.5, 0.5));
-        System.out.println(diamond.contains(0.501, 0.501));
-        System.out.println(diamond.contains(0.6, 0.6));
-        System.out.println(diamond.contains(0.5, 0.5));
-        System.out.println(diamond.contains(0.5, -0.5));
-        System.out.println(diamond.contains(-0.5, 0.5));
-        System.out.println(diamond.contains(-0.5, -0.5));
-    }
-
     public int hashCode()
     {
-        int ret = 0;
+        long ret = 0;
         for (int i = 0; i < len; i ++)
         {
-            ret ^= Double.valueOf(X[i]).hashCode();
-            ret ^= Double.valueOf(Y[i]).hashCode();
+            ret += Double.doubleToLongBits(X[i]);
+            ret *= 31;
+            ret += Double.doubleToLongBits(Y[i]);
+            ret *= 31;
         }
-        return ret;
+        return (int)(ret % 0x7FFFFFFF);
     }
+
 
     public boolean equals(Object other)
     {
@@ -159,5 +148,48 @@ public class Polygon implements Serializable
                 return false;
         }
         return true;
+    }
+
+
+    Polygon translate(double[][] m)
+    {
+        assert m.length == 3;
+        assert m[0].length == 3 && m[1].length == 3 && m[2].length==3;
+        // since this is 2D transform, third column should be identity
+        assert m[0][2] == 0 && m[1][2] == 0 && m[2][2] == 1;
+
+        double[] x = new double[this.len];
+        double[] y = new double[this.len];
+        for (int i=0 ; i<this.len ; i++)
+        {
+            double _x = X[i];
+            double _y = Y[i];
+            x[i] = _x * m[0][0] + _y * m[1][0] + m[2][0];
+            y[i] = _x * m[0][1] + _y * m[1][1] + m[2][1];
+        }
+        return new Polygon(x,y);
+    }
+
+
+    Polygon invert()
+    {
+        //noinspection SuspiciousNameCombination
+        return new Polygon(Y, X);
+    }
+
+
+    public static void main(String[] args)
+    {
+        Polygon diamond = new Polygon(new double[]{0, -1, 0, 1}, new double[]{1, 0, -1, 0});
+        System.out.println(diamond.contains(0.0, 0.0));
+        System.out.println(diamond.contains(0.4, 0.4));
+        System.out.println(diamond.contains(0.499, 0.499));
+        System.out.println(diamond.contains(0.5, 0.5));
+        System.out.println(diamond.contains(0.501, 0.501));
+        System.out.println(diamond.contains(0.6, 0.6));
+        System.out.println(diamond.contains(0.5, 0.5));
+        System.out.println(diamond.contains(0.5, -0.5));
+        System.out.println(diamond.contains(-0.5, 0.5));
+        System.out.println(diamond.contains(-0.5, -0.5));
     }
 }

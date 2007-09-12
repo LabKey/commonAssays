@@ -3,16 +3,13 @@ package org.labkey.flow.analysis.model;
 import org.labkey.flow.analysis.data.NumberArray;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.apache.log4j.Logger;
 
-import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
 import java.io.Serializable;
 
 public class EllipseGate extends Gate
 {
-    static final private Logger _log = Logger.getLogger(EllipseGate.class);
     String xAxis;
     String yAxis;
     static public class Point implements Serializable
@@ -56,27 +53,39 @@ public class EllipseGate extends Gate
         return yAxis;
     }
 
+
     public BitSet apply(DataFrame data)
     {
+        // quick compute bounding rect (could even draw it in closer with a bit more math)
+        double r = distance/2;
+        double xMax = Math.max(foci[0].x,foci[1].x) + r;
+        double xMin = Math.min(foci[0].x,foci[1].x) - r;
+        double yMax = Math.max(foci[0].y,foci[1].y) + r;
+        double yMin = Math.min(foci[0].y,foci[1].y) - r;
+
         BitSet ret = new BitSet(data.getRowCount());
         NumberArray xValues = data.getColumn(xAxis);
         NumberArray yValues = data.getColumn(yAxis);
         for (int i = 0; i < data.getRowCount(); i ++)
         {
+            double x = xValues.getDouble(i);
+            double y = yValues.getDouble(i);
+            if (x < xMin || x > xMax || y < yMin || y > yMax)
+                continue;
             double dCompare = 0;
             for (int f = 0; f < 2; f ++)
             {
-                double dx = xValues.getDouble(i) - foci[f].x;
-                double dy = yValues.getDouble(i) - foci[f].y;
+                double dx = x - foci[f].x;
+                double dy = y - foci[f].y;
                 dCompare += Math.sqrt(dx * dx + dy * dy);
             }
-            if (dCompare <= distance)
-            {
-                ret.set(i, true);
-            }
+            if (dCompare > distance)
+                continue;
+            ret.set(i, true);
         }
         return ret;
     }
+
 
 
     public boolean requiresCompensationMatrix()
@@ -84,12 +93,49 @@ public class EllipseGate extends Gate
         return CompensationMatrix.isParamCompensated(xAxis) || CompensationMatrix.isParamCompensated(yAxis);
     }
 
+
+    static Polygon unitCircle;
+    static
+    {
+        double[] x = new double[60];
+        double[] y = new double[60];
+        double d = (2*Math.PI)/x.length;
+        for (int i=0 ; i<x.length ; i++)
+        {
+            x[i] = Math.cos(i*d);
+            y[i] = Math.sin(i*d);
+        }
+        unitCircle = new Polygon(x,y);
+    }
+
+
     public void getPolygons(List<Polygon> list, String xAxis, String yAxis)
     {
+        if (!(xAxis.equals(getXAxis()) && yAxis.equals(getYAxis()) ||
+           xAxis.equals(getYAxis()) && yAxis.equals(getXAxis())))
+                return;
+
+        // Compute ellipse points as transformation of unit circle
+        // stretch, translate, rotate
+        double[] center = new double[] {(foci[0].x+foci[1].x)/2, (foci[0].y+foci[1].y)/2, 1};
+        double c = length(foci)/2;
+        double a = Math.max(distance/2,c);      // width
+        double b = Math.sqrt((a*a)-(c*c));      // height
+        double v[] = new double[] { c==0?1:(foci[0].x-center[0])/c, c==0?0:(foci[0].y-center[1])/c};
+        double[] xrotate = new double[] {a*v[0],a*v[1],0};
+        double[] yrotate = new double[] {-1*b*v[1], b*v[0], 0};
+        double[][] m = new double[][] {xrotate, yrotate, center};
+
+        Polygon ellipse = unitCircle.translate(m);
+        if (xAxis.equals(getXAxis()))
+            list.add(ellipse);
+        else
+            list.add(ellipse.invert());
     }
 
     static private double length(Point[] points)
     {
+        assert points.length == 2;
         double dx = points[0].x - points[1].x;
         double dy = points[0].y - points[1].y;
         return Math.sqrt(dx * dx + dy * dy);
@@ -114,28 +160,21 @@ public class EllipseGate extends Gate
         double d1 = length(axis1);
         double d2 = length(axis2);
         Point[] majorAxis;
-        Point[] minorAxis;
         double majorAxisLength;
         double minorAxisLength;
         if (d1 >= d2)
         {
             majorAxis = axis1;
-            minorAxis = axis2;
             majorAxisLength = d1;
             minorAxisLength = d2;
         }
         else
         {
             majorAxis = axis2;
-            minorAxis = axis1;
             majorAxisLength = d2;
             minorAxisLength = d1;
         }
         Point center = new Point((majorAxis[0].x + majorAxis[1].x)/2, (majorAxis[0].y + majorAxis[1].y)/2);
-        Point center2 = new Point((minorAxis[0].x + minorAxis[1].x) / 2, (minorAxis[0].y + minorAxis[1].y) / 2);
-
-        double dotProduct = (majorAxis[1].x - majorAxis[0].x) * (minorAxis[1].x - minorAxis[0].x) +
-                (majorAxis[1].y - majorAxis[0].y) * (minorAxis[1].y - minorAxis[0].y);
 
         double focalAxisLength = Math.sqrt(majorAxisLength * majorAxisLength - minorAxisLength * minorAxisLength);
         double focalRatio = focalAxisLength / majorAxisLength;
@@ -148,13 +187,6 @@ public class EllipseGate extends Gate
             );
         }
         EllipseGate ret = new EllipseGate(xAxis, yAxis, majorAxisLength, foci[0], foci[1]);
-
-        double dSquared = majorAxisLength * majorAxisLength;
-        for (Point vertex : vertices)
-        {
-            double dCompare = distance(vertex, ret.getFoci());
-            double difference = dCompare - dSquared;
-        }
         return ret;
     }
 
@@ -202,5 +234,35 @@ public class EllipseGate extends Gate
         result = 31 * result + Arrays.hashCode(foci);
         result = 31 * result + Double.valueOf(distance).hashCode();
         return result;
+    }
+
+
+    public static void main(String[] args)
+    {
+        EllipseGate g = new EllipseGate("x", "y", 14, new Point(10,10), new Point(20,15));
+        Polygon p;
+
+        System.out.println("10\t10");
+        System.out.println("20\t15");
+        List<Polygon> l = new ArrayList<Polygon>();
+
+        l.clear();
+        g.getPolygons(l, "x", "y");
+        p = l.get(0);
+        for (int i=0 ; i<p.len ;i++)
+        {
+            System.out.println(p.X[i] + "\t" + p.Y[i]);
+        }
+
+        System.out.println();
+        System.out.println();
+
+        l.clear();
+        g.getPolygons(l, "y", "x");
+        p = l.get(0);
+        for (int i=0 ; i<p.len ;i++)
+        {
+            System.out.println(p.X[i] + "\t" + p.Y[i]);
+        }
     }
 }
