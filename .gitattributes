@@ -97,6 +97,7 @@ flow/gwtsrc/org/labkey/flow/gateeditor/client/model/GWTCompensationCalculation.j
 flow/gwtsrc/org/labkey/flow/gateeditor/client/model/GWTCompensationMatrix.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/model/GWTCriteria.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/model/GWTEditingMode.java -text
+flow/gwtsrc/org/labkey/flow/gateeditor/client/model/GWTEllipseGate.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/model/GWTGate.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/model/GWTGraphInfo.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/model/GWTGraphOptions.java -text

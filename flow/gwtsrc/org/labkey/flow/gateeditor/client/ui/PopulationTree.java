@@ -3,10 +3,10 @@ package org.labkey.flow.gateeditor.client.ui;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.DOM;
 import org.labkey.flow.gateeditor.client.model.*;
-import org.labkey.flow.gateeditor.client.ui.PopulationItem;
 import org.labkey.flow.gateeditor.client.GateEditor;
 import org.labkey.flow.gateeditor.client.FlowUtil;
 import org.labkey.api.gwt.client.ui.WindowUtil;
+import org.labkey.api.gwt.client.ui.ImageButton;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ public class PopulationTree extends GateComponent
     VerticalPanel widget;
     ScrollPanel scrollPanel;
     VerticalPanel tree;
-    Button newPopulationButton;
+    ImageButton newPopulationButton;
     Map populationNameLabelMap = new HashMap();
     Map labelPopulationMap = new HashMap();
     Label currentLabel;
@@ -70,8 +70,8 @@ public class PopulationTree extends GateComponent
         editor.addListener(listener);
         if (!editor.getState().isRunMode())
         {
-            newPopulationButton = new Button("New Population");
-            newPopulationButton.addClickListener(new ClickListener() {
+            newPopulationButton = new ImageButton("New Population")
+            {
                 public void onClick(Widget sender)
                 {
                     NewPopulationDialog dlg = new NewPopulationDialog(getEditor());
@@ -79,7 +79,7 @@ public class PopulationTree extends GateComponent
                     dlg.getDialog().show();
                     WindowUtil.scrollIntoView(dlg.getDialog());
                 }
-            });
+            };
             widget.add(newPopulationButton);
         }
     }

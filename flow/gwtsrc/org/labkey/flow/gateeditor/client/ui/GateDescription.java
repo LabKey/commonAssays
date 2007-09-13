@@ -3,6 +3,7 @@ package org.labkey.flow.gateeditor.client.ui;
 import com.google.gwt.user.client.ui.*;
 import org.labkey.flow.gateeditor.client.model.*;
 import org.labkey.flow.gateeditor.client.GateEditor;
+import org.labkey.api.gwt.client.ui.ImageButton;
 
 import java.util.*;
 
@@ -13,18 +14,20 @@ public class GateDescription extends GateComponent
     Map labelMap = new HashMap();
     ListBox xAxis;
     ListBox yAxis;
-    Button btnClearAllPoints = new Button("Clear All Points", new ClickListener() {
+    ImageButton btnClearAllPoints = new ImageButton("Clear All Points")
+    {
         public void onClick(Widget sender)
         {
             clearAllPoints();
         }
-    });
-    Button btnSave = new Button("Save", new ClickListener() {
+    };
+    ImageButton btnSave = new ImageButton("Save")
+    {
         public void onClick(Widget sender)
         {
             save();
         }
-    });
+    };
     GateEditorListener listener = new GateEditorListener()
     {
         public void onGateChanged()
@@ -104,6 +107,7 @@ public class GateDescription extends GateComponent
 
     public void setGate(GWTGate gate)
     {
+        boolean editable = true;
         while (widget.getRowCount() > 0)
         {
             widget.removeRow(0);
@@ -149,12 +153,29 @@ public class GateDescription extends GateComponent
                 }
             }
         }
+        else if (gate instanceof GWTEllipseGate)
+        {
+            GWTEllipseGate ellipse = new GWTEllipseGate(((GWTEllipseGate)gate));
+            ellipse.normalize();
+            setValue(xAxis, ellipse.getXAxis());
+            setValue(yAxis, ellipse.getYAxis());
+            GWTPoint center = ellipse.getCenter();
+            widget.setText(++row, 0, String.valueOf(center.x));
+            widget.setText(row, 1, String.valueOf(center.y));
+            widget.setText(++row, 0, "major axis");
+            widget.setText(row, 1, String.valueOf(ellipse.getMajorAxisLength()));
+            widget.setText(++row, 0, "minor axis");
+            widget.setText(row, 1, String.valueOf(ellipse.getMinorAxisLength()));
+//            widget.setText(++row, 0, "angle");
+//            widget.setText(row, 1, "? nyi");
+            editable = false;
+        }
         else
         {
             widget.setText(++row, 0, "This gate is too complex to be edited.");
             widget.getFlexCellFormatter().setColSpan(row, 0, 2);
         }
-        if (!isReadOnly())
+        if (!isReadOnly() && editable)
         {
             widget.setWidget(++row, 0, btnClearAllPoints);
             widget.getFlexCellFormatter().setColSpan(row, 0, 2);

@@ -153,8 +153,17 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             }
             return new GWTPolygonGate(polygon.getXAxis(), arrX, polygon.getYAxis(), arrY);
         }
+        if (gate.getEllipse() != null)
+        {
+            EllipseDef def = gate.getEllipse();
+            PointDef f0 = def.getFocusArray(0);
+            PointDef f1 = def.getFocusArray(1);
+            GWTEllipseGate e = new GWTEllipseGate(def.getXAxis(), def.getYAxis(), def.getDistance(), f0.getX(), f0.getY(), f1.getX(), f1.getY());
+            return e;
+        }
         return null;
     }
+
 
     public GWTRun[] getRuns()
     {
@@ -175,6 +184,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
         }
     }
 
+
     public GWTRun makeRun(FlowRun run)
     {
         GWTRun ret = new GWTRun();
@@ -182,6 +192,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
         ret.setName(run.getName());
         return ret;
     }
+
 
     public GWTWell makeWell(FlowWell well)
     {
@@ -199,6 +210,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             throw UnexpectedException.wrap(e);
         }
     }
+
 
     GWTWell makeRunModeWell(FlowWell well, FlowScript runScript) throws Exception
     {

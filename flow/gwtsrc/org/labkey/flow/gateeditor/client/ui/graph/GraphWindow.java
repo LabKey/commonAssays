@@ -2,7 +2,6 @@ package org.labkey.flow.gateeditor.client.ui.graph;
 
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import org.labkey.flow.gateeditor.client.GateEditor;
 import org.labkey.flow.gateeditor.client.GateCallback;
 import org.labkey.flow.gateeditor.client.FlowUtil;
@@ -151,6 +150,12 @@ public class GraphWindow extends GateComponent
             options.xAxis = polygon.getXAxis();
             options.yAxis = polygon.getYAxis();
         }
+        else if (gate instanceof GWTEllipseGate)
+        {
+            options.xAxis = ((GWTEllipseGate)gate).getXAxis();
+            options.yAxis = ((GWTEllipseGate)gate).getYAxis();
+        }
+        
         options.compensationMatrix = getCompensationMatrix();
         return options;
     }
