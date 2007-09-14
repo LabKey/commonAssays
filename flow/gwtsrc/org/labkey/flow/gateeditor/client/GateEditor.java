@@ -40,7 +40,7 @@ public class GateEditor implements EntryPoint
         getState().setSubsetName(PropertyUtil.getServerProperty("subset"));
         init(workspaceOptions);
 
-        _root = RootPanel.get("org.labkey.flow.gateeditor.GateEditor");
+        _root = RootPanel.get("org.labkey.flow.gateeditor.GateEditor-Root");
         gateEditorPanel = new GateEditorPanel(this);
         _root.add(gateEditorPanel.getWidget());
     }

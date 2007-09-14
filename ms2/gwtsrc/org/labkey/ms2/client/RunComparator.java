@@ -18,7 +18,7 @@ public class RunComparator implements EntryPoint
 
     public void onModuleLoad()
     {
-        RootPanel panel = RootPanel.get("org.labkey.ms2.RunComparator");
+        RootPanel panel = RootPanel.get("org.labkey.ms2.RunComparator-Root");
         RunComparatorView view = new RunComparatorView(panel);
         view.requestComparison();
     }
