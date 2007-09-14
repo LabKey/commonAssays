@@ -171,6 +171,7 @@ flow/src/org/labkey/flow/analysis/data/SubsetNumberArray.java -text
 flow/src/org/labkey/flow/analysis/groovy/FCSExpression.java -text
 flow/src/org/labkey/flow/analysis/model/Analysis.java -text
 flow/src/org/labkey/flow/analysis/model/AndGate.java -text
+flow/src/org/labkey/flow/analysis/model/CalibrationTable.java -text
 flow/src/org/labkey/flow/analysis/model/CompensationCalculation.java -text
 flow/src/org/labkey/flow/analysis/model/CompensationMatrix.java -text
 flow/src/org/labkey/flow/analysis/model/DataFrame.java -text
@@ -180,10 +181,12 @@ flow/src/org/labkey/flow/analysis/model/FCSCache.java -text
 flow/src/org/labkey/flow/analysis/model/FCSHeader.java -text
 flow/src/org/labkey/flow/analysis/model/FCSKeywordData.java -text
 flow/src/org/labkey/flow/analysis/model/FJ8Workspace.java -text
+flow/src/org/labkey/flow/analysis/model/FixedCalibrationTable.java -text
 flow/src/org/labkey/flow/analysis/model/FlowException.java -text
 flow/src/org/labkey/flow/analysis/model/FlowJoWorkspace.java -text
 flow/src/org/labkey/flow/analysis/model/Gate.java -text
 flow/src/org/labkey/flow/analysis/model/GateList.java -text
+flow/src/org/labkey/flow/analysis/model/IdentityCalibrationTable.java -text
 flow/src/org/labkey/flow/analysis/model/IntervalGate.java -text
 flow/src/org/labkey/flow/analysis/model/MacWorkspace.java -text
 flow/src/org/labkey/flow/analysis/model/MinMaxConstraint.java -text

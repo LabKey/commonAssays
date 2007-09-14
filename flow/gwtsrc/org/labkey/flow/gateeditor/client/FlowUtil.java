@@ -6,21 +6,11 @@ public class FlowUtil
 {
     static public String flowResource(String filename)
     {
-        String contextPath = PropertyUtil.getContextPath();
-        if (contextPath == null)
-        {
-            contextPath = "";
-        }
-        return contextPath + "/Flow/" + filename;
+        return PropertyUtil.getContextPath() + "/Flow/" + filename;
     }
     static public String _gif()
     {
-        String contextPath = PropertyUtil.getContextPath();
-        if (contextPath == null)
-        {
-            contextPath = "";
-        }
-        return contextPath + "/_.gif";
+        return PropertyUtil.getContextPath() + "/_.gif";
 
     }
 }

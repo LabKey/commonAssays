@@ -43,8 +43,9 @@ public class MacWorkspace extends FlowJoWorkspace
 
     public MacWorkspace(Element elDoc) throws Exception
     {
-        readSamples(elDoc);
         readCompensationMatrices(elDoc);
+        readCalibrationTables(elDoc);
+        readSamples(elDoc);
         readSampleAnalyses(elDoc);
         readGroupAnalyses(elDoc);
     }
@@ -69,6 +70,17 @@ public class MacWorkspace extends FlowJoWorkspace
             for (Element elCompensationMatrix : getElementsByTagName(elCompensationMatrices, "CompensationMatrix"))
             {
                 _compensationMatrices.add(new CompensationMatrix(elCompensationMatrix));
+            }
+        }
+    }
+
+    public void readCalibrationTables(Element elDoc)
+    {
+        for (Element elCalibrationTables : getElementsByTagName(elDoc, "CalibrationTables"))
+        {
+            for (Element elCalibrationTable : getElementsByTagName(elCalibrationTables, "Table"))
+            {
+                _calibrationTables.add(FixedCalibrationTable.fromString(getInnerText(elCalibrationTable)));
             }
         }
     }
@@ -255,6 +267,7 @@ public class MacWorkspace extends FlowJoWorkspace
         double[] X = toDoubleArray(lstX);
         double[] Y = toDoubleArray(lstY);
         PolygonGate gate = new PolygonGate(xAxis, yAxis, new Polygon(X, Y));
+        gate = interpolatePolygon(gate);
         return gate;
     }
 
@@ -394,6 +407,20 @@ public class MacWorkspace extends FlowJoWorkspace
                 ParameterInfo pi = new ParameterInfo();
                 pi.name = name;
                 pi.multiplier = findMultiplier(elParameter);
+                String calibrationIndex = elParameter.getAttribute("calibrationIndex");
+                if (!StringUtils.isEmpty(calibrationIndex))
+                {
+                    int index = Integer.valueOf(calibrationIndex);
+                    if (index > 0 && index <= _calibrationTables.size())
+                    {
+                        pi.calibrationTable = _calibrationTables.get(index - 1);
+                    }
+                }
+                else
+                {
+
+                    pi.calibrationTable = new IdentityCalibrationTable(getRange(elParameter));
+                }
                 _parameters.put(name, pi);
             }
             String lowValue = elParameter.getAttribute("lowValue");

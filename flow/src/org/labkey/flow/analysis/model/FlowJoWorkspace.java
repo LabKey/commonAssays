@@ -37,6 +37,7 @@ abstract public class FlowJoWorkspace implements Serializable
     protected Map<String, AttributeSet> _sampleAnalysisResults = new HashMap();
     protected Map<String, SampleInfo> _sampleInfos = new HashMap();
     protected Map<String, ParameterInfo> _parameters = new LinkedHashMap();
+    protected List<CalibrationTable> _calibrationTables = new ArrayList();
     protected ScriptSettings _settings = new ScriptSettings();
     protected List<String> _warnings;
     protected List<CompensationMatrix> _compensationMatrices = new ArrayList();
@@ -44,6 +45,7 @@ abstract public class FlowJoWorkspace implements Serializable
     public class SampleInfo implements Serializable
     {
         Map<String, String> _keywords = new HashMap();
+        Map<String, ParameterInfo> _parameters;
         String _sampleId;
         String _compensationId;
 
@@ -152,6 +154,7 @@ abstract public class FlowJoWorkspace implements Serializable
         // This multiplier maps to the range that we actually use.
         public double multiplier;
         public double minValue;
+        public CalibrationTable calibrationTable;
     }
 
     static public FlowJoWorkspace readWorkspace(InputStream stream) throws Exception
@@ -224,6 +227,17 @@ abstract public class FlowJoWorkspace implements Serializable
         return null;
     }
 
+    static String getInnerText(Element el)
+    {
+        NodeList nl = el.getChildNodes();
+        StringBuilder ret = new StringBuilder();
+        for (int i = 0; i < nl.getLength(); i ++)
+        {
+            ret.append(nl.item(i).getNodeValue());
+        }
+        return ret.toString();
+    }
+
     // For some parameters, the actual range is 262144, but FlowJo coerces
     // the value to something between 0 and 4096.  This code is a bit of a
     // hack to try to detect that case.
@@ -238,6 +252,16 @@ abstract public class FlowJoWorkspace implements Serializable
             return 64;
         return 1;
     }
+
+    protected double getRange(Element elParameter)
+    {
+        if (StringUtils.isEmpty(elParameter.getAttribute("highValue")))
+        {
+            return 4096;
+        }
+        return Double.valueOf(elParameter.getAttribute("highValue")) * findMultiplier(elParameter);
+    }
+
     static public String cleanName(String name)
     {
         name = StringUtils.replace(name, "<", CompensationMatrix.PREFIX);
@@ -613,6 +637,91 @@ abstract public class FlowJoWorkspace implements Serializable
         {
             values.set(i, values.get(i) * multiplier);
         }
+    }
+
+    private CalibrationTable getCalibrationTable(String param)
+    {
+        if (param.startsWith(CompensationMatrix.PREFIX) && param.endsWith(CompensationMatrix.SUFFIX))
+        {
+            param = param.substring(CompensationMatrix.PREFIX.length(), param.length() - CompensationMatrix.SUFFIX.length());
+        }
+        ParameterInfo info = _parameters.get(param);
+        if (info == null)
+            return null;
+        return info.calibrationTable;
+    }
+
+    private double interpolate(double v1, double v2, CalibrationTable ct, int index, int count)
+    {
+        double i1 = ct.indexOf(v1);
+        double i2 = ct.indexOf(v2);
+        return ct.fromIndex(i2 * index / count + i1 * (count - index) / count);
+    }
+
+    /**
+     * Decide the number of points that it will be necessary to add to a line in a polygon so that LabKey's representation
+     * of the polygon will closely match FlowJo's interpretation.
+     * FlowJo makes their polygons have straight lines in the scaled (logarithmic) space.  In order to not have this
+     * introduce differences, LabKey interpolates the polygon points.
+     * We decide here that the number of points necessary to interpolate a diagonal line is the lesser of the following:
+     * a) 10
+     * b) The number of 64ths of the graph range that the line travels in the x and y directions
+     */
+
+    private int decideInterpCount(double v1, double v2, CalibrationTable ct)
+    {
+        double dScale = Math.abs(ct.indexOf(v1) - ct.indexOf(v2)) * 64 / ct.getRange();
+        if (dScale <= 1)
+            return 1;
+        return Math.min(10, (int) dScale);
+    }
+
+    protected void interpolateLine(List<Double> lstX, List<Double> lstY, double x1, double y1, double x2, double y2, CalibrationTable ctX, CalibrationTable ctY)
+    {
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+        if (dx == 0 || dy == 0)
+        {
+            lstX.add(x2);
+            lstY.add(y2);
+            return;
+        }
+
+        int interpCount = Math.min(decideInterpCount(x1, x2, ctX), decideInterpCount(y1, y2, ctY));
+        for (int i = 1; i <= interpCount; i ++)
+        {
+            lstX.add(interpolate(x1, x2, ctX, i, interpCount));
+            lstY.add(interpolate(y1, y2, ctY, i, interpCount));
+        }
+    }
+
+    /**
+     * FlowJo computes the polygon in transformed space.  LabKey applies the polygon to untransformed values.
+     * In order to ensure that the results we get are comparable, LabKey fills in the points along some of the diagonal
+     * lines of the polygon with extra points so as not to have an error.
+     */
+    protected PolygonGate interpolatePolygon(PolygonGate polygonGate)
+    {
+        CalibrationTable ctX = getCalibrationTable(polygonGate.getX());
+        CalibrationTable ctY = getCalibrationTable(polygonGate.getY());
+        if (ctX.isLinear() && ctY.isLinear())
+            return polygonGate;
+
+        List<Double> lstX = new ArrayList();
+        List<Double> lstY = new ArrayList();
+        Polygon polygon = polygonGate.getPolygon();
+        double x1 = polygon.X[polygon.len - 1];
+        double y1 = polygon.Y[polygon.len - 1];
+        for (int i = 0; i < polygon.len; i ++)
+        {
+            double x2 = polygon.X[i];
+            double y2 = polygon.Y[i];
+            interpolateLine(lstX, lstY, x1, y1, x2, y2, ctX, ctY);
+            x1 = x2;
+            y1 = y2;
+        }
+        polygon = new Polygon(lstX, lstY);
+        return new PolygonGate(polygonGate.getX(), polygonGate.getY(), polygon);
     }
 
     public FlowRun createExperimentRun(User user, Container container, FlowExperiment experiment, File workspaceFile, File runFilePathRoot) throws Exception

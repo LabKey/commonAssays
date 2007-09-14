@@ -11,6 +11,8 @@ import org.jfree.data.contour.ContourDataset;
 import org.jfree.data.Range;
 
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.Point2D;
+
 import org.labkey.flow.analysis.model.Polygon;
 import java.awt.*;
 import java.util.Iterator;
@@ -40,6 +42,40 @@ public class DensityPlot extends ContourPlot
         super(dataset, domainAxis, rangeAxis, colorBar);
     }
 
+    protected void drawLine(Graphics2D g2, Rectangle2D dataArea, double x1, double y1, double x2, double y2)
+    {
+        int nSegments = 10;
+        Point2D.Double prev = new Point2D.Double();
+        prev.x = getDomainAxis().valueToJava2D(x1, dataArea, RectangleEdge.BOTTOM);
+        prev.y = getRangeAxis().valueToJava2D(y1, dataArea, RectangleEdge.LEFT);
+        for (int i = 1; i <= nSegments; i ++)
+        {
+            double x = x2 * i / nSegments + x1 * (nSegments - i) / nSegments;
+            double y = y2 * i / nSegments + y1 * (nSegments - i) / nSegments;
+            Point2D.Double next = new Point2D.Double();
+            next.x = getDomainAxis().valueToJava2D(x, dataArea, RectangleEdge.BOTTOM);
+            next.y = getRangeAxis().valueToJava2D(y, dataArea, RectangleEdge.LEFT);
+            g2.drawLine((int) prev.x, (int) prev.y, (int) next.x, (int) next.y);
+            prev = next;
+        }
+    }
+
+    protected void drawPolygon(Graphics2D g2, Rectangle2D dataArea, PolygonData polygon)
+    {
+        int len = polygon._poly.X.length;
+        double x1 = polygon._poly.X[len - 1];
+        double y1 = polygon._poly.Y[len - 1];
+        for (int i = 0; i < len; i ++)
+        {
+            double x2 = polygon._poly.X[i];
+            double y2 = polygon._poly.Y[i];
+            drawLine(g2, dataArea, x1, y1, x2, y2);
+            x1 = x2;
+            y1 = y2;
+        }
+    }
+
+
     public void render(Graphics2D g2, Rectangle2D dataArea, PlotRenderingInfo info, CrosshairState crosshairState)
     {
         super.render(g2, dataArea, info, crosshairState);
@@ -47,14 +83,7 @@ public class DensityPlot extends ContourPlot
         for (Iterator it = _polyDatas.iterator(); it.hasNext();)
         {
             PolygonData data = (PolygonData) it.next();
-            int[] X = new int[data._poly.X.length];
-            int[] Y = new int[data._poly.Y.length];
-            for (int i = 0; i < data._poly.X.length; i ++)
-            {
-                X[i] = (int) getDomainAxis().valueToJava2D(data._poly.X[i], dataArea, RectangleEdge.BOTTOM);
-                Y[i] = (int) getRangeAxis().valueToJava2D(data._poly.Y[i], dataArea, RectangleEdge.LEFT);
-            }
-            g2.drawPolygon(X, Y, X.length);
+            drawPolygon(g2, dataArea, data);
         }
     }
 
