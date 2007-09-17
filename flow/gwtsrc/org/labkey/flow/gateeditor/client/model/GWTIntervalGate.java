@@ -8,11 +8,12 @@ public class GWTIntervalGate extends GWTGate
 
     public GWTIntervalGate()
     {
-        
+        super("interval");
     }
 
     public GWTIntervalGate(String axis, double minValue, double maxValue)
     {
+        this();
         this.axis = axis;
         this.minValue = minValue;
         this.maxValue = maxValue;
@@ -53,10 +54,10 @@ public class GWTIntervalGate extends GWTGate
         return true;
     }
 
-    public GWTGate close()
-    {
-        return new GWTIntervalGate(getAxis(), getMinValue(), getMaxValue());
-    }
+//    public GWTGate close()
+//    {
+//        return new GWTIntervalGate(getAxis(), getMinValue(), getMaxValue());
+//    }
 
     public boolean equals(Object other)
     {

@@ -17,11 +17,13 @@ public class GWTEllipseGate extends GWTGate
 
     public GWTEllipseGate()
     {
+        super("ellipse");
     }
 
-
+    
     public GWTEllipseGate(GWTEllipseGate copy)
     {
+        this();
         this.xAxis = copy.xAxis;
         this.yAxis = copy.yAxis;
 
@@ -38,6 +40,7 @@ public class GWTEllipseGate extends GWTGate
         assert this.equals(copy);
     }
 
+    
     /**
      * Note server side we store foci[] and distance
      * which works well for gating.  For editing we will use
@@ -47,6 +50,7 @@ public class GWTEllipseGate extends GWTGate
      */
     public GWTEllipseGate(String xAxis, String yAxis, double distance, double x0, double y0, double x1, double y1)
     {
+        this();
         this.xAxis = xAxis;
         this.yAxis = yAxis;
         centerX = (x0+x1)/2;
@@ -120,12 +124,12 @@ public class GWTEllipseGate extends GWTGate
     }
 
 
-    public GWTGate close()
-    {
-        GWTEllipseGate copy = new GWTEllipseGate(this);
-        copy.normalize();
-        return copy;
-    }
+//    public GWTGate close()
+//    {
+//        GWTEllipseGate copy = new GWTEllipseGate(this);
+//        copy.normalize();
+//        return copy;
+//    }
 
 
     //

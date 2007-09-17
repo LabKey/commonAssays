@@ -1,6 +1,5 @@
 package org.labkey.flow.gateeditor.client.model;
 
-import java.util.Arrays;
 
 public class GWTPolygonGate extends GWTGate implements Cloneable
 {
@@ -11,11 +10,12 @@ public class GWTPolygonGate extends GWTGate implements Cloneable
 
     public GWTPolygonGate()
     {
-        
+        super("polygon");
     }
 
     public GWTPolygonGate(String xAxis, double[] arrX, String yAxis, double[] arrY)
     {
+        this();
         this.xAxis = xAxis;
         this.arrX = arrX;
         this.yAxis = yAxis;
@@ -109,19 +109,19 @@ public class GWTPolygonGate extends GWTGate implements Cloneable
         return arrX.length;
     }
 
-    public GWTGate close()
-    {
-        if (length() < 2)
-            return this;
-        if (length() == 2)
-        {
-            return new GWTIntervalGate(this.xAxis, Math.min(arrX[0], arrX[1]), Math.max(arrX[0], arrX[1]));
-        }
-        else
-        {
-            return new GWTPolygonGate(this.xAxis, this.arrX, this.yAxis, this.arrY);
-        }
-    }
+//    public GWTGate close()
+//    {
+//        if (length() < 2)
+//            return this;
+//        if (length() == 2)
+//        {
+//            return new GWTIntervalGate(this.xAxis, Math.min(arrX[0], arrX[1]), Math.max(arrX[0], arrX[1]));
+//        }
+//        else
+//        {
+//            return new GWTPolygonGate(this.xAxis, this.arrX, this.yAxis, this.arrY);
+//        }
+//    }
 
     public GWTGate addPoint(GWTPoint point)
     {

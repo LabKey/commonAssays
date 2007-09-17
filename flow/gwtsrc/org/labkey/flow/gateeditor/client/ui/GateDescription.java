@@ -107,13 +107,17 @@ public class GateDescription extends GateComponent
 
     public void setGate(GWTGate gate)
     {
-        boolean editable = true;
+        boolean editable = null != gate;
+
         while (widget.getRowCount() > 0)
         {
             widget.removeRow(0);
         }
+
+        String caption = getPopulation().getFullName() + ((gate == null) ? "" : " - " + gate.getType());
+
         int row = -1;
-        widget.setText(++row, 0, getPopulation().getFullName());
+        widget.setText(++row, 0, caption);
         widget.getFlexCellFormatter().setColSpan(row, 0, 2);
         if (gate instanceof GWTIntervalGate)
         {
