@@ -137,6 +137,8 @@ flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/graph/GraphWidget.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/graph/GraphWindow.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/graph/Handle.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/ui/graph/TransparentEventImage.java -text
+flow/gwtsrc/org/labkey/flow/gateeditor/client/util/LogAxisFunction.java -text
+flow/gwtsrc/org/labkey/flow/gateeditor/client/util/RangeFunction.java -text
 flow/module.properties -text
 flow/src/META-INF/flow.xml -text
 flow/src/META-INF/flow/scripts/postgresql/flow-1.50-1.60.sql -text

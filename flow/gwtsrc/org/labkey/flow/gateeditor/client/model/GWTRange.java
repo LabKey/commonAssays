@@ -1,63 +1,33 @@
 package org.labkey.flow.gateeditor.client.model;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import org.labkey.flow.gateeditor.client.util.LogAxisFunction;
 
-public class GWTRange implements IsSerializable
+public class GWTRange extends LogAxisFunction implements IsSerializable
 {
     public double min;
     public double max;
     public boolean log;
-    public double logLinSwitch;
 
-    static private double log10(double value)
+    public GWTRange()   // for GWT serializablity
     {
-        return Math.log(value) / Math.log(10);
+        this(1);
+    }
+
+    public GWTRange(double logLinSwitch)
+    {
+        super(logLinSwitch);
     }
 
     public double adjustedLog10(double val)
     {
-        boolean neg = false;
-        if (val < 0)
-        {
-            neg = true;
-            val = -val;
-        }
-
-        double ret;
-        if (val < logLinSwitch)
-        {
-            ret = val / logLinSwitch / Math.log(10);
-        }
-        else
-        {
-            ret = log10(val) + (1 - Math.log(logLinSwitch)) / Math.log(10);
-
-        }
-        return neg ? -ret : ret;
+        return compute(val);
     }
 
     double adjustedPow10(double val)
     {
-        boolean neg = false;
-        if (val < 0)
-        {
-            neg = true;
-            val = - val;
-        }
-
-        double ret;
-        if (val < 1 / Math.log(10))
-        {
-            ret = val * logLinSwitch * Math.log(10);
-        }
-        else
-        {
-            ret = Math.pow(10, val - (1 - Math.log(logLinSwitch)) / Math.log(10));
-        }
-
-        return neg ? -ret : ret;
+        return invert(val);
     }
-
 
     public double toScreen(double val, double width)
     {
@@ -76,7 +46,6 @@ public class GWTRange implements IsSerializable
             return Math.round(value);
         return Math.round(value * 10) / 10;
     }
-
 
     public double toValue(double coor, double width)
     {
