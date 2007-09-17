@@ -1,22 +1,20 @@
 package org.labkey.flow.analysis.chart;
 
 import org.jfree.chart.axis.LogarithmicAxis;
-import org.jfree.chart.axis.NumberTick;
-import org.jfree.chart.axis.Tick;
 import org.jfree.ui.RectangleEdge;
-import org.jfree.ui.TextAnchor;
 import org.jfree.data.Range;
+import org.labkey.flow.gateeditor.client.util.LogAxisFunction;
 
-import java.util.List;
-import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.text.NumberFormat;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
 
+
 public class FlowLogarithmicAxis extends LogarithmicAxis
 {
     static public final int LOG_LIN_SWITCH = 50;
+    static LogAxisFunction fn = new LogAxisFunction(LOG_LIN_SWITCH);
 
     private class TickFormat extends NumberFormat
     {
@@ -72,43 +70,15 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
 
     static public double s_adjustedLog10(double val)
     {
-        boolean negFlag = (val < 0.0);
-        if (negFlag) {
-            val = -val;          // if negative then set flag and make positive
-        }
-        double ret;
-        if (val < LOG_LIN_SWITCH) {                // if < 10 then
-            ret = val / LOG_LIN_SWITCH / Math.log(10);
-        }
-        else
-        {
-            ret = Math.log10(val) + (1 - Math.log(LOG_LIN_SWITCH)) / Math.log(10);
-        }
-        //return value; negate if original value was negative:
-        return negFlag ? -ret
-                : ret;
+        return fn.compute(val);
     }
+
 
     static public double s_adjustedPow10(double val)
     {
-        boolean neg = false;
-        if (val < 0)
-        {
-            neg = true;
-            val = - val;
-        }
-        double ret;
-        if (val < 1 / Math.log(10))
-        {
-            ret = val * LOG_LIN_SWITCH * Math.log(10);
-        }
-        else
-        {
-            ret = Math.pow(10, val - (1 - Math.log(LOG_LIN_SWITCH)) / Math.log(10));
-        }
-
-        return neg ? -ret : ret;
+        return fn.invert(val);
     }
+
 
     /**
      * Converts a data value to a coordinate in Java2D space, assuming that
@@ -195,6 +165,4 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
             );
         }
     }
-
-
 }

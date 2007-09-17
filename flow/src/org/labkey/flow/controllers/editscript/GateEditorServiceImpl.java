@@ -537,11 +537,10 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
 
     private GWTRange makeRange(ValueAxis axis)
     {
-        GWTRange ret = new GWTRange();
+        GWTRange ret = new GWTRange(FlowLogarithmicAxis.LOG_LIN_SWITCH);
         ret.min = axis.getLowerBound();
         ret.max = axis.getUpperBound();
         ret.log = axis instanceof FlowLogarithmicAxis;
-        ret.logLinSwitch = FlowLogarithmicAxis.LOG_LIN_SWITCH;
         return ret;
     }
 
