@@ -560,7 +560,7 @@ public class ProjectController extends SpringActionController
 
             boolean includeSubfolders = "on".equals(getProperty("includeSubfolders", null));
 
-            HttpView results = new SearchResultsView(c, Search.ALL_MODULES, searchTerm, getSearchUrl(c), getUser(), includeSubfolders, true);
+            HttpView results = new SearchResultsView(c, Search.ALL_SEARCHABLES, searchTerm, getSearchUrl(c), getUser(), includeSubfolders, true);
 
             getPageConfig().setFocus("forms[0].search");
             getPageConfig().setTitle("Search Results");

@@ -3,7 +3,7 @@
 Search <%=what%> in this <%=(container.isProject() ? "project" : "folder") + (includeSubfolders ? " and all subfolders" : "")%>
 <table>
 <tr>
-    <td colspan=2><input type="text" name="search" value="<%=searchTerm%>"<%=width > 0 ? " size=\"" + width + "\"" : ""%>></td><%
+    <td colspan=2><input type="text" name="search" value="<%=PageFlowUtil.filter(searchTerm)%>"<%=width > 0 ? " size=\"" + width + "\"" : ""%>></td><%
 
     if (showSettings)
     { %>
