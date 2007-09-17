@@ -3,7 +3,7 @@ package org.labkey.luminex;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.ACL;
 import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.DefaultAssayProvider;
+import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.data.*;
@@ -36,7 +36,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     protected void addRunActionButtons(InsertView insertView, ButtonBar bbar)
     {
-        PropertyDescriptor[] analyteColumns = DefaultAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        PropertyDescriptor[] analyteColumns = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         if (analyteColumns.length == 0)
         {
             super.addRunActionButtons(insertView, bbar);
@@ -55,7 +55,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         {
             Map<String, String> result = new HashMap<String, String>();
             Analyte[] analytes = getAnalytes(form.getDataId());
-            PropertyDescriptor[] analyteColumns = DefaultAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+            PropertyDescriptor[] analyteColumns = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
 
             try
             {
@@ -94,7 +94,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     protected ModelAndView afterRunCreation(LuminexRunUploadForm form, ExperimentRun run) throws ServletException, SQLException
     {
-        PropertyDescriptor[] analyteColumns = DefaultAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        PropertyDescriptor[] analyteColumns = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         if (analyteColumns.length == 0)
         {
             return super.afterRunCreation(form, run);
@@ -119,7 +119,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         view.getDataRegion().addHiddenFormField("dataId", Integer.toString(dataRowId));
 
         Analyte[] analytes = getAnalytes(dataRowId);
-        PropertyDescriptor[] pds = DefaultAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        PropertyDescriptor[] pds = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         if (reshow && !form.isResetDefaultValues())
         {
             view.setInitialValues(getViewContext().getRequest().getParameterMap());

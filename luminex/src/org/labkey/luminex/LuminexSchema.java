@@ -8,12 +8,9 @@ import org.labkey.api.exp.api.ExpDataTable;
 import org.labkey.api.exp.Protocol;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.study.AssayService;
-import org.labkey.api.study.DefaultAssayProvider;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.DataView;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AbstractAssayProvider;
 
-import javax.servlet.ServletException;
 import java.util.*;
 import java.sql.Types;
 
@@ -75,7 +72,7 @@ public class LuminexSchema extends UserSchema
                 ExprColumn.STR_TABLE_ALIAS + ".lsid)";
 
         ColumnInfo colProperty = new ExprColumn(result, "Properties", new SQLFragment(sqlObjectId), Types.INTEGER);
-        PropertyDescriptor[] pds = DefaultAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        PropertyDescriptor[] pds = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         Map<String, PropertyDescriptor> map = new TreeMap<String, PropertyDescriptor>();
         for(PropertyDescriptor pd : pds)
         {
@@ -153,7 +150,7 @@ public class LuminexSchema extends UserSchema
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Ratio")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("SamplingErrors")));
 
-        FieldKey studyFieldKey = FieldKey.fromParts("Data", "Run", "Run Properties", DefaultAssayProvider.TARGET_STUDY_PROPERTY_NAME);
+        FieldKey studyFieldKey = FieldKey.fromParts("Data", "Run", "Run Properties", AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME);
         ColumnInfo studyColumn = QueryService.get().getColumns(result, Collections.singleton(studyFieldKey)).get(studyFieldKey);
 
         ExprColumn participantCol;

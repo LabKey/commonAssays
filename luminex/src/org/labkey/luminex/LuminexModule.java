@@ -6,7 +6,7 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.study.AssayService;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.apache.log4j.Logger;

@@ -1,6 +1,6 @@
 <%@ page import="org.labkey.nab.NabController"%>
 <%@ page import="org.labkey.api.study.WellGroup" %>
-<%@ page import="org.labkey.api.study.GenericAssayService" %>
+<%@ page import="org.labkey.api.study.assay.GenericAssayService" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
@@ -33,7 +33,7 @@ Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All
 <%
     for (org.labkey.api.study.WellGroup group : bean.getSampleInfoMap().keySet())
     {
-        GenericAssayService.SampleInfo sampleInfo = bean.getSampleInfoMap().get(group);
+        org.labkey.api.study.assay.GenericAssayService.SampleInfo sampleInfo = bean.getSampleInfoMap().get(group);
         String sequenceNumString = null;
         if (sampleInfo instanceof NabController.PublishSampleInfo)
             sequenceNumString = ((NabController.PublishSampleInfo) sampleInfo).getSequenceNumString();

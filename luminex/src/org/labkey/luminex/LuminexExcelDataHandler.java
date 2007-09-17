@@ -9,8 +9,8 @@ import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
-import org.labkey.api.study.AssayProvider;
-import org.labkey.api.study.AssayService;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssayService;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,8 +19,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.sql.SQLException;
-import java.sql.PreparedStatement;
-import java.sql.Types;
 
 import jxl.Workbook;
 import jxl.Sheet;

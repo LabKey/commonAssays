@@ -1,6 +1,6 @@
 package org.labkey.luminex;
 
-import org.labkey.api.study.*;
+import org.labkey.api.study.assay.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.property.DomainProperty;
@@ -28,7 +28,7 @@ import java.io.File;
  * User: jeckels
  * Date: Jul 13, 2007
  */
-public class LuminexAssayProvider extends DefaultAssayProvider
+public class LuminexAssayProvider extends AbstractAssayProvider
 {
     public static final String ASSAY_DOMAIN_ANALYTE = Protocol.ASSAY_DOMAIN_PREFIX + "Analyte";
     public static final String ASSAY_DOMAIN_EXCEL_RUN = Protocol.ASSAY_DOMAIN_PREFIX + "ExcelRun";
@@ -45,6 +45,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
 
     protected void registerLsidHandler()
     {
+        super.registerLsidHandler();
         LsidManager.get().registerHandler("LuminexDataRow", new LsidManager.LsidHandler()
         {
             public Identifiable getObject(Lsid lsid)
@@ -319,14 +320,6 @@ public class LuminexAssayProvider extends DefaultAssayProvider
         return FieldKey.fromParts("RowId");
     }
 
-    private PropertyDescriptor addPropertyDescriptor(String name, Container c, PropertyType type, Map<String, PropertyDescriptor> pds)
-    {
-        String uri = new Lsid("LuminexDataRowProperty", "Folder-" + c.getRowId(), name).toString();
-        PropertyDescriptor pd = new PropertyDescriptor(uri, type.getTypeUri(), name, c);
-        pds.put(pd.getName(), pd);
-        return pd;
-    }
-
     public ViewURLHelper publish(User user, Protocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
     {
         try
@@ -354,7 +347,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
             PropertyDescriptor[] runPDs = getRunPropertyColumns(protocol);
             PropertyDescriptor[] uploadSetPDs = getUploadSetColumns(protocol);
 
-            List<PropertyDescriptor> pds = new ArrayList();
+            List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
             pds.addAll(Arrays.asList(runPDs));
             pds.addAll(Arrays.asList(uploadSetPDs));
 
@@ -408,6 +401,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
                 {
                     ExpData data = ExperimentService.get().getExpData(luminexDataRow.getDataId());
                     run = data.getRun();
+                    runs.put(luminexDataRow.getDataId(), run);
                 }
                 addProperty(study, "Run Name", run.getName(), dataMap, types);
                 addProperty(study, "Run Comments", run.getComment(), dataMap, types);
@@ -419,6 +413,7 @@ public class LuminexAssayProvider extends DefaultAssayProvider
                 if (props == null)
                 {
                     props = OntologyManager.getPropertyObjects(run.getContainer().getId(), run.getLSID());
+                    runProperties.put(run, props);
                 }
                 for (PropertyDescriptor pd : pds)
                 {

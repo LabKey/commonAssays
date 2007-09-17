@@ -1,7 +1,7 @@
 package org.labkey.luminex;
 
 import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.DefaultAssayProvider;
+import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
 
@@ -46,7 +46,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm
 
     public Map<PropertyDescriptor, String> getAnalyteProperties(int analyteId)
     {
-        List<PropertyDescriptor> propertyDescriptors = Arrays.asList(DefaultAssayProvider.getPropertiesForDomainPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE));
+        List<PropertyDescriptor> propertyDescriptors = Arrays.asList(AbstractAssayProvider.getPropertiesForDomainPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE));
         return getAnalytePropertyMapFromRequest(propertyDescriptors, analyteId);
     }
 }
