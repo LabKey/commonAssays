@@ -12,10 +12,8 @@ import java.net.URI;
 import java.util.*;
 import java.util.List;
 import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.awt.*;
-import java.awt.geom.Point2D;
 
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.web.*;
@@ -210,8 +208,8 @@ public class FlowAnalyzer
 
     static public void fillPolygonGate(PolygonDef polygonDef, PolygonGate polygonGate)
     {
-        polygonDef.setXAxis(polygonGate.getX());
-        polygonDef.setYAxis(polygonGate.getY());
+        polygonDef.setXAxis(polygonGate.getXAxis());
+        polygonDef.setYAxis(polygonGate.getYAxis());
         Polygon polygon = polygonGate.getPolygon();
         for (int i = 0; i < polygon.len; i ++)
         {
@@ -223,7 +221,7 @@ public class FlowAnalyzer
 
     static public void fillIntervalGate(IntervalDef intervalDef, IntervalGate intervalGate)
     {
-        intervalDef.setAxis(intervalGate.getAxis());
+        intervalDef.setAxis(intervalGate.getXAxis());
         intervalDef.setMin(intervalGate.getMin());
         intervalDef.setMax(intervalGate.getMax());
     }

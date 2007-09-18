@@ -702,8 +702,8 @@ abstract public class FlowJoWorkspace implements Serializable
      */
     protected PolygonGate interpolatePolygon(PolygonGate polygonGate)
     {
-        CalibrationTable ctX = getCalibrationTable(polygonGate.getX());
-        CalibrationTable ctY = getCalibrationTable(polygonGate.getY());
+        CalibrationTable ctX = getCalibrationTable(polygonGate.getXAxis());
+        CalibrationTable ctY = getCalibrationTable(polygonGate.getYAxis());
         if (ctX.isLinear() && ctY.isLinear())
             return polygonGate;
 
@@ -721,7 +721,7 @@ abstract public class FlowJoWorkspace implements Serializable
             y1 = y2;
         }
         polygon = new Polygon(lstX, lstY);
-        return new PolygonGate(polygonGate.getX(), polygonGate.getY(), polygon);
+        return new PolygonGate(polygonGate.getXAxis(), polygonGate.getYAxis(), polygon);
     }
 
     public FlowRun createExperimentRun(User user, Container container, FlowExperiment experiment, File workspaceFile, File runFilePathRoot) throws Exception

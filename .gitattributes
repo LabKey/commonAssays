@@ -199,6 +199,7 @@ flow/src/org/labkey/flow/analysis/model/Polygon.java -text
 flow/src/org/labkey/flow/analysis/model/PolygonGate.java -text
 flow/src/org/labkey/flow/analysis/model/Population.java -text
 flow/src/org/labkey/flow/analysis/model/PopulationSet.java -text
+flow/src/org/labkey/flow/analysis/model/RegionGate.java -text
 flow/src/org/labkey/flow/analysis/model/SampleCriteria.java -text
 flow/src/org/labkey/flow/analysis/model/ScalingFunction.java -text
 flow/src/org/labkey/flow/analysis/model/ScriptComponent.java -text

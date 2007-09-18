@@ -7,12 +7,10 @@ import java.util.BitSet;
 import java.util.List;
 
 import org.labkey.flow.analysis.data.NumberArray;
-import org.labkey.api.util.ExceptionUtil;
-import org.labkey.api.util.MothershipReport;
 
 /**
  */
-public class PolygonGate extends Gate
+public class PolygonGate extends RegionGate
 {
     String _strX;
     String _strY;
@@ -47,12 +45,12 @@ public class PolygonGate extends Gate
         return ret;
     }
 
-    public String getX()
+    public String getXAxis()
     {
         return _strX;
     }
 
-    public String getY()
+    public String getYAxis()
     {
         return _strY;
     }
@@ -61,6 +59,7 @@ public class PolygonGate extends Gate
     {
         return _poly;
     }
+
 
     static public PolygonGate readPolygon(Element elPolygon)
     {
@@ -77,6 +76,7 @@ public class PolygonGate extends Gate
         return ret;
     }
 
+
     public int hashCode()
     {
         int ret = super.hashCode();
@@ -85,6 +85,7 @@ public class PolygonGate extends Gate
         ret ^= _poly.hashCode();
         return ret;
     }
+
 
     public boolean equals(Object other)
     {
@@ -100,24 +101,26 @@ public class PolygonGate extends Gate
         return true;
     }
 
+
     public void getPolygons(List<Polygon> list, String xAxis, String yAxis)
     {
         double[] X = null;
         double[] Y = null;
-        if (getX().equals(xAxis))
+        if (getXAxis().equals(xAxis))
             X = getPolygon().X;
-        else if (getY().equals(xAxis))
+        else if (getYAxis().equals(xAxis))
             X = getPolygon().Y;
 
-        if (getX().equals(yAxis))
+        if (getXAxis().equals(yAxis))
             Y = getPolygon().X;
-        else if (getY().equals(yAxis))
+        else if (getYAxis().equals(yAxis))
             Y = getPolygon().Y;
 
         if (X == null || Y == null)
             return;
         list.add(new Polygon(X, Y));
     }
+
 
     public boolean requiresCompensationMatrix()
     {

@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.List;
 import java.io.Serializable;
 
-public class EllipseGate extends Gate
+public class EllipseGate extends RegionGate
 {
     String xAxis;
     String yAxis;

@@ -10,6 +10,7 @@ abstract public class GateList extends Gate
     {
         return _gates;
     }
+
     public void addGate(Gate gate)
     {
         _gates.add(gate);
@@ -22,6 +23,7 @@ abstract public class GateList extends Gate
             gate.getPolygons(list, xAxis, yAxis);
         }
     }
+
     public boolean requiresCompensationMatrix()
     {
         for (Gate gate : _gates)

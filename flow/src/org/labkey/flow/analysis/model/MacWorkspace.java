@@ -6,8 +6,6 @@ import org.w3c.dom.Node;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
-import java.net.URI;
-import java.awt.geom.Point2D;
 
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
@@ -300,7 +298,7 @@ public class MacWorkspace extends FlowJoWorkspace
                 {
                     PolygonGate gate = readPolygon(el);
                     ret.addGate(gate);
-                    analysis.addGraph(new GraphSpec(parentSubset, gate.getX(), gate.getY()));
+                    analysis.addGraph(new GraphSpec(parentSubset, gate.getXAxis(), gate.getYAxis()));
                 }
                 else if ("Range".equals(el.getTagName()))
                 {
@@ -317,7 +315,7 @@ public class MacWorkspace extends FlowJoWorkspace
                     scaleValues(axis, lstValues);
                     IntervalGate gate = new IntervalGate(axis, lstValues.get(0), lstValues.get(1));
                     ret.addGate(gate);
-                    analysis.addGraph(new GraphSpec(parentSubset, gate.getAxis()));
+                    analysis.addGraph(new GraphSpec(parentSubset, gate.getXAxis()));
                 }
                 else if ("Ellipse".equals(el.getTagName()))
                 {
@@ -327,9 +325,9 @@ public class MacWorkspace extends FlowJoWorkspace
                     {
                         vertices[i] = new EllipseGate.Point(polygon.getPolygon().X[i], polygon.getPolygon().Y[i]);
                     }
-                    EllipseGate gate = EllipseGate.fromVertices(polygon.getX(), polygon.getY(), vertices);
+                    EllipseGate gate = EllipseGate.fromVertices(polygon.getXAxis(), polygon.getYAxis(), vertices);
                     ret.addGate(gate);
-                    analysis.addGraph(new GraphSpec(parentSubset, polygon.getX(), polygon.getY()));
+                    analysis.addGraph(new GraphSpec(parentSubset, polygon.getXAxis(), polygon.getYAxis()));
                 }
             }
         }

@@ -9,7 +9,7 @@ import org.labkey.flow.analysis.data.NumberArray;
 
 /**
  */
-public class IntervalGate extends Gate
+public class IntervalGate extends RegionGate
 {
     String _axis;
     double _min;
@@ -21,6 +21,7 @@ public class IntervalGate extends Gate
         _min = min;
         _max = max;
     }
+
 
     public BitSet apply(DataFrame data)
     {
@@ -36,20 +37,30 @@ public class IntervalGate extends Gate
         return ret;
     }
 
-    public String getAxis()
+
+    public String getXAxis()
     {
         return _axis;
     }
+
+
+    public String getYAxis()
+    {
+        return null;
+    }
+
 
     public double getMin()
     {
         return _min;
     }
 
+
     public double getMax()
     {
         return _max;
     }
+
 
     static public IntervalGate readInterval(Element el)
     {
@@ -57,10 +68,12 @@ public class IntervalGate extends Gate
         return ret;
     }
 
+
     public int hashCode()
     {
         return super.hashCode() ^ _axis.hashCode() ^ Double.valueOf(_max).hashCode() ^ Double.valueOf(_min).hashCode();
     }
+
 
     public boolean equals(Object other)
     {
@@ -71,6 +84,7 @@ public class IntervalGate extends Gate
             return false;
         return this._max == gate._max && this._min == gate._min;
     }
+
 
     public void getPolygons(List<Polygon> polys, String xAxis, String yAxis)
     {
@@ -98,6 +112,7 @@ public class IntervalGate extends Gate
         }
         polys.add(new Polygon(X, Y));
     }
+
 
     public boolean requiresCompensationMatrix()
     {

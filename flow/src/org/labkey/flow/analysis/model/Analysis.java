@@ -5,7 +5,6 @@ import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 
 import java.util.*;
-import java.io.Serializable;
 
 public class Analysis extends ScriptComponent
 {
@@ -144,13 +143,13 @@ public class Analysis extends ScriptComponent
             if (gate instanceof PolygonGate)
             {
                 PolygonGate poly = (PolygonGate) gate;
-                GraphSpec graph = new GraphSpec(parent, poly.getX(), poly.getY());
+                GraphSpec graph = new GraphSpec(parent, poly.getXAxis(), poly.getYAxis());
                 graphs.add(graph);
             }
             else if (gate instanceof IntervalGate)
             {
                 IntervalGate interval = (IntervalGate) gate;
-                GraphSpec graph = new GraphSpec(parent, interval.getAxis());
+                GraphSpec graph = new GraphSpec(parent, interval.getXAxis());
                 graphs.add(graph);
             }
         }

@@ -859,7 +859,7 @@ public class ScriptController extends BaseFlowController
         }
         BufferedImage image = info.getImage();
         Gate gate = gateFromPoints(form.xAxis, form.yAxis, form.ptX, form.ptY, form.open);
-        image = addSelection(image, info, gate, !form.open, true);
+        image = addSelection(image, info, gate, !form.open, true, form.xAxis, form.yAxis);
         SubsetSpec subset = SubsetSpec.fromString(form.subset);
         SubsetSpec parent = subset.getParent();
         PopulationSet popset;
@@ -875,34 +875,41 @@ public class ScriptController extends BaseFlowController
         {
             for (Population childPop : popset.getPopulations())
             {
-                if (childPop.getName().equals(subset.getSubset()))
-                    continue;
                 if (childPop.getGates().size() != 1)
                     continue;
-                if (!(childPop.getGates().get(0) instanceof PolygonGate))
+                if (!(childPop.getGates().get(0) instanceof RegionGate))
                     continue;
-                PolygonGate polyGate = (PolygonGate) childPop.getGates().get(0);
-                if (StringUtils.equals(polyGate.getX(), form.xAxis) && StringUtils.equals(polyGate.getY(), form.yAxis))
+                RegionGate regionGate = (RegionGate) childPop.getGates().get(0);
+                
+                // PolygonGates are editable, skip if it is being edited
+                if (childPop.getName().equals(subset.getSubset()) && gate instanceof PolygonGate)
+                    continue;
+
+                if (StringUtils.equals(regionGate.getXAxis(), form.xAxis) && (regionGate.getYAxis()==null||StringUtils.equals(regionGate.getYAxis(), form.yAxis)))
                 {
                     // nothing to do
                 }
-                else if (StringUtils.equals(polyGate.getY(), form.yAxis) && StringUtils.equals(polyGate.getX(), form.yAxis))
+                else if (StringUtils.equals(regionGate.getXAxis(), form.yAxis) && (regionGate.getYAxis()==null||StringUtils.equals(regionGate.getYAxis(), form.xAxis)))
                 {
-                    Polygon newPoly = new Polygon(polyGate.getPolygon().Y, polyGate.getPolygon().X);
-                    polyGate = new PolygonGate(polyGate.getY(), polyGate.getX(), newPoly);
+                    if (regionGate instanceof PolygonGate)
+                    {
+                    Polygon newPoly = new Polygon(((PolygonGate)regionGate).getPolygon().Y, ((PolygonGate)regionGate).getPolygon().X);
+                    regionGate = new PolygonGate(regionGate.getYAxis(), regionGate.getXAxis(), newPoly);
+                    }
                 }
                 else
                 {
                     // doesn't match
                     continue;
                 }
-                image = addSelection(image, info, polyGate, true, false);
+                image = addSelection(image, info, regionGate, true, false, form.xAxis, form.yAxis);
             }
         }
         return streamImage(image);
     }
 
-    protected BufferedImage addSelection(BufferedImage imageIn, PlotInfo info, Gate gate, boolean closePoly, boolean primaryGate)
+
+    protected BufferedImage addSelection(BufferedImage imageIn, PlotInfo info, Gate gate, boolean closePoly, boolean primaryGate, String xAxis, String yAxis)
     {
         if (gate == null)
             return imageIn;
@@ -910,10 +917,23 @@ public class ScriptController extends BaseFlowController
         imageIn.copyData(image.getRaster());
         Graphics2D g = image.createGraphics();
         g.setColor(primaryGate ? Color.BLACK : Color.GRAY);
-        if (gate instanceof PolygonGate)
+        if (gate instanceof RegionGate)
         {
-            PolygonGate polyGate = (PolygonGate) gate;
-            Polygon polygon = polyGate.getPolygon();
+            RegionGate regionGate = (RegionGate) gate;
+            Polygon polygon;
+
+            if (regionGate instanceof PolygonGate)
+            {
+                polygon = ((PolygonGate)regionGate).getPolygon();
+            }
+            else
+            {
+                List<Polygon> list = new ArrayList<Polygon>();
+                gate.getPolygons(list, xAxis, yAxis);
+                if (list.size() != 1)
+                    return imageIn;
+                polygon = list.get(0);
+            }
             Point[] pts = new Point[polygon.X.length];
             for (int i = 0; i < pts.length; i ++)
             {
