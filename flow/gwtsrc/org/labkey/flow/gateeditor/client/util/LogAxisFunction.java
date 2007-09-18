@@ -10,16 +10,16 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class LogAxisFunction implements RangeFunction, IsSerializable
 {
-    final double logLinSwitch;
-
+    // can't use final keyword, it breaks GWT serialization
+    private double logLinSwitch;
     // precomputed constants
-    final double intersect;
-    final double scale;
-    final double adjust;
+    private double intersect;
+    private double scale;
+    private double adjust;
 
     public LogAxisFunction() // required for GWT serializability
     {
-        this(1);
+        this(-1);
     }
 
     public LogAxisFunction(double logLinSwitch)
@@ -33,6 +33,7 @@ public class LogAxisFunction implements RangeFunction, IsSerializable
 
     public double compute(double val)
     {
+        if (logLinSwitch < 0) throw new IllegalStateException("logLinSwitch not set");
         double sign = signum(val);
         val = Math.abs(val);
         if (val < logLinSwitch)
@@ -43,6 +44,7 @@ public class LogAxisFunction implements RangeFunction, IsSerializable
 
     public double invert(double val)
     {
+        if (logLinSwitch < 0) throw new IllegalStateException("logLinSwitch not set");
         double sign = signum(val);
         val = Math.abs(val);
         if (val < intersect)
