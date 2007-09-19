@@ -22,6 +22,7 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.util.PageFlowUtil;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -31,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 
-import org.labkey.flow.util.PFUtil;
 import org.labkey.flow.controllers.well.WellController;
 
 /**
@@ -48,7 +48,7 @@ public class GraphView extends GridView
         try
         {
             int wellId = (Integer) ctx.getRow().get("RowId");
-            ViewURLHelper src = PFUtil.urlFor(WellController.Action.showGraph, ctx.getContainer().getPath());
+            ViewURLHelper src = PageFlowUtil.urlFor(WellController.Action.showGraph, ctx.getContainer().getPath());
             src.addParameter("wellId", Integer.toString(wellId));
             src.addParameter("graph", description);
             out.write("<img src=\"" + src + "\">");

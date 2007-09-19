@@ -2,7 +2,7 @@
 <%@ page import="java.util.Map"%>
 <%@ page import="org.labkey.api.query.FieldKey"%>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.Action"%>
-<%@ page import="org.labkey.flow.util.PFUtil"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% JoinSampleSetForm form = (JoinSampleSetForm) __form;
@@ -17,10 +17,10 @@
         <% for (int i = 0; i < form.ff_samplePropertyURI.length; i ++)
         { %>
         <tr><td>
-            <%=PFUtil.strSelect("ff_samplePropertyURI", sampleKeyFields, form.ff_samplePropertyURI[i]) %>
+            <%=PageFlowUtil.strSelect("ff_samplePropertyURI", sampleKeyFields, form.ff_samplePropertyURI[i]) %>
         </td>
             <td>
-                <%=PFUtil.strSelect("ff_dataField", dataKeyFields, form.ff_dataField[i])%>
+                <%=org.labkey.api.util.PageFlowUtil.strSelect("ff_dataField", dataKeyFields, form.ff_dataField[i])%>
             </td>
         </tr>
         <% } %>

@@ -8,12 +8,12 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
 import org.labkey.api.view.*;
 import org.labkey.api.util.HelpTopic;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.data.FlowObject;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.script.ScriptJob;
-import org.labkey.flow.util.PFUtil;
 import org.labkey.flow.webparts.FlowFolderType;
 
 import javax.servlet.ServletException;
@@ -73,7 +73,7 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
         }
         else
         {
-            ViewURLHelper url = PFUtil.urlFor(FlowController.Action.begin, context.getContainer().getPath());
+            ViewURLHelper url = PageFlowUtil.urlFor(FlowController.Action.begin, context.getContainer().getPath());
             children.add(0, new NavTree(FlowModule.getShortProductName(), url.clone()));
         }
 
@@ -85,7 +85,7 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
         }
         ntc.setExtraChildren(children.toArray(new NavTree[0]));
         ntc.setTitle(title);
-        ntc.setHelpTopic(new HelpTopic(PFUtil.helpTopic(action), HelpTopic.Area.FLOW));
+        ntc.setHelpTopic(new HelpTopic(PageFlowUtil.helpTopic(action), HelpTopic.Area.FLOW));
         return ntc;
 
     }
@@ -126,7 +126,7 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
 
         public ViewURLHelper urlFor(Enum action) throws ServletException
         {
-            return PFUtil.urlFor(action, getContainer().getPath());
+            return PageFlowUtil.urlFor(action, getContainer().getPath());
         }
 
     }

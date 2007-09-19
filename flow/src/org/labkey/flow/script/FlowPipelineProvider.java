@@ -6,7 +6,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.security.ACL;
-import org.labkey.flow.util.PFUtil;
+import org.labkey.api.util.PageFlowUtil;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -105,7 +105,7 @@ public class FlowPipelineProvider extends PipelineProvider
         {
             FileEntry entry = entries.get(0);
             File file = new File(entry.getURI());
-            ViewURLHelper url = PFUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer());
+            ViewURLHelper url = PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer());
 
             url.addParameter("path", root.relativePath(file));
             url.addParameter("srcURL", context.getViewURLHelper().toString());

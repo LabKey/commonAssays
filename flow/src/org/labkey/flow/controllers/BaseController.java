@@ -2,13 +2,13 @@ package org.labkey.flow.controllers;
 
 import org.labkey.api.view.ViewController;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.flow.util.PFUtil;
+import org.labkey.api.util.PageFlowUtil;
 
 abstract public class BaseController<A extends Enum, P extends Enum> extends ViewController
 {
     public ViewURLHelper urlFor(Enum action)
     {
-        return PFUtil.urlFor(action, getContainerPath());
+        return PageFlowUtil.urlFor(action, getContainerPath());
     }
 
     protected int getIntParam(P param)

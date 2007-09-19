@@ -1,11 +1,11 @@
 
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToAnalyzeForm" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsView" %>
-<%@ page import="org.labkey.flow.util.PFUtil" %>
 <%@ page import="java.util.*" %>
 <%@ page import="org.labkey.flow.data.*"%>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController"%>
 <%@ page import="org.labkey.flow.analysis.model.PopulationSet"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <style type="text/css">
@@ -17,7 +17,7 @@
 <%!
     String select(String name, Object curVal, Collection<? extends FlowObject> objs, String nullLabel)
     {
-        return PFUtil.strSelect(name, FlowObject.idLabelsFor(objs, nullLabel), curVal);
+        return PageFlowUtil.strSelect(name, FlowObject.idLabelsFor(objs, nullLabel), curVal);
     }
 %>
 <% ChooseRunsToAnalyzeForm form = (ChooseRunsToAnalyzeForm) __form;
@@ -28,7 +28,7 @@
     PopulationSet analysis = form.getProtocol().getCompensationCalcOrAnalysis(form.getProtocolStep());
 %>
 <labkey:errors/>
-<form class="normal" method="POST" action="<%=PFUtil.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, getContainer())%>">
+<form class="normal" method="POST" action="<%=org.labkey.api.util.PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, getContainer())%>">
     <table>
         <tr><td>Analysis script to use:</td>
             <td><select name="scriptId" onchange="this.form.submit()">

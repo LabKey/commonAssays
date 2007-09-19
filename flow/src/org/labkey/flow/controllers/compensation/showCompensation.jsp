@@ -11,7 +11,7 @@
 <%@ page import="org.labkey.api.jsp.JspLoader"%>
 <%@ page import="org.labkey.flow.view.GraphView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.flow.util.PFUtil" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%!
     String compImg(FlowWell well, String param) throws Exception
@@ -59,7 +59,7 @@
     <%}%>
     <% for (int iChannel = 0; iChannel <= channelCount; iChannel ++)
     {
-        %><td style="border-top:solid 1px #AAAAAA;"><%=PFUtil._gif(1,80)%></td><%
+        %><td style="border-top:solid 1px #AAAAAA;"><%=org.labkey.api.util.PageFlowUtil._gif(1, 80)%></td><%
     }%>
 </table>
 

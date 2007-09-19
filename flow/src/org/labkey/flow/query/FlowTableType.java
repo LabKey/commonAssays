@@ -1,6 +1,5 @@
 package org.labkey.flow.query;
 
-import org.labkey.flow.util.PFUtil;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.view.FlowQueryView;
 import org.labkey.api.view.ViewURLHelper;

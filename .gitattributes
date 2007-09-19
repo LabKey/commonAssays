@@ -367,7 +367,6 @@ flow/src/org/labkey/flow/script/KeywordsHandler.java -text
 flow/src/org/labkey/flow/script/MoveRunFromWorkspaceJob.java -text
 flow/src/org/labkey/flow/script/ScriptJob.java -text
 flow/src/org/labkey/flow/script/ScriptXarSource.java -text
-flow/src/org/labkey/flow/util/PFUtil.java -text
 flow/src/org/labkey/flow/view/FlowQueryView.java -text
 flow/src/org/labkey/flow/view/GraphColumn.java -text
 flow/src/org/labkey/flow/view/GraphView.java -text

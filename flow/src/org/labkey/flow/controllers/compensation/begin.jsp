@@ -1,7 +1,7 @@
 <%@ page import="org.labkey.flow.controllers.compensation.CompensationController.Action"%>
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix"%>
-<%@ page import="org.labkey.flow.util.PFUtil"%>
 <%@ page import="java.util.List"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
@@ -16,5 +16,5 @@
     <% } %>
 </table>
 <% } %>
-<labkey:link href="<%=PFUtil.urlFor(Action.upload, getContainer())%>" text="Upload a new compensation matrix" />
+<labkey:link href="<%=PageFlowUtil.urlFor(Action.upload, getContainer())%>" text="Upload a new compensation matrix" />
 

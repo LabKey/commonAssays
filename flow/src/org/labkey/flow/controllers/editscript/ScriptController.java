@@ -29,7 +29,6 @@ import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.FlowAnalyzer;
-import org.labkey.flow.util.PFUtil;
 import org.w3c.dom.Element;
 
 import javax.imageio.ImageIO;
@@ -78,7 +77,7 @@ public class ScriptController extends BaseFlowController
         FlowScript script = form.analysisScript;
         if (script == null)
         {
-            return new ViewForward(PFUtil.urlFor(FlowController.Action.begin, getContainer()));
+            return new ViewForward(PageFlowUtil.urlFor(FlowController.Action.begin, getContainer()));
         }
         return new ViewForward(script.urlShow());
     }
@@ -1307,7 +1306,7 @@ public class ScriptController extends BaseFlowController
         {
             ExpData protocol = form.analysisScript.getExpObject();
             protocol.delete(getUser());
-            return new ViewForward(PFUtil.urlFor(FlowController.Action.begin, getContainer()));
+            return new ViewForward(PageFlowUtil.urlFor(FlowController.Action.begin, getContainer()));
         }
         return renderInTemplate(getPage("delete.jsp", form), "Confirm Delete", Action.delete);
     }

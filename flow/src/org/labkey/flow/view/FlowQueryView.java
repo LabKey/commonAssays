@@ -21,7 +21,6 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.query.FlowQueryForm;
 import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
-import org.labkey.flow.util.PFUtil;
 import org.labkey.flow.webparts.FlowFolderType;
 
 import java.io.PrintWriter;
@@ -182,7 +181,7 @@ public class FlowQueryView extends QueryView
         }
         else
         {
-            children.add(0, new NavTree(FlowModule.getShortProductName(), PFUtil.urlFor(FlowController.Action.begin, getContainer())));
+            children.add(0, new NavTree(FlowModule.getShortProductName(), PageFlowUtil.urlFor(FlowController.Action.begin, getContainer())));
         }
         if (run != null)
         {

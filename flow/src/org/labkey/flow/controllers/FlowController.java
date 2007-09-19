@@ -23,7 +23,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionError;
 import org.labkey.flow.script.*;
 import org.labkey.flow.view.JobStatusView;
-import org.labkey.flow.util.PFUtil;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.webparts.FlowFolderType;
@@ -257,7 +256,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
                 }
             }
         }
-        ViewURLHelper forward = PFUtil.urlFor(Action.begin, destContainer);
+        ViewURLHelper forward = PageFlowUtil.urlFor(Action.begin, destContainer);
         return new ViewForward(forward);
     }
 

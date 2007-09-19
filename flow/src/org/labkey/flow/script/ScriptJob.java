@@ -9,7 +9,6 @@ import org.labkey.flow.data.*;
 import org.labkey.flow.data.FlowDataType;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.flow.FlowSettings;
-import org.labkey.flow.util.PFUtil;
 import org.fhcrc.cpas.exp.xml.*;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpRun;
@@ -630,7 +629,7 @@ abstract public class ScriptJob extends PipelineJob
         logFile.createNewFile();
 
         File statusFile = logFile;
-        _statusHref = PFUtil.urlFor(FlowController.Action.showStatusJob, getContainer());
+        _statusHref = PageFlowUtil.urlFor(FlowController.Action.showStatusJob, getContainer());
         _statusHref.addParameter(FlowParam.statusFile.toString(), PipelineStatusManager.getStatusFilePath(statusFile.toString()));
         setStatusFile(statusFile);
         setLogFile(logFile);
@@ -741,7 +740,7 @@ abstract public class ScriptJob extends PipelineJob
 
     public ViewURLHelper urlCancel()
     {
-        ViewURLHelper ret = PFUtil.urlFor(FlowController.Action.cancelJob, getContainer());
+        ViewURLHelper ret = PageFlowUtil.urlFor(FlowController.Action.cancelJob, getContainer());
         ret.addParameter(FlowParam.statusFile.toString(), getStatusFilePath());
         return ret;
     }

@@ -5,12 +5,12 @@
 <%@ page import="org.labkey.flow.controllers.well.ChooseGraphForm" %>
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
-<%@ page import="org.labkey.flow.util.PFUtil" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ page import="org.labkey.flow.data.FlowWell" %>
 <%@ page import="java.util.*" %>
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page import="org.labkey.flow.controllers.FlowParam" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -170,14 +170,14 @@
         String[] params;
         if (form.getYaxis() != null)
         {
-            params = new String[] { form.getXaxis(), form.getYaxis() };
+            params = new String[]{form.getXaxis(), form.getYaxis()};
         }
         else
         {
-            params = new String[] { form.getXaxis() };
+            params = new String[]{form.getXaxis()};
         }
         GraphSpec graphspec = new GraphSpec(SubsetSpec.fromString(form.getSubset()), params);
-        ViewURLHelper urlGenerateGraph = PFUtil.urlFor(WellController.Action.generateGraph, getContainer());
+        ViewURLHelper urlGenerateGraph = org.labkey.api.util.PageFlowUtil.urlFor(WellController.Action.generateGraph, getContainer());
         well.addParams(urlGenerateGraph);
         if (script != null)
         {

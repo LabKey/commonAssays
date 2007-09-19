@@ -4,12 +4,12 @@ import org.labkey.flow.view.FlowQueryView;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowTableType;
-import org.labkey.flow.util.PFUtil;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.security.ACL;
+import org.labkey.api.util.PageFlowUtil;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
     {
         if (!getViewContext().hasPermission(ACL.PERM_UPDATE))
             return;
-        ActionButton btnNewScript = new ActionButton("Create New Analysis Script", PFUtil.urlFor(ScriptController.Action.newProtocol, getContainer()));
+        ActionButton btnNewScript = new ActionButton("Create New Analysis Script", PageFlowUtil.urlFor(ScriptController.Action.newProtocol, getContainer()));
         bar.add(btnNewScript);
         return;
     }

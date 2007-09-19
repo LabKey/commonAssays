@@ -5,10 +5,10 @@ import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.log4j.Logger;
 import org.labkey.flow.data.*;
 import org.labkey.flow.view.FlowQueryView;
-import org.labkey.flow.util.PFUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.jsp.FormPage;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
@@ -123,7 +123,7 @@ public class RunController extends BaseFlowController<RunController.Action>
     @Jpf.Action
     protected Forward details() throws Exception
     {
-        ViewURLHelper forward = PFUtil.urlFor(Action.showRun, getContainer());
+        ViewURLHelper forward = PageFlowUtil.urlFor(Action.showRun, getContainer());
         forward.addParameter(FlowParam.runId.toString(), getViewURLHelper().getParameter("Runs.RunId~eq"));
         return new ViewForward(forward);
     }

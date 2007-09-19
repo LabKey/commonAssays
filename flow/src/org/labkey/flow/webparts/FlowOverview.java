@@ -11,6 +11,7 @@ import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.Overview;
 import org.labkey.api.query.QueryAction;
 import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.controllers.FlowModule;
@@ -23,7 +24,6 @@ import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.query.FlowTableType;
-import org.labkey.flow.util.PFUtil;
 
 public class FlowOverview extends Overview
 {
@@ -108,14 +108,14 @@ public class FlowOverview extends Overview
             int jobCount = jobData.getPendingJobs().size() + jobData.getRunningJobs().size();
             if (jobCount != 0)
             {
-                Action action = new Action("Show jobs", PFUtil.urlFor(FlowController.Action.showJobs, getContainer()));
+                Action action = new Action("Show jobs", PageFlowUtil.urlFor(FlowController.Action.showJobs, getContainer()));
                 action.setDescriptionHTML("There are " + jobCount + " jobs running in this folder.");
                 addAction(action);
             }
         }
         if (_hasPipelineRoot && _canCreateFolder && _protocol != null)
         {
-            Action action = new Action("Create new folder", PFUtil.urlFor(FlowController.Action.newFolder, getContainer()));
+            Action action = new Action("Create new folder", PageFlowUtil.urlFor(FlowController.Action.newFolder, getContainer()));
             action.setDescriptionHTML("<i>If you want to analyze a new set of experiment runs with a different protocol, you should create a new folder to do this work in. You can copy some of the settings from this folder.</i>");
             addAction(action);
         }
@@ -243,7 +243,7 @@ public class FlowOverview extends Overview
                 ret.setStatusHTML(statusHTML);
             }
         }
-        ret.addAction(new Action("Create a new Analysis script", PFUtil.urlFor(ScriptController.Action.newProtocol, getContainer())));
+        ret.addAction(new Action("Create a new Analysis script", PageFlowUtil.urlFor(ScriptController.Action.newProtocol, getContainer())));
         return ret;
     }
 
@@ -294,7 +294,7 @@ public class FlowOverview extends Overview
             {
                 statusHTML.append("<br>");
             }
-            ViewURLHelper urlFlowComp = PFUtil.urlFor(CompensationController.Action.begin, getContainer());
+            ViewURLHelper urlFlowComp = PageFlowUtil.urlFor(CompensationController.Action.begin, getContainer());
             statusHTML.append("There are <a href=\"" + h(urlFlowComp.getLocalURIString()) + "\">" + _compensationMatrixCount + " compensation matrices</a>.");
             if (_compensationRunCount != 0)
             {
@@ -306,7 +306,7 @@ public class FlowOverview extends Overview
         {
             ret.addAction(new Action("Calculate compensation matrices", _scriptCompensation.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, FlowProtocolStep.calculateCompensation)));
         }
-        ret.addAction(new Action("Upload a compensation matrix", PFUtil.urlFor(CompensationController.Action.upload, getContainer())));
+        ret.addAction(new Action("Upload a compensation matrix", PageFlowUtil.urlFor(CompensationController.Action.upload, getContainer())));
         return ret;
     }
 

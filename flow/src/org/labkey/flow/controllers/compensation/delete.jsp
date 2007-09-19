@@ -1,6 +1,5 @@
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix"%>
 <%@ page import="org.labkey.flow.controllers.compensation.CompensationController"%>
-<%@ page import="org.labkey.flow.util.PFUtil"%>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getViewContext().getViewURLHelper(), request); %>

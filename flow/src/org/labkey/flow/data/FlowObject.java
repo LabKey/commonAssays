@@ -2,7 +2,6 @@ package org.labkey.flow.data;
 
 import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.flow.util.PFUtil;
 import org.labkey.api.security.User;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.property.SystemProperty;
@@ -10,6 +9,7 @@ import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.controllers.FlowParam;
 
 import javax.servlet.ServletException;
@@ -55,7 +55,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
 
     protected ViewURLHelper pfURL(Enum action)
     {
-        return PFUtil.urlFor(action, getContainerPath());
+        return PageFlowUtil.urlFor(action, getContainerPath());
     }
 
     public ViewURLHelper urlFor(Enum action)
@@ -131,7 +131,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
 
     static public <T extends FlowObject> String strSelect(String name, T current, Collection<T> objects)
     {
-        return PFUtil.strSelect(name, idLabelsFor(objects, ""), current == null ? null : current.getId());
+        return PageFlowUtil.strSelect(name, idLabelsFor(objects, ""), current == null ? null : current.getId());
     }
 
     static public Map<Object,String> idLabelsFor(Collection<? extends FlowObject> list, String nullLabel)

@@ -1,7 +1,6 @@
 package org.labkey.flow.view;
 
 import org.labkey.api.data.*;
-import org.labkey.flow.util.PFUtil;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.AppProps;
@@ -44,7 +43,7 @@ public class GraphColumn extends DataColumn
         }
 
         Object displayValue = getColumnInfo().getDisplayField().getValue(ctx);
-        ViewURLHelper urlGraph = PFUtil.urlFor(WellController.Action.showGraph, ctx.getContainer());
+        ViewURLHelper urlGraph = PageFlowUtil.urlFor(WellController.Action.showGraph, ctx.getContainer());
         urlGraph.addParameter(FlowParam.objectId.toString(), boundValue.toString());
         urlGraph.addParameter(FlowParam.graph.toString(), displayValue.toString());
         out.write("<img class=\"flow-graph\" src=\"");

@@ -1,7 +1,7 @@
 package org.labkey.flow;
 
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.flow.util.PFUtil;
+import org.labkey.api.util.PageFlowUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -56,7 +56,7 @@ public enum FlowPreference
 
     public String urlUpdate()
     {
-        ViewURLHelper url = PFUtil.urlFor(FlowController.Action.savePreferences, "");
+        ViewURLHelper url = PageFlowUtil.urlFor(FlowController.Action.savePreferences, "");
         url.addParameter(name(), "");
         return url.toString();
     }

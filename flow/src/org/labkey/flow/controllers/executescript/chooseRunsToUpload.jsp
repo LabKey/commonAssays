@@ -1,9 +1,9 @@
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToUploadForm" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<%@ page import="org.labkey.flow.util.PFUtil" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.flow.controllers.FlowModule" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%
     ChooseRunsToUploadForm form = (ChooseRunsToUploadForm) __form;
@@ -11,7 +11,7 @@
 <labkey:errors/>
 <%   Map<String, String> paths = form.getNewPaths();
     if (paths.size() != 0) { %>
-<form method="POST" action="<%=PFUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, getContainer())%>"
+<form method="POST" action="<%=org.labkey.api.util.PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, getContainer())%>"
       class="normal">
     <input type="hidden" name="path" value="<%=h(form.path)%>">
     <p>
