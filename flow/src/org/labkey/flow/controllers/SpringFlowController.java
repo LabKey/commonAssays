@@ -4,7 +4,7 @@ import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.view.*;
-import org.labkey.api.util.HelpTopic;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.security.User;
 import org.labkey.api.data.Container;
 import org.labkey.api.action.SpringActionController;
@@ -14,7 +14,6 @@ import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowObject;
 import org.labkey.flow.script.ScriptJob;
 import org.labkey.flow.webparts.FlowFolderType;
-import org.labkey.flow.util.PFUtil;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -104,7 +103,7 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
         }
         else
         {
-            ViewURLHelper url = PFUtil.urlFor(FlowController.Action.begin, context.getContainer().getPath());
+            ViewURLHelper url = PageFlowUtil.urlFor(FlowController.Action.begin, context.getContainer().getPath());
             project = new NavTree(FlowModule.getShortProductName(), url.clone());
         }
         return project;
@@ -142,7 +141,7 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
 
         public ViewURLHelper urlFor(Enum action) throws ServletException
         {
-            return PFUtil.urlFor(action, getContainer().getPath());
+            return PageFlowUtil.urlFor(action, getContainer().getPath());
         }
 
     }
@@ -160,7 +159,7 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
 
     public ViewURLHelper urlFor(Enum action)
     {
-        return PFUtil.urlFor(action, getContainerPath());
+        return PageFlowUtil.urlFor(action, getContainerPath());
     }
 
     protected int getIntParam(P param)
