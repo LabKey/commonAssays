@@ -22,9 +22,11 @@ import java.util.*;
  */
 public class NabModule extends DefaultModule implements ContainerManager.ContainerListener
 {
+    private static final String NAME = "Nab";
+
     public NabModule()
     {
-        super("Nab", 2.20, null, false);
+        super(NAME, 2.20, null, false);
         addController("Nab", NabController.class);
     }
 

@@ -536,7 +536,7 @@ public class NabController extends ViewController
 
         Plate plate = PlateService.get().getPlate(getContainer(), form.getEntityId());
 
-        AttachmentService.get().download(getResponse(), plate, form);
+        AttachmentService.get().download(getResponse(), plate, form.getName());
 
         return null;
     }

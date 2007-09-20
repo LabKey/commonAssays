@@ -264,7 +264,7 @@ public class SampleController extends ViewController
         if (null == slide)
             HttpView.throwNotFound("Unable to find slide");
 
-        AttachmentService.get().download(getResponse(), slide, form);
+        AttachmentService.get().download(getResponse(), slide, form.getName());
 
         return null;
     }

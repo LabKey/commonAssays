@@ -12,7 +12,7 @@
         int index = 0;
 
         for (Attachment a : attachments) {
-            String downloadUrl = a.getDownloadUrl(ctx.getRequest(), "MouseModel-Mouse");
+            String downloadUrl = a.getDownloadUrl("MouseModel-Mouse");
 
             if ((index % 2) == 0)
                 out.print("<tr>");%>

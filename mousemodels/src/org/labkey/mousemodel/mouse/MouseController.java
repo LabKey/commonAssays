@@ -261,7 +261,7 @@ public class MouseController extends ViewController
         Attachment[] attachments = AttachmentService.get().getAttachments(mouse);
 //        photoView.addObject("parent", form.get("entityId"));
         photoView.addObject("attachments", attachments);
-        DownloadUrlHelper deleteUrl = new DownloadUrlHelper(getRequest(), "MouseModel-Mouse", getContainer().getPath(), mouse.getEntityId(), null);
+        DownloadUrlHelper deleteUrl = new DownloadUrlHelper("MouseModel-Mouse", getContainer().getPath(), mouse.getEntityId(), null);
         deleteUrl.setAction("showConfirmDelete.view");
         photoView.addObject("deleteUrl", deleteUrl);
         photoView.addObject("canDelete", getViewContext().hasPermission(ACL.PERM_UPDATE));
@@ -332,7 +332,7 @@ public class MouseController extends ViewController
     {
         Mouse mouse = getMouse(form, ACL.PERM_READ);
 
-        AttachmentService.get().download(getResponse(), mouse, form);
+        AttachmentService.get().download(getResponse(), mouse, form.getName());
 
         return null;
     }
@@ -343,7 +343,7 @@ public class MouseController extends ViewController
     {
         Mouse mouse = getMouse(form, ACL.PERM_UPDATE);  // TODO: Shouldn't this be DELETE?  But it's UPDATE above...
 
-        return includeView(AttachmentService.get().getConfirmDeleteView(mouse, form));
+        return includeView(AttachmentService.get().getConfirmDeleteView(getContainer(), getViewURLHelper(), mouse, form.getName()));
     }
 
 
@@ -352,7 +352,7 @@ public class MouseController extends ViewController
     {
         Mouse mouse = getMouse(form, ACL.PERM_DELETE);  // TODO: DELETE or UPDATE?
 
-        return includeView(AttachmentService.get().delete(mouse, form));
+        return includeView(AttachmentService.get().delete(getUser(), mouse, form.getName()));
     }
 
 
