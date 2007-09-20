@@ -273,32 +273,6 @@
             </table>
         </td>
     </tr>
-    <tr>
-        <th style="<%= headerTDStyle %>">Hill-Slope Curve Properties</th>
-    </tr>
-    <tr>
-        <td style="<%= dataTDStyle %>">
-            <table>
-                <tr>
-                    <td class="header" style="vertical-align:middle" align="right">Slope</td>
-                    <td>
-                        <input id="slopeTextBox" name="runSettings.slopeText" type="text" size="3" value="<%= form.getRunSettings().getSlopeText() %>"
-                            <%= form.getRunSettings().isAutoSlope() ? "DISABLED" : "" %>>
-                        <input type="checkbox" name="runSettings.autoSlope" value="true"
-                               onclick="document.getElementById('slopeTextBox').disabled = this.checked;"
-                               <%= form.getRunSettings().isAutoSlope() ? "CHECKED" : "" %>>
-                        Auto-calculate
-                    </td>
-                    <td>
-                        <input type="checkbox" name="runSettings.endpointsOptional"
-                               value="true" <%= form.getRunSettings().isEndpointsOptional() ? "CHECKED" : "" %>>
-                        Ignore first and/or last concentration if fit measure improves
-                    </td>
-
-                </tr>
-            </table>
-        </td>
-    </tr>
 </table>
     <%= buttonImg("Calculate") %> <%= buttonLink("Reset Form", "begin.view?reset=true") %>
 

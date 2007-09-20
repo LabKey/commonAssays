@@ -40,8 +40,6 @@ public class SampleInfo implements Serializable
     private String _sampleId;
     private SafeTextConverter.DoubleConverter _initialDilution = new SafeTextConverter.DoubleConverter(new Double(20));
     private SafeTextConverter.DoubleConverter _factor = new SafeTextConverter.DoubleConverter(new Double(3));
-    private Double _fixedSlope;
-    private boolean _endpointsOptional;
     private String _dilutionSummaryLsid;
     private String _sampleDescription;
     private Method _method;
@@ -99,26 +97,6 @@ public class SampleInfo implements Serializable
     public void setFactorText(String factorText)
     {
         _factor.setText(factorText);
-    }
-
-    public Double getFixedSlope()
-    {
-        return _fixedSlope;
-    }
-
-    public void setFixedSlope(Double fixedSlope)
-    {
-        _fixedSlope = fixedSlope;
-    }
-
-    public boolean isEndpointsOptional()
-    {
-        return _endpointsOptional;
-    }
-
-    public void setEndpointsOptional(boolean endpointsOptional)
-    {
-        _endpointsOptional = endpointsOptional;
     }
 
     public String getDilutionSummaryLsid()

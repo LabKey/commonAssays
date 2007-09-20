@@ -153,9 +153,6 @@ public class NabController extends ViewController
         for (int i = 0; i < assayForm.getSampleInfos().length; i++)
         {
             SampleInfo info = assayForm.getSampleInfos()[i];
-            if (!assayForm.getRunSettings().isAutoSlope())
-                info.setFixedSlope(assayForm.getRunSettings().getSlope());
-            info.setEndpointsOptional(assayForm.getRunSettings().isEndpointsOptional());
             if (i > 0)
             {
                 if (assayForm.getRunSettings().isSameMethod())
@@ -1273,11 +1270,6 @@ public class NabController extends ViewController
                             getMetadata().getExperimentDateString() + ". Please re-enter in a standard date format."));
                 }
             }
-
-            Double slope = getRunSettings().getSlope();
-            if ((!getRunSettings().isAutoSlope() && slope == null) || (slope != null && Double.isNaN(slope)))
-                errors.add("main", new ActionMessage("Error", "Could not parse slope value: " +
-                        getRunSettings().getSlopeText() + ". Please re-enter in a numeric format."));
 
             SafeTextConverter.PercentConverter[] cutoffs = getRunSettings().getCutoffs();
             for (SafeTextConverter.PercentConverter cutoff : cutoffs)

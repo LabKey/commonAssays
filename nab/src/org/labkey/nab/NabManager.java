@@ -73,8 +73,6 @@ public class NabManager
         InitialDilution(PropertyType.DOUBLE),
         SampleId(PropertyType.STRING),
         SampleDescription(PropertyType.STRING),
-        EndpointsOptional(PropertyType.BOOLEAN),
-        Slope(PropertyType.DOUBLE),
         Factor(PropertyType.DOUBLE),
         Method(PropertyType.STRING),
         FitError(PropertyType.DOUBLE);
@@ -267,11 +265,8 @@ public class NabManager
             group.setProperty(SampleProperty.InitialDilution.name(), info.getInitialDilution());
             group.setProperty(SampleProperty.SampleId.name(), info.getSampleId());
             group.setProperty(SampleProperty.SampleDescription.name(), info.getSampleDescription());
-            group.setProperty(SampleProperty.EndpointsOptional.name(), info.isEndpointsOptional());
             group.setProperty(SampleProperty.Factor.name(), info.getFactor());
             group.setProperty(SampleProperty.Method.name(), info.getMethod().name());
-            group.setProperty(SampleProperty.Slope.name(), info.getFixedSlope());
-
 
             List<WellData> wells = group.getWellData(true);
             boolean first = true;
@@ -308,7 +303,6 @@ public class NabManager
                 group.setProperty("Point IC" + cutoff, dilution.getInterpolatedCutoffDilution((double) cutoff / 100.0));
             }
             group.setProperty(SampleProperty.FitError.name(), dilution.getFitError());
-            group.setProperty(SampleProperty.Slope.name(), dilution.getSlope());
         }
 
         int rowid = PlateService.get().save(container, user, plate);
@@ -421,13 +415,11 @@ public class NabManager
             String prefix = "sampleInfo" + i + ".";
             SampleInfo info = form.getSampleInfos()[i];
             targetMap.put(prefix + "factorText", info.getFactorText() != null ? info.getFactorText() : "" + info.getFactor());
-            targetMap.put(prefix + "fixedSlope", null == info.getFixedSlope() ? null : info.toString());
             targetMap.put(prefix + "initialDilution", info.getInitialDilutionText() != null ?
                     info.getInitialDilutionText() : "" + info.getInitialDilution());
             targetMap.put(prefix + "method", info.getMethodName());
             targetMap.put(prefix + "sampleDescription", info.getSampleDescription());
             targetMap.put(prefix + "sampleId", info.getSampleId());
-            targetMap.put(prefix + "endpointsOptional", String.valueOf(info.isEndpointsOptional()));
         }
         // file property:
         targetMap.put("fileName", form.getFileName());
@@ -456,10 +448,6 @@ public class NabManager
             }
         }
         targetMap.put("cutoffs", cutoffs.toString());
-        targetMap.put("slope", form.getRunSettings().getSlopeText() != null ?
-                form.getRunSettings().getSlopeText() : form.getRunSettings().getSlope().toString());
-        targetMap.put("autoSlope", String.valueOf(form.getRunSettings().isAutoSlope()));
-        targetMap.put("endpointsOptional", String.valueOf(form.getRunSettings().isEndpointsOptional()));
         targetMap.put("inferFromFile", String.valueOf(form.getRunSettings().isInferFromFile()));
         targetMap.put("sameFactor", String.valueOf(form.getRunSettings().isSameFactor()));
         targetMap.put("sameInitialValue", String.valueOf(form.getRunSettings().isSameInitialValue()));
@@ -480,20 +468,9 @@ public class NabManager
             String prefix = "sampleInfo" + i + ".";
             SampleInfo info = new SampleInfo(properties.get(prefix + "sampleId"));
             info.setFactorText(properties.get(prefix + "factorText"));
-            try
-            {
-                String slopeString = properties.get(prefix + "fixedSlope");
-                if (slopeString != null)
-                    info.setFixedSlope(Double.parseDouble(slopeString));
-            }
-            catch (NumberFormatException e)
-            {
-                // fall through and continue: we'll fail to populate the fixed slope, but that's okay.
-            }
             info.setInitialDilutionText(properties.get(prefix + "initialDilution"));
             info.setMethodName(properties.get(prefix + "method"));
             info.setSampleDescription(properties.get(prefix + "sampleDescription"));
-            info.setEndpointsOptional(Boolean.valueOf(properties.get(prefix + "endpointsOptional")));
             sampleInfos[i] = info;
         }
         form.setSampleInfos(sampleInfos);
@@ -556,9 +533,6 @@ public class NabManager
                 cutoffConverters[i].setText(cutoffStrings[i]);
         }
         settings.setCutoffs(cutoffConverters);
-        settings.setSlopeText(properties.get("slope"));
-        settings.setAutoSlope(Boolean.valueOf(properties.get("autoSlope")));
-        settings.setEndpointsOptional(Boolean.valueOf(properties.get("endpointsOptional")));
         settings.setInferFromFile(Boolean.valueOf(properties.get("inferFromFile")));
         settings.setSameFactor(Boolean.valueOf(properties.get("sameFactor")));
         settings.setSameInitialValue(Boolean.valueOf(properties.get("sameInitialValue")));

@@ -118,7 +118,7 @@
                     <th colspan=3>Curve Properties</th>
                 </tr>
                 <tr>
-                    <td>&nbsp;</td><td style="<%= labelStyle %>">Slope</td><td style="<%= labelStyle %>">Fit Error</td>
+                    <td>&nbsp;</td><td style="<%= labelStyle %>">Fit Error</td>
                 </tr>
                 <%
                     DecimalFormat shortDecFormat = new DecimalFormat("0.0");
@@ -127,7 +127,6 @@
                 %>
                 <tr>
                     <td><%= h(summary.getSampleId()) %></td>
-                    <td align="right"><%= shortDecFormat.format(summary.getSlope().doubleValue()) %></td>
                     <td align="right"><%= shortDecFormat.format(summary.getFitError()) %></td>
                 </tr>
                 <%

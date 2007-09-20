@@ -55,11 +55,6 @@ public class DilutionSummary implements Serializable
         return (String) _sampleGroup.getProperty(NabManager.SampleProperty.SampleDescription.name());
     }
 
-    public Double getFixedSlope()
-    {
-        return (Double) _sampleGroup.getProperty(NabManager.SampleProperty.Slope.name());
-    }
-
     public double getPercent(WellData data)
     {
         return _assay.getPercent(_sampleGroup, data);
@@ -69,10 +64,7 @@ public class DilutionSummary implements Serializable
     {
         if (_dilutionCurve == null)
         {
-            if (getFixedSlope() != null)
-                _dilutionCurve = _sampleGroup.getDilutionCurve(_assay, getMethod() == SampleInfo.Method.Dilution, getFixedSlope(), isEndpointsOptional());
-            else
-                _dilutionCurve = _sampleGroup.getDilutionCurve(_assay, getMethod() == SampleInfo.Method.Dilution, isEndpointsOptional());
+            _dilutionCurve = _sampleGroup.getDilutionCurve(_assay, getMethod() == SampleInfo.Method.Dilution);
         }
         return _dilutionCurve;
     }
@@ -106,12 +98,6 @@ public class DilutionSummary implements Serializable
         return SampleInfo.Method.valueOf(name);
     }
 
-    protected boolean isEndpointsOptional()
-    {
-        Boolean endpointsOptional = (Boolean) _sampleGroup.getProperty(NabManager.SampleProperty.EndpointsOptional.name());
-        return endpointsOptional != null && endpointsOptional.booleanValue();
-    }
-
     public double getCutoffDilution(double cutoff)
     {
         return getDilutionCurve().getCutoffDilution(cutoff);
@@ -130,11 +116,6 @@ public class DilutionSummary implements Serializable
     public double getFitError()
     {
         return getDilutionCurve().getFitError();
-    }
-
-    public Double getSlope()
-    {
-        return getDilutionCurve().getSlope();
     }
 
     public double getMinDilution()

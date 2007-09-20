@@ -15,9 +15,6 @@ public class RunSettings implements Serializable
     private boolean _sameInitialValue;
     private boolean _sameMethod;
     private boolean _sameFactor;
-    private SafeTextConverter.DoubleConverter _slope = new SafeTextConverter.DoubleConverter(new Double(-1));
-    private boolean _autoSlope;
-    private boolean _endpointsOptional;
     private SafeTextConverter.PercentConverter[] _cutoffs = new SafeTextConverter.PercentConverter[MAX_CUTOFF_OPTIONS];
 
     public RunSettings()
@@ -42,7 +39,6 @@ public class RunSettings implements Serializable
         _sameInitialValue = returnDefaultForUnsetBools;
         _sameMethod = returnDefaultForUnsetBools;
         _sameFactor = returnDefaultForUnsetBools;
-        _autoSlope = returnDefaultForUnsetBools;
 
         _cutoffs[0] = new SafeTextConverter.PercentConverter(50);
         _cutoffs[1] = new SafeTextConverter.PercentConverter(80);
@@ -89,46 +85,6 @@ public class RunSettings implements Serializable
     public void setSameInitialValue(boolean sameInitialValue)
     {
         _sameInitialValue = sameInitialValue;
-    }
-
-    public String getSlopeText()
-    {
-        return _slope.getText();
-    }
-
-    public void setSlopeText(String slopeText)
-    {
-        _slope.setText(slopeText);
-    }
-
-    public Double getSlope()
-    {
-        return _slope.getValue();
-    }
-
-    public void setSlope(double slope)
-    {
-        _slope.setValue(slope);
-    }
-
-    public boolean isAutoSlope()
-    {
-        return _autoSlope;
-    }
-
-    public void setAutoSlope(boolean autoSlope)
-    {
-        _autoSlope = autoSlope;
-    }
-
-    public boolean isEndpointsOptional()
-    {
-        return _endpointsOptional;
-    }
-
-    public void setEndpointsOptional(boolean endpointsOptional)
-    {
-        _endpointsOptional = endpointsOptional;
     }
 
     public SafeTextConverter.PercentConverter[] getCutoffs()
