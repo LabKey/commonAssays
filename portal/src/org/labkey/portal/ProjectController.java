@@ -30,6 +30,7 @@ import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.Search;
+import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.Search.SearchResultsView;
 import org.labkey.api.view.*;
 import org.springframework.validation.BindException;
@@ -385,9 +386,6 @@ public class ProjectController extends SpringActionController
     // FORMS
     //
 
-    /**
-     * FormData get and set methods may be overwritten by the Form Bean editor.
-     */
     public static class CreateForm
     {
         private String name;
@@ -562,8 +560,10 @@ public class ProjectController extends SpringActionController
 
             HttpView results = new SearchResultsView(c, Search.ALL_SEARCHABLES, searchTerm, getSearchUrl(c), getUser(), includeSubfolders, true);
 
-            getPageConfig().setFocus("forms[0].search");
-            getPageConfig().setTitle("Search Results");
+            PageConfig config = getPageConfig();
+            config.setFocus("forms[0].search");
+            config.setTitle("Search Results");
+            config.setHelpTopic(new HelpTopic("search", HelpTopic.Area.DEFAULT));
             return results;
         }
 
