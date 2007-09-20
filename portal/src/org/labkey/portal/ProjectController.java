@@ -622,4 +622,59 @@ public class ProjectController extends SpringActionController
             this.text = text;
         }
     }
+
+
+
+    @RequiresPermission(ACL.PERM_NONE)
+    public static class ExpandCollapseAction extends SimpleViewAction<CollapseExpandForm>
+    {
+        public ModelAndView getView(CollapseExpandForm form, BindException errors) throws Exception
+        {
+            NavTreeManager.expandCollapsePath(getViewContext(), form.getTreeId(), form.getPath(), form.isCollapse());
+            return null;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+
+    public static class CollapseExpandForm
+    {
+        private boolean collapse;
+        private String path;
+        private String treeId;
+
+        public boolean isCollapse()
+        {
+            return collapse;
+        }
+
+        public void setCollapse(boolean collapse)
+        {
+            this.collapse = collapse;
+        }
+
+        public String getTreeId()
+        {
+            return treeId;
+        }
+
+        public void setTreeId(String treeId)
+        {
+            this.treeId = treeId;
+        }
+
+        public String getPath()
+        {
+            return path;
+        }
+
+        public void setPath(String path)
+        {
+            this.path = path;
+        }
+    }
 }

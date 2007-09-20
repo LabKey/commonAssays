@@ -55,13 +55,13 @@ public class DownloadTask extends BtTask
         TarArchive tar = new TarArchive(url.openStream());
         tar.extractContents(targetFile);
         List<File> files = findFiles(targetFile);
-        if (files.size() != 1)
+        if (files.isEmpty())
         {
-            _log.error("Unexpected number of files found after extracting: " + files.size());
+            _log.error("No files found after extracting.");
         }
-        if (files.size() == 1)
+        else
         {
-            entity.ensurePhysicalFile(files.get(0));
+            entity.ensurePhysicalFiles(files);
         }
         FileUtil.deleteDir(targetFile);
     }

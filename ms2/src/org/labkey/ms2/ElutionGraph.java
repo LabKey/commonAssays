@@ -60,13 +60,13 @@ public class ElutionGraph
             if (scanInfo.getScan() >= firstSelectedScan && scanInfo.getScan() <= lastSelectedScan && !scans.contains(scanInfo.getScan()))
             {
                 selectedSeries.add(scanInfo.getScan(), scanInfo.getIntensity());
-                scans.add(scanInfo.getScan());
                 area += scanInfo.getIntensity();
             }
             else
             {
                 surroundingSeries.add(scanInfo.getScan(), scanInfo.getIntensity());
             }
+            scans.add(scanInfo.getScan());
         }
         if (!scans.contains(minScan))
         {

@@ -1,6 +1,8 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Importer;
 import org.labkey.api.util.NetworkDrive;
@@ -77,9 +79,10 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
         boolean completeStatus = false;
         try
         {
+            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
             String sequenceDB = getSequenceDatabase ();
             File fileSequenceDatabase = new File(
-                    MS2PipelineManager.getSequenceDatabaseRoot(this.getContainer()).getPath(), sequenceDB);
+                    MS2PipelineManager.getSequenceDatabaseRoot(root.getContainer()).getPath(), sequenceDB);
 
             if (!dirWork.exists() && !dirWork.mkdir())
             {

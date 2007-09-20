@@ -246,7 +246,7 @@ public class PieJChartHelper extends JChartHelper
             }
         }
 
-        try
+/*        try
         {
             PieJChartHelper oldPie = OLDprepareGOPie(title, distinctSeqIdsSql, goChartType);
 
@@ -260,7 +260,7 @@ public class PieJChartHelper extends JChartHelper
                 throw new RuntimeSQLException(e);
 
         }
-
+*/
         return retVal;
     }
 

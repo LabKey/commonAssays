@@ -5,6 +5,7 @@ import org.labkey.biotrue.datamodel.BtManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class BtEntity
 {
@@ -140,19 +141,24 @@ public class BtEntity
         return getPhysicalFile();
     }
 
-    public File ensurePhysicalFile(File sourceFile) throws Exception
+    public File ensurePhysicalFiles(List<File> sourceFiles) throws Exception
     {
         if (_data.getPhysicalName() != null)
         {
             throw new IllegalStateException("File already exists.");
         }
         File dirParent = getParent() == null ? _server.getPhysicalRoot() : getParent().ensurePhysicalDirectory();
-        File destFile = findUniqueFilename(dirParent, _data.getBioTrue_Name());
-        if (!sourceFile.renameTo(destFile))
+        for (File source : sourceFiles)
         {
-            throw new IOException("Error renaming file " + destFile);
+            File destFile = findUniqueFilename(dirParent, source.getName());
+            if (!source.renameTo(destFile))
+            {
+                throw new IOException("Error renaming file " + destFile);
+            }
+
+            if (_data.getBioTrue_Name().equals(source.getName()))
+                _data.setPhysicalName(destFile.getName());
         }
-        _data.setPhysicalName(destFile.getName());
         _data = BtManager.get().updateEntity(_data);
         return getPhysicalFile();
     }

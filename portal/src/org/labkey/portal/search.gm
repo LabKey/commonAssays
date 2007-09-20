@@ -1,5 +1,5 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
-<form method="post" action="<%=postURL%>">
+<form method="get" action="<%=postURL%>">
 Search <%=what%> in this <%=(container.isProject() ? "project" : "folder") + (includeSubfolders ? " and all subfolders" : "")%>
 <table>
 <tr>
