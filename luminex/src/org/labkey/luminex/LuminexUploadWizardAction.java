@@ -135,7 +135,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             }
         }
 
-        addHiddenSampleSetProperties(form, view);
+        addHiddenUploadSetProperties(form, view);
 
         ButtonBar bbar = new ButtonBar();
         addFinishButtons(view, bbar);

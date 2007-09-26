@@ -50,7 +50,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         {
             public Identifiable getObject(Lsid lsid)
             {
-                throw new UnsupportedOperationException();
+                return getDataForDataRow(lsid.getObjectId());
             }
 
             public String getDisplayURL(Lsid lsid)
@@ -452,5 +452,10 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
+    {
+        return Collections.<ParticipantVisitResolverType>singletonList(new SpecimenIDLookupResolverType());
     }
 }
