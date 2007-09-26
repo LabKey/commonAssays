@@ -31,11 +31,10 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.upload.FormFile;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.attachments.StrutsAttachmentFile;
-import org.labkey.api.attachments.AttachmentFile;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.MaterialSource;
-import org.labkey.api.exp.Material;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.sample.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
@@ -313,7 +312,7 @@ public class NecropsyController extends ViewController
                     sample.setFixed(false);
                     //If samples are deleted through data controller materials might be out of synch.
                     //Deal with that...
-                    Material mat = ExperimentService.get().getMaterial(sample.getLSID());
+                    ExpMaterial mat = ExperimentService.get().getExpMaterial(sample.getLSID());
                     if (null != mat)
                         ExperimentService.get().deleteMaterialByRowIds(getContainer(), mat.getRowId());
                     SampleManager.insert(form.getUser(), sample);
@@ -490,7 +489,7 @@ public class NecropsyController extends ViewController
                     sample.setFixed(samples[i].getFixed());
                     //If samples are deleted through data controller materials might be out of synch.
                     //Deal with that...
-                    Material mat = ExperimentService.get().getMaterial(sample.getLSID());
+                    ExpMaterial mat = ExperimentService.get().getExpMaterial(sample.getLSID());
                     if (null != mat)
                         ExperimentService.get().deleteMaterialByRowIds(getContainer(), mat.getRowId());
                     SampleManager.insert(getUser(), sample);

@@ -7,7 +7,7 @@
 <%@ page import="java.util.Map"%>
 <%@ page import="org.labkey.ms2.pipeline.FileStatus"%>
 <%@ page import="org.labkey.api.view.ThemeFont"%>
-<%@ page import="org.labkey.api.exp.Material" %>
+<%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
 <p/>
 <form method=post action="describeMS2Run.post" name="describeForm">
 <%
@@ -212,7 +212,7 @@ for (File file : getMzXmlFileStatus().keySet())
     }
 
     var materialSourceMaterials = new Object();
-    <% for (Map.Entry<Integer, Material[]> entry : getMaterialSourceMaterials().entrySet())
+    <% for (Map.Entry<Integer, ExpMaterial[]> entry : getMaterialSourceMaterials().entrySet())
     { %>
         var materials = new Object();
         <%

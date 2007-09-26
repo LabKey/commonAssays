@@ -2,7 +2,7 @@ package org.labkey.ms2.pipeline;
 
 import org.fhcrc.cpas.exp.xml.*;
 import org.labkey.api.exp.MaterialSource;
-import org.labkey.api.exp.Material;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.PathRelativizer;
 import org.labkey.api.jsp.JspBase;
@@ -34,7 +34,7 @@ abstract public class DescribeRunPage extends JspBase
     protected Map<File, FileStatus> mzXmlFileStatus;
     protected MaterialSource[] materialSources;
     protected PipelineController controller;
-    private Map<Integer, Material[]> _materialSourceMaterials;
+    private Map<Integer, ExpMaterial[]> _materialSourceMaterials;
 
     private static Set<String> ignoreParams = PageFlowUtil.set(
             "terms.fhcrc.org#XarTemplate.ApplicationLSID",
@@ -171,10 +171,10 @@ abstract public class DescribeRunPage extends JspBase
         builder.append("<select name=\"" + namePrefix + "Existing" + nameSuffix + "\" onchange=\"document.getElementById('" + namePrefix + "ExistingType" + nameSuffix + "').checked = true;\">");
         if (getMaterialSources().length > 0)
         {
-            Material[] materials = _materialSourceMaterials.get(this.getMaterialSources()[0].getRowId());
+            ExpMaterial[] materials = _materialSourceMaterials.get(this.getMaterialSources()[0].getRowId());
             if (materials != null)
             {
-                for (Material material : materials)
+                for (ExpMaterial material : materials)
                 {
                     builder.append("\n<option value=\"");
                     builder.append(material.getRowId());
@@ -304,12 +304,12 @@ abstract public class DescribeRunPage extends JspBase
         this.controller = controller;
     }
 
-    public void setMaterialSourceMaterials(Map<Integer, Material[]> materialSourceMaterials)
+    public void setMaterialSourceMaterials(Map<Integer, ExpMaterial[]> materialSourceMaterials)
     {
         _materialSourceMaterials = materialSourceMaterials;
     }
 
-    public Map<Integer, Material[]> getMaterialSourceMaterials()
+    public Map<Integer, ExpMaterial[]> getMaterialSourceMaterials()
     {
         return _materialSourceMaterials;
     }

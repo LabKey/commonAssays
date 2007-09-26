@@ -26,6 +26,7 @@ import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.security.ACL;
@@ -1208,10 +1209,10 @@ public class PipelineController extends ViewController
                 materialSources = new MaterialSource[] { activeMaterialSource, ExperimentService.get().ensureDefaultMaterialSource() };
             }
 
-            Map<Integer, Material[]> materialSourceMaterials = new HashMap<Integer, Material[]>();
+            Map<Integer, ExpMaterial[]> materialSourceMaterials = new HashMap<Integer, ExpMaterial[]>();
             for (MaterialSource source : materialSources)
             {
-                Material[] materials = ExperimentService.get().getMaterialsForMaterialSource(source.getMaterialLSIDPrefix(), source.getContainer());
+                ExpMaterial[] materials = ExperimentService.get().getMaterialsForMaterialSource(source.getMaterialLSIDPrefix(), source.getContainer());
                 materialSourceMaterials.put(source.getRowId(), materials);
             }
             drv.setMaterialSources(materialSources);
@@ -1764,7 +1765,7 @@ public class PipelineController extends ViewController
         requiresAdmin(msrun.getContainer());
 
         MaterialSource source = ExperimentService.get().getMaterialSource(form.getMaterialSource());
-        Material mat = new Material();
+        ExpMaterial mat = ExperimentService.get().createExpMaterial();
         //getResponse().setContentType("text/xml;charset=UTF-8");
         GroovyView gv = new GroovyView("/org/labkey/ms2/pipeline/ExperimentTemplate.gm");
         Lsid experimentLSID = getDefaultExperimentLSID(getContainer());
