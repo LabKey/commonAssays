@@ -2,7 +2,9 @@ package org.labkey.flow.gateeditor.client.model;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class GWTPopulationSet implements IsSerializable
+import java.io.Serializable;
+
+public class GWTPopulationSet implements IsSerializable, Serializable
 {
     static private final GWTPopulation[] EMPTY_LIST = new GWTPopulation[0];
     GWTPopulation[] populations;

@@ -2,7 +2,9 @@ package org.labkey.flow.gateeditor.client.model;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class GWTCompensationMatrix implements IsSerializable
+import java.io.Serializable;
+
+public class GWTCompensationMatrix implements IsSerializable, Serializable
 {
     public static String PREFIX = "<";
     public static String SUFFIX = ">";

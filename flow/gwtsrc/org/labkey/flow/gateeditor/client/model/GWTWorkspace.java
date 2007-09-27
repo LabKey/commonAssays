@@ -4,8 +4,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.io.Serializable;
 
-public class GWTWorkspace implements IsSerializable
+public class GWTWorkspace implements IsSerializable, Serializable
 {
     boolean readOnly;
     GWTEditingMode editingMode;

@@ -1,12 +1,9 @@
 package org.labkey.flow.gateeditor.client.model;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
-import org.labkey.flow.gateeditor.client.model.GWTRectangle;
-import org.labkey.flow.gateeditor.client.model.GWTRange;
-import org.labkey.flow.gateeditor.client.model.GWTPoint;
+import java.io.Serializable;
 
-public class GWTGraphInfo implements IsSerializable
+public class GWTGraphInfo implements IsSerializable, Serializable
 {
     public GWTGraphOptions graphOptions;
     public GWTRectangle rcChart;

@@ -2,13 +2,15 @@ package org.labkey.flow.gateeditor.client.util;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.io.Serializable;
+
 /**
  * Created by IntelliJ IDEA.
  * User: matthewb
  * Date: Sep 13, 2007
  * Time: 2:41:32 PM
  */
-public class LogAxisFunction implements RangeFunction, IsSerializable
+public class LogAxisFunction implements RangeFunction, IsSerializable, Serializable
 {
     // can't use final keyword, it breaks GWT serialization
     private double logLinSwitch;

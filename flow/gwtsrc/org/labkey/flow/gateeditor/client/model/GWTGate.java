@@ -2,7 +2,9 @@ package org.labkey.flow.gateeditor.client.model;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-abstract public class GWTGate implements IsSerializable
+import java.io.Serializable;
+
+abstract public class GWTGate implements IsSerializable, Serializable
 {
     String typeName = "";
     boolean open;

@@ -2,7 +2,9 @@ package org.labkey.flow.gateeditor.client.model;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class GWTSettings implements IsSerializable
+import java.io.Serializable;
+
+public class GWTSettings implements IsSerializable, Serializable
 {
     GWTParameterInfo[] parameters;
 

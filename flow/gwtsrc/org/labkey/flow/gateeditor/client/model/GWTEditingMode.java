@@ -4,8 +4,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.io.Serializable;
 
-abstract public class GWTEditingMode implements IsSerializable
+abstract public class GWTEditingMode implements IsSerializable, Serializable
 {
     abstract public String name();
     abstract public int getActionSequence();

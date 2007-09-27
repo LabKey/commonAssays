@@ -2,7 +2,9 @@ package org.labkey.flow.gateeditor.client.model;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class GWTRun implements IsSerializable
+import java.io.Serializable;
+
+public class GWTRun implements IsSerializable, Serializable
 {
     int runId;
     String name;
