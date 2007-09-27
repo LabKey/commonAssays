@@ -54,16 +54,6 @@ public class ProjectController extends SpringActionController
         setActionResolver(_actionResolver.getInstance(this));
     }
 
-    Container getContainer()
-    {
-        return getViewContext().getContainer();
-    }
-
-    User getUser()
-    {
-        return getViewContext().getUser();
-    }
-
     ViewURLHelper homeUrl()
     {
         return new ViewURLHelper("Project", "begin", ContainerManager.HOME_PROJECT_PATH);

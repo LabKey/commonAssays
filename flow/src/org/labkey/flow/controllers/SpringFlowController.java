@@ -194,16 +194,9 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
         return false;
     }
 
-
-
     public String getContainerPath()
     {
         return getViewURLHelper().getExtraPath();
-    }
-
-    public Container getContainer()
-    {
-        return getViewContext().getContainer();
     }
 
     public HttpServletRequest getRequest()
@@ -214,10 +207,5 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
     public ViewURLHelper getViewURLHelper()
     {
         return getViewContext().getViewURLHelper();
-    }
-
-    public User getUser()
-    {
-        return getViewContext().getUser();
     }
 }
