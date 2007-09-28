@@ -100,7 +100,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         _bindingMap.put(new ColumnBinding("scanLast", "ScanLast", java.sql.Types.INTEGER, false));
         _bindingMap.put(new ColumnBinding("scanCount", "ScanCount", java.sql.Types.INTEGER, false));
         _bindingMap.put(new ColumnBinding("totalIntensity", "TotalIntensity", java.sql.Types.REAL, false));
-        _bindingMap.put(new ColumnBinding("description", "Description", java.sql.Types.NVARCHAR, false));
+        _bindingMap.put(new ColumnBinding("description", "Description", java.sql.Types.VARCHAR, false));
 
         //columns added by Ceaders-Sinai to their post-processed features files
         _bindingMap.put(new ColumnBinding("MS2scan", "MS2Scan", java.sql.Types.INTEGER, false));
