@@ -162,7 +162,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user) throws ExperimentException
+    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
     {
         try
         {

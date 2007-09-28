@@ -96,8 +96,7 @@ public class MSInspectImportPipelineJob extends PipelineJob
         File mzXMLFile = new File(analysisRootDir, name + ".mzXML");
         if (!NetworkDrive.exists(mzXMLFile))
         {
-            File xmlDir = new File(analysisRootDir, "xml");
-            mzXMLFile = new File(xmlDir, name + ".mzXML");
+            mzXMLFile = new File(analysisRootDir, name + ".mzXML");
         }
 
         String protocolName = resultsDir.getName();
@@ -143,6 +142,13 @@ public class MSInspectImportPipelineJob extends PipelineJob
         String pepXMLFilePath = PathRelativizer.relativizePathUnix(resultsDir, _featuresFile);
         xarXml = StringUtils.replace(xarXml, "@@FEATURES_FILE_PATH@@",
                 pepXMLFilePath);
+
+        //peaks XML file will be in the same dir as _featuresFile and have the same base name
+        //but with an .xml file extension
+        String peaksXMLFilePath = PathRelativizer.relativizePathUnix(resultsDir, _featuresFile);
+        peaksXMLFilePath = peaksXMLFilePath.substring(0,peaksXMLFilePath.length() - 4); //len of ".tsv"
+        peaksXMLFilePath += ".xml";
+        xarXml = StringUtils.replace(xarXml, "@@PEAKS_FILE_PATH@@", peaksXMLFilePath);
 
         File uniquifierFile = resultsDir.getParentFile();
         String uniquifier = PathRelativizer.relativizePathUnix(containerRoot, uniquifierFile);

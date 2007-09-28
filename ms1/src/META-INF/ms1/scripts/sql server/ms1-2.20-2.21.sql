@@ -14,27 +14,47 @@
  * limitations under the License.
  */
 
+/* SQL Server Version */
+
+CREATE TABLE ms1.PeaksFiles
+(
+    PeaksFileID INT IDENTITY NOT NULL PRIMARY KEY CLUSTERED,
+    ExpDataFileID INT NOT NULL,
+    MzXmlURL NVARCHAR(800) NULL,
+    Description NVARCHAR(255) NULL,
+    Imported BIT DEFAULT 0
+)
+GO
+
 CREATE TABLE ms1.Scans
 (
-    Scan INT NOT NULL PRIMARY KEY CLUSTERED,
-    RetentionTime REAL NULL,
-    ObservedDuration REAL NULL
+    PeaksFileID INT NOT NULL FOREIGN KEY REFERENCES ms1.PeaksFiles(PeaksFileID),
+    Scan INT NOT NULL,
+    RetentionTime FLOAT NULL,
+    ObservedDuration FLOAT NULL,
+    
+    CONSTRAINT PK_Scans PRIMARY KEY CLUSTERED (PeaksFileID,Scan)
 )
 GO
 
 CREATE TABLE ms1.CalibrationParams
 (
-    Name NVARCHAR(255) NOT NULL PRIMARY KEY CLUSTERED,
-	Scan INT NOT NULL FOREIGN KEY REFERENCES ms1.Scans(Scan),
-    Value REAL NOT NULL
+    PeaksFileID INT NOT NULL,
+	Scan INT NOT NULL,
+    Name NVARCHAR(255) NOT NULL,
+    Value FLOAT NOT NULL,
+
+    CONSTRAINT PK_CalibrationParams PRIMARY KEY CLUSTERED (PeaksFileID,Scan,Name),
+    CONSTRAINT FK_CalibrationParms_Scans FOREIGN KEY (PeaksFileID,Scan) REFERENCES ms1.Scans(PeaksFileID,Scan)
 )
 GO
 
 CREATE TABLE ms1.PeakFamilies
 (
     PeakFamilyID INT IDENTITY NOT NULL PRIMARY KEY CLUSTERED,
-    Scan INT NOT NULL FOREIGN KEY REFERENCES ms1.Scans(Scan),
-    MZ REAL NULL,
+    PeaksFileID INT NULL,
+    Scan INT NULL,
+    MZ FLOAT NULL,
     Charge TINYINT NULL
 )
 GO
@@ -42,13 +62,25 @@ GO
 CREATE TABLE ms1.Peaks
 (
     PeakID INT IDENTITY NOT NULL PRIMARY KEY CLUSTERED,
+    PeaksFileID INT NOT NULL,
+    Scan INT NOT NULL,
+    MZ FLOAT NULL,
+    Frequency FLOAT NULL,
+    Amplitude FLOAT NULL,
+    Phase FLOAT NULL,
+    Decay FLOAT NULL,
+    Error FLOAT NULL,
+    Area FLOAT NULL,
+
+    CONSTRAINT FK_Peaks_Scans FOREIGN KEY (PeaksFileID,Scan) REFERENCES ms1.Scans(PeaksFileID,Scan)
+)
+GO
+
+CREATE TABLE ms1.PeaksToFamilies
+(
+    PeakID INT NOT NULL FOREIGN KEY REFERENCES ms1.Peaks(PeakID),
     PeakFamilyID INT NOT NULL FOREIGN KEY REFERENCES ms1.PeakFamilies(PeakFamilyID),
-    Frequency REAL NULL,
-    Amplitude REAL NULL,
-    Phase REAL NULL,
-    Decay REAL NULL,
-    Error REAL NULL,
-    Area REAL NULL
+    CONSTRAINT PK_PeaksToFamilies PRIMARY KEY CLUSTERED (PeakID,PeakFamilyID) 
 )
 GO
 
@@ -65,26 +97,26 @@ CREATE TABLE ms1.Features
     FeatureID INT IDENTITY NOT NULL PRIMARY KEY CLUSTERED,
 	FeaturesFileID INT FOREIGN KEY REFERENCES ms1.FeaturesFiles(FeaturesFileID),
     Scan INT NULL,
-    Time REAL NULL,
-    MZ REAL NULL,
+    Time FLOAT NULL,
+    MZ FLOAT NULL,
     AccurateMZ BIT NULL,
-    Mass REAL NULL,
-    Intensity REAL NULL,
+    Mass FLOAT NULL,
+    Intensity FLOAT NULL,
     Charge TINYINT NULL,
     ChargeStates TINYINT NULL,
-    KL REAL NULL,
-    Background REAL NULL,
-    Median REAL NULL,
+    KL FLOAT NULL,
+    Background FLOAT NULL,
+    Median FLOAT NULL,
     Peaks TINYINT NULL,
     ScanFirst INT NULL,
     ScanLast INT NULL,
     ScanCount INT NULL,
-    TotalIntensity REAL NULL,
+    TotalIntensity FLOAT NULL,
     Description NVARCHAR(300) NULL,
 
     /* extra cols for ceaders-sinai */
     MS2Scan INT NULL,
-    MS2ConnectivityProbability REAL NULL,
+    MS2ConnectivityProbability FLOAT NULL
 )
 GO
 

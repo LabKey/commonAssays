@@ -25,7 +25,7 @@
             </exp:Properties>
         </exp:Protocol>
 		<exp:Protocol rdf:about="${FolderLSIDBase}:MS1.msInspectFeatureFinding:1">
-			<exp:Name>Do the actual feature finding work</exp:Name>
+			<exp:Name>Create an msInspect features TSV file</exp:Name>
 			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
 			<exp:MaxInputMaterialPerInstance>0</exp:MaxInputMaterialPerInstance>
             <exp:MaxInputDataPerInstance xsi:nil="true"/>
@@ -40,6 +40,22 @@
 			</exp:ParameterDeclarations>
 			<exp:Properties/>
 		</exp:Protocol>
+        <exp:Protocol rdf:about="${FolderLSIDBase}:MS1.msInspectCreatePeaksFile:1">
+            <exp:Name>Create the Peaks XML file</exp:Name>
+            <exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+            <exp:MaxInputMaterialPerInstance>0</exp:MaxInputMaterialPerInstance>
+            <exp:MaxInputDataPerInstance xsi:nil="true"/>
+            <exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+            <exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+            <exp:ParameterDeclarations>
+                <exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String"/>
+                <exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String"/>
+                <exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String"/>
+                <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String"/>
+                <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String"/>
+            </exp:ParameterDeclarations>
+            <exp:Properties/>
+        </exp:Protocol>
         <exp:Protocol rdf:about="${FolderLSIDBase}:MarkRunOutput:2">
             <exp:Name>Mark Run Outputs</exp:Name>
             <exp:ProtocolDescription/>
@@ -64,8 +80,12 @@
 			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS1.msInspectFeatureFinding:1" ActionSequence="50">
 				<exp:PredecessorAction ActionSequenceRef="1"/>
 			</exp:ProtocolAction>
+            <exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS1.msInspectCreatePeaksFile:1" ActionSequence="60">
+                <exp:PredecessorAction ActionSequenceRef="1"/>
+            </exp:ProtocolAction>
             <exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MarkRunOutput:2" ActionSequence="1000">
                 <exp:PredecessorAction ActionSequenceRef="50"/>
+                <exp:PredecessorAction ActionSequenceRef="60"/>
             </exp:ProtocolAction>
 		</exp:ProtocolActionSet>
 	</exp:ProtocolActionDefinitions>
@@ -101,6 +121,15 @@
                         <exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${RunLSIDBase}:msInspectFeaturesFile</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">msInspect Feature Finding Results</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@FEATURES_FILE_PATH@@</exp:SimpleVal>
+                    </exp:CommonParametersApplied>
+                  </exp:ExperimentLogEntry>
+                <exp:ExperimentLogEntry ActionSequenceRef="60">
+                    <exp:CommonParametersApplied>
+                        <exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:MS1.msInspectCreatePeaksFile</exp:SimpleVal>
+                        <exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Create the Peaks XML file</exp:SimpleVal>
+                        <exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${RunLSIDBase}:msInspectPeaksFile</exp:SimpleVal>
+                        <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">msInspect Peaks File</exp:SimpleVal>
+                        <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@PEAKS_FILE_PATH@@</exp:SimpleVal>
                     </exp:CommonParametersApplied>
                   </exp:ExperimentLogEntry>
 

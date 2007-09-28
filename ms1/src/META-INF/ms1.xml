@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 
  * Copyright (c) 2003-2005 Fred Hutchinson Cancer Research Center
  *
@@ -16,5 +16,91 @@
  * limitations under the License.
 
  -->
-<ns:tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ns:tables xsi:schemaLocation="http://cpas.fhcrc.org/data/xml ..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ns:table tableName="PeaksFiles" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="PeaksFileID"/>
+      <ns:column columnName="ExpDataFileID"/>
+      <ns:column columnName="MzXmlURL"/>
+      <ns:column columnName="Description"/>
+      <ns:column columnName="Imported"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="CalibrationParams" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="Name"/>
+      <ns:column columnName="Scan"/>
+      <ns:column columnName="Value"/>
+      <ns:column columnName="PeaksFileID"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="Features" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="FeatureID"/>
+      <ns:column columnName="FeaturesFileID"/>
+      <ns:column columnName="Scan"/>
+      <ns:column columnName="Time"/>
+      <ns:column columnName="MZ"/>
+      <ns:column columnName="AccurateMZ"/>
+      <ns:column columnName="Mass"/>
+      <ns:column columnName="Intensity"/>
+      <ns:column columnName="Charge"/>
+      <ns:column columnName="ChargeStates"/>
+      <ns:column columnName="KL"/>
+      <ns:column columnName="Background"/>
+      <ns:column columnName="Median"/>
+      <ns:column columnName="Peaks"/>
+      <ns:column columnName="ScanFirst"/>
+      <ns:column columnName="ScanLast"/>
+      <ns:column columnName="ScanCount"/>
+      <ns:column columnName="TotalIntensity"/>
+      <ns:column columnName="Description"/>
+      <ns:column columnName="MS2Scan"/>
+      <ns:column columnName="MS2ConnectivityProbability"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="FeaturesFiles" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="FeaturesFileID"/>
+      <ns:column columnName="ExpDataFileID"/>
+      <ns:column columnName="MzXmlURL"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="PeakFamilies" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="PeakFamilyID"/>
+      <ns:column columnName="Scan"/>
+      <ns:column columnName="MZ"/>
+      <ns:column columnName="Charge"/>
+      <ns:column columnName="PeaksFileID"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="Peaks" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="PeakID"/>
+      <ns:column columnName="Frequency"/>
+      <ns:column columnName="Amplitude"/>
+      <ns:column columnName="Phase"/>
+      <ns:column columnName="Decay"/>
+      <ns:column columnName="Error"/>
+      <ns:column columnName="Area"/>
+      <ns:column columnName="Scan"/>
+      <ns:column columnName="MZ"/>
+      <ns:column columnName="PeaksFileID"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="Scans" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="Scan"/>
+      <ns:column columnName="RetentionTime"/>
+      <ns:column columnName="ObservedDuration"/>
+      <ns:column columnName="PeaksFileID"/>
+    </ns:columns>
+  </ns:table>
+  <ns:table tableName="PeaksToFamilies" tableDbType="TABLE">
+    <ns:columns>
+      <ns:column columnName="PeakID"/>
+      <ns:column columnName="PeakFamilyID"/>
+    </ns:columns>
+  </ns:table>
 </ns:tables>

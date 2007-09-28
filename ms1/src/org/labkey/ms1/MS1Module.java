@@ -30,7 +30,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
 
     public MS1Module()
     {
-        super(NAME, 2.20, null, true);
+        super(NAME, 2.21, null, true);
         addController("ms1", MS1Controller.class);
 
         MS1Schema.register();
@@ -62,6 +62,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
 
         // Tell the pipeline that we know how to handle msInspect files
         ExperimentService.get().registerExperimentDataHandler(new MSInspectFeaturesDataHandler());
+        ExperimentService.get().registerExperimentDataHandler(new PeaksFileDataHandler());
 
         ExperimentService.get().registerExperimentRunFilter(new ExperimentRunFilter("msInspect Feature Finding", MS1Schema.SCHEMA_NAME, MS1Schema.MSINSPECT_FEATURE_EXPERIMENT_RUNS_TABLE_NAME));
     }

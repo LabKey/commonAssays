@@ -80,7 +80,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         // For now, let the PepXML file control when the data is deleted
     }
 
-    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user) throws ExperimentException
+    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
     {
         // For now, let the PepXML file control when the data is moved
     }
