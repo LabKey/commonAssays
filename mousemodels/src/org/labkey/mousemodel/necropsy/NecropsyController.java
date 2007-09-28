@@ -32,9 +32,9 @@ import org.apache.struts.upload.FormFile;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.attachments.StrutsAttachmentFile;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.MaterialSource;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.sample.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
@@ -284,7 +284,7 @@ public class NecropsyController extends ViewController
 
         Mouse mouse = form.getMouse();
         MouseModel model = MouseModelManager.getModel(mouse.getModelId());
-        MaterialSource matSource = ExperimentService.get().getMaterialSource(model.getMaterialSourceLSID());
+        ExpSampleSet matSource = ExperimentService.get().getSampleSet(model.getMaterialSourceLSID());
 
         Date necropsyDate = form.getCollectionDate();
         MouseModelManager.beginTransaction();
@@ -461,7 +461,7 @@ public class NecropsyController extends ViewController
         samples = (NecropsySample[]) sampleList.toArray(new NecropsySample[sampleList.size()]);
 
         MouseModel mouseModel = MouseModelManager.getMouseModel(MouseModelController.getModelId(form));
-        MaterialSource matSource = ExperimentService.get().getMaterialSource(mouseModel.getMaterialSourceLSID());
+        ExpSampleSet matSource = ExperimentService.get().getSampleSet(mouseModel.getMaterialSourceLSID());
 
         Mouse mouse = form.getMouse();
 

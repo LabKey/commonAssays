@@ -27,15 +27,13 @@ import org.labkey.api.data.*;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
-import org.labkey.ms2.MS2Fraction;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.RunForm;
 import org.labkey.ms2.protocol.*;
 
 import javax.servlet.ServletException;
@@ -1157,8 +1155,8 @@ public class PipelineController extends ViewController
         if (uriData == null)
             HttpView.throwNotFound();
 
-        ExperimentService.get().ensureDefaultMaterialSource();
-        MaterialSource activeMaterialSource = ExperimentService.get().ensureActiveMaterialSource(getContainer());
+        ExperimentService.get().ensureDefaultSampleSet();
+        ExpSampleSet activeMaterialSource = ExperimentService.get().ensureActiveSampleSet(getContainer());
 
         ViewBackgroundInfo info =
                 PipelineService.get().getJobBackgroundInfo(getViewBackgroundInfo(), new File(uriData));
@@ -1199,23 +1197,23 @@ public class PipelineController extends ViewController
             DescribeRunPage drv = (DescribeRunPage) JspLoader.createPage(getRequest(), PipelineController.class, "describe.jsp");
             drv.setMzXmlFileStatus(mzXmlFileStatus);
             drv.setForm(form);
-            MaterialSource[] materialSources;
-            if (activeMaterialSource.getLSID().equals(ExperimentService.get().getDefaultMaterialSourceLsid()))
+            ExpSampleSet[] materialSources;
+            if (activeMaterialSource.getLSID().equals(ExperimentService.get().getDefaultSampleSetLsid()))
             {
-                materialSources = new MaterialSource[] { activeMaterialSource };
+                materialSources = new ExpSampleSet[] { activeMaterialSource };
             }
             else
             {
-                materialSources = new MaterialSource[] { activeMaterialSource, ExperimentService.get().ensureDefaultMaterialSource() };
+                materialSources = new ExpSampleSet[] { activeMaterialSource, ExperimentService.get().ensureDefaultSampleSet() };
             }
 
             Map<Integer, ExpMaterial[]> materialSourceMaterials = new HashMap<Integer, ExpMaterial[]>();
-            for (MaterialSource source : materialSources)
+            for (ExpSampleSet source : materialSources)
             {
-                ExpMaterial[] materials = ExperimentService.get().getMaterialsForMaterialSource(source.getMaterialLSIDPrefix(), source.getContainer());
+                ExpMaterial[] materials = ExperimentService.get().getMaterialsForSampleSet(source.getMaterialLSIDPrefix(), source.getContainer());
                 materialSourceMaterials.put(source.getRowId(), materials);
             }
-            drv.setMaterialSources(materialSources);
+            drv.setSampleSets(materialSources);
             drv.setMaterialSourceMaterials(materialSourceMaterials);
             drv.setController(this);
             if ("share".equals(protocolSharing))
@@ -1711,211 +1709,4 @@ public class PipelineController extends ViewController
             return _localPathRoot;
         }
     }
-
-
-    /**
-     * This action is not available yet and is still in progress!
-     */
-    @Jpf.Action
-    protected Forward showMS2Run(RunForm form) throws Exception
-    {
-        //TODO: Check for error conditions
-        int runId = Integer.parseInt(form.getRun());
-        MS2Run run = MS2Manager.getRun(runId);
-
-        if (run == null)
-            throw new NotFoundException();
-
-        requiresPermission(ACL.PERM_READ, run.getContainer());
-
-        if (null == run.getExperimentRunLSID())
-        {
-            requiresPermission(ACL.PERM_UPDATE, run.getContainer());
-            GroovyView gv = new GroovyView("/Experiment/AnnotateRun.gm");
-            gv.addObject("run", run);
-            MaterialSource[] sources = ExperimentService.get().getMaterialSources();
-            if (sources.length == 0)
-            {
-                ExperimentService.get().insertMaterialSource(getUser(), getContainer(), "Default", "Default samples for " + getContainer().getPath().substring(1));
-                sources = ExperimentService.get().getMaterialSources();
-            }
-
-            gv.addObject("materialSources", sources);
-            //TODO: Get containers right
-            Protocol[] samplePreps = ExperimentService.get().getProtocolsByType("SamplePreparation", null);
-            gv.addObject("samplePreps", samplePreps);
-            Protocol[] protocols = ExperimentService.get().getProtocolsByType("ExperimentRun", null);
-            gv.addObject("protocols", protocols);
-            return renderInTemplate(gv, getContainer(), "Annotate MS2 Run");
-        }
-        else
-        {
-            HttpView.throwRedirect(getViewURLHelper().relativeUrl("showRunGraph.view", "rowId=" + runId));
-        }
-
-        return null;
-    }
-
-    @Jpf.Action(validationErrorForward = @Jpf.Forward(path = "showMS2Run.do", name = "validate"))
-    protected Forward generateRun(GenerateRunForm form) throws Exception
-    {
-        int run = form.getRun();
-
-        MS2Run msrun = MS2Manager.getRun(run);
-        requiresAdmin(msrun.getContainer());
-
-        MaterialSource source = ExperimentService.get().getMaterialSource(form.getMaterialSource());
-        ExpMaterial mat = ExperimentService.get().createExpMaterial();
-        //getResponse().setContentType("text/xml;charset=UTF-8");
-        GroovyView gv = new GroovyView("/org/labkey/ms2/pipeline/ExperimentTemplate.gm");
-        Lsid experimentLSID = getDefaultExperimentLSID(getContainer());
-        gv.addObject("experimentLSID", experimentLSID.toString());
-        mat.setLSID(source.getMaterialLSIDPrefix() + form.getSampleId());
-        mat.setName(form.getSampleName());
-
-        Protocol prepProtocol = null;
-        String prepId = form.getSamplePrep();
-        if ("_new".equals(prepId))
-        {
-            Protocol protocol = new Protocol();
-            //Create a unique LSID for this new protocol. In this case, based on the runId
-            Lsid prepLSID = new Lsid("Protocol", "SamplePreparation", String.valueOf(run));
-            protocol.setLSID(prepLSID.toString());
-            protocol.setName(form.getPrepName());
-            protocol.setProtocolDescription(form.getPrepDescription());
-            prepProtocol = protocol;
-        }
-        else if (!"_none".equals(prepId))
-        {
-            //TODO: Error out if null
-            prepProtocol = ExperimentService.get().getProtocol(Integer.parseInt(prepId));
-        }
-        MS2Fraction[] fractions = MS2Manager.getFractions(run);
-        gv.addObject("sample", mat);
-        gv.addObject("prepProtocol", prepProtocol);
-        gv.addObject("description", form.getDescription());
-        gv.addObject("run", msrun);
-        gv.addObject("fractions", fractions);
-        gv.addObject("lsidAuthority", AppProps.getInstance().getDefaultLsidAuthority());
-        File tempFile = File.createTempFile("xar", ".xml");
-        tempFile.deleteOnExit();
-        FileOutputStream fos = new FileOutputStream(tempFile);
-        PrintWriter writer = new PrintWriter(fos);
-        getView().include(gv, writer);
-        writer.close();
-
-        PipelineService service = PipelineService.get();
-        ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), tempFile);
-
-        ExperimentPipelineJob job = new ExperimentPipelineJob(info, tempFile, form.getDescription(), false);
-        PipelineService.get().queueJob(job);
-
-        //BUGBUG: This should not happen unless upload succeeds!!
-        String runLsid = "urn:lsid:" + AppProps.getInstance().getDefaultLsidAuthority() + ":ExperimentRun.MS2:" + run;
-        MS2Manager.updateMS2Application(run, runLsid);
-
-        HttpView.throwRedirect(getViewURLHelper().relativeUrl("begin.view", "", "Project"));
-
-        return null;
-    }
-
-    public static class GenerateRunForm extends ViewForm
-    {
-        private int run;
-        private String sampleId = "Unspecified";
-        private String sampleName = "Unnamed Sample";
-        private String description = "MS2 Run";
-        private Integer materialSource;
-        private String samplePrep;
-        private String prepName;
-        private String prepDescription;
-
-        public void setRun(int run)
-        {
-            this.run = run;
-        }
-
-        public int getRun()
-        {
-            return run;
-        }
-
-        public void setSampleId(String sampleLSID)
-        {
-            this.sampleId = sampleLSID;
-        }
-
-        @Jpf.ValidatableProperty(displayName = "Sample Id", validateRequired = @Jpf.ValidateRequired())
-        public String getSampleId()
-        {
-            return sampleId;
-        }
-
-        public void setSampleName(String sampleName)
-        {
-            this.sampleName = sampleName;
-        }
-
-        public String getSampleName()
-        {
-            return sampleName;
-        }
-
-        public void setDescription(String description)
-        {
-            this.description = description;
-        }
-
-        public String getDescription()
-        {
-            return description;
-        }
-
-        public void setMaterialSource(Integer materialSource)
-        {
-            this.materialSource = materialSource;
-        }
-
-        @Jpf.ValidatableProperty(displayName = "Material Source", validateRequired = @Jpf.ValidateRequired())
-        public Integer getMaterialSource()
-        {
-            return materialSource;
-        }
-
-        public void setSamplePrep(String samplePrep)
-        {
-            this.samplePrep = samplePrep;
-        }
-
-        public String getSamplePrep()
-        {
-            return samplePrep;
-        }
-
-        public void setPrepName(String prepName)
-        {
-            this.prepName = prepName;
-        }
-
-        public String getPrepName()
-        {
-            return prepName;
-        }
-
-        public void setPrepDescription(String prepDescription)
-        {
-            this.prepDescription = prepDescription;
-        }
-
-        public String getPrepDescription()
-        {
-            return prepDescription;
-        }
-    }
-
-    protected static Lsid getDefaultExperimentLSID(Container c)
-    {
-        return new Lsid("Experiment", "Folder-" + String.valueOf(c.getRowId()), DEFAULT_EXPERIMENT_OBJECTID);
-    }
-
 }

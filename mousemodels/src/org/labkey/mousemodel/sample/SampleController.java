@@ -23,8 +23,8 @@ import org.apache.struts.action.*;
 import org.apache.struts.upload.FormFile;
 import org.apache.struts.upload.MultipartRequestHandler;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.MaterialSource;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.sample.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
@@ -197,7 +197,7 @@ public class SampleController extends ViewController
         if (null == lsid)
         {
             MouseModel model = MouseModelController.getModel(form);
-            MaterialSource matSource = ExperimentService.get().getMaterialSource(model.getMaterialSourceLSID());
+            ExpSampleSet matSource = ExperimentService.get().getSampleSet(model.getMaterialSourceLSID());
             String prefix = matSource.getMaterialLSIDPrefix();
             lsid = prefix + sample.getSampleId();
         }
@@ -619,7 +619,7 @@ public class SampleController extends ViewController
                 if (sampleId == null || sampleId.trim().length() == 0)
                     continue;
 
-                MaterialSource matSource = form.getMaterialSource();
+                ExpSampleSet matSource = form.getMaterialSource();
                 String sampleLsid = matSource.getMaterialLSIDPrefix() + sampleId;
                 location.setSampleLSID(sampleLsid);
                 Location curLocation = SampleManager.getLocation(sampleLsid);
@@ -645,7 +645,7 @@ public class SampleController extends ViewController
     public static class EnterSamplesForm extends ViewForm
     {
         public static int MAX_LOCATIONS = 20;
-        private MaterialSource materialSource;
+        private ExpSampleSet materialSource;
 
         private Location[] locations = new Location[MAX_LOCATIONS];
         private String[] sampleIds = new String[MAX_LOCATIONS];
@@ -709,7 +709,7 @@ public class SampleController extends ViewController
 
         public void setMaterialSourceLSID(String sampleSource)
         {
-            this.materialSource = ExperimentService.get().getMaterialSource(sampleSource);
+            this.materialSource = ExperimentService.get().getSampleSet(sampleSource);
         }
 
         public String getMaterialSourceLSID()
@@ -717,14 +717,9 @@ public class SampleController extends ViewController
             return materialSource != null ? materialSource.getLSID() : null;
         }
 
-        public MaterialSource getMaterialSource()
+        public ExpSampleSet getMaterialSource()
         {
             return materialSource;
-        }
-
-        public void setMaterialSource(MaterialSource materialSource)
-        {
-            this.materialSource = materialSource;
         }
 
         public String getSampleId(int index)

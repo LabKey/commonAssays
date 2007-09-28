@@ -3,7 +3,6 @@ package org.labkey.flow.data;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.data.*;
 import org.labkey.flow.query.FlowSchema;
@@ -11,7 +10,6 @@ import org.labkey.flow.query.FlowTableType;
 import org.labkey.api.security.User;
 import org.labkey.api.query.QueryAction;
 import org.apache.log4j.Logger;
-import org.apache.commons.lang.ObjectUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -54,7 +52,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     static public FlowExperiment[] getExperiments(Container container)
     {
         ExperimentService.Interface svc = ExperimentService.get();
-        ExpExperiment[] experiments = svc.getExpExperiments(container);
+        ExpExperiment[] experiments = svc.getExperiments(container);
         FlowExperiment[] ret = new FlowExperiment[experiments.length];
         for (int i = 0; i < experiments.length; i ++)
         {

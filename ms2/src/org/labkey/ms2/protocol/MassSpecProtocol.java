@@ -19,6 +19,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpSampleSet;
 import org.fhcrc.cpas.exp.xml.*;
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.apache.log4j.Logger;
@@ -264,7 +265,7 @@ public class MassSpecProtocol extends PipelineProtocol
             else
             {
                 Integer matSourceId = runInfo.getMaterialSourceIds()[i];
-                MaterialSource matSource = ExperimentService.get().getMaterialSource(matSourceId);
+                ExpSampleSet matSource = ExperimentService.get().getSampleSet(matSourceId);
 
                 materialLSID = matSource.getMaterialLSIDPrefix() + runInfo.getSampleIdsNew()[i];
                 materialName = runInfo.getSampleIdsNew()[i];

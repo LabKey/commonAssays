@@ -1,13 +1,12 @@
 package org.labkey.ms2.pipeline;
 
 import org.fhcrc.cpas.exp.xml.*;
-import org.labkey.api.exp.MaterialSource;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.PathRelativizer;
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.ms2.protocol.MassSpecProtocol;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipeRoot;
@@ -32,7 +31,7 @@ abstract public class DescribeRunPage extends JspBase
     protected ExperimentArchiveDocument[] xarDocs;
     protected PipelineController.MS2ExperimentForm form;
     protected Map<File, FileStatus> mzXmlFileStatus;
-    protected MaterialSource[] materialSources;
+    protected ExpSampleSet[] sampleSets;
     protected PipelineController controller;
     private Map<Integer, ExpMaterial[]> _materialSourceMaterials;
 
@@ -169,9 +168,9 @@ abstract public class DescribeRunPage extends JspBase
         builder.append("<br>\n");
         builder.append("<input type=\"radio\" id=\"" + namePrefix + "ExistingType" + nameSuffix + "\" name=\"" + namePrefix + "Type" + nameSuffix + "\" value=\"Existing\"/>\n");
         builder.append("<select name=\"" + namePrefix + "Existing" + nameSuffix + "\" onchange=\"document.getElementById('" + namePrefix + "ExistingType" + nameSuffix + "').checked = true;\">");
-        if (getMaterialSources().length > 0)
+        if (getSampleSets().length > 0)
         {
-            ExpMaterial[] materials = _materialSourceMaterials.get(this.getMaterialSources()[0].getRowId());
+            ExpMaterial[] materials = _materialSourceMaterials.get(this.getSampleSets()[0].getRowId());
             if (materials != null)
             {
                 for (ExpMaterial material : materials)
@@ -238,7 +237,7 @@ abstract public class DescribeRunPage extends JspBase
         builder.append(">\n");
 
         boolean activeSource = true;
-        for(MaterialSource source : materialSources)
+        for(ExpSampleSet source : sampleSets)
         {
             builder.append("<option ");
             if (activeSource)
@@ -253,7 +252,7 @@ abstract public class DescribeRunPage extends JspBase
             builder.append(PageFlowUtil.filter(source.getName()));
             if (!source.getContainer().equals(form.getContainer().getId()))
             {
-                String containerPath = ContainerManager.getForId(source.getContainer()).getPath();
+                String containerPath = source.getContainer().getPath();
                 builder.append(" in ").append(containerPath);
             }
 
@@ -284,14 +283,14 @@ abstract public class DescribeRunPage extends JspBase
         this.mzXmlFileStatus = mzXmlFileStatus;
     }
 
-    public MaterialSource[] getMaterialSources()
+    public ExpSampleSet[] getSampleSets()
     {
-        return materialSources;
+        return sampleSets;
     }
 
-    public void setMaterialSources(MaterialSource[] materialSources)
+    public void setSampleSets(ExpSampleSet[] sampleSets)
     {
-        this.materialSources = materialSources;
+        this.sampleSets = sampleSets;
     }
 
     public PipelineController getController()

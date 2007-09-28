@@ -720,7 +720,6 @@ ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.java -text
 ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.jsp -text
 ms2/src/org/labkey/ms2/pipeline/ConverterFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/DescribeRunPage.java -text
-ms2/src/org/labkey/ms2/pipeline/ExperimentTemplate.gm -text
 ms2/src/org/labkey/ms2/pipeline/FileStatus.java -text
 ms2/src/org/labkey/ms2/pipeline/IInputXMLConverter.java -text
 ms2/src/org/labkey/ms2/pipeline/IParamsValidator.java -text
