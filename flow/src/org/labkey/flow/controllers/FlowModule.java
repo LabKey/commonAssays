@@ -36,6 +36,7 @@ import org.labkey.flow.controllers.log.LogController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
+import org.labkey.flow.controllers.remote.FlowRemoteController;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocolImplementation;
@@ -81,6 +82,7 @@ public class FlowModule extends DefaultModule
         addController("Flow-Log", LogController.class);
         addController("Flow-Compensation", CompensationController.class);
         addController("Flow-Protocol", ProtocolController.class);
+        addController("Flow-Remote", FlowRemoteController.class);
         FlowProperty.register();
         ContainerManager.addContainerListener(new FlowContainerListener());
     }

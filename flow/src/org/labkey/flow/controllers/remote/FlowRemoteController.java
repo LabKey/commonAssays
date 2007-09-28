@@ -1,0 +1,51 @@
+package org.labkey.flow.controllers.remote;
+
+import org.labkey.flow.controllers.editscript.GateEditorServiceImpl;
+import org.labkey.flow.controllers.remote.InterfaceAction;
+import org.labkey.flow.controllers.FlowModule;
+import org.labkey.flow.gateeditor.client.GateEditorService;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.action.SpringActionController;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.ACL;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: matthewb
+ * Date: Sep 24, 2007
+ * Time: 4:06:44 PM
+ */
+public class FlowRemoteController extends SpringActionController
+{
+    static DefaultActionResolver _actionResolver = new DefaultActionResolver(FlowRemoteController.class);
+
+    public FlowRemoteController() throws Exception
+    {
+        super();
+        setActionResolver(_actionResolver.getInstance(this));
+    }
+
+    // UNDONE: InfoAction { version number, login status, etc }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class GateEditorServiceAction extends InterfaceAction<GateEditorService>
+    {
+        public GateEditorServiceAction()
+        {
+            super(GateEditorService.class, FlowModule.NAME);
+        }
+
+        public GateEditorServiceImpl getInstance(int version)   // version * 1000
+        {
+            ViewContext context = HttpView.currentContext();
+            switch (version)
+            {
+                case 2300:
+                    return new GateEditorServiceImpl(context);
+                default:
+                    return new GateEditorServiceImpl(context);
+            }
+        }
+    }
+}
