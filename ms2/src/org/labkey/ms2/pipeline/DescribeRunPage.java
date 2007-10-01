@@ -250,7 +250,7 @@ abstract public class DescribeRunPage extends JspBase
             builder.append(source.getRowId());
             builder.append("\">");
             builder.append(PageFlowUtil.filter(source.getName()));
-            if (!source.getContainer().equals(form.getContainer().getId()))
+            if (!source.getContainer().equals(form.getContainer()))
             {
                 String containerPath = source.getContainer().getPath();
                 builder.append(" in ").append(containerPath);

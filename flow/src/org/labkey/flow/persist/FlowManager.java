@@ -4,14 +4,12 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.Data;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.LimitedCacheMap;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.util.CacheMap;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.query.AttributeCache;
@@ -225,7 +223,7 @@ public class FlowManager
 
     public AttrObject createAttrObject(ExpData data, ObjectType type, URI uri) throws SQLException
     {
-        if (FlowDataHandler.instance.getPriority(ExperimentService.get().getData(data.getRowId())) != Handler.Priority.HIGH)
+        if (FlowDataHandler.instance.getPriority(ExperimentService.get().getExpData(data.getRowId())) != Handler.Priority.HIGH)
         {
             // Need to make sure the right ExperimentDataHandler is associated with this data file, otherwise, you
             // won't be able to delete it because of the foreign key constraint from the flow.object table.
@@ -312,19 +310,19 @@ public class FlowManager
 
     }
 
-    public void deleteData(List<Data> datas) throws SQLException
+    public void deleteData(List<ExpData> datas) throws SQLException
     {
         if (datas.size() == 0)
             return;
         StringBuilder sqlGetOIDs = new StringBuilder("SELECT flow.Object.RowId FROM flow.Object WHERE flow.Object.DataId IN (");
         String comma = "";
         Set<Container> containers = new HashSet();
-        for (Data data : datas)
+        for (ExpData data : datas)
         {
             sqlGetOIDs.append(comma);
             comma = ",";
             sqlGetOIDs.append(data.getRowId());
-            containers.add(ContainerManager.getForId(data.getContainer()));
+            containers.add(data.getContainer());
         }
         sqlGetOIDs.append(")");
         Integer[] objectIds = Table.executeArray(getSchema(), sqlGetOIDs.toString(), null, Integer.class);

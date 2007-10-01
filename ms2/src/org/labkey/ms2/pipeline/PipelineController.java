@@ -28,6 +28,7 @@ import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.security.ACL;
@@ -527,7 +528,7 @@ public class PipelineController extends ViewController
             }
         }
         
-        Set<ExperimentRun> creatingRuns = new HashSet<ExperimentRun>();
+        Set<ExpRun> creatingRuns = new HashSet<ExpRun>();
         Set<File> annotationFiles = new HashSet<File>();
         try
         {
@@ -536,7 +537,7 @@ public class PipelineController extends ViewController
                 if (mzXmlFileStatus.get(mzXMLFile) == FileStatus.UNKNOWN)
                     continue;
                 
-                ExperimentRun run = ExperimentService.get().getCreatingRun(mzXMLFile, c);
+                ExpRun run = ExperimentService.get().getCreatingRun(mzXMLFile, c);
                 if (run != null)
                 {
                     creatingRuns.add(run);
@@ -1123,7 +1124,7 @@ public class PipelineController extends ViewController
         File[] mzXMLFiles = new File(uriData).listFiles(MS2PipelineManager.getAnalyzeFilter());
         for (File mzXMLFile : mzXMLFiles)
         {
-            ExperimentRun run = ExperimentService.get().getCreatingRun(mzXMLFile, c);
+            ExpRun run = ExperimentService.get().getCreatingRun(mzXMLFile, c);
             if (run != null)
             {
                 ExperimentService.get().deleteExperimentRunsByRowIds(c, getUser(), run.getRowId());

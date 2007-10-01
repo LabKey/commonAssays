@@ -25,7 +25,7 @@ import org.labkey.api.util.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.Data;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.ms2.protocol.*;
 
 import java.io.*;
@@ -758,7 +758,7 @@ public class MS2PipelineManager
             boolean all = exists(getLogFile(dirAnalysis, "all"), knownFiles, checkedDirectories);
             boolean allComplete = all && exists(getSearchExperimentFile(dirAnalysis, "all"), knownFiles, checkedDirectories);
 
-            Data[] allContainerDatas = null;
+            ExpData[] allContainerDatas = null;
 
             for (File file : mzXMLFiles)
             {
@@ -796,13 +796,13 @@ public class MS2PipelineManager
                         }
                         if (allContainerDatas == null)
                         {
-                            allContainerDatas = ExperimentService.get().getData(c);
+                            allContainerDatas = ExperimentService.get().getExpData(c);
                         }
-                        for (Data data : allContainerDatas)
+                        for (ExpData data : allContainerDatas)
                         {
                             if (fileURL.equals(data.getDataFileUrl()))
                             {
-                                if (data.getRunId() != null)
+                                if (data.getRun() != null)
                                 {
                                     status = FileStatus.ANNOTATED;
                                 }

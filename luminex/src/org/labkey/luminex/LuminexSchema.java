@@ -5,7 +5,7 @@ import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpDataTable;
-import org.labkey.api.exp.Protocol;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.study.assay.AssayService;
@@ -18,14 +18,14 @@ public class LuminexSchema extends UserSchema
 {
     private static final String ANALYTE_TABLE_NAME = "Analyte";
     private static final String DATA_ROW_TABLE_NAME = "DataRow";
-    private final Protocol _protocol;
+    private final ExpProtocol _protocol;
 
     public LuminexSchema(User user, Container container)
     {
         this(user, container, null);
     }
 
-    public LuminexSchema(User user, Container container, Protocol protocol)
+    public LuminexSchema(User user, Container container, ExpProtocol protocol)
     {
         super("Luminex", user, container, getSchema());
         _protocol = protocol;

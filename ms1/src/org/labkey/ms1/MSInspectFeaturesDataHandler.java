@@ -3,7 +3,6 @@ package org.labkey.ms1;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
@@ -364,7 +363,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      * @param user
      * @throws ExperimentException
      */
-    public void deleteData(Data data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
     {
         // Delete the database records for this features file
         if(null == data || null == user)
@@ -398,7 +397,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      * @param oldDataRowID
      * @throws ExperimentException
      */
-    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
+    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
     {
         if(null == newData || null == user)
                 return;
@@ -420,7 +419,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      * @param data  The data file to import
      * @return      Priority if this file can import it, otherwise null.
      */
-    public Priority getPriority(Data data)
+    public Priority getPriority(ExpData data)
     {
         //we handle only *.rtfeatures.tvt files
         String fileUrl = data.getDataFileUrl();

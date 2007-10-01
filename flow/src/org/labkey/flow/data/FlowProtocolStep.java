@@ -45,22 +45,6 @@ public class FlowProtocolStep
         return parentProtocol.addStep(user, ensureForContainer(user, parentProtocol.getContainer()).getExpObject(), getDefaultActionSequence());
     }
 
-    static public void addProtocolSteps(User user, Container container, Protocol parentProtocol) throws SQLException
-    {
-        /*ProtocolAction runInputsAction = addAction(user, parentProtocol, parentProtocol, 0);
-        ProtocolAction loadRunAction = loadRun.addAction(user, container, parentProtocol);
-        ProtocolAction calculateCompensationAction = calculateCompensation.addAction(user, container, parentProtocol);
-        ProtocolAction analysisAction = analysis.addAction(user, container, parentProtocol);
-        ProtocolAction markRunOutputsAction = markRunOutputs.addAction(user, container, parentProtocol);
-        insertPredecessors(user, runInputsAction, runInputsAction); // ? every action must have a predecessor, or we hit
-                                                                    // xml errors exporting the protocol. 
-
-        insertPredecessors(user, loadRunAction, runInputsAction);
-        insertPredecessors(user, calculateCompensationAction, runInputsAction, loadRunAction);
-        insertPredecessors(user, analysisAction, runInputsAction, calculateCompensationAction, loadRunAction);
-        insertPredecessors(user, markRunOutputsAction, runInputsAction, loadRunAction, calculateCompensationAction, analysisAction);*/
-    }
-
     public String getLSID(Container container)
     {
         return FlowObject.generateLSID(container, "Protocol", lsidName);

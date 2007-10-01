@@ -21,6 +21,8 @@ import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
 //wch: mascotdev
 import org.labkey.ms2.pipeline.MascotImportPipelineJob;
@@ -591,10 +593,14 @@ public class MS2Manager
                 try
                 {
                     File file = new File(run.getPath(), run.getFileName());
-                    Data data = ExperimentService.get().getDataByURL(file, c);
-                    if (data != null && data.getRunId() != null)
+                    ExpData data = ExperimentService.get().getDataByURL(file, c);
+                    if (data != null)
                     {
-                        experimentRunsToDelete.add(data.getRunId());
+                        ExpRun expRun = data.getRun();
+                        if (expRun != null)
+                        {
+                            experimentRunsToDelete.add(expRun.getRowId());
+                        }
                     }
                 }
                 catch (SQLException e)

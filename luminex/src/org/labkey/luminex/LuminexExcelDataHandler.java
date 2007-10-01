@@ -49,14 +49,14 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         try
         {
             ExpProtocol expProtocol = expRun.getProtocol();
-            Protocol protocol = ExperimentService.get().getProtocol(expProtocol.getRowId());
+            ExpProtocol protocol = ExperimentService.get().getExpProtocol(expProtocol.getRowId());
             Domain dataDomain = null;
             Domain analyteDomain = null;
             Domain excelRunDomain = null;
             for (String uri : protocol.retrieveObjectProperties().keySet())
             {
                 Lsid lsid = new Lsid(uri);
-                if (lsid.getNamespacePrefix() != null && lsid.getNamespacePrefix().startsWith(Protocol.ASSAY_DOMAIN_DATA))
+                if (lsid.getNamespacePrefix() != null && lsid.getNamespacePrefix().startsWith(ExpProtocol.ASSAY_DOMAIN_DATA))
                 {
                     dataDomain = PropertyService.get().getDomain(info.getContainer(), uri);
                 }
@@ -771,7 +771,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         if (run != null)
         {
             ExpProtocol protocol = run.getProtocol();
-            Protocol p = ExperimentService.get().getProtocol(protocol.getRowId());
+            ExpProtocol p = ExperimentService.get().getExpProtocol(protocol.getRowId());
             AssayProvider provider = AssayService.get().getProvider(p);
             if (provider != null)
             {
@@ -782,7 +782,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
     }
 
 
-    public void beforeDeleteData(List<Data> data) throws ExperimentException
+    public void beforeDeleteData(List<ExpData> data) throws ExperimentException
     {
         try
         {
@@ -800,7 +800,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public void deleteData(Data data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
     {
         try
         {
@@ -812,12 +812,12 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
+    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
     {
         throw new UnsupportedOperationException();
     }
 
-    public Priority getPriority(Data data)
+    public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());
         if (LUMINEX_DATA_LSID_PREFIX.equals(lsid.getNamespacePrefix()))

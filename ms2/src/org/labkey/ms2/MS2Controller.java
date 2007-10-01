@@ -26,7 +26,6 @@ import org.apache.struts.action.ActionMapping;
 import org.jfree.chart.imagemap.ImageMapUtilities;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.ExperimentRun;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.*;
@@ -1790,17 +1789,17 @@ public class MS2Controller extends ViewController
             ids.add(new Integer(idString));
         }
         List<MS2Run> runs = getRuns(ids, new ArrayList<String>(), false);
-        List<ExperimentRun> expRuns = new ArrayList<ExperimentRun>();
+        List<ExpRun> expRuns = new ArrayList<ExpRun>();
         Container sourceContainer = null;
         for (Iterator<MS2Run> iter = runs.iterator(); iter.hasNext(); )
         {
             MS2Run run = iter.next();
             if (run.getExperimentRunLSID() != null)
             {
-                ExperimentRun expRun = ExperimentService.get().getExperimentRun(run.getExperimentRunLSID());
-                if (expRun != null && expRun.getContainer().equals(run.getContainer()))
+                ExpRun expRun = ExperimentService.get().getExpRun(run.getExperimentRunLSID());
+                if (expRun != null && expRun.getContainer().getId().equals(run.getContainer()))
                 {
-                    sourceContainer = ContainerManager.getForId(expRun.getContainer());
+                    sourceContainer = expRun.getContainer();
                     expRuns.add(expRun);
                     iter.remove();
                 }

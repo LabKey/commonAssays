@@ -8,6 +8,9 @@ import org.labkey.api.view.InsertView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.*;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.util.PageFlowUtil;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
@@ -92,7 +95,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
     }
 
-    protected ModelAndView afterRunCreation(LuminexRunUploadForm form, ExperimentRun run) throws ServletException, SQLException
+    protected ModelAndView afterRunCreation(LuminexRunUploadForm form, ExpRun run) throws ServletException, SQLException
     {
         PropertyDescriptor[] analyteColumns = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         if (analyteColumns.length == 0)
@@ -101,7 +104,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
         else
         {
-            List<Data> outputs = run.retrieveOutputDataList();
+            List<ExpData> outputs = run.retrieveOutputDataList();
             assert outputs.size() == 1;
             return getAnalytesView(outputs.get(0).getRowId(), form, false);
         }
@@ -168,7 +171,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
     }
 
-    protected void addSampleInputColumns(Protocol protocol, InsertView insertView)
+    protected void addSampleInputColumns(ExpProtocol protocol, InsertView insertView)
     {
         // Don't add any columns - they're part of the uploaded spreadsheet
     }

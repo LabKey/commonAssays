@@ -75,17 +75,17 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         return result;
     }
 
-    public void deleteData(Data data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
     {
         // For now, let the PepXML file control when the data is deleted
     }
 
-    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
+    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
     {
         // For now, let the PepXML file control when the data is moved
     }
 
-    public Priority getPriority(Data data)
+    public Priority getPriority(ExpData data)
     {
         File f = data.getFile();
         if (f != null && MS2PipelineManager.isProtXMLFile(f))

@@ -76,12 +76,12 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
             {
                 if (existingRun.getExperimentRunLSID() != null && !existingRun.getExperimentRunLSID().equals(expRun.getLSID()))
                 {
-                    ExperimentRun associatedRun = ExperimentService.get().getExperimentRun(existingRun.getExperimentRunLSID());
+                    ExpRun associatedRun = ExperimentService.get().getExpRun(existingRun.getExperimentRunLSID());
                     if (associatedRun != null)
                     {
                         throw new ExperimentException("The MS2 data '" +
                                 dataFile.getPath() + "' is already associated with an experiment run in the folder " +
-                                ContainerManager.getForId(associatedRun.getContainer()).getPath() + " (LSID= '" + existingRun.getExperimentRunLSID() + "')");
+                                associatedRun.getContainer().getPath() + " (LSID= '" + existingRun.getExperimentRunLSID() + "')");
                     }
                 }
 
@@ -140,7 +140,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         return new ViewURLHelper(request, "MS2", "showRun", container.getPath()).addParameter("run", Integer.toString(run.getRun()));
     }
 
-    public void deleteData(Data data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
     {
         try
         {
@@ -162,7 +162,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
+    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
     {
         try
         {
@@ -191,7 +191,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public Priority getPriority(Data data)
+    public Priority getPriority(ExpData data)
     {
         File f = data.getFile();
         if (f != null && f.getName().toLowerCase().endsWith(".pep.xml"))

@@ -4,19 +4,16 @@ import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.Data;
-import org.labkey.api.exp.Handler;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
-import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
 import org.labkey.api.util.URLHelper;
 import org.labkey.common.tools.SimpleXMLStreamReader;
 import org.apache.log4j.Logger;
-import org.xml.sax.XMLReader;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamConstants;
@@ -344,7 +341,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         return mzxmlFile.getPath().replace('\\', '/');
     } //getMzXmlFilePath()
 
-    public void deleteData(Data data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
     {
         if(null == data || null == container || null == user)
             return;
@@ -361,7 +358,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
     } //deleteData()
 
 
-    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
+    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
     {
         if(null == newData || null == user) //anything else?
             return;
@@ -384,7 +381,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         return url;
     } //getContentURL()
 
-    public Priority getPriority(Data data)
+    public Priority getPriority(ExpData data)
     {
         //we handle only *.rtfeatures.xml files
         return (null != data && null != data.getDataFileUrl() && 

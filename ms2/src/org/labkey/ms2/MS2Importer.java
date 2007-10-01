@@ -20,9 +20,9 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
-import org.labkey.api.exp.Data;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.security.User;
 import org.labkey.api.util.CsvSet;
 import org.labkey.ms2.protein.ProteinManager;
@@ -348,7 +348,7 @@ public abstract class MS2Importer
             }
             File pepXMLFile = new File(path, pepXMLFileName);
 
-            Data pepXMLData = ExperimentService.get().getDataByURL(pepXMLFile, c);
+            ExpData pepXMLData = ExperimentService.get().getDataByURL(pepXMLFile, c);
             if (pepXMLData != null)
             {
                 fractionMap.put("PepXmlDataLSID", pepXMLData.getLSID());

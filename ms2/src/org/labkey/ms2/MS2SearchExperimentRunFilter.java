@@ -5,7 +5,6 @@ import org.labkey.ms2.query.MS2Schema;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.ButtonBar;
-import org.labkey.api.data.ButtonBarLineBreak;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.security.ACL;

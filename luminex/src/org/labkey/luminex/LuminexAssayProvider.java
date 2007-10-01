@@ -12,6 +12,7 @@ import org.labkey.api.exp.list.ListItem;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.data.*;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.FieldKey;
@@ -30,8 +31,8 @@ import java.io.File;
  */
 public class LuminexAssayProvider extends AbstractAssayProvider
 {
-    public static final String ASSAY_DOMAIN_ANALYTE = Protocol.ASSAY_DOMAIN_PREFIX + "Analyte";
-    public static final String ASSAY_DOMAIN_EXCEL_RUN = Protocol.ASSAY_DOMAIN_PREFIX + "ExcelRun";
+    public static final String ASSAY_DOMAIN_ANALYTE = ExpProtocol.ASSAY_DOMAIN_PREFIX + "Analyte";
+    public static final String ASSAY_DOMAIN_EXCEL_RUN = ExpProtocol.ASSAY_DOMAIN_PREFIX + "ExcelRun";
 
     public LuminexAssayProvider()
     {
@@ -48,23 +49,23 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         super.registerLsidHandler();
         LsidManager.get().registerHandler("LuminexDataRow", new LsidManager.LsidHandler()
         {
-            public Identifiable getObject(Lsid lsid)
+            public ExpData getObject(Lsid lsid)
             {
                 return getDataForDataRow(lsid.getObjectId());
             }
 
             public String getDisplayURL(Lsid lsid)
             {
-                Data data = getDataForDataRow(lsid.getObjectId());
+                ExpData data = getDataForDataRow(lsid.getObjectId());
                 if (data == null)
                     return null;
-                ExperimentRun run = ExperimentService.get().getExperimentRun(data.getRunId());
-                if (run == null)
+                ExpRun expRun = data.getRun();
+                if (expRun == null)
                     return null;
-                Protocol protocol = ExperimentService.get().getProtocol(run.getProtocolLSID());
+                ExpProtocol protocol = expRun.getProtocol();
                 if (protocol == null)
                     return null;
-                ViewURLHelper dataURL = getAssayDataURL(ContainerManager.getForId(run.getContainer()), protocol, run.getRowId());
+                ViewURLHelper dataURL = getAssayDataURL(expRun.getContainer(), protocol, expRun.getRowId());
                 return dataURL.getLocalURIString();
             }
         });
@@ -79,7 +80,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return result;
     }
 
-    public PropertyDescriptor[] getRunPropertyColumns(Protocol protocol)
+    public PropertyDescriptor[] getRunPropertyColumns(ExpProtocol protocol)
     {
         List<PropertyDescriptor> result = new ArrayList<PropertyDescriptor>(Arrays.asList(super.getRunPropertyColumns(protocol)));
         result.addAll(Arrays.asList(getPropertiesForDomainPrefix(protocol, ASSAY_DOMAIN_EXCEL_RUN)));
@@ -87,12 +88,12 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return result.toArray(new PropertyDescriptor[result.size()]);
     }
 
-    public TableInfo createDataTable(QuerySchema schema, String alias, Protocol protocol)
+    public TableInfo createDataTable(QuerySchema schema, String alias, ExpProtocol protocol)
     {
         return new LuminexSchema(schema.getUser(), schema.getContainer(), protocol).createDataRowTable(alias);
     }
 
-    public PropertyDescriptor[] getRunDataColumns(Protocol protocol)
+    public PropertyDescriptor[] getRunDataColumns(ExpProtocol protocol)
     {
         throw new UnsupportedOperationException();
     }
@@ -258,7 +259,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return result;
     }
 
-    public Map<String, TableInfo> getTableInfos(Protocol protocol, QuerySchema schema)
+    public Map<String, TableInfo> getTableInfos(ExpProtocol protocol, QuerySchema schema)
     {
         Map<String, TableInfo> result = super.getTableInfos(protocol, schema);
 
@@ -271,33 +272,26 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return result;
     }
 
-    public boolean shouldShowDataDescription(Protocol protocol)
+    public boolean shouldShowDataDescription(ExpProtocol protocol)
     {
         return false;
     }
     
-    public ViewURLHelper getUploadWizardURL(Container container, Protocol protocol)
+    public ViewURLHelper getUploadWizardURL(Container container, ExpProtocol protocol)
     {
         ViewURLHelper url = new ViewURLHelper("Luminex", "luminexUploadWizard.view", container);
         url.addParameter("rowId", protocol.getRowId());
         return url;
     }
 
-    public Data getDataForDataRow(Object dataRowId)
+    public ExpData getDataForDataRow(Object dataRowId)
     {
         LuminexDataRow dataRow = Table.selectObject(LuminexSchema.getTableInfoDataRow(), dataRowId, LuminexDataRow.class);
         if (dataRow == null)
         {
             return null;
         }
-        try
-        {
-            return ExperimentService.get().getData(dataRow.getDataId());
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        return ExperimentService.get().getExpData(dataRow.getDataId());
     }
 
     public FieldKey getRunIdFieldKeyFromDataRow()
@@ -320,7 +314,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return FieldKey.fromParts("RowId");
     }
 
-    public ViewURLHelper publish(User user, Protocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
+    public ViewURLHelper publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
     {
         try
         {

@@ -29,7 +29,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
     static public final String EXT_DATA = "flowdata.xml";
     static public final String EXT_SCRIPT = "flowscript.xml";
     static public final FlowDataHandler instance = new FlowDataHandler();
-    public void beforeDeleteData(List<Data> datas) throws ExperimentException
+    public void beforeDeleteData(List<ExpData> datas) throws ExperimentException
     {
         try
         {
@@ -66,7 +66,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
-    public Priority getPriority(Data data)
+    public Priority getPriority(ExpData data)
     {
         File object = data.getFile();
         if (object != null && (object.getName().endsWith("." + EXT_DATA)|| object.getName().endsWith("." + EXT_SCRIPT)))
@@ -107,11 +107,11 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public void deleteData(Data data, Container container, User user) throws ExperimentException
+    public void deleteData(ExpData data, Container container, User user) throws ExperimentException
     {
     }
 
-    public void runMoved(Data newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
+    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
     {
 
     }

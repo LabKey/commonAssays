@@ -263,7 +263,7 @@ public class FlowRun extends FlowObject<ExpRun>
     {
         try
         {
-            for (ProtocolApplication app : ExperimentService.get().getProtocolApplicationForRun(getRunId()))
+            for (ExpProtocolApplication app : ExperimentService.get().getExpProtocolApplicationsForRun(getRunId()))
             {
                 FlowProtocolStep step = FlowProtocolStep.fromActionSequence(app.getActionSequence());
                 if (step != null)
