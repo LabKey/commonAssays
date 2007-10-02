@@ -13,13 +13,15 @@ import java.io.File;
 public class MS1Manager
 {
     private static MS1Manager _instance;
-    private static final String SCHEMA_NAME = "ms1";
-    private static final String TABLE_PEAKS_FILES = "PeaksFiles";
-    private static final String TABLE_SCANS = "Scans";
-    private static final String TABLE_CALIBRATION_PARAMS = "CalibrationParams";
-    private static final String TABLE_PEAK_FAMILIES = "PeakFamilies";
-    private static final String TABLE_PEAKS_TO_FAMILIES = "PeaksToFamilies";
-    private static final String TABLE_PEAKS = "Peaks";
+    public static final String SCHEMA_NAME = "ms1";
+    public static final String TABLE_PEAKS_FILES = "PeaksFiles";
+    public static final String TABLE_SCANS = "Scans";
+    public static final String TABLE_CALIBRATION_PARAMS = "CalibrationParams";
+    public static final String TABLE_PEAK_FAMILIES = "PeakFamilies";
+    public static final String TABLE_PEAKS_TO_FAMILIES = "PeaksToFamilies";
+    public static final String TABLE_PEAKS = "Peaks";
+    public static final String TABLE_FEATURES = "Features";
+    public static final String TABLE_FEATURES_FILES = "FeaturesFiles";
 
     //this maps the class of our DbBean derivatives to their proper table names
     //used in the save() method below
@@ -123,10 +125,12 @@ public class MS1Manager
     protected boolean isAlreadyImported(File dataFile, ExpData data) throws SQLException
     {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS existing FROM exp.Data INNER JOIN ");
-        if(dataFile.getPath().endsWith("features.xml"))
+        if(dataFile.getPath().endsWith(".peaks.xml"))
             sql.append("ms1.PeaksFiles as t");
-        else if(dataFile.getPath().endsWith("features.tsv"))
+        else if(dataFile.getPath().endsWith(".features.tsv"))
             sql.append("ms1.FeaturesFiles as t");
+        else
+            assert false : "isAlreadyImported() only works with .peaks.xml and .features.tsv files!";
 
         sql.append(" ON (exp.Data.RowId = t.ExpDataFileID) WHERE DataFileUrl='file:/");
         sql.append(dataFile.getAbsolutePath().replace("\\", "/"));

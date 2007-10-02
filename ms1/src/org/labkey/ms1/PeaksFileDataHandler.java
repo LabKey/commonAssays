@@ -385,7 +385,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
     {
         //we handle only *.rtfeatures.xml files
         return (null != data && null != data.getDataFileUrl() && 
-                (data.getDataFileUrl().endsWith(".rtfeatures.xml") || data.getDataFileUrl().endsWith(".features.xml"))) ? Priority.MEDIUM : null;
+                data.getDataFileUrl().endsWith(".peaks.xml")) ? Priority.MEDIUM : null;
     } //Priority()
 
     ///////////////////////////////////////////////////////////////////////////

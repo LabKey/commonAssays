@@ -79,7 +79,7 @@ public class MSInspectImportPipelineJob extends PipelineJob
 
         // Check out the file system for the expected hierarchy
         File resultsDir = _featuresFile.getParentFile();
-        File msInspectDefFile = new File(resultsDir, "inspect.def");
+        File msInspectDefFile = new File(resultsDir, "inspect.xml");
 
         File protocolsDir = resultsDir.getParentFile();
         if (protocolsDir == null)
@@ -92,12 +92,8 @@ public class MSInspectImportPipelineJob extends PipelineJob
             throw new IOException("Expected analysis files to be in a subdirectory ./inspect/<protocol_name>/ relative to the .mzXML file");
         }
 
-        String name = _featuresFile.getName().substring(0, _featuresFile.getName().length() - ".tsv".length());
+        String name = _featuresFile.getName().substring(0, _featuresFile.getName().length() - ".features.tsv".length());
         File mzXMLFile = new File(analysisRootDir, name + ".mzXML");
-        if (!NetworkDrive.exists(mzXMLFile))
-        {
-            mzXMLFile = new File(analysisRootDir, name + ".mzXML");
-        }
 
         String protocolName = resultsDir.getName();
         
@@ -107,7 +103,9 @@ public class MSInspectImportPipelineJob extends PipelineJob
         }
         if (!NetworkDrive.exists(msInspectDefFile))
         {
-            throw new IOException("Could not find inspect.def   file on disk, expected it to be: " + msInspectDefFile);
+            //just print a warning to the log and keep going...the experiment run details will already
+            //show the file as not available on disk.
+            getLogger().warn("No msInspect settings file was found at the expected location: " + msInspectDefFile);
         }
         if (!NetworkDrive.exists(mzXMLFile))
         {
@@ -146,8 +144,8 @@ public class MSInspectImportPipelineJob extends PipelineJob
         //peaks XML file will be in the same dir as _featuresFile and have the same base name
         //but with an .xml file extension
         String peaksXMLFilePath = PathRelativizer.relativizePathUnix(resultsDir, _featuresFile);
-        peaksXMLFilePath = peaksXMLFilePath.substring(0,peaksXMLFilePath.length() - 4); //len of ".tsv"
-        peaksXMLFilePath += ".xml";
+        peaksXMLFilePath = peaksXMLFilePath.substring(0,peaksXMLFilePath.length() - ".features.tsv".length());
+        peaksXMLFilePath += ".peaks.xml";
         xarXml = StringUtils.replace(xarXml, "@@PEAKS_FILE_PATH@@", peaksXMLFilePath);
 
         File uniquifierFile = resultsDir.getParentFile();

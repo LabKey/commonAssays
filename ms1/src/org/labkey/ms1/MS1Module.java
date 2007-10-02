@@ -25,12 +25,13 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
 {
     private static final Logger _log = Logger.getLogger(MS1Module.class);
     public static final String NAME = "MS1";
+    public static final ExperimentRunFilter EXP_RUN_FILTER = new ExperimentRunFilter("msInspect Feature Finding", MS1Schema.SCHEMA_NAME, MS1Schema.TABLE_FEATURE_RUNS);
 
     private Set<ExperimentDataHandler> _dataHandlers;
 
     public MS1Module()
     {
-        super(NAME, 2.21, null, true);
+        super(NAME, 2.22, null, true);
         addController("ms1", MS1Controller.class);
 
         MS1Schema.register();
@@ -64,7 +65,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
         ExperimentService.get().registerExperimentDataHandler(new MSInspectFeaturesDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new PeaksFileDataHandler());
 
-        ExperimentService.get().registerExperimentRunFilter(new ExperimentRunFilter("msInspect Feature Finding", MS1Schema.SCHEMA_NAME, MS1Schema.MSINSPECT_FEATURE_EXPERIMENT_RUNS_TABLE_NAME));
+        ExperimentService.get().registerExperimentRunFilter(EXP_RUN_FILTER);
     }
 
 

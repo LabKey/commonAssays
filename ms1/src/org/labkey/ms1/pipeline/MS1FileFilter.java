@@ -15,6 +15,7 @@ public class MS1FileFilter extends PipelineProvider.FileEntryFilter
 {
     public boolean accept(File f)
     {
-        return f.getName().toLowerCase().endsWith(".rtfeatures.tsv");
+        String name = f.getName().toLowerCase();
+        return name.endsWith(".rtfeatures.tsv") || name.endsWith(".features.tsv");
     }
 }

@@ -13,6 +13,8 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.ExperimentRunFilter;
+import org.labkey.api.query.QueryView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -40,8 +42,10 @@ public class MS1Controller extends ViewController
     @Jpf.Action
     protected Forward begin() throws Exception
     {
-        HtmlView v = new HtmlView("MS1 module");
-        return renderInTemplate(v);
+        //the begin view should be a list of the msInspect feature finding experiment runs
+        //each row will have a links to other views.
+        QueryView view = ExperimentService.get().createExperimentRunWebPart(getViewContext(),MS1Module.EXP_RUN_FILTER, true);
+        return renderInTemplate(view);
     }
 
     /**
