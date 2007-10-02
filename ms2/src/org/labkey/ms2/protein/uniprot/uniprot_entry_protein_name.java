@@ -16,48 +16,35 @@
 package org.labkey.ms2.protein.uniprot;
 
 /**
- * Created by IntelliJ IDEA.
  * User: tholzman
  * Date: Feb 28, 2005
- * Time: 9:44:57 AM
- * To change this template use File | Settings | File Templates.
  */
-
 import java.util.*;
 import java.sql.*;
 
 import org.labkey.ms2.protein.*;
+import org.xml.sax.SAXException;
 
-public class uniprot_entry_protein_name extends ParseActions
+public class uniprot_entry_protein_name extends CharactersParseActions
 {
 
-    public boolean endElement(Connection c, Map<String,ParseActions> tables)
+    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
     {
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        try
+        if (root.getSkipEntries() > 0)
         {
-            Map<String, Object> curSeq = tables.get("ProtSequences").getCurItem();
-            if (curSeq == null) return false;
-
-            if (!curSeq.containsKey("description"))
-            {
-                curSeq.put("description", accumulated);
-            }
+            return;
         }
-        catch (Exception e)
+
+        Map<String, Object> curSeq = tables.get("ProtSequences").getCurItem();
+        if (curSeq == null)
         {
-            return false;
+            throw new SAXException("Unable to find a current ProtSequences");
         }
-        return true;
-    }
 
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
-    {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        accumulated += new String(ch, start, len);
-        return true;
+        if (!curSeq.containsKey("description"))
+        {
+            curSeq.put("description", _accumulated);
+        }
     }
-
 }

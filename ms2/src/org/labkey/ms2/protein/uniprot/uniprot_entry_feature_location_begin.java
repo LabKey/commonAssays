@@ -16,13 +16,9 @@
 package org.labkey.ms2.protein.uniprot;
 
 /**
- * Created by IntelliJ IDEA.
  * User: tholzman
  * Date: Mar 3, 2005
- * Time: 9:41:21 AM
- * To change this template use File | Settings | File Templates.
  */
-
 import java.util.*;
 import java.sql.*;
 
@@ -32,28 +28,21 @@ import org.labkey.ms2.protein.*;
 public class uniprot_entry_feature_location_begin extends ParseActions
 {
 
-    public boolean beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
     {
-        accumulated = null;
+        _accumulated = null;
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        try
+        if (root.getSkipEntries() > 0)
         {
-            Map surroundingFeature = (Map) ((Vector)tables.get("ProtAnnotations").getCurItem().get("Annotations")).lastElement();
-            if (surroundingFeature == null) return true;
-            String position = attrs.getValue("position");
-            if (position != null)
-                surroundingFeature.put("start_pos", position);
+            return;
         }
-        catch (Exception e)
+        Map surroundingFeature = (Map) ((Vector)tables.get("ProtAnnotations").getCurItem().get("Annotations")).lastElement();
+        if (surroundingFeature == null)
         {
-            return false;
+            return;
         }
-        return true;
-    }
-
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
-    {
-        return true;
+        String position = attrs.getValue("position");
+        if (position != null)
+            surroundingFeature.put("start_pos", position);
     }
 }

@@ -21,94 +21,81 @@ import java.sql.*;
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 
-public class uniprot_entry_organism_name extends ParseActions
+public class uniprot_entry_organism_name extends CharactersParseActions
 {
 
     private String curType = null;
 
-    public boolean beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
     {
-        accumulated = null;
+        _accumulated = null;
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        try
+        if (root.getSkipEntries() > 0)
         {
-            curType = attrs.getValue("type");
-            this.clearCurItems();
-            if (curType == null) return false;
-            accumulated = "";
+            return;
         }
-        catch (Exception e)
+
+        curType = attrs.getValue("type");
+        clearCurItems();
+        if (curType == null)
         {
-            return false;
+            throw new SAXException("type is not set");
         }
-        return true;
+        _accumulated = "";
     }
 
-    public boolean endElement(Connection c, Map<String,ParseActions> tables)
+    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
     {
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        try
+        if (root.getSkipEntries() > 0)
         {
-            ParseActions u = tables.get("Organism");
-            if (u.getCurItem() == null) return false;
-            if (curType.equalsIgnoreCase("common"))
+            return;
+        }
+
+        ParseActions u = tables.get("Organism");
+        if (u.getCurItem() == null)
+        {
+            throw new SAXException("No current organism");
+        }
+        if (curType.equalsIgnoreCase("common"))
+        {
+            u.getCurItem().put("common_name", _accumulated.trim());
+            return;
+        }
+        if (curType.equalsIgnoreCase("scientific") || curType.equalsIgnoreCase("full"))
+        {
+            String together = _accumulated.trim();
+            String separate[] = together.split(" ");
+            if (separate == null || separate.length < 2)
             {
-                u.getCurItem().put("common_name", accumulated.trim());
-                return true;
+                XMLProteinHandler.parseWarning("Found organism with this name: '" + together + "'");
             }
-            if (curType.equalsIgnoreCase("scientific") || curType.equalsIgnoreCase("full"))
+            if (separate != null && separate.length >= 1)
             {
-                String together = accumulated.trim();
-                String separate[] = together.split(" ");
-                if (separate == null || separate.length < 2)
-                {
-                    XMLProteinHandler.parseWarning("Found organism with this name: '" + together + "'");
-                }
-                if (separate != null && separate.length >= 1)
-                {
-                    u.getCurItem().put("genus", separate[0].replaceAll("'", ""));
-                }
-                if (separate != null && separate.length >= 2)
-                {
-                    u.getCurItem().put("species", separate[1].replaceAll("'", ""));
-                }
-                if (separate != null && (curType.equalsIgnoreCase("full") || separate.length > 2))
-                {
-                    u.getCurItem().put("comments", together);
-                }
-                Vector annots = (Vector) tables.get("ProtAnnotations").getCurItem().get("Annotations");
-                annots.add(this.getCurItem());
-
-                this.getCurItem().put("annot_val", together);
-                Map curSeq = tables.get("ProtSequences").getCurItem();
-                this.getCurItem().put("sequence", curSeq);
-                if (curType.equalsIgnoreCase("full"))
-                {
-                    this.getCurItem().put("annotType", "FullOrganismName");
-                }
-                else
-                {
-                    this.getCurItem().put("annotType", "ScientificOrganismName");
-                }
-
-                return true;
+                u.getCurItem().put("genus", separate[0].replaceAll("'", ""));
             }
-            return true;
-        }
-        catch (Exception e)
-        {
-            return false;
+            if (separate != null && separate.length >= 2)
+            {
+                u.getCurItem().put("species", separate[1].replaceAll("'", ""));
+            }
+            if (separate != null && (curType.equalsIgnoreCase("full") || separate.length > 2))
+            {
+                u.getCurItem().put("comments", together);
+            }
+            Vector annots = (Vector) tables.get("ProtAnnotations").getCurItem().get("Annotations");
+            annots.add(getCurItem());
+
+            getCurItem().put("annot_val", together);
+            Map curSeq = tables.get("ProtSequences").getCurItem();
+            getCurItem().put("sequence", curSeq);
+            if (curType.equalsIgnoreCase("full"))
+            {
+                getCurItem().put("annotType", "FullOrganismName");
+            }
+            else
+            {
+                getCurItem().put("annotType", "ScientificOrganismName");
+            }
         }
     }
-
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
-    {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        accumulated += new String(ch, start, len);
-        return true;
-    }
-
 }

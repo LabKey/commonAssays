@@ -794,6 +794,7 @@ ms2/src/org/labkey/ms2/pipeline/setTandemDefaults.gm -text
 ms2/src/org/labkey/ms2/protein.vm -text
 ms2/src/org/labkey/ms2/protein/AnnotationLoader.java -text
 ms2/src/org/labkey/ms2/protein/AnnotationUploadManager.java -text
+ms2/src/org/labkey/ms2/protein/CharactersParseActions.java -text
 ms2/src/org/labkey/ms2/protein/CustomAnnotationImportHelper.java -text
 ms2/src/org/labkey/ms2/protein/CustomAnnotationSet.java -text
 ms2/src/org/labkey/ms2/protein/CustomAnnotationType.java -text

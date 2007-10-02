@@ -22,50 +22,33 @@ import java.sql.*;
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 
-public class uniprot_entry_accession extends ParseActions
+public class uniprot_entry_accession extends CharactersParseActions
 {
 
-    public boolean beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
     {
-        accumulated = null;
+        _accumulated = null;
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        try
+        if (root.getSkipEntries() > 0)
         {
-            accumulated = "";
-            this.clearCurItems();
+            return;
         }
-        catch (Exception e)
-        {
-            return false;
-        }
-        return true;
+
+        _accumulated = "";
+        clearCurItems();
     }
 
-    public boolean endElement(Connection c, Map<String,ParseActions> tables)
+    public void endElement(Connection c, Map<String,ParseActions> tables)
     {
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        try
+        if (root.getSkipEntries() > 0)
         {
-            Vector idents = (Vector)tables.get("ProtIdentifiers").getCurItem().get("Identifiers");
-            idents.add(this.getCurItem());
-            this.getCurItem().put("identType", "SwissProtAccn");
-            this.getCurItem().put("identifier", accumulated);
-            this.getCurItem().put("sequence", tables.get("ProtSequences").getCurItem());
-            return true;
+            return;
         }
-        catch (Exception e)
-        {
-            return false;
-        }
-    }
-
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
-    {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        accumulated += new String(ch, start, len);
-        return true;
+        Vector idents = (Vector)tables.get("ProtIdentifiers").getCurItem().get("Identifiers");
+        idents.add(getCurItem());
+        getCurItem().put("identType", "SwissProtAccn");
+        getCurItem().put("identifier", _accumulated);
+        getCurItem().put("sequence", tables.get("ProtSequences").getCurItem());
     }
 }

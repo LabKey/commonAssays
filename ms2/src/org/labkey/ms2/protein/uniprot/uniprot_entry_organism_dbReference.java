@@ -24,19 +24,15 @@ import org.labkey.ms2.protein.*;
 public class uniprot_entry_organism_dbReference extends ParseActions
 {
 
-    public boolean beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
     {
-        accumulated = null;
+        _accumulated = null;
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        ParseActions u = (ParseActions) tables.get("Organism");
+        if (root.getSkipEntries() > 0)
+        {
+            return;
+        }
+        ParseActions u = tables.get("Organism");
         u.getCurItem().put("identID", attrs.getValue("id"));
-        return true;
     }
-
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
-    {
-        return true;
-    }
-
 }

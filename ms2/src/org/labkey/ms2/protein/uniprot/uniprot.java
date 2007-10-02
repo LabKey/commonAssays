@@ -22,9 +22,9 @@ import org.labkey.api.data.SqlDialect;
 import org.labkey.api.util.DateUtil;
 import org.labkey.ms2.protein.ParseActions;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.ms2.protein.XMLProteinHandler;
 import org.labkey.ms2.protein.XMLProteinLoader;
 import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
 
 import java.sql.*;
 import java.util.Date;
@@ -43,16 +43,16 @@ public class uniprot extends ParseActions
     private static final int TRANSACTION_ROW_COUNT = 100;
 
     // n of top-level "entries" to skip
-    protected int skipEntries = 0;
+    protected int _skipEntries = 0;
 
     public void setSkipEntries(int s)
     {
-        this.skipEntries = s;
+        _skipEntries = s;
     }
 
     public int getSkipEntries()
     {
-        return this.skipEntries;
+        return _skipEntries;
     }
 
     public boolean unBumpSkip()
@@ -68,28 +68,28 @@ public class uniprot extends ParseActions
         }
     }
 
-    public boolean beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
     {
         _startTime = System.currentTimeMillis();
-        accumulated = null;
-        this.clearCurItems();
+        _accumulated = null;
+        clearCurItems();
         tables.put("UniprotRoot", this);
         tables.put("ProtIdentifiers", this);
         tables.put("ProtAnnotations", this);
         // Annotations and Identifiers are Vectors of Maps
         // The Vectors get cleared by insertTables
-        this.getCurItem().put("Identifiers", new Vector());
-        this.getCurItem().put("Annotations", new Vector());
+        getCurItem().put("Identifiers", new Vector());
+        getCurItem().put("Annotations", new Vector());
         try
         {
             setupNames(c);
             if (getCurrentInsertId() == 0)
             {
-                InitialInsertion.setString(1, this.getWhatImParsing());
-                if (this.getComment() == null) this.setComment("");
-                InitialInsertion.setString(2, this.getComment());
-                InitialInsertion.setTimestamp(3, new java.sql.Timestamp(new java.util.Date().getTime()));
-                InitialInsertion.executeUpdate();
+                _initialInsertion.setString(1, getWhatImParsing());
+                if (getComment() == null) setComment("");
+                _initialInsertion.setString(2, getComment());
+                _initialInsertion.setTimestamp(3, new java.sql.Timestamp(new java.util.Date().getTime()));
+                _initialInsertion.executeUpdate();
                 //c.commit();
                 ResultSet idrs =
                         c.createStatement().executeQuery(_dialect.appendSelectAutoIncrement("", ProteinManager.getTableInfoAnnotInsertions(), "InsertId"));
@@ -111,77 +111,76 @@ public class uniprot extends ParseActions
             Thread.currentThread().setName("AnnotLoader" + getCurrentInsertId());
             //c.commit();
         }
-        catch (Exception e)
+        catch (SQLException e)
         {
-            XMLProteinHandler.parseError("Can't initialize insertion table entry: " + e);
+            throw new SAXException(e);
         }
-        return true;
     }
 
-    public boolean endElement(Connection c, Map<String,ParseActions> tables)
+    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
     {
         try
         {
             insertTables(tables, c);
-            FinalizeInsertion.setTimestamp(1, new java.sql.Timestamp(new java.util.Date().getTime()));
-            FinalizeInsertion.setInt(2, getCurrentInsertId());
-            FinalizeInsertion.executeUpdate();
-            executeUpdate("DROP TABLE " + OTableName, c);
-            executeUpdate("DROP TABLE " + ATableName, c);
-            executeUpdate("DROP TABLE " + STableName, c);
-            executeUpdate("DROP TABLE " + ITableName, c);
-
-            //c.commit();
+            _finalizeInsertion.setTimestamp(1, new java.sql.Timestamp(new java.util.Date().getTime()));
+            _finalizeInsertion.setInt(2, getCurrentInsertId());
+            _finalizeInsertion.executeUpdate();
+            executeUpdate("DROP TABLE " + _oTableName, c);
+            executeUpdate("DROP TABLE " + _aTableName, c);
+            executeUpdate("DROP TABLE " + _sTableName, c);
+            executeUpdate("DROP TABLE " + _iTableName, c);
         }
-        catch (Exception e)
+        catch (SQLException e)
         {
-            XMLProteinHandler.parseError("Final table insert failed in uniprot's endElement: " + e);
+            throw new SAXException(e);
         }
+
+        if (_addOrg != null) { try { _addOrg.close(); } catch (SQLException e) {} }
+        if (_addSeq != null) { try { _addSeq.close(); } catch (SQLException e) {} }
+        if (_addAnnot != null) { try { _addAnnot.close(); } catch (SQLException e) {} }
+        if (_addIdent != null) { try { _addIdent.close(); } catch (SQLException e) {} }
+
+        //c.commit();
+
         long totalTime = System.currentTimeMillis() - _startTime;
         _log.info("Finished uniprot upload in " + totalTime + " milliseconds");
-        return true;
     }
-
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
-    {
-        return true;
-    }
-
+    
     // All Database Stuff Follows
     // Some day this should be refactored into per-DBM modules
 
-    private static String OTableName = null;
-    private static String STableName = null;
-    private static String ITableName = null;
-    private static String ATableName = null;
-    private static PreparedStatement addOrg = null;
-    private static PreparedStatement addSeq = null;
-    private static PreparedStatement addAnnot = null;
-    private static PreparedStatement addIdent = null;
-    private static String InsertIntoOrgCommand = null;
-    private static String DeleteFromTmpOrgCommand = null;
-    private static String InsertOrgIDCommand = null;
-    private static String UpdateOrgCommand = null;
-    private static String InsertIntoSeqCommand = null;
-    private static String UpdateSeqTableCommand = null;
-    private static String InsertIdentTypesCommand = null;
-    private static String InsertIntoIdentsCommand = null;
-    private static String InsertInfoSourceFromSeqCommand = null;
-    private static String InsertAnnotTypesCommand = null;
-    private static String InsertIntoAnnotsCommand = null;
-    private static String UpdateAnnotsWithSeqsCommand = null;
-    private static String UpdateAnnotsWithIdentsCommand = null;
-    private static String UpdateIdentsWithSeqsCommand = null;
-    private static PreparedStatement InitialInsertion = null;
-    private static PreparedStatement UpdateInsertion = null;
-    private static PreparedStatement FinalizeInsertion;
-    private static PreparedStatement GetCurrentInsertStats = null;
+    private String _oTableName = null;
+    private String _sTableName = null;
+    private String _iTableName = null;
+    private String _aTableName = null;
+    private PreparedStatement _addOrg = null;
+    private PreparedStatement _addSeq = null;
+    private PreparedStatement _addAnnot = null;
+    private PreparedStatement _addIdent = null;
+    private String _insertIntoOrgCommand = null;
+    private String _deleteFromTmpOrgCommand = null;
+    private String _insertOrgIDCommand = null;
+    private String _updateOrgCommand = null;
+    private String _insertIntoSeqCommand = null;
+    private String _updateSeqTableCommand = null;
+    private String _insertIdentTypesCommand = null;
+    private String _insertIntoIdentsCommand = null;
+    private String _insertInfoSourceFromSeqCommand = null;
+    private String _insertAnnotTypesCommand = null;
+    private String _insertIntoAnnotsCommand = null;
+    private String _updateAnnotsWithSeqsCommand = null;
+    private String _updateAnnotsWithIdentsCommand = null;
+    private String _updateIdentsWithSeqsCommand = null;
+    private PreparedStatement _initialInsertion = null;
+    private PreparedStatement _updateInsertion = null;
+    private PreparedStatement _finalizeInsertion;
+    private PreparedStatement _getCurrentInsertStats = null;
 
-    private void setupNames(Connection c) throws Exception
+    private void setupNames(Connection c) throws SQLException
     {
         int randomTableSuffix = (new Random().nextInt(1000000000));
-        OTableName = _dialect.getTempTablePrefix() + "organism" + randomTableSuffix;
-        String createOTableCommand = "CREATE " + _dialect.getTempTableKeyword() + " TABLE " + OTableName + " ( " +
+        _oTableName = _dialect.getTempTablePrefix() + "organism" + randomTableSuffix;
+        String createOTableCommand = "CREATE " + _dialect.getTempTableKeyword() + " TABLE " + _oTableName + " ( " +
                 "common_name varchar(50) NULL, " +
                 "genus varchar(100), " +
                 "species varchar(100), " +
@@ -190,9 +189,9 @@ public class uniprot extends ParseActions
                 "entry_date " + _dialect.getDefaultDateTimeDatatype() + " NULL " +
                 ")";
         executeUpdate(createOTableCommand, c);
-        STableName = _dialect.getTempTablePrefix() + "sequences" + randomTableSuffix;
+        _sTableName = _dialect.getTempTablePrefix() + "sequences" + randomTableSuffix;
         String createSTableCommand =
-                "CREATE " + _dialect.getTempTableKeyword() + " TABLE " + STableName + " ( " +
+                "CREATE " + _dialect.getTempTableKeyword() + " TABLE " + _sTableName + " ( " +
                         "ProtSequence text NULL , " +
                         "hash varchar(100) NULL , " +
                         "description varchar(200) NULL ," +
@@ -208,8 +207,8 @@ public class uniprot extends ParseActions
                         "entry_date " + _dialect.getDefaultDateTimeDatatype() + " NULL" +
                         ")";
         executeUpdate(createSTableCommand, c);
-        ITableName = _dialect.getTempTablePrefix() + "identifiers" + randomTableSuffix;
-        String createITableCommand = "CREATE " + _dialect.getTempTableKeyword() + " TABLE " + ITableName + " ( " +
+        _iTableName = _dialect.getTempTablePrefix() + "identifiers" + randomTableSuffix;
+        String createITableCommand = "CREATE " + _dialect.getTempTableKeyword() + " TABLE " + _iTableName + " ( " +
                 "identifier varchar(50)  NOT NULL, " +
                 "identType varchar(50) NULL, " +
                 "genus varchar(100) NULL, " +
@@ -219,9 +218,9 @@ public class uniprot extends ParseActions
                 "entry_date " + _dialect.getDefaultDateTimeDatatype() + " NULL" +
                 ")";
         executeUpdate(createITableCommand, c);
-        ATableName = _dialect.getTempTablePrefix() + "annotations" + randomTableSuffix;
+        _aTableName = _dialect.getTempTablePrefix() + "annotations" + randomTableSuffix;
         String createATableCommand =
-                "CREATE " + _dialect.getTempTableKeyword() + " TABLE " + ATableName + " ( " +
+                "CREATE " + _dialect.getTempTableKeyword() + " TABLE " + _aTableName + " ( " +
                         "annot_val varchar(200) NOT NULL, " +
                         "annotType varchar(50) NULL, " +
                         "genus varchar(100) NULL, " +
@@ -237,37 +236,37 @@ public class uniprot extends ParseActions
                         ")";
         executeUpdate(createATableCommand, c);
 
-        addOrg = c.prepareStatement(
-                "INSERT INTO " + OTableName + " (common_name,genus,species,comments,identID,entry_date) " +
+        _addOrg = c.prepareStatement(
+                "INSERT INTO " + _oTableName + " (common_name,genus,species,comments,identID,entry_date) " +
                         " VALUES (?,?,?,?,?,?) "
         );
-        addSeq = c.prepareStatement(
-                "INSERT INTO " + STableName +
+        _addSeq = c.prepareStatement(
+                "INSERT INTO " + _sTableName +
                         " (ProtSequence,hash,description,source_change_date,source_insert_date,genus,species," +
                         "  mass,length,source,best_name,best_gene_name,entry_date) " +
                         " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) "
         );
-        addIdent = c.prepareStatement(
-                "INSERT INTO " + ITableName + " (identifier,identType,genus,species,hash,entry_date)" +
+        _addIdent = c.prepareStatement(
+                "INSERT INTO " + _iTableName + " (identifier,identType,genus,species,hash,entry_date)" +
                         " VALUES (?,?,?,?,?,?)");
-        addAnnot = c.prepareStatement(
-                "INSERT INTO " + ATableName + " (annot_val,annotType,genus,species,hash,start_pos,end_pos,identifier,identType,entry_date)" +
+        _addAnnot = c.prepareStatement(
+                "INSERT INTO " + _aTableName + " (annot_val,annotType,genus,species,hash,start_pos,end_pos,identifier,identType,entry_date)" +
                         " VALUES (?,?,?,?,?,?,?,?,?,?)"
         );
 
-        InsertIntoOrgCommand =
+        _insertIntoOrgCommand =
                 "INSERT INTO " + ProteinManager.getTableInfoOrganisms() + " (Genus,Species,CommonName,Comments) " +
-                        "SELECT genus,species,common_name,comments FROM " + OTableName +
+                        "SELECT genus,species,common_name,comments FROM " + _oTableName +
                         " WHERE NOT EXISTS (" +
-                        "SELECT * FROM " + ProteinManager.getTableInfoOrganisms() + " WHERE " + OTableName + ".genus = " + ProteinManager.getTableInfoOrganisms() + ".genus AND " +
-                        OTableName + ".species = " + ProteinManager.getTableInfoOrganisms() + ".species)";
+                        "SELECT * FROM " + ProteinManager.getTableInfoOrganisms() + " WHERE " + _oTableName + ".genus = " + ProteinManager.getTableInfoOrganisms() + ".genus AND " +
+                        _oTableName + ".species = " + ProteinManager.getTableInfoOrganisms() + ".species)";
 
-        DeleteFromTmpOrgCommand =
-                "DELETE FROM " + OTableName +
+        _deleteFromTmpOrgCommand =
+                "DELETE FROM " + _oTableName +
                         " WHERE EXISTS (" +
-                        "   SELECT * FROM " + ProteinManager.getTableInfoOrganisms() + "," + OTableName +
-                        "      WHERE " + OTableName + ".genus=" + ProteinManager.getTableInfoOrganisms() + ".genus AND " +
-                        OTableName + ".species=" + ProteinManager.getTableInfoOrganisms() + ".species AND " + ProteinManager.getTableInfoOrganisms() + ".IdentId IS NOT NULL" +
+                        "   SELECT * FROM " + ProteinManager.getTableInfoOrganisms() + "," + _oTableName +
+                        "      WHERE " + _oTableName + ".genus=" + ProteinManager.getTableInfoOrganisms() + ".genus AND " +
+                        _oTableName + ".species=" + ProteinManager.getTableInfoOrganisms() + ".species AND " + ProteinManager.getTableInfoOrganisms() + ".IdentId IS NOT NULL" +
                         " )";
         ResultSet rs = c.createStatement().executeQuery(
                 "SELECT IdentTypeId FROM " + ProteinManager.getTableInfoIdentTypes() + " WHERE name='NCBI Taxonomy'"
@@ -275,27 +274,27 @@ public class uniprot extends ParseActions
         rs.next();
         int taxonomyTypeIndex = rs.getInt(1);
         rs.close();
-        InsertOrgIDCommand =
+        _insertOrgIDCommand =
                 "INSERT INTO " + ProteinManager.getTableInfoIdentifiers() + " (identifier,IdentTypeId,EntryDate) " +
                         "SELECT DISTINCT identID," + taxonomyTypeIndex + ",entry_date " +
-                        "FROM " + OTableName + " " +
+                        "FROM " + _oTableName + " " +
                         "WHERE NOT EXISTS (SELECT * FROM " + ProteinManager.getTableInfoIdentifiers() + " WHERE " +
-                        "" + ProteinManager.getTableInfoIdentifiers() + ".identifier = " + OTableName + ".identID AND " +
+                        "" + ProteinManager.getTableInfoIdentifiers() + ".identifier = " + _oTableName + ".identID AND " +
                         "" + ProteinManager.getTableInfoIdentifiers() + ".identtypeid=" + taxonomyTypeIndex + ")";
-        UpdateOrgCommand =
+        _updateOrgCommand =
                 "UPDATE " + ProteinManager.getTableInfoOrganisms() + " SET identid=c.identid " +
-                        "FROM " + ProteinManager.getTableInfoOrganisms() + " a," + OTableName + " b, " + ProteinManager.getTableInfoIdentifiers() + " c " +
+                        "FROM " + ProteinManager.getTableInfoOrganisms() + " a," + _oTableName + " b, " + ProteinManager.getTableInfoIdentifiers() + " c " +
                         "WHERE a.genus=b.genus AND a.species=b.species AND " +
                         "  c.identtypeid=" + taxonomyTypeIndex + " AND " +
                         "  c.identifier=b.identID";
-        InsertIntoSeqCommand =
+        _insertIntoSeqCommand =
                 "INSERT INTO " + ProteinManager.getTableInfoSequences() + " (ProtSequence,hash,description," +
                         "SourceChangeDate,SourceInsertDate,mass,length,OrgId," +
                         "SourceId,BestName,InsertDate,BestGeneName) " +
                         "SELECT a.ProtSequence,a.hash,a.description,a.source_change_date," +
                         "a.source_insert_date,a.mass,a.length,b.OrgId,c.SourceId," +
                         "a.best_name, a.entry_date, a.best_gene_name " +
-                        "  FROM " + STableName + " a, " + ProteinManager.getTableInfoOrganisms() + " b, " + ProteinManager.getTableInfoInfoSources() + " c " +
+                        "  FROM " + _sTableName + " a, " + ProteinManager.getTableInfoOrganisms() + " b, " + ProteinManager.getTableInfoInfoSources() + " c " +
                         " WHERE NOT EXISTS (" +
                         "SELECT * FROM " + ProteinManager.getTableInfoSequences() + " WHERE " +
                         "a.hash = " + ProteinManager.getTableInfoSequences() + ".hash AND b.OrgId=" + ProteinManager.getTableInfoSequences() + ".OrgId AND " +
@@ -305,30 +304,30 @@ public class uniprot extends ParseActions
                         " UPPER(a.genus)=UPPER(b.genus) AND " +
                         "c.name=a.source";
 
-        UpdateSeqTableCommand =
+        _updateSeqTableCommand =
                 "UPDATE "+ ProteinManager.getTableInfoSequences() +
                         " SET description=a.description, bestname=a.best_name, bestgenename=a.best_gene_name " +
-                        " FROM " + STableName + " a, "+ProteinManager.getTableInfoOrganisms() + " b " +
+                        " FROM " + _sTableName + " a, "+ProteinManager.getTableInfoOrganisms() + " b " +
                         " WHERE " + ProteinManager.getTableInfoSequences()+".hash = a.hash AND " +
                         ProteinManager.getTableInfoSequences()+".orgid=b.orgid AND UPPER(a.genus)=UPPER(b.genus) AND " +
                         " UPPER(a.species)=UPPER(b.species)";
 
-        InsertIdentTypesCommand =
+        _insertIdentTypesCommand =
                 "INSERT INTO " + ProteinManager.getTableInfoIdentTypes() + " (name,EntryDate) " +
                         " SELECT DISTINCT a.identType,max(a.entry_date) FROM " +
-                        ITableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinManager.getTableInfoIdentTypes() + " " +
+                        _iTableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinManager.getTableInfoIdentTypes() + " " +
                         " WHERE a.identType = " + ProteinManager.getTableInfoIdentTypes() + ".name) GROUP BY a.identType";
 
-        InsertInfoSourceFromSeqCommand =
+        _insertInfoSourceFromSeqCommand =
                 "INSERT INTO " + ProteinManager.getTableInfoInfoSources() + " (name,InsertDate) SELECT DISTINCT source,max(entry_date) FROM " +
-                        STableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinManager.getTableInfoInfoSources() + " " +
+                        _sTableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinManager.getTableInfoInfoSources() + " " +
                         " WHERE a.source = " + ProteinManager.getTableInfoInfoSources() + ".name) GROUP BY a.source";
 
-        InsertIntoIdentsCommand =
+        _insertIntoIdentsCommand =
                 "INSERT INTO " + ProteinManager.getTableInfoIdentifiers() + " " +
                         "  (identifier,IdentTypeId,SeqId,EntryDate) " +
                         "  SELECT DISTINCT b.identifier,a.identtypeid,b.seq_id,max(b.entry_date) " +
-                        "  FROM " + ProteinManager.getTableInfoIdentTypes() + " a," + ITableName + " b " +
+                        "  FROM " + ProteinManager.getTableInfoIdentTypes() + " a," + _iTableName + " b " +
                         "  WHERE " +
                         "    a.name = b.identType  AND " +
                         "    NOT EXISTS (" +
@@ -338,17 +337,17 @@ public class uniprot extends ParseActions
                         "    b.seq_id=c.seqid                 AND " +
                         "    b.identifier = c.identifier " +
                         "   ) GROUP BY b.identifier,a.identtypeid,b.seq_id";
-        InsertAnnotTypesCommand =
+        _insertAnnotTypesCommand =
                 "INSERT INTO " + ProteinManager.getTableInfoAnnotationTypes() + " (name,EntryDate) SELECT DISTINCT a.annotType,max(a.entry_date) FROM " +
-                        ATableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinManager.getTableInfoAnnotationTypes() + " " +
+                        _aTableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinManager.getTableInfoAnnotationTypes() + " " +
                         " WHERE a.annotType = " + ProteinManager.getTableInfoAnnotationTypes() + ".name) GROUP BY a.annotType";
 
-        InsertIntoAnnotsCommand =
+        _insertIntoAnnotsCommand =
                 "INSERT INTO " + ProteinManager.getTableInfoAnnotations() + " " +
                         "  (annotval,annottypeid,annotident,seqid,startpos,endpos,insertdate) " +
                         "  SELECT DISTINCT b.annot_val,a.annottypeid, b.ident_id, " +
                         "b.seq_id, b.start_pos, b.end_pos,max(b.entry_date) " +
-                        "  FROM " + ProteinManager.getTableInfoAnnotationTypes() + " a," + ATableName + " b " +
+                        "  FROM " + ProteinManager.getTableInfoAnnotationTypes() + " a," + _aTableName + " b " +
                         "  WHERE " +
                         "    a.name = b.annotType              AND " +
                         "    NOT EXISTS (" +
@@ -360,44 +359,44 @@ public class uniprot extends ParseActions
                         "    b.start_pos = c.startpos AND b.end_pos=c.endpos " +
                         "   ) GROUP BY b.annot_val,a.annottypeid,b.ident_id,b.seq_id,b.start_pos,b.end_pos";
 
-        UpdateAnnotsWithSeqsCommand =
-                "UPDATE " + ATableName + " SET seq_id = " +
+        _updateAnnotsWithSeqsCommand =
+                "UPDATE " + _aTableName + " SET seq_id = " +
                         "(SELECT c.seqId FROM " +
                         ProteinManager.getTableInfoOrganisms() + " b, " +
                         ProteinManager.getTableInfoSequences() + " c " +
-                        " WHERE c.hash=" + ATableName + ".hash AND " + ATableName + ".genus=b.genus AND " + ATableName + ".species=b.species AND b.orgid=c.orgid" +
+                        " WHERE c.hash=" + _aTableName + ".hash AND " + _aTableName + ".genus=b.genus AND " + _aTableName + ".species=b.species AND b.orgid=c.orgid" +
                         ")"
                 ;
 
-        UpdateAnnotsWithIdentsCommand =
-                "UPDATE " + ATableName + " SET ident_id = (SELECT DISTINCT b.identID FROM " +
+        _updateAnnotsWithIdentsCommand =
+                "UPDATE " + _aTableName + " SET ident_id = (SELECT DISTINCT b.identID FROM " +
                         ProteinManager.getTableInfoIdentifiers() + " b, " + ProteinManager.getTableInfoIdentTypes() + " c " +
-                        " WHERE " + ATableName + ".seq_id=b.seqid AND " + ATableName + ".identifier=b.identifier AND " +
-                        "  b.identtypeid=c.identtypeid AND " + ATableName + ".identType=c.name)";
+                        " WHERE " + _aTableName + ".seq_id=b.seqid AND " + _aTableName + ".identifier=b.identifier AND " +
+                        "  b.identtypeid=c.identtypeid AND " + _aTableName + ".identType=c.name)";
 
-        UpdateIdentsWithSeqsCommand =
-                "UPDATE " + ITableName + " SET seq_id = " +
+        _updateIdentsWithSeqsCommand =
+                "UPDATE " + _iTableName + " SET seq_id = " +
                         "(SELECT c.seqId FROM " +
                         ProteinManager.getTableInfoOrganisms() + " b, " +
                         ProteinManager.getTableInfoSequences() + " c " +
-                        " WHERE c.hash=" + ITableName + ".hash AND " + ITableName + ".genus=b.genus AND " + ITableName + ".species=b.species AND b.orgid=c.orgid" +
+                        " WHERE c.hash=" + _iTableName + ".hash AND " + _iTableName + ".genus=b.genus AND " + _iTableName + ".species=b.species AND b.orgid=c.orgid" +
                         ")"
                 ;
 
         String initialInsertionCommand = "INSERT INTO " + ProteinManager.getTableInfoAnnotInsertions() + " (FileName,FileType,Comment,InsertDate) VALUES (?,'uniprot',?,?)";
-        InitialInsertion = c.prepareStatement(initialInsertionCommand);
+        _initialInsertion = c.prepareStatement(initialInsertionCommand);
         String getCurrentInsertStatsCommand =
                 "SELECT SequencesAdded,AnnotationsAdded,IdentifiersAdded,OrganismsAdded,Mouthsful,RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=?";
-        GetCurrentInsertStats = c.prepareStatement(getCurrentInsertStatsCommand);
+        _getCurrentInsertStats = c.prepareStatement(getCurrentInsertStatsCommand);
         String updateInsertionCommand = "UPDATE " + ProteinManager.getTableInfoAnnotInsertions() + " SET " +
                 " Mouthsful=?,SequencesAdded=?,AnnotationsAdded=?,IdentifiersAdded=?,OrganismsAdded=?, " +
                 " MRMSequencesAdded=?,MRMAnnotationsAdded=?,MRMIdentifiersAdded=?,MRMOrganismsAdded=?,MRMSize=?," +
                 " RecordsProcessed=?,ChangeDate=? " +
                 " WHERE InsertId=?";
-        UpdateInsertion = c.prepareStatement(updateInsertionCommand);
+        _updateInsertion = c.prepareStatement(updateInsertionCommand);
         String finalizeInsertionCommand = "UPDATE " + ProteinManager.getTableInfoAnnotInsertions() + " SET " +
                 " CompletionDate=? WHERE InsertId=?";
-        FinalizeInsertion = c.prepareStatement(finalizeInsertionCommand);
+        _finalizeInsertion = c.prepareStatement(finalizeInsertionCommand);
     }
 
     protected void handleThreadStateChangeRequests()
@@ -411,356 +410,304 @@ public class uniprot extends ParseActions
         */
     }
 
-    public void insertTables(Map<String, ParseActions> tables, Connection conn)
+    public void insertTables(Map<String, ParseActions> tables, Connection conn) throws SQLException
     {
 
-        try
-        {
-            conn.setAutoCommit(false);
-            handleThreadStateChangeRequests();
-            int orgsAdded = insertOrganisms(tables, conn);
-            handleThreadStateChangeRequests();
+        conn.setAutoCommit(false);
+        handleThreadStateChangeRequests();
+        int orgsAdded = insertOrganisms(tables, conn);
+        handleThreadStateChangeRequests();
 
-            int seqsAdded = insertSequences(tables, conn);
-            handleThreadStateChangeRequests();
-            int identsAdded = insertIdentifiers(tables, conn);
-            handleThreadStateChangeRequests();
+        int seqsAdded = insertSequences(tables, conn);
+        handleThreadStateChangeRequests();
+        int identsAdded = insertIdentifiers(tables, conn);
+        handleThreadStateChangeRequests();
 
-            int annotsAdded = insertAnnotations(tables, conn);
-            conn.setAutoCommit(true);
-            handleThreadStateChangeRequests();
-            _log.info(new java.util.Date() + " Added: " +
-                    orgsAdded + " organisms; " +
-                    seqsAdded + " sequences; " +
-                    identsAdded + " identifiers; " +
-                    annotsAdded + " annotations");
-            _log.info(new java.util.Date() + " This batch of records processed successfully");
-            GetCurrentInsertStats.setInt(1, getCurrentInsertId());
-            ResultSet r = GetCurrentInsertStats.executeQuery();
-            r.next();
-            int priorseqs = r.getInt("SequencesAdded");
-            int priorannots = r.getInt("AnnotationsAdded");
-            int prioridents = r.getInt("IdentifiersAdded");
-            int priororgs = r.getInt("OrganismsAdded");
-            int mouthsful = r.getInt("Mouthsful");
-            int records = r.getInt("RecordsProcessed");
-            r.close();
+        int annotsAdded = insertAnnotations(tables, conn);
+        conn.setAutoCommit(true);
+        handleThreadStateChangeRequests();
+        _log.info(new java.util.Date() + " Added: " +
+                orgsAdded + " organisms; " +
+                seqsAdded + " sequences; " +
+                identsAdded + " identifiers; " +
+                annotsAdded + " annotations");
+        _log.info(new java.util.Date() + " This batch of records processed successfully");
+        _getCurrentInsertStats.setInt(1, getCurrentInsertId());
+        ResultSet r = _getCurrentInsertStats.executeQuery();
+        r.next();
+        int priorseqs = r.getInt("SequencesAdded");
+        int priorannots = r.getInt("AnnotationsAdded");
+        int prioridents = r.getInt("IdentifiersAdded");
+        int priororgs = r.getInt("OrganismsAdded");
+        int mouthsful = r.getInt("Mouthsful");
+        int records = r.getInt("RecordsProcessed");
+        r.close();
 
-            ParseActions p = tables.get("ProtSequences");
-            int curNRecords = p.getAllItems().size();
+        ParseActions p = tables.get("ProtSequences");
+        int curNRecords = p.getAllItems().size();
 
-            UpdateInsertion.setInt(1, mouthsful + 1);
-            UpdateInsertion.setInt(2, priorseqs + seqsAdded);
-            UpdateInsertion.setInt(3, priorannots + annotsAdded);
-            UpdateInsertion.setInt(4, prioridents + identsAdded);
-            UpdateInsertion.setInt(5, priororgs + orgsAdded);
-            UpdateInsertion.setInt(6, seqsAdded);
-            UpdateInsertion.setInt(7, annotsAdded);
-            UpdateInsertion.setInt(8, identsAdded);
-            UpdateInsertion.setInt(9, orgsAdded);
-            UpdateInsertion.setInt(10, curNRecords);
-            UpdateInsertion.setInt(11, records + curNRecords);
-            UpdateInsertion.setInt(13, getCurrentInsertId());
-            UpdateInsertion.setTimestamp(12, new java.sql.Timestamp(new java.util.Date().getTime()));
-            UpdateInsertion.executeUpdate();
-            //conn.commit();
+        _updateInsertion.setInt(1, mouthsful + 1);
+        _updateInsertion.setInt(2, priorseqs + seqsAdded);
+        _updateInsertion.setInt(3, priorannots + annotsAdded);
+        _updateInsertion.setInt(4, prioridents + identsAdded);
+        _updateInsertion.setInt(5, priororgs + orgsAdded);
+        _updateInsertion.setInt(6, seqsAdded);
+        _updateInsertion.setInt(7, annotsAdded);
+        _updateInsertion.setInt(8, identsAdded);
+        _updateInsertion.setInt(9, orgsAdded);
+        _updateInsertion.setInt(10, curNRecords);
+        _updateInsertion.setInt(11, records + curNRecords);
+        _updateInsertion.setInt(13, getCurrentInsertId());
+        _updateInsertion.setTimestamp(12, new java.sql.Timestamp(new java.util.Date().getTime()));
+        _updateInsertion.executeUpdate();
+        //conn.commit();
 
-            _log.info(
-                    "Added: " +
-                            orgsAdded + " organisms; " +
-                            seqsAdded + " sequences; " +
-                            identsAdded + " identifiers; " +
-                            annotsAdded + " annotations"
-            );
-        }
-        catch (Exception e)
-        {
-            XMLProteinHandler.parseWarning("Could not process this batch of records: " + e);
-            e.printStackTrace();
-        }
+        _log.info(
+                "Added: " +
+                        orgsAdded + " organisms; " +
+                        seqsAdded + " sequences; " +
+                        identsAdded + " identifiers; " +
+                        annotsAdded + " annotations"
+        );
     }
 
-    public int insertOrganisms(Map<String, ParseActions> tables, Connection conn) throws Exception
+    public int insertOrganisms(Map<String, ParseActions> tables, Connection conn) throws SQLException
     {
-        try
+        int transactionCount = 0;
+        _addOrg.setTimestamp(6, new Timestamp(new Date().getTime()));
+
+        //Add current mouthful of Organisms
+        _log.debug((new java.util.Date()) + " Processing organisms");
+        ParseActions p = tables.get("Organism");
+
+        // All organism records.  Each one is a HashMap
+        for (Map<String, Object> curOrg : p.getAllItems().values())
         {
-            int transactionCount = 0;
-            addOrg.setTimestamp(6, new Timestamp(new Date().getTime()));
-
-            //Add current mouthful of Organisms
-            _log.debug((new java.util.Date()) + " Processing organisms");
-            ParseActions p = tables.get("Organism");
-
-            // All organism records.  Each one is a HashMap
-            for (Map<String, Object> curOrg : p.getAllItems().values())
+            transactionCount++;
+            if (curOrg.get("common_name") == null)
             {
-                transactionCount++;
-                if (curOrg.get("common_name") == null)
-                {
-                    addOrg.setNull(1, Types.VARCHAR);
-                }
-                else
-                {
-                    addOrg.setString(1, (String) curOrg.get("common_name"));
-                }
-                addOrg.setString(2, (String) curOrg.get("genus"));
-                addOrg.setString(3, (String) curOrg.get("species"));
-                if (curOrg.get("comments") == null)
-                {
-                    addOrg.setNull(4, Types.VARCHAR);
-                }
-                else
-                {
-                    addOrg.setString(4, (String) curOrg.get("comments"));
-                }
-                addOrg.setString(5, (String) curOrg.get("identID"));
-                // Timestamp at index 6 is set once for the whole PreparedStatement
-                addOrg.addBatch();
-                if (transactionCount == TRANSACTION_ROW_COUNT)
-                {
-                    transactionCount = 0;
-                    addOrg.executeBatch();
-                    conn.commit();
-                    addOrg.clearBatch();
-                }
-                handleThreadStateChangeRequests();
+                _addOrg.setNull(1, Types.VARCHAR);
             }
-
-            try
+            else
             {
-                addOrg.executeBatch();
+                _addOrg.setString(1, (String) curOrg.get("common_name"));
+            }
+            _addOrg.setString(2, (String) curOrg.get("genus"));
+            _addOrg.setString(3, (String) curOrg.get("species"));
+            if (curOrg.get("comments") == null)
+            {
+                _addOrg.setNull(4, Types.VARCHAR);
+            }
+            else
+            {
+                _addOrg.setString(4, (String) curOrg.get("comments"));
+            }
+            _addOrg.setString(5, (String) curOrg.get("identID"));
+            // Timestamp at index 6 is set once for the whole PreparedStatement
+            _addOrg.addBatch();
+            if (transactionCount == TRANSACTION_ROW_COUNT)
+            {
+                transactionCount = 0;
+                _addOrg.executeBatch();
                 conn.commit();
-                handleThreadStateChangeRequests();
-                addOrg.clearBatch();
+                _addOrg.clearBatch();
             }
-            catch (Exception ee)
-            {
-                XMLProteinHandler.parseWarning("Org batch exeception: " + ee);
-                throw ee;
-            }
-            // Insert Organisms into real table
-            int result = executeUpdate(InsertIntoOrgCommand, conn);
-            //get rid of previously entered vals in temp table
-            executeUpdate(DeleteFromTmpOrgCommand, conn);
-
-            //insert identifiers associated with the organism
-            executeUpdate(InsertOrgIDCommand, conn);
-
-            // update missing ident_ids in newly inserted organism records
-            executeUpdate(UpdateOrgCommand, conn);
-
-            executeUpdate("TRUNCATE TABLE " + OTableName, conn);
-
-            return result;
+            handleThreadStateChangeRequests();
         }
-        catch (Exception e)
-        {
-            XMLProteinHandler.parseWarning("Problem in Organism table insert: " + e);
-            throw e;
-        }
+
+        _addOrg.executeBatch();
+        conn.commit();
+        handleThreadStateChangeRequests();
+        _addOrg.clearBatch();
+
+        // Insert Organisms into real table
+        int result = executeUpdate(_insertIntoOrgCommand, conn);
+        //get rid of previously entered vals in temp table
+        executeUpdate(_deleteFromTmpOrgCommand, conn);
+
+        //insert identifiers associated with the organism
+        executeUpdate(_insertOrgIDCommand, conn);
+
+        // update missing ident_ids in newly inserted organism records
+        executeUpdate(_updateOrgCommand, conn);
+
+        executeUpdate("TRUNCATE TABLE " + _oTableName, conn);
+
+        return result;
     }
 
-    public int insertSequences(Map tables, Connection conn) throws Exception
+    public int insertSequences(Map tables, Connection conn) throws SQLException
     {
         int transactionCount = 0;
 
-        try
-        {
-            addSeq.setTimestamp(13, new Timestamp(new Date().getTime()));
+        _addSeq.setTimestamp(13, new Timestamp(new Date().getTime()));
 
-            //Process current mouthful of sequences
-            _log.debug(new java.util.Date() + " Processing sequences");
-            ParseActions p = (ParseActions) tables.get("ProtSequences");
-            for (Map<String, Object> curSeq : p.getAllItems().values())
+        //Process current mouthful of sequences
+        _log.debug(new java.util.Date() + " Processing sequences");
+        ParseActions p = (ParseActions) tables.get("ProtSequences");
+        for (Map<String, Object> curSeq : p.getAllItems().values())
+        {
+            transactionCount++;
+            _addSeq.setString(1, (String) curSeq.get("ProtSequence"));
+            _addSeq.setString(2, (String) curSeq.get("hash"));
+            if (curSeq.get("description") == null)
             {
-                transactionCount++;
-                addSeq.setString(1, (String) curSeq.get("ProtSequence"));
-                addSeq.setString(2, (String) curSeq.get("hash"));
-                if (curSeq.get("description") == null)
-                {
-                    addSeq.setNull(3, Types.VARCHAR);
-                }
-                else
-                {
-                    String tmp = (String) curSeq.get("description");
-                    if (tmp.length() >= 200) tmp = tmp.substring(0, 190) + "...";
-                    addSeq.setString(3, tmp);
-                }
-                if (curSeq.get("source_change_date") == null)
-                {
-                    addSeq.setNull(4, Types.TIMESTAMP);
-                }
-                else
-                {
-                    addSeq.setTimestamp(4, new Timestamp(DateUtil.parseDateTime((String) curSeq.get("source_change_date"))));
-                }
-                if (curSeq.get("source_insert_date") == null)
-                {
-                    addSeq.setNull(5, Types.TIMESTAMP);
-                }
-                else
-                {
-                    addSeq.setTimestamp(5, new Timestamp(DateUtil.parseDateTime((String) curSeq.get("source_insert_date"))));
-                }
-                addSeq.setString(6, (String) curSeq.get("genus"));
-                addSeq.setString(7, (String) curSeq.get("species"));
-                if (curSeq.get("mass") == null)
-                {
-                    addSeq.setNull(8, Types.FLOAT);
-                }
-                else
-                {
-                    addSeq.setFloat(8, Float.parseFloat((String) curSeq.get("mass")));
-                }
-                if (curSeq.get("length") == null)
-                {
-                    addSeq.setNull(9, Types.INTEGER);
-                }
-                else
-                {
-                    addSeq.setInt(9, Integer.parseInt((String) curSeq.get("length")));
-                }
-                if (curSeq.get("source") == null)
-                {
-                    addSeq.setNull(10, Types.VARCHAR);
-                }
-                else
-                {
-                    addSeq.setString(10, (String) curSeq.get("source"));
-                }
-                if (curSeq.get("best_name") == null)
-                {
-                    addSeq.setNull(11, Types.VARCHAR);
-                }
-                else
-                {
-                    String tmp = (String) curSeq.get("best_name");
-                    if (tmp.length() >= 50) tmp = tmp.substring(0, 45) + "...";
-                    addSeq.setString(11, tmp);
-                }
-                if (curSeq.get("best_gene_name") == null)
-                {
-                    addSeq.setNull(12, Types.VARCHAR);
-                }
-                else
-                {
-                    String tmp = (String) curSeq.get("best_gene_name");
-                    if (tmp.length() >= 50) tmp = tmp.substring(0, 45) + "...";
-                    addSeq.setString(12, tmp);
-                }
-                // Timestamp at index 13 is set once for the whole prepared statement
-                addSeq.addBatch();
-                if (transactionCount == TRANSACTION_ROW_COUNT)
-                {
-                    transactionCount = 0;
-                    addSeq.executeBatch();
-                    conn.commit();
-                    addSeq.clearBatch();
-                }
-                handleThreadStateChangeRequests();
+                _addSeq.setNull(3, Types.VARCHAR);
             }
-            try
+            else
             {
-                addSeq.executeBatch();
-                handleThreadStateChangeRequests();
+                String tmp = (String) curSeq.get("description");
+                if (tmp.length() >= 200) tmp = tmp.substring(0, 190) + "...";
+                _addSeq.setString(3, tmp);
+            }
+            if (curSeq.get("source_change_date") == null)
+            {
+                _addSeq.setNull(4, Types.TIMESTAMP);
+            }
+            else
+            {
+                _addSeq.setTimestamp(4, new Timestamp(DateUtil.parseDateTime((String) curSeq.get("source_change_date"))));
+            }
+            if (curSeq.get("source_insert_date") == null)
+            {
+                _addSeq.setNull(5, Types.TIMESTAMP);
+            }
+            else
+            {
+                _addSeq.setTimestamp(5, new Timestamp(DateUtil.parseDateTime((String) curSeq.get("source_insert_date"))));
+            }
+            _addSeq.setString(6, (String) curSeq.get("genus"));
+            _addSeq.setString(7, (String) curSeq.get("species"));
+            if (curSeq.get("mass") == null)
+            {
+                _addSeq.setNull(8, Types.FLOAT);
+            }
+            else
+            {
+                _addSeq.setFloat(8, Float.parseFloat((String) curSeq.get("mass")));
+            }
+            if (curSeq.get("length") == null)
+            {
+                _addSeq.setNull(9, Types.INTEGER);
+            }
+            else
+            {
+                _addSeq.setInt(9, Integer.parseInt((String) curSeq.get("length")));
+            }
+            if (curSeq.get("source") == null)
+            {
+                _addSeq.setNull(10, Types.VARCHAR);
+            }
+            else
+            {
+                _addSeq.setString(10, (String) curSeq.get("source"));
+            }
+            if (curSeq.get("best_name") == null)
+            {
+                _addSeq.setNull(11, Types.VARCHAR);
+            }
+            else
+            {
+                String tmp = (String) curSeq.get("best_name");
+                if (tmp.length() >= 50) tmp = tmp.substring(0, 45) + "...";
+                _addSeq.setString(11, tmp);
+            }
+            if (curSeq.get("best_gene_name") == null)
+            {
+                _addSeq.setNull(12, Types.VARCHAR);
+            }
+            else
+            {
+                String tmp = (String) curSeq.get("best_gene_name");
+                if (tmp.length() >= 50) tmp = tmp.substring(0, 45) + "...";
+                _addSeq.setString(12, tmp);
+            }
+            // Timestamp at index 13 is set once for the whole prepared statement
+            _addSeq.addBatch();
+            if (transactionCount == TRANSACTION_ROW_COUNT)
+            {
+                transactionCount = 0;
+                _addSeq.executeBatch();
                 conn.commit();
-                addSeq.clearBatch();
+                _addSeq.clearBatch();
             }
-            catch (Exception ee)
-            {
-                XMLProteinHandler.parseWarning("Seq batch exception: " + ee);
-                throw ee;
-            }
-            executeUpdate(InsertInfoSourceFromSeqCommand, conn);
-
-            executeUpdate(UpdateSeqTableCommand, conn);
-
-            int result = executeUpdate(InsertIntoSeqCommand, conn);
-
-            executeUpdate("TRUNCATE TABLE " + STableName, conn);
-
-            return result;
+            handleThreadStateChangeRequests();
         }
-        catch (Exception e)
-        {
-            XMLProteinHandler.parseWarning("Problem in Sequence table insert: " + e);
-            throw e;
-        }
+
+        _addSeq.executeBatch();
+        handleThreadStateChangeRequests();
+        conn.commit();
+        _addSeq.clearBatch();
+
+        executeUpdate(_insertInfoSourceFromSeqCommand, conn);
+
+        executeUpdate(_updateSeqTableCommand, conn);
+
+        int result = executeUpdate(_insertIntoSeqCommand, conn);
+
+        executeUpdate("TRUNCATE TABLE " + _sTableName, conn);
+
+        return result;
     }
 
-    public int insertIdentifiers(Map tables, Connection conn) throws Exception
+    public int insertIdentifiers(Map tables, Connection conn) throws SQLException
     {
         int transactionCount = 0;
 
         // Process current mouthful of identifiers
-        try
+        _log.debug(new java.util.Date() + " Processing identifiers");
+        _addIdent.setTimestamp(6, new java.sql.Timestamp(new java.util.Date().getTime()));
+        Vector idents = (Vector) ((ParseActions) tables.get("ProtIdentifiers")).getCurItem().get("Identifiers");
+        for (Enumeration e = idents.elements(); e.hasMoreElements();)
         {
-            _log.debug(new java.util.Date() + " Processing identifiers");
-            addIdent.setTimestamp(6, new java.sql.Timestamp(new java.util.Date().getTime()));
-            Vector idents = (Vector) ((ParseActions) tables.get("ProtIdentifiers")).getCurItem().get("Identifiers");
-            for (Enumeration e = idents.elements(); e.hasMoreElements();)
+            transactionCount++;
+            Map curIdent = (Map) e.nextElement();
+            String curIdentVal = (String) curIdent.get("identifier");
+            if (curIdentVal.length() > 50) curIdentVal = curIdentVal.substring(0, 45) + "...";
+            _addIdent.setString(1, curIdentVal);
+            _addIdent.setString(2, (String) curIdent.get("identType"));
+            Map curSeq = (Map) curIdent.get("sequence");
+            _addIdent.setString(3, (String) curSeq.get("genus"));
+            _addIdent.setString(4, (String) curSeq.get("species"));
+            _addIdent.setString(5, (String) curSeq.get("hash"));
+            // Timestamp at index 6 is set once for the whole PreparedStatement
+            _addIdent.addBatch();
+            if (transactionCount == TRANSACTION_ROW_COUNT)
             {
-                transactionCount++;
-                Map curIdent = (Map) e.nextElement();
-                String curIdentVal = (String) curIdent.get("identifier");
-                if (curIdentVal.length() > 50) curIdentVal = curIdentVal.substring(0, 45) + "...";
-                addIdent.setString(1, curIdentVal);
-                addIdent.setString(2, (String) curIdent.get("identType"));
-                Map curSeq = (Map) curIdent.get("sequence");
-                addIdent.setString(3, (String) curSeq.get("genus"));
-                addIdent.setString(4, (String) curSeq.get("species"));
-                addIdent.setString(5, (String) curSeq.get("hash"));
-                // Timestamp at index 6 is set once for the whole PreparedStatement
-                addIdent.addBatch();
-                if (transactionCount == TRANSACTION_ROW_COUNT)
-                {
-                    transactionCount = 0;
-                    addIdent.executeBatch();
-                    conn.commit();
-                    addIdent.clearBatch();
-                }
-                handleThreadStateChangeRequests();
-            }
-            try
-            {
-                addIdent.executeBatch();
-                handleThreadStateChangeRequests();
+                transactionCount = 0;
+                _addIdent.executeBatch();
                 conn.commit();
-                addIdent.clearBatch();
+                _addIdent.clearBatch();
             }
-            catch (Exception ee)
-            {
-                XMLProteinHandler.parseWarning("Ident batch exception: " + ee);
-                throw ee;
-            }
-
-            _log.debug("Starting to create indices on " + ITableName);
-            executeUpdate("create index iIdentifier on " + ITableName + "(Identifier)", conn);
-            executeUpdate("create index iIdenttype on " + ITableName + "(IdentType)", conn);
-            executeUpdate("create index iSpeciesGenusHash on " + ITableName + "(Species, Genus, Hash)", conn);
-
-            executeUpdate(_dialect.getAnalyzeCommandForTable(ITableName), conn, "Analyzing " + ITableName);
-
-            // Insert ident types
-            executeUpdate(InsertIdentTypesCommand, conn, "InsertIdentTypes");
-
-            executeUpdate(UpdateIdentsWithSeqsCommand, conn, "UpdateIdentsWithSeqs");
-
-            int result = executeUpdate(InsertIntoIdentsCommand, conn, "InsertIntoIdents");
-
-            executeUpdate(_dialect.getDropIndexCommand(ITableName, "iIdentifier"), conn);
-            executeUpdate(_dialect.getDropIndexCommand(ITableName, "iIdenttype"), conn);
-            executeUpdate(_dialect.getDropIndexCommand(ITableName, "iSpeciesGenusHash"), conn);
-            executeUpdate("TRUNCATE TABLE " + ITableName, conn, "TRUNCATE TABLE " + ITableName);
-
-            _log.debug("Done with identifiers");
-            return result;
+            handleThreadStateChangeRequests();
         }
-        catch (Exception e)
-        {
-            XMLProteinHandler.parseWarning("Problem in Identifier table insert: " + e);
-            throw e;
-        }
+
+        _addIdent.executeBatch();
+        handleThreadStateChangeRequests();
+        conn.commit();
+        _addIdent.clearBatch();
+
+        _log.debug("Starting to create indices on " + _iTableName);
+        executeUpdate("create index iIdentifier on " + _iTableName + "(Identifier)", conn);
+        executeUpdate("create index iIdenttype on " + _iTableName + "(IdentType)", conn);
+        executeUpdate("create index iSpeciesGenusHash on " + _iTableName + "(Species, Genus, Hash)", conn);
+
+        executeUpdate(_dialect.getAnalyzeCommandForTable(_iTableName), conn, "Analyzing " + _iTableName);
+
+        // Insert ident types
+        executeUpdate(_insertIdentTypesCommand, conn, "InsertIdentTypes");
+
+        executeUpdate(_updateIdentsWithSeqsCommand, conn, "UpdateIdentsWithSeqs");
+
+        int result = executeUpdate(_insertIntoIdentsCommand, conn, "InsertIntoIdents");
+
+        executeUpdate(_dialect.getDropIndexCommand(_iTableName, "iIdentifier"), conn);
+        executeUpdate(_dialect.getDropIndexCommand(_iTableName, "iIdenttype"), conn);
+        executeUpdate(_dialect.getDropIndexCommand(_iTableName, "iSpeciesGenusHash"), conn);
+        executeUpdate("TRUNCATE TABLE " + _iTableName, conn, "TRUNCATE TABLE " + _iTableName);
+
+        _log.debug("Done with identifiers");
+        return result;
     }
 
     private int executeUpdate(String sql, Connection conn, String description) throws SQLException
@@ -794,112 +741,98 @@ public class uniprot extends ParseActions
 
     private static final int MAX_ANNOT_SIZE = 190;
 
-    public int insertAnnotations(Map tables, Connection conn) throws Exception
+    public int insertAnnotations(Map tables, Connection conn) throws SQLException
     {
         int transactionCount = 0;
         // Process current mouthful of identifiers
-        try
+
+        _addAnnot.setTimestamp(10, new java.sql.Timestamp(new java.util.Date().getTime()));
+        transactionCount++;
+        _log.debug(new java.util.Date() + " Processing annotations");
+        Vector annots = (Vector) ((ParseActions) tables.get("ProtAnnotations")).getCurItem().get("Annotations");
+        for (Enumeration e = annots.elements(); e.hasMoreElements();)
         {
-            addAnnot.setTimestamp(10, new java.sql.Timestamp(new java.util.Date().getTime()));
-            transactionCount++;
-            _log.debug(new java.util.Date() + " Processing annotations");
-            Vector annots = (Vector) ((ParseActions) tables.get("ProtAnnotations")).getCurItem().get("Annotations");
-            for (Enumeration e = annots.elements(); e.hasMoreElements();)
+            Map curAnnot = (Map) e.nextElement();
+            String annotVal = (String) curAnnot.get("annot_val");
+            if (annotVal.length() > MAX_ANNOT_SIZE)
+                annotVal = annotVal.substring(0, MAX_ANNOT_SIZE) + "...";
+            _addAnnot.setString(1, annotVal);
+            _addAnnot.setString(2, (String) curAnnot.get("annotType"));
+            Map curSeq = (Map) curAnnot.get("sequence");
+            _addAnnot.setString(3, (String) curSeq.get("genus"));
+            _addAnnot.setString(4, (String) curSeq.get("species"));
+            _addAnnot.setString(5, (String) curSeq.get("hash"));
+            if (curAnnot.get("start_pos") == null)
             {
-                Map curAnnot = (Map) e.nextElement();
-                String annotVal = (String) curAnnot.get("annot_val");
-                if (annotVal.length() > MAX_ANNOT_SIZE)
-                    annotVal = annotVal.substring(0, MAX_ANNOT_SIZE) + "...";
-                addAnnot.setString(1, annotVal);
-                addAnnot.setString(2, (String) curAnnot.get("annotType"));
-                Map curSeq = (Map) curAnnot.get("sequence");
-                addAnnot.setString(3, (String) curSeq.get("genus"));
-                addAnnot.setString(4, (String) curSeq.get("species"));
-                addAnnot.setString(5, (String) curSeq.get("hash"));
-                if (curAnnot.get("start_pos") == null)
-                {
-                    addAnnot.setInt(6, 0);
-                }
-                else
-                {
-                    addAnnot.setInt(6, Integer.parseInt((String) curAnnot.get("start_pos")));
-                }
-                if (curAnnot.get("end_pos") == null)
-                {
-                    addAnnot.setInt(7, 0);
-                }
-                else
-                {
-                    addAnnot.setInt(7, Integer.parseInt((String) curAnnot.get("end_pos")));
-                }
-                if (curAnnot.get("identifier") == null)
-                {
-                    addAnnot.setNull(8, Types.VARCHAR);
-                }
-                else
-                {
-                    addAnnot.setString(8, (String) curAnnot.get("identifier"));
-                }
-                if (curAnnot.get("identType") == null)
-                {
-                    addAnnot.setNull(9, Types.VARCHAR);
-                }
-                else
-                {
-                    addAnnot.setString(9, (String) curAnnot.get("identType"));
-                }
-                // Timestamp at index 10 is set once for the whole PreparedStatement
-                addAnnot.addBatch();
-                if (transactionCount == TRANSACTION_ROW_COUNT)
-                {
-                    transactionCount = 0;
-                    addAnnot.executeBatch();
-                    conn.commit();
-                    addAnnot.clearBatch();
-                }
-                handleThreadStateChangeRequests();
+                _addAnnot.setInt(6, 0);
             }
-            try
+            else
             {
-                addAnnot.executeBatch();
+                _addAnnot.setInt(6, Integer.parseInt((String) curAnnot.get("start_pos")));
+            }
+            if (curAnnot.get("end_pos") == null)
+            {
+                _addAnnot.setInt(7, 0);
+            }
+            else
+            {
+                _addAnnot.setInt(7, Integer.parseInt((String) curAnnot.get("end_pos")));
+            }
+            if (curAnnot.get("identifier") == null)
+            {
+                _addAnnot.setNull(8, Types.VARCHAR);
+            }
+            else
+            {
+                _addAnnot.setString(8, (String) curAnnot.get("identifier"));
+            }
+            if (curAnnot.get("identType") == null)
+            {
+                _addAnnot.setNull(9, Types.VARCHAR);
+            }
+            else
+            {
+                _addAnnot.setString(9, (String) curAnnot.get("identType"));
+            }
+            // Timestamp at index 10 is set once for the whole PreparedStatement
+            _addAnnot.addBatch();
+            if (transactionCount == TRANSACTION_ROW_COUNT)
+            {
+                transactionCount = 0;
+                _addAnnot.executeBatch();
                 conn.commit();
-                handleThreadStateChangeRequests();
-                addAnnot.clearBatch();
+                _addAnnot.clearBatch();
             }
-            catch (Exception ee)
-            {
-                XMLProteinHandler.parseWarning("Annot batch exception: " + ee);
-                throw ee;
-            }
-
-            _log.debug("Starting to create indices on " + ATableName);
-            executeUpdate("create index aAnnot_val on " + ATableName + "(Annot_Val)", conn);
-            executeUpdate("create index aAnnotType on " + ATableName + "(AnnotType)", conn);
-            executeUpdate("create index aHashGenusSpecies on " + ATableName + "(Hash, Genus, Species)", conn);
-
-            executeUpdate(_dialect.getAnalyzeCommandForTable(ATableName), conn, "Analyzing " + ATableName);
-
-            // Insert ident types
-            executeUpdate(InsertAnnotTypesCommand, conn, "InsertAnnotTypes");
-
-            executeUpdate(UpdateAnnotsWithSeqsCommand, conn, "UpdateAnnotsWithSeqs");
-
-            executeUpdate(UpdateAnnotsWithIdentsCommand, conn, "UpdateAnnotsWithIdents");
-
-            int result = executeUpdate(InsertIntoAnnotsCommand, conn, "InsertIntoAnnots");
-
-            executeUpdate(_dialect.getDropIndexCommand(ATableName, "aAnnot_val"), conn);
-            executeUpdate(_dialect.getDropIndexCommand(ATableName, "aAnnotType"), conn);
-            executeUpdate(_dialect.getDropIndexCommand(ATableName, "aHashGenusSpecies"), conn);
-            executeUpdate("TRUNCATE TABLE " + ATableName, conn, "TRUNCATE TABLE " + ATableName);
-
-            _log.debug("Done with annotations");
-            return result;
+            handleThreadStateChangeRequests();
         }
-        catch (Exception e)
-        {
-            XMLProteinHandler.parseWarning("Problem in Annotation table insert: " + e);
-            throw e;
-        }
+
+        _addAnnot.executeBatch();
+        conn.commit();
+        handleThreadStateChangeRequests();
+        _addAnnot.clearBatch();
+
+        _log.debug("Starting to create indices on " + _aTableName);
+        executeUpdate("create index aAnnot_val on " + _aTableName + "(Annot_Val)", conn);
+        executeUpdate("create index aAnnotType on " + _aTableName + "(AnnotType)", conn);
+        executeUpdate("create index aHashGenusSpecies on " + _aTableName + "(Hash, Genus, Species)", conn);
+
+        executeUpdate(_dialect.getAnalyzeCommandForTable(_aTableName), conn, "Analyzing " + _aTableName);
+
+        // Insert ident types
+        executeUpdate(_insertAnnotTypesCommand, conn, "InsertAnnotTypes");
+
+        executeUpdate(_updateAnnotsWithSeqsCommand, conn, "UpdateAnnotsWithSeqs");
+
+        executeUpdate(_updateAnnotsWithIdentsCommand, conn, "UpdateAnnotsWithIdents");
+
+        int result = executeUpdate(_insertIntoAnnotsCommand, conn, "InsertIntoAnnots");
+
+        executeUpdate(_dialect.getDropIndexCommand(_aTableName, "aAnnot_val"), conn);
+        executeUpdate(_dialect.getDropIndexCommand(_aTableName, "aAnnotType"), conn);
+        executeUpdate(_dialect.getDropIndexCommand(_aTableName, "aHashGenusSpecies"), conn);
+        executeUpdate("TRUNCATE TABLE " + _aTableName, conn, "TRUNCATE TABLE " + _aTableName);
+
+        _log.debug("Done with annotations");
+        return result;
     }
 }

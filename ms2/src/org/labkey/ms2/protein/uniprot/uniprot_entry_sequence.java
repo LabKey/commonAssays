@@ -22,75 +22,63 @@ import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 import org.labkey.api.util.HashHelpers;
 
-public class uniprot_entry_sequence extends ParseActions
+public class uniprot_entry_sequence extends CharactersParseActions
 {
 
-    public boolean beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
     {
-        accumulated = null;
+        _accumulated = null;
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        try
+        if (root.getSkipEntries() > 0)
         {
-            accumulated = new String("");
-            Map curSeq = ((ParseActions) tables.get("ProtSequences")).getCurItem();
-            if (curSeq == null) return false;
-            String curHash = attrs.getValue("checksum");
-            if (curHash != null)
-            {
-                curSeq.put("hash", curHash);
-            }
-            String curSCD = attrs.getValue("modified");
-            if (curSCD != null)
-            {
-                curSeq.put("source_change_date", curSCD);
-            }
-            String curMass = attrs.getValue("mass");
-            if (curMass != null)
-            {
-                curSeq.put("mass", curMass);
-            }
-            String curLength = attrs.getValue("length");
-            if (curLength != null)
-            {
-                curSeq.put("length", curLength);
-            }
+            return;
+        }
 
-        }
-        catch (Exception e)
+        _accumulated = "";
+        Map curSeq = tables.get("ProtSequences").getCurItem();
+        if (curSeq == null)
         {
-            return false;
+            throw new SAXException("ProtSequences was not set");
         }
-        return true;
-    }
-
-    public boolean endElement(Connection c, Map<String,ParseActions> tables)
-    {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        try
+        String curHash = attrs.getValue("checksum");
+        if (curHash != null)
         {
-            ParseActions p = (ParseActions) tables.get("ProtSequences");
-            Map curSeq = p.getCurItem();
-            if (curSeq == null) return false;
-            curSeq.put("ProtSequence", accumulated.replaceAll("\\s", ""));
-            // re-do hash of sequence
-            String newHash = HashHelpers.hash((String) curSeq.get("ProtSequence"));
-            curSeq.put("hash", newHash);
-            return true;
+            curSeq.put("hash", curHash);
         }
-        catch (Exception e)
+        String curSCD = attrs.getValue("modified");
+        if (curSCD != null)
         {
-            return false;
+            curSeq.put("source_change_date", curSCD);
+        }
+        String curMass = attrs.getValue("mass");
+        if (curMass != null)
+        {
+            curSeq.put("mass", curMass);
+        }
+        String curLength = attrs.getValue("length");
+        if (curLength != null)
+        {
+            curSeq.put("length", curLength);
         }
     }
 
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
+    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
     {
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        accumulated += new String(ch, start, len);
-        return true;
-    }
+        if (root.getSkipEntries() > 0)
+        {
+            return;
+        }
 
+        ParseActions p = tables.get("ProtSequences");
+        Map curSeq = p.getCurItem();
+        if (curSeq == null)
+        {
+            throw new SAXException("Unable to find a current sequence");
+        }
+        curSeq.put("ProtSequence", _accumulated.replaceAll("\\s", ""));
+        // re-do hash of sequence
+        String newHash = HashHelpers.hash((String) curSeq.get("ProtSequence"));
+        curSeq.put("hash", newHash);
+    }
 }

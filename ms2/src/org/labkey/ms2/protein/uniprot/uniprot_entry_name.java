@@ -16,50 +16,37 @@
 package org.labkey.ms2.protein.uniprot;
 
 /**
- * Created by IntelliJ IDEA.
  * User: tholzman
  * Date: Feb 28, 2005
- * Time: 9:34:42 AM
- * To change this template use File | Settings | File Templates.
  */
-
 import java.util.*;
 import java.sql.*;
 
 import org.labkey.ms2.protein.*;
+import org.xml.sax.SAXException;
 
-public class uniprot_entry_name extends ParseActions
+public class uniprot_entry_name extends CharactersParseActions
 {
 
-    public boolean endElement(Connection c, Map<String,ParseActions> tables)
+    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
     {
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        try
+        if (root.getSkipEntries() > 0)
         {
-            this.clearCurItems();
-            Map curSeq = (Map) ((ParseActions) tables.get("ProtSequences")).getCurItem();
-            if (curSeq == null) return false;
-            Vector idents = (Vector) (((ParseActions) tables.get("ProtIdentifiers")).getCurItem().get("Identifiers"));
-            idents.add(this.getCurItem());
-            this.getCurItem().put("identType", "SwissProt");
-            this.getCurItem().put("identifier", accumulated);
-            this.getCurItem().put("sequence", curSeq);
-            curSeq.put("best_name", accumulated);
-            return true;
+            return;
         }
-        catch (Exception e)
+
+        clearCurItems();
+        Map curSeq = ((ParseActions) tables.get("ProtSequences")).getCurItem();
+        if (curSeq == null)
         {
-            return false;
+            throw new SAXException("Unable to find a current ProtSequences");
         }
+        Vector idents = (Vector) (((ParseActions) tables.get("ProtIdentifiers")).getCurItem().get("Identifiers"));
+        idents.add(getCurItem());
+        getCurItem().put("identType", "SwissProt");
+        getCurItem().put("identifier", _accumulated);
+        getCurItem().put("sequence", curSeq);
+        curSeq.put("best_name", _accumulated);
     }
-
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
-    {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        accumulated += new String(ch, start, len);
-        return true;
-    }
-
 }

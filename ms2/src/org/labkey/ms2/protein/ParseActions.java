@@ -25,16 +25,16 @@ import java.sql.*;
 public abstract class ParseActions
 {
 
-    protected String accumulated;
+    protected String _accumulated;
 
     public String getAccumulated()
     {
-        return accumulated;
+        return _accumulated;
     }
 
     public void setAccumulated(String a)
     {
-        this.accumulated = a;
+        this._accumulated = a;
     }
 
     protected String comment = null;
@@ -125,19 +125,16 @@ public abstract class ParseActions
        }
     }
     */
-    public boolean beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
     {
-        accumulated = "";
-        return true;
+        _accumulated = "";
     }
 
-    public boolean endElement(Connection c, Map<String,ParseActions> tables)
+    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
     {
-        return true;
     }
 
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
+    public void characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len) throws SAXException
     {
-        return true;
     }
 }

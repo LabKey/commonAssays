@@ -21,59 +21,43 @@ import java.sql.*;
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 
-public class uniprot_entry_keyword extends ParseActions
+public class uniprot_entry_keyword extends CharactersParseActions
 {
 
-    private String kwid;
-
-    public boolean beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
     {
-        accumulated = null;
+        _accumulated = null;
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        try
+        if (root.getSkipEntries() > 0)
         {
-            kwid = attrs.getValue("id");
-            if (kwid == null) return false;
-            accumulated = new String("");
-            this.clearCurItems();
-            Vector idents = (Vector) (((ParseActions) tables.get("ProtIdentifiers")).getCurItem().get("Identifiers"));
-            idents.add(this.getCurItem());
-            this.getCurItem().put("identType", "Uniprot_keyword");
-            this.getCurItem().put("identifier", kwid);
-            this.getCurItem().put("sequence", ((ParseActions) tables.get("ProtSequences")).getCurItem());
+            return;
         }
-        catch (Exception e)
+
+        String kwid = attrs.getValue("id");
+        if (kwid == null)
         {
-            return false;
+            throw new SAXException("id is not set");
         }
-        return true;
+        _accumulated = "";
+        clearCurItems();
+        Vector idents = (Vector) (((ParseActions) tables.get("ProtIdentifiers")).getCurItem().get("Identifiers"));
+        idents.add(getCurItem());
+        getCurItem().put("identType", "Uniprot_keyword");
+        getCurItem().put("identifier", kwid);
+        getCurItem().put("sequence", tables.get("ProtSequences").getCurItem());
     }
 
-    public boolean endElement(Connection c, Map<String,ParseActions> tables)
+    public void endElement(Connection c, Map<String,ParseActions> tables)
     {
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        try
+        if (root.getSkipEntries() > 0)
         {
-            Vector annots = (Vector) (((ParseActions) tables.get("ProtAnnotations")).getCurItem().get("Annotations"));
-            annots.add(this.getCurItem());
-            this.getCurItem().put("annot_val", accumulated);
-            this.getCurItem().put("annotType", "keyword");
+            return;
         }
-        catch (Exception e)
-        {
-            return false;
-        }
-        return true;
-    }
 
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
-    {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        accumulated += new String(ch, start, len);
-        return true;
+        Vector annots = (Vector) (((ParseActions) tables.get("ProtAnnotations")).getCurItem().get("Annotations"));
+        annots.add(getCurItem());
+        getCurItem().put("annot_val", _accumulated);
+        getCurItem().put("annotType", "keyword");
     }
-
 }

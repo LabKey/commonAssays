@@ -24,40 +24,33 @@ import org.labkey.ms2.protein.*;
 public class uniprot_entry_feature extends ParseActions
 {
 
-    public boolean beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
     {
-        accumulated = null;
+        _accumulated = null;
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
+        if (root.getSkipEntries() > 0)
+        {
+            return;
+        }
         String annotVal = "";
         String attrType = attrs.getValue("type");
         String attrDesc = attrs.getValue("description");
         String attrStatus = attrs.getValue("status");
-        this.clearCurItems();
+        clearCurItems();
 
         if (attrType != null) annotVal += attrType + " ";
         if (attrDesc != null) annotVal += attrDesc + " ";
         if (attrStatus != null) annotVal += attrStatus + " ";
-        try
-        {
-            Map curSeq = tables.get("ProtSequences").getCurItem();
-            if (curSeq == null) return false;
-            Vector annots = (Vector)tables.get("ProtAnnotations").getCurItem().get("Annotations");
-            annots.add(this.getCurItem());
-            this.getCurItem().put("annot_val", annotVal.trim());
-            this.getCurItem().put("annotType", "feature");
-            this.getCurItem().put("sequence", curSeq);
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
-        return true;
-    }
 
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
-    {
-        return true;
+        Map curSeq = tables.get("ProtSequences").getCurItem();
+        if (curSeq == null)
+        {
+            throw new SAXException("ProtSequences has no current item");
+        }
+        Vector annots = (Vector)tables.get("ProtAnnotations").getCurItem().get("Annotations");
+        annots.add(getCurItem());
+        getCurItem().put("annot_val", annotVal.trim());
+        getCurItem().put("annotType", "feature");
+        getCurItem().put("sequence", curSeq);
     }
-
 }

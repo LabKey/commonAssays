@@ -24,47 +24,38 @@ import org.labkey.ms2.protein.*;
 public class uniprot_entry_organism extends ParseActions
 {
 
-    public boolean beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
     {
-        accumulated = null;
+        _accumulated = null;
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        try
+        if (root.getSkipEntries() > 0)
         {
-            this.clearCurItems();
-            tables.put("Organism", this);
+            return;
+        }
 
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
-        return true;
+        clearCurItems();
+        tables.put("Organism", this);
     }
 
-    public boolean endElement(Connection c, Map<String,ParseActions> tables)
+    public void endElement(Connection c, Map<String,ParseActions> tables)
     {
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        if (this.getCurItem().get("species") == null || ((String) this.getCurItem().get("species")).equalsIgnoreCase("sp"))
+        if (root.getSkipEntries() > 0)
         {
-            this.getCurItem().put("species", "sp.");
+            return;
+        }
+        if (getCurItem().get("species") == null || ((String) getCurItem().get("species")).equalsIgnoreCase("sp"))
+        {
+            getCurItem().put("species", "sp.");
         }
         String uniqKey =
-                ((String) this.getCurItem().get("genus")).toUpperCase() +
+                ((String) getCurItem().get("genus")).toUpperCase() +
                         " " +
-                        ((String) this.getCurItem().get("species")).toUpperCase();
-        this.getAllItems().put(uniqKey, this.getCurItem());
-        this.setItemCount(this.getItemCount() + 1);
-        Map s = ((ParseActions) tables.get("ProtSequences")).getCurItem();
-        s.put("genus", this.getCurItem().get("genus"));
-        s.put("species", this.getCurItem().get("species"));
-        return true;
+                        ((String) getCurItem().get("species")).toUpperCase();
+        getAllItems().put(uniqKey, getCurItem());
+        setItemCount(getItemCount() + 1);
+        Map s = tables.get("ProtSequences").getCurItem();
+        s.put("genus", getCurItem().get("genus"));
+        s.put("species", getCurItem().get("species"));
     }
-
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
-    {
-        return true;
-    }
-
 }

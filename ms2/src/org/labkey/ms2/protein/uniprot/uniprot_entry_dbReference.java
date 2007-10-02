@@ -17,14 +17,11 @@
 package org.labkey.ms2.protein.uniprot;
 
 /**
- * Created by IntelliJ IDEA.
  * User: tholzman
  * Date: Feb 28, 2005
- * Time: 9:50:57 AM
- * To change this template use File | Settings | File Templates.
  */
-
 import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
 import org.labkey.ms2.protein.*;
 
 import java.sql.Connection;
@@ -33,33 +30,25 @@ import java.util.*;
 public class uniprot_entry_dbReference extends ParseActions
 {
 
-    public boolean beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
     {
-        accumulated = null;
+        _accumulated = null;
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
+        if (root.getSkipEntries() > 0)
+        {
+            return;
+        }
         String curType = attrs.getValue("type");
         String curID = attrs.getValue("id");
-        this.clearCurItems();
-        if (curType == null || curID == null) return false;
-        try
+        clearCurItems();
+        if (curType == null || curID == null)
         {
-            Vector idents = (Vector)tables.get("ProtIdentifiers").getCurItem().get("Identifiers");
-            idents.add(this.getCurItem());
-            this.getCurItem().put("identType", curType);
-            this.getCurItem().put("identifier", curID);
-            this.getCurItem().put("sequence", tables.get("ProtSequences").getCurItem());
+            throw new SAXException("type and/or id is not set");
         }
-        catch (Exception e)
-        {
-            return false;
-        }
-        return true;
+        Vector idents = (Vector)tables.get("ProtIdentifiers").getCurItem().get("Identifiers");
+        idents.add(getCurItem());
+        getCurItem().put("identType", curType);
+        getCurItem().put("identifier", curID);
+        getCurItem().put("sequence", tables.get("ProtSequences").getCurItem());
     }
-
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
-    {
-        return true;
-    }
-
 }

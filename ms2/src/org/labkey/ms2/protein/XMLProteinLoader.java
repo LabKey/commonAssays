@@ -74,11 +74,6 @@ public class XMLProteinLoader extends DefaultAnnotationLoader implements Annotat
         return 0;
     }
 
-    private Connection fetchAConnection() throws SQLException
-    {
-        return ProteinManager.getSchema().getScope().getConnection();
-    }
-
     public XMLProteinLoader(InputStream is)
     {
         setParseSource(new InputSource(is));
@@ -106,46 +101,19 @@ public class XMLProteinLoader extends DefaultAnnotationLoader implements Annotat
             }
         }
 
-        Connection conn = null;
         try
         {
-            conn = this.fetchAConnection();
+            Connection conn = ProteinManager.getSchema().getScope().beginTransaction();
             XMLProteinHandler handler = new XMLProteinHandler(conn, this);
             handler.parse(fName);
+            conn.setAutoCommit(false);
+            ProteinManager.getSchema().getScope().commitTransaction();
         }
         finally
         {
-            if (conn != null) try { conn.close(); } catch (SQLException e) {}
+            ProteinManager.getSchema().getScope().closeConnection();
         }
     }
-
-    public void parseInputSource(InputSource is) throws SQLException, IOException, SAXException
-    {
-        Connection conn = null;
-        try
-        {
-            conn = this.fetchAConnection();
-            XMLProteinHandler handler = new XMLProteinHandler(conn, this);
-            handler.parse(is);
-        }
-        finally
-        {
-            if (conn != null) try
-            {
-                conn.close();
-            }
-            catch (SQLException e)
-            {
-            }
-        }
-    }
-
-    public void parseInputSource() throws SQLException, IOException, SAXException
-    {
-        parseInputSource(getParseSource());
-    }
-
-
 
     //
     // ContentHandler methods

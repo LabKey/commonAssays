@@ -21,53 +21,53 @@ import java.sql.*;
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 
-public class uniprot_entry_gene_name extends ParseActions
+public class uniprot_entry_gene_name extends CharactersParseActions
 {
 
     private String curType = null;
 
-    public boolean beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
     {
-        accumulated = null;
+        _accumulated = null;
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-
-        String nameType = attrs.getValue("type");
-        if (nameType == null) return false;
-        curType = nameType;
-        accumulated = "";
-        this.clearCurItems();
-
-        return true;
-    }
-
-    public boolean endElement(Connection c, Map<String,ParseActions> tables)
-    {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-
-        Map<String, Object> curSeq = tables.get("ProtSequences").getCurItem();
-        if (curSeq == null) return false;
-        accumulated = accumulated.trim();
-        if (curType.equalsIgnoreCase("primary") && accumulated.length() > 0)
+        if (root.getSkipEntries() > 0)
         {
-            Vector idents = (Vector) tables.get("ProtIdentifiers").getCurItem().get("Identifiers");
-            idents.add(this.getCurItem());
-            this.getCurItem().put("identType", "GeneName");
-            this.getCurItem().put("identifier", accumulated);
-            this.getCurItem().put("sequence", curSeq);
-            curSeq.put("best_name", accumulated);
-            curSeq.put("best_gene_name", accumulated);
+            return;
         }
 
-        return true;
+        String nameType = attrs.getValue("type");
+        if (nameType == null)
+        {
+            throw new SAXException("No type is currently set");
+        }
+        curType = nameType;
+        _accumulated = "";
+        clearCurItems();
     }
 
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
+    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
     {
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-        accumulated += new String(ch, start, len);
-        return true;
+        if (root.getSkipEntries() > 0)
+        {
+            return;
+        }
+
+        Map<String, Object> curSeq = tables.get("ProtSequences").getCurItem();
+        if (curSeq == null)
+        {
+            throw new SAXException("No current ProtSequences is available");
+        }
+        _accumulated = _accumulated.trim();
+        if (curType.equalsIgnoreCase("primary") && _accumulated.length() > 0)
+        {
+            Vector idents = (Vector) tables.get("ProtIdentifiers").getCurItem().get("Identifiers");
+            idents.add(getCurItem());
+            getCurItem().put("identType", "GeneName");
+            getCurItem().put("identifier", _accumulated);
+            getCurItem().put("sequence", curSeq);
+            curSeq.put("best_name", _accumulated);
+            curSeq.put("best_gene_name", _accumulated);
+        }
     }
 }

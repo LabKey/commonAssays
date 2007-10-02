@@ -233,8 +233,7 @@ public class XMLProteinHandler extends DefaultHandler
             if (p.getComment() == null) p.setComment(_loader.getComment());
             if (p.getCurrentInsertId() == 0 && _loader.getRecoveryId() != 0)
                 p.setCurrentInsertId(_loader.getRecoveryId());
-            if (!p.beginElement(_conn, parseTables, attrs))
-                parseWarning("Can't parse beginElement for " + _tree.getCurrentDescription());
+            p.beginElement(_conn, parseTables, attrs);
         }
     }
 
@@ -257,8 +256,7 @@ public class XMLProteinHandler extends DefaultHandler
         {
             if (p.getWhatImParsing() == null) p.setWhatImParsing(_loader.getParseFName());
             if (p.getComment() == null) p.setComment(_loader.getComment());
-            if (!p.endElement(_conn, parseTables))
-                parseWarning("Can't parse endElement for " + _tree.getCurrentDescription());
+            p.endElement(_conn, parseTables);
         }
         _tree.pop();
     }
@@ -275,8 +273,7 @@ public class XMLProteinHandler extends DefaultHandler
         if (p != null)
         {
             if (p.getWhatImParsing() == null) p.setWhatImParsing(_loader.getParseFName());
-            if (!p.characters(_conn, parseTables, ch, start, length))
-                parseWarning("Can't parse characters for " + _tree.getCurrentDescription());
+            p.characters(_conn, parseTables, ch, start, length);
         }
     }
 
@@ -314,22 +311,12 @@ public class XMLProteinHandler extends DefaultHandler
         getParser().parse(file);
     }
 
-    public void parse(InputSource is) throws IOException, SAXException
-    {
-        getParser().parse(is);
-    }
-
     //
     // Error handlers.
     //
     public static void parseWarning(String s)
     {
         _log.warn(s);
-    }
-
-    public static void parseError(String s)
-    {
-        _log.error(s);
     }
 }
 

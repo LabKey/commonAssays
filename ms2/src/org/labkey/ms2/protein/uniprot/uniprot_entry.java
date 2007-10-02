@@ -19,8 +19,10 @@ package org.labkey.ms2.protein.uniprot;
 import org.apache.log4j.Logger;
 import org.labkey.ms2.protein.ParseActions;
 import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Vector;
@@ -37,52 +39,48 @@ public class uniprot_entry extends ParseActions
 
     public static final int REPORT_MOD = 50;
 
-    public int MOUTHFUL = 5000;
+    public int _mouthful = 5000;
 
-    public int getMOUTHFUL()
+    public int getMouthful()
     {
-        return MOUTHFUL;
+        return _mouthful;
     }
 
-    public void setMOUTHFUL(int MOUTHFUL)
+    public void setMouthful(int i)
     {
-        this.MOUTHFUL = MOUTHFUL;
+        _mouthful = i;
     }
 
-    public boolean Verbose = false;
+    public boolean _verbose = false;
 
     public boolean isVerbose()
     {
-        return Verbose;
+        return _verbose;
     }
 
     public void setVerbose(boolean verbose)
     {
-        Verbose = verbose;
+        _verbose = verbose;
     }
 
-    private int skipTracer = 0;
+    private int _skipTracer = 0;
 
-    public boolean beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
     {
         uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0) return true;
-
-        try
+        if (root.getSkipEntries() > 0)
         {
-            this.clearCurItems();
-            tables.put("ProtSequences", this);
-
+            return;
         }
-        catch (Exception e)
+        
+        clearCurItems();
+        tables.put("ProtSequences", this);
+
+        if (_verbose)
         {
-            return false;
-        }
-        if (Verbose)
-        {
-            if (this.getItemCount() % REPORT_MOD == 0 && this.getItemCount() > 0)
+            if (getItemCount() % REPORT_MOD == 0 && getItemCount() > 0)
             {
-                System.out.println(this.getItemCount());
+                System.out.println(getItemCount());
             }
             else
             {
@@ -90,50 +88,50 @@ public class uniprot_entry extends ParseActions
             }
         }
         if (attrs.getValue("dataset") != null)
-            this.getCurItem().put("source", attrs.getValue("dataset"));
+            getCurItem().put("source", attrs.getValue("dataset"));
         if (attrs.getValue("created") != null)
-            this.getCurItem().put("source_insert_date", attrs.getValue("created"));
+            getCurItem().put("source_insert_date", attrs.getValue("created"));
         if (attrs.getValue("modified") != null)
-            this.getCurItem().put("source_change_date", attrs.getValue("modified"));
-        return true;
+            getCurItem().put("source_change_date", attrs.getValue("modified"));
     }
 
-    public boolean endElement(Connection c, Map<String,ParseActions> tables)
+    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
     {
         uniprot root = (uniprot) tables.get("UniprotRoot");
         if (!root.unBumpSkip())
         {
-            skipTracer++;
-            if (Verbose)
+            _skipTracer++;
+            if (_verbose)
             {
-                if ((skipTracer % 1000) == 0)
+                if ((_skipTracer % 1000) == 0)
                     _log.info((new Date()) + " 1000 <entry> elements skipped, " + root.getSkipEntries() + " more to go");
             }
-            return true;
+            return;
         }
 
         String uniqKey =
-                ((String) this.getCurItem().get("genus")).toUpperCase() +
+                ((String) getCurItem().get("genus")).toUpperCase() +
                         " " +
-                        ((String) this.getCurItem().get("species")).toUpperCase() +
+                        ((String) getCurItem().get("species")).toUpperCase() +
                         " " +
-                        ((String) this.getCurItem().get("hash"));
-        this.getAllItems().put(uniqKey, this.getCurItem());
-        this.setItemCount(this.getItemCount() + 1);
-        if (this.getAllItems().size() >= MOUTHFUL)
+                        ((String) getCurItem().get("hash"));
+        getAllItems().put(uniqKey, getCurItem());
+        setItemCount(getItemCount() + 1);
+        if (getAllItems().size() >= _mouthful)
         {
-            root.insertTables(tables, c);
-            this.getAllItems().clear();
+            try
+            {
+                root.insertTables(tables, c);
+            }
+            catch (SQLException e)
+            {
+                throw new SAXException(e);
+            }
+            getAllItems().clear();
             tables.get("Organism").getAllItems().clear();
             ((Vector)tables.get("ProtIdentifiers").getCurItem().get("Identifiers")).clear();
             ((Vector)tables.get("ProtAnnotations").getCurItem().get("Annotations")).clear();
         }
-        return true;
-    }
-
-    public boolean characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len)
-    {
-        return true;
     }
 }
 
