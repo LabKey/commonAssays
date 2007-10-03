@@ -29,6 +29,19 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
         init();
     }
 
+    public Luc5Assay(Plate plate, List<Integer> cutoffs)
+    {
+        this(plate, toIntArray(cutoffs));
+    }
+
+    private static int[] toIntArray(List<Integer> cutoffs)
+    {
+        int[] cutoffArray = new int[cutoffs.size()];
+        for (int i = 0; i < cutoffs.size(); i++)
+            cutoffArray[i] = cutoffs.get(i);
+        return cutoffArray;
+    }
+
     private void init()
     {
         List<? extends WellGroup> specimenGroups = _plate.getWellGroups(WellGroup.Type.SPECIMEN);

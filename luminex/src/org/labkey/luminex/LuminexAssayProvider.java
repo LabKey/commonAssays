@@ -23,7 +23,6 @@ import javax.servlet.ServletException;
 import java.util.*;
 import java.sql.SQLException;
 import java.io.IOException;
-import java.io.File;
 
 /**
  * User: jeckels
@@ -69,15 +68,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 return dataURL.getLocalURIString();
             }
         });
-    }
-
-    public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles)
-    {
-        List<AssayDataCollector> result = new ArrayList<AssayDataCollector>();
-        if (uploadedFiles != null)
-            result.add(new PreviouslyUploadedDataCollector(uploadedFiles));
-        result.add(new FileUploadDataCollector());
-        return result;
     }
 
     public PropertyDescriptor[] getRunPropertyColumns(ExpProtocol protocol)
@@ -432,7 +422,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
                 dataMaps[index++] = dataMap;
             }
-            return GenericAssayService.get().publishAssayData(user, study, protocol.getName(), dataMaps, types, errors);
+            return AssayPublishService.get().publishAssayData(user, study, protocol.getName(), dataMaps, types, errors);
         }
         catch (SQLException e)
         {

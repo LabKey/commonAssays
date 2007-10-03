@@ -7,8 +7,10 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.Plate;
+import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.security.User;
+import org.labkey.api.exp.api.ExperimentService;
 
 import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
@@ -28,6 +30,7 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
     {
         super(NAME, 2.20, null, false);
         addController("Nab", NabController.class);
+        addController("NabAssay", NabAssayController.class);
     }
 
     //void wantsToDelete(Container c, List<String> messages);
@@ -67,6 +70,8 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
         });
 
         PlateService.get().registerPlateTypeHandler(new NabPlateTypeHandler());
+        AssayService.get().registerAssayProvider(new NabAssayProvider());
+        ExperimentService.get().registerExperimentDataHandler(new NabDataHandler());
     }
 
 

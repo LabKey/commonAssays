@@ -176,7 +176,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         // Don't add any columns - they're part of the uploaded spreadsheet
     }
 
-    public class AnalyteStepHandler extends StepHandler
+    public class AnalyteStepHandler extends StepHandler<LuminexRunUploadForm>
     {
         public static final String NAME = "ANALYTE";
 
@@ -191,7 +191,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     {
                         Map<PropertyDescriptor, String> properties = form.getAnalyteProperties(analyte.getRowId());
 
-                        validatePost(properties);
+                        validatePostedProperties(properties);
                     }
                 }
 

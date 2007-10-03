@@ -918,10 +918,15 @@ ms2/webapp/_images/red.gif -text
 nab/module.properties -text
 nab/src/org/labkey/nab/DilutionSummary.java -text
 nab/src/org/labkey/nab/Luc5Assay.java -text
+nab/src/org/labkey/nab/NabAssayController.java -text
+nab/src/org/labkey/nab/NabAssayProvider.java -text
 nab/src/org/labkey/nab/NabController.java -text
+nab/src/org/labkey/nab/NabDataHandler.java -text
 nab/src/org/labkey/nab/NabManager.java -text
 nab/src/org/labkey/nab/NabModule.java -text
 nab/src/org/labkey/nab/NabPlateTypeHandler.java -text
+nab/src/org/labkey/nab/NabRunUploadForm.java -text
+nab/src/org/labkey/nab/NabUploadWizardAction.java -text
 nab/src/org/labkey/nab/RunMetadata.java -text
 nab/src/org/labkey/nab/RunSettings.java -text
 nab/src/org/labkey/nab/SafeTextConverter.java -text

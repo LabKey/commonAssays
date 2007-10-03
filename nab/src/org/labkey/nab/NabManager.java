@@ -159,10 +159,10 @@ public class NabManager
     {
         NabPlateTypeHandler nabHandler = new NabPlateTypeHandler();
         PlateTemplate template;
-        PlateTemplate[] templates = PlateService.get().getPlateTemplates(container, user);
+        PlateTemplate[] templates = PlateService.get().getPlateTemplates(container);
         if (templates == null || templates.length == 0)
         {
-            template = nabHandler.createPlate("Default", container, user);
+            template = nabHandler.createPlate("Default", container);
             template.setName(DEFAULT_TEMPLATE_NAME);
             PlateService.get().save(container, user, template);
         }
@@ -178,7 +178,7 @@ public class NabManager
     {
         try
         {
-            PlateTemplate nabTemplate = PlateService.get().getPlateTemplate(container, user, plateTemplate);
+            PlateTemplate nabTemplate = PlateService.get().getPlateTemplate(container, plateTemplate);
             List<String> errors = new ArrayList<String>();
             if (nabTemplate == null)
                 errors.add("Plate template " + plateTemplate + " no longer exists.");
@@ -210,7 +210,7 @@ public class NabManager
 
     protected Luc5Assay createLuc5Assay(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, String datafileName, InputStream attachmentStream) throws SQLException, IOException, ServletException, BiffException
     {
-        PlateTemplate nabTemplate = PlateService.get().getPlateTemplate(container, user, plateTemplate);
+        PlateTemplate nabTemplate = PlateService.get().getPlateTemplate(container, plateTemplate);
 
         WorkbookSettings settings = new WorkbookSettings();
         settings.setGCDisabled(true);
@@ -229,7 +229,7 @@ public class NabManager
         }
 
         // create plate, and set its properties:
-        Plate plate = PlateService.get().createPlate(nabTemplate, user, cellValues);
+        Plate plate = PlateService.get().createPlate(nabTemplate, null, cellValues);
 
         if (cutoffs == null || cutoffs.length == 0)
             cutoffs = new int[]{50, 80};

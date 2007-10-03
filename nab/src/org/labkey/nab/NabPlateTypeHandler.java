@@ -27,9 +27,9 @@ public class NabPlateTypeHandler implements PlateTypeHandler
         return names;
     }
 
-    public PlateTemplate createPlate(String templateTypeName, Container container, User user) throws SQLException
+    public PlateTemplate createPlate(String templateTypeName, Container container) throws SQLException
     {
-        PlateTemplate template = PlateService.get().createPlateTemplate(container, user);
+        PlateTemplate template = PlateService.get().createPlateTemplate(container);
         for (NabManager.PlateProperty prop : NabManager.PlateProperty.values())
             template.setProperty(prop.name(), "");
 

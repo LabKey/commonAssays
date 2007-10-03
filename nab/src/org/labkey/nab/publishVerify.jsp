@@ -1,9 +1,11 @@
 <%@ page import="org.labkey.nab.NabController"%>
 <%@ page import="org.labkey.api.study.WellGroup" %>
-<%@ page import="org.labkey.api.study.assay.GenericAssayService" %>
+<%@ page import="org.labkey.api.study.assay.AssayPublishService" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.study.SpecimenService" %>
+<%@ page import="org.labkey.api.study.ParticipantVisit" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <script type="text/javascript">LABKEY.requiresScript('completion.js');</script>
 <%
@@ -33,25 +35,25 @@ Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All
 <%
     for (org.labkey.api.study.WellGroup group : bean.getSampleInfoMap().keySet())
     {
-        org.labkey.api.study.assay.GenericAssayService.SampleInfo sampleInfo = bean.getSampleInfoMap().get(group);
+        ParticipantVisit sampleInfo = bean.getSampleInfoMap().get(group);
         String sequenceNumString = null;
         if (sampleInfo instanceof NabController.PublishSampleInfo)
-            sequenceNumString = ((NabController.PublishSampleInfo) sampleInfo).getSequenceNumString();
+            sequenceNumString = ((NabController.PublishSampleInfo) sampleInfo).getVisitIDString();
 
 %>
         <tr>
             <td>
-                <input type="checkbox" name="includedSampleIds" value="<%= h(sampleInfo.getSampleId())%>" CHECKED>
-                <input type="hidden" name="sampleIds" value="<%= h(sampleInfo.getSampleId())%>">
+                <input type="checkbox" name="includedSampleIds" value="<%= h(sampleInfo.getSpecimenID())%>" CHECKED>
+                <input type="hidden" name="sampleIds" value="<%= h(sampleInfo.getSpecimenID())%>">
                 <input type="hidden" name="id" value="<%= group.getRowId() %>">
             </td>
-            <td><%= h(sampleInfo.getSampleId())%></td>
+            <td><%= h(sampleInfo.getSpecimenID())%></td>
             <td>
                 <input type="text" name="sequenceNums"
                   onKeyDown="return ctrlKeyCheck(event);"
                   onBlur="hideCompletionDiv();"
                   autocomplete="off"
-                  value="<%= h(sequenceNumString != null ? sequenceNumString : bean.format(sampleInfo.getSequenceNum())) %>"
+                  value="<%= h(sequenceNumString != null ? sequenceNumString : bean.format(sampleInfo.getVisitID())) %>"
                   onKeyUp="return handleChange(this, event, '<%= bean.getVisitIdCompletionBase() %>');">
                 </td>
             <td>
@@ -59,7 +61,7 @@ Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All
                   onKeyDown="return ctrlKeyCheck(event);"
                   onBlur="hideCompletionDiv();"
                   autocomplete="off"
-                  value="<%= h(bean.format(sampleInfo.getParticipantId())) %>"
+                  value="<%= h(bean.format(sampleInfo.getParticipantID())) %>"
                   onKeyUp="return handleChange(this, event, '<%= bean.getParticipantCompletionBase() %>');">
 
                 </td>

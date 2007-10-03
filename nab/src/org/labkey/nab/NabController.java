@@ -29,11 +29,12 @@ import org.labkey.api.data.Container;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
-import org.labkey.api.study.assay.GenericAssayService;
+import org.labkey.api.study.assay.AssayPublishService;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.announcements.DiscussionService;
+import org.labkey.api.exp.api.ExpMaterial;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -134,7 +135,7 @@ public class NabController extends ViewController
         deleteButton.setDisplayPermission(ACL.PERM_DELETE);
         buttons.add(deleteButton);
 
-        if (!GenericAssayService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
+        if (!AssayPublishService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
         {
             ActionButton publishButton = new ActionButton("publishPlatesChooseStudy.view", "Publish Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
             publishButton.setDisplayPermission(ACL.PERM_INSERT);
@@ -696,7 +697,7 @@ public class NabController extends ViewController
             if (!sampleProperties.isEmpty())
             {
                 List<String> errors = new ArrayList<String>();
-                ViewURLHelper helper = GenericAssayService.get().publishAssayData(getUser(), targetContainer,
+                ViewURLHelper helper = AssayPublishService.get().publishAssayData(getUser(), targetContainer,
                         "NAB", sampleProperties.toArray(new Map[sampleProperties.size()]),
                         NabManager.get().getPropertyTypes(plates),
                         NabManager.PlateProperty.VirusId.name(), errors);
@@ -764,13 +765,13 @@ public class NabController extends ViewController
             }
         });
 
-        Map<WellGroup, GenericAssayService.SampleInfo> sampleInfoMap = new LinkedHashMap<WellGroup, GenericAssayService.SampleInfo>();
+        Map<WellGroup, ParticipantVisit> sampleInfoMap = new LinkedHashMap<WellGroup, ParticipantVisit>();
         for (WellGroup wellgroup : sortedGroups)
         {
             String sampleId = (String) wellgroup.getProperty(NabManager.SampleProperty.SampleId.name());
-            GenericAssayService.SampleInfo sampleInfo = form.getReshowData(sampleId);
+            ParticipantVisit sampleInfo = form.getReshowData(sampleId);
             if (sampleInfo == null)
-                sampleInfo = GenericAssayService.get().getSampleInfo(targetContainer, sampleId);
+                sampleInfo = SpecimenService.get().getSampleInfo(targetContainer, sampleId);
             sampleInfoMap.put(wellgroup, sampleInfo);
         }
 
@@ -838,46 +839,51 @@ public class NabController extends ViewController
         }
     }
 
-    public static class PublishSampleInfo implements GenericAssayService.SampleInfo
+    public static class PublishSampleInfo implements ParticipantVisit
     {
         private String _ptid;
-        private String _sampleId;
-        private String _sequenceNum;
+        private String _specimenID;
+        private String _visitID;
         public PublishSampleInfo(String ptid, String sampleId, String sequenceNum)
         {
-            _sequenceNum = sequenceNum;
-            _sampleId = sampleId;
+            _visitID = sequenceNum;
+            _specimenID = sampleId;
             _ptid = ptid;
         }
 
-        public String getParticipantId()
+        public String getParticipantID()
         {
             return _ptid;
         }
 
-        public String getSampleId()
+        public String getSpecimenID()
         {
-            return _sampleId;
+            return _specimenID;
         }
 
-        public String getSequenceNumString()
+        public String getVisitIDString()
         {
-            return _sequenceNum;
+            return _visitID;
         }
 
-        public Double getSequenceNum()
+        public Double getVisitID()
         {
             try
             {
-                if (_sequenceNum == null)
+                if (_visitID == null)
                     return null;
                 else
-                    return Double.parseDouble(_sequenceNum);
+                    return Double.parseDouble(_visitID);
             }
             catch (NumberFormatException e)
             {
                 return null;
             }
+        }
+
+        public ExpMaterial getMaterial()
+        {
+            throw new UnsupportedOperationException("Not Implemented for PublishSampleInfo");
         }
     }
     public static class PublishForm extends FormData
@@ -960,7 +966,7 @@ public class NabController extends ViewController
             _targetContainerId = targetContainerId;
         }
 
-        public GenericAssayService.SampleInfo getReshowData(final String sampleId)
+        public ParticipantVisit getReshowData(final String sampleId)
         {
             if (_sampleIds == null)
                 return null;
@@ -1012,12 +1018,12 @@ public class NabController extends ViewController
     public static class PublishVerifyBean
     {
         private List<String> _sampleProperties;
-        private Map<WellGroup, GenericAssayService.SampleInfo> _sampleInfoMap;
+        private Map<WellGroup, ParticipantVisit> _sampleInfoMap;
         private Container _targetContainer;
         private DecimalFormat _decimalFormat = new DecimalFormat("0.##");
         private List<String> _uploadErrors;
         
-        public PublishVerifyBean(Container targetContainer, Map<WellGroup, GenericAssayService.SampleInfo> sampleInfoMap)
+        public PublishVerifyBean(Container targetContainer, Map<WellGroup, ParticipantVisit> sampleInfoMap)
         {
             _sampleInfoMap = sampleInfoMap;
             _targetContainer = targetContainer;
@@ -1029,7 +1035,7 @@ public class NabController extends ViewController
             Collections.sort(_sampleProperties);
         }
 
-        public Map<WellGroup, GenericAssayService.SampleInfo> getSampleInfoMap()
+        public Map<WellGroup, ParticipantVisit> getSampleInfoMap()
         {
             return _sampleInfoMap;
         }
@@ -1046,20 +1052,20 @@ public class NabController extends ViewController
 
         public String getSampleIdCompletionBase()
         {
-            return GenericAssayService.get().getCompletionURLBase(_targetContainer,
-                    GenericAssayService.CompletionType.SpecimenGlobalUniqueId);
+            return SpecimenService.get().getCompletionURLBase(_targetContainer,
+                    SpecimenService.CompletionType.SpecimenGlobalUniqueId);
         }
 
         public String getVisitIdCompletionBase()
         {
-            return GenericAssayService.get().getCompletionURLBase(_targetContainer,
-                    GenericAssayService.CompletionType.VisitId);
+            return SpecimenService.get().getCompletionURLBase(_targetContainer,
+                    SpecimenService.CompletionType.VisitId);
         }
 
         public String getParticipantCompletionBase()
         {
-            return GenericAssayService.get().getCompletionURLBase(_targetContainer,
-                    GenericAssayService.CompletionType.ParticpantId);
+            return SpecimenService.get().getCompletionURLBase(_targetContainer,
+                    SpecimenService.CompletionType.ParticpantId);
         }
 
         public List<String> getUploadErrors()
@@ -1097,7 +1103,7 @@ public class NabController extends ViewController
 
         public Map<Container, String> getValidTargets()
         {
-            return GenericAssayService.get().getValidPublishTargets(_user, ACL.PERM_INSERT);
+            return AssayPublishService.get().getValidPublishTargets(_user, ACL.PERM_INSERT);
         }
 
         public List<Integer> getIds()
@@ -1139,7 +1145,7 @@ public class NabController extends ViewController
         graphSelectedButton.setActionType(ActionButton.Action.GET);
         buttons.add(graphSelectedButton);
 
-        if (!GenericAssayService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
+        if (!AssayPublishService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
         {
             ActionButton publishButton = new ActionButton("publishWellGroupsChooseStudy.view", "Publish Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
             publishButton.setDisplayPermission(ACL.PERM_INSERT);
@@ -1380,7 +1386,7 @@ public class NabController extends ViewController
             {
                 PlateTemplate template = null;
                 if (_plateTemplate != null)
-                    template = PlateService.get().getPlateTemplate(container, user, _plateTemplate);
+                    template = PlateService.get().getPlateTemplate(container, _plateTemplate);
 
                 if (template == null)
                 {
@@ -1399,7 +1405,7 @@ public class NabController extends ViewController
         {
             try
             {
-                PlateTemplate[] templates = PlateService.get().getPlateTemplates(container, user);
+                PlateTemplate[] templates = PlateService.get().getPlateTemplates(container);
                 if (templates == null || templates.length == 0)
                 {
                     PlateTemplate defaultTemplate = NabManager.get().ensurePlateTemplate(container, user);
