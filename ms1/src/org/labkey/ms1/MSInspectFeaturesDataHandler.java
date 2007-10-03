@@ -351,8 +351,8 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      */
     public URLHelper getContentURL(HttpServletRequest request, Container container, ExpData data) throws ExperimentException
     {
-        ViewURLHelper url = new ViewURLHelper(request, "ms1", "showFeaturesFile.view", container);
-        url.addParameter("dataRowId", Integer.toString(data.getRowId()));
+        ViewURLHelper url = new ViewURLHelper(request, MS1Module.CONTROLLER_NAME, "showFeatures.view", container);
+        url.addParameter("runId", Integer.toString(data.getRun().getRowId()));
         return url;
     }
 
@@ -421,9 +421,9 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      */
     public Priority getPriority(ExpData data)
     {
-        //we handle only *.rtfeatures.tvt files
+        //we handle only *.features.tvt files
         String fileUrl = data.getDataFileUrl();
-        if(null != fileUrl && (fileUrl.endsWith(".rtfeatures.tsv") || fileUrl.endsWith(".features.tsv")))
+        if(null != fileUrl && fileUrl.endsWith(".features.tsv"))
             return Priority.MEDIUM;
         else
             return null;

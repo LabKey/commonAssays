@@ -1,138 +1,152 @@
 package org.labkey.ms1;
 
-import org.apache.beehive.netui.pageflow.Forward;
-import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.log4j.Logger;
-import org.labkey.api.view.*;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
-import org.labkey.api.security.ACL;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.util.URIUtil;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.ExperimentRunFilter;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.util.URIUtil;
+import org.labkey.api.view.*;
+import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
+import org.labkey.ms1.pipeline.MSInspectImportPipelineJob;
+import org.springframework.validation.BindException;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.URI;
-
-import org.labkey.ms1.pipeline.MSInspectImportPipelineJob;
-
-import javax.servlet.ServletException;
 
 /**
  * This controller is the entry point for all web pages specific to the MS1
  * module.
  */
 
-@Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
-public class MS1Controller extends ViewController
+public class MS1Controller extends SpringActionController
 {
     static Logger _log = Logger.getLogger(MS1Controller.class);
+    static DefaultActionResolver _actionResolver = new DefaultActionResolver(MS1Controller.class);
 
-    /**
-     * begin() is the default page the user will be shown when they click on the
-     * MS1 tab
-     */
-    @Jpf.Action
-    protected Forward begin() throws Exception
+    public MS1Controller() throws Exception
     {
-        //the begin view should be a list of the msInspect feature finding experiment runs
-        //each row will have a links to other views.
-        QueryView view = ExperimentService.get().createExperimentRunWebPart(getViewContext(),MS1Module.EXP_RUN_FILTER, true);
-        return renderInTemplate(view);
+        super();
+        setActionResolver(_actionResolver.getInstance(this));
+    }
+
+    protected ViewURLHelper getViewURLHelper(String action)
+    {
+        return new ViewURLHelper(MS1Module.CONTROLLER_NAME, action, getContainer());
+    }
+
+    protected NavTree addBeginChild(NavTree root)
+    {
+        return root.addChild("MS1 Runs", getViewURLHelper("begin.view"));
+    }
+
+    protected NavTree addFeaturesChild(NavTree root)
+    {
+        return root.addChild("Features for Run", getViewURLHelper("showFeatures.view"));
     }
 
     /**
-     * Invoked when the user clicks to import a .tsv file 
+     * Begin action for the MS1 Module. Displays a list of msInspect feature finding runs
      */
-    @Jpf.Action
-    protected Forward importMsInspect(ImportForm form) throws Exception
+    @RequiresPermission(ACL.PERM_READ)
+    public class BeginAction extends SimpleViewAction
     {
-        Container c = getContainer(ACL.PERM_INSERT);
-        PipelineService service = PipelineService.get();
-
-        File f = null;
-        String path = form.getPath();
-        if (path != null)
+        public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            // Figure out the pipeline root for this container, which might
-            // be set directly on this container, or on a parent container
-            PipeRoot pr = service.findPipelineRoot(c);
-            if (pr != null)
+            return ExperimentService.get().createExperimentRunWebPart(getViewContext(),MS1Module.EXP_RUN_FILTER, true);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return addBeginChild(root);
+        }
+    } //class BeginAction
+
+    /**
+     * Action to show the features for a given experiment run
+     */
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowFeaturesAction extends SimpleViewAction<RunIdForm>
+    {
+
+        public ModelAndView getView(RunIdForm form, BindException errors) throws Exception
+        {
+            if(-1 == form.getRunId())
+                return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
+            else
+                return new FeaturesView(getViewContext(), form.getRunId());
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            addBeginChild(root);
+            return addFeaturesChild(root);
+        }
+    } //class ShowFeaturesAction
+
+    @RequiresPermission(ACL.PERM_INSERT)
+    public class ImportMsInspectAction extends SimpleViewAction<ImportForm>
+    {
+        public ModelAndView getView(ImportForm form, BindException errors) throws Exception
+        {
+            Container c = getContainer();
+            PipelineService service = PipelineService.get();
+
+            File f = null;
+            String path = form.getPath();
+            if (path != null)
             {
-                // The path to the file to load will be relative to the pipeline root
-                URI uriData = URIUtil.resolve(pr.getUri(c), path);
-                f = new File(uriData);
+                // Figure out the pipeline root for this container, which might
+                // be set directly on this container, or on a parent container
+                PipeRoot pr = service.findPipelineRoot(c);
+                if (pr != null)
+                {
+                    // The path to the file to load will be relative to the pipeline root
+                    URI uriData = URIUtil.resolve(pr.getUri(c), path);
+                    f = new File(uriData);
+                }
             }
+
+
+            if (null != f && f.exists() && f.isFile())
+            {
+                // Assuming we can find the job, put a job in the queue to load this run
+                ViewBackgroundInfo info = new ViewBackgroundInfo(getContainer(), getUser(), getViewContext().getViewURLHelper());
+                info = service.getJobBackgroundInfo(info, f);
+                MSInspectImportPipelineJob job = new MSInspectImportPipelineJob(info, f);
+                service.queueJob(job);
+
+                // Be sure to use the job's container for forwarding.
+                // Depending on the pipeline setup for this container, the job
+                // may actually load the run into a child container
+                c = info.getContainer();
+            }
+            else
+            {
+                throw new FileNotFoundException("Unable to open the msInspect feature file '" + form.getPath() + "'.");
+            }
+
+            ViewURLHelper url = new ViewURLHelper(getViewContext().getRequest(), "Project", "begin", c.getPath());
+            return HttpView.redirect(url);
         }
 
-
-        if (null != f && f.exists() && f.isFile())
+        public NavTree appendNavTrail(NavTree root)
         {
-            // Assuming we can find the job, put a job in the queue to load this run
-            ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), f);
-            MSInspectImportPipelineJob job = new MSInspectImportPipelineJob(info, f);
-            service.queueJob(job);
-
-            // Be sure to use the job's container for forwarding.
-            // Depending on the pipeline setup for this container, the job
-            // may actually load the run into a child container
-            c = info.getContainer();
+            return root; //since the action always redirects, just return what was passed in
         }
-        else
-        {
-            throw new FileNotFoundException("Unable to open the file '" + form.getPath() + "' to load as a msInspect feature file");
-        }
-
-        ViewURLHelper url = new ViewURLHelper(getRequest(), "Project", "begin", c.getPath());
-        return new ViewForward(url);
-    }
-
-    @Jpf.Action
-    protected Forward showFeaturesFile(FeatureFileForm form) throws ServletException, ExperimentException, IOException
-    {
-        // Currently this method just reads the file off of disk and returns
-        // it to the browser. To add a richer UI, this is the place to start
-        // on the rendering code.
-        Container c = getContainer(ACL.PERM_READ);
-        ExpData data = ExperimentService.get().getExpData(form.getDataRowId());
-        if (data == null)
-        {
-            return HttpView.throwNotFound("Could not find data object with rowId " + form.getDataRowId());
-        }
-
-        if (!data.getContainer().hasPermission(getUser(), ACL.PERM_READ))
-        {
-            HttpView.throwUnauthorized();
-        }
-
-        File f = data.getDataFile();
-        if (f == null || !f.isFile())
-        {
-            return HttpView.throwNotFound("Could not find data file on disk");
-        }
-
-        PageFlowUtil.streamFile(getResponse(), f, false);
-        return null;
-    }
-
-    /** Helper to use the specified view to render a response */
-    private Forward renderInTemplate(HttpView view) throws Exception
-    {
-        HttpView template = new HomeTemplate(getViewContext(), getContainer(), view);
-        return includeView(template);
-    }
+    } //class ImportMsInspectAction
 
     /**
-     * Beehive/Struts form for importing data 
+     * Form used by the ImportMsInspectAction
      */
-    public static class ImportForm extends ViewForm
+    public static class ImportForm
     {
         private String _path;
 
@@ -145,23 +159,20 @@ public class MS1Controller extends ViewController
         {
             _path = path;
         }
-    }
+    } //class ImportForm
 
-    /**
-     * Beehive/Struts form for showing a particular file in the UI
-     */
-    public static class FeatureFileForm extends ViewForm
+    public static class RunIdForm
     {
-        private int _dataRowId;
+        private int _runId = -1;
 
-        public int getDataRowId()
+        public int getRunId()
         {
-            return _dataRowId;
+            return _runId;
         }
 
-        public void setDataRowId(int dataRowId)
+        public void setRunId(int runId)
         {
-            _dataRowId = dataRowId;
+            _runId = runId;
         }
-    }
-}
+    } //class RunIDForm
+} //class MS1Controller

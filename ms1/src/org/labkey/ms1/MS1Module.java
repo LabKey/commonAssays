@@ -25,6 +25,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
 {
     private static final Logger _log = Logger.getLogger(MS1Module.class);
     public static final String NAME = "MS1";
+    public static final String CONTROLLER_NAME = "ms1";
     public static final ExperimentRunFilter EXP_RUN_FILTER = new ExperimentRunFilter("msInspect Feature Finding", MS1Schema.SCHEMA_NAME, MS1Schema.TABLE_FEATURE_RUNS);
 
     private Set<ExperimentDataHandler> _dataHandlers;
@@ -32,7 +33,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
     public MS1Module()
     {
         super(NAME, 2.22, null, true);
-        addController("ms1", MS1Controller.class);
+        addController(CONTROLLER_NAME, MS1Controller.class);
 
         MS1Schema.register();
     }

@@ -5,6 +5,8 @@ import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
+import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.view.ViewURLHelper;
 
 import java.util.Set;
 import java.util.List;
@@ -49,54 +51,53 @@ public class MS1Schema extends UserSchema
     public TableInfo getTable(String name, String alias)
     {
         if (TABLE_FEATURE_RUNS.equalsIgnoreCase(name))
-        {
-            // Start with a standard experiment run table
-            ExpRunTable result = _expSchema.createRunsTable(alias);
-
-            // Filter to just the runs with the MS1 protocol
-            result.setProtocolPatterns("urn:lsid:%:Protocol.%:MS1.msInspectFeatureFindingAnalysis%");
-
-            List<FieldKey> columns = new ArrayList(result.getDefaultVisibleColumns());
-            columns.add(FieldKey.fromParts("Input", "msInspectDefFile"));
-            columns.add(FieldKey.fromParts("Input", "mzXMLFile"));
-            result.setDefaultVisibleColumns(columns);
-            return result;
-        }
+            return getMS1ExpRunsTableInfo(alias);
         if(TABLE_FEATURES.equalsIgnoreCase(name))
+            return getFeaturesTableInfo();
+        else
+            return super.getTable(name, alias);
+    } //getTable()
+
+    public FeaturesTableInfo getFeaturesTableInfo()
+    {
+        return new FeaturesTableInfo(_expSchema, getContainer());
+    } //getFeaturesTableInfo()
+
+    public ExpRunTable getMS1ExpRunsTableInfo(String alias)
+    {
+        // Start with a standard experiment run table
+        ExpRunTable result = _expSchema.createRunsTable(alias);
+
+        // Filter to just the runs with the MS1 protocol
+        result.setProtocolPatterns("urn:lsid:%:Protocol.%:MS1.msInspectFeatureFindingAnalysis%");
+
+        //add a new column info for the features link that uses a display column
+        //factory to return a UrlColumn.
+        //this depends on the RowId column, but that will always be selected
+        //because it's a primary key
+        ColumnInfo cinfo = new ColumnInfo("Features Link");
+        cinfo.setDescription("Link to the msInspect features found in each run");
+        cinfo.setDisplayColumnFactory(new DisplayColumnFactory()
         {
-            FilteredTable ft = new FilteredTable(MS1Manager.get().getTable(MS1Manager.TABLE_FEATURES));
-
-            //wrap all the columns
-            ft.wrapAllColumns(true);
-
-            //but only display a subset by default
-            List<FieldKey> visibleColumns = new ArrayList(ft.getDefaultVisibleColumns());
-            visibleColumns.remove(FieldKey.fromParts("FeatureID"));
-            visibleColumns.remove(FieldKey.fromParts("FeaturesFileID"));
-            visibleColumns.remove(FieldKey.fromParts("Description"));
-            ft.setDefaultVisibleColumns(visibleColumns);
-
-            //tell it that ms1.FeaturesFiles.FeaturesFileID is a foreign key to exp.Data.RowId
-            TableInfo fftinfo = ft.getColumn("FeaturesFileID").getFkTableInfo();
-            ColumnInfo ffid = fftinfo.getColumn("ExpDataFileID");
-            ffid.setFk(new LookupForeignKey("RowId")
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                public TableInfo getLookupTableInfo()
-                {
-                    return _expSchema.createDatasTable(null);
-                }
-            });
+                ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showFeatures.view", getContainer());
+                return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "runId=${RowId}"), "features");
+            }
+        });
+        result.addColumn(cinfo);
 
-            //add a condition that limits the features returned to just those existing in the
-            //current container. The FilteredTable class supports this automatically only if
-            //the underlying table contains a column named "Container," which our Features table
-            //does not, so we need to use a SQL fragment here that uses a sub-select.
-            SQLFragment sf = new SQLFragment("FeaturesFileID IN (SELECT FeaturesFileID FROM ms1.FeaturesFiles as f INNER JOIN Exp.Data as d ON (f.ExpDataFileID=d.RowId) WHERE d.Container=?)",
-                                                getContainer().getId());
-            ft.addCondition(sf, "FeaturesFileID");
-            
-            return ft;
-        }
-        return super.getTable(name, alias);
-    }
-}
+        //set the default visible columns list
+        List<FieldKey> columns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+        //move the Features link to position 1
+        columns.remove(FieldKey.fromParts("Features Link"));
+        columns.add(1, FieldKey.fromParts("Features Link"));
+
+        //add the msInspect def file and mzXml file columns
+        columns.add(FieldKey.fromParts("Input", "msInspectDefFile"));
+        columns.add(FieldKey.fromParts("Input", "mzXMLFile"));
+        result.setDefaultVisibleColumns(columns);
+
+        return result;
+    } //getMS1ExpRunsTableInfo()
+} //class MS1Schema

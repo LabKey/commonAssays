@@ -383,7 +383,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
 
     public Priority getPriority(ExpData data)
     {
-        //we handle only *.rtfeatures.xml files
+        //we handle only *.peaks.xml files
         return (null != data && null != data.getDataFileUrl() && 
                 data.getDataFileUrl().endsWith(".peaks.xml")) ? Priority.MEDIUM : null;
     } //Priority()

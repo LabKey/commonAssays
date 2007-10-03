@@ -149,7 +149,7 @@ public class MSInspectImportPipelineJob extends PipelineJob
         xarXml = StringUtils.replace(xarXml, "@@PEAKS_FILE_PATH@@", peaksXMLFilePath);
 
         File uniquifierFile = resultsDir.getParentFile();
-        String uniquifier = PathRelativizer.relativizePathUnix(containerRoot, uniquifierFile);
+        String uniquifier = PathRelativizer.relativizePathUnix(containerRoot, uniquifierFile) + "/" + name;
 
         xarXml = StringUtils.replace(xarXml, "@@RUN-UNIQUIFIER@@", uniquifier);
 
