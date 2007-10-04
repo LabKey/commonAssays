@@ -232,10 +232,12 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      */
     protected String getMzXmlFilePath(ExpData data)
     {
+        //by convention, the mzXML has the same base name as the data file (minus the ".features.tsv")
+        //and is located three directories above the data file
         File dataFile = data.getDataFile();
-        String dataFileName = dataFile.getName().substring(0, dataFile.getName().length() - 4);
+        String dataFileName = dataFile.getName().substring(0, dataFile.getName().length() - ".features.tsv".length());
         File mzxmlFile = new File(dataFile.getParentFile().getParentFile().getParentFile(), dataFileName + ".mzXML");
-        return mzxmlFile.getPath().replace('\\', '/');
+        return mzxmlFile.toURI().toString();
     } //getMzXmlFilePath()
 
     /**
