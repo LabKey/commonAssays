@@ -24,9 +24,9 @@ import java.net.URI;
 
 /**
  * This controller is the entry point for all web pages specific to the MS1
- * module.
+ * module. Each action is represented by a nested class named as such:
+ * [action]Action
  */
-
 public class MS1Controller extends SpringActionController
 {
     static Logger _log = Logger.getLogger(MS1Controller.class);
@@ -38,19 +38,34 @@ public class MS1Controller extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
+    /**
+     * Returns a url helper for the specified action within this controller and current contianer
+     * @param action Name of action
+     * @return URL helper for the action in this controller and current container
+     */
     protected ViewURLHelper getViewURLHelper(String action)
     {
         return new ViewURLHelper(MS1Module.CONTROLLER_NAME, action, getContainer());
     }
 
+    /**
+     * Adds the begin step to a NavTree
+     * @param root The root of the NavTree
+     * @return Modified NavTree
+     */
     protected NavTree addBeginChild(NavTree root)
     {
         return root.addChild("MS1 Runs", getViewURLHelper("begin.view"));
     }
 
+    /**
+     * Adds the Features view step to a NavTree
+     * @param root The root of the NavTree
+     * @return Modified NavTree
+     */
     protected NavTree addFeaturesChild(NavTree root)
     {
-        return root.addChild("Features for Run", getViewURLHelper("showFeatures.view"));
+        return root.addChild("Features from Run", getViewURLHelper("showFeatures.view"));
     }
 
     /**
@@ -92,6 +107,9 @@ public class MS1Controller extends SpringActionController
         }
     } //class ShowFeaturesAction
 
+    /**
+     * Action to import an msInspect TSV features file
+     */
     @RequiresPermission(ACL.PERM_INSERT)
     public class ImportMsInspectAction extends SimpleViewAction<ImportForm>
     {
@@ -162,6 +180,9 @@ public class MS1Controller extends SpringActionController
         }
     } //class ImportForm
 
+    /**
+     * Form used by the ShowFeaturesAction
+     */
     public static class RunIdForm
     {
         private int _runId = -1;

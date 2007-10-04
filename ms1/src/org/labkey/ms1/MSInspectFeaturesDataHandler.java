@@ -152,13 +152,13 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
             TabLoader.ColumnDescriptor[] coldescrs = tsvloader.getColumns();
 
             //select the appropriate bindings for this tsv file
-            ArrayList<ColumnBinding> bindings = selectBindings(coldescrs);
+            ArrayList<ColumnBinding> bindings = selectBindings(coldescrs, log);
 
             //build the approrpriate insert sql for the features table
             //and prepare it
             pstmt = cn.prepareStatement(genInsertSQL(bindings));
 
-            Map row = null;
+            Map row;
             int numRows = 0;
 
             //iterate over the rows
@@ -222,7 +222,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         map.put("MzXmlURL", getMzXmlFilePath(data));
 
         map = Table.insert(user, schema.getTable("FeaturesFiles"), map);
-        return (Integer)(map.get("FeaturesFileID"));
+        return ((Integer) (map.get("FeaturesFileID"))).intValue();
     } //insertFeaturesFile()
 
     /**
@@ -241,17 +241,20 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
     /**
      * Selects the appropriate column bindings based on the passed column descriptors
      * @param coldescrs The set of column descriptors for the tsv file
+     * @param log       Log file
      * @return          The appropriate set of column bindings
      */
-    protected ArrayList<ColumnBinding> selectBindings(TabLoader.ColumnDescriptor[] coldescrs)
+    protected ArrayList<ColumnBinding> selectBindings(TabLoader.ColumnDescriptor[] coldescrs, Logger log)
     {
         ArrayList<ColumnBinding> ret = new ArrayList<ColumnBinding>(coldescrs.length);
-        ColumnBinding binding = null;
-        for(int idx = 0; idx < coldescrs.length; ++idx)
+        ColumnBinding binding;
+        for(TabLoader.ColumnDescriptor coldescr : coldescrs)
         {
-            binding = _bindingMap.get(coldescrs[idx].name);
+            binding = _bindingMap.get(coldescr.name);
             if(null != binding)
                 ret.add(binding);
+            else
+                log.warn("The msInspect Features importer does not recognize the column '" + coldescr.name + "' in this file. Its contents will be ignored.");
         }
         return ret;
     } //selectBindings()
@@ -296,8 +299,8 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      * @param rowNum        The row number (used for error messages)
      * @param binding       The appropriate column bindings for this paramter
      * @param row           The row Map from the TabLoader
-     * @throws ExperimentException
-     * @throws SQLException
+     * @throws ExperimentException Thrown if required value is not present
+     * @throws SQLException Thrown if there is a database exception
      */
     protected void setParam(PreparedStatement pstmt, int paramIndex, int rowNum, ColumnBinding binding, Map row) throws ExperimentException, SQLException
     {
@@ -323,15 +326,15 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
                 if(val instanceof String)
                     pstmt.setString(paramIndex, (String)val);
                 else if(val instanceof Integer)
-                    pstmt.setInt(paramIndex, (Integer)val); //relying on java 5.0 auto-unboxing
+                    pstmt.setInt(paramIndex, ((Integer) val).intValue()); //relying on java 5.0 auto-unboxing
                 else if(val instanceof Double)
-                    pstmt.setDouble(paramIndex, (Double)val);
+                    pstmt.setDouble(paramIndex, ((Double) val).doubleValue());
                 else if(val instanceof Boolean)
-                    pstmt.setBoolean(paramIndex, (Boolean)val);
+                    pstmt.setBoolean(paramIndex, ((Boolean)val).booleanValue());
                 else if(val instanceof Date)
                     pstmt.setDate(paramIndex, new java.sql.Date(((Date)val).getTime()));
                 else
-                    assert(false) : "Unsupported column value data type in column " + binding.sourceColumn + ", row " + rowNum;
+                    throw new ExperimentException("Unsupported column value data type in column " + binding.sourceColumn + ", row " + rowNum);
             } //not null
         }
         catch(SQLException e)
@@ -342,12 +345,12 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
     } //setParam()
 
     /**
-     * Returns the content URL for files imported through this class
-     * @param request
-     * @param container
-     * @param data
-     * @return
-     * @throws ExperimentException
+     * Returns the content URL for files imported through this class. This is called by the Experiment module
+     * @param request       The HTTP request object
+     * @param container     The current container
+     * @param data          The experiment data object
+     * @return              The URL the user should be redirected to
+     * @throws ExperimentException Thrown if there's a problem
      */
     public URLHelper getContentURL(HttpServletRequest request, Container container, ExpData data) throws ExperimentException
     {
@@ -358,10 +361,10 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
     /**
      * Deletes data rows imported by this class when the experiment run is deleted
-     * @param data
-     * @param container
-     * @param user
-     * @throws ExperimentException
+     * @param data          The experiment data file being deleted
+     * @param container     The container in which it lives
+     * @param user          The user deleting it
+     * @throws ExperimentException  Thrown if something goes wrong
      */
     public void deleteData(ExpData data, Container container, User user) throws ExperimentException
     {
@@ -388,14 +391,14 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
     /**
      * Moves the container for the given data file uploaded through this class
-     * @param newData
-     * @param container
-     * @param targetContainer
-     * @param oldRunLSID
-     * @param newRunLSID
-     * @param user
-     * @param oldDataRowID
-     * @throws ExperimentException
+     * @param newData           The new experiment data object
+     * @param container         The old container
+     * @param targetContainer   The the container
+     * @param oldRunLSID        The old run LSID
+     * @param newRunLSID        The new run LSID
+     * @param user              The user moving the data
+     * @param oldDataRowID      The old data file row id
+     * @throws ExperimentException  Thrown if something goes wrong
      */
     public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
     {
