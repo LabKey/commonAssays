@@ -1,6 +1,7 @@
 package org.labkey.nab;
 
 import org.labkey.api.study.assay.*;
+import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpData;
@@ -109,7 +110,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
 
     protected Domain createUploadSetDomain(Container c, User user)
     {
-        return super.createUploadSetDomain(c, user);    //To change body of overridden methods use File | Settings | File Templates.
+        return super.createUploadSetDomain(c, user);
     }
 
     protected Domain createSampleWellGroupDomain(Container c, User user)
@@ -183,11 +184,6 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         throw new UnsupportedOperationException("Not Yet Implemented");
     }
 
-    public boolean isPlateBased()
-    {
-        return true;
-    }
-
     public ViewURLHelper getUploadWizardURL(Container container, ExpProtocol protocol)
     {
         ViewURLHelper url = new ViewURLHelper("NabAssay", "nabUploadWizard.view", container);
@@ -199,5 +195,4 @@ public class NabAssayProvider extends PlateBasedAssayProvider
     {
         throw new UnsupportedOperationException("Not Yet Implemented");
     }
-
 }

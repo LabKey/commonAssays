@@ -104,7 +104,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
         else
         {
-            List<ExpData> outputs = run.retrieveOutputDataList();
+            List<ExpData> outputs = run.getDataOutputs();
             assert outputs.size() == 1;
             return getAnalytesView(outputs.get(0).getRowId(), form, false);
         }
@@ -131,7 +131,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         {
             for (PropertyDescriptor pd : pds)
             {
-                ColumnInfo info = createColumnInfo(pd, view.getDataRegion().getTable(), lsidColumn);
+                ColumnInfo info = pd.createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getViewContext().getUser());
                 info.setName(getAnalytePropertyName(analyte, pd));
                 info.setCaption(analyte.getName() + " " + pd.getName());
                 view.getDataRegion().addColumn(info);
@@ -191,7 +191,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     {
                         Map<PropertyDescriptor, String> properties = form.getAnalyteProperties(analyte.getRowId());
 
-                        validatePostedProperties(properties);
+                        validatePostedProperties(properties, getViewContext().getRequest());
                     }
                 }
 
