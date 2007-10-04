@@ -44,7 +44,7 @@ public class CompensationController extends SpringFlowController<CompensationCon
     public CompensationController() throws Exception
     {
         super();
-        setActionResolver(_actionResolver.getInstance(this));
+        setActionResolver(_actionResolver);
     }
 
 

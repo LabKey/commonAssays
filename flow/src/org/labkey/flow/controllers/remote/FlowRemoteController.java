@@ -23,7 +23,7 @@ public class FlowRemoteController extends SpringActionController
     public FlowRemoteController() throws Exception
     {
         super();
-        setActionResolver(_actionResolver.getInstance(this));
+        setActionResolver(_actionResolver);
     }
 
     // UNDONE: InfoAction { version number, login status, etc }

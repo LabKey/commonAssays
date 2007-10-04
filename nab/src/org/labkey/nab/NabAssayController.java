@@ -20,13 +20,13 @@ public class NabAssayController extends SpringActionController
 
     static
     {
-        NabAssayController._resolver.addAction(NabUploadWizardAction.class);
+        _resolver.addAction(NabUploadWizardAction.class);
     }
 
     public NabAssayController()
     {
         super();
-        setActionResolver(NabAssayController._resolver.getInstance(this));
+        setActionResolver(_resolver);
     }
 
     @RequiresPermission(ACL.PERM_READ)

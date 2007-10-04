@@ -29,7 +29,7 @@ public class LogController extends SpringFlowController<LogController.Action, Fl
     public LogController() throws Exception
     {
         super();
-        setActionResolver(_actionResolver.getInstance(this));
+        setActionResolver(_actionResolver);
     }
 
 

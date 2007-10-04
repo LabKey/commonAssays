@@ -26,7 +26,7 @@ public class LuminexController extends SpringActionController
     public LuminexController()
     {
         super();
-        setActionResolver(_resolver.getInstance(this));
+        setActionResolver(_resolver);
     }
 
     @RequiresPermission(ACL.PERM_READ)

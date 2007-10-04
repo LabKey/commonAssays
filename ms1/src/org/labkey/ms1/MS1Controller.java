@@ -10,9 +10,10 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.URIUtil;
-import org.labkey.api.view.*;
-import org.labkey.api.query.QuerySettings;
-import org.labkey.api.query.QueryView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.ViewURLHelper;
 import org.labkey.ms1.pipeline.MSInspectImportPipelineJob;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -34,7 +35,7 @@ public class MS1Controller extends SpringActionController
     public MS1Controller() throws Exception
     {
         super();
-        setActionResolver(_actionResolver.getInstance(this));
+        setActionResolver(_actionResolver);
     }
 
     protected ViewURLHelper getViewURLHelper(String action)

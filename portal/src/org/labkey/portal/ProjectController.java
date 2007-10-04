@@ -50,7 +50,7 @@ public class ProjectController extends SpringActionController
     public ProjectController() throws Exception
     {
         super();
-        setActionResolver(_actionResolver.getInstance(this));
+        setActionResolver(_actionResolver);
     }
 
     ViewURLHelper homeUrl()
