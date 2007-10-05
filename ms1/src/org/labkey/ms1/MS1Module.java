@@ -9,6 +9,8 @@ import org.labkey.api.exp.ExperimentDataHandler;
 import org.labkey.api.exp.ExperimentRunFilter;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
+import org.labkey.api.view.*;
+import org.labkey.api.query.QueryView;
 import org.labkey.ms1.pipeline.MSInspectPipelineProvider;
 import org.apache.log4j.Logger;
 
@@ -26,13 +28,26 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
     private static final Logger _log = Logger.getLogger(MS1Module.class);
     public static final String NAME = "MS1";
     public static final String CONTROLLER_NAME = "ms1";
+    public static final String WEBPART_MS1_RUNS = "MS1 Runs";
     public static final ExperimentRunFilter EXP_RUN_FILTER = new ExperimentRunFilter("msInspect Feature Finding", MS1Schema.SCHEMA_NAME, MS1Schema.TABLE_FEATURE_RUNS);
-
-    private Set<ExperimentDataHandler> _dataHandlers;
 
     public MS1Module()
     {
-        super(NAME, 2.22, null, true);
+        super(NAME, 2.22, "/org/labkey/ms1", true,
+                new WebPartFactory(WEBPART_MS1_RUNS)
+                {
+                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                    {
+                        QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MS1Module.EXP_RUN_FILTER, true);
+                        view.setTitle("MS1 Runs");
+                        ViewURLHelper url = portalCtx.getViewURLHelper().clone();
+                        url.setPageFlow(CONTROLLER_NAME);
+                        url.setAction("begin");
+                        view.setTitleHref(url.getLocalURIString());
+                        return view;
+                    }
+                }
+        );
         addController(CONTROLLER_NAME, MS1Controller.class);
 
         MS1Schema.register();
