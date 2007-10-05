@@ -16,12 +16,9 @@ import org.springframework.validation.BindException;
  */
 public class NabAssayController extends SpringActionController
 {
-    private static final DefaultActionResolver _resolver = new DefaultActionResolver(NabAssayController.class);
-
-    static
-    {
-        _resolver.addAction(NabUploadWizardAction.class);
-    }
+    private static final DefaultActionResolver _resolver = new DefaultActionResolver(NabAssayController.class,
+            new Action(NabUploadWizardAction.class)
+        );
 
     public NabAssayController()
     {

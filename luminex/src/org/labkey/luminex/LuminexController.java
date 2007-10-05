@@ -16,12 +16,9 @@ import org.springframework.validation.BindException;
  */
 public class LuminexController extends SpringActionController
 {
-    private static final DefaultActionResolver _resolver = new DefaultActionResolver(LuminexController.class);
-
-    static
-    {
-        _resolver.addAction(LuminexUploadWizardAction.class);
-    }
+    private static final DefaultActionResolver _resolver = new DefaultActionResolver(LuminexController.class,
+            new Action(LuminexUploadWizardAction.class)
+        );
 
     public LuminexController()
     {
