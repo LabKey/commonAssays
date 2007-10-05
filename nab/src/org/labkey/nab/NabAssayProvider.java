@@ -1,7 +1,7 @@
 package org.labkey.nab;
 
 import org.labkey.api.study.assay.*;
-import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpData;
@@ -16,6 +16,8 @@ import org.labkey.api.data.Container;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.HtmlView;
 import org.labkey.api.security.User;
 
 import java.util.*;
@@ -129,11 +131,6 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         return sampleWellGroupDomain;
     }
 
-    protected Domain createDataDomain(Container c, User user)
-    {
-        return null;
-    }
-
     public ExpData getDataForDataRow(Object dataRowId)
     {
         throw new UnsupportedOperationException("Not Yet Implemented");
@@ -142,6 +139,11 @@ public class NabAssayProvider extends PlateBasedAssayProvider
     public String getName()
     {
         return "Neutralizing Antibodies (NAb)";
+    }
+
+    public HttpView getDataDescriptionView(AssayRunUploadForm form)
+    {
+        return new HtmlView("The NAb data file is a specially formatted Excel file.");
     }
 
     public boolean shouldShowDataDescription(ExpProtocol protocol)

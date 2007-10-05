@@ -11,6 +11,7 @@ import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -50,29 +51,11 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         {
             ExpProtocol expProtocol = expRun.getProtocol();
             ExpProtocol protocol = ExperimentService.get().getExpProtocol(expProtocol.getRowId());
-            Domain dataDomain = null;
-            Domain analyteDomain = null;
-            Domain excelRunDomain = null;
-            for (String uri : protocol.retrieveObjectProperties().keySet())
-            {
-                Lsid lsid = new Lsid(uri);
-                if (lsid.getNamespacePrefix() != null && lsid.getNamespacePrefix().startsWith(ExpProtocol.ASSAY_DOMAIN_DATA))
-                {
-                    dataDomain = PropertyService.get().getDomain(info.getContainer(), uri);
-                }
-                else if (lsid.getNamespacePrefix() != null && lsid.getNamespacePrefix().startsWith(LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE))
-                {
-                    analyteDomain = PropertyService.get().getDomain(info.getContainer(), uri);
-                }
-                else if (lsid.getNamespacePrefix() != null && lsid.getNamespacePrefix().startsWith(LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN))
-                {
-                    excelRunDomain = PropertyService.get().getDomain(info.getContainer(), uri);
-                }
-            }
-            if (dataDomain == null)
-            {
-                throw new ExperimentException("Could not find data domain for protocol with LSID " + protocol.getLSID());
-            }
+            String analyteDomainURI = AbstractAssayProvider.getDomainURIForPrefix(expProtocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+            String excelRunDomainURI = AbstractAssayProvider.getDomainURIForPrefix(expProtocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
+            Domain analyteDomain = PropertyService.get().getDomain(info.getContainer(), analyteDomainURI);
+            Domain excelRunDomain = PropertyService.get().getDomain(info.getContainer(), excelRunDomainURI);
+
             if (analyteDomain == null)
             {
                 throw new ExperimentException("Could not find analyte domain for protocol with LSID " + protocol.getLSID());
@@ -87,12 +70,9 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             settings.setGCDisabled(true);
             Workbook workbook = Workbook.getWorkbook(fIn, settings);
 
-            Integer id = OntologyManager.ensureObject(info.getContainer().getId(), data.getLSID());
-
-            PropertyDescriptor[] dataColumns = OntologyManager.getPropertiesForType(dataDomain.getTypeURI(), info.getContainer());
             PropertyDescriptor[] analyteColumns = OntologyManager.getPropertiesForType(analyteDomain.getTypeURI(), info.getContainer());
             PropertyDescriptor[] excelRunColumns = OntologyManager.getPropertiesForType(excelRunDomain.getTypeURI(), info.getContainer());
-            parseFile(dataColumns, analyteColumns, excelRunColumns, workbook, expRun, info.getContainer(), data, info.getUser());
+            parseFile(analyteColumns, excelRunColumns, workbook, expRun, info.getContainer(), data, info.getUser());
         }
         catch (IOException e)
         {
@@ -384,7 +364,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    private void parseFile(PropertyDescriptor[] dataColumns, PropertyDescriptor[] analyteColumns, PropertyDescriptor[] excelRunColumns, Workbook workbook, final ExpRun expRun, Container container, ExpData data, User user) throws SQLException, ExperimentException
+    private void parseFile(PropertyDescriptor[] analyteColumns, PropertyDescriptor[] excelRunColumns, Workbook workbook, final ExpRun expRun, Container container, ExpData data, User user) throws SQLException, ExperimentException
     {
         List<Map<String, Object>> dataRowsProps = new ArrayList<Map<String, Object>>();
         
@@ -420,7 +400,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             do
             {
                 Map<String, Object> dataRowProps = new LinkedHashMap<String, Object>();
-                LuminexDataRow dataRow = createDataRow(data, sheet, colNames, row, dataColumns, dataRowProps);
+                LuminexDataRow dataRow = createDataRow(data, sheet, colNames, row);
                 dataRows.add(dataRow);
                 dataRowsProps.add(dataRowProps);
             }
@@ -597,7 +577,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }, excelRunColumns, new Map[] { excelRunProps }, true);
     }
 
-    private LuminexDataRow createDataRow(ExpData data, Sheet sheet, List<String> colNames, int row, PropertyDescriptor[] dataColumns, Map<String, Object> rowValues)
+    private LuminexDataRow createDataRow(ExpData data, Sheet sheet, List<String> colNames, int row)
     {
         LuminexDataRow dataRow = new LuminexDataRow();
         dataRow.setDataId(data.getRowId());
@@ -673,10 +653,6 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             else if ("Sampling Errors".equalsIgnoreCase(columnName))
             {
                 dataRow.setSamplingErrors(value);
-            }
-            else
-            {
-                storePropertyValue(columnName, value, dataColumns, rowValues);
             }
         }
         return dataRow;
@@ -772,11 +748,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         {
             ExpProtocol protocol = run.getProtocol();
             ExpProtocol p = ExperimentService.get().getExpProtocol(protocol.getRowId());
-            AssayProvider provider = AssayService.get().getProvider(p);
-            if (provider != null)
-            {
-                return provider.getAssayDataURL(container, p, run.getRowId());
-            }
+            return AssayService.get().getAssayDataURL(container, p, run.getRowId());
         }
         return null;
     }

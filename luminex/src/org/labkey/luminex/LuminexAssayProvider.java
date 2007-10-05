@@ -1,6 +1,7 @@
 package org.labkey.luminex;
 
 import org.labkey.api.study.assay.*;
+import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.property.DomainProperty;
@@ -17,6 +18,8 @@ import org.labkey.api.data.*;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.HtmlView;
 import org.labkey.api.security.User;
 
 import javax.servlet.ServletException;
@@ -64,7 +67,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 ExpProtocol protocol = expRun.getProtocol();
                 if (protocol == null)
                     return null;
-                ViewURLHelper dataURL = getAssayDataURL(expRun.getContainer(), protocol, expRun.getRowId());
+                ViewURLHelper dataURL = AssayService.get().getAssayDataURL(expRun.getContainer(), protocol, expRun.getRowId());
                 return dataURL.getLocalURIString();
             }
         });
@@ -249,17 +252,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return result;
     }
 
-    public Map<String, TableInfo> getTableInfos(ExpProtocol protocol, QuerySchema schema)
+    public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        Map<String, TableInfo> result = super.getTableInfos(protocol, schema);
-
-        LuminexSchema luminexSchema = new LuminexSchema(schema.getUser(), schema.getContainer(), protocol);
-        for (String tableName : luminexSchema.getTableNames())
-        {
-            result.put(tableName, luminexSchema.getTable(tableName, null));
-        }
-        
-        return result;
+        return new HtmlView("Currently the only supported file format is the multi-sheet BioPlex Excel file format.");
     }
 
     public boolean shouldShowDataDescription(ExpProtocol protocol)
