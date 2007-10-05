@@ -61,11 +61,29 @@ public class MS1Controller extends SpringActionController
     /**
      * Adds the Features view step to a NavTree
      * @param root The root of the NavTree
+     * @param runId The runId parameter
      * @return Modified NavTree
      */
-    protected NavTree addFeaturesChild(NavTree root)
+    protected NavTree addFeaturesChild(NavTree root, int runId)
     {
-        return root.addChild("Features from Run", getViewURLHelper("showFeatures.view"));
+        ViewURLHelper url = getViewURLHelper("showFeatures.view");
+        url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
+        return root.addChild("Features from Run", url);
+    }
+
+    /**
+     * Adds a the peaks view step to the NavTree
+     * @param root  The root of the NavTree
+     * @param runId The runId parameter
+     * @param scan  The scan parameter
+     * @return Modified NavTree
+     */
+    protected NavTree addPeaksChild(NavTree root, int runId, int scan)
+    {
+        ViewURLHelper url = getViewURLHelper("showPeaks.view");
+        url.addParameter(ShowPeaksAction.PARAM_RUNID, runId);
+        url.addParameter(ShowPeaksAction.PARAM_SCAN, scan);
+        return root.addChild("Peaks from Scan", getViewURLHelper("showPeaks.view"));
     }
 
     /**
@@ -91,19 +109,63 @@ public class MS1Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowFeaturesAction extends SimpleViewAction<RunIdForm>
     {
-
+        public static final String PARAM_RUNID = "runId";
+        private RunIdForm _form;
         public ModelAndView getView(RunIdForm form, BindException errors) throws Exception
         {
+            _form = null;
             if(-1 == form.getRunId())
                 return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
             else
-                return new FeaturesView(getViewContext(), form.getRunId());
+            {
+                _form = form;
+                return new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId());
+            }
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
             addBeginChild(root);
-            return addFeaturesChild(root);
+            if(null != _form)
+                addFeaturesChild(root, _form.getRunId());
+
+            _form = null;
+            return root;
+        }
+    } //class ShowFeaturesAction
+
+    /**
+     * Action to show the peaks for a given experiment run and scan number
+     */
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowPeaksAction extends SimpleViewAction<RunScanForm>
+    {
+        public static final String PARAM_RUNID = "runId";
+        public static final String PARAM_SCAN = "scan";
+        private RunScanForm _form;
+        public ModelAndView getView(RunScanForm form, BindException errors) throws Exception
+        {
+            _form = null;
+            if(-1 == form.getRunId() || -1 == form.getScan())
+                return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
+            else
+            {
+                _form = form;
+                return new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
+                                        form.getRunId(), form.getScan());
+            }
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            addBeginChild(root);
+            if(null != _form)
+            {
+                addFeaturesChild(root, _form.getRunId());
+                addPeaksChild(root, _form.getRunId(), _form.getScan());
+            }
+            _form = null;
+            return root;
         }
     } //class ShowFeaturesAction
 
@@ -197,4 +259,30 @@ public class MS1Controller extends SpringActionController
             _runId = runId;
         }
     } //class RunIDForm
+
+    public static class RunScanForm
+    {
+        private int _runId = -1;
+        private int _scan = -1;
+
+        public int getRunId()
+        {
+            return _runId;
+        }
+
+        public void setRunId(int runId)
+        {
+            _runId = runId;
+        }
+
+        public int getScan()
+        {
+            return _scan;
+        }
+
+        public void setScan(int scan)
+        {
+            _scan = scan;
+        }
+    } //class RunScanForm
 } //class MS1Controller

@@ -31,18 +31,13 @@ public class FeaturesView extends QueryView
      * Constructs a new FeaturesView given a ViewContext and the experiment run id. The view
      * will automatically filter the list of Features to just those belonging to the specified run.
      * @param ctx       The view context
+     * @param schema    The MS1Schema to use
      * @param runId     The id of the experiment run
      */
-    public FeaturesView(ViewContext ctx, int runId)
+    public FeaturesView(ViewContext ctx, MS1Schema schema, int runId)
     {
-        super(new MS1Schema(ctx.getUser(), ctx.getContainer()));
-
-        //this is a bit hacky, but the call to the super's c-tor must be the first line
-        //and the super stores the schema as a UserSchema, not a specific sub-type.
-        //however, we need it as an MS1Schema so we can call getFeaturesTableInfo()
-        //I suppose I could make the caller pass this in, but they shouldn't have to
-        _ms1Schema = (MS1Schema)getSchema();
-
+        super(schema);
+        _ms1Schema = schema;
         _runId = runId;
 
         //NOTE: The use of QueryView.DATAREGIONNAME_DEFAULT is essential here!
@@ -70,7 +65,7 @@ public class FeaturesView extends QueryView
 
         FeaturesTableInfo tinfo = _ms1Schema.getFeaturesTableInfo();
         if(_runId >= 0)
-            tinfo.addRunIdCondition(_runId);
+            tinfo.addRunIdCondition(_runId, getContainer());
         return tinfo;
     }
 

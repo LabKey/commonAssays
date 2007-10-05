@@ -8,6 +8,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpSchema;
+import org.labkey.api.view.ViewURLHelper;
 
 import java.util.ArrayList;
 
@@ -22,6 +23,10 @@ import java.util.ArrayList;
  */
 public class FeaturesTableInfo extends FilteredTable
 {
+    //Localizable Strings
+    public static final String CAPTION_FEATURES_FILE = "Features File";
+    public static final String CAPTION_EXP_DATA_FILE = "Experiment Data File";
+
     public FeaturesTableInfo(ExpSchema expSchema, Container container)
     {
         super(MS1Manager.get().getTable(MS1Manager.TABLE_FEATURES));
@@ -38,10 +43,16 @@ public class FeaturesTableInfo extends FilteredTable
         visibleColumns.remove(FieldKey.fromParts("Description"));
         setDefaultVisibleColumns(visibleColumns);
 
+        //mark the FeatureID column as hidden
+        getColumn("FeatureID").setIsHidden(true);
+
+        //rename the FeaturesFileID to something nicer
+        getColumn("FeaturesFileID").setCaption(CAPTION_FEATURES_FILE);
+
         //tell it that ms1.FeaturesFiles.FeaturesFileID is a foreign key to exp.Data.RowId
-        //Q: Should this be in ms1.xml instead?
         TableInfo fftinfo = getColumn("FeaturesFileID").getFkTableInfo();
         ColumnInfo ffid = fftinfo.getColumn("ExpDataFileID");
+        ffid.setCaption(CAPTION_EXP_DATA_FILE);
         ffid.setFk(new LookupForeignKey("RowId")
         {
             public TableInfo getLookupTableInfo()
@@ -59,11 +70,18 @@ public class FeaturesTableInfo extends FilteredTable
         addCondition(sf, "FeaturesFileID");
     } //c-tor
 
-    public void addRunIdCondition(int runId)
+    public void addRunIdCondition(int runId, Container container)
     {
         SQLFragment sf = new SQLFragment("FeaturesFileID IN (SELECT FeaturesFileID FROM ms1.FeaturesFiles AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileID=d.RowId) INNER JOIN Exp.ExperimentRun AS r ON (d.RunId=r.RowId) WHERE r.RowId=?)",
                                             runId);
         addCondition(sf, "FeaturesFileID");
+
+        //when limited to a run, we can make the scan number a link to the peaks view
+        assert null != getColumn("Scan") : "Scan column not present in Features table info!";
+        ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks", container);
+        String surl = url.getLocalURIString() + "runId=" + runId + "&scan=${Scan}";
+        getColumn("Scan").setURL(surl);
+
     } //addRunIdCondition()
 
     // Protected Data Members

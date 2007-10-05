@@ -21,6 +21,7 @@ public class MS1Schema extends UserSchema
     public static final String SCHEMA_NAME = "ms1";
     public static final String TABLE_FEATURE_RUNS = "MSInspectFeatureRuns";
     public static final String TABLE_FEATURES = "Features";
+    public static final String TABLE_PEAKS = "Peaks";
 
     static public void register()
     {
@@ -54,6 +55,8 @@ public class MS1Schema extends UserSchema
             return getMS1ExpRunsTableInfo(alias);
         if(TABLE_FEATURES.equalsIgnoreCase(name))
             return getFeaturesTableInfo();
+        if(TABLE_PEAKS.equalsIgnoreCase(name))
+            return getPeaksTableInfo();
         else
             return super.getTable(name, alias);
     } //getTable()
@@ -62,6 +65,11 @@ public class MS1Schema extends UserSchema
     {
         return new FeaturesTableInfo(_expSchema, getContainer());
     } //getFeaturesTableInfo()
+
+    public PeaksTableInfo getPeaksTableInfo()
+    {
+        return new PeaksTableInfo(_expSchema, getContainer());
+    }
 
     public ExpRunTable getMS1ExpRunsTableInfo(String alias)
     {
