@@ -46,7 +46,9 @@
       <ns:column columnName="MZ">
           <ns:formatString>0.00</ns:formatString>
       </ns:column>
-      <ns:column columnName="AccurateMZ"/>
+      <ns:column columnName="AccurateMZ">
+          <ns:formatString>Y;N</ns:formatString>
+      </ns:column>
       <ns:column columnName="Mass">
           <ns:formatString>0.00</ns:formatString>
       </ns:column>
@@ -59,7 +61,7 @@
       </ns:column>
       <ns:column columnName="ChargeStates"/>
       <ns:column columnName="KL">
-          <ns:formatString>0.00</ns:formatString>
+          <ns:formatString>0.0000</ns:formatString>
       </ns:column>
       <ns:column columnName="Background">
           <ns:formatString>#,##0.0000</ns:formatString>
