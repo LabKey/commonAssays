@@ -298,7 +298,6 @@ flow/src/org/labkey/flow/controllers/protocol/joinSampleSet.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/showProtocol.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/updateSamples.jsp -text
 flow/src/org/labkey/flow/controllers/remote/FlowRemoteController.java -text
-flow/src/org/labkey/flow/controllers/remote/InterfaceAction.java -text
 flow/src/org/labkey/flow/controllers/run/MoveToAnalysisForm.java -text
 flow/src/org/labkey/flow/controllers/run/RunController.java -text
 flow/src/org/labkey/flow/controllers/run/RunForm.java -text

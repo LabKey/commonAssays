@@ -1,7 +1,7 @@
 package org.labkey.flow.controllers.remote;
 
 import org.labkey.flow.controllers.editscript.GateEditorServiceImpl;
-import org.labkey.flow.controllers.remote.InterfaceAction;
+import org.labkey.api.action.InterfaceAction;
 import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.gateeditor.client.GateEditorService;
 import org.labkey.api.view.ViewContext;
