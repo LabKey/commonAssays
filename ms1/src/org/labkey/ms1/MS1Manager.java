@@ -14,26 +14,19 @@ public class MS1Manager
 {
     private static MS1Manager _instance;
     public static final String SCHEMA_NAME = "ms1";
-    public static final String TABLE_PEAKS_FILES = "PeaksFiles";
     public static final String TABLE_SCANS = "Scans";
-    public static final String TABLE_CALIBRATION_PARAMS = "CalibrationParams";
+    public static final String TABLE_CALIBRATION_PARAMS = "Calibrations";
     public static final String TABLE_PEAK_FAMILIES = "PeakFamilies";
     public static final String TABLE_PEAKS_TO_FAMILIES = "PeaksToFamilies";
     public static final String TABLE_PEAKS = "Peaks";
     public static final String TABLE_FEATURES = "Features";
-    public static final String TABLE_FEATURES_FILES = "FeaturesFiles";
+    public static final String TABLE_FILES = "Files";
+    public static final String TABLE_SOFTWARE = "Software";
+    public static final String TABLE_SOFTWARE_PARAMS = "SoftwareParams";
 
-    //this maps the class of our DbBean derivatives to their proper table names
-    //used in the save() method below
-    private static final HashMap<Class,String> _tablemap = new HashMap<Class,String>();
-    static
-    {
-        _tablemap.put(PeaksFile.class,TABLE_PEAKS_FILES);
-        _tablemap.put(Scan.class,TABLE_SCANS);
-        _tablemap.put(CalibrationParam.class,TABLE_CALIBRATION_PARAMS);
-        _tablemap.put(PeakFamily.class,TABLE_PEAK_FAMILIES);
-        _tablemap.put(Peak.class,TABLE_PEAKS);
-    }
+    //constants for the file type bitmask
+    public static final int FILETYPE_FEATURES = 1;
+    public static final int FILETYPE_PEAKS = 2;
 
     private MS1Manager()
     {
@@ -61,86 +54,178 @@ public class MS1Manager
         return getSchema().getTable(tablename);
     }
 
-    /**
-     * Saves a DbBean-derived class to the database. This will use the
-     * dirty and new flags to determine if the bean needs to be saved
-     * and if so, if it should be inserted or updated. The function
-     * returns a reference to the object returned from the Table layer
-     * (which is typically the same instance as the object passed in)
-     * @param dbbean    bean to save
-     * @param user      user saving the bean
-     * @return          reference to bean returned from the Table layer
-     * @throws SQLException
-     */
-    public <K extends DbBean> K save(K dbbean, User user) throws SQLException
+    public void deleteFeaturesData(ExpData expData, User user) throws SQLException
     {
-        if(dbbean.isDirty())
-        {
-            if(dbbean.isNew())
-                dbbean = Table.insert(user, getTable(_tablemap.get(dbbean.getClass())), dbbean);
-            else
-                dbbean = Table.update(user, getTable(_tablemap.get(dbbean.getClass())), dbbean, dbbean.getRowID(), null);
+        int idExpData = expData.getRowId();
 
-            //in either case, this object is clean and no longer new
-            dbbean.setDirty(false);
-            dbbean.setNew(false);
-        }
+        StringBuilder sql = new StringBuilder("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_FEATURES));
+        sql.append(" WHERE FileId IN (");
+        sql.append(genFileListSQL(idExpData));
+        sql.append(");");
 
-        return dbbean;
-    } //save()
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_SOFTWARE_PARAMS));
+        sql.append(" WHERE SoftwareId IN (");
+        sql.append(genSoftwareListSQL(idExpData));
+        sql.append(");");
 
-    public void addPeakToFamily(PeakFamily pfam, Peak pk, User user) throws SQLException
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_SOFTWARE));
+        sql.append(" WHERE FileId IN (");
+        sql.append(genFileListSQL(idExpData));
+        sql.append(");");
+
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" WHERE ExpDataFileId=");
+        sql.append(String.valueOf(idExpData));
+
+        Table.execute(getSchema(), sql.toString(), null);
+    }
+
+    public void moveFileData(int oldExpDataFileID, int newExpDataFileID, User user) throws SQLException
     {
-        HashMap<String,Integer> map = new HashMap<String,Integer>();
-        map.put("PeakID", pk.getPeakID());
-        map.put("PeakFamilyID", pfam.getPeakFamilyID());
-        Table.insert(user, getSchema().getTable(TABLE_PEAKS_TO_FAMILIES), map);
+        Integer[] ids = {newExpDataFileID, oldExpDataFileID};
+        Table.execute(getSchema(), "UPDATE " + SCHEMA_NAME + "." + TABLE_FILES + " SET ExpDataFileID=? WHERE ExpDataFileID=?", ids);
     }
 
     public void deletePeakData(int expDataFileID, User user) throws SQLException
     {
-        StringBuilder sql = new StringBuilder("DELETE FROM ms1.PeaksToFamilies WHERE PeakID IN (SELECT PeakID FROM ms1.Peaks WHERE PeaksFileID IN (SELECT PeaksFileID FROM ms1.PeaksFiles WHERE ExpDataFileID=" + expDataFileID + "))");
-        sql.append("; DELETE FROM ms1.PeakFamilies WHERE PeaksFileID IN (SELECT PeaksFileID FROM ms1.PeaksFiles WHERE ExpDataFileID=" + expDataFileID + ")");
-        sql.append("; DELETE FROM ms1.Peaks WHERE PeaksFileID IN (SELECT PeaksFileID FROM ms1.PeaksFiles WHERE ExpDataFileID=" + expDataFileID + ")");
-        sql.append("; DELETE FROM ms1.CalibrationParams WHERE PeaksFileID IN (SELECT PeaksFileID FROM ms1.PeaksFiles WHERE ExpDataFileID=" + expDataFileID + ")");
-        sql.append("; DELETE FROM ms1.Scans WHERE PeaksFileID IN (SELECT PeaksFileID FROM ms1.PeaksFiles WHERE ExpDataFileID=" + expDataFileID + ")");
-        sql.append("; DELETE FROM ms1.PeaksFiles WHERE ExpDataFileID=" + expDataFileID);
-        
+        StringBuilder sql = new StringBuilder("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_PEAKS_TO_FAMILIES));
+        sql.append(" WHERE PeakId IN (");
+        sql.append(genPeakListSQL(expDataFileID));
+        sql.append(");");
+
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_PEAK_FAMILIES));
+        sql.append(" WHERE ScanId IN (");
+        sql.append(genScanListSQL(expDataFileID));
+        sql.append(");");
+
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_PEAKS));
+        sql.append(" WHERE ScanId IN (");
+        sql.append(genScanListSQL(expDataFileID));
+        sql.append(");");
+
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_CALIBRATION_PARAMS));
+        sql.append(" WHERE ScanId IN (");
+        sql.append(genScanListSQL(expDataFileID));
+        sql.append(");");
+
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_SCANS));
+        sql.append(" WHERE FileId IN (");
+        sql.append(genFileListSQL(expDataFileID));
+        sql.append(");");
+
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_SOFTWARE_PARAMS));
+        sql.append(" WHERE SoftwareId IN (");
+        sql.append(genSoftwareListSQL(expDataFileID));
+        sql.append(");");
+
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_SOFTWARE));
+        sql.append(" WHERE FileId IN (");
+        sql.append(genFileListSQL(expDataFileID));
+        sql.append(");");
+
+        sql.append("DELETE FROM ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" WHERE ExpDataFileID=");
+        sql.append(String.valueOf(expDataFileID));
+        sql.append(";");
+
         Table.execute(getSchema(), sql.toString(), null);
     } //deletePeakData
 
-    public void movePeakData(int oldExpDataFileID, int newExpDataFileID, User user) throws SQLException
+    protected String genPeakListSQL(int expDataFileID)
     {
-        Integer[] ids = {newExpDataFileID, oldExpDataFileID};
-        Table.execute(getSchema(), "UPDATE ms1.PeaksFiles SET ExpDataFileID=? WHERE ExpDataFileID=?", ids);
-    } //movePeakData()
+        StringBuilder sql = new StringBuilder("SELECT PeakId FROM ");
+        sql.append(getSQLTableName(TABLE_PEAKS));
+        sql.append(" WHERE ScanId IN (");
+        sql.append(genScanListSQL(expDataFileID));
+        sql.append(")");
+        return sql.toString();
+    }
+
+    protected String genScanListSQL(int expDataFileID)
+    {
+        StringBuilder sql = new StringBuilder("SELECT ScanId FROM ");
+        sql.append(getSQLTableName(TABLE_SCANS));
+        sql.append(" WHERE FileId IN (");
+        sql.append(genFileListSQL(expDataFileID));
+        sql.append(")");
+        return sql.toString();
+    }
+
+    protected String genFileListSQL(int expDataFileID)
+    {
+        StringBuilder sql = new StringBuilder("SELECT FileId FROM ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" WHERE ExpDataFileId=");
+        sql.append(String.valueOf(expDataFileID));
+        return sql.toString();
+    }
+
+    protected String genSoftwareListSQL(int expDataFileID)
+    {
+        StringBuilder sql = new StringBuilder("SELECT SoftwareId FROM ");
+        sql.append(getSQLTableName(TABLE_SOFTWARE));
+        sql.append(" WHERE FileId IN (");
+        sql.append(genFileListSQL(expDataFileID));
+        sql.append(")");
+        return sql.toString();
+    }
+
+    /**
+     * Returns the fully-qualified table name (schema.table) for use in SQL statements
+     * @param tableName The table name
+     * @return Fully-qualified table name
+     */
+    public String getSQLTableName(String tableName)
+    {
+        return SCHEMA_NAME + "." + tableName;
+    }
 
     /**
      * Returns true if this data file has already been imported into the experiment's container
      * @param dataFile  Data file to import
      * @param data      Experiment data object
      * @return          True if already loaded into the experiment's container, otherwise false
-     * @throws SQLException
+     * @throws SQLException Exception thrown from database layer
      */
     protected boolean isAlreadyImported(File dataFile, ExpData data) throws SQLException
     {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS existing FROM exp.Data INNER JOIN ");
-        if(dataFile.getPath().endsWith(".peaks.xml"))
-            sql.append("ms1.PeaksFiles as t");
-        else if(dataFile.getPath().endsWith(".features.tsv"))
-            sql.append("ms1.FeaturesFiles as t");
-        else
-            assert false : "isAlreadyImported() only works with .peaks.xml and .features.tsv files!";
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS existing FROM exp.Data as d INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" as f");
+        sql.append(" ON (d.RowId = f.ExpDataFileId) WHERE DataFileUrl=? AND Container=?");
 
-        sql.append(" ON (exp.Data.RowId = t.ExpDataFileID) WHERE DataFileUrl='file:/");
-        sql.append(dataFile.getAbsolutePath().replace("\\", "/"));
-        sql.append("' AND Container='");
-        sql.append(data.getContainer().getId());
-        sql.append("'");
-
-        Integer count = new Integer(0);
-        count = Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
-        return (count.intValue() != 0);
+        Integer count = Table.executeSingleton(getSchema(), sql.toString(),
+                                                new Object[]{dataFile.toURI().toString(), data.getContainer().getId()},
+                                                Integer.class);
+        return (null != count && count.intValue() != 0);
     } //isAlreadyImported()
+
+    /**
+     * Returns a string containing all errors from a SQLException, which may contain many messages
+     * @param e The SQLException object
+     * @return A string containing all the error messages
+     */
+    public String getAllErrors(SQLException e)
+    {
+        StringBuilder sb = new StringBuilder(e.toString());
+        while(null != (e = e.getNextException()))
+        {
+            sb.append("; ");
+            sb.append(e.toString());
+        }
+        return sb.toString();
+    }
 
 } //class MS1Manager

@@ -49,7 +49,7 @@ public class FeaturesView extends QueryView
         setSettings(settings);
 
         ExpRun run = ExperimentService.get().getExpRun(runId);
-        setTitle("MS1 Features from " + run.getName());
+        setTitle("MS1 Features from " + (null != run ? run.getName() : "(Invalid Run)"));
         setShowCustomizeViewLinkInButtonBar(true);
         setShowRecordSelectors(false);
         setShowExportButtons(false);
@@ -126,7 +126,7 @@ public class FeaturesView extends QueryView
 
         //replace our runId paramter with a query filter on the run table's RowId column
         url.deleteParameter("runId");
-        url.addParameter("query.FeaturesFileID/ExpDataFileID/Run/RowId~eq", _runId);
+        url.addParameter("query.FileId/ExpDataFileId/Run/RowId~eq", _runId);
 
         ActionButton btn = new ActionButton(url.getEncodedLocalURIString(), caption, DataRegion.MODE_ALL, ActionButton.Action.LINK);
         bar.add(btn);

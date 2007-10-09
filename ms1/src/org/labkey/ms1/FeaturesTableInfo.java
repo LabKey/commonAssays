@@ -8,7 +8,6 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpSchema;
-import org.labkey.api.view.ViewURLHelper;
 
 import java.util.ArrayList;
 
@@ -38,20 +37,20 @@ public class FeaturesTableInfo extends FilteredTable
 
         //but only display a subset by default
         ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(getDefaultVisibleColumns());
-        visibleColumns.remove(FieldKey.fromParts("FeatureID"));
-        visibleColumns.remove(FieldKey.fromParts("FeaturesFileID"));
+        visibleColumns.remove(FieldKey.fromParts("FeatureId"));
+        visibleColumns.remove(FieldKey.fromParts("FileId"));
         visibleColumns.remove(FieldKey.fromParts("Description"));
         setDefaultVisibleColumns(visibleColumns);
 
-        //mark the FeatureID column as hidden
-        getColumn("FeatureID").setIsHidden(true);
+        //mark the FeatureId column as hidden
+        getColumn("FeatureId").setIsHidden(true);
 
-        //rename the FeaturesFileID to something nicer
-        getColumn("FeaturesFileID").setCaption(CAPTION_FEATURES_FILE);
+        //rename the FileId to something nicer
+        getColumn("FileId").setCaption(CAPTION_FEATURES_FILE);
 
-        //tell it that ms1.FeaturesFiles.FeaturesFileID is a foreign key to exp.Data.RowId
-        TableInfo fftinfo = getColumn("FeaturesFileID").getFkTableInfo();
-        ColumnInfo ffid = fftinfo.getColumn("ExpDataFileID");
+        //tell it that ms1.Files.FileId is a foreign key to exp.Data.RowId
+        TableInfo fftinfo = getColumn("FileId").getFkTableInfo();
+        ColumnInfo ffid = fftinfo.getColumn("ExpDataFileId");
         ffid.setCaption(CAPTION_EXP_DATA_FILE);
         ffid.setFk(new LookupForeignKey("RowId")
         {
@@ -65,23 +64,23 @@ public class FeaturesTableInfo extends FilteredTable
         //current container. The FilteredTable class supports this automatically only if
         //the underlying table contains a column named "Container," which our Features table
         //does not, so we need to use a SQL fragment here that uses a sub-select.
-        SQLFragment sf = new SQLFragment("FeaturesFileID IN (SELECT FeaturesFileID FROM ms1.FeaturesFiles AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileID=d.RowId) WHERE d.Container=?)",
+        SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=?)",
                                             container.getId());
-        addCondition(sf, "FeaturesFileID");
+        addCondition(sf, "FileId");
     } //c-tor
 
     public void addRunIdCondition(int runId, Container container)
     {
-        SQLFragment sf = new SQLFragment("FeaturesFileID IN (SELECT FeaturesFileID FROM ms1.FeaturesFiles AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileID=d.RowId) INNER JOIN Exp.ExperimentRun AS r ON (d.RunId=r.RowId) WHERE r.RowId=?)",
+        SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) INNER JOIN Exp.ExperimentRun AS r ON (d.RunId=r.RowId) WHERE r.RowId=?)",
                                             runId);
-        addCondition(sf, "FeaturesFileID");
-
+        addCondition(sf, "FileID");
+/*
         //when limited to a run, we can make the scan number a link to the peaks view
         assert null != getColumn("Scan") : "Scan column not present in Features table info!";
         ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks", container);
         String surl = url.getLocalURIString() + "runId=" + runId + "&scan=${Scan}";
         getColumn("Scan").setURL(surl);
-
+*/
     } //addRunIdCondition()
 
     // Protected Data Members

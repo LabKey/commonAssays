@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.sql.*;
+import java.text.ParseException;
 
 /**
  * This data handler loads msInspect feature files, which use a tsv format.
@@ -29,6 +30,8 @@ import java.sql.*;
  */
 public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 {
+    public static final String FEATURES_FILE_EXTENSION = ".features.tsv";
+
     /**
      * This class maps a source column in the features tsv file with its
      * target database column and its jdbc data type. This is used within
@@ -70,9 +73,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
     } //class ColumBindingHashMap
 
     //Constants and Static Data Members
-    protected static final String TABLE_FEATURES = "ms1.Features";              //features db table name
-    protected static final String TABLE_FEATURES_FILES = "ms1.FeaturesFiles";   //FeaturesFiles db table name
-    private static final int CHUNK_SIZE = 1000;                                 //number of insert statements in a batch
+    private static final int CHUNK_SIZE = 1000;         //number of insert statements in a batch
 
     //Master map of all possible column bindings.
     //The code below will select the appropriate bindings after the
@@ -86,7 +87,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         _bindingMap.put(new ColumnBinding("scan", "Scan", java.sql.Types.INTEGER, true));
         _bindingMap.put(new ColumnBinding("time", "Time", java.sql.Types.REAL, false));
         _bindingMap.put(new ColumnBinding("mz", "MZ", java.sql.Types.REAL, false));
-        _bindingMap.put(new ColumnBinding("accurateMZ", "AccurateMZ", java.sql.Types.BIT, false));
+        _bindingMap.put(new ColumnBinding("accurateMZ", "AccurateMZ", java.sql.Types.BOOLEAN, false));
         _bindingMap.put(new ColumnBinding("mass", "Mass", java.sql.Types.REAL, false));
         _bindingMap.put(new ColumnBinding("intensity", "Intensity", java.sql.Types.REAL, false));
         _bindingMap.put(new ColumnBinding("charge", "Charge", java.sql.Types.TINYINT, false));
@@ -94,7 +95,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         _bindingMap.put(new ColumnBinding("kl", "KL", java.sql.Types.REAL, false));
         _bindingMap.put(new ColumnBinding("background", "Background", java.sql.Types.REAL, false));
         _bindingMap.put(new ColumnBinding("median", "Median", java.sql.Types.REAL, false));
-        _bindingMap.put(new ColumnBinding("peaks", "Peaks", java.sql.Types.TINYINT, false));
+        _bindingMap.put(new ColumnBinding("peaks", "Peaks", java.sql.Types.INTEGER, false));
         _bindingMap.put(new ColumnBinding("scanFirst", "ScanFirst", java.sql.Types.INTEGER, false));
         _bindingMap.put(new ColumnBinding("scanLast", "ScanLast", java.sql.Types.INTEGER, false));
         _bindingMap.put(new ColumnBinding("scanCount", "ScanCount", java.sql.Types.INTEGER, false));
@@ -120,6 +121,21 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         if(null == data || null == dataFile || null == info || null == log || null == context)
             return;
 
+        try
+        {
+            //if this file has already been imported before, just return
+            if(MS1Manager.get().isAlreadyImported(dataFile, data))
+            {
+                log.info("Already imported features file " + dataFile.toURI() + " for this experiment into this container.");
+                return;
+            }
+        }
+        catch(SQLException e)
+        {
+            log.info("Problem checking if this file has already been imported!");
+            throw new ExperimentException(MS1Manager.get().getAllErrors(e));
+        }
+
         //NOTE: I'm using the highly-efficient technique of prepared statements and batch execution here,
         //but that also means I'm not using the Table layer and benefiting from its functionality.
         // This may need to change in the future.
@@ -132,24 +148,21 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
         try
         {
-            //if this file has already been imported before, just return
-            if(MS1Manager.get().isAlreadyImported(dataFile, data))
-            {
-                log.info("Already imported features file " + dataFile.getPath().replace("\\","/") + " for this experiment into this container.");
-                return;
-            }
-
             //begin a transaction
             scope.beginTransaction();
             cn = schema.getScope().getConnection();
+            long startMs = System.currentTimeMillis();
 
             //insert the feature files row
-            int idFeaturesFile = insertFeaturesFile(info.getUser(), schema, data);
+            int idFile = insertFeaturesFile(info.getUser(), schema, data);
 
             //open the tsv file using TabLoader for automatic parsing
             TabLoader tsvloader = new TabLoader(dataFile);
             TabLoader.TabLoaderIterator iter = tsvloader.iterator();
             TabLoader.ColumnDescriptor[] coldescrs = tsvloader.getColumns();
+
+            //insert information about the software used to produce the file
+            insertSoftwareInfo(tsvloader.getComments(), idFile, info.getUser(), schema);
 
             //select the appropriate bindings for this tsv file
             ArrayList<ColumnBinding> bindings = selectBindings(coldescrs, log);
@@ -170,7 +183,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
                 //set parameter values
                 pstmt.clearParameters();
-                pstmt.setInt(1, idFeaturesFile); //jdbc params are 1-based!
+                pstmt.setInt(1, idFile); //jdbc params are 1-based!
 
                 for(int idx = 0; idx < bindings.size(); ++idx)
                     setParam(pstmt, idx + 2, numRows, bindings.get(idx), row);
@@ -193,7 +206,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
             //commit the transaction
             scope.commitTransaction();
 
-            log.info("Finished loading " + numRows + " features.");
+            log.info("Finished loading " + numRows + " features in " + (System.currentTimeMillis() - startMs) + " milliseconds.");
         }
         catch(IOException ex)
         {
@@ -203,7 +216,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         catch(SQLException ex)
         {
             scope.rollbackTransaction();
-            throw new ExperimentException(ex);
+            throw new ExperimentException(MS1Manager.get().getAllErrors(ex));
         }
         finally
         {
@@ -214,16 +227,45 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
     } //importFile()
 
-    protected int insertFeaturesFile(User user, DbSchema schema, ExpData data) throws SQLException
+    protected int insertFeaturesFile(User user, DbSchema schema, ExpData data) throws SQLException, ExperimentException
     {
         HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("FeaturesFileID",null);
-        map.put("ExpDataFileID",new Integer(data.getRowId()));
+        map.put("FileId",null);
+        map.put("ExpDataFileId", new Integer(data.getRowId()));
+        map.put("Type", new Integer(MS1Manager.FILETYPE_FEATURES));
         map.put("MzXmlURL", getMzXmlFilePath(data));
+        map.put("Imported", Boolean.TRUE);
 
-        map = Table.insert(user, schema.getTable("FeaturesFiles"), map);
-        return ((Integer) (map.get("FeaturesFileID"))).intValue();
+        map = Table.insert(user, schema.getTable(MS1Manager.TABLE_FILES), map);
+        if(null == map.get("FileId"))
+            throw new ExperimentException("Unable to get new id for features file.");
+        
+        return ((Integer) (map.get("FileId"))).intValue();
     } //insertFeaturesFile()
+
+    protected void insertSoftwareInfo(Map comments, int idFile, User user, DbSchema schema) throws SQLException
+    {
+        HashMap<String,Object> software = new HashMap<String,Object>();
+        software.put("SoftwareId", null);
+        software.put("FileId", idFile);
+        software.put("Name", "msInspect");
+        software.put("Author", "Fred Hutchinson Cancer Research Center");
+
+        software = Table.insert(user, schema.getTable(MS1Manager.TABLE_SOFTWARE), software);
+
+        //now try to get the algorithm from the comments
+        //if we can get it, add that as a named parameter
+        String algorithm = (String)comments.get("algorithm");
+        if(null != algorithm && algorithm.length() > 0)
+        {
+            HashMap<String,Object> softwareParam = new HashMap<String,Object>();
+            softwareParam.put("SoftwareId", software.get("SoftwareId"));
+            softwareParam.put("Name", "algorithm");
+            softwareParam.put("Value", algorithm);
+
+            Table.insert(user, schema.getTable(MS1Manager.TABLE_SOFTWARE_PARAMS), softwareParam);
+        }
+    } //insertSoftwareInfo()
 
     /**
      * Returns the master mzXML file path for the data file
@@ -235,8 +277,9 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         //by convention, the mzXML has the same base name as the data file (minus the ".features.tsv")
         //and is located three directories above the data file
         File dataFile = data.getDataFile();
-        String dataFileName = dataFile.getName().substring(0, dataFile.getName().length() - ".features.tsv".length());
-        File mzxmlFile = new File(dataFile.getParentFile().getParentFile().getParentFile(), dataFileName + ".mzXML");
+        String dataFileName = dataFile.getName();
+        String baseName = dataFileName.substring(0, dataFileName.length() - FEATURES_FILE_EXTENSION.length());
+        File mzxmlFile = new File(dataFile.getParentFile().getParentFile().getParentFile(), baseName + ".mzXML");
         return mzxmlFile.toURI().toString();
     } //getMzXmlFilePath()
 
@@ -270,8 +313,8 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
     protected String genInsertSQL(ArrayList<ColumnBinding> bindings)
     {
         StringBuilder sbCols = new StringBuilder("INSERT INTO ");
-        sbCols.append(TABLE_FEATURES);
-        sbCols.append(" (FeaturesFileID");
+        sbCols.append(MS1Manager.get().getSQLTableName(MS1Manager.TABLE_FEATURES));
+        sbCols.append(" (FileId");
 
         StringBuilder sbParams = new StringBuilder("(?");
 
@@ -325,10 +368,8 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
             else
             {
                 //the TabLoader uses String, Integer, Double, Boolean and Date types only
-                if(val instanceof String)
-                    pstmt.setString(paramIndex, (String)val);
-                else if(val instanceof Integer)
-                    pstmt.setInt(paramIndex, ((Integer) val).intValue()); //relying on java 5.0 auto-unboxing
+                if(val instanceof Integer)
+                    pstmt.setInt(paramIndex, ((Integer) val).intValue());
                 else if(val instanceof Double)
                     pstmt.setDouble(paramIndex, ((Double) val).doubleValue());
                 else if(val instanceof Boolean)
@@ -336,13 +377,28 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
                 else if(val instanceof Date)
                     pstmt.setDate(paramIndex, new java.sql.Date(((Date)val).getTime()));
                 else
-                    throw new ExperimentException("Unsupported column value data type in column " + binding.sourceColumn + ", row " + rowNum);
+                {
+                    //special case for PostgreSQL: their driver won't convert "true" to a boolean or a bit
+                    //like the SQL Server driver will, so we need to catch that here and convert ourselves
+                    if(java.sql.Types.BOOLEAN == binding.jdbcType)
+                    {
+                        BooleanFormat fmt = BooleanFormat.getInstance();
+                        pstmt.setBoolean(paramIndex, ((Boolean)fmt.parseObject((String)val)).booleanValue());
+                    }
+                    else
+                        pstmt.setString(paramIndex, (String)val);
+                }
             } //not null
         }
         catch(SQLException e)
         {
             throw new ExperimentException("Problem setting the value for column " + binding.sourceColumn + 
                                             " in row " + rowNum + " to the value " + val + ": " + e.toString());
+        }
+        catch(ParseException e)
+        {
+            throw new ExperimentException("Unable to interpret the value '" + val + "' for column " + binding.sourceColumn +
+                                            " in row " + rowNum);
         }
     } //setParam()
 
@@ -379,15 +435,11 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         //so don't use a transaction here because it's already transacted in the caller.
         try
         {
-            DbSchema schema = DbSchema.get("ms1");
-            Table.execute(schema, "delete from " + TABLE_FEATURES + " where FeaturesFileID in (select FeaturesFileID from "
-                                + TABLE_FEATURES_FILES + " where ExpDataFileID="
-                                + data.getRowId() + ")", null);
-            Table.execute(schema, "delete from " + TABLE_FEATURES_FILES + " where ExpDataFileID=" + data.getRowId(), null);
+            MS1Manager.get().deleteFeaturesData(data, user);
         }
-        catch(SQLException ex)
+        catch(SQLException e)
         {
-            throw new ExperimentException(ex);
+            throw new ExperimentException(MS1Manager.get().getAllErrors(e));
         }
     } //deleteData()
 
@@ -399,10 +451,10 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      * @param oldRunLSID        The old run LSID
      * @param newRunLSID        The new run LSID
      * @param user              The user moving the data
-     * @param oldDataRowID      The old data file row id
+     * @param oldDataRowId      The old data file row id
      * @throws ExperimentException  Thrown if something goes wrong
      */
-    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
+    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowId) throws ExperimentException
     {
         if(null == newData || null == user)
                 return;
@@ -410,12 +462,11 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         //update the database records to reflect the new data file row id
         try
         {
-            DbSchema schema = DbSchema.get("ms1");
-            Table.execute(schema, "update " + TABLE_FEATURES_FILES + " set ExpDataFileID=" + newData.getRowId() + " where ExpDataFileID=" + oldDataRowID, null);
+            MS1Manager.get().moveFileData(oldDataRowId, newData.getRowId(), user);
         }
-        catch(SQLException ex)
+        catch(SQLException e)
         {
-            throw new ExperimentException(ex);
+            throw new ExperimentException(MS1Manager.get().getAllErrors(e));
         }
     } //runMoved()
 
@@ -428,7 +479,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
     {
         //we handle only *.features.tvt files
         String fileUrl = data.getDataFileUrl();
-        if(null != fileUrl && fileUrl.endsWith(".features.tsv"))
+        if(null != fileUrl && fileUrl.endsWith(FEATURES_FILE_EXTENSION))
             return Priority.MEDIUM;
         else
             return null;
