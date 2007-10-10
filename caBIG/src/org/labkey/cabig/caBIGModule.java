@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.module.Module;
 import org.labkey.api.security.SecurityManager;
 import org.labkey.api.util.PageFlowUtil;
 
@@ -36,6 +37,11 @@ public class caBIGModule extends DefaultModule
     public Set<DbSchema> getSchemasToTest()
     {
         return PageFlowUtil.set(caBIGSchema.getInstance().getSchema());
+    }
+
+    public TabDisplayMode getTabDisplayMode()
+    {
+        return TabDisplayMode.DISPLAY_NEVER;
     }
 
     @Override
