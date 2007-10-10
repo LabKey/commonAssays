@@ -935,6 +935,8 @@ nab/src/org/labkey/nab/header.jsp -text
 nab/src/org/labkey/nab/multiRunGraph.jsp -text
 nab/src/org/labkey/nab/publishChooseStudy.jsp -text
 nab/src/org/labkey/nab/publishVerify.jsp -text
+nab/src/org/labkey/nab/query/NabRunDataTable.java -text
+nab/src/org/labkey/nab/query/NabSchema.java -text
 nab/src/org/labkey/nab/runProperties.jsp -text
 nab/src/org/labkey/nab/runResults.jsp -text
 portal/module.properties -text

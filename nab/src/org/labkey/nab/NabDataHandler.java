@@ -7,8 +7,7 @@ import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.*;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,6 +30,9 @@ import jxl.read.biff.BiffException;
 public class NabDataHandler extends AbstractExperimentDataHandler
 {
     public static final String NAB_DATA_LSID_PREFIX = "AssayRunNabData";
+    public static final String NAB_DATA_ROW_LSID_PREFIX = "AssayRunNabDataRow";
+    public static final String NAB_PROPERTY_LSID_PREFIX = "NabProperty";
+    public static final String NAB_INPUT_MATERIAL_DATA_PROPERTY = "SpecimenLsid";
     private static final int START_ROW = 6; //0 based, row 7 inthe workshet
     private static final int START_COL = 0;
 
@@ -42,26 +44,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
             ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
             Container container = data.getContainer();
             AssayProvider provider = AssayService.get().getProvider(protocol);
-            User user = info.getUser();
             PlateTemplate nabTemplate = provider.getPlateTemplate(container, protocol);
-            WorkbookSettings settings = new WorkbookSettings();
-            settings.setGCDisabled(true);
-            Workbook workbook = Workbook.getWorkbook(dataFile, settings);
-            double[][] cellValues = new double[nabTemplate.getRows()][nabTemplate.getColumns()];
-
-            Sheet plateSheet = workbook.getSheet(1);
-            for (int row = 0; row < nabTemplate.getRows(); row++)
-            {
-                for (int col = 0; col < nabTemplate.getColumns(); col++)
-                {
-                    Cell cell = plateSheet.getCell(col + START_COL, row + START_ROW);
-                    String cellContents = cell.getContents();
-                    cellValues[row][col] = Double.parseDouble(cellContents);
-                }
-            }
-
-            // create plate, and set its properties:
-            Plate plate = PlateService.get().createPlate(nabTemplate, run.getLSID(), cellValues);
 
             Map<String, PropertyDescriptor> runProperties = new HashMap<String, PropertyDescriptor>();
             for (PropertyDescriptor column : provider.getRunPropertyColumns(protocol))
@@ -69,98 +52,65 @@ public class NabDataHandler extends AbstractExperimentDataHandler
             for (PropertyDescriptor column : provider.getUploadSetColumns(protocol))
                 runProperties.put(column.getName(), column);
 
-            List<Integer> cutoffs = new ArrayList<Integer>();
-            Set<String> cutoffPropertyNames = new HashSet<String>();
+            Map<Integer, String> cutoffs = new HashMap<Integer, String>();
             for (String cutoffPropName : NabAssayProvider.CUTOFF_PROPERTIES)
             {
-                cutoffPropertyNames.add(cutoffPropName);
                 PropertyDescriptor cutoffProp = runProperties.get(cutoffPropName);
                 Integer cutoff = (Integer) run.getProperty(cutoffProp);
                 if (cutoff != null)
-                    cutoffs.add(cutoff);
+                    cutoffs.put(cutoff, cutoffProp.getFormat());
             }
 
             if (cutoffs.isEmpty())
             {
-                cutoffs.add(50);
-                cutoffs.add(80);
-            }
-            Collections.sort(cutoffs);
-            StringBuilder cutoffString = new StringBuilder();
-            for (int i = 0; i < cutoffs.size(); i++)
-            {
-                if (i > 0)
-                    cutoffString.append(",");
-                cutoffString.append(cutoffs.get(i));
-            }
-            plate.setProperty("Cutoffs", cutoffString);
-            for (PropertyDescriptor column : runProperties.values())
-            {
-                if (!cutoffPropertyNames.contains(column.getName()))
-                {
-                    Object value = run.getProperty(column);
-                    plate.setProperty(column.getName(), value);
-                }
+                cutoffs.put(50, "0.000");
+                cutoffs.put(80, "0.000");
             }
 
-            ExpData[] sampleInputs = run.getInputDatas(null, ExpProtocol.ApplicationType.ExperimentRun);
-            // set sample group properties:
-            List<? extends WellGroup> specimenGroups = plate.getWellGroups(WellGroup.Type.SPECIMEN);
+            double[][] cellValues = getCellValues(dataFile, nabTemplate);
+
             // UNDONE: Eliminate cast to NabAssayProvider here: there needs to be a more general way of retrieving
             // sample preparation information from a protocol/provider.
-            PropertyDescriptor[] sampleProperties = ((NabAssayProvider) provider).getSampleWellGroupColumns(protocol);
+            PropertyDescriptor[] sampleProperties = ((PlateBasedAssayProvider) provider).getSampleWellGroupColumns(protocol);
             Map<String, PropertyDescriptor> samplePropertyMap = new HashMap<String, PropertyDescriptor>();
             for (PropertyDescriptor sampleProperty : sampleProperties)
                 samplePropertyMap.put(sampleProperty.getName(), sampleProperty);
 
-            for (int i = 0; i < sampleInputs.length; i++)
-            {
-                WellGroup group = specimenGroups.get(i);
-                ExpData sampleInput = sampleInputs[i];
-                for (PropertyDescriptor property : sampleProperties)
-                    group.setProperty(property.getName(), sampleInput.getProperty(property));
 
-                List<WellData> wells = group.getWellData(true);
-                boolean first = true;
-                Double dilution = (Double) sampleInput.getProperty(samplePropertyMap.get(NabAssayProvider.SAMPLE_INITIAL_DILUTION_PROPERTY_NAME));
-                Double factor = (Double) sampleInput.getProperty(samplePropertyMap.get(NabAssayProvider.SAMPLE_DILUTION_FACTOR_PROPERTY_NAME));
-                String methodString = (String) sampleInput.getProperty(samplePropertyMap.get(NabAssayProvider.SAMPLE_METHOD_PROPERTY_NAME));
-                SampleInfo.Method method = SampleInfo.Method.valueOf(methodString);
-                for (int groupIndex = wells.size() - 1; groupIndex >= 0; groupIndex--)
-                {
-                    WellData well = wells.get(groupIndex);
-                    if (!first)
-                    {
-                        if (method == SampleInfo.Method.Dilution)
-                            dilution *= factor;
-                        else if (method == SampleInfo.Method.Concentration)
-                            dilution /= factor;
-                    }
-                    else
-                        first = false;
-                    well.setDilution(dilution);
-                }
-            }
+            Plate plate = PlateService.get().createPlate(nabTemplate, run.getLSID(), cellValues);
+            List<? extends WellGroup> specimenGroups = plate.getWellGroups(WellGroup.Type.SPECIMEN);
+            List<ExpMaterial> sampleInputs = run.getMaterialInputs();
+            Map<WellGroup, ExpMaterial> inputs = getWellGroupMaterialPairings(sampleInputs, specimenGroups);
 
-            Luc5Assay temp = new Luc5Assay(plate, cutoffs);
-            for (int summaryIndex = 0; summaryIndex < temp.getSummaries().length; summaryIndex++)
+            prepareWellGroups(inputs, samplePropertyMap);
+
+            List<Integer> sortedCutoffs = new ArrayList<Integer>(cutoffs.keySet());
+            Collections.sort(sortedCutoffs);
+            Luc5Assay assayResults = new Luc5Assay(plate, sortedCutoffs);
+            OntologyManager.ensureObject(container.getId(), data.getLSID());
+            for (int summaryIndex = 0; summaryIndex < assayResults.getSummaries().length; summaryIndex++)
             {
-                DilutionSummary dilution = temp.getSummaries()[summaryIndex];
+                DilutionSummary dilution = assayResults.getSummaries()[summaryIndex];
                 WellGroup group = dilution.getWellGroup();
-                for (int cutoff : cutoffs)
+                ExpMaterial sampleInput = inputs.get(group);
+                List<ObjectProperty> results = new ArrayList<ObjectProperty>();
+                Lsid dataRowLsid = new Lsid(data.getLSID());
+                dataRowLsid.setNamespacePrefix(NAB_DATA_ROW_LSID_PREFIX);
+                dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + group.getName());
+                for (Integer cutoff : sortedCutoffs)
                 {
-                    group.setProperty("Curve IC" + cutoff, dilution.getCutoffDilution((double) cutoff / 100.0));
-                    group.setProperty("Point IC" + cutoff, dilution.getInterpolatedCutoffDilution((double) cutoff / 100.0));
+                    String format = cutoffs.get(cutoff);
+                    results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "Curve IC" + cutoff,
+                            dilution.getCutoffDilution(cutoff / 100.0), PropertyType.DOUBLE, format));
+                    results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "Point IC" + cutoff,
+                            dilution.getInterpolatedCutoffDilution(cutoff / 100.0), PropertyType.DOUBLE, format));
                 }
-                group.setProperty("FitError", dilution.getFitError());
 
-                String sampleRowLsid = data.getLSID() + "-sample" + summaryIndex;
-                OntologyManager.ensureObject(container.getId(), sampleRowLsid,  data.getLSID());
-                ObjectProperty[] properties = new ObjectProperty[group.getPropertyNames().size()];
-                int propIndex = 0;
-                for (String propName : group.getPropertyNames())
-                    properties[propIndex++] = new ObjectProperty(sampleRowLsid, container.getId(), sampleRowLsid + "#" + propName, group.getProperty(propName));
-                OntologyManager.insertProperties(container.getId(), properties, sampleRowLsid);
+                results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "Fit Error", dilution.getFitError(), PropertyType.DOUBLE, "0.0"));
+                results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), NAB_INPUT_MATERIAL_DATA_PROPERTY, sampleInput.getLSID(), PropertyType.STRING));
+
+                OntologyManager.ensureObject(container.getId(), dataRowLsid.toString(),  data.getLSID());
+                OntologyManager.insertProperties(container.getId(), results.toArray(new ObjectProperty[results.size()]), dataRowLsid.toString());
             }
         }
         catch (SQLException e)
@@ -175,6 +125,91 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         {
             throw new RuntimeException(e);
         }
+    }
+
+    private Map<WellGroup, ExpMaterial> getWellGroupMaterialPairings(List<ExpMaterial> sampleInputs, List<? extends WellGroup> wellgroups)
+    {
+        Map<String, ExpMaterial> nameToMaterial = new HashMap<String, ExpMaterial>();
+        for (ExpMaterial material : sampleInputs)
+            nameToMaterial.put(material.getName(), material);
+
+        Map<WellGroup, ExpMaterial> mapping = new HashMap<WellGroup, ExpMaterial>();
+        for (WellGroup wellgroup : wellgroups)
+        {
+            ExpMaterial material = nameToMaterial.get(wellgroup.getName());
+            if (material == null)
+                throw new IllegalStateException("Each wellgroup should have a matching input material.");
+            mapping.put(wellgroup, material);
+        }
+        return mapping;
+    }
+
+    private double[][] getCellValues(File dataFile, PlateTemplate nabTemplate) throws IOException, BiffException
+    {
+        WorkbookSettings settings = new WorkbookSettings();
+        settings.setGCDisabled(true);
+        Workbook workbook = Workbook.getWorkbook(dataFile, settings);
+        double[][] cellValues = new double[nabTemplate.getRows()][nabTemplate.getColumns()];
+
+        Sheet plateSheet = workbook.getSheet(1);
+        for (int row = 0; row < nabTemplate.getRows(); row++)
+        {
+            for (int col = 0; col < nabTemplate.getColumns(); col++)
+            {
+                Cell cell = plateSheet.getCell(col + START_COL, row + START_ROW);
+                String cellContents = cell.getContents();
+                cellValues[row][col] = Double.parseDouble(cellContents);
+            }
+        }
+        return cellValues;
+    }
+
+    private void prepareWellGroups(Map<WellGroup, ExpMaterial> inputs, Map<String, PropertyDescriptor> properties)
+    {
+        for (Map.Entry<WellGroup, ExpMaterial> input : inputs.entrySet())
+        {
+            WellGroup group = input.getKey();
+            ExpMaterial sampleInput = input.getValue();
+            for (PropertyDescriptor property : properties.values())
+                group.setProperty(property.getName(), sampleInput.getProperty(property));
+
+            List<WellData> wells = group.getWellData(true);
+            boolean first = true;
+            Double dilution = (Double) sampleInput.getProperty(properties.get(NabAssayProvider.SAMPLE_INITIAL_DILUTION_PROPERTY_NAME));
+            Double factor = (Double) sampleInput.getProperty(properties.get(NabAssayProvider.SAMPLE_DILUTION_FACTOR_PROPERTY_NAME));
+            String methodString = (String) sampleInput.getProperty(properties.get(NabAssayProvider.SAMPLE_METHOD_PROPERTY_NAME));
+            SampleInfo.Method method = SampleInfo.Method.valueOf(methodString);
+            for (int groupIndex = wells.size() - 1; groupIndex >= 0; groupIndex--)
+            {
+                WellData well = wells.get(groupIndex);
+                if (!first)
+                {
+                    if (method == SampleInfo.Method.Dilution)
+                        dilution *= factor;
+                    else if (method == SampleInfo.Method.Concentration)
+                        dilution /= factor;
+                }
+                else
+                    first = false;
+                well.setDilution(dilution);
+            }
+        }
+    }
+
+
+    private ObjectProperty getResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
+                                                   String propertyName, Object value, PropertyType type)
+    {
+        return getResultObjectProperty(container, protocol, objectURI, propertyName, value, type, null);
+    }
+
+    private ObjectProperty getResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
+                                                   String propertyName, Object value, PropertyType type, String format)
+    {
+        Lsid propertyURI = new Lsid(NAB_PROPERTY_LSID_PREFIX, protocol.getName(), propertyName);
+        ObjectProperty prop = new ObjectProperty(objectURI, container.getId(), propertyURI.toString(), value, type, propertyName);
+        prop.setFormat(format);
+        return prop;
     }
 
     public URLHelper getContentURL(HttpServletRequest request, Container container, ExpData data) throws ExperimentException
