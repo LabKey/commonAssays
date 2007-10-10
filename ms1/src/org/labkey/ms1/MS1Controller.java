@@ -81,7 +81,7 @@ public class MS1Controller extends SpringActionController
     protected NavTree addPeaksChild(NavTree root, int runId, int scan)
     {
         ViewURLHelper url = getViewURLHelper("showPeaks.view");
-        url.addParameter(ShowPeaksAction.PARAM_RUNID, runId);
+        url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
         url.addParameter(ShowPeaksAction.PARAM_SCAN, scan);
         return root.addChild("Peaks from Scan", getViewURLHelper("showPeaks.view"));
     }
@@ -140,13 +140,12 @@ public class MS1Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowPeaksAction extends SimpleViewAction<RunScanForm>
     {
-        public static final String PARAM_RUNID = "runId";
         public static final String PARAM_SCAN = "scan";
         private RunScanForm _form;
         public ModelAndView getView(RunScanForm form, BindException errors) throws Exception
         {
             _form = null;
-            if(-1 == form.getRunId() || -1 == form.getScan())
+            if(-1 == form.getRunId() && -1 == form.getScan())
                 return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
             else
             {

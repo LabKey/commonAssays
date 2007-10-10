@@ -8,6 +8,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpSchema;
+import org.labkey.api.view.ViewURLHelper;
 
 import java.util.ArrayList;
 
@@ -50,6 +51,7 @@ public class FeaturesTableInfo extends FilteredTable
 
         //tell it that ms1.Files.FileId is a foreign key to exp.Data.RowId
         TableInfo fftinfo = getColumn("FileId").getFkTableInfo();
+        fftinfo.getColumn("FileId").setIsHidden(true);
         ColumnInfo ffid = fftinfo.getColumn("ExpDataFileId");
         ffid.setCaption(CAPTION_EXP_DATA_FILE);
         ffid.setFk(new LookupForeignKey("RowId")
@@ -71,16 +73,16 @@ public class FeaturesTableInfo extends FilteredTable
 
     public void addRunIdCondition(int runId, Container container)
     {
-        SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) INNER JOIN Exp.ExperimentRun AS r ON (d.RunId=r.RowId) WHERE r.RowId=?)",
+        SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.RunId=?)",
                                             runId);
-        addCondition(sf, "FileID");
-/*
+        getFilter().deleteConditions("FileId");
+        addCondition(sf, "FileId");
+
         //when limited to a run, we can make the scan number a link to the peaks view
         assert null != getColumn("Scan") : "Scan column not present in Features table info!";
         ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks", container);
-        String surl = url.getLocalURIString() + "runId=" + runId + "&scan=${Scan}";
+        String surl = url.getLocalURIString() + "runId=" + runId + "&scan=${scan}";
         getColumn("Scan").setURL(surl);
-*/
     } //addRunIdCondition()
 
     // Protected Data Members

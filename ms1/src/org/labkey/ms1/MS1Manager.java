@@ -54,6 +54,25 @@ public class MS1Manager
         return getSchema().getTable(tablename);
     }
 
+    /**
+     * Returns the corresponding ScanId for a given Experiment runId and scan number.
+     * @param runId The experiment run id
+     * @param scan  The scan number
+     * @return The corresponding ScanId from the ms1.Scans table, or null if no match is found
+     * @throws SQLException Thrown if there is a database exception
+     */
+    public Integer getScanIdFromRunScan(int runId, int scan) throws SQLException
+    {
+        StringBuilder sql = new StringBuilder("SELECT ScanId FROM ").append(getSQLTableName(TABLE_SCANS));
+        sql.append(" AS s INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data as d ON (f.ExpDataFileId=d.RowId)");
+        sql.append(" WHERE d.RunId=").append(runId);
+        sql.append(" AND s.Scan=").append(scan);
+        
+        return Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
+    }
+
     public void deleteFeaturesData(ExpData expData, User user) throws SQLException
     {
         int idExpData = expData.getRowId();

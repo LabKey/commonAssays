@@ -90,13 +90,27 @@
       <ns:columns>
         <ns:column columnName="PeakId"/>
         <ns:column columnName="ScanId"/>
-        <ns:column columnName="MZ"/>
-        <ns:column columnName="Intensity"/>
-        <ns:column columnName="Area"/>
-        <ns:column columnName="Error"/>
-        <ns:column columnName="Frequency"/>
-        <ns:column columnName="Phase"/>
-        <ns:column columnName="Decay"/>
+        <ns:column columnName="MZ">
+            <ns:formatString>#,##0.0000</ns:formatString>
+        </ns:column>
+        <ns:column columnName="Intensity">
+            <ns:formatString>#,##0.0000</ns:formatString>
+        </ns:column>
+        <ns:column columnName="Area">
+            <ns:formatString>#,##0.0000</ns:formatString>
+        </ns:column>
+        <ns:column columnName="Error">
+            <ns:formatString>#,##0.0000</ns:formatString>
+        </ns:column>
+        <ns:column columnName="Frequency">
+            <ns:formatString>#,##0.0000</ns:formatString>
+        </ns:column>
+        <ns:column columnName="Phase">
+            <ns:formatString>#,##0.0000</ns:formatString>
+        </ns:column>
+        <ns:column columnName="Decay">
+            <ns:formatString>#,##0.0000</ns:formatString>
+        </ns:column>
       </ns:columns>
     </ns:table>
     <ns:table tableName="PeaksToFamilies" tableDbType="TABLE">
@@ -110,8 +124,12 @@
         <ns:column columnName="ScanId"/>
         <ns:column columnName="FileId"/>
         <ns:column columnName="Scan"/>
-        <ns:column columnName="RetentionTime"/>
-        <ns:column columnName="ObservationDuration"/>
+        <ns:column columnName="RetentionTime">
+            <ns:formatString>#,##0.0000</ns:formatString>
+        </ns:column>
+        <ns:column columnName="ObservationDuration">
+            <ns:formatString>#,##0.0000</ns:formatString>
+        </ns:column>
       </ns:columns>
     </ns:table>
     <ns:table tableName="Software" tableDbType="TABLE">

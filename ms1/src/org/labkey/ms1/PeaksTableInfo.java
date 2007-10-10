@@ -18,10 +18,6 @@ import java.util.ArrayList;
  */
 public class PeaksTableInfo extends FilteredTable
 {
-    //Localizable Strings
-    public static final String CAPTION_PEAKS_FILE = "Peaks File";
-    public static final String CAPTION_EXP_DATA_FILE = "Experiment Data File";
-
     public PeaksTableInfo(ExpSchema expSchema, Container container)
     {
         super(MS1Manager.get().getTable(MS1Manager.TABLE_PEAKS));
@@ -32,32 +28,18 @@ public class PeaksTableInfo extends FilteredTable
 
         //but only display a subset by default
         ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(getDefaultVisibleColumns());
-        visibleColumns.remove(FieldKey.fromParts("PeakID"));
-        visibleColumns.remove(FieldKey.fromParts("PeaksFileID"));
-        visibleColumns.remove(FieldKey.fromParts("Scan"));
+        visibleColumns.remove(FieldKey.fromParts("PeakId"));
+        visibleColumns.remove(FieldKey.fromParts("ScanId"));
         setDefaultVisibleColumns(visibleColumns);
-
-        //mark the PeakID column as hidden
-        getColumn("PeakID").setIsHidden(true);
-
-        //rename the PeaksFileID to something nicer
-        getColumn("PeaksFileID").setCaption(CAPTION_PEAKS_FILE);
         
-        //add a condition that limits the peaks returned to just those existing in the
-        //current container. The FilteredTable class supports this automatically only if
-        //the underlying table contains a column named "Container," which our Peaks table
-        //does not, so we need to use a SQL fragment here that uses a sub-select.
-        SQLFragment sf = new SQLFragment("PeaksFileID IN (SELECT PeaksFileID FROM ms1.PeaksFiles AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileID=d.RowId) WHERE d.Container=?)",
-                                            container.getId());
-        addCondition(sf, "PeaksFileID");
+        //mark the PeakId column as hidden
+        getColumn("PeakId").setIsHidden(true);
+        getColumn("ScanId").setIsHidden(true);
     }
 
-    public void addScanCondition(int runId, int scan)
+    public void addScanCondition(int scanId)
     {
-        SQLFragment sf = new SQLFragment("PeaksFileID IN (SELECT PeaksFileID FROM ms1.FeaturesFiles AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileID=d.RowId) INNER JOIN Exp.ExperimentRun AS r ON (d.RunId=r.RowId) WHERE r.RowId=?)",
-                                            runId);
-        addCondition(sf, "PeaksFileID");
-        addCondition(getRealTable().getColumn("Scan"), scan);
+        addCondition(getRealTable().getColumn("ScanId"), scanId);
     }
 
     private ExpSchema _expSchema;
