@@ -93,6 +93,10 @@ public class FeaturesTableInfo extends FilteredTable
         }
         catch(SQLException e)
         {
+            //This is very non-ideal. This method is called by FeaturesView.createTable()
+            //which is overridden from QueryView, and the base class method does
+            //not have a throws declaration. So we either need to eat this here
+            //or throw an unchecked exception.
             throw new RuntimeException(MS1Manager.get().getAllErrors(e));
         }
     } //addRunIdCondition()
