@@ -5,6 +5,8 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.TableInfo;
 
 import java.util.ArrayList;
 
@@ -18,10 +20,9 @@ import java.util.ArrayList;
  */
 public class PeaksTableInfo extends FilteredTable
 {
-    public PeaksTableInfo(ExpSchema expSchema, Container container)
+    public PeaksTableInfo()
     {
         super(MS1Manager.get().getTable(MS1Manager.TABLE_PEAKS));
-        _expSchema = expSchema;
 
         //wrap all the columns
         wrapAllColumns(true);
@@ -34,7 +35,14 @@ public class PeaksTableInfo extends FilteredTable
         
         //mark the PeakId column as hidden
         getColumn("PeakId").setIsHidden(true);
-        getColumn("ScanId").setIsHidden(true);
+
+        //rename ScanId to something nicer
+        //hide ScanId on Scans and rename FileId to something nicer
+        ColumnInfo ciScan = getColumn("ScanId");
+        ciScan.setCaption("Scan");
+        TableInfo tiScans = ciScan.getFkTableInfo();
+        tiScans.getColumn("FileId").setCaption("Data File");
+        tiScans.getColumn("ScanId").setIsHidden(true);
     }
 
     public void addScanCondition(int scanId)
@@ -42,5 +50,4 @@ public class PeaksTableInfo extends FilteredTable
         addCondition(getRealTable().getColumn("ScanId"), scanId);
     }
 
-    private ExpSchema _expSchema;
 } //class PeaksTableInfo

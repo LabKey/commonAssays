@@ -28,13 +28,11 @@ public class PeaksView extends QueryView
     private static final String CAPTION_EXPORT_ALL_TSV = "Export All to Text";
     private static final String CAPTION_PRINT_ALL = "Print";
 
-    public PeaksView(ViewContext ctx, MS1Schema schema, int runId, int scan) throws SQLException
+    public PeaksView(ViewContext ctx, MS1Schema schema, int runId, int scan, int scanId) throws SQLException
     {
         super(schema);
         _schema = schema;
-
-        //get the corresponding scanId for the given runId and scan number
-        _scanId = MS1Manager.get().getScanIdFromRunScan(runId, scan);
+        _scanId = scanId;
 
         //NOTE: The use of QueryView.DATAREGIONNAME_DEFAULT is essential here!
         //the export/print buttons that I will add later use the query controller's

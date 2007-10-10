@@ -484,6 +484,9 @@ ms1/src/org/labkey/ms1/PeaksFileDataHandler.java -text
 ms1/src/org/labkey/ms1/PeaksFileImporter.java -text
 ms1/src/org/labkey/ms1/PeaksTableInfo.java -text
 ms1/src/org/labkey/ms1/PeaksView.java -text
+ms1/src/org/labkey/ms1/Software.java -text
+ms1/src/org/labkey/ms1/SoftwareParam.java -text
+ms1/src/org/labkey/ms1/SoftwareView.java -text
 ms1/src/org/labkey/ms1/pipeline/MS1FileFilter.java -text
 ms1/src/org/labkey/ms1/pipeline/MSInspectImportPipelineJob.java -text
 ms1/src/org/labkey/ms1/pipeline/MSInspectPipelineProvider.java -text

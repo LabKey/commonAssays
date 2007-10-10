@@ -10,10 +10,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.URIUtil;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.view.NavTree;
-import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.*;
 import org.labkey.ms1.pipeline.MSInspectImportPipelineJob;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -119,7 +116,14 @@ public class MS1Controller extends SpringActionController
             else
             {
                 _form = form;
-                return new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId());
+
+                //get the corresponding file Id and initialize a software view
+                Integer fileId = MS1Manager.get().getFileIdForRun(form.getRunId());
+                if(null != fileId)
+                    return new VBox(new SoftwareView(fileId.intValue()), 
+                                    new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId()));
+                else
+                    return new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId());
             }
         }
 
@@ -147,12 +151,26 @@ public class MS1Controller extends SpringActionController
             _form = null;
             if(-1 == form.getRunId() && -1 == form.getScan())
                 return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
+
+            MS1Manager mgr = MS1Manager.get();
+            Integer scanId = mgr.getScanIdFromRunScan(form.getRunId(), form.getScan());
+
+            if(null == scanId)
+                return new HtmlView("The supporting peak data for this scan have not yet been uploaded to the database.");
+
+            //save the form so we have access to the params when we build the nav trail
+            _form = form;
+
+            //get the corresponding file Id for the scanId and if one is found
+            //include a software view
+            Integer fileId = MS1Manager.get().getFileIdForScan(scanId.intValue());
+            if(null != fileId)
+                return new VBox(new SoftwareView(fileId.intValue()),
+                                new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
+                                    form.getRunId(), form.getScan(), scanId.intValue()));
             else
-            {
-                _form = form;
                 return new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                        form.getRunId(), form.getScan());
-            }
+                                    form.getRunId(), form.getScan(), scanId.intValue());
         }
 
         public NavTree appendNavTrail(NavTree root)

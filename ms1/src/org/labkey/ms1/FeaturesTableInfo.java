@@ -11,6 +11,7 @@ import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.view.ViewURLHelper;
 
 import java.util.ArrayList;
+import java.sql.SQLException;
 
 /**
  * Provides a filtered table implementation for the Features table, allowing clients
@@ -71,7 +72,7 @@ public class FeaturesTableInfo extends FilteredTable
         addCondition(sf, "FileId");
     } //c-tor
 
-    public void addRunIdCondition(int runId, Container container)
+    public void addRunIdCondition(int runId, Container container) throws SQLException
     {
         SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.RunId=?)",
                                             runId);
@@ -79,10 +80,14 @@ public class FeaturesTableInfo extends FilteredTable
         addCondition(sf, "FileId");
 
         //when limited to a run, we can make the scan number a link to the peaks view
-        assert null != getColumn("Scan") : "Scan column not present in Features table info!";
-        ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks", container);
-        String surl = url.getLocalURIString() + "runId=" + runId + "&scan=${scan}";
-        getColumn("Scan").setURL(surl);
+        //provided peak data is available
+        if(MS1Manager.get().isPeakDataAvailable(runId))
+        {
+            assert null != getColumn("Scan") : "Scan column not present in Features table info!";
+            ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks", container);
+            String surl = url.getLocalURIString() + "runId=" + runId + "&scan=${scan}";
+            getColumn("Scan").setURL(surl);
+        }
     } //addRunIdCondition()
 
     // Protected Data Members

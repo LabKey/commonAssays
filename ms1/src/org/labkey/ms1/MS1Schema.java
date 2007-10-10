@@ -53,9 +53,9 @@ public class MS1Schema extends UserSchema
     {
         if (TABLE_FEATURE_RUNS.equalsIgnoreCase(name))
             return getMS1ExpRunsTableInfo(alias);
-        if(TABLE_FEATURES.equalsIgnoreCase(name))
+        else if(TABLE_FEATURES.equalsIgnoreCase(name))
             return getFeaturesTableInfo();
-        if(TABLE_PEAKS.equalsIgnoreCase(name))
+        else if(TABLE_PEAKS.equalsIgnoreCase(name))
             return getPeaksTableInfo();
         else
             return super.getTable(name, alias);
@@ -68,7 +68,7 @@ public class MS1Schema extends UserSchema
 
     public PeaksTableInfo getPeaksTableInfo()
     {
-        return new PeaksTableInfo(_expSchema, getContainer());
+        return new PeaksTableInfo();
     }
 
     public ExpRunTable getMS1ExpRunsTableInfo(String alias)

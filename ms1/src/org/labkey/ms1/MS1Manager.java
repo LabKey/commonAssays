@@ -3,11 +3,11 @@ package org.labkey.ms1;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.SchemaTableInfo;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.security.User;
 import org.labkey.api.exp.api.ExpData;
 
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.io.File;
 
 public class MS1Manager
@@ -71,6 +71,49 @@ public class MS1Manager
         sql.append(" AND s.Scan=").append(scan);
         
         return Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
+    }
+
+    public boolean isPeakDataAvailable(int runId) throws SQLException
+    {
+        StringBuilder sql = new StringBuilder("SELECT count(*) FROM ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" AS f INNER JOIN exp.Data AS d ON (f.ExpDataFileId=d.RowId)");
+        sql.append(" WHERE d.RunId=").append(runId);
+        sql.append(" AND f.Type=").append(FILETYPE_PEAKS);
+
+        Integer num = Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
+        return (num != null && num.intValue() > 0);
+    }
+
+    public Integer getFileIdForRun(int runId) throws SQLException
+    {
+        StringBuilder sql = new StringBuilder("SELECT FileId FROM ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" AS f INNER JOIN exp.Data AS d ON (f.ExpDataFileId=d.RowId)");
+        sql.append(" WHERE d.RunId=").append(runId);
+
+        return Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
+    }
+
+    public Integer getFileIdForScan(int scanId) throws SQLException
+    {
+        StringBuilder sql = new StringBuilder("SELECT FileId FROM ");
+        sql.append(getSQLTableName(TABLE_SCANS));
+        sql.append(" WHERE ScanId=").append(scanId);
+
+        return Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
+    }
+
+    public Software[] getSoftware(int fileId) throws SQLException
+    {
+        SimpleFilter fltr = new SimpleFilter("FileId", fileId);
+        return Table.select(getTable(TABLE_SOFTWARE), Table.ALL_COLUMNS, fltr, null, Software.class);
+    }
+
+    public SoftwareParam[] getSoftwareParams(int softwareId) throws SQLException
+    {
+        SimpleFilter fltr = new SimpleFilter("SoftwareId", softwareId);
+        return Table.select(getTable(TABLE_SOFTWARE_PARAMS), Table.ALL_COLUMNS, fltr, null, SoftwareParam.class);
     }
 
     public void deleteFeaturesData(ExpData expData, User user) throws SQLException
