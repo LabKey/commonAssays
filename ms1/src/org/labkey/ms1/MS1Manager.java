@@ -8,6 +8,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.exp.api.ExpData;
 
 import java.sql.SQLException;
+import java.sql.ResultSet;
 import java.io.File;
 
 public class MS1Manager
@@ -103,6 +104,25 @@ public class MS1Manager
         sql.append(" WHERE ScanId=").append(scanId);
 
         return Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
+    }
+
+    public FeaturePeptideLink getFeaturePeptideLink(int featureId) throws SQLException
+    {
+        String sql = "SELECT fr.run AS MS2Run, pd.rowid AS PeptideId from ms2.Fractions as fr\n" +
+                "inner join ms2.PeptidesData as pd on (fr.fraction=pd.fraction)\n" +
+                "inner join (select MzXmlUrl, ms2scan, charge \n" +
+                "from ms1.Files as fi inner join ms1.Features as fe on fi.FileId = fe.FileId\n" +
+                "where FeatureId=?) as m1f on (pd.scan=m1f.ms2scan\n" +
+                "and fr.mzxmlurl=m1f.MzXmlUrl\n" +
+                "and pd.charge=m1f.charge)";
+
+        FeaturePeptideLink link = null;
+        ResultSet rs = Table.executeQuery(getSchema(), sql, new Integer[]{featureId}, 1, false);
+        if(rs.next())
+            link = new FeaturePeptideLink(rs.getLong("MS2Run"), rs.getInt("PeptideId"));
+
+        rs.close();
+        return link;
     }
 
     public Software[] getSoftware(int fileId) throws SQLException

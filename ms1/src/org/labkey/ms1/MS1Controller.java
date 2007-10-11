@@ -113,23 +113,27 @@ public class MS1Controller extends SpringActionController
             _form = null;
             if(-1 == form.getRunId())
                 return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
-            else
+
+            _form = form;
+            MS1Manager mgr = MS1Manager.get();
+
+            //determine if there is peak data available for these features
+            boolean peaksAvailable = mgr.isPeakDataAvailable(form.getRunId());
+
+            //get the corresponding file Id and initialize a software view
+            Integer fileId = mgr.getFileIdForRun(form.getRunId(), MS1Manager.FILETYPE_FEATURES);
+            if(null != fileId)
             {
-                _form = form;
-                MS1Manager mgr = MS1Manager.get();
-
-                //get the corresponding file Id and initialize a software view
-                Integer fileId = mgr.getFileIdForRun(form.getRunId(), MS1Manager.FILETYPE_FEATURES);
-                
-                //determine if there is peak data available for these features
-                boolean peaksAvailable = mgr.isPeakDataAvailable(form.getRunId());
-
-                if(null != fileId)
-                    return new VBox(new SoftwareView(fileId.intValue()), 
-                                    new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId(), peaksAvailable));
-                else
-                    return new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId(), peaksAvailable);
+                Software[] swares = mgr.getSoftware(fileId.intValue());
+                if(null != swares && swares.length > 0)
+                {
+                    JspView softwareView = new JspView<Software[]>("/org/labkey/ms1/softwareView.jsp", swares);
+                    softwareView.setTitle("Software Information");
+                    return new VBox(softwareView, new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId(), peaksAvailable));
+                }
             }
+
+            return new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId(), peaksAvailable);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -170,12 +174,20 @@ public class MS1Controller extends SpringActionController
             //include a software view
             Integer fileId = MS1Manager.get().getFileIdForScan(scanId.intValue());
             if(null != fileId)
-                return new VBox(new SoftwareView(fileId.intValue()),
-                                new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                    form.getRunId(), form.getScan(), scanId.intValue()));
-            else
-                return new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                    form.getRunId(), form.getScan(), scanId.intValue());
+            {
+                Software[] swares = MS1Manager.get().getSoftware(fileId.intValue());
+                if(null != swares && swares.length > 0)
+                {
+                    JspView softwareView = new JspView<Software[]>("/org/labkey/ms1/softwareView.jsp", swares);
+                    softwareView.setTitle("Software Information");
+                    return new VBox(softwareView,
+                                    new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
+                                        form.getRunId(), form.getScan(), scanId.intValue()));
+                }
+            }
+
+            return new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
+                                form.getRunId(), form.getScan(), scanId.intValue());
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -190,6 +202,33 @@ public class MS1Controller extends SpringActionController
             return root;
         }
     } //class ShowFeaturesAction
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class showMS2PeptideAction extends SimpleViewAction<FeatureIdForm>
+    {
+        public ModelAndView getView(FeatureIdForm featureIdForm, BindException errors) throws Exception
+        {
+            if(null == featureIdForm || featureIdForm.getFeatureId() < 0)
+                return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
+
+            FeaturePeptideLink link = MS1Manager.get().getFeaturePeptideLink(featureIdForm.getFeatureId());
+            if(null == link)
+                return new HtmlView("The corresponding MS2 peptide information was not found in the database. Ensure that it has been imported before attempting to view the MS2 peptide.");
+
+            ViewURLHelper url = new ViewURLHelper("ms2", "showPeptide", getContainer());
+            url.addParameter("run", String.valueOf(link.getMs2Run()));
+            url.addParameter("peptideId", link.getPeptideId());
+            url.addParameter("rowIndex", -1);
+            return HttpView.redirect(url);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            //if this gets called, then we couldn't find the peptide and
+            //displayed the message returned in the HtmlView above.
+            return root.addChild("Associated Peptide Not Found");
+        }
+    }
 
     /**
      * Action to import an msInspect TSV features file
@@ -307,4 +346,19 @@ public class MS1Controller extends SpringActionController
             _scan = scan;
         }
     } //class RunScanForm
+
+    public static class FeatureIdForm
+    {
+        private int _featureId = -1;
+
+        public int getFeatureId()
+        {
+            return _featureId;
+        }
+
+        public void setFeatureId(int featureId)
+        {
+            _featureId = featureId;
+        }
+    }
 } //class MS1Controller

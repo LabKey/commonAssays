@@ -3,10 +3,7 @@ package org.labkey.ms1;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Container;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.view.ViewURLHelper;
 
@@ -87,6 +84,22 @@ public class FeaturesTableInfo extends FilteredTable
             String surl = url.getLocalURIString() + "runId=" + runId + "&scan=${scan}";
             getColumn("Scan").setURL(surl);
         }
+
+        //make the ms2 scan a hyperlink to showPeptide view
+        ViewURLHelper urlPep = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showMS2Peptide", container);
+        DisplayColumnFactory factory = new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                DataColumn dataColumn = new DataColumn(colInfo);
+                dataColumn.setLinkTarget("peptide");
+                return dataColumn;
+            }
+        };
+
+        ColumnInfo ciMS2Scan = getColumn("MS2Scan");
+        ciMS2Scan.setURL(urlPep.getLocalURIString() + "featureId=${FeatureId}");
+        ciMS2Scan.setDisplayColumnFactory(factory);
 
     } //addRunIdCondition()
 
