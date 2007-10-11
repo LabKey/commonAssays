@@ -72,33 +72,22 @@ public class FeaturesTableInfo extends FilteredTable
         addCondition(sf, "FileId");
     } //c-tor
 
-    public void addRunIdCondition(int runId, Container container)
+    public void addRunIdCondition(int runId, Container container, boolean peaksAvailable)
     {
         SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.RunId=?)",
                                             runId);
         getFilter().deleteConditions("FileId");
         addCondition(sf, "FileId");
 
-        //when limited to a run, we can make the scan number a link to the peaks view
-        //provided peak data is available
-        try
+        //if peak data is available, make the scan column a hyperlink to the showPeaks view
+        if(peaksAvailable)
         {
-            if(MS1Manager.get().isPeakDataAvailable(runId))
-            {
-                assert null != getColumn("Scan") : "Scan column not present in Features table info!";
-                ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks", container);
-                String surl = url.getLocalURIString() + "runId=" + runId + "&scan=${scan}";
-                getColumn("Scan").setURL(surl);
-            }
+            assert null != getColumn("Scan") : "Scan column not present in Features table info!";
+            ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks", container);
+            String surl = url.getLocalURIString() + "runId=" + runId + "&scan=${scan}";
+            getColumn("Scan").setURL(surl);
         }
-        catch(SQLException e)
-        {
-            //This is very non-ideal. This method is called by FeaturesView.createTable()
-            //which is overridden from QueryView, and the base class method does
-            //not have a throws declaration. So we either need to eat this here
-            //or throw an unchecked exception.
-            throw new RuntimeException(MS1Manager.get().getAllErrors(e));
-        }
+
     } //addRunIdCondition()
 
     // Protected Data Members

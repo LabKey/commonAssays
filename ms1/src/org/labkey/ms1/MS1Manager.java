@@ -85,12 +85,13 @@ public class MS1Manager
         return (num != null && num.intValue() > 0);
     }
 
-    public Integer getFileIdForRun(int runId) throws SQLException
+    public Integer getFileIdForRun(int runId, int fileType) throws SQLException
     {
         StringBuilder sql = new StringBuilder("SELECT FileId FROM ");
         sql.append(getSQLTableName(TABLE_FILES));
         sql.append(" AS f INNER JOIN exp.Data AS d ON (f.ExpDataFileId=d.RowId)");
         sql.append(" WHERE d.RunId=").append(runId);
+        sql.append(" AND f.Type=").append(fileType);
 
         return Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
     }

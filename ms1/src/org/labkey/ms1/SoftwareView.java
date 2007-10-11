@@ -1,6 +1,6 @@
 package org.labkey.ms1;
 
-import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.WebPartView;
 import org.labkey.api.util.PageFlowUtil;
 
 import javax.servlet.ServletException;
@@ -16,7 +16,7 @@ import java.sql.SQLException;
  * Date: Oct 10, 2007
  * Time: 2:37:58 PM
  */
-public class SoftwareView extends HtmlView
+public class SoftwareView extends WebPartView
 {
     public SoftwareView(int fileId)
     {

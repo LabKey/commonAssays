@@ -116,14 +116,19 @@ public class MS1Controller extends SpringActionController
             else
             {
                 _form = form;
+                MS1Manager mgr = MS1Manager.get();
 
                 //get the corresponding file Id and initialize a software view
-                Integer fileId = MS1Manager.get().getFileIdForRun(form.getRunId());
+                Integer fileId = mgr.getFileIdForRun(form.getRunId(), MS1Manager.FILETYPE_FEATURES);
+                
+                //determine if there is peak data available for these features
+                boolean peaksAvailable = mgr.isPeakDataAvailable(form.getRunId());
+
                 if(null != fileId)
                     return new VBox(new SoftwareView(fileId.intValue()), 
-                                    new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId()));
+                                    new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId(), peaksAvailable));
                 else
-                    return new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId());
+                    return new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId(), peaksAvailable);
             }
         }
 

@@ -33,12 +33,14 @@ public class FeaturesView extends QueryView
      * @param ctx       The view context
      * @param schema    The MS1Schema to use
      * @param runId     The id of the experiment run
+     * @param peaksAvailable Pass true if peak data is available
      */
-    public FeaturesView(ViewContext ctx, MS1Schema schema, int runId)
+    public FeaturesView(ViewContext ctx, MS1Schema schema, int runId, boolean peaksAvailable)
     {
         super(schema);
         _ms1Schema = schema;
         _runId = runId;
+        _peaksAvaialble = peaksAvailable;
 
         //NOTE: The use of QueryView.DATAREGIONNAME_DEFAULT is essential here!
         //the export/print buttons that I will add later use the query controller's
@@ -65,7 +67,7 @@ public class FeaturesView extends QueryView
 
         FeaturesTableInfo tinfo = _ms1Schema.getFeaturesTableInfo();
         if(_runId >= 0)
-            tinfo.addRunIdCondition(_runId, getContainer());
+            tinfo.addRunIdCondition(_runId, getContainer(), _peaksAvaialble);
         return tinfo;
     }
 
@@ -135,4 +137,5 @@ public class FeaturesView extends QueryView
     //Data members
     private MS1Schema _ms1Schema;
     private int _runId = -1;
+    private boolean _peaksAvaialble = false;
 } //class FeaturesView
