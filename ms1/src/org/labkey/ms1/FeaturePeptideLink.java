@@ -12,10 +12,11 @@ package org.labkey.ms1;
 public class FeaturePeptideLink
 {
     public FeaturePeptideLink() {}
-    public FeaturePeptideLink(long ms2Run, int peptideId)
+    public FeaturePeptideLink(long ms2Run, int peptideId, int scan)
     {
         _ms2Run = ms2Run;
         _peptideId = peptideId;
+        _scan = scan;
     }
 
     public long getMs2Run()
@@ -38,6 +39,17 @@ public class FeaturePeptideLink
         _peptideId = peptideId;
     }
 
+    public int getScan()
+    {
+        return _scan;
+    }
+
+    public void setScan(int scan)
+    {
+        _scan = scan;
+    }
+
     private long _ms2Run;
     private int _peptideId;
+    private int _scan;
 }

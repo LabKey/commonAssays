@@ -211,6 +211,7 @@ public class MS1Controller extends SpringActionController
             if(null == featureIdForm || featureIdForm.getFeatureId() < 0)
                 return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
 
+            //get the first matching peptide for the given feature id
             FeaturePeptideLink link = MS1Manager.get().getFeaturePeptideLink(featureIdForm.getFeatureId());
             if(null == link)
                 return new HtmlView("The corresponding MS2 peptide information was not found in the database. Ensure that it has been imported before attempting to view the MS2 peptide.");
@@ -218,8 +219,11 @@ public class MS1Controller extends SpringActionController
             ViewURLHelper url = new ViewURLHelper("ms2", "showPeptide", getContainer());
             url.addParameter("run", String.valueOf(link.getMs2Run()));
             url.addParameter("peptideId", link.getPeptideId());
-            url.addParameter("rowIndex", -1);
-            return HttpView.redirect(url);
+
+            //add a filter for MS2 scan so that the showPeptide view will know to enable or
+            //disable it's <<prev and next>> buttons based on how many peptides were actually
+            //matched.
+            return HttpView.redirect(url + "&MS2Peptides.Scan~eq=" + link.getScan());
         }
 
         public NavTree appendNavTrail(NavTree root)
