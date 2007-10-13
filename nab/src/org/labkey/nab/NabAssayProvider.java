@@ -13,16 +13,20 @@ import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.data.*;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryViewCustomizer;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.DataView;
 import org.labkey.api.security.User;
 import org.labkey.nab.query.NabSchema;
+import org.labkey.nab.query.NabRunDataTable;
 
 import javax.servlet.ServletException;
 import java.util.*;
 import java.sql.SQLException;
 import java.io.IOException;
+import java.io.Writer;
 
 /**
  * User: brittp
@@ -36,12 +40,40 @@ public class NabAssayProvider extends PlateBasedAssayProvider
     public static final String SAMPLE_METHOD_PROPERTY_CAPTION = "Method";
     public static final String SAMPLE_INITIAL_DILUTION_PROPERTY_NAME = "InitialDilution";
     public static final String SAMPLE_INITIAL_DILUTION_PROPERTY_CAPTION = "Initial Dilution";
-    public static final String SAMPLE_DILUTION_FACTOR_PROPERTY_NAME = "DilutionFactor";
+    public static final String SAMPLE_DILUTION_FACTOR_PROPERTY_NAME = "Factor";
     public static final String SAMPLE_DILUTION_FACTOR_PROPERTY_CAPTION = "Dilution Factor";
+    public static final String ORIGINAL_DATAFILE_PROPERTY_NAME = "OriginalDataFile";
+    public static final String SAMPLE_DESCRIPTION_PROPERTY_NAME = "SampleDescription";
+    public static final String SAMPLE_DESCRIPTION_PROPERTY_CAPTION = "Sample Description";
+    public static final String CURVE_FIT_METHOD_PROPERTY_NAME = "CurveFitMethod";
+    public static final String CURVE_FIT_METHOD_PROPERTY_CAPTION = "Curve Fit Method";
 
     public NabAssayProvider()
     {
         super("NabAssayProtocol", "NabAssayRun", NabDataHandler.NAB_DATA_LSID_PREFIX);
+    }
+
+    protected void registerLsidHandler()
+    {
+        LsidManager.get().registerHandler(_runLSIDPrefix, new LsidManager.LsidHandler()
+        {
+            public ExpRun getObject(Lsid lsid)
+            {
+                return ExperimentService.get().getExpRun(lsid.toString());
+            }
+
+            public String getDisplayURL(Lsid lsid)
+            {
+                ExpRun run = ExperimentService.get().getExpRun(lsid.toString());
+                if (run == null)
+                    return null;
+                ExpProtocol protocol = run.getProtocol();
+                if (protocol == null)
+                    return null;
+                ViewURLHelper dataURL = new ViewURLHelper("NabAssay", "details", run.getContainer()).addParameter("rowId", run.getRowId());
+                return dataURL.getLocalURIString();
+            }
+        });
     }
 
     private ListDefinition createSimpleList(Container lookupContainer, User user, String listName, String displayColumn,
@@ -107,7 +139,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         Container lookupContainer = c.getProject();
         ListDefinition curveFitMethodList = createSimpleList(lookupContainer, user, "NabCurveFitMethod", "FitMethod",
                 "Method of curve fitting that will be applied to the neutralization data for each sample.", "Four Parameter", "Five Parameter");
-        DomainProperty method = addProperty(runDomain, "CurveFitMethod", "Curve Fit Method", PropertyType.STRING);
+        DomainProperty method = addProperty(runDomain, CURVE_FIT_METHOD_PROPERTY_NAME, CURVE_FIT_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
         method.setLookup(new Lookup(lookupContainer, "lists", curveFitMethodList.getName()));
         method.setRequired(true);
         return runDomain;
@@ -127,7 +159,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         addProperty(sampleWellGroupDomain, SPECIMENID_PROPERTY_NAME, SPECIMENID_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(sampleWellGroupDomain, PARTICIPANTID_PROPERTY_NAME, PARTICIPANTID_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(sampleWellGroupDomain, VISITID_PROPERTY_NAME, VISITID_PROPERTY_CAPTION, PropertyType.DOUBLE);
-        addProperty(sampleWellGroupDomain, "SampleDescription", "Sample Description", PropertyType.STRING);
+        addProperty(sampleWellGroupDomain, SAMPLE_DESCRIPTION_PROPERTY_NAME, SAMPLE_DESCRIPTION_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(sampleWellGroupDomain, SAMPLE_INITIAL_DILUTION_PROPERTY_NAME, SAMPLE_INITIAL_DILUTION_PROPERTY_CAPTION, PropertyType.DOUBLE).setRequired(true);
         addProperty(sampleWellGroupDomain, SAMPLE_DILUTION_FACTOR_PROPERTY_NAME, SAMPLE_DILUTION_FACTOR_PROPERTY_CAPTION, PropertyType.DOUBLE).setRequired(true);
         DomainProperty method = addProperty(sampleWellGroupDomain, SAMPLE_METHOD_PROPERTY_NAME, SAMPLE_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
@@ -326,6 +358,49 @@ public class NabAssayProvider extends PlateBasedAssayProvider
     
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
-        return Arrays.asList(new SpecimenIDLookupResolverType(), new ThawListResolverType());
+        return Arrays.asList(new ParticipantVisitNoOpResolverType(), new SpecimenIDLookupResolverType(), new ThawListResolverType());
+    }
+
+    private static class NabQueryViewCustomizer implements QueryViewCustomizer
+    {
+        private String _idColumn;
+
+        public NabQueryViewCustomizer(String idColumn)
+        {
+            _idColumn = idColumn;
+        }
+        public void customize(DataView view)
+        {
+            DataRegion rgn = view.getDataRegion();
+            rgn.addColumn(0, new SimpleDisplayColumn()
+            {
+                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                {
+                    Object runId = ctx.getRow().get(_idColumn);
+                    if (runId != null)
+                    {
+                        ViewURLHelper url = new ViewURLHelper("NabAssay", "details", ctx.getContainer()).addParameter("rowId", "" + runId);
+                        out.write("[<a href=\"" + url.getLocalURIString() + "\" title=\"View run details\">run&nbsp;details</a>]");
+                    }
+                }
+            });
+        }
+    }
+
+    public QueryViewCustomizer getRunsViewCustomizer()
+    {
+        return new NabQueryViewCustomizer(ExpRunTable.Column.RowId.toString());
+    }
+
+    public QueryViewCustomizer getDataViewCustomizer()
+    {
+        return new NabQueryViewCustomizer(NabRunDataTable.RUN_ID_COLUMN_NAME)
+        {
+            public void customize(DataView view)
+            {
+                super.customize(view);
+                view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
+            }
+        };
     }
 }

@@ -105,7 +105,7 @@ public class NabManager
     public Luc5Assay loadFromDatabase(User user, Container container, int rowid) throws Exception
     {
         Plate plate = PlateService.get().getPlate(container, rowid);
-        return new Luc5Assay(plate, getCutoffs(plate));
+        return new Luc5Assay(plate, getCutoffs(plate), DilutionCurve.FitType.FIVE_PARAMETER);
     }
 
     public void deletePlate(Container container, int rowid) throws SQLException
@@ -122,7 +122,7 @@ public class NabManager
         WellGroup group = PlateService.get().getWellGroup(container, wellGroupRowId);
         if (group == null)
             return null;
-        Luc5Assay assay = new Luc5Assay(group.getPlate(), getCutoffs(group.getPlate()));
+        Luc5Assay assay = new Luc5Assay(group.getPlate(), getCutoffs(group.getPlate()), DilutionCurve.FitType.FIVE_PARAMETER);
         for (DilutionSummary summary : assay.getSummaries())
         {
             if (summary.getWellGroup().getRowId().intValue() == wellGroupRowId)
@@ -229,7 +229,7 @@ public class NabManager
         }
 
         // create plate, and set its properties:
-        Plate plate = PlateService.get().createPlate(nabTemplate, null, cellValues);
+        Plate plate = PlateService.get().createPlate(nabTemplate, cellValues);
 
         if (cutoffs == null || cutoffs.length == 0)
             cutoffs = new int[]{50, 80};
@@ -292,7 +292,7 @@ public class NabManager
         // actually retrieved from the database (so all rowids are properly
         // populated), but we also need to save the cutoff dilutions with the
         // plate, which requires creating an assay instance before saving.
-        Luc5Assay temp = new Luc5Assay(plate, cutoffs);
+        Luc5Assay temp = new Luc5Assay(plate, cutoffs, DilutionCurve.FitType.FIVE_PARAMETER);
         for (DilutionSummary dilution : temp.getSummaries())
         {
             WellGroup group = dilution.getWellGroup();
@@ -307,7 +307,7 @@ public class NabManager
 
         int rowid = PlateService.get().save(container, user, plate);
         plate = PlateService.get().getPlate(container, rowid);
-        return new Luc5Assay(plate, cutoffs);
+        return new Luc5Assay(plate, cutoffs, DilutionCurve.FitType.FIVE_PARAMETER);
     }
 
     protected Luc5Assay createLuc5Assay(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, FormFile datafile) throws SQLException, IOException, ServletException, BiffException

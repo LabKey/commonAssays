@@ -1,9 +1,13 @@
 package org.labkey.nab;
 
 import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.PlateSamplePropertyHelper;
+import org.labkey.api.study.assay.*;
+import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.view.InsertView;
+import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.ACL;
 import org.springframework.web.servlet.ModelAndView;
@@ -35,7 +39,8 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
     {
         NabAssayProvider provider = (NabAssayProvider) getProvider(newRunForm);
         InsertView parent = super.createRunInsertView(newRunForm, reshow);
-        PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm.getContainer(), newRunForm.getProtocol());
+        ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
+        PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm.getContainer(), newRunForm.getProtocol(), resolverType);
         helper.addSampleColumns(parent, getViewContext().getUser());
         return parent;
     }
@@ -54,9 +59,9 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
             boolean runPropsValid = super.validatePost(form);
 
             NabAssayProvider provider = (NabAssayProvider) getProvider(form);
-
-            _postedSampleProperties = provider.createSamplePropertyHelper(getContainer(), _protocol).getPostedPropertyValues(form.getRequest());
-
+            PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(getContainer(), _protocol,
+                    getSelectedParticipantVisitResolverType(provider, form));
+            _postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());
             boolean samplePropsValid = validatePostedProperties(_postedSampleProperties, getViewContext().getRequest());
             return runPropsValid && samplePropsValid;
         }
@@ -65,6 +70,17 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
         {
             saveDefaultValues(_postedSampleProperties, RunStepHandler.NAME);
             return super.handleSuccessfulPost(form);
+        }
+    }
+
+    protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run) throws ServletException, SQLException
+    {
+        if (form.isMultiRunUpload())
+            return super.afterRunCreation(form, run);
+        else
+        {
+            HttpView.throwRedirect(new ViewURLHelper("NabAssay", "details", run.getContainer()).addParameter("rowId", run.getRowId()));
+            return null;
         }
     }
 }

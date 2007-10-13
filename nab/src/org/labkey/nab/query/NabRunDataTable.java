@@ -25,6 +25,8 @@ import java.sql.SQLException;
  */
 public class NabRunDataTable extends FilteredTable
 {
+    public static final String RUN_ID_COLUMN_NAME = "RunId";
+
     public NabRunDataTable(final QuerySchema schema, String alias, final ExpProtocol protocol)
     {
         super(OntologyManager.getTinfoObject(), schema.getContainer());
@@ -123,6 +125,20 @@ public class NabRunDataTable extends FilteredTable
             }
         });
         addColumn(runColumn);
+
+        String sqlRunRowId = "(SELECT r.RowId FROM exp.Object AS DataRowParents, " +
+                "    exp.Object AS RunObjects, exp.Data d, exp.ExperimentRun r WHERE \n" +
+                "    DataRowParents.ObjectUri = d.lsid AND\n" +
+                "    r.RowId = d.RunId AND\n" +
+                "    RunObjects.ObjectURI = r.lsid AND\n" +
+                "    DataRowParents.ObjectID IN (SELECT OwnerObjectId FROM exp.Object AS DataRowObjects\n" +
+                "    WHERE DataRowObjects.ObjectId = " + ExprColumn.STR_TABLE_ALIAS + ".ObjectId))";
+
+        ExprColumn runIdColumn = new ExprColumn(this, RUN_ID_COLUMN_NAME, new SQLFragment(sqlRunRowId), Types.INTEGER);
+        ColumnInfo addedRunIdColumn = addColumn(runIdColumn);
+        addedRunIdColumn.setIsHidden(true);
+        addedRunIdColumn.setKeyField(true);
+
         Set<String> hiddenProperties = new HashSet<String>();
         for (String cutoffProperty : NabAssayProvider.CUTOFF_PROPERTIES)
             hiddenProperties.add(cutoffProperty);
@@ -137,7 +153,8 @@ public class NabRunDataTable extends FilteredTable
             if (!hiddenProperties.contains(prop.getName()))
                 visibleColumns.add(FieldKey.fromParts("Run", "Run Properties", prop.getName()));
         }
-
         setDefaultVisibleColumns(visibleColumns);
     }
+
+
 }

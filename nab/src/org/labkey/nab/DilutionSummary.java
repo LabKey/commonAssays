@@ -19,12 +19,14 @@ public class DilutionSummary implements Serializable
     private DilutionCurve _dilutionCurve;
     private Luc5Assay _assay;
     private String _lsid;
+    private DilutionCurve.FitType _curveFitType;
 
-    public DilutionSummary(Luc5Assay assay, WellGroup sampleGroup, String lsid)
+    public DilutionSummary(Luc5Assay assay, WellGroup sampleGroup, String lsid, DilutionCurve.FitType curveFitType)
     {
         assert sampleGroup!= null : "sampleGroup cannot be null";
         assert sampleGroup.getPlate() != null : "sampleGroup must have a plate.";
         assert assay != null : "assay cannot be null";
+        _curveFitType = curveFitType;
         _sampleGroup = sampleGroup;
         _assay = assay;
         _lsid = lsid;
@@ -64,7 +66,7 @@ public class DilutionSummary implements Serializable
     {
         if (_dilutionCurve == null)
         {
-            _dilutionCurve = _sampleGroup.getDilutionCurve(_assay, getMethod() == SampleInfo.Method.Dilution);
+            _dilutionCurve = _sampleGroup.getDilutionCurve(_assay, getMethod() == SampleInfo.Method.Dilution, _curveFitType);
         }
         return _dilutionCurve;
     }
