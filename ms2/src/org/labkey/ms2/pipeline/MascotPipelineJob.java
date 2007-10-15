@@ -55,14 +55,13 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
 
     public MascotPipelineJob(ViewBackgroundInfo info,
                              String name,
-                             URI uriRoot,
-                             URI uriSequenceRoot,
+                             File dirSequenceRoot,
                              File filesMzXML[],
                              File fileInputXML,
                              boolean cluster,
-                             boolean append)
+                             boolean append) throws SQLException
     {
-        super(getProviderName(cluster), info, filesMzXML, name, uriRoot, uriSequenceRoot);
+        super(getProviderName(cluster), info, filesMzXML, name, dirSequenceRoot);
 
         _fileMascotXML = fileInputXML;
         if (isFractions())
@@ -210,9 +209,9 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
         String paramDefaults = parser.getInputParameter("list path, default parameters");
         File fileDefaults;
         if (paramDefaults == null)
-            fileDefaults = MS2PipelineManager.getDefaultInputFile(_uriRoot, "mascot");
+            fileDefaults = MS2PipelineManager.getDefaultInputFile(getRootDir().toURI(), "mascot");
         else
-            fileDefaults = new File(_uriRoot.resolve(paramDefaults));
+            fileDefaults = new File(getRootDir().toURI().resolve(paramDefaults));
         parser.setInputParameter("list path, default parameters",
                 fileDefaults.getAbsolutePath());
 
@@ -365,8 +364,8 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
             long nmascotFileSize=Long.parseLong(smascotFileSize);
             long nmascotFileTimestamp=Long.parseLong(smascotFileTimestamp);
 
-            File localDB = MS2PipelineManager.getLocalMascotFile(_uriSequenceRoot.getPath(), sequenceDB, sequenceRelease);
-            File localDBHash = MS2PipelineManager.getLocalMascotFileHash(_uriSequenceRoot.getPath(), sequenceDB, sequenceRelease);
+            File localDB = MS2PipelineManager.getLocalMascotFile(_dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
+            File localDBHash = MS2PipelineManager.getLocalMascotFileHash(_dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
             File localDBParent = localDB.getParentFile();
             localDBParent.mkdirs();
             long filesize=0;
@@ -427,7 +426,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
             header("Mascot2XML output");
 
             //File fileSequenceDatabase = new File(_uriSequenceRoot.getPath(), sequenceDB);
-            File fileSequenceDatabase = MS2PipelineManager.getLocalMascotFile(_uriSequenceRoot.getPath(), sequenceDB, sequenceRelease);
+            File fileSequenceDatabase = MS2PipelineManager.getLocalMascotFile(_dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
 
             iReturn = runSubProcess(new ProcessBuilder("Mascot2XML",
                     fileOutputDat.getName(),
@@ -662,7 +661,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
             if (mascotDatFile.exists()) {
                 String sequenceDB = getSequenceDatabase(mascotDatFile);
                 String sequenceRelease = getDatabaseRelease(mascotDatFile);
-                File localDB = MS2PipelineManager.getLocalMascotFile(_uriSequenceRoot.getPath(), sequenceDB, sequenceRelease);
+                File localDB = MS2PipelineManager.getLocalMascotFile(_dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
                 databaseFiles[i] = localDB;
             } else {
                 File dirWork = new File(_dirAnalysis, _baseName + ".work");
@@ -670,10 +669,10 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
                 if (mascotDatFile.exists()) {
                     String sequenceDB = getSequenceDatabase(mascotDatFile);
                     String sequenceRelease = getDatabaseRelease(mascotDatFile);
-                    File localDB = MS2PipelineManager.getLocalMascotFile(_uriSequenceRoot.getPath(), sequenceDB, sequenceRelease);
+                    File localDB = MS2PipelineManager.getLocalMascotFile(_dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
                     databaseFiles[i] = localDB;
                 } else {
-                    databaseFiles[i] = MS2PipelineManager.getSequenceDBFile(_uriSequenceRoot, database);
+                    databaseFiles[i] = MS2PipelineManager.getSequenceDBFile(_dirSequenceRoot.toURI(), database);
                 }
             }
             databaseSB.append(getStartingInputDataSnippet(databaseFiles[i], analysisDir));
@@ -689,7 +688,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob
 
         String mzXMLPaths = getMzXMLPaths(analysisDir);
 
-        Container c = _info.getContainer();
+        Container c = getContainer();
         PipelineService service = PipelineService.get();
         PipeRoot pr = service.findPipelineRoot(c);
         if (pr == null)

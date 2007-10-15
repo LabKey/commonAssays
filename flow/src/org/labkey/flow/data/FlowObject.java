@@ -16,8 +16,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.sql.SQLException;
+import java.io.Serializable;
 
-abstract public class FlowObject<T extends ExpObject> implements Comparable<Object>
+abstract public class FlowObject<T extends ExpObject> implements Comparable<Object>, Serializable
 {
     static public final String PROP_CATEGORY = "flow";
     protected T _expObject;

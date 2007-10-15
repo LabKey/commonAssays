@@ -27,7 +27,7 @@ public class MSInspectImportPipelineJob extends PipelineJob
     /** The .tsv file */
     private final File _featuresFile;
 
-    public MSInspectImportPipelineJob(ViewBackgroundInfo info, File file)
+    public MSInspectImportPipelineJob(ViewBackgroundInfo info, File file) throws SQLException
     {
         super(MSInspectPipelineProvider.NAME, info);
         _featuresFile = file;
@@ -121,7 +121,7 @@ public class MSInspectImportPipelineJob extends PipelineJob
 
         String mzXMLPath = PathRelativizer.relativizePathUnix(resultsDir, mzXMLFile);
 
-        Container c = _info.getContainer();
+        Container c = getContainer();
         PipelineService service = PipelineService.get();
         PipeRoot pr = service.findPipelineRoot(c);
         if (pr == null)

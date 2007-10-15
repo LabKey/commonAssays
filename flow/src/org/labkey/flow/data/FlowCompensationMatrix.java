@@ -14,6 +14,7 @@ import java.util.*;
 import java.sql.SQLException;
 import java.net.URI;
 import java.io.File;
+import java.io.Serializable;
 
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.compensation.CompensationController;
@@ -21,7 +22,7 @@ import org.labkey.flow.FlowSettings;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class FlowCompensationMatrix extends FlowDataObject
+public class FlowCompensationMatrix extends FlowDataObject implements Serializable
 {
     public FlowCompensationMatrix(ExpData data)
     {

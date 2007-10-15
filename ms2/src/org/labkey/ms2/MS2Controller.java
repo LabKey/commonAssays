@@ -433,11 +433,11 @@ public class MS2Controller extends ViewController
         }
 
         vBox.addView(grid);
-        _log.info("Lookup took " + (System.currentTimeMillis() - time) + " milliseconds");
+        _log.debug("Lookup took " + (System.currentTimeMillis() - time) + " milliseconds");
         time = System.currentTimeMillis();
         _renderInTemplate(vBox, Template.fast, run.getDescription(), "viewRun", exploratoryFeatures,
                 new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
-        _log.info("Render took " + (System.currentTimeMillis() - time) + " milliseconds");
+        _log.debug("Render took " + (System.currentTimeMillis() - time) + " milliseconds");
         return null;
     }
 

@@ -14,10 +14,11 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.io.Serializable;
 
 import org.labkey.flow.controllers.FlowParam;
 
-public class FlowProtocolStep
+public class FlowProtocolStep implements Serializable
 {
     static public FlowProtocolStep keywords = new FlowProtocolStep("Keywords", "Read a directory containing FCS files", ExpProtocol.ApplicationType.ProtocolApplication, 10);
     static public FlowProtocolStep calculateCompensation = new FlowProtocolStep("Compensation", "Calculate the compensation matrix", ExpProtocol.ApplicationType.ProtocolApplication, 20);

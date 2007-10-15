@@ -59,14 +59,13 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
 
     public SequestPipelineJob(ViewBackgroundInfo info,
                               String name,
-                              URI uriRoot,
-                              URI uriSequenceRoot,
+                              File dirSequenceRoot,
                               File filesMzXML[],
                               File fileInputXML,
                               boolean isFractions,
-                              boolean append)
+                              boolean append) throws SQLException
     {
-        super(SequestLocalPipelineProvider.name, info, filesMzXML, name, uriRoot, uriSequenceRoot);
+        super(SequestLocalPipelineProvider.name, info, filesMzXML, name, dirSequenceRoot);
 
         _fileSequestXML = fileInputXML;
         _dirAnalysis = _fileSequestXML.getParentFile();
@@ -262,7 +261,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
                 AppProps appProps = AppProps.getInstance();
 
                 SequestClientImpl sequestClient = new SequestClientImpl(appProps.getSequestServer(), getLogger());
-                String sequenceRoot = new File(_uriSequenceRoot).getAbsolutePath() + File.separator;
+                String sequenceRoot = _dirSequenceRoot.getAbsolutePath() + File.separator;
                 iReturn = sequestClient.search(sequenceRoot,_fileSequestParamsRemote.getAbsolutePath(),fileMzXML.getAbsolutePath(),
                         fileSequestSummary.getAbsolutePath(),inputXmlParams);
 
@@ -615,7 +614,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
         for (int i = 0; i < _databases.length; i++)
         {
             String database = _databases[i];
-            databaseFiles[i] = MS2PipelineManager.getSequenceDBFile(_uriSequenceRoot, database);
+            databaseFiles[i] = MS2PipelineManager.getSequenceDBFile(_dirSequenceRoot.toURI(), database);
             databaseSB.append(getStartingInputDataSnippet(databaseFiles[i], _dirAnalysis));
         }
 
@@ -629,7 +628,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
 
         String mzXMLPaths = getMzXMLPaths(_dirAnalysis);
         
-        Container c = _info.getContainer();
+        Container c = getContainer();
         PipelineService service = PipelineService.get();
         PipeRoot pr = service.findPipelineRoot(c);
         if (pr == null)
@@ -712,9 +711,9 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
             String paramDefaults = _parser.getInputParameter("list path, default parameters");
             File fileDefaults;
             if (paramDefaults == null)
-                fileDefaults = MS2PipelineManager.getDefaultInputFile(_uriRoot, SEQUEST);
+                fileDefaults = MS2PipelineManager.getDefaultInputFile(getRootDir().toURI(), SEQUEST);
             else
-                fileDefaults = new File(_uriRoot.resolve(paramDefaults));
+                fileDefaults = new File(getRootDir().toURI().resolve(paramDefaults));
             _parser.setInputParameter("list path, default parameters",
                 fileDefaults.getAbsolutePath());
 
@@ -791,9 +790,9 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
     private String createSequestParamFile()
     {
             SequestParamsBuilder sequestParamsV2Builder =
-            SequestParamsBuilderFactory.createVersion2Builder(_parser, _uriSequenceRoot);
+            SequestParamsBuilderFactory.createVersion2Builder(_parser, _dirSequenceRoot.toURI());
             SequestParamsBuilder sequestParamsV1Builder =
-                    SequestParamsBuilderFactory.createVersion1Builder(_parser, _uriSequenceRoot);
+                    SequestParamsBuilderFactory.createVersion1Builder(_parser, _dirSequenceRoot.toURI());
             String parseError = sequestParamsV2Builder.initXmlValues();
             if (!parseError.equals(""))
             {

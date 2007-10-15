@@ -10,12 +10,13 @@ import org.labkey.api.data.Container;
 import java.util.*;
 import java.sql.SQLException;
 import java.io.File;
+import java.io.Serializable;
 
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 
-abstract public class BaseHandler
+abstract public class BaseHandler implements Serializable
 {
     protected ScriptJob _job;
     protected FlowProtocolStep _step;

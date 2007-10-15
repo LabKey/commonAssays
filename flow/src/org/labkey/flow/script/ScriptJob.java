@@ -4,7 +4,6 @@ import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineStatusManager;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.security.User;
 import org.labkey.flow.data.*;
 import org.labkey.flow.data.FlowDataType;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
@@ -32,12 +31,13 @@ import org.labkey.flow.controllers.FlowController;
 
 abstract public class ScriptJob extends PipelineJob
 {
-    public Logger getLogger()
+    private static Logger _log = getJobLogger(ScriptJob.class);
+
+    public Logger getClassLogger()
     {
         return _log;
     }
 
-    private Logger _log = Logger.getLogger(ScriptJob.class);
     private Map<SampleKey, ExpMaterial> _sampleMap;
     private File _containerFolder;
 
@@ -321,11 +321,6 @@ abstract public class ScriptJob extends PipelineJob
         {
             _runData.logError(lsid, propertyURI, message);
         }
-    }
-
-    public User getUser()
-    {
-        return _info.getUser();
     }
 
     protected boolean checkProcessPath(File path, FlowProtocolStep step) throws SQLException
@@ -631,7 +626,6 @@ abstract public class ScriptJob extends PipelineJob
         File statusFile = logFile;
         _statusHref = PageFlowUtil.urlFor(FlowController.Action.showStatusJob, getContainer());
         _statusHref.addParameter(FlowParam.statusFile.toString(), PipelineStatusManager.getStatusFilePath(statusFile.toString()));
-        setStatusFile(statusFile);
         setLogFile(logFile);
     }
 
@@ -735,7 +729,7 @@ abstract public class ScriptJob extends PipelineJob
 
     public String getStatusFilePath()
     {
-        return PipelineStatusManager.getStatusFilePath(_statusFile.toString());
+        return PipelineStatusManager.getStatusFilePath(getStatusFile().toString());
     }
 
     public ViewURLHelper urlCancel()

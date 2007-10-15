@@ -936,7 +936,7 @@ public class MS2PipelineManager
                                    URI uriData,
                                    URI uriSequenceRoot,
                                    PipelineProtocol protocol,
-                                   String searchEngine) throws IOException
+                                   String searchEngine) throws IOException, SQLException
     {
         String protocolName = protocol.getName();
         File dirData = new File(uriData);
@@ -1017,8 +1017,7 @@ public class MS2PipelineManager
             {
                 job = new MascotPipelineJob(info,
                                              protocolName,
-                                             uriRoot,
-                                             uriSequenceRoot,
+                                             new File(uriSequenceRoot),
                                              new File[] { fileMzXML },
                                              fileConfigureXML,
                                              hasCluster,
@@ -1034,8 +1033,7 @@ public class MS2PipelineManager
                     {
                         job = new SequestPipelineJob(info,
                                              protocolName,
-                                             uriRoot,
-                                             uriSequenceRoot,
+                                             new File(uriSequenceRoot),
                                              mzXMLFiles,
                                              fileConfigureXML,
                                              true,
@@ -1053,8 +1051,7 @@ public class MS2PipelineManager
                 {
                     job = new SequestPipelineJob(info,
                                              protocolName,
-                                             uriRoot,
-                                             uriSequenceRoot,
+                                             new File(uriSequenceRoot),
                                              new File[] { fileMzXML },
                                              fileConfigureXML,
                                              false,
@@ -1077,8 +1074,7 @@ public class MS2PipelineManager
                 // we take X! Tandem as the default case
                 job = new XTandemPipelineJob(info,
                                              protocolName,
-                                             uriRoot,
-                                             uriSequenceRoot,
+                                             new File(uriSequenceRoot),
                                              new File[] { fileMzXML },
                                              fileConfigureXML,
                                              hasCluster,
@@ -1106,8 +1102,7 @@ public class MS2PipelineManager
                 {
                     job = new MascotPipelineJob(info,
                                                  protocolName,
-                                                 uriRoot,
-                                                 uriSequenceRoot,
+                                                 new File(uriSequenceRoot),
                                                  mzXMLFiles,
                                                  fileConfigureXML,
                                                  hasCluster,
@@ -1118,8 +1113,7 @@ public class MS2PipelineManager
                     // we take X! Tandem as the default case
                     job = new XTandemPipelineJob(info,
                                                  protocolName,
-                                                 uriRoot,
-                                                 uriSequenceRoot,
+                                                 new File(uriSequenceRoot),
                                                  mzXMLFiles,
                                                  fileConfigureXML,
                                                  hasCluster,
@@ -1150,7 +1144,7 @@ public class MS2PipelineManager
                                    URI uriData,
                                    URI uriSequenceRoot,
                                    String protocolName,
-                                   File fileUpload) throws IOException
+                                   File fileUpload) throws IOException, SQLException
     {
         File dirData = new File(uriData);
         if (!dirData.exists())
@@ -1193,8 +1187,7 @@ public class MS2PipelineManager
         {
             job = new MascotPipelineJob(info,
                       protocolName,
-                      uriRoot,
-                      uriSequenceRoot,
+                      new File(uriSequenceRoot),
                       filesMzXML,
                       fileConfigureXML,
                       hasCluster,
@@ -1204,8 +1197,7 @@ public class MS2PipelineManager
         {
             job = new XTandemPipelineJob(info,
                       protocolName,
-                      uriRoot,
-                      uriSequenceRoot,
+                      new File(uriSequenceRoot),
                       filesMzXML,
                       fileConfigureXML,
                       hasCluster,

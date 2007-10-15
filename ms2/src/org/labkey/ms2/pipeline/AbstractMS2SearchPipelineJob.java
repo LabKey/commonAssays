@@ -4,12 +4,12 @@ import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.PathRelativizer;
-import org.labkey.api.util.XMLValidationParser;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.util.*;
 import java.net.URI;
+import java.sql.SQLException;
 
 /**
  * User: jeckels
@@ -20,22 +20,19 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
     protected Integer _experimentRowId;
     protected String _name;
     protected String _baseName;
+    protected File _dirSequenceRoot;
     protected File _dirMzXML;
     protected File[] _filesMzXML;
-    protected URI _uriRoot;
-    protected URI _uriSequenceRoot;
     protected File _dirAnalysis;
     protected File _filePepXML;
 
-    public AbstractMS2SearchPipelineJob(String provider, ViewBackgroundInfo info, File filesMzXML[], String name, URI uriRoot, URI uriSequenceRoot)
+    public AbstractMS2SearchPipelineJob(String provider, ViewBackgroundInfo info, File filesMzXML[], String name, File dirSequenceRoot) throws SQLException
     {
         super(provider, info);
         _filesMzXML = filesMzXML;
         _dirMzXML = filesMzXML[0].getParentFile();
         _name = name;
-
-        _uriRoot = uriRoot;
-        _uriSequenceRoot = uriSequenceRoot;
+        _dirSequenceRoot = dirSequenceRoot; 
     }
 
     protected String getInstanceDetailsSnippet(File mzXMLFile, File analysisDir, File[] databaseFiles, File configFile) throws IOException

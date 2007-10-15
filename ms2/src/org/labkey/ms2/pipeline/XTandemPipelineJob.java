@@ -40,7 +40,12 @@ import java.util.*;
  */
 public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
 {
-    private static Logger _log = Logger.getLogger(XTandemPipelineJob.class);
+    private static Logger _log = getJobLogger(XTandemPipelineJob.class);
+
+    public Logger getClassLogger()
+    {
+        return _log;
+    }
 
     private File _fileTandemXML;
 
@@ -54,14 +59,13 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
 
     public XTandemPipelineJob(ViewBackgroundInfo info,
                               String name,
-                              URI uriRoot,
-                              URI uriSequenceRoot,
+                              File dirSequenceRoot,
                               File filesMzXML[],
                               File fileInputXML,
                               boolean cluster,
-                              boolean append)
+                              boolean append) throws SQLException
     {
-        super(getProviderName(cluster), info, filesMzXML, name, uriRoot, uriSequenceRoot);
+        super(getProviderName(cluster), info, filesMzXML, name, dirSequenceRoot);
 
         _fileTandemXML = fileInputXML;
         if (isFractions())
@@ -202,11 +206,9 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
         String paramDefaults = parser.getInputParameter("list path, default parameters");
         File fileDefaults;
         if (paramDefaults == null)
-//wch: mascotdev
-            fileDefaults = MS2PipelineManager.getDefaultInputFile(_uriRoot,"X!Tandem");
-//END-wch: mascotdev
+            fileDefaults = MS2PipelineManager.getDefaultInputFile(getRootDir().toURI(),"X!Tandem");
         else
-            fileDefaults = new File(_uriRoot.resolve(paramDefaults));
+            fileDefaults = new File(getRootDir().toURI().resolve(paramDefaults));
         parser.setInputParameter("list path, default parameters",
                 fileDefaults.getAbsolutePath());
 
@@ -225,7 +227,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
         taxonomyBuffer.append("  <taxon label=\"sequences\">\n");
         for (String database : databases)
         {
-            File fileDatabase = MS2PipelineManager.getSequenceDBFile(_uriSequenceRoot, database);
+            File fileDatabase = MS2PipelineManager.getSequenceDBFile(_dirSequenceRoot.toURI(), database);
             taxonomyBuffer.append("    <file format=\"peptide\" URL=\"");
             taxonomyBuffer.append(fileDatabase.getAbsolutePath());
             taxonomyBuffer.append("\"/>\n");
@@ -565,7 +567,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
         for (int i = 0; i < databases.length; i++)
         {
             String database = databases[i];
-            databaseFiles[i] = MS2PipelineManager.getSequenceDBFile(_uriSequenceRoot, database);
+            databaseFiles[i] = MS2PipelineManager.getSequenceDBFile(_dirSequenceRoot.toURI(), database);
             databaseSB.append(getStartingInputDataSnippet(databaseFiles[i], analysisDir));
         }
 
@@ -580,7 +582,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
 
         String mzXMLPaths = getMzXMLPaths(analysisDir);
 
-        Container c = _info.getContainer();
+        Container c = getContainer();
         PipelineService service = PipelineService.get();
         PipeRoot pr = service.findPipelineRoot(c);
         if (pr == null)

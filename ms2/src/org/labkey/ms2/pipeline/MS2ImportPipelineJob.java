@@ -44,7 +44,7 @@ public class MS2ImportPipelineJob extends PipelineJob
         String filePath = PipelineStatusManager.getStatusFilePath(getStatusFile().getAbsolutePath());
         PipelineStatusFile sf = PipelineStatusManager.getStatusFile(filePath);
         if (sf != null)
-            _provider = sf.getProvider();
+            setProvider(sf.getProvider());
     }
 
     public ViewURLHelper getStatusHref()
