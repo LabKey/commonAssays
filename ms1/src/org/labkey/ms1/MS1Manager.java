@@ -74,6 +74,17 @@ public class MS1Manager
         return Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
     }
 
+    public Integer getRunIdFromFeature(int featureId) throws SQLException
+    {
+        StringBuilder sql = new StringBuilder("SELECT RunId FROM exp.Data AS d INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" AS f ON (d.RowId=f.ExpDataFileId) INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_FEATURES));
+        sql.append(" AS fe ON (f.FileId=fe.FileId) WHERE fe.FeatureId=?");
+
+        return Table.executeSingleton(getSchema(), sql.toString(), new Object[]{featureId}, Integer.class);
+    }
+
     public boolean isPeakDataAvailable(int runId) throws SQLException
     {
         StringBuilder sql = new StringBuilder("SELECT count(*) FROM ");
@@ -129,6 +140,11 @@ public class MS1Manager
         return link;
     }
 
+    public Feature getFeature(int featureId) throws SQLException
+    {
+        return Table.selectObject(getTable(TABLE_FEATURES), featureId, Feature.class);
+    }
+
     public Software[] getSoftware(int fileId) throws SQLException
     {
         SimpleFilter fltr = new SimpleFilter("FileId", fileId);
@@ -139,6 +155,21 @@ public class MS1Manager
     {
         SimpleFilter fltr = new SimpleFilter("SoftwareId", softwareId);
         return Table.select(getTable(TABLE_SOFTWARE_PARAMS), Table.ALL_COLUMNS, fltr, null, SoftwareParam.class);
+    }
+
+    public Table.TableResultSet getPeakData(int runId, int scan, double mzLow, double mzHigh) throws SQLException
+    {
+        StringBuilder sql = new StringBuilder("SELECT s.ScanId, s.Scan, s.RetentionTime, s.ObservationDuration, p.PeakId, p.MZ, p.Intensity, p.Area, p.Error, p.Frequency, p.Phase, p.Decay FROM ");
+        sql.append(getSQLTableName(TABLE_SCANS));
+        sql.append(" AS s INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_PEAKS));
+        sql.append(" AS p ON (s.ScanId=p.ScanId) INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=");
+        sql.append(FILETYPE_PEAKS);
+        sql.append(" AND s.Scan=? AND (p.MZ BETWEEN ? AND ?)");
+
+        return Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, scan, mzLow, mzHigh});
     }
 
     public void deleteFeaturesData(ExpData expData, User user) throws SQLException

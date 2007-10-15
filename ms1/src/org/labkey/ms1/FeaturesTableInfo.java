@@ -6,6 +6,7 @@ import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.util.StringExpressionFactory;
 
 import java.util.ArrayList;
 import java.sql.SQLException;
@@ -30,6 +31,7 @@ public class FeaturesTableInfo extends FilteredTable
         super(MS1Manager.get().getTable(MS1Manager.TABLE_FEATURES));
 
         _expSchema = expSchema;
+        _container = container;
 
         //wrap all the columns
         wrapAllColumns(true);
@@ -71,18 +73,53 @@ public class FeaturesTableInfo extends FilteredTable
 
     public void addRunIdCondition(int runId, Container container, boolean peaksAvailable)
     {
-        SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.RunId=?)",
-                                            runId);
+        _container = container;
+        _runId = runId;
+
+        SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND d.RunId=?)",
+                                            container.getId(), runId);
         getFilter().deleteConditions("FileId");
         addCondition(sf, "FileId");
 
-        //if peak data is available, make the scan column a hyperlink to the showPeaks view
+        //if peak data is available...
         if(peaksAvailable)
         {
-            assert null != getColumn("Scan") : "Scan column not present in Features table info!";
-            ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks", container);
-            String surl = url.getLocalURIString() + "runId=" + runId + "&scan=${scan}";
-            getColumn("Scan").setURL(surl);
+            //add a new column info for the feature details link
+            ColumnInfo cinfo = new ColumnInfo("Details Link");
+            cinfo.setDescription("Link to details about the Feature");
+            cinfo.setDisplayColumnFactory(new DisplayColumnFactory()
+            {
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showFeatureDetails.view", _container);
+                    url.addParameter("runId", _runId);
+                    return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}"), "details");
+                }
+            });
+            addColumn(cinfo);
+
+            //add a new column info for the peaks link
+            cinfo = new ColumnInfo("Peaks Link");
+            cinfo.setDescription("Link to detailed Peak data for the Feature");
+            cinfo.setDisplayColumnFactory(new DisplayColumnFactory()
+            {
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks.view", _container);
+                    url.addParameter("runId", _runId);
+                    return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&scan=${scan}"), "peaks");
+                }
+            });
+            addColumn(cinfo);
+
+
+            //move it to the front of the visible column set
+            ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(getDefaultVisibleColumns());
+            visibleColumns.remove(FieldKey.fromParts("Details Link"));
+            visibleColumns.remove(FieldKey.fromParts("Peaks Link"));
+            visibleColumns.add(0, FieldKey.fromParts("Details Link"));
+            visibleColumns.add(1, FieldKey.fromParts("Peaks Link"));
+            setDefaultVisibleColumns(visibleColumns);
         }
 
         //make the ms2 scan a hyperlink to showPeptide view
@@ -105,4 +142,6 @@ public class FeaturesTableInfo extends FilteredTable
 
     // Protected Data Members
     protected ExpSchema _expSchema;
+    protected Container _container;
+    protected int _runId = 0;
 } //class FeaturesTableInfo

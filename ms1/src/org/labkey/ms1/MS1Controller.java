@@ -204,7 +204,7 @@ public class MS1Controller extends SpringActionController
     } //class ShowFeaturesAction
 
     @RequiresPermission(ACL.PERM_READ)
-    public class showMS2PeptideAction extends SimpleViewAction<FeatureIdForm>
+    public class ShowMS2PeptideAction extends SimpleViewAction<FeatureIdForm>
     {
         public ModelAndView getView(FeatureIdForm featureIdForm, BindException errors) throws Exception
         {
@@ -231,6 +231,58 @@ public class MS1Controller extends SpringActionController
             //if this gets called, then we couldn't find the peptide and
             //displayed the message returned in the HtmlView above.
             return root.addChild("Associated Peptide Not Found");
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowFeatureDetailsAction extends SimpleViewAction<FeatureIdForm>
+    {
+
+        public ModelAndView getView(FeatureIdForm form, BindException errors) throws Exception
+        {
+            if(form.getFeatureId() < 0)
+                return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
+
+            _form = form;
+            Feature feature = MS1Manager.get().getFeature(form.getFeatureId());
+            return new JspView<Feature>("/org/labkey/ms1/FeatureDetailView.jsp", feature);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            if(null != _form)
+                addFeaturesChild(root, _form.getRunId());
+            _form = null;
+            return root.addChild("Feature Details");
+        }
+        private FeatureIdForm _form;
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowChartAction extends SimpleViewAction<ChartForm>
+    {
+        public ModelAndView getView(ChartForm form, BindException errors) throws Exception
+        {
+            FeatureChart chart = null;
+            String type = form.getType();
+            if(type.equalsIgnoreCase("spectrum"))
+                chart = new SpectrumChart(form.getFeatureId(), form.getRunId(), form.getScan(),
+                                                            form.getMzLow(), form.getMzHigh());
+
+
+            if(null != chart)
+            {
+                getViewContext().getResponse().setContentType("image/png");
+                chart.render(getViewContext().getResponse().getOutputStream());
+            }
+
+            //no need to return a view since this is only called from an <img> tag
+            return null;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
         }
     }
 
@@ -354,6 +406,7 @@ public class MS1Controller extends SpringActionController
     public static class FeatureIdForm
     {
         private int _featureId = -1;
+        private int _runId = -1;
 
         public int getFeatureId()
         {
@@ -363,6 +416,86 @@ public class MS1Controller extends SpringActionController
         public void setFeatureId(int featureId)
         {
             _featureId = featureId;
+        }
+
+        public int getRunId()
+        {
+            return _runId;
+        }
+
+        public void setRunId(int runId)
+        {
+            _runId = runId;
+        }
+    }
+
+    public static class ChartForm
+    {
+        private int _featureId = -1;
+        private int _runId = -1;
+        private int _scan = 0;
+        private double _mzLow = 0;
+        private double _mzHigh = 0;
+        private String _type;
+
+        public int getFeatureId()
+        {
+            return _featureId;
+        }
+
+        public void setFeatureId(int featureId)
+        {
+            _featureId = featureId;
+        }
+
+        public int getRunId()
+        {
+            return _runId;
+        }
+
+        public void setRunId(int runId)
+        {
+            _runId = runId;
+        }
+
+        public String getType()
+        {
+            return _type;
+        }
+
+        public void setType(String type)
+        {
+            _type = type;
+        }
+
+        public int getScan()
+        {
+            return _scan;
+        }
+
+        public void setScan(int scan)
+        {
+            _scan = scan;
+        }
+
+        public double getMzLow()
+        {
+            return _mzLow;
+        }
+
+        public void setMzLow(double mzLow)
+        {
+            _mzLow = mzLow;
+        }
+
+        public double getMzHigh()
+        {
+            return _mzHigh;
+        }
+
+        public void setMzHigh(double mzHigh)
+        {
+            _mzHigh = mzHigh;
         }
     }
 } //class MS1Controller

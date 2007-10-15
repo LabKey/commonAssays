@@ -473,6 +473,9 @@ ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-2.20-2.21.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-2.21-2.22.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-2.22-2.23.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/obsolete/ms1-0.00-0.01.sql -text
+ms1/src/org/labkey/ms1/Feature.java -text
+ms1/src/org/labkey/ms1/FeatureChart.java -text
+ms1/src/org/labkey/ms1/FeatureDetailView.jsp -text
 ms1/src/org/labkey/ms1/FeaturePeptideLink.java -text
 ms1/src/org/labkey/ms1/FeaturesTableInfo.java -text
 ms1/src/org/labkey/ms1/FeaturesView.java -text
@@ -487,6 +490,7 @@ ms1/src/org/labkey/ms1/PeaksTableInfo.java -text
 ms1/src/org/labkey/ms1/PeaksView.java -text
 ms1/src/org/labkey/ms1/Software.java -text
 ms1/src/org/labkey/ms1/SoftwareParam.java -text
+ms1/src/org/labkey/ms1/SpectrumChart.java -text
 ms1/src/org/labkey/ms1/pipeline/MS1FileFilter.java -text
 ms1/src/org/labkey/ms1/pipeline/MSInspectImportPipelineJob.java -text
 ms1/src/org/labkey/ms1/pipeline/MSInspectPipelineProvider.java -text
