@@ -698,7 +698,7 @@ public class NabController extends ViewController
             {
                 List<String> errors = new ArrayList<String>();
                 ViewURLHelper helper = AssayPublishService.get().publishAssayData(getUser(), targetContainer,
-                        "NAB", sampleProperties.toArray(new Map[sampleProperties.size()]),
+                        "NAB", null, sampleProperties.toArray(new Map[sampleProperties.size()]),
                         NabManager.get().getPropertyTypes(plates),
                         NabManager.PlateProperty.VirusId.name(), errors);
 

@@ -329,7 +329,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                 addProperty(study, "Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(), dataMap, typeList);
                 dataMaps[rowIndex++] = dataMap;
             }
-            return AssayPublishService.get().publishAssayData(user, study, protocol.getName(),
+            return AssayPublishService.get().publishAssayData(user, study, protocol.getName(), protocol, 
                     dataMaps, typeList, getDataRowIdFieldKey().toString(), errors);
         }
         catch (SQLException e)

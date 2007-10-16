@@ -417,7 +417,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
                 dataMaps[index++] = dataMap;
             }
-            return AssayPublishService.get().publishAssayData(user, study, protocol.getName(), dataMaps, types, errors);
+            return AssayPublishService.get().publishAssayData(user, study, protocol.getName(), protocol, dataMaps, types, errors);
         }
         catch (SQLException e)
         {
