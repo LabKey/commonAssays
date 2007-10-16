@@ -66,8 +66,8 @@ public class FeaturesTableInfo extends FilteredTable
         //current container. The FilteredTable class supports this automatically only if
         //the underlying table contains a column named "Container," which our Features table
         //does not, so we need to use a SQL fragment here that uses a sub-select.
-        SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=?)",
-                                            container.getId());
+        SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=?)",
+                                            container.getId(), true);
         addCondition(sf, "FileId");
     } //c-tor
 
@@ -76,8 +76,8 @@ public class FeaturesTableInfo extends FilteredTable
         _container = container;
         _runId = runId;
 
-        SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND d.RunId=?)",
-                                            container.getId(), runId);
+        SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=? AND d.RunId=?)",
+                                            container.getId(), true, runId);
         getFilter().deleteConditions("FileId");
         addCondition(sf, "FileId");
 
