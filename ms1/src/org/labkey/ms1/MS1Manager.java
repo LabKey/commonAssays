@@ -75,6 +75,35 @@ public class MS1Manager
         return Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
     }
 
+    /**
+     * Similar to getScanIdFromRunScan, but can get multiple scanIds for multiple scan numbers.
+     * @param runId The experiment run id
+     * @param scans The scan numbers
+     * @return The corresponding scan ids
+     * @throws SQLException thrown if there is a database exception
+     */
+    public Integer[] getScanIdsFromRunScans(int runId, Integer[] scans) throws SQLException
+    {
+        StringBuilder sql = new StringBuilder("SELECT ScanId FROM ").append(getSQLTableName(TABLE_SCANS));
+        sql.append(" AS s INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data as d ON (f.ExpDataFileId=d.RowId)");
+        sql.append(" WHERE d.RunId=").append(runId);
+        sql.append(" AND s.Scan IN (");
+        for(int idx = 0; idx < scans.length; ++idx)
+        {
+            if(scans[idx] == null)
+                continue;
+
+            if(idx > 0)
+                sql.append(",");
+            sql.append(scans[idx].intValue());
+        }
+        sql.append(") ORDER BY ScanId");
+
+        return Table.executeArray(getSchema(), sql.toString(), null, Integer.class);
+    }
+
     public Integer getRunIdFromFeature(int featureId) throws SQLException
     {
         StringBuilder sql = new StringBuilder("SELECT RunId FROM exp.Data AS d INNER JOIN ");
@@ -151,6 +180,11 @@ public class MS1Manager
     public Feature getFeature(int featureId) throws SQLException
     {
         return Table.selectObject(getTable(TABLE_FEATURES), featureId, Feature.class);
+    }
+
+    public Scan getScan(int scanId) throws SQLException
+    {
+        return Table.selectObject(getTable(TABLE_SCANS), scanId, Scan.class);
     }
 
     public Software[] getSoftware(int fileId) throws SQLException

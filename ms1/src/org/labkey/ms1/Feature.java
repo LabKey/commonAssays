@@ -2,7 +2,8 @@ package org.labkey.ms1;
 
 import org.labkey.api.data.Table;
 import org.labkey.api.util.ResultSetUtil;
-import org.labkey.common.util.Pair;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 
 import java.sql.SQLException;
 
@@ -233,6 +234,12 @@ public class Feature
         return _runId;
     }
 
+    public ExpRun getExpRun() throws SQLException
+    {
+        Integer runId = getRunId();
+        return null == runId ? null : ExperimentService.get().getExpRun(getRunId().intValue());
+    }
+
     public static class PrevNextScans
     {
         public PrevNextScans(Integer prev, Integer next)
@@ -265,7 +272,7 @@ public class Feature
         {
             rs = MS1Manager.get().getScanList(getRunId().intValue(), mzLow, mzHigh,
                                             _scanFirst.intValue(), _scanLast.intValue());
-            int curScan = 0;
+            int curScan;
             while(null != rs && rs.next())
             {
                 curScan = rs.getInt("Scan");
@@ -273,7 +280,7 @@ public class Feature
                 {
                     if(curScan < scan)
                         prevScan = curScan;
-                    if(curScan > scan && null == nextScan)
+                    if(curScan > scan)
                     {
                         nextScan = curScan;
                         break;

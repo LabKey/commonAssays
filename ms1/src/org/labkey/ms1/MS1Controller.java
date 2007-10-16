@@ -5,6 +5,7 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
@@ -153,43 +154,57 @@ public class MS1Controller extends SpringActionController
      * Action to show the peaks for a given experiment run and scan number
      */
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowPeaksAction extends SimpleViewAction<RunScanForm>
+    public class ShowPeaksAction extends SimpleViewAction<FeatureIdForm>
     {
         public static final String PARAM_SCAN = "scan";
-        private RunScanForm _form;
-        public ModelAndView getView(RunScanForm form, BindException errors) throws Exception
+        private FeatureIdForm _form;
+
+        public ModelAndView getView(FeatureIdForm form, BindException errors) throws Exception
         {
             _form = null;
-            if(-1 == form.getRunId() && -1 == form.getScan())
+            if(-1 == form.getRunId() && -1 == form.getFeatureId())
                 return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
 
             MS1Manager mgr = MS1Manager.get();
-            Integer scanId = mgr.getScanIdFromRunScan(form.getRunId(), form.getScan());
 
-            if(null == scanId)
-                return new HtmlView("The supporting peak data for this scan have not yet been uploaded to the database.");
+            //get the feature
+            Feature feature = mgr.getFeature(form.getFeatureId());
+            if(null == feature)
+                return new HtmlView("The Feature Id '" + form.getFeatureId() + "' was not found in the database.");
+
+            //get the experiment run
+            ExpRun expRun = feature.getExpRun();
+            if(null == expRun)
+                return new HtmlView("The Experiment run this Feature was not found in the database.");
+
+            Integer[] scanIds = mgr.getScanIdsFromRunScans(form.getRunId(), new Integer[]{feature.getScanFirst(), feature.getScanLast()});
+            if(null == scanIds || scanIds.length < 2 || null == scanIds[0] || null == scanIds[1])
+                return new HtmlView("The supporting peak data for this Feature have not yet been uploaded to the database.");
+
+            //get the corresponding Scans
+            Scan scanFirst = mgr.getScan(scanIds[0].intValue());
+            Scan scanLast = mgr.getScan(scanIds[1].intValue());
 
             //save the form so we have access to the params when we build the nav trail
             _form = form;
 
             //get the corresponding file Id for the scanId and if one is found
             //include a software view
-            Integer fileId = MS1Manager.get().getFileIdForScan(scanId.intValue());
-            if(null != fileId)
+            if(null != scanFirst)
             {
-                Software[] swares = MS1Manager.get().getSoftware(fileId.intValue());
+                Software[] swares = mgr.getSoftware(scanFirst.getFileId());
                 if(null != swares && swares.length > 0)
                 {
                     JspView softwareView = new JspView<Software[]>("/org/labkey/ms1/softwareView.jsp", swares);
                     softwareView.setTitle("Software Information");
                     return new VBox(softwareView,
                                     new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                        form.getRunId(), form.getScan(), scanId.intValue()));
+                                        expRun, scanFirst, scanLast));
                 }
             }
 
             return new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                form.getRunId(), form.getScan(), scanId.intValue());
+                                expRun, scanFirst, scanLast);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -198,7 +213,7 @@ public class MS1Controller extends SpringActionController
             if(null != _form)
             {
                 addFeaturesChild(root, _form.getRunId());
-                addPeaksChild(root, _form.getRunId(), _form.getScan());
+                //addPeaksChild(root, _form.getRunId(), _form.getScan());
             }
             _form = null;
             return root;

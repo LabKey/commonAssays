@@ -28,11 +28,15 @@ public class PeaksView extends QueryView
     private static final String CAPTION_EXPORT_ALL_TSV = "Export All to Text";
     private static final String CAPTION_PRINT_ALL = "Print";
 
-    public PeaksView(ViewContext ctx, MS1Schema schema, int runId, int scan, int scanId) throws SQLException
+    public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Scan scanFirst, Scan scanLast) throws SQLException
     {
         super(schema);
         _schema = schema;
-        _scanId = scanId;
+
+        assert null != _schema : "Null schema passed to PeaksView!";
+        assert (null != scanFirst && null != scanLast) : "Null scans passed to PeaksView!";
+        _scanFirst = scanFirst;
+        _scanLast = scanLast;
 
         //NOTE: The use of QueryView.DATAREGIONNAME_DEFAULT is essential here!
         //the export/print buttons that I will add later use the query controller's
@@ -42,11 +46,10 @@ public class PeaksView extends QueryView
         settings.setAllowChooseQuery(false);
         setSettings(settings);
 
-        ExpRun run = ExperimentService.get().getExpRun(runId);
         if(null != run)
-            setTitle("Peaks from Scan " + scan + " from " + run.getName());
+            setTitle("Peaks from Scans " +  _scanFirst.getScan() + " through " + _scanLast.getScan() + " from " + run.getName());
         else
-            setTitle("Peaks from Scan " + scan);
+            setTitle("Peaks from Scans " + _scanFirst.getScan() + " through " + _scanLast.getScan());
         
 
         setShowCustomizeViewLinkInButtonBar(true);
@@ -56,13 +59,8 @@ public class PeaksView extends QueryView
 
     protected TableInfo createTable()
     {
-        assert null != _schema : "MS1 Schema was not set in PeaksView class!";
-
         PeaksTableInfo tinfo = _schema.getPeaksTableInfo();
-        if(null != _scanId)
-            tinfo.addScanCondition(_scanId.intValue());
-        else
-            tinfo.addScanCondition(-1);
+        tinfo.addScanRangeCondition(_scanFirst.getScanId(), _scanLast.getScanId());
         return tinfo;
     }
 
@@ -124,14 +122,18 @@ public class PeaksView extends QueryView
         //replace our runId paramter with a query filter on the run table's RowId column
         url.deleteParameter("runId");
         url.deleteParameter("scan");
-        if(null != _scanId)
-            url.addParameter("query.ScanId~eq", _scanId.intValue());
+        if(null != _scanFirst && null != _scanLast)
+        {
+            url.addParameter("query.ScanId~gte", _scanFirst.getScanId());
+            url.addParameter("query.ScanId~lte", _scanLast.getScanId());
+        }
 
         ActionButton btn = new ActionButton(url.getEncodedLocalURIString(), caption, DataRegion.MODE_ALL, ActionButton.Action.LINK);
         bar.add(btn);
     } //addQueryActionButton()
 
     private MS1Schema _schema;
-    private Integer _scanId = null;
+    private Scan _scanFirst = null;
+    private Scan _scanLast = null;
 } //class PeaksView
 

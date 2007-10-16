@@ -490,6 +490,7 @@ ms1/src/org/labkey/ms1/PeaksFileImporter.java -text
 ms1/src/org/labkey/ms1/PeaksTableInfo.java -text
 ms1/src/org/labkey/ms1/PeaksView.java -text
 ms1/src/org/labkey/ms1/RetentionMassChart.java -text
+ms1/src/org/labkey/ms1/Scan.java -text
 ms1/src/org/labkey/ms1/Software.java -text
 ms1/src/org/labkey/ms1/SoftwareParam.java -text
 ms1/src/org/labkey/ms1/SpectrumChart.java -text

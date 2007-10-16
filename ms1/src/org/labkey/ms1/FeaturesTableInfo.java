@@ -107,7 +107,7 @@ public class FeaturesTableInfo extends FilteredTable
                 {
                     ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks.view", _container);
                     url.addParameter("runId", _runId);
-                    return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&scan=${scan}"), "peaks");
+                    return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}"), "peaks");
                 }
             });
             addColumn(cinfo);

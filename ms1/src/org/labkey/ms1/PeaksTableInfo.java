@@ -2,11 +2,11 @@ package org.labkey.ms1;
 
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.exp.api.ExpSchema;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.*;
+import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.util.StringExpressionFactory;
 
 import java.util.ArrayList;
 
@@ -27,10 +27,34 @@ public class PeaksTableInfo extends FilteredTable
         //wrap all the columns
         wrapAllColumns(true);
 
-        //but only display a subset by default
+        //tell query that Peaks joins to PeaksToFamilies so we can add the PeakFamily columns
+        ColumnInfo peakFamCol = wrapColumn("PeakFamilies", getRealTable().getColumn("PeakId"));
+        peakFamCol.setIsUnselectable(true);
+        peakFamCol.setDescription("Link to the Peak Family information");
+        peakFamCol.setFk(new LookupForeignKey("PeakId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                setPrefixColumnCaption(false);
+                return MS1Manager.get().getTable(MS1Manager.TABLE_PEAKS_TO_FAMILIES);
+            }
+        });
+        addColumn(peakFamCol);
+
+        TableInfo joinTable = peakFamCol.getFkTableInfo();
+        joinTable.getColumn("PeakId").setIsHidden(true);
+        joinTable.getColumn("PeakFamilyId").setCaption("Peak Family");
+        TableInfo peakFamTable = joinTable.getColumn("PeakFamilyId").getFkTableInfo();
+        peakFamTable.getColumn("MZMono").setCaption("MZ Monoisotopic");
+        peakFamTable.getColumn("Charge").setCaption("Charge");
+
+        //display only a subset by default
         ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(getDefaultVisibleColumns());
         visibleColumns.remove(FieldKey.fromParts("PeakId"));
         visibleColumns.remove(FieldKey.fromParts("ScanId"));
+        visibleColumns.add(0, FieldKey.fromParts("ScanId", "Scan"));
+        visibleColumns.add(1, FieldKey.fromParts("PeakFamilies", "PeakFamilyId", "MZMono"));
+        visibleColumns.add(2, FieldKey.fromParts("PeakFamilies", "PeakFamilyId", "Charge"));
         setDefaultVisibleColumns(visibleColumns);
         
         //mark the PeakId column as hidden
@@ -50,4 +74,9 @@ public class PeaksTableInfo extends FilteredTable
         addCondition(getRealTable().getColumn("ScanId"), scanId);
     }
 
+    public void addScanRangeCondition(int scanIdFirst, int scanIdLast)
+    {
+        SQLFragment sql = new SQLFragment("ScanId BETWEEN ? AND ?", scanIdFirst, scanIdLast);
+        addCondition(sql, "ScanId");
+    }
 } //class PeaksTableInfo
