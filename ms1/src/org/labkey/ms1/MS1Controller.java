@@ -74,16 +74,16 @@ public class MS1Controller extends SpringActionController
      * Adds a the peaks view step to the NavTree
      * @param root  The root of the NavTree
      * @param runId The runId parameter
-     * @param scan  The scan parameter
+     * @param featureId  The featureId parameter
      * @return Modified NavTree
      */
-    protected NavTree addPeaksChild(NavTree root, int runId, int scan)
+    protected NavTree addPeaksChild(NavTree root, int runId, int featureId)
     {
         ViewURLHelper url = getViewURLHelper("showPeaks.view");
         url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
-        url.addParameter(ShowPeaksAction.PARAM_SCAN, scan);
+        url.addParameter(ShowPeaksAction.PARAM_FEATUREID, featureId);
         url.addParameter(".lastFilter", "true"); 
-        return root.addChild("Peaks from Scan", getViewURLHelper("showPeaks.view"));
+        return root.addChild("Peaks from Feature", url);
     }
 
     /**
@@ -156,7 +156,7 @@ public class MS1Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowPeaksAction extends SimpleViewAction<FeatureIdForm>
     {
-        public static final String PARAM_SCAN = "scan";
+        public static final String PARAM_FEATUREID = "featureId";
         private FeatureIdForm _form;
 
         public ModelAndView getView(FeatureIdForm form, BindException errors) throws Exception
@@ -213,7 +213,7 @@ public class MS1Controller extends SpringActionController
             if(null != _form)
             {
                 addFeaturesChild(root, _form.getRunId());
-                //addPeaksChild(root, _form.getRunId(), _form.getScan());
+                addPeaksChild(root, _form.getRunId(), _form.getFeatureId());
             }
             _form = null;
             return root;
