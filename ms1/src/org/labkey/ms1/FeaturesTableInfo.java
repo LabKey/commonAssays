@@ -1,15 +1,14 @@
 package org.labkey.ms1;
 
-import org.labkey.api.query.FilteredTable;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpSchema;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.view.ViewURLHelper;
 
 import java.util.ArrayList;
-import java.sql.SQLException;
 
 /**
  * Provides a filtered table implementation for the Features table, allowing clients
