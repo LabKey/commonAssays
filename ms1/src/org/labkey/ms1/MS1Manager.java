@@ -6,6 +6,7 @@ import org.labkey.api.data.SchemaTableInfo;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.security.User;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.util.ResultSetUtil;
 
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -127,16 +128,23 @@ public class MS1Manager
                 " and fr.mzxmlurl=m1f.MzXmlUrl)";
 
         FeaturePeptideLink link = null;
-        ResultSet rs = Table.executeQuery(getSchema(), sql, new Integer[]{featureId}, 1, false);
+        ResultSet rs = null;
 
-        if(rs.next())
+        try
         {
-            //this query could match multiple peptides with different charges, but
-            //we need to return the first one only
-            link = new FeaturePeptideLink(rs.getLong("MS2Run"), rs.getInt("PeptideId"), rs.getInt("Scan"));
-        }
+            rs = Table.executeQuery(getSchema(), sql, new Integer[]{featureId}, 1, false);
 
-        rs.close();
+            if(rs.next())
+            {
+                //this query could match multiple peptides with different charges, but
+                //we need to return the first one only
+                link = new FeaturePeptideLink(rs.getLong("MS2Run"), rs.getInt("PeptideId"), rs.getInt("Scan"));
+            }
+        }
+        finally
+        {
+            ResultSetUtil.close(rs);
+        }
         return link;
     }
 
@@ -160,16 +168,56 @@ public class MS1Manager
     public Table.TableResultSet getPeakData(int runId, int scan, double mzLow, double mzHigh) throws SQLException
     {
         StringBuilder sql = new StringBuilder("SELECT s.ScanId, s.Scan, s.RetentionTime, s.ObservationDuration, p.PeakId, p.MZ, p.Intensity, p.Area, p.Error, p.Frequency, p.Phase, p.Decay FROM ");
-        sql.append(getSQLTableName(TABLE_SCANS));
-        sql.append(" AS s INNER JOIN ");
         sql.append(getSQLTableName(TABLE_PEAKS));
-        sql.append(" AS p ON (s.ScanId=p.ScanId) INNER JOIN ");
+        sql.append(" AS p INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_SCANS));
+        sql.append(" AS s ON (s.ScanId=p.ScanId) INNER JOIN ");
         sql.append(getSQLTableName(TABLE_FILES));
         sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=");
         sql.append(FILETYPE_PEAKS);
         sql.append(" AND s.Scan=? AND (p.MZ BETWEEN ? AND ?)");
 
         return Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, scan, mzLow, mzHigh});
+    }
+
+    public Table.TableResultSet getPeakData(int runId, double mzLow, double mzHigh, int scanFirst, int scanLast) throws SQLException
+    {
+        return getPeakData(runId, mzLow, mzHigh, scanFirst, scanLast, null);
+    }
+
+    public Table.TableResultSet getPeakData(int runId, double mzLow, double mzHigh, int scanFirst, int scanLast, String orderBy) throws SQLException
+    {
+        StringBuilder sql = new StringBuilder("SELECT s.ScanId, s.Scan, s.RetentionTime, s.ObservationDuration, p.PeakId, p.MZ, p.Intensity, p.Area, p.Error, p.Frequency, p.Phase, p.Decay FROM ");
+        sql.append(getSQLTableName(TABLE_PEAKS));
+        sql.append(" AS p INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_SCANS));
+        sql.append(" AS s ON (s.ScanId=p.ScanId) INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=");
+        sql.append(FILETYPE_PEAKS);
+        sql.append(" AND (p.MZ BETWEEN ? AND ?)");
+        sql.append(" AND (s.Scan BETWEEN ? AND ?)");
+        if(null != orderBy)
+            sql.append(" ORDER BY ").append(orderBy);
+
+        return Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, mzLow, mzHigh, scanFirst, scanLast});
+    }
+
+    public Table.TableResultSet getScanList(int runId, double mzLow, double mzHigh, int scanFirst, int scanLast) throws SQLException
+    {
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT s.Scan FROM ");
+        sql.append(getSQLTableName(TABLE_PEAKS));
+        sql.append(" AS p INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_SCANS));
+        sql.append(" AS s ON (s.ScanId=p.ScanId) INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=");
+        sql.append(FILETYPE_PEAKS);
+        sql.append(" AND (p.MZ BETWEEN ? AND ?)");
+        sql.append(" AND (s.Scan BETWEEN ? AND ?)");
+        sql.append(" ORDER BY s.Scan");
+
+        return Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, mzLow, mzHigh, scanFirst, scanLast});
     }
 
     public void deleteFeaturesData(ExpData expData, User user) throws SQLException

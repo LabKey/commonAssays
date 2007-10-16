@@ -65,6 +65,7 @@ public class MS1Controller extends SpringActionController
     {
         ViewURLHelper url = getViewURLHelper("showFeatures.view");
         url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
+        url.addParameter(".lastFilter", "true");
         return root.addChild("Features from Run", url);
     }
 
@@ -80,6 +81,7 @@ public class MS1Controller extends SpringActionController
         ViewURLHelper url = getViewURLHelper("showPeaks.view");
         url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
         url.addParameter(ShowPeaksAction.PARAM_SCAN, scan);
+        url.addParameter(".lastFilter", "true"); 
         return root.addChild("Peaks from Scan", getViewURLHelper("showPeaks.view"));
     }
 
@@ -219,6 +221,7 @@ public class MS1Controller extends SpringActionController
             ViewURLHelper url = new ViewURLHelper("ms2", "showPeptide", getContainer());
             url.addParameter("run", String.valueOf(link.getMs2Run()));
             url.addParameter("peptideId", link.getPeptideId());
+            url.addParameter("rowIndex", 1);
 
             //add a filter for MS2 scan so that the showPeptide view will know to enable or
             //disable it's <<prev and next>> buttons based on how many peptides were actually
@@ -266,9 +269,13 @@ public class MS1Controller extends SpringActionController
             FeatureChart chart = null;
             String type = form.getType();
             if(type.equalsIgnoreCase("spectrum"))
-                chart = new SpectrumChart(form.getFeatureId(), form.getRunId(), form.getScan(),
-                                                            form.getMzLow(), form.getMzHigh());
-
+                chart = new SpectrumChart(form.getRunId(), form.getScan(), form.getMzLow(), form.getMzHigh());
+            else if(type.equalsIgnoreCase("bubble"))
+                chart = new RetentionMassChart(form.getRunId(), form.getMzLow(), form.getMzHigh(),
+                                                form.getScanFirst(), form.getScanLast());
+            else if(type.equalsIgnoreCase("elution"))
+                chart = new ElutionChart(form.getRunId(), form.getMzLow(), form.getMzHigh(),
+                                                form.getScanFirst(), form.getScanLast());
 
             if(null != chart)
             {
@@ -437,6 +444,8 @@ public class MS1Controller extends SpringActionController
         private double _mzLow = 0;
         private double _mzHigh = 0;
         private String _type;
+        private int _scanFirst = 0;
+        private int _scanLast = 0;
 
         public int getFeatureId()
         {
@@ -476,6 +485,26 @@ public class MS1Controller extends SpringActionController
         public void setScan(int scan)
         {
             _scan = scan;
+        }
+
+        public int getScanFirst()
+        {
+            return _scanFirst;
+        }
+
+        public void setScanFirst(int scanFirst)
+        {
+            _scanFirst = scanFirst;
+        }
+
+        public int getScanLast()
+        {
+            return _scanLast;
+        }
+
+        public void setScanLast(int scanLast)
+        {
+            _scanLast = scanLast;
         }
 
         public double getMzLow()

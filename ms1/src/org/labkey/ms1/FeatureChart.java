@@ -19,39 +19,6 @@ import java.sql.SQLException;
  */
 public abstract class FeatureChart
 {
-    public static final String TYPE_MASS = "mass";
-
-    public FeatureChart(int featureId, int runId, int scan, double mzLow, double mzHigh)
-    {
-        assert featureId >= 0 : "The featureId " + featureId + " passed to FeatureChart was invalid!";
-
-        _featureId = featureId;
-        _runId = runId;
-        _scan = scan;
-        _mzLow = mzLow;
-        _mzHigh = mzHigh;
-    }
-
-    public int getFeatureId()
-    {
-        return _featureId;
-    }
-
-    public int getScan()
-    {
-        return _scan;
-    }
-
-    public double getMzLow()
-    {
-        return _mzLow;
-    }
-
-    public double getMzHigh()
-    {
-        return _mzHigh;
-    }
-
     public void render(OutputStream out) throws SQLException, IOException
     {
         Table.TableResultSet rs = null;
@@ -80,10 +47,7 @@ public abstract class FeatureChart
      * @return The data to use for the chart
      * @throws SQLException Thrown if database error
      */
-    protected Table.TableResultSet getChartData() throws SQLException
-    {
-        return MS1Manager.get().getPeakData(_runId, _scan, _mzLow, _mzHigh);
-    }
+    protected abstract Table.TableResultSet getChartData() throws SQLException;
 
     /**
      * Derived classes should override this to actually construct the chart. The calling
@@ -95,9 +59,4 @@ public abstract class FeatureChart
      */
     protected abstract JFreeChart makeChart(Table.TableResultSet rs) throws SQLException;
 
-    private int _featureId = -1;
-    private int _runId = -1;
-    private int _scan = 0;
-    private double _mzLow = 0;
-    private double _mzHigh = 0;
 }

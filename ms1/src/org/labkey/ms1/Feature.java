@@ -1,5 +1,9 @@
 package org.labkey.ms1;
 
+import org.labkey.api.data.Table;
+import org.labkey.api.util.ResultSetUtil;
+import org.labkey.common.util.Pair;
+
 import java.sql.SQLException;
 
 /**
@@ -227,6 +231,62 @@ public class Feature
         if(null == _runId)
             _runId = MS1Manager.get().getRunIdFromFeature(_featureId);
         return _runId;
+    }
+
+    public static class PrevNextScans
+    {
+        public PrevNextScans(Integer prev, Integer next)
+        {
+            _prev = prev;
+            _next = next;
+        }
+
+        public Integer getPrev()
+        {
+            return _prev;
+        }
+
+        public Integer getNext()
+        {
+            return _next;
+        }
+
+        private Integer _prev = null;
+        private Integer _next = null;
+    }
+
+    public PrevNextScans getPrevNextScan(int scan, double mzLow, double mzHigh) throws SQLException
+    {
+        Table.TableResultSet rs = null;
+        Integer prevScan = null;
+        Integer nextScan = null;
+
+        try
+        {
+            rs = MS1Manager.get().getScanList(getRunId().intValue(), mzLow, mzHigh,
+                                            _scanFirst.intValue(), _scanLast.intValue());
+            int curScan = 0;
+            while(null != rs && rs.next())
+            {
+                curScan = rs.getInt("Scan");
+                if(!rs.wasNull())
+                {
+                    if(curScan < scan)
+                        prevScan = curScan;
+                    if(curScan > scan && null == nextScan)
+                    {
+                        nextScan = curScan;
+                        break;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            ResultSetUtil.close(rs);
+        }
+
+        return new PrevNextScans(prevScan, nextScan);
     }
 
     private int _featureId;

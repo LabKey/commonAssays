@@ -5,6 +5,7 @@
 <%@ page import="java.text.Format" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.common.util.Pair" %>
 <%
     JspView<Feature> me = (JspView<Feature>) HttpView.currentView();
     Feature feature = me.getModelBean();
@@ -35,7 +36,7 @@
     <tr>
         <td valign="top">
             <!-- feature data -->
-            <table cellspacing="0" cellpadding="0">
+            <table cellspacing="0" cellpadding="2px">
                 <tr>
                     <td bgcolor="#EEEEEE">Scan</td>
                     <td><%=feature.getScan()%></td>
@@ -110,26 +111,27 @@
             <%
                 String prevScanCaption = "<< Previous Scan";
                 String nextScanCaption = "Next Scan >>";
+                Feature.PrevNextScans prevNextScans = feature.getPrevNextScan(scan, feature.getMz() - 1, feature.getMz() + 5);
 
-                if(scan <= feature.getScanFirst())
-                    out.print(PageFlowUtil.buttonImg(prevScanCaption,"disabled"));
+                if (null == prevNextScans.getPrev())
+                    out.print(PageFlowUtil.buttonImg(prevScanCaption, "disabled"));
                 else
                 {
                     ViewURLHelper urlPrev = url.clone();
                     urlPrev.deleteParameter("scan");
-                    urlPrev.addParameter("scan", scan - 1);
+                    urlPrev.addParameter("scan", prevNextScans.getPrev().intValue());
                     out.print("<a href=\"" + urlPrev.getLocalURIString() + "\">" + PageFlowUtil.buttonImg(prevScanCaption) + "</a>");
                 }
 
                 out.print("&nbsp;");
 
-                if(scan >= feature.getScanLast())
-                    out.print(PageFlowUtil.buttonImg(nextScanCaption,"disabled"));
+                if (null == prevNextScans.getNext())
+                    out.print(PageFlowUtil.buttonImg(nextScanCaption, "disabled"));
                 else
                 {
                     ViewURLHelper urlPrev = url.clone();
                     urlPrev.deleteParameter("scan");
-                    urlPrev.addParameter("scan", scan + 1);
+                    urlPrev.addParameter("scan", prevNextScans.getNext().intValue());
                     out.print("<a href=\"" + urlPrev.getLocalURIString() + "\">" + PageFlowUtil.buttonImg(nextScanCaption) + "</a>");
                 }
 
@@ -137,16 +139,19 @@
             <!-- m/z and intensity peaks mass chart -->
             <br/>
             <img src="showChart.view?type=spectrum&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scan=<%=scan%>&mzLow=<%=feature.getMz()-1%>&mzHigh=<%=feature.getMz()+5%>" alt="Spectrum chart"/>
+            <br/><i>This chart shows the intensities of peaks with similar m/z values as the feature for a particular scan.</i>
         </td>
     </tr>
     <tr>
-        <td>
+        <td align="center">
             <!-- retention time and intensity peaks elution chart -->
-            Chart goes here
+            <img src="showChart.view?type=elution&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst()%>&scanLast=<%=feature.getScanLast()%>&mzLow=<%=feature.getMz()-0.02%>&mzHigh=<%=feature.getMz()+0.02%>" alt="Elution chart"/>
+            <br/><i>This chart shows the intensity of the peaks with the closest m/z value to the feature, across all scans within the feature&apos;s range.</i>
         </td>
-        <td>
+        <td align="center">
             <!-- retention time and m/z bubble chart -->
-            Chart goes here
+            <img src="showChart.view?type=bubble&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst()%>&scanLast=<%=feature.getScanLast()%>&mzLow=<%=feature.getMz()-1%>&mzHigh=<%=feature.getMz()+5%>" alt="Intesities Bubble chart"/>
+            <br/><i>This chart shows the peaks with a similar m/z as the feature, across all scans within the feature&apos;s range. The size of each bubble represents the peak&apos;s intensity.</i>
         </td>
     </tr>
 </table>

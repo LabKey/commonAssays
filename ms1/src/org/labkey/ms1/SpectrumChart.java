@@ -18,9 +18,17 @@ import java.sql.SQLException;
  */
 public class SpectrumChart extends FeatureChart
 {
-    public SpectrumChart(int featureId, int runId, int scan, double mzLow, double mzHigh)
+    public SpectrumChart(int runId, int scan, double mzLow, double mzHigh)
     {
-        super(featureId, runId, scan, mzLow, mzHigh);
+        _runId = runId;
+        _scan = scan;
+        _mzHigh = mzHigh;
+        _mzLow = mzLow;
+    }
+
+    protected Table.TableResultSet getChartData() throws SQLException
+    {
+        return MS1Manager.get().getPeakData(_runId, _scan, _mzLow, _mzHigh);
     }
 
     protected JFreeChart makeChart(Table.TableResultSet rs) throws SQLException
@@ -33,9 +41,14 @@ public class SpectrumChart extends FeatureChart
         XYSeriesCollection dataset = new XYSeriesCollection(series);
         dataset.setIntervalWidth(0); //this controls the width of the bars, which we want to be very thin
         
-        return ChartFactory.createXYBarChart("Spectrum for Scan " + getScan(), "m/z", false, "Intensity",
+        return ChartFactory.createXYBarChart("Spectrum for Scan " + _scan, "m/z", false, "Intensity",
                                                         dataset, PlotOrientation.VERTICAL,
                                                         false, false, false);
 
     }
+    
+    private int _runId = -1;
+    private int _scan = 0;
+    private double _mzLow = 0;
+    private double _mzHigh = 0;
 }
