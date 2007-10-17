@@ -310,8 +310,15 @@ public class MS1Controller extends SpringActionController
                 return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
 
             _form = form;
+
             Feature feature = MS1Manager.get().getFeature(form.getFeatureId());
-            return new JspView<Feature>("/org/labkey/ms1/FeatureDetailView.jsp", feature);
+            FeaturesView featuresView = new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()),
+                                                            form.getRunId(), false, true);
+
+            int[] prevNextFeatureIds = featuresView.getPrevNextFeature(form.getFeatureId());
+            FeatureDetailsViewContext ctx = new FeatureDetailsViewContext(feature, prevNextFeatureIds[0], prevNextFeatureIds[1]);
+            
+            return new JspView<FeatureDetailsViewContext>("/org/labkey/ms1/FeatureDetailView.jsp", ctx);
         }
 
         public NavTree appendNavTrail(NavTree root)

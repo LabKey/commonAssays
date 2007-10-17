@@ -6,9 +6,11 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page import="org.labkey.common.util.Pair" %>
+<%@ page import="org.labkey.ms1.FeatureDetailsViewContext" %>
 <%
-    JspView<Feature> me = (JspView<Feature>) HttpView.currentView();
-    Feature feature = me.getModelBean();
+    JspView<FeatureDetailsViewContext> me = (JspView<FeatureDetailsViewContext>) HttpView.currentView();
+    FeatureDetailsViewContext ctx = me.getModelBean();
+    Feature feature = ctx.getFeature();
     me.setTitle("Feature Details");
 
     int scan = feature.getScan().intValue();
@@ -33,6 +35,36 @@
 %>
 
 <table cellspacing="0" cellpadding="4px">
+    <tr>
+        <td colspan="2" align="left">
+            <%
+                String prevFeatureCaption = "<< Previous Feature";
+                String nextFeatureCaption = "Next Feature >>";
+
+                //clone the current url and remove anything specific to the feature
+                ViewURLHelper urlFeature = url.clone();
+                urlFeature.deleteParameter("scan");
+
+                if(ctx.getPrevFeatureId() < 0)
+                    out.write(PageFlowUtil.buttonImg(prevFeatureCaption, "disabled"));
+                else
+                {
+                    urlFeature.replaceParameter("featureId", String.valueOf(ctx.getPrevFeatureId()));
+                    out.print("<a href=\"" + urlFeature.getLocalURIString() + "\">" + PageFlowUtil.buttonImg(prevFeatureCaption) + "</a>");
+                }
+
+                out.write("&nbsp;");
+
+                if(ctx.getNextFeatureId() < 0)
+                    out.write(PageFlowUtil.buttonImg(nextFeatureCaption, "disabled"));
+                else
+                {
+                    urlFeature.replaceParameter("featureId", String.valueOf(ctx.getNextFeatureId()));
+                    out.print("<a href=\"" + urlFeature.getLocalURIString() + "\">" + PageFlowUtil.buttonImg(nextFeatureCaption) + "</a>");
+                }
+            %>
+        </td>
+    </tr>
     <tr>
         <td valign="top">
             <!-- feature data -->
@@ -111,27 +143,27 @@
             <%
                 String prevScanCaption = "<< Previous Scan";
                 String nextScanCaption = "Next Scan >>";
-                Feature.PrevNextScans prevNextScans = feature.getPrevNextScan(scan, feature.getMz() - 1, feature.getMz() + 5);
+                Integer[] prevNextScans = ctx.getPrevNextScans(scan, feature.getMz() - 1, feature.getMz() + 5);
 
-                if (null == prevNextScans.getPrev())
+                if (null == prevNextScans || 0 == prevNextScans.length || null == prevNextScans[0])
                     out.print(PageFlowUtil.buttonImg(prevScanCaption, "disabled"));
                 else
                 {
                     ViewURLHelper urlPrev = url.clone();
                     urlPrev.deleteParameter("scan");
-                    urlPrev.addParameter("scan", prevNextScans.getPrev().intValue());
+                    urlPrev.addParameter("scan", prevNextScans[0].intValue());
                     out.print("<a href=\"" + urlPrev.getLocalURIString() + "\">" + PageFlowUtil.buttonImg(prevScanCaption) + "</a>");
                 }
 
                 out.print("&nbsp;");
 
-                if (null == prevNextScans.getNext())
+                if (null == prevNextScans || 0 == prevNextScans.length || null == prevNextScans[1])
                     out.print(PageFlowUtil.buttonImg(nextScanCaption, "disabled"));
                 else
                 {
                     ViewURLHelper urlPrev = url.clone();
                     urlPrev.deleteParameter("scan");
-                    urlPrev.addParameter("scan", prevNextScans.getNext().intValue());
+                    urlPrev.addParameter("scan", prevNextScans[1].intValue());
                     out.print("<a href=\"" + urlPrev.getLocalURIString() + "\">" + PageFlowUtil.buttonImg(nextScanCaption) + "</a>");
                 }
 

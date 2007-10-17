@@ -58,7 +58,7 @@ public class PeaksView extends QueryView
     protected TableInfo createTable()
     {
         PeaksTableInfo tinfo = _schema.getPeaksTableInfo();
-        tinfo.addScanRangeCondition(_scanFirst.getScanId(), _scanLast.getScanId());
+        tinfo.addScanIdRangeCondition(_scanFirst.getScanId(), _scanLast.getScanId());
         return tinfo;
     }
 

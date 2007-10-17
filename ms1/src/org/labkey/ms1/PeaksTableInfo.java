@@ -73,7 +73,7 @@ public class PeaksTableInfo extends FilteredTable
         addCondition(getRealTable().getColumn("ScanId"), scanId);
     }
 
-    public void addScanRangeCondition(int scanIdFirst, int scanIdLast)
+    public void addScanIdRangeCondition(int scanIdFirst, int scanIdLast)
     {
         SQLFragment sql = new SQLFragment("ScanId BETWEEN ? AND ?", scanIdFirst, scanIdLast);
         addCondition(sql, "ScanId");

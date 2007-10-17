@@ -477,6 +477,7 @@ ms1/src/org/labkey/ms1/ElutionChart.java -text
 ms1/src/org/labkey/ms1/Feature.java -text
 ms1/src/org/labkey/ms1/FeatureChart.java -text
 ms1/src/org/labkey/ms1/FeatureDetailView.jsp -text
+ms1/src/org/labkey/ms1/FeatureDetailsViewContext.java -text
 ms1/src/org/labkey/ms1/FeaturePeptideLink.java -text
 ms1/src/org/labkey/ms1/FeaturesTableInfo.java -text
 ms1/src/org/labkey/ms1/FeaturesView.java -text

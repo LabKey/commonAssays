@@ -5,12 +5,14 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.ButtonBar;
-import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.util.ResultSetUtil;
+
+import java.sql.SQLException;
+import java.sql.ResultSet;
+import java.io.IOException;
 
 /**
  * Implements a query view over the features data, allows filtering for features from a specific run
@@ -56,6 +58,34 @@ public class FeaturesView extends QueryView
         setShowExportButtons(false);
     }
 
+    public int[] getPrevNextFeature(int featureIdCur) throws SQLException, IOException
+    {
+        ResultSet rs = null;
+        int prevFeatureId = -1;
+        int nextFeatureId = -1;
+        try
+        {
+            rs = createDataRegion().getResultSet(new RenderContext(getViewContext()));
+            while(rs.next())
+            {
+                if(rs.getInt("FeatureId") == featureIdCur)
+                {
+                    if(rs.next())
+                        nextFeatureId = rs.getInt("FeatureId");
+                    break;
+                }
+
+                prevFeatureId = rs.getInt("FeatureId");
+            }
+
+            return new int[] {prevFeatureId, nextFeatureId};
+        }
+        finally
+        {
+            ResultSetUtil.close(rs);
+        }
+    }
+
     /**
      * Overridden to add the run id filter condition to the features TableInfo.
      * @return A features TableInfo filtered to the current run id
@@ -66,7 +96,7 @@ public class FeaturesView extends QueryView
 
         FeaturesTableInfo tinfo = _ms1Schema.getFeaturesTableInfo();
         if(_runId >= 0)
-            tinfo.addRunIdCondition(_runId, getContainer(), _peaksAvaialble, _forExport);
+            tinfo.addRunIdCondition(_runId, getContainer(), getViewContext().getViewURLHelper(), _peaksAvaialble, _forExport);
         return tinfo;
     }
 

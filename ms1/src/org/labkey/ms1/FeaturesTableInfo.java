@@ -70,10 +70,11 @@ public class FeaturesTableInfo extends FilteredTable
         addCondition(sf, "FileId");
     } //c-tor
 
-    public void addRunIdCondition(int runId, Container container, boolean peaksAvailable, boolean forExport)
+    public void addRunIdCondition(int runId, Container container, ViewURLHelper urlBase, boolean peaksAvailable, boolean forExport)
     {
         _container = container;
         _runId = runId;
+        _urlBase = urlBase;
 
         SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=? AND d.RunId=?)",
                                             container.getId(), true, runId);
@@ -90,8 +91,8 @@ public class FeaturesTableInfo extends FilteredTable
             {
                 public DisplayColumn createRenderer(ColumnInfo colInfo)
                 {
-                    ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showFeatureDetails.view", _container);
-                    url.addParameter("runId", _runId);
+                    ViewURLHelper url = _urlBase.clone();
+                    url.setAction("showFeatureDetails.view");
                     return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}"), "details");
                 }
             });
@@ -144,5 +145,6 @@ public class FeaturesTableInfo extends FilteredTable
     // Protected Data Members
     protected ExpSchema _expSchema;
     protected Container _container;
+    protected ViewURLHelper _urlBase;
     protected int _runId = 0;
 } //class FeaturesTableInfo

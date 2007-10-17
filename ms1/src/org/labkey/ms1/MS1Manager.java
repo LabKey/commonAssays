@@ -254,6 +254,30 @@ public class MS1Manager
         return Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, mzLow, mzHigh, scanFirst, scanLast});
     }
 
+    public Integer[] getPrevNextScan(int runId, double mzLow, double mzHigh, int scanFirst, int scanLast, int scanCur) throws SQLException
+    {
+        StringBuilder sql = new StringBuilder(" FROM ");
+        sql.append(getSQLTableName(TABLE_PEAKS));
+        sql.append(" AS p INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_SCANS));
+        sql.append(" AS s ON (s.ScanId=p.ScanId) INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=");
+        sql.append(FILETYPE_PEAKS);
+        sql.append(" AND (p.MZ BETWEEN ? AND ?)");
+        sql.append(" AND (s.Scan BETWEEN ? AND ?)");
+
+        //find the max of those less than cur
+        String sqlPrev = "SELECT MAX(s.Scan)" + sql.toString() + " AND s.Scan < ?";
+        Integer prevScan = Table.executeSingleton(getSchema(), sqlPrev, new Object[]{runId, mzLow, mzHigh, scanFirst, scanLast, scanCur}, Integer.class);
+
+        //find the min of those greater than cur
+        String sqlNext = "SELECT MIN(s.Scan)" + sql.toString() + " AND s.Scan > ?";
+        Integer nextScan = Table.executeSingleton(getSchema(), sqlNext, new Object[]{runId, mzLow, mzHigh, scanFirst, scanLast, scanCur}, Integer.class);
+
+        return new Integer[]{prevScan, nextScan};
+    }
+
     public void deleteFeaturesData(ExpData expData, User user) throws SQLException
     {
         int idExpData = expData.getRowId();
