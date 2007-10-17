@@ -3,6 +3,7 @@ package org.labkey.ms1;
 import org.labkey.api.data.Table;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.contour.DefaultContourDataset;
 
@@ -46,24 +47,27 @@ public class RetentionMassChart extends FeatureChart
         double minZ = Double.MAX_VALUE;
         double maxY = Double.MIN_VALUE;
         double maxZ = Double.MIN_VALUE;
+        double curZ;
+        LogarithmicAxis logaxis = new LogarithmicAxis("temp");
 
         while(rs.next())
         {
             xvals.add(rs.getDouble("RetentionTime"));
             yvals.add(rs.getDouble("MZ"));
-            zvals.add(rs.getDouble("Intensity"));
+            curZ = logaxis.adjustedLog10(rs.getDouble("Intensity"));
+            zvals.add(curZ);
 
             minY = Math.min(minY, rs.getDouble("MZ"));
-            minZ = Math.min(minZ, rs.getDouble("Intensity"));
+            minZ = Math.min(minZ, curZ);
             maxY = Math.max(maxY, rs.getDouble("MZ"));
-            maxZ = Math.max(maxZ, rs.getDouble("Intensity"));
+            maxZ = Math.max(maxZ, curZ);
         }
 
         //scale the Z values so that they will be a reasonable size
         //comapred to the Y axis, which is what the chart uses to
         //calculate the bubble diameter
         for(int idx = 0; idx < zvals.size(); ++idx)
-            zvals.set(idx, ((zvals.get(idx).doubleValue() / (maxZ - minZ)) * (maxY - minY)) * 0.5); //largest bubble will be 50% of Y's scale
+            zvals.set(idx, (zvals.get(idx).doubleValue() / maxZ) * (maxY - minY) * .05);
 
         //NOTE: in version 1.0.2 of JFreeChart, the DefaultContourDataset was replaced with
         //the DefaultXYZDataset class. The former is marked as depricated in versions 1.0.4 and beyond.
@@ -71,12 +75,10 @@ public class RetentionMassChart extends FeatureChart
         //DefaultXYZDataset.
         DefaultContourDataset dataset = new DefaultContourDataset("Intensities", xvals.toArray(), yvals.toArray(), zvals.toArray());
 
-        JFreeChart chart = ChartFactory.createBubbleChart("Intensities for Scans " + _scanFirst + " through " + _scanLast,
+        return ChartFactory.createBubbleChart("Intensities for Scans " + _scanFirst + " through " + _scanLast,
                                                             "Retention Time", "m/z", dataset, PlotOrientation.VERTICAL,
                                                             false, false, false);
 
-        chart.getPlot().setForegroundAlpha(0.5f);
-        return chart;
     }
 
     private int _runId = -1;
