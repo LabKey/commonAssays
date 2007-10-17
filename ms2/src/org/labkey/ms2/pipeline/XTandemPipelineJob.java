@@ -23,6 +23,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.util.PathRelativizer;
 import org.labkey.api.util.XMLValidationParser;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.data.Container;
 
@@ -624,7 +625,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob
         File uniquifierFile = _fileTandemXML.getParentFile();
         if (!isFractions())
             uniquifierFile = new File(uniquifierFile, _baseName);
-        String uniquifier = PathRelativizer.relativizePathUnix(containerRoot, uniquifierFile);
+        String uniquifier = PageFlowUtil.encode(PathRelativizer.relativizePathUnix(containerRoot, uniquifierFile)).replaceAll("%2F", "/");
 
         replaceString(sb, "RUN-UNIQUIFIER", uniquifier);
 

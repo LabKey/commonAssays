@@ -2781,7 +2781,7 @@ public class MS2Controller extends ViewController
         ViewURLHelper url = cloneViewURLHelper();
         url.setAction("showRun.view");
 
-        MS2Run run = MS2Manager.getRun((String) ctx.get("run"));
+        MS2Run run = MS2Manager.getRun(getRequest().getParameter("run"));
         String paramName = run.getChargeFilterParamName();
 
         // Stick posted values onto showRun URL and forward.  URL shouldn't have any rawScores or tryptic (they are
