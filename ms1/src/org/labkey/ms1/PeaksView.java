@@ -1,17 +1,17 @@
 package org.labkey.ms1;
 
-import org.labkey.api.data.ActionButton;
-import org.labkey.api.data.ButtonBar;
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.DisplayElement;
 
 import java.sql.SQLException;
+import java.io.Writer;
+import java.io.IOException;
 
 /**
  * Implements a simple, flat QueryView over the Scan/Peaks data
@@ -27,13 +27,14 @@ public class PeaksView extends QueryView
     private static final String CAPTION_EXPORT_ALL_TSV = "Export All to Text";
     private static final String CAPTION_PRINT_ALL = "Print";
 
-    public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Scan scanFirst, Scan scanLast) throws SQLException
+    public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Feature feature, Scan scanFirst, Scan scanLast) throws SQLException
     {
         super(schema);
-        _schema = schema;
-
-        assert null != _schema : "Null schema passed to PeaksView!";
+        assert null != schema : "Null schema passed to PeaksView!";
+        assert null != feature : "Null Feature passed to PeaksView!";
         assert (null != scanFirst && null != scanLast) : "Null scans passed to PeaksView!";
+        _schema = schema;
+        _feature = feature;
         _scanFirst = scanFirst;
         _scanLast = scanLast;
 
@@ -95,6 +96,8 @@ public class PeaksView extends QueryView
             addQueryActionButton(bar, "exportRowsExcel", CAPTION_EXPORT_ALL_EXCEL);
             addQueryActionButton(bar, "exportRowsTsv", CAPTION_EXPORT_ALL_TSV);
             addQueryActionButton(bar, "printRows", CAPTION_PRINT_ALL);
+
+            bar.add(0, new ScanFilter(_feature, getViewContext().getViewURLHelper()));
         }
 
         return view;
@@ -131,8 +134,50 @@ public class PeaksView extends QueryView
         bar.add(btn);
     } //addQueryActionButton()
 
+    public static class ScanFilter extends DisplayElement
+    {
+        private static final String SCAN_FILTER = "query.ScanId/Scan~eq";
+
+        public ScanFilter(Feature feature, ViewURLHelper url)
+        {
+            _url = url;
+            _feature = feature;
+        }
+        public void render(RenderContext ctx, Writer out) throws IOException
+        {
+            if(null == _feature)
+                return;
+
+            ViewURLHelper urlAll = _url.clone();
+            urlAll.deleteParameter(SCAN_FILTER);
+
+            out.write("Show:&nbsp;");
+            out.write("<select onchange=\"document.location.href=this.options[this.selectedIndex].value\">");
+            out.write("<option");
+            if(_url.getParameter(SCAN_FILTER) == null)
+                out.write(" selected");
+
+            out.write(" value=\"" + urlAll.getLocalURIString() + "\">All Scans</option>");
+
+            ViewURLHelper urlApex = _url.clone();
+            if(_feature.getScan() != null)
+            {
+                urlApex.addParameter("query.ScanId/Scan~eq", _feature.getScan().intValue());
+                out.write("<option");
+                if(_url.getParameter(SCAN_FILTER) != null)
+                    out.write(" selected");
+                out.write(" value=\"" + urlApex.getLocalURIString() + "\">Feature Apex Scan</option>");
+            }
+            out.write("</select>");
+        }
+
+        private ViewURLHelper _url = null;
+        private Feature _feature = null;
+    }
+
     private MS1Schema _schema;
     private Scan _scanFirst = null;
     private Scan _scanLast = null;
+    private Feature _feature = null;
 } //class PeaksView
 

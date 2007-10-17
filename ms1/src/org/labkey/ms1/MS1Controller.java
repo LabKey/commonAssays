@@ -199,12 +199,12 @@ public class MS1Controller extends SpringActionController
                     softwareView.setTitle("Software Information");
                     return new VBox(softwareView,
                                     new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                        expRun, scanFirst, scanLast));
+                                        expRun, feature, scanFirst, scanLast));
                 }
             }
 
             return new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                expRun, scanFirst, scanLast);
+                                expRun, feature, scanFirst, scanLast);
         }
 
         public NavTree appendNavTrail(NavTree root)
