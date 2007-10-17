@@ -70,7 +70,7 @@ public class FeaturesTableInfo extends FilteredTable
         addCondition(sf, "FileId");
     } //c-tor
 
-    public void addRunIdCondition(int runId, Container container, boolean peaksAvailable)
+    public void addRunIdCondition(int runId, Container container, boolean peaksAvailable, boolean forExport)
     {
         _container = container;
         _runId = runId;
@@ -81,7 +81,7 @@ public class FeaturesTableInfo extends FilteredTable
         addCondition(sf, "FileId");
 
         //if peak data is available...
-        if(peaksAvailable)
+        if(peaksAvailable && !forExport)
         {
             //add a new column info for the feature details link
             ColumnInfo cinfo = new ColumnInfo("Details Link");
@@ -121,22 +121,24 @@ public class FeaturesTableInfo extends FilteredTable
             setDefaultVisibleColumns(visibleColumns);
         }
 
-        //make the ms2 scan a hyperlink to showPeptide view
-        ViewURLHelper urlPep = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showMS2Peptide", container);
-        DisplayColumnFactory factory = new DisplayColumnFactory()
+        if(!forExport)
         {
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            //make the ms2 scan a hyperlink to showPeptide view
+            ViewURLHelper urlPep = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showMS2Peptide", container);
+            DisplayColumnFactory factory = new DisplayColumnFactory()
             {
-                DataColumn dataColumn = new DataColumn(colInfo);
-                dataColumn.setLinkTarget("peptide");
-                return dataColumn;
-            }
-        };
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    DataColumn dataColumn = new DataColumn(colInfo);
+                    dataColumn.setLinkTarget("peptide");
+                    return dataColumn;
+                }
+            };
 
-        ColumnInfo ciMS2Scan = getColumn("MS2Scan");
-        ciMS2Scan.setURL(urlPep.getLocalURIString() + "featureId=${FeatureId}");
-        ciMS2Scan.setDisplayColumnFactory(factory);
-
+            ColumnInfo ciMS2Scan = getColumn("MS2Scan");
+            ciMS2Scan.setURL(urlPep.getLocalURIString() + "featureId=${FeatureId}");
+            ciMS2Scan.setDisplayColumnFactory(factory);
+        }
     } //addRunIdCondition()
 
     // Protected Data Members

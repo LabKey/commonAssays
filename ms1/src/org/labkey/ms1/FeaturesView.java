@@ -34,17 +34,16 @@ public class FeaturesView extends QueryView
      * @param schema    The MS1Schema to use
      * @param runId     The id of the experiment run
      * @param peaksAvailable Pass true if peak data is available
+     * @param forExport Pass true if this is being created for export to excel/tsv/print
      */
-    public FeaturesView(ViewContext ctx, MS1Schema schema, int runId, boolean peaksAvailable)
+    public FeaturesView(ViewContext ctx, MS1Schema schema, int runId, boolean peaksAvailable, boolean forExport)
     {
         super(schema);
         _ms1Schema = schema;
         _runId = runId;
         _peaksAvaialble = peaksAvailable;
+        _forExport = forExport;
 
-        //NOTE: The use of QueryView.DATAREGIONNAME_DEFAULT is essential here!
-        //the export/print buttons that I will add later use the query controller's
-        //actions, and those expect that the sorts/filters use the default data region name.
         QuerySettings settings = new QuerySettings(ctx.getViewURLHelper(), ctx.getRequest(), QueryView.DATAREGIONNAME_DEFAULT);
         settings.setQueryName(MS1Schema.TABLE_FEATURES);
         settings.setAllowChooseQuery(false);
@@ -67,7 +66,7 @@ public class FeaturesView extends QueryView
 
         FeaturesTableInfo tinfo = _ms1Schema.getFeaturesTableInfo();
         if(_runId >= 0)
-            tinfo.addRunIdCondition(_runId, getContainer(), _peaksAvaialble);
+            tinfo.addRunIdCondition(_runId, getContainer(), _peaksAvaialble, _forExport);
         return tinfo;
     }
 
@@ -100,42 +99,25 @@ public class FeaturesView extends QueryView
             ButtonBar bar = region.getButtonBar(DataRegion.MODE_GRID);
             assert null != bar : "Coun't get the button bar during FeaturesView.createDataView()!";
 
-            addQueryActionButton(bar, "exportRowsExcel", CAPTION_EXPORT_ALL_EXCEL);
-            addQueryActionButton(bar, "exportRowsTsv", CAPTION_EXPORT_ALL_TSV);
-            addQueryActionButton(bar, "printRows", CAPTION_PRINT_ALL);
+            addExportButton(bar, "excel", CAPTION_EXPORT_ALL_EXCEL);
+            addExportButton(bar, "tsv", CAPTION_EXPORT_ALL_TSV);
+            addExportButton(bar, "print", CAPTION_PRINT_ALL);
         }
 
         return view;
     } //createDataView()
 
-    /**
-     * Adds a button to the bar that will invoke a query controller action. This will automatically
-     * substitute our runId filter paramter with the equivalent query filter, as well as add
-     * other parameters needed by query (e.g., schema and query name).
-     * @param bar       The button bar
-     * @param action    The query controller action name
-     * @param caption   The caption of the new button
-     */
-    protected void addQueryActionButton(ButtonBar bar, String action, String caption)
+    protected void addExportButton(ButtonBar bar, String format, String caption)
     {
         ViewURLHelper url = getViewContext().getViewURLHelper().clone();
-        url.setPageFlow("query");
-        url.setAction(action);
+        url.replaceParameter("export", format);
+        bar.add(new ActionButton(url.getEncodedLocalURIString(), caption, DataRegion.MODE_ALL, ActionButton.Action.LINK));
+    }
 
-        //add the parameters the query action will need
-        url.addParameter("query.queryName", MS1Schema.TABLE_FEATURES);
-        url.addParameter("schemaName", MS1Schema.SCHEMA_NAME);
-
-        //replace our runId paramter with a query filter on the run table's RowId column
-        url.deleteParameter("runId");
-        url.addParameter("query.FileId/ExpDataFileId/Run/RowId~eq", _runId);
-
-        ActionButton btn = new ActionButton(url.getEncodedLocalURIString(), caption, DataRegion.MODE_ALL, ActionButton.Action.LINK);
-        bar.add(btn);
-    } //addQueryActionButton()
 
     //Data members
     private MS1Schema _ms1Schema;
     private int _runId = -1;
     private boolean _peaksAvaialble = false;
+    private boolean _forExport = false;
 } //class FeaturesView

@@ -12,6 +12,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.query.QueryView;
 import org.labkey.ms1.pipeline.MSInspectImportPipelineJob;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -86,6 +87,32 @@ public class MS1Controller extends SpringActionController
         return root.addChild("Peaks from Feature", url);
     }
 
+    protected ModelAndView exportQueryView(QueryView view, String format) throws Exception
+    {
+        if(format.equalsIgnoreCase("excel"))
+            view.exportToExcel(getViewContext().getResponse());
+        else if(format.equalsIgnoreCase("tsv"))
+            view.exportToTsv(getViewContext().getResponse());
+        else if(format.equalsIgnoreCase("print"))
+        {
+            view.setPrintView(true);
+            PrintTemplate template = new PrintTemplate(view, view.getTitle());
+            template.getModelBean().setShowPrintDialog(true);
+            HttpView.include(template, getViewContext().getRequest(), getViewContext().getResponse());
+        }
+
+        return null;
+    }
+
+    protected boolean isExportRequest(String exportParam)
+    {
+        return (null != exportParam && exportParam.length() > 0 &&
+                (exportParam.equalsIgnoreCase("excel") 
+                || exportParam.equalsIgnoreCase("tsv")
+                || exportParam.equalsIgnoreCase("print")
+                ));
+    }
+
     /**
      * Begin action for the MS1 Module. Displays a list of msInspect feature finding runs
      */
@@ -117,26 +144,40 @@ public class MS1Controller extends SpringActionController
             if(-1 == form.getRunId())
                 return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
 
-            _form = form;
             MS1Manager mgr = MS1Manager.get();
 
             //determine if there is peak data available for these features
             boolean peaksAvailable = mgr.isPeakDataAvailable(form.getRunId());
 
+            //create the features view
+            FeaturesView featuresView = new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()),
+                                                            form.getRunId(), peaksAvailable, 
+                                                            isExportRequest(form.getExport()));
+
+            //if there is an export request, export and return
+            if(isExportRequest(form.getExport()))
+                return exportQueryView(featuresView, form.getExport());
+
             //get the corresponding file Id and initialize a software view
+            JspView softwareView = null;
             Integer fileId = mgr.getFileIdForRun(form.getRunId(), MS1Manager.FILETYPE_FEATURES);
             if(null != fileId)
             {
                 Software[] swares = mgr.getSoftware(fileId.intValue());
                 if(null != swares && swares.length > 0)
                 {
-                    JspView softwareView = new JspView<Software[]>("/org/labkey/ms1/softwareView.jsp", swares);
+                    softwareView = new JspView<Software[]>("/org/labkey/ms1/softwareView.jsp", swares);
                     softwareView.setTitle("Software Information");
-                    return new VBox(softwareView, new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId(), peaksAvailable));
                 }
             }
 
-            return new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()), form.getRunId(), peaksAvailable);
+            //save the form so that we have access to it in the appendNavTrail method
+            _form = form;
+
+            if(null != softwareView)
+                return new VBox(softwareView, featuresView);
+            else
+                return featuresView;
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -185,26 +226,33 @@ public class MS1Controller extends SpringActionController
             Scan scanFirst = mgr.getScan(scanIds[0].intValue());
             Scan scanLast = mgr.getScan(scanIds[1].intValue());
 
-            //save the form so we have access to the params when we build the nav trail
-            _form = form;
+            //initialize the PeaksView
+            PeaksView peaksView = new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
+                                                expRun, feature, scanFirst, scanLast);
 
-            //get the corresponding file Id for the scanId and if one is found
-            //include a software view
+            //if there is an export parameter, do the export and return
+            if(isExportRequest(form.getExport()))
+                return exportQueryView(peaksView, form.getExport());
+
+            //if software information is available, create and initialize the software view
+            JspView softwareView = null;
             if(null != scanFirst)
             {
                 Software[] swares = mgr.getSoftware(scanFirst.getFileId());
                 if(null != swares && swares.length > 0)
                 {
-                    JspView softwareView = new JspView<Software[]>("/org/labkey/ms1/softwareView.jsp", swares);
+                    softwareView = new JspView<Software[]>("/org/labkey/ms1/softwareView.jsp", swares);
                     softwareView.setTitle("Software Information");
-                    return new VBox(softwareView,
-                                    new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                        expRun, feature, scanFirst, scanLast));
                 }
             }
 
-            return new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                expRun, feature, scanFirst, scanLast);
+            //save the form so we have access to the params when we build the nav trail
+            _form = form;
+
+            if(null != softwareView)
+                return new VBox(softwareView, peaksView);
+            else
+                return peaksView;
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -387,6 +435,7 @@ public class MS1Controller extends SpringActionController
     public static class RunIdForm
     {
         private int _runId = -1;
+        private String _export = null;
 
         public int getRunId()
         {
@@ -396,6 +445,16 @@ public class MS1Controller extends SpringActionController
         public void setRunId(int runId)
         {
             _runId = runId;
+        }
+
+        public String getExport()
+        {
+            return _export;
+        }
+
+        public void setExport(String export)
+        {
+            _export = export;
         }
     } //class RunIDForm
 
@@ -429,6 +488,7 @@ public class MS1Controller extends SpringActionController
     {
         private int _featureId = -1;
         private int _runId = -1;
+        private String _export = null;
 
         public int getFeatureId()
         {
@@ -448,6 +508,16 @@ public class MS1Controller extends SpringActionController
         public void setRunId(int runId)
         {
             _runId = runId;
+        }
+
+        public String getExport()
+        {
+            return _export;
+        }
+
+        public void setExport(String export)
+        {
+            _export = export;
         }
     }
 

@@ -82,7 +82,9 @@
       <ns:columns>
         <ns:column columnName="PeakFamilyId"/>
         <ns:column columnName="ScanId"/>
-        <ns:column columnName="MzMono"/>
+        <ns:column columnName="MzMono">
+            <ns:formatString>#,##0.0000</ns:formatString>
+        </ns:column>
         <ns:column columnName="Charge"/>
       </ns:columns>
     </ns:table>
