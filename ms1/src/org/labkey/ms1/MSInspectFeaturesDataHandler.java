@@ -25,6 +25,7 @@ import java.text.ParseException;
  * This data handler loads msInspect feature files, which use a tsv format.
  * It also handles deleting and moving that data when the experiment run
  * is deleted or moved.
+ * @author DaveS
  * User: daves
  * Date: Sept, 2007
  */
@@ -37,14 +38,14 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      * target database column and its jdbc data type. This is used within
      * the MSInspectFeaturesDataHandler class, and enables us to handle
      * feature files with missing or additional (but well-known) columns.
-     * User: daves
+     * @author DaveS
      */
     protected static class ColumnBinding
     {
-        String sourceColumn;    //name of the source column
-        String targetColumn;    //name of the target column
-        int jdbcType;           //jdbc data type of target column
-        boolean isRequired;     //true if this column is required
+        public String sourceColumn;    //name of the source column
+        public String targetColumn;    //name of the target column
+        public int jdbcType;           //jdbc data type of target column
+        public boolean isRequired;     //true if this column is required
 
         public ColumnBinding(String sourceColumn, String targetColumn, int jdbcType, boolean isRequired)
         {
@@ -132,7 +133,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         }
         catch(SQLException e)
         {
-            log.info("Problem checking if this file has already been imported!");
+            log.warn("Problem checking if this file has already been imported!");
             throw new ExperimentException(MS1Manager.get().getAllErrors(e));
         }
 
@@ -166,6 +167,14 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
             //select the appropriate bindings for this tsv file
             ArrayList<ColumnBinding> bindings = selectBindings(coldescrs, log);
+
+            //if there are no bindings, there is nothing in the file we know how
+            //to import, so just return
+            if(bindings.isEmpty())
+            {
+                log.warn("The file " + dataFile.toURI() + " did not contain any columns this system knows how to import.");
+                return;
+            }
 
             //build the approrpriate insert sql for the features table
             //and prepare it

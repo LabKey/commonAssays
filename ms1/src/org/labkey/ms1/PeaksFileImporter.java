@@ -54,7 +54,8 @@ public class PeaksFileImporter extends DefaultHandler
             throw new SAXException(MS1Manager.get().getAllErrors(e));
         }
 
-        _log.info("Finished importing " + _numPeaks + " peaks into the database in "
+        _log.info("Finished importing " + _numScans + " scans, " + _numPeakFamilies + " peak families, and "
+                    + _numPeaks + " peaks into the database in "
                     + ((System.currentTimeMillis() - _msStart) / 1000) + " seconds.");
 
         //cleanup
@@ -129,6 +130,7 @@ public class PeaksFileImporter extends DefaultHandler
         map.put("ObservationDuration", getAttrAsDouble(attrs, "observationDuration"));
 
         map = Table.insert(_user, MS1Manager.get().getTable(MS1Manager.TABLE_SCANS), map);
+        ++_numScans;
         return (Integer)map.get("ScanId");
     }
 
@@ -152,6 +154,7 @@ public class PeaksFileImporter extends DefaultHandler
         map.put("MzMono", getAttrAsDouble(attrs, "mzMonoisotopic"));
         map.put("Charge", getAttrAsInteger(attrs, "charge"));
         map = Table.insert(_user, MS1Manager.get().getTable(MS1Manager.TABLE_PEAK_FAMILIES), map);
+        ++_numPeakFamilies;
         return (Integer)map.get("PeakFamilyId");
     }
 
@@ -178,6 +181,9 @@ public class PeaksFileImporter extends DefaultHandler
         Table.insert(_user, MS1Manager.get().getTable(MS1Manager.TABLE_PEAKS_TO_FAMILIES), mapP2F);
 
         ++_numPeaks;
+
+        if((_numPeaks % 1000) == 0)
+            _log.info("Imported 1000 peaks into the database.");
     }
 
     protected Double getAttrAsDouble(Attributes attrs, String qName) throws SAXException
@@ -240,6 +246,8 @@ public class PeaksFileImporter extends DefaultHandler
 
     protected void clear()
     {
+        _numPeakFamilies = 0;
+        _numScans = 0;
         _numPeaks = 0;
         _idFile = 0;
         _idSoftware = 0;
@@ -247,11 +255,6 @@ public class PeaksFileImporter extends DefaultHandler
         _idPeakFamily = 0;
     }
 
-    protected static HashMap<String,HashMap<String,String>> _bindings = new HashMap<String,HashMap<String,String>>();
-    static
-    {
-        
-    }
 
     protected Logger _log;              //the log file
     protected String _mzXmlUrl;         //URI to the mzXML file
@@ -259,6 +262,8 @@ public class PeaksFileImporter extends DefaultHandler
     protected User _user;               //the current user
     protected long _msStart;            //milliseconds at start of doc
 
+    protected int _numPeakFamilies;     //the number of peak families imported
+    protected int _numScans;            //the number of scans imported
     protected int _numPeaks;            //the number of peaks imported
 
     protected Integer _idFile;          //id for newly-inserted file

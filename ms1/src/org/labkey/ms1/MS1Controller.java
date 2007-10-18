@@ -25,6 +25,7 @@ import java.net.URI;
  * This controller is the entry point for all web pages specific to the MS1
  * module. Each action is represented by a nested class named as such:
  * [action]Action
+ * @author DaveS
  */
 public class MS1Controller extends SpringActionController
 {
@@ -39,6 +40,7 @@ public class MS1Controller extends SpringActionController
 
     /**
      * Returns a url helper for the specified action within this controller and current contianer
+     *
      * @param action Name of action
      * @return URL helper for the action in this controller and current container
      */
@@ -49,6 +51,7 @@ public class MS1Controller extends SpringActionController
 
     /**
      * Adds the begin step to a NavTree
+     *
      * @param root The root of the NavTree
      * @return Modified NavTree
      */
@@ -59,6 +62,7 @@ public class MS1Controller extends SpringActionController
 
     /**
      * Adds the Features view step to a NavTree
+     *
      * @param root The root of the NavTree
      * @param runId The runId parameter
      * @return Modified NavTree
@@ -73,6 +77,7 @@ public class MS1Controller extends SpringActionController
 
     /**
      * Adds a the peaks view step to the NavTree
+     *
      * @param root  The root of the NavTree
      * @param runId The runId parameter
      * @param featureId  The featureId parameter
@@ -87,6 +92,15 @@ public class MS1Controller extends SpringActionController
         return root.addChild("Peaks from Feature", url);
     }
 
+    /**
+     * Exports a QueryView (or derived class) to Excel, TSV, or Print, depending
+     * on the value of the format parameter.
+     *
+     * @param view The view to export
+     * @param format The export format (may be "excel", "tsv", or "print")
+     * @return A null ModelAndView suitable for returning from the Action's getView() method
+     * @throws Exception Thrown from QueryView's export methods
+     */
     protected ModelAndView exportQueryView(QueryView view, String format) throws Exception
     {
         if(format.equalsIgnoreCase("excel"))
@@ -104,6 +118,12 @@ public class MS1Controller extends SpringActionController
         return null;
     }
 
+    /**
+     * Returns true if the parameter exportParam is set to either "excel", "tsv", or "print" (ignoring case)
+     *
+     * @param exportParam The export parameter's value
+     * @return True if set to an export command
+     */
     protected boolean isExportRequest(String exportParam)
     {
         return (null != exportParam && exportParam.length() > 0 &&
@@ -138,6 +158,7 @@ public class MS1Controller extends SpringActionController
     {
         public static final String PARAM_RUNID = "runId";
         private RunIdForm _form;
+
         public ModelAndView getView(RunIdForm form, BindException errors) throws Exception
         {
             _form = null;
@@ -158,7 +179,7 @@ public class MS1Controller extends SpringActionController
             if(isExportRequest(form.getExport()))
                 return exportQueryView(featuresView, form.getExport());
 
-            //get the corresponding file Id and initialize a software view
+            //get the corresponding file Id and initialize a software view if there is software info
             JspView softwareView = null;
             Integer fileId = mgr.getFileIdForRun(form.getRunId(), MS1Manager.FILETYPE_FEATURES);
             if(null != fileId)
@@ -202,7 +223,6 @@ public class MS1Controller extends SpringActionController
 
         public ModelAndView getView(FeatureIdForm form, BindException errors) throws Exception
         {
-            _form = null;
             if(-1 == form.getRunId() && -1 == form.getFeatureId())
                 return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
 
@@ -218,9 +238,10 @@ public class MS1Controller extends SpringActionController
             if(null == expRun)
                 return new HtmlView("The Experiment run this Feature was not found in the database.");
 
-            Integer[] scanIds = mgr.getScanIdsFromRunScans(form.getRunId(), new Integer[]{feature.getScanFirst(), feature.getScanLast()});
-            if(null == scanIds || scanIds.length < 2 || null == scanIds[0] || null == scanIds[1])
-                return new HtmlView("The supporting peak data for this Feature have not yet been uploaded to the database.");
+            //ensure that we have a scanFirst and scanLast value for this feature
+            //if we don't, we can't filter the peaks to a reasonable subset
+            if(null == feature.getScanFirst() || null == feature.getScanLast())
+                return new HtmlView("The peaks for this feature cannot be displayed because the first and last scan number for the feature were not supplied.");
 
             //initialize the PeaksView
             PeaksView peaksView = new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
@@ -265,6 +286,9 @@ public class MS1Controller extends SpringActionController
         }
     } //class ShowFeaturesAction
 
+    /**
+     * Action to show the related MS2 peptide(s) for the specified feature
+     */
     @RequiresPermission(ACL.PERM_READ)
     public class ShowMS2PeptideAction extends SimpleViewAction<FeatureIdForm>
     {
@@ -297,24 +321,35 @@ public class MS1Controller extends SpringActionController
         }
     }
 
+    /**
+     * Action to show the feature details view (with all the charts)
+     */
     @RequiresPermission(ACL.PERM_READ)
     public class ShowFeatureDetailsAction extends SimpleViewAction<FeatureIdForm>
     {
 
         public ModelAndView getView(FeatureIdForm form, BindException errors) throws Exception
         {
-            if(form.getFeatureId() < 0)
+            if(null == form || form.getFeatureId() < 0 || form.getRunId() < 0)
                 return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
 
-            _form = form;
-
+            //get the feature
             Feature feature = MS1Manager.get().getFeature(form.getFeatureId());
+
+            //create and initialize a new features view so that we can know which features
+            //are immediately before and after the current one
+            //this gives the illusion to the user that they are stepping through the same list of
+            //features they were viewing on the previous screen (the showFeatures action)
             FeaturesView featuresView = new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()),
                                                             form.getRunId(), false, true);
 
+            //get the previous and next feature ids (ids will be -1 if there isn't a prev or next)
             int[] prevNextFeatureIds = featuresView.getPrevNextFeature(form.getFeatureId());
             FeatureDetailsViewContext ctx = new FeatureDetailsViewContext(feature, prevNextFeatureIds[0], prevNextFeatureIds[1]);
-            
+
+            //save the form for the nav trail
+            _form = form;
+
             return new JspView<FeatureDetailsViewContext>("/org/labkey/ms1/FeatureDetailView.jsp", ctx);
         }
 
@@ -328,11 +363,17 @@ public class MS1Controller extends SpringActionController
         private FeatureIdForm _form;
     }
 
+    /**
+     * Action to render a particular chart--typically called from an img tag
+     */
     @RequiresPermission(ACL.PERM_READ)
     public class ShowChartAction extends SimpleViewAction<ChartForm>
     {
         public ModelAndView getView(ChartForm form, BindException errors) throws Exception
         {
+            if(null == form || form.getFeatureId() < 0 || form.getRunId() < 0)
+                return null;
+
             FeatureChart chart = null;
             String type = form.getType();
             if(type.equalsIgnoreCase("spectrum"))
@@ -461,32 +502,6 @@ public class MS1Controller extends SpringActionController
             _export = export;
         }
     } //class RunIDForm
-
-    public static class RunScanForm
-    {
-        private int _runId = -1;
-        private int _scan = -1;
-
-        public int getRunId()
-        {
-            return _runId;
-        }
-
-        public void setRunId(int runId)
-        {
-            _runId = runId;
-        }
-
-        public int getScan()
-        {
-            return _scan;
-        }
-
-        public void setScan(int scan)
-        {
-            _scan = scan;
-        }
-    } //class RunScanForm
 
     public static class FeatureIdForm
     {
