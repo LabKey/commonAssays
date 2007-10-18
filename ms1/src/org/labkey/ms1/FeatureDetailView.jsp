@@ -139,7 +139,7 @@
                 </tr>
             </table>
         </td>
-        <td align="center">
+        <td valign="top" align="center">
             <%
                 String prevScanCaption = "<< Previous Scan";
                 String nextScanCaption = "Next Scan >>";
@@ -175,12 +175,12 @@
         </td>
     </tr>
     <tr>
-        <td align="center">
+        <td valign="top" align="center">
             <!-- retention time and intensity peaks elution chart -->
             <img src="showChart.view?type=elution&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst()%>&scanLast=<%=feature.getScanLast()%>&mzLow=<%=feature.getMz()-0.02%>&mzHigh=<%=feature.getMz()+0.02%>" alt="Elution chart"/>
             <br/><i>This chart shows the intensity of the peaks with the closest m/z value to the feature, across all scans within the feature&apos;s range.</i>
         </td>
-        <td align="center">
+        <td valign="top" align="center">
             <!-- retention time and m/z bubble chart -->
             <img src="showChart.view?type=bubble&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst()%>&scanLast=<%=feature.getScanLast()%>&mzLow=<%=feature.getMz()-1%>&mzHigh=<%=feature.getMz()+5%>" alt="Intesities Bubble chart"/>
             <br/><i>This chart shows the peaks with a similar m/z as the feature, across all scans within the feature&apos;s range. The size of each bubble represents the peak&apos;s intensity.</i>
