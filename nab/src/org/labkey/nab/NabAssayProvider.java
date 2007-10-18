@@ -21,6 +21,7 @@ import org.labkey.api.view.DataView;
 import org.labkey.api.security.User;
 import org.labkey.nab.query.NabSchema;
 import org.labkey.nab.query.NabRunDataTable;
+import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
 import java.util.*;
@@ -402,5 +403,31 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                 view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
             }
         };
+    }
+
+    public Pair<ExpProtocol, List<Domain>> getAssayTemplate(User user, Container targetContainer, ExpProtocol toCopy)
+    {
+        try
+        {
+            NabManager.get().ensurePlateTemplate(targetContainer, user);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+        return super.getAssayTemplate(user, targetContainer, toCopy);
+    }
+
+    public Pair<ExpProtocol, List<Domain>> getAssayTemplate(User user, Container targetContainer)
+    {
+        try
+        {
+            NabManager.get().ensurePlateTemplate(targetContainer, user);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+        return super.getAssayTemplate(user, targetContainer);
     }
 }
