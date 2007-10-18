@@ -28,16 +28,14 @@ public class PeaksView extends QueryView
     private static final String CAPTION_EXPORT_ALL_TSV = "Export All to Text";
     private static final String CAPTION_PRINT_ALL = "Print";
 
-    public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Feature feature, Scan scanFirst, Scan scanLast) throws SQLException
+    public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Feature feature) throws SQLException
     {
         super(schema);
         assert null != schema : "Null schema passed to PeaksView!";
         assert null != feature : "Null Feature passed to PeaksView!";
-        assert (null != scanFirst && null != scanLast) : "Null scans passed to PeaksView!";
         _schema = schema;
         _feature = feature;
-        _scanFirst = scanFirst;
-        _scanLast = scanLast;
+        _expRun = run;
 
         QuerySettings settings = new QuerySettings(ctx.getViewURLHelper(), ctx.getRequest(), QueryView.DATAREGIONNAME_DEFAULT);
         settings.setQueryName(MS1Schema.TABLE_PEAKS);
@@ -45,9 +43,9 @@ public class PeaksView extends QueryView
         setSettings(settings);
 
         if(null != run)
-            setTitle("Peaks from Scans " +  _scanFirst.getScan() + " through " + _scanLast.getScan() + " from " + PageFlowUtil.filter(run.getName()));
+            setTitle("Peaks from Scans " +  _feature.getScanFirst() + " through " + _feature.getScanLast() + " from " + PageFlowUtil.filter(run.getName()));
         else
-            setTitle("Peaks from Scans " + _scanFirst.getScan() + " through " + _scanLast.getScan());
+            setTitle("Peaks from Scans " + _feature.getScanFirst() + " through " + _feature.getScanLast());
         
 
         setShowCustomizeViewLinkInButtonBar(true);
@@ -58,7 +56,8 @@ public class PeaksView extends QueryView
     protected TableInfo createTable()
     {
         PeaksTableInfo tinfo = _schema.getPeaksTableInfo();
-        tinfo.addScanIdRangeCondition(_scanFirst.getScanId(), _scanLast.getScanId());
+        tinfo.addScanRangeCondition(_expRun.getRowId(), _feature.getScanFirst().intValue(),
+                                    _feature.getScanLast().intValue(), getContainer());
         return tinfo;
     }
 
@@ -142,8 +141,7 @@ public class PeaksView extends QueryView
     }
 
     private MS1Schema _schema;
-    private Scan _scanFirst = null;
-    private Scan _scanLast = null;
     private Feature _feature = null;
+    private ExpRun _expRun = null;
 } //class PeaksView
 

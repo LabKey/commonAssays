@@ -3,6 +3,7 @@ package org.labkey.ms1;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.Container;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
  */
 public class PeaksTableInfo extends FilteredTable
 {
-    public PeaksTableInfo()
+    public PeaksTableInfo(Container container)
     {
         super(MS1Manager.get().getTable(MS1Manager.TABLE_PEAKS));
 
@@ -66,16 +67,23 @@ public class PeaksTableInfo extends FilteredTable
         TableInfo tiScans = ciScan.getFkTableInfo();
         tiScans.getColumn("FileId").setCaption("Data File");
         tiScans.getColumn("ScanId").setIsHidden(true);
+
+        //add a condition that limits the features returned to just those existing in the
+        //current container. The FilteredTable class supports this automatically only if
+        //the underlying table contains a column named "Container," which our Peaks table
+        //does not, so we need to use a SQL fragment here that uses a sub-select.
+        SQLFragment sf = new SQLFragment("ScanId IN (SELECT ScanId FROM ms1.Scans as s INNER JOIN ms1.Files AS f ON (s.FileId=f.FileId) INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=?)",
+                                            container.getId(), true);
+        addCondition(sf, "ScanId");
+
     }
 
-    public void addScanCondition(int scanId)
+    public void addScanRangeCondition(int runId, int scanFirst, int scanLast, Container container)
     {
-        addCondition(getRealTable().getColumn("ScanId"), scanId);
-    }
+        SQLFragment sf = new SQLFragment("ScanId IN (SELECT ScanId FROM ms1.Scans as s INNER JOIN ms1.Files AS f ON (s.FileId=f.FileId) INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=? AND d.RunId=? AND s.Scan BETWEEN ? AND ?)",
+                                            container.getId(), true, runId, scanFirst, scanLast);
 
-    public void addScanIdRangeCondition(int scanIdFirst, int scanIdLast)
-    {
-        SQLFragment sql = new SQLFragment("ScanId BETWEEN ? AND ?", scanIdFirst, scanIdLast);
-        addCondition(sql, "ScanId");
+        getFilter().deleteConditions("ScanId");
+        addCondition(sf, "ScanId");
     }
 } //class PeaksTableInfo

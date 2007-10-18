@@ -222,13 +222,9 @@ public class MS1Controller extends SpringActionController
             if(null == scanIds || scanIds.length < 2 || null == scanIds[0] || null == scanIds[1])
                 return new HtmlView("The supporting peak data for this Feature have not yet been uploaded to the database.");
 
-            //get the corresponding Scans
-            Scan scanFirst = mgr.getScan(scanIds[0].intValue());
-            Scan scanLast = mgr.getScan(scanIds[1].intValue());
-
             //initialize the PeaksView
             PeaksView peaksView = new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                                expRun, feature, scanFirst, scanLast);
+                                                expRun, feature);
 
             //if there is an export parameter, do the export and return
             if(isExportRequest(form.getExport()))
@@ -236,9 +232,10 @@ public class MS1Controller extends SpringActionController
 
             //if software information is available, create and initialize the software view
             JspView softwareView = null;
-            if(null != scanFirst)
+            Integer fileId = mgr.getFileIdForRun(form.getRunId(), MS1Manager.FILETYPE_PEAKS);
+            if(null != fileId)
             {
-                Software[] swares = mgr.getSoftware(scanFirst.getFileId());
+                Software[] swares = mgr.getSoftware(fileId.intValue());
                 if(null != swares && swares.length > 0)
                 {
                     softwareView = new JspView<Software[]>("/org/labkey/ms1/softwareView.jsp", swares);

@@ -68,7 +68,7 @@ public class MS1Schema extends UserSchema
 
     public PeaksTableInfo getPeaksTableInfo()
     {
-        return new PeaksTableInfo();
+        return new PeaksTableInfo(getContainer());
     }
 
     public ExpRunTable getMS1ExpRunsTableInfo(String alias)
