@@ -3,34 +3,55 @@
 <%@ page import="java.util.*" %>
 <%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace"%>
 <%@ page import="org.labkey.flow.analysis.model.Analysis"%>
+<%@ page import="org.apache.commons.collections.map.MultiValueMap" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <script type="text/javascript" src="<%=request.getContextPath()%>/Flow/editCompensationCalculation.js"></script>
 <script type="text/javascript">
-    var keywordValueSubsetListMap = {};
-    var subsetList = {};
-    <%
+function o() { var o = {}; for (var i = 0; i < arguments.length; i += 2) o[arguments[i]] = arguments[i + 1]; return o; }
+var SS = []; // SUBSETS
+<%
+    // these arrays are duplicated a lot so only output each one once
+    MultiValueMap arrays = new MultiValueMap();
     for (FlowJoWorkspace.SampleInfo sample : form.workspace.getSamples())
     {
         Analysis analysis = form.workspace.getSampleAnalysis(sample);
         if (analysis != null)
         {
-    %>subsetList['<%=sample.getSampleId()%>'] = <%=javascriptArray(getSubsetNames(analysis))%>;<%
+            String array = javascriptArray(getSubsetNames(analysis));
+            arrays.put(array,sample.getSampleId());
         }
     }
-
-for (Map.Entry<String, Map<String, FlowJoWorkspace.SampleInfo>> keywordEntry : keywordValueSampleMap.entrySet())
-{
- String keyword = keywordEntry.getKey();%>
-    keywordValueSubsetListMap['<%=keyword%>'] = {};
-    <%
-    for (Map.Entry<String, FlowJoWorkspace.SampleInfo> valueEntry : keywordEntry.getValue().entrySet()) {
-    String value = valueEntry.getKey();
-    %>
-    keywordValueSubsetListMap['<%=keyword%>']['<%=value%>'] = subsetList['<%=valueEntry.getValue().getSampleId()%>'];
-    <% }
+    HashMap<String,Integer> sampleToSubsetArray = new HashMap<String,Integer>();
+    Integer index = 0;
+    for (String jsArray : (Set<String>)arrays.keySet())
+    {
+        %>SS.push(<%=jsArray%>);<%
+        out.println();
+        Collection<String> sampleids = (Collection<String>)arrays.get(jsArray);
+        for (String sampleid : sampleids)
+            sampleToSubsetArray.put(sampleid,index);
+        index = index.intValue() + 1;
     }
-    %>
-
+%>
+var KV = {}; // KEYWORD->VALUE->SUBSET
+<%
+    for (Map.Entry<String, Map<String, FlowJoWorkspace.SampleInfo>> keywordEntry : keywordValueSampleMap.entrySet())
+    {
+        String keyword = keywordEntry.getKey();
+        %>KV['<%=keyword%>']=o(<%
+        String and="";
+        for (Map.Entry<String, FlowJoWorkspace.SampleInfo> valueEntry : keywordEntry.getValue().entrySet())
+        {
+            String value = valueEntry.getKey();
+            String sampleId = valueEntry.getValue().getSampleId(); 
+            %><%=and%>'<%=value%>', SS[<%=sampleToSubsetArray.get(sampleId)%>]<%
+            and = ",";
+        }
+        %>);<%
+        out.println();
+    }
+%>
+var keywordValueSubsetListMap = KV;
 </script>
 <p><b>Instructions:</b></p>
 <p>
