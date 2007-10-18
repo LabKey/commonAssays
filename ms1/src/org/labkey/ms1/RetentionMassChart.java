@@ -52,14 +52,14 @@ public class RetentionMassChart extends FeatureChart
 
         while(rs.next())
         {
-            xvals.add(rs.getDouble("RetentionTime"));
-            yvals.add(rs.getDouble("MZ"));
+            xvals.add(rs.getDouble("MZ"));
+            yvals.add(rs.getDouble("RetentionTime"));
             curZ = logaxis.adjustedLog10(rs.getDouble("Intensity"));
             zvals.add(curZ);
 
-            minY = Math.min(minY, rs.getDouble("MZ"));
+            minY = Math.min(minY, rs.getDouble("RetentionTime"));
             minZ = Math.min(minZ, curZ);
-            maxY = Math.max(maxY, rs.getDouble("MZ"));
+            maxY = Math.max(maxY, rs.getDouble("RetentionTime"));
             maxZ = Math.max(maxZ, curZ);
         }
 
@@ -76,7 +76,7 @@ public class RetentionMassChart extends FeatureChart
         DefaultContourDataset dataset = new DefaultContourDataset("Intensities", xvals.toArray(), yvals.toArray(), zvals.toArray());
 
         return ChartFactory.createBubbleChart("Intensities for Scans " + _scanFirst + " through " + _scanLast,
-                                                            "Retention Time", "m/z", dataset, PlotOrientation.VERTICAL,
+                                                            "m/z", "Retention Time", dataset, PlotOrientation.VERTICAL,
                                                             false, false, false);
 
     }

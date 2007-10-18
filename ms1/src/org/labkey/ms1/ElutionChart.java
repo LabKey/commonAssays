@@ -8,6 +8,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import java.sql.SQLException;
+import java.awt.*;
 
 /**
  * Creates the elution line chart in the features detail view
@@ -41,9 +42,12 @@ public class ElutionChart extends FeatureChart
 
         XYSeriesCollection dataset = new XYSeriesCollection(series);
 
-        return ChartFactory.createXYLineChart("Elution for Scans " + _scanFirst + " through " + _scanLast, 
-                                                "RetentionTime", "Intensity", dataset, PlotOrientation.VERTICAL,
+        JFreeChart chart = ChartFactory.createXYLineChart("Elution for Scans " + _scanFirst + " through " + _scanLast,
+                                                "Retention Time", "Intensity", dataset, PlotOrientation.HORIZONTAL,
                                                         false, false, false);
+        
+        chart.getXYPlot().getRenderer().setStroke(new BasicStroke(1.5f));
+        return chart;
     }
 
     private int _runId = -1;

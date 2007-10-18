@@ -8,6 +8,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.labkey.api.data.Table;
 
 import java.sql.SQLException;
+import java.awt.*;
 
 /**
  * Can produce a spectrum chart for a given feature/scan
@@ -41,9 +42,12 @@ public class SpectrumChart extends FeatureChart
         XYSeriesCollection dataset = new XYSeriesCollection(series);
         dataset.setIntervalWidth(0); //this controls the width of the bars, which we want to be very thin
         
-        return ChartFactory.createXYBarChart("Spectrum for Scan " + _scan, "m/z", false, "Intensity",
+        JFreeChart chart = ChartFactory.createXYBarChart("Spectrum for Scan " + _scan, "m/z", false, "Intensity",
                                                         dataset, PlotOrientation.VERTICAL,
                                                         false, false, false);
+
+        chart.getXYPlot().getRenderer().setStroke(new BasicStroke(1.5f));
+        return chart;
 
     }
     

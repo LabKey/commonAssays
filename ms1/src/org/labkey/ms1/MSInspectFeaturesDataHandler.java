@@ -1,25 +1,30 @@
 package org.labkey.ms1;
 
-import org.labkey.api.exp.*;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.AbstractExperimentDataHandler;
-import org.labkey.api.util.URLHelper;
-import org.labkey.api.data.*;
-import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.security.User;
-import org.labkey.common.tools.TabLoader;
 import org.apache.log4j.Logger;
+import org.labkey.api.data.*;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.api.AbstractExperimentDataHandler;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.security.User;
+import org.labkey.api.util.URLHelper;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.ViewURLHelper;
+import org.labkey.common.tools.TabLoader;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.ArrayList;
-import java.sql.*;
-import java.text.ParseException;
+import java.util.Map;
 
 /**
  * This data handler loads msInspect feature files, which use a tsv format.
@@ -376,40 +381,133 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
             }
             else
             {
-                //the TabLoader uses String, Integer, Double, Boolean and Date types only
-                if(val instanceof Integer)
-                    pstmt.setInt(paramIndex, ((Integer) val).intValue());
-                else if(val instanceof Double)
-                    pstmt.setDouble(paramIndex, ((Double) val).doubleValue());
-                else if(val instanceof Boolean)
-                    pstmt.setBoolean(paramIndex, ((Boolean)val).booleanValue());
-                else if(val instanceof Date)
-                    pstmt.setDate(paramIndex, new java.sql.Date(((Date)val).getTime()));
-                else
+                //switch on target column jdbc type
+                switch(binding.jdbcType)
                 {
-                    //special case for PostgreSQL: their driver won't convert "true" to a boolean or a bit
-                    //like the SQL Server driver will, so we need to catch that here and convert ourselves
-                    if(java.sql.Types.BOOLEAN == binding.jdbcType)
-                    {
-                        BooleanFormat fmt = BooleanFormat.getInstance();
-                        pstmt.setBoolean(paramIndex, ((Boolean)fmt.parseObject((String)val)).booleanValue());
-                    }
-                    else
-                        pstmt.setString(paramIndex, (String)val);
+                    case Types.BIT:
+                    case Types.BOOLEAN:
+                        pstmt.setBoolean(paramIndex, objToBoolean(val, binding, rowNum));
+                        break;
+
+                    case Types.DATE:
+                        pstmt.setDate(paramIndex, objToDate(val, binding, rowNum));
+                        break;
+
+                    case Types.CHAR:
+                    case Types.VARCHAR:
+                    case Types.LONGVARCHAR:
+                        pstmt.setString(paramIndex, val.toString());
+                        break;
+
+                    case Types.INTEGER:
+                    case Types.SMALLINT:
+                    case Types.TINYINT:
+                        pstmt.setInt(paramIndex, objToInt(val, binding, rowNum));
+                        break;
+
+                    case Types.REAL:
+                    case Types.NUMERIC:
+                    case Types.FLOAT:
+                    case Types.DECIMAL:
+                    case Types.DOUBLE:
+                        pstmt.setDouble(paramIndex, objToDouble(val, binding, rowNum));
+                        break;
+
+                    default:
+                        assert false : "Unsupported JDBC type."; //if you get this, add support above
                 }
             } //not null
         }
         catch(SQLException e)
         {
-            throw new ExperimentException("Problem setting the value for column " + binding.sourceColumn + 
-                                            " in row " + rowNum + " to the value " + val + ": " + e.toString());
-        }
-        catch(ParseException e)
-        {
-            throw new ExperimentException("Unable to interpret the value '" + val + "' for column " + binding.sourceColumn +
-                                            " in row " + rowNum);
+            throw new ExperimentException("Problem setting the value for column '" + binding.sourceColumn +
+                                            "' in row " + rowNum + " to the value " + val + ": " + e.toString());
         }
     } //setParam()
+
+    protected int objToInt(Object val, ColumnBinding binding, int rowNum) throws ExperimentException
+    {
+        try
+        {
+            if(val instanceof Number)
+                return ((Number)val).intValue();
+            else if(val instanceof String)
+                return Integer.parseInt((String)val);
+            else
+                throw new ExperimentException("The value '" + val + "' in row " + rowNum + ", column '" + binding.sourceColumn
+                                                + "' cannot be converted to an integer as required by the database.");
+        }
+        catch (NumberFormatException e)
+        {
+            throw new ExperimentException("Unable to convert the value '" + val + "' for column '" + binding.sourceColumn +
+                                            "' in row " + rowNum + " to an integer for the following reason: " + e);
+        }
+    }
+
+    protected double objToDouble(Object val, ColumnBinding binding, int rowNum) throws ExperimentException
+    {
+        try
+        {
+            if(val instanceof Number)
+                return ((Number)val).doubleValue();
+            else if(val instanceof String)
+                return Double.parseDouble((String)val);
+            else
+                throw new ExperimentException("The value '" + val + "' in row " + rowNum + ", column '" + binding.sourceColumn
+                                                + "' cannot be converted to a double-precision decimal number as required by the database.");
+        }
+        catch (NumberFormatException e)
+        {
+            throw new ExperimentException("Unable to convert the value '" + val + "' for column '" + binding.sourceColumn +
+                                            "' in row " + rowNum + " to a double-precision decimal number for the following reason: " + e);
+        }
+    }
+
+    protected boolean objToBoolean(Object val, ColumnBinding binding, int rowNum) throws ExperimentException
+    {
+        try
+        {
+            if(val instanceof Boolean)
+                return ((Boolean)val).booleanValue();
+            if(val instanceof Number)
+                return ((Number)val).intValue() != 0;
+            else if(val instanceof String)
+            {
+                BooleanFormat parser = BooleanFormat.getInstance();
+                return parser.parseObject((String)val).booleanValue();
+            }
+            else
+                throw new ExperimentException("The value '" + val + "' in row " + rowNum + ", column '" + binding.sourceColumn
+                                                + "' cannot be converted to a boolean as required by the database.");
+        }
+        catch (ParseException e)
+        {
+            throw new ExperimentException("Unable to convert the value '" + val + "' for column '" + binding.sourceColumn +
+                                            "' in row " + rowNum + " to a boolean for the following reason: " + e);
+        }
+    }
+
+    protected java.sql.Date objToDate(Object val, ColumnBinding binding, int rowNum) throws ExperimentException
+    {
+        try
+        {
+            if(val instanceof Date)
+                return new java.sql.Date(((Date)val).getTime());
+            else if(val instanceof String)
+            {
+                SimpleDateFormat parser = new SimpleDateFormat();
+                return new java.sql.Date(parser.parse((String)val).getTime());
+            }
+            else
+                throw new ExperimentException("The value '" + val + "' in row " + rowNum + ", column '" + binding.sourceColumn
+                                                + "' cannot be converted to a date/time as required by the database.");
+        }
+        catch (ParseException e)
+        {
+            throw new ExperimentException("Unable to convert the value '" + val + "' for column '" + binding.sourceColumn +
+                                            "' in row " + rowNum + " to a date/time for the following reason: " + e);
+        }
+    }
 
     /**
      * Returns the content URL for files imported through this class. This is called by the Experiment module
