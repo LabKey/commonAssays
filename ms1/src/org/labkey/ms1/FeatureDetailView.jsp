@@ -132,19 +132,19 @@
             </td>
         </tr>
         <tr>
-            <td colspan="2">
-                Show peaks within
+            <td colspan="2" style="text-align:center">
+                Show peaks with an m/z value within
             </td>
         </tr>
         <tr>
-            <td colspan="2">
-                -<input id="txtMzWindowLow" type="text" name="mzWindowLow" value="<%=Math.abs(mzWindowLow)%>" size="4"/>
-                and +
+            <td colspan="2" style="text-align:center">
+                <b>-</b><input id="txtMzWindowLow" type="text" name="mzWindowLow" value="<%=Math.abs(mzWindowLow)%>" size="4"/>
+                and <b>+</b>
                 <input type="text" id="txtMzWindowHigh" name="mzWindowHigh" value="<%=mzWindowHigh%>" size="4"/>
             </td>
         </tr>
         <tr>
-            <td colspan="2">
+            <td colspan="2" style="text-align:center">
                 of the feature's m/z value.
             </td>
         </tr>
@@ -294,7 +294,7 @@
             %>
             <!-- m/z and intensity peaks mass chart -->
             <br/>
-            <a href="<%=urlPeaksView.getLocalURIString() + "&query.ScanId/Scan~eq=" + scan%>">
+            <a href="<%=urlPeaksView.getLocalURIString() + "&query.ScanId/Scan~eq=" + scan + "&query.MZ~gte=" + (feature.getMz()+mzWindowLow) + "&query.MZ~lte=" + (feature.getMz()+mzWindowHigh)%>">
             <img src="showChart.view?type=spectrum&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scan=<%=scan%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>" alt="Spectrum chart"/>
             </a>
             <br/><i>Intensities of peaks with a
@@ -307,14 +307,14 @@
         <td valign="top" align="center">
             <!-- retention time and intensity peaks elution chart -->
             <% /*Note that this chart does not use the mzWindow* values since it is supposed to show the closest peak values within a fine tolerance*/ %>
-            <a href="<%=urlPeaksView.getLocalURIString()%>">
+            <a href="<%=urlPeaksView.getLocalURIString() + "&query.MZ~gte=" + (feature.getMz()-0.02) + "&query.MZ~lte=" + (feature.getMz()+0.02)%>">
             <img src="showChart.view?type=elution&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst()%>&scanLast=<%=feature.getScanLast()%>&mzLow=<%=feature.getMz()-0.02%>&mzHigh=<%=feature.getMz()+0.02%>" alt="Elution chart"/>
             </a>
             <br/><i>Intensity of the peaks with the closest m/z value to the feature, across all scans within the feature's range.</i>
         </td>
         <td valign="top" align="center">
             <!-- retention time and m/z bubble chart -->
-            <a href="<%=urlPeaksView.getLocalURIString()%>">
+            <a href="<%=urlPeaksView.getLocalURIString() + "&query.MZ~gte=" + (feature.getMz()+mzWindowLow) + "&query.MZ~lte=" + (feature.getMz()+mzWindowHigh)%>">
             <img src="showChart.view?type=bubble&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst()%>&scanLast=<%=feature.getScanLast()%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>" alt="Intesities Bubble chart"/>
             </a>
 
