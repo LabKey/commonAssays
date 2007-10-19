@@ -2,7 +2,6 @@ package org.labkey.nab;
 
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.*;
-import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.view.InsertView;
@@ -41,7 +40,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
         InsertView parent = super.createRunInsertView(newRunForm, reshow);
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
         PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm.getContainer(), newRunForm.getProtocol(), resolverType);
-        helper.addSampleColumns(parent, getViewContext().getUser());
+        helper.addSampleColumns(parent.getDataRegion(), getViewContext().getUser());
         return parent;
     }
 

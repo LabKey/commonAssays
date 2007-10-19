@@ -1,0 +1,1 @@
+ALTER TABLE prot.organisms ALTER COLUMN CommonName TYPE varchar(100); 

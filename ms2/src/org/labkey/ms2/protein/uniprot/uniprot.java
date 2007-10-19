@@ -181,7 +181,7 @@ public class uniprot extends ParseActions
         int randomTableSuffix = (new Random().nextInt(1000000000));
         _oTableName = _dialect.getTempTablePrefix() + "organism" + randomTableSuffix;
         String createOTableCommand = "CREATE " + _dialect.getTempTableKeyword() + " TABLE " + _oTableName + " ( " +
-                "common_name varchar(50) NULL, " +
+                "common_name varchar(100) NULL, " +
                 "genus varchar(100), " +
                 "species varchar(100), " +
                 "comments varchar(200) NULL, " +
