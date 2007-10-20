@@ -17,6 +17,11 @@ public class OpenSSOModule extends DefaultModule
         addController("opensso", OpenSSOController.class);
     }
 
+    public TabDisplayMode getTabDisplayMode()
+    {
+        return TabDisplayMode.DISPLAY_NEVER;
+    }
+
     public void startup(ModuleContext moduleContext)
     {
         super.startup(moduleContext);
@@ -29,7 +34,7 @@ public class OpenSSOModule extends DefaultModule
         }
         catch (Exception e)
         {
-            _log.debug("OpenSSO initialization failure", e);
+            _log.error("OpenSSO initialization failure", e);
         }
     }
 }

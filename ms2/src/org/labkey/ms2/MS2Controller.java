@@ -740,13 +740,24 @@ public class MS2Controller extends ViewController
         postUrl.deleteParameter("x");
         postUrl.deleteParameter("y");
 
-        VelocityView manageViews = new VelocityView("/org/labkey/ms2/manageViews.vm");
-        manageViews.addObject("postUrl", postUrl.getEncodedLocalURIString());
-        manageViews.addObject("select", renderViewSelect(10, false, ACL.PERM_DELETE, false));
+        ManageViewsBean bean = new ManageViewsBean();
+        bean.postUrl = postUrl;
+        bean.select = renderViewSelect(10, false, ACL.PERM_DELETE, false);
+
+        HttpView manageViews = new JspView<ManageViewsBean>("/org/labkey/ms2/manageViews.jsp", bean);
+//        manageViews.addObject("postUrl", postUrl.getEncodedLocalURIString());
+//        manageViews.addObject("select", renderViewSelect(10, false, ACL.PERM_DELETE, false));
 
         return _renderInTemplate(manageViews, false, "Manage Views", "viewRun",
                 new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
                 new NavTree(run.getDescription(), runUrl));
+    }
+
+
+    public static class ManageViewsBean
+    {
+        public ViewURLHelper postUrl;
+        public StringBuilder select;
     }
 
 

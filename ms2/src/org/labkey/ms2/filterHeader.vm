@@ -75,12 +75,10 @@
 <div>
     #parse("/org/labkey/ms2/renderFilter.vm")
 </div>
-<script language="JavaScript">
+<script type="text/javascript">
     var viewTypeInfo = new Object();
     var count = 0;
     #foreach ($viewType in $viewTypes)
         viewTypeInfo[count++] = $viewType.supportsExpansion();
     #end
-
-
 </script>

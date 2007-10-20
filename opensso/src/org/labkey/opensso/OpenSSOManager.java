@@ -1,48 +1,18 @@
 package org.labkey.opensso;
 
 import com.iplanet.am.util.SystemProperties;
-import com.iplanet.sso.SSOException;
-import com.iplanet.sso.SSOToken;
-import com.iplanet.sso.SSOTokenManager;
 
 import java.io.IOException;
-import java.util.Properties;
+import java.io.InputStream;
+import java.util.*;
+
+import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.PropertyManager.PropertyMap;
+import org.labkey.api.data.ContainerManager;
 
 public class OpenSSOManager
 {
     private static OpenSSOManager _instance;
-
-    private OpenSSOManager()
-    {
-        addProps("AMConfig.properties");
-
-        // TODO: Do we really need all these?
-        addProps("amAuth.properties");
-        addProps("amAuthContext.properties");
-        addProps("amIdRepo.properties");
-        addProps("amNaming.properties");
-        addProps("amProfile.properties");
-        addProps("amSecurity.properties");
-        addProps("amSession.properties");
-        addProps("amSSOProvider.properties");
-        addProps("amUtilMsgs.properties");
-        addProps("clientDefault.properties");
-    }
-
-    private void addProps(String filename)
-    {
-        try
-        {
-            Properties props = new Properties();
-            props.load(OpenSSOManager.class.getResourceAsStream(filename));
-            SystemProperties.initializeProperties(props);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-    }
 
     public static synchronized OpenSSOManager get()
     {
@@ -51,14 +21,84 @@ public class OpenSSOManager
         return _instance;
     }
 
-    public SSOToken getSSOToken(String tokenID) throws SSOException
+    public void initialize() throws Exception
     {
-        SSOTokenManager manager = SSOTokenManager.getInstance();
-        return manager.createSSOToken(tokenID);
+        Properties props = loadProps("AMClient.properties");
+        replaceDefaults(props, getSystemSettings());  // System settings will replace values in static properties file
+        SystemProperties.initializeProperties(props);
     }
 
-    public boolean isValid(SSOToken token) throws SSOException
+
+    private Properties loadProps(String filename) throws IOException
     {
-        return SSOTokenManager.getInstance().isValidToken(token);
+        InputStream is = null;
+
+        try
+        {
+            is = OpenSSOManager.class.getResourceAsStream(filename);
+            Properties props = new Properties();
+            props.load(is);
+            return props;
+        }
+        finally
+        {
+            if (null != is)
+                is.close();
+        }
+    }
+
+
+    private void replaceDefaults(Properties props, Map<String, String> replacements)
+    {
+        Set keys = props.keySet();
+
+        for (Object o : keys)
+        {
+            String key = (String)o;
+            String value = props.getProperty(key);
+
+            if (value.startsWith("@") && value.endsWith("@"))
+            {
+                String defaultKey = value.substring(1, value.length() - 1);
+                String defaultValue = replacements.get(defaultKey);
+                props.setProperty(key, defaultValue);
+            }
+        }
+    }
+
+
+    private static final String KEY = "OpenSSO";
+
+    public Map<String, String> getSystemSettings() throws IOException
+    {
+        Properties fileProps = loadProps("clientDefault.properties");
+        // dbProps will be null if settings have never been saved
+        Map<String, String> dbProps = PropertyManager.getProperties(ContainerManager.getRoot().getId(), KEY, false);
+        // Map we will return -- sort by key
+        Map<String, String> map = new TreeMap<String, String>();
+        Set<Object> keys = fileProps.keySet();
+
+        for (Object o : keys)
+        {
+            String key = (String)o;
+            String value = (null != dbProps ? dbProps.get(key) : null);
+            if (null != value)
+                map.put(key, value);
+            else
+                map.put(key, fileProps.getProperty(key));
+        }
+
+        // TODO: Eliminate some of the properties we don't care about
+
+        return map;
+    }
+
+
+    public void writeSystemSettings(Map<String, String> newSettings)
+    {
+        PropertyMap map = PropertyManager.getWritableProperties(0, ContainerManager.getRoot().getId(), KEY, true);
+        map.clear();
+        map.putAll(newSettings);
+        PropertyManager.saveProperties(map);
     }
 }

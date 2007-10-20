@@ -1,17 +1,15 @@
 package org.labkey.opensso;
 
-import com.iplanet.am.util.SystemProperties;
 import com.iplanet.sso.SSOException;
 import com.iplanet.sso.SSOToken;
 import com.iplanet.sso.SSOTokenManager;
 import org.apache.log4j.Logger;
 import org.labkey.api.security.AuthenticationProvider;
 import org.labkey.api.security.ValidEmail;
+import org.labkey.api.view.ViewURLHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Properties;
 
 /**
  * User: adam
@@ -22,35 +20,19 @@ public class OpenSSOProvider implements AuthenticationProvider.RequestAuthentica
 {
     private static final Logger _log = Logger.getLogger(OpenSSOProvider.class);
 
-    public OpenSSOProvider()
+    public OpenSSOProvider() throws Exception
     {
-        addProps("AMConfig.properties");
-
-        // TODO: Do we really need all these?
-        addProps("amAuth.properties");
-        addProps("amAuthContext.properties");
-        addProps("amIdRepo.properties");
-        addProps("amNaming.properties");
-        addProps("amProfile.properties");
-        addProps("amSecurity.properties");
-        addProps("amSession.properties");
-        addProps("amSSOProvider.properties");
-        addProps("amUtilMsgs.properties");
-        addProps("clientDefault.properties");
+        OpenSSOManager.get().initialize();
     }
 
-    private void addProps(String filename)
+    public String getName()
     {
-        try
-        {
-            Properties props = new Properties();
-            props.load(OpenSSOManager.class.getResourceAsStream(filename));
-            SystemProperties.initializeProperties(props);
-        }
-        catch (IOException e)
-        {
-            _log.error("Exception initializing OpenSSO properties", e);
-        }
+        return "OpenSSO";
+    }
+
+    public ViewURLHelper getConfigurationLink(ViewURLHelper returnUrl)
+    {
+        return OpenSSOController.getCurrentSettingsUrl(returnUrl);
     }
 
     public ValidEmail authenticate(HttpServletRequest request, HttpServletResponse response) throws ValidEmail.InvalidEmailException
@@ -76,5 +58,19 @@ public class OpenSSOProvider implements AuthenticationProvider.RequestAuthentica
         }
 
         return null;
+    }
+
+    public void logout(HttpServletRequest request)
+    {
+        try
+        {
+            SSOTokenManager manager = SSOTokenManager.getInstance();
+            SSOToken token = manager.createSSOToken(request);
+            manager.destroyToken(token);
+        }
+        catch (SSOException e)
+        {
+            // Ignore
+        }
     }
 }

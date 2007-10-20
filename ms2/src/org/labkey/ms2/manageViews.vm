@@ -1,9 +1,0 @@
-<table class="dataRegion">
-  <tr><td>Select one or more views and press Delete</td></tr>
-  <tr><td><form method="post" action="$postUrl">
-    <table class="dataRegion" border="0">
-      <tr><td>$select</td></tr>
-      <tr><td align=center><input type="image" src="$tools.buttonSrc('Delete')"></td></tr>
-    </table>
-  </form></td></tr>
-</table>

@@ -1,15 +1,19 @@
 package org.labkey.opensso;
 
-import com.iplanet.sso.SSOToken;
-import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.ViewURLHelper;
 import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class OpenSSOController extends SpringActionController
 {
@@ -21,17 +25,48 @@ public class OpenSSOController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermission(ACL.PERM_ADMIN)
-    public class BeginAction extends GetTokenAction
+
+    public static ViewURLHelper getUrl(String action, ViewURLHelper returnUrl)
     {
+        return new ViewURLHelper("opensso", action, "").addParameter("returnUrl", returnUrl.getLocalURIString());
     }
 
-    @RequiresPermission(ACL.PERM_ADMIN)
-    public class GetTokenAction extends SimpleViewAction
+
+    public static ViewURLHelper getConfigureUrl(ViewURLHelper returnUrl)
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        return getUrl("configure", returnUrl);
+    }
+
+
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class ConfigureAction extends FormViewAction<ConfigProperties>
+    {
+        public ViewURLHelper getSuccessURL(ConfigProperties form)
         {
-            return new JspView("/org/labkey/opensso/view/getToken.jsp");
+            return new ViewURLHelper(form.getReturnUrl());
+        }
+
+        public ModelAndView getView(ConfigProperties form, boolean reshow, BindException errors) throws Exception
+        {
+            form.props = OpenSSOManager.get().getSystemSettings();
+            return new JspView<ConfigProperties>("/org/labkey/opensso/view/configure.jsp", form);
+        }
+
+        public boolean handlePost(ConfigProperties form, BindException errors) throws Exception
+        {
+            Map<String, String> props = new HashMap<String, String>(getViewContext().getExtendedProperties());
+            props.remove("x");
+            props.remove("y");
+            props.remove("returnUrl");
+
+            OpenSSOManager.get().writeSystemSettings(props);
+            OpenSSOManager.get().initialize();
+
+            return true;
+        }
+
+        public void validateCommand(ConfigProperties target, Errors errors)
+        {
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -40,23 +75,42 @@ public class OpenSSOController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_ADMIN)
-    public class ShowTokenAction extends SimpleViewAction
-    {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
-        {
-            String tokenId = getViewContext().getViewURLHelper().getParameter("token").trim();
-            SSOToken token = OpenSSOManager.get().getSSOToken(tokenId);
 
-            if (OpenSSOManager.get().isValid(token))
-                return new JspView<SSOToken>("/org/labkey/opensso/view/showToken.jsp", token);
-            else
-                return new HtmlView(tokenId + " is not a valid token");
+    public static ViewURLHelper getCurrentSettingsUrl(ViewURLHelper returnUrl)
+    {
+        return getUrl("currentSettings.view", returnUrl);
+    }
+
+
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class CurrentSettingsAction extends SimpleViewAction<ConfigProperties>
+    {
+        public ModelAndView getView(ConfigProperties form, BindException errors) throws Exception
+        {
+            form.props = OpenSSOManager.get().getSystemSettings();
+            return new JspView<ConfigProperties>("/org/labkey/opensso/view/currentSettings.jsp", form);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
             return root;
+        }
+    }
+
+
+    public static class ConfigProperties
+    {
+        public String returnUrl;
+        public Map<String, String> props;
+
+        public String getReturnUrl()
+        {
+            return returnUrl;
+        }
+
+        public void setReturnUrl(String returnUrl)
+        {
+            this.returnUrl = returnUrl;
         }
     }
 }
