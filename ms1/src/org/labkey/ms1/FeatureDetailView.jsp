@@ -125,9 +125,9 @@
     <input type="hidden" name="scan" value="<%=scan%>"/>
     <input type="submit" value="Filter" style="display:none;"/>
     <table cellspacing="0" cellpadding="2px" border="0" class="wp">
-        <tr class="wpHeader">
-            <th class="wpTitle" style="border-right:0px none;">Adjust m/z Window</th>
-            <td class="wpTitle" style="border-left:0px none;text-align:right" title="Close">
+        <tr class="wpHeader" style="border-top:none;border-left:none;border-right:none">
+            <th class="wpTitle" style="border-right:0px none;border-top:none;border-left:none;border-right:none">Adjust m/z Window</th>
+            <td class="wpTitle" style="border-left:0px none;border-top:none;border-left:none;border-right:none;text-align:right" title="Close">
                 <img border="0" onclick="hideMzFilter()" src="<%=contextPath%>/_images/partdelete.gif" alt="close"/>
             </td>
         </tr>
@@ -298,7 +298,7 @@
             <img src="showChart.view?type=spectrum&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scan=<%=scan%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>" alt="Spectrum chart"/>
             </a>
             <br/><i>Intensities of peaks with a
-            <a href="javascript:{}" onclick="showMzFilter(this);">
+            <a href="javascript:{}" onclick="showMzFilter(this);" title="Click to adjust">
             similar m/z as the feature (-<%=Math.abs(mzWindowLow)%> to +<%=mzWindowHigh%>)</a>,
             for a particular scan.</i>
         </td>
@@ -315,11 +315,11 @@
         <td valign="top" align="center">
             <!-- retention time and m/z bubble chart -->
             <a href="<%=urlPeaksView.getLocalURIString() + "&query.MZ~gte=" + (feature.getMz()+mzWindowLow) + "&query.MZ~lte=" + (feature.getMz()+mzWindowHigh)%>">
-            <img src="showChart.view?type=bubble&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst()%>&scanLast=<%=feature.getScanLast()%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>" alt="Intesities Bubble chart"/>
+            <img src="showChart.view?type=bubble&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst()%>&scanLast=<%=feature.getScanLast()%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>&scan=<%=scan%>" alt="Intesities Bubble chart"/>
             </a>
 
             <br/><i>Peaks with a
-            <a href="javascript:{}" onclick="showMzFilter(this);">
+            <a href="javascript:{}" onclick="showMzFilter(this);" title="Click to adjust">
             similar m/z as the feature (-<%=Math.abs(mzWindowLow)%> to +<%=mzWindowHigh%>)</a>,
             across all scans within the feature's range. The size of each bubble represents the peak's intensity.</i>
         </td>

@@ -380,7 +380,7 @@ public class MS1Controller extends SpringActionController
                 chart = new SpectrumChart(form.getRunId(), form.getScan(), form.getMzLow(), form.getMzHigh());
             else if(type.equalsIgnoreCase("bubble"))
                 chart = new RetentionMassChart(form.getRunId(), form.getMzLow(), form.getMzHigh(),
-                                                form.getScanFirst(), form.getScanLast());
+                                                form.getScanFirst(), form.getScanLast(), form.getScan());
             else if(type.equalsIgnoreCase("elution"))
                 chart = new ElutionChart(form.getRunId(), form.getMzLow(), form.getMzHigh(),
                                                 form.getScanFirst(), form.getScanLast());

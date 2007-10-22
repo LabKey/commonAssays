@@ -47,6 +47,7 @@ public class SpectrumChart extends FeatureChart
                                                         false, false, false);
 
         chart.getXYPlot().getRenderer().setStroke(new BasicStroke(1.5f));
+        chart.getXYPlot().getDomainAxis().setRange(_mzLow, _mzHigh);
         return chart;
 
     }
