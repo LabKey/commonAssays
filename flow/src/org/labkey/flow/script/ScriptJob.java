@@ -7,6 +7,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.data.*;
 import org.labkey.flow.data.FlowDataType;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.labkey.flow.FlowSettings;
 import org.fhcrc.cpas.exp.xml.*;
 import org.labkey.api.exp.api.ExperimentService;
@@ -44,13 +45,20 @@ abstract public class ScriptJob extends PipelineJob
     FlowScript _runAnalysisScript;
     FlowProtocolStep _step;
     FlowCompensationMatrix _compensationMatrix;
-    ViewURLHelper _statusHref;
     String _experimentLSID;
     String _compensationExperimentLSID;
     String _experimentName;
     volatile Date _start;
     volatile Date _end;
     volatile boolean _errors;
+
+    RunData _runData;
+    List<String> _pendingRunLSIDs = new ArrayList();
+    private final Map<FlowProtocolStep, List<String>> _processedRunLSIDs = new HashMap();
+    FlowProtocol _protocol;
+
+    private transient ScriptHandlerGroup _handlers;
+    private transient ViewURLHelper _statusHref;
 
     class RunData
     {
@@ -86,15 +94,74 @@ abstract public class ScriptJob extends PipelineJob
         }
     }
 
-    RunData _runData;
-    transient FileWriter _logWriter;
-    List<String> _pendingRunLSIDs = new ArrayList();
-    private final Map<FlowProtocolStep, List<String>> _processedRunLSIDs = new HashMap();
-    KeywordsHandler _runHandler;
-    CompensationCalculationHandler _compensationCalculationHandler;
-    AnalysisHandler _analysisHandler;
-    FlowProtocol _protocol;
+    class ScriptHandlerGroup
+    {
+        private KeywordsHandler _runHandler;
+        private CompensationCalculationHandler _compensationCalculationHandler;
+        private AnalysisHandler _analysisHandler;
 
+        public ScriptHandlerGroup()
+        {
+            try
+            {
+                ScriptDocument scriptDoc = null;
+                if (_runAnalysisScript != null)
+                {
+                    scriptDoc = _runAnalysisScript.getAnalysisScriptDocument();
+                }
+                _runHandler = new KeywordsHandler(ScriptJob.this);
+                if (scriptDoc != null)
+                {
+                    ScriptDef scriptDef = scriptDoc.getScript();
+                    if (scriptDef.getCompensationCalculation() != null)
+                    {
+                        _compensationCalculationHandler = new CompensationCalculationHandler(ScriptJob.this,
+                                scriptDef.getSettings(), scriptDef.getCompensationCalculation());
+                    }
+                    if (scriptDef.getAnalysis() != null)
+                    {
+                        _analysisHandler = new AnalysisHandler(ScriptJob.this,
+                                scriptDef.getSettings(), scriptDef.getAnalysis());
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                warn("Failed to get script handlers for FlowScript:\n" +
+                        (_runAnalysisScript == null ? "" : _runAnalysisScript.getAnalysisScript()), e);
+            }
+        }
+
+        public KeywordsHandler getRunHandler()
+        {
+            return _runHandler;
+        }
+
+        public void setRunHandler(KeywordsHandler runHandler)
+        {
+            _runHandler = runHandler;
+        }
+
+        public CompensationCalculationHandler getCompensationCalculationHandler()
+        {
+            return _compensationCalculationHandler;
+        }
+
+        public void setCompensationCalculationHandler(CompensationCalculationHandler compensationCalculationHandler)
+        {
+            _compensationCalculationHandler = compensationCalculationHandler;
+        }
+
+        public AnalysisHandler getAnalysisHandler()
+        {
+            return _analysisHandler;
+        }
+
+        public void setAnalysisHandler(AnalysisHandler analysisHandler)
+        {
+            _analysisHandler = analysisHandler;
+        }
+    }
 
     class StartingInput
     {
@@ -118,24 +185,30 @@ abstract public class ScriptJob extends PipelineJob
         _experimentLSID = experimentLSID;
         _protocol = protocol;
         _containerFolder = getWorkingFolder(getContainer());
-        ScriptDocument scriptDoc = null;
-        if (script != null)
-        {
-            scriptDoc = script.getAnalysisScriptDocument();
-        }
-        _runHandler = new KeywordsHandler(this);
-        if (scriptDoc != null)
-        {
-            if (scriptDoc.getScript().getCompensationCalculation() != null)
-            {
-                _compensationCalculationHandler = new CompensationCalculationHandler(this, scriptDoc.getScript().getSettings(), scriptDoc.getScript().getCompensationCalculation());
-            }
-            if (scriptDoc.getScript().getAnalysis() != null)
-            {
-                _analysisHandler = new AnalysisHandler(this, scriptDoc.getScript().getSettings(), scriptDoc.getScript().getAnalysis());
-            }
-        }
+
         initStatus();
+    }
+
+    private ScriptHandlerGroup getHandlers()
+    {
+        if (_handlers == null)
+            _handlers = new ScriptHandlerGroup();
+        return _handlers;
+    }
+
+    public CompensationCalculationHandler getCompensationCalculationHandler()
+    {
+        return getHandlers().getCompensationCalculationHandler();
+    }
+
+    public AnalysisHandler getAnalysisHandler()
+    {
+        return getHandlers().getAnalysisHandler();
+    }
+
+    public KeywordsHandler getRunHandler()
+    {
+        return getHandlers().getRunHandler();
     }
 
     public void setCompensationExperimentLSID(String compensationExperimentLSID)
@@ -177,6 +250,12 @@ abstract public class ScriptJob extends PipelineJob
 
     public ViewURLHelper urlStatus()
     {
+        if (_statusHref == null)
+        {
+            File statusFile = getLogFile();
+            _statusHref = PageFlowUtil.urlFor(FlowController.Action.showStatusJob, getContainer());
+            _statusHref.addParameter(FlowParam.statusFile.toString(), PipelineStatusManager.getStatusFilePath(statusFile.toString()));
+        }
         return _statusHref;
     }
 
@@ -226,9 +305,9 @@ abstract public class ScriptJob extends PipelineJob
         FlowCompensationMatrix ret = findCompensationMatrix(run);
         if (ret != null)
             return ret;
-        if (_compensationCalculationHandler == null)
+        if (getCompensationCalculationHandler() == null)
             return null;
-        FlowRun compRun = executeHandler(run, _compensationCalculationHandler);
+        FlowRun compRun = executeHandler(run, getCompensationCalculationHandler());
         return compRun.getCompensationMatrix();
     }
 
@@ -239,7 +318,7 @@ abstract public class ScriptJob extends PipelineJob
         {
             return ret;
         }
-        return _statusHref.clone();
+        return urlStatus().clone();
     }
 
     public ViewURLHelper getStatusHref(HttpServletRequest request)
@@ -296,21 +375,7 @@ abstract public class ScriptJob extends PipelineJob
 
     synchronized public void addStatus(String status)
     {
-        try
-        {
-            if (_logWriter == null)
-            {
-                _logWriter = new FileWriter(getLogFile(), true);
-
-            }
-            _logWriter.write(status);
-            _logWriter.write("\n");
-            _logWriter.flush();
-        }
-        catch (Exception e)
-        {
-            _log.error("Error writing status", e);
-        }
+        info(status);
     }
 
     public void addError(String lsid, String propertyURI, String message)
@@ -359,18 +424,6 @@ abstract public class ScriptJob extends PipelineJob
             addStatus("Job completed at " + DateUtil.formatDateTime(_end));
             long duration = Math.max(0, _end.getTime() - _start.getTime());
             addStatus("Elapsed time " + DateUtil.formatDuration(duration));
-            if (_logWriter != null)
-            {
-                try
-                {
-                    _logWriter.close();
-                }
-                catch (Exception e)
-                {
-                    _log.error("Error closing log file", e);
-                }
-                _logWriter = null;
-            }
         }
         if (checkInterrupted())
         {
@@ -622,10 +675,6 @@ abstract public class ScriptJob extends PipelineJob
         String guid = GUID.makeGUID();
         File logFile = new File(_containerFolder, guid + ".flow.log");
         logFile.createNewFile();
-
-        File statusFile = logFile;
-        _statusHref = PageFlowUtil.urlFor(FlowController.Action.showStatusJob, getContainer());
-        _statusHref.addParameter(FlowParam.statusFile.toString(), PipelineStatusManager.getStatusFilePath(statusFile.toString()));
         setLogFile(logFile);
     }
 

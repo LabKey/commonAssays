@@ -32,7 +32,7 @@ public class AddRunsJob extends ScriptJob
                 continue;
             try
             {
-                _runHandler.run(path);
+                getRunHandler().run(path);
             }
             catch (Throwable t)
             {

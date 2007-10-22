@@ -16,7 +16,7 @@ import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 
-abstract public class BaseHandler implements Serializable
+abstract public class BaseHandler
 {
     protected ScriptJob _job;
     protected FlowProtocolStep _step;

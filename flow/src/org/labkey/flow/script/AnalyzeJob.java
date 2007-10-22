@@ -33,7 +33,7 @@ public class AnalyzeJob extends ScriptJob
         {
             if (!checkProcessPath(new File(run.getPath()), FlowProtocolStep.calculateCompensation))
                 return;
-            executeHandler(run, _compensationCalculationHandler);
+            executeHandler(run, getCompensationCalculationHandler());
             return;
         }
         else
@@ -41,7 +41,7 @@ public class AnalyzeJob extends ScriptJob
             if (!checkProcessPath(new File(run.getPath()), FlowProtocolStep.analysis))
                 return;
             ensureCompensationMatrix(run);
-            executeHandler(run, _analysisHandler);
+            executeHandler(run, getAnalysisHandler());
             return;
         }
     }
