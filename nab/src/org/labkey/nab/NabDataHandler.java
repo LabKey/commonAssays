@@ -135,7 +135,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
 
         Plate plate = PlateService.get().createPlate(nabTemplate, cellValues);
         List<? extends WellGroup> specimenGroups = plate.getWellGroups(WellGroup.Type.SPECIMEN);
-        List<ExpMaterial> sampleInputs = run.getMaterialInputs();
+        Collection<ExpMaterial> sampleInputs = run.getMaterialInputs().keySet();
         Map<WellGroup, ExpMaterial> inputs = getWellGroupMaterialPairings(sampleInputs, specimenGroups);
 
         prepareWellGroups(inputs, samplePropertyMap);
@@ -159,7 +159,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         return assay;
     }
 
-    private static Map<WellGroup, ExpMaterial> getWellGroupMaterialPairings(List<ExpMaterial> sampleInputs, List<? extends WellGroup> wellgroups)
+    private static Map<WellGroup, ExpMaterial> getWellGroupMaterialPairings(Collection<ExpMaterial> sampleInputs, List<? extends WellGroup> wellgroups)
     {
         Map<String, ExpMaterial> nameToMaterial = new HashMap<String, ExpMaterial>();
         for (ExpMaterial material : sampleInputs)

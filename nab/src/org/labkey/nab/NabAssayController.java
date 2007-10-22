@@ -254,7 +254,7 @@ public class NabAssayController extends SpringActionController
         {
             if (_sampleProperties == null)
             {
-                List<ExpMaterial> inputs = _run.getMaterialInputs();
+                Collection<ExpMaterial> inputs = _run.getMaterialInputs().keySet();
                 _sampleProperties = new ArrayList<Pair<String, Map<PropertyDescriptor, Object>>>();
                 PropertyDescriptor[] samplePropertyDescriptors = _provider.getSampleWellGroupColumns(_protocol);
 

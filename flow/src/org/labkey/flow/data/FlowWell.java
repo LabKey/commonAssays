@@ -1,11 +1,8 @@
 package org.labkey.flow.data;
 
 import org.labkey.api.exp.api.*;
-import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.FlowManager;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.log4j.Logger;
@@ -61,8 +58,7 @@ public class FlowWell extends FlowDataObject
     {
         if (getDataType() == FlowDataType.FCSFile)
             return (FlowFCSFile) this;
-        ExpData[] inputs = getProtocolApplication().getInputDatas();
-        for (ExpData input : inputs)
+        for (ExpData input : getProtocolApplication().getInputDatas())
         {
             if (input.getDataType() == FlowDataType.FCSFile)
                 return (FlowFCSFile) FlowDataObject.fromData(input);
@@ -203,7 +199,7 @@ public class FlowWell extends FlowDataObject
         List<FlowWell> ret = new ArrayList();
         for (ExpProtocolApplication app : apps)
         {
-            addDataOfType(app.getDataOutputs(), FlowDataType.FCSAnalysis, ret);
+            addDataOfType(app.getOutputDatas(), FlowDataType.FCSAnalysis, ret);
         }
         return ret;
     }
@@ -218,7 +214,7 @@ public class FlowWell extends FlowDataObject
         return null;
     }
 
-    public ExpMaterial[] getSamples()
+    public List<ExpMaterial> getSamples()
     {
         ExpProtocolApplication app = getExpObject().getSourceApplication();
         if (app == null)

@@ -57,7 +57,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         return fromRowId(obj.getDataId());
     }
 
-    static public void addDataOfType(ExpData[] datas, FlowDataType typeFilter, List list)
+    static public void addDataOfType(List<ExpData> datas, FlowDataType typeFilter, List list)
     {
         for (ExpData data : datas)
         {
