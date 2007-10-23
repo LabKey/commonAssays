@@ -37,6 +37,11 @@
     urlPeaksView.addParameter("runId", feature.getRunId());
     urlPeaksView.addParameter("featureId", feature.getFeatureId());
 
+    ViewURLHelper urlMs2Scan = url.clone();
+    urlMs2Scan.deleteParameters();
+    urlMs2Scan.setAction("showMS2Peptide");
+    urlMs2Scan.addParameter("featureId", feature.getFeatureId());
+
     String contextPath = request.getContextPath();
 %>
 <%!
@@ -209,7 +214,9 @@
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">MS2 Scan</td>
-                    <td><%=formatNumber(feature.getMs2Scan(), null)%></td>
+                    <td>
+                        <a href="<%=urlMs2Scan%>" target="peptide"><%=formatNumber(feature.getMs2Scan(), null)%></a>
+                    </td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">MS2 Probability</td>
