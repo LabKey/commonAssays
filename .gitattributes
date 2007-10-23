@@ -484,6 +484,7 @@ ms1/src/org/labkey/ms1/FeatureDetailsViewContext.java -text
 ms1/src/org/labkey/ms1/FeaturePeptideLink.java -text
 ms1/src/org/labkey/ms1/FeaturesTableInfo.java -text
 ms1/src/org/labkey/ms1/FeaturesView.java -text
+ms1/src/org/labkey/ms1/FilesTableInfo.java -text
 ms1/src/org/labkey/ms1/MS1Controller.java -text
 ms1/src/org/labkey/ms1/MS1Manager.java -text
 ms1/src/org/labkey/ms1/MS1Module.java -text
@@ -495,6 +496,7 @@ ms1/src/org/labkey/ms1/PeaksTableInfo.java -text
 ms1/src/org/labkey/ms1/PeaksView.java -text
 ms1/src/org/labkey/ms1/RetentionMassChart.java -text
 ms1/src/org/labkey/ms1/Scan.java -text
+ms1/src/org/labkey/ms1/ScansTableInfo.java -text
 ms1/src/org/labkey/ms1/Software.java -text
 ms1/src/org/labkey/ms1/SoftwareParam.java -text
 ms1/src/org/labkey/ms1/SpectrumChart.java -text

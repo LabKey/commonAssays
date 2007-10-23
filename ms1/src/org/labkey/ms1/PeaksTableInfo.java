@@ -20,9 +20,10 @@ import java.util.ArrayList;
  */
 public class PeaksTableInfo extends FilteredTable
 {
-    public PeaksTableInfo(Container container)
+    public PeaksTableInfo(MS1Schema schema, Container container)
     {
         super(MS1Manager.get().getTable(MS1Manager.TABLE_PEAKS));
+        _schema = schema;
 
         //wrap all the columns
         wrapAllColumns(true);
@@ -41,12 +42,16 @@ public class PeaksTableInfo extends FilteredTable
         });
         addColumn(peakFamCol);
 
-        TableInfo joinTable = peakFamCol.getFkTableInfo();
-        joinTable.getColumn("PeakId").setIsHidden(true);
-        joinTable.getColumn("PeakFamilyId").setCaption("Peak Family");
-        TableInfo peakFamTable = joinTable.getColumn("PeakFamilyId").getFkTableInfo();
-        peakFamTable.getColumn("MZMono").setCaption("MZ Monoisotopic");
-        peakFamTable.getColumn("Charge").setCaption("Charge");
+        //tell query to use our user schema for scans
+        ColumnInfo scanCol = getColumn("ScanId");
+        scanCol.setFk(new LookupForeignKey("ScanId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                setPrefixColumnCaption(false);
+                return _schema.getScansTableInfo();
+            }
+        });
 
         //display only a subset by default
         ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(getDefaultVisibleColumns());
@@ -59,14 +64,6 @@ public class PeaksTableInfo extends FilteredTable
         
         //mark the PeakId column as hidden
         getColumn("PeakId").setIsHidden(true);
-
-        //rename ScanId to something nicer
-        //hide ScanId on Scans and rename FileId to something nicer
-        ColumnInfo ciScan = getColumn("ScanId");
-        ciScan.setCaption("Scan");
-        TableInfo tiScans = ciScan.getFkTableInfo();
-        tiScans.getColumn("FileId").setCaption("Data File");
-        tiScans.getColumn("ScanId").setIsHidden(true);
 
         //add a condition that limits the features returned to just those existing in the
         //current container. The FilteredTable class supports this automatically only if
@@ -86,4 +83,6 @@ public class PeaksTableInfo extends FilteredTable
         getFilter().deleteConditions("ScanId");
         addCondition(sf, "ScanId");
     }
+
+    private MS1Schema _schema;
 } //class PeaksTableInfo

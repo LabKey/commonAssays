@@ -16,18 +16,25 @@
  * limitations under the License.
 
  -->
-<ns:tables xsi:schemaLocation="http://cpas.fhcrc.org/data/xml ..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ns:tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <ns:table tableName="Calibrations" tableDbType="TABLE">
       <ns:columns>
-        <ns:column columnName="ScanId"/>
+        <ns:column columnName="ScanId">
+            <ns:isHidden>true</ns:isHidden>
+        </ns:column>
         <ns:column columnName="Name"/>
         <ns:column columnName="Value"/>
       </ns:columns>
     </ns:table>
     <ns:table tableName="Features" tableDbType="TABLE">
       <ns:columns>
-        <ns:column columnName="FeatureId"/>
-        <ns:column columnName="FileId"/>
+        <ns:column columnName="FeatureId">
+            <ns:isHidden>true</ns:isHidden>
+        </ns:column>
+        <ns:column columnName="FileId">
+            <ns:columnTitle>Features File</ns:columnTitle>
+            <ns:isUnselectable>true</ns:isUnselectable>
+        </ns:column>
         <ns:column columnName="Scan"/>
         <ns:column columnName="Time">
           <ns:formatString>#,##0.0000</ns:formatString>
@@ -71,27 +78,45 @@
     </ns:table>
     <ns:table tableName="Files" tableDbType="TABLE">
       <ns:columns>
-        <ns:column columnName="FileId"/>
-        <ns:column columnName="ExpDataFileId"/>
+        <ns:column columnName="FileId">
+            <ns:isHidden>true</ns:isHidden>
+        </ns:column>
+        <ns:column columnName="ExpDataFileId">
+            <ns:columnTitle>Experiment Data File</ns:columnTitle>
+            <ns:isUnselectable>true</ns:isUnselectable>
+        </ns:column>
         <ns:column columnName="Type"/>
         <ns:column columnName="MzXmlUrl"/>
-        <ns:column columnName="Imported"/>
+        <ns:column columnName="Imported">
+            <ns:isHidden>true</ns:isHidden>
+        </ns:column>
       </ns:columns>
     </ns:table>
     <ns:table tableName="PeakFamilies" tableDbType="TABLE">
       <ns:columns>
-        <ns:column columnName="PeakFamilyId"/>
-        <ns:column columnName="ScanId"/>
+        <ns:column columnName="PeakFamilyId">
+            <ns:isHidden>true</ns:isHidden>
+        </ns:column>
+        <ns:column columnName="ScanId">
+            <ns:isHidden>true</ns:isHidden>
+            <ns:isUnselectable>true</ns:isUnselectable>
+        </ns:column>
         <ns:column columnName="MzMono">
             <ns:formatString>#,##0.0000</ns:formatString>
+            <ns:columnTitle>MZ Monoisotopic</ns:columnTitle>
         </ns:column>
         <ns:column columnName="Charge"/>
       </ns:columns>
     </ns:table>
     <ns:table tableName="Peaks" tableDbType="TABLE">
       <ns:columns>
-        <ns:column columnName="PeakId"/>
-        <ns:column columnName="ScanId"/>
+        <ns:column columnName="PeakId">
+            <ns:isHidden>true</ns:isHidden>
+        </ns:column>
+        <ns:column columnName="ScanId">
+            <ns:columnTitle>Scan Information</ns:columnTitle>
+            <ns:isUnselectable>true</ns:isUnselectable>
+        </ns:column>
         <ns:column columnName="MZ">
             <ns:formatString>#,##0.0000</ns:formatString>
         </ns:column>
@@ -117,14 +142,25 @@
     </ns:table>
     <ns:table tableName="PeaksToFamilies" tableDbType="TABLE">
       <ns:columns>
-        <ns:column columnName="PeakFamilyId"/>
-        <ns:column columnName="PeakId"/>
+        <ns:column columnName="PeakFamilyId">
+            <ns:columnTitle>Peak Family</ns:columnTitle>
+            <ns:isUnselectable>true</ns:isUnselectable>
+        </ns:column>
+        <ns:column columnName="PeakId">
+            <ns:isHidden>true</ns:isHidden>
+            <ns:isUnselectable>true</ns:isUnselectable>
+        </ns:column>
       </ns:columns>
     </ns:table>
     <ns:table tableName="Scans" tableDbType="TABLE">
       <ns:columns>
-        <ns:column columnName="ScanId"/>
-        <ns:column columnName="FileId"/>
+        <ns:column columnName="ScanId">
+            <ns:isHidden>true</ns:isHidden>
+        </ns:column>
+        <ns:column columnName="FileId">
+            <ns:columnTitle>Peaks File</ns:columnTitle>
+            <ns:isUnselectable>true</ns:isUnselectable>
+        </ns:column>
         <ns:column columnName="Scan"/>
         <ns:column columnName="RetentionTime">
             <ns:formatString>#,##0.0000</ns:formatString>

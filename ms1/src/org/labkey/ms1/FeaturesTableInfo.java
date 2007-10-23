@@ -1,7 +1,6 @@
 package org.labkey.ms1;
 
 import org.labkey.api.data.*;
-import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
@@ -21,15 +20,11 @@ import java.util.ArrayList;
  */
 public class FeaturesTableInfo extends FilteredTable
 {
-    //Localizable Strings
-    public static final String CAPTION_FEATURES_FILE = "Features File";
-    public static final String CAPTION_EXP_DATA_FILE = "Experiment Data File";
-
-    public FeaturesTableInfo(ExpSchema expSchema, Container container)
+    public FeaturesTableInfo(MS1Schema schema, Container container)
     {
         super(MS1Manager.get().getTable(MS1Manager.TABLE_FEATURES));
 
-        _expSchema = expSchema;
+        _schema = schema;
         _container = container;
 
         //wrap all the columns
@@ -46,18 +41,11 @@ public class FeaturesTableInfo extends FilteredTable
         getColumn("FeatureId").setIsHidden(true);
 
         //rename the FileId to something nicer
-        getColumn("FileId").setCaption(CAPTION_FEATURES_FILE);
-
-        //tell it that ms1.Files.FileId is a foreign key to exp.Data.RowId
-        TableInfo fftinfo = getColumn("FileId").getFkTableInfo();
-        fftinfo.getColumn("FileId").setIsHidden(true);
-        ColumnInfo ffid = fftinfo.getColumn("ExpDataFileId");
-        ffid.setCaption(CAPTION_EXP_DATA_FILE);
-        ffid.setFk(new LookupForeignKey("RowId")
+        getColumn("FileId").setFk(new LookupForeignKey("FileId")
         {
             public TableInfo getLookupTableInfo()
             {
-                return _expSchema.createDatasTable(null);
+                return _schema.getFilesTableInfo();
             }
         });
 
@@ -143,7 +131,7 @@ public class FeaturesTableInfo extends FilteredTable
     } //addRunIdCondition()
 
     // Protected Data Members
-    protected ExpSchema _expSchema;
+    protected MS1Schema _schema;
     protected Container _container;
     protected ViewURLHelper _urlBase;
     protected int _runId = 0;
