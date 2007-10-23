@@ -21,11 +21,11 @@
 
     String paramVal = me.getViewContext().getRequest().getParameter("mzWindowLow");
     if (null != paramVal && paramVal.length() > 0)
-        mzWindowLow = -(Math.abs(Double.parseDouble(paramVal))); //to ensure the value is negative
+        mzWindowLow = Double.parseDouble(paramVal);
 
     paramVal = me.getViewContext().getRequest().getParameter("mzWindowHigh");
     if (null != paramVal && paramVal.length() > 0)
-        mzWindowHigh = Math.abs(Double.parseDouble(paramVal)); //to ensure the value is positive
+        mzWindowHigh = Double.parseDouble(paramVal);
 
     DecimalFormat fmtDouble = new DecimalFormat("#,##0.0000");
     DecimalFormat fmtPercent = new DecimalFormat("0%");
@@ -52,50 +52,40 @@
 <script type="text/javascript">
     function showMzFilter(elem)
     {
-        var posLeft = 0;
-        var posTop = 0;
-        var offsetElem = elem;
-
-        var filterbox = document.getElementById("boxMzWindowFilter");
-        if(null == filterbox)
+        var filterbox = document.getElementById("mzFilterUI");
+        if(!filterbox)
             return;
 
-        while (offsetElem.tagName != "BODY")
+        if("none" == filterbox.style.display)
         {
-            posLeft += offsetElem.offsetLeft;
-            posTop += offsetElem.offsetTop;
-            offsetElem = offsetElem.offsetParent;
+            filterbox.style.display="";
+            _slider.recalculate();
+
+            var scc = document.getElementById("spectrumChartContainer");
+            if(scc)
+                scc.className = "ms-navframe";
+            var bcc = document.getElementById("bubbleChartContainer");
+            if(bcc)
+                bcc.className = "ms-navframe";
+
+            document.getElementById("sliderMzWindow").focus();
         }
-
-        posTop += elem.offsetHeight;
-
-        filterbox.style.top = posTop;
-        filterbox.style.left = posLeft;
-
-        var viewportWidth = YAHOO.util.Dom.getViewportWidth();
-        var leftScroll = YAHOO.util.DragDropMgr.getScrollLeft();
-        if (viewportWidth + leftScroll < filterbox.offsetWidth + posLeft)
-        {
-            posLeft = viewportWidth + leftScroll - filterbox.offsetWidth - 10;
-            filterbox.style.left = posLeft;
-        }
-
-        filterbox.style.display = "block";
-
-        var txt = document.getElementById("txtMzWindowLow");
-        if(null != txt)
-        {
-            txt.focus();
-            txt.select();
-        }
+        else
+            hideMzFilter();
     }
 
     function hideMzFilter()
     {
-        var filterbox = document.getElementById("boxMzWindowFilter");
-        if(null == filterbox)
-            return;
-        filterbox.style.display = "none";
+        var filterbox = document.getElementById("mzFilterUI");
+        if(filterbox)
+            filterbox.style.display = "none";
+
+        var scc = document.getElementById("spectrumChartContainer");
+        if(scc)
+            scc.className = "";
+        var bcc = document.getElementById("bubbleChartContainer");
+        if(bcc)
+            bcc.className = "";
     }
 
     function submitMzWindowFilter()
@@ -109,7 +99,7 @@
     {
         var txt = document.getElementById("txtMzWindowLow");
         if(null != txt)
-            txt.value = "1.0";
+            txt.value = "-1.0";
         txt = document.getElementById("txtMzWindowHigh");
         if(null != txt)
             txt.value = "5.0";
@@ -117,50 +107,14 @@
         submitMzWindowFilter();
     }
 </script>
-
-<div id="boxMzWindowFilter" style="background-color:#F9F9F9;border:1px solid #AAAAAA;position:absolute;display:none;">
-    <form id="frmMzWindowFilter" action="showFeatureDetails.view" method="GET">
-    <input type="hidden" name="runId" value="<%=feature.getRunId()%>"/>
-    <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
-    <input type="hidden" name="scan" value="<%=scan%>"/>
-    <input type="submit" value="Filter" style="display:none;"/>
-    <table cellspacing="0" cellpadding="2px" border="0" class="wp">
-        <tr class="wpHeader" style="border-top:none;border-left:none;border-right:none">
-            <th class="wpTitle" style="border-right:0px none;border-top:none;border-left:none;border-right:none">Adjust m/z Window</th>
-            <td class="wpTitle" style="border-left:0px none;border-top:none;border-left:none;border-right:none;text-align:right" title="Close">
-                <img border="0" onclick="hideMzFilter()" src="<%=contextPath%>/_images/partdelete.gif" alt="close"/>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2" style="text-align:center">
-                Show peaks with an m/z value within
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2" style="text-align:center">
-                <b>-</b><input id="txtMzWindowLow" type="text" name="mzWindowLow" value="<%=Math.abs(mzWindowLow)%>" size="4"/>
-                and <b>+</b>
-                <input type="text" id="txtMzWindowHigh" name="mzWindowHigh" value="<%=mzWindowHigh%>" size="4"/>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2" style="text-align:center">
-                of the feature's m/z value.
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2" style="text-align:right;">
-                <img src="<%=PageFlowUtil.buttonSrc("Reset")%>" onclick="resetMzWindowFilter();" alt="Reset"/>
-                <img src="<%=PageFlowUtil.buttonSrc("Filter")%>" onclick="submitMzWindowFilter();" alt="Filter"/>
-            </td>
-        </tr>
-    </table>
-    </form>
-</div>
+<link type="text/css" rel="StyleSheet" href="<%=contextPath%>/slider/css/rangeslider.css" />
+<script type="text/javascript" src="<%=contextPath%>/slider/range.js"></script>
+<script type="text/javascript" src="<%=contextPath%>/slider/slidertimer.js"></script>
+<script type="text/javascript" src="<%=contextPath%>/slider/rangeslider.js"></script>
 
 <table cellspacing="0" cellpadding="4px">
     <tr>
-        <td colspan="2" align="left">
+        <td colspan="2" align="left" style="background-color:#EEEEEE">
             <%
                 String prevFeatureCaption = "<< Previous Feature";
                 String nextFeatureCaption = "Next Feature >>";
@@ -263,7 +217,7 @@
                 </tr>
             </table>
         </td>
-        <td valign="top" align="center">
+        <td valign="top" align="center" id="spectrumChartContainer">
             <%
                 String prevScanCaption = "<< Previous Scan";
                 String nextScanCaption = "Next Scan >>";
@@ -303,6 +257,56 @@
             for a particular scan.</i>
         </td>
     </tr>
+    <tr id="mzFilterUI" style="display:none">
+        <td></td>
+        <td class="ms-navframe" style="text-align:center;border-top:1px solid #AAAAAA;border-bottom:1px solid #AAAAAA">
+            <!-- m/z filter UI -->
+            <table cellspacing="0" cellpadding="4px">
+                <tr>
+                    <td colspan="3" style="text-align:center;font-weight:bold">Show Peaks within:</td>
+                </tr>
+                <tr>
+                    <td style="font-size:x-small;">-50</td>
+                    <td>
+                        <div class="slider" id="sliderMzWindow" tabindex="1" style="width:350px"/>
+                    </td>
+                    <td style="font-size:x-small">50</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align:center">
+                        <form id="frmMzWindowFilter" action="showFeatureDetails.view" method="GET">
+                            <input type="hidden" name="runId" value="<%=feature.getRunId()%>"/>
+                            <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
+                            <input type="hidden" name="scan" value="<%=scan%>"/>
+                            <input type="submit" value="Filter" style="display:none;"/>
+                            <input type="text" id="txtMzWindowLow" name="mzWindowLow" size="4" onchange="_slider.setValueLow(this.value);" tabindex="2"/>
+                            and <input type="text" id="txtMzWindowHigh" name="mzWindowHigh" size="4" onchange="_slider.setValueHigh(this.value);" tabindex="3"/>
+                            <br/>of the Feature's m/z value.
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align:right">
+                        <img src="<%=PageFlowUtil.buttonSrc("Cancel")%>" onclick="hideMzFilter();" alt="Cancel" title="Cancel Chanages" tabindex="4"/>
+                        <img src="<%=PageFlowUtil.buttonSrc("Reset")%>" onclick="resetMzWindowFilter();" alt="Reset" title="Reset to Defaults and Refresh" tabindex="5"/>
+                        <img src="<%=PageFlowUtil.buttonSrc("Filter")%>" onclick="submitMzWindowFilter();" alt="Filter" title="Set Filter and Refresh" tabindex="6"/>
+                    </td>
+                </tr>
+            </table>
+
+            <script type="text/javascript">
+                var _slider = new Slider(document.getElementById("sliderMzWindow"),
+                                   document.getElementById("txtMzWindowLow"),
+                                   document.getElementById("txtMzWindowHigh"));
+                _slider.setMinimum(-50);
+                _slider.setMaximum(50);
+                _slider.setValueLow(<%=mzWindowLow%>);
+                _slider.setValueHigh(<%=mzWindowHigh%>);
+                _slider.setPrecision(1);
+            </script>
+
+        </td>
+    </tr>
     <tr>
         <td valign="top" align="center">
             <!-- retention time and intensity peaks elution chart -->
@@ -312,7 +316,7 @@
             </a>
             <br/><i>Intensity of the peaks with the closest m/z value to the feature, across all scans within the feature's range.</i>
         </td>
-        <td valign="top" align="center">
+        <td valign="top" align="center" id="bubbleChartContainer">
             <!-- retention time and m/z bubble chart -->
             <a href="<%=urlPeaksView.getLocalURIString() + "&query.MZ~gte=" + (feature.getMz()+mzWindowLow) + "&query.MZ~lte=" + (feature.getMz()+mzWindowHigh)%>">
             <img src="showChart.view?type=bubble&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst()%>&scanLast=<%=feature.getScanLast()%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>&scan=<%=scan%>" alt="Intesities Bubble chart"/>
@@ -321,7 +325,7 @@
             <br/><i>Peaks with a
             <a href="javascript:{}" onclick="showMzFilter(this);" title="Click to adjust">
             similar m/z as the feature (-<%=Math.abs(mzWindowLow)%> to +<%=mzWindowHigh%>)</a>,
-            across all scans within the feature's range. The size of each bubble represents the peak's intensity.</i>
+            across all scans within the feature's range. The color and size of each bubble represents the peak's intensity.</i>
         </td>
     </tr>
 </table>
