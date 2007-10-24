@@ -1,5 +1,7 @@
 package org.labkey.flow.persist;
 
+import org.apache.commons.collections.MultiMap;
+import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -8,13 +10,17 @@ import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
-import org.labkey.api.util.LimitedCacheMap;
-import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.util.*;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewURLHelper;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.query.AttributeCache;
 
+import java.io.File;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -472,5 +478,93 @@ public class FlowManager
     {
         SQLFragment sqlOIDs = new SQLFragment("(SELECT flow.object.rowid FROM flow.object INNER JOIN exp.data ON flow.object.dataid = exp.data.rowid AND exp.data.container = ?)", container.getId());
         deleteObjectIds(sqlOIDs, Collections.singleton(container));
+    }
+
+
+    public MultiMap searchFCSFiles(Collection<String> containerIds, Search.SearchTermParser parser)
+    {
+        FCSFileSearch search = new FCSFileSearch(containerIds, parser);
+        return search.search();
+    }
+
+
+    public static class FCSFileSearch implements Search.Searchable
+    {
+        Collection<String> containerIds;
+        Search.SearchTermParser parser;
+        
+        public FCSFileSearch(Collection<String> containerIds, Search.SearchTermParser parser)
+        {
+            this.containerIds = containerIds;
+            this.parser = parser;
+        }
+
+        public MultiMap search(Collection<String> containerIds, Search.SearchTermParser parser)
+        {
+            this.containerIds = containerIds;
+            this.parser = parser;
+            return search();
+        }
+
+
+        protected MultiMap search()
+        {
+            DbSchema s = DbSchema.get("flow");
+            String fromClause = "flow.attribute A inner join flow.keyword K on A.rowid=K.keywordid inner join flow.object O on K.objectid = O.rowid inner join exp.data D on O.dataid = D.rowid";
+            SQLFragment fragment = Search.getSQLFragment("container, uri, dataid", "D.container, O.uri, O.dataid, A.name, K.value", fromClause, "D.Container", null, containerIds, parser, s.getSqlDialect(),  "A.name", "K.value");
+
+            MultiMap map = new MultiValueMap();
+            ResultSet rs = null;
+
+            ViewURLHelper url = new ViewURLHelper("flow-well", "showWell", "");
+            StringBuilder link = new StringBuilder(200);
+
+            try
+            {
+                rs = Table.executeQuery(s, fragment);
+
+                while(rs.next())
+                {
+                    String containerId = rs.getString(1);
+                    String uri = rs.getString(2);
+                    String wellId = String.valueOf(rs.getInt(3));
+                    
+                    String path;
+                    try
+                    {
+                        path = new File(new URI(uri)).getPath();
+                    }
+                    catch (URISyntaxException x)
+                    {
+                        continue;
+                    }
+                    Container c = ContainerManager.getForId(containerId);
+                    url.setExtraPath(c.getPath());
+                    url.replaceParameter("wellId", wellId);
+                    link.append("<a href=\"");
+                    link.append(url.getEncodedLocalURIString());
+                    link.append("\">");
+                    link.append(PageFlowUtil.filter(path));
+                    link.append("</a>");
+                    map.put(containerId, link.toString());
+                    link.setLength(0);
+                }
+            }
+            catch(SQLException e)
+            {
+                ExceptionUtil.logExceptionToMothership(HttpView.currentRequest(), e);
+            }
+            finally
+            {
+                ResultSetUtil.close(rs);
+            }
+
+            return map;
+        }
+
+        public String getSearchResultName()
+        {
+            return "FCS File";
+        }
     }
 }

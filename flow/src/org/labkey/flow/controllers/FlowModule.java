@@ -28,23 +28,24 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Search;
 import org.labkey.api.view.ViewContext;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.log.LogController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
+import org.labkey.flow.controllers.remote.FlowRemoteController;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
-import org.labkey.flow.controllers.remote.FlowRemoteController;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocolImplementation;
 import org.labkey.flow.data.InputRole;
+import org.labkey.flow.persist.FlowContainerListener;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.persist.FlowContainerListener;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.webparts.AnalysesWebPart;
@@ -145,6 +146,7 @@ public class FlowModule extends DefaultModule
         FlowProtocolImplementation.register();
         super.startup(moduleContext);
         ModuleLoader.getInstance().registerFolderType(new FlowFolderType(this));
+        Search.register(new FlowManager.FCSFileSearch(null,null));
     }
 
 
