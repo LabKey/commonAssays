@@ -216,12 +216,12 @@ public class MS1Controller extends SpringActionController
      * Action to show the peaks for a given experiment run and scan number
      */
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowPeaksAction extends SimpleViewAction<FeatureIdForm>
+    public class ShowPeaksAction extends SimpleViewAction<PeaksViewForm>
     {
         public static final String PARAM_FEATUREID = "featureId";
-        private FeatureIdForm _form;
+        private PeaksViewForm _form;
 
-        public ModelAndView getView(FeatureIdForm form, BindException errors) throws Exception
+        public ModelAndView getView(PeaksViewForm form, BindException errors) throws Exception
         {
             if(-1 == form.getRunId() && -1 == form.getFeatureId())
                 return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
@@ -244,8 +244,11 @@ public class MS1Controller extends SpringActionController
                 return new HtmlView("The peaks for this feature cannot be displayed because the first and last scan number for the feature were not supplied.");
 
             //initialize the PeaksView
+            //the form's scanFirst/Last can override the feature's scanFirst/Last
             PeaksView peaksView = new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                                expRun, feature);
+                                                expRun, feature,
+                                                null == form.getScanFirst() ? feature.getScanFirst().intValue() : form.getScanFirst().intValue(),
+                                                null == form.getScanLast() ? feature.getScanLast().intValue() : form.getScanLast().intValue());
 
             //if there is an export parameter, do the export and return
             if(isExportRequest(form.getExport()))
@@ -253,7 +256,7 @@ public class MS1Controller extends SpringActionController
 
             //if software information is available, create and initialize the software view
             JspView softwareView = null;
-            Integer fileId = mgr.getFileIdForRun(form.getRunId(), MS1Manager.FILETYPE_PEAKS);
+            Integer fileId = mgr.getFileIdForRun(expRun.getRowId(), MS1Manager.FILETYPE_PEAKS);
             if(null != fileId)
             {
                 Software[] swares = mgr.getSoftware(fileId.intValue());
@@ -537,6 +540,65 @@ public class MS1Controller extends SpringActionController
         public void setExport(String export)
         {
             _export = export;
+        }
+    }
+
+    public static class PeaksViewForm
+    {
+        private int _featureId = -1;
+        private int _runId = -1;
+        private String _export = null;
+        private Integer _scanFirst = null;
+        private Integer _scanLast = null;
+
+        public int getFeatureId()
+        {
+            return _featureId;
+        }
+
+        public void setFeatureId(int featureId)
+        {
+            _featureId = featureId;
+        }
+
+        public int getRunId()
+        {
+            return _runId;
+        }
+
+        public void setRunId(int runId)
+        {
+            _runId = runId;
+        }
+
+        public String getExport()
+        {
+            return _export;
+        }
+
+        public void setExport(String export)
+        {
+            _export = export;
+        }
+
+        public Integer getScanFirst()
+        {
+            return _scanFirst;
+        }
+
+        public void setScanFirst(Integer scanFirst)
+        {
+            _scanFirst = scanFirst;
+        }
+
+        public Integer getScanLast()
+        {
+            return _scanLast;
+        }
+
+        public void setScanLast(Integer scanLast)
+        {
+            _scanLast = scanLast;
         }
     }
 

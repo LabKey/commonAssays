@@ -30,12 +30,19 @@ public class PeaksView extends QueryView
 
     public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Feature feature) throws SQLException
     {
+        this(ctx, schema, run, feature, feature.getScanFirst().intValue(), feature.getScanLast().intValue());
+    }
+
+    public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Feature feature, int scanFirst, int scanLast) throws SQLException
+    {
         super(schema);
         assert null != schema : "Null schema passed to PeaksView!";
         assert null != feature : "Null Feature passed to PeaksView!";
         _schema = schema;
         _feature = feature;
         _expRun = run;
+        _scanFirst = scanFirst;
+        _scanLast = scanLast;
 
         QuerySettings settings = new QuerySettings(ctx.getViewURLHelper(), ctx.getRequest(), QueryView.DATAREGIONNAME_DEFAULT);
         settings.setQueryName(MS1Schema.TABLE_PEAKS);
@@ -43,9 +50,9 @@ public class PeaksView extends QueryView
         setSettings(settings);
 
         if(null != run)
-            setTitle("Peaks from Scans " +  _feature.getScanFirst() + " through " + _feature.getScanLast() + " from " + PageFlowUtil.filter(run.getName()));
+            setTitle("Peaks from Scans " +  _scanFirst + " through " + _scanLast + " from " + PageFlowUtil.filter(run.getName()));
         else
-            setTitle("Peaks from Scans " + _feature.getScanFirst() + " through " + _feature.getScanLast());
+            setTitle("Peaks from Scans " + _scanFirst + " through " + _scanLast);
         
 
         setShowCustomizeViewLinkInButtonBar(true);
@@ -56,8 +63,7 @@ public class PeaksView extends QueryView
     protected TableInfo createTable()
     {
         PeaksTableInfo tinfo = _schema.getPeaksTableInfo();
-        tinfo.addScanRangeCondition(_expRun.getRowId(), _feature.getScanFirst().intValue(),
-                                    _feature.getScanLast().intValue(), getContainer());
+        tinfo.addScanRangeCondition(_expRun.getRowId(), _scanFirst, _scanLast, getContainer());
         return tinfo;
     }
 
@@ -143,5 +149,7 @@ public class PeaksView extends QueryView
     private MS1Schema _schema;
     private Feature _feature = null;
     private ExpRun _expRun = null;
+    private int _scanFirst = 0;
+    private int _scanLast = 0;
 } //class PeaksView
 

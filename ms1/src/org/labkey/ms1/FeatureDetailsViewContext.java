@@ -33,7 +33,7 @@ public class FeatureDetailsViewContext
         return _nextFeatureId;
     }
 
-    public Integer[] getPrevNextScans(int scan, double mzLow, double mzHigh) throws SQLException
+    public Integer[] getPrevNextScans(int scan, double mzLow, double mzHigh, int scanFirst, int scanLast) throws SQLException
     {
         if(null == _feature)
             return new Integer[0];
@@ -46,8 +46,7 @@ public class FeatureDetailsViewContext
             return new Integer[0];
         
         return MS1Manager.get().getPrevNextScan(_feature.getRunId().intValue(), mzLow, mzHigh,
-                                                _feature.getScanFirst().intValue(),
-                                                _feature.getScanLast().intValue(), scan);
+                                                scanFirst, scanLast, scan);
     }
 
     private Feature _feature;
