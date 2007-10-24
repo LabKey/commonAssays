@@ -241,11 +241,9 @@ public class PeptidesTableInfo extends FilteredTable
         }
         for (MS2RunType runType : runTypes)
         {
-            StringTokenizer st = new StringTokenizer(runType.getScoreColumnNames(), " ,", false);
             int index = 1;
-            while (st.hasMoreTokens())
+            for (String name : runType.getScoreColumnList())
             {
-                String name = st.nextToken();
                 List<Pair<MS2RunType, Integer>> l = columnMap.get(name);
                 if (l == null)
                 {
@@ -329,10 +327,9 @@ public class PeptidesTableInfo extends FilteredTable
         MS2Run[] runs = _schema.getRuns();
         if (runs != null && runs.length > 0)
         {
-            StringTokenizer st = new StringTokenizer(runs[0].getRunType().getScoreColumnNames(), ", ", false);
-            while (st.hasMoreTokens())
+            for (String name : runs[0].getRunType().getScoreColumnList())
             {
-                result.add(FieldKey.fromParts(st.nextToken()));
+                result.add(FieldKey.fromParts(name));
             }
         }
         else

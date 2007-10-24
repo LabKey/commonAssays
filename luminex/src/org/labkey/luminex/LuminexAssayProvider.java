@@ -95,57 +95,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     protected Domain createUploadSetDomain(Container c, User user)
     {
         Domain uploadSetDomain = super.createUploadSetDomain(c, user);
-        Container lookupContainer = c.getProject();
-        Map<String, ListDefinition> lists = ListService.get().getLists(lookupContainer);
 
-        ListDefinition speciesList = lists.get("LuminexSpecies");
-        if (speciesList == null)
-        {
-            speciesList = ListService.get().createList(lookupContainer, "LuminexSpecies");
-            DomainProperty nameProperty = addProperty(speciesList.getDomain(), "Name", PropertyType.STRING);
-            nameProperty.setPropertyURI(speciesList.getDomain().getTypeURI() + "#Name");
-            speciesList.setKeyName("SpeciesID");
-            speciesList.setTitleColumn(nameProperty.getName());
-            speciesList.setKeyType(ListDefinition.KeyType.Varchar);
-            speciesList.setDescription("Species for Luminex assays");
-            try
-            {
-                speciesList.save(user);
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
-
-        DomainProperty speciesProperty = addProperty(uploadSetDomain, "Species", PropertyType.STRING);
-//        speciesProperty.setRequired(true);
-        speciesProperty.setLookup(new Lookup(lookupContainer, "lists", speciesList.getName()));
-
-        ListDefinition labList = lists.get("LuminexLabs");
-        if (labList == null)
-        {
-            labList = ListService.get().createList(lookupContainer, "LuminexLabs");
-            DomainProperty nameProperty = addProperty(labList.getDomain(), "Name", PropertyType.STRING);
-            nameProperty.setPropertyURI(labList.getDomain().getTypeURI() + "#Name");
-            labList.setKeyName("LabID");
-            labList.setTitleColumn(nameProperty.getName());
-            labList.setKeyType(ListDefinition.KeyType.Varchar);
-            labList.setDescription("Labs performing Luminex assays");
-            try
-            {
-                labList.save(user);
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
-
-        DomainProperty labProperty = addProperty(uploadSetDomain, "Lab ID", PropertyType.STRING);
-//        labProperty.setRequired(true);
-        labProperty.setLookup(new Lookup(lookupContainer, "lists", labList.getName()));
-
+        addProperty(uploadSetDomain, "Species", PropertyType.STRING);
+        addProperty(uploadSetDomain, "Lab ID", PropertyType.STRING);
         addProperty(uploadSetDomain, "Analysis Software", PropertyType.STRING);
 
         return uploadSetDomain;
@@ -173,29 +125,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
         Domain analyteDomain = PropertyService.get().createDomain(c, "urn:lsid:${LSIDAuthority}:" + ASSAY_DOMAIN_ANALYTE + ".Folder-${Container.RowId}:${AssayName}", "Analyte Properties");
         analyteDomain.setDescription("The user will be prompted to enter these properties for each of the analytes in the file they upload. This is the third and final step of the upload process.");
-        DomainProperty standardNameProp = addProperty(analyteDomain, "Standard Name", PropertyType.STRING);
-
-        ListDefinition standardList = lists.get("LuminexStandardAnalytes");
-        if (standardList == null)
-        {
-            standardList = ListService.get().createList(lookupContainer, "LuminexStandardAnalytes");
-            DomainProperty nameProperty = addProperty(standardList.getDomain(), "Name", PropertyType.STRING);
-            nameProperty.setPropertyURI(standardList.getDomain().getTypeURI() + "#Name");
-            standardList.setKeyName(nameProperty.getName());
-            standardList.setKeyType(ListDefinition.KeyType.Varchar);
-            standardList.setDescription("Standard data about analytes, including a standard name");
-            standardList.setTitleColumn("Name");
-            try
-            {
-                standardList.save(user);
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
-
-        standardNameProp.setLookup(new Lookup(c.getProject(), "lists", standardList.getName()));
+        addProperty(analyteDomain, "Standard Name", PropertyType.STRING);
 
         addProperty(analyteDomain, "Units of Concentration", PropertyType.STRING);
 
@@ -254,14 +184,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("Currently the only supported file format is the multi-sheet BioPlex Excel file format.");
+        return new HtmlView("Currently the only supported file type is the multi-sheet BioPlex Excel file format.");
     }
 
-    public boolean shouldShowDataDescription(ExpProtocol protocol)
-    {
-        return false;
-    }
-    
     public ViewURLHelper getUploadWizardURL(Container container, ExpProtocol protocol)
     {
         ViewURLHelper url = new ViewURLHelper("Luminex", "luminexUploadWizard.view", container);
@@ -391,7 +316,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 Map<String, ObjectProperty> props = runProperties.get(run);
                 if (props == null)
                 {
-                    props = OntologyManager.getPropertyObjects(run.getContainer().getId(), run.getLSID());
+                    props = run.getObjectProperties();
                     runProperties.put(run, props);
                 }
                 for (PropertyDescriptor pd : pds)

@@ -1,17 +1,20 @@
 package org.labkey.ms2.compare;
 
+import org.apache.commons.lang.StringUtils;
+import org.labkey.api.data.*;
+import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.common.util.Pair;
-import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.api.data.*;
-import org.apache.commons.lang.StringUtils;
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.MS2RunType;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * User: adam
@@ -65,7 +68,6 @@ public abstract class CompareQuery extends SQLFragment
 
     public ResultSet createResultSet() throws SQLException
     {
-        generateSql();
         return Table.executeQuery(MS2Manager.getSchema(), getSQL(), getParams().toArray());
     }
 
@@ -74,15 +76,15 @@ public abstract class CompareQuery extends SQLFragment
         return _compareColumn;
     }
 
-    protected void generateSql()
+    protected void generateSql(List<String> errors)
     {
-        selectColumns();
-        selectRows();
-        groupByCompareColumn();
-        sort();
+        selectColumns(errors);
+        selectRows(errors);
+        groupByCompareColumn(errors);
+        sort(errors);
     }
 
-    protected void selectColumns()
+    protected void selectColumns(List<String> errors)
     {
         // SELECT SeqId, Max(Run0Total) AS Run0Total, MAX(Run0Unique) AS Run0Unique..., COUNT(Run) As RunCount,
         append("SELECT ");
@@ -128,7 +130,7 @@ public abstract class CompareQuery extends SQLFragment
         append(" AS Pattern");
     }
 
-    protected void selectRows()
+    protected void selectRows(List<String> errors)
     {
         // FROM (SELECT Run, SeqId, CASE WHEN Run=1 THEN COUNT(DISTINCT Peptide) ELSE NULL END AS Run0, ... FROM MS2Peptides WHERE (peptideFilter)
         //       AND Run IN (?, ?, ...) GROUP BY Run, SeqId
@@ -172,6 +174,36 @@ public abstract class CompareQuery extends SQLFragment
 
         addWhereClauses(filter);
 
+        String firstType = _runs.get(0).getType();
+        boolean sameType = true;
+        for (MS2Run run : _runs)
+        {
+            sameType = sameType && firstType.equals(run.getType());
+        }
+        if (!sameType)
+        {
+            Set<String> engineScores = new CaseInsensitiveHashSet();
+            for (MS2RunType type : MS2RunType.values())
+            {
+                engineScores.addAll(type.getScoreColumnList());
+            }
+            Set<String> illegalColumns = new CaseInsensitiveHashSet();
+            for (SimpleFilter.FilterClause clause : filter.getClauses())
+            {
+                for (String colName : clause.getColumnNames())
+                {
+                    if (engineScores.contains(colName))
+                    {
+                        illegalColumns.add(colName);
+                    }
+                }
+            }
+            if (!illegalColumns.isEmpty())
+            {
+                errors.add("If you are comparing runs of different types, you cannot filter on search-engine specific scores: " + illegalColumns);
+            }
+        }
+
         append(filter.getWhereSQL(MS2Manager.getSqlDialect()));
         addAll(filter.getWhereParams(MS2Manager.getTableInfoPeptides()));
         
@@ -187,7 +219,7 @@ public abstract class CompareQuery extends SQLFragment
 
     protected abstract void addWhereClauses(SimpleFilter filter);
 
-    protected void groupByCompareColumn()
+    protected void groupByCompareColumn(List<String> errors)
     {
         outdent();
         appendNewLine();
@@ -199,12 +231,16 @@ public abstract class CompareQuery extends SQLFragment
         append(_compareColumn);
     }
 
-    protected void sort()
+    protected void sort(List<String> errors)
     {
         appendNewLine();
         // ORDER BY RunCount DESC, Pattern DESC, Protein ASC (plus apply any URL sort)
         Sort sort = new Sort("-RunCount,-Pattern," + getLabelColumn());
         sort.applyURLSort(_currentUrl, MS2Manager.getDataRegionNameCompare());
+        for (Sort.SortField sortField : sort.getSortList())
+        {
+            sortField.getColumnName();
+        }
         // TODO: If there are more than three columns in the sort list, then it may be that "BestName" and "Protein"
         // are in the list, in which case SQL server will fail to execute the query.  Therefore, we restrict the number
         // of columns you can sort on to 3.
@@ -338,6 +374,7 @@ public abstract class CompareQuery extends SQLFragment
 
     public void checkForErrors(List<String> errors) throws SQLException
     {
+        generateSql(errors);
         if (getGridColumns().size() == 0)
             errors.add("You must choose at least one column to display in the grid.");
     }

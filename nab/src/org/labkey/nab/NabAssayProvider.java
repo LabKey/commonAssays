@@ -192,11 +192,6 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         return new HtmlView("The NAb data file is a specially formatted Excel file.");
     }
 
-    public boolean shouldShowDataDescription(ExpProtocol protocol)
-    {
-        return false;
-    }
-
     public TableInfo createDataTable(QuerySchema schema, String alias, ExpProtocol protocol)
     {
         return NabSchema.getDataRowTable(schema.getUser(), protocol, alias);

@@ -92,7 +92,7 @@ public class ProteinProphetCompareQuery extends CompareQuery
         return "BestName";
     }
 
-    protected void selectColumns()
+    protected void selectColumns(List<String> errors)
     {
         // Use subselect to make it easier to join seqid to prot.sequences for bestname
         append("SELECT ");
@@ -103,12 +103,12 @@ public class ProteinProphetCompareQuery extends CompareQuery
         indent();
         appendNewLine();
 
-        super.selectColumns();
+        super.selectColumns(errors);
     }
 
-    protected void groupByCompareColumn()
+    protected void groupByCompareColumn(List<String> errors)
     {
-        super.groupByCompareColumn();
+        super.groupByCompareColumn(errors);
 
         outdent();
         appendNewLine();

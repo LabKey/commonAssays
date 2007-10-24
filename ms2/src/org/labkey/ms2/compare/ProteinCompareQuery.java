@@ -56,7 +56,7 @@ public class ProteinCompareQuery extends CompareQuery
         return "BestName";
     }
 
-    protected void selectColumns()
+    protected void selectColumns(List<String> errors)
     {
         // Use subselect to make it easier to join seqid to prot.sequences for bestname
         append("SELECT ");
@@ -67,7 +67,7 @@ public class ProteinCompareQuery extends CompareQuery
         indent();
         appendNewLine();
 
-        super.selectColumns();
+        super.selectColumns(errors);
     }
 
     protected String getFromClause()
@@ -77,9 +77,9 @@ public class ProteinCompareQuery extends CompareQuery
             "p.SeqId = s.SeqSeqId ";
     }
 
-    protected void selectRows()
+    protected void selectRows(List<String> errors)
     {
-        super.selectRows();
+        super.selectRows(errors);
 
         SimpleFilter proteinFilter = new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteins());
         // Add to GROUP BY
@@ -110,9 +110,9 @@ public class ProteinCompareQuery extends CompareQuery
         filter.addAllClauses(peptideFilter);
     }
 
-    protected void groupByCompareColumn()
+    protected void groupByCompareColumn(List<String> errors)
     {
-        super.groupByCompareColumn();
+        super.groupByCompareColumn(errors);
 
         outdent();
         appendNewLine();

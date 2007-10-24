@@ -8,9 +8,12 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.DisplayColumn;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
 /**
  * User: adam
@@ -29,6 +32,22 @@ public class PeptideCompareQuery extends CompareQuery
         header.append("number of times each peptide appears in each run.");
         setHeader(header.toString());
         addGridColumn("Total", "Peptide");
+        if ("1".equals(currentUrl.getParameter("maxPeptideProphet")))
+        {
+            addGridColumn("MaxPepProphet", "peptideprophet", "MAX");
+        }
+        if ("1".equals(currentUrl.getParameter("avgPeptideProphet")))
+        {
+            addGridColumn("AvgPepProphet", "CASE WHEN peptideprophet >= 0 THEN peptideprophet ELSE NULL END", "AVG");
+        }
+        if ("1".equals(currentUrl.getParameter("minPeptideProphetErrorRate")))
+        {
+            addGridColumn("MinErrorRate", "peptidepropheterrorrate", "MIN");
+        }
+        if ("1".equals(currentUrl.getParameter("avgPeptideProphetErrorRate")))
+        {
+            addGridColumn("AvgErrorRate", "peptidepropheterrorrate", "AVG");
+        }
     }
 
     public String getComparisonDescription()
@@ -62,4 +81,20 @@ public class PeptideCompareQuery extends CompareQuery
         result.add(new Pair<String, String>("Peptide Filter", filterString));
         return result;
     }
+
+    protected DisplayColumn createColumn(ViewURLHelper linkURL, RunColumn column, String runPrefix, String columnName, TableInfo ti, ResultSetMetaData md, CompareDataRegion rgn)
+        throws SQLException
+    {
+        DisplayColumn result = super.createColumn(linkURL, column, runPrefix, columnName, ti, md, rgn);
+        if (column.getLabel().equals("AvgPepProphet"))
+        {
+            result.setFormatString("0.####");
+        }
+        else if (column.getLabel().equals("AvgErrorRate"))
+        {
+            result.setFormatString("0.######");
+        }
+        return result;
+    }
+
 }

@@ -2897,6 +2897,13 @@ public class MS2Controller extends ViewController
         sb.append("</div></div><br/>");
 
         sb.append("<input type=\"radio\" name=\"column\" value=\"Peptide\" /><b>Peptide</b><br/>");
+        sb.append("<div style=\"padding-left: 20px;\">Choose what columns should appear in the grid:<br/>\n");
+        sb.append("<div style=\"padding-left: 20px;\"><input type=\"checkbox\" name=\"peptideCount\" value=\"1\" checked=\"checked\" disabled>Count<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"maxPeptideProphet\" value=\"1\" checked=\"checked\">Maximum Peptide Prophet Probability<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"avgPeptideProphet\" value=\"1\" checked=\"checked\">Average Peptide Prophet Probability<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"minPeptideProphetErrorRate\" value=\"1\">Minimum Peptide Prophet Error Rate<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"avgPeptideProphetErrorRate\" value=\"1\">Average Peptide Prophet Error Rate<br/>\n");
+        sb.append("</div></div><br/>");
         sb.append("<hr>");
         sb.append("<input type=\"radio\" name=\"column\" value=\"Query\" /><b>Query (beta)</b><br/>");
         sb.append("<div style=\"padding-left: 20px;\">The query-based comparison does not use the view selected above. Instead, please follow the instructions at the top of the comparison page to customize the results. It is based on ProteinProphet protein groups, so the runs must be associated with ProteinProphet data.</div>");
@@ -2976,7 +2983,7 @@ public class MS2Controller extends ViewController
         }
 
         List<String> errors = new ArrayList<String>();
-        List<MS2Run> runs = getCachedRuns(runListIndex, errors, true);
+        List<MS2Run> runs = getCachedRuns(runListIndex, errors, false);
 
         if (!errors.isEmpty())
             return _renderErrors(errors);

@@ -158,16 +158,16 @@ public class LuminexSchema extends UserSchema
 
         if (studyColumn != null)
         {
-            SQLFragment participantSQL = new SQLFragment("(SELECT ptid FROM study.specimen s WHERE s.GlobalUniqueId = " + ExprColumn.STR_TABLE_ALIAS + ".Description AND CAST(s.container AS VARCHAR) = " + studyColumn.getValueSql() +  ")");
+            SQLFragment participantSQL = new SQLFragment("(CASE WHEN (" + ExprColumn.STR_TABLE_ALIAS + ".PTID IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".VisitID IS NULL) THEN (SELECT MIN(ptid) FROM study.specimen s WHERE s.GlobalUniqueId = " + ExprColumn.STR_TABLE_ALIAS + ".Description AND CAST(s.container AS VARCHAR(50)) = " + studyColumn.getValueSql() +  ") ELSE " + ExprColumn.STR_TABLE_ALIAS + ".PTID END)");
             participantCol = new ExprColumn(result, "ParticipantID", participantSQL, Types.VARCHAR, studyColumn);
 
-            SQLFragment visitSQL = new SQLFragment("(SELECT visitvalue FROM study.specimen s WHERE s.GlobalUniqueId = " + ExprColumn.STR_TABLE_ALIAS + ".Description AND CAST(s.container AS VARCHAR) = " + studyColumn.getValueSql() +  ")");
+            SQLFragment visitSQL = new SQLFragment("(CASE WHEN (" + ExprColumn.STR_TABLE_ALIAS + ".PTID IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".VisitID IS NULL) THEN (SELECT MIN(visitvalue) FROM study.specimen s WHERE s.GlobalUniqueId = " + ExprColumn.STR_TABLE_ALIAS + ".Description AND CAST(s.container AS VARCHAR(50)) = " + studyColumn.getValueSql() +  ") ELSE " + ExprColumn.STR_TABLE_ALIAS + ".VisitID END)");
             visitCol = new ExprColumn(result, "VisitID", visitSQL, Types.REAL, studyColumn);
         }
         else
         {
-            participantCol = new ExprColumn(result, "ParticipantID", new SQLFragment("NULL"), Types.VARCHAR);
-            visitCol = new ExprColumn(result, "VisitID", new SQLFragment("NULL"), Types.REAL);
+            participantCol = new ExprColumn(result, "ParticipantID", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".PTID"), Types.VARCHAR);
+            visitCol = new ExprColumn(result, "VisitID", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".VisitID"), Types.REAL);
         }
 
         result.addColumn(participantCol);
@@ -178,6 +178,8 @@ public class LuminexSchema extends UserSchema
         defaultCols.add(FieldKey.fromParts("Type"));
         defaultCols.add(FieldKey.fromParts("Well"));
         defaultCols.add(FieldKey.fromParts("Description"));
+        defaultCols.add(FieldKey.fromParts("ParticipantID"));
+        defaultCols.add(FieldKey.fromParts("VisitID"));
         defaultCols.add(FieldKey.fromParts("FI"));
         defaultCols.add(FieldKey.fromParts("FIBackground"));
         defaultCols.add(FieldKey.fromParts("StdDev"));

@@ -42,6 +42,8 @@
             <ns:column columnName="Well"/>
             <ns:column columnName="Outlier"/>
             <ns:column columnName="Description"/>
+            <ns:column columnName="PTID"/>
+            <ns:column columnName="VisitID"/>
             <ns:column columnName="FIString"/>
             <ns:column columnName="FI">
                 <ns:formatString>0.0</ns:formatString>

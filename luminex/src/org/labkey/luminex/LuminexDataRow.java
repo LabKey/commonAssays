@@ -13,6 +13,8 @@ public class LuminexDataRow
     private String _well;
     private boolean _outlier;
     private String _description;
+    private String _ptid;
+    private Double _visitID;
     private String _fiString;
     private Double _fi;
     private String _fiOORIndicator;
@@ -318,5 +320,25 @@ public class LuminexDataRow
     public void setSamplingErrors(String samplingErrors)
     {
         _samplingErrors = samplingErrors;
+    }
+
+    public String getPtid()
+    {
+        return _ptid;
+    }
+
+    public void setPtid(String ptid)
+    {
+        _ptid = ptid;
+    }
+
+    public Double getVisitID()
+    {
+        return _visitID;
+    }
+
+    public void setVisitID(Double visitID)
+    {
+        _visitID = visitID;
     }
 }

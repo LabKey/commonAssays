@@ -1,30 +1,28 @@
 package org.labkey.luminex;
 
-import org.labkey.api.exp.api.*;
-import org.labkey.api.exp.*;
-import org.labkey.api.exp.property.Domain;
-import org.labkey.api.exp.property.PropertyService;
-import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.util.URLHelper;
+import jxl.Sheet;
+import jxl.Workbook;
+import jxl.WorkbookSettings;
+import jxl.read.biff.BiffException;
+import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
+import org.labkey.api.exp.*;
+import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.security.User;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.apache.log4j.Logger;
+import org.labkey.api.study.ParticipantVisit;
+import org.labkey.api.study.assay.*;
+import org.labkey.api.util.URLHelper;
+import org.labkey.api.view.ViewBackgroundInfo;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
 import java.sql.SQLException;
-
-import jxl.Workbook;
-import jxl.Sheet;
-import jxl.WorkbookSettings;
-import jxl.read.biff.BiffException;
+import java.util.*;
 
 /**
  * User: jeckels
@@ -370,6 +368,19 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         
         Map<String, Object> excelRunProps = new HashMap<String, Object>();
 
+        ParticipantVisitResolver resolver = null;
+        AssayProvider provider = AssayService.get().getProvider(expRun.getProtocol());
+        if (provider instanceof LuminexAssayProvider)
+        {
+            LuminexAssayProvider luminexProvider = (LuminexAssayProvider) provider;
+            Container targetStudy = luminexProvider.getTargetStudy(expRun);
+            if (targetStudy != null)
+            {
+                SpecimenIDLookupResolverType resolverType = new SpecimenIDLookupResolverType();
+                resolver = resolverType.createResolver(expRun, targetStudy, user);
+            }
+        }
+
         for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
         {
             Sheet sheet = workbook.getSheet(sheetIndex);
@@ -400,7 +411,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             do
             {
                 Map<String, Object> dataRowProps = new LinkedHashMap<String, Object>();
-                LuminexDataRow dataRow = createDataRow(data, sheet, colNames, row);
+                LuminexDataRow dataRow = createDataRow(data, sheet, colNames, row, resolver);
                 dataRows.add(dataRow);
                 dataRowsProps.add(dataRowProps);
             }
@@ -577,7 +588,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }, excelRunColumns, new Map[] { excelRunProps }, true);
     }
 
-    private LuminexDataRow createDataRow(ExpData data, Sheet sheet, List<String> colNames, int row)
+    private LuminexDataRow createDataRow(ExpData data, Sheet sheet, List<String> colNames, int row, ParticipantVisitResolver resolver)
     {
         LuminexDataRow dataRow = new LuminexDataRow();
         dataRow.setDataId(data.getRowId());
@@ -611,6 +622,12 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             else if ("Description".equalsIgnoreCase(columnName))
             {
                 dataRow.setDescription(value);
+                if (resolver != null)
+                {
+                    ParticipantVisit match = resolver.resolve(value, null, null);
+                    dataRow.setPtid(match.getParticipantID());
+                    dataRow.setVisitID(match.getVisitID());
+                }
             }
             else if ("Std Dev".equalsIgnoreCase(columnName))
             {
