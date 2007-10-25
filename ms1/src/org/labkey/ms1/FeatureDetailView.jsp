@@ -170,15 +170,6 @@
             _oldScanLow = <%=scanWindowLow%>;
             _oldScanHigh = <%=scanWindowHigh%>;
 
-            //if the window is 0-0, set the values to something that
-            //will keep the handles apart. This will have no effect
-            //unless the user decides to click the filter button
-            if(0 == _sliderScan.getValueLow() && 0 == _sliderScan.getValueHigh())
-            {
-                _sliderScan.setValueLow(-5);
-                _sliderScan.setValueHigh(5);
-            }
-
             setElemDisplay("scanFilterUI", "")
             setElemDisplay("scanFilterCol-1", "");
             setElemDisplay("scanFilterCol-2", "");
