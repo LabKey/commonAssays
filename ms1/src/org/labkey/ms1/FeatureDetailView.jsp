@@ -507,8 +507,8 @@
                             <input type="hidden" name="runId" value="<%=feature.getRunId()%>"/>
                             <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
                             <input type="hidden" name="scan" value="<%=scan%>"/>
-                            <input type="hidden" name="mzWindowLow"/>
-                            <input type="hidden" name="mzWindowHigh"/>
+                            <input type="hidden" name="mzWindowLow" value="<%=mzWindowLow%>"/>
+                            <input type="hidden" name="mzWindowHigh" value="<%=mzWindowHigh%>"/>
                             <input type="submit" value="Filter" style="display:none;"/>
 
                             <input type="text" id="txtScanWindowLow" name="scanWindowLow" size="3" onchange="_sliderScan.setValueLow(this.value)" tabindex="102"/>
