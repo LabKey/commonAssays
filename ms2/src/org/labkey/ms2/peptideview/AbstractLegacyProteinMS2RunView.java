@@ -4,10 +4,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.data.*;
 import org.labkey.api.util.CaseInsensitiveHashMap;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MS2Controller;
-import org.labkey.ms2.AACoverageColumn;
-import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletOutputStream;
@@ -27,6 +24,8 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
     static
     {
         _calculatedProteinColumns.put("AACoverage", AACoverageColumn.class);
+        _calculatedProteinColumns.put(TotalFilteredPeptidesColumn.NAME, TotalFilteredPeptidesColumn.class);
+        _calculatedProteinColumns.put(UniqueFilteredPeptidesColumn.NAME, UniqueFilteredPeptidesColumn.class);
     }
 
     public AbstractLegacyProteinMS2RunView(ViewContext viewContext, String columnPropertyName, MS2Run... runs)

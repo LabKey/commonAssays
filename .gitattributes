@@ -694,6 +694,8 @@ ms2/src/org/labkey/ms2/Spectrum.java -text
 ms2/src/org/labkey/ms2/SpectrumIterator.java -text
 ms2/src/org/labkey/ms2/SpectrumLoader.java -text
 ms2/src/org/labkey/ms2/SpectrumRenderer.java -text
+ms2/src/org/labkey/ms2/TotalFilteredPeptidesColumn.java -text
+ms2/src/org/labkey/ms2/UniqueFilteredPeptidesColumn.java -text
 ms2/src/org/labkey/ms2/XCometRun.java -text
 ms2/src/org/labkey/ms2/XTandemRun.java -text
 ms2/src/org/labkey/ms2/XTandemcometRun.java -text
@@ -730,6 +732,7 @@ ms2/src/org/labkey/ms2/peptideview/ProteinProphetDataRegion.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinProphetExcelWriter.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinProphetPeptideView.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinProphetQueryNestingOption.java -text
+ms2/src/org/labkey/ms2/peptideview/ProteinProphetTSVGridWriter.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinResultSetSpectrumIterator.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinStringExpression.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinTSVGridWriter.java -text

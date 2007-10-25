@@ -15,7 +15,7 @@ import java.io.PrintWriter;
  * User: adam
  * Date: Sep 6, 2006
  */
-public class ProteinTSVGridWriter extends TSVGridWriter
+public abstract class ProteinTSVGridWriter extends TSVGridWriter
 {
     protected boolean _expanded = false;
     protected TSVGridWriter _nestedTSVGridWriter = null;
@@ -65,6 +65,7 @@ public class ProteinTSVGridWriter extends TSVGridWriter
         return header;
     }
 
+    protected abstract void addCalculatedValues(RenderContext ctx, ResultSet nestedRS) throws SQLException;
 
     protected void writeRow(PrintWriter out, RenderContext ctx, List<DisplayColumn> displayColumns)
     {
@@ -94,6 +95,9 @@ public class ProteinTSVGridWriter extends TSVGridWriter
 
     protected void writeExpandedRow(PrintWriter out, RenderContext ctx, List<DisplayColumn> displayColumns, ResultSet nestedRS) throws SQLException
     {
+        addCalculatedValues(ctx, nestedRS);
+        nestedRS.beforeFirst();
+
         // Generate the protein information and store in the context; it will be pre-pended to each peptide row
         StringBuilder proteinRow = getRow(ctx, displayColumns);
 
@@ -109,6 +113,10 @@ public class ProteinTSVGridWriter extends TSVGridWriter
 
     protected void writeCollapsedRow(PrintWriter out, RenderContext ctx, List<DisplayColumn> displayColumns) throws SQLException
     {
+        ResultSet nestedRS = _groupedRS.getNextResultSet();
+        addCalculatedValues(ctx, nestedRS);
+        nestedRS.close();
+
         super.writeRow(out, ctx, displayColumns);
     }
 }

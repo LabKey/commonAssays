@@ -847,7 +847,7 @@ public class ProteinManager
     {
         SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames);
 
-        return (Table.TableResultSet)Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray(), 0, maxProteinRows != 0);
+        return (Table.TableResultSet)Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray(), 0, maxProteinRows != 0, maxProteinRows == 0);
     }
 
     public static SQLFragment getProteinProphetPeptideSql(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames)
@@ -875,8 +875,7 @@ public class ProteinManager
         sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".RatioNumberPeptides, ");
         sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".Heavy2LightRatioMean, ");
         sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".Heavy2LightRatioStandardDev, ");
-        sql.append(MS2Manager.getTableInfoSimplePeptides());
-        sql.append(".Fraction AS Fraction$Fraction, ");
+        sql.append(MS2Manager.getTableInfoSimplePeptides() + ".Fraction AS Fraction$Fraction, ");
         sql.append(columnNames);
 
         sql.append(" FROM ");

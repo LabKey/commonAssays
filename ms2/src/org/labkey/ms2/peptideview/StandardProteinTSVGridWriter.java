@@ -26,27 +26,7 @@ public class StandardProteinTSVGridWriter extends ProteinTSVGridWriter
         super(proteinDisplayColumns, peptideDisplayColumns);
     }
 
-
-    protected void writeExpandedRow(PrintWriter out, RenderContext ctx, List<DisplayColumn> displayColumns, ResultSet nestedRS) throws SQLException
-    {
-        addAACoverage(ctx, nestedRS);
-        nestedRS.beforeFirst();
-
-        super.writeExpandedRow(out, ctx, displayColumns, nestedRS);
-    }
-
-
-    protected void writeCollapsedRow(PrintWriter out, RenderContext ctx, List<DisplayColumn> displayColumns) throws SQLException
-    {
-        ResultSet nestedRS = _groupedRS.getNextResultSet();
-        addAACoverage(ctx, nestedRS);
-        nestedRS.close();
-
-        super.writeCollapsedRow(out, ctx, displayColumns);
-    }
-
-
-    private void addAACoverage(RenderContext ctx, ResultSet nestedRS) throws SQLException
+    protected void addCalculatedValues(RenderContext ctx, ResultSet nestedRS) throws SQLException
     {
         Protein protein = new Protein();
 

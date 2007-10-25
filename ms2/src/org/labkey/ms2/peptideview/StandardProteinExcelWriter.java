@@ -32,14 +32,14 @@ public class StandardProteinExcelWriter extends AbstractProteinExcelWriter
         protein.setSequence((String) ctx.get("Sequence"));
 
         List<String> peptides = new ArrayList<String>();
-        ResultSet _nestedRS = _groupedRS.getNextResultSet();
+        ResultSet nestedRS = _groupedRS.getNextResultSet();
 
-        while (_nestedRS.next())
-            peptides.add(_nestedRS.getString(getPeptideIndex()));
+        while (nestedRS.next())
+            peptides.add(nestedRS.getString(getPeptideIndex()));
 
         // If expanded view, back up to the first peptide in this group
         if (_expanded)
-            _nestedRS.beforeFirst();
+            nestedRS.beforeFirst();
 
         String[] peptideArray = new String[peptides.size()];
         protein.setPeptides(peptides.toArray(peptideArray));
@@ -53,11 +53,11 @@ public class StandardProteinExcelWriter extends AbstractProteinExcelWriter
         if (_expanded)
         {
             _nestedExcelWriter.setCurrentRow(getCurrentRow());
-            _nestedExcelWriter.renderGrid(sheet, _nestedRS);
+            _nestedExcelWriter.renderGrid(sheet, nestedRS);
             setCurrentRow(_nestedExcelWriter.getCurrentRow());
         }
         else
-            _nestedRS.close();
+            nestedRS.close();
     }
 
     private int getPeptideIndex() throws SQLException

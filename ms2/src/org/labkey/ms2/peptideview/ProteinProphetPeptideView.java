@@ -53,6 +53,14 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
             {
                 addColumn(_calculatedProteinColumns, "PercentCoverage", displayColumns, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
             }
+            else if (name.equalsIgnoreCase(TotalFilteredPeptidesColumn.NAME))
+            {
+                addColumn(_calculatedProteinColumns, TotalFilteredPeptidesColumn.NAME, displayColumns, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+            }
+            else if (name.equalsIgnoreCase(UniqueFilteredPeptidesColumn.NAME))
+            {
+                addColumn(_calculatedProteinColumns, UniqueFilteredPeptidesColumn.NAME, displayColumns, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+            }
             else if (name.equalsIgnoreCase("Peptides"))
             {
                 addColumn(_calculatedProteinColumns, "TotalNumberPeptides", displayColumns, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
@@ -185,8 +193,13 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     public ResultSet createPeptideResultSet(String requestedPeptideColumnNames, int maxRows, String extraWhere) throws SQLException
     {
         MS2Run run = getSingleRun();
-        String sqlColumnNames = run.getSQLPeptideColumnNames(requestedPeptideColumnNames, false, MS2Manager.getTableInfoSimplePeptides(), MS2Manager.getTableInfoPeptideMemberships());
+        String sqlColumnNames = getPeptideSQLColumnNames(requestedPeptideColumnNames, run);
         return ProteinManager.getProteinProphetPeptideRS(_url, run, extraWhere, maxRows, sqlColumnNames);
+    }
+
+    private String getPeptideSQLColumnNames(String peptideColumnNames, MS2Run run)
+    {
+        return run.getSQLPeptideColumnNames(peptideColumnNames + ", Peptide", false, MS2Manager.getTableInfoSimplePeptides(), MS2Manager.getTableInfoPeptideMemberships());
     }
 
     // Need to add proteinGroupId to signature
@@ -238,7 +251,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         peptidesGridView = new GridView(rgn);
 
         String columnNames = getPeptideColumnNames(form.getColumns());
-        String sqlColumnNames = getSingleRun().getSQLPeptideColumnNames(columnNames, false, MS2Manager.getTableInfoSimplePeptides(), MS2Manager.getTableInfoPeptideMemberships());
+        String sqlColumnNames = getPeptideSQLColumnNames(columnNames, getSingleRun());
         String extraWhere;
         if (form.getGroupNumber() != 0)
         {
@@ -311,7 +324,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
 
     public ProteinTSVGridWriter getTSVProteinGridWriter(List<DisplayColumn> proteinDisplayColumns, List<DisplayColumn> peptideDisplayColumns)
     {
-        return new ProteinTSVGridWriter(proteinDisplayColumns, peptideDisplayColumns);
+        return new ProteinProphetTSVGridWriter(proteinDisplayColumns, peptideDisplayColumns);
     }
 
     public void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException
@@ -322,13 +335,14 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         ewProtein.setExpanded(expanded);
         ewProtein.setAutoSize(false);
 
+        String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumnNames);
+        String sqlPeptideColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
+
+        GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, ExcelWriter.MAX_ROWS, sqlPeptideColumnNames), "ProteinGroupId");
+        ewProtein.setGroupedResultSet(peptideRS);
+
         if (expanded)
         {
-            String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumnNames);
-            String sqlPeptideColumnNames = run.getSQLPeptideColumnNames(peptideColumnNames, false, MS2Manager.getTableInfoSimplePeptides(), MS2Manager.getTableInfoPeptideMemberships());
-            GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, ExcelWriter.MAX_ROWS, sqlPeptideColumnNames), "ProteinGroupId");
-            ewProtein.setGroupedResultSet(peptideRS);
-
             DataRegion peptideRgn = getPeptideGrid(peptideColumnNames, 0);
             ExcelWriter ewPeptide = new ExcelWriter(peptideRS, peptideRgn.getDisplayColumnList());
             ExcelColumn ec = ewPeptide.getExcelColumn("Protein");
@@ -341,13 +355,14 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     // TODO: Put in base class?
     public void exportTSVProteinGrid(ProteinTSVGridWriter tw, String requestedPeptideColumns, MS2Run run, String where) throws SQLException
     {
-        GroupedResultSet peptideRS = null;
+        String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumns);
+        String peptideSqlColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
+        GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, 0, peptideSqlColumnNames), "ProteinGroupId", false);
+        tw.setGroupedResultSet(peptideRS);
         if (tw.getExpanded())
         {
-            String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumns);
-            String peptideSqlColumnNames = run.getSQLPeptideColumnNames(peptideColumnNames, false, MS2Manager.getTableInfoSimplePeptides(), MS2Manager.getTableInfoPeptideMemberships());
 
-            peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, 0, peptideSqlColumnNames), "ProteinGroupId", false);
+
 
             TSVGridWriter twPeptide = new TSVGridWriter(peptideRS, getPeptideDisplayColumns(peptideColumnNames))
             {
@@ -360,7 +375,6 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
             };
 
             twPeptide.setPrintWriter(tw.getPrintWriter());
-            tw.setGroupedResultSet(peptideRS);
             tw.setTSVGridWriter(twPeptide);
         }
 

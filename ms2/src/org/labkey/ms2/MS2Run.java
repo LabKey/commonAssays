@@ -181,7 +181,7 @@ public abstract class MS2Run implements Serializable
 
     public static String getProteinProphetProteinColumnNames()
     {
-        return getDefaultProteinProphetProteinColumnNames() + ", ErrorRate, FirstProtein, FirstDescription, FirstGeneName, FirstBestName";
+        return getDefaultProteinProphetProteinColumnNames() + ", ErrorRate, FirstProtein, FirstDescription, FirstGeneName, FirstBestName, " + TotalFilteredPeptidesColumn.NAME + ", " + UniqueFilteredPeptidesColumn.NAME;
     }
 
     public String getQuantitationProteinColumnNames()
