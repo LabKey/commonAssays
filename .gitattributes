@@ -904,7 +904,7 @@ ms2/src/org/labkey/ms2/reader/SequentialMzxmlIterator.java -text
 ms2/src/org/labkey/ms2/reader/SimpleScan.java -text
 ms2/src/org/labkey/ms2/reader/SimpleScanIterator.java -text
 ms2/src/org/labkey/ms2/reader/TarIterator.java -text
-ms2/src/org/labkey/ms2/renameMe.jsp -text
+ms2/src/org/labkey/ms2/reloadGo.jsp -text
 ms2/src/org/labkey/ms2/renameRun.vm -text
 ms2/src/org/labkey/ms2/renderFilter.vm -text
 ms2/src/org/labkey/ms2/runSummary.vm -text

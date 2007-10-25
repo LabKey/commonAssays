@@ -360,7 +360,7 @@ public abstract class GoLoader
 
         protected InputStream getInputStream() throws IOException, ServletException
         {
-            logStatus("Searching for latest GO annotation files at " + SERVER);
+            logStatus("Searching for the latest GO annotation files at " + SERVER);
             List<String> filenames = FTPUtil.listFiles("anonymous", "anonymous", SERVER, PATH, PATTERN);
 
             if (filenames.size() != 1)

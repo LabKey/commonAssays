@@ -745,8 +745,6 @@ public class MS2Controller extends ViewController
         bean.select = renderViewSelect(10, false, ACL.PERM_DELETE, false);
 
         HttpView manageViews = new JspView<ManageViewsBean>("/org/labkey/ms2/manageViews.jsp", bean);
-//        manageViews.addObject("postUrl", postUrl.getEncodedLocalURIString());
-//        manageViews.addObject("select", renderViewSelect(10, false, ACL.PERM_DELETE, false));
 
         return _renderInTemplate(manageViews, false, "Manage Views", "viewRun",
                 new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
@@ -1139,7 +1137,7 @@ public class MS2Controller extends ViewController
 
     private static ActionButton NewAnnot = new ActionButton("insertAnnots.post", "Load New Annot File");
     private static ActionButton ReloadSprotOrgMap = new ActionButton("reloadSPOM.post", "Reload SWP Org Map");
-    private static ActionButton ReloadGO = new ActionButton("reloadGO.post", "Load or Reload GO");
+    private static ActionButton ReloadGO = new ActionButton("showLoadGo.view", "Load or Reload GO");
     private static ButtonBar annotLoadButtons = new ButtonBar();
 
 
@@ -1237,8 +1235,7 @@ public class MS2Controller extends ViewController
 
         bb.add(NewAnnot);
         bb.add(ReloadSprotOrgMap);
-        ReloadGO.setScript("alert(\"Note: Gene Ontologies are large.  This takes some time,\\nit will be loaded in the background.\");this.form.action=\"reloadGO.post\";this.form.method=\"post\";return true");
-        ReloadGO.setActionType(ActionButton.Action.GET);
+        ReloadGO.setActionType(ActionButton.Action.LINK);
         bb.add(ReloadGO);
 
         rgn.setButtonBar(bb);
@@ -1258,7 +1255,24 @@ public class MS2Controller extends ViewController
 
 
     @Jpf.Action
-    protected Forward reloadGO() throws Exception
+    protected Forward showLoadGo() throws Exception
+    {
+        requiresGlobalAdmin();
+
+        JspView view = new JspView("/org/labkey/ms2/loadGo.jsp");
+
+        return _renderInTemplate(view, Template.home, "Load GO Annotations", null, false);
+    }
+
+
+    public static ViewURLHelper getReloadGoUrl()
+    {
+        return new ViewURLHelper("MS2", "reloadGo", "");
+    }
+
+
+    @Jpf.Action
+    protected Forward reloadGo() throws Exception
     {
         requiresGlobalAdmin();
 
@@ -3604,7 +3618,7 @@ public class MS2Controller extends ViewController
     }
 
 
-    private static ViewURLHelper getShowProteinAdminUrl()
+    public static ViewURLHelper getShowProteinAdminUrl()
     {
         return new ViewURLHelper("MS2", "showProteinAdmin.view", "");
     }
