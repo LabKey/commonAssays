@@ -3,7 +3,10 @@ package org.labkey.ms1;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogarithmicAxis;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBubbleRenderer;
 import org.jfree.data.xy.AbstractXYZDataset;
 import org.labkey.api.data.Table;
@@ -11,6 +14,7 @@ import org.labkey.api.data.Table;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.text.DecimalFormat;
 
 /**
  * Produces the retention time vs. m/z chart for the feature details view
@@ -42,13 +46,17 @@ public class RetentionMassChart extends FeatureChart
         IntensityXYZSeries seriesCurScan = new IntensityXYZSeries("Current Scan (" + _scanCur + ")");
         IntensityXYZSeries seriesRest = new IntensityXYZSeries("Other Scans");
 
+        //get the actual min/max scan info for the requested scan range
+        //we need this to set the range of the Y axes properly
+        MinMaxScanInfo mmsi = MS1Manager.get().getMinMaxScanRT(_runId, _scanFirst, _scanLast);
+
         Double x,y,z;
         while(rs.next())
         {
             x = rs.getDouble("MZ");
             if(rs.wasNull())
                 x = null;
-            y = rs.getDouble("RetentionTime");
+            y = rs.getDouble("Scan");
             if(rs.wasNull())
                 y = null;
             z = rs.getDouble("Intensity");
@@ -62,13 +70,33 @@ public class RetentionMassChart extends FeatureChart
         }
 
         IntensityXYZDataset dataset = new IntensityXYZDataset(seriesCurScan, seriesRest);
-        JFreeChart chart = ChartFactory.createBubbleChart("Intensities for Scans " + _scanFirst + " through " + _scanLast,
-                                                            "m/z", "Retention Time", dataset, PlotOrientation.VERTICAL,
+        JFreeChart chart = ChartFactory.createBubbleChart("Intensities for Scans " + mmsi.getMinScan() + " through " + mmsi.getMaxScan(),
+                                                            "m/z", "Scan", dataset, PlotOrientation.VERTICAL,
                                                             true, false, false);
 
+        XYPlot plot = chart.getXYPlot();
+
+        //manually set the range of the m/z axis to our m/z window
+        plot.getDomainAxis().setRangeWithMargins(_mzLow, _mzHigh);
+
+        NumberAxis scanAxis = plot.getRangeAxis(0) instanceof NumberAxis ? (NumberAxis)plot.getRangeAxis(0) : null;
+        if(null != scanAxis)
+        {
+            scanAxis.setNumberFormatOverride(new DecimalFormat("0"));
+            scanAxis.setRangeWithMargins(mmsi.getMinScan(), mmsi.getMaxScan());
+
+            //create a secondary axis for the retention times
+            NumberAxis rtAxis = new NumberAxis("Retention Time");
+            rtAxis.setAutoRangeIncludesZero(false);
+            rtAxis.setRangeWithMargins(mmsi.getMinRetentionTime(), mmsi. getMaxRetentionTime());
+
+            //add the scan axis
+            plot.setRangeAxis(1, rtAxis);
+        }
+
         //use our custom renderer to get color-mapped bubbles
-        chart.getXYPlot().setRenderer(new IntensityBubbleRenderer());
-        chart.getXYPlot().getDomainAxis().setRange(_mzLow, _mzHigh);
+        plot.setRenderer(new IntensityBubbleRenderer());
+
         return chart;
 
     }

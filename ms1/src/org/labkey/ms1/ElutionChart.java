@@ -3,12 +3,16 @@ package org.labkey.ms1;
 import org.labkey.api.data.Table;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import java.sql.SQLException;
 import java.awt.*;
+import java.text.DecimalFormat;
 
 /**
  * Creates the elution line chart in the features detail view
@@ -36,17 +40,38 @@ public class ElutionChart extends FeatureChart
 
     protected JFreeChart makeChart(Table.TableResultSet rs) throws SQLException
     {
+        //get the actual min/max scan info for the requested scan range
+        //we need this to set the range of the Y axes properly
+        MinMaxScanInfo mmsi = MS1Manager.get().getMinMaxScanRT(_runId, _scanFirst, _scanLast);
+
         XYSeries series = new XYSeries("Elution");
         while(rs.next())
-            series.add(rs.getDouble("RetentionTime"), rs.getDouble("Intensity"));
+            series.add(rs.getDouble("Scan"), rs.getDouble("Intensity"));
 
         XYSeriesCollection dataset = new XYSeriesCollection(series);
 
-        JFreeChart chart = ChartFactory.createXYLineChart("Elution for Scans " + _scanFirst + " through " + _scanLast,
-                                                "Retention Time", "Intensity", dataset, PlotOrientation.HORIZONTAL,
-                                                        false, false, false);
-        
-        chart.getXYPlot().getRenderer().setStroke(new BasicStroke(1.5f));
+        JFreeChart chart = ChartFactory.createXYLineChart("Elution for Scans " + mmsi.getMinScan() + " through " + mmsi.getMaxScan(),
+                                                            "Scan", "Intensity", dataset, PlotOrientation.HORIZONTAL,
+                                                            false, false, false);
+
+        XYPlot plot = chart.getXYPlot();
+
+        //make the stroke a bit heavier than default
+        plot.getRenderer().setStroke(new BasicStroke(1.5f));
+
+        NumberAxis scanAxis = plot.getDomainAxis(0) instanceof NumberAxis ? (NumberAxis)plot.getDomainAxis(0) : null;
+        if(null != scanAxis)
+        {
+            scanAxis.setRangeWithMargins(mmsi.getMinScan(), mmsi.getMaxScan());
+            scanAxis.setNumberFormatOverride(new DecimalFormat("0"));
+
+            //create a secondary axis for the retention times
+            NumberAxis rtAxis = new NumberAxis("Retention Time");
+            rtAxis.setAutoRangeIncludesZero(false);
+            rtAxis.setRangeWithMargins(mmsi.getMinRetentionTime(), mmsi.getMaxRetentionTime());
+
+            plot.setDomainAxis(1, rtAxis);
+        }
         return chart;
     }
 

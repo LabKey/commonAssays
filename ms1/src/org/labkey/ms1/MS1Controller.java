@@ -391,7 +391,8 @@ public class MS1Controller extends SpringActionController
             if(null != chart)
             {
                 getViewContext().getResponse().setContentType("image/png");
-                chart.render(getViewContext().getResponse().getOutputStream());
+                chart.render(getViewContext().getResponse().getOutputStream(),
+                                form.getChartWidth(), form.getChartHeight());
             }
 
             //no need to return a view since this is only called from an <img> tag
@@ -612,6 +613,8 @@ public class MS1Controller extends SpringActionController
         private String _type;
         private int _scanFirst = 0;
         private int _scanLast = 0;
+        private int _chartWidth = 425;
+        private int _chartHeight = 300;
 
         public int getFeatureId()
         {
@@ -691,6 +694,26 @@ public class MS1Controller extends SpringActionController
         public void setMzHigh(double mzHigh)
         {
             _mzHigh = mzHigh;
+        }
+
+        public int getChartWidth()
+        {
+            return _chartWidth;
+        }
+
+        public void setChartWidth(int chartWidth)
+        {
+            _chartWidth = chartWidth;
+        }
+
+        public int getChartHeight()
+        {
+            return _chartHeight;
+        }
+
+        public void setChartHeight(int chartHeight)
+        {
+            _chartHeight = chartHeight;
         }
     }
 } //class MS1Controller

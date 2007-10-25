@@ -21,6 +21,11 @@ public abstract class FeatureChart
 {
     public void render(OutputStream out) throws SQLException, IOException
     {
+        render(out, 425, 300);
+    }
+
+    public void render(OutputStream out, int width, int height) throws SQLException, IOException
+    {
         Table.TableResultSet rs = null;
         try
         {
@@ -34,7 +39,7 @@ public abstract class FeatureChart
 
             //render
             if(null != chart)
-                ChartUtilities.writeChartAsPNG(out, chart, 425, 300);
+                ChartUtilities.writeChartAsPNG(out, chart, width, height);
         }
         finally
         {

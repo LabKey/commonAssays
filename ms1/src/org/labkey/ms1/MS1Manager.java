@@ -278,6 +278,23 @@ public class MS1Manager
         return new Integer[]{prevScan, nextScan};
     }
 
+    public MinMaxScanInfo getMinMaxScanRT(int runId, int scanFirst, int scanLast) throws SQLException
+    {
+        StringBuilder sql = new StringBuilder("SELECT MIN(s.Scan) AS MinScan, MAX(s.Scan) AS MaxScan");
+        sql.append(", MIN(s.RetentionTime) AS MinRetentionTime, MAX(s.RetentionTime) AS MaxRetentionTime FROM ");
+        sql.append(getSQLTableName(TABLE_PEAKS));
+        sql.append(" AS p INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_SCANS));
+        sql.append(" AS s ON (s.ScanId=p.ScanId) INNER JOIN ");
+        sql.append(getSQLTableName(TABLE_FILES));
+        sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=");
+        sql.append(FILETYPE_PEAKS);
+        sql.append(" AND (s.Scan BETWEEN ? AND ?)");
+
+        MinMaxScanInfo[] result = Table.executeQuery(getSchema(), sql.toString(), new Integer[]{runId, scanFirst, scanLast}, MinMaxScanInfo.class);
+        return null == result || 0 == result.length ? null : result[0];
+    }
+
     public void deleteFeaturesData(ExpData expData, User user) throws SQLException
     {
         int idExpData = expData.getRowId();

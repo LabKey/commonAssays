@@ -42,12 +42,13 @@ public class SpectrumChart extends FeatureChart
         XYSeriesCollection dataset = new XYSeriesCollection(series);
         dataset.setIntervalWidth(0); //this controls the width of the bars, which we want to be very thin
         
-        JFreeChart chart = ChartFactory.createXYBarChart("Spectrum for Scan " + _scan, "m/z", false, "Intensity",
+        JFreeChart chart = ChartFactory.createXYBarChart("Intensity Spectrum for Scan " + _scan, "m/z", false, null,
                                                         dataset, PlotOrientation.VERTICAL,
                                                         false, false, false);
 
         chart.getXYPlot().getRenderer().setStroke(new BasicStroke(1.5f));
-        chart.getXYPlot().getDomainAxis().setRange(_mzLow, _mzHigh);
+        chart.getXYPlot().getDomainAxis().setRangeWithMargins(_mzLow, _mzHigh);
+        chart.getXYPlot().setRangeAxis(1, chart.getXYPlot().getRangeAxis());
         return chart;
 
     }

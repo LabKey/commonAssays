@@ -544,7 +544,8 @@
             <!-- retention time and m/z bubble chart -->
 
             <a href="<%=urlPeaksView.getLocalURIString() + "&query.MZ~gte=" + (feature.getMz()+mzWindowLow) + "&query.MZ~lte=" + (feature.getMz()+mzWindowHigh)%>">
-            <img src="showChart.view?type=bubble&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst() + scanWindowLow%>&scanLast=<%=feature.getScanLast() + scanWindowHigh%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>&scan=<%=scan%>" alt="Intesities Bubble chart" title="Click to see tabular data"/>
+            <img src="showChart.view?type=bubble&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst() + scanWindowLow%>&scanLast=<%=feature.getScanLast() + scanWindowHigh%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>&scan=<%=scan%>"
+                 alt="Intesities Bubble chart" title="Click to see tabular data"/>
             </a>
 
             <br/>Peaks with a

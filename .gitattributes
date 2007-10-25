@@ -492,6 +492,7 @@ ms1/src/org/labkey/ms1/MS1Manager.java -text
 ms1/src/org/labkey/ms1/MS1Module.java -text
 ms1/src/org/labkey/ms1/MS1Schema.java -text
 ms1/src/org/labkey/ms1/MSInspectFeaturesDataHandler.java -text
+ms1/src/org/labkey/ms1/MinMaxScanInfo.java -text
 ms1/src/org/labkey/ms1/PeaksFileDataHandler.java -text
 ms1/src/org/labkey/ms1/PeaksFileImporter.java -text
 ms1/src/org/labkey/ms1/PeaksTableInfo.java -text
