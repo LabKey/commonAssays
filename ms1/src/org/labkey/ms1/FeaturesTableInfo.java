@@ -4,8 +4,10 @@ import org.labkey.api.data.*;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.ms2.MS2Service;
 
 import java.util.ArrayList;
 
@@ -30,22 +32,37 @@ public class FeaturesTableInfo extends FilteredTable
         //wrap all the columns
         wrapAllColumns(true);
 
-        //but only display a subset by default
-        ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(getDefaultVisibleColumns());
-        visibleColumns.remove(FieldKey.fromParts("FeatureId"));
-        visibleColumns.remove(FieldKey.fromParts("FileId"));
-        visibleColumns.remove(FieldKey.fromParts("Description"));
-        setDefaultVisibleColumns(visibleColumns);
-
         //mark the FeatureId column as hidden
         getColumn("FeatureId").setIsHidden(true);
 
-        //rename the FileId to something nicer
+        //tell query that FileId is an FK to the Files user table info
         getColumn("FileId").setFk(new LookupForeignKey("FileId")
         {
             public TableInfo getLookupTableInfo()
             {
                 return _schema.getFilesTableInfo();
+            }
+        });
+
+        //add an expression column that finds the corresponding peptide id based on
+        //the mzXmlUrl and MS2Scan (but not charge since, according to Roland, it may not always be correct)
+        //Since we're not matching on charge, we could get multiple rows back, so use MIN to
+        //select just the first matching one.
+        SQLFragment sqlPepJoin = new SQLFragment("(SELECT MIN(pd.rowid) AS PeptideId" +
+                " FROM ms2.PeptidesData AS pd" +
+                " INNER JOIN ms2.Fractions AS fr ON (fr.fraction=pd.fraction)" +
+                " INNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl)" +
+                " INNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)" +
+                " WHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId)");
+
+        ColumnInfo ciPepId = addColumn(new ExprColumn(this, "Peptide Data", sqlPepJoin, java.sql.Types.INTEGER, getColumn("FeatureId")));
+
+        //tell query that this new column is an FK to the peptides data table
+        ciPepId.setFk(new LookupForeignKey("RowId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return MS2Service.get().createPeptidesTableInfo(_schema.getUser(), _schema.getContainer());
             }
         });
 
@@ -56,6 +73,13 @@ public class FeaturesTableInfo extends FilteredTable
         SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=?)",
                                             container.getId(), true);
         addCondition(sf, "FileId");
+
+        //only display a subset of the columns by by default
+        ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(getDefaultVisibleColumns());
+        visibleColumns.remove(FieldKey.fromParts("FeatureId"));
+        visibleColumns.remove(FieldKey.fromParts("FileId"));
+        visibleColumns.remove(FieldKey.fromParts("Description"));
+        setDefaultVisibleColumns(visibleColumns);
     } //c-tor
 
     public void addRunIdCondition(int runId, Container container, ViewURLHelper urlBase, boolean peaksAvailable, boolean forExport)
