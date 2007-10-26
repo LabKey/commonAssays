@@ -11,6 +11,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.labkey.api.view.*;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.ms1.MS1Service;
 import org.labkey.ms1.pipeline.MSInspectPipelineProvider;
 import org.apache.log4j.Logger;
 
@@ -51,6 +52,8 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
         addController(CONTROLLER_NAME, MS1Controller.class);
 
         MS1Schema.register();
+
+        MS1Service.register(new MS1ServiceImpl());
     }
 
     public void containerCreated(Container c)

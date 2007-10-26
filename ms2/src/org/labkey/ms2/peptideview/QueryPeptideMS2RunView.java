@@ -170,7 +170,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
         protected PeptidesTableInfo createTable()
         {
-            return new PeptidesTableInfo((MS2Schema) getSchema(), _runs, _url.clone());
+            return new PeptidesTableInfo((MS2Schema) getSchema(), _runs, _url.clone(), true);
         }
     }
 

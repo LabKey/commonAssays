@@ -308,7 +308,7 @@
       </ns:column>
       <ns:column columnName="RowId">
         <ns:isAutoInc>true</ns:isAutoInc>
-      </ns:column>          
+      </ns:column>
         <ns:column columnName="PeptideProphetErrorRate">
           <ns:columnTitle>PPErrorRate</ns:columnTitle>
           <ns:inputType>text</ns:inputType>

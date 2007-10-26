@@ -3,6 +3,7 @@ package org.labkey.ms2.query;
 import org.labkey.api.query.*;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.ms1.MS1Service;
 import org.labkey.ms2.*;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
 import org.labkey.common.util.Pair;
@@ -21,10 +22,15 @@ public class PeptidesTableInfo extends FilteredTable
 
     public PeptidesTableInfo(MS2Schema schema)
     {
-        this(schema, null, new ViewURLHelper("MS2", "someAction.view", schema.getContainer()));
+        this(schema, null, new ViewURLHelper("MS2", "someAction.view", schema.getContainer()), true);
     }
 
-    public PeptidesTableInfo(MS2Schema schema, final MS2Run[] runs, ViewURLHelper url)
+    public PeptidesTableInfo(MS2Schema schema, boolean includeFeatureFk)
+    {
+        this(schema, null, new ViewURLHelper("MS2", "someAction.view", schema.getContainer()), includeFeatureFk);
+    }
+
+    public PeptidesTableInfo(MS2Schema schema, final MS2Run[] runs, ViewURLHelper url, boolean includeFeatureFk)
     {
         super(MS2Manager.getTableInfoPeptidesData());
         _schema = schema;
@@ -190,6 +196,33 @@ public class PeptidesTableInfo extends FilteredTable
         }
         sql.append("))");
         addCondition(sql);
+
+        if(includeFeatureFk)
+            addFeatureInfoColumn();
+    }
+
+    private void addFeatureInfoColumn()
+    {
+        //add an expression column that finds the corresponding ms1 feature id based on
+        //the mzXmlUrl and MS2Scan (but not charge since, according to Roland, it may not always be correct)
+        //Since we're not matching on charge, we could get multiple rows back, so use MIN to
+        //select just the first matching one.
+        SQLFragment sqlFeatureJoin = new SQLFragment("(SELECT MIN(fe.FeatureId) as FeatureId FROM ms1.Features AS fe\n" +
+                "INNER JOIN ms1.Files AS fi ON (fe.FileId=fi.FileId)\n" +
+                "INNER JOIN ms2.Fractions AS fr ON (fr.MzXmlUrl=fi.MzXmlUrl)\n" +
+                "INNER JOIN ms2.PeptidesData AS pd ON (pd.Fraction=fr.Fraction AND pd.scan=fe.MS2Scan)\n" +
+                "WHERE pd.RowId=" + ExprColumn.STR_TABLE_ALIAS + ".RowId)");
+
+        ColumnInfo ciFeatureId = addColumn(new ExprColumn(this, "MS1 Feature", sqlFeatureJoin, java.sql.Types.INTEGER, getColumn("RowId")));
+
+        //tell query that this new column is an FK to the features table info
+        ciFeatureId.setFk(new LookupForeignKey("FeatureId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return MS1Service.get().createFeaturesTableInfo(_schema.getUser(), _schema.getContainer(), false);
+            }
+        });
     }
 
     private void setupProteinColumns(final String showProteinURLString)

@@ -24,6 +24,11 @@ public class FeaturesTableInfo extends FilteredTable
 {
     public FeaturesTableInfo(MS1Schema schema, Container container)
     {
+        this(schema, container, true);
+    }
+
+    public FeaturesTableInfo(MS1Schema schema, Container container, boolean includePepFk)
+    {
         super(MS1Manager.get().getTable(MS1Manager.TABLE_FEATURES));
 
         _schema = schema;
@@ -44,27 +49,30 @@ public class FeaturesTableInfo extends FilteredTable
             }
         });
 
-        //add an expression column that finds the corresponding peptide id based on
-        //the mzXmlUrl and MS2Scan (but not charge since, according to Roland, it may not always be correct)
-        //Since we're not matching on charge, we could get multiple rows back, so use MIN to
-        //select just the first matching one.
-        SQLFragment sqlPepJoin = new SQLFragment("(SELECT MIN(pd.rowid) AS PeptideId" +
-                " FROM ms2.PeptidesData AS pd" +
-                " INNER JOIN ms2.Fractions AS fr ON (fr.fraction=pd.fraction)" +
-                " INNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl)" +
-                " INNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)" +
-                " WHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId)");
-
-        ColumnInfo ciPepId = addColumn(new ExprColumn(this, "Peptide Data", sqlPepJoin, java.sql.Types.INTEGER, getColumn("FeatureId")));
-
-        //tell query that this new column is an FK to the peptides data table
-        ciPepId.setFk(new LookupForeignKey("RowId")
+        if(includePepFk)
         {
-            public TableInfo getLookupTableInfo()
+            //add an expression column that finds the corresponding peptide id based on
+            //the mzXmlUrl and MS2Scan (but not charge since, according to Roland, it may not always be correct)
+            //Since we're not matching on charge, we could get multiple rows back, so use MIN to
+            //select just the first matching one.
+            SQLFragment sqlPepJoin = new SQLFragment("(SELECT MIN(pd.rowid) AS PeptideId" +
+                    " FROM ms2.PeptidesData AS pd" +
+                    " INNER JOIN ms2.Fractions AS fr ON (fr.fraction=pd.fraction)" +
+                    " INNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl)" +
+                    " INNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)" +
+                    " WHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId)");
+
+            ColumnInfo ciPepId = addColumn(new ExprColumn(this, "Peptide", sqlPepJoin, java.sql.Types.INTEGER, getColumn("FeatureId")));
+
+            //tell query that this new column is an FK to the peptides data table
+            ciPepId.setFk(new LookupForeignKey("RowId")
             {
-                return MS2Service.get().createPeptidesTableInfo(_schema.getUser(), _schema.getContainer());
-            }
-        });
+                public TableInfo getLookupTableInfo()
+                {
+                    return MS2Service.get().createPeptidesTableInfo(_schema.getUser(), _schema.getContainer(), false);
+                }
+            });
+        } //if(includePepFk)
 
         //add a condition that limits the features returned to just those existing in the
         //current container. The FilteredTable class supports this automatically only if
