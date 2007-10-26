@@ -1,7 +1,7 @@
 package org.labkey.ms1;
 
+import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.Table;
-import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 
@@ -238,6 +238,19 @@ public class Feature
     {
         Integer runId = getRunId();
         return null == runId ? null : ExperimentService.get().getExpRun(getRunId().intValue());
+    }
+
+    public Peptide[] getMatchingPeptides() throws SQLException
+    {
+        String sql = "SELECT fr.run, pd.* FROM ms2.PeptidesData AS pd\n" +
+                "INNER JOIN ms2.Fractions AS fr ON (fr.fraction=pd.fraction)\n" +
+                "INNER JOIN ms2.Runs AS r ON (fr.Run=r.Run)\n" +
+                "INNER JOIN exp.Data AS d ON (r.Container=d.Container)\n" +
+                "INNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl AND fi.ExpDataFileId=d.RowId)\n" +
+                "INNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)\n" +
+                "WHERE fe.FeatureId=? ORDER BY pd.RowId";
+
+        return Table.executeQuery(DbSchema.get("ms2"), sql, new Integer[]{_featureId}, Peptide.class);
     }
 
     private int _featureId;

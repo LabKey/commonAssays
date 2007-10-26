@@ -293,27 +293,32 @@ public class MS1Controller extends SpringActionController
      * Action to show the related MS2 peptide(s) for the specified feature
      */
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowMS2PeptideAction extends SimpleViewAction<FeatureIdForm>
+    public class ShowMS2PeptideAction extends SimpleViewAction<MS2PeptideForm>
     {
-        public ModelAndView getView(FeatureIdForm featureIdForm, BindException errors) throws Exception
+        public ModelAndView getView(MS2PeptideForm form, BindException errors) throws Exception
         {
-            if(null == featureIdForm || featureIdForm.getFeatureId() < 0)
+            if(null == form || form.getFeatureId() < 0)
                 return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
 
-            //get the first matching peptide for the given feature id
-            FeaturePeptideLink link = MS1Manager.get().getFeaturePeptideLink(featureIdForm.getFeatureId());
-            if(null == link)
+            //get the feature
+            Feature feature = MS1Manager.get().getFeature(form.getFeatureId());
+            if(null == feature)
+                return new HtmlView("Invalid Feature Id: " + form.getFeatureId());
+
+            Peptide[] peptides = feature.getMatchingPeptides();
+            if(null == peptides || 0 == peptides.length)
                 return new HtmlView("The corresponding MS2 peptide information was not found in the database. Ensure that it has been imported before attempting to view the MS2 peptide.");
 
-            ViewURLHelper url = new ViewURLHelper("ms2", "showPeptide", getContainer());
-            url.addParameter("run", String.valueOf(link.getMs2Run()));
-            url.addParameter("peptideId", link.getPeptideId());
+            Peptide pepFirst = peptides[0];
+            ViewURLHelper url = new ViewURLHelper("MS2", "showPeptide", getContainer());
+            url.addParameter("run", String.valueOf(pepFirst.getRun()));
+            url.addParameter("peptideId", String.valueOf(pepFirst.getRowId()));
             url.addParameter("rowIndex", 1);
 
             //add a filter for MS2 scan so that the showPeptide view will know to enable or
             //disable it's <<prev and next>> buttons based on how many peptides were actually
             //matched.
-            return HttpView.redirect(url + "&MS2Peptides.Scan~eq=" + link.getScan());
+            return HttpView.redirect(url + "&MS2Peptides.Scan~eq=" + pepFirst.getScan());
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -541,6 +546,21 @@ public class MS1Controller extends SpringActionController
         public void setExport(String export)
         {
             _export = export;
+        }
+    }
+
+    public static class MS2PeptideForm
+    {
+        private int _featureId = -1;
+
+        public int getFeatureId()
+        {
+            return _featureId;
+        }
+
+        public void setFeatureId(int featureId)
+        {
+            _featureId = featureId;
         }
     }
 

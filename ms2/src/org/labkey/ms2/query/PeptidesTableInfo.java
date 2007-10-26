@@ -209,7 +209,9 @@ public class PeptidesTableInfo extends FilteredTable
         //select just the first matching one.
         SQLFragment sqlFeatureJoin = new SQLFragment("(SELECT MIN(fe.FeatureId) as FeatureId FROM ms1.Features AS fe\n" +
                 "INNER JOIN ms1.Files AS fi ON (fe.FileId=fi.FileId)\n" +
-                "INNER JOIN ms2.Fractions AS fr ON (fr.MzXmlUrl=fi.MzXmlUrl)\n" +
+                "INNER JOIN exp.Data AS d ON (fi.ExpDataFileId=d.RowId)\n" +
+                "INNER JOIN ms2.Runs AS r ON (r.Container=d.Container)\n" +
+                "INNER JOIN ms2.Fractions AS fr ON (fr.Run=r.Run AND fr.MzXmlUrl=fi.MzXmlUrl)\n" +
                 "INNER JOIN ms2.PeptidesData AS pd ON (pd.Fraction=fr.Fraction AND pd.scan=fe.MS2Scan)\n" +
                 "WHERE pd.RowId=" + ExprColumn.STR_TABLE_ALIAS + ".RowId)");
 

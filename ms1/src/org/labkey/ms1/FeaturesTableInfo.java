@@ -58,7 +58,9 @@ public class FeaturesTableInfo extends FilteredTable
             SQLFragment sqlPepJoin = new SQLFragment("(SELECT MIN(pd.rowid) AS PeptideId" +
                     " FROM ms2.PeptidesData AS pd" +
                     " INNER JOIN ms2.Fractions AS fr ON (fr.fraction=pd.fraction)" +
-                    " INNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl)" +
+                    " INNER JOIN ms2.Runs AS r ON (fr.Run=r.Run)" +
+                    " INNER JOIN exp.Data AS d ON (r.Container=d.Container)" +
+                    " INNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl AND fi.ExpDataFileId=d.RowId)" +
                     " INNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)" +
                     " WHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId)");
 

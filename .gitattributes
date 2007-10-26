@@ -498,6 +498,7 @@ ms1/src/org/labkey/ms1/PeaksFileDataHandler.java -text
 ms1/src/org/labkey/ms1/PeaksFileImporter.java -text
 ms1/src/org/labkey/ms1/PeaksTableInfo.java -text
 ms1/src/org/labkey/ms1/PeaksView.java -text
+ms1/src/org/labkey/ms1/Peptide.java -text
 ms1/src/org/labkey/ms1/RetentionMassChart.java -text
 ms1/src/org/labkey/ms1/Scan.java -text
 ms1/src/org/labkey/ms1/ScansTableInfo.java -text

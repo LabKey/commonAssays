@@ -358,6 +358,35 @@
                     <td bgcolor="#EEEEEE">MS2 Probability</td>
                     <td><%=formatNumber(feature.getMs2ConnectivityProbability(), fmtPercent)%></td>
                 </tr>
+                <tr>
+                    <td bgcolor="#EEEEEE">Matching Peptides</td>
+                    <td>
+                        <%
+                            {
+                                ViewURLHelper urlShowPep = url.clone();
+                                urlShowPep.setAction("showPeptide.view");
+                                urlShowPep.setPageFlow("MS2");
+                                urlShowPep.deleteParameters();
+
+                                Peptide[] peptides = feature.getMatchingPeptides();
+                                for(int idx = 0; idx < peptides.length; ++idx)
+                                {
+                                    if(idx > 0)
+                                        out.print(", ");
+
+                                    urlShowPep.deleteParameters();
+                                    urlShowPep.addParameter("run", peptides[idx].getRun());
+                                    urlShowPep.addParameter("peptideId", String.valueOf(peptides[idx].getRowId()));
+                                    urlShowPep.addParameter("rowIndex", idx+1);
+
+                                    out.print("<a href=\"" + urlShowPep + "&MS2Peptides.Scan~eq=" + peptides[idx].getScan() + "\" target=\"peptide\">");
+                                    out.print(peptides[idx].getPeptide());
+                                    out.print("</a>");
+                                }
+                            }
+                        %>
+                    </td>
+                </tr>
             </table>
         </td>
 
