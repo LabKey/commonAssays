@@ -57,10 +57,11 @@ public class NabDataHandler extends AbstractExperimentDataHandler
                 for (Integer cutoff : assayResults.getCutoffs())
                 {
                     String format = assayResults.getCutoffFormats().get(cutoff);
-                    results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "Curve IC" + cutoff,
-                            dilution.getCutoffDilution(cutoff / 100.0), PropertyType.DOUBLE, format));
-                    results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "Point IC" + cutoff,
-                            dilution.getInterpolatedCutoffDilution(cutoff / 100.0), PropertyType.DOUBLE, format));
+                    saveICValue("Curve IC" + cutoff, dilution.getCutoffDilution(cutoff / 100.0),
+                            dilution, dataRowLsid, protocol, container, format, results);
+
+                    saveICValue("Point IC" + cutoff, dilution.getInterpolatedCutoffDilution(cutoff / 100.0),
+                            dilution, dataRowLsid, protocol, container, format, results);
                 }
 
                 results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "Fit Error", dilution.getFitError(), PropertyType.DOUBLE, "0.0"));
@@ -74,6 +75,27 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         {
             throw new RuntimeException(e);
         }
+    }
+
+    private void saveICValue(String name, double icValue, DilutionSummary dilution, Lsid dataRowLsid,
+                             ExpProtocol protocol, Container container, String format, List<ObjectProperty> results)
+    {
+        String outOfRange = null;
+        if (Double.NEGATIVE_INFINITY == icValue)
+        {
+            outOfRange = "<";
+            icValue = dilution.getMinDilution();
+        }
+        else if (Double.POSITIVE_INFINITY == icValue)
+        {
+            outOfRange = ">";
+            icValue = dilution.getMaxDilution();
+        }
+        ObjectProperty curveIC = getResultObjectProperty(container, protocol, dataRowLsid.toString(), name,
+                icValue, PropertyType.DOUBLE, format);
+        results.add(curveIC);
+        results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), curveIC.getName() + "OORIndicator",
+                outOfRange, PropertyType.STRING, null));
     }
 
     public static File getDataFile(ExpRun run)

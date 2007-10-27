@@ -57,7 +57,7 @@ public class NabRunDataTable extends FilteredTable
             ColumnInfo propertyLookupColumn = wrapColumn("Properties", _rootTable.getColumn("ObjectId"));
             propertyLookupColumn.setKeyField(false);
             propertyLookupColumn.setIsUnselectable(true);
-            PropertyForeignKey fk = new PropertyForeignKey(pds, schema)
+            OORAwarePropertyForeignKey fk = new OORAwarePropertyForeignKey(pds, this, schema)
             {
                 protected ColumnInfo constructColumnInfo(ColumnInfo parent, String name, PropertyDescriptor pd)
                 {
@@ -83,14 +83,19 @@ public class NabRunDataTable extends FilteredTable
             propertyLookupColumn.setFk(fk);
             addColumn(propertyLookupColumn);
 
+            Set<String> hiddenCols = new HashSet<String>();
+            for (PropertyDescriptor pd : fk.getDefaultHiddenProperties())
+                hiddenCols.add(pd.getName());
+            hiddenCols.add(NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY);
             // run through the property columns, setting all to be visible by default:
-            ColumnInfo[] cols = fk.getLookupTableInfo().getColumns();
             FieldKey dataKeyProp = new FieldKey(null, propertyLookupColumn.getName());
-            for (ColumnInfo lookupCol : cols)
+            for (PropertyDescriptor lookupCol : pds)
             {
-                FieldKey key = new FieldKey(dataKeyProp, lookupCol.getName());
-                if (!NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY.equals(lookupCol.getName()))
+                if (!hiddenCols.contains(lookupCol.getName()))
+                {
+                    FieldKey key = new FieldKey(dataKeyProp, lookupCol.getName());
                     visibleColumns.add(key);
+                }
             }
         }
         catch (SQLException e)
@@ -140,8 +145,7 @@ public class NabRunDataTable extends FilteredTable
         addedRunIdColumn.setKeyField(true);
 
         Set<String> hiddenProperties = new HashSet<String>();
-        for (String cutoffProperty : NabAssayProvider.CUTOFF_PROPERTIES)
-            hiddenProperties.add(cutoffProperty);
+        hiddenProperties.addAll(Arrays.asList(NabAssayProvider.CUTOFF_PROPERTIES));
         hiddenProperties.add(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
         for (PropertyDescriptor prop : provider.getRunPropertyColumns(protocol))
         {
