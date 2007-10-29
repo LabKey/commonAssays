@@ -1265,14 +1265,14 @@ public class MS2Controller extends ViewController
     }
 
 
-    public static ViewURLHelper getReloadGoUrl()
+    public static ViewURLHelper getLoadGoUrl()
     {
-        return new ViewURLHelper("MS2", "reloadGo", "");
+        return new ViewURLHelper("MS2", "loadGo", "");
     }
 
 
     @Jpf.Action
-    protected Forward reloadGo() throws Exception
+    protected Forward loadGo() throws Exception
     {
         requiresGlobalAdmin();
 

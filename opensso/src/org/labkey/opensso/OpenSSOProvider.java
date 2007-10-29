@@ -20,7 +20,12 @@ public class OpenSSOProvider implements AuthenticationProvider.RequestAuthentica
 {
     private static final Logger _log = Logger.getLogger(OpenSSOProvider.class);
 
-    public OpenSSOProvider() throws Exception
+    public boolean isPermanent()
+    {
+        return false;
+    }
+
+    public void initialize() throws Exception
     {
         OpenSSOManager.get().initialize();
     }

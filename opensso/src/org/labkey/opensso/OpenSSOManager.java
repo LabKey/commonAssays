@@ -21,6 +21,7 @@ public class OpenSSOManager
         return _instance;
     }
 
+
     public void initialize() throws Exception
     {
         Properties props = loadProps("AMClient.properties");

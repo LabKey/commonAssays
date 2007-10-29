@@ -29,5 +29,5 @@ process by refreshing the status information on the next page.<br><br>
 
 If you wish to proceed, click the Continue button. Otherwise click Cancel.<br><br>
 
-<%=PageFlowUtil.buttonLink("Continue", MS2Controller.getReloadGoUrl())%>
+<%=PageFlowUtil.buttonLink("Continue", MS2Controller.getLoadGoUrl())%>
 <%=PageFlowUtil.buttonLink("Cancel", MS2Controller.getShowProteinAdminUrl())%>

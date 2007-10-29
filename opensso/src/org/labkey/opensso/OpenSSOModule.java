@@ -26,15 +26,8 @@ public class OpenSSOModule extends DefaultModule
     {
         super.startup(moduleContext);
 
-        // TODO: Remove try/catch... but for now, ignore exceptions until OpenSSO integration is complete
-        try
-        {
-            AuthenticationProvider opensso = new OpenSSOProvider();
-            AuthenticationManager.registerProvider(opensso);
-        }
-        catch (Exception e)
-        {
-            _log.error("OpenSSO initialization failure", e);
-        }
+        // TODO: Move to constructor?  Should be safe...
+        AuthenticationProvider opensso = new OpenSSOProvider();
+        AuthenticationManager.registerProvider(opensso);
     }
 }
