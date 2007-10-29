@@ -1,18 +1,19 @@
 package org.labkey.ms1;
 
-import org.labkey.api.query.QueryView;
-import org.labkey.api.query.QuerySettings;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.DataView;
-import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.view.DataView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.ViewURLHelper;
 
-import java.sql.SQLException;
-import java.sql.ResultSet;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Implements a query view over the features data, allows filtering for features from a specific run
@@ -43,7 +44,7 @@ public class FeaturesView extends QueryView
         super(schema);
         _ms1Schema = schema;
         _runId = runId;
-        _peaksAvaialble = peaksAvailable;
+        _peaksAvailable = peaksAvailable;
         _forExport = forExport;
 
         QuerySettings settings = new QuerySettings(ctx.getViewURLHelper(), ctx.getRequest(), QueryView.DATAREGIONNAME_DEFAULT);
@@ -96,7 +97,7 @@ public class FeaturesView extends QueryView
 
         FeaturesTableInfo tinfo = _ms1Schema.getFeaturesTableInfo();
         if(_runId >= 0)
-            tinfo.addRunIdCondition(_runId, getContainer(), getViewContext().getViewURLHelper(), _peaksAvaialble, _forExport);
+            tinfo.addRunIdCondition(_runId, getContainer(), getViewContext().getViewURLHelper(), _peaksAvailable, _forExport);
         return tinfo;
     }
 
@@ -108,6 +109,10 @@ public class FeaturesView extends QueryView
     {
         DataRegion region = super.createDataRegion();
         region.setShadeAlternatingRows(true);
+
+        //if this is for export, remove the details and peaks links
+        if(_forExport)
+            region.removeColumnsFromDisplayColumnList(FeaturesTableInfo.COLUMN_DETAILS_LINK, FeaturesTableInfo.COLUMN_PEAKS_LINK);
         return region;
     }
 
@@ -148,6 +153,6 @@ public class FeaturesView extends QueryView
     //Data members
     private MS1Schema _ms1Schema;
     private int _runId = -1;
-    private boolean _peaksAvaialble = false;
+    private boolean _peaksAvailable = false;
     private boolean _forExport = false;
 } //class FeaturesView

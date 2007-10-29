@@ -22,6 +22,9 @@ import java.util.ArrayList;
  */
 public class FeaturesTableInfo extends FilteredTable
 {
+    public static final String COLUMN_DETAILS_LINK = "DetailsLink";
+    public static final String COLUMN_PEAKS_LINK = "PeaksLink";
+
     public FeaturesTableInfo(MS1Schema schema, Container container)
     {
         this(schema, container, true);
@@ -80,8 +83,26 @@ public class FeaturesTableInfo extends FilteredTable
         //create the details and peaks links columns
         //note that the URL for these is dependent upon the current container
         //so that will be set in addRunIdCondition()
-        addColumn(new ColumnInfo("DetailsLink"));
-        addColumn(new ColumnInfo("PeaksLink"));
+        ColumnInfo ciLink = addColumn(new ColumnInfo(COLUMN_DETAILS_LINK));
+        ciLink.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                SimpleDisplayColumn dc = new SimpleDisplayColumn("(no details)");
+                dc.setName(COLUMN_DETAILS_LINK);
+                return dc;
+            }
+        });
+        ciLink = addColumn(new ColumnInfo(COLUMN_PEAKS_LINK));
+        ciLink.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                SimpleDisplayColumn dc = new SimpleDisplayColumn("(no peaks)");
+                dc.setName(COLUMN_PEAKS_LINK);
+                return dc;
+            }
+        });
 
         //add a condition that limits the features returned to just those existing in the
         //current container. The FilteredTable class supports this automatically only if
@@ -116,26 +137,30 @@ public class FeaturesTableInfo extends FilteredTable
         addCondition(sf, "FileId");
 
         //if peak data is available...
-        if(peaksAvailable && !forExport)
+        if(peaksAvailable)
         {
             //set the display column factory for the details and peaks links columns
-            getColumn("DetailsLink").setDisplayColumnFactory(new DisplayColumnFactory()
+            getColumn(COLUMN_DETAILS_LINK).setDisplayColumnFactory(new DisplayColumnFactory()
             {
                 public DisplayColumn createRenderer(ColumnInfo colInfo)
                 {
                     ViewURLHelper url = _urlBase.clone();
                     url.setAction("showFeatureDetails.view");
-                    return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}"), "details");
+                    UrlColumn uc = new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}"), "details");
+                    uc.setName(COLUMN_DETAILS_LINK);
+                    return uc;
                 }
             });
 
-            getColumn("PeaksLink").setDisplayColumnFactory(new DisplayColumnFactory()
+            getColumn(COLUMN_PEAKS_LINK).setDisplayColumnFactory(new DisplayColumnFactory()
             {
                 public DisplayColumn createRenderer(ColumnInfo colInfo)
                 {
                     ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks.view", _container);
                     url.addParameter("runId", _runId);
-                    return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}"), "peaks");
+                    UrlColumn uc = new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}"), "peaks");
+                    uc.setName(COLUMN_PEAKS_LINK);
+                    return uc;
                 }
             });
         }
