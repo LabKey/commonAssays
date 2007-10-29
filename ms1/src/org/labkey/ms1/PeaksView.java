@@ -136,7 +136,7 @@ public class PeaksView extends QueryView
 
             if(_feature.getScan() != null)
             {
-                url.addParameter("query.ScanId/Scan~eq", _feature.getScan().intValue());
+                url.addParameter(SCAN_FILTER, _feature.getScan().intValue());
                 out.write("<option value=\"" + url.getLocalURIString() + "\">Feature Apex Scan</option>");
             }
             out.write("</select>");

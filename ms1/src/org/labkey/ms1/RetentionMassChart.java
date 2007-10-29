@@ -3,7 +3,6 @@ package org.labkey.ms1;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogarithmicAxis;
-import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
@@ -13,8 +12,8 @@ import org.labkey.api.data.Table;
 
 import java.awt.*;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 /**
  * Produces the retention time vs. m/z chart for the feature details view

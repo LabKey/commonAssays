@@ -65,6 +65,7 @@ public class FeaturesTableInfo extends FilteredTable
                     " WHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId)");
 
             ColumnInfo ciPepId = addColumn(new ExprColumn(this, "Peptide", sqlPepJoin, java.sql.Types.INTEGER, getColumn("FeatureId")));
+            ciPepId.setIsUnselectable(true);
 
             //tell query that this new column is an FK to the peptides data table
             ciPepId.setFk(new LookupForeignKey("RowId")
@@ -75,6 +76,12 @@ public class FeaturesTableInfo extends FilteredTable
                 }
             });
         } //if(includePepFk)
+
+        //create the details and peaks links columns
+        //note that the URL for these is dependent upon the current container
+        //so that will be set in addRunIdCondition()
+        addColumn(new ColumnInfo("DetailsLink"));
+        addColumn(new ColumnInfo("PeaksLink"));
 
         //add a condition that limits the features returned to just those existing in the
         //current container. The FilteredTable class supports this automatically only if
@@ -89,6 +96,11 @@ public class FeaturesTableInfo extends FilteredTable
         visibleColumns.remove(FieldKey.fromParts("FeatureId"));
         visibleColumns.remove(FieldKey.fromParts("FileId"));
         visibleColumns.remove(FieldKey.fromParts("Description"));
+        visibleColumns.remove(FieldKey.fromParts("DetailsLink"));
+        visibleColumns.remove(FieldKey.fromParts("PeaksLink"));
+        visibleColumns.add(0, FieldKey.fromParts("DetailsLink"));
+        visibleColumns.add(1, FieldKey.fromParts("PeaksLink"));
+        visibleColumns.add(FieldKey.fromParts("Peptide", "Peptide"));
         setDefaultVisibleColumns(visibleColumns);
     } //c-tor
 
@@ -106,10 +118,8 @@ public class FeaturesTableInfo extends FilteredTable
         //if peak data is available...
         if(peaksAvailable && !forExport)
         {
-            //add a new column info for the feature details link
-            ColumnInfo cinfo = new ColumnInfo("Details Link");
-            cinfo.setDescription("Link to details about the Feature");
-            cinfo.setDisplayColumnFactory(new DisplayColumnFactory()
+            //set the display column factory for the details and peaks links columns
+            getColumn("DetailsLink").setDisplayColumnFactory(new DisplayColumnFactory()
             {
                 public DisplayColumn createRenderer(ColumnInfo colInfo)
                 {
@@ -118,12 +128,8 @@ public class FeaturesTableInfo extends FilteredTable
                     return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}"), "details");
                 }
             });
-            addColumn(cinfo);
 
-            //add a new column info for the peaks link
-            cinfo = new ColumnInfo("Peaks Link");
-            cinfo.setDescription("Link to detailed Peak data for the Feature");
-            cinfo.setDisplayColumnFactory(new DisplayColumnFactory()
+            getColumn("PeaksLink").setDisplayColumnFactory(new DisplayColumnFactory()
             {
                 public DisplayColumn createRenderer(ColumnInfo colInfo)
                 {
@@ -132,16 +138,6 @@ public class FeaturesTableInfo extends FilteredTable
                     return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}"), "peaks");
                 }
             });
-            addColumn(cinfo);
-
-
-            //move it to the front of the visible column set
-            ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(getDefaultVisibleColumns());
-            visibleColumns.remove(FieldKey.fromParts("Details Link"));
-            visibleColumns.remove(FieldKey.fromParts("Peaks Link"));
-            visibleColumns.add(0, FieldKey.fromParts("Details Link"));
-            visibleColumns.add(1, FieldKey.fromParts("Peaks Link"));
-            setDefaultVisibleColumns(visibleColumns);
         }
 
         if(!forExport)
