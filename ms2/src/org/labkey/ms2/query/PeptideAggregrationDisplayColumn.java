@@ -17,10 +17,11 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
     private ColumnInfo _groupingColumn;
     private ColumnInfo _peptideColumn;
 
-    public PeptideAggregrationDisplayColumn(ColumnInfo groupingColumn, ColumnInfo peptideColumn)
+    public PeptideAggregrationDisplayColumn(ColumnInfo groupingColumn, ColumnInfo peptideColumn, String caption)
     {
         _groupingColumn = groupingColumn;
         _peptideColumn = peptideColumn;
+        setCaption(caption);
     }
 
     public ColumnInfo getColumnInfo()
@@ -30,17 +31,26 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
 
     public Object getValue(RenderContext ctx)
     {
-        ResultSet rs = ctx.getResultSet();
+        ResultSet originalRS = ctx.getResultSet();
+        ResultSet rs = originalRS;
+
+        boolean closeRS = false;
         try
         {
-            List<String> peptides = (List<String>)ctx.getRow().get("PeptideList");
-            if (peptides == null)
+            if (originalRS instanceof GroupedResultSet)
+            {
+                rs = ((GroupedResultSet)originalRS).getNextResultSet();
+                closeRS = true;
+            }
+            Object groupingValue = originalRS.getObject(_groupingColumn.getAlias());
+            List<String> peptides = (List<String>)ctx.get("PeptideList");
+            Object cachedGroupingValue = ctx.get("PeptideListGroupingValue");
+            if (peptides == null || cachedGroupingValue == null || !cachedGroupingValue.equals(groupingValue))
             {
                 peptides = new ArrayList<String>();
-                Object groupingValue = rs.getObject(_groupingColumn.getAlias());
 
-                peptides.add(rs.getString(_peptideColumn.getAlias()));
-                int originalRow = rs.getRow();
+                peptides.add(originalRS.getString(_peptideColumn.getAlias()));
+                int originalRow = originalRS.getRow();
 
                 while (rs.next())
                 {
@@ -53,9 +63,10 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
                         break;
                     }
                 }
-                rs.absolute(originalRow);
+                originalRS.absolute(originalRow);
 
-                ctx.getRow().put("PeptidesList", peptides);
+                ctx.put("PeptideList", peptides);
+                ctx.put("PeptideListGroupingValue", groupingValue);
             }
 
             return calculateValue(ctx, peptides);
@@ -63,6 +74,10 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
+        }
+        finally
+        {
+            if (closeRS) { try { rs.close(); } catch (SQLException e) {} }
         }
     }
 

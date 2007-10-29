@@ -13,9 +13,9 @@ import java.sql.SQLException;
  */
 public class UniquePeptideCountCoverageColumn extends PeptideAggregrationDisplayColumn
 {
-    public UniquePeptideCountCoverageColumn(ColumnInfo colInfo, ColumnInfo peptideColumn)
+    public UniquePeptideCountCoverageColumn(ColumnInfo colInfo, ColumnInfo peptideColumn, String caption)
     {
-        super(colInfo, peptideColumn);
+        super(colInfo, peptideColumn, caption);
     }
 
     protected Object calculateValue(RenderContext ctx, List<String> peptides) throws SQLException

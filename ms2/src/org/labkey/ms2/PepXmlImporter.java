@@ -281,7 +281,7 @@ public class PepXmlImporter extends MS2Importer
     protected static boolean isAbsolute(String filename)
     {
         if (filename == null) return false;
-        if (filename.startsWith("\\") || filename.startsWith("/"))
+        if (filename.startsWith("\\") || filename.startsWith("/") || (filename.length() > 2 && Character.isLetter(filename.charAt(0)) && ':' == filename.charAt(1)))
             return true;
         File f = new File(filename);
         return f.isAbsolute();

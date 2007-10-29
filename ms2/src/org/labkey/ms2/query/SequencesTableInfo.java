@@ -140,7 +140,7 @@ public class SequencesTableInfo extends FilteredTable
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
-                return new PeptideCountCoverageColumn(colInfo, peptideColumn);
+                return new PeptideCountCoverageColumn(colInfo, peptideColumn, "Peptides");
             }
         });
         addColumn(totalCount);
@@ -151,7 +151,7 @@ public class SequencesTableInfo extends FilteredTable
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
-                return new UniquePeptideCountCoverageColumn(colInfo, peptideColumn);
+                return new UniquePeptideCountCoverageColumn(colInfo, peptideColumn, "Unique");
             }
         });
         addColumn(uniqueCount);

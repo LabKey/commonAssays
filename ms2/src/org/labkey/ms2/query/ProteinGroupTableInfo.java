@@ -235,6 +235,29 @@ public class ProteinGroupTableInfo extends FilteredTable
         ColumnInfo descriptionColumn = wrapColumn("Description", rowIdColumn);
         descriptionColumn.setDisplayColumnFactory(factory);
         addColumn(descriptionColumn);
+
+
+        ColumnInfo totalCount = wrapColumn("TotalFilteredPeptides", rowIdColumn);
+        totalCount.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
+                return new PeptideCountCoverageColumn(colInfo, peptideColumn, "TotalFilteredPeptides");
+            }
+        });
+        addColumn(totalCount);
+
+        ColumnInfo uniqueCount = wrapColumn("UniqueFilteredPeptides", rowIdColumn);
+        uniqueCount.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
+                return new UniquePeptideCountCoverageColumn(colInfo, peptideColumn, "UniqueFilteredPeptides");
+            }
+        });
+        addColumn(uniqueCount);
     }
 
     public void addContainerCondition(Container c, User u, boolean includeSubfolders)

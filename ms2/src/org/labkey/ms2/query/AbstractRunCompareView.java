@@ -148,8 +148,8 @@ public abstract class AbstractRunCompareView  extends QueryView
         {
             sort = new Sort();
         }
-        sort.insertSortColumn("-Pattern", false);
-        sort.insertSortColumn("-RunCount", false);
+        sort.insertSortColumn("-RunCount", false, sort.getSortList().size());
+        sort.insertSortColumn("-Pattern", false, sort.getSortList().size());
         result.getRenderContext().setBaseSort(sort);
         result.getRenderContext().setViewContext(getViewContext());
         SimpleFilter filter = new SimpleFilter(result.getRenderContext().getBaseFilter());

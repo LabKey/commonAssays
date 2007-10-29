@@ -12,9 +12,9 @@ import java.sql.SQLException;
  */
 public class PeptideCountCoverageColumn extends PeptideAggregrationDisplayColumn
 {
-    public PeptideCountCoverageColumn(ColumnInfo colInfo, ColumnInfo peptideColumn)
+    public PeptideCountCoverageColumn(ColumnInfo colInfo, ColumnInfo peptideColumn, String caption)
     {
-        super(colInfo, peptideColumn);
+        super(colInfo, peptideColumn, caption);
     }
 
     public Class getValueClass()

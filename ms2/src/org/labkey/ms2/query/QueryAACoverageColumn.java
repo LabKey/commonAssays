@@ -17,11 +17,10 @@ public class QueryAACoverageColumn extends PeptideAggregrationDisplayColumn
 
     public QueryAACoverageColumn(ColumnInfo sequenceColumn, ColumnInfo seqIdColumn, ColumnInfo peptideColumn)
     {
-        super(seqIdColumn, peptideColumn);
+        super(seqIdColumn, peptideColumn, "AA Coverage");
 
         _sequenceColumn = sequenceColumn;
 
-        setCaption("AA Coverage");
         setFormatString("0.0%");
         setTsvFormatString("0.00");
         setWidth("90");
