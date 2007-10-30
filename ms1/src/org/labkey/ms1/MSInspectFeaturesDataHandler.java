@@ -1,5 +1,6 @@
 package org.labkey.ms1;
 
+import org.apache.commons.beanutils.ConversionException;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentException;
@@ -78,6 +79,25 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         }
     } //class ColumBindingHashMap
 
+    /**
+     * Helper class for detecting conversion errors when using
+     * the TabLoader class.
+     */
+    protected static class ConversionError
+    {
+        private String _columnName = "";
+
+        public ConversionError(String columnName)
+        {
+            _columnName = columnName;
+        }
+
+        public String getColumnName()
+        {
+            return _columnName;
+        }
+    }
+
     //Constants and Static Data Members
     private static final int CHUNK_SIZE = 1000;         //number of insert statements in a batch
 
@@ -127,6 +147,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         if(null == data || null == dataFile || null == info || null == log || null == context)
             return;
 
+        int numRows = 0;
         try
         {
             //if this file has already been imported before, just return
@@ -167,6 +188,11 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
             TabLoader.TabLoaderIterator iter = tsvloader.iterator();
             TabLoader.ColumnDescriptor[] coldescrs = tsvloader.getColumns();
 
+            //set the error value for each column descriptor so that we can
+            //detect conversion errors as we process the rows
+            for(TabLoader.ColumnDescriptor coldescr : coldescrs)
+                coldescr.errorValues = new ConversionError(coldescr.name);
+
             //insert information about the software used to produce the file
             insertSoftwareInfo(tsvloader.getComments(), idFile, info.getUser(), schema);
 
@@ -186,7 +212,6 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
             pstmt = cn.prepareStatement(genInsertSQL(bindings));
 
             Map row;
-            int numRows = 0;
 
             //iterate over the rows
             while(iter.hasNext())
@@ -221,6 +246,12 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
             scope.commitTransaction();
 
             log.info("Finished loading " + numRows + " features in " + (System.currentTimeMillis() - startMs) + " milliseconds.");
+        }
+        catch(ConversionException ex)
+        {
+            log.error("Error while converting data in row " + (numRows + 1) + " : " + ex);
+            scope.rollbackTransaction();
+            throw new ExperimentException(ex);
         }
         catch(IOException ex)
         {
@@ -367,6 +398,9 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
             return;
 
         Object val = row.get(binding.sourceColumn);
+
+        if(val instanceof ConversionError)
+            throw new ExperimentException("Error converting the value in column '" + ((ConversionError)val).getColumnName() + "' at row " + rowNum);
 
         try
         {

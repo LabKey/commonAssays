@@ -415,10 +415,10 @@ public class MS1Manager
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS existing FROM exp.Data as d INNER JOIN ");
         sql.append(getSQLTableName(TABLE_FILES));
         sql.append(" as f");
-        sql.append(" ON (d.RowId = f.ExpDataFileId) WHERE DataFileUrl=? AND Container=?");
+        sql.append(" ON (d.RowId = f.ExpDataFileId) WHERE DataFileUrl=? AND Container=? AND f.Imported=?");
 
         Integer count = Table.executeSingleton(getSchema(), sql.toString(),
-                                                new Object[]{dataFile.toURI().toString(), data.getContainer().getId()},
+                                                new Object[]{dataFile.toURI().toString(), data.getContainer().getId(), true},
                                                 Integer.class);
         return (null != count && count.intValue() != 0);
     } //isAlreadyImported()

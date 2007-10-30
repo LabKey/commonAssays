@@ -428,7 +428,7 @@
             <!-- m/z and intensity peaks mass chart -->
             <br/>
             <a href="<%=urlPeaksView.getLocalURIString() + "&query.ScanId/Scan~eq=" + scan + "&query.MZ~gte=" + (feature.getMz()+mzWindowLow) + "&query.MZ~lte=" + (feature.getMz()+mzWindowHigh)%>">
-            <img src="showChart.view?type=spectrum&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scan=<%=scan%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>" alt="Spectrum chart" title="Click to see tabular data"/>
+            <img width="425" height="300" src="showChart.view?type=spectrum&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scan=<%=scan%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>" alt="Spectrum chart" title="Click to see tabular data"/>
             </a>
             <br/>Intensities of peaks with a
             <a href="javascript:{}" onclick="showMzFilter(this);" title="Click to adjust">
@@ -502,7 +502,7 @@
             <% /*Note that this chart does not use the mzWindow* values since it is supposed to show the closest peak values within a fine tolerance*/ %>
 
             <a href="<%=urlPeaksView.getLocalURIString() + "&query.MZ~gte=" + (feature.getMz()-0.02) + "&query.MZ~lte=" + (feature.getMz()+0.02)%>">
-            <img src="showChart.view?type=elution&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst() + scanWindowLow%>&scanLast=<%=feature.getScanLast() + scanWindowHigh%>&mzLow=<%=feature.getMz()-0.02%>&mzHigh=<%=feature.getMz()+0.02%>" alt="Elution chart" title="Click to see tabular data"/>
+            <img width="425" heigh="300" src="showChart.view?type=elution&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst() + scanWindowLow%>&scanLast=<%=feature.getScanLast() + scanWindowHigh%>&mzLow=<%=feature.getMz()-0.02%>&mzHigh=<%=feature.getMz()+0.02%>" alt="Elution chart" title="Click to see tabular data"/>
             </a>
 
             <br/>Intensity of the peaks with the closest m/z value to the feature, across
@@ -573,7 +573,7 @@
             <!-- retention time and m/z bubble chart -->
 
             <a href="<%=urlPeaksView.getLocalURIString() + "&query.MZ~gte=" + (feature.getMz()+mzWindowLow) + "&query.MZ~lte=" + (feature.getMz()+mzWindowHigh)%>">
-            <img src="showChart.view?type=bubble&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst() + scanWindowLow%>&scanLast=<%=feature.getScanLast() + scanWindowHigh%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>&scan=<%=scan%>"
+            <img width="425" height="300" src="showChart.view?type=bubble&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst() + scanWindowLow%>&scanLast=<%=feature.getScanLast() + scanWindowHigh%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>&scan=<%=scan%>"
                  alt="Intesities Bubble chart" title="Click to see tabular data"/>
             </a>
 
@@ -583,7 +583,7 @@
             across
             <a href="javascript:{}" onclick="showScanFilter();">
                 all scans within the feature's range (<%=formatWindowExtent(scanWindowLow, true)%>/<%=formatWindowExtent(scanWindowHigh)%> scans <b>[adjust]</b>)
-            </a>.
+            </a>. The size and color of the bubbles represent the peak's relative intensity.
         </td>
     </tr>
 </table>

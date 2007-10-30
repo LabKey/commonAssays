@@ -13,7 +13,6 @@ import org.labkey.api.view.ViewURLHelper;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 /**
  * Implements a query view over the features data, allows filtering for features from a specific run
