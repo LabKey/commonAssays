@@ -362,6 +362,10 @@ public class PepXmlImporter extends MS2Importer
 
         stmt.setInt(n++, _fractionId);
         stmt.setInt(n++, peptide.getScan());
+        if (peptide.getScan() == peptide.getEndScan())
+            stmt.setNull(n++, Types.INTEGER);
+        else
+            stmt.setInt(n++, peptide.getEndScan());
 
         Double retentionTime = peptide.getRetentionTime();
         if (retentionTime == null)

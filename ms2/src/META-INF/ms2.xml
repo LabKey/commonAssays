@@ -112,6 +112,15 @@
           <ns:isReadOnly>false</ns:isReadOnly>
           <ns:isUserEditable>false</ns:isUserEditable>
         </ns:column>
+        <ns:column columnName="EndScan">
+          <ns:columnTitle>EndScan</ns:columnTitle>
+          <ns:inputType>text</ns:inputType>
+          <ns:displayWidth>65</ns:displayWidth>
+          <ns:inputLength>10</ns:inputLength>
+          <ns:nullable>false</ns:nullable>
+          <ns:isReadOnly>false</ns:isReadOnly>
+          <ns:isUserEditable>false</ns:isUserEditable>
+        </ns:column>
         <ns:column columnName="RetentionTime">
           <ns:columnTitle>RetTime</ns:columnTitle>
           <ns:formatString>0.00</ns:formatString>
@@ -634,6 +643,15 @@
         <ns:isReadOnly>false</ns:isReadOnly>
         <ns:isUserEditable>false</ns:isUserEditable>
       </ns:column>
+      <ns:column columnName="EndScan">
+        <ns:columnTitle>EndScan</ns:columnTitle>
+        <ns:inputType>text</ns:inputType>
+        <ns:displayWidth>65</ns:displayWidth>
+        <ns:inputLength>10</ns:inputLength>
+        <ns:nullable>false</ns:nullable>
+        <ns:isReadOnly>false</ns:isReadOnly>
+        <ns:isUserEditable>false</ns:isUserEditable>
+      </ns:column>
       <ns:column columnName="RetentionTime">
         <ns:columnTitle>RetTime</ns:columnTitle>
         <ns:formatString>0.00</ns:formatString>
@@ -1093,6 +1111,15 @@
         <ns:columnTitle>Scan</ns:columnTitle>
         <ns:inputType>text</ns:inputType>
         <ns:displayWidth>45</ns:displayWidth>
+        <ns:inputLength>10</ns:inputLength>
+        <ns:nullable>false</ns:nullable>
+        <ns:isReadOnly>false</ns:isReadOnly>
+        <ns:isUserEditable>false</ns:isUserEditable>
+      </ns:column>
+      <ns:column columnName="EndScan">
+        <ns:columnTitle>EndScan</ns:columnTitle>
+        <ns:inputType>text</ns:inputType>
+        <ns:displayWidth>65</ns:displayWidth>
         <ns:inputLength>10</ns:inputLength>
         <ns:nullable>false</ns:nullable>
         <ns:isReadOnly>false</ns:isReadOnly>

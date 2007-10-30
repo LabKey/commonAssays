@@ -35,7 +35,16 @@ public class PeptidesTableInfo extends FilteredTable
         super(MS2Manager.getTableInfoPeptidesData());
         _schema = schema;
 
-        for (ColumnInfo col : getRealTable().getColumns())
+        // Stick EndScan column just after Scan column
+        ColumnInfo scanColumn = getRealTable().getColumn("Scan");
+        ColumnInfo endScanColumn = getRealTable().getColumn("EndScan");
+        ColumnInfo[] tableColumns = getRealTable().getColumns();
+        List<ColumnInfo> columns = new ArrayList<ColumnInfo>(Arrays.asList(tableColumns));
+        columns.remove(endScanColumn);
+        int i = columns.indexOf(scanColumn);
+        columns.add(i + 1, endScanColumn);
+
+        for (ColumnInfo col : columns)
         {
             if (!col.getName().toLowerCase().startsWith("score"))
             {

@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.module.Module;
 import org.labkey.api.security.SecurityManager;
 import org.labkey.api.util.PageFlowUtil;
 
