@@ -24,6 +24,7 @@ public class FeaturesTableInfo extends FilteredTable
 {
     public static final String COLUMN_DETAILS_LINK = "DetailsLink";
     public static final String COLUMN_PEAKS_LINK = "PeaksLink";
+    public static final String COLUMN_PEPTIDE_INFO = "Peptide";
 
     public FeaturesTableInfo(MS1Schema schema, Container container)
     {
@@ -67,7 +68,7 @@ public class FeaturesTableInfo extends FilteredTable
                     " INNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)" +
                     " WHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId)");
 
-            ColumnInfo ciPepId = addColumn(new ExprColumn(this, "Peptide", sqlPepJoin, java.sql.Types.INTEGER, getColumn("FeatureId")));
+            ColumnInfo ciPepId = addColumn(new ExprColumn(this, COLUMN_PEPTIDE_INFO, sqlPepJoin, java.sql.Types.INTEGER, getColumn("FeatureId")));
             ciPepId.setIsUnselectable(true);
 
             //tell query that this new column is an FK to the peptides data table
@@ -117,11 +118,11 @@ public class FeaturesTableInfo extends FilteredTable
         visibleColumns.remove(FieldKey.fromParts("FeatureId"));
         visibleColumns.remove(FieldKey.fromParts("FileId"));
         visibleColumns.remove(FieldKey.fromParts("Description"));
-        visibleColumns.remove(FieldKey.fromParts("DetailsLink"));
-        visibleColumns.remove(FieldKey.fromParts("PeaksLink"));
-        visibleColumns.add(0, FieldKey.fromParts("DetailsLink"));
-        visibleColumns.add(1, FieldKey.fromParts("PeaksLink"));
-        visibleColumns.add(FieldKey.fromParts("Peptide", "Peptide"));
+        visibleColumns.remove(FieldKey.fromParts(COLUMN_DETAILS_LINK));
+        visibleColumns.remove(FieldKey.fromParts(COLUMN_PEAKS_LINK));
+        visibleColumns.add(0, FieldKey.fromParts(COLUMN_DETAILS_LINK));
+        visibleColumns.add(1, FieldKey.fromParts(COLUMN_PEAKS_LINK));
+        visibleColumns.add(FieldKey.fromParts(COLUMN_PEPTIDE_INFO, "Peptide"));
         setDefaultVisibleColumns(visibleColumns);
     } //c-tor
 
@@ -163,6 +164,14 @@ public class FeaturesTableInfo extends FilteredTable
                     return uc;
                 }
             });
+        }
+        else
+        {
+            //remove the details and peaks links from the default set
+            ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(getDefaultVisibleColumns());
+            visibleColumns.remove(FieldKey.fromParts(COLUMN_DETAILS_LINK));
+            visibleColumns.remove(FieldKey.fromParts(COLUMN_PEAKS_LINK));
+            setDefaultVisibleColumns(visibleColumns);
         }
 
         if(!forExport)

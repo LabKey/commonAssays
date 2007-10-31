@@ -182,8 +182,8 @@ public class PeaksFileImporter extends DefaultHandler
 
         ++_numPeaks;
 
-        if((_numPeaks % 1000) == 0)
-            _log.info("Imported 1000 peaks into the database.");
+        if((_numPeaks % 5000) == 0)
+            _log.info("Imported " + _numPeaks + " peaks so far....");
     }
 
     protected Double getAttrAsDouble(Attributes attrs, String qName) throws SAXException
