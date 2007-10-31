@@ -15,9 +15,7 @@
           <root url="jar://$MODULE_DIR$/lib/amclientsdk.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/lib/opensso-src.zip!/" />
-        </SOURCES>
+        <SOURCES />
       </library>
     </orderEntry>
     <orderEntryProperties />
