@@ -322,7 +322,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 for (PropertyDescriptor pd : pds)
                 {
                     ObjectProperty prop = props.get(pd.getPropertyURI());
-                    if (prop != null && !TARGET_STUDY_PROPERTY_NAME.equals(pd.getName()))
+                    if (prop != null && !TARGET_STUDY_PROPERTY_NAME.equals(pd.getName()) && !PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(pd.getName()))
                     {
                         PropertyDescriptor publishPD = pd.clone();
                         publishPD.setName("Run " + pd.getName());

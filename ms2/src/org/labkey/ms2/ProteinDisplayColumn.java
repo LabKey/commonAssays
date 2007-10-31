@@ -2,7 +2,11 @@ package org.labkey.ms2;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -21,7 +25,23 @@ public class ProteinDisplayColumn extends DataColumn
     public void addQueryColumns(Set<ColumnInfo> set)
     {
         super.addQueryColumns(set);
-        set.add(getColumnInfo().getParentTable().getColumn("SeqId"));
-        set.add(getColumnInfo().getParentTable().getColumn("Protein"));
+        FieldKey key = FieldKey.fromString(getColumnInfo().getName());
+
+        FieldKey parentKey = key.getParent();
+        FieldKey seqIdKey;
+        FieldKey proteinKey;
+        if (parentKey != null)
+        {
+            seqIdKey = new FieldKey(parentKey, "SeqId");
+            proteinKey = new FieldKey(parentKey, "Protein");
+        }
+        else
+        {
+            seqIdKey = FieldKey.fromParts("SeqId");
+            proteinKey = FieldKey.fromParts("Protein");
+        }
+        
+        Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(getColumnInfo().getParentTable(), Arrays.asList(seqIdKey, proteinKey));
+        set.addAll(colMap.values());
     }
 }
