@@ -9,7 +9,7 @@ Search <%=what%> in this <%=(container.isProject() ? "project" : "folder") + (in
     { %>
 </tr>
 <tr>
-    <td width="1"><input type="checkbox" name="includeSubfolders" <%=includeSubfolders ? "checked" : ""%>></td><td>Search subfolders</td>
+    <td width="1"><input type="checkbox" name="includeSubfolders" value="on" <%=includeSubfolders ? "checked" : ""%>></td><td>Search subfolders</td>
 </tr>
 <tr>
     <td colspan=2>&nbsp;</td>
