@@ -431,7 +431,7 @@ public class NabController extends ViewController
         DilutionSummary[] summaries = getDilutionSummaries(wellGroupIds);
         int[] cutoffList = getCutoffs(summaries);
         _cachedSummaries = summaries;
-        JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/multiRunGraph.jsp",
+        JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/legacyGraph.jsp",
                 new GraphSelectedBean(summaries, cutoffList));
 
         ViewURLHelper printLink = null;

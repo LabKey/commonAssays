@@ -33,6 +33,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
     public static final String NAB_DATA_ROW_LSID_PREFIX = "AssayRunNabDataRow";
     public static final String NAB_PROPERTY_LSID_PREFIX = "NabProperty";
     public static final String NAB_INPUT_MATERIAL_DATA_PROPERTY = "SpecimenLsid";
+    public static final String WELLGROUP_NAME_PROPERTY = "WellgroupName";
     private static final int START_ROW = 6; //0 based, row 7 inthe workshet
     private static final int START_COL = 0;
 
@@ -66,6 +67,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
 
                 results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "Fit Error", dilution.getFitError(), PropertyType.DOUBLE, "0.0"));
                 results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), NAB_INPUT_MATERIAL_DATA_PROPERTY, sampleInput.getLSID(), PropertyType.STRING));
+                results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), WELLGROUP_NAME_PROPERTY, group.getName(), PropertyType.STRING));
 
                 OntologyManager.ensureObject(container.getId(), dataRowLsid.toString(),  data.getLSID());
                 OntologyManager.insertProperties(container.getId(), results.toArray(new ObjectProperty[results.size()]), dataRowLsid.toString());
@@ -75,6 +77,56 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         {
             throw new RuntimeException(e);
         }
+    }
+
+    public static List<DilutionSummary> getDilutionSummaries(int... dataObjectIds) throws ExperimentException, SQLException
+    {
+        Map<String, Luc5Assay> dataToAssay = new HashMap<String, Luc5Assay>();
+        List<DilutionSummary> summaries = new ArrayList<DilutionSummary>();
+        for (int dataObjectId : dataObjectIds)
+        {
+            OntologyObject dataRow = OntologyManager.getOntologyObject(dataObjectId);
+            if (dataRow == null || dataRow.getOwnerObjectId() == null)
+                continue;
+            Map<String, ObjectProperty> properties = OntologyManager.getPropertyObjects(dataRow.getContainer(), dataRow.getObjectURI());
+            String wellgroupName = null;
+            for (ObjectProperty property : properties.values())
+            {
+                if (WELLGROUP_NAME_PROPERTY.equals(property.getName()))
+                {
+                    wellgroupName = property.getStringValue();
+                    break;
+                }
+            }
+            if (wellgroupName == null)
+                continue;
+
+            OntologyObject dataParent = OntologyManager.getOntologyObject(dataRow.getOwnerObjectId());
+            if (dataParent == null)
+                continue;
+            String dataLsid = dataParent.getObjectURI();
+            Luc5Assay assay = dataToAssay.get(dataLsid);
+            if (assay == null)
+            {
+                ExpData dataObject = ExperimentService.get().getExpData(dataLsid);
+                if (dataObject == null)
+                    continue;
+                assay = getAssayResults(dataObject.getRun());
+                if (assay == null)
+                    continue;
+                dataToAssay.put(dataLsid, assay);
+            }
+
+            for (DilutionSummary summary : assay.getSummaries())
+            {
+                if (wellgroupName.equals(summary.getWellGroup().getName()))
+                {
+                    summaries.add(summary);
+                    break;
+                }
+            }
+        }
+        return summaries;
     }
 
     private void saveICValue(String name, double icValue, DilutionSummary dilution, Lsid dataRowLsid,
@@ -174,10 +226,20 @@ public class NabDataHandler extends AbstractExperimentDataHandler
                 fit = DilutionCurve.FitType.fromLabel((String) value);
         }
 
+        boolean lockAxes = false;
+        PropertyDescriptor lockAxesProperty = runProperties.get(NabAssayProvider.LOCK_AXES_PROPERTY_NAME);
+        if (lockAxesProperty != null)
+        {
+            Boolean lock = (Boolean) run.getProperty(lockAxesProperty);
+            if (lock != null)
+                lockAxes = lock.booleanValue();
+        }
+
         Luc5Assay assay = new Luc5Assay(plate, sortedCutoffs, fit);
         assay.setCutoffFormats(cutoffs);
         assay.setWellGroupMaterialMapping(inputs);
         assay.setDataFile(dataFile);
+        assay.setLockAxes(lockAxes);
         return assay;
     }
 
@@ -292,7 +354,14 @@ public class NabDataHandler extends AbstractExperimentDataHandler
 
     public void deleteData(ExpData data, Container container, User user) throws ExperimentException
     {
-        throw new UnsupportedOperationException("Not Yet Implemented");
+        try
+        {
+            OntologyManager.deleteOntologyObject(data.getLSID(), container, true);
+        }
+        catch (SQLException e)
+        {
+            throw new ExperimentException(e);
+        }
     }
 
     public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException

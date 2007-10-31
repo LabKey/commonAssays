@@ -48,6 +48,8 @@ public class NabAssayProvider extends PlateBasedAssayProvider
     public static final String SAMPLE_DESCRIPTION_PROPERTY_CAPTION = "Sample Description";
     public static final String CURVE_FIT_METHOD_PROPERTY_NAME = "CurveFitMethod";
     public static final String CURVE_FIT_METHOD_PROPERTY_CAPTION = "Curve Fit Method";
+    public static final String LOCK_AXES_PROPERTY_NAME = "LockYAxis";
+    public static final String LOCK_AXES_PROPERTY_CAPTION = "Lock Graph Y-Axis";
 
     public NabAssayProvider()
     {
@@ -136,6 +138,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         addProperty(runDomain, "PlateNumber", "Plate Number", PropertyType.STRING);
         addProperty(runDomain, "ExperimentDate", "Experiment Date", PropertyType.DATE_TIME);
         addProperty(runDomain, "FileID", "File ID", PropertyType.STRING);
+        addProperty(runDomain, LOCK_AXES_PROPERTY_NAME, LOCK_AXES_PROPERTY_CAPTION, PropertyType.BOOLEAN);
 
         Container lookupContainer = c.getProject();
         ListDefinition curveFitMethodList = createSimpleList(lookupContainer, user, "NabCurveFitMethod", "FitMethod",
@@ -357,7 +360,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         return Arrays.asList(new ParticipantVisitNoOpResolverType(), new SpecimenIDLookupResolverType(), new ThawListResolverType());
     }
 
-    private static class NabQueryViewCustomizer implements QueryViewCustomizer
+    public static class NabQueryViewCustomizer implements QueryViewCustomizer
     {
         private String _idColumn;
 
@@ -365,6 +368,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         {
             _idColumn = idColumn;
         }
+
         public void customize(DataView view)
         {
             DataRegion rgn = view.getDataRegion();
@@ -383,12 +387,12 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         }
     }
 
-    public QueryViewCustomizer getRunsViewCustomizer()
+    public QueryViewCustomizer getRunsViewCustomizer(Container container, ExpProtocol protocol)
     {
         return new NabQueryViewCustomizer(ExpRunTable.Column.RowId.toString());
     }
 
-    public QueryViewCustomizer getDataViewCustomizer()
+    public QueryViewCustomizer getDataViewCustomizer(final Container container, final ExpProtocol protocol)
     {
         return new NabQueryViewCustomizer(NabRunDataTable.RUN_ID_COLUMN_NAME)
         {
@@ -396,6 +400,13 @@ public class NabAssayProvider extends PlateBasedAssayProvider
             {
                 super.customize(view);
                 view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
+                view.getDataRegion().addHiddenFormField("protocolId", "" + protocol.getRowId());
+                ButtonBar bbar = view.getDataRegion().getButtonBar(DataRegion.MODE_GRID);
+                ViewURLHelper graphSelectedURL = new ViewURLHelper("NabAssay", "graphSelected", container);
+                ActionButton graphSelectedButton = new ActionButton("button", "Graph Selected");
+                graphSelectedButton.setScript("return verifySelected(this.form, \"" + graphSelectedURL.getLocalURIString() + "\", \"get\", \"rows\")");
+                graphSelectedButton.setActionType(ActionButton.Action.GET);
+                bbar.add(graphSelectedButton);
             }
         };
     }

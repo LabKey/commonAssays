@@ -26,6 +26,7 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
     private Map<WellGroup, ExpMaterial> _wellGroupMaterialMapping;
     private File _dataFile;
     private DilutionCurve.FitType _curveFitType;
+    private boolean _lockAxes;
 
     public Luc5Assay(Plate plate, int[] cutoffs, DilutionCurve.FitType curveFitType)
     {
@@ -219,5 +220,15 @@ public class Luc5Assay implements Serializable, DilutionCurve.PercentCalculator
     public void setDataFile(File dataFile)
     {
         _dataFile = dataFile;
+    }
+
+    public boolean isLockAxes()
+    {
+        return _lockAxes;
+    }
+
+    public void setLockAxes(boolean lockAxes)
+    {
+        _lockAxes = lockAxes;
     }
 }

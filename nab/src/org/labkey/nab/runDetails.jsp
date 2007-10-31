@@ -28,6 +28,12 @@
     Set<PropertyDescriptor> samplePropertyDescriptors = firstSample.keySet();
 
     Map<PropertyDescriptor, Object> runProperties = bean.getRunProperties();
+    Map<PropertyDescriptor, Object> nonNullRunProperties = new HashMap<PropertyDescriptor, Object>();
+    for (Map.Entry<PropertyDescriptor, Object> prop : runProperties.entrySet())
+    {
+        if (prop.getValue() != null)
+            nonNullRunProperties.put(prop.getKey(), prop.getValue());
+    }
 
     boolean writer = context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT);
     String headerTDStyle = "text-align:left;background-color:#EEEEEE;border-top:solid 1px";
@@ -76,7 +82,7 @@
         <td>
             <table width="100%">
                 <%
-                    Iterator<Map.Entry<PropertyDescriptor, Object>> propertyIt = runProperties.entrySet().iterator();
+                    Iterator<Map.Entry<PropertyDescriptor, Object>> propertyIt = nonNullRunProperties.entrySet().iterator();
                     while (propertyIt.hasNext())
                     {
                 %>

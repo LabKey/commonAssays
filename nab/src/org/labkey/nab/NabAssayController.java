@@ -1,44 +1,49 @@
 package org.labkey.nab;
 
-import org.labkey.api.action.SpringActionController;
-import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.ACL;
-import org.labkey.api.view.*;
-import org.labkey.api.study.WellData;
-import org.labkey.api.study.DilutionCurve;
-import org.labkey.api.study.actions.AssayHeaderView;
-import org.labkey.api.study.assay.*;
-import org.labkey.api.data.*;
-import org.labkey.api.announcements.DiscussionService;
-import org.labkey.api.exp.api.*;
-import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.query.QueryView;
-import org.labkey.api.query.QueryViewCustomizer;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.common.util.Pair;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.validation.BindException;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.chart.JFreeChart;
+import org.apache.beehive.netui.pageflow.FormData;
+import org.jfree.chart.ChartColor;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
-import org.jfree.chart.ChartColor;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogarithmicAxis;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.plot.ValueMarker;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
+import org.labkey.api.announcements.DiscussionService;
+import org.labkey.api.data.*;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.QueryView;
+import org.labkey.api.query.QueryViewCustomizer;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.study.DilutionCurve;
+import org.labkey.api.study.WellData;
+import org.labkey.api.study.actions.AssayHeaderView;
+import org.labkey.api.study.assay.*;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.*;
+import org.labkey.common.util.Pair;
+import org.labkey.nab.query.NabRunDataTable;
+import org.springframework.validation.BindException;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
-import java.sql.SQLException;
-import java.sql.ResultSet;
-import java.io.IOException;
-import java.io.File;
-import java.awt.*;
 
 /**
  * User: jeckels
@@ -119,8 +124,7 @@ public class NabAssayController extends SpringActionController
             _hiddenRunColumns = new HashSet<String>();
             _hiddenRunColumns.add(AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME);
             _hiddenRunColumns.add(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME);
-            for (String name : NabAssayProvider.CUTOFF_PROPERTIES)
-                _hiddenRunColumns.add(name);
+            _hiddenRunColumns.addAll(Arrays.asList(NabAssayProvider.CUTOFF_PROPERTIES));
         }
 
         public Luc5Assay getAssay()
@@ -379,7 +383,8 @@ public class NabAssayController extends SpringActionController
 
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
         {
-            Luc5Assay assay = getCachedAssay(form.getRowId());
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            Luc5Assay assay = NabDataHandler.getAssayResults(run);
             _run = ExperimentService.get().getExpRun(form.getRowId());
             _protocol = _run.getProtocol();
             PlateBasedAssayProvider provider = (PlateBasedAssayProvider) AssayService.get().getProvider(_protocol);
@@ -401,37 +406,187 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    private Luc5Assay getCachedAssay(int rowId) throws Exception
+    public static class GraphSelectedForm extends FormData
     {
-        Luc5Assay assay = _cachedAssay;
-        if (assay == null || assay.getRunRowId() == null || assay.getRunRowId().intValue() != rowId)
+        private int _protocolId;
+        private int[] _id;
+
+        public int[] getId()
         {
-            ExpRun run = ExperimentService.get().getExpRun(rowId);
-            assay = NabDataHandler.getAssayResults(run);
-            _cachedAssay = assay;
+            return _id;
         }
-        return assay;
+
+        public void setId(int[] id)
+        {
+            _id = id;
+        }
+
+        public int getProtocolId()
+        {
+            return _protocolId;
+        }
+
+        public void setProtocolId(int protocolId)
+        {
+            _protocolId = protocolId;
+        }
+    }
+
+    public static class GraphSelectedBean
+    {
+        private ViewContext _context;
+        private DilutionSummary[] _dilutionSummaries;
+        private int[] _cutoffs;
+        private ExpProtocol _protocol;
+        private int[] _dataObjectIds;
+        private QueryView _queryView;
+        private int[] _graphableIds;
+
+        public GraphSelectedBean(ViewContext context, ExpProtocol protocol, DilutionSummary[] dilutions, int[] cutoffs, int[] dataObjectIds)
+        {
+            _context = context;
+            _dilutionSummaries = dilutions;
+            _cutoffs = cutoffs;
+            _protocol = protocol;
+            _dataObjectIds = dataObjectIds;
+        }
+
+        public DilutionSummary[] getDilutionSummaries()
+        {
+            return _dilutionSummaries;
+        }
+
+        public int[] getCutoffs()
+        {
+            return _cutoffs;
+        }
+
+        public ExpProtocol getProtocol()
+        {
+            return _protocol;
+        }
+
+        public int[] getGraphableObjectIds() throws IOException, SQLException
+        {
+            if (_graphableIds == null)
+            {
+                QueryView dataView = getQueryView();
+                ResultSet rs = null;
+                try
+                {
+                    rs = dataView.getResultset();
+                    Set<Integer> graphableIds = new HashSet<Integer>();
+                    while (rs.next())
+                        graphableIds.add(rs.getInt("ObjectId"));
+                    _graphableIds = new int[graphableIds.size()];
+                    int i = 0;
+                    for (Integer id : graphableIds)
+                        _graphableIds[i++] = id.intValue();
+                }
+                finally
+                {
+                    if (rs != null) try { rs.close(); } catch (SQLException e) {}
+                }
+            }
+            return _graphableIds;
+        }
+
+        public QueryView getQueryView()
+        {
+            if (_queryView == null)
+            {
+                QueryView dataView = AssayService.get().createRunDataView(_context, _protocol);
+                dataView.setQueryViewCustomizer(new NabAssayProvider.NabQueryViewCustomizer(NabRunDataTable.RUN_ID_COLUMN_NAME)
+                {
+                    public void customize(DataView view)
+                    {
+                        super.customize(view);
+                        SimpleFilter filter = new SimpleFilter();
+                        SimpleFilter existingFilter = (SimpleFilter) view.getRenderContext().getBaseFilter();
+                        if (existingFilter != null)
+                            filter.addAllClauses(existingFilter);
+                        List<Integer> objectIds = new ArrayList<Integer>(_dataObjectIds.length);
+                        for (int dataObjectId : _dataObjectIds)
+                            objectIds.add(new Integer(dataObjectId));
+                        filter.addInClause("ObjectId", objectIds);
+                        view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
+                        view.getRenderContext().setBaseFilter(filter);
+                    }
+                });
+                _queryView = dataView;
+            }
+            return _queryView;
+        }
     }
 
     @RequiresPermission(ACL.PERM_READ)
-    public class GraphAction extends SimpleViewAction<RenderAssayForm>
+    public class GraphSelectedAction extends SimpleViewAction<GraphSelectedForm>
     {
-        public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
+        private ExpProtocol _protocol;
+        public ModelAndView getView(GraphSelectedForm form, BindException errors) throws Exception
         {
-            Luc5Assay assay = getCachedAssay(form.getRowId());
-
-            List<Pair<String, DilutionSummary>> summaries = new ArrayList<Pair<String, DilutionSummary>>();
-            for (int i = 0; i < assay.getSummaries().length; i++)
+            _protocol = ExperimentService.get().getExpProtocol(form.getProtocolId());
+            if (_protocol == null)
+                HttpView.throwNotFound();
+            int[] objectIds;
+            if (form.getId() != null)
+                objectIds = form.getId();
+            else
             {
-                DilutionSummary summary = assay.getSummaries()[i];
-
-                String sampleId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
-                String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
-                Double visitId = (Double) summary.getWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
-                String key = getMaterialKey(sampleId, participantId, visitId);
-                summaries.add(new Pair<String, DilutionSummary>(key, summary));
+                List<String> objectIdStrings = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
+                if (objectIdStrings == null || objectIdStrings.size() == 0)
+                    HttpView.throwNotFound("No samples specified.");
+                objectIds = new int[objectIdStrings.size()];
+                int idx = 0;
+                for (String objectIdString : objectIdStrings)
+                    objectIds[idx++] = Integer.parseInt(objectIdString);
             }
-            renderChartPNG(getViewContext().getResponse(), summaries, assay.getCutoffs());
+
+            Set<Integer> cutoffSet = new HashSet<Integer>();
+            List<DilutionSummary> summaries = NabDataHandler.getDilutionSummaries(objectIds);
+            for (DilutionSummary summary :summaries)
+            {
+                for (int cutoff : summary.getAssay().getCutoffs())
+                    cutoffSet.add(cutoff);
+            }
+            JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/multiRunGraph.jsp",
+                    new GraphSelectedBean(getViewContext(), _protocol, summaries.toArray(new DilutionSummary[summaries.size()]), toArray(cutoffSet), objectIds));
+
+            return new VBox(new AssayHeaderView(_protocol, AssayService.get().getProvider(_protocol)), multiGraphView);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            ViewURLHelper assayListURL = AssayService.get().getAssayListURL(getContainer());
+            ViewURLHelper runListURL = AssayService.get().getAssayRunsURL(getContainer(), _protocol);
+            return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
+                    " Runs", runListURL).addChild("Graph Selected Specimens");
+        }
+    }
+
+    private int[] toArray(Collection<Integer> integerList)
+    {
+        int[] arr = new int[integerList.size()];
+        int i = 0;
+        for (Integer cutoff : integerList)
+            arr[i++] = cutoff.intValue();
+        return arr;
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class MultiGraphAction extends SimpleViewAction<GraphSelectedForm>
+    {
+        public ModelAndView getView(GraphSelectedForm form, BindException errors) throws Exception
+        {
+            int[] ids = form.getId();
+            List<DilutionSummary> summaries = NabDataHandler.getDilutionSummaries(ids);
+            Set<Integer> cutoffSet = new HashSet<Integer>();
+            for (DilutionSummary summary :summaries)
+            {
+                for (int cutoff : summary.getAssay().getCutoffs())
+                    cutoffSet.add(cutoff);
+            }
+            renderChartPNG(getViewContext().getResponse(), summaries.toArray(new DilutionSummary[summaries.size()]), toArray(cutoffSet), false);
             return null;
         }
 
@@ -441,8 +596,23 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    protected Luc5Assay _cachedAssay = null;
-    protected DilutionSummary[] _cachedSummaries = null;
+    @RequiresPermission(ACL.PERM_READ)
+    public class GraphAction extends SimpleViewAction<RenderAssayForm>
+    {
+        public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
+        {
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            Luc5Assay assay = NabDataHandler.getAssayResults(run);
+            renderChartPNG(getViewContext().getResponse(), assay, assay.isLockAxes());
+            return null;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            throw new UnsupportedOperationException();
+        }
+    }
+
     private static final Color[] GRAPH_COLORS = {
             ChartColor.BLUE,
             ChartColor.RED,
@@ -451,14 +621,35 @@ public class NabAssayController extends SpringActionController
             ChartColor.MAGENTA
     };
 
-    private void renderChartPNG(HttpServletResponse response, List<Pair<String, DilutionSummary>> dilutionSummaries, int[] cutoffs) throws IOException
+    private void renderChartPNG(HttpServletResponse response, DilutionSummary[] summaries, int[] cutoffs, boolean lockAxes) throws IOException
+    {
+        List<Pair<String, DilutionSummary>> summaryMap = new ArrayList<Pair<String, DilutionSummary>>();
+        for (DilutionSummary summary : summaries)
         {
+            String sampleId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
+            String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
+            Double visitId = (Double) summary.getWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
+            String key = getMaterialKey(sampleId, participantId, visitId);
+            summaryMap.add(new Pair<String, DilutionSummary>(key, summary));
+        }
+        renderChartPNG(response, summaryMap, cutoffs, lockAxes);
+    }
+
+    private void renderChartPNG(HttpServletResponse response, Luc5Assay assay, boolean lockAxes) throws IOException
+    {
+        renderChartPNG(response, assay.getSummaries(), assay.getCutoffs(), lockAxes);
+    }
+
+    private void renderChartPNG(HttpServletResponse response, List<Pair<String, DilutionSummary>> dilutionSummaries, int[] cutoffs, boolean lockAxes) throws IOException
+    {
         XYSeriesCollection curvesDataset = new XYSeriesCollection();
         XYSeriesCollection pointDataset = new XYSeriesCollection();
         JFreeChart chart = ChartFactory.createXYLineChart(null, null, "Percentage", curvesDataset, PlotOrientation.VERTICAL, true, true, false);
         XYPlot plot = chart.getXYPlot();
         plot.setDataset(1, pointDataset);
         plot.getRenderer(0).setStroke(new BasicStroke(1.5f));
+        if (lockAxes)
+            plot.getRangeAxis().setRange(-20, 120);
         XYLineAndShapeRenderer pointRenderer = new XYLineAndShapeRenderer(true, true);
         plot.setRenderer(1, pointRenderer);
         pointRenderer.setStroke(new BasicStroke(

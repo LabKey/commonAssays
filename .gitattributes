@@ -967,6 +967,7 @@ nab/src/org/labkey/nab/RunSettings.java -text
 nab/src/org/labkey/nab/SafeTextConverter.java -text
 nab/src/org/labkey/nab/SampleInfo.java -text
 nab/src/org/labkey/nab/header.jsp -text
+nab/src/org/labkey/nab/legacyGraph.jsp -text
 nab/src/org/labkey/nab/multiRunGraph.jsp -text
 nab/src/org/labkey/nab/publishChooseStudy.jsp -text
 nab/src/org/labkey/nab/publishVerify.jsp -text
