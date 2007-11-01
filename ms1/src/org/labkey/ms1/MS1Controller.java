@@ -167,6 +167,11 @@ public class MS1Controller extends SpringActionController
             if(-1 == form.getRunId())
                 return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
 
+            //ensure that the experiment run is valid and exists within the current container
+            ExpRun run = ExperimentService.get().getExpRun(form.getRunId());
+            if(null == run || !(run.getContainer().equals(getViewContext().getContainer())))
+                throw new NotFoundException("Experiment run " + form.getRunId() + " does not exist in " + getViewContext().getContainer().getPath());
+
             MS1Manager mgr = MS1Manager.get();
 
             //determine if there is peak data available for these features
@@ -236,15 +241,16 @@ public class MS1Controller extends SpringActionController
 
             MS1Manager mgr = MS1Manager.get();
 
-            //get the feature
+            //get the feature and ensure that it is valid and that it's ExpRun is valid
+            //and that it exists within the current container
             Feature feature = mgr.getFeature(form.getFeatureId());
             if(null == feature)
-                return new HtmlView("The Feature Id '" + form.getFeatureId() + "' was not found in the database.");
+                throw new NotFoundException("Feature " + form.getFeatureId() + " does not exist within " + getViewContext().getContainer().getPath());
 
-            //get the experiment run
             ExpRun expRun = feature.getExpRun();
-            if(null == expRun)
-                return new HtmlView("The Experiment run this Feature was not found in the database.");
+            if(null == expRun || !(expRun.getContainer().equals(getViewContext().getContainer()))
+                    || expRun.getRowId() != form.getRunId())
+                throw new NotFoundException("The experiment run " + form.getRunId() + " was not found in " + getViewContext().getContainer().getPath());
 
             //ensure that we have a scanFirst and scanLast value for this feature
             //if we don't, we can't filter the peaks to a reasonable subset
@@ -351,6 +357,14 @@ public class MS1Controller extends SpringActionController
 
             //get the feature
             Feature feature = MS1Manager.get().getFeature(form.getFeatureId());
+            if(null == feature)
+                throw new NotFoundException("Feature " + form.getFeatureId() + " does not exist within " + getViewContext().getContainer().getPath());
+
+            //ensure that the run for this feature exists within the current container
+            //and that the runid parameter matches
+            ExpRun run = feature.getExpRun();
+            if(null == run || run.getRowId() != form.getRunId() || !(run.getContainer().equals(getViewContext().getContainer())))
+                    throw new NotFoundException("Experiment run " + form.getRunId() + " does not exist within " + getViewContext().getContainer().getPath());
 
             //create and initialize a new features view so that we can know which features
             //are immediately before and after the current one
@@ -767,5 +781,5 @@ public class MS1Controller extends SpringActionController
         }
     }
 
-    private Thread _purgeThread = new Thread(new PurgeTask(), "MS1 Purge Task");;
+    private Thread _purgeThread = new Thread(new PurgeTask(), "MS1 Purge Task");
 } //class MS1Controller
