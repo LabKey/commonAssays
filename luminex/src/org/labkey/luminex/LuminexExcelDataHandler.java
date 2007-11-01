@@ -624,7 +624,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                 dataRow.setDescription(value);
                 if (resolver != null)
                 {
-                    ParticipantVisit match = resolver.resolve(value, null, null);
+                    ParticipantVisit match = resolver.resolve(value, null, null, null);
                     dataRow.setPtid(match.getParticipantID());
                     dataRow.setVisitID(match.getVisitID());
                 }

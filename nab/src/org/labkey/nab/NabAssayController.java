@@ -265,6 +265,7 @@ public class NabAssayController extends SpringActionController
                 PropertyDescriptor sampleIdPD = null;
                 PropertyDescriptor visitIdPD = null;
                 PropertyDescriptor participantIdPD = null;
+                PropertyDescriptor datePD = null;
                 for (PropertyDescriptor property : samplePropertyDescriptors)
                 {
                     if (property.getName().equals(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME))
@@ -273,6 +274,8 @@ public class NabAssayController extends SpringActionController
                         participantIdPD = property;
                     else if (property.getName().equals(AbstractAssayProvider.VISITID_PROPERTY_NAME))
                         visitIdPD = property;
+                    else if (property.getName().equals(AbstractAssayProvider.DATE_PROPERTY_NAME))
+                        datePD = property;
                 }
 
                 for (ExpMaterial material : inputs)
@@ -280,11 +283,11 @@ public class NabAssayController extends SpringActionController
                     Map<PropertyDescriptor, Object> sampleProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
                     for (PropertyDescriptor property : _provider.getSampleWellGroupColumns(_protocol))
                     {
-                        if (property != sampleIdPD && property != visitIdPD && property != participantIdPD)
+                        if (property != sampleIdPD && property != visitIdPD && property != participantIdPD && property != datePD)
                             sampleProperties.put(property, material.getProperty(property));
                     }
                     String key = getMaterialKey((String) material.getProperty(sampleIdPD),
-                            (String) material.getProperty(participantIdPD), (Double) material.getProperty(visitIdPD));
+                            (String) material.getProperty(participantIdPD), (Double) material.getProperty(visitIdPD), (Date) material.getProperty(datePD));
                     _sampleProperties.add(new Pair<String, Map<PropertyDescriptor, Object>>(key, sampleProperties));
                 }
             }
@@ -297,11 +300,14 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    protected static String getMaterialKey(String specimenId, String participantId, Double visitId)
+    protected static String getMaterialKey(String specimenId, String participantId, Double visitId, Date date)
     {
         if (specimenId != null)
             return specimenId;
-        return "Ptid " + participantId + ", Vst " + visitId;
+        else if (visitId == null && date != null)
+            return "Ptid " + participantId + ", Date " + date;
+        else
+            return "Ptid " + participantId + ", Vst " + visitId;
     }
 
     public static class HeaderBean
@@ -629,7 +635,8 @@ public class NabAssayController extends SpringActionController
             String sampleId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
             String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
             Double visitId = (Double) summary.getWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
-            String key = getMaterialKey(sampleId, participantId, visitId);
+            Date date = (Date) summary.getWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
+            String key = getMaterialKey(sampleId, participantId, visitId, date);
             summaryMap.add(new Pair<String, DilutionSummary>(key, summary));
         }
         renderChartPNG(response, summaryMap, cutoffs, lockAxes);

@@ -5,6 +5,7 @@ import org.apache.beehive.netui.pageflow.FormData;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.commons.beanutils.ConversionException;
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
@@ -22,10 +23,12 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
@@ -33,8 +36,6 @@ import org.labkey.api.study.assay.AssayPublishService;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.announcements.DiscussionService;
-import org.labkey.api.exp.api.ExpMaterial;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -654,6 +655,7 @@ public class NabController extends ViewController
         if (!targetContainer.hasPermission(getUser(), ACL.PERM_INSERT))
             HttpView.throwUnauthorized();
 
+        boolean dateBased = AssayPublishService.get().getTimepointType(targetContainer) == TimepointType.DATE;
         Set<String> includedSamples = new HashSet<String>();
         for (String sampleId : form.getIncludedSampleIds())
             includedSamples.add(sampleId);
@@ -672,9 +674,22 @@ public class NabController extends ViewController
                     {
                         plates.add(sample.getPlate());
                         String ptid = form.getParticipantIds()[i];
-                        String visitIdString = form.getSequenceNums()[i];
+                        String visitIdString = null;
+                        Double visitId = null;
+                        String dateString = null;
+                        Date date = null;
+                        if (dateBased)
+                        {
+                            dateString = form.getDates()[i];
+                            date = (Date) ConvertUtils.convert(dateString, Date.class);
+                        }
+                        else
+                        {
+                            visitIdString = form.getSequenceNums()[i];
                         // parse the double here: we've already verified that it's convertable in 'validate'.
-                        Double visitId = Double.parseDouble(visitIdString);
+                            visitId = Double.parseDouble(visitIdString);
+                        }
+
                         Map<String, Object> samplePropertyMap = new HashMap<String, Object>();
                         for (String property : sample.getPropertyNames())
                             samplePropertyMap.put(property, sample.getProperty(property));
@@ -682,7 +697,10 @@ public class NabController extends ViewController
                         for (String property : sample.getPlate().getPropertyNames())
                             samplePropertyMap.put(property, sample.getPlate().getProperty(property));
                         samplePropertyMap.put("participantid", ptid);
-                        samplePropertyMap.put("sequencenum", visitId);
+                        if (dateBased)
+                            samplePropertyMap.put("date", date);
+                        else
+                            samplePropertyMap.put("sequencenum", visitId);
                         samplePropertyMap.put("sourceLsid", sample.getLSID());
                         String virusName = (String) samplePropertyMap.get(NabManager.PlateProperty.VirusName.name());
                         String virusId = (String) samplePropertyMap.get(NabManager.PlateProperty.VirusId.name());
@@ -844,11 +862,14 @@ public class NabController extends ViewController
         private String _ptid;
         private String _specimenID;
         private String _visitID;
-        public PublishSampleInfo(String ptid, String sampleId, String sequenceNum)
+        private String _dateString;
+
+        public PublishSampleInfo(String ptid, String sampleId, String sequenceNum, String dateString)
         {
             _visitID = sequenceNum;
             _specimenID = sampleId;
             _ptid = ptid;
+            _dateString = dateString;
         }
 
         public String getParticipantID()
@@ -885,13 +906,34 @@ public class NabController extends ViewController
         {
             throw new UnsupportedOperationException("Not Implemented for PublishSampleInfo");
         }
+
+        public Date getDate()
+        {
+            try
+            {
+                if (null == _dateString)
+                    return null;
+                return (Date) ConvertUtils.convert(_dateString, Date.class);
+            }
+            catch (ConversionException x)
+            {
+                return null;
+            }
+        }
+
+        public String getDateString()
+        {
+            return _dateString;
+        }
     }
+
     public static class PublishForm extends FormData
     {
         private String[] _includedSampleIds;
         private String[] _sequenceNums;
         private String[] _sampleIds;
         private String[] _participantIds;
+        private String[] _dates;
         private int[] _id;
         private boolean _plateIds;
         private String _targetContainerId;
@@ -936,6 +978,17 @@ public class NabController extends ViewController
             _sequenceNums = sequenceNums;
         }
 
+
+        public String[] getDates()
+        {
+            return _dates;
+        }
+
+        public void setDates(String[] dates)
+        {
+            _dates = dates;
+        }
+
         public int[] getId()
         {
             return _id;
@@ -974,7 +1027,7 @@ public class NabController extends ViewController
             for (int index = 0; index < _sampleIds.length; index++)
             {
                 if (_sampleIds[index].equals(sampleId))
-                    return new PublishSampleInfo(_participantIds[index], sampleId, _sequenceNums[index]);
+                    return new PublishSampleInfo(_participantIds[index], sampleId, _sequenceNums[index], _dates[index]);
             }
             return null;
         }
@@ -996,18 +1049,38 @@ public class NabController extends ViewController
                         continue;
                     if (_participantIds[i] == null || _participantIds[i].length() == 0)
                         errors.add("main", new ActionMessage("Error", "Participant ID is required for sample " + _sampleIds[i]));
-                    if (_sequenceNums[i] == null)
-                        errors.add("main", new ActionMessage("Error", "Visit Sequence number is required for sample " + _sampleIds[i]));
+                    if (AssayPublishService.get().getTimepointType(ContainerManager.getForId(getTargetContainerId())) == TimepointType.VISIT)
+                    {
+                        if (_sequenceNums[i] == null)
+                            errors.add("main", new ActionMessage("Error", "Visit Sequence number is required for sample " + _sampleIds[i]));
+                        else
+                        {
+                            try
+                            {
+                                double d = Double.parseDouble(_sequenceNums[i]);
+                            }
+                            catch (NumberFormatException e)
+                            {
+                                errors.add("main", new ActionMessage("Error", "Visit Sequence numbers should be decimal values.  The following is invalid: " + _sequenceNums[i]));
+                            }
+                        }
+                    }
                     else
                     {
-                        try
+                        if (_dates[i] == null)
+                            errors.add("main", new ActionMessage("Error", "Date is required for sample " + _sampleIds[i]));
+                        else
                         {
-                            double d = Double.parseDouble(_sequenceNums[i]);
+                            try
+                            {
+                                Date d = (Date) ConvertUtils.convert(_dates[i], Date.class);
+                            }
+                            catch (ConversionException e)
+                            {
+                                errors.add("main", new ActionMessage("Error", "The following is not a valid date: " + _dates[i]));
+                            }
                         }
-                        catch (NumberFormatException e)
-                        {
-                            errors.add("main", new ActionMessage("Error", "Visit Sequence numbers should be decimal values.  The following is invalid: " + _sequenceNums[i]));
-                        }
+
                     }
                 }
             }
@@ -1084,6 +1157,8 @@ public class NabController extends ViewController
                 return null;
             if (obj instanceof Double|| obj instanceof Float)
                 return _decimalFormat.format(obj);
+            if (obj instanceof Date)
+                return DateUtil.formatDate((Date) obj);
             return obj.toString();
         }
     }

@@ -1,11 +1,10 @@
-<%@ page import="org.labkey.nab.NabController"%>
-<%@ page import="org.labkey.api.study.WellGroup" %>
+<%@ page import="org.labkey.api.study.ParticipantVisit"%>
+<%@ page import="org.labkey.api.study.TimepointType" %>
 <%@ page import="org.labkey.api.study.assay.AssayPublishService" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.study.SpecimenService" %>
-<%@ page import="org.labkey.api.study.ParticipantVisit" %>
+<%@ page import="org.labkey.nab.NabController" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <script type="text/javascript">LABKEY.requiresScript('completion.js');</script>
 <%
@@ -21,7 +20,20 @@ Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All
         <tr>
             <th>Include</th>
             <th>Specimen Id</th>
+<%
+    if (AssayPublishService.get().getTimepointType(bean.getTargetContainer()) == TimepointType.VISIT)
+    {
+%>
             <th>Visit Id</th>
+<%            
+    }
+    else
+    {
+%>
+            <th>Date</th>
+<%
+    }
+%>
             <th>Participant Id</th>
 <%
     for (String property : bean.getSampleProperties())
@@ -36,9 +48,6 @@ Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All
     for (org.labkey.api.study.WellGroup group : bean.getSampleInfoMap().keySet())
     {
         ParticipantVisit sampleInfo = bean.getSampleInfoMap().get(group);
-        String sequenceNumString = null;
-        if (sampleInfo instanceof NabController.PublishSampleInfo)
-            sequenceNumString = ((NabController.PublishSampleInfo) sampleInfo).getVisitIDString();
 
 %>
         <tr>
@@ -49,13 +58,34 @@ Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All
             </td>
             <td><%= h(sampleInfo.getSpecimenID())%></td>
             <td>
+<%
+            if (AssayPublishService.get().getTimepointType(bean.getTargetContainer()) == TimepointType.VISIT)
+            {
+                String sequenceNumString = null;
+                if (sampleInfo instanceof NabController.PublishSampleInfo)
+                    sequenceNumString = ((NabController.PublishSampleInfo) sampleInfo).getVisitIDString();
+%>
                 <input type="text" name="sequenceNums"
                   onKeyDown="return ctrlKeyCheck(event);"
                   onBlur="hideCompletionDiv();"
                   autocomplete="off"
                   value="<%= h(sequenceNumString != null ? sequenceNumString : bean.format(sampleInfo.getVisitID())) %>"
                   onKeyUp="return handleChange(this, event, '<%= bean.getVisitIdCompletionBase() %>');">
-                </td>
+<%
+            }
+            else
+            {
+                String dateString = null;
+                if (sampleInfo instanceof NabController.PublishSampleInfo)
+                    dateString = ((NabController.PublishSampleInfo) sampleInfo).getDateString();
+%>
+            <input type="text" name="dates"
+              value="<%= h(dateString != null ? dateString : bean.format(sampleInfo.getDate())) %>" >
+
+<%
+            }
+%>
+            </td>
             <td>
                 <input type="text" name="participantIds"
                   onKeyDown="return ctrlKeyCheck(event);"

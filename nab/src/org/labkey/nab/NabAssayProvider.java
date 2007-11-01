@@ -2,6 +2,7 @@ package org.labkey.nab;
 
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.TimepointType;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.list.ListDefinition;
@@ -163,6 +164,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         addProperty(sampleWellGroupDomain, SPECIMENID_PROPERTY_NAME, SPECIMENID_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(sampleWellGroupDomain, PARTICIPANTID_PROPERTY_NAME, PARTICIPANTID_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(sampleWellGroupDomain, VISITID_PROPERTY_NAME, VISITID_PROPERTY_CAPTION, PropertyType.DOUBLE);
+        addProperty(sampleWellGroupDomain, DATE_PROPERTY_NAME, DATE_PROPERTY_CAPTION, PropertyType.DATE_TIME);
         addProperty(sampleWellGroupDomain, SAMPLE_DESCRIPTION_PROPERTY_NAME, SAMPLE_DESCRIPTION_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(sampleWellGroupDomain, SAMPLE_INITIAL_DILUTION_PROPERTY_NAME, SAMPLE_INITIAL_DILUTION_PROPERTY_CAPTION, PropertyType.DOUBLE).setRequired(true);
         addProperty(sampleWellGroupDomain, SAMPLE_DILUTION_FACTOR_PROPERTY_NAME, SAMPLE_DILUTION_FACTOR_PROPERTY_CAPTION, PropertyType.DOUBLE).setRequired(true);
@@ -206,10 +208,15 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                 NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", PARTICIPANTID_PROPERTY_NAME));
     }
 
-    public Set<FieldKey> getVisitIDDataKeys()
+    public Set<FieldKey> getVisitIDDataKeys(Container container)
     {
-        return Collections.singleton(FieldKey.fromParts("Properties",
-                NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", VISITID_PROPERTY_NAME));
+        if (AssayPublishService.get().getTimepointType(container) == TimepointType.VISIT)
+            return Collections.singleton(FieldKey.fromParts("Properties",
+                    NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", VISITID_PROPERTY_NAME));
+        else
+            return Collections.singleton(FieldKey.fromParts("Properties",
+                    NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", DATE_PROPERTY_NAME));
+
     }
 
     public FieldKey getRunIdFieldKeyFromDataRow()
@@ -282,7 +289,8 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                     for (PropertyDescriptor pd : samplePDs)
                     {
                         if (!PARTICIPANTID_PROPERTY_NAME.equals(pd.getName()) &&
-                                !VISITID_PROPERTY_NAME.equals(pd.getName()))
+                                !VISITID_PROPERTY_NAME.equals(pd.getName()) &&
+                                !DATE_PROPERTY_NAME.equals(pd.getName()))
                         {
                             addProperty(pd, material.getProperty(pd), dataMap, typeList);
                         }
@@ -319,6 +327,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                 AssayPublishKey publishKey = dataIdToPublishKey.get(row.getObjectId());
                 dataMap.put("ParticipantID", publishKey.getParticipantId());
                 dataMap.put("SequenceNum", publishKey.getVisitId());
+                dataMap.put("Date", publishKey.getDate());
                 dataMap.put("SourceLSID", run.getLSID());
                 dataMap.put(getDataRowIdFieldKey().toString(), publishKey.getDataId());
                 addProperty(study, "Run Name", run.getName(), dataMap, typeList);
@@ -357,7 +366,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
     
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
-        return Arrays.asList(new ParticipantVisitNoOpResolverType(), new SpecimenIDLookupResolverType(), new ThawListResolverType());
+        return Arrays.asList(new ParticipantVisitNoOpResolverType(), new SpecimenIDLookupResolverType(), new ThawListResolverType(), new ParticipantVisitDateResolverType());
     }
 
     public static class NabQueryViewCustomizer implements QueryViewCustomizer

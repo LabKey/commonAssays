@@ -1,31 +1,35 @@
 package org.labkey.luminex;
 
-import org.labkey.api.study.assay.*;
-import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.exp.property.Domain;
-import org.labkey.api.exp.property.PropertyService;
-import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.property.Lookup;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.*;
-import org.labkey.api.exp.list.ListService;
-import org.labkey.api.exp.list.ListDefinition;
-import org.labkey.api.exp.list.ListItem;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.data.*;
-import org.labkey.api.query.QuerySchema;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.list.ListDefinition;
+import org.labkey.api.exp.list.ListItem;
+import org.labkey.api.exp.list.ListService;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.property.Lookup;
+import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.view.HtmlView;
+import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
+import org.labkey.api.study.TimepointType;
+import org.labkey.api.study.actions.AssayRunUploadForm;
+import org.labkey.api.study.assay.*;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewURLHelper;
 
 import javax.servlet.ServletException;
-import java.util.*;
-import java.sql.SQLException;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * User: jeckels
@@ -214,9 +218,12 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return Collections.singleton(FieldKey.fromParts("ParticipantID"));
     }
 
-    public Set<FieldKey> getVisitIDDataKeys()
+    public Set<FieldKey> getVisitIDDataKeys(Container container)
     {
-        return Collections.singleton(FieldKey.fromParts("VisitID"));
+        if (AssayPublishService.get().getTimepointType(container) == TimepointType.VISIT)
+            return Collections.singleton(FieldKey.fromParts("VisitID"));
+        else
+            return Collections.singleton(FieldKey.fromParts("Date"));
     }
 
     public FieldKey getDataRowIdFieldKey()
