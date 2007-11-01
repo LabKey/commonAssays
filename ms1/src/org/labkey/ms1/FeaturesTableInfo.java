@@ -109,8 +109,8 @@ public class FeaturesTableInfo extends FilteredTable
         //current container. The FilteredTable class supports this automatically only if
         //the underlying table contains a column named "Container," which our Features table
         //does not, so we need to use a SQL fragment here that uses a sub-select.
-        SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=?)",
-                                            container.getId(), true);
+        SQLFragment sf = new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=? AND f.Deleted=?)",
+                                            container.getId(), true, false);
         addCondition(sf, "FileId");
 
         //only display a subset of the columns by by default

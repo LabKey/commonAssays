@@ -69,16 +69,16 @@ public class PeaksTableInfo extends FilteredTable
         //current container. The FilteredTable class supports this automatically only if
         //the underlying table contains a column named "Container," which our Peaks table
         //does not, so we need to use a SQL fragment here that uses a sub-select.
-        SQLFragment sf = new SQLFragment("ScanId IN (SELECT ScanId FROM ms1.Scans as s INNER JOIN ms1.Files AS f ON (s.FileId=f.FileId) INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=?)",
-                                            container.getId(), true);
+        SQLFragment sf = new SQLFragment("ScanId IN (SELECT ScanId FROM ms1.Scans as s INNER JOIN ms1.Files AS f ON (s.FileId=f.FileId) INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=? AND f.Deleted=?)",
+                                            container.getId(), true, false);
         addCondition(sf, "ScanId");
 
     }
 
     public void addScanRangeCondition(int runId, int scanFirst, int scanLast, Container container)
     {
-        SQLFragment sf = new SQLFragment("ScanId IN (SELECT ScanId FROM ms1.Scans as s INNER JOIN ms1.Files AS f ON (s.FileId=f.FileId) INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=? AND d.RunId=? AND s.Scan BETWEEN ? AND ?)",
-                                            container.getId(), true, runId, scanFirst, scanLast);
+        SQLFragment sf = new SQLFragment("ScanId IN (SELECT ScanId FROM ms1.Scans as s INNER JOIN ms1.Files AS f ON (s.FileId=f.FileId) INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container=? AND f.Imported=? AND f.Deleted=? AND d.RunId=? AND s.Scan BETWEEN ? AND ?)",
+                                            container.getId(), true, false, runId, scanFirst, scanLast);
 
         getFilter().deleteConditions("ScanId");
         addCondition(sf, "ScanId");

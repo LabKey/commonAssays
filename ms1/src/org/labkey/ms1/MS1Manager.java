@@ -1,16 +1,13 @@
 package org.labkey.ms1;
 
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.SchemaTableInfo;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.security.User;
+import org.labkey.api.data.Table;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.util.ResultSetUtil;
 
-import java.sql.SQLException;
-import java.sql.ResultSet;
 import java.io.File;
+import java.sql.SQLException;
 
 public class MS1Manager
 {
@@ -56,54 +53,6 @@ public class MS1Manager
         return getSchema().getTable(tablename);
     }
 
-    /**
-     * Returns the corresponding ScanId for a given Experiment runId and scan number.
-     * @param runId The experiment run id
-     * @param scan  The scan number
-     * @return The corresponding ScanId from the ms1.Scans table, or null if no match is found
-     * @throws SQLException Thrown if there is a database exception
-     */
-    public Integer getScanIdFromRunScan(int runId, int scan) throws SQLException
-    {
-        StringBuilder sql = new StringBuilder("SELECT ScanId FROM ").append(getSQLTableName(TABLE_SCANS));
-        sql.append(" AS s INNER JOIN ");
-        sql.append(getSQLTableName(TABLE_FILES));
-        sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data as d ON (f.ExpDataFileId=d.RowId)");
-        sql.append(" WHERE d.RunId=").append(runId);
-        sql.append(" AND s.Scan=").append(scan);
-        
-        return Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
-    }
-
-    /**
-     * Similar to getScanIdFromRunScan, but can get multiple scanIds for multiple scan numbers.
-     * @param runId The experiment run id
-     * @param scans The scan numbers
-     * @return The corresponding scan ids
-     * @throws SQLException thrown if there is a database exception
-     */
-    public Integer[] getScanIdsFromRunScans(int runId, Integer[] scans) throws SQLException
-    {
-        StringBuilder sql = new StringBuilder("SELECT ScanId FROM ").append(getSQLTableName(TABLE_SCANS));
-        sql.append(" AS s INNER JOIN ");
-        sql.append(getSQLTableName(TABLE_FILES));
-        sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data as d ON (f.ExpDataFileId=d.RowId)");
-        sql.append(" WHERE d.RunId=").append(runId);
-        sql.append(" AND s.Scan IN (");
-        for(int idx = 0; idx < scans.length; ++idx)
-        {
-            if(scans[idx] == null)
-                continue;
-
-            if(idx > 0)
-                sql.append(",");
-            sql.append(scans[idx].intValue());
-        }
-        sql.append(") ORDER BY ScanId");
-
-        return Table.executeArray(getSchema(), sql.toString(), null, Integer.class);
-    }
-
     public Integer getRunIdFromFeature(int featureId) throws SQLException
     {
         StringBuilder sql = new StringBuilder("SELECT RunId FROM exp.Data AS d INNER JOIN ");
@@ -117,14 +66,7 @@ public class MS1Manager
 
     public boolean isPeakDataAvailable(int runId) throws SQLException
     {
-        StringBuilder sql = new StringBuilder("SELECT count(*) FROM ");
-        sql.append(getSQLTableName(TABLE_FILES));
-        sql.append(" AS f INNER JOIN exp.Data AS d ON (f.ExpDataFileId=d.RowId)");
-        sql.append(" WHERE d.RunId=").append(runId);
-        sql.append(" AND f.Type=").append(FILETYPE_PEAKS);
-
-        Integer num = Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
-        return (num != null && num.intValue() > 0);
+        return (null != getFileIdForRun(runId, FILETYPE_PEAKS));
     }
 
     public Integer getFileIdForRun(int runId, int fileType) throws SQLException
@@ -132,19 +74,9 @@ public class MS1Manager
         StringBuilder sql = new StringBuilder("SELECT FileId FROM ");
         sql.append(getSQLTableName(TABLE_FILES));
         sql.append(" AS f INNER JOIN exp.Data AS d ON (f.ExpDataFileId=d.RowId)");
-        sql.append(" WHERE d.RunId=").append(runId);
-        sql.append(" AND f.Type=").append(fileType);
+        sql.append(" WHERE d.RunId=? AND f.Type=? AND f.Imported=? AND f.Deleted=?");
 
-        return Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
-    }
-
-    public Integer getFileIdForScan(int scanId) throws SQLException
-    {
-        StringBuilder sql = new StringBuilder("SELECT FileId FROM ");
-        sql.append(getSQLTableName(TABLE_SCANS));
-        sql.append(" WHERE ScanId=").append(scanId);
-
-        return Table.executeSingleton(getSchema(), sql.toString(), null, Integer.class);
+        return Table.executeSingleton(getSchema(), sql.toString(), new Object[]{runId, fileType, true, false}, Integer.class);
     }
 
     public Feature getFeature(int featureId) throws SQLException
@@ -179,9 +111,9 @@ public class MS1Manager
         sql.append(getSQLTableName(TABLE_FILES));
         sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=");
         sql.append(FILETYPE_PEAKS);
-        sql.append(" AND s.Scan=? AND (p.MZ BETWEEN ? AND ?)");
+        sql.append(" AND s.Scan=? AND (p.MZ BETWEEN ? AND ?) AND f.Imported=? AND f.Deleted=?");
 
-        return Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, scan, mzLow, mzHigh});
+        return Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, scan, mzLow, mzHigh, true, false});
     }
 
     public Table.TableResultSet getPeakData(int runId, double mzLow, double mzHigh, int scanFirst, int scanLast) throws SQLException
@@ -200,28 +132,11 @@ public class MS1Manager
         sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=");
         sql.append(FILETYPE_PEAKS);
         sql.append(" AND (p.MZ BETWEEN ? AND ?)");
-        sql.append(" AND (s.Scan BETWEEN ? AND ?)");
+        sql.append(" AND (s.Scan BETWEEN ? AND ?) AND f.Imported=? AND f.Deleted=?");
         if(null != orderBy)
             sql.append(" ORDER BY ").append(orderBy);
 
-        return Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, mzLow, mzHigh, scanFirst, scanLast});
-    }
-
-    public Table.TableResultSet getScanList(int runId, double mzLow, double mzHigh, int scanFirst, int scanLast) throws SQLException
-    {
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT s.Scan FROM ");
-        sql.append(getSQLTableName(TABLE_PEAKS));
-        sql.append(" AS p INNER JOIN ");
-        sql.append(getSQLTableName(TABLE_SCANS));
-        sql.append(" AS s ON (s.ScanId=p.ScanId) INNER JOIN ");
-        sql.append(getSQLTableName(TABLE_FILES));
-        sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=");
-        sql.append(FILETYPE_PEAKS);
-        sql.append(" AND (p.MZ BETWEEN ? AND ?)");
-        sql.append(" AND (s.Scan BETWEEN ? AND ?)");
-        sql.append(" ORDER BY s.Scan");
-
-        return Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, mzLow, mzHigh, scanFirst, scanLast});
+        return Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, mzLow, mzHigh, scanFirst, scanLast, true, false});
     }
 
     public Integer[] getPrevNextScan(int runId, double mzLow, double mzHigh, int scanFirst, int scanLast, int scanCur) throws SQLException
@@ -235,15 +150,15 @@ public class MS1Manager
         sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=");
         sql.append(FILETYPE_PEAKS);
         sql.append(" AND (p.MZ BETWEEN ? AND ?)");
-        sql.append(" AND (s.Scan BETWEEN ? AND ?)");
+        sql.append(" AND (s.Scan BETWEEN ? AND ?) AND f.Imported=? AND f.Deleted=?");
 
         //find the max of those less than cur
         String sqlPrev = "SELECT MAX(s.Scan)" + sql.toString() + " AND s.Scan < ?";
-        Integer prevScan = Table.executeSingleton(getSchema(), sqlPrev, new Object[]{runId, mzLow, mzHigh, scanFirst, scanLast, scanCur}, Integer.class);
+        Integer prevScan = Table.executeSingleton(getSchema(), sqlPrev, new Object[]{runId, mzLow, mzHigh, scanFirst, scanLast, true, false, scanCur}, Integer.class);
 
         //find the min of those greater than cur
         String sqlNext = "SELECT MIN(s.Scan)" + sql.toString() + " AND s.Scan > ?";
-        Integer nextScan = Table.executeSingleton(getSchema(), sqlNext, new Object[]{runId, mzLow, mzHigh, scanFirst, scanLast, scanCur}, Integer.class);
+        Integer nextScan = Table.executeSingleton(getSchema(), sqlNext, new Object[]{runId, mzLow, mzHigh, scanFirst, scanLast, true, false, scanCur}, Integer.class);
 
         return new Integer[]{prevScan, nextScan};
     }
@@ -259,138 +174,179 @@ public class MS1Manager
         sql.append(getSQLTableName(TABLE_FILES));
         sql.append(" AS f ON (s.FileId=f.FileId) INNER JOIN exp.Data AS d ON (f.expDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=");
         sql.append(FILETYPE_PEAKS);
-        sql.append(" AND (s.Scan BETWEEN ? AND ?)");
+        sql.append(" AND (s.Scan BETWEEN ? AND ?) AND f.Imported=? AND f.Deleted=?");
 
-        MinMaxScanInfo[] result = Table.executeQuery(getSchema(), sql.toString(), new Integer[]{runId, scanFirst, scanLast}, MinMaxScanInfo.class);
+        MinMaxScanInfo[] result = Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, scanFirst, scanLast, true, false}, MinMaxScanInfo.class);
         return null == result || 0 == result.length ? null : result[0];
     }
 
-    public void deleteFeaturesData(ExpData expData, User user) throws SQLException
+    public void deleteFeaturesData(ExpData expData) throws SQLException
     {
-        int idExpData = expData.getRowId();
+        Table.execute(getSchema(), "UPDATE ms1.Files SET Deleted=? WHERE ExpDataFileId=? AND Type=?",
+                    new Object[]{true,expData.getRowId(),FILETYPE_FEATURES});
+    }
 
+    public void purgeFeaturesData(int fileId) throws SQLException
+    {
         StringBuilder sql = new StringBuilder("DELETE FROM ");
         sql.append(getSQLTableName(TABLE_FEATURES));
-        sql.append(" WHERE FileId IN (");
-        sql.append(genFileListSQL(idExpData));
-        sql.append(");");
+        sql.append(" WHERE FileId=");
+        sql.append(fileId);
+        sql.append(";");
 
         sql.append("DELETE FROM ");
         sql.append(getSQLTableName(TABLE_SOFTWARE_PARAMS));
         sql.append(" WHERE SoftwareId IN (");
-        sql.append(genSoftwareListSQL(idExpData));
+        sql.append(genSoftwareListSQL(fileId));
         sql.append(");");
 
         sql.append("DELETE FROM ");
         sql.append(getSQLTableName(TABLE_SOFTWARE));
-        sql.append(" WHERE FileId IN (");
-        sql.append(genFileListSQL(idExpData));
-        sql.append(");");
+        sql.append(" WHERE FileId=");
+        sql.append(fileId);
+        sql.append(";");
 
         sql.append("DELETE FROM ");
         sql.append(getSQLTableName(TABLE_FILES));
-        sql.append(" WHERE ExpDataFileId=");
-        sql.append(String.valueOf(idExpData));
+        sql.append(" WHERE FileId=");
+        sql.append(fileId);
+        sql.append(";");
 
         Table.execute(getSchema(), sql.toString(), null);
     }
 
-    public void moveFileData(int oldExpDataFileID, int newExpDataFileID, User user) throws SQLException
+    public void moveFileData(int oldExpDataFileID, int newExpDataFileID) throws SQLException
     {
         Integer[] ids = {newExpDataFileID, oldExpDataFileID};
         Table.execute(getSchema(), "UPDATE " + SCHEMA_NAME + "." + TABLE_FILES + " SET ExpDataFileID=? WHERE ExpDataFileID=?", ids);
     }
 
-    public void deletePeakData(int expDataFileID, User user) throws SQLException
+    public void deletePeakData(int expDataFileId) throws SQLException
+    {
+        Table.execute(getSchema(), "UPDATE ms1.Files SET Deleted=? WHERE ExpDataFileId=? AND Type=?", 
+                        new Object[]{true, expDataFileId, FILETYPE_PEAKS});
+    }
+
+    public void purgePeakData(int fileId) throws SQLException
     {
         StringBuilder sql = new StringBuilder("DELETE FROM ");
         sql.append(getSQLTableName(TABLE_PEAKS_TO_FAMILIES));
         sql.append(" WHERE PeakId IN (");
-        sql.append(genPeakListSQL(expDataFileID));
+        sql.append(genPeakListSQL(fileId));
         sql.append(");");
 
         sql.append("DELETE FROM ");
         sql.append(getSQLTableName(TABLE_PEAK_FAMILIES));
         sql.append(" WHERE ScanId IN (");
-        sql.append(genScanListSQL(expDataFileID));
+        sql.append(genScanListSQL(fileId));
         sql.append(");");
 
         sql.append("DELETE FROM ");
         sql.append(getSQLTableName(TABLE_PEAKS));
         sql.append(" WHERE ScanId IN (");
-        sql.append(genScanListSQL(expDataFileID));
+        sql.append(genScanListSQL(fileId));
         sql.append(");");
 
         sql.append("DELETE FROM ");
         sql.append(getSQLTableName(TABLE_CALIBRATION_PARAMS));
         sql.append(" WHERE ScanId IN (");
-        sql.append(genScanListSQL(expDataFileID));
+        sql.append(genScanListSQL(fileId));
         sql.append(");");
 
         sql.append("DELETE FROM ");
         sql.append(getSQLTableName(TABLE_SCANS));
-        sql.append(" WHERE FileId IN (");
-        sql.append(genFileListSQL(expDataFileID));
-        sql.append(");");
+        sql.append(" WHERE FileId=");
+        sql.append(fileId);
+        sql.append(";");
 
         sql.append("DELETE FROM ");
         sql.append(getSQLTableName(TABLE_SOFTWARE_PARAMS));
         sql.append(" WHERE SoftwareId IN (");
-        sql.append(genSoftwareListSQL(expDataFileID));
+        sql.append(genSoftwareListSQL(fileId));
         sql.append(");");
 
         sql.append("DELETE FROM ");
         sql.append(getSQLTableName(TABLE_SOFTWARE));
-        sql.append(" WHERE FileId IN (");
-        sql.append(genFileListSQL(expDataFileID));
-        sql.append(");");
+        sql.append(" WHERE FileId=");
+        sql.append(fileId);
+        sql.append(";");
 
         sql.append("DELETE FROM ");
         sql.append(getSQLTableName(TABLE_FILES));
-        sql.append(" WHERE ExpDataFileID=");
-        sql.append(String.valueOf(expDataFileID));
+        sql.append(" WHERE FileId=");
+        sql.append(String.valueOf(fileId));
         sql.append(";");
 
         Table.execute(getSchema(), sql.toString(), null);
     } //deletePeakData
 
-    protected String genPeakListSQL(int expDataFileID)
+    protected String genPeakListSQL(int fileId)
     {
         StringBuilder sql = new StringBuilder("SELECT PeakId FROM ");
         sql.append(getSQLTableName(TABLE_PEAKS));
         sql.append(" WHERE ScanId IN (");
-        sql.append(genScanListSQL(expDataFileID));
+        sql.append(genScanListSQL(fileId));
         sql.append(")");
         return sql.toString();
     }
 
-    protected String genScanListSQL(int expDataFileID)
+    protected String genScanListSQL(int fileId)
     {
         StringBuilder sql = new StringBuilder("SELECT ScanId FROM ");
         sql.append(getSQLTableName(TABLE_SCANS));
-        sql.append(" WHERE FileId IN (");
-        sql.append(genFileListSQL(expDataFileID));
-        sql.append(")");
+        sql.append(" WHERE FileId=");
+        sql.append(fileId);
         return sql.toString();
     }
 
-    protected String genFileListSQL(int expDataFileID)
-    {
-        StringBuilder sql = new StringBuilder("SELECT FileId FROM ");
-        sql.append(getSQLTableName(TABLE_FILES));
-        sql.append(" WHERE ExpDataFileId=");
-        sql.append(String.valueOf(expDataFileID));
-        return sql.toString();
-    }
-
-    protected String genSoftwareListSQL(int expDataFileID)
+    protected String genSoftwareListSQL(int fileId)
     {
         StringBuilder sql = new StringBuilder("SELECT SoftwareId FROM ");
         sql.append(getSQLTableName(TABLE_SOFTWARE));
-        sql.append(" WHERE FileId IN (");
-        sql.append(genFileListSQL(expDataFileID));
-        sql.append(")");
+        sql.append(" WHERE FileId=");
+        sql.append(fileId);
         return sql.toString();
+    }
+
+    public int getDeletedFileCount() throws SQLException
+    {
+        Integer ret = Table.executeSingleton(getSchema(), "SELECT COUNT(FileId) FROM ms1.Files WHERE Deleted=?", new Object[]{true}, Integer.class);
+        if(null != ret)
+            return ret.intValue();
+        else
+            return 0;
+    }
+
+    /**
+     * Returns the next file id to purge from the ms1 schema
+     * @return The next file id, or null if there are no more to purge
+     * @throws SQLException thrown if there is a database error
+     */
+    public Integer getNextPurgeFile() throws SQLException
+    {
+        return Table.executeSingleton(getSchema(), "SELECT MIN(FileId) FROM ms1.Files WHERE Deleted=?", new Object[]{true}, Integer.class);
+    }
+
+    /**
+     * Purges a the data for a given file id
+     * @param fileId The id of the file to purge
+     * @throws SQLException thrown if something goes wrong
+     */
+    public void purgeFile(int fileId) throws SQLException
+    {
+        Integer fileType = Table.executeSingleton(getSchema(), "SELECT Type FROM ms1.Files WHERE FileId=?", new Object[]{fileId}, Integer.class);
+        if(null == fileType)
+            return;
+        if(fileType.intValue() == FILETYPE_FEATURES)
+            purgeFeaturesData(fileId);
+        else if(fileType.intValue() == FILETYPE_PEAKS)
+            purgePeakData(fileId);
+    }
+
+    public void deleteFailedImports(int expDataFileId, int fileType) throws SQLException
+    {
+        Table.execute(getSchema(), "UPDATE ms1.Files SET Deleted=? WHERE ExpDataFileId=? AND Type=? AND Imported=?",
+                        new Object[]{true,expDataFileId,fileType,false});
     }
 
     /**
@@ -415,10 +371,10 @@ public class MS1Manager
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS existing FROM exp.Data as d INNER JOIN ");
         sql.append(getSQLTableName(TABLE_FILES));
         sql.append(" as f");
-        sql.append(" ON (d.RowId = f.ExpDataFileId) WHERE DataFileUrl=? AND Container=? AND f.Imported=?");
+        sql.append(" ON (d.RowId = f.ExpDataFileId) WHERE DataFileUrl=? AND Container=? AND f.Imported=? AND f.Deleted=?");
 
         Integer count = Table.executeSingleton(getSchema(), sql.toString(),
-                                                new Object[]{dataFile.toURI().toString(), data.getContainer().getId(), true},
+                                                new Object[]{dataFile.toURI().toString(), data.getContainer().getId(), true, false},
                                                 Integer.class);
         return (null != count && count.intValue() != 0);
     } //isAlreadyImported()

@@ -4,16 +4,18 @@ import org.apache.log4j.Logger;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.query.QueryView;
+import org.labkey.ms1.maintenance.PurgeTask;
 import org.labkey.ms1.pipeline.MSInspectImportPipelineJob;
+import org.labkey.ms1.view.AdminViewContext;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -410,6 +412,28 @@ public class MS1Controller extends SpringActionController
         }
     }
 
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class ShowAdminAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            AdminViewContext ctx = new AdminViewContext(MS1Manager.get().getDeletedFileCount());
+            if(getProperty("purgeNow", "false").equals("true") && ctx.getNumDeleted() > 0)
+            {
+                if(!(_purgeThread.isAlive()))
+                    _purgeThread.run();
+                
+                ctx.setPurgeRunning(true);
+            }
+            return new JspView<AdminViewContext>("/org/labkey/ms1/view/AdminView.jsp", ctx);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("MS1 Admin");
+        }
+    }
+
     /**
      * Action to import an msInspect TSV features file
      */
@@ -736,4 +760,6 @@ public class MS1Controller extends SpringActionController
             _chartHeight = chartHeight;
         }
     }
+
+    private Thread _purgeThread = new Thread(new PurgeTask(), "MS1 Purge Task");;
 } //class MS1Controller

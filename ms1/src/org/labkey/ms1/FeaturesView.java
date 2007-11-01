@@ -122,6 +122,7 @@ public class FeaturesView extends QueryView
     protected DataView createDataView()
     {
         DataView view = super.createDataView();
+        view.getRenderContext().setBaseSort(new Sort("Scan"));
         DataRegion region = view.getDataRegion();
 
         //Since this code calls getDataRegion() on the newly created view, you'd *think* that

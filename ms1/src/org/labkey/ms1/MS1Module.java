@@ -1,19 +1,22 @@
 package org.labkey.ms1;
 
-import org.labkey.api.module.DefaultModule;
-import org.labkey.api.module.ModuleContext;
-import org.labkey.api.data.*;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.exp.ExperimentDataHandler;
+import org.apache.log4j.Logger;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.ExperimentRunFilter;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.security.User;
-import org.labkey.api.view.*;
-import org.labkey.api.query.QueryView;
+import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.ModuleContext;
 import org.labkey.api.ms1.MS1Service;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.query.QueryView;
+import org.labkey.api.security.User;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.SystemMaintenance;
+import org.labkey.api.view.*;
+import org.labkey.ms1.maintenance.PurgeTask;
 import org.labkey.ms1.pipeline.MSInspectPipelineProvider;
-import org.apache.log4j.Logger;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Set;
@@ -34,7 +37,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
 
     public MS1Module()
     {
-        super(NAME, 2.24, "/org/labkey/ms1", true,
+        super(NAME, 2.25, "/org/labkey/ms1", true,
                 new WebPartFactory(WEBPART_MS1_RUNS)
                 {
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
@@ -54,6 +57,9 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
         MS1Schema.register();
 
         MS1Service.register(new MS1ServiceImpl());
+        
+        //add the MS1 purge task to the list of system maintenance tasks
+        SystemMaintenance.addTask(new PurgeTask());
     }
 
     public void containerCreated(Container c)

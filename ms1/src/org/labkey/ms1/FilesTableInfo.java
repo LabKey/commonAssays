@@ -38,8 +38,8 @@ public class FilesTableInfo extends FilteredTable
         //current container. The FilteredTable class supports this automatically only if
         //the underlying table contains a column named "Container," which our Files table
         //does not, so we need to use a SQL fragment here that uses a sub-select.
-        SQLFragment sf = new SQLFragment("Imported=? AND ExpDataFileId IN (SELECT RowId FROM Exp.Data WHERE Container=?)",
-                                            true, container.getId());
+        SQLFragment sf = new SQLFragment("Imported=? AND Deleted=? AND ExpDataFileId IN (SELECT RowId FROM Exp.Data WHERE Container=?)",
+                                            true, false, container.getId());
         addCondition(sf, "FileId");
 
     }

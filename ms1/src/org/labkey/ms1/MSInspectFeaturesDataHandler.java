@@ -576,7 +576,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         //so don't use a transaction here because it's already transacted in the caller.
         try
         {
-            MS1Manager.get().deleteFeaturesData(data, user);
+            MS1Manager.get().deleteFeaturesData(data);
         }
         catch(SQLException e)
         {
@@ -603,7 +603,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         //update the database records to reflect the new data file row id
         try
         {
-            MS1Manager.get().moveFileData(oldDataRowId, newData.getRowId(), user);
+            MS1Manager.get().moveFileData(oldDataRowId, newData.getRowId());
         }
         catch(SQLException e)
         {

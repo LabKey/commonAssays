@@ -7,24 +7,17 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.DbScope;
 import org.labkey.api.security.User;
 import org.labkey.api.util.URLHelper;
-import org.labkey.common.tools.SimpleXMLStreamReader;
 import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.sql.SQLException;
 
 /**
@@ -51,7 +44,14 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
                 log.info("The file " + dataFile.toURI() + " has already been imported for this experiment into this container.");
                 return;
             }
-            
+
+            //because peak files can be huge, we do not load them under a transaction, which would escallate to a table lock
+            //however, this also means that if the server dies during an import, we could have half-imported data
+            //sitting in the database for this same experiment data file id.
+            //this method will mark those for deletion (see PurgeTask)
+            //note that this assumes the pipeline will never allow two user to load the same file at the same time
+            MS1Manager.get().deleteFailedImports(data.getRowId(), MS1Manager.FILETYPE_PEAKS);
+
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setNamespaceAware(false);
             factory.setValidating(false);
@@ -102,7 +102,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         int expDataFileID = data.getRowId();
         try
         {
-            MS1Manager.get().deletePeakData(data.getRowId(), user);
+            MS1Manager.get().deletePeakData(data.getRowId());
         }
         catch(SQLException e)
         {
@@ -118,7 +118,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
 
         try
         {
-            MS1Manager.get().moveFileData(oldDataRowID, newData.getRowId(), user);
+            MS1Manager.get().moveFileData(oldDataRowID, newData.getRowId());
         }
         catch(SQLException e)
         {
