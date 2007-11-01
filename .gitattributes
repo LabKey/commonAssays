@@ -514,6 +514,7 @@ ms1/src/org/labkey/ms1/pipeline/templates/msInspectFeatureFinding.xml -text
 ms1/src/org/labkey/ms1/softwareView.jsp -text
 ms1/src/org/labkey/ms1/view/AdminView.jsp -text
 ms1/src/org/labkey/ms1/view/AdminViewContext.java -text
+ms1/src/org/labkey/ms1/view/PeakWarnView.jsp -text
 ms2/gwtsrc/MS2GWT.iml -text
 ms2/gwtsrc/org/labkey/ms2/RunComparator.gwt.xml -text
 ms2/gwtsrc/org/labkey/ms2/client/CompareResult.java -text

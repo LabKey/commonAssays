@@ -170,11 +170,12 @@ public class MS1Controller extends SpringActionController
             MS1Manager mgr = MS1Manager.get();
 
             //determine if there is peak data available for these features
-            boolean peaksAvailable = mgr.isPeakDataAvailable(form.getRunId());
+            MS1Manager.PeakAvailability peakAvail = mgr.isPeakDataAvailable(form.getRunId());
 
             //create the features view
             FeaturesView featuresView = new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                                            form.getRunId(), peaksAvailable, 
+                                                            form.getRunId(),
+                                                            (peakAvail == MS1Manager.PeakAvailability.Available),
                                                             isExportRequest(form.getExport()));
 
             //if there is an export request, export and return
@@ -182,7 +183,7 @@ public class MS1Controller extends SpringActionController
                 return exportQueryView(featuresView, form.getExport());
 
             //get the corresponding file Id and initialize a software view if there is software info
-            JspView softwareView = null;
+            JspView<Software[]> softwareView = null;
             Integer fileId = mgr.getFileIdForRun(form.getRunId(), MS1Manager.FILETYPE_FEATURES);
             if(null != fileId)
             {
@@ -194,11 +195,16 @@ public class MS1Controller extends SpringActionController
                 }
             }
 
+            //if peak data is partially available, warn the user
+            WebPartView topView = peakAvail == MS1Manager.PeakAvailability.PartiallyAvailable ?
+                                    new VBox(new JspView("/org/labkey/ms1/view/PeakWarnView.jsp"), softwareView) :
+                                    softwareView;
+
             //save the form so that we have access to it in the appendNavTrail method
             _form = form;
 
             if(null != softwareView)
-                return new VBox(softwareView, featuresView);
+                return new VBox(topView, featuresView);
             else
                 return featuresView;
         }

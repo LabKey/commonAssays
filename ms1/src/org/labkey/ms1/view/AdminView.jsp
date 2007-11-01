@@ -14,7 +14,7 @@
     </tr>
 </table>
 
-<% if(ctx.getNumDeleted() > 0 && (!ctx.isPurgeRunning())) { %>
+<% if(ctx.getNumDeleted() > 0 && (!(ctx.isPurgeRunning()))) { %>
 <p>Data marked for deletion will be automatically purged during the scheduled system maintenance process,
 but you can manually start a purge now by clicking the button below.
 </p>

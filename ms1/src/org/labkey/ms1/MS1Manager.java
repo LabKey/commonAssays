@@ -8,6 +8,7 @@ import org.labkey.api.exp.api.ExpData;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.Map;
 
 public class MS1Manager
 {
@@ -64,9 +65,19 @@ public class MS1Manager
         return Table.executeSingleton(getSchema(), sql.toString(), new Object[]{featureId}, Integer.class);
     }
 
-    public boolean isPeakDataAvailable(int runId) throws SQLException
+    public enum PeakAvailability {Available, PartiallyAvailable, NotAvailable}
+
+    public PeakAvailability isPeakDataAvailable(int runId) throws SQLException
     {
-        return (null != getFileIdForRun(runId, FILETYPE_PEAKS));
+        String sql = "Select FileId, Imported FROM ms1.Files AS f INNER JOIN exp.Data AS d on (f.ExpDataFileId=d.RowId) WHERE d.RunId=? AND f.Type=? AND f.Deleted=?";
+        Map[] values = Table.executeQuery(getSchema(), sql, new Object[]{runId, FILETYPE_PEAKS, false}, java.util.Map.class);
+
+        if(null == values || 0 == values.length || null == values[0].get("FileId"))
+            return PeakAvailability.NotAvailable;
+        else if(Boolean.FALSE.equals(values[0].get("Imported")))
+            return PeakAvailability.PartiallyAvailable;
+        else
+            return PeakAvailability.Available;
     }
 
     public Integer getFileIdForRun(int runId, int fileType) throws SQLException
