@@ -67,7 +67,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
 
         protected ModelAndView handleSuccessfulPost(NabRunUploadForm form) throws SQLException, ServletException
         {
-            saveDefaultValues(_postedSampleProperties, RunStepHandler.NAME);
+            saveDefaultValues(_postedSampleProperties, form.getRequest(), form.getProvider(), RunStepHandler.NAME);
             return super.handleSuccessfulPost(form);
         }
     }

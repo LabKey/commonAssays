@@ -238,8 +238,8 @@
 		<note> Will ignore all scans # below the entered value</note>
 	<note type="input" label="MzXML2Search, last scan"></note>
 		<note> Will ignore all scans # above the entered value</note>
-	<note type="input" label="MzXML2Search, charge">1,2,3</note>
-        <note>Specifies which charge of the precursor ions is to be included.</note>
+	<note type="input" label="MzXML2Search, charge">1,3</note>
+        <note>Specifies which charge of the precursor ions is to be included (e.g. 1,3 includes charge states 1 thru 3).</note>
 
 
 </bioml>
