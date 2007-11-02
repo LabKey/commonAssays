@@ -15,19 +15,11 @@ public class OpenSSOModule extends DefaultModule
     {
         super(NAME, 0.01, null, false);
         addController("opensso", OpenSSOController.class);
+        AuthenticationManager.registerProvider(new OpenSSOProvider());
     }
 
     public TabDisplayMode getTabDisplayMode()
     {
         return TabDisplayMode.DISPLAY_NEVER;
-    }
-
-    public void startup(ModuleContext moduleContext)
-    {
-        super.startup(moduleContext);
-
-        // TODO: Move to constructor?  Should be safe...
-        AuthenticationProvider opensso = new OpenSSOProvider();
-        AuthenticationManager.registerProvider(opensso);
     }
 }
