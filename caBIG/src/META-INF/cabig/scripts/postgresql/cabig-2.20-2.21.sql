@@ -1,3 +1,4 @@
+select core.fn_dropifexists('ProteinGroupMembers', 'cabig', 'VIEW', NULL);
 select core.fn_dropifexists('protsequences', 'cabig', 'VIEW', NULL);
 
 CREATE VIEW cabig.ProtSequences AS
@@ -15,3 +16,10 @@ WHERE s.Deleted = 0
 	FROM prot.FastaSequences fs
 	WHERE fs.FastaId IN (	SELECT FastaId FROM cabig.MS2RunsFilter))
 ;
+
+CREATE VIEW cabig.ProteinGroupMembers AS
+SELECT (CAST((4294967296 * pgm.ProteinGroupId) AS BigInt) + pgm.SeqId) AS GroupMemberId,
+	pgm.ProteinGroupId, pgm.Probability, s.*
+FROM ms2.ProteinGroupMemberships pgm
+	INNER JOIN cabig.ProtSequences s ON s.SeqId = pgm.SeqId
+	INNER JOIN cabig.ProteinGroups pg ON pgm.ProteinGroupId = pg.RowId;
