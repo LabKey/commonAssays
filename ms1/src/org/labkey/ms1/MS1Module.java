@@ -8,6 +8,7 @@ import org.labkey.api.exp.ExperimentRunFilter;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
@@ -94,6 +95,9 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
         ExperimentService.get().registerExperimentDataHandler(new PeaksFileDataHandler());
 
         ExperimentService.get().registerExperimentRunFilter(EXP_RUN_FILTER);
+
+        //register the MS1 folder type
+        ModuleLoader.getInstance().registerFolderType(new MS1FolderType(this));
     }
 
 

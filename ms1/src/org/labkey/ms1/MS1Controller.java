@@ -153,7 +153,12 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return addBeginChild(root);
+            return root.addChild("MS1 Runs", getUrl());
+        }
+
+        public ViewURLHelper getUrl()
+        {
+            return new ViewURLHelper(MS1Module.CONTROLLER_NAME, "begin.view", getContainer());
         }
     } //class BeginAction
 
@@ -234,12 +239,20 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            addBeginChild(root);
-            if(null != _form)
-                addFeaturesChild(root, _form.getRunId());
+            return appendNavTrail(root, _form.getRunId());
+        }
 
-            _form = null;
-            return root;
+        public NavTree appendNavTrail(NavTree root, int runId)
+        {
+            return new BeginAction().appendNavTrail(root).addChild("Features", getUrl(runId));
+        }
+
+        public ViewURLHelper getUrl(int runId)
+        {
+            ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showFeatures.view", getContainer());
+            url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
+            url.addParameter(".lastFilter", "true");
+            return url;
         }
     } //class ShowFeaturesAction
 
@@ -324,14 +337,22 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            addBeginChild(root);
-            if(null != _form)
-            {
-                addFeaturesChild(root, _form.getRunId());
-                addPeaksChild(root, _form.getRunId(), _form.getFeatureId());
-            }
-            _form = null;
-            return root;
+            return appendNavTrail(root, _form.getRunId(), _form.getFeatureId());
+        }
+
+        public NavTree appendNavTrail(NavTree root, int runId, int featureId)
+        {
+            return new ShowFeaturesAction().appendNavTrail(new BeginAction().appendNavTrail(root), runId).addChild("Peaks",
+                    getUrl(runId, featureId));
+        }
+
+        public ViewURLHelper getUrl(int runId, int featureId)
+        {
+            ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks.view", getContainer());
+            url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
+            url.addParameter(ShowPeaksAction.PARAM_FEATUREID, featureId);
+            url.addParameter(".lastFilter", "true"); 
+            return url;
         }
     } //class ShowFeaturesAction
 
@@ -417,11 +438,23 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            if(null != _form)
-                addFeaturesChild(root, _form.getRunId());
-            _form = null;
-            return root.addChild("Feature Details");
+            return appendNavTrail(root, _form.getRunId(), _form.getFeatureId());
         }
+
+        public NavTree appendNavTrail(NavTree root, int runId, int featureId)
+        {
+            return new ShowFeaturesAction().appendNavTrail(new BeginAction().appendNavTrail(root), runId).addChild("Feature Details",
+                    getUrl(runId, featureId));
+        }
+
+        public ViewURLHelper getUrl(int runId, int featureId)
+        {
+            ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showFeatureDetails.view", getContainer());
+            url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
+            url.addParameter(ShowPeaksAction.PARAM_FEATUREID, featureId);
+            return url;
+        }
+
         private FeatureIdForm _form;
     }
 
@@ -482,7 +515,8 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("MS1 Admin");
+            root.addChild("MS1 Admin");
+            return root;
         }
     }
 
