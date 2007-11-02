@@ -51,8 +51,12 @@
         <ns:column columnName="Intensity">
             <ns:formatString>#,##0.0000</ns:formatString>
         </ns:column>
-        <ns:column columnName="Charge"/>
-        <ns:column columnName="ChargeStates"/>
+        <ns:column columnName="Charge">
+            <ns:columnTitle>Z</ns:columnTitle>
+        </ns:column>
+        <ns:column columnName="ChargeStates">
+            <ns:columnTitle>Z States</ns:columnTitle>
+        </ns:column>
         <ns:column columnName="KL">
             <ns:formatString>#,##0.0000</ns:formatString>
         </ns:column>
@@ -73,6 +77,7 @@
         <ns:column columnName="MS2Scan"/>
         <ns:column columnName="MS2ConnectivityProbability">
             <ns:formatString>0%</ns:formatString>
+            <ns:columnTitle>MS2 Prob</ns:columnTitle>
         </ns:column>
       </ns:columns>
     </ns:table>
@@ -108,7 +113,9 @@
             <ns:formatString>#,##0.0000</ns:formatString>
             <ns:columnTitle>MZ Monoisotopic</ns:columnTitle>
         </ns:column>
-        <ns:column columnName="Charge"/>
+        <ns:column columnName="Charge">
+            <ns:columnTitle>Z</ns:columnTitle>
+        </ns:column>
       </ns:columns>
     </ns:table>
     <ns:table tableName="Peaks" tableDbType="TABLE">
@@ -127,19 +134,19 @@
             <ns:formatString>#,##0.0000</ns:formatString>
         </ns:column>
         <ns:column columnName="Area">
-            <ns:formatString>#,##0.0000</ns:formatString>
+            <ns:formatString>#,##0.00</ns:formatString>
         </ns:column>
         <ns:column columnName="Error">
             <ns:formatString>#,##0.0000</ns:formatString>
         </ns:column>
         <ns:column columnName="Frequency">
-            <ns:formatString>#,##0.0000</ns:formatString>
+            <ns:formatString>#,##0</ns:formatString>
         </ns:column>
         <ns:column columnName="Phase">
-            <ns:formatString>#,##0.0000</ns:formatString>
+            <ns:formatString>#,##0.00</ns:formatString>
         </ns:column>
         <ns:column columnName="Decay">
-            <ns:formatString>#,##0.0000</ns:formatString>
+            <ns:formatString>#,##0.00</ns:formatString>
         </ns:column>
       </ns:columns>
     </ns:table>

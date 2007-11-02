@@ -91,6 +91,11 @@ public class MS1Manager
         return Table.executeSingleton(getSchema(), sql.toString(), new Object[]{runId, fileType, true, false}, Integer.class);
     }
 
+    public DataFile getDataFile(int fileId) throws SQLException
+    {
+        return Table.selectObject(getTable(TABLE_FILES), fileId, DataFile.class);
+    }
+
     public Feature getFeature(int featureId) throws SQLException
     {
         return Table.selectObject(getTable(TABLE_FEATURES), featureId, Feature.class);

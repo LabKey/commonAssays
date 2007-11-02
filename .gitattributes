@@ -485,6 +485,7 @@ ms1/src/org/labkey/ms1/MS1Manager.java -text
 ms1/src/org/labkey/ms1/MS1Module.java -text
 ms1/src/org/labkey/ms1/MS1ServiceImpl.java -text
 ms1/src/org/labkey/ms1/maintenance/PurgeTask.java -text
+ms1/src/org/labkey/ms1/model/DataFile.java -text
 ms1/src/org/labkey/ms1/model/Feature.java -text
 ms1/src/org/labkey/ms1/model/MinMaxScanInfo.java -text
 ms1/src/org/labkey/ms1/model/Peptide.java -text
@@ -510,6 +511,7 @@ ms1/src/org/labkey/ms1/view/FeatureChart.java -text
 ms1/src/org/labkey/ms1/view/FeatureDetailView.jsp -text
 ms1/src/org/labkey/ms1/view/FeatureDetailsViewContext.java -text
 ms1/src/org/labkey/ms1/view/FeaturesView.java -text
+ms1/src/org/labkey/ms1/view/FileDetailsView.jsp -text
 ms1/src/org/labkey/ms1/view/PeakWarnView.jsp -text
 ms1/src/org/labkey/ms1/view/PeaksView.java -text
 ms1/src/org/labkey/ms1/view/RetentionMassChart.java -text

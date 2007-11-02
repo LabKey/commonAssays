@@ -1,14 +1,13 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.*;
+import org.labkey.api.ms2.MS2Service;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.query.ExprColumn;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.ms2.MS2Service;
-import org.labkey.ms1.query.MS1Schema;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.MS1Module;
 
@@ -27,7 +26,7 @@ public class FeaturesTableInfo extends FilteredTable
 {
     public static final String COLUMN_DETAILS_LINK = "DetailsLink";
     public static final String COLUMN_PEAKS_LINK = "PeaksLink";
-    public static final String COLUMN_PEPTIDE_INFO = "Peptide";
+    public static final String COLUMN_PEPTIDE_INFO = "Related Peptide";
 
     public FeaturesTableInfo(MS1Schema schema, Container container)
     {
@@ -121,6 +120,11 @@ public class FeaturesTableInfo extends FilteredTable
         visibleColumns.remove(FieldKey.fromParts("FeatureId"));
         visibleColumns.remove(FieldKey.fromParts("FileId"));
         visibleColumns.remove(FieldKey.fromParts("Description"));
+        visibleColumns.remove(FieldKey.fromParts("Background"));
+        visibleColumns.remove(FieldKey.fromParts("Median"));
+        visibleColumns.remove(FieldKey.fromParts("KL"));
+        visibleColumns.remove(FieldKey.fromParts("ScanCount"));
+        visibleColumns.remove(FieldKey.fromParts("ChargeStates"));
         visibleColumns.remove(FieldKey.fromParts(COLUMN_DETAILS_LINK));
         visibleColumns.remove(FieldKey.fromParts(COLUMN_PEAKS_LINK));
         visibleColumns.add(0, FieldKey.fromParts(COLUMN_DETAILS_LINK));

@@ -14,12 +14,13 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
 import org.labkey.ms1.maintenance.PurgeTask;
-import org.labkey.ms1.pipeline.MSInspectImportPipelineJob;
-import org.labkey.ms1.view.*;
+import org.labkey.ms1.model.DataFile;
 import org.labkey.ms1.model.Feature;
 import org.labkey.ms1.model.Peptide;
 import org.labkey.ms1.model.Software;
+import org.labkey.ms1.pipeline.MSInspectImportPipelineJob;
 import org.labkey.ms1.query.MS1Schema;
+import org.labkey.ms1.view.*;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -192,7 +193,9 @@ public class MS1Controller extends SpringActionController
                 return exportQueryView(featuresView, form.getExport());
 
             //get the corresponding file Id and initialize a software view if there is software info
+            //also create a file details view
             JspView<Software[]> softwareView = null;
+            JspView<DataFile> fileDetailsView = null;
             Integer fileId = mgr.getFileIdForRun(form.getRunId(), MS1Manager.FILETYPE_FEATURES);
             if(null != fileId)
             {
@@ -200,22 +203,33 @@ public class MS1Controller extends SpringActionController
                 if(null != swares && swares.length > 0)
                 {
                     softwareView = new JspView<Software[]>("/org/labkey/ms1/view/softwareView.jsp", swares);
-                    softwareView.setTitle("Software Information");
+                    softwareView.setTitle("Processing Software Information");
+                }
+
+                DataFile dataFile = mgr.getDataFile(fileId.intValue());
+                if(null != dataFile)
+                {
+                    fileDetailsView = new JspView<DataFile>("/org/labkey/ms1/view/FileDetailsView.jsp", dataFile);
+                    fileDetailsView.setTitle("Data File Information");
                 }
             }
-
-            //if peak data is partially available, warn the user
-            WebPartView topView = peakAvail == MS1Manager.PeakAvailability.PartiallyAvailable ?
-                                    new VBox(new JspView("/org/labkey/ms1/view/PeakWarnView.jsp"), softwareView) :
-                                    softwareView;
 
             //save the form so that we have access to it in the appendNavTrail method
             _form = form;
 
+            //build up the views and return
+            VBox views = new VBox();
+
+            if(peakAvail == MS1Manager.PeakAvailability.PartiallyAvailable)
+                views.addView(new JspView("/org/labkey/ms1/view/PeakWarnView.jsp"));
+            if(null != fileDetailsView)
+                views.addView(fileDetailsView);
             if(null != softwareView)
-                return new VBox(topView, featuresView);
-            else
-                return featuresView;
+                views.addView(softwareView);
+
+            views.addView(featuresView);
+
+            return views;
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -273,7 +287,9 @@ public class MS1Controller extends SpringActionController
                 return exportQueryView(peaksView, form.getExport());
 
             //if software information is available, create and initialize the software view
-            JspView softwareView = null;
+            //also the data file information view
+            JspView<Software[]> softwareView = null;
+            JspView<DataFile> fileDetailsView = null;
             Integer fileId = mgr.getFileIdForRun(expRun.getRowId(), MS1Manager.FILETYPE_PEAKS);
             if(null != fileId)
             {
@@ -283,15 +299,27 @@ public class MS1Controller extends SpringActionController
                     softwareView = new JspView<Software[]>("/org/labkey/ms1/view/softwareView.jsp", swares);
                     softwareView.setTitle("Software Information");
                 }
+
+                DataFile dataFile = mgr.getDataFile(fileId.intValue());
+                if(null != dataFile)
+                {
+                    fileDetailsView = new JspView<DataFile>("/org/labkey/ms1/view/FileDetailsView.jsp", dataFile);
+                    fileDetailsView.setTitle("Data File Information");
+                }
             }
 
             //save the form so we have access to the params when we build the nav trail
             _form = form;
 
+            //build up the views and return
+            VBox views = new VBox();
+            if(null != fileDetailsView)
+                views.addView(fileDetailsView);
             if(null != softwareView)
-                return new VBox(softwareView, peaksView);
-            else
-                return peaksView;
+                views.addView(softwareView);
+
+            views.addView(peaksView);
+            return views;
         }
 
         public NavTree appendNavTrail(NavTree root)

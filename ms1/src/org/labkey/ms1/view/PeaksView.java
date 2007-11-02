@@ -104,6 +104,15 @@ public class PeaksView extends QueryView
             addExportButton(bar, "excel", CAPTION_EXPORT_ALL_EXCEL);
             addExportButton(bar, "tsv", CAPTION_EXPORT_ALL_TSV);
             addExportButton(bar, "print", CAPTION_PRINT_ALL);
+
+            //if feature is valid, add a button to view the feature details
+            if(null != _feature)
+            {
+                ViewURLHelper urlFeatureDetails = getViewContext().getViewURLHelper().clone();
+                urlFeatureDetails.deleteFilterParameters(QueryView.DATAREGIONNAME_DEFAULT);
+                urlFeatureDetails.setAction("showFeatureDetails.view");
+                bar.add(new ActionButton(urlFeatureDetails, "Feature Details"));
+            }
         }
 
         return view;
