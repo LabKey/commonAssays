@@ -5,6 +5,7 @@ import org.labkey.api.data.SchemaTableInfo;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.ms1.model.*;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -377,7 +378,7 @@ public class MS1Manager
      * @return          True if already loaded into the experiment's container, otherwise false
      * @throws SQLException Exception thrown from database layer
      */
-    protected boolean isAlreadyImported(File dataFile, ExpData data) throws SQLException
+    public boolean isAlreadyImported(File dataFile, ExpData data) throws SQLException
     {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS existing FROM exp.Data as d INNER JOIN ");
         sql.append(getSQLTableName(TABLE_FILES));

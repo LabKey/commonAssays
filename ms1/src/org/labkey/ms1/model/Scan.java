@@ -1,4 +1,4 @@
-package org.labkey.ms1;
+package org.labkey.ms1.model;
 
 /**
  * Represents an MS1 Scan

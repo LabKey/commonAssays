@@ -17,6 +17,9 @@ import org.labkey.api.util.SystemMaintenance;
 import org.labkey.api.view.*;
 import org.labkey.ms1.maintenance.PurgeTask;
 import org.labkey.ms1.pipeline.MSInspectPipelineProvider;
+import org.labkey.ms1.pipeline.MSInspectFeaturesDataHandler;
+import org.labkey.ms1.pipeline.PeaksFileDataHandler;
+import org.labkey.ms1.query.MS1Schema;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Set;

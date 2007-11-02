@@ -1,4 +1,4 @@
-package org.labkey.ms1;
+package org.labkey.ms1.model;
 
 /**
  * Represents a parameter setting for a software package used to create an MS1 data file

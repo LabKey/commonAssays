@@ -1,4 +1,4 @@
-package org.labkey.ms1;
+package org.labkey.ms1.query;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
@@ -7,6 +7,8 @@ import org.labkey.api.data.Container;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
+import org.labkey.ms1.query.MS1Schema;
+import org.labkey.ms1.MS1Manager;
 
 import java.util.ArrayList;
 

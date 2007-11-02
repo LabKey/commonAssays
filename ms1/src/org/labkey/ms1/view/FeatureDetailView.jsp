@@ -5,6 +5,9 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
 <%@ page import="org.labkey.ms1.*" %>
+<%@ page import="org.labkey.ms1.model.Feature" %>
+<%@ page import="org.labkey.ms1.view.FeatureDetailsViewContext" %>
+<%@ page import="org.labkey.ms1.model.Peptide" %>
 <%
     JspView<FeatureDetailsViewContext> me = (JspView<FeatureDetailsViewContext>) HttpView.currentView();
     FeatureDetailsViewContext ctx = me.getModelBean();

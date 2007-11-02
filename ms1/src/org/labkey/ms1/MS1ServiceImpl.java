@@ -4,6 +4,7 @@ import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
+import org.labkey.ms1.query.MS1Schema;
 
 /**
  * Implementation of MS1Service.Service

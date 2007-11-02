@@ -1,17 +1,18 @@
-package org.labkey.ms1;
+package org.labkey.ms1.view;
 
-import org.labkey.api.data.Table;
-import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.labkey.api.data.Table;
+import org.labkey.ms1.MS1Manager;
+import org.labkey.ms1.model.MinMaxScanInfo;
 
-import java.sql.SQLException;
 import java.awt.*;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 
 /**

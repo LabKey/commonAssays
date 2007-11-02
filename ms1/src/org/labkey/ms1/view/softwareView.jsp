@@ -1,7 +1,7 @@
 <%@ page import="org.labkey.api.view.HttpView"%>
-<%@ page import="org.labkey.ms1.Software" %>
+<%@ page import="org.labkey.ms1.model.Software" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms1.SoftwareParam" %>
+<%@ page import="org.labkey.ms1.model.SoftwareParam" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%
     JspView<Software[]> me = (JspView<Software[]>) HttpView.currentView();

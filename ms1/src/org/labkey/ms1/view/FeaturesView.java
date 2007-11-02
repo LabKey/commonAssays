@@ -1,4 +1,4 @@
-package org.labkey.ms1;
+package org.labkey.ms1.view;
 
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpRun;
@@ -9,6 +9,8 @@ import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.ms1.query.FeaturesTableInfo;
+import org.labkey.ms1.query.MS1Schema;
 
 import java.io.IOException;
 import java.sql.ResultSet;

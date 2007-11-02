@@ -1,4 +1,4 @@
-package org.labkey.ms1;
+package org.labkey.ms1.model;
 
 /**
  * Simple bean to hold info about the real min/max scan and retention time within a scan range

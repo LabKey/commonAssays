@@ -1,4 +1,4 @@
-package org.labkey.ms1;
+package org.labkey.ms1.view;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -9,6 +9,9 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBubbleRenderer;
 import org.jfree.data.xy.AbstractXYZDataset;
 import org.labkey.api.data.Table;
+import org.labkey.ms1.view.FeatureChart;
+import org.labkey.ms1.model.MinMaxScanInfo;
+import org.labkey.ms1.MS1Manager;
 
 import java.awt.*;
 import java.sql.SQLException;

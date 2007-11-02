@@ -1,4 +1,7 @@
-package org.labkey.ms1;
+package org.labkey.ms1.view;
+
+import org.labkey.ms1.model.Feature;
+import org.labkey.ms1.MS1Manager;
 
 import java.sql.SQLException;
 

@@ -1,4 +1,4 @@
-package org.labkey.ms1;
+package org.labkey.ms1.query;
 
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpSchema;
@@ -7,6 +7,12 @@ import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ViewURLHelper;
+import org.labkey.ms1.query.FeaturesTableInfo;
+import org.labkey.ms1.query.FilesTableInfo;
+import org.labkey.ms1.MS1Manager;
+import org.labkey.ms1.query.PeaksTableInfo;
+import org.labkey.ms1.query.ScansTableInfo;
+import org.labkey.ms1.MS1Module;
 
 import java.util.Set;
 import java.util.List;

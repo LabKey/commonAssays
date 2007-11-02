@@ -1,4 +1,4 @@
-package org.labkey.ms1;
+package org.labkey.ms1.query;
 
 import org.labkey.api.data.*;
 import org.labkey.api.query.FieldKey;
@@ -8,6 +8,9 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.ms2.MS2Service;
+import org.labkey.ms1.query.MS1Schema;
+import org.labkey.ms1.MS1Manager;
+import org.labkey.ms1.MS1Module;
 
 import java.util.ArrayList;
 

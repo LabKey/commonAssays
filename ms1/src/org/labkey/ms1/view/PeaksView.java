@@ -1,4 +1,4 @@
-package org.labkey.ms1;
+package org.labkey.ms1.view;
 
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpRun;
@@ -9,6 +9,9 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.DisplayElement;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.ms1.query.MS1Schema;
+import org.labkey.ms1.model.Feature;
+import org.labkey.ms1.query.PeaksTableInfo;
 
 import java.sql.SQLException;
 import java.io.Writer;

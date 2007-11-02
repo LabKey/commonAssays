@@ -1,9 +1,11 @@
-package org.labkey.ms1;
+package org.labkey.ms1.model;
 
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.ms1.MS1Manager;
+import org.labkey.ms1.model.Peptide;
 
 import java.sql.SQLException;
 

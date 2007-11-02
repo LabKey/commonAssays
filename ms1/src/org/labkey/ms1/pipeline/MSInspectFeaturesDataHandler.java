@@ -1,4 +1,4 @@
-package org.labkey.ms1;
+package org.labkey.ms1.pipeline;
 
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.log4j.Logger;
@@ -12,6 +12,8 @@ import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.common.tools.TabLoader;
+import org.labkey.ms1.MS1Manager;
+import org.labkey.ms1.MS1Module;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;

@@ -1,4 +1,4 @@
-package org.labkey.ms1;
+package org.labkey.ms1.view;
 
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;

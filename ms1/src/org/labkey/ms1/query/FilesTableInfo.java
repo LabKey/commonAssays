@@ -1,4 +1,4 @@
-package org.labkey.ms1;
+package org.labkey.ms1.query;
 
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
@@ -7,6 +7,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.ms1.MS1Manager;
 
 /**
  * User schema table info for the ms1.Files table

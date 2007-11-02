@@ -15,7 +15,11 @@ import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
 import org.labkey.ms1.maintenance.PurgeTask;
 import org.labkey.ms1.pipeline.MSInspectImportPipelineJob;
-import org.labkey.ms1.view.AdminViewContext;
+import org.labkey.ms1.view.*;
+import org.labkey.ms1.model.Feature;
+import org.labkey.ms1.model.Peptide;
+import org.labkey.ms1.model.Software;
+import org.labkey.ms1.query.MS1Schema;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -195,7 +199,7 @@ public class MS1Controller extends SpringActionController
                 Software[] swares = mgr.getSoftware(fileId.intValue());
                 if(null != swares && swares.length > 0)
                 {
-                    softwareView = new JspView<Software[]>("/org/labkey/ms1/softwareView.jsp", swares);
+                    softwareView = new JspView<Software[]>("/org/labkey/ms1/view/softwareView.jsp", swares);
                     softwareView.setTitle("Software Information");
                 }
             }
@@ -276,7 +280,7 @@ public class MS1Controller extends SpringActionController
                 Software[] swares = mgr.getSoftware(fileId.intValue());
                 if(null != swares && swares.length > 0)
                 {
-                    softwareView = new JspView<Software[]>("/org/labkey/ms1/softwareView.jsp", swares);
+                    softwareView = new JspView<Software[]>("/org/labkey/ms1/view/softwareView.jsp", swares);
                     softwareView.setTitle("Software Information");
                 }
             }
@@ -380,7 +384,7 @@ public class MS1Controller extends SpringActionController
             //save the form for the nav trail
             _form = form;
 
-            return new JspView<FeatureDetailsViewContext>("/org/labkey/ms1/FeatureDetailView.jsp", ctx);
+            return new JspView<FeatureDetailsViewContext>("/org/labkey/ms1/view/FeatureDetailView.jsp", ctx);
         }
 
         public NavTree appendNavTrail(NavTree root)

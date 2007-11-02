@@ -1,4 +1,4 @@
-package org.labkey.ms1;
+package org.labkey.ms1.model;
 
 /**
  * Simple bean representing a row in ms2.PeptideData

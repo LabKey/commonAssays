@@ -1,9 +1,10 @@
-package org.labkey.ms1;
+package org.labkey.ms1.pipeline;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.security.User;
+import org.labkey.ms1.MS1Manager;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
