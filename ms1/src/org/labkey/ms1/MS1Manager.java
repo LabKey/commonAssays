@@ -6,6 +6,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.ms1.model.*;
+import org.labkey.ms1.maintenance.PurgeTask;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -29,6 +30,8 @@ public class MS1Manager
     public static final int FILETYPE_FEATURES = 1;
     public static final int FILETYPE_PEAKS = 2;
 
+    private Thread _purgeThread = new Thread(new PurgeTask(), "MS1 Purge Task");
+
     private MS1Manager()
     {
         // prevent external construction with a private default constructor
@@ -39,6 +42,16 @@ public class MS1Manager
         if (_instance == null)
             _instance = new MS1Manager();
         return _instance;
+    }
+
+    /**
+     * Starts a manual purge of deleted data files on a background thread.
+     * If the purge process is already running, this results in a NOOP.
+     */
+    public void startManualPurge()
+    {
+        if(_purgeThread.getState() == Thread.State.NEW || _purgeThread.getState() == Thread.State.TERMINATED)
+            _purgeThread.start();
     }
 
     public String getSchemaName()

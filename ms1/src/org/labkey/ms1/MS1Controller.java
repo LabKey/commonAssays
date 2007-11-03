@@ -505,9 +505,7 @@ public class MS1Controller extends SpringActionController
             AdminViewContext ctx = new AdminViewContext(MS1Manager.get().getDeletedFileCount());
             if(getProperty("purgeNow", "false").equals("true") && ctx.getNumDeleted() > 0)
             {
-                if(!(_purgeThread.isAlive()))
-                    _purgeThread.run();
-                
+                MS1Manager.get().startManualPurge();
                 ctx.setPurgeRunning(true);
             }
             return new JspView<AdminViewContext>("/org/labkey/ms1/view/AdminView.jsp", ctx);
@@ -847,5 +845,4 @@ public class MS1Controller extends SpringActionController
         }
     }
 
-    private Thread _purgeThread = new Thread(new PurgeTask(), "MS1 Purge Task");
 } //class MS1Controller

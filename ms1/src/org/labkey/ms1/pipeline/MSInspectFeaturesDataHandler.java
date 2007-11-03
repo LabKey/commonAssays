@@ -234,10 +234,10 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
                 //execute if we've reached our chunk limit
                 if((numRows % CHUNK_SIZE) == 0)
-                {
                     pstmt.executeBatch();
-                    log.info("Uploaded " + CHUNK_SIZE + " feature rows to the database.");
-                }
+
+                if(0 == numRows % 5000)
+                    log.info("Imported " + numRows + " features to the database so far...");
             } //while reading rows
 
             //execute any remaining in the batch
