@@ -67,7 +67,9 @@ public class FeaturesView extends QueryView
         int nextFeatureId = -1;
         try
         {
-            rs = createDataRegion().getResultSet(new RenderContext(getViewContext()));
+            RenderContext ctx = new RenderContext(getViewContext());
+            ctx.setBaseSort(getBaseSort());
+            rs = createDataRegion().getResultSet(ctx);
             while(rs.next())
             {
                 if(rs.getInt("FeatureId") == featureIdCur)
@@ -124,7 +126,7 @@ public class FeaturesView extends QueryView
     protected DataView createDataView()
     {
         DataView view = super.createDataView();
-        view.getRenderContext().setBaseSort(new Sort("Scan"));
+        view.getRenderContext().setBaseSort(getBaseSort());
         DataRegion region = view.getDataRegion();
 
         //Since this code calls getDataRegion() on the newly created view, you'd *think* that
@@ -149,6 +151,11 @@ public class FeaturesView extends QueryView
         ViewURLHelper url = getViewContext().getViewURLHelper().clone();
         url.replaceParameter("export", format);
         bar.add(new ActionButton(url.getEncodedLocalURIString(), caption, DataRegion.MODE_ALL, ActionButton.Action.LINK));
+    }
+
+    protected Sort getBaseSort()
+    {
+        return new Sort("Scan,MZ");
     }
 
 

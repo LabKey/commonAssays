@@ -9,9 +9,8 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBubbleRenderer;
 import org.jfree.data.xy.AbstractXYZDataset;
 import org.labkey.api.data.Table;
-import org.labkey.ms1.view.FeatureChart;
-import org.labkey.ms1.model.MinMaxScanInfo;
 import org.labkey.ms1.MS1Manager;
+import org.labkey.ms1.model.MinMaxScanInfo;
 
 import java.awt.*;
 import java.sql.SQLException;
@@ -86,6 +85,8 @@ public class RetentionMassChart extends FeatureChart
         {
             scanAxis.setNumberFormatOverride(new DecimalFormat("0"));
             scanAxis.setRangeWithMargins(mmsi.getMinScan(), mmsi.getMaxScan());
+            dataset.setMinY(mmsi.getMinScan());
+            dataset.setMaxY(mmsi.getMaxScan());
 
             //create a secondary axis for the retention times
             NumberAxis rtAxis = new NumberAxis("Retention Time");
@@ -285,8 +286,10 @@ public class RetentionMassChart extends FeatureChart
             //comapred to the Y axis, which is what the chart uses to
             //calculate the bubble diameter
             Double z = _vals.get(item).getZ();
-            return null == z ? null : (logaxis.adjustedLog10(z.doubleValue()) / getDataset().getMaxLogZ())
-                                        * (getDataset().getMaxY() - getDataset().getMinY()) * .07;
+            IntensityXYZDataset dataset = getDataset();
+            return null == z || null == dataset ? null : 
+                            (logaxis.adjustedLog10(z.doubleValue()) / dataset.getMaxLogZ())
+                                        * (dataset.getMaxY() - dataset.getMinY()) * .07;
         }
 
         /**
@@ -436,6 +439,16 @@ public class RetentionMassChart extends FeatureChart
         public double getMinY()
         {
             return _minY;
+        }
+
+        public void setMinY(double minY)
+        {
+            _minY = minY;
+        }
+
+        public void setMaxY(double maxY)
+        {
+            _maxY = maxY;
         }
 
         private double _minY = Double.MAX_VALUE;
