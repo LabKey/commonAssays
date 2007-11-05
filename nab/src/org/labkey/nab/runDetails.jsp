@@ -91,19 +91,23 @@
                         for (int col = 0; col < 3; col++)
                         {
                             Map.Entry<PropertyDescriptor, Object> property = propertyIt.hasNext() ? propertyIt.next() : null;
-                            Object value = property.getValue();
-                            if (property.getKey().getPropertyType() == PropertyType.DATE_TIME && value instanceof Date)
+                            Object value = null;
+                            if (property != null)
                             {
-                                Date date = (Date) value;
-                                if (date.getHours() == 0 &&
-                                        date.getMinutes() == 0 &&
-                                        date.getSeconds() == 0)
+                                value = property.getValue();
+                                if (property.getKey().getPropertyType() == PropertyType.DATE_TIME && value instanceof Date)
                                 {
-                                    value = formatDate(date);
-                                }
-                                else
-                                {
-                                    value = formatDateTime(date);
+                                    Date date = (Date) value;
+                                    if (date.getHours() == 0 &&
+                                            date.getMinutes() == 0 &&
+                                            date.getSeconds() == 0)
+                                    {
+                                        value = formatDate(date);
+                                    }
+                                    else
+                                    {
+                                        value = formatDateTime(date);
+                                    }
                                 }
                             }
                     %>
