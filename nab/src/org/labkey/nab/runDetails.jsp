@@ -91,9 +91,24 @@
                         for (int col = 0; col < 3; col++)
                         {
                             Map.Entry<PropertyDescriptor, Object> property = propertyIt.hasNext() ? propertyIt.next() : null;
+                            Object value = property.getValue();
+                            if (property.getKey().getPropertyType() == PropertyType.DATE_TIME && value instanceof Date)
+                            {
+                                Date date = (Date) value;
+                                if (date.getHours() == 0 &&
+                                        date.getMinutes() == 0 &&
+                                        date.getSeconds() == 0)
+                                {
+                                    value = formatDate(date);
+                                }
+                                else
+                                {
+                                    value = formatDateTime(date);
+                                }
+                            }
                     %>
                         <td style="<%= labelStyle %>"><%= property != null ? h(property.getKey().getLabel()) : "&nbsp;"  %></td>
-                        <td ><%= property != null ? h(property.getValue()) : "&nbsp;"  %></td>
+                        <td ><%= property != null ? h(value) : "&nbsp;"  %></td>
                     <%
                         }
                     %>
@@ -140,7 +155,7 @@
                                     %>
                                     <tr>
                                         <td class="normal">
-                                            <%=h(sampleProperties.get(i).getKey())%>
+                                            <%=h(summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME))%>
                                         </td>
                                         <%
                                             for (int cutoff : assay.getCutoffs())
@@ -203,12 +218,24 @@
                             %>
                             </tr>
                             <%
-                                for (Pair<String, Map<PropertyDescriptor, Object>> sample : sampleProperties)
+
+                                for (DilutionSummary summary : assay.getSummaries())
                                 {
-                                    Map<PropertyDescriptor, Object> properties = sample.getValue();
+                                    String specimenId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
+                                    Map<PropertyDescriptor, Object> properties = null;
+                                    for (Pair<String, Map<PropertyDescriptor, Object>> sample : sampleProperties)
+                                    {
+                                        if (specimenId.equals(sample.getKey()))
+                                        {
+                                            properties = sample.getValue();
+                                            break;
+                                        }
+                                    }
+                                    if (properties == null)
+                                        continue;
                             %>
                                 <tr>
-                                    <td><%= h(sample.getKey()) %></td>
+                                    <td><%= h(specimenId) %></td>
                             <%
                                 for (Map.Entry<PropertyDescriptor, Object> entry : properties.entrySet())
                                 {
@@ -253,13 +280,24 @@
                                 <td style="<%= labelStyle %>"><%= h(NabAssayProvider.SAMPLE_DESCRIPTION_PROPERTY_CAPTION) %></td>
                             </tr>
                             <%
-                                for (Pair<String, Map<PropertyDescriptor, Object>> sample : sampleProperties)
+                                for (DilutionSummary summary : assay.getSummaries())
                                 {
-                                    Map<PropertyDescriptor, Object> properties = sample.getValue();
+                                    String specimenId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
+                                    Map<PropertyDescriptor, Object> properties = null;
+                                    for (Pair<String, Map<PropertyDescriptor, Object>> sample : sampleProperties)
+                                    {
+                                        if (specimenId.equals(sample.getKey()))
+                                        {
+                                            properties = sample.getValue();
+                                            break;
+                                        }
+                                    }
+                                    if (properties == null)
+                                        continue;
                                     String desc = (String) properties.get(sampleDescPD);
                             %>
                             <tr>
-                                <td><%= h(sample.getKey()) %></td>
+                                <td><%= h(specimenId) %></td>
                                 <td><%= h(desc) %></td>
                             </tr>
                             <%
@@ -311,7 +349,7 @@
                     <td>
                         <table>
                             <tr>
-                                <th colspan="4"><%= h(sampleProperties.get(i).getKey()) %></th>
+                                <th colspan="4"><%= h(summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME)) %></th>
                             </tr>
                             <tr>
                                 <td style="<%= labelStyle %>" align="right"><%= summary.getMethod().getAbbreviation() %></td>
