@@ -40,7 +40,7 @@ public abstract class AbstractMS2RunView
         _calculatedPeptideColumns.put("DeltaScan", DeltaScanColumn.class);
 
         // Different renderer to ensure that SeqId is always selected when Protein column is displayed
-        MS2Manager.getTableInfoPeptides().getColumn("Protein").setDisplayColumnFactory(ProteinDisplayColumnFactory.INSTANCE);
+        MS2Manager.getTableInfoPeptides().getColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory());
     }
 
     private final Container _container;

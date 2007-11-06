@@ -25,22 +25,9 @@ public class ProteinDisplayColumn extends DataColumn
     public void addQueryColumns(Set<ColumnInfo> set)
     {
         super.addQueryColumns(set);
-        FieldKey key = FieldKey.fromString(getColumnInfo().getName());
+        FieldKey seqIdKey = FieldKey.fromParts("SeqId");
+        FieldKey proteinKey = FieldKey.fromParts("Protein");
 
-        FieldKey parentKey = key.getParent();
-        FieldKey seqIdKey;
-        FieldKey proteinKey;
-        if (parentKey != null)
-        {
-            seqIdKey = new FieldKey(parentKey, "SeqId");
-            proteinKey = new FieldKey(parentKey, "Protein");
-        }
-        else
-        {
-            seqIdKey = FieldKey.fromParts("SeqId");
-            proteinKey = FieldKey.fromParts("Protein");
-        }
-        
         Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(getColumnInfo().getParentTable(), Arrays.asList(seqIdKey, proteinKey));
         set.addAll(colMap.values());
     }

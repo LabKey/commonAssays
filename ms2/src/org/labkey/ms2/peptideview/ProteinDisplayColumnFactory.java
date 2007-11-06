@@ -11,10 +11,25 @@ import org.labkey.ms2.ProteinDisplayColumn;
 */
 public class ProteinDisplayColumnFactory implements DisplayColumnFactory
 {
-    public static final ProteinDisplayColumnFactory INSTANCE = new ProteinDisplayColumnFactory();
+    private final String _url;
+
+    public ProteinDisplayColumnFactory()
+    {
+        this(null);
+    }
+
+    public ProteinDisplayColumnFactory(String url)
+    {
+        _url = url;
+    }
 
     public DisplayColumn createRenderer(ColumnInfo colInfo)
     {
-        return new ProteinDisplayColumn(colInfo);
+        ProteinDisplayColumn result = new ProteinDisplayColumn(colInfo);
+        if (_url != null)
+        {
+            result.setURL(_url);
+        }
+        return result;
     }
 }
