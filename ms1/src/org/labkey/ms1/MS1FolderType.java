@@ -25,7 +25,8 @@ public class MS1FolderType extends DefaultFolderType
             ), null,
             set(module, ModuleLoader.getInstance().getModule("Pipeline"),
                     ModuleLoader.getInstance().getModule("Experiment"),
-                    ModuleLoader.getInstance().getModule("Portal")),
+                    ModuleLoader.getInstance().getModule("Portal"),
+                    ModuleLoader.getInstance().getModule("MS2")),
             module);
     }
 }
