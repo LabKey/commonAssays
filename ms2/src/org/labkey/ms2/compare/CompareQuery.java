@@ -55,16 +55,15 @@ public abstract class CompareQuery extends SQLFragment
 
     public abstract String getComparisonDescription();
 
-    protected void addGridColumn(String label, String name)
-    {
-        addGridColumn(label, name, "COUNT");
-    }
-
     protected void addGridColumn(String label, String name, String aggregate)
     {
         _gridColumns.add(new RunColumn(label, name, aggregate));
     }
 
+    protected void addGridColumn(String label, String name, String aggregate, String formatString)
+    {
+        _gridColumns.add(new RunColumn(label, name, aggregate, formatString));
+    }
 
     public ResultSet createResultSet() throws SQLException
     {
@@ -329,6 +328,10 @@ public abstract class CompareQuery extends SQLFragment
                 String columnName = runPrefix + column.getLabel();
 
                 DisplayColumn displayColumn = createColumn(linkURL, column, runPrefix, columnName, ti, md, rgn);
+                if (column.getFormatString() != null)
+                {
+                    displayColumn.setFormatString(column.getFormatString());
+                }
                 if (displayColumn != null)
                 {
                     _columnsPerRun++;

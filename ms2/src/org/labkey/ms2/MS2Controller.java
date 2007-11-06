@@ -2908,6 +2908,11 @@ public class MS2Controller extends ViewController
         sb.append("<div style=\"padding-left: 20px;\">Choose what columns should appear in the grid:<br/>\n");
         sb.append("<div style=\"padding-left: 20px;\"><input type=\"checkbox\" name=\"unique\" value=\"1\" checked=\"checked\">Unique Peptides<br/>\n");
         sb.append("<input type=\"checkbox\" name=\"total\" value=\"1\">Total Peptides<br/>\n");
+//        sb.append("<input type=\"checkbox\" name=\"sumLightArea-Protein\" value=\"1\">Total light area (quantitation)<br/>\n");
+//        sb.append("<input type=\"checkbox\" name=\"sumHeavyArea-Protein\" value=\"1\">Total heavy area (quantitation)<br/>\n");
+//        sb.append("<input type=\"checkbox\" name=\"avgDecimalRatio-Protein\" value=\"1\">Average decimal ratio (quantitation)<br/>\n");
+//        sb.append("<input type=\"checkbox\" name=\"maxDecimalRatio-Protein\" value=\"1\">Maximum decimal ratio (quantitation)<br/>\n");
+//        sb.append("<input type=\"checkbox\" name=\"minDecimalRatio-Protein\" value=\"1\">Minimum decimal ratio (quantitation)<br/>\n");
         sb.append("</div></div><br/>");
 
         sb.append("<input type=\"radio\" name=\"column\" value=\"Peptide\" /><b>Peptide</b><br/>");
@@ -2917,6 +2922,11 @@ public class MS2Controller extends ViewController
         sb.append("<input type=\"checkbox\" name=\"avgPeptideProphet\" value=\"1\" checked=\"checked\">Average Peptide Prophet Probability<br/>\n");
         sb.append("<input type=\"checkbox\" name=\"minPeptideProphetErrorRate\" value=\"1\">Minimum Peptide Prophet Error Rate<br/>\n");
         sb.append("<input type=\"checkbox\" name=\"avgPeptideProphetErrorRate\" value=\"1\">Average Peptide Prophet Error Rate<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"sumLightArea-Peptide\" value=\"1\">Total light area (quantitation)<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"sumHeavyArea-Peptide\" value=\"1\">Total heavy area (quantitation)<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"avgDecimalRatio-Peptide\" value=\"1\">Average decimal ratio (quantitation)<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"maxDecimalRatio-Peptide\" value=\"1\">Maximum decimal ratio (quantitation)<br/>\n");
+        sb.append("<input type=\"checkbox\" name=\"minDecimalRatio-Peptide\" value=\"1\">Minimum decimal ratio (quantitation)<br/>\n");
         sb.append("</div></div><br/>");
         sb.append("<hr>");
         sb.append("<input type=\"radio\" name=\"column\" value=\"Query\" /><b>Query (beta)</b><br/>");

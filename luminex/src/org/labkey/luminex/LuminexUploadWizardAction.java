@@ -128,16 +128,24 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         {
             view.setInitialValues(getViewContext().getRequest().getParameterMap());
         }
-        for (Analyte analyte : analytes)
+        for (PropertyDescriptor pd : pds)
         {
-            for (PropertyDescriptor pd : pds)
+            List<DisplayColumn> cols = new ArrayList<DisplayColumn>();
+            for (Analyte analyte : analytes)
             {
                 ColumnInfo info = pd.createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getViewContext().getUser());
                 info.setName(getAnalytePropertyName(analyte, pd));
-                info.setCaption(analyte.getName() + " " + pd.getName());
-                view.getDataRegion().addColumn(info);
+                cols.add(info.getRenderer());
             }
+            view.getDataRegion().addGroup(cols, pd.getName(), true);
         }
+        view.getDataRegion().setHorizontalGroups(false);
+        List<String> analyteNames = new ArrayList<String>();
+        for (Analyte analyte : analytes)
+        {
+            analyteNames.add(analyte.getName());
+        }
+        view.getDataRegion().setGroupHeadings(analyteNames);
 
         addHiddenUploadSetProperties(form, view);
 

@@ -31,22 +31,42 @@ public class PeptideCompareQuery extends CompareQuery
         StringBuilder header = new StringBuilder(HEADER_PREFIX);
         header.append("number of times each peptide appears in each run.");
         setHeader(header.toString());
-        addGridColumn("Total", "Peptide");
+        addGridColumn("Total", "Peptide", "COUNT");
         if ("1".equals(currentUrl.getParameter("maxPeptideProphet")))
         {
-            addGridColumn("MaxPepProphet", "peptideprophet", "MAX");
+            addGridColumn("MaxPepProphet", "peptideprophet", "MAX", "0.0000");
         }
         if ("1".equals(currentUrl.getParameter("avgPeptideProphet")))
         {
-            addGridColumn("AvgPepProphet", "CASE WHEN peptideprophet >= 0 THEN peptideprophet ELSE NULL END", "AVG");
+            addGridColumn("AvgPepProphet", "CASE WHEN peptideprophet >= 0 THEN peptideprophet ELSE NULL END", "AVG", "0.0000");
         }
         if ("1".equals(currentUrl.getParameter("minPeptideProphetErrorRate")))
         {
-            addGridColumn("MinErrorRate", "peptidepropheterrorrate", "MIN");
+            addGridColumn("MinErrorRate", "peptidepropheterrorrate", "MIN", "0.00");
         }
         if ("1".equals(currentUrl.getParameter("avgPeptideProphetErrorRate")))
         {
-            addGridColumn("AvgErrorRate", "peptidepropheterrorrate", "AVG");
+            addGridColumn("AvgErrorRate", "peptidepropheterrorrate", "AVG", "0.00");
+        }
+        if ("1".equals(currentUrl.getParameter("sumLightArea-Peptide")))
+        {
+            addGridColumn("SumLightArea", "lightarea", "SUM", "0.##");
+        }
+        if ("1".equals(currentUrl.getParameter("sumHeavyArea-Peptide")))
+        {
+            addGridColumn("SumHeavyArea", "heavyarea", "SUM", "0.##");
+        }
+        if ("1".equals(currentUrl.getParameter("avgDecimalRatio-Peptide")))
+        {
+            addGridColumn("AvgDecimalRatio", "DecimalRatio", "AVG", "0.##");
+        }
+        if ("1".equals(currentUrl.getParameter("maxDecimalRatio-Peptide")))
+        {
+            addGridColumn("MaxDecimalRatio", "DecimalRatio", "MAX", "0.##");
+        }
+        if ("1".equals(currentUrl.getParameter("minDecimalRatio-Peptide")))
+        {
+            addGridColumn("MinDecimalRatio", "DecimalRatio", "MIN", "0.##");
         }
     }
 

@@ -18,8 +18,10 @@ WHERE s.Deleted = 0
 ;
 
 CREATE VIEW cabig.ProteinGroupMembers AS
-SELECT (CAST((4294967296 * pgm.ProteinGroupId) AS BigInt) + pgm.SeqId) AS GroupMemberId,
-	pgm.ProteinGroupId, pgm.Probability, s.*
+SELECT pgm.SeqId, pgm.ProteinGroupId, pgm.probability, (CAST((4294967296 * pgm.ProteinGroupId) AS BIGINT) + pgm.SeqId) AS ProteinGroupMemberId
 FROM ms2.ProteinGroupMemberships pgm
-	INNER JOIN cabig.ProtSequences s ON s.SeqId = pgm.SeqId
-	INNER JOIN cabig.ProteinGroups pg ON pgm.ProteinGroupId = pg.RowId;
+WHERE pgm.ProteinGroupId IN (
+	SELECT pg.RowId FROM ms2.ProteinGroups pg
+	INNER JOIN ms2.ProteinProphetFiles pp ON pg.ProteinProphetFileId = pp.RowId
+	INNER JOIN cabig.MS2RunsFilter r ON r.run = pp.run )
+;

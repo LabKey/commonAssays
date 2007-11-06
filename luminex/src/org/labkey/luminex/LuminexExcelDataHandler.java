@@ -424,11 +424,11 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
 
             analyte.setLsid(new Lsid("LuminexAnalyte", "Data-" + data.getRowId() + "." + analyte.getName()).toString());
 
-            if (analyte.getMaxStandardRecovery() == 0 && analyte.getMinStandardRecovery() == 0)
+/*            if (analyte.getMaxStandardRecovery() == 0 && analyte.getMinStandardRecovery() == 0)
             {
                 throw new ExperimentException("Unable to find max and min standard recovery values for analyte " + analyte.getName()); 
             }
-
+*/
             analyte = Table.insert(user, LuminexSchema.getTableInfoAnalytes(), analyte);
 
             Getter fiGetter = new Getter()
@@ -661,7 +661,12 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             }
             else if ("Dilution".equalsIgnoreCase(columnName))
             {
-                dataRow.setDilution(parseDouble(value));
+                String dilutionValue = value;
+                if (dilutionValue != null && dilutionValue.startsWith("1:"))
+                {
+                    dilutionValue = dilutionValue.substring("1:".length());
+                }
+                dataRow.setDilution(parseDouble(dilutionValue));
             }
             else if ("Group".equalsIgnoreCase(columnName))
             {

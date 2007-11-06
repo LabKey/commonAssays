@@ -31,15 +31,35 @@ public class ProteinCompareQuery extends CompareQuery
         StringBuilder header = new StringBuilder(HEADER_PREFIX);
         if (total)
         {
-            addGridColumn("Total", "Peptide");
+            addGridColumn("Total", "Peptide", "COUNT");
             header.append("total peptides ");
         }
         if (unique)
         {
-            addGridColumn("Unique", "DISTINCT Peptide");
+            addGridColumn("Unique", "DISTINCT Peptide", "COUNT");
             if (total)
                 header.append("and ");
             header.append("unique peptides ");
+        }
+        if ("1".equals(currentUrl.getParameter("sumLightArea-Protein")))
+        {
+            addGridColumn("SumLightArea", "lightarea", "SUM", "0.##");
+        }
+        if ("1".equals(currentUrl.getParameter("sumHeavyArea-Protein")))
+        {
+            addGridColumn("SumHeavyArea", "heavyarea", "SUM", "0.##");
+        }
+        if ("1".equals(currentUrl.getParameter("avgDecimalRatio-Protein")))
+        {
+            addGridColumn("AvgDecimalRatio", "DecimalRatio", "AVG", "0.##");
+        }
+        if ("1".equals(currentUrl.getParameter("maxDecimalRatio-Protein")))
+        {
+            addGridColumn("MaxDecimalRatio", "DecimalRatio", "MAX", "0.##");
+        }
+        if ("1".equals(currentUrl.getParameter("minDecimalRatio-Protein")))
+        {
+            addGridColumn("MinDecimalRatio", "DecimalRatio", "MIN", "0.##");
         }
         header.append("mapping to each protein in each run.");
 

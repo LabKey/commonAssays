@@ -9,12 +9,19 @@ public class RunColumn
     private final String _label;
     private final String _name;
     private final String _aggregate;
+    private String _formatString;
 
-    public RunColumn(String label, String name, String aggregate)
+    public RunColumn(String label, String name, String aggregate, String formatString)
     {
         _label = label;
         _name = name;
         _aggregate = aggregate;
+        _formatString = formatString;
+    }
+
+    public RunColumn(String label, String name, String aggregate)
+    {
+        this(label, name, aggregate, null);
     }
     
     public String getLabel()
@@ -30,5 +37,10 @@ public class RunColumn
     public String getAggregate()
     {
         return _aggregate;
+    }
+
+    public String getFormatString()
+    {
+        return _formatString;
     }
 }
