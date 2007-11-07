@@ -2,26 +2,28 @@ package org.labkey.flow.controllers.executescript;
 
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionError;
 import org.labkey.api.jsp.FormPage;
-import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.browse.DefaultBrowseView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.flow.FlowSettings;
+import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.controllers.BaseFlowController;
-import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.controllers.FlowController;
+import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.AddRunsJob;
 import org.labkey.flow.script.AnalyzeJob;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.script.FlowPipelineProvider;
-import org.labkey.flow.FlowSettings;
 
 import java.io.File;
 import java.util.*;
@@ -149,25 +151,24 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             addError(displayPath + " is not a directory.");
             return Collections.EMPTY_MAP;
         }
-        List<File> files = new ArrayList();
+        List<File> files = new ArrayList<File>();
         files.add(directory);
-        File[] dirFiles = directory.listFiles();
+        File[] dirFiles = directory.listFiles((java.io.FileFilter)DirectoryFileFilter.INSTANCE);
         if (dirFiles != null)
-        {
             files.addAll(Arrays.asList(dirFiles));
-        }
 
-        Set<String> usedPaths = new HashSet();
+        Set<String> usedPaths = new HashSet<String>();
         for (FlowRun run : FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords))
         {
             usedPaths.add(run.getExperimentRun().getFilePathRoot());
         }
 
-        Map<String, String> ret = new TreeMap();
+        Map<String, String> ret = new TreeMap<String, String>();
         boolean anyFCSDirectories = false;
         for (File file : files)
         {
-            if (FlowAnalyzer.isFCSDirectory(file))
+            File[] fcsFiles = file.listFiles((java.io.FileFilter)FCS.FCSFILTER);
+            if (fcsFiles.length > 0)
             {
                 anyFCSDirectories = true;
                 if (!usedPaths.contains(file.toString()))
@@ -176,11 +177,11 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                     String displayName;
                     if (file.equals(directory))
                     {
-                        displayName = "This Directory";
+                        displayName = "This Directory (" + fcsFiles.length + " fcs files)";
                     }
                     else
                     {
-                        displayName = file.getName();
+                        displayName = file.getName() + " (" + fcsFiles.length + " fcs files)";
                     }
                     ret.put(relativePath, displayName);
                 }
@@ -198,8 +199,8 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             }
         }
         return ret;
-
     }
+
 
     @Jpf.Action
     protected Forward chooseRunsToUpload(ChooseRunsToUploadForm form) throws Exception
@@ -212,10 +213,11 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
 
         NavTrailConfig ntc = getNavTrailConfig(null, "Choose Runs To Upload", Action.chooseRunsToUpload);
         form.setNewPaths(getNewPaths(form));
-
+        form.setPipeRoot(root);
 
         return includeView(new HomeTemplate(getViewContext(), view, ntc));
     }
+
 
     @Jpf.Action
     protected Forward uploadRuns(ChooseRunsToUploadForm form) throws Exception

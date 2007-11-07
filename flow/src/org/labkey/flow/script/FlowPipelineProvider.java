@@ -1,26 +1,31 @@
 package org.labkey.flow.script;
 
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.log4j.Logger;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
-import org.apache.log4j.Logger;
-
-import java.util.*;
-import java.io.File;
-import java.sql.SQLException;
-
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.ViewURLHelper;
+import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
-import org.xml.sax.helpers.DefaultHandler;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowProtocolStep;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
+import java.io.FileFilter;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 public class FlowPipelineProvider extends PipelineProvider
 {
@@ -84,6 +89,7 @@ public class FlowPipelineProvider extends PipelineProvider
         }
     }
 
+
     public void updateFileProperties(ViewContext context, List<FileEntry> entries)
     {
         if (!context.hasPermission(ACL.PERM_INSERT))
@@ -92,33 +98,78 @@ public class FlowPipelineProvider extends PipelineProvider
             return;
         if (entries.size() == 0)
             return;
+
         PipeRoot root;
+        Set<String> usedPaths = new HashSet<String>();
+
         try
         {
             root = PipelineService.get().findPipelineRoot(context.getContainer());
+            for (FlowRun run : FlowRun.getRunsForContainer(context.getContainer(), FlowProtocolStep.keywords))
+                usedPaths.add(run.getExperimentRun().getFilePathRoot());
         }
         catch (SQLException e)
         {
             return;
         }
 
-        {
-            FileEntry entry = entries.get(0);
-            File file = new File(entry.getURI());
-            ViewURLHelper url = PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer());
+        ViewURLHelper url = PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer());
+        String srcURL = context.getViewURLHelper().toString();
+        url.replaceParameter("srcURL", srcURL);
 
-            url.addParameter("path", root.relativePath(file));
-            url.addParameter("srcURL", context.getViewURLHelper().toString());
-            FileAction action = new FileAction("Upload FCS files", url, null);
+        boolean hasFlowDir = false;
+        
+        for (FileEntry entry : entries)
+        {
+            File[] dirs = entry.listFiles(DirectoryFileFilter.INSTANCE);
+            for (File dir : dirs)
+            {
+                if (usedPaths.contains(dir.getPath()))
+                    continue;
+                File[] fcsFiles = dir.listFiles((FileFilter)FCS.FCSFILTER);
+                if (null == fcsFiles || 0 == fcsFiles.length)
+                    continue;
+                url.replaceParameter("path", root.relativePath(dir));
+                FileAction action = new UploadRunAction("Upload Flow Run", url, dir);
+                action.setDescription("" + fcsFiles.length + "&nbsp;fcs&nbsp;file" + ((fcsFiles.length>1)?"s":""));
+                entry.addAction(action);
+                hasFlowDir = true;
+            }
+        }
+
+        if (hasFlowDir)
+        {
+            FileEntry entryRoot = entries.get(0);
+            File file = new File(entryRoot.getURI());
+
+            url.replaceParameter("path", root.relativePath(file));
+            FileAction action = new FileAction("Upload Multiple Runs", url, null);
             action.setDescription("<p><b>Flow Instructions:</b><br>Navigate to the directories containing FCS files.  Click the button to upload FCS files in the directories shown.</p>");
-            entry.addAction(action);
+            entryRoot.addAction(action);
         }
     }
+
 
     public boolean suppressOverlappingRootsWarning(ViewContext context)
     {
         if (!hasFlowModule(context))
             return super.suppressOverlappingRootsWarning(context);
         return true;
+    }
+
+
+    class UploadRunAction extends FileAction
+    {
+        UploadRunAction(String label, ViewURLHelper url, File dir)
+        {
+            super(label, url, new File[] {dir});
+        }
+
+        @Override
+        public String getDisplay()
+        {
+            String img = super.getDisplay();
+            return img + "&nbsp(" + getDescription() + ")";
+        }
     }
 }

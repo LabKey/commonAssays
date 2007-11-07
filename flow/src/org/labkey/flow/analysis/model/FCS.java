@@ -17,10 +17,14 @@
  */
 package org.labkey.flow.analysis.model;
 
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.log4j.Logger;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * Created by IntelliJ IDEA.
@@ -263,6 +267,39 @@ public class FCS extends FCSHeader
         return rawData.translate(settings);
     }
 
+
+    static public FcsFileFilter FCSFILTER = new FcsFileFilter();
+
+    static class FcsFileFilter implements IOFileFilter
+    {
+        private FcsFileFilter() {}
+
+        public boolean accept(File file)
+        {
+            int i;
+            if (-1 != (i= file.getName().indexOf(".")))
+            {
+                String ext = file.getName().substring(i).toLowerCase();
+                return ext.equals(".fcs") || ext.equals(".facs");
+            }
+            else
+                return isFCSFile(file);
+        }
+
+        public boolean accept(File dir, String name)
+        {
+            int i;
+            if (-1 != (i= name.indexOf(".")))
+            {
+                String ext = name.substring(i).toLowerCase();
+                return ext.equals(".fcs") || ext.equals(".facs");
+            }
+            else
+                return isFCSFile(new File(dir,name));
+        }
+    }
+
+    
     static public boolean isFCSFile(File file)
     {
         InputStream stream = null;
@@ -296,6 +333,7 @@ public class FCS extends FCSHeader
             }
         }
     }
+
 
     private int indexOf(byte[] buf, byte[] key, int min, int max)
     {
