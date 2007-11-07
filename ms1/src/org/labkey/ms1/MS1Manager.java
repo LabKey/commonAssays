@@ -30,7 +30,7 @@ public class MS1Manager
     public static final int FILETYPE_FEATURES = 1;
     public static final int FILETYPE_PEAKS = 2;
 
-    private Thread _purgeThread = new Thread(new PurgeTask(), "MS1 Purge Task");
+    private Thread _purgeThread = null;
 
     private MS1Manager()
     {
@@ -50,8 +50,11 @@ public class MS1Manager
      */
     public void startManualPurge()
     {
-        if(_purgeThread.getState() == Thread.State.NEW || _purgeThread.getState() == Thread.State.TERMINATED)
+        if(null == _purgeThread || _purgeThread.getState() == Thread.State.TERMINATED)
+        {
+            _purgeThread = new Thread(new PurgeTask(), "MS1 Purge Task");
             _purgeThread.start();
+        }
     }
 
     public String getSchemaName()
