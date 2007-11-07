@@ -173,6 +173,7 @@ public class FlowModule extends DefaultModule
         ret.add(ModuleLoader.getInstance().getModule("Query"));
         ret.add(ModuleLoader.getInstance().getModule("Experiment"));
         ret.add(ModuleLoader.getInstance().getModule("Pipeline"));
+        ret.add(ModuleLoader.getInstance().getModule("Portal"));
         return ret;
     }
 
