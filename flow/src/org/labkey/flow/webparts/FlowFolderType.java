@@ -18,7 +18,7 @@ public class FlowFolderType extends DefaultFolderType
         super("Flow", Arrays.asList(OverviewWebPart.FACTORY.createWebPart()),
                 Arrays.asList(AnalysesWebPart.FACTORY.createWebPart(),
                         AnalysisScriptsWebPart.FACTORY.createWebPart()),
-                module.getActiveModulesForOwnedFolder(), module);
+                getDefaultModuleSet(module, getModule("Pipeline")), module);
     }
 
     public ViewURLHelper getStartURL(HttpServletRequest request, Container c, User user)

@@ -23,10 +23,7 @@ public class MS1FolderType extends DefaultFolderType
                 Portal.getPortalPart("Data Pipeline").createWebPart(),
                 Portal.getPortalPart("MS1 Runs").createWebPart()
             ), null,
-            set(module, ModuleLoader.getInstance().getModule("Pipeline"),
-                    ModuleLoader.getInstance().getModule("Experiment"),
-                    ModuleLoader.getInstance().getModule("Portal"),
-                    ModuleLoader.getInstance().getModule("MS2")),
+            getDefaultModuleSet(module, getModule("MS2"), getModule("Pipeline")),
             module);
     }
 }

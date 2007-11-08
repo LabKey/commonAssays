@@ -16,8 +16,16 @@ import java.util.ArrayList;
 
 public class AnalysisScriptsWebPart extends FlowQueryView
 {
-    static public final WebPartFactory FACTORY = new WebPartFactory("Flow Analysis Scripts")
+    static public final WebPartFactory FACTORY = new Factory();
+
+    static class Factory extends WebPartFactory
     {
+        Factory()
+        {
+            super("Flow Scripts");
+            addLegacyNames("Flow Analysis Scripts");
+        }
+
         public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart wp) throws Exception
         {
             FlowSchema schema = new FlowSchema(portalCtx.getUser(), portalCtx.getContainer());
@@ -32,7 +40,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
     public AnalysisScriptsWebPart(ViewContext context, FlowSchema schema, FlowQuerySettings settings)
     {
         super(context, schema, settings);
-        setTitle("Flow Analysis Scripts");
+        setTitle("Flow Scripts");
         setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
     }
 

@@ -20,10 +20,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.module.DefaultModule;
-import org.labkey.api.module.Module;
-import org.labkey.api.module.ModuleContext;
-import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.module.*;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
@@ -164,17 +161,6 @@ public class FlowModule extends DefaultModule
     public static String getLongProductName()
     {
         return "LabKey Flow";
-    }
-
-    public Set<Module> getActiveModulesForOwnedFolder()
-    {
-        Set<Module> ret = new HashSet<Module>();
-        ret.add(this);
-        ret.add(ModuleLoader.getInstance().getModule("Query"));
-        ret.add(ModuleLoader.getInstance().getModule("Experiment"));
-        ret.add(ModuleLoader.getInstance().getModule("Pipeline"));
-        ret.add(ModuleLoader.getInstance().getModule("Portal"));
-        return ret;
     }
 
     /**
