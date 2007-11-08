@@ -463,6 +463,7 @@
                 <tr>
                     <td colspan="3" style="text-align:center">
                         <form id="frmMzWindowFilter" action="showFeatureDetails.view" method="GET">
+                            <input type="hidden" name=".lastFilter" value="true"/>
                             <input type="hidden" name="runId" value="<%=feature.getRunId()%>"/>
                             <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
                             <input type="hidden" name="scan" value="<%=scan%>"/>
@@ -536,6 +537,7 @@
                 <tr>
                     <td style="text-align:center">
                         <form id="frmScanWindowFilter" action="showFeatureDetails.view" method="GET">
+                            <input type="hidden" name=".lastFilter" value="true"/>
                             <input type="hidden" name="runId" value="<%=feature.getRunId()%>"/>
                             <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
                             <input type="hidden" name="scan" value="<%=scan%>"/>
