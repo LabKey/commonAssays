@@ -370,14 +370,25 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
 
         ParticipantVisitResolver resolver = null;
         AssayProvider provider = AssayService.get().getProvider(expRun.getProtocol());
-        if (provider instanceof LuminexAssayProvider)
+        for (ObjectProperty objectProperty : expRun.getObjectProperties().values())
         {
-            LuminexAssayProvider luminexProvider = (LuminexAssayProvider) provider;
-            Container targetStudy = luminexProvider.getTargetStudy(expRun);
-            if (targetStudy != null)
+            if (AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(objectProperty.getName()))
             {
-                SpecimenIDLookupResolverType resolverType = new SpecimenIDLookupResolverType();
-                resolver = resolverType.createResolver(expRun, targetStudy, user);
+                ParticipantVisitResolverType resolverType = AbstractAssayProvider.findType(objectProperty.getStringValue(), provider.getParticipantVisitResolverTypes());
+                Container targetStudy = null;
+                if (provider instanceof LuminexAssayProvider)
+                {
+                    LuminexAssayProvider luminexProvider = (LuminexAssayProvider) provider;
+                    targetStudy = luminexProvider.getTargetStudy(expRun);
+                }
+                try
+                {
+                    resolver = resolverType.createResolver(expRun, targetStudy, user);
+                }
+                catch (IOException e)
+                {
+                    throw new ExperimentException(e);
+                }
             }
         }
 
@@ -627,6 +638,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                     ParticipantVisit match = resolver.resolve(value, null, null, null);
                     dataRow.setPtid(match.getParticipantID());
                     dataRow.setVisitID(match.getVisitID());
+                    dataRow.setDate(match.getDate());
                 }
             }
             else if ("Std Dev".equalsIgnoreCase(columnName))

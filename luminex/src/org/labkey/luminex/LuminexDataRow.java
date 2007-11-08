@@ -1,5 +1,7 @@
 package org.labkey.luminex;
 
+import java.util.Date;
+
 /**
  * User: jeckels
  * Date: Jun 26, 2007
@@ -15,6 +17,7 @@ public class LuminexDataRow
     private String _description;
     private String _ptid;
     private Double _visitID;
+    private Date _date;
     private String _fiString;
     private Double _fi;
     private String _fiOORIndicator;
@@ -340,5 +343,15 @@ public class LuminexDataRow
     public void setVisitID(Double visitID)
     {
         _visitID = visitID;
+    }
+
+    public Date getDate()
+    {
+        return _date;
+    }
+
+    public void setDate(Date date)
+    {
+        _date = date;
     }
 }

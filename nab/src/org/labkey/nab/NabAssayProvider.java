@@ -202,20 +202,20 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         return NabSchema.getDataRowTable(schema.getUser(), protocol, alias);
     }
 
-    public Set<FieldKey> getParticipantIDDataKeys()
+    public FieldKey getParticipantIDFieldKey()
     {
-        return Collections.singleton(FieldKey.fromParts("Properties",
-                NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", PARTICIPANTID_PROPERTY_NAME));
+        return FieldKey.fromParts("Properties",
+                NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", PARTICIPANTID_PROPERTY_NAME);
     }
 
-    public Set<FieldKey> getVisitIDDataKeys(Container container)
+    public FieldKey getVisitIDFieldKey(Container container)
     {
         if (AssayPublishService.get().getTimepointType(container) == TimepointType.VISIT)
-            return Collections.singleton(FieldKey.fromParts("Properties",
-                    NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", VISITID_PROPERTY_NAME));
+            return FieldKey.fromParts("Properties",
+                    NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", VISITID_PROPERTY_NAME);
         else
-            return Collections.singleton(FieldKey.fromParts("Properties",
-                    NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", DATE_PROPERTY_NAME));
+            return FieldKey.fromParts("Properties",
+                    NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", DATE_PROPERTY_NAME);
 
     }
 
@@ -227,6 +227,12 @@ public class NabAssayProvider extends PlateBasedAssayProvider
     public FieldKey getDataRowIdFieldKey()
     {
         return FieldKey.fromParts("ObjectId");
+    }
+
+    public FieldKey getSpecimenIDFieldKey()
+    {
+        return FieldKey.fromParts("Properties",
+                NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY, "Property", SPECIMENID_PROPERTY_NAME);
     }
 
     protected PropertyType getDataRowIdType()
@@ -366,7 +372,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
     
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
-        return Arrays.asList(new ParticipantVisitNoOpResolverType(), new SpecimenIDLookupResolverType(), new ThawListResolverType(), new ParticipantVisitDateResolverType());
+        return Arrays.asList(new ParticipantVisitLookupResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());
     }
 
     public static class NabQueryViewCustomizer implements QueryViewCustomizer

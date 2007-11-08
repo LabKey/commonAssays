@@ -418,6 +418,7 @@ luminex/src/META-INF/luminex/scripts/postgresql/luminex-0.03-0.04.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-0.04-0.05.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-0.06-0.07.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-2.20-2.21.sql -text
+luminex/src/META-INF/luminex/scripts/postgresql/luminex-2.21-2.22.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-0.00-2.20.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-0.01-0.02.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-0.02-0.03.sql -text
@@ -426,6 +427,7 @@ luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-0.04-0.05.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-0.05-0.06.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-0.06-0.07.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-2.20-2.21.sql -text
+luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-2.21-2.22.sql -text
 luminex/src/org/labkey/luminex/Analyte.java -text
 luminex/src/org/labkey/luminex/AnalyteImportHelper.java -text
 luminex/src/org/labkey/luminex/LuminexAssayProvider.java -text

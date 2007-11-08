@@ -213,22 +213,27 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return FieldKey.fromParts("Data", "Run", "RowId");
     }
 
-    public Set<FieldKey> getParticipantIDDataKeys()
+    public FieldKey getParticipantIDFieldKey()
     {
-        return Collections.singleton(FieldKey.fromParts("ParticipantID"));
+        return FieldKey.fromParts("ParticipantID");
     }
 
-    public Set<FieldKey> getVisitIDDataKeys(Container container)
+    public FieldKey getVisitIDFieldKey(Container container)
     {
         if (AssayPublishService.get().getTimepointType(container) == TimepointType.VISIT)
-            return Collections.singleton(FieldKey.fromParts("VisitID"));
+            return FieldKey.fromParts("VisitID");
         else
-            return Collections.singleton(FieldKey.fromParts("Date"));
+            return FieldKey.fromParts("Date");
     }
 
     public FieldKey getDataRowIdFieldKey()
     {
         return FieldKey.fromParts("RowId");
+    }
+
+    public FieldKey getSpecimenIDFieldKey()
+    {
+        return FieldKey.fromParts("Description");
     }
 
     public ViewURLHelper publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
@@ -261,6 +266,8 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
             pds.addAll(Arrays.asList(runPDs));
             pds.addAll(Arrays.asList(uploadSetPDs));
+
+            TimepointType timepointType = AssayPublishService.get().getTimepointType(study);
 
             int index = 0;
             for (LuminexDataRow luminexDataRow : luminexDataRows)
@@ -342,14 +349,21 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                     if (((Integer)dataKey.getDataId()).intValue() == luminexDataRow.getRowId())
                     {
                         dataMap.put("ParticipantID", dataKey.getParticipantId());
-                        dataMap.put("SequenceNum", dataKey.getVisitId());
+                        if (timepointType.equals(TimepointType.VISIT))
+                        {
+                            dataMap.put("SequenceNum", dataKey.getVisitId());
+                        }
+                        else
+                        {
+                            dataMap.put("Date", dataKey.getDate());
+                        }
                         break;
                     }
                 }
 
                 dataMaps[index++] = dataMap;
             }
-            return AssayPublishService.get().publishAssayData(user, study, protocol.getName(), protocol, dataMaps, types, errors);
+            return AssayPublishService.get().publishAssayData(user, study, protocol.getName(), protocol, dataMaps, types, getDataRowIdFieldKey().toString(), errors);
         }
         catch (SQLException e)
         {
@@ -367,6 +381,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
-        return Collections.<ParticipantVisitResolverType>singletonList(new SpecimenIDLookupResolverType());
+        return Arrays.asList(new StudyParticipantVisitResolverType(), new ThawListResolverType());
     }
 }

@@ -150,28 +150,9 @@ public class LuminexSchema extends UserSchema
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Ratio")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("SamplingErrors")));
 
-        FieldKey studyFieldKey = FieldKey.fromParts("Data", "Run", "Run Properties", AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME);
-        ColumnInfo studyColumn = QueryService.get().getColumns(result, Collections.singleton(studyFieldKey)).get(studyFieldKey);
-
-        ExprColumn participantCol;
-        ExprColumn visitCol;
-
-        if (studyColumn != null)
-        {
-            SQLFragment participantSQL = new SQLFragment("(CASE WHEN (" + ExprColumn.STR_TABLE_ALIAS + ".PTID IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".VisitID IS NULL) THEN (SELECT MIN(ptid) FROM study.specimen s WHERE s.GlobalUniqueId = " + ExprColumn.STR_TABLE_ALIAS + ".Description AND CAST(s.container AS VARCHAR(50)) = " + studyColumn.getValueSql() +  ") ELSE " + ExprColumn.STR_TABLE_ALIAS + ".PTID END)");
-            participantCol = new ExprColumn(result, "ParticipantID", participantSQL, Types.VARCHAR, studyColumn);
-
-            SQLFragment visitSQL = new SQLFragment("(CASE WHEN (" + ExprColumn.STR_TABLE_ALIAS + ".PTID IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".VisitID IS NULL) THEN (SELECT MIN(visitvalue) FROM study.specimen s WHERE s.GlobalUniqueId = " + ExprColumn.STR_TABLE_ALIAS + ".Description AND CAST(s.container AS VARCHAR(50)) = " + studyColumn.getValueSql() +  ") ELSE " + ExprColumn.STR_TABLE_ALIAS + ".VisitID END)");
-            visitCol = new ExprColumn(result, "VisitID", visitSQL, Types.REAL, studyColumn);
-        }
-        else
-        {
-            participantCol = new ExprColumn(result, "ParticipantID", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".PTID"), Types.VARCHAR);
-            visitCol = new ExprColumn(result, "VisitID", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".VisitID"), Types.REAL);
-        }
-
-        result.addColumn(participantCol);
-        result.addColumn(visitCol);
+        result.addColumn(result.wrapColumn("ParticipantID", result.getRealTable().getColumn("PTID")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("VisitID")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Date")));
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("Analyte"));

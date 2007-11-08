@@ -1,0 +1,1 @@
+ALTER TABLE luminex.DataRow ADD COLUMN Date TIMESTAMP;
