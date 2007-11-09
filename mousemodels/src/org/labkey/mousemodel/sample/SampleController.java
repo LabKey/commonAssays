@@ -246,7 +246,7 @@ public class SampleController extends ViewController
         locationView.setTitle("Location");
 
         SlidesView slidesView = new SlidesView(model, sample, getViewContext());
-        HttpView discussionView = DiscussionService.get().getDisussionArea(getViewContext(), getContainer(), getUser(), sample.getLSID(), getViewContext().cloneViewURLHelper(), sample.getSampleId());
+        HttpView discussionView = DiscussionService.get().getDisussionArea(getViewContext(), getContainer(), getUser(), sample.getLSID(), getViewContext().cloneViewURLHelper(), sample.getSampleId(), true);
 
         VBox vbox = new VBox(new HBox(new HttpView[]{detailsView, locationView}), slidesView, discussionView);
         _renderInTemplate(vbox, modelId);

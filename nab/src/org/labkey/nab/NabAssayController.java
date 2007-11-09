@@ -215,7 +215,7 @@ public class NabAssayController extends SpringActionController
             String entityId = _run.getLSID();
             DiscussionService.Service service = DiscussionService.get();
             return service.getDisussionArea(context, context.getContainer(), context.getUser(),
-                    entityId, pageUrl, discussionTitle);
+                    entityId, pageUrl, discussionTitle, true);
         }
 
         private class PropertyDescriptorComparator implements Comparator<PropertyDescriptor>

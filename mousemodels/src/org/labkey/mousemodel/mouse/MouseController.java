@@ -246,7 +246,7 @@ public class MouseController extends ViewController
 
         HttpView discussionView = DiscussionService.get().getDisussionArea(
                 getViewContext(), getContainer(), getUser(),
-                mouse.getEntityId(), getViewContext().cloneViewURLHelper(), mouse.getMouseNo());
+                mouse.getEntityId(), getViewContext().cloneViewURLHelper(), mouse.getMouseNo(), true);
 
         GridView sampleView = new GridView(getSamplesGridRegion(mouse));
         SimpleFilter filter = new SimpleFilter("organismId", form.getEntityId());

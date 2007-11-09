@@ -291,7 +291,7 @@ public class NabController extends ViewController
             String entityId = _assay.getPlate().getEntityId();
             DiscussionService.Service service = DiscussionService.get();
             return service.getDisussionArea(context, context.getContainer(), context.getUser(),
-                    entityId, pageUrl, discussionTitle);
+                    entityId, pageUrl, discussionTitle, true);
         }
     }
 
