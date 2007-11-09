@@ -45,7 +45,7 @@ public class ShowPeptideContext
 
     private void calcXRange()
     {
-        SpectrumGraph graph = new SpectrumGraph(peptide, form.getWidth(), form.getHeight(), form.getTolerance(), form.getxStart(),  form.getxEnd());
+        SpectrumGraph graph = new SpectrumGraph(peptide, form.getWidth(), form.getHeight(), form.getTolerance(), form.getxStartDouble(),  form.getxEnd());
 
         actualXStart = Formats.f0.format(graph.getXStart());
         actualXEnd = Formats.f0.format(graph.getXEnd());

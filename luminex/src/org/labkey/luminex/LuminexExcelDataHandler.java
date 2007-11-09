@@ -411,25 +411,31 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             row++;
             
             List<String> colNames = new ArrayList<String>();
-            for (int col = 0; col < sheet.getColumns(); col++)
+            if (row < sheet.getRows())
             {
-                colNames.add(sheet.getCell(col, row).getContents());
+                for (int col = 0; col < sheet.getColumns(); col++)
+                {
+                    colNames.add(sheet.getCell(col, row).getContents());
+                }
+                row++;
             }
-            row++;
 
             List<LuminexDataRow> dataRows = new ArrayList<LuminexDataRow>();
 
-            do
+            if (row < sheet.getRows())
             {
-                Map<String, Object> dataRowProps = new LinkedHashMap<String, Object>();
-                LuminexDataRow dataRow = createDataRow(data, sheet, colNames, row, resolver);
-                dataRows.add(dataRow);
-                dataRowsProps.add(dataRowProps);
-            }
-            while (row++ < sheet.getRows() && !"".equals(sheet.getCell(0, row).getContents()));
+                do
+                {
+                    Map<String, Object> dataRowProps = new LinkedHashMap<String, Object>();
+                    LuminexDataRow dataRow = createDataRow(data, sheet, colNames, row, resolver);
+                    dataRows.add(dataRow);
+                    dataRowsProps.add(dataRowProps);
+                }
+                while (++row < sheet.getRows() && !"".equals(sheet.getCell(0, row).getContents()));
 
-            // Skip over the blank line
-            row++;
+                // Skip over the blank line
+                row++;
+            }
 
             row = handleHeaderOrFooterRow(sheet, row, analyte, analyteColumns, analyteProps, excelRunColumns, excelRunProps);
 
@@ -694,6 +700,11 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
 
     private int handleHeaderOrFooterRow(Sheet analyteSheet, int row, Analyte analyte, PropertyDescriptor[] analyteColumns, Map<String, Object> analyteProps, PropertyDescriptor[] excelRunColumns, Map<String, Object> excelRunProps)
     {
+        if (row >= analyteSheet.getRows())
+        {
+            return row;
+        }
+        
         do
         {
             String cellContents = analyteSheet.getCell(0, row).getContents();

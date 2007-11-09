@@ -76,7 +76,7 @@
     graphUrl.addParameter("width", "600");
     graphUrl.addParameter("height", "400");
 
-    if (Double.MIN_VALUE != ctx.form.getxStart()) graphUrl.addParameter("xStart", ctx.form.getStringXStart());
+    if (Double.MIN_VALUE != ctx.form.getxStartDouble()) graphUrl.addParameter("xStart", ctx.form.getStringXStart());
     if (Double.MAX_VALUE != ctx.form.getxEnd()) graphUrl.addParameter("xEnd", ctx.form.getStringXEnd());
 
     graphUrl.addParameter("tolerance", String.valueOf(ctx.form.getTolerance()));

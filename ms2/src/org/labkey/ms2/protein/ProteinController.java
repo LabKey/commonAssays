@@ -191,31 +191,43 @@ public class ProteinController extends ViewController
         tabLoader.setScanAheadLineCount(200);
 
         Map<String, Object>[] rows = (Map<String, Object>[]) tabLoader.load();
+        TabLoader.ColumnDescriptor[] columns = tabLoader.getColumns();
+        String lookupStringColumnName = null;
 
         if (rows.length < 1)
         {
             addError("Your annotation set must have at least one annotation, plus the header line");
         }
-
-        TabLoader.ColumnDescriptor[] columns = tabLoader.getColumns();
-        String lookupStringColumnName = columns[0].name;
-
-        Set<String> lookupStrings = new CaseInsensitiveHashSet();
-        for (Map<String, Object> row : rows)
+        else
         {
-            String lookupString = CustomAnnotationImportHelper.convertLookup(row.get(lookupStringColumnName));
-            if (lookupString == null || lookupString.length() == 0)
+            Set<String> columnNames = new CaseInsensitiveHashSet();
+            for (TabLoader.ColumnDescriptor column : columns)
             {
-                addError("All rows must contain a protein identifier.");
-                break;
+                if (!columnNames.add(column.name))
+                {
+                    addError("Duplicate column name: " + column.name);
+                }
             }
 
-            if (!lookupStrings.add(lookupString))
+            lookupStringColumnName = columns[0].name;
+
+            Set<String> lookupStrings = new CaseInsensitiveHashSet();
+            for (Map<String, Object> row : rows)
             {
-                addError("The input contains multiple entries for the protein " + lookupString);
-                break;
+                String lookupString = CustomAnnotationImportHelper.convertLookup(row.get(lookupStringColumnName));
+                if (lookupString == null || lookupString.length() == 0)
+                {
+                    addError("All rows must contain a protein identifier.");
+                    break;
+                }
+
+                if (!lookupStrings.add(lookupString))
+                {
+                    addError("The input contains multiple entries for the protein " + lookupString);
+                    break;
+                }
+                row.put(lookupStringColumnName, lookupString);
             }
-            row.put(lookupStringColumnName, lookupString);
         }
 
         if (!PageFlowUtil.getActionErrors(getRequest(), true).isEmpty())

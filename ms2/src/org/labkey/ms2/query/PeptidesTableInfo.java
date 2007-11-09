@@ -4,6 +4,7 @@ import org.labkey.api.query.*;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.ms1.MS1Service;
+import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.ms2.*;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
 import org.labkey.common.util.Pair;
@@ -378,9 +379,17 @@ public class PeptidesTableInfo extends FilteredTable
         }
         else
         {
-            result.add(FieldKey.fromParts("RawScore"));
-            result.add(FieldKey.fromParts("DiffScore"));
-            result.add(FieldKey.fromParts("Expect"));
+            Set<String> scoreCols = new CaseInsensitiveHashSet();
+            for (MS2RunType runType : MS2RunType.values())
+            {
+                for (String name : runType.getScoreColumnList())
+                {
+                    if (scoreCols.add(name))
+                    {
+                        result.add(FieldKey.fromParts(name));
+                    }
+                }
+            }
         }
         result.add(FieldKey.fromParts("IonPercent"));
         result.add(FieldKey.fromParts("Mass"));

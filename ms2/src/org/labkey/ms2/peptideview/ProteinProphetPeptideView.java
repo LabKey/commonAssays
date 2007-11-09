@@ -265,10 +265,10 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
     {
         SimpleFilter coverageFilter = null;
-        if (form.getSeqId() != 0)
+        if (form.getSeqIdInt() != 0)
         {
             coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getSingleRun());
-            coverageFilter.addCondition("pgm.SeqId", form.getSeqId());
+            coverageFilter.addCondition("pgm.SeqId", form.getSeqIdInt());
         }
         else if (form.getGroupNumber() != 0)
         {

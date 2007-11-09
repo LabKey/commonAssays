@@ -1914,7 +1914,7 @@ public class MS2Controller extends ViewController
         if (!isAuthorized(form.run))
             return null;
 
-        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
+        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
         Quantitation quant = peptide.getQuantitation();
 
         EditElutionGraphContext ctx = new EditElutionGraphContext(quant.getLightElutionProfile(peptide.getCharge()), quant.getHeavyElutionProfile(peptide.getCharge()), quant, getViewURLHelper(), peptide);
@@ -1931,7 +1931,7 @@ public class MS2Controller extends ViewController
         if (!isAuthorized(form.run))
             return null;
 
-        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
+        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
         if (peptide == null)
         {
             throw new NotFoundException();
@@ -1960,7 +1960,7 @@ public class MS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
+        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
 
         if (null != peptide)
         {
@@ -1971,7 +1971,7 @@ public class MS2Controller extends ViewController
             response.setDateHeader("Expires", System.currentTimeMillis() + DateUtils.MILLIS_PER_HOUR);
             response.setHeader("Pragma", "");
             response.setContentType("image/png");
-            peptide.renderGraph(response, form.getTolerance(), form.getxStart(), form.getxEnd(), form.getWidth(), form.getHeight());
+            peptide.renderGraph(response, form.getTolerance(), form.getxStartDouble(), form.getxEnd(), form.getWidth(), form.getHeight());
         }
 
         return null;
@@ -1984,7 +1984,7 @@ public class MS2Controller extends ViewController
         if (!isAuthorized(form.run))
             return null;
 
-        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
+        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
 
         HttpServletResponse response = getResponse();
         if (null != peptide)
@@ -2027,7 +2027,7 @@ public class MS2Controller extends ViewController
         }
         else
         {
-            return HttpView.throwNotFound("Could not find peptide with id " + form.getPeptideId());
+            return HttpView.throwNotFound("Could not find peptide with id " + form.getPeptideIdLong());
         }
     }
 
@@ -2067,7 +2067,7 @@ public class MS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        long peptideId = form.getPeptideId();
+        long peptideId = form.getPeptideIdLong();
         MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
 
         if (peptide == null)
@@ -2772,13 +2772,13 @@ public class MS2Controller extends ViewController
         if (!isAuthorized(form.run))
             return null;
 
-        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
+        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
 
         if (null == peptide)
         {
             // This should only happen if an old, cached link is being used... a saved favorite or google bot with fraction=x&scan=y&charge=z instead of peptideId
             // Log an error just to make sure.
-            _log.error("Couldn't find peptide " + form.getPeptideId() + ". " + getViewURLHelper().toString());
+            _log.error("Couldn't find peptide " + form.getPeptideIdLong() + ". " + getViewURLHelper().toString());
             return _renderError("Peptide not found");
         }
 
@@ -3369,7 +3369,7 @@ public class MS2Controller extends ViewController
         if (!isAuthorized(form.run))
             return null;
 
-        long peptideId = form.getPeptideId();
+        long peptideId = form.getPeptideIdLong();
 
         if (peptideId == 0)
             return _renderError("No peptide specified");
@@ -3618,7 +3618,10 @@ public class MS2Controller extends ViewController
         gridView.getViewContext().setPermissions(ACL.PERM_READ);
         SimpleFilter runFilter = new SimpleFilter();
 
-        runFilter.addInClause("Container", ContainerManager.getIds(getUser(), ACL.PERM_READ));
+        if (!getUser().isAdministrator())
+        {
+            runFilter.addInClause("Container", ContainerManager.getIds(getUser(), ACL.PERM_READ));
+        }
 
         gridView.setFilter(runFilter);
         gridView.setTitle("Show All Runs");
@@ -4462,22 +4465,40 @@ public class MS2Controller extends ViewController
             this.indistinguishableCollectionId = indistinguishableCollectionId;
         }
 
-        public void setPeptideId(long peptideId)
+        public void setPeptideId(String peptideId)
         {
-            this.peptideId = peptideId;
+            try
+            {
+                this.peptideId = Long.parseLong(peptideId);
+            }
+            catch (NumberFormatException e) {}
         }
 
-        public long getPeptideId()
+        public String getPeptideId()
+        {
+            return Long.toString(peptideId);
+        }
+
+        public long getPeptideIdLong()
         {
             return this.peptideId;
         }
 
-        public void setxStart(double xStart)
+        public void setxStart(String xStart)
         {
-            this.xStart = xStart;
+            try
+            {
+                this.xStart = Double.parseDouble(xStart);
+            }
+            catch (NumberFormatException e) {}
         }
 
-        public double getxStart()
+        public String getxStart()
+        {
+            return Double.toString(xStart);
+        }
+
+        public double getxStartDouble()
         {
             return this.xStart;
         }
@@ -4556,12 +4577,21 @@ public class MS2Controller extends ViewController
             return this.rowIndex;
         }
 
-        public void setSeqId(int seqId)
+        public void setSeqId(String seqId)
         {
-            this.seqId = seqId;
+            try
+            {
+                this.seqId = Integer.parseInt(seqId);
+            }
+            catch (NumberFormatException e) {}
         }
 
-        public int getSeqId()
+        public String getSeqId()
+        {
+            return Integer.toString(this.seqId);
+        }
+
+        public int getSeqIdInt()
         {
             return this.seqId;
         }
@@ -4714,14 +4744,18 @@ public class MS2Controller extends ViewController
             return this.viewParams;
         }
 
-        public void setRun(int run)
+        public void setRun(String run)
         {
-            this.run = run;
+            try
+            {
+                this.run = Integer.parseInt(run);
+            }
+            catch (NumberFormatException e) {}
         }
 
-        public int getRun()
+        public String getRun()
         {
-            return this.run;
+            return Integer.toString(run);
         }
 
         public boolean isShared()

@@ -118,7 +118,13 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         Map row = ctx.getRow();
         try
         {
-            int groupId = ((Integer) row.get(_columnName)).intValue();
+            Object groupIdObject = row.get(_columnName);
+            if (!(groupIdObject instanceof Number))
+            {
+                out.write("ProteinGroupId not present in ResultSet");
+                return;
+            }
+            int groupId = ((Number) groupIdObject).intValue();
             List<ProteinSummary> summaryList = _proteins.getSummaries(groupId, ctx, _columnName);
 
             ViewURLHelper url = ctx.getViewContext().cloneViewURLHelper();

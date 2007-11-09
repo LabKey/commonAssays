@@ -34,6 +34,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.pipeline.*;
+import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
@@ -160,6 +161,11 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
             long count = MS2Manager.getRunCount(c);
             if (count > 0)
                 list.add("" + count + " MS2 Run" + (count > 1 ? "s" : ""));
+            int customAnnotationCount = ProteinManager.getCustomAnnotationSets(c, false).size();
+            if (customAnnotationCount > 0)
+            {
+                list.add(customAnnotationCount + " custom protein annotation set" + (customAnnotationCount > 1 ? "s" : ""));
+            }
         }
         catch (SQLException x)
         {
@@ -179,6 +185,11 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
     public void containerDeleted(Container c, User user)
     {
         MS2Manager.markAsDeleted(c, user);
+
+        for (CustomAnnotationSet set : ProteinManager.getCustomAnnotationSets(c, false).values())
+        {
+            ProteinManager.deleteCustomAnnotationSet(set);
+        }
     }
 
 

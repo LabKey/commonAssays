@@ -26,7 +26,7 @@ public class ProteinGroupProteins
     {
         Map<Integer, List<ProteinSummary>> result = new HashMap<Integer, List<ProteinSummary>>();
 
-        if (_runs.length > 0)
+        if (_runs != null && _runs.length > 0)
         {
             StringBuilder inClause = new StringBuilder();
             inClause.append("SELECT pg.RowId FROM\n");
