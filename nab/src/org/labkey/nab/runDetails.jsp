@@ -1,21 +1,19 @@
 <%@ page import="org.apache.commons.lang.StringUtils"%>
-<%@ page import="org.labkey.api.study.WellData"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
-<%@ page import="org.labkey.api.view.HttpView"%>
-<%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="java.text.DecimalFormat" %>
-<%@ page import="org.labkey.api.study.PlateQueryView" %>
-<%@ page import="org.labkey.nab.*" %>
+<%@ page import="org.labkey.api.exp.PropertyDescriptor"%>
+<%@ page import="org.labkey.api.exp.PropertyType"%>
+<%@ page import="org.labkey.api.query.QueryView"%>
 <%@ page import="org.labkey.api.security.ACL" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.api.query.QueryView" %>
-<%@ page import="org.labkey.api.exp.PropertyDescriptor" %>
-<%@ page import="org.labkey.api.exp.PropertyType" %>
-<%@ page import="java.text.DateFormat" %>
-<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="org.labkey.api.study.WellData" %>
 <%@ page import="org.labkey.api.study.assay.AbstractAssayProvider" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.nab.*" %>
+<%@ page import="java.text.DateFormat" %>
+<%@ page import="java.text.DecimalFormat" %>
+<%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.*" %>
-<%@ page import="org.labkey.common.util.Pair" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<NabAssayController.RenderAssayBean> me = (JspView<NabAssayController.RenderAssayBean>) HttpView.currentView();
@@ -23,8 +21,8 @@
     Luc5Assay assay = bean.getAssay();
     ViewContext context = me.getViewContext();
 
-    List<Pair<String, Map<PropertyDescriptor, Object>>> sampleProperties = bean.getSampleProperties();
-    Map<PropertyDescriptor, Object> firstSample = sampleProperties.get(0).getValue();
+    List<NabAssayController.SampleResult> sampleInfos = bean.getSampleResults();
+    Map<PropertyDescriptor, Object> firstSample = sampleInfos.get(0).getProperties();
     Set<PropertyDescriptor> samplePropertyDescriptors = firstSample.keySet();
 
     Map<PropertyDescriptor, Object> runProperties = bean.getRunProperties();
@@ -153,13 +151,13 @@
                                         %>
                                     </tr>
                                     <%
-                                        for (int i = 0; i < assay.getSummaries().length; i++)
+                                        for (NabAssayController.SampleResult results : bean.getSampleResults())
                                         {
-                                            DilutionSummary summary = assay.getSummaries()[i];
+                                            DilutionSummary summary = results.getDilutionSummary();
                                     %>
                                     <tr>
                                         <td class="normal">
-                                            <%=h(summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME))%>
+                                            <%=h(results.getKey())%>
                                         </td>
                                         <%
                                             for (int cutoff : assay.getCutoffs())
@@ -223,25 +221,13 @@
                             </tr>
                             <%
 
-                                for (DilutionSummary summary : assay.getSummaries())
+                                for (NabAssayController.SampleResult results : bean.getSampleResults())
                                 {
-                                    String specimenId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
-                                    Map<PropertyDescriptor, Object> properties = null;
-                                    for (Pair<String, Map<PropertyDescriptor, Object>> sample : sampleProperties)
-                                    {
-                                        if (specimenId.equals(sample.getKey()))
-                                        {
-                                            properties = sample.getValue();
-                                            break;
-                                        }
-                                    }
-                                    if (properties == null)
-                                        continue;
                             %>
                                 <tr>
-                                    <td><%= h(specimenId) %></td>
+                                    <td><%= h(results.getKey()) %></td>
                             <%
-                                for (Map.Entry<PropertyDescriptor, Object> entry : properties.entrySet())
+                                for (Map.Entry<PropertyDescriptor, Object> entry : results.getProperties().entrySet())
                                 {
                                     PropertyDescriptor pd = entry.getKey();
 
@@ -284,24 +270,12 @@
                                 <td style="<%= labelStyle %>"><%= h(NabAssayProvider.SAMPLE_DESCRIPTION_PROPERTY_CAPTION) %></td>
                             </tr>
                             <%
-                                for (DilutionSummary summary : assay.getSummaries())
+                                for (NabAssayController.SampleResult results : bean.getSampleResults())
                                 {
-                                    String specimenId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
-                                    Map<PropertyDescriptor, Object> properties = null;
-                                    for (Pair<String, Map<PropertyDescriptor, Object>> sample : sampleProperties)
-                                    {
-                                        if (specimenId.equals(sample.getKey()))
-                                        {
-                                            properties = sample.getValue();
-                                            break;
-                                        }
-                                    }
-                                    if (properties == null)
-                                        continue;
-                                    String desc = (String) properties.get(sampleDescPD);
+                                    String desc = (String) results.getProperties().get(sampleDescPD);
                             %>
                             <tr>
-                                <td><%= h(specimenId) %></td>
+                                <td><%= h(results.getKey()) %></td>
                                 <td><%= h(desc) %></td>
                             </tr>
                             <%
@@ -346,14 +320,14 @@
             <table class="normal">
                 <tr>
                     <%
-                        for (int i = 0; i < assay.getSummaries().length; i++)
+                        for (NabAssayController.SampleResult results : bean.getSampleResults())
                         {
-                            DilutionSummary summary = assay.getSummaries()[i];
+                            DilutionSummary summary = results.getDilutionSummary();
                     %>
                     <td>
                         <table>
                             <tr>
-                                <th colspan="4"><%= h(summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME)) %></th>
+                                <th colspan="4"><%= h(results.getKey()) %></th>
                             </tr>
                             <tr>
                                 <td style="<%= labelStyle %>" align="right"><%= summary.getMethod().getAbbreviation() %></td>

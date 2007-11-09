@@ -110,8 +110,8 @@ public class NabAssayController extends SpringActionController
         private PlateBasedAssayProvider _provider;
         private ExpRun _run;
         private Map<PropertyDescriptor, Object> _runProperties;
-        private List<Pair<String, Map<PropertyDescriptor, Object>>> _sampleProperties;
         private Set<String> _hiddenRunColumns;
+        List<SampleResult> _sampleResults;
 
         public RenderAssayBean(Luc5Assay assay, boolean newRun, boolean printView, ExpProtocol protocol, PlateBasedAssayProvider provider, ExpRun run)
         {
@@ -254,49 +254,97 @@ public class NabAssayController extends SpringActionController
             return Collections.unmodifiableMap(_runProperties);
         }
 
-        public List<Pair<String, Map<PropertyDescriptor, Object>>> getSampleProperties()
+        public List<SampleResult> getSampleResults()
         {
-            if (_sampleProperties == null)
+            if (_sampleResults == null)
             {
-                Collection<ExpMaterial> inputs = _run.getMaterialInputs().keySet();
-                _sampleProperties = new ArrayList<Pair<String, Map<PropertyDescriptor, Object>>>();
-                PropertyDescriptor[] samplePropertyDescriptors = _provider.getSampleWellGroupColumns(_protocol);
-
-                PropertyDescriptor sampleIdPD = null;
-                PropertyDescriptor visitIdPD = null;
-                PropertyDescriptor participantIdPD = null;
-                PropertyDescriptor datePD = null;
-                for (PropertyDescriptor property : samplePropertyDescriptors)
+                _sampleResults = new ArrayList<SampleResult>();
+                Map<String, Map<PropertyDescriptor, Object>> sampleProperties = getSampleProperties();
+                for (DilutionSummary summary : _assay.getSummaries())
                 {
-                    if (property.getName().equals(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME))
-                        sampleIdPD = property;
-                    else if (property.getName().equals(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME))
-                        participantIdPD = property;
-                    else if (property.getName().equals(AbstractAssayProvider.VISITID_PROPERTY_NAME))
-                        visitIdPD = property;
-                    else if (property.getName().equals(AbstractAssayProvider.DATE_PROPERTY_NAME))
-                        datePD = property;
-                }
-
-                for (ExpMaterial material : inputs)
-                {
-                    Map<PropertyDescriptor, Object> sampleProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
-                    for (PropertyDescriptor property : _provider.getSampleWellGroupColumns(_protocol))
-                    {
-                        if (property != sampleIdPD && property != visitIdPD && property != participantIdPD && property != datePD)
-                            sampleProperties.put(property, material.getProperty(property));
-                    }
-                    String key = getMaterialKey((String) material.getProperty(sampleIdPD),
-                            (String) material.getProperty(participantIdPD), (Double) material.getProperty(visitIdPD), (Date) material.getProperty(datePD));
-                    _sampleProperties.add(new Pair<String, Map<PropertyDescriptor, Object>>(key, sampleProperties));
+                    String specimenId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
+                    Double visitId = (Double) summary.getWellGroup().getProperty(AbstractAssayProvider.VISITID_PROPERTY_NAME);
+                    String participantId = (String) summary.getWellGroup().getProperty(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
+                    Date visitDate = (Date) summary.getWellGroup().getProperty(AbstractAssayProvider.DATE_PROPERTY_NAME);
+                    String key = getMaterialKey(specimenId, participantId, visitId, visitDate);
+                    Map<PropertyDescriptor, Object> properties = sampleProperties.get(key);
+                    _sampleResults.add(new SampleResult(summary, key, properties));
                 }
             }
-            return _sampleProperties;
+            return _sampleResults;
+        }
+
+        private Map<String, Map<PropertyDescriptor, Object>> getSampleProperties()
+        {
+            Map<String, Map<PropertyDescriptor, Object>> samplePropertyMap = new HashMap<String, Map<PropertyDescriptor, Object>>();
+
+            Collection<ExpMaterial> inputs = _run.getMaterialInputs().keySet();
+            PropertyDescriptor[] samplePropertyDescriptors = _provider.getSampleWellGroupColumns(_protocol);
+
+            PropertyDescriptor sampleIdPD = null;
+            PropertyDescriptor visitIdPD = null;
+            PropertyDescriptor participantIdPD = null;
+            PropertyDescriptor datePD = null;
+            for (PropertyDescriptor property : samplePropertyDescriptors)
+            {
+                if (property.getName().equals(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME))
+                    sampleIdPD = property;
+                else if (property.getName().equals(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME))
+                    participantIdPD = property;
+                else if (property.getName().equals(AbstractAssayProvider.VISITID_PROPERTY_NAME))
+                    visitIdPD = property;
+                else if (property.getName().equals(AbstractAssayProvider.DATE_PROPERTY_NAME))
+                    datePD = property;
+            }
+
+            for (ExpMaterial material : inputs)
+            {
+                Map<PropertyDescriptor, Object> sampleProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
+                for (PropertyDescriptor property : _provider.getSampleWellGroupColumns(_protocol))
+                {
+                    if (property != sampleIdPD && property != visitIdPD && property != participantIdPD && property != datePD)
+                        sampleProperties.put(property, material.getProperty(property));
+                }
+                String key = getMaterialKey((String) material.getProperty(sampleIdPD),
+                        (String) material.getProperty(participantIdPD), (Double) material.getProperty(visitIdPD), (Date) material.getProperty(datePD));
+                samplePropertyMap.put(key, sampleProperties);
+            }
+            return samplePropertyMap;
         }
 
         public int getRunId()
         {
             return _run.getRowId();
+        }
+
+    }
+
+    public static class SampleResult
+    {
+        private DilutionSummary _dilutionSummary;
+        private String _materialKey;
+        private Map<PropertyDescriptor, Object> _properties;
+
+        public SampleResult(DilutionSummary dilutionSummary, String materialKey, Map<PropertyDescriptor, Object> properties)
+        {
+            _dilutionSummary = dilutionSummary;
+            _materialKey = materialKey;
+            _properties = properties;
+        }
+
+        public DilutionSummary getDilutionSummary()
+        {
+            return _dilutionSummary;
+        }
+
+        public String getKey()
+        {
+            return _materialKey;
+        }
+
+        public Map<PropertyDescriptor, Object> getProperties()
+        {
+            return _properties;
         }
     }
 
@@ -373,10 +421,10 @@ public class NabAssayController extends SpringActionController
         {
             super(protocol, provider);
             if (getViewContext().hasPermission(ACL.PERM_INSERT))
-                _links.put("new run", provider.getUploadWizardURL(getContainer(), protocol).toString());
+                _links.put("new run", provider.getUploadWizardURL(getContainer(), protocol));
             ViewURLHelper downloadURL = new ViewURLHelper("NabAssay", "downloadDatafile", getContainer()).addParameter("rowId", runId);
-            _links.put("download datafile", downloadURL.toString());
-            _links.put("print", getViewContext().cloneViewURLHelper().addParameter("_print", "true").toString());
+            _links.put("download datafile", downloadURL);
+            _links.put("print", getViewContext().cloneViewURLHelper().addParameter("_print", "true"));
         }
     }
 

@@ -271,22 +271,40 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         }
         catch (IOException e)
         {
-            throw new ExperimentException(e);
+            throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: " + e.getMessage(), e);
         }
         catch (BiffException e)
         {
-            throw new ExperimentException(e);
+            throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: " + e.getMessage(), e);
         }
         double[][] cellValues = new double[nabTemplate.getRows()][nabTemplate.getColumns()];
 
+        if (workbook.getSheets().length < 2)
+            throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: did not find expected sheet 2.");
         Sheet plateSheet = workbook.getSheet(1);
+
+        if (nabTemplate.getRows() + START_ROW > plateSheet.getRows() || nabTemplate.getColumns() + START_COL > plateSheet.getColumns())
+        {
+            throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: expected " +
+                    (nabTemplate.getRows() + START_ROW) + " rows and " + (nabTemplate.getColumns() + START_COL) + " colums, but found "+
+                    plateSheet.getRows() + " rows and " + plateSheet.getColumns() + " colums.");
+        }
+
         for (int row = 0; row < nabTemplate.getRows(); row++)
         {
             for (int col = 0; col < nabTemplate.getColumns(); col++)
             {
                 Cell cell = plateSheet.getCell(col + START_COL, row + START_ROW);
                 String cellContents = cell.getContents();
-                cellValues[row][col] = Double.parseDouble(cellContents);
+                try
+                {
+                    cellValues[row][col] = Double.parseDouble(cellContents);
+                }
+                catch (NumberFormatException e)
+                {
+                    throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: could not parse '" +
+                            cellContents + "' as a number.", e);
+                }
             }
         }
         return cellValues;

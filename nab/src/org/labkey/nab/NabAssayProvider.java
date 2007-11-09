@@ -174,6 +174,35 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         return sampleWellGroupDomain;
     }
 
+    protected Map<String, Set<String>> getRequiredDomainProperties()
+    {
+        Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();
+        Set<String> sampleProperties = domainMap.get(ASSAY_DOMAIN_SAMPLE_WELLGROUP);
+        if (sampleProperties == null)
+        {
+            sampleProperties = new HashSet<String>();
+            domainMap.put(ASSAY_DOMAIN_SAMPLE_WELLGROUP, sampleProperties);
+        }
+        sampleProperties.add(SPECIMENID_PROPERTY_NAME);
+        sampleProperties.add(PARTICIPANTID_PROPERTY_NAME);
+        sampleProperties.add(VISITID_PROPERTY_NAME);
+        sampleProperties.add(DATE_PROPERTY_NAME);
+        sampleProperties.add(SAMPLE_INITIAL_DILUTION_PROPERTY_NAME);
+        sampleProperties.add(SAMPLE_DILUTION_FACTOR_PROPERTY_NAME);
+        sampleProperties.add(SAMPLE_METHOD_PROPERTY_NAME);
+
+        Set<String> runProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_RUN);
+        if (runProperties == null)
+        {
+            runProperties = new HashSet<String>();
+            domainMap.put(ExpProtocol.ASSAY_DOMAIN_RUN, runProperties);
+        }
+        runProperties.add(CURVE_FIT_METHOD_PROPERTY_NAME);
+        runProperties.add(CUTOFF_PROPERTIES[0]);
+
+        return domainMap;
+    }
+
     public ExpData getDataForDataRow(Object dataRowId)
     {
         if (!(dataRowId instanceof Integer))
@@ -194,7 +223,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
 
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("The NAb data file is a specially formatted Excel file.");
+        return new HtmlView("The NAb data file is a specially formatted Excel 1997-2003 file with a .xls extension.");
     }
 
     public TableInfo createDataTable(QuerySchema schema, String alias, ExpProtocol protocol)
