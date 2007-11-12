@@ -40,13 +40,18 @@ public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
         ResultSet getNextResultSet() throws SQLException
         {
             SQLFragment sql;
+            String joinSql;
 
             if (_peptideView instanceof StandardProteinPeptideView)
+            {
                 sql = ProteinManager.getPeptideSql(_currentUrl, _iter.next(), _extraWhere, 0, "Charge, PrecursorMass, MZ, Spectrum");
+                joinSql = sql.toString().replaceFirst("RIGHT OUTER JOIN", "INNER JOIN (SELECT Run AS fRun, Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + ") spec ON Run=fRun AND Scan = fScan\nRIGHT OUTER JOIN");
+            }
             else
+            {
                 sql = ProteinManager.getProteinProphetPeptideSql(_currentUrl, _iter.next(), _extraWhere, 0, "Charge, PrecursorMass, MZ, Spectrum");
-
-            String joinSql = sql.toString().replaceFirst("INNER JOIN", "INNER JOIN (SELECT Run AS fRun, Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + ") spec ON Run=fRun AND Scan = fScan\nINNER JOIN");
+                joinSql = sql.toString().replaceFirst("WHERE", ", (SELECT s.Run AS fRun, s.Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + " s) spec WHERE ms2.simplepeptides.Run=fRun AND Scan = fScan AND ");
+            }
 
             return Table.executeQuery(ProteinManager.getSchema(), joinSql, sql.getParams().toArray(), 0, false);
         }

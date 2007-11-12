@@ -78,7 +78,7 @@ if (null != error)
     <tr><td class='ms-searchform'>Protocol Name:</td>
         <td class='ms-vb'><input type="text" name="protocolName" size="40" value="<%=filter(form.protocolName)%>"></td></tr>
     <tr><td class='ms-searchform'>Protocol Description:</td>
-        <td class='ms-vb'><textarea name="protocolDescription" cols="80" rows="4"><%=filter(form.protocolDescription)%></textarea></td></tr>
+        <td class='ms-vb'><textarea style="width: 100%;" name="protocolDescription" cols="150" rows="4"><%=filter(form.protocolDescription)%></textarea></td></tr>
 <%      } %>
 
 <%  if (fileStatus.size() != 1) { %>
@@ -207,7 +207,7 @@ else
 <!--wch: mascotdev-->
         <td class='ms-vb'>
 <%  if (form.protocol == "") { %>
-            <textarea name="configureXml" cols="80" rows="20"><%=form.configureXml%></textarea><br>
+            <textarea style="width: 100%" name="configureXml" cols="150" rows="20"><%=form.configureXml%></textarea><br>
 <%      } else { %>
 <pre>
 <%=filter(form.configureXml)%>
@@ -231,7 +231,7 @@ else
 {
 %>
 
-<a href="http://www.thegpm.org/TANDEM/api/index.html" target="_api">X!Tandem API Documentation</a><%
+<a href="<%=(new HelpTopic("pipelineXTandem", HelpTopic.Area.CPAS)).getHelpTopicLink()%>" target="_api">X!Tandem API Documentation</a> or <a href="http://www.thegpm.org/TANDEM/api/index.html" target="_api">X!Tandem site</a><%
 }
 %>
  on-line.</td></tr>

@@ -59,6 +59,11 @@ public class PortalModule extends DefaultModule
             addLegacyNames("Narrow Search");
         }
 
+        public boolean isAvailable(Container c, String location)
+        {
+            return location.equals(getDefaultLocation());
+        }
+
         public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart) throws IllegalAccessException, InvocationTargetException
         {
             int width = 40;

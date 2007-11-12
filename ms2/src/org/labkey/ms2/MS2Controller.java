@@ -2503,7 +2503,8 @@ public class MS2Controller extends ViewController
         if (proteins != null)
         {
             StringBuilder sb = new StringBuilder();
-            sb.append("RowId IN (");
+            sb.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+            sb.append(".RowId IN (");
             String separator = "";
             for (String protein : proteins)
             {

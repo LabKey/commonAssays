@@ -275,13 +275,15 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         {
             int rowIndex = 0;
 
-            List<PropertyDescriptor> typeList = new ArrayList<PropertyDescriptor>();
+            TimepointType studyType = AssayPublishService.get().getTimepointType(study);
+
+            Set<PropertyDescriptor> typeSet = new LinkedHashSet<PropertyDescriptor>();
 
             Map<Integer, ExpRun> runCache = new HashMap<Integer, ExpRun>();
             Map<Integer, Map<String, Object>> runPropertyCache = new HashMap<Integer, Map<String, Object>>();
 
-            typeList.add(createPublishPropertyDescriptor(study, getDataRowIdFieldKey().toString(), getDataRowIdType()));
-            typeList.add(createPublishPropertyDescriptor(study, "SourceLSID", getDataRowIdType()));
+            typeSet.add(createPublishPropertyDescriptor(study, getDataRowIdFieldKey().toString(), getDataRowIdType()));
+            typeSet.add(createPublishPropertyDescriptor(study, "SourceLSID", getDataRowIdType()));
 
             PropertyDescriptor[] samplePDs = getSampleWellGroupColumns(protocol);
             PropertyDescriptor[] dataPDs = NabSchema.getExistingDataProperties(protocol);
@@ -313,7 +315,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                 {
                     Object value = rowProperties.get(pd.getPropertyURI());
                     if (!NabDataHandler.NAB_INPUT_MATERIAL_DATA_PROPERTY.equals(pd.getName()))
-                        addProperty(pd, value, dataMap, typeList);
+                        addProperty(pd, value, dataMap, typeSet);
                     else
                         materialLsid = (String) value;
                 }
@@ -327,7 +329,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                                 !VISITID_PROPERTY_NAME.equals(pd.getName()) &&
                                 !DATE_PROPERTY_NAME.equals(pd.getName()))
                         {
-                            addProperty(pd, material.getProperty(pd), dataMap, typeList);
+                            addProperty(pd, material.getProperty(pd), dataMap, typeSet);
                         }
                     }
                 }
@@ -355,25 +357,28 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                     {
                         PropertyDescriptor publishPd = pd.clone();
                         publishPd.setName("Run " + pd.getName());
-                        addProperty(publishPd, runProperties.get(pd.getPropertyURI()), dataMap, typeList);
+                        addProperty(publishPd, runProperties.get(pd.getPropertyURI()), dataMap, typeSet);
                     }
                 }
 
                 AssayPublishKey publishKey = dataIdToPublishKey.get(row.getObjectId());
                 dataMap.put("ParticipantID", publishKey.getParticipantId());
                 dataMap.put("SequenceNum", publishKey.getVisitId());
-                dataMap.put("Date", publishKey.getDate());
+                if (TimepointType.DATE == studyType)
+                {
+                    dataMap.put("Date", publishKey.getDate());
+                }
                 dataMap.put("SourceLSID", run.getLSID());
                 dataMap.put(getDataRowIdFieldKey().toString(), publishKey.getDataId());
-                addProperty(study, "Run Name", run.getName(), dataMap, typeList);
-                addProperty(study, "Run Comments", run.getComments(), dataMap, typeList);
-                addProperty(study, "Run CreatedOn", run.getCreated(), dataMap, typeList);
+                addProperty(study, "Run Name", run.getName(), dataMap, typeSet);
+                addProperty(study, "Run Comments", run.getComments(), dataMap, typeSet);
+                addProperty(study, "Run CreatedOn", run.getCreated(), dataMap, typeSet);
                 User createdBy = run.getCreatedBy();
-                addProperty(study, "Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(), dataMap, typeList);
+                addProperty(study, "Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(), dataMap, typeSet);
                 dataMaps[rowIndex++] = dataMap;
             }
             return AssayPublishService.get().publishAssayData(user, study, protocol.getName(), protocol, 
-                    dataMaps, typeList, getDataRowIdFieldKey().toString(), errors);
+                    dataMaps, new ArrayList<PropertyDescriptor>(typeSet), getDataRowIdFieldKey().toString(), errors);
         }
         catch (SQLException e)
         {

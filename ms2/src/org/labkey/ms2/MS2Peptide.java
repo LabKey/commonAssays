@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.net.URL;
 import java.net.URISyntaxException;
+import java.net.URI;
 
 public class MS2Peptide
 {
@@ -102,16 +103,24 @@ public class MS2Peptide
             if (fraction != null && fraction.getMzXmlURL() != null)
             {
                 URL url = new URL(fraction.getMzXmlURL());
-                File f;
+                File f = null;
                 try
                 {
-                    f = new File(url.toURI());
+                    URI uri = url.toURI();
+                    if (uri.getAuthority() == null)
+                    {
+                        f = new File(uri);
+                    }
+                    else
+                    {
+                        _spectrumErrorMessage = "Invalid mzXMLURL: " + fraction.getMzXmlURL();
+                    }
                 }
                 catch (URISyntaxException e)
                 {
-                    throw ((IOException)new IOException("Bad URI").initCause(e));
+                    _spectrumErrorMessage = "Bad mzXML URI: " + fraction.getMzXmlURL();
                 }
-                if (NetworkDrive.exists(f))
+                if (f != null && NetworkDrive.exists(f))
                 {
                     RandomAccessMzxmlIterator iter = null;
                     try
@@ -137,9 +146,16 @@ public class MS2Peptide
                         }
                     }
                 }
-                else
+                else if (_spectrumErrorMessage == null)
                 {
-                    _spectrumErrorMessage = "Spectra file not found.\n" + f.getAbsolutePath();
+                    if (f != null)
+                    {
+                        _spectrumErrorMessage = "Spectra file not found.\n" + f.getAbsolutePath();
+                    }
+                    else
+                    {
+                        _spectrumErrorMessage = "Unable to find spectra";
+                    }
                 }
             }
         }
