@@ -15,7 +15,9 @@ public class FlowFolderType extends DefaultFolderType
 {
     public FlowFolderType(FlowModule module)
     {
-        super("Flow", Arrays.asList(OverviewWebPart.FACTORY.createWebPart()),
+        super("Flow",
+                "Perform statistical analysis and create graphs for high-volume, highly standardized flow experiments. Organize, archive and track statistics and keywords for FlowJo experiments.",
+                Arrays.asList(OverviewWebPart.FACTORY.createWebPart()),
                 Arrays.asList(AnalysesWebPart.FACTORY.createWebPart(),
                         AnalysisScriptsWebPart.FACTORY.createWebPart()),
                 getDefaultModuleSet(module, getModule("Pipeline")), module);

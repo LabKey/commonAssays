@@ -30,6 +30,7 @@ import org.labkey.flow.webparts.OverviewWebPart;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.SecurityManager;
 import org.labkey.api.view.*;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineJob;

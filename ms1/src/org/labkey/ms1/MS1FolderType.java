@@ -19,6 +19,7 @@ public class MS1FolderType extends DefaultFolderType
     public MS1FolderType(MS1Module module)
     {
         super("MS1",
+                "Combine MS1 quantitation results with MS2 data.",
             Arrays.asList(
                 Portal.getPortalPart("Data Pipeline").createWebPart(),
                 Portal.getPortalPart("MS1 Runs").createWebPart()
