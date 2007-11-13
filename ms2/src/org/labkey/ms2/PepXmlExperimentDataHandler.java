@@ -16,7 +16,6 @@
 package org.labkey.ms2;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
@@ -164,19 +163,25 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
 
     public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
     {
+        updateRunLSID(newData, container, targetContainer, newRunLSID, user);
+    }
+
+    private void updateRunLSID(ExpData data, Container originalContainer, Container targetContainer, String lsid, User user)
+            throws ExperimentException
+    {
         try
         {
-            File f = newData.getFile();
+            File f = data.getFile();
             if (f != null)
             {
-                MS2Run run = getMS2Run(f, container);
+                MS2Run run = getMS2Run(f, originalContainer);
                 // Run might be null if it's already been moved, possibly because
                 // the pep.xml file is referenced multiple times in the same experiment run.
                 if (run != null)
                 {
                     MS2Manager.moveRuns(user, Collections.singletonList(run), targetContainer);
                     run = getMS2Run(f, targetContainer);
-                    run.setExperimentRunLSID(newRunLSID);
+                    run.setExperimentRunLSID(lsid);
                     MS2Manager.updateRun(run, user);
                 }
             }
@@ -199,5 +204,10 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
             return Priority.HIGH;
         }
         return null;
+    }
+
+    public void beforeMove(ExpData oldData, Container container, User user) throws ExperimentException
+    {
+        updateRunLSID(oldData, container, container, null, user);
     }
 }
