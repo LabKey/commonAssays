@@ -1,20 +1,24 @@
 package org.labkey.nab;
 
-import org.labkey.api.module.DefaultModule;
-import org.labkey.api.module.ModuleContext;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.study.PlateService;
-import org.labkey.api.study.Plate;
-import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.security.User;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.ModuleContext;
+import org.labkey.api.security.User;
+import org.labkey.api.study.Plate;
+import org.labkey.api.study.PlateService;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.ViewURLHelper;
 
+import javax.servlet.http.HttpServletRequest;
 import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Copyright (C) 2004 Fred Hutchinson Cancer Research Center. All Rights Reserved.
@@ -81,5 +85,20 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
         Set<String> result = new HashSet<String>();
         result.add("Study");
         return result;
+    }
+
+    public ViewURLHelper getTabURL(HttpServletRequest request, Container c, User user)
+    {
+        ViewURLHelper defaultURL = super.getTabURL(request, c, user);
+
+        // this is a bit of a hack: while we're supporting both old and new assay-based NAB
+        // implementations, it's less confusing to the user if the NAB tab keeps them from switching
+        // from the new implementation to the old, so we swap out the pageflow of the tab URL:
+        ViewContext context = HttpView.getRootContext();
+        String pageFlow = context != null ? context.getViewURLHelper().getPageFlow() : null;
+        if ("assay".equals(pageFlow) || "NabAssay".equals(pageFlow))
+            defaultURL.setPageFlow("assay");
+
+        return defaultURL;
     }
 }

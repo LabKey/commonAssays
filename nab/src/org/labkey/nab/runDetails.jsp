@@ -50,7 +50,16 @@
     if (bean.isNewRun())
     {
 %>
-    This run has been automatically saved. <%= buttonLink("Delete Run", "deleteRun.view?rowId=" + assay.getRunRowId())%><br>
+    This run has been automatically saved.
+<%
+        if (getViewContext().getContainer().hasPermission(getViewContext().getUser(), ACL.PERM_DELETE))
+        {
+%>
+<%= buttonLink("Delete Run", "deleteRun.view?rowId=" + bean.getRunId(), "return confirm('Permanently delete this run?')")%>
+<%
+        }
+%>
+<br>
 <%
     }
     if (!bean.isPrintView() &&  duplicateDataFileView != null)

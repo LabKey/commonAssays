@@ -438,6 +438,8 @@ public class NabAssayController extends SpringActionController
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
         {
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            if (run == null)
+                HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
             Luc5Assay assay = NabDataHandler.getAssayResults(run);
             _run = ExperimentService.get().getExpRun(form.getRowId());
             _protocol = _run.getProtocol();
@@ -615,6 +617,69 @@ public class NabAssayController extends SpringActionController
             ViewURLHelper runListURL = AssayService.get().getAssayRunsURL(getContainer(), _protocol);
             return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
                     " Runs", runListURL).addChild("Graph Selected Specimens");
+        }
+    }
+
+    public static class DeleteRunForm
+    {
+        private int _rowId;
+        private boolean _reupload;
+
+        public int getRowId()
+        {
+            return _rowId;
+        }
+
+        public void setRowId(int rowId)
+        {
+            _rowId = rowId;
+        }
+
+        public boolean isReupload()
+        {
+            return _reupload;
+        }
+
+        public void setReupload(boolean reupload)
+        {
+            _reupload = reupload;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_DELETE)
+    public class DeleteRunAction extends SimpleViewAction<DeleteRunForm>
+    {
+        public ModelAndView getView(DeleteRunForm deleteRunForm, BindException errors) throws Exception
+        {
+            if (deleteRunForm.getRowId() == 0)
+                HttpView.throwNotFound("No run specified");
+            ExpRun run = ExperimentService.get().getExpRun(deleteRunForm.getRowId());
+            if (run == null)
+                HttpView.throwNotFound("Run " + deleteRunForm.getRowId() + " does not exist.");
+            File file = null;
+            if (deleteRunForm.isReupload())
+            {
+                file = NabDataHandler.getDataFile(run);
+                if (file == null)
+                    HttpView.throwNotFound("Data file for run " + run.getName() + " was not found.  Deleted from the file system?");
+            }
+
+            ExperimentService.get().deleteExperimentRunsByRowIds(getContainer(), getUser(), deleteRunForm.getRowId());
+
+            if (deleteRunForm.isReupload())
+            {
+                ViewURLHelper reuploadURL = new ViewURLHelper("NabAssay", "nabUploadWizard", getContainer());
+                reuploadURL.addParameter("dataFile", file.getPath());
+                HttpView.throwRedirect(reuploadURL);
+            }
+            else
+                HttpView.throwRedirect(AssayService.get().getAssayRunsURL(getContainer(), run.getProtocol()));
+            return null;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            throw new UnsupportedOperationException("Expected redirect did not occur.");
         }
     }
 

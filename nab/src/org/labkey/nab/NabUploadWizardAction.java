@@ -1,19 +1,28 @@
 package org.labkey.nab;
 
-import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.SamplePropertyHelper;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.study.WellGroup;
+import org.labkey.api.study.actions.UploadWizardAction;
+import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.PlateSamplePropertyHelper;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.ACL;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -34,6 +43,14 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
         return super.getView(assayRunUploadForm, errors);
     }
 
+    protected InsertView createInsertView(TableInfo baseTable, String lsidCol, Map<PropertyDescriptor, String> propertyDescriptors, boolean reshow, boolean resetDefaultValues, String uploadStepName, NabRunUploadForm form)
+    {
+        InsertView view = super.createInsertView(baseTable, lsidCol, propertyDescriptors, reshow, resetDefaultValues, uploadStepName, form);
+        if (form.getReplaceRunId() != null)
+            view.getDataRegion().addHiddenFormField("replaceRunId", "" + form.getReplaceRunId());
+        return view;
+    }
+
     protected InsertView createRunInsertView(NabRunUploadForm newRunForm, boolean reshow)
     {
         NabAssayProvider provider = (NabAssayProvider) getProvider(newRunForm);
@@ -43,7 +60,54 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
         helper.addSampleColumns(parent.getDataRegion(), getViewContext().getUser());
         return parent;
     }
+/*
+    protected Map<String, String> getDefaultValues(String suffix, NabRunUploadForm form)
+    {
+        if (form.getReplaceRunId() == null)
+            return super.getDefaultValues(suffix, form);
+        else
+        {
+            ExpRun run = ExperimentService.get().getExpRun(form.getReplaceRunId());
+            NabAssayProvider provider = (NabAssayProvider) form.getProvider();
+            ExpProtocol protocol = run.getProtocol();
 
+            Map<String, String> properties = new HashMap<String, String>();
+
+            properties.put("name", run.getName());
+            properties.put("comments", run.getComments());
+            properties.put("uploadedFile", NabDataHandler.getDataFile(run).getPath());
+            
+            for (PropertyDescriptor column : provider.getRunPropertyColumns(protocol))
+                properties.put(ColumnInfo.propNameFromName(column.getName()), nullSafeToStr(run.getProperty(column)));
+            for (PropertyDescriptor column : provider.getUploadSetColumns(protocol))
+                properties.put(ColumnInfo.propNameFromName(column.getName()), nullSafeToStr(run.getProperty(column)));
+
+            try
+            {
+                Map<WellGroup, Map<PropertyDescriptor, Object>> wellgroups = NabDataHandler.getWellGroupProperties(run);
+                for (Map.Entry<WellGroup, Map<PropertyDescriptor, Object>> wellGroupMapEntry : wellgroups.entrySet())
+                {
+                    WellGroup group = wellGroupMapEntry.getKey();
+                    for (Map.Entry<PropertyDescriptor, Object> wellgroupProperty : wellGroupMapEntry.getValue().entrySet())
+                    {
+                        PropertyDescriptor property = wellgroupProperty.getKey();
+                        properties.put(SamplePropertyHelper.getSpecimenPropertyInputName(group.getName(), property), nullSafeToStr(wellgroupProperty.getValue()));
+                    }
+                }
+            }
+            catch (ExperimentException e)
+            {
+                throw new RuntimeException(e);
+            }
+            return properties;
+        }
+    }
+
+    private String nullSafeToStr(Object obj)
+    {
+        return "" + (obj != null ? obj.toString() : "");
+    }
+*/
     protected StepHandler getRunStepHandler()
     {
         return new NabRunStepHandler();
@@ -78,7 +142,8 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
             return super.afterRunCreation(form, run);
         else
         {
-            HttpView.throwRedirect(new ViewURLHelper("NabAssay", "details", run.getContainer()).addParameter("rowId", run.getRowId()));
+            HttpView.throwRedirect(new ViewURLHelper("NabAssay", "details",
+                    run.getContainer()).addParameter("rowId", run.getRowId()).addParameter("newRun", "true"));
             return null;
         }
     }

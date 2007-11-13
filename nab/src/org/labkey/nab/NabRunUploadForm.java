@@ -9,5 +9,15 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
  */
 public class NabRunUploadForm extends AssayRunUploadForm
 {
-    
+    private Integer _replaceRunId;
+
+    public Integer getReplaceRunId()
+    {
+        return _replaceRunId;
+    }
+
+    public void setReplaceRunId(Integer replaceRunId)
+    {
+        _replaceRunId = replaceRunId;
+    }
 }

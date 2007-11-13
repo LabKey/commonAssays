@@ -152,6 +152,8 @@ public class NabDataHandler extends AbstractExperimentDataHandler
 
     public static File getDataFile(ExpRun run)
     {
+        if (run == null)
+            return null;
         ExpData[] outputDatas = run.getOutputDatas(new DataType(NAB_DATA_LSID_PREFIX));
         if (outputDatas == null || outputDatas.length != 1)
             throw new IllegalStateException("Nab runs should have a single data output.");
@@ -241,6 +243,27 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         assay.setDataFile(dataFile);
         assay.setLockAxes(lockAxes);
         return assay;
+    }
+
+    public static Map<WellGroup, Map<PropertyDescriptor, Object>> getWellGroupProperties(ExpRun run) throws ExperimentException
+    {
+        ExpProtocol protocol = run.getProtocol();
+        AssayProvider provider = AssayService.get().getProvider(protocol);
+        Luc5Assay assay = getAssayResults(run);
+        List<WellGroup> wellgroups = new ArrayList<WellGroup>();
+        for (DilutionSummary summary : assay.getSummaries())
+            wellgroups.add(summary.getWellGroup());
+        Map<WellGroup, ExpMaterial> materials = getWellGroupMaterialPairings(run.getMaterialInputs().keySet(), wellgroups);
+        PropertyDescriptor[] sampleProperties = ((PlateBasedAssayProvider) provider).getSampleWellGroupColumns(protocol);
+        Map<WellGroup, Map<PropertyDescriptor, Object>> ret = new HashMap<WellGroup, Map<PropertyDescriptor, Object>>();
+        for (Map.Entry<WellGroup,  ExpMaterial> entry : materials.entrySet())
+        {
+            Map<PropertyDescriptor, Object> properties = new HashMap<PropertyDescriptor, Object>();
+            for (PropertyDescriptor pd : sampleProperties)
+                properties.put(pd, entry.getValue().getProperty(pd));
+            ret.put(entry.getKey(), properties);
+        }
+        return ret;
     }
 
     private static Map<WellGroup, ExpMaterial> getWellGroupMaterialPairings(Collection<ExpMaterial> sampleInputs, List<? extends WellGroup> wellgroups)
@@ -390,7 +413,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());
-        if (lsid.getNamespacePrefix().equals(NAB_DATA_LSID_PREFIX))
+        if (NAB_DATA_LSID_PREFIX.equals(lsid.getNamespacePrefix()))
         {
             return Priority.HIGH;
         }
