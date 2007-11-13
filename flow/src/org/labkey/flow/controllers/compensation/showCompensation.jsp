@@ -29,6 +29,11 @@
 %>
 <%
     final FlowCompensationMatrix flowComp = FlowCompensationMatrix.fromURL(getViewContext().getViewURLHelper(), request);
+    if (null == flowComp)
+    {
+        %><font color="red">compensation matrix definition not found</font><%
+        return;
+    }
     final CompensationMatrix comp = flowComp.getCompensationMatrix();
     final String[] channelNames = comp.getChannelNames();
     final int channelCount = channelNames.length;

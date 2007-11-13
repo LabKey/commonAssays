@@ -182,6 +182,8 @@ public class CompensationController extends SpringFlowController<CompensationCon
 
         public NavTree appendNavTrail(NavTree root)
         {
+            if (null == _comp)
+                return root;
             // show run this compensation was derived from
             if (_comp.getParent() != null)
                 return appendFlowNavTrail(root, _comp, "Show Compensation " + _comp.getName(), Action.showCompensation);
