@@ -522,7 +522,7 @@ public class ProjectController extends SpringActionController
         @Override
         protected void populatePropertyMap(HttpServletRequest request, Portal.WebPart webPart)
         {
-            String value = request.getParameter(PARAM);     // This is the only param we care about right now -- need special handling to for "uncheck" case
+            String value = request.getParameter(PARAM);     // This is the only param we care about right now -- need special handling for "uncheck" case
             if (null == value || "".equals(value.trim()))
                 webPart.getPropertyMap().put(PARAM, "off");
             else

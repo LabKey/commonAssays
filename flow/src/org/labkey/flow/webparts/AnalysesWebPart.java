@@ -1,21 +1,17 @@
 package org.labkey.flow.webparts;
 
-import org.labkey.api.view.*;
-import org.labkey.api.jsp.JspLoader;
-import org.labkey.api.jsp.ContextPage;
-import org.labkey.api.query.*;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.DataRegion;
 import org.labkey.api.security.ACL;
+import org.labkey.api.view.*;
+import org.labkey.flow.controllers.executescript.AnalysisScriptController;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
-import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.view.FlowQueryView;
-import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.data.FlowProtocolStep;
-import org.labkey.flow.controllers.executescript.AnalysisScriptController;
-
-import java.util.List;
-import java.util.ArrayList;
 
 public class AnalysesWebPart extends FlowQueryView
 {
