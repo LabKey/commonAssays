@@ -38,8 +38,6 @@ import java.io.FileNotFoundException;
 public class FastaDbLoader extends DefaultAnnotationLoader implements AnnotationLoader
 {
     private Connection conn = null;
-    protected String parseFName;
-    protected String comment = null;
     protected int currentInsertId = 0;
     protected String defaultOrganism = null;
     protected int associatedFastaId = 0;
@@ -54,10 +52,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
     private OrganismGuessStrategy _parsingStrategy;
     private OrganismGuessStrategy _sharedIdentsStrategy;
-
-    //Todo:  this should be an enumerated type; this loader and the xml loader should be
-    //Todo:  children of the same abstract type.
-
 
     public FastaDbLoader(File file, String hash, Logger log) throws IOException
     {
@@ -76,25 +70,23 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         // Declare which package our individual parsers belong
         // to.  We assume that the package is a child of the
         // current package with the loaderPrefix appended
-        parseFName = getCanonicalPath(file);
+        _parseFName = getCanonicalPath(file);
 
         _parsingStrategy = new GuessOrgByParsing();
         _sharedIdentsStrategy = new GuessOrgBySharedIdents();
     }
 
-    public String getParseFName()
-    {
-        return parseFName;
-    }
-
-    public void setComment(String c)
-    {
-        this.comment = c;
-    }
-
     public int getId()
     {
         return currentInsertId;
+    }
+
+    public void validate() throws IOException
+    {
+        if (!NetworkDrive.exists(new File(_parseFName)))
+        {
+            throw new IOException("File " + _parseFName + " does not exist.");
+        }
     }
 
     public void setDefaultOrganism(String o)
@@ -602,7 +594,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         }
         fdbu._insertIntoFastasStmt.setString(1, getParseFName());
         fdbu._insertIntoFastasStmt.setInt(2, seqIds.size());
-        fdbu._insertIntoFastasStmt.setString(3, comment);
+        fdbu._insertIntoFastasStmt.setString(3, _comment);
         fdbu._insertIntoFastasStmt.setString(4, hash);
         fdbu._insertIntoFastasStmt.setTimestamp(5, new java.sql.Timestamp(new java.util.Date().getTime()));
         fdbu._insertIntoFastasStmt.executeUpdate();
@@ -627,7 +619,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
         if (_recoveryId == 0)
         {
-            insertId = initAnnotLoad(conn, getParseFName(), comment);
+            insertId = initAnnotLoad(conn, getParseFName(), _comment);
         }
         else
         {
@@ -722,20 +714,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
     public static void parseError(String s)
     {
         _log.error(s);
-    }
-
-    //
-    // Background Thread Stuff
-    //
-    public void parseInBackground()
-    {
-        AnnotationUploadManager.getInstance().enqueueAnnot(this);
-    }
-
-    public void parseInBackground(int recoveryId)
-    {
-        setRecoveryId(recoveryId);
-        AnnotationUploadManager.getInstance().enqueueAnnot(this);
     }
 
     public void cleanUp()

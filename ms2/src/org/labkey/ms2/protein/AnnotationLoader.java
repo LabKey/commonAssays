@@ -1,6 +1,6 @@
 package org.labkey.ms2.protein;
 
-import org.xml.sax.XMLReader;
+import java.io.IOException;
 
 /**
  * User: brittp
@@ -33,4 +33,6 @@ public interface AnnotationLoader
     int getId();
 
     boolean isPaused();
+
+    void validate() throws IOException;
 }

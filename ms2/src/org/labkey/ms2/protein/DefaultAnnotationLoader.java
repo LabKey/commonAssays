@@ -9,6 +9,8 @@ import org.apache.log4j.Logger;
  */
 public abstract class DefaultAnnotationLoader implements AnnotationLoader
 {
+    protected String _parseFName;
+    protected String _comment = null;
     protected static Logger _log;
     protected AnnotationLoader.Status _requestedThreadState = null;
     protected int _recoveryId;
@@ -17,6 +19,11 @@ public abstract class DefaultAnnotationLoader implements AnnotationLoader
     public DefaultAnnotationLoader()
     {
         _log = Logger.getLogger(getClass());
+    }
+
+    public String getParseFName()
+    {
+        return _parseFName;
     }
 
     public void requestThreadState(AnnotationLoader.Status t)
@@ -80,5 +87,26 @@ public abstract class DefaultAnnotationLoader implements AnnotationLoader
     public int getRecoveryId()
     {
         return _recoveryId;
+    }
+
+    public void setComment(String c)
+    {
+        this._comment = c;
+    }
+
+    public String getComment()
+    {
+        return _comment;
+    }
+
+    public void parseInBackground()
+    {
+        AnnotationUploadManager.getInstance().enqueueAnnot(this);
+    }
+
+    public void parseInBackground(int recoveryId)
+    {
+        setRecoveryId(recoveryId);
+        AnnotationUploadManager.getInstance().enqueueAnnot(this);
     }
 }

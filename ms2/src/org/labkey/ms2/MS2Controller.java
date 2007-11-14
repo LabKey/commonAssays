@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.action.ActionMessage;
 import org.jfree.chart.imagemap.ImageMapUtilities;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
@@ -48,10 +49,10 @@ import org.labkey.ms2.pipeline.MascotClientImpl;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.SequestClientImpl;
 import org.labkey.ms2.protein.*;
+import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
-import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.query.*;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
@@ -950,47 +951,49 @@ public class MS2Controller extends ViewController
             String fname = form.getFileName();
             String comment = form.getComment();
 
+            DefaultAnnotationLoader loader;
+
             //TODO: this style of dealing with different file types must be repaired.
             if ("uniprot".equalsIgnoreCase(form.getFileType()))
             {
-                try
-                {
-                    XMLProteinLoader xpl = new XMLProteinLoader(fname);
-                    xpl.setComment(comment);
-                    xpl.parseInBackground();
-                }
-                catch (Exception e)
-                {
-                    _log.error("Problem loading XML protein annotations for file " + fname + ": " + e);
-                    throw e;
-                }
+                loader = new XMLProteinLoader(fname);
             }
-            if ("fasta".equalsIgnoreCase(form.getFileType()))
+            else if ("fasta".equalsIgnoreCase(form.getFileType()))
             {
-                try
-                {
-                    FastaDbLoader fdbl = new FastaDbLoader(new File(fname));
-                    fdbl.setComment(comment);
-                    fdbl.setDefaultOrganism(form.getDefaultOrganism());
-                    fdbl.setOrganismIsToGuessed(form.getShouldGuess() != null);
-                    fdbl.parseInBackground();
-                }
-                catch (Exception e)
-                {
-                    _log.error("Problem loading FASTA file " + fname + ": " + e);
-                }
+                FastaDbLoader fdbl = new FastaDbLoader(new File(fname));
+                fdbl.setDefaultOrganism(form.getDefaultOrganism());
+                fdbl.setOrganismIsToGuessed(form.getShouldGuess() != null);
+                loader = fdbl;
             }
+            else
+            {
+                throw new IllegalArgumentException("Unknown annotation file type: " + form.getFileType());
+            }
+
+            loader.setComment(comment);
+
+            try
+            {
+                loader.validate();
+            }
+            catch (IOException e)
+            {
+                PageFlowUtil.getActionErrors(getRequest(), true).add("main", new ActionMessage(e.getMessage()));
+                return insertAnnots(form);
+            }
+
+            loader.parseInBackground();
         }
 
         return new ViewForward(getShowProteinAdminUrl());
     }
 
     @Jpf.Action
-    protected Forward insertAnnots() throws Exception
+    protected Forward insertAnnots(LoadAnnotForm form) throws Exception
     {
         requiresGlobalAdmin();
-        HttpView v = new GroovyView("/org/labkey/ms2/insertAnnots.gm");
-        return _renderInTemplate(v, true, "Protein Annotations Loaded", null);
+        HttpView v = new JspView<LoadAnnotForm>("/org/labkey/ms2/insertAnnots.jsp", form);
+        return _renderInTemplate(v, true, "Load Protein Annotations", null);
     }
 
 
@@ -4224,7 +4227,7 @@ public class MS2Controller extends ViewController
             return this.comment;
         }
 
-        private String defaultOrganism;
+        private String defaultOrganism = "Unknown unknown";
 
         public String getDefaultOrganism()
         {
@@ -4236,7 +4239,7 @@ public class MS2Controller extends ViewController
             this.defaultOrganism = o;
         }
 
-        private String shouldGuess;
+        private String shouldGuess = "1";
 
         public String getShouldGuess()
         {

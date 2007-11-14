@@ -17,12 +17,10 @@
 package org.labkey.ms2.protein;
 
 import org.labkey.api.util.NetworkDrive;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -33,51 +31,14 @@ import java.sql.SQLException;
 
 public class XMLProteinLoader extends DefaultAnnotationLoader implements AnnotationLoader
 {
-    protected String parseFName;
-
-    public String getParseFName()
-    {
-        return parseFName;
-    }
-
-    public void setParseFName(String parseFName)
-    {
-        this.parseFName = parseFName;
-    }
-
-    protected InputSource parseSource = null;
-
-    public InputSource getParseSource()
-    {
-        return parseSource;
-    }
-
-    public void setParseSource(InputSource parseSource)
-    {
-        this.parseSource = parseSource;
-    }
-
-    protected String comment = null;
-
-    public void setComment(String c)
-    {
-        this.comment = c;
-    }
-
-    public String getComment()
-    {
-        return comment;
-    }
-
     public int getId()
     {
         return 0;
     }
 
-    public XMLProteinLoader(InputStream is)
+    public void validate() throws IOException
     {
-        setParseSource(new InputSource(is));
-        setParseFName(getParseSource().getSystemId());
+        getFile();
     }
 
     public XMLProteinLoader(String fileName)
@@ -85,21 +46,12 @@ public class XMLProteinLoader extends DefaultAnnotationLoader implements Annotat
         // Declare which package our individual parsers belong
         // to.  We assume that the package is a child of the
         // current package with the loaderPrefix appended
-        setParseFName(fileName);
+        _parseFName = fileName;
     }
 
     public void parseFile() throws SQLException, IOException, SAXException
     {
-        String fName = getParseFName();
-        File f = new File(fName);
-        if (!f.exists())
-        {
-            NetworkDrive.ensureDrive(f.getPath());
-            if (!f.exists())
-            {
-                throw(new SAXException("Can't open file '" + fName + "'"));
-            }
-        }
+        String fName = getFile();
 
         try
         {
@@ -115,22 +67,22 @@ public class XMLProteinLoader extends DefaultAnnotationLoader implements Annotat
         }
     }
 
+    private String getFile() throws IOException
+    {
+        String fName = getParseFName();
+        File f = new File(fName);
+        if (!NetworkDrive.exists(f))
+        {
+            throw new IOException("Can't open file '" + fName + "'");
+        }
+        return fName;
+    }
+
     //
     // ContentHandler methods
     //
     public void cleanUp()
     {
-    }
-
-    public void parseInBackground()
-    {
-        AnnotationUploadManager.getInstance().enqueueAnnot(this);
-    }
-
-    public void parseInBackground(int recoveryId)
-    {
-        setRecoveryId(recoveryId);
-        AnnotationUploadManager.getInstance().enqueueAnnot(this);
     }
 
     //

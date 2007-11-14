@@ -731,7 +731,7 @@ ms2/src/org/labkey/ms2/compare/RunColumn.java -text
 ms2/src/org/labkey/ms2/createExperimentXml.gm -text
 ms2/src/org/labkey/ms2/editElution.jsp -text
 ms2/src/org/labkey/ms2/filterHeader.vm -text
-ms2/src/org/labkey/ms2/insertAnnots.gm -text
+ms2/src/org/labkey/ms2/insertAnnots.jsp -text
 ms2/src/org/labkey/ms2/loadGo.jsp -text
 ms2/src/org/labkey/ms2/manageViews.jsp -text
 ms2/src/org/labkey/ms2/modifications.gm -text
