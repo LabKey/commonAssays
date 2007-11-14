@@ -4077,9 +4077,11 @@ public class MS2Controller extends ViewController
 
         String originalSequestServer = form.getSequestServer();
         SequestClientImpl sequestClient = new SequestClientImpl(form.getSequestServer());
-        String html = sequestClient.getEnvironmentConf();
-        String message;
+        String html = sequestClient.testConnectivity();
+        if (sequestClient.getErrorCode() == 0)
+                html = sequestClient.getEnvironmentConf();
 
+        String message;
         if(sequestClient.getErrorCode() != 0)
         {
             form.setStatus(sequestClient.getErrorCode());

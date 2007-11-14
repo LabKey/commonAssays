@@ -1094,8 +1094,16 @@ public class PipelineController extends ViewController
             form.setError(e.getMessage());
             return showCreateMS2Protocol(form);
         }
-        
-        protocol.saveDefinition(uriRoot);
+
+        try
+        {
+            protocol.saveDefinition(uriRoot);
+        }
+        catch (IOException e)
+        {
+            form.setError(e.getMessage());
+            return showCreateMS2Protocol(form);
+        }
 
         ViewURLHelper redirectUrl = cloneViewURLHelper();
         redirectUrl.setAction("showDescribeMS2Run");

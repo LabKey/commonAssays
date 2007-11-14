@@ -547,7 +547,7 @@ public class MS2PipelineManager
     public static Map<String, String[]> addSequenceDBNames(File dir, String path, Map<String, String[]> m, String searchEngine)
     {
         File[] dbFiles;
-        if(searchEngine.equals(SEQUEST))
+        if(SEQUEST.equals(searchEngine))
         {
             dbFiles = dir.listFiles(new FileFilter()
             {
@@ -623,7 +623,12 @@ public class MS2PipelineManager
 
     public static void addSequenceDB(Container container, String name, BufferedReader reader) throws IOException, SQLException
     {
-        File fileDB = getSequenceDBFile(getSequenceDatabaseRoot(container), name);
+        URI uriSequenceRoot = getSequenceDatabaseRoot(container);
+        if (uriSequenceRoot == null)
+        {
+            throw new IllegalArgumentException("Sequence root directory is not set.");
+        }
+        File fileDB = getSequenceDBFile(uriSequenceRoot, name);
         if (fileDB.exists())
         {
             throw new IllegalArgumentException("The sequence database '" + name +
@@ -676,6 +681,8 @@ public class MS2PipelineManager
 
     public static File getSequenceDBFile(URI uriSequenceRoot, String name)
     {
+        if (uriSequenceRoot == null)
+            throw new IllegalArgumentException("Invalid sequence root directory.");
         File fileRoot = new File(uriSequenceRoot);
         File file = new File(uriSequenceRoot.getPath() + name);
         if (!file.getAbsolutePath().startsWith(fileRoot.getAbsolutePath()))
@@ -965,7 +972,7 @@ public class MS2PipelineManager
         // Make sure defaults are set before the search begins.
         // Cluster pipeline has its own default input semantics.
         boolean hasCluster = AppProps.getInstance().hasPipelineCluster();
-        if ((!hasCluster || searchEngine.equalsIgnoreCase(SEQUEST)) && !getDefaultInputFile(uriRoot, searchEngine).exists())
+        if ((!hasCluster || SEQUEST.equalsIgnoreCase(searchEngine)) && !getDefaultInputFile(uriRoot, searchEngine).exists())
             setDefaultInputXML(uriRoot, getDefaultInputXML(uriRoot, searchEngine), searchEngine);
 
         File fileConfigureXML = getConfigureXMLFile(uriData, protocolName, searchEngine);
@@ -1173,7 +1180,7 @@ public class MS2PipelineManager
             for (File fileMzXML : mzXMLFileStatus.keySet())
             {
                 FileStatus status = mzXMLFileStatus.get(fileMzXML);
-                if (status.equals(FileStatus.COMPLETE) || status.equals(FileStatus.RUNNING))
+                if (FileStatus.COMPLETE.equals(status) || FileStatus.RUNNING.equals(status))
                     fileList.add(fileMzXML);
             }
             filesMzXML = fileList.toArray(new File[fileList.size()]);

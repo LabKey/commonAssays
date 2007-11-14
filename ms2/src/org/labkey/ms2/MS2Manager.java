@@ -413,17 +413,17 @@ public class MS2Manager
         return importer.upload(runInfo);
     }
 
-    private static MS2Importer createImporter(File file, ViewBackgroundInfo info, String description, Logger log, XarContext context)
+    private static MS2Importer createImporter(File file, ViewBackgroundInfo info, String description, Logger log, XarContext context) throws IOException
     {
         Container c = info.getContainer();
 
         String fileName = file.getPath();
         if (fileName.endsWith(".xml") || fileName.endsWith(".pepXML"))
             return new PepXmlImporter(info.getUser(), c, description, fileName, log, context);
-        else if (fileName.endsWith(".dat"))
+        else if (fileName.toLowerCase().endsWith(".dat"))
             return new MascotDatImporter(info.getUser(), c, description, fileName, log, context);
         else
-            return null;
+            throw new IOException("Unable to load file type '" + file + "'.");
     }
 
 
