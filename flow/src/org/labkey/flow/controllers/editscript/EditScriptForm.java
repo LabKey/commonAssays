@@ -190,7 +190,7 @@ public class EditScriptForm extends ViewForm
             return ret;
         try
         {
-            FlowWell[] wells = run.getWells();
+            FlowWell[] wells = run.getWells(true);
             int cWellsCounted = 0;
             for (int i = 0; i < wells.length && cWellsCounted < MAX_WELLS_TO_POLL; i ++)
             {

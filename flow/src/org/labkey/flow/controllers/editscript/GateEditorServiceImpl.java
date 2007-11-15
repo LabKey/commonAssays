@@ -170,12 +170,13 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
         try
         {
             FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-            GWTRun[] ret = new GWTRun[runs.length];
+            List<GWTRun> ret = new ArrayList();
             for (int i = 0; i < runs.length; i ++)
             {
-                ret[i] = makeRun(runs[i]);
+                if (runs[i].hasRealWells())
+                    ret.add(makeRun(runs[i]));
             }
-            return ret;
+            return ret.toArray(new GWTRun[ret.size()]);
         }
         catch (SQLException e)
         {
@@ -235,7 +236,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
         {
             if (editingMode.equals(GWTEditingMode.run))
             {
-                FlowWell[] wells = run.getWells();
+                FlowWell[] wells = run.getWells(true);
                 List<GWTWell> ret = new ArrayList();
                 for (FlowWell well : wells)
                 {
@@ -243,6 +244,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
                 }
                 return ret.toArray(new GWTWell[0]);
             }
+
             ScriptComponent scriptComponent;
             ScriptDocument doc = script.getAnalysisScriptDocument();
             ScriptDef scriptDef = doc.getScript();

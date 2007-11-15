@@ -66,7 +66,7 @@ public class FlowWell extends FlowDataObject
         return null;
     }
 
-    public URI getFCSURI() throws Exception
+    public URI getFCSURI()
     {
         return getAttributeSet().getURI();
     }

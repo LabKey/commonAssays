@@ -98,7 +98,7 @@
 <% } %>
 
 <% if (well.getFCSURI() == null) { %>
-    <p>There is not file on disk for this well.</p>
+    <p>There is no file on disk for this well.</p>
 <% } else { %>
     <p class="normal"><a href="<%=h(getWell().urlFor(WellController.Action.chooseGraph))%>">More Graphs</a><br>
     <a href="<%=h(getWell().urlFor(WellController.Action.showFCS))%>&amp;mode=keywords">Keywords from the FCS file</a></p>

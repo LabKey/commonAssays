@@ -137,13 +137,13 @@ public class RunController extends BaseFlowController<RunController.Action>
         FlowRun run = getRun();
         String strEventCount = getRequest().getParameter("eventCount");
         Map<String, File> files = new TreeMap();
-        FlowWell[] wells = run.getWells();
+        FlowWell[] wells = run.getWells(true);
         if (wells.length == 0)
         {
             response.getWriter().write("Error: no wells in run");
             return null;
         }
-        for (FlowWell well : run.getWells())
+        for (FlowWell well : wells)
         {
             URI uri = FlowAnalyzer.getFCSUri(well);
             File file = new File(uri);

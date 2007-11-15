@@ -56,7 +56,27 @@ public class FlowRun extends FlowObject<ExpRun>
         return FlowDataObject.fromDatas(getExperimentRun().getOutputDatas(type));
     }
 
+    public boolean hasRealWells() throws SQLException
+    {
+        List<? extends FlowDataObject> all = getDatas(null);
+        for (FlowDataObject obj : all)
+        {
+            if (obj instanceof FlowWell)
+            {
+                FlowWell well = (FlowWell)obj;
+                if (well.getFCSURI() != null)
+                    return true;
+            }
+        }
+        return false;
+    }
+
     public FlowWell[] getWells() throws SQLException
+    {
+        return getWells(false);
+    }
+
+    public FlowWell[] getWells(boolean realFiles) throws SQLException
     {
         List<? extends FlowDataObject> all = getDatas(null);
         List<FlowWell> wells = new ArrayList();
@@ -64,10 +84,12 @@ public class FlowRun extends FlowObject<ExpRun>
         {
             if (obj instanceof FlowWell)
             {
-                wells.add((FlowWell) obj);
+                FlowWell well = (FlowWell)obj;
+                if (!realFiles || well.getFCSURI() != null)
+                    wells.add((FlowWell) obj);
             }
         }
-        FlowWell[] ret = wells.toArray(new FlowWell[0]);
+        FlowWell[] ret = wells.toArray(new FlowWell[wells.size()]);
         Arrays.sort(ret);
         return ret;
     }
@@ -292,7 +314,9 @@ public class FlowRun extends FlowObject<ExpRun>
             FlowWell well = FlowWell.fromWellId(colRowId.getIntValue(rs));
             if (well instanceof FlowFCSFile)
             {
-                ret.add((FlowFCSFile) well);
+                FlowFCSFile fcsFile = (FlowFCSFile)well;
+                if (fcsFile.getFCSURI() != null)
+                    ret.add(fcsFile);
             }
         }
         rs.close();
@@ -321,7 +345,7 @@ public class FlowRun extends FlowObject<ExpRun>
 
     public Map<Integer, String> getWells(FlowProtocol protocol, PopulationSet popset, FlowProtocolStep step) throws Exception
     {
-        FlowWell[] wells = getWells();
+        FlowWell[] wells = getWells(true);
         Map<Integer, String> ret = new LinkedHashMap();
         if (step == FlowProtocolStep.calculateCompensation)
         {
