@@ -364,206 +364,182 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
 
     private void parseFile(PropertyDescriptor[] analyteColumns, PropertyDescriptor[] excelRunColumns, Workbook workbook, final ExpRun expRun, Container container, ExpData data, User user) throws SQLException, ExperimentException
     {
-        List<Map<String, Object>> dataRowsProps = new ArrayList<Map<String, Object>>();
-        
-        Map<String, Object> excelRunProps = new HashMap<String, Object>();
-
-        ParticipantVisitResolver resolver = null;
-        AssayProvider provider = AssayService.get().getProvider(expRun.getProtocol());
-        for (ObjectProperty objectProperty : expRun.getObjectProperties().values())
+        boolean ownTransaction = !ExperimentService.get().isTransactionActive();
+        if (ownTransaction)
         {
-            if (AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(objectProperty.getName()))
-            {
-                ParticipantVisitResolverType resolverType = AbstractAssayProvider.findType(objectProperty.getStringValue(), provider.getParticipantVisitResolverTypes());
-                Container targetStudy = null;
-                if (provider instanceof LuminexAssayProvider)
-                {
-                    LuminexAssayProvider luminexProvider = (LuminexAssayProvider) provider;
-                    targetStudy = luminexProvider.getTargetStudy(expRun);
-                }
-                try
-                {
-                    resolver = resolverType.createResolver(expRun, targetStudy, user);
-                }
-                catch (IOException e)
-                {
-                    throw new ExperimentException(e);
-                }
-            }
+            ExperimentService.get().beginTransaction();
         }
-
-        for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
+        try
         {
-            Sheet sheet = workbook.getSheet(sheetIndex);
+            List<Map<String, Object>> dataRowsProps = new ArrayList<Map<String, Object>>();
 
-            if ("Row #".equals(sheet.getCell(0, 0).getContents()))
+            Map<String, Object> excelRunProps = new HashMap<String, Object>();
+
+            ParticipantVisitResolver resolver = null;
+            AssayProvider provider = AssayService.get().getProvider(expRun.getProtocol());
+            for (ObjectProperty objectProperty : expRun.getObjectProperties().values())
             {
-                continue;
+                if (AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(objectProperty.getName()))
+                {
+                    ParticipantVisitResolverType resolverType = AbstractAssayProvider.findType(objectProperty.getStringValue(), provider.getParticipantVisitResolverTypes());
+                    Container targetStudy = null;
+                    if (provider instanceof LuminexAssayProvider)
+                    {
+                        LuminexAssayProvider luminexProvider = (LuminexAssayProvider) provider;
+                        targetStudy = luminexProvider.getTargetStudy(expRun);
+                    }
+                    try
+                    {
+                        resolver = resolverType.createResolver(expRun, targetStudy, user);
+                    }
+                    catch (IOException e)
+                    {
+                        throw new ExperimentException(e);
+                    }
+                }
             }
 
-            Analyte analyte = new Analyte(sheet.getName(), data.getRowId());
-
-            Map<String, Object> analyteProps = new HashMap<String, Object>();
-
-            int row = handleHeaderOrFooterRow(sheet, 0, analyte, analyteColumns, analyteProps, excelRunColumns, excelRunProps);
-
-            // Skip over the blank line
-            row++;
-            
-            List<String> colNames = new ArrayList<String>();
-            if (row < sheet.getRows())
+            for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
             {
-                for (int col = 0; col < sheet.getColumns(); col++)
-                {
-                    colNames.add(sheet.getCell(col, row).getContents());
-                }
-                row++;
-            }
+                Sheet sheet = workbook.getSheet(sheetIndex);
 
-            List<LuminexDataRow> dataRows = new ArrayList<LuminexDataRow>();
-
-            if (row < sheet.getRows())
-            {
-                do
+                if ("Row #".equals(sheet.getCell(0, 0).getContents()))
                 {
-                    Map<String, Object> dataRowProps = new LinkedHashMap<String, Object>();
-                    LuminexDataRow dataRow = createDataRow(data, sheet, colNames, row, resolver);
-                    dataRows.add(dataRow);
-                    dataRowsProps.add(dataRowProps);
+                    continue;
                 }
-                while (++row < sheet.getRows() && !"".equals(sheet.getCell(0, row).getContents()));
+
+                Analyte analyte = new Analyte(sheet.getName(), data.getRowId());
+
+                Map<String, Object> analyteProps = new HashMap<String, Object>();
+
+                int row = handleHeaderOrFooterRow(sheet, 0, analyte, analyteColumns, analyteProps, excelRunColumns, excelRunProps);
 
                 // Skip over the blank line
                 row++;
-            }
 
-            row = handleHeaderOrFooterRow(sheet, row, analyte, analyteColumns, analyteProps, excelRunColumns, excelRunProps);
-
-            analyte.setLsid(new Lsid("LuminexAnalyte", "Data-" + data.getRowId() + "." + analyte.getName()).toString());
-
-/*            if (analyte.getMaxStandardRecovery() == 0 && analyte.getMinStandardRecovery() == 0)
-            {
-                throw new ExperimentException("Unable to find max and min standard recovery values for analyte " + analyte.getName()); 
-            }
-*/
-            analyte = Table.insert(user, LuminexSchema.getTableInfoAnalytes(), analyte);
-
-            Getter fiGetter = new Getter()
-            {
-                public Double getValue(LuminexDataRow dataRow)
+                List<String> colNames = new ArrayList<String>();
+                if (row < sheet.getRows())
                 {
-                    if (determineOutOfRange(dataRow.getFiString()) == OORIndicator.IN_RANGE)
+                    for (int col = 0; col < sheet.getColumns(); col++)
                     {
-                        return dataRow.getFi();
+                        colNames.add(sheet.getCell(col, row).getContents());
                     }
-                    return null;
+                    row++;
                 }
-            };
-            Getter fiBackgroundGetter = new Getter()
-            {
-                public Double getValue(LuminexDataRow dataRow)
+
+                List<LuminexDataRow> dataRows = new ArrayList<LuminexDataRow>();
+
+                if (row < sheet.getRows())
                 {
-                    if (determineOutOfRange(dataRow.getFiBackgroundString()) == OORIndicator.IN_RANGE)
+                    do
                     {
-                        return dataRow.getFiBackground();
+                        Map<String, Object> dataRowProps = new LinkedHashMap<String, Object>();
+                        LuminexDataRow dataRow = createDataRow(data, sheet, colNames, row, resolver);
+                        dataRows.add(dataRow);
+                        dataRowsProps.add(dataRowProps);
                     }
-                    return null;
+                    while (++row < sheet.getRows() && !"".equals(sheet.getCell(0, row).getContents()));
+
+                    // Skip over the blank line
+                    row++;
                 }
-            };
-            Getter stdDevGetter = new Getter()
-            {
-                public Double getValue(LuminexDataRow dataRow)
+
+                row = handleHeaderOrFooterRow(sheet, row, analyte, analyteColumns, analyteProps, excelRunColumns, excelRunProps);
+
+                analyte.setLsid(new Lsid("LuminexAnalyte", "Data-" + data.getRowId() + "." + analyte.getName()).toString());
+
+    /*            if (analyte.getMaxStandardRecovery() == 0 && analyte.getMinStandardRecovery() == 0)
                 {
-                    if (determineOutOfRange(dataRow.getStdDevString()) == OORIndicator.IN_RANGE)
+                    throw new ExperimentException("Unable to find max and min standard recovery values for analyte " + analyte.getName());
+                }
+    */
+                analyte = Table.insert(user, LuminexSchema.getTableInfoAnalytes(), analyte);
+
+                Getter fiGetter = new Getter()
+                {
+                    public Double getValue(LuminexDataRow dataRow)
                     {
-                        return dataRow.getStdDev();
-                    }
-                    return null;
-                }
-            };
-            Getter obsConcGetter = new Getter()
-            {
-                public Double getValue(LuminexDataRow dataRow)
-                {
-                    if (determineOutOfRange(dataRow.getObsConcString()) == OORIndicator.IN_RANGE)
-                    {
-                        return dataRow.getObsConc();
-                    }
-                    return null;
-                }
-            };
-            Getter concInRangeGetter = new Getter()
-            {
-                public Double getValue(LuminexDataRow dataRow)
-                {
-                    if (determineOutOfRange(dataRow.getConcInRangeString()) == OORIndicator.IN_RANGE)
-                    {
-                        return dataRow.getConcInRange();
-                    }
-                    return null;
-                }
-            };
-
-            Double minStandardFI = getValidStandard(dataRows, fiGetter, true, analyte);
-            Double maxStandardFI = getValidStandard(dataRows, fiGetter, false, analyte);
-            Double minStandardObsConc = getValidStandard(dataRows, obsConcGetter, true, analyte);
-            Double maxStandardObsConc = getValidStandard(dataRows, obsConcGetter, false, analyte);
-
-            for (LuminexDataRow dataRow : dataRows)
-            {
-                OORIndicator fiOORType = determineOutOfRange(dataRow.getFiString());
-                dataRow.setFiOORIndicator(fiOORType.getOORIndicator(dataRow.getFiString(), dataRows, fiGetter));
-                dataRow.setFi(fiOORType.getValue(dataRow.getFiString(), dataRows, fiGetter, analyte));
-
-                OORIndicator fiBackgroundOORType = determineOutOfRange(dataRow.getFiBackgroundString());
-                dataRow.setFiBackgroundOORIndicator(fiBackgroundOORType.getOORIndicator(dataRow.getFiBackgroundString(), dataRows, fiBackgroundGetter));
-                dataRow.setFiBackground(fiBackgroundOORType.getValue(dataRow.getFiBackgroundString(), dataRows, fiBackgroundGetter, analyte));
-
-                OORIndicator stdDevOORType = determineOutOfRange(dataRow.getStdDevString());
-                dataRow.setStdDevOORIndicator(stdDevOORType.getOORIndicator(dataRow.getStdDevString(), dataRows, stdDevGetter));
-                dataRow.setStdDev(stdDevOORType.getValue(dataRow.getStdDevString(), dataRows, stdDevGetter, analyte));
-
-                OORIndicator obsConcOORType = determineOutOfRange(dataRow.getObsConcString());
-                dataRow.setObsConcOORIndicator(obsConcOORType.getOORIndicator(dataRow.getObsConcString(), dataRows, obsConcGetter));
-                Double obsConc;
-                switch (obsConcOORType)
-                {
-                    case IN_RANGE:
-                        obsConc = parseDouble(dataRow.getObsConcString());
-                        break;
-                    case OUT_OF_RANGE_ABOVE:
-                        if (dataRow.getDilution() != null && maxStandardObsConc != null)
+                        if (determineOutOfRange(dataRow.getFiString()) == OORIndicator.IN_RANGE)
                         {
-                            obsConc = dataRow.getDilution().doubleValue() * maxStandardObsConc.doubleValue();
+                            return dataRow.getFi();
                         }
-                        else
+                        return null;
+                    }
+                };
+                Getter fiBackgroundGetter = new Getter()
+                {
+                    public Double getValue(LuminexDataRow dataRow)
+                    {
+                        if (determineOutOfRange(dataRow.getFiBackgroundString()) == OORIndicator.IN_RANGE)
                         {
-                            obsConc = null;
+                            return dataRow.getFiBackground();
                         }
-                        break;
-                    case OUT_OF_RANGE_BELOW:
-                        if (dataRow.getDilution() != null && minStandardObsConc != null)
+                        return null;
+                    }
+                };
+                Getter stdDevGetter = new Getter()
+                {
+                    public Double getValue(LuminexDataRow dataRow)
+                    {
+                        if (determineOutOfRange(dataRow.getStdDevString()) == OORIndicator.IN_RANGE)
                         {
-                            obsConc = dataRow.getDilution().doubleValue() * minStandardObsConc.doubleValue();
+                            return dataRow.getStdDev();
                         }
-                        else
+                        return null;
+                    }
+                };
+                Getter obsConcGetter = new Getter()
+                {
+                    public Double getValue(LuminexDataRow dataRow)
+                    {
+                        if (determineOutOfRange(dataRow.getObsConcString()) == OORIndicator.IN_RANGE)
                         {
-                            obsConc = null;
+                            return dataRow.getObsConc();
                         }
-                        break;
-                    case ERROR:
-                    case OUTLIER:
-                    case NOT_AVAILABLE:
-                        obsConc = null;
-                        break;
-                    case BEYOND_RANGE:
-                        if (dataRow.getFi() != null)
+                        return null;
+                    }
+                };
+                Getter concInRangeGetter = new Getter()
+                {
+                    public Double getValue(LuminexDataRow dataRow)
+                    {
+                        if (determineOutOfRange(dataRow.getConcInRangeString()) == OORIndicator.IN_RANGE)
                         {
-                            if (minStandardFI != null && dataRow.getFi().doubleValue() < minStandardFI.doubleValue())
-                            {
-                                obsConc = dataRow.getDilution().doubleValue() * minStandardObsConc.doubleValue();
-                            }
-                            else if (maxStandardFI != null && dataRow.getFi().doubleValue() > maxStandardFI.doubleValue())
+                            return dataRow.getConcInRange();
+                        }
+                        return null;
+                    }
+                };
+
+                Double minStandardFI = getValidStandard(dataRows, fiGetter, true, analyte);
+                Double maxStandardFI = getValidStandard(dataRows, fiGetter, false, analyte);
+                Double minStandardObsConc = getValidStandard(dataRows, obsConcGetter, true, analyte);
+                Double maxStandardObsConc = getValidStandard(dataRows, obsConcGetter, false, analyte);
+
+                for (LuminexDataRow dataRow : dataRows)
+                {
+                    OORIndicator fiOORType = determineOutOfRange(dataRow.getFiString());
+                    dataRow.setFiOORIndicator(fiOORType.getOORIndicator(dataRow.getFiString(), dataRows, fiGetter));
+                    dataRow.setFi(fiOORType.getValue(dataRow.getFiString(), dataRows, fiGetter, analyte));
+
+                    OORIndicator fiBackgroundOORType = determineOutOfRange(dataRow.getFiBackgroundString());
+                    dataRow.setFiBackgroundOORIndicator(fiBackgroundOORType.getOORIndicator(dataRow.getFiBackgroundString(), dataRows, fiBackgroundGetter));
+                    dataRow.setFiBackground(fiBackgroundOORType.getValue(dataRow.getFiBackgroundString(), dataRows, fiBackgroundGetter, analyte));
+
+                    OORIndicator stdDevOORType = determineOutOfRange(dataRow.getStdDevString());
+                    dataRow.setStdDevOORIndicator(stdDevOORType.getOORIndicator(dataRow.getStdDevString(), dataRows, stdDevGetter));
+                    dataRow.setStdDev(stdDevOORType.getValue(dataRow.getStdDevString(), dataRows, stdDevGetter, analyte));
+
+                    OORIndicator obsConcOORType = determineOutOfRange(dataRow.getObsConcString());
+                    dataRow.setObsConcOORIndicator(obsConcOORType.getOORIndicator(dataRow.getObsConcString(), dataRows, obsConcGetter));
+                    Double obsConc;
+                    switch (obsConcOORType)
+                    {
+                        case IN_RANGE:
+                            obsConc = parseDouble(dataRow.getObsConcString());
+                            break;
+                        case OUT_OF_RANGE_ABOVE:
+                            if (dataRow.getDilution() != null && maxStandardObsConc != null)
                             {
                                 obsConc = dataRow.getDilution().doubleValue() * maxStandardObsConc.doubleValue();
                             }
@@ -571,38 +547,90 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                             {
                                 obsConc = null;
                             }
-                        }
-                        else
-                        {
+                            break;
+                        case OUT_OF_RANGE_BELOW:
+                            if (dataRow.getDilution() != null && minStandardObsConc != null)
+                            {
+                                obsConc = dataRow.getDilution().doubleValue() * minStandardObsConc.doubleValue();
+                            }
+                            else
+                            {
+                                obsConc = null;
+                            }
+                            break;
+                        case ERROR:
+                        case OUTLIER:
+                        case NOT_AVAILABLE:
                             obsConc = null;
-                        }
-                        break;
-                    default:
-                        throw new IllegalArgumentException(obsConcOORType.toString());
+                            break;
+                        case BEYOND_RANGE:
+                            if (dataRow.getFi() != null)
+                            {
+                                if (minStandardFI != null && dataRow.getFi().doubleValue() < minStandardFI.doubleValue())
+                                {
+                                    obsConc = dataRow.getDilution().doubleValue() * minStandardObsConc.doubleValue();
+                                }
+                                else if (maxStandardFI != null && dataRow.getFi().doubleValue() > maxStandardFI.doubleValue())
+                                {
+                                    obsConc = dataRow.getDilution().doubleValue() * maxStandardObsConc.doubleValue();
+                                }
+                                else
+                                {
+                                    obsConc = null;
+                                }
+                            }
+                            else
+                            {
+                                obsConc = null;
+                            }
+                            break;
+                        default:
+                            throw new IllegalArgumentException(obsConcOORType.toString());
+                    }
+                    dataRow.setObsConc(obsConc);
+
+                    OORIndicator concInRangeOORType = determineOutOfRange(dataRow.getConcInRangeString());
+                    dataRow.setConcInRangeOORIndicator(concInRangeOORType.getOORIndicator(dataRow.getConcInRangeString(), dataRows, concInRangeGetter));
+                    dataRow.setConcInRange(concInRangeOORType.getValue(dataRow.getConcInRangeString(), dataRows, concInRangeGetter, analyte));
+
+                    dataRow.setAnalyteId(analyte.getRowId());
+
+                    Table.insert(user, LuminexSchema.getTableInfoDataRow(), dataRow);
                 }
-                dataRow.setObsConc(obsConc);
+            }
 
-                OORIndicator concInRangeOORType = determineOutOfRange(dataRow.getConcInRangeString());
-                dataRow.setConcInRangeOORIndicator(concInRangeOORType.getOORIndicator(dataRow.getConcInRangeString(), dataRows, concInRangeGetter));
-                dataRow.setConcInRange(concInRangeOORType.getValue(dataRow.getConcInRangeString(), dataRows, concInRangeGetter, analyte));
+            // Clear out the values - this is necessary if this is a XAR import where the run properties would
+            // have been loaded as part of the ExperimentRun itself.
+            Integer objectId = OntologyManager.ensureObject(container.getId(), expRun.getLSID());
+            for (PropertyDescriptor excelRunColumn : excelRunColumns)
+            {
+                OntologyManager.deleteProperty(container.getId(), expRun.getLSID(), excelRunColumn.getPropertyURI());
+            }
 
-                dataRow.setAnalyteId(analyte.getRowId());
+            OntologyManager.insertTabDelimited(container, objectId, new OntologyManager.ImportHelper()
+            {
+                public String beforeImportObject(Map map) throws SQLException
+                {
+                    return expRun.getLSID();
+                }
 
-                Table.insert(user, LuminexSchema.getTableInfoDataRow(), dataRow);
+                public void afterImportObject(String lsid, ObjectProperty[] props) throws SQLException
+                {
+                }
+            }, excelRunColumns, new Map[] { excelRunProps }, true);
+            if (ownTransaction)
+            {
+                ExperimentService.get().commitTransaction();
+                ownTransaction = false;
             }
         }
-
-        OntologyManager.insertTabDelimited(container, OntologyManager.ensureObject(container.getId(), expRun.getLSID()), new OntologyManager.ImportHelper()
+        finally
         {
-            public String beforeImportObject(Map map) throws SQLException
+            if (ownTransaction)
             {
-                return expRun.getLSID();
+                ExperimentService.get().rollbackTransaction();
             }
-
-            public void afterImportObject(String lsid, ObjectProperty[] props) throws SQLException
-            {
-            }
-        }, excelRunColumns, new Map[] { excelRunProps }, true);
+        }
     }
 
     private LuminexDataRow createDataRow(ExpData data, Sheet sheet, List<String> colNames, int row, ParticipantVisitResolver resolver)
