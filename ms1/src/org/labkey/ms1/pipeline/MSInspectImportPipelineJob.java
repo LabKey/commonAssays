@@ -1,18 +1,19 @@
 package org.labkey.ms1.pipeline;
 
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewURLHelper;
+import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.Container;
-import org.labkey.api.util.PathRelativizer;
-import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.exp.ExperimentPipelineJob;
 import org.labkey.api.exp.FileXarSource;
-import org.apache.commons.lang.StringUtils;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PathRelativizer;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.ViewURLHelper;
 
 import java.io.*;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 
 /**
@@ -150,6 +151,8 @@ public class MSInspectImportPipelineJob extends PipelineJob
 
         //File uniquifierFile = resultsDir.getParentFile();
         String uniquifier = PathRelativizer.relativizePathUnix(containerRoot, resultsDir) + "/" + name;
+        try {uniquifier = URLEncoder.encode(uniquifier, "UTF-8");}
+        catch(UnsupportedEncodingException ignore) {} //if this doesn't work, just ignore
 
         xarXml = StringUtils.replace(xarXml, "@@RUN-UNIQUIFIER@@", uniquifier);
 

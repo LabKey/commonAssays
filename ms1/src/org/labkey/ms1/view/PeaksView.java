@@ -111,7 +111,7 @@ public class PeaksView extends QueryView
                 ViewURLHelper urlFeatureDetails = getViewContext().getViewURLHelper().clone();
                 urlFeatureDetails.deleteFilterParameters(QueryView.DATAREGIONNAME_DEFAULT);
                 urlFeatureDetails.setAction("showFeatureDetails.view");
-                bar.add(new ActionButton(urlFeatureDetails, "Feature Details"));
+                bar.add(new ActionButton(urlFeatureDetails.getEncodedLocalURIString(), "Feature Details", DataRegion.MODE_ALL, ActionButton.Action.LINK));
             }
         }
 
