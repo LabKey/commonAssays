@@ -41,7 +41,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
 
     public MS1Module()
     {
-        super(NAME, 2.25, "/org/labkey/ms1", true,
+        super(NAME, 2.29, "/org/labkey/ms1", true,
                 new WebPartFactory(WEBPART_MS1_RUNS)
                 {
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)

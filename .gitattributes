@@ -472,6 +472,7 @@ ms1/module.properties -text
 ms1/src/META-INF/ms1.xml -text
 ms1/src/META-INF/ms1/scripts/postgresql/ms1-0.00-2.10.sql -text
 ms1/src/META-INF/ms1/scripts/postgresql/ms1-2.20-2.21.sql -text
+ms1/src/META-INF/ms1/scripts/postgresql/ms1-2.20-2.29.sql -text
 ms1/src/META-INF/ms1/scripts/postgresql/ms1-2.21-2.22.sql -text
 ms1/src/META-INF/ms1/scripts/postgresql/ms1-2.22-2.23.sql -text
 ms1/src/META-INF/ms1/scripts/postgresql/ms1-2.23-2.24.sql -text
@@ -479,6 +480,7 @@ ms1/src/META-INF/ms1/scripts/postgresql/ms1-2.24-2.25.sql -text
 ms1/src/META-INF/ms1/scripts/postgresql/obsolete/ms1-0.00-0.01.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-0.00-2.10.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-2.20-2.21.sql -text
+ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-2.20-2.29.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-2.21-2.22.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-2.22-2.23.sql -text
 ms1/src/META-INF/ms1/scripts/sql[!!-~]server/ms1-2.23-2.24.sql -text
