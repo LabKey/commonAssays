@@ -642,7 +642,7 @@ public class ProteinManager
             String seqId = currentUrl.getParameter("seqId");
 
             if (null != seqId)
-                filter.addCondition("SeqId", seqId);
+                filter.addCondition("SeqId", Integer.parseInt(seqId));
         }
 
         return filter;

@@ -434,7 +434,7 @@ public class MS2Manager
         if (null != run)
             return run;
 
-        MS2Run[] runs = getRuns("Run = ?", runId);
+        MS2Run[] runs = getRuns("Run = ?", Integer.parseInt(runId));
 
         if (runs != null && runs.length == 1)
         {
