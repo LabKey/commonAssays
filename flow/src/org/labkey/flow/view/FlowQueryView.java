@@ -39,6 +39,7 @@ public class FlowQueryView extends QueryView
     {
         super(context, schema, settings);
         setShowChartButton(true);
+        setShowRReportButton(true);
     }
 
     protected boolean showRecordSelectors()
