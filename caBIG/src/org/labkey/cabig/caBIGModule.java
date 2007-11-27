@@ -19,13 +19,13 @@ public class caBIGModule extends DefaultModule
     public caBIGModule()
     {
         super(NAME, 2.22, null, true);
-        addController("cabig", NewCaBIGController.class);
+        addController("cabig", caBIGController.class);
     }
 
     public void startup(ModuleContext moduleContext)
     {
         super.startup(moduleContext);
-        SecurityManager.addViewFactory(new NewCaBIGController.caBIGPermissionsViewFactory());
+        SecurityManager.addViewFactory(new caBIGController.caBIGPermissionsViewFactory());
     }
 
     public Set<String> getSchemaNames()

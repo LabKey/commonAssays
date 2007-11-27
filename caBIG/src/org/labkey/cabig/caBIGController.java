@@ -26,11 +26,11 @@ import java.util.List;
  * Date: Nov 22, 2007
  * Time: 8:32:19 AM
  */
-public class NewCaBIGController extends SpringActionController
+public class caBIGController extends SpringActionController
 {
-    private static ActionResolver _actionResolver = new DefaultActionResolver(NewCaBIGController.class);
+    private static ActionResolver _actionResolver = new DefaultActionResolver(caBIGController.class);
 
-    public NewCaBIGController()
+    public caBIGController()
     {
         super();
         setActionResolver(_actionResolver);
