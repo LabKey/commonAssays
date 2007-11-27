@@ -79,7 +79,7 @@ caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/obsolete/cabig-0.01-0.02.sql -t
 caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/obsolete/cabig-0.02-0.03.sql -text
 caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/obsolete/cabig-0.03-0.04.sql -text
 caBIG/src/META-INF/cabig/scripts/sql[!!-~]server/obsolete/cabig-0.04-0.05.sql -text
-caBIG/src/org/labkey/cabig/caBIGController.java -text
+caBIG/src/org/labkey/cabig/NewCaBIGController.java -text
 caBIG/src/org/labkey/cabig/caBIGManager.java -text
 caBIG/src/org/labkey/cabig/caBIGModule.java -text
 caBIG/src/org/labkey/cabig/caBIGSchema.java -text

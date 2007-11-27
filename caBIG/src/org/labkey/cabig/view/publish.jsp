@@ -1,15 +1,16 @@
+<%@ page import="org.labkey.api.util.HelpTopic"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
-<%@ page import="org.labkey.api.view.ViewContext"%>
-<%@ page import="org.labkey.cabig.caBIGManager"%>
+<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.ViewURLHelper" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.util.HelpTopic" %>
+<%@ page import="org.labkey.cabig.NewCaBIGController" %>
+<%@ page import="org.labkey.cabig.caBIGManager" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ViewContext ctx = HttpView.currentContext();
     boolean isPublished = caBIGManager.get().isPublished(ctx.getContainer());
-    String publishButton = PageFlowUtil.buttonLink(isPublished ? "Unpublish" : "Publish", new ViewURLHelper("cabig", isPublished ? "unpublish" : "publish", ctx.getContainer()));
-    ViewURLHelper adminUrl = new ViewURLHelper("cabig", "admin.view", ctx.getContainer());
+    String publishButton = PageFlowUtil.buttonLink(isPublished ? "Unpublish" : "Publish", NewCaBIGController.getCaBigUrl(isPublished ? "unpublish" : "publish", ctx.getContainer(), ctx.getViewURLHelper()));
+    ViewURLHelper adminUrl = NewCaBIGController.getCaBigUrl("admin", ctx.getContainer(), ctx.getViewURLHelper());
 
     if (isPublished)
     {

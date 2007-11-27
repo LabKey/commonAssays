@@ -80,7 +80,6 @@ public class VelocityDataView extends VelocityView
     public void setResultSet(ResultSet rs)
     {
         _rc.setResultSet(rs);
-        ;
     }
 
     public void setDataRegion(DataRegion dataRegion)
