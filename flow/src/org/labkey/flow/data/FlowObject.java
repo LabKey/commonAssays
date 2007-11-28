@@ -4,6 +4,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.security.User;
 import org.labkey.api.exp.*;
+import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.property.SystemProperty;
 import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.util.AppProps;
@@ -216,6 +217,11 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     {
         String str = "urn:lsid:" + AppProps.getInstance().getDefaultLsidAuthority() + ":" + type + ".Folder-" + container.getRowId() + ":" + name;
         return new Lsid(str).toString();
+    }
+
+    static public String generateLSID(Container container, DataType type, String name)
+    {
+        return generateLSID(container, type.getNamespacePrefix(), name);
     }
 
     static public String generateUniqueLSID(String type)

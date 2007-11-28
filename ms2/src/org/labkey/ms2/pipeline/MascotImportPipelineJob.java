@@ -118,6 +118,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
             if (iReturn != 0 || !fileOutputTGZ.exists() || !fileOutputXML.exists())
             {
                 getLogger().error("Failed running Mascot2XML.");
+                return;
             }
             else
             {
@@ -125,10 +126,12 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
                 if (!fileOutputTGZ.renameTo (filePepXMLTGZ))
                 {
                     getLogger().error("Failed move "+fileOutputTGZ.getName()+" to "+filePepXMLTGZ.getAbsolutePath());
+                    return;
                 }
                 if (!fileOutputXML.renameTo (filePepXML))
                 {
                     getLogger().error("Failed move "+fileOutputXML.getName()+" to "+filePepXML.getAbsolutePath());
+                    return;
                 }
             }
 

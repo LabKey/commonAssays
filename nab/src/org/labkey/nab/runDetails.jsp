@@ -240,7 +240,8 @@
                                 {
                                     PropertyDescriptor pd = entry.getKey();
 
-                                    if (pd.getName().equals(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME) ||
+                                    if (pd.equals(sampleDescPD) ||
+                                            pd.getName().equals(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME) ||
                                             pd.getName().equals(AbstractAssayProvider.VISITID_PROPERTY_NAME) ||
                                             pd.getName().equals(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME))
                                         continue;

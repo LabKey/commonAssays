@@ -52,43 +52,25 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
         //  it associated with? Very slow!  Good for sprot fastas
 
         String pName = p.getProtein().getLookup();
+         Map<String, Set<String>> possibleIdents = Protein.identParse(pName);
 
-        if (
-                (pName.indexOf("|") != -1) ||
-                        (pName.indexOf(":") != -1) ||
-                        (pName.length() > 30) ||
-                        (pName.startsWith("IPI"))
-                )
-        {
-            Map<String, Set<String>> possibleIdents = Protein.identParse(pName);
-            if (possibleIdents != null && possibleIdents.size() > 0)
-            {
-                if (possibleIdents.containsKey("SwissProt"))
-                {
-                    pName = possibleIdents.get("SwissProt").iterator().next();
-                }
-                else
-                {
-                    pName = possibleIdents.values().iterator().next().iterator().next();
-                }
-            }
-        }
-        if (pName.equals(""))
+        if (null == possibleIdents)
             return null;
-        
-        String retVal;
-        if (Protein.mightBeASwissProtName(pName))
-        {
-            retVal = guessOrganismBySprotSuffix(p);
-            if (retVal != null) return retVal;
-        }
-        retVal = _identCache.get(pName);
+
+        if (possibleIdents.containsKey("SwissProt"))
+            {
+                pName = possibleIdents.get("SwissProt").iterator().next();
+                return guessOrganismBySprotSuffix(pName);
+            }
+
+        // todo:  this identcache is never filled?
+        String retVal = _identCache.get(pName);
         if (CACHED_MISS_VALUE.equals(retVal))
             return null;
         return retVal;
     }
 
-    public String guessOrganismBySprotSuffix(ProteinPlus p) throws SQLException
+    public String guessOrganismBySprotSuffix(String pName) throws SQLException
     {
         if (sprotLoadStatus == SPROTload.not_tried_yet)
         {
@@ -110,7 +92,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
         }
         if (sprotLoadStatus == SPROTload.tried_and_failed) return null;
         String retVal;
-        String pName = p.getProtein().getLookup();
+
         pName = pName.substring(pName.indexOf("_") + 1);
         retVal = _sprotCache.get(pName);
         if (CACHED_MISS_VALUE.equals(retVal))

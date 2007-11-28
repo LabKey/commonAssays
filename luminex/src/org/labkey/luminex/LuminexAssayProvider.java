@@ -270,6 +270,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             TimepointType timepointType = AssayPublishService.get().getTimepointType(study);
 
             int index = 0;
+            Container sourceContainer = null;
             for (LuminexDataRow luminexDataRow : luminexDataRows)
             {
                 Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -319,6 +320,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 {
                     ExpData data = ExperimentService.get().getExpData(luminexDataRow.getDataId());
                     run = data.getRun();
+                    sourceContainer = run.getContainer();
                     runs.put(luminexDataRow.getDataId(), run);
                 }
                 addProperty(study, "Run Name", run.getName(), dataMap, types);
@@ -363,7 +365,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
                 dataMaps[index++] = dataMap;
             }
-            return AssayPublishService.get().publishAssayData(user, study, protocol.getName(), protocol, dataMaps, types, getDataRowIdFieldKey().toString(), errors);
+            return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol, dataMaps, types, getDataRowIdFieldKey().toString(), errors);
         }
         catch (SQLException e)
         {

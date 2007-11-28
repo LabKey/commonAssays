@@ -218,7 +218,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
 
     public String getName()
     {
-        return "Neutralizing Antibodies (NAb)";
+        return "TZM-bl Neutralization (NAb)";
     }
 
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
@@ -305,7 +305,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                     new Sort(getDataRowIdFieldKey().toString()), OntologyObject.class);
 
             Map<String, Object>[] dataMaps = new HashMap[dataRows.length];
-
+            Container sourceContainer = null;
             for (OntologyObject row : dataRows)
             {
                 Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -340,6 +340,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                     OntologyObject dataRowParent = OntologyManager.getOntologyObject(row.getOwnerObjectId());
                     ExpData data = ExperimentService.get().getExpData(dataRowParent.getObjectURI());
                     run = data.getRun();
+                    sourceContainer = run.getContainer();
                     runCache.put(row.getOwnerObjectId(), run);
                 }
 
@@ -377,7 +378,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                 addProperty(study, "Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(), dataMap, typeSet);
                 dataMaps[rowIndex++] = dataMap;
             }
-            return AssayPublishService.get().publishAssayData(user, study, protocol.getName(), protocol, 
+            return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol,
                     dataMaps, new ArrayList<PropertyDescriptor>(typeSet), getDataRowIdFieldKey().toString(), errors);
         }
         catch (SQLException e)

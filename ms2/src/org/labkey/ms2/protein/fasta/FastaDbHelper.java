@@ -67,7 +67,7 @@ public class FastaDbHelper
     // if there are multiple matching sequences, it just picks the matching hash with the lowest Orgid
     // that is not the orgid for the Unknown Unknown
     public final PreparedStatement _guessOrgBySharedHashStmt;
-    
+
     public final PreparedStatement _insertIntoOrgsStmt;
     public final PreparedStatement _updateSTempWithOrgIDsStmt;
     public final PreparedStatement _insertIntoSeqsStmt;
@@ -115,8 +115,7 @@ public class FastaDbHelper
 
         c.createStatement().execute("CREATE INDEX IX_" + _seqTableName + "_HASH_ORGID_SROWID ON " + _seqTableName + "(hash, orgId, srowid)");
         c.createStatement().execute("CREATE INDEX IX_" + _seqTableName + "_ORGID ON " + _seqTableName + "(orgId)");
-        c.createStatement().execute("CREATE INDEX IX_" + _seqTableName + "_HASH ON " + _seqTableName + "(hash)");
-
+ 
         c.createStatement().execute("CREATE " + _dialect.getTempTableKeyword() + " TABLE " + _identTableName + " ( " +
                 "Identifier varchar(50)  NOT NULL, " +
                 "identType varchar(50) NULL, " +
@@ -134,16 +133,18 @@ public class FastaDbHelper
         _insertIntoOrgsStmt = c.prepareStatement("INSERT INTO " + ProteinManager.getTableInfoOrganisms() + " (Genus,Species) " +
                 "SELECT DISTINCT genus,species FROM " + _seqTableName +
                 " WHERE " + _seqTableName + ".orgid IS NULL AND NOT EXISTS (" +
-                "SELECT * FROM " + ProteinManager.getTableInfoOrganisms() + " WHERE " + _seqTableName + ".genus = " + ProteinManager.getTableInfoOrganisms() + ".genus AND " +
-                _seqTableName + ".species = " + ProteinManager.getTableInfoOrganisms() + ".species)");
+                "SELECT * FROM " + ProteinManager.getTableInfoOrganisms() + " WHERE UPPER(" + _seqTableName + ".genus) = UPPER(" + ProteinManager.getTableInfoOrganisms() + ".genus) AND UPPER(" +
+                _seqTableName + ".species) = UPPER(" + ProteinManager.getTableInfoOrganisms() + ".species))");
 
         _updateSTempWithGuessedOrgStmt = c.prepareStatement("UPDATE " + _seqTableName + " SET genus = x.genus, species = x.species, fullorg = x.fullorg \n" +
             "FROM ( SELECT a.genus" + _dialect.getConcatenationOperator() + "' '" + _dialect.getConcatenationOperator() + "a.species AS fullorg, a.species as species, a.genus as genus, c.identifier as identifier " +
                 "  FROM " + ProteinManager.getTableInfoOrganisms() + " a JOIN " + ProteinManager.getTableInfoSequences() + " b ON (a.orgid=b.orgid) JOIN " + ProteinManager.getTableInfoIdentifiers() + " c ON (c.seqid=b.seqid)) x \n" +
                 " WHERE " + _seqTableName + ".fullorg IS NULL AND x.identifier=" + _seqTableName + ".lookup");
 
-        _updateSTempWithOrgIDsStmt = c.prepareStatement("UPDATE " + _seqTableName + " SET orgid = " + ProteinManager.getTableInfoOrganisms() + ".orgid FROM " + ProteinManager.getTableInfoOrganisms() + " WHERE " + ProteinManager.getTableInfoOrganisms() + ".genus=" + _seqTableName + ".genus" +
-                " AND " + ProteinManager.getTableInfoOrganisms() + ".species=" + _seqTableName + ".species");
+        _updateSTempWithOrgIDsStmt = c.prepareStatement("UPDATE " + _seqTableName +
+                " SET orgid = " + ProteinManager.getTableInfoOrganisms() + ".orgid FROM " + ProteinManager.getTableInfoOrganisms() +
+                " WHERE UPPER(" + ProteinManager.getTableInfoOrganisms() + ".genus) = UPPER(" + _seqTableName + ".genus)" +
+                " AND UPPER(" + ProteinManager.getTableInfoOrganisms() + ".species) = UPPER(" + _seqTableName + ".species)");
 
         _insertIntoSeqsStmt = c.prepareStatement("INSERT INTO " + ProteinManager.getTableInfoSequences() + " (ProtSequence, Hash, Description, Mass, Length, OrgId, BestName, InsertDate) " +
                 " SELECT a.ProtSequence,a.hash,a.description,a.mass,a.length,a.OrgId,substring(a.best_name,1,50),entry_date " +
@@ -176,8 +177,8 @@ public class FastaDbHelper
                 "          a.SeqId = " + _identTableName + ".SeqId) " +
                 "  GROUP BY Identifier,IdentTypeId,SeqId");
 
-        _emptySeqsStmt = c.prepareStatement("DELETE FROM " + _seqTableName);
-        _emptyIdentsStmt = c.prepareStatement("DELETE FROM " + _identTableName);
+        _emptySeqsStmt = c.prepareStatement("TRUNCATE TABLE " + _seqTableName);
+        _emptyIdentsStmt = c.prepareStatement("TRUNCATE TABLE " + _identTableName);
         _getCurrentInsertIdStmt = c.prepareStatement(_dialect.appendSelectAutoIncrement("", ProteinManager.getTableInfoAnnotInsertions(), "InsertId"));
 
         _guessOrgBySharedHashStmt = c.prepareStatement("UPDATE " + _seqTableName + " SET orgid = ( SELECT MIN(PS.orgid) " +

@@ -486,6 +486,8 @@ public class ProjectController extends SpringActionController
             // UNDONE: use getPropertyValues()
             Enumeration params = request.getParameterNames();
 
+            webPart.getPropertyMap().clear();
+
             // TODO: Clean this up. Type checking... (though type conversion also must be done by the webpart)
             while (params.hasMoreElements())
             {
@@ -493,10 +495,8 @@ public class ProjectController extends SpringActionController
                 if (!"index".equals(s) && !"pageId".equals(s) && !"x".equals(s) && !"y".equals(s))
                 {
                     String value = request.getParameter(s);
-                    if ("".equals(value.trim()))
-                        webPart.getPropertyMap().remove(s);
-                    else
-                        webPart.getPropertyMap().put(s, request.getParameter(s));
+                    if (value != null && !"".equals(value.trim()))
+                        webPart.getPropertyMap().put(s, value.trim());
                 }
             }
         }

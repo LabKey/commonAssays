@@ -138,7 +138,7 @@ public class NabController extends ViewController
 
         if (!AssayPublishService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
         {
-            ActionButton publishButton = new ActionButton("publishPlatesChooseStudy.view", "Publish Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            ActionButton publishButton = new ActionButton("publishPlatesChooseStudy.view", "Copy Selected to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
             publishButton.setDisplayPermission(ACL.PERM_INSERT);
             buttons.add(publishButton);
         }
@@ -715,7 +715,7 @@ public class NabController extends ViewController
             if (!sampleProperties.isEmpty())
             {
                 List<String> errors = new ArrayList<String>();
-                ViewURLHelper helper = AssayPublishService.get().publishAssayData(getUser(), targetContainer,
+                ViewURLHelper helper = AssayPublishService.get().publishAssayData(getUser(), getContainer(), targetContainer,
                         "NAB", null, sampleProperties.toArray(new Map[sampleProperties.size()]),
                         NabManager.get().getPropertyTypes(plates),
                         NabManager.PlateProperty.VirusId.name(), errors);
@@ -732,7 +732,7 @@ public class NabController extends ViewController
             }
         }
         ActionErrors actionErrors = PageFlowUtil.getActionErrors(getRequest(), true);
-        actionErrors.add("main", new ActionMessage("Error", "At least one sample must be selected to publish."));
+        actionErrors.add("main", new ActionMessage("Error", "At least one sample must be selected to copy to a study."));
         return publishVerify(form);
     }
 
@@ -827,7 +827,7 @@ public class NabController extends ViewController
         if (wellgroupIds.isEmpty())
         {
             ActionErrors actionErrors = PageFlowUtil.getActionErrors(getRequest(), true);
-            actionErrors.add("main", new ActionMessage("Error", "You must select at least one specimen to publish."));
+            actionErrors.add("main", new ActionMessage("Error", "You must select at least one specimen to copy to a study."));
             return sampleList();
         }
         else
@@ -846,7 +846,7 @@ public class NabController extends ViewController
         if (plateIds.isEmpty())
         {
             ActionErrors actionErrors = PageFlowUtil.getActionErrors(getRequest(), true);
-            actionErrors.add("main", new ActionMessage("Error", "You must select at least one row to publish."));
+            actionErrors.add("main", new ActionMessage("Error", "You must select at least one row to copy to a study."));
             return runs();
         }
         else
@@ -1038,7 +1038,7 @@ public class NabController extends ViewController
             ActionErrors errors = new ActionErrors();
             Set<String> selectedSamples = new HashSet<String>();
             if (getIncludedSampleIds() == null)
-                errors.add("main", new ActionMessage("Error", "You must select at least one specimen to publish."));
+                errors.add("main", new ActionMessage("Error", "You must select at least one specimen to copy to a study."));
             else
             {
                 for (String sample : getIncludedSampleIds())
@@ -1222,7 +1222,7 @@ public class NabController extends ViewController
 
         if (!AssayPublishService.get().getValidPublishTargets(getUser(), ACL.PERM_INSERT).isEmpty())
         {
-            ActionButton publishButton = new ActionButton("publishWellGroupsChooseStudy.view", "Publish Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            ActionButton publishButton = new ActionButton("publishWellGroupsChooseStudy.view", "Copy Selected to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
             publishButton.setDisplayPermission(ACL.PERM_INSERT);
             buttons.add(publishButton);
         }

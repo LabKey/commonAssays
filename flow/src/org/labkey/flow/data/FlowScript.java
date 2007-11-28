@@ -144,7 +144,7 @@ public class FlowScript extends FlowDataObject
 
     static public String lsidForName(Container container, String name)
     {
-        return generateLSID(container, "Protocol", name);
+        return generateLSID(container, FlowDataType.Script, name);
     }
 
     static private void initScript(ExpData data)

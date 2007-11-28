@@ -304,6 +304,7 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
             org.labkey.ms2.pipeline.BooleanParamsValidator.TestCase.class,
             org.labkey.ms2.pipeline.PositiveIntegerParamsValidator.TestCase.class,
             org.labkey.ms2.pipeline.ListParamsValidator.TestCase.class,
+            org.labkey.ms2.protein.FastaDbLoader.TestCase.class,                
             org.labkey.ms2.reader.RandomAccessMzxmlIterator.TestCase.class));
     }
 }

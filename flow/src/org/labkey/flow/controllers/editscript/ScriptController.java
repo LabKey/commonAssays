@@ -141,7 +141,8 @@ public class ScriptController extends BaseFlowController
 
     protected boolean isScriptNameUnique(String name) throws Exception
     {
-        return ExperimentService.get().getExpData(FlowScript.lsidForName(getContainer(), name)) == null;
+        String lsid = FlowScript.lsidForName(getContainer(), name);
+        return ExperimentService.get().getExpData(lsid) == null;
     }
 
     public boolean isEmptyScript(FlowScript analysisScript)
@@ -1210,7 +1211,7 @@ public class ScriptController extends BaseFlowController
         }
         if (!isScriptNameUnique(form.name))
         {
-            addError("There is already a protocol named '" + form.name);
+            addError("There is already a protocol named '" + form.name + "'");
             return null;
         }
         ScriptDef src = form.analysisScript.getAnalysisScriptDocument().getScript();

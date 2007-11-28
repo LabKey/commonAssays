@@ -72,7 +72,7 @@ public class PortalModule extends DefaultModule
                 width = 0;
             }
             boolean includeSubfolders = !"off".equals(webPart.getPropertyMap().get("includeSubfolders"));
-            return new SearchWebPart(Search.ALL_SEARCHABLES, "", ProjectController.getSearchUrl(portalCtx.getContainer()), includeSubfolders, false, width);
+            return new SearchWebPart(Search.ALL_SEARCHABLES, "", ProjectController.getSearchUrl(portalCtx.getContainer()), includeSubfolders, false, width, false);
         }
 
 

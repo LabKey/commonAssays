@@ -109,5 +109,5 @@ Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All
     }
 %>
     </table>
-    <%= buttonLink("Cancel", "begin.view") %> <%= buttonImg("Publish")%>
+    <%= buttonLink("Cancel", "begin.view") %> <%= buttonImg("Copy to Study")%>
 </form>

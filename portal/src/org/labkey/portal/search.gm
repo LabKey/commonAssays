@@ -1,6 +1,8 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <form method="get" action="<%=postURL%>">
-Search <%=what%> in this <%=(container.isProject() ? "project" : "folder") + (includeSubfolders ? " and all subfolders" : "")%>
+<% if(showExplanatoryText) { %>
+Search <%=what%> in this <%=(container.isProject() ? "project" : "folder") %>
+<% } %>
 <table>
 <tr>
     <td colspan=2><input type="text" name="search" value="<%=PageFlowUtil.filter(searchTerm)%>"<%=width > 0 ? " size=\"" + width + "\"" : ""%>></td><%

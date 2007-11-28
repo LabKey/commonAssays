@@ -25,6 +25,7 @@ import org.labkey.ms2.protein.fasta.FastaFile;
 import org.labkey.ms2.protein.organism.*;
 import org.labkey.common.tools.FastaLoader;
 import org.labkey.common.tools.Protein;
+import org.labkey.common.tools.IdPattern;
 import org.labkey.api.exp.XarContext;
 import org.apache.log4j.Logger;
 
@@ -34,6 +35,9 @@ import java.sql.*;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileNotFoundException;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class FastaDbLoader extends DefaultAnnotationLoader implements AnnotationLoader
 {
@@ -389,6 +393,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
             // fasta files from IPI have good annotation in their description field,
             // not their name field.
+            // todo:  this is almost the same code as in Protein.getIdentifier map and should be consolidated
             if (rawIdentString.startsWith("IPI") && rawIdentString.indexOf("|") == -1)
             {
                 String possibleNewRawIdentString = rs.getString(3);
@@ -396,10 +401,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
                 {
                     rawIdentString = possibleNewRawIdentString;
                 }
-            }
-            else if((rawIdentString.indexOf("|") == -1) && Protein.mightBeASwissProtName(rawIdentString))
-            {
-                rawIdentString = "SPROT_NAME|" + rawIdentString;
             }
 
             Map<String, Set<String>> identifiers = Protein.identParse(rawIdentString);
@@ -840,5 +841,222 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             }
         }
     }
+    //JUnit TestCase
+    public static class TestCase extends junit.framework.TestCase
+    {
+
+        TestCase(String name)
+        {
+            super(name);
+        }
+
+        public static Test suite()
+        {
+            TestSuite suite = new TestSuite();
+            suite.addTest(new TestCase("testValidateIdentParser"));
+            return suite;
+        }
+
+        public void testValidateIdentParser()
+        {
+            Map<String, Set<String>> idMapE;
+
+            idMapE = IdPattern.createIdMap("GI", "16758788");
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("REFSEQ", "NP_446360.1"));
+            parseAndCompare("GI|16758788|ref|NP_446360.1|", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt", "2A5D_YEAST"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn", "P38903"));
+            parseAndCompare("P38903|2A5D_YEAST", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt","143G_BOVIN"));
+            parseAndCompare("143G_BOVIN", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","B32382"));
+            parseAndCompare("B32382", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","1350702"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt","RL26_XENLA"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","P49629"));
+            parseAndCompare("gi|1350702|sp|P49629|RL26_XENLA", idMapE);   // check this
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("Genbank","EY193505.1"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","159497289"));
+            parseAndCompare("gi|159497289|gb|EY193505.1|EY193505", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","16758788"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("REFSEQ","NP_446360.1"));
+            parseAndCompare("gi|16758788|ref|NP_446360.1|", idMapE);
+
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","1705439"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt","BCCP_BACSU"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","P49786"));
+            parseAndCompare("gi|1705439|sp|P49786|BCCP_BACSU", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","17233017"));
+            parseAndCompare("gi|17233017|COG0589:COG0077", idMapE);
+
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","17233017"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("REFSEQ","NC_003276.1"));
+            parseAndCompare("gi|17233017|ref|NC_003276.1|_268495_270174|", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("Genbank","AAM45611.1"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","21305377"));
+            parseAndCompare("gi|21305377|gb|AAM45611.1|AF384285_1", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","2136708"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","I45994"));
+            parseAndCompare("gi|2136708|pir||I45994", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","25140706"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("Genbank","DAA00377.1"));
+            parseAndCompare("gi|25140706|tpg|DAA00377.1|", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("Genbank","BAA76286.1"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","4521223"));
+            parseAndCompare("gi|4521223|dbj|BAA76286.1|", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("Genbank","CAA34470.1"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","61"));
+            parseAndCompare("gi|61|emb|CAA34470.1|", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("Genbank","CAB95676.1"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","8745138"));
+            parseAndCompare("gi|8745138|emb|CAB95676.1|", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SI","143GT"));
+            parseAndCompare("gnl|si|143GT_SUFFIX", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00387615"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00387615.2"));
+            parseAndCompare("ipi|IPI00387615|IPI00387615.2", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("ENSEMBL","ENSRNOP00000030679"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00387615.1"));
+            parseAndCompare("IPI:IPI00387615.1|ENSEMBL:ENSRNOP00000030679", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00421289.1"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("REFSEQ","NP_955791"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","Q6RVG2"));
+            parseAndCompare("IPI:IPI00421289.1|REFSEQ_NP:NP_955791|UniProt/TrEMBL:Q6RVG2", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00454216.1"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","Q6RVG1"));
+            parseAndCompare("IPI:IPI00454216.1|UniProt/TrEMBL:Q6RVG1", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt","O05473_SULIS"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","O05473"));
+            parseAndCompare("O05473|O05473_SULIS", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("UniRef100","Q4U9M9"));
+            parseAndCompare("UniRef100_Q4U9M9", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00421289.1"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","Q6RVG2"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","Q6RVG3"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","Q6RVG4"));
+            parseAndCompare("IPI:IPI00421289.1|UniProt/TrEMBL:Q6RVG2;Q6RVG3;Q6RVG4;", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt","HPH2_YEAST"));
+            parseAndCompare("UPSP:HPH2_YEAST", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt","Q6B2T6_YEAST"));
+            parseAndCompare("UPTR:Q6B2T6_YEAST", idMapE);
+
+            // return empty map
+            idMapE=new HashMap<String,Set<String>>();
+            parseAndCompare("GENSCAN00000048050", idMapE);
+            parseAndCompare("uniparc|UPI0000503605|UPI0000503605", idMapE);
+            parseAndCompare("gnl|unk|UNKNOWN_ID", idMapE);
+
+            parseAndCompare("spaces spaces", idMapE);
+            parseAndCompare("    | ", idMapE);
+            parseAndCompare("     ", idMapE);
+            parseAndCompare("|||||||", idMapE);
+            parseAndCompare("UPTR:", idMapE);
+            parseAndCompare("IPI:", idMapE);
+            parseAndCompare("ipi|", idMapE);
+            parseAndCompare("ipi| ", idMapE);
+            parseAndCompare("UniRef100_", idMapE);
+            parseAndCompare("|a|a|:|test||", idMapE);
+            parseAndCompare("BAD|a|a|:|test||", idMapE);
+            parseAndCompare("Value,Value:other|a|a|:|test||", idMapE);
+            parseAndCompare("||lots||of|||bars|||", idMapE);
+            parseAndCompare("\\||\"\"", idMapE);
+            parseAndCompare("sprot_like***", idMapE);
+            parseAndCompare("Q12345_sprot_like", idMapE);
+            parseAndCompare("\r\t\n\"", idMapE);
+            parseAndCompare(null, idMapE);
+            parseAndCompare("UniRef100_Q4U9M9;UniRef100_Q4U123;UniRef100_Q4U456;", idMapE);
+
+        }
+
+        protected boolean compareIdMaps (Map<String, Set<String>> idMapExpected, Map<String, Set<String>> idMapReturned)
+        {
+            if (null == idMapReturned)
+            {
+                return null == idMapExpected;
+            }
+            else
+            {
+                if (null == idMapExpected)
+                    return false;
+
+                if (idMapExpected.size() != idMapReturned.size())
+                    return false;
+
+                for (String keyE : idMapExpected.keySet())
+                {
+                    if (!idMapReturned.containsKey(keyE))
+                        return false;
+                    Set<String> valsE = idMapExpected.get(keyE);
+                    if (valsE.size() != idMapReturned.get(keyE).size())
+                        return false;
+                    for (String valE : valsE)
+                    {
+                        if (!(idMapReturned.get(keyE)).contains(valE))
+                            return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        protected void parseAndCompare(String strLookup, Map<String, Set<String>> idMapExpected)
+        {
+            Map<String, Set<String>> idMapReturned = Protein.identParse(strLookup);
+            assert(compareIdMaps(idMapExpected, idMapReturned));
+        }
+
+    }
+
 } // class FastaDbLoader
+
 

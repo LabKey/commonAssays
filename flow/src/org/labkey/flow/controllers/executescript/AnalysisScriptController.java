@@ -361,11 +361,15 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                     break;
                 }
             }
-            FlowRun[] existing = experiment.findRun(runFilePathRoot, null);
-            if (existing.length != 0)
+
+            if (runFilePathRoot != null)
             {
-                addError("This analysis folder already contains this path.");
-                return null;
+                FlowRun[] existing = experiment.findRun(runFilePathRoot, null);
+                if (existing.length != 0)
+                {
+                    addError("This analysis folder already contains this path.");
+                    return null;
+                }
             }
         }
         else
