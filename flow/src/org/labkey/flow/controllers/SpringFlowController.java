@@ -1,20 +1,23 @@
 package org.labkey.flow.controllers;
 
-import org.labkey.api.jsp.JspLoader;
-import org.labkey.api.jsp.JspBase;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.view.*;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.security.User;
-import org.labkey.api.data.Container;
+import org.apache.beehive.netui.pageflow.Forward;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.data.FlowRun;
-import org.labkey.flow.data.FlowProtocol;
+import org.labkey.api.data.Container;
+import org.labkey.api.jsp.JspBase;
+import org.labkey.api.jsp.JspLoader;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.security.User;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.ViewForward;
+import org.labkey.api.view.ViewURLHelper;
 import org.labkey.flow.data.FlowObject;
+import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.script.ScriptJob;
 import org.labkey.flow.webparts.FlowFolderType;
-import org.apache.beehive.netui.pageflow.Forward;
 import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.ServletException;
@@ -146,21 +149,12 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
 
     }
 
-//    protected Forward renderInTemplate(HttpView view, FlowObject object, String title, A action) throws Exception
-//    {
-//        return renderInTemplate(view, getContainer(), getNavTrailConfig(object, title, action));
-//    }
-//
-//    protected Forward renderPage(ViewForm form, String jspFile, FlowObject object, String title, A action) throws Exception
-//    {
-//        return renderInTemplate(FormPage.getView(getClass(), form, jspFile), object, title, action);
-//    }
-
 
     public ViewURLHelper urlFor(Enum action)
     {
-        return PageFlowUtil.urlFor(action, getContainerPath());
+        return PageFlowUtil.urlFor(action, getContainer());
     }
+
 
     protected int getIntParam(P param)
     {
