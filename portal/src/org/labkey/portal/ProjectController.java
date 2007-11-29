@@ -137,7 +137,7 @@ public class ProjectController extends SpringActionController
 
             Portal.populatePortalView(getViewContext(), c.getId(), template, getViewContext().getContextPath());
             
-            getPageConfig().setUseTemplate(false);
+            getPageConfig().setTemplate(PageConfig.Template.None);
             return template;
         }
 

@@ -13,7 +13,6 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
-import org.labkey.ms1.maintenance.PurgeTask;
 import org.labkey.ms1.model.DataFile;
 import org.labkey.ms1.model.Feature;
 import org.labkey.ms1.model.Peptide;
