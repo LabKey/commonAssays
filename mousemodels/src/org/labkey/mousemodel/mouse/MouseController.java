@@ -33,6 +33,8 @@ import org.labkey.api.sample.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
+import org.labkey.api.view.template.PrintTemplate;
 import org.labkey.common.util.Pair;
 import org.labkey.mousemodel.MouseModelController;
 import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;

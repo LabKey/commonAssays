@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.labkey.flow.data.*;
 import org.labkey.flow.view.FlowQueryView;
 import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.api.security.ACL;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.util.PageFlowUtil;

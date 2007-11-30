@@ -40,6 +40,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.common.util.Pair;
 import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

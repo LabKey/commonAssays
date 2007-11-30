@@ -36,6 +36,8 @@ import org.labkey.api.study.assay.AssayPublishService;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
+import org.labkey.api.view.template.PrintTemplate;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

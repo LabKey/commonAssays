@@ -30,6 +30,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
 import static org.labkey.api.util.PageFlowUtil.filter;
 import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.attachments.StrutsAttachmentFile;

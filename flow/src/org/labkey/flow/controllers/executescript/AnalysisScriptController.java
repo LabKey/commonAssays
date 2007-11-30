@@ -13,6 +13,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
@@ -22,7 +23,6 @@ import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.AddRunsJob;
 import org.labkey.flow.script.AnalyzeJob;
-import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.script.FlowPipelineProvider;
 
 import java.io.File;

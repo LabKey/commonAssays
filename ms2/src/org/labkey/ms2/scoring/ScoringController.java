@@ -16,6 +16,7 @@
 package org.labkey.ms2.scoring;
 
 import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.api.security.ACL;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;

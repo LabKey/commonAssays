@@ -10,6 +10,7 @@ import org.labkey.flow.data.*;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;

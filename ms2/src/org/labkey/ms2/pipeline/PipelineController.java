@@ -34,6 +34,7 @@ import org.labkey.api.pipeline.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protocol.*;
 

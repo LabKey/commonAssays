@@ -32,6 +32,8 @@ import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.Search;
 import org.labkey.api.util.Search.SearchResultsView;
 import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
+import org.labkey.api.view.template.PageConfig;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;

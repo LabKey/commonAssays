@@ -25,6 +25,7 @@ import org.labkey.api.sample.MouseSchema;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.view.template.HomeTemplate;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.beehive.netui.pageflow.Forward;
 
