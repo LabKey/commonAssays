@@ -722,7 +722,7 @@ ms2/src/org/labkey/ms2/UniqueFilteredPeptidesColumn.java -text
 ms2/src/org/labkey/ms2/XCometRun.java -text
 ms2/src/org/labkey/ms2/XTandemRun.java -text
 ms2/src/org/labkey/ms2/XTandemcometRun.java -text
-ms2/src/org/labkey/ms2/annotLoadDetails.vm -text
+ms2/src/org/labkey/ms2/annotLoadDetails.jsp -text
 ms2/src/org/labkey/ms2/compare/CompareDataRegion.java -text
 ms2/src/org/labkey/ms2/compare/CompareExcelWriter.java -text
 ms2/src/org/labkey/ms2/compare/CompareQuery.java -text
@@ -731,13 +731,14 @@ ms2/src/org/labkey/ms2/compare/ProteinCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/ProteinProphetCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/RunColumn.java -text
 ms2/src/org/labkey/ms2/createExperimentXml.gm -text
+ms2/src/org/labkey/ms2/currentFilter.jsp -text
 ms2/src/org/labkey/ms2/editElution.jsp -text
-ms2/src/org/labkey/ms2/filterHeader.vm -text
+ms2/src/org/labkey/ms2/filterHeader.jsp -text
 ms2/src/org/labkey/ms2/insertAnnots.jsp -text
 ms2/src/org/labkey/ms2/loadGo.jsp -text
 ms2/src/org/labkey/ms2/manageViews.jsp -text
 ms2/src/org/labkey/ms2/modifications.gm -text
-ms2/src/org/labkey/ms2/ms2Admin.vm -text
+ms2/src/org/labkey/ms2/ms2Admin.jsp -text
 ms2/src/org/labkey/ms2/nestedGridScript.gm -text
 ms2/src/org/labkey/ms2/peptideChart.vm -text
 ms2/src/org/labkey/ms2/peptideview/AbstractLegacyProteinMS2RunView.java -text
@@ -931,8 +932,7 @@ ms2/src/org/labkey/ms2/reader/SequentialMzxmlIterator.java -text
 ms2/src/org/labkey/ms2/reader/SimpleScan.java -text
 ms2/src/org/labkey/ms2/reader/SimpleScanIterator.java -text
 ms2/src/org/labkey/ms2/reader/TarIterator.java -text
-ms2/src/org/labkey/ms2/renameRun.vm -text
-ms2/src/org/labkey/ms2/renderFilter.vm -text
+ms2/src/org/labkey/ms2/renameRun.jsp -text
 ms2/src/org/labkey/ms2/runSummary.vm -text
 ms2/src/org/labkey/ms2/scoring/ScoringController.java -text
 ms2/src/org/labkey/ms2/scoring/compare.gm -text

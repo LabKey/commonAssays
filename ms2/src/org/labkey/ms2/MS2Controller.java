@@ -423,7 +423,13 @@ public class MS2Controller extends ViewController
         runSummary.addObject("writePermissions", getViewContext().hasPermission(ACL.PERM_UPDATE));
         runSummary.addObject("quantAlgorithm", MS2Manager.getQuantAnalysisAlgorithm(form.run));
         vBox.addView(runSummary);
-        vBox.addView(createHeader(currentUrl, form, run, peptideView));
+        vBox.addView(new FilterHeaderView(currentUrl, form, run));
+
+        List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
+        SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run);
+        peptideView.addSQLSummaries(peptideFilter, sqlSummaries);
+
+        vBox.addView(new CurrentFilterView(null, sqlSummaries));
 
         boolean exploratoryFeatures = false;
         for (DisplayColumn displayColumn : displayColumns)
@@ -478,16 +484,25 @@ public class MS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_UPDATE);
 
+        RenameBean bean = new RenameBean();
+
         MS2Run run = MS2Manager.getRun(form.getRun());
         String description = form.getDescription();
         if (description == null || description.length() == 0)
             description = run.getDescription();
 
-        VelocityView view = new VelocityView("/org/labkey/ms2/renameRun.vm");
-        view.addObject("run", run);
-        view.addObject("description", description);
+        bean.run = run;
+        bean.description = description;
+
+        HttpView view = new JspView<RenameBean>("/org/labkey/ms2/renameRun.jsp", bean);
 
         return _renderInTemplate(view, true, "Rename Run", null);
+    }
+
+    public class RenameBean
+    {
+        public MS2Run run;
+        public String description;
     }
 
     @Jpf.Action
@@ -512,60 +527,66 @@ public class MS2Controller extends ViewController
         return new ViewForward(url);
     }
 
-    private HttpView createHeader(ViewURLHelper currentUrl, RunForm form, MS2Run run, AbstractMS2RunView peptideView) throws ServletException, SQLException
+    private class FilterHeaderView extends JspView<FilterHeaderBean>
     {
-        String chargeFilterParamName = run.getChargeFilterParamName();
+        private FilterHeaderView(ViewURLHelper currentUrl, RunForm form, MS2Run run) throws ServletException, SQLException
+        {
+            super("/org/labkey/ms2/filterHeader.jsp", new FilterHeaderBean());
 
-        VelocityView headerView = new VelocityView("/org/labkey/ms2/filterHeader.vm");
-        headerView.addObject("run", run);
+            FilterHeaderBean bean = getModelBean();
 
-        Map<String, String> urlMap = new HashMap<String, String>();
+            bean.run = run;
+            bean.applyViewUrl = clearFilter(currentUrl).setAction("applyRunView");
+            bean.applyView = renderViewSelect(0, true, ACL.PERM_READ, true);
+            bean.saveViewUrl = currentUrl.clone().setAction("pickName");
+            bean.manageViewsUrl = currentUrl.clone().setAction("manageViews");
+            bean.pickPeptideColumnsUrl = currentUrl.clone().setAction("pickPeptideColumns");
+            bean.pickProteinColumnsUrl = currentUrl.clone().setAction("pickProteinColumns");
+            bean.viewTypes = MS2RunViewType.getTypesForRun(run);
+            bean.currentViewType = MS2RunViewType.getViewType(form.getGrouping());
+            bean.expanded = form.getExpanded();
 
-        ViewURLHelper applyViewUrl = clearFilter(currentUrl).setAction("applyRunView");
-//        applyViewUrl.addParameter("action", "showRun");
-        urlMap.put("applyView", applyViewUrl.getEncodedLocalURIString());
-        headerView.addObject("applyView", renderViewSelect(0, true, ACL.PERM_READ, true));
+            String chargeFilterParamName = run.getChargeFilterParamName();
+            ViewURLHelper extraFilterUrl = currentUrl.clone().setAction("addExtraFilter.post");
+            extraFilterUrl.deleteParameter(chargeFilterParamName + "1");
+            extraFilterUrl.deleteParameter(chargeFilterParamName + "2");
+            extraFilterUrl.deleteParameter(chargeFilterParamName + "3");
+            extraFilterUrl.deleteParameter("tryptic");
+            extraFilterUrl.deleteParameter("grouping");
+            extraFilterUrl.deleteParameter("expanded");
+            bean.extraFilterUrl = extraFilterUrl;
 
-        ViewURLHelper cloneUrl = currentUrl.clone().setAction("pickName");
-        urlMap.put("saveView", cloneUrl.getEncodedLocalURIString());
+            bean.charge1 = defaultIfNull(currentUrl.getParameter(chargeFilterParamName + "1"), "0");
+            bean.charge2 = defaultIfNull(currentUrl.getParameter(chargeFilterParamName + "2"), "0");
+            bean.charge3 = defaultIfNull(currentUrl.getParameter(chargeFilterParamName + "3"), "0");
+            bean.tryptic = form.tryptic;
 
-        urlMap.put("manageViews", cloneUrl.setAction("manageViews").getEncodedLocalURIString());
-        urlMap.put("pickPeptideColumns", cloneUrl.setAction("pickPeptideColumns").getEncodedLocalURIString());
-        urlMap.put("pickProteinColumns", cloneUrl.setAction("pickProteinColumns").getEncodedLocalURIString());
-
-        cloneUrl.deleteParameter("expanded");
-        cloneUrl.deleteParameter("grouping");
-        cloneUrl.setAction("showRun");
-        headerView.addObject("viewTypes", MS2RunViewType.getTypesForRun(run));
-        headerView.addObject("currentViewType", MS2RunViewType.getViewType(form.getGrouping()));
-        headerView.addObject("expanded", form.getExpanded());
-
-        ViewURLHelper extraFilterUrl = currentUrl.clone().setAction("addExtraFilter.post");
-        extraFilterUrl.deleteParameter(chargeFilterParamName + "1");
-        extraFilterUrl.deleteParameter(chargeFilterParamName + "2");
-        extraFilterUrl.deleteParameter(chargeFilterParamName + "3");
-        extraFilterUrl.deleteParameter("tryptic");
-        extraFilterUrl.deleteParameter("grouping");
-        extraFilterUrl.deleteParameter("expanded");
-        urlMap.put("extraFilter", extraFilterUrl.getEncodedLocalURIString());
-
-        headerView.addObject("charge1", defaultIfNull(currentUrl.getParameter(chargeFilterParamName + "1"), "0"));
-        headerView.addObject("charge2", defaultIfNull(currentUrl.getParameter(chargeFilterParamName + "2"), "0"));
-        headerView.addObject("charge3", defaultIfNull(currentUrl.getParameter(chargeFilterParamName + "3"), "0"));
-        headerView.addObject("tryptic", form.tryptic);
-
-        SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run);
-
-        List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
-        peptideView.addSQLSummaries(peptideFilter, sqlSummaries);
-
-        headerView.addObject("sqlSummaries", sqlSummaries);
-        headerView.addObject("urls", urlMap);
-        headerView.setTitle("View");
-        return headerView;
+            setTitle("View");
+        }
     }
 
-    private String defaultIfNull(String s, String def)
+
+    public static class FilterHeaderBean
+    {
+        public MS2Run run;
+        public ViewURLHelper applyViewUrl;
+        public StringBuilder applyView;        
+        public ViewURLHelper saveViewUrl;
+        public ViewURLHelper manageViewsUrl;
+        public ViewURLHelper pickPeptideColumnsUrl;
+        public ViewURLHelper pickProteinColumnsUrl;
+        public ViewURLHelper extraFilterUrl;
+        public List<MS2RunViewType> viewTypes;
+        public MS2RunViewType currentViewType;
+        public boolean expanded;
+        public String charge1;
+        public String charge2;
+        public String charge3;
+        public int tryptic;
+    }
+
+
+    private static String defaultIfNull(String s, String def)
     {
         return (null != s ? s : def);
     }
@@ -657,7 +678,7 @@ public class MS2Controller extends ViewController
     }
 
 
-    private ViewURLHelper clearFilter(ViewURLHelper currentUrl)
+    private static ViewURLHelper clearFilter(ViewURLHelper currentUrl)
     {
         ViewURLHelper newUrl = currentUrl.clone();
         String run = newUrl.getParameter("run");
@@ -1348,14 +1369,15 @@ public class MS2Controller extends ViewController
     }
 
 
-    VelocityView fillInInsertDetails(int insertId) throws Exception
+    HttpView fillInInsertDetails(int insertId) throws Exception
     {
-        VelocityView retVal = null;
+        HttpView view = null;
+        ResultSet rs = null;
+        Map<String, String> map = new HashMap<String, String>();
+
         try
         {
-            retVal = new VelocityView("/org/labkey/ms2/annotLoadDetails.vm");
-            ResultSet rs =
-                    Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE insertId=" + insertId, null);
+            rs = Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE insertId=" + insertId, null);
             rs.next();
             ResultSetMetaData rsmd = rs.getMetaData();
             int colCount = rsmd.getColumnCount();
@@ -1363,15 +1385,16 @@ public class MS2Controller extends ViewController
             {
                 String name = rsmd.getColumnName(i).toLowerCase();
                 String val = rs.getString(name);
-                retVal.addObject(name, val);
+                map.put(name, val);
             }
+            view = new JspView<Map<String, String>>("/org/labkey/ms2/annotLoadDetails.jsp", map);            
             rs.close();
         }
-        catch (Exception e)
+        finally
         {
-            _log.error("In fillInInsertDetails:" + e);
+            ResultSetUtil.close(rs);
         }
-        return retVal;
+        return view;
     }
 
 
@@ -1384,7 +1407,7 @@ public class MS2Controller extends ViewController
         ViewURLHelper urlhelp = cloneViewURLHelper();
         String insertIdStr = urlhelp.getParameter("insertId");
         int insertId = Integer.parseInt(insertIdStr);
-        VelocityView vv = fillInInsertDetails(insertId);
+        HttpView vv = fillInInsertDetails(insertId);
         return _renderInTemplate(vv, true, "Annotation Insertion Details", null);
     }
 
@@ -3077,10 +3100,7 @@ public class MS2Controller extends ViewController
             rgn.setColSpan(query.getColumnsPerRun());
             rgn.setMultiColumnCaptions(runCaptions);
 
-            VelocityView filterView = new VelocityView("/org/labkey/ms2/renderFilter.vm");
-
-            filterView.addObject("headers", new String[]{query.getHeader()});
-            filterView.addObject("sqlSummaries", query.getSQLSummaries());
+            HttpView filterView = new CurrentFilterView(query);
 
             GridView compareView = new GridView(rgn);
             compareView.setResultSet(rgn.getResultSet());
@@ -3091,6 +3111,33 @@ public class MS2Controller extends ViewController
 
         return null;
     }
+
+
+    public static class CurrentFilterView extends JspView<CurrentFilterView.CurrentFilterBean>
+    {
+        private CurrentFilterView(String[] headers, List<Pair<String, String>> sqlSummaries)
+        {
+            super("/org/labkey/ms2/currentFilter.jsp", new CurrentFilterBean(headers, sqlSummaries));
+        }
+
+        private CurrentFilterView(CompareQuery query)
+        {
+            this(new String[]{query.getHeader()}, query.getSQLSummaries());
+        }
+
+        public static class CurrentFilterBean
+        {
+            public String[] headers;
+            public List<Pair<String, String>> sqlSummaries;
+
+            private CurrentFilterBean(String[] headers, List<Pair<String, String>> sqlSummaries)
+            {
+                this.headers = headers;
+                this.sqlSummaries = sqlSummaries;
+            }
+        }
+    }
+
 
     private List<MS2Run> getSelectedRuns(List<String> errors, boolean requireSameType) throws ServletException
     {
@@ -3423,11 +3470,13 @@ public class MS2Controller extends ViewController
         String GOCategories[] = ProteinManager.getGOCategoriesFromId(seqId);
         String IPIds[] = ProteinManager.getIdentifiersFromId("IPI", seqId);
         String RefSeqIds[] = ProteinManager.getIdentifiersFromId("REFSEQ", seqId);
+
         HashSet<String> allGbIds = new HashSet<String>();
+        allGbIds.addAll(Arrays.asList(GenBankIds));
+        allGbIds.addAll(Arrays.asList(RefSeqIds));
+
         HashSet<String> allGbURLs = new HashSet<String>();
 
-        for (String GenBankId : GenBankIds) allGbIds.add(GenBankId);
-        for (String RefSeqId : RefSeqIds) allGbIds.add(RefSeqId);
         for (Object allGbId : allGbIds)
         {
             String ident = (String) allGbId;
@@ -3520,20 +3569,16 @@ public class MS2Controller extends ViewController
 
         if (showPeptides)
         {
-            VelocityView peptideFilter = new VelocityView("/org/labkey/ms2/renderFilter.vm");
-            vbox.addView(peptideFilter);
-            vbox.addView(new HtmlView("<a name=\"Peptides\"/>"));
             List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
-
-            GridView peptidesGridView = peptideView.createPeptideViewForGrouping(form);
-
-            peptidesGridView.getDataRegion().removeColumnsFromDisplayColumnList("Description,Protein,GeneName,SeqId");
             String peptideFilterString = ProteinManager.getPeptideFilter(currentUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run).getFilterText();
             sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilterString));
             sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(currentUrl, MS2Manager.getDataRegionNamePeptides()).getSortText()));
-            peptideFilter.addObject("sqlSummaries", sqlSummaries);
+            CurrentFilterView peptideFilter = new CurrentFilterView(null, sqlSummaries);
             peptideFilter.setTitle("Peptides");
+            vbox.addView(peptideFilter);
 
+            GridView peptidesGridView = peptideView.createPeptideViewForGrouping(form);
+            peptidesGridView.getDataRegion().removeColumnsFromDisplayColumnList("Description,Protein,GeneName,SeqId");
             vbox.addView(peptidesGridView);
         }
 
@@ -3545,23 +3590,31 @@ public class MS2Controller extends ViewController
     {
         requiresGlobalAdmin();
 
-        int days = getDays();
+        MS2AdminBean bean = new MS2AdminBean();
 
-        Map stats = MS2Manager.getStats(days);
-        VelocityView vv = new VelocityView("/org/labkey/ms2/ms2Admin.vm");
-        vv.addObject("stats", stats);
-        vv.addObject("days", days);
-        vv.addObject("purgeStatus", MS2Manager.getPurgeStatus());
+        bean.days = getDays();
+        bean.stats = MS2Manager.getStats(bean.days);
+        bean.purgeStatus = MS2Manager.getPurgeStatus();
+        bean.successfulUrl = showRunsUrl(false, 1);
+        bean.inProcessUrl = showRunsUrl(false, 0);
+        bean.failedUrl = showRunsUrl(false, 2);
+        bean.deletedUrl = showRunsUrl(true, null);
 
-        Map<String, String> urls = new HashMap<String, String>(10);
-        urls.put("successful", showRunsUrl(false, 1));
-        urls.put("inprocess", showRunsUrl(false, 0));
-        urls.put("failed", showRunsUrl(false, 2));
-        urls.put("deleted", showRunsUrl(true, null));
+        HttpView view = new JspView<MS2AdminBean>("/org/labkey/ms2/ms2Admin.jsp", bean);
 
-        vv.addObject("urls", urls);
+        return _renderInTemplate(view, false, "MS2 Admin", null);
+    }
 
-        return _renderInTemplate(vv, false, "MS2 Admin", null);
+
+    public static class MS2AdminBean
+    {
+        public ViewURLHelper successfulUrl;
+        public ViewURLHelper inProcessUrl;
+        public ViewURLHelper failedUrl;
+        public ViewURLHelper deletedUrl;
+        public Map<String, String> stats;
+        public int days;
+        public String purgeStatus;
     }
 
 
@@ -3587,7 +3640,7 @@ public class MS2Controller extends ViewController
     }
 
 
-    private String showRunsUrl(Boolean deleted, Integer statusId)
+    private ViewURLHelper showRunsUrl(Boolean deleted, Integer statusId)
     {
         ViewURLHelper url = new ViewURLHelper("MS2", "showAllRuns", (String)null);
 
@@ -3597,7 +3650,7 @@ public class MS2Controller extends ViewController
         if (null != statusId)
             url.addParameter(MS2Manager.getDataRegionNameRuns() + ".StatusId~eq", String.valueOf(statusId));
 
-        return url.getEncodedLocalURIString();
+        return url;
     }
 
 

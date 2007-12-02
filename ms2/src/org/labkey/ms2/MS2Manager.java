@@ -1000,7 +1000,7 @@ public class MS2Manager
 
     private static DecimalFormat df = new DecimalFormat("#,##0");
 
-    public static Map getStats(int days) throws SQLException
+    public static Map<String, String> getStats(int days) throws SQLException
     {
         Map<String, String> stats = new HashMap<String, String>(20);
 
