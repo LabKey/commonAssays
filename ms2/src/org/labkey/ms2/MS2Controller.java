@@ -417,12 +417,15 @@ public class MS2Controller extends ViewController
         GroovyView scriptView = new GroovyView("/org/labkey/ms2/nestedGridScript.gm");
         scriptView.addObject("DataRegionName", dataRegionName);
         vBox.addView(scriptView);
-        VelocityView runSummary = new VelocityView("/org/labkey/ms2/runSummary.vm");
-        runSummary.addObject("run", run);
-        runSummary.addObject("modHref", modificationHref(run));
-        runSummary.addObject("writePermissions", getViewContext().hasPermission(ACL.PERM_UPDATE));
-        runSummary.addObject("quantAlgorithm", MS2Manager.getQuantAnalysisAlgorithm(form.run));
+
+        JspView<RunSummaryBean> runSummary = new JspView<RunSummaryBean>("/org/labkey/ms2/runSummary.jsp", new RunSummaryBean());
+        RunSummaryBean bean = runSummary.getModelBean();
+        bean.run = run;
+        bean.modHref = modificationHref(run);
+        bean.writePermissions = getViewContext().hasPermission(ACL.PERM_UPDATE);
+        bean.quantAlgorithm = MS2Manager.getQuantAnalysisAlgorithm(form.run);
         vBox.addView(runSummary);
+
         vBox.addView(new FilterHeaderView(currentUrl, form, run));
 
         List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
@@ -450,6 +453,15 @@ public class MS2Controller extends ViewController
                 new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
         _log.debug("Render took " + (System.currentTimeMillis() - time) + " milliseconds");
         return null;
+    }
+
+
+    public static class RunSummaryBean
+    {
+        public MS2Run run;
+        public String modHref;
+        public boolean writePermissions;
+        public String quantAlgorithm;
     }
 
 
@@ -586,7 +598,7 @@ public class MS2Controller extends ViewController
     }
 
 
-    private static String defaultIfNull(String s, String def)
+    public static String defaultIfNull(String s, String def)
     {
         return (null != s ? s : def);
     }
@@ -694,27 +706,31 @@ public class MS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        VelocityView pickName = new VelocityView("/org/labkey/ms2/pickName.vm");
-
-        ViewURLHelper returnUrl = cloneViewURLHelper().setAction("showRun");
-        pickName.addObject("returnUrl", returnUrl);
-
-        if (getContainer().hasPermission(getUser(), ACL.PERM_INSERT))
-            pickName.addObject("canShare", Boolean.TRUE);
-
-        ViewURLHelper newUrl = returnUrl.clone();
-        newUrl.deleteParameter("run");
-        pickName.addObject("viewParams", PageFlowUtil.filter(newUrl.getRawQuery()));
-
         if (!isAuthorized(form.run))
         {
             return null;
         }
 
+        JspView<PickNameBean> pickName = new JspView<PickNameBean>("/org/labkey/ms2/pickName.jsp", new PickNameBean());
+        PickNameBean bean = pickName.getModelBean();
+        bean.returnUrl = cloneViewURLHelper().setAction("showRun");
+        bean.canShare = getContainer().hasPermission(getUser(), ACL.PERM_INSERT);
+
+        ViewURLHelper newUrl = bean.returnUrl.clone().deleteParameter("run");
+        bean.viewParams = newUrl.getRawQuery();
+
         MS2Run run = MS2Manager.getRun(form.run);
-        return _renderInTemplate(pickName, true, "Save View", "viewRun",
+        return _renderInTemplate(pickName, false, "Save View", "viewRun",
                 new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
-                new NavTree(run.getDescription(), returnUrl));
+                new NavTree(run.getDescription(), bean.returnUrl));
+    }
+
+
+    public static class PickNameBean
+    {
+        public ViewURLHelper returnUrl;
+        public boolean canShare;
+        public String viewParams;
     }
 
 
@@ -838,25 +854,40 @@ public class MS2Controller extends ViewController
 
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
-        VelocityView pickColumns = new VelocityView("/org/labkey/ms2/pickPeptideColumns.vm");
-        pickColumns.addObject("commonColumns", run.getCommonPeptideColumnNames());
-        pickColumns.addObject("proteinProphetColumns", run.getProteinProphetPeptideColumnNames());
-        pickColumns.addObject("quantitationColumns", run.getQuantitationPeptideColumnNames());
+        JspView<PickColumnsBean> pickColumns = new JspView<PickColumnsBean>("/org/labkey/ms2/pickPeptideColumns.jsp", new PickColumnsBean());
+        PickColumnsBean bean = pickColumns.getModelBean();
+        bean.commonColumns = run.getCommonPeptideColumnNames();
+        bean.proteinProphetColumns = run.getProteinProphetPeptideColumnNames();
+        bean.quantitationColumns = run.getQuantitationPeptideColumnNames();
 
         // Put a space between each name
-        pickColumns.addObject("defaultColumns", peptideView.getPeptideColumnNames(null).replaceAll(" ", "").replaceAll(",", ", "));
-        pickColumns.addObject("currentColumns", peptideView.getPeptideColumnNames(form.getColumns()).replaceAll(" ", "").replaceAll(",", ", "));
+        bean.defaultColumns = peptideView.getPeptideColumnNames(null).replaceAll(" ", "").replaceAll(",", ", ");
+        bean.currentColumns = peptideView.getPeptideColumnNames(form.getColumns()).replaceAll(" ", "").replaceAll(",", ", ");
 
         url.deleteParameter("columns");
 
-        pickColumns.addObject("queryString", PageFlowUtil.filter(url.getRawQuery()));
+        bean.queryString = url.getRawQuery();
         url.deleteParameters().setAction("savePeptideColumns");
-        pickColumns.addObject("saveUrl", url.getEncodedLocalURIString());
-        pickColumns.addObject("saveDefaultUrl", url.addParameter("saveDefault", "1").getEncodedLocalURIString());
+        bean.saveUrl = url;
+        bean.saveDefaultUrl = url.clone().addParameter("saveDefault", "1");
         return _renderInTemplate(pickColumns, false, "Pick Peptide Columns", "pickPeptideColumns",
                 new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
                 new NavTree(run.getDescription(), cloneViewURLHelper().setAction("showRun")));
     }
+
+
+    public static class PickColumnsBean
+    {
+        public String commonColumns;
+        public String proteinProphetColumns;
+        public String quantitationColumns;
+        public String defaultColumns;
+        public String currentColumns;
+        public String queryString;
+        public ViewURLHelper saveUrl;
+        public ViewURLHelper saveDefaultUrl;
+    }
+
 
     @Jpf.Action
     protected Forward pickProteinColumns(RunForm form) throws Exception
@@ -872,21 +903,23 @@ public class MS2Controller extends ViewController
 
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
-        VelocityView pickColumns = new VelocityView("/org/labkey/ms2/pickProteinColumns.vm");
-        pickColumns.addObject("commonColumns", MS2Run.getCommonProteinColumnNames());
-        pickColumns.addObject("proteinProphetColumns", MS2Run.getProteinProphetProteinColumnNames());
-        pickColumns.addObject("quantitationColumns", run.getQuantitationProteinColumnNames());
+        JspView<PickColumnsBean> pickColumns = new JspView<PickColumnsBean>("/org/labkey/ms2/pickProteinColumns.jsp", new PickColumnsBean());
+        PickColumnsBean bean = pickColumns.getModelBean();
+
+        bean.commonColumns = MS2Run.getCommonProteinColumnNames();
+        bean.proteinProphetColumns = MS2Run.getProteinProphetProteinColumnNames();
+        bean.quantitationColumns = run.getQuantitationProteinColumnNames();
 
         // Put a space between each name
-        pickColumns.addObject("defaultColumns", peptideView.getProteinColumnNames(null).replaceAll(" ", "").replaceAll(",", ", "));
-        pickColumns.addObject("currentColumns", peptideView.getProteinColumnNames(form.getProteinColumns()).replaceAll(" ", "").replaceAll(",", ", "));
+        bean.defaultColumns = peptideView.getProteinColumnNames(null).replaceAll(" ", "").replaceAll(",", ", ");
+        bean.currentColumns = peptideView.getProteinColumnNames(form.getProteinColumns()).replaceAll(" ", "").replaceAll(",", ", ");
 
         url.deleteParameter("proteinColumns");
 
-        pickColumns.addObject("queryString", PageFlowUtil.filter(url.getRawQuery()));
+        bean.queryString = url.getRawQuery();
         url.deleteParameters().setAction("saveProteinColumns");
-        pickColumns.addObject("saveUrl", url.getEncodedLocalURIString());
-        pickColumns.addObject("saveDefaultUrl", url.addParameter("saveDefault", "1").getEncodedLocalURIString());
+        bean.saveUrl = url;
+        bean.saveDefaultUrl = url.clone().addParameter("saveDefault", "1");
         return _renderInTemplate(pickColumns, false, "Pick Protein Columns", "pickProteinColumns",
                 new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
                 new NavTree(run.getDescription(), cloneViewURLHelper().setAction("showRun")));
@@ -2899,20 +2932,32 @@ public class MS2Controller extends ViewController
         if (!errors.isEmpty())
             return _renderErrors(errors);
 
-        VelocityView pickView = new VelocityView("/org/labkey/ms2/pickView.vm");
+        JspView<PickViewBean> pickView = new JspView<PickViewBean>("/org/labkey/ms2/pickView.jsp", new PickViewBean());
+
+        PickViewBean bean = pickView.getModelBean();
 
         nextUrl.deleteFilterParameters("button");
         nextUrl.deleteFilterParameters("button.x");
         nextUrl.deleteFilterParameters("button.y");
 
-        pickView.addObject("nextUrl", nextUrl.getEncodedLocalURIString());
-        pickView.addObject("select", renderViewSelect(0, true, ACL.PERM_READ, false));
-        pickView.addObject("extraHtml", extraFormHtml);
-        pickView.addObject("viewInstructions", viewInstructions);
-        pickView.addObject("runList", runListIndex);
+        bean.nextUrl = nextUrl;
+        bean.select = renderViewSelect(0, true, ACL.PERM_READ, false);
+        bean.extraHtml = extraFormHtml;
+        bean.viewInstructions = viewInstructions;
+        bean.runList = runListIndex;
 
         return _renderInTemplate(pickView, false, navTreeName, helpTopic,
                 new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
+    }
+
+
+    public static class PickViewBean
+    {
+        public ViewURLHelper nextUrl;
+        public StringBuilder select;
+        public String extraHtml;
+        public String viewInstructions;
+        public int runList;
     }
 
 

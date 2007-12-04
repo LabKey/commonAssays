@@ -1,9 +1,0 @@
-<form method="get" action="saveView.view" class="dataRegion"><table>
-  <tr><td>Name:</td><td class="normal"><input name="name" style="width:200;">
-  <input type=hidden value="$viewParams" name="viewParams"><input type=hidden value="$returnUrl" name="returnUrl">
-  </td></tr>
-#if($canShare)
-  <tr><td colspan=2><input name=shared type=checkbox> Share view with all users of this folder</td></tr>
-#end
-  <tr><td colspan=2><input type="image" src="$tools.buttonSrc('Save View')"></td></tr>
-</table></form><script for=window event=onload>try {document.getElementById("name").focus();} catch(x){}</script>
