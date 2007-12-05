@@ -15,15 +15,10 @@
  */
 package org.labkey.ms2.protocol;
 
-import org.labkey.api.pipeline.PipelineProtocolFactory;
-import org.labkey.api.util.XMLValidationParser;
+import org.labkey.ms2.pipeline.BioMLInputParser;
 import org.labkey.ms2.pipeline.XTandemInputParser;
 
-import java.net.URI;
-import java.io.IOException;
 import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
 
 /**
  * XTandemSearchProtocolFactory class
@@ -32,7 +27,7 @@ import java.io.FileReader;
  *
  * @author bmaclean
  */
-public class XTandemSearchProtocolFactory extends PipelineProtocolFactory<XTandemSearchProtocol>
+public class XTandemSearchProtocolFactory extends AbstractMS2SearchProtocolFactory<XTandemSearchProtocol>
 {
     public static XTandemSearchProtocolFactory instance = new XTandemSearchProtocolFactory();
 
@@ -46,83 +41,42 @@ public class XTandemSearchProtocolFactory extends PipelineProtocolFactory<XTande
         return "xtandem";
     }
 
-    public XTandemSearchProtocol load(URI uriRoot, String name) throws IOException
+    public String getParametersFileName()
     {
-        return loadInstance(getProtocolFile(uriRoot, name));
+        return "tandem.xml";
     }
 
-    public XTandemSearchProtocol loadInstance(File file) throws IOException
+    public String getDefaultParametersFileName()
     {
-        BufferedReader inputReader = null;
-        StringBuffer xmlBuffer = new StringBuffer();
-        try
+        return "default_input.xml";
+    }
+
+    public String getDefaultParametersResource()
+    {
+        return "org/labkey/ms2/pipeline/XTandemDefaults.xml";
+    }
+
+    public BioMLInputParser createInputParser()
+    {
+        return new XTandemInputParser();
+    }
+
+    public XTandemSearchProtocol createProtocolInstance(String name, String description, String[] dbNames, String xml)
+    {
+        return new XTandemSearchProtocol(name, description, dbNames, xml);
+    }
+
+    public XTandemSearchProtocol createProtocolInstance(String name, String description, File dirSeqRoot,
+                                                        String dbPath, String[] dbNames, String xml)
+    {
+        if (dbPath != null && dbPath.length() > 0)
         {
-            inputReader = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = inputReader.readLine()) != null)
-                xmlBuffer.append(line).append("\n");
-        }
-        catch (IOException eio)
-        {
-            throw new IOException("Failed to load protocol file '" + file + "'.");
-        }
-        finally
-        {
-            if (inputReader != null)
-            {
-                try
-                {
-                    inputReader.close();
-                }
-                catch (IOException eio)
-                {
-                }
-            }
+            String[] dbPaths = new String[dbNames.length];
+            for (int i = 0; i < dbNames.length; i++)
+                dbPaths[i] = dbPath + dbNames[i];
+            dbNames = dbPaths;
         }
 
-        XTandemInputParser parser = new XTandemInputParser();
-        parser.parse(xmlBuffer.toString());
-        if (parser.getErrors() != null)
-        {
-            XMLValidationParser.Error err = parser.getErrors()[0];
-            if (err.getLine() == 0)
-            {
-                throw new IOException("Failed parsing X!Tandem input xml '" + file + "'.\n" +
-                        err.getMessage());
-            }
-            else
-            {
-                throw new IOException("Failed parsing X!Tandem input xml '" + file + "'.\n" +
-                        "Line " + err.getLine() + ": " + err.getMessage());
-            }
-        }
-
-        // Remove the pipeline specific parameters.
-        String name = parser.removeInputParameter("pipeline, protocol name");
-        String description = parser.removeInputParameter("pipeline, protocol description");
-        String folder = parser.removeInputParameter("pipeline, load folder");
-        String databases = parser.removeInputParameter("pipeline, database");
-        String email = parser.removeInputParameter("pipeline, email address");
-
-        // Remove the parameters set in the pipeline job.
-        parser.removeInputParameter("list path, default parameters");
-        parser.removeInputParameter("list path, taxonomy information");
-        parser.removeInputParameter("protein, taxon");
-        parser.removeInputParameter("spectrum, path");
-        parser.removeInputParameter("output, path");
-
-        String[] dbNames;
-        if (databases == null)
-        {
-            dbNames = new String[0];
-        }
-        else
-        {
-            dbNames = databases.split(";");
-        }
-
-        XTandemSearchProtocol instance = new XTandemSearchProtocol(name, description, dbNames, parser.getXML());
-        instance.setEmail(email);
-        return instance;
+        return createProtocolInstance(name, description, dbNames, xml);
     }
 }

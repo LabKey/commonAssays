@@ -368,7 +368,6 @@ public class MS2Manager
         }
     }
 
-//wch: mascotdev
     public static MS2Importer.RunInfo addMascotRunToQueue(ViewBackgroundInfo info,
                                                     File file,
                                                     String description,
@@ -380,7 +379,6 @@ public class MS2Manager
         PipelineService.get().queueJob(job);
         return runInfo;
     }
-//END-wch: mascotdev
 
     public static MS2Importer.RunInfo addRunToQueue(ViewBackgroundInfo info,
                                                     File file,

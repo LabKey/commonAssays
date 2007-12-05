@@ -27,7 +27,6 @@ import java.util.List;
 public class MS2PipelineProvider extends PipelineProvider
 {
     static String name = "MS2";
-    public static final String SEQUEST = "Sequest";
 
     public MS2PipelineProvider()
     {

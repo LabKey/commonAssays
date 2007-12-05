@@ -8,6 +8,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Importer;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.exp.XarContext;
 
 import java.io.File;
@@ -31,7 +32,7 @@ public class MS2ImportPipelineJob extends PipelineJob
         _description = description;
         _runInfo = runInfo;
 
-        String basename = MS2PipelineManager.getBaseName(_file, 2);
+        String basename = FileUtil.getBaseName(_file, 2);
         setLogFile(MS2PipelineManager.getLogFile(_file.getParentFile(), basename), appendLog);
 
         File fileStatus = MS2PipelineManager.getStatusFile(_file.getParentFile(), basename);

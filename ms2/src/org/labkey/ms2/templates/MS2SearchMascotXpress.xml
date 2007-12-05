@@ -169,7 +169,7 @@
 		<exp:Data rdf:about="${AutoFileLSID}">
 			<exp:Name>Mascot Settings</exp:Name>
 			<exp:CpasType>Data</exp:CpasType>
-			<exp:DataFileUrl>@@MASCOT_XML_FILE_PATH@@</exp:DataFileUrl>
+			<exp:DataFileUrl>@@INPUT_XML_FILE_PATH@@</exp:DataFileUrl>
 		</exp:Data>
 @@PROTEIN_DATABASES@@
 	</exp:StartingInputDefinitions>
@@ -184,7 +184,7 @@
                     <exp:ApplicationInstanceCollection>
                         <exp:InstanceDetails>
                             <exp:InstanceInputs>
-                                <exp:DataLSID DataFileUrl="@@MASCOT_XML_FILE_PATH@@" RoleName="SearchConfig">${AutoFileLSID}</exp:DataLSID>
+                                <exp:DataLSID DataFileUrl="@@INPUT_XML_FILE_PATH@@" RoleName="SearchConfig">${AutoFileLSID}</exp:DataLSID>
 @@PROTEIN_DATABASE_DATALSIDS@@
 @@MZXML_DATALSIDS@@
                             </exp:InstanceInputs>
@@ -197,7 +197,7 @@
                         <exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Convert to Mgf</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${RunLSIDBase}:MgfFile</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">Mgf/Mascot Search file</exp:SimpleVal>
-                        <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@MGF_FILE_PATH@@</exp:SimpleVal>
+                        <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@SPECTRA_CONVERT_FILE_PATH@@</exp:SimpleVal>
                     </exp:CommonParametersApplied>
                   </exp:ExperimentLogEntry>
                 <exp:ExperimentLogEntry ActionSequenceRef="60">
@@ -206,7 +206,7 @@
                         <exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Mascot Database Search</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${RunLSIDBase}:MascotFile</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">Mascot Search Results</exp:SimpleVal>
-                        <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@MASCOT_DAT_FILE_PATH@@</exp:SimpleVal>
+                        <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@SEARCH_OUTPUT_FILE_PATH@@</exp:SimpleVal>
                     </exp:CommonParametersApplied>
                   </exp:ExperimentLogEntry>
                 <exp:ExperimentLogEntry ActionSequenceRef="70">

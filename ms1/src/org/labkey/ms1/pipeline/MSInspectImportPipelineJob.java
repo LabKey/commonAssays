@@ -182,10 +182,11 @@ public class MSInspectImportPipelineJob extends PipelineJob
             File xarFile = writeExperiment();
             setStatus("LOADING EXPERIMENT");
             // Kick off an experiment load 
-            String status = ExperimentPipelineJob.loadExperiment(this, new FileXarSource(xarFile), false);
-
-            setStatus(status);
-            completeStatus = true;
+            if (ExperimentPipelineJob.loadExperiment(this, new FileXarSource(xarFile), false))
+            {
+                completeStatus = true;
+                setStatus(PipelineJob.COMPLETE_STATUS);
+            }
         }
         catch (SQLException e)
         {

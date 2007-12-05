@@ -2,21 +2,15 @@ package org.labkey.ms2.protocol;
 
 import org.labkey.ms2.pipeline.BioMLInputParser;
 import org.labkey.ms2.pipeline.SequestInputParser;
-import org.labkey.api.pipeline.PipelineProtocolFactory;
-import org.labkey.api.util.XMLValidationParser;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URI;
 
 /**
  * User: billnelson@uky.edu
  * Date: Aug 25, 2006
  * Time: 10:59:40 AM
  */
-public class SequestSearchProtocolFactory extends PipelineProtocolFactory<SequestSearchProtocol>
+public class SequestSearchProtocolFactory extends AbstractMS2SearchProtocolFactory<SequestSearchProtocol>
 {
     public static SequestSearchProtocolFactory instance = new SequestSearchProtocolFactory();
 
@@ -30,77 +24,40 @@ public class SequestSearchProtocolFactory extends PipelineProtocolFactory<Seques
         return "sequest";
     }
 
-    public SequestSearchProtocol load(URI uriRoot, String name) throws IOException
+    public String getDefaultParametersResource()
     {
-        return loadInstance(getProtocolFile(uriRoot, name));
+        return "org/labkey/ms2/pipeline/SequestDefaults.xml";
     }
 
-    public SequestSearchProtocol loadInstance(File file) throws IOException
+    public BioMLInputParser createInputParser()
     {
-        BufferedReader inputReader = null;
-        StringBuffer xmlBuffer = new StringBuffer();
-        try
-        {
-            inputReader = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = inputReader.readLine()) != null)
-                xmlBuffer.append(line).append("\n");
-        }
-        catch (IOException eio)
-        {
-            throw new IOException("Failed to load protocol file '" + file + "'.");
-        }
-        finally
-        {
-            if (inputReader != null)
-            {
-                try
-                {
-                    inputReader.close();
-                }
-                catch (IOException eio)
-                {
-                }
-            }
-        }
-
-        BioMLInputParser parser = new SequestInputParser();
-        parser.parse(xmlBuffer.toString());
-        if (parser.getErrors() != null)
-        {
-            XMLValidationParser.Error err = parser.getErrors()[0];
-            if (err.getLine() == 0)
-            {
-                throw new IOException("Failed parsing Sequest input xml '" + file + "'.\n" +
-                    err.getMessage());
-            }
-            else
-            {
-                throw new IOException("Failed parsing Sequest input xml '" + file + "'.\n" +
-                    "Line " + err.getLine() + ": " + err.getMessage());
-            }
-        }
-
-//TODO: WCH-check that we are using the same parameters set
-        // Remove the pipeline specific parameters.
-        String name = parser.removeInputParameter("pipeline, protocol name");
-        String description = parser.removeInputParameter("pipeline, protocol description");
-        String folder = parser.removeInputParameter("pipeline, load folder");        
-        String databases = parser.removeInputParameter("pipeline, database");
-        String email = parser.removeInputParameter("pipeline, email address");
-
-        // Remove the parameters set in the pipeline job.
-        parser.removeInputParameter("list path, default parameters");
-        parser.removeInputParameter("list path, taxonomy information");
-        parser.removeInputParameter("protein, taxon");
-        parser.removeInputParameter("spectrum, path");
-        parser.removeInputParameter("output, path");
-//END-TODO: WCH-check that we are using the same parameters set
-
-        String[] dbNames = databases.split(";");
-
-        SequestSearchProtocol instance = new SequestSearchProtocol(name, description, dbNames, parser.getXML());
-        instance.setEmail(email);
-        return instance;
+        return new SequestInputParser();
     }
+
+    public SequestSearchProtocol createProtocolInstance(String name, String description, String[] dbNames, String xml)
+    {
+        return new SequestSearchProtocol(name, description, dbNames, xml);
+    }
+
+    public SequestSearchProtocol createProtocolInstance(String name, String description, File dirSeqRoot,
+                                                        String dbPath, String[] dbNames, String xml)
+    {
+        if(dbNames == null || dbNames.length == 0)
+            throw new IllegalArgumentException("A sequence database must be selected.");
+
+        if (dbPath != null && dbPath.length() > 0)
+        {
+            String[] seqFullDBs = new String[dbNames.length];
+            for (int i = 0; i < dbNames.length; i++)
+                seqFullDBs[i] = dbPath + dbNames[i];
+            dbNames = seqFullDBs;
+        }
+
+        File fileSequenceDB = new File(dirSeqRoot, dbNames[0]);
+        if (!fileSequenceDB.exists())
+            throw new IllegalArgumentException("Sequence database '" + dbNames[0] + "' is not found in local FASTA root.");
+
+        return new SequestSearchProtocol(name, description, dbNames, xml);
+    }
+
 }

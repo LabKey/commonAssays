@@ -16,18 +16,24 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineProviderCluster;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.view.WebPartView;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.view.HttpView;
+import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.WebPartView;
+import org.labkey.ms2.protocol.MS2SearchPipelineProtocol;
+import org.labkey.ms2.protocol.MascotSearchProtocol;
+import org.labkey.ms2.protocol.MascotSearchProtocolFactory;
+import org.labkey.ms2.protocol.AbstractMS2SearchProtocolFactory;
 
+import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.File;
+import java.net.URI;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 /**
  * MascotCPipelineProvider class
@@ -36,9 +42,9 @@ import java.util.ListIterator;
  *
  * @author bmaclean
  */
-public class MascotCPipelineProvider extends PipelineProviderCluster
+public class MascotCPipelineProvider extends PipelineProviderCluster  implements MS2SearchPipelineProvider
 {
-    public static String name = "Mascot (Cluster)";
+    public static String name = "Mascot";
 
     public MascotCPipelineProvider()
     {
@@ -58,9 +64,6 @@ public class MascotCPipelineProvider extends PipelineProviderCluster
         if (!AppProps.getInstance().hasMascotServer())
             return;
 
-        if (!AppProps.getInstance().hasPipelineCluster())
-            return;
-
         for (ListIterator<FileEntry> it = entries.listIterator(); it.hasNext();)
         {
             FileEntry entry = it.next();
@@ -76,7 +79,73 @@ public class MascotCPipelineProvider extends PipelineProviderCluster
 
     public HttpView getSetupWebPart()
     {
-        // No extra setup for cluster.
-        return null;
+        if (!AppProps.getInstance().hasMascotServer())
+            return null;
+        if (AppProps.getInstance().hasPipelineCluster())
+        {
+            // No extra setup for cluster.
+            return null;
+        }
+        return new SetupWebPart();
+    }
+
+    private static class SetupWebPart extends WebPartView
+    {
+        @Override
+        protected void renderView(Object model, PrintWriter out) throws Exception
+        {
+            ViewContext context = getViewContext();
+            if (!context.hasPermission(ACL.PERM_INSERT))
+                return;
+            StringBuilder html = new StringBuilder();
+            if (!AppProps.getInstance().hasPipelineCluster())
+            {
+                html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">Mascot specific settings:</td></tr>");
+                ViewURLHelper setDefaultsURL = new ViewURLHelper("MS2-Pipeline", "setMascotDefaults", context.getViewURLHelper().getExtraPath());
+                html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
+                        .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
+                        .append(" - Specify the default XML parameters file for Mascot.</td></tr>");
+            }
+            out.write(html.toString());
+        }
+    }
+
+    public AbstractMS2SearchProtocolFactory getProtocolFactory()
+    {
+        return MascotSearchProtocolFactory.get();
+    }
+
+    public Map<String, String[]> getSequenceFiles(URI sequenceRoot) throws IOException
+    {
+        AppProps appProps = AppProps.getInstance();
+        if (!appProps.hasMascotServer())
+            throw new IOException("Mascot server has not been specified in site customization.");
+
+        MascotClientImpl mascotClient = new MascotClientImpl(appProps.getMascotServer(), null);
+        mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
+        Map<String, String[]> sequenceDBs = mascotClient.getSequenceDBNames();
+
+        if (0 == sequenceDBs.size())
+        {
+            // TODO: Would be nice if the Mascot client just threw its own connectivity exception.
+            String connectivityResult = mascotClient.testConnectivity(false);
+            if (!"".equals(connectivityResult))
+                throw new IOException(connectivityResult);
+        }
+
+        return sequenceDBs;
+    }
+
+    public String getHelpTopic()
+    {
+        return "pipelineMascot";
+    }
+
+    public void ensureEnabled() throws PipelineValidationException
+    {
+        AppProps appProps = AppProps.getInstance();
+        String mascotServer = appProps.getMascotServer();
+        if ((!appProps.hasMascotServer() || 0==mascotServer.length()))
+            throw new PipelineValidationException("Mascot server has not been specified in site customization.");
     }
 }

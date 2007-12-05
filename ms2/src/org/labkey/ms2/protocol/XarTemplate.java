@@ -1,16 +1,19 @@
 package org.labkey.ms2.protocol;
 
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.SimpleInputColumn;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.TextAreaInputColumn;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.CsvSet;
+import org.labkey.api.util.PageFlowUtil;
 
 import java.io.File;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Copyright (C) 2004 Fred Hutchinson Cancer Research Center. All Rights Reserved.

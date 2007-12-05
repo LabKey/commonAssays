@@ -19,8 +19,15 @@ import org.labkey.api.util.XMLValidationParser;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.io.File;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  * BioMLInputParser class
@@ -31,13 +38,19 @@ import java.util.ArrayList;
  */
 public class BioMLInputParser extends XMLValidationParser
 {
+    private static String TAG_BIOML = "bioml";
+    private static String TAG_NOTE = "note";
+    private static String ATTR_LABEL = "label";
+    private static String ATTR_TYPE = "type";
+    private static String VAL_INPUT = "input";
+
     /**
      * Override this function to further validate specific parameters.
      */
     public void validateDocument()
     {
         Element el = _doc.getDocumentElement();
-        if (!el.getTagName().equals("bioml"))
+        if (!TAG_BIOML.equals(el.getTagName()))
             addError(new Error("Root tag name should be 'bioml'"));
         NodeList notes = el.getChildNodes();
         for (int i = 0; i < notes.getLength(); i++)
@@ -46,17 +59,17 @@ public class BioMLInputParser extends XMLValidationParser
             if (child.getNodeType() != Node.ELEMENT_NODE)
                 continue;
             Element elNote = (Element) child;
-            if (!"note".equals(elNote.getNodeName()))
+            if (!TAG_NOTE.equals(elNote.getNodeName()))
             {
                 addError(new Error("Tag '" + elNote.getNodeName() + "' not supported."));
                 continue;
             }
 
-            String type = elNote.getAttribute("type");
+            String type = elNote.getAttribute(ATTR_TYPE);
             if (type == null || type.length() == 0 || "description".equals(type))
                 continue;
 
-            if (!"input".equals(type))
+            if (!VAL_INPUT.equals(type))
             {
                 addError(new Error("Note type '" + type + "' not supported."));
                 continue;
@@ -87,15 +100,15 @@ public class BioMLInputParser extends XMLValidationParser
         removeInputParameter(name);
 
         Element el = _doc.getDocumentElement();
-        Element elParameter = _doc.createElement("note");
-        elParameter.setAttribute("type", "input");
-        elParameter.setAttribute("label", name);
+        Element elParameter = _doc.createElement(TAG_NOTE);
+        elParameter.setAttribute(ATTR_TYPE, VAL_INPUT);
+        elParameter.setAttribute(ATTR_LABEL, name);
         elParameter.setTextContent(value);
 
         Node beforeNode = null;
         if (before != null)
         {
-            NodeList notes = el.getElementsByTagName("note");
+            NodeList notes = el.getElementsByTagName(TAG_NOTE);
             for (int i = 0; i < notes.getLength(); i++)
             {
                 Element elNote = (Element) notes.item(i);
@@ -117,7 +130,7 @@ public class BioMLInputParser extends XMLValidationParser
     {
         String value = null;
         Element el = _doc.getDocumentElement();
-        NodeList notes = el.getElementsByTagName("note");
+        NodeList notes = el.getElementsByTagName(TAG_NOTE);
         for (int i = 0; i < notes.getLength(); i++)
         {
             Element elNote = (Element) notes.item(i);
@@ -131,25 +144,70 @@ public class BioMLInputParser extends XMLValidationParser
         return value;
     }
 
-    public String[] getInputParameterNames ()
+    public String[] getInputParameterNames()
     {
         ArrayList<String> names = new ArrayList<String>();
         Element el = _doc.getDocumentElement();
-        NodeList notes = el.getElementsByTagName("note");
+        NodeList notes = el.getElementsByTagName(TAG_NOTE);
         for (int i = 0; i < notes.getLength(); i++)
         {
             Element elNote = (Element) notes.item(i);
-            if ("input".equals(elNote.getAttribute("type")))
+            if (VAL_INPUT.equals(elNote.getAttribute(ATTR_TYPE)))
             {
-                names.add (elNote.getAttribute("label"));
+                names.add(elNote.getAttribute(ATTR_LABEL));
             }
         }
         return names.toArray(new String[names.size()]);
     }
 
+    public Map<String, String> getInputParameters()
+    {
+        Map<String, String> parameters = new HashMap<String, String>();
+        if (_doc != null)
+        {
+            Element el = _doc.getDocumentElement();
+            NodeList notes = el.getElementsByTagName(TAG_NOTE);
+            for (int i = 0; i < notes.getLength(); i++)
+            {
+                Element elNote = (Element) notes.item(i);
+                if (VAL_INPUT.equals(elNote.getAttribute(ATTR_TYPE)))
+                {
+                    parameters.put(elNote.getAttribute(ATTR_LABEL), elNote.getTextContent());
+                }
+            }
+        }
+
+        return parameters;
+    }
+
     private boolean isInputParameterElement(String name, Element elNote)
     {
-        String type = elNote.getAttribute("type");
-        return ("input".equals(type) && name.equals(elNote.getAttribute("label")));
+        String type = elNote.getAttribute(ATTR_TYPE);
+        return (VAL_INPUT.equals(type) && name.equals(elNote.getAttribute(ATTR_LABEL)));
+    }
+
+    public static void writeFromMap(Map<String, String> props, File fileDest) throws IOException
+    {
+        BioMLInputParser parser = new BioMLInputParser();
+        String xmlEmpty = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
+                "<bioml>\n" +
+                "</bioml>";
+        parser.parse(xmlEmpty);
+        for (Map.Entry<String, String> pair : props.entrySet())
+            parser.setInputParameter(pair.getKey(), pair.getValue());
+
+        String xml = parser.getXML();
+
+        BufferedWriter inputWriter = null;
+        try
+        {
+            inputWriter = new BufferedWriter(new FileWriter(fileDest));
+            inputWriter.write(xml);
+        }
+        finally
+        {
+            if (inputWriter != null)
+                inputWriter.close();
+        }        
     }
 }

@@ -19,7 +19,7 @@ import org.labkey.api.util.AppProps;
 public abstract class SequestParamsBuilder
 {
 
-    BioMLInputParser sequestInputParser;
+    Map<String, String> sequestInputParams;
     URI uriSequenceRoot;
     char[] _validResidues = {'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'O'};
     HashMap<String, String> supportedEnzymes = new HashMap<String, String>();
@@ -27,9 +27,9 @@ public abstract class SequestParamsBuilder
 
 
 
-    public SequestParamsBuilder(SequestInputParser sequestInputParser, URI uriSequenceRoot)
+    public SequestParamsBuilder(Map<String, String> sequestInputParams, URI uriSequenceRoot)
     {
-        this.sequestInputParser = sequestInputParser;
+        this.sequestInputParams = sequestInputParams;
         this.uriSequenceRoot = uriSequenceRoot;
 
     }
@@ -51,7 +51,7 @@ public abstract class SequestParamsBuilder
     {
         String parserError = "";
         ArrayList<String> databases = new ArrayList<String>();
-        String value = sequestInputParser.getInputParameter("pipeline, database");
+        String value = sequestInputParams.get("pipeline, database");
         if (value == null || value.equals(""))
         {
             parserError = "pipeline, database; No value entered for database.\n";
@@ -107,10 +107,10 @@ public abstract class SequestParamsBuilder
     {
         String parserError = "";
         String plusValueString =
-            sequestInputParser.getInputParameter("spectrum, parent monoisotopic mass error plus");
+            sequestInputParams.get("spectrum, parent monoisotopic mass error plus");
 
         String minusValueString =
-            sequestInputParser.getInputParameter("spectrum, parent monoisotopic mass error minus");
+            sequestInputParams.get("spectrum, parent monoisotopic mass error minus");
 
         if (plusValueString == null && minusValueString == null)
         {
@@ -242,7 +242,7 @@ public abstract class SequestParamsBuilder
         defaultMods.put('Y', "0.000000");
 
         String parserError = "";
-        String mods = sequestInputParser.getInputParameter("residue, potential modification mass");
+        String mods = sequestInputParams.get("residue, potential modification mass");
         if (mods == null || mods.equals("")) return parserError;
         mods = removeWhiteSpace(mods);
         ArrayList<Character> residues = new ArrayList<Character>();
@@ -275,7 +275,7 @@ public abstract class SequestParamsBuilder
     String initStaticMods()
     {
         String parserError;
-        String mods = sequestInputParser.getInputParameter("residue, modification mass");
+        String mods = sequestInputParams.get("residue, modification mass");
 
         ArrayList<Character> residues = new ArrayList<Character>();
         ArrayList<String> masses = new ArrayList<String>();
@@ -335,8 +335,8 @@ public abstract class SequestParamsBuilder
     String initTermDynamicMods()
     {
         String parserError = "";
-        String nMod = sequestInputParser.getInputParameter("potential N-terminus modifications");
-        String cMod = sequestInputParser.getInputParameter("potential C-terminus modifications");
+        String nMod = sequestInputParams.get("potential N-terminus modifications");
+        String cMod = sequestInputParams.get("potential C-terminus modifications");
         Param termProp = _params.getParam("term_diff_search_options");
         String defaultTermMod = termProp.getValue();
         StringTokenizer st = new StringTokenizer(defaultTermMod);
@@ -372,7 +372,7 @@ public abstract class SequestParamsBuilder
     String initMassType()
     {
         String parserError = "";
-        String massType = sequestInputParser.getInputParameter("spectrum, fragment mass type");
+        String massType = sequestInputParams.get("spectrum, fragment mass type");
         String sequestValue;
         if (massType == null)
         {
@@ -403,11 +403,11 @@ public abstract class SequestParamsBuilder
     String initMassUnits()
     {
         String parserError = "";
-        String pepMassUnit = sequestInputParser.getInputParameter("spectrum, parent mass error units");
+        String pepMassUnit = sequestInputParams.get("spectrum, parent mass error units");
         if(pepMassUnit == null || pepMassUnit.equals(""))
         {
             //Check depricated param
-            pepMassUnit = sequestInputParser.getInputParameter("spectrum, parent monoisotopic mass error units");
+            pepMassUnit = sequestInputParams.get("spectrum, parent monoisotopic mass error units");
             if(pepMassUnit == null || pepMassUnit.equals("")) return parserError;
         }
         if(pepMassUnit.equalsIgnoreCase("daltons"))
@@ -424,8 +424,8 @@ public abstract class SequestParamsBuilder
    String initMassRange()
    {
        StringBuilder parserError = new StringBuilder();
-       String rangeMin = sequestInputParser.getInputParameter("spectrum, minimum parent m+h");
-       String rangeMax = sequestInputParser.getInputParameter("sequest, maximum parent m+h");
+       String rangeMin = sequestInputParams.get("spectrum, minimum parent m+h");
+       String rangeMax = sequestInputParams.get("sequest, maximum parent m+h");
        String defaultMin;
        String defaultMax;
        Param sequestProp = _params.getParam("digest_mass_range");
@@ -478,7 +478,7 @@ public abstract class SequestParamsBuilder
         for (SequestParam passThrough : passThroughs)
         {
             String label = passThrough.getInputXmlLabels().get(0);
-            String value = sequestInputParser.getInputParameter(label);
+            String value = sequestInputParams.get(label);
             if (value == null)
             {
                 continue;
@@ -517,7 +517,7 @@ public abstract class SequestParamsBuilder
 
         String parserError = "";
         String value;
-        String iPValue = sequestInputParser.getInputParameter(xmlLabel);
+        String iPValue = sequestInputParams.get(xmlLabel);
         if (iPValue == null)
         {
             return parserError;
@@ -533,7 +533,7 @@ public abstract class SequestParamsBuilder
             value = (xmlLabel.endsWith("loss")) ? "1" : "1.0";
             labelValue.append(value);
         }
-        else if (sequestInputParser.getInputParameter(xmlLabel).equalsIgnoreCase("no"))
+        else if (sequestInputParams.get(xmlLabel).equalsIgnoreCase("no"))
         {
             labelValue.delete(0, labelValue.length());
             value = (xmlLabel.endsWith("loss")) ? "0" : "0.0";
@@ -734,6 +734,7 @@ public abstract class SequestParamsBuilder
         SequestParamsBuilder spb;
         SequestInputParser ip;
         String dbPath;
+        File root;
 
         TestCase(String name)
         {
@@ -790,11 +791,11 @@ public abstract class SequestParamsBuilder
         {
             ip = new SequestInputParser();
             String projectRoot = AppProps.getInstance().getProjectRoot();
-            if (projectRoot == null || projectRoot.equals("")) projectRoot = "C:/CPAS";
-            File root = new File(projectRoot);
-            root = new File(root, "/sampledata/xarfiles/ms2pipe/databases");
+            if (projectRoot == null || projectRoot.equals(""))
+                projectRoot = "C:/CPAS";
+            root = new File(new File(projectRoot), "/sampledata/xarfiles/ms2pipe/databases");
             dbPath = root.getCanonicalPath();
-            spb = SequestParamsBuilderFactory.createVersion2Builder(ip, root.toURI());
+            spb = SequestParamsBuilderFactory.createVersion2Builder(ip.getInputParameters(), root.toURI());
         }
 
         protected void tearDown()
@@ -803,10 +804,16 @@ public abstract class SequestParamsBuilder
             spb = null;
         }
 
+        public void parseParams(String xml)
+        {
+            ip.parse(xml);
+            spb = SequestParamsBuilderFactory.createVersion2Builder(ip.getInputParameters(), root.toURI());
+        }
+
         public void testInitDatabasesNormal() throws IOException
         {
             String value = "Bovine_mini.fasta";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
                 "</bioml>");
@@ -818,7 +825,7 @@ public abstract class SequestParamsBuilder
 
             value = "Bovine_mini.fasta";
             String value2 = "Bovine_mini.fasta.hdr";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"pipeline, database\">" + value + ", " + value2 + "</note>" +
                 "</bioml>");
@@ -838,7 +845,7 @@ public abstract class SequestParamsBuilder
         public void testInitDatabasesMissingValue()
         {
             String value = "";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
                 "</bioml>");
@@ -850,7 +857,7 @@ public abstract class SequestParamsBuilder
 
         public void testInitDatabasesMissingInput()
         {
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "</bioml>");
 
@@ -862,7 +869,7 @@ public abstract class SequestParamsBuilder
         public void testInitDatabasesGarbage()
         {
             String value = "garbage";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
                 "</bioml>");
@@ -872,7 +879,7 @@ public abstract class SequestParamsBuilder
             assertEquals("pipeline, database; The database does not exist on the local server (" + value + ").\n", parserError);
 
             value = "Bovine_mini.fasta, garbage";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
                 "</bioml>");
@@ -882,7 +889,7 @@ public abstract class SequestParamsBuilder
             assertEquals("pipeline, database; The database does not exist(garbage).\n", parserError);
 
             value = "garbage, Bovine_mini.fasta";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"pipeline, database\">" + value + "</note>" +
                 "</bioml>");
@@ -895,7 +902,7 @@ public abstract class SequestParamsBuilder
         public void testInitPeptideMassToleranceNormal()
         {
             float expected = 30.0f;
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error plus\">" + expected + "</note>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\">" + expected + "</note>" +
@@ -911,7 +918,7 @@ public abstract class SequestParamsBuilder
         public void testInitPeptideMassToleranceMissingValue()
         {
             String expected = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error plus\"></note>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\">4.0</note>" +
@@ -923,7 +930,7 @@ public abstract class SequestParamsBuilder
             assertEquals("peptide_mass_tolerance", expected, actual);
             assertEquals("Sequest does not support asymmetric parent error ranges (minus=4.0 plus=).\n", parserError);
 
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error plus\">4.0</note>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\"></note>" +
@@ -934,7 +941,7 @@ public abstract class SequestParamsBuilder
             assertEquals("peptide_mass_tolerance", expected, actual);
             assertEquals("Sequest does not support asymmetric parent error ranges (minus= plus=4.0).\n", parserError);
 
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error plus\"></note>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\"></note>" +
@@ -950,7 +957,7 @@ public abstract class SequestParamsBuilder
         {
             float expected = -30.0f;
             String defaultValue = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error plus\">" + expected + "</note>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\">" + expected + "</note>" +
@@ -967,7 +974,7 @@ public abstract class SequestParamsBuilder
         {
             String expected = "garbage";
             String defaultValue = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error plus\">" + expected + "</note>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\">" + expected + "</note>" +
@@ -985,7 +992,7 @@ public abstract class SequestParamsBuilder
         {
             String expected = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
 
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error plus\">5.0</note>" +
                 "</bioml>");
@@ -995,7 +1002,7 @@ public abstract class SequestParamsBuilder
             assertEquals("peptide_mass_tolerance", expected, actual);
             assertEquals("Sequest does not support asymmetric parent error ranges (minus=null plus=5.0).\n", parserError);
 
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, parent monoisotopic mass error minus\">5.0</note>" +
                 "</bioml>");
@@ -1010,7 +1017,7 @@ public abstract class SequestParamsBuilder
         {
             String expected = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
 
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "</bioml>");
             String parserError = spb.initPeptideMassTolerance();
@@ -1022,7 +1029,7 @@ public abstract class SequestParamsBuilder
         public void testInitMassTypeNormal()
         {
             String expected = "AveRage";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, fragment mass type\">" + expected + "</note>" +
                 "</bioml>");
@@ -1034,7 +1041,7 @@ public abstract class SequestParamsBuilder
             assertEquals("mass_type_fragment", "0", actual);
 
             expected = "MonoIsotopic";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, fragment mass type\">" + expected + "</note>" +
                 "</bioml>");
@@ -1049,7 +1056,7 @@ public abstract class SequestParamsBuilder
         public void testInitMassTypeMissingValue()
         {
             String expected = "1";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, fragment mass type\"></note>" +
                 "</bioml>");
@@ -1065,7 +1072,7 @@ public abstract class SequestParamsBuilder
         public void testInitMassTypeDefault()
         {
             String expected = "1";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "</bioml>");
 
@@ -1079,7 +1086,7 @@ public abstract class SequestParamsBuilder
         public void testInitMassTypeGarbage()
         {
             String expected = "1";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"spectrum, fragment mass type\">garbage</note>" +
                 "</bioml>");
@@ -1095,7 +1102,7 @@ public abstract class SequestParamsBuilder
         public void testInitIonScoringNormal()
         {
             String expected = "0 0 0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"sequest, a neutral loss\">no</note>" +
                 "<note type=\"input\" label=\"sequest, b neutral loss\">No</note>" +
@@ -1118,7 +1125,7 @@ public abstract class SequestParamsBuilder
             assertEquals("ion_series", expected, actual);
 
             expected = "1 1 1 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"sequest, a neutral loss\">Yes</note>" +
                 "<note type=\"input\" label=\"sequest, b neutral loss\">yEs</note>" +
@@ -1144,7 +1151,7 @@ public abstract class SequestParamsBuilder
         public void testInitIonScoringMissingValue()
         {
             String expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"sequest, a neutral loss\">no</note>" +
                 "<note type=\"input\" label=\"sequest, b neutral loss\">No</note>" +
@@ -1168,7 +1175,7 @@ public abstract class SequestParamsBuilder
             assertEquals("ion_series", "sequest, y neutral loss did not contain a value.\n", parserError);
 
             expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"sequest, a neutral loss\">yes</note>" +
                 "<note type=\"input\" label=\"sequest, b neutral loss\">yes</note>" +
@@ -1192,7 +1199,7 @@ public abstract class SequestParamsBuilder
             assertEquals("ion_series", "scoring, c ions did not contain a value.\n", parserError);
 
             expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"sequest, a neutral loss\">yes</note>" +
                 "<note type=\"input\" label=\"sequest, b neutral loss\">yes</note>" +
@@ -1219,7 +1226,7 @@ public abstract class SequestParamsBuilder
         public void testInitIonScoringMissingDefault()
         {
             String expected = "0 0 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"sequest, a neutral loss\">no</note>" +
                 "<note type=\"input\" label=\"sequest, b neutral loss\">No</note>" +
@@ -1244,7 +1251,7 @@ public abstract class SequestParamsBuilder
         public void testInitIonScoringDefault()
         {
             String expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "</bioml>");
 
@@ -1258,7 +1265,7 @@ public abstract class SequestParamsBuilder
         public void testInitIonScoringGarbage()
         {
             String expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"sequest, a neutral loss\">no</note>" +
                 "<note type=\"input\" label=\"sequest, b neutral loss\">No</note>" +
@@ -1282,7 +1289,7 @@ public abstract class SequestParamsBuilder
             assertEquals("ion_series", "sequest, y neutral loss contained an invalid value(garbage).\n", parserError);
 
             expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"sequest, a neutral loss\">yes</note>" +
                 "<note type=\"input\" label=\"sequest, b neutral loss\">yes</note>" +
@@ -1306,7 +1313,7 @@ public abstract class SequestParamsBuilder
             assertEquals("ion_series", "scoring, c ions contained an invalid value(garbage).\n", parserError);
 
             expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"sequest, a neutral loss\">yes</note>" +
                 "<note type=\"input\" label=\"sequest, b neutral loss\">yes</note>" +
@@ -1337,7 +1344,7 @@ public abstract class SequestParamsBuilder
             String expected1 = "0";
             //String expected2 = "No_Enzyme\t\t\t\t0\t0\t-\t\t-";
             String expected2 = "No_Enzyme 0 0 - -";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[X]|[X]</note>" +
                 "</bioml>");
@@ -1359,7 +1366,7 @@ public abstract class SequestParamsBuilder
             expected1 = "1";
             //expected2 = "Trypsin_K\t\t\t\t1\tK\t\tP";
             expected2 = "Trypsin_K 1 1 K P";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[K]|{P}</note>" +
                 "</bioml>");
@@ -1381,7 +1388,7 @@ public abstract class SequestParamsBuilder
             expected1 = "1";
             //expected2 = "Trypsin(KRLNH)\t\t\t\t1\tKRLNH\t\t-";
             expected2 = "Trypsin(KRLNH) 1 1 KRLNH -";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[KRLNH]|[X]</note>" +
                 "</bioml>");
@@ -1405,7 +1412,7 @@ public abstract class SequestParamsBuilder
         {
             String expected1 = "1";
             String expected2 = "Unknown([QND]|[X]) 1 1 QND -";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[QND]|[X]</note>" +
                 "</bioml>");
@@ -1426,7 +1433,7 @@ public abstract class SequestParamsBuilder
 
             expected1 = "1";
             expected2 = "Unknown([PGY]|{W}) 1 1 PGY W";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[PGY]|{W}</note>" +
                 "</bioml>");
@@ -1448,7 +1455,7 @@ public abstract class SequestParamsBuilder
             expected1 = "1";
             //TODO: I don't know if this syntax is right(1 or 0)?
             expected2 = "Unknown([X]|[W]) 1 0 W -";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[X]|[W]</note>" +
                 "</bioml>");
@@ -1474,7 +1481,7 @@ public abstract class SequestParamsBuilder
             String expected1 = "1";
 //            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
             String expected2 = "Trypsin(KR/P) 1 1 KR P";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "</bioml>");
 
@@ -1498,7 +1505,7 @@ public abstract class SequestParamsBuilder
             String expected1 = "1";
 //            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
             String expected2 = "Trypsin(KR/P) 1 1 KR P";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\"></note>" +
                 "</bioml>");
@@ -1526,7 +1533,7 @@ public abstract class SequestParamsBuilder
             String expected1 = "1";
 //            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
             String expected2 = "Trypsin(KR/P) 1 1 KR P";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">foo</note>" +
                 "</bioml>");
@@ -1547,7 +1554,7 @@ public abstract class SequestParamsBuilder
             assertEquals("enzyme_description", expected2, actual);
             assertEquals("enzyme_description", "protein, cleavage site contained invalid format(foo).\n", parserError);
 
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[CV]|{P},[KR]|{P}</note>" +
                 "</bioml>");
@@ -1568,7 +1575,7 @@ public abstract class SequestParamsBuilder
             assertEquals("enzyme_description", expected2, actual);
             assertEquals("protein, cleavage site contained more than one cleavage site([CV]|{P},[KR]|{P}).\n", parserError);
 
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">{P}|[KR]</note>" +
                 "</bioml>");
@@ -1589,7 +1596,7 @@ public abstract class SequestParamsBuilder
             assertEquals("enzyme_description", expected2, actual);
             assertEquals("protein, cleavage site does not support n-terminal blocking AAs({P}|[KR]).\n", parserError);
 
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[a]|[X]</note>" +
                 "</bioml>");
@@ -1610,7 +1617,7 @@ public abstract class SequestParamsBuilder
             assertEquals("enzyme_description", expected2, actual);
             assertEquals("protein, cleavage site contained invalid residue(a).\n", parserError);
 
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[X]|[a]</note>" +
                 "</bioml>");
@@ -1631,7 +1638,7 @@ public abstract class SequestParamsBuilder
             assertEquals("enzyme_description", expected2, actual);
             assertEquals("protein, cleavage site contained invalid residue(a).\n", parserError);
 
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[X]|P</note>" +
                 "</bioml>");
@@ -1656,7 +1663,7 @@ public abstract class SequestParamsBuilder
         public void testInitDynamicModsNormal()
         {
             String expected1 = "0.000000 C 16.0 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\">+16@M</note>" +
                 "</bioml>");
@@ -1669,7 +1676,7 @@ public abstract class SequestParamsBuilder
 
 
             expected1 = "0.000000 C 16.0 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\">16@M</note>" +
                 "</bioml>");
@@ -1681,7 +1688,7 @@ public abstract class SequestParamsBuilder
             assertEquals("diff_search_options", expected1, actual);
 
             expected1 = "0.000000 C -16.0 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\">- 16.0000 @ M</note>" +
                 "</bioml>");
@@ -1694,7 +1701,7 @@ public abstract class SequestParamsBuilder
 
 
             expected1 = "9.0 C 16.0 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\"> 16@M,9@C </note>" +
                 "</bioml>");
@@ -1709,7 +1716,7 @@ public abstract class SequestParamsBuilder
         public void testInitDynamicModsMissingValue()
         {
             String expected1 = "0.000000 C 0.000000 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\"></note>" +
                 "</bioml>");
@@ -1724,7 +1731,7 @@ public abstract class SequestParamsBuilder
         public void testInitDynamicModsDefault()
         {
             String expected1 = "0.000000 C 0.000000 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "</bioml>");
 
@@ -1738,7 +1745,7 @@ public abstract class SequestParamsBuilder
         public void testInitDynamicModsGarbage()
         {
             String expected1 = "0.000000 C 0.000000 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\">16@J</note>" +
                 "</bioml>");
@@ -1751,7 +1758,7 @@ public abstract class SequestParamsBuilder
             assertEquals("diff_search_options", "modification mass contained an invalid residue(J).\n", parserError);
 
             expected1 = "0.000000 C 0.000000 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, potential modification mass\">G@18</note>" +
                 "</bioml>");
@@ -1770,7 +1777,7 @@ public abstract class SequestParamsBuilder
             Param sp = spb.getProperties().getParam("term_diff_search_options");
             String defaultValue = sp.getValue();
             String expected1 = "42.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"potential N-terminus modifications\">+42.0@[</note>" +
                 "</bioml>");
@@ -1783,7 +1790,7 @@ public abstract class SequestParamsBuilder
 
             sp.setValue(defaultValue);
             expected1 = "42.0 -88.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"potential C-terminus modifications\">-88 @ ]</note>" +
                 "<note type=\"input\" label=\"potential N-terminus modifications\">+ 42.0 @[</note>" +
@@ -1797,7 +1804,7 @@ public abstract class SequestParamsBuilder
 
             sp.setValue(defaultValue);
             expected1 = "0.0 -88.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"potential C-terminus modifications\">-88@]</note>" +
                 "</bioml>");
@@ -1815,7 +1822,7 @@ public abstract class SequestParamsBuilder
             Param sp = spb.getProperties().getParam("term_diff_search_options");
             String defaultValue = sp.getValue();
             String expected1 = "0.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"potential N-terminus modifications\">+0.0@[</note>" +
                 "<note type=\"input\" label=\"potential C-terminus modifications\"></note>" +
@@ -1829,7 +1836,7 @@ public abstract class SequestParamsBuilder
 
             sp.setValue(defaultValue);
             expected1 = "42.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"potential C-terminus modifications\"></note>" +
                 "<note type=\"input\" label=\"potential N-terminus modifications\">+ 42.0 @[</note>" +
@@ -1845,7 +1852,7 @@ public abstract class SequestParamsBuilder
         public void testInitTermDynamicModsDefault()
         {
             String expected1 = "0.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "</bioml>");
 
@@ -1861,7 +1868,7 @@ public abstract class SequestParamsBuilder
             Param sp = spb.getProperties().getParam("term_diff_search_options");
             String defaultValue = sp.getValue();
             String expected1 = "0.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"potential C-terminus modifications\">foo</note>" +
                 "<note type=\"input\" label=\"potential N-terminus modifications\"></note>" +
@@ -1876,7 +1883,7 @@ public abstract class SequestParamsBuilder
 
             sp.setValue(defaultValue);
             expected1 = "0.0 0.0";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"potential C-terminus modifications\"></note>" +
                 "<note type=\"input\" label=\"potential N-terminus modifications\">bar</note>" +
@@ -1896,7 +1903,7 @@ public abstract class SequestParamsBuilder
             for (char residue : validResidues)
             {
                 String expected1 = "227.0";
-                ip.parse("<?xml version=\"1.0\"?>" +
+                parseParams("<?xml version=\"1.0\"?>" +
                     "<bioml>" +
                     "<note type=\"input\" label=\"residue, modification mass\">+227@" + residue + "</note>" +
                     "</bioml>");
@@ -1912,7 +1919,7 @@ public abstract class SequestParamsBuilder
             for (char residue : validResidues)
             {
                 String expected1 = "-9.0";
-                ip.parse("<?xml version=\"1.0\"?>" +
+                parseParams("<?xml version=\"1.0\"?>" +
                     "<bioml>" +
                     "<note type=\"input\" label=\"residue, modification mass\">- 9 @ " + residue + "</note>" +
                     "</bioml>");
@@ -1925,7 +1932,7 @@ public abstract class SequestParamsBuilder
                 assertEquals("residue, modification mass", expected1, actual);
             }
 
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, modification mass\">227@C,16@M</note>" +
                 "</bioml>");
@@ -1952,7 +1959,7 @@ public abstract class SequestParamsBuilder
             for (char residue : validResidues)
             {
                 String expected1 = "0.0";
-                ip.parse("<?xml version=\"1.0\"?>" +
+                parseParams("<?xml version=\"1.0\"?>" +
                     "<bioml>" +
                     "<note type=\"input\" label=\"residue, modification mass\"></note>" +
                     "</bioml>");
@@ -1972,7 +1979,7 @@ public abstract class SequestParamsBuilder
             for (char residue : validResidues)
             {
                 String expected1 = "0.0";
-                ip.parse("<?xml version=\"1.0\"?>" +
+                parseParams("<?xml version=\"1.0\"?>" +
                     "<bioml>" +
                     "</bioml>");
 
@@ -1988,7 +1995,7 @@ public abstract class SequestParamsBuilder
         public void testInitStaticModsGarbage()
         {
             String value = "garbage";
-            ip.parse("<?xml version=\"1.0\"?>" +
+            parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"residue, modification mass\">" + value + "</note>" +
                 "</bioml>");

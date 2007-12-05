@@ -1,15 +1,13 @@
 package org.labkey.ms2.protocol;
 
-import org.labkey.api.pipeline.PipelineProtocolFactory;
-import org.labkey.api.data.Container;
-import org.labkey.ms2.pipeline.SequestInputParser;
-import org.labkey.ms2.pipeline.BioMLInputParser;
 import org.apache.log4j.Logger;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
+import org.labkey.ms2.pipeline.SequestPipelineJob;
 
-import java.io.IOException;
 import java.io.File;
-import java.util.Map;
-import java.util.HashMap;
+import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * User: billnelson@uky.edu
@@ -25,21 +23,18 @@ public class SequestSearchProtocol extends MS2SearchPipelineProtocol
         super(name, description, dbNames, xml);
     }
 
-    public PipelineProtocolFactory getFactory()
+    public AbstractMS2SearchProtocolFactory getFactory()
     {
         return SequestSearchProtocolFactory.get();
     }
 
-    public void saveInstance(File file, Container c) throws IOException
+    public AbstractMS2SearchPipelineJob createPipelineJob(ViewBackgroundInfo info,
+                                                          File dirSequenceRoot,
+                                                          File[] mzXMLFiles,
+                                                          File fileParameters,
+                                                          boolean fromCluster)
+            throws SQLException, IOException
     {
-        Map<String, String> addParams = new HashMap<String, String>();
-        addParams.put("pipeline, load folder", c.getPath());
-        addParams.put("pipeline, email address", email);
-        save(file, addParams);
-    }
-
-    protected BioMLInputParser createInputParser()
-    {
-        return new SequestInputParser();
+        return new SequestPipelineJob(info, getName(), dirSequenceRoot, mzXMLFiles, fileParameters, fromCluster);
     }
 }

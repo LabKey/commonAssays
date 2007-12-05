@@ -5,13 +5,13 @@ import org.labkey.api.data.SqlDialect;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.FileUtil;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.common.tools.ProtXmlReader;
 import org.labkey.common.tools.ProteinGroup;
 import org.labkey.common.tools.SimpleXMLStreamReader;
 import org.labkey.common.util.Pair;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
+import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.ExperimentException;
 import org.apache.log4j.Logger;
@@ -276,10 +276,10 @@ public class ProteinProphetImporter
             {
                 // Third, try replacing the .pep-prot.xml on the file name with .pep.xml
                 // and looking in the same directory
-                if (MS2PipelineManager.isProtXMLFile(_file))
+                if (TPPTask.isProtXMLFile(_file))
                 {
-                    String baseName = MS2PipelineManager.getBaseName(_file, 2);
-                    pepXMLFile = MS2PipelineManager.getPepXMLFile(_file.getParentFile(), baseName);
+                    String baseName = FileUtil.getBaseName(_file, 2);
+                    pepXMLFile = TPPTask.getPepXMLFile(_file.getParentFile(), baseName);
                     if (!NetworkDrive.exists(pepXMLFile))
                     {
                         throw new FileNotFoundException(pepXMLFileName + " could not be found on disk.");

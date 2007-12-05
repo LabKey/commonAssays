@@ -15,20 +15,16 @@
  */
 package org.labkey.ms2.protocol;
 
-import org.labkey.api.pipeline.PipelineProtocolFactory;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.AppProps;
 import org.apache.log4j.Logger;
+import org.labkey.api.pipeline.PipelineProtocolFactory;
+import org.labkey.api.util.AppProps;
+import org.labkey.api.util.PageFlowUtil;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -61,10 +57,8 @@ public class MassSpecProtocolFactory extends PipelineProtocolFactory<MassSpecPro
         List<String> templateNames = super.getTemplateNames(uriRoot);
 
         templateNames.add(DEFAULT_TEMPLATE_NAME);
-        if (AppProps.getInstance().hasPipelineCluster())
-        {
-            templateNames.add(DEFAULT_FRACTIONATION_TEMPLATE_NAME);
-        }
+        templateNames.add(DEFAULT_FRACTIONATION_TEMPLATE_NAME);
+
         return templateNames;
     }
 

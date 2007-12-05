@@ -131,7 +131,7 @@
 		<exp:Data rdf:about="${AutoFileLSID}">
 			<exp:Name>Tandem Settings</exp:Name>
 			<exp:CpasType>Data</exp:CpasType>
-			<exp:DataFileUrl>@@TANDEM_XML_FILE_PATH@@</exp:DataFileUrl>
+			<exp:DataFileUrl>@@INPUT_XML_FILE_PATH@@</exp:DataFileUrl>
 		</exp:Data>
 @@PROTEIN_DATABASES@@
 	</exp:StartingInputDefinitions>
@@ -146,7 +146,7 @@
                     <exp:ApplicationInstanceCollection>
                         <exp:InstanceDetails>
                             <exp:InstanceInputs>
-                                <exp:DataLSID DataFileUrl="@@TANDEM_XML_FILE_PATH@@" RoleName="SearchConfig">${AutoFileLSID}</exp:DataLSID>
+                                <exp:DataLSID DataFileUrl="@@INPUT_XML_FILE_PATH@@" RoleName="SearchConfig">${AutoFileLSID}</exp:DataLSID>
 @@PROTEIN_DATABASE_DATALSIDS@@
 @@MZXML_DATALSIDS@@
                             </exp:InstanceInputs>

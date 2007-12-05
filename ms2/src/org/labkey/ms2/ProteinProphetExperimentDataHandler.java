@@ -8,7 +8,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
+import org.labkey.ms2.pipeline.TPPTask;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -88,7 +88,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
     public Priority getPriority(ExpData data)
     {
         File f = data.getFile();
-        if (f != null && MS2PipelineManager.isProtXMLFile(f))
+        if (f != null && TPPTask.isProtXMLFile(f))
         {
             return Priority.HIGH;
         }

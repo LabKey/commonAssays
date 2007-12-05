@@ -105,7 +105,7 @@ public class PipelineController extends ViewController
             int extParts = 1;
             if (file.getName().endsWith(".xml"))
                 extParts = 2;
-            String baseName = MS2PipelineManager.getBaseName(file, extParts);
+            String baseName = FileUtil.getBaseName(file, extParts);
             File dir = file.getParentFile();
             // If the data was created by our pipeline, try to get the name
             // to look like the normal generated name.
@@ -113,7 +113,7 @@ public class PipelineController extends ViewController
             String protocolName;
             File dirDataOriginal;
             String description;
-            if (MS2PipelineManager.isMascotResultFile(file))
+            if (MascotSearchTask.isNativeOutputFile(file))
             {
                 //TODO: wch: use an appropriate protocol
                 //      after all, this is what the Mascot search processing is doing
@@ -147,11 +147,11 @@ public class PipelineController extends ViewController
                     ExperimentPipelineJob job = new ExperimentPipelineJob(info, file, description, false);
                     PipelineService.get().queueJob(job);
                 }
-                else if (MS2PipelineManager.isMs2ResultsFile(file))
+                else if (TPPTask.isPepXMLFile(file))
                 {
                     MS2Manager.addRunToQueue(info, file, description, false);
                 }
-                else if (MS2PipelineManager.isMascotResultFile(file))
+                else if (MascotSearchTask.isNativeOutputFile(file))
                 {
                     MS2Manager.addMascotRunToQueue(info, file, description, false);
                 }
@@ -169,143 +169,29 @@ public class PipelineController extends ViewController
         return new ViewForward(new ViewURLHelper(getRequest(), "MS2", "showList", c.getPath()));
     }
 
-    public static class SearchForm extends FormData
-    {
-        private String path;
-        private String protocol = "";
-        private String protocolName = "";
-        private String protocolDescription = "";
-        private String sequenceDBPath = "";
-        private String[] sequenceDBs = new String[0];
-        private String configureXml = "";
-        private boolean skipDescription;
-        private String searchEngine = "X!Tandem";
-        private boolean saveProtocol = false;
-
-        public String getPath()
-        {
-            return path;
-        }
-
-        public void setPath(String path)
-        {
-            this.path = path;
-        }
-
-        public String[] getSequenceDBs()
-        {
-            return sequenceDBs;
-        }
-
-        public void setSequenceDBs(String[] sequenceDBs)
-        {
-            this.sequenceDBs = (sequenceDBs == null ? new String[0] : sequenceDBs);
-        }
-
-        public String getConfigureXml()
-        {
-            return configureXml;
-        }
-
-        public void setConfigureXml(String configureXml)
-        {
-            this.configureXml = (configureXml == null ? "" : configureXml);
-        }
-
-        public String getProtocol()
-        {
-            return protocol;
-        }
-
-        public void setProtocol(String protocol)
-        {
-            this.protocol = (protocol == null ? "" : protocol);
-        }
-
-        public String getProtocolName()
-        {
-            return protocolName;
-        }
-
-        public void setProtocolName(String protocolName)
-        {
-            this.protocolName = (protocolName == null ? "" : protocolName);
-        }
-
-        public String getProtocolDescription()
-        {
-            return protocolDescription;
-        }
-
-        public void setProtocolDescription(String protocolDescription)
-        {
-            this.protocolDescription = (protocolDescription == null ? "" : protocolDescription);
-        }
-
-        public String getSequenceDBPath()
-        {
-            return sequenceDBPath;
-        }
-
-        public void setSequenceDBPath(String sequenceDBPath)
-        {
-            this.sequenceDBPath = sequenceDBPath;
-        }
-
-        public boolean isSkipDescription()
-        {
-            return skipDescription;
-        }
-
-        public void setSkipDescription(boolean skipDescription)
-        {
-            this.skipDescription = skipDescription;
-        }
-
-        public String getSearchEngine()
-        {
-            return searchEngine;
-        }
-
-        public void setSearchEngine(String searchEngine)
-        {
-            this.searchEngine = searchEngine;
-        }
-
-        public boolean isSaveProtocol()
-        {
-            return saveProtocol;
-        }
-
-        public void setSaveProtocol(boolean saveProtocol)
-        {
-            this.saveProtocol = saveProtocol;
-        }
-    }
-
     @Jpf.Action
-    protected Forward searchXTandem(SearchForm form) throws Exception
+    protected Forward searchXTandem(MS2SearchForm form) throws Exception
     {
-        form.setSearchEngine ("X!Tandem");
+        form.setSearchEngine(XTandemCPipelineProvider.name);
         return search(form);
     }
 
     @Jpf.Action
-    protected Forward searchMascot(SearchForm form) throws Exception
+    protected Forward searchMascot(MS2SearchForm form) throws Exception
     {
-        form.setSearchEngine ("Mascot");
+        form.setSearchEngine (MascotCPipelineProvider.name);
         return search(form);
     }
 
     @Jpf.Action
-    protected Forward searchSequest(SearchForm form) throws ServletException, SQLException, URISyntaxException, Exception
+    protected Forward searchSequest(MS2SearchForm form) throws ServletException, SQLException, URISyntaxException, Exception
     {
-        form.setSearchEngine ("Sequest");
+        form.setSearchEngine(SequestLocalPipelineProvider.name);
         return search(form);
     }
 
     @Jpf.Action
-    protected Forward search(SearchForm form) throws ServletException, SQLException, URISyntaxException, Exception
+    protected Forward search(MS2SearchForm form) throws ServletException, SQLException, URISyntaxException, Exception
     {
         requiresPermission(ACL.PERM_INSERT);
 
@@ -326,61 +212,53 @@ public class PipelineController extends ViewController
         if (pr == null || !URIUtil.exists(pr.getUri()))
             HttpView.throwNotFound();
 
+        String protocolName = form.getProtocol();
+
         URI uriRoot = pr.getUri();
-        URI sequenceRoot = MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer());
+        URI uriSeqRoot = MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer());
         URI uriData = URIUtil.resolve(pr.getUri(c), form.getPath());
         if (uriData == null)
             HttpView.throwNotFound();
+
+        File dirRoot = new File(uriRoot);
+        File dirSeqRoot = new File(uriSeqRoot);
+        File dirData = new File(uriData);
+        if (!NetworkDrive.exists(dirData))
+            HttpView.throwNotFound();
+
         ViewBackgroundInfo info =
                 service.getJobBackgroundInfo(getViewBackgroundInfo(), new File(uriData));
 
-        PipelineProtocolFactory searchProtocol = MS2PipelineManager.getSearchProtocolInstance(form.getSearchEngine());
+        MS2SearchPipelineProvider provider = (MS2SearchPipelineProvider)
+                PipelineService.get().getPipelineProvider(form.getSearchEngine());
+
+        AbstractMS2SearchProtocolFactory protocolFactory = provider.getProtocolFactory();
+
+        File dirAnalysis = protocolFactory.getAnalysisDir(dirData, protocolName);
 
         String error = null;
-        PipelineProtocol protocol = null;
-        String protocolName = form.getProtocol();
+        MS2SearchPipelineProtocol protocol = null;
         if (protocolName.length() != 0)
         {
             try
             {
-                File protocolFile = MS2PipelineManager.getConfigureXMLFile(uriData, protocolName, form.getSearchEngine());
-                if (protocolFile.exists())
+                File protocolFile = protocolFactory.getParametersFile(dirData, protocolName);
+                if (NetworkDrive.exists(protocolFile))
                 {
-                    protocol = searchProtocol.loadInstance(protocolFile);
+                    protocol = protocolFactory.loadInstance(protocolFile);
 
                     // Don't allow the instance file to override the protocol name.
                     protocol.setName(protocolName);
                 }
                 else
                 {
-                    protocol = searchProtocol.load(uriRoot, form.getProtocol());
+                    protocol = protocolFactory.load(uriRoot, form.getProtocol());
                 }
 
                 form.setProtocolName(protocol.getName());
-
-                // TODO: wch - define a class to be inherited
-                if ("mascot".equalsIgnoreCase(form.getSearchEngine()))
-                {
-                    MascotSearchProtocol specificProtocol = (MascotSearchProtocol) protocol;
-                    form.setProtocolDescription(specificProtocol.getDescription());
-                    form.setSequenceDBs(specificProtocol.getDbNames());
-                    form.setConfigureXml(specificProtocol.getXml());
-                }
-                else if("sequest".equalsIgnoreCase(form.getSearchEngine()))
-                {
-                    SequestSearchProtocol specificProtocol = (SequestSearchProtocol) protocol;
-                    form.setProtocolDescription(specificProtocol.getDescription());
-                    form.setSequenceDBs(specificProtocol.getDbNames());
-                    form.setConfigureXml(specificProtocol.getXml());
-                }
-                else
-                {
-                    // we take X! Tandem as the default case
-                    XTandemSearchProtocol specificProtocol = (XTandemSearchProtocol) protocol;
-                    form.setProtocolDescription(specificProtocol.getDescription());
-                    form.setSequenceDBs(specificProtocol.getDbNames());
-                    form.setConfigureXml(specificProtocol.getXml());
-                }
+                form.setProtocolDescription(protocol.getDescription());
+                form.setSequenceDBs(protocol.getDbNames());
+                form.setConfigureXml(protocol.getXml());
             }
             catch (IOException eio)
             {
@@ -392,93 +270,19 @@ public class PipelineController extends ViewController
         {
             try
             {
-                if (form.getProtocol().length() == 0)
+                provider.ensureEnabled();   // throws exception if not enabled
+
+                if ("".equals(protocolName))
                 {
-                    String[] seqDBs = form.getSequenceDBs();
-                    if ("mascot".equalsIgnoreCase(form.getSearchEngine()))
-                    {
-                        // we check that the database exist locally
-                        // so that Mascot2XML will work
-                        //WCH: 2007-02-19 we no longer check for existence, we will download the database
-                        /*
-                        File fileSequenceDB = new File(sequenceRoot.getPath(), seqDBs[0]);
-                        if (!fileSequenceDB.exists())
-                            throw new IllegalArgumentException("Sequence database '" + seqDBs[0] + "' is not found in local FASTA root");
-                            */
-                    }
-                    if ("sequest".equalsIgnoreCase(form.getSearchEngine()))
-                    {
-                        String seqDBPath = form.getSequenceDBPath();
-                        if(seqDBs == null || seqDBs.length == 0)
-                            throw new IllegalArgumentException(
-                                    "A sequence database must be selected.");
-                        if (seqDBPath != null && seqDBPath.length() > 0)
-                        {
-                            String[] seqFullDBs = new String[seqDBs.length];
-                            for (int i = 0; i < seqDBs.length; i++)
-                                seqFullDBs[i] = seqDBPath + seqDBs[i];
-                            seqDBs = seqFullDBs;
-                        }
-
-                        File fileSequenceDB = new File(sequenceRoot.getPath(), seqDBs[0]);
-                        if (!fileSequenceDB.exists())
-                            throw new IllegalArgumentException("Sequence database '" + seqDBs[0] + "' is not found in local FASTA root");
-                    }
-                    else
-                    {
-                        String seqDBPath = form.getSequenceDBPath();
-                        if (seqDBPath != null && seqDBPath.length() > 0)
-                        {
-                            String[] seqFullDBs = new String[seqDBs.length];
-                            for (int i = 0; i < seqDBs.length; i++)
-                                seqFullDBs[i] = seqDBPath + seqDBs[i];
-                            seqDBs = seqFullDBs;
-                        }
-                    }
-
-                    // TODO: wch - define a class to be inherited
-                    if ("mascot".equalsIgnoreCase(form.getSearchEngine()))
-                    {
-                        AppProps appProps = AppProps.getInstance();
-                        String mascotServer = appProps.getMascotServer();
-                        String mascotHTTPProxy = appProps.getMascotHTTPProxy();
-                        if (!appProps.hasMascotServer() || 0==mascotServer.length())
-                            throw new IllegalArgumentException("Mascot server has not been specified in site customization.");
-
-                        MascotSearchProtocol specificProtocol
-                            = new MascotSearchProtocol(
-                                form.getProtocolName(),
-                                form.getProtocolDescription(),
-                                seqDBs,
-                                form.getConfigureXml());
-                        specificProtocol.setEmail(getUser().getEmail());
-                        specificProtocol.setMascotServer(mascotServer);
-                        specificProtocol.setMascotHTTPProxy(mascotHTTPProxy);
-                        protocol = specificProtocol;
-                    }
-                    else if("sequest".equalsIgnoreCase(form.getSearchEngine()))
-                    {
-                        SequestSearchProtocol specificProtocol
-                            = new SequestSearchProtocol(
-                                form.getProtocolName(),
-                                form.getProtocolDescription(),
-                                seqDBs,
-                                form.getConfigureXml());
-                        specificProtocol.setEmail(getUser().getEmail());
-                        protocol = specificProtocol;
-                    }
-                    else
-                    {
-                        // we take X! Tandem as the default case
-                        XTandemSearchProtocol specificProtocol
-                            = new XTandemSearchProtocol(
-                                form.getProtocolName(),
-                                form.getProtocolDescription(),
-                                seqDBs,
-                                form.getConfigureXml());
-                        specificProtocol.setEmail(getUser().getEmail());
-                        protocol = specificProtocol;
-                    }
+                    protocol = provider.getProtocolFactory().createProtocolInstance(
+                            form.getProtocolName(),
+                            form.getProtocolDescription(),
+                            dirSeqRoot,
+                            form.getSequenceDBPath(),
+                            form.getSequenceDBs(),
+                            form.getConfigureXml());
+                    
+                    protocol.setEmail(getUser().getEmail());
                     protocol.validate(uriRoot);
                     if (form.isSaveProtocol())
                     {
@@ -486,12 +290,53 @@ public class PipelineController extends ViewController
                     }
                 }
 
-                MS2PipelineManager.runAnalysis(info,
-                        uriRoot,
-                        uriData,
-                        sequenceRoot,
-                        protocol,
-                        form.getSearchEngine());
+                File[] annotatedFiles = MS2PipelineManager.getAnalysisFiles(dirData, dirAnalysis, FileStatus.ANNOTATED, c);
+                File[] unprocessedFile = MS2PipelineManager.getAnalysisFiles(dirData, dirAnalysis, FileStatus.UNKNOWN, c);
+                List<File> mzXMLFileList = new ArrayList<File>();
+                mzXMLFileList.addAll(Arrays.asList(annotatedFiles));
+                mzXMLFileList.addAll(Arrays.asList(unprocessedFile));
+                File[] mzXMLFiles = mzXMLFileList.toArray(new File[mzXMLFileList.size()]);
+                if (mzXMLFiles.length == 0)
+                    throw new IllegalArgumentException("Analysis for this protocol is already complete.");
+
+                protocol.getFactory().ensureDefaultParameters(dirRoot);
+
+                File fileParameters = protocol.getParametersFile(dirData);
+                // Make sure configure.xml file exists for the job when it runs.
+                if (!fileParameters.exists())
+                {
+                    protocol.setEmail(info.getUser().getEmail());
+                    protocol.saveInstance(fileParameters, info.getContainer());
+                }
+
+                AbstractMS2SearchPipelineJob job =
+                        protocol.createPipelineJob(info, dirSeqRoot, mzXMLFiles, fileParameters, false);
+
+                boolean hasStatusFile = (job.getStatusFile() != job.getLogFile());
+
+                // If there are multiple files, and this is not a fractions job, or a Perl driven cluster
+                // will do the work, then create the single-file child jobs.
+                if (mzXMLFiles.length > 1)
+                {
+                    for (AbstractMS2SearchPipelineJob jobSingle : job.getSingleFileJobs())
+                    {
+                        // If fractions or for a Perl cluster, just create a placeholder for the status.
+                        if (job.isFractions() || hasStatusFile)
+                            jobSingle.setStatus(PipelineJob.WAITING_STATUS);
+                        else
+                            PipelineService.get().queueJob(jobSingle);
+                    }
+                }
+
+                // If this is a single file job, or a factions job, then it requires its own processing.
+                if (mzXMLFiles.length == 1 || job.isFractions())
+                {
+                    // If a Perl driven cluster will do the work, then just create a placeholder for the status.
+                    if (hasStatusFile)
+                        job.setStatus(PipelineJob.WAITING_STATUS);
+                    else
+                        PipelineService.get().queueJob(job);
+                }
 
                 // Forward to the job's container.
                 c = info.getContainer();
@@ -516,7 +361,7 @@ public class PipelineController extends ViewController
         }
 
         Map<File, FileStatus> mzXmlFileStatus =
-                MS2PipelineManager.getAnalysisFileStatus(uriData, protocolName, info.getContainer(), form.getSearchEngine());
+                MS2PipelineManager.getAnalysisFileStatus(dirData, dirAnalysis, info.getContainer());
         for (FileStatus status : mzXmlFileStatus.values())
         {
             // Look for unannotated data.
@@ -565,41 +410,26 @@ public class PipelineController extends ViewController
         }
 
         Map<String, String[]> sequenceDBs = new HashMap<String, String[]>();
-        // If the protocol is being loaded, then the user doesn't neet to pick a FASTA file,
+        // If the protocol is being loaded, then the user doesn't need to pick a FASTA file,
         // it will be part of the protocol.
         // CONSIDER: Should we check for the existence of the protocol's FASTA file, since
         //           it may have been deleted?
         if ("".equals(form.getProtocol()))
         {
-            sequenceDBs = MS2PipelineManager.getSequenceDBNames(sequenceRoot, form.getSearchEngine());
-            if (0 == sequenceDBs.size())
+            try
             {
-                if (null == error && "mascot".equalsIgnoreCase(form.getSearchEngine()))
-                {
-                    AppProps appProps = AppProps.getInstance();
-                    if (appProps.hasMascotServer())
-                    {
-                        MascotClientImpl mascotClient = new MascotClientImpl(appProps.getMascotServer(), null);
-                        mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
-                        String connectivityResult = mascotClient.testConnectivity(false);
-                        if ("".equals(connectivityResult))
-                            error = "Mascot server has no databases available for searching.";
-                        else
-                            error = connectivityResult;
-                    }
-                    else
-                    {
-                        error = "Mascot server has not been specified in site customization.";
-                    }
-                }
-                if (null == error && "sequest".equalsIgnoreCase(form.getSearchEngine()))
-                {
-                    error = "Sequest server has no databases available for searching.";
-                }
+                sequenceDBs = provider.getSequenceFiles(uriSeqRoot);
+                if (0 == sequenceDBs.size() && error == null)
+                    error = "No databases available for searching.";
+            }
+            catch (IOException e)
+            {
+                if (error == null)
+                    error = e.getMessage();
             }
         }
 
-        String[] protocolNames = searchProtocol.getProtocolNames(uriRoot);
+        String[] protocolNames = protocolFactory.getProtocolNames(uriRoot);
 
         HttpView v = new GroovyView("/org/labkey/ms2/pipeline/search.gm");
         v.addObject("error", error);
@@ -611,15 +441,7 @@ public class PipelineController extends ViewController
         v.addObject("creatingRuns", creatingRuns);
         v.addObject("container", c);
 
-        String searchEngine;
-        if ("sequest".equalsIgnoreCase(form.getSearchEngine()))
-            searchEngine = "Sequest";
-        else if("mascot".equalsIgnoreCase(form.getSearchEngine()))
-            searchEngine = "Mascot";
-        else
-            searchEngine = "XTandem";
-
-        return _renderInTemplate(v, "Search MS2 Data", "pipeline" + searchEngine);
+        return _renderInTemplate(v, "Search MS2 Data", provider.getHelpTopic());
     }
 
     @Jpf.Action
@@ -671,7 +493,37 @@ public class PipelineController extends ViewController
     }
 
 
-    public static class MascotDefaultsForm extends FormData
+    @Jpf.Action
+    protected Forward setMascotDefaults(SetDefaultsForm form) throws Exception
+    {
+        return setDefaults(form,
+                            MascotCPipelineProvider.name,
+                            "/org/labkey/ms2/pipeline/setMascotDefaults.gm",
+                            "Set Mascot Defaults",
+                            "MS2-Pipeline/setMascotDefaults");
+    }
+
+    @Jpf.Action
+    protected Forward setTandemDefaults(SetDefaultsForm form) throws Exception
+    {
+        return setDefaults(form,
+                XTandemCPipelineProvider.name,
+                            "/org/labkey/ms2/pipeline/setTandemDefaults.gm",
+                            "Set X! Tandem Defaults",
+                            "MS2-Pipeline/setTandemDefaults");
+    }
+
+    @Jpf.Action
+    protected Forward setSequestDefaults(SetDefaultsForm form) throws Exception
+    {
+        return setDefaults(form,
+                            SequestLocalPipelineProvider.name,
+                            "/org/labkey/ms2/pipeline/setSequestDefaults.gm",
+                            "Set Sequest Defaults",
+                            "MS2-Pipeline/setSequestDefaults");
+    }
+    
+    public static class SetDefaultsForm extends FormData
     {
         private String configureXml;
 
@@ -686,21 +538,28 @@ public class PipelineController extends ViewController
         }
     }
 
-    @Jpf.Action
-    protected Forward setMascotDefaults(MascotDefaultsForm form) throws Exception
+    protected Forward setDefaults(SetDefaultsForm form, String providerName, String gmResource,
+                                  String title, String helpTopic) throws Exception
     {
         requiresPermission(ACL.PERM_INSERT);
 
         Container c = getContainer();
 
-        URI uriRoot = PipelineService.get().getPipelineRootSetting(c);
+        File dirRoot = new File(PipelineService.get().getPipelineRootSetting(c));
+
+        MS2SearchPipelineProvider provider = (MS2SearchPipelineProvider)
+                PipelineService.get().getPipelineProvider(providerName);
 
         String error = "";
-        if ("POST".equalsIgnoreCase(getRequest().getMethod()))
+        if (!"POST".equalsIgnoreCase(getRequest().getMethod()))
+        {
+            form.setConfigureXml(provider.getProtocolFactory().getDefaultParametersXML(dirRoot));
+        }
+        else
         {
             try
             {
-                MS2PipelineManager.setDefaultInputXML(uriRoot, form.getConfigureXml(), "mascot");
+                provider.getProtocolFactory().setDefaultParametersXML(dirRoot, form.getConfigureXml());
             }
             catch (IllegalArgumentException ea)
             {
@@ -723,144 +582,11 @@ public class PipelineController extends ViewController
                 HttpView.throwRedirect(ViewURLHelper.toPathString("Project", "begin", c.getPath()));
             }
         }
-        else
-        {
-//TODO: need to get the default based on the engine!
-//      so, MS2PipelineManager will need to get additional parameters
-            form.setConfigureXml(MS2PipelineManager.getDefaultInputXML(uriRoot, "mascot"));
-        }
 
-        HttpView v = new GroovyView("/org/labkey/ms2/pipeline/setMascotDefaults.gm");
+        HttpView v = new GroovyView(gmResource);
         v.addObject("error", error);
         v.addObject("form", form);
-        return _renderInTemplate(v, "Set Mascot Defaults", "MS2-Pipeline/setMascotDefaults");
-    }
-
-    public static class TandemDefaultsForm extends FormData
-    {
-        private String configureXml;
-
-        public String getConfigureXml()
-        {
-            return configureXml;
-        }
-
-        public void setConfigureXml(String configureXml)
-        {
-            this.configureXml = configureXml;
-        }
-    }
-
-    @Jpf.Action
-    protected Forward setTandemDefaults(TandemDefaultsForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_INSERT);
-
-        Container c = getContainer();
-
-        URI uriRoot = PipelineService.get().getPipelineRootSetting(c);
-
-        String error = "";
-        if ("POST".equalsIgnoreCase(getRequest().getMethod()))
-        {
-            try
-            {
-                MS2PipelineManager.setDefaultInputXML(uriRoot, form.getConfigureXml(), "X!Tandem");
-            }
-            catch (IllegalArgumentException ea)
-            {
-                error = ea.getMessage();
-            }
-            catch (FileNotFoundException efnf)
-            {
-                if (efnf.getMessage().indexOf("Access") != -1)
-                    error = "Access denied attempting to write defaults. Contact the server administrator.";
-                else
-                    error = "Failure attempting to write defaults.  Please try again.";
-            }
-            catch (IOException eio)
-            {
-                error = "Failure attempting to write defaults.  Please try again.";
-            }
-
-            if (error.length() == 0)
-            {
-                HttpView.throwRedirect(ViewURLHelper.toPathString("Project", "begin", c.getPath()));
-            }
-        }
-        else
-        {
-            form.setConfigureXml(MS2PipelineManager.getDefaultInputXML(uriRoot, "X!Tandem"));
-        }
-
-        HttpView v = new GroovyView("/org/labkey/ms2/pipeline/setTandemDefaults.gm");
-        v.addObject("error", error);
-        v.addObject("form", form);
-        return _renderInTemplate(v, "Set X!Tandem Defaults", "MS2-Pipeline/setTandemDefaults");
-    }
-    public static class SequestDefaultsForm extends FormData
-    {
-        private String configureXml;
-
-        public String getConfigureXml()
-        {
-            return configureXml;
-        }
-
-        public void setConfigureXml(String configureXml)
-        {
-            this.configureXml = configureXml;
-        }
-    }
-
-    @Jpf.Action
-    protected Forward setSequestDefaults(SequestDefaultsForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_INSERT);
-
-        Container c = getContainer();
-
-        URI uriRoot = PipelineService.get().getPipelineRootSetting(c);
-
-        String error = "";
-        if ("POST".equalsIgnoreCase(getRequest().getMethod()))
-        {
-            try
-            {
-                MS2PipelineManager.setDefaultInputXML(uriRoot, form.getConfigureXml(), "sequest");
-            }
-            catch (IllegalArgumentException ea)
-            {
-                error = ea.getMessage();
-            }
-            catch (FileNotFoundException efnf)
-            {
-                if (efnf.getMessage().indexOf("Access") != -1)
-                    error = "Access denied attempting to write defaults. Contact the server administrator.";
-                else
-                    error = "Failure attempting to write defaults.  Please try again.";
-            }
-            catch (IOException eio)
-            {
-                error = "Failure attempting to write defaults.  Please try again.";
-            }
-
-            if (error.length() == 0)
-            {
-                HttpView.throwRedirect(ViewURLHelper.toPathString("Project", "begin", c.getPath()));
-            }
-        }
-        else
-        {
-//wch: mascotdev
-            form.setConfigureXml(MS2PipelineManager.getDefaultInputXML(uriRoot, "sequest"));
-//END-wch: mascotdev
-        }
-
-        HttpView v = new GroovyView("/org/labkey/ms2/pipeline/setSequestDefaults.gm");
-        v.addObject("error", error);
-        v.addObject("form", form);
-        return _renderInTemplate(v, "Set Sequest Defaults", "MS2-Pipeline/setSequestDefaults");
+        return _renderInTemplate(v, title, helpTopic);
     }
 
     public static class SequenceDBForm extends FormData
@@ -1170,8 +896,9 @@ public class PipelineController extends ViewController
 
         ViewBackgroundInfo info =
                 PipelineService.get().getJobBackgroundInfo(getViewBackgroundInfo(), new File(uriData));
+
         Map<File, FileStatus> mzXmlFileStatus =
-            MS2PipelineManager.getAnalysisFileStatus(uriData, null, info.getContainer(), form.getSearchEngine ());
+            MS2PipelineManager.getAnalysisFileStatus(new File(uriData), null, info.getContainer());
         String[] protocolNames = MassSpecProtocolFactory.get().getProtocolNames(uriRoot);
 
         String protocolSharing = form.getProtocolSharing();
@@ -1409,7 +1136,7 @@ public class PipelineController extends ViewController
                 runInfo.setRunFileName(form.getFileNames()[i]);
 
                 File mzXMLFile = new File(dirData, form.getFileNames()[i]);
-                String baseName = MS2PipelineManager.getBaseName(mzXMLFile);
+                String baseName = FileUtil.getBaseName(mzXMLFile);
 
                 // quick hack to get the search to go forward.
                 if ("fractions".equals(form.getProtocolSharing()))
@@ -1456,7 +1183,7 @@ public class PipelineController extends ViewController
 
     public static class MS2ExperimentForm extends ViewForm
     {
-        private String searchEngine = "X!Tandem";
+        private String searchEngine = XTandemCPipelineProvider.name;
         private String path = "";
         private String protocolSharing;
         private String sharedProtocol;

@@ -48,15 +48,15 @@ import org.labkey.ms2.compare.CompareExcelWriter;
 import org.labkey.ms2.compare.CompareQuery;
 import org.labkey.ms2.compare.RunColumn;
 import org.labkey.ms2.peptideview.*;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
-import org.labkey.ms2.pipeline.MascotClientImpl;
-import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
-import org.labkey.ms2.pipeline.SequestClientImpl;
+import org.labkey.ms2.pipeline.*;
 import org.labkey.ms2.protein.*;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
+import org.labkey.ms2.protocol.MascotSearchProtocolFactory;
+import org.labkey.ms2.protocol.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.protocol.MS2SearchPipelineProtocol;
 import org.labkey.ms2.query.*;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
@@ -1566,8 +1566,8 @@ public class MS2Controller extends ViewController
                 PipelineService service = PipelineService.get();
                 ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), f);
 
-//wch:mascotdev
-                boolean mascotFile = "mascot".equalsIgnoreCase(MS2PipelineManager.getSearchEngine (new File(form.getFileName())));
+                // TODO: Clean this up.
+                boolean mascotFile = MascotSearchProtocolFactory.get().equals(AbstractMS2SearchProtocolFactory.fromFile(f));
                 int run;
                 if (mascotFile)
                 {
@@ -1579,7 +1579,7 @@ public class MS2Controller extends ViewController
                     run = MS2Manager.addRunToQueue(info,
                             f, form.getDescription(), false).getRunId();
                 }
-//END-wch:mascotdev
+
                 if (run == -1)
                     return HttpView.throwNotFound();
 
@@ -1611,7 +1611,7 @@ public class MS2Controller extends ViewController
                     // Make sure container exists.
                     c = ContainerManager.ensureContainer(getViewURLHelper().getExtraPath());
                     if (null == c)
-                        HttpView.throwNotFound();
+                        return HttpView.throwNotFound();
 
                     PipelineService service = PipelineService.get();
                     PipeRoot pr = service.findPipelineRoot(c);
@@ -1619,17 +1619,49 @@ public class MS2Controller extends ViewController
                         return HttpView.throwUnauthorized();
 
                     ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), f);
-    //wch:mascotdev
-                    PipelineJob job = MS2PipelineManager.runUpload(info,
-    //END-wch:mascotdev
-                            pr.getUri(c),
-                            new File(form.getDataDir()).toURI(),
-                            MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer()),
-                            form.getProtocol(),
-                            f);
-
-                    if (job == null)
+                    String protocolName = form.getProtocol();
+                    File dirData = new File(form.getDataDir());
+                    if (!NetworkDrive.exists(dirData))
                         return HttpView.throwNotFound();
+
+                    AbstractMS2SearchProtocolFactory protocolFactory = AbstractMS2SearchProtocolFactory.fromFile(f);
+
+                    File dirSeqRoot = new File(MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer()));
+                    File dirAnalysis = protocolFactory.getAnalysisDir(dirData, protocolName);
+                    File fileParameters = protocolFactory.getParametersFile(dirData, protocolName);
+                    String baseName = FileUtil.getBaseName(f, 2);
+
+                    File[] filesMzXML;
+                    if (!"all".equals(baseName))
+                    {
+                        filesMzXML = new File[] { MS2PipelineManager.getMzXMLFile(dirData, baseName) };
+                    }
+                    else
+                    {
+                        // Anything that is running or complete.
+                        Map<File, FileStatus> mzXMLFileStatus = MS2PipelineManager.getAnalysisFileStatus(dirData, dirAnalysis, info.getContainer());
+                        List<File> fileList = new ArrayList<File>();
+                        for (File fileMzXML : mzXMLFileStatus.keySet())
+                        {
+                            FileStatus status = mzXMLFileStatus.get(fileMzXML);
+                            if (status.equals(FileStatus.COMPLETE) || status.equals(FileStatus.RUNNING))
+                                fileList.add(fileMzXML);
+                        }
+                        filesMzXML = fileList.toArray(new File[fileList.size()]);
+
+                        if (filesMzXML.length == 0)
+                            return HttpView.throwNotFound();
+                    }
+
+                    MS2SearchPipelineProtocol protocol = protocolFactory.loadInstance(fileParameters);
+
+                    PipelineJob job = protocol.createPipelineJob(info,
+                            dirSeqRoot,
+                            filesMzXML,
+                            fileParameters,
+                            true);
+
+                    PipelineService.get().queueJob(job);
 
                     url = new ViewURLHelper("MS2", "addFileRunStatus", "");
                     url.addParameter("path", job.getLogFile().getAbsolutePath());

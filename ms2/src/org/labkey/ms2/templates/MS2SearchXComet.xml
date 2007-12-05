@@ -131,7 +131,7 @@
 		<exp:Data rdf:about="${AutoFileLSID}">
 			<exp:Name>Tandem Settings</exp:Name>
 			<exp:CpasType>Data</exp:CpasType>
-			<exp:DataFileUrl>@@TANDEM_XML_FILE_PATH@@</exp:DataFileUrl>
+			<exp:DataFileUrl>@@INPUT_XML_FILE_PATH@@</exp:DataFileUrl>
 		</exp:Data>
 @@PROTEIN_DATABASES@@
 	</exp:StartingInputDefinitions>
@@ -146,7 +146,7 @@
                     <exp:ApplicationInstanceCollection>
                         <exp:InstanceDetails>
                             <exp:InstanceInputs>
-                                <exp:DataLSID DataFileUrl="@@TANDEM_XML_FILE_PATH@@" RoleName="SearchConfig">${AutoFileLSID}</exp:DataLSID>
+                                <exp:DataLSID DataFileUrl="@@INPUT_XML_FILE_PATH@@" RoleName="SearchConfig">${AutoFileLSID}</exp:DataLSID>
 @@PROTEIN_DATABASE_DATALSIDS@@
 @@MZXML_DATALSIDS@@
                             </exp:InstanceInputs>
@@ -159,7 +159,7 @@
                         <exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">X!Tandem Database Search</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${RunLSIDBase}:XTanFile</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">XTandem Search Results</exp:SimpleVal>
-                        <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@XTAN_XML_FILE_PATH@@</exp:SimpleVal>
+                        <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@SEARCH_OUTPUT_FILE_PATH@@</exp:SimpleVal>
                     </exp:CommonParametersApplied>
                   </exp:ExperimentLogEntry>
                 <exp:ExperimentLogEntry ActionSequenceRef="60">

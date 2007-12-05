@@ -15,15 +15,11 @@
  */
 package org.labkey.ms2.protocol;
 
-import org.labkey.api.pipeline.PipelineProtocolFactory;
-import org.labkey.api.util.XMLValidationParser;
+import org.labkey.api.util.AppProps;
+import org.labkey.ms2.pipeline.BioMLInputParser;
 import org.labkey.ms2.pipeline.MascotInputParser;
 
-import java.net.URI;
-import java.io.IOException;
 import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
 
 /**
  * MascotSearchProtocolFactory class
@@ -32,7 +28,7 @@ import java.io.FileReader;
  *
  * @author bmaclean
  */
-public class MascotSearchProtocolFactory extends PipelineProtocolFactory<MascotSearchProtocol>
+public class MascotSearchProtocolFactory extends AbstractMS2SearchProtocolFactory<MascotSearchProtocol>
 {
     public static MascotSearchProtocolFactory instance = new MascotSearchProtocolFactory();
 
@@ -46,81 +42,35 @@ public class MascotSearchProtocolFactory extends PipelineProtocolFactory<MascotS
         return "mascot";
     }
 
-    public MascotSearchProtocol load(URI uriRoot, String name) throws IOException
+    public String getDefaultParametersResource()
     {
-        return loadInstance(getProtocolFile(uriRoot, name));
+        return "org/labkey/ms2/pipeline/MascotDefaults.xml";
     }
 
-    public MascotSearchProtocol loadInstance(File file) throws IOException
+    public BioMLInputParser createInputParser()
     {
-        BufferedReader inputReader = null;
-        StringBuffer xmlBuffer = new StringBuffer();
-        try
-        {
-            inputReader = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = inputReader.readLine()) != null)
-                xmlBuffer.append(line).append("\n");
-        }
-        catch (IOException eio)
-        {
-            throw new IOException("Failed to load protocol file '" + file + "'.");
-        }
-        finally
-        {
-            if (inputReader != null)
-            {
-                try
-                {
-                    inputReader.close();
-                }
-                catch (IOException eio)
-                {
-                }
-            }
-        }
+        return new MascotInputParser();
+    }
 
-        MascotInputParser parser = new MascotInputParser();
-        parser.parse(xmlBuffer.toString());
-        if (parser.getErrors() != null)
-        {
-            XMLValidationParser.Error err = parser.getErrors()[0];
-            if (err.getLine() == 0)
-            {
-                throw new IOException("Failed parsing Mascot input xml '" + file + "'.\n" +
-                        err.getMessage());
-            }
-            else
-            {
-                throw new IOException("Failed parsing Mascot input xml '" + file + "'.\n" +
-                        "Line " + err.getLine() + ": " + err.getMessage());
-            }
-        }
+    public MascotSearchProtocol createProtocolInstance(String name, String description, String[] dbNames, String xml)
+    {
+        return new MascotSearchProtocol(name, description, dbNames, xml);
+    }
 
-//TODO: WCH-check that we are using the same parameters set
-        // Remove the pipeline specific parameters.
-        String name = parser.removeInputParameter("pipeline, protocol name");
-        String description = parser.removeInputParameter("pipeline, protocol description");
-        String folder = parser.removeInputParameter("pipeline, load folder");
-        String databases = parser.removeInputParameter("pipeline, database");
-        String email = parser.removeInputParameter("pipeline, email address");
-        String mascotServer = parser.removeInputParameter("pipeline, mascot server");
-        String mascotHTTPProxy = parser.removeInputParameter("pipeline, mascot http proxy");
+    public MascotSearchProtocol createProtocolInstance(String name, String description, File dirSeqRoot,
+                                                       String dbPath, String[] dbNames, String xml)
+    {
+        AppProps appProps = AppProps.getInstance();
+        String mascotServer = appProps.getMascotServer();
+        String mascotHTTPProxy = appProps.getMascotHTTPProxy();
+        if (!appProps.hasMascotServer() || 0 == mascotServer.length())
+            throw new IllegalArgumentException("Mascot server has not been specified in site customization.");
 
-        // Remove the parameters set in the pipeline job.
-        parser.removeInputParameter("list path, default parameters");
-        parser.removeInputParameter("list path, taxonomy information");
-        parser.removeInputParameter("protein, taxon");
-        parser.removeInputParameter("spectrum, path");
-        parser.removeInputParameter("output, path");
-//END-TODO: WCH-check that we are using the same parameters set
+        MascotSearchProtocol protocol = createProtocolInstance(name,
+                description, dbNames, xml);
 
-        String[] dbNames = databases.split(";");
-
-        MascotSearchProtocol instance = new MascotSearchProtocol(name, description, dbNames, parser.getXML());
-        instance.setEmail(email);
-        instance.setMascotServer(mascotServer);
-        instance.setMascotHTTPProxy(mascotHTTPProxy);
-        return instance;
+        protocol.setMascotServer(mascotServer);
+        protocol.setMascotHTTPProxy(mascotHTTPProxy);
+        return protocol;
     }
 }

@@ -1,18 +1,22 @@
 package org.labkey.ms2.protocol;
 
+import org.apache.log4j.Logger;
+import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.XMLValidationParser;
-import org.labkey.ms2.pipeline.MascotInputParser;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.BioMLInputParser;
-import org.apache.log4j.Logger;
 
-import java.net.URI;
-import java.io.IOException;
-import java.io.File;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URI;
+import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -96,11 +100,29 @@ public abstract class MS2SearchPipelineProtocol extends PipelineProtocol
         this.email = email;
     }
 
-    protected abstract BioMLInputParser createInputParser();
+    public abstract AbstractMS2SearchProtocolFactory getFactory();
+
+    public File getAnalysisDir(File dirData)
+    {
+        return getFactory().getAnalysisDir(dirData, getName());
+    }
+
+    public File getParametersFile(File dirData)
+    {
+        return getFactory().getParametersFile(dirData, getName());
+    }
 
     public void saveDefinition(URI uriRoot) throws IOException
     {
         save(getFactory().getProtocolFile(uriRoot, getName()), null);
+    }
+
+    public void saveInstance(File file, Container c) throws IOException
+    {
+        Map<String, String> addParams = new HashMap<String, String>();
+        addParams.put("pipeline, load folder", c.getPath());
+        addParams.put("pipeline, email address", email);
+        save(file, addParams);
     }
 
     protected void save(File file, Map<String, String> addParams) throws IOException
@@ -112,7 +134,7 @@ public abstract class MS2SearchPipelineProtocol extends PipelineProtocol
                     "</bioml>";
         }
 
-        BioMLInputParser parser = new MascotInputParser();
+        BioMLInputParser parser = getFactory().createInputParser();
         parser.parse(xml);
         if (parser.getErrors() != null)
         {
@@ -174,4 +196,11 @@ public abstract class MS2SearchPipelineProtocol extends PipelineProtocol
             }
         }
     }
+
+    public abstract AbstractMS2SearchPipelineJob createPipelineJob(ViewBackgroundInfo info,
+                                                                   File dirSequenceRoot,
+                                                                   File[] mzXMLFiles,
+                                                                   File fileParameters,
+                                                                   boolean fromCluster)
+            throws SQLException, IOException;
 }

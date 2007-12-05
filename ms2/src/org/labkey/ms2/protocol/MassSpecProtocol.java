@@ -15,22 +15,23 @@
  */
 package org.labkey.ms2.protocol;
 
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.exp.*;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.exp.api.ExpSampleSet;
-import org.fhcrc.cpas.exp.xml.*;
-import org.labkey.api.pipeline.PipelineProtocol;
+import org.apache.commons.beanutils.ConversionException;
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlException;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.beanutils.ConversionException;
+import org.fhcrc.cpas.exp.xml.*;
+import org.labkey.api.exp.PropertyType;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.pipeline.PipelineProtocol;
+import org.labkey.api.util.PageFlowUtil;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.util.*;
 
 /**
  * MassSpecProtocol class

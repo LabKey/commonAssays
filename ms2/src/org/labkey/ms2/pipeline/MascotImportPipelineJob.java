@@ -1,11 +1,13 @@
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.PipelineJob;
+import org.apache.commons.io.FileUtils;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Importer;
-import org.labkey.api.util.NetworkDrive;
 
 import java.io.*;
 import java.sql.SQLException;
@@ -22,7 +24,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
                                 MS2Importer.RunInfo runInfo, boolean appendLog) throws SQLException
     {
         super(info,
-            MS2PipelineManager.getPepXMLFile(file.getParentFile(), MS2PipelineManager.getBaseName(file))
+            TPPTask.getPepXMLFile(file.getParentFile(), FileUtil.getBaseName(file))
             , description, runInfo, appendLog);
         _file = file;
     }
@@ -67,7 +69,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
         setStatus("TRANSLATING");
 
         String _dirAnalysis = _file.getParent();
-        String _baseName = MS2PipelineManager.getBaseName(_file);
+        String _baseName = FileUtil.getBaseName(_file);
         File dirWork = new File(_dirAnalysis, _baseName + ".import.work");
         File workFile = new File(dirWork.getAbsolutePath(), _file.getName());
 
@@ -92,7 +94,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
 
             try
             {
-                MS2PipelineManager.copyFile (_file, workFile);
+                FileUtils.copyFile(_file, workFile);
             }
             catch (IOException x)
             {
@@ -102,8 +104,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
 
             // let's convert Mascot .dat to .pep.xml
             // via Mascot2XML.exe <input.dat> -D<database> -xml
-            header("Mascot2XML output");
-            int iReturn = runSubProcess(new ProcessBuilder("Mascot2XML"
+            runSubProcess(new ProcessBuilder("Mascot2XML"
                     ,workFile.getName()
                     ,"-D" + fileSequenceDatabase.getAbsolutePath()
                     ,"-xml"
@@ -115,7 +116,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
 
             // we let any error fall thru' to super.run() so that
             // MS2Run's status get updated correctly
-            if (iReturn != 0 || !fileOutputTGZ.exists() || !fileOutputXML.exists())
+            if (!fileOutputTGZ.exists() || !fileOutputXML.exists())
             {
                 getLogger().error("Failed running Mascot2XML.");
                 return;

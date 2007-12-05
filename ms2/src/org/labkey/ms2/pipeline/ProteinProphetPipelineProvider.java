@@ -2,10 +2,10 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.util.FileUtil;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.List;
 
 /**
@@ -38,10 +38,10 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
     {
         public boolean accept(File f)
         {
-            if (MS2PipelineManager.isProtXMLFile(f))
+            if (TPPTask.isProtXMLFile(f))
             {
                 File parent = f.getParentFile();
-                String basename = MS2PipelineManager.getBaseName(f, 2);
+                String basename = FileUtil.getBaseName(f, 2);
                 
                 return !fileExists(MS2PipelineManager.getSearchExperimentFile(parent, basename));
             }

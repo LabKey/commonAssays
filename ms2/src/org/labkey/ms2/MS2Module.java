@@ -126,12 +126,10 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
     {
         PipelineService service = PipelineService.get();
         service.registerPipelineProvider(new MS2PipelineProvider());
-        service.registerPipelineProvider(new XTandemLocalPipelineProvider());
-        service.registerPipelineProvider(new XTandemCPipelineProvider());
+        service.registerPipelineProvider(new XTandemCPipelineProvider(), "X!Tandem (Cluster)");
         service.registerPipelineProvider(new CometCPipelineProvider());
         service.registerPipelineProvider(new SequestLocalPipelineProvider());
-        service.registerPipelineProvider(new MascotLocalPipelineProvider());
-        service.registerPipelineProvider(new MascotCPipelineProvider());
+        service.registerPipelineProvider(new MascotCPipelineProvider(), "Mascot (Cluster)");
 
         service.registerPipelineProvider(new InspectCPipelineProvider());
         service.registerPipelineProvider(new ProteinProphetPipelineProvider());

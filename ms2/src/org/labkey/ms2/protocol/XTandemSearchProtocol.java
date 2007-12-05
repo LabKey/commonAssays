@@ -16,15 +16,13 @@
 package org.labkey.ms2.protocol;
 
 import org.apache.log4j.Logger;
-import org.labkey.ms2.pipeline.BioMLInputParser;
-import org.labkey.ms2.pipeline.XTandemInputParser;
-import org.labkey.api.pipeline.PipelineProtocolFactory;
-import org.labkey.api.data.Container;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
+import org.labkey.ms2.pipeline.XTandemPipelineJob;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.SQLException;
 
 /**
  * XTandemSearchProtocol class
@@ -42,22 +40,18 @@ public class XTandemSearchProtocol extends MS2SearchPipelineProtocol
         super(name, description, dbNames, xml);
     }
 
-    public PipelineProtocolFactory getFactory()
+    public AbstractMS2SearchProtocolFactory getFactory()
     {
         return XTandemSearchProtocolFactory.get();
     }
 
-    public void saveInstance(File file, Container c) throws IOException
+    public AbstractMS2SearchPipelineJob createPipelineJob(ViewBackgroundInfo info,
+                                                          File dirSequenceRoot,
+                                                          File[] mzXMLFiles,
+                                                          File fileParameters,
+                                                          boolean fromCluster)
+            throws SQLException, IOException
     {
-        Map<String, String> addParams = new HashMap<String, String>();
-        addParams.put("pipeline, load folder", c.getPath());
-        addParams.put("pipeline, email address", email);
-        save(file, addParams);
-    }
-
-
-    protected BioMLInputParser createInputParser()
-    {
-        return new XTandemInputParser();
+        return new XTandemPipelineJob(info, getName(), dirSequenceRoot, mzXMLFiles, fileParameters, fromCluster);
     }
 }

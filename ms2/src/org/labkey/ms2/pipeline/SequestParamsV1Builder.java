@@ -1,6 +1,7 @@
 package org.labkey.ms2.pipeline;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 /**
@@ -10,7 +11,7 @@ import java.util.StringTokenizer;
  */
 public class SequestParamsV1Builder extends SequestParamsBuilder{
 
-    public SequestParamsV1Builder(SequestInputParser sequestInputParser, URI uriSequenceRoot)
+    public SequestParamsV1Builder(Map<String, String> sequestInputParser, URI uriSequenceRoot)
     {
         super(sequestInputParser, uriSequenceRoot);
 
@@ -68,7 +69,7 @@ public class SequestParamsV1Builder extends SequestParamsBuilder{
         String cleavageSites;
         String cleavageBlockers = "-";
         String offset;
-        String enzyme = sequestInputParser.getInputParameter("protein, cleavage site");
+        String enzyme = sequestInputParams.get("protein, cleavage site");
         if (enzyme == null) return parserError;
         if (enzyme.equals(""))
         {

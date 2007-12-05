@@ -23,6 +23,8 @@ import java.io.*;
  */
 public class SequestClientImpl implements SearchClient
 {
+    private static Logger _log = Logger.getLogger(SequestClientImpl.class);
+    
     private Logger _instanceLogger = null;
     private String _url;
     private int errorCode = 0;
@@ -33,35 +35,33 @@ public class SequestClientImpl implements SearchClient
 
     public SequestClientImpl(String url)
     {
-        this(url, Logger.getLogger("null"));
+        this(url, null);
     }
 
     public SequestClientImpl(String url, Logger instanceLogger)
     {
         _url = url;
-        if(instanceLogger == null) _instanceLogger = Logger.getLogger(SequestClientImpl.class);
-        else _instanceLogger = instanceLogger;        
-        _instanceLogger = instanceLogger;
+        _instanceLogger = (instanceLogger == null ? _log : instanceLogger);
         errorCode = 0;
         errorString = "";
     }
 
-    public int getErrorCode ()
+    public int getErrorCode()
     {
         return errorCode;
     }
 
-    public String getErrorString ()
+    public String getErrorString()
     {
         return errorString;
     }
 
-    public boolean setProxyURL (String proxyURL)
+    public boolean setProxyURL(String proxyURL)
     {
         return false;
     }
 
-    public String testConnectivity ()
+    public String testConnectivity()
     {
         // to test and report connectivity problem
         errorCode = 0;
@@ -170,7 +170,7 @@ public class SequestClientImpl implements SearchClient
         }
     }
 
-    public String startSession ()
+    public String startSession()
     {
         findWorkableSettings();
 
@@ -180,7 +180,7 @@ public class SequestClientImpl implements SearchClient
             return "";
     }
 
-    private String startSessionInternal ()
+    private String startSessionInternal()
     {
         Properties results;
 
@@ -736,7 +736,7 @@ public class SequestClientImpl implements SearchClient
 
         Properties results = new Properties();
         String sequestRequestURL = requestURL(parameters);
-        _instanceLogger.info("Submitting URL '" + sequestRequestURL + "'.");
+        _instanceLogger.debug("Submitting URL '" + sequestRequestURL + "'.");
         try
         {
             URL sequestURL = new URL(sequestRequestURL);
@@ -753,7 +753,12 @@ public class SequestClientImpl implements SearchClient
         }
         catch (MalformedURLException x)
         {
-            _instanceLogger.error("Exception "+x.getClass()+" connect("+ _url + ")=" + sequestRequestURL);
+            // If using the class logger, then assume user interface will deliver the error message.
+            String msg = "Exception "+x.getClass()+" connect("+ _url + ")=" + sequestRequestURL;
+            if (_instanceLogger == _log)
+                _instanceLogger.debug(msg);
+            else
+                _instanceLogger.error(msg);
             errorCode = 1;
             errorString = "Fail to parse Sequest Server URL: " + x.getMessage();
             results.setProperty("error", "1");
@@ -761,7 +766,12 @@ public class SequestClientImpl implements SearchClient
         }
         catch (Exception x)
         {
-            _instanceLogger.error("Exception "+x.getClass()+" connect("+_url+"," + ")=" + sequestRequestURL);
+            // If using the class logger, then assume user interface will deliver the error message.
+            String msg = "Exception "+x.getClass()+" connect("+_url+"," + ")=" + sequestRequestURL;
+            if (_instanceLogger == _log)
+                _instanceLogger.debug(msg);
+            else
+                _instanceLogger.error(msg);
             errorCode = 2;
             errorString = "Failed to interact with SequestQueue application: " + x.getMessage();
             results.setProperty("error", "2");
