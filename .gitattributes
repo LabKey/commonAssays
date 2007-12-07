@@ -440,6 +440,7 @@ luminex/src/org/labkey/luminex/LuminexRunUploadForm.java -text
 luminex/src/org/labkey/luminex/LuminexSchema.java -text
 luminex/src/org/labkey/luminex/LuminexUploadWizardAction.java -text
 luminex/src/org/labkey/luminex/LuminexWell.java -text
+mousemodels/lib/velocity.jar -text
 mousemodels/module.properties -text
 mousemodels/src/META-INF/mousemodels/scripts/postgresql/mousemod-0.80-1.30.sql -text
 mousemodels/src/META-INF/mousemodels/scripts/postgresql/mousemod-1.50-1.60.sql -text
@@ -695,10 +696,8 @@ ms2/src/org/labkey/ms2/PepXmlExperimentDataHandler.java -text
 ms2/src/org/labkey/ms2/PepXmlImporter.java -text
 ms2/src/org/labkey/ms2/PeptideProphetGraphs.java -text
 ms2/src/org/labkey/ms2/PhenyxRun.java -text
-ms2/src/org/labkey/ms2/PiesliceDetailListHeader.vm -text
 ms2/src/org/labkey/ms2/PklSpectrumRenderer.java -text
 ms2/src/org/labkey/ms2/PlainTextRenderer.java -text
-ms2/src/org/labkey/ms2/ProtAnnots.vm -text
 ms2/src/org/labkey/ms2/Protein.java -text
 ms2/src/org/labkey/ms2/ProteinDisplayColumn.java -text
 ms2/src/org/labkey/ms2/ProteinGroupProteins.java -text
@@ -740,7 +739,7 @@ ms2/src/org/labkey/ms2/manageViews.jsp -text
 ms2/src/org/labkey/ms2/modifications.gm -text
 ms2/src/org/labkey/ms2/ms2Admin.jsp -text
 ms2/src/org/labkey/ms2/nestedGridScript.gm -text
-ms2/src/org/labkey/ms2/peptideChart.vm -text
+ms2/src/org/labkey/ms2/peptideChart.jsp -text
 ms2/src/org/labkey/ms2/peptideview/AbstractLegacyProteinMS2RunView.java -text
 ms2/src/org/labkey/ms2/peptideview/AbstractMS2RunView.java -text
 ms2/src/org/labkey/ms2/peptideview/AbstractProteinDataRegion.java -text
@@ -850,7 +849,8 @@ ms2/src/org/labkey/ms2/pipeline/search.gm -text
 ms2/src/org/labkey/ms2/pipeline/setMascotDefaults.gm -text
 ms2/src/org/labkey/ms2/pipeline/setSequestDefaults.gm -text
 ms2/src/org/labkey/ms2/pipeline/setTandemDefaults.gm -text
-ms2/src/org/labkey/ms2/protein.vm -text
+ms2/src/org/labkey/ms2/protAnnots.jsp -text
+ms2/src/org/labkey/ms2/protein.jsp -text
 ms2/src/org/labkey/ms2/protein/AnnotationLoader.java -text
 ms2/src/org/labkey/ms2/protein/AnnotationUploadManager.java -text
 ms2/src/org/labkey/ms2/protein/CharactersParseActions.java -text

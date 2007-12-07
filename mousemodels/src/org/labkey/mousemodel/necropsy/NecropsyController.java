@@ -17,6 +17,7 @@
 package org.labkey.mousemodel.necropsy;
 
 import org.labkey.mousemodel.MouseModelController;
+import org.labkey.mousemodel.VelocityView;
 import org.labkey.mousemodel.MouseModelController.MouseModelForm;
 import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
 import org.apache.beehive.netui.pageflow.Forward;
@@ -100,16 +101,6 @@ public class NecropsyController extends ViewController
         formView.addObject("collectionDate", formatDate());
         formView.setTitle("Add Forms");
 
-        /*
-        VelocityView selectBoxView = new VelocityView("/org/labkey/mousemodel/necropsy/selectBox.vm");
-        BoxForm boxForm = new BoxForm();
-        boxForm.reset(null, getRequest());
-        boxForm.setModelId((Integer) form.getTypedValue("modelId"));
-        selectBoxView.addObject("form", boxForm);
-        boxForm.setInputMode(true);
-        selectBoxView.addObject("freezers", MouseSchema.freezer.getSelectList());
-        selectBoxView.setTitle("Fill Box");
-        */
         DataRegion drTasks = new DataRegion();
         drTasks.setShowRecordSelectors(true);
         ButtonBar bb = new ButtonBar();

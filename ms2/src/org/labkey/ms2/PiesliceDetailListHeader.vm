@@ -1,7 +1,0 @@
-<font size="+1">
-#if($sliceDefinition.length() > 0)
-$!sliceDefinition
-#else
-Miscellaneous or Defunct Category
-#end
-</font>

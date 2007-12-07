@@ -17,7 +17,6 @@ package org.labkey.mousemodel;
 
 import org.apache.velocity.VelocityContext;
 import org.labkey.api.data.*;
-import org.labkey.api.view.VelocityView;
 
 import javax.servlet.ServletException;
 import java.sql.ResultSet;

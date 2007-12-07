@@ -36,6 +36,7 @@ import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.attachments.StrutsAttachmentFile;
 import org.labkey.api.announcements.DiscussionService;
 import org.labkey.mousemodel.MouseModelController;
+import org.labkey.mousemodel.VelocityView;
 import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
 import org.labkey.mousemodel.mouse.MouseController;
 

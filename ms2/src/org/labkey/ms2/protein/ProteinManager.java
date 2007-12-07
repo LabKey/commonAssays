@@ -962,7 +962,7 @@ public class ProteinManager
                 new Object[]{identType, id}, String.class);
     }
 
-    public static HashSet getOrganismsFromId(int id) throws SQLException
+    public static Set<String> getOrganismsFromId(int id) throws SQLException
     {
         HashSet<String> retVal = new HashSet<String>();
         Integer paramArr[] = {id};
@@ -971,8 +971,7 @@ public class ProteinManager
                 paramArr,
                 String.class);
 
-        for (String aRvString : rvString)
-            retVal.add(aRvString);
+        retVal.addAll(Arrays.asList(rvString));
 
         String org = Table.executeSingleton(getSchema(),
                 "SELECT genus" + getSqlDialect().getConcatenationOperator() +

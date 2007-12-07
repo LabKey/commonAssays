@@ -1084,7 +1084,6 @@ public class MS2Controller extends ViewController
             return null;
 
         ProteinDictionaryHelpers.GoTypes goChartType = ProteinDictionaryHelpers.GTypeStringToEnum(form.getChartType());
-        String chartTitle = "GO " + goChartType + " Classifications";
 
         MS2Run run = MS2Manager.getRun(form.run);
 
@@ -1092,8 +1091,6 @@ public class MS2Controller extends ViewController
         ViewContext ctx = getViewContext();
         String queryString = (String) ctx.get("queryString");
         queryUrl.setRawQuery(queryString);
-
-        HttpView v = new VelocityView("/org/labkey/ms2/peptideChart.vm");
 
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
@@ -1110,36 +1107,46 @@ public class MS2Controller extends ViewController
             if (filters.containsKey("proteinGroupFilter"))
                 proteinFilterInfo = "Protein Group Filter: " + filters.get("proteinGroupFilter").getFilterText();
         }
-        v.addObject("peptideFilterInfo", peptideFilterInfo);
-        v.addObject("proteinFilterInfo", proteinFilterInfo);
-        v.addObject("proteinGroupFilterInfo", proteinGroupFilterInfo);
 
+        String chartTitle = "GO " + goChartType + " Classifications";
         SQLFragment fragment = peptideView.getProteins(queryUrl, run, form);
         PieJChartHelper pjch = PieJChartHelper.prepareGOPie(chartTitle, fragment, goChartType);
         pjch.renderAsPNG(new NullOutputStream());
 
-        String runInfo = "Run: " + run;
-        v.addObject("runInfo", runInfo);
+        GoChartBean bean = new GoChartBean();
+        bean.run = run;
+        bean.chartTitle = chartTitle;
+        bean.goChartType = goChartType;
+        bean.peptideFilterInfo = peptideFilterInfo;
+        bean.proteinFilterInfo = proteinFilterInfo;
+        bean.proteinGroupFilterInfo = proteinGroupFilterInfo;
+        bean.imageMap = ImageMapUtilities.getImageMap("pie1", pjch.getChartRenderingInfo());
+        bean.queryString = queryString;
+        bean.grouping = form.getGrouping();
+        bean.pieHelperObjName = "piechart-" + (new Random().nextInt(1000000000));
+        bean.chartUrl = new ViewURLHelper("ms2", "doOnePeptideChart", getContainer()).addParameter("ctype", goChartType.toString()).addParameter("helpername", bean.pieHelperObjName);
 
-        v.addObject("imageMap", ImageMapUtilities.getImageMap("pie1", pjch.getChartRenderingInfo()));
-        v.addObject("queryString", queryString);
-        v.addObject("run", run.getRun());
-        v.addObject("grouping", form.getGrouping());
+        Cache.getShared().put(bean.pieHelperObjName, pjch, Cache.HOUR * 2);
 
-        String pieHelperObjName = "piechart-" + (new Random().nextInt(1000000000));
-        String listOfSlices = "?ctype=" + goChartType.toString().replace(' ', '+') + "&helpername=" + pieHelperObjName;
-        v.addObject("PieSliceString", listOfSlices);
-        v.addObject("PiechartHelperObj", pieHelperObjName);
-        v.addObject("ChartTitle", chartTitle);
-        v.addObject("GOC", ProteinDictionaryHelpers.GoTypes.CELL_LOCATION);
-        v.addObject("GOCSelected", goChartType == ProteinDictionaryHelpers.GoTypes.CELL_LOCATION ? "selected" : "");
-        v.addObject("GOF", ProteinDictionaryHelpers.GoTypes.FUNCTION);
-        v.addObject("GOFSelected", goChartType == ProteinDictionaryHelpers.GoTypes.FUNCTION ? "selected" : "");
-        v.addObject("GOP", ProteinDictionaryHelpers.GoTypes.PROCESS);
-        v.addObject("GOPSelected", goChartType == ProteinDictionaryHelpers.GoTypes.PROCESS ? "selected" : "");
-        Cache.getShared().put(pieHelperObjName, pjch, Cache.HOUR * 2);
+        HttpView v = new JspView<GoChartBean>("/org/labkey/ms2/peptideChart.jsp", bean);
 
-        return _renderInTemplate(v, true, "GO " + goChartType + " Chart", null);
+        return _renderInTemplate(v, false, "GO " + goChartType + " Chart", null);
+    }
+
+
+    public static class GoChartBean
+    {
+        public MS2Run run;
+        public ProteinDictionaryHelpers.GoTypes goChartType;
+        public String chartTitle;
+        public String peptideFilterInfo = "";
+        public String proteinFilterInfo = "";
+        public String proteinGroupFilterInfo = "";
+        public String pieHelperObjName;
+        public ViewURLHelper chartUrl;
+        public String imageMap;
+        public String queryString;
+        public String grouping;
     }
 
 
@@ -1177,22 +1184,26 @@ public class MS2Controller extends ViewController
     public Forward pieSliceSection() throws Exception
     {
         requiresPermission(ACL.PERM_READ);
-        VBox lotsOfAnnots = new VBox();
+        VBox vbox = new VBox();
         HttpServletRequest req = getRequest();
 
-        VelocityView vv = new VelocityView("/org/labkey/ms2/PiesliceDetailListHeader.vm", "Definition");
         String accn = req.getParameter("sliceTitle").split(" ")[0];
-        vv.addObject("sliceDefinition", ProteinDictionaryHelpers.getGODefinitionFromAcc(accn));
-        lotsOfAnnots.addView(vv);
+        String sliceDefinition = ProteinDictionaryHelpers.getGODefinitionFromAcc(accn);
+        if (StringUtils.isBlank(sliceDefinition))
+            sliceDefinition = "Miscellaneous or Defunct Category";
+        String html = "<font size=\"+1\">" + PageFlowUtil.filter(sliceDefinition) + "</font>";
+        HttpView definitionView = new HtmlView("Definition", html);
+        vbox.addView(definitionView);
+
         String sqids = req.getParameter("sqids");
         String sqidArr[] = sqids.split(",");
         for (String curSqid : sqidArr)
         {
             int curSeqId = Integer.parseInt(curSqid);
             String curTitle = ProteinManager.getSeqParamFromId("BestName", curSeqId);
-            lotsOfAnnots.addView(annotView(curTitle, curSeqId));
+            vbox.addView(annotView(curTitle, curSeqId));
         }
-        return _renderInTemplate(lotsOfAnnots, false, "Pieslice Details for: " + req.getParameter("sliceTitle"), null);
+        return _renderInTemplate(vbox, false, "Pieslice Details for: " + req.getParameter("sliceTitle"), null);
     }
 
 
@@ -2456,14 +2467,13 @@ public class MS2Controller extends ViewController
         if (!errors.isEmpty())
             return _renderErrors(errors);
 
-        AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), runs.toArray(new MS2Run[]{}));
+        AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), runs.toArray(new MS2Run[runs.size()]));
         ViewURLHelper currentUrl = cloneViewURLHelper();
         SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentUrl, runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
 
         if (form.getExportFormat() != null && form.getExportFormat().startsWith("Excel"))
         {
             peptideView.exportToExcel(form, getResponse(), null);
-//            exportToExcel(runs, peptideFilter, form, peptideView, "All");
         }
 
         if ("TSV".equals(form.getExportFormat()))
@@ -3527,13 +3537,8 @@ public class MS2Controller extends ViewController
 
 
     // TODO: Pass in Protein object
-    protected VelocityView annotView(String title, int seqId) throws Exception
+    protected HttpView annotView(String title, int seqId) throws Exception
     {
-        VelocityView retVal = new VelocityView("/org/labkey/ms2/ProtAnnots.vm");
-        if (title != null)
-        {
-            retVal.setTitle("Annotations for " + title);
-        }
         /* collect header info */
         String SeqName = ProteinManager.getSeqParamFromId("BestName", seqId);
         String SeqDesc = ProteinManager.getSeqParamFromId("Description", seqId);
@@ -3552,7 +3557,7 @@ public class MS2Controller extends ViewController
         allGbIds.addAll(Arrays.asList(GenBankIds));
         allGbIds.addAll(Arrays.asList(RefSeqIds));
 
-        HashSet<String> allGbURLs = new HashSet<String>();
+        Set<String> allGbURLs = new HashSet<String>();
 
         for (Object allGbId : allGbIds)
         {
@@ -3564,25 +3569,10 @@ public class MS2Controller extends ViewController
             allGbURLs.add(url);
         }
 
-        /* info from db into view */
-        retVal.addObject("SeqName", SeqName);
-        retVal.addObject("SeqDesc", SeqDesc);
-        if (GeneNames != null && GeneNames.length > 0)
-            retVal.addObject("GeneName", StringUtils.join(ProteinManager.makeFullAnchorStringArray(GeneNames, "protWindow", "GeneName"), ", "));
-        retVal.addObject("SeqOrgs", ProteinManager.getOrganismsFromId(seqId));
-
-        retVal.addObject("GenBankIds", allGbURLs);
-
-        retVal.addObject("SwissProtNames", ProteinManager.makeFullAnchorStringArray(SwissProtNames, "protWindow", "SwissProt"));
-        retVal.addObject("SwissProtAccns", ProteinManager.makeFullAnchorStringArray(SwissProtAccns, "protWindow", "SwissProtAccn"));
-        retVal.addObject("GIs", ProteinManager.makeFullAnchorStringArray(GIs, "protWindow", "GI"));
-        retVal.addObject("EnsemblIDs", ProteinManager.makeFullAnchorStringArray(EnsemblIDs, "protWindow", "Ensembl"));
-        retVal.addObject("GOCategories", ProteinManager.makeFullGOAnchorStringArray(GOCategories, "protWindow"));
-
         // It is convenient to strip the version numbers from the IPI identifiers
         // and this may cause some duplications.  Use a hash-set to compress
         // duplicates
-        HashSet<String> IPIset = new HashSet<String>();
+        Set<String> IPIset = new HashSet<String>();
 
         for (String idWithoutVersion : IPIds)
         {
@@ -3594,9 +3584,45 @@ public class MS2Controller extends ViewController
         IPIds = new String[IPIset.size()];
         IPIset.toArray(IPIds);
 
-        retVal.addObject("IPIDs", ProteinManager.makeFullAnchorStringArray(IPIds, "protWindow", "IPI"));
+        AnnotViewBean bean = new AnnotViewBean();
 
-        return retVal;
+        /* info from db into view */
+        bean.seqName = SeqName;
+        bean.seqDesc = SeqDesc;
+        if (GeneNames != null && GeneNames.length > 0)
+            bean.geneName = StringUtils.join(ProteinManager.makeFullAnchorStringArray(GeneNames, "protWindow", "GeneName"), ", ");
+        bean.seqOrgs = ProteinManager.getOrganismsFromId(seqId);
+        bean.genBankUrls = allGbURLs;
+        bean.swissProtNames = ProteinManager.makeFullAnchorStringArray(SwissProtNames, "protWindow", "SwissProt");
+        bean.swissProtAccns = ProteinManager.makeFullAnchorStringArray(SwissProtAccns, "protWindow", "SwissProtAccn");
+        bean.GIs = ProteinManager.makeFullAnchorStringArray(GIs, "protWindow", "GI");
+        bean.ensemblIds = ProteinManager.makeFullAnchorStringArray(EnsemblIDs, "protWindow", "Ensembl");
+        bean.goCategories = ProteinManager.makeFullGOAnchorStringArray(GOCategories, "protWindow");
+        bean.IPI = ProteinManager.makeFullAnchorStringArray(IPIds, "protWindow", "IPI");
+
+        JspView view = new JspView<AnnotViewBean>("/org/labkey/ms2/protAnnots.jsp", bean);
+        if (title != null)
+        {
+            view.setTitle("Annotations for " + title);
+        }
+
+        return view;
+    }
+
+
+    public static class AnnotViewBean
+    {
+        public String seqName;
+        public String seqDesc;
+        public String geneName = null;
+        public Set<String> seqOrgs;
+        public Set<String> genBankUrls;
+        public String[] swissProtNames;
+        public String[] swissProtAccns;
+        public String[] GIs;
+        public String[] ensemblIds;
+        public String[] goCategories;
+        public String[] IPI;
     }
 
 
@@ -3628,18 +3654,17 @@ public class MS2Controller extends ViewController
 
         for (int i = 0; i < proteinCount; i++)
         {
-            VelocityView proteinSummary = new VelocityView("/org/labkey/ms2/protein.vm");
+            vbox.addView(new HtmlView("<a name=\"Protein" + i + "\"/>"));
 
+            ProteinViewBean bean = new ProteinViewBean();
             proteins[i].setPeptides(peptides);
             proteins[i].setShowEntireFragmentInCoverage(stringSearch);
-            proteinSummary.addObject("protein", proteins[i]);
+            bean.protein = proteins[i];
+            bean.showPeptides = showPeptides;
+            JspView proteinSummary = new JspView<ProteinViewBean>("/org/labkey/ms2/protein.jsp", bean);
             proteinSummary.setTitle(getProteinTitle(proteins[i], true));
-            proteinSummary.addObject("integer", Formats.commaf0);
-
-            if (showPeptides)
-                proteinSummary.addObject("percent", Formats.percent);
-            vbox.addView(new HtmlView("<a name=\"Protein" + i + "\"/>"));
             vbox.addView(proteinSummary);
+
             // Add annotations
             vbox.addView(annotView(null, proteins[i].getSeqId()));
         }
@@ -3661,6 +3686,14 @@ public class MS2Controller extends ViewController
 
         return vbox;
     }
+
+
+    public static class ProteinViewBean
+    {
+        public Protein protein;
+        public boolean showPeptides;
+    }
+
 
     @Jpf.Action
     protected Forward showMS2Admin() throws Exception
