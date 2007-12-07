@@ -165,7 +165,7 @@ public class PopulationTree extends GateComponent
             if (currentLabel != null)
             {
                 makeBold(population, currentLabel);
-                DOM.setStyleAttribute(currentLabel.getElement(), "backgroundColor", "blue");
+                DOM.setStyleAttribute(currentLabel.getElement(), "backgroundColor", "#FFDF8C");
             }
         }
     }

@@ -107,7 +107,7 @@ public class WellList extends GateComponent
             currentLabel = (Label) wellLabelMap.get(new Integer(well.getWellId()));
             if (currentLabel != null)
             {
-                DOM.setStyleAttribute(currentLabel.getElement(), "backgroundColor", "blue");
+                DOM.setStyleAttribute(currentLabel.getElement(), "backgroundColor", "#FFDF8C");
                 if (well.getScript() != null)
                 {
                     DOM.setStyleAttribute(currentLabel.getElement(), "fontWeight", "bold");
