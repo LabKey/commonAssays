@@ -10,7 +10,6 @@ import org.labkey.api.study.*;
 import org.labkey.api.study.assay.*;
 import org.apache.log4j.Logger;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -381,7 +380,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         return prop;
     }
 
-    public URLHelper getContentURL(HttpServletRequest request, Container container, ExpData data) throws ExperimentException
+    public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
     {
         ExpRun run = data.getRun();
         if (run != null)

@@ -14,7 +14,6 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
 
-import javax.servlet.http.HttpServletRequest;
 import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -87,9 +86,9 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
         return result;
     }
 
-    public ViewURLHelper getTabURL(HttpServletRequest request, Container c, User user)
+    public ViewURLHelper getTabURL(Container c, User user)
     {
-        ViewURLHelper defaultURL = super.getTabURL(request, c, user);
+        ViewURLHelper defaultURL = super.getTabURL(c, user);
 
         // this is a bit of a hack: while we're supporting both old and new assay-based NAB
         // implementations, it's less confusing to the user if the NAB tab keeps them from switching

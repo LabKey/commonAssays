@@ -17,7 +17,6 @@ import org.labkey.flow.flowdata.xml.FlowdataDocument;
 import org.labkey.flow.flowdata.xml.FlowData;
 import org.apache.log4j.Logger;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.OutputStream;
 import java.sql.SQLException;
@@ -61,7 +60,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public URLHelper getContentURL(HttpServletRequest request, Container container, ExpData data) throws ExperimentException
+    public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
     {
         return null;
     }

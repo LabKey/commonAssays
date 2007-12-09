@@ -7,9 +7,7 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.security.User;
 import org.labkey.flow.controllers.FlowModule;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
-import java.util.Collections;
 
 public class FlowFolderType extends DefaultFolderType
 {
@@ -23,9 +21,9 @@ public class FlowFolderType extends DefaultFolderType
                 getDefaultModuleSet(module, getModule("Pipeline")), module);
     }
 
-    public ViewURLHelper getStartURL(HttpServletRequest request, Container c, User user)
+    public ViewURLHelper getStartURL(Container c, User user)
     {
-        ViewURLHelper ret = super.getStartURL(request, c, user);
+        ViewURLHelper ret = super.getStartURL(c, user);
         ret.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
         return ret;
     }

@@ -15,7 +15,6 @@ import org.labkey.common.tools.TabLoader;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.MS1Module;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -547,15 +546,14 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
     /**
      * Returns the content URL for files imported through this class. This is called by the Experiment module
-     * @param request       The HTTP request object
      * @param container     The current container
      * @param data          The experiment data object
      * @return              The URL the user should be redirected to
      * @throws ExperimentException Thrown if there's a problem
      */
-    public URLHelper getContentURL(HttpServletRequest request, Container container, ExpData data) throws ExperimentException
+    public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
     {
-        ViewURLHelper url = new ViewURLHelper(request, MS1Module.CONTROLLER_NAME, "showFeatures.view", container);
+        ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showFeatures.view", container);
         url.addParameter("runId", Integer.toString(data.getRun().getRowId()));
         return url;
     }

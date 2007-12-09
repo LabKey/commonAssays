@@ -238,7 +238,7 @@ public class MS2Controller extends ViewController
         sb.append("</table>");
         HtmlView view = new HtmlView(sb.toString());
         return _renderInTemplate(view, false, "Error", null,
-                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())));
+                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
     }
 
 
@@ -309,7 +309,7 @@ public class MS2Controller extends ViewController
             HttpView.throwNotFound("Unable to open the file '" + form.getPath() + "' to load as a ProteinProphet file");
         }
 
-        ViewURLHelper url = new ViewURLHelper(getRequest(), "Project", "begin", c.getPath());
+        ViewURLHelper url = new ViewURLHelper("Project", "begin", c.getPath());
         return new ViewForward(url);
     }
 
@@ -524,7 +524,7 @@ public class MS2Controller extends ViewController
 
         MS2Manager.renameRun(form.getRun(), form.getDescription());
 
-        ViewURLHelper url = new ViewURLHelper(getRequest(), "MS2", "showRun", getViewURLHelper().getExtraPath());
+        ViewURLHelper url = new ViewURLHelper("MS2", "showRun", getViewURLHelper().getExtraPath());
         url.addParameter("run", Integer.toString(form.getRun()));
         return new ViewForward(url);
     }
@@ -534,7 +534,7 @@ public class MS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        ViewURLHelper url = new ViewURLHelper(getRequest(), "MS2-Scoring", "discriminate", getViewURLHelper().getExtraPath());
+        ViewURLHelper url = new ViewURLHelper("MS2-Scoring", "discriminate", getViewURLHelper().getExtraPath());
         url.addParameter("runId", Integer.toString(form.getRun()));
         return new ViewForward(url);
     }
@@ -721,7 +721,7 @@ public class MS2Controller extends ViewController
 
         MS2Run run = MS2Manager.getRun(form.run);
         return _renderInTemplate(pickName, false, "Save View", "viewRun",
-                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
+                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())),
                 new NavTree(run.getDescription(), bean.returnUrl));
     }
 
@@ -789,7 +789,7 @@ public class MS2Controller extends ViewController
         HttpView manageViews = new JspView<ManageViewsBean>("/org/labkey/ms2/manageViews.jsp", bean);
 
         return _renderInTemplate(manageViews, false, "Manage Views", "viewRun",
-                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
+                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())),
                 new NavTree(run.getDescription(), runUrl));
     }
 
@@ -871,7 +871,7 @@ public class MS2Controller extends ViewController
         bean.saveUrl = url;
         bean.saveDefaultUrl = url.clone().addParameter("saveDefault", "1");
         return _renderInTemplate(pickColumns, false, "Pick Peptide Columns", "pickPeptideColumns",
-                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
+                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())),
                 new NavTree(run.getDescription(), cloneViewURLHelper().setAction("showRun")));
     }
 
@@ -921,7 +921,7 @@ public class MS2Controller extends ViewController
         bean.saveUrl = url;
         bean.saveDefaultUrl = url.clone().addParameter("saveDefault", "1");
         return _renderInTemplate(pickColumns, false, "Pick Protein Columns", "pickProteinColumns",
-                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
+                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())),
                 new NavTree(run.getDescription(), cloneViewURLHelper().setAction("showRun")));
     }
 
@@ -3421,7 +3421,7 @@ public class MS2Controller extends ViewController
         VBox fullPage = new VBox(summaryView, view);
 
         return _renderInTemplate(fullPage, false, "Protein Group Details", "showProteinGroup",
-                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
+                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())),
                 new NavTree(MS2Manager.getRun(form.run).getDescription(), getViewURLHelper().clone().setAction("showRun")));
     }
 
@@ -3485,7 +3485,7 @@ public class MS2Controller extends ViewController
             ViewURLHelper runUrl = currentUrl.clone();
             runUrl.deleteParameter("seqId");
 
-            navTrail.add(new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())));
+            navTrail.add(new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
             if (run != null)
             {
                 navTrail.add(new NavTree(run.getDescription(), runUrl.setAction("showRun")));
@@ -3531,7 +3531,7 @@ public class MS2Controller extends ViewController
         currentUrl.deleteParameter("peptideId");
 
         return _renderInTemplate(proteinView, false, "Proteins Containing " + peptide, "showProtein",
-                new NavTree("MS2 Runs", new ViewURLHelper(getRequest(), "MS2", "showList", getViewURLHelper().getExtraPath())),
+                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())),
                 new NavTree(MS2Manager.getRun(form.run).getDescription(), currentUrl.setAction("showRun")));
     }
 
@@ -3559,9 +3559,8 @@ public class MS2Controller extends ViewController
 
         Set<String> allGbURLs = new HashSet<String>();
 
-        for (Object allGbId : allGbIds)
+        for (String ident : allGbIds)
         {
-            String ident = (String) allGbId;
             String url = ProteinManager.makeFullAnchorString(
                     ProteinManager.makeAnyKnownIdentURLString(ident, 1),
                     "protWindow",

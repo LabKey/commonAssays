@@ -11,7 +11,6 @@ import org.labkey.api.security.User;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.apache.log4j.Logger;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +43,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         }
     }
 
-    public URLHelper getContentURL(HttpServletRequest request, Container container, ExpData data) throws ExperimentException
+    public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
     {
         File dataFile = data.getDataFile();
         MS2Run run = null;
@@ -68,7 +67,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         {
             return null;
         }
-        ViewURLHelper result = new ViewURLHelper(request, "MS2", "showRun", container.getPath());
+        ViewURLHelper result = new ViewURLHelper("MS2", "showRun", container.getPath());
         result.addParameter("run", Integer.toString(run.getRun()));
         result.addParameter("expanded", "1");
         result.addParameter("grouping", "proteinprophet");

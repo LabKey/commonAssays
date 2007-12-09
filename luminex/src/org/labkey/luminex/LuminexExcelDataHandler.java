@@ -17,7 +17,6 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -814,7 +813,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public URLHelper getContentURL(HttpServletRequest request, Container container, ExpData data) throws ExperimentException
+    public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
     {
         ExpRun run = data.getRun();
         if (run != null)

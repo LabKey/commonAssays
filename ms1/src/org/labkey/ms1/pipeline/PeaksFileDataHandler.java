@@ -14,7 +14,6 @@ import org.labkey.ms1.pipeline.PeaksFileImporter;
 import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.ParserConfigurationException;
@@ -128,9 +127,9 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         }
     } //runMoved()
 
-    public URLHelper getContentURL(HttpServletRequest request, Container container, ExpData data) throws ExperimentException
+    public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
     {
-        ViewURLHelper url = new ViewURLHelper(request, "ms1", "showPeaks.view", container);
+        ViewURLHelper url = new ViewURLHelper("ms1", "showPeaks.view", container);
         url.addParameter("dataRowId", Integer.toString(data.getRowId()));
         return url;
     } //getContentURL()

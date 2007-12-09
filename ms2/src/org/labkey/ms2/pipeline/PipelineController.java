@@ -166,7 +166,7 @@ public class PipelineController extends ViewController
             }
         }
 
-        return new ViewForward(new ViewURLHelper(getRequest(), "MS2", "showList", c.getPath()));
+        return new ViewForward(new ViewURLHelper("MS2", "showList", c.getPath()));
     }
 
     @Jpf.Action

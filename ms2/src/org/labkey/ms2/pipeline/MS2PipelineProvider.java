@@ -16,10 +16,13 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.api.view.*;
 import org.labkey.api.security.ACL;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.WebPartView;
+
 import java.io.PrintWriter;
-import java.io.File;
 import java.util.List;
 
 /**
@@ -60,8 +63,7 @@ public class MS2PipelineProvider extends PipelineProvider
                 return;
             StringBuilder html = new StringBuilder();
             html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">MS2 specific settings:</td></tr>");
-            ViewURLHelper buttonURL = new ViewURLHelper(context.getRequest(), "MS2-Pipeline",
-                "setupClusterSequenceDB", context.getViewURLHelper().getExtraPath());
+            ViewURLHelper buttonURL = new ViewURLHelper("MS2-Pipeline", "setupClusterSequenceDB", context.getViewURLHelper().getExtraPath());
             html.append("<tr class=\"normal\"><td>&nbsp;&nbsp;&nbsp;&nbsp;")
                     .append("<a href=\"").append(buttonURL.getLocalURIString()).append("\">Set FASTA root</a>")
                     .append(" - Specify the location on the web server where FASTA sequence files will be located.</td></tr>");

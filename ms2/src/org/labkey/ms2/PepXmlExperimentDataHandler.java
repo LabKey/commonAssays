@@ -28,7 +28,6 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
 import org.apache.log4j.Logger;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileFilter;
@@ -128,7 +127,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         return MS2Manager.getRunByFileName(dataFile.getParent(), dataFile.getName(), c);
     }
 
-    public URLHelper getContentURL(HttpServletRequest request, Container container, ExpData data) throws ExperimentException
+    public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
     {
         File dataFile = data.getDataFile();
         MS2Run run = getMS2Run(dataFile, container);
@@ -136,7 +135,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         {
             return null;
         }
-        return new ViewURLHelper(request, "MS2", "showRun", container.getPath()).addParameter("run", Integer.toString(run.getRun()));
+        return new ViewURLHelper("MS2", "showRun", container.getPath()).addParameter("run", Integer.toString(run.getRun()));
     }
 
     public void deleteData(ExpData data, Container container, User user) throws ExperimentException

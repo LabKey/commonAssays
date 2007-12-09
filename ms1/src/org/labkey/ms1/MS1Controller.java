@@ -563,7 +563,7 @@ public class MS1Controller extends SpringActionController
                 throw new FileNotFoundException("Unable to open the msInspect feature file '" + form.getPath() + "'.");
             }
 
-            ViewURLHelper url = new ViewURLHelper(getViewContext().getRequest(), "Project", "begin", c.getPath());
+            ViewURLHelper url = new ViewURLHelper("Project", "begin", c.getPath());
             return HttpView.redirect(url);
         }
 
