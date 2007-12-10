@@ -16,16 +16,14 @@
 
 package org.labkey.ms2.protein.uniprot;
 
-import org.apache.log4j.Logger;
 import org.labkey.ms2.protein.ParseActions;
+import org.labkey.ms2.protein.ParseContext;
+import org.labkey.api.util.DateUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Date;
-import java.util.Map;
-import java.util.Vector;
+import java.sql.Timestamp;
 
 /**
  * User: tholzman
@@ -34,103 +32,45 @@ import java.util.Vector;
  */
 public class uniprot_entry extends ParseActions
 {
+    public static final int BATCH_SIZE = 5000;
 
-    private static Logger _log = Logger.getLogger(uniprot_entry.class);
-
-    public static final int REPORT_MOD = 50;
-
-    public int _mouthful = 5000;
-
-    public int getMouthful()
+    public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
-        return _mouthful;
-    }
-
-    public void setMouthful(int i)
-    {
-        _mouthful = i;
-    }
-
-    public boolean _verbose = false;
-
-    public boolean isVerbose()
-    {
-        return _verbose;
-    }
-
-    public void setVerbose(boolean verbose)
-    {
-        _verbose = verbose;
-    }
-
-    private int _skipTracer = 0;
-
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
-    {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
         
-        clearCurItems();
-        tables.put("ProtSequences", this);
+        UniprotSequence curSeq = new UniprotSequence();
+        context.setCurrentSequence(curSeq);
 
-        if (_verbose)
-        {
-            if (getItemCount() % REPORT_MOD == 0 && getItemCount() > 0)
-            {
-                System.out.println(getItemCount());
-            }
-            else
-            {
-                System.out.print(".");
-            }
-        }
         if (attrs.getValue("dataset") != null)
-            getCurItem().put("source", attrs.getValue("dataset"));
+            curSeq.setSource("dataset");
         if (attrs.getValue("created") != null)
-            getCurItem().put("source_insert_date", attrs.getValue("created"));
+            curSeq.setSourceInsertDate(new Timestamp(DateUtil.parseDateTime(attrs.getValue("created"))));
         if (attrs.getValue("modified") != null)
-            getCurItem().put("source_change_date", attrs.getValue("modified"));
+            curSeq.setSourceChangeDate(new Timestamp(DateUtil.parseDateTime(attrs.getValue("modified"))));
     }
 
-    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
+    public void endElement(ParseContext context) throws SAXException
     {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (!root.unBumpSkip())
+        if (!context.unBumpSkip())
         {
-            _skipTracer++;
-            if (_verbose)
-            {
-                if ((_skipTracer % 1000) == 0)
-                    _log.info((new Date()) + " 1000 <entry> elements skipped, " + root.getSkipEntries() + " more to go");
-            }
             return;
         }
 
-        String uniqKey =
-                ((String) getCurItem().get("genus")).toUpperCase() +
-                        " " +
-                        ((String) getCurItem().get("species")).toUpperCase() +
-                        " " +
-                        ((String) getCurItem().get("hash"));
-        getAllItems().put(uniqKey, getCurItem());
-        setItemCount(getItemCount() + 1);
-        if (getAllItems().size() >= _mouthful)
+        context.addCurrentSequence();
+        if (context.getSequences().size() >= BATCH_SIZE)
         {
             try
             {
-                root.insertTables(tables, c);
+                context.insert();
             }
             catch (SQLException e)
             {
                 throw new SAXException(e);
             }
-            getAllItems().clear();
-            tables.get("Organism").getAllItems().clear();
-            ((Vector)tables.get("ProtIdentifiers").getCurItem().get("Identifiers")).clear();
-            ((Vector)tables.get("ProtAnnotations").getCurItem().get("Annotations")).clear();
+            context.clear();
         }
     }
 }

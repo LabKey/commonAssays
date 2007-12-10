@@ -15,70 +15,61 @@
  */
 package org.labkey.ms2.protein.uniprot;
 
-import java.util.*;
 import java.sql.*;
 
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 import org.labkey.api.util.HashHelpers;
+import org.labkey.api.util.DateUtil;
 
 public class uniprot_entry_sequence extends CharactersParseActions
 {
 
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
+    public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
-        _accumulated = null;
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
 
         _accumulated = "";
-        Map curSeq = tables.get("ProtSequences").getCurItem();
+        UniprotSequence curSeq = context.getCurrentSequence();
         if (curSeq == null)
         {
             throw new SAXException("ProtSequences was not set");
         }
-        String curHash = attrs.getValue("checksum");
-        if (curHash != null)
-        {
-            curSeq.put("hash", curHash);
-        }
         String curSCD = attrs.getValue("modified");
         if (curSCD != null)
         {
-            curSeq.put("source_change_date", curSCD);
+            curSeq.setSourceChangeDate(new Timestamp(DateUtil.parseDateTime(curSCD)));
         }
         String curMass = attrs.getValue("mass");
         if (curMass != null)
         {
-            curSeq.put("mass", curMass);
+            curSeq.setMass(new Float(curMass));
         }
         String curLength = attrs.getValue("length");
         if (curLength != null)
         {
-            curSeq.put("length", curLength);
+            curSeq.setLength(new Integer(curLength));
         }
     }
 
-    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
+    public void endElement(ParseContext context) throws SAXException
     {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
 
-        ParseActions p = tables.get("ProtSequences");
-        Map curSeq = p.getCurItem();
+        UniprotSequence curSeq = context.getCurrentSequence();
         if (curSeq == null)
         {
             throw new SAXException("Unable to find a current sequence");
         }
-        curSeq.put("ProtSequence", _accumulated.replaceAll("\\s", ""));
-        // re-do hash of sequence
-        String newHash = HashHelpers.hash((String) curSeq.get("ProtSequence"));
-        curSeq.put("hash", newHash);
+        String sequence = _accumulated.replaceAll("\\s", "");
+        curSeq.setProtSequence(sequence);
+        String newHash = HashHelpers.hash(sequence);
+        curSeq.setHash(newHash);
     }
 }

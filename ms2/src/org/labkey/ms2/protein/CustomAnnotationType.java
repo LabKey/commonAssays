@@ -9,96 +9,23 @@ import org.labkey.api.query.ExprColumn;
  */
 public enum CustomAnnotationType
 {
-    IPI("IPI")
+    IPI("IPI", IdentifierType.IPI)
     {
-        public String getLookupStringSelect(ColumnInfo colSeqId)
+        protected String getIdentifierSelectSQL()
         {
-            StringBuilder sb = new StringBuilder("SELECT ");
-            sb.append(ProteinManager.getSchema().getSqlDialect().getSubstringFunction("Identifier", "0", "12"));
-            sb.append(" FROM ");
-            sb.append(ProteinManager.getTableInfoIdentifiers());
-            sb.append(" WHERE SeqId = ");
-            sb.append(colSeqId.getValueSql());
-            sb.append(" AND IdentTypeId IN ");
-            sb.append(getIdentTypeIdSelect("IPI"));
-            return sb.toString();
-        }
-
-        public String getSeqIdSelect()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.append("SELECT SeqId, ");
-            sb.append(ProteinManager.getSchema().getSqlDialect().getSubstringFunction("Identifier", "0", "12"));
-            sb.append(" AS ident FROM ");
-            sb.append(ProteinManager.getTableInfoIdentifiers());
-            sb.append(" WHERE IdentTypeId IN ");
-            sb.append(getIdentTypeIdSelect("IPI"));
-            return sb.toString();
-        }
-
-        public String getFirstSelectForSeqId()
-        {
-            return getFirstSelectForSeqId("IPI");
+            return ProteinManager.getSchema().getSqlDialect().getSubstringFunction("Identifier", "0", "12");
         }
     },
-    GENE_NAME("Gene Name")
+    GENE_NAME("Gene Name", IdentifierType.GeneName),
+    SWISS_PROT("Swiss Prot", IdentifierType.SwissProt),
+    SWISS_PROT_ACCN("Swiss Prot Accession", IdentifierType.SwissProtAccn);
+
+    protected String getIdentifierSelectSQL()
     {
-        public String getLookupStringSelect(ColumnInfo colSeqId)
-        {
-            StringBuilder sb = new StringBuilder("SELECT Identifier FROM ");
-            sb.append(ProteinManager.getTableInfoIdentifiers());
-            sb.append(" WHERE SeqId = ");
-            sb.append(colSeqId.getValueSql());
-            sb.append(" AND IdentTypeId IN ");
-            sb.append(getIdentTypeIdSelect("GeneName"));
-            return sb.toString();
-        }
+        return "Identifier";
+    }
 
-        public String getSeqIdSelect()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.append("SELECT SeqId, Identifier AS Ident FROM ");
-            sb.append(ProteinManager.getTableInfoIdentifiers());
-            sb.append(" WHERE IdentTypeId IN ");
-            sb.append(getIdentTypeIdSelect("GeneName"));
-            return sb.toString();
-        }
-
-        public String getFirstSelectForSeqId()
-        {
-            return getFirstSelectForSeqId("GeneName");
-        }
-    },
-    SWISS_PROT("Swiss Prot")
-    {
-        public String getFirstSelectForSeqId()
-        {
-            return getFirstSelectForSeqId("SwissProt");
-        }
-
-        public String getLookupStringSelect(ColumnInfo colSeqId)
-        {
-            StringBuilder sb = new StringBuilder("SELECT Identifier FROM ");
-            sb.append(ProteinManager.getTableInfoIdentifiers());
-            sb.append(" WHERE SeqId = ");
-            sb.append(colSeqId.getValueSql());
-            sb.append(" AND IdentTypeId IN ");
-            sb.append(getIdentTypeIdSelect("SwissProt"));
-            return sb.toString();
-        }
-
-        public String getSeqIdSelect()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.append("SELECT SeqId, Identifier AS Ident FROM ");
-            sb.append(ProteinManager.getTableInfoIdentifiers());
-            sb.append(" WHERE IdentTypeId IN ");
-            sb.append(getIdentTypeIdSelect("SwissProt"));
-            return sb.toString();
-        }
-    };
-
-    protected String getFirstSelectForSeqId(String typeName)
+    public String getFirstSelectForSeqId()
     {
         StringBuilder sql = new StringBuilder();
         sql.append("(SELECT MIN(Identifier) FROM ");
@@ -106,28 +33,50 @@ public enum CustomAnnotationType
         sql.append(" i, ");
         sql.append(ProteinManager.getTableInfoIdentTypes());
         sql.append(" it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
-        sql.append(typeName);
+        sql.append(_type.toString());
         sql.append("' AND i.SeqId = ");
         sql.append(ExprColumn.STR_TABLE_ALIAS);
         sql.append(".SeqId)");
         return sql.toString();
     }
 
-    private String _description;
+    private final String _description;
+    private final IdentifierType _type;
 
-    CustomAnnotationType(String description)
+    CustomAnnotationType(String description, IdentifierType type)
     {
         _description = description;
+        _type = type;
     }
 
-    public abstract String getLookupStringSelect(ColumnInfo colSeqId);
-
-    public abstract String getSeqIdSelect();
-    public abstract String getFirstSelectForSeqId();
-
-    protected String getIdentTypeIdSelect(String identTypeName)
+    public String getLookupStringSelect(ColumnInfo colSeqId)
     {
-        return "(SELECT IdentTypeId FROM " + ProteinManager.getTableInfoIdentTypes() + " WHERE Name = '" + identTypeName + "')";
+        StringBuilder sb = new StringBuilder("SELECT ");
+        sb.append(getIdentifierSelectSQL());
+        sb.append(" FROM ");
+        sb.append(ProteinManager.getTableInfoIdentifiers());
+        sb.append(" WHERE SeqId = ");
+        sb.append(colSeqId.getValueSql());
+        sb.append(" AND IdentTypeId IN ");
+        sb.append(getIdentTypeIdSelect());
+        return sb.toString();
+    }
+
+    public String getSeqIdSelect()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT SeqId, ");
+        sb.append(getIdentifierSelectSQL());
+        sb.append(" AS Ident FROM ");
+        sb.append(ProteinManager.getTableInfoIdentifiers());
+        sb.append(" WHERE IdentTypeId IN ");
+        sb.append(getIdentTypeIdSelect());
+        return sb.toString();
+    }
+
+    protected String getIdentTypeIdSelect()
+    {
+        return "(SELECT IdentTypeId FROM " + ProteinManager.getTableInfoIdentTypes() + " WHERE Name = '" + _type.toString() + "')";
     }
 
     public String getDescription()

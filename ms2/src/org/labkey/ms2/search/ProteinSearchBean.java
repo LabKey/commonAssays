@@ -8,6 +8,7 @@ public class ProteinSearchBean
 {
     private boolean _includeSubfolders = true;
     private boolean _exactMatch = true;
+    private boolean _restrictProteins = true;
     private Float _minProbability;
     private Float _maxErrorRate;
     private String _identifier = "";
@@ -71,5 +72,15 @@ public class ProteinSearchBean
     public void setMinProbability(Float minProbability)
     {
         _minProbability = minProbability;
+    }
+
+    public boolean isRestrictProteins()
+    {
+        return _restrictProteins;
+    }
+
+    public void setRestrictProteins(boolean restrictProteins)
+    {
+        _restrictProteins = restrictProteins;
     }
 }

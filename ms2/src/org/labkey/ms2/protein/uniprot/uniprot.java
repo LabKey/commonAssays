@@ -19,10 +19,10 @@ package org.labkey.ms2.protein.uniprot;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.CoreSchema;
 import org.labkey.api.data.SqlDialect;
-import org.labkey.api.util.DateUtil;
 import org.labkey.ms2.protein.ParseActions;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.XMLProteinLoader;
+import org.labkey.ms2.protein.ParseContext;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -68,21 +68,16 @@ public class uniprot extends ParseActions
         }
     }
 
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
+    public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
         _startTime = System.currentTimeMillis();
-        _accumulated = null;
-        clearCurItems();
-        tables.put("UniprotRoot", this);
-        tables.put("ProtIdentifiers", this);
-        tables.put("ProtAnnotations", this);
+        context.setUniprotRoot(this);
+
         // Annotations and Identifiers are Vectors of Maps
         // The Vectors get cleared by insertTables
-        getCurItem().put("Identifiers", new Vector());
-        getCurItem().put("Annotations", new Vector());
         try
         {
-            setupNames(c);
+            setupNames(context.getConnection());
             if (getCurrentInsertId() == 0)
             {
                 _initialInsertion.setString(1, getWhatImParsing());
@@ -92,7 +87,7 @@ public class uniprot extends ParseActions
                 _initialInsertion.executeUpdate();
                 //c.commit();
                 ResultSet idrs =
-                        c.createStatement().executeQuery(_dialect.appendSelectAutoIncrement("", ProteinManager.getTableInfoAnnotInsertions(), "InsertId"));
+                        context.getConnection().createStatement().executeQuery(_dialect.appendSelectAutoIncrement("", ProteinManager.getTableInfoAnnotInsertions(), "InsertId"));
 
                 idrs.next();
                 setCurrentInsertId(idrs.getInt(1));
@@ -101,7 +96,7 @@ public class uniprot extends ParseActions
             else
             {
                 ResultSet rs =
-                        c.createStatement().executeQuery(
+                        context.getConnection().createStatement().executeQuery(
                                 "SELECT RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=" + getCurrentInsertId()
                         );
                 rs.next();
@@ -117,18 +112,18 @@ public class uniprot extends ParseActions
         }
     }
 
-    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
+    public void endElement(ParseContext context) throws SAXException
     {
         try
         {
-            insertTables(tables, c);
+            context.insert();
             _finalizeInsertion.setTimestamp(1, new java.sql.Timestamp(new java.util.Date().getTime()));
             _finalizeInsertion.setInt(2, getCurrentInsertId());
             _finalizeInsertion.executeUpdate();
-            executeUpdate("DROP TABLE " + _oTableName, c);
-            executeUpdate("DROP TABLE " + _aTableName, c);
-            executeUpdate("DROP TABLE " + _sTableName, c);
-            executeUpdate("DROP TABLE " + _iTableName, c);
+            executeUpdate("DROP TABLE " + _oTableName, context.getConnection());
+            executeUpdate("DROP TABLE " + _aTableName, context.getConnection());
+            executeUpdate("DROP TABLE " + _sTableName, context.getConnection());
+            executeUpdate("DROP TABLE " + _iTableName, context.getConnection());
         }
         catch (SQLException e)
         {
@@ -410,20 +405,19 @@ public class uniprot extends ParseActions
         */
     }
 
-    public void insertTables(Map<String, ParseActions> tables, Connection conn) throws SQLException
+    public void insertTables(ParseContext context, Connection conn) throws SQLException
     {
-
         conn.setAutoCommit(false);
         handleThreadStateChangeRequests();
-        int orgsAdded = insertOrganisms(tables, conn);
+        int orgsAdded = insertOrganisms(context, conn);
         handleThreadStateChangeRequests();
 
-        int seqsAdded = insertSequences(tables, conn);
+        int seqsAdded = insertSequences(context, conn);
         handleThreadStateChangeRequests();
-        int identsAdded = insertIdentifiers(tables, conn);
+        int identsAdded = insertIdentifiers(context, conn);
         handleThreadStateChangeRequests();
 
-        int annotsAdded = insertAnnotations(tables, conn);
+        int annotsAdded = insertAnnotations(context, conn);
         conn.setAutoCommit(true);
         handleThreadStateChangeRequests();
         _log.info(new java.util.Date() + " Added: " +
@@ -443,8 +437,7 @@ public class uniprot extends ParseActions
         int records = r.getInt("RecordsProcessed");
         r.close();
 
-        ParseActions p = tables.get("ProtSequences");
-        int curNRecords = p.getAllItems().size();
+        int curNRecords = context.getSequences().size();
 
         _updateInsertion.setInt(1, mouthsful + 1);
         _updateInsertion.setInt(2, priorseqs + seqsAdded);
@@ -471,38 +464,37 @@ public class uniprot extends ParseActions
         );
     }
 
-    public int insertOrganisms(Map<String, ParseActions> tables, Connection conn) throws SQLException
+    public int insertOrganisms(ParseContext context, Connection conn) throws SQLException
     {
         int transactionCount = 0;
         _addOrg.setTimestamp(6, new Timestamp(new Date().getTime()));
 
         //Add current mouthful of Organisms
         _log.debug((new java.util.Date()) + " Processing organisms");
-        ParseActions p = tables.get("Organism");
 
         // All organism records.  Each one is a HashMap
-        for (Map<String, Object> curOrg : p.getAllItems().values())
+        for (UniprotOrganism curOrg : context.getOrganisms())
         {
             transactionCount++;
-            if (curOrg.get("common_name") == null)
+            if (curOrg.getCommonName() == null)
             {
                 _addOrg.setNull(1, Types.VARCHAR);
             }
             else
             {
-                _addOrg.setString(1, (String) curOrg.get("common_name"));
+                _addOrg.setString(1, curOrg.getCommonName());
             }
-            _addOrg.setString(2, (String) curOrg.get("genus"));
-            _addOrg.setString(3, (String) curOrg.get("species"));
-            if (curOrg.get("comments") == null)
+            _addOrg.setString(2, curOrg.getGenus());
+            _addOrg.setString(3, curOrg.getSpecies());
+            if (curOrg.getComments() == null)
             {
                 _addOrg.setNull(4, Types.VARCHAR);
             }
             else
             {
-                _addOrg.setString(4, (String) curOrg.get("comments"));
+                _addOrg.setString(4, curOrg.getComments());
             }
-            _addOrg.setString(5, (String) curOrg.get("identID"));
+            _addOrg.setString(5, curOrg.getIdentID());
             // Timestamp at index 6 is set once for the whole PreparedStatement
             _addOrg.addBatch();
             if (transactionCount == TRANSACTION_ROW_COUNT)
@@ -536,7 +528,7 @@ public class uniprot extends ParseActions
         return result;
     }
 
-    public int insertSequences(Map tables, Connection conn) throws SQLException
+    public int insertSequences(ParseContext context, Connection conn) throws SQLException
     {
         int transactionCount = 0;
 
@@ -544,81 +536,80 @@ public class uniprot extends ParseActions
 
         //Process current mouthful of sequences
         _log.debug(new java.util.Date() + " Processing sequences");
-        ParseActions p = (ParseActions) tables.get("ProtSequences");
-        for (Map<String, Object> curSeq : p.getAllItems().values())
+        for (org.labkey.ms2.protein.uniprot.UniprotSequence curSeq : context.getSequences())
         {
             transactionCount++;
-            _addSeq.setString(1, (String) curSeq.get("ProtSequence"));
-            _addSeq.setString(2, (String) curSeq.get("hash"));
-            if (curSeq.get("description") == null)
+            _addSeq.setString(1, curSeq.getProtSequence());
+            _addSeq.setString(2, curSeq.getHash());
+            if (curSeq.getDescription() == null)
             {
                 _addSeq.setNull(3, Types.VARCHAR);
             }
             else
             {
-                String tmp = (String) curSeq.get("description");
+                String tmp = curSeq.getDescription();
                 if (tmp.length() >= 200) tmp = tmp.substring(0, 190) + "...";
                 _addSeq.setString(3, tmp);
             }
-            if (curSeq.get("source_change_date") == null)
+            if (curSeq.getSourceChangeDate() == null)
             {
                 _addSeq.setNull(4, Types.TIMESTAMP);
             }
             else
             {
-                _addSeq.setTimestamp(4, new Timestamp(DateUtil.parseDateTime((String) curSeq.get("source_change_date"))));
+                _addSeq.setTimestamp(4, curSeq.getSourceChangeDate());
             }
-            if (curSeq.get("source_insert_date") == null)
+            if (curSeq.getSourceInsertDate() == null)
             {
                 _addSeq.setNull(5, Types.TIMESTAMP);
             }
             else
             {
-                _addSeq.setTimestamp(5, new Timestamp(DateUtil.parseDateTime((String) curSeq.get("source_insert_date"))));
+                _addSeq.setTimestamp(5, curSeq.getSourceInsertDate());
             }
-            _addSeq.setString(6, (String) curSeq.get("genus"));
-            _addSeq.setString(7, (String) curSeq.get("species"));
-            if (curSeq.get("mass") == null)
+            _addSeq.setString(6, curSeq.getGenus());
+            _addSeq.setString(7, curSeq.getSpecies());
+            if (curSeq.getMass() == null)
             {
                 _addSeq.setNull(8, Types.FLOAT);
             }
             else
             {
-                _addSeq.setFloat(8, Float.parseFloat((String) curSeq.get("mass")));
+                _addSeq.setFloat(8, curSeq.getMass().floatValue());
             }
-            if (curSeq.get("length") == null)
+            if (curSeq.getLength() == null)
             {
                 _addSeq.setNull(9, Types.INTEGER);
             }
             else
             {
-                _addSeq.setInt(9, Integer.parseInt((String) curSeq.get("length")));
+                _addSeq.setInt(9, curSeq.getLength().intValue());
             }
-            if (curSeq.get("source") == null)
+            if (curSeq.getSource() == null)
             {
                 _addSeq.setNull(10, Types.VARCHAR);
             }
             else
             {
-                _addSeq.setString(10, (String) curSeq.get("source"));
+                _addSeq.setString(10, curSeq.getSource());
             }
-            if (curSeq.get("best_name") == null)
+            if (curSeq.getBestName() == null)
             {
                 _addSeq.setNull(11, Types.VARCHAR);
             }
             else
             {
-                String tmp = (String) curSeq.get("best_name");
+                String tmp = curSeq.getBestName();
                 if (tmp.length() >= 50) tmp = tmp.substring(0, 45) + "...";
                 _addSeq.setString(11, tmp);
             }
-            if (curSeq.get("best_gene_name") == null)
+            if (curSeq.getBestGeneName() == null)
             {
                 _addSeq.setNull(12, Types.VARCHAR);
             }
             else
             {
-                String tmp = (String) curSeq.get("best_gene_name");
+                String tmp = curSeq.getBestGeneName();
                 if (tmp.length() >= 50) tmp = tmp.substring(0, 45) + "...";
                 _addSeq.setString(12, tmp);
             }
@@ -650,26 +641,24 @@ public class uniprot extends ParseActions
         return result;
     }
 
-    public int insertIdentifiers(Map tables, Connection conn) throws SQLException
+    public int insertIdentifiers(ParseContext context, Connection conn) throws SQLException
     {
         int transactionCount = 0;
 
         // Process current mouthful of identifiers
         _log.debug(new java.util.Date() + " Processing identifiers");
         _addIdent.setTimestamp(6, new java.sql.Timestamp(new java.util.Date().getTime()));
-        Vector idents = (Vector) ((ParseActions) tables.get("ProtIdentifiers")).getCurItem().get("Identifiers");
-        for (Enumeration e = idents.elements(); e.hasMoreElements();)
+        for (UniprotIdentifier curIdent : context.getIdentifiers())
         {
             transactionCount++;
-            Map curIdent = (Map) e.nextElement();
-            String curIdentVal = (String) curIdent.get("identifier");
+            String curIdentVal = curIdent.getIdentifier();
             if (curIdentVal.length() > 50) curIdentVal = curIdentVal.substring(0, 45) + "...";
             _addIdent.setString(1, curIdentVal);
-            _addIdent.setString(2, (String) curIdent.get("identType"));
-            Map curSeq = (Map) curIdent.get("sequence");
-            _addIdent.setString(3, (String) curSeq.get("genus"));
-            _addIdent.setString(4, (String) curSeq.get("species"));
-            _addIdent.setString(5, (String) curSeq.get("hash"));
+            _addIdent.setString(2, curIdent.getIdentType());
+            UniprotSequence curSeq = curIdent.getSequence();
+            _addIdent.setString(3, curSeq.getGenus());
+            _addIdent.setString(4, curSeq.getSpecies());
+            _addIdent.setString(5, curSeq.getHash());
             // Timestamp at index 6 is set once for the whole PreparedStatement
             _addIdent.addBatch();
             if (transactionCount == TRANSACTION_ROW_COUNT)
@@ -741,7 +730,7 @@ public class uniprot extends ParseActions
 
     private static final int MAX_ANNOT_SIZE = 190;
 
-    public int insertAnnotations(Map tables, Connection conn) throws SQLException
+    public int insertAnnotations(ParseContext context, Connection conn) throws SQLException
     {
         int transactionCount = 0;
         // Process current mouthful of identifiers
@@ -749,51 +738,45 @@ public class uniprot extends ParseActions
         _addAnnot.setTimestamp(10, new java.sql.Timestamp(new java.util.Date().getTime()));
         transactionCount++;
         _log.debug(new java.util.Date() + " Processing annotations");
-        Vector annots = (Vector) ((ParseActions) tables.get("ProtAnnotations")).getCurItem().get("Annotations");
-        for (Enumeration e = annots.elements(); e.hasMoreElements();)
+        for (UniprotAnnotation curAnnot : context.getAnnotations())
         {
-            Map curAnnot = (Map) e.nextElement();
-            String annotVal = (String) curAnnot.get("annot_val");
+            String annotVal = curAnnot.getAnnotVal();
             if (annotVal.length() > MAX_ANNOT_SIZE)
                 annotVal = annotVal.substring(0, MAX_ANNOT_SIZE) + "...";
             _addAnnot.setString(1, annotVal);
-            _addAnnot.setString(2, (String) curAnnot.get("annotType"));
-            Map curSeq = (Map) curAnnot.get("sequence");
-            _addAnnot.setString(3, (String) curSeq.get("genus"));
-            _addAnnot.setString(4, (String) curSeq.get("species"));
-            _addAnnot.setString(5, (String) curSeq.get("hash"));
-            if (curAnnot.get("start_pos") == null)
+            _addAnnot.setString(2, curAnnot.getAnnotType());
+            UniprotSequence curSeq = curAnnot.getSequence();
+            _addAnnot.setString(3, curSeq.getGenus());
+            _addAnnot.setString(4, curSeq.getSpecies());
+            _addAnnot.setString(5, curSeq.getHash());
+            if (curAnnot.getStartPos() == null)
             {
                 _addAnnot.setInt(6, 0);
             }
             else
             {
-                _addAnnot.setInt(6, Integer.parseInt((String) curAnnot.get("start_pos")));
+                _addAnnot.setInt(6, curAnnot.getStartPos().intValue());
             }
-            if (curAnnot.get("end_pos") == null)
+            if (curAnnot.getEndPos() == null)
             {
                 _addAnnot.setInt(7, 0);
             }
             else
             {
-                _addAnnot.setInt(7, Integer.parseInt((String) curAnnot.get("end_pos")));
+                _addAnnot.setInt(7, curAnnot.getEndPos().intValue());
             }
-            if (curAnnot.get("identifier") == null)
+            UniprotIdentifier ident = curAnnot.getIdentifier();
+            if (ident == null)
             {
                 _addAnnot.setNull(8, Types.VARCHAR);
-            }
-            else
-            {
-                _addAnnot.setString(8, (String) curAnnot.get("identifier"));
-            }
-            if (curAnnot.get("identType") == null)
-            {
                 _addAnnot.setNull(9, Types.VARCHAR);
             }
             else
             {
-                _addAnnot.setString(9, (String) curAnnot.get("identType"));
+                _addAnnot.setString(8, ident.getIdentifier());
+                _addAnnot.setString(9, ident.getIdentType());
             }
+
             // Timestamp at index 10 is set once for the whole PreparedStatement
             _addAnnot.addBatch();
             if (transactionCount == TRANSACTION_ROW_COUNT)

@@ -866,22 +866,22 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             parseAndCompare("GI|16758788|ref|NP_446360.1|", idMapE);
 
             idMapE=null;
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt", "2A5D_YEAST"));
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn", "P38903"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(), "2A5D_YEAST"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(), "P38903"));
             parseAndCompare("P38903|2A5D_YEAST", idMapE);
 
             idMapE=null;
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt","143G_BOVIN"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(),"143G_BOVIN"));
             parseAndCompare("143G_BOVIN", idMapE);
 
             idMapE=null;
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","B32382"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"B32382"));
             parseAndCompare("B32382", idMapE);
 
             idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","1350702"));
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt","RL26_XENLA"));
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","P49629"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(),"RL26_XENLA"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"P49629"));
             parseAndCompare("gi|1350702|sp|P49629|RL26_XENLA", idMapE);   // check this
 
             idMapE=null;
@@ -897,8 +897,8 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
             idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","1705439"));
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt","BCCP_BACSU"));
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","P49786"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(),"BCCP_BACSU"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"P49786"));
             parseAndCompare("gi|1705439|sp|P49786|BCCP_BACSU", idMapE);
 
             idMapE=null;
@@ -918,7 +918,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
             idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GI","2136708"));
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","I45994"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"I45994"));
             parseAndCompare("gi|2136708|pir||I45994", idMapE);
 
             idMapE=null;
@@ -958,17 +958,17 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00421289.1"));
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("REFSEQ","NP_955791"));
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","Q6RVG2"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"Q6RVG2"));
             parseAndCompare("IPI:IPI00421289.1|REFSEQ_NP:NP_955791|UniProt/TrEMBL:Q6RVG2", idMapE);
 
             idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00454216.1"));
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","Q6RVG1"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"Q6RVG1"));
             parseAndCompare("IPI:IPI00454216.1|UniProt/TrEMBL:Q6RVG1", idMapE);
 
             idMapE=null;
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt","O05473_SULIS"));
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","O05473"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(),"O05473_SULIS"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"O05473"));
             parseAndCompare("O05473|O05473_SULIS", idMapE);
 
             idMapE=null;
@@ -977,17 +977,17 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
             idMapE=null;
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00421289.1"));
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","Q6RVG2"));
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","Q6RVG3"));
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProtAccn","Q6RVG4"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"Q6RVG2"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"Q6RVG3"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"Q6RVG4"));
             parseAndCompare("IPI:IPI00421289.1|UniProt/TrEMBL:Q6RVG2;Q6RVG3;Q6RVG4;", idMapE);
 
             idMapE=null;
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt","HPH2_YEAST"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(),"HPH2_YEAST"));
             parseAndCompare("UPSP:HPH2_YEAST", idMapE);
 
             idMapE=null;
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("SwissProt","Q6B2T6_YEAST"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(),"Q6B2T6_YEAST"));
             parseAndCompare("UPTR:Q6B2T6_YEAST", idMapE);
 
             // return empty map

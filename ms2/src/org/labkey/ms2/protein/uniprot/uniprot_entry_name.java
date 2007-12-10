@@ -19,34 +19,37 @@ package org.labkey.ms2.protein.uniprot;
  * User: tholzman
  * Date: Feb 28, 2005
  */
-import java.util.*;
-import java.sql.*;
 
 import org.labkey.ms2.protein.*;
 import org.xml.sax.SAXException;
+import org.xml.sax.Attributes;
 
 public class uniprot_entry_name extends CharactersParseActions
 {
 
-    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
+    public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
 
-        clearCurItems();
-        Map curSeq = ((ParseActions) tables.get("ProtSequences")).getCurItem();
+        _accumulated = "";
+    }
+
+    public void endElement(ParseContext context) throws SAXException
+    {
+        if (context.isIgnorable())
+        {
+            return;
+        }
+
+        UniprotSequence curSeq = context.getCurrentSequence();
         if (curSeq == null)
         {
             throw new SAXException("Unable to find a current ProtSequences");
         }
-        Vector idents = (Vector) (((ParseActions) tables.get("ProtIdentifiers")).getCurItem().get("Identifiers"));
-        idents.add(getCurItem());
-        getCurItem().put("identType", "SwissProt");
-        getCurItem().put("identifier", _accumulated);
-        getCurItem().put("sequence", curSeq);
-        curSeq.put("best_name", _accumulated);
+        context.getIdentifiers().add(new UniprotIdentifier(IdentifierType.SwissProt.toString(), _accumulated, curSeq));
+        curSeq.setBestName(_accumulated);
     }
 }

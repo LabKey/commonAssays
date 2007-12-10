@@ -15,47 +15,35 @@
  */
 package org.labkey.ms2.protein.uniprot;
 
-import java.util.*;
-import java.sql.*;
-
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 
 public class uniprot_entry_organism extends ParseActions
 {
-
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(ParseContext context, Attributes attrs)
     {
-        _accumulated = null;
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
-
-        clearCurItems();
-        tables.put("Organism", this);
+        context.setCurrentOrganism(new UniprotOrganism());
     }
 
-    public void endElement(Connection c, Map<String,ParseActions> tables)
+    public void endElement(ParseContext context)
     {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
-        if (getCurItem().get("species") == null || ((String) getCurItem().get("species")).equalsIgnoreCase("sp"))
+        UniprotOrganism organism = context.getCurrentOrganism();
+        if (organism.getSpecies() == null || organism.getSpecies().equalsIgnoreCase("sp"))
         {
-            getCurItem().put("species", "sp.");
+            organism.setSpecies("sp.");
         }
-        String uniqKey =
-                ((String) getCurItem().get("genus")).toUpperCase() +
-                        " " +
-                        ((String) getCurItem().get("species")).toUpperCase();
-        getAllItems().put(uniqKey, getCurItem());
-        setItemCount(getItemCount() + 1);
-        Map s = tables.get("ProtSequences").getCurItem();
-        s.put("genus", getCurItem().get("genus"));
-        s.put("species", getCurItem().get("species"));
+        context.addCurrentOrganism();
+
+        UniprotSequence s = context.getCurrentSequence();
+        s.setGenus(organism.getGenus());
+        s.setSpecies(organism.getSpecies());
     }
 }

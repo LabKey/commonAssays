@@ -40,6 +40,9 @@
             <td>Exact:</td>
             <td nowrap><input type="checkbox" name="exactMatch" <% if (bean.isExactMatch()) { %>checked="true" <% } %> /><%= helpPopup("Protein Search: Exact Match", "If checked, the search will only find proteins with an exact name match. If not checked, proteins that start with the name entered will also match, but the search may be significantly slower.") %></td>
         <%= separator %>
+            <td>Restrict:</td>
+            <td nowrap><input type="checkbox" name="restrictProteins" <% if (bean.isRestrictProteins()) { %>checked="true" <% } %> /><%= helpPopup("Protein Search: Restrict Proteins", "If checked, the search will only look for proteins that are in FASTA files that have been searched by the included runs. If not checked, the list of Matching Proteins will include all proteins that match the criteria.") %></td>
+        <%= separator %>
             <td></td>
             <td><labkey:button text="Search" /></td>
         <%= separator %>

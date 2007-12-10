@@ -15,20 +15,15 @@
  */
 package org.labkey.ms2.protein.uniprot;
 
-import java.util.*;
-import java.sql.*;
-
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 
 public class uniprot_entry_feature extends ParseActions
 {
 
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
+    public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
-        _accumulated = null;
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
@@ -36,21 +31,17 @@ public class uniprot_entry_feature extends ParseActions
         String attrType = attrs.getValue("type");
         String attrDesc = attrs.getValue("description");
         String attrStatus = attrs.getValue("status");
-        clearCurItems();
 
         if (attrType != null) annotVal += attrType + " ";
         if (attrDesc != null) annotVal += attrDesc + " ";
         if (attrStatus != null) annotVal += attrStatus + " ";
 
-        Map curSeq = tables.get("ProtSequences").getCurItem();
+        UniprotSequence curSeq = context.getCurrentSequence();
         if (curSeq == null)
         {
             throw new SAXException("ProtSequences has no current item");
         }
-        Vector annots = (Vector)tables.get("ProtAnnotations").getCurItem().get("Annotations");
-        annots.add(getCurItem());
-        getCurItem().put("annot_val", annotVal.trim());
-        getCurItem().put("annotType", "feature");
-        getCurItem().put("sequence", curSeq);
+        UniprotAnnotation annot = new UniprotAnnotation(annotVal.trim(), "feature", curSeq);
+        context.getAnnotations().add(annot);
     }
 }

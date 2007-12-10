@@ -24,117 +24,50 @@ import java.sql.*;
 
 public abstract class ParseActions
 {
-
-    protected String _accumulated;
-
-    public String getAccumulated()
-    {
-        return _accumulated;
-    }
-
-    public void setAccumulated(String a)
-    {
-        this._accumulated = a;
-    }
-
-    protected String comment = null;
-
+    protected String _whatImParsing;
+    protected String _comment = null;
+    protected int _currentInsertId = 0;
+    
     public String getComment()
     {
-        return this.comment;
+        return _comment;
     }
 
     public void setComment(String c)
     {
-        this.comment = c;
+        _comment = c;
     }
-
-    protected String whatImParsing;
-
+    
     public String getWhatImParsing()
     {
-        return whatImParsing;
+        return _whatImParsing;
     }
 
     public void setWhatImParsing(String whatImParsing)
     {
-        this.whatImParsing = whatImParsing;
+        _whatImParsing = whatImParsing;
     }
 
-    protected int currentInsertId = 0;
 
     public void setCurrentInsertId(int id)
     {
-        this.currentInsertId = id;
+        _currentInsertId = id;
     }
 
     public int getCurrentInsertId()
     {
-        return this.currentInsertId;
+        return _currentInsertId;
     }
 
-    private int itemCount;
-
-    public int getItemCount()
-    {
-        return itemCount;
-    }
-
-    public void setItemCount(int itemCount)
-    {
-        this.itemCount = itemCount;
-    }
-
-    protected Map<String, Map<String, Object>> allItems = new HashMap<String, Map<String, Object>>();
-
-    public Map<String, Map<String, Object>> getAllItems()
-    {
-        return allItems;
-    }
-
-    public void setAllItems(Map<String, Map<String, Object>> allItems)
-    {
-        this.allItems = allItems;
-    }
-
-    protected Map<String,Object> curItem;
-
-    public Map<String, Object> getCurItem()
-    {
-        return curItem;
-    }
-
-    public void clearCurItems()
-    {
-        curItem = new HashMap<String, Object>();
-    }
-
-    public ParseActions()
+    public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
     }
 
-    /*
-    protected void copyAttribsToColumns(Map m, Attributes attrs, Map target){
-       if(m == null || attrs == null || target == null) return;
-       for(Iterator it=m.keySet().iterator(); it.hasNext();) {
-          String attribName = (String)it.next();
-          String attribVal = null;
-          if((attribVal=attrs.getValue(attribName)) != null) {
-             target.put((String)m.get(attribName),attribVal);
-          }
-       }
-    }
-    */
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
-    {
-        _accumulated = "";
-    }
-
-    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
+    public void endElement(ParseContext context) throws SAXException
     {
     }
 
-    public void characters(Connection c, Map<String,ParseActions> tables, char ch[], int start, int len) throws SAXException
+    public void characters(ParseContext context, char ch[], int start, int len) throws SAXException
     {
     }
 }

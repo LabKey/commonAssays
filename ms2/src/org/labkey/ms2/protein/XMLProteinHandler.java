@@ -5,12 +5,10 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import org.xml.sax.SAXException;
 import org.xml.sax.Attributes;
 import org.xml.sax.XMLReader;
-import org.xml.sax.InputSource;
 import org.labkey.ms2.protein.tools.REProperties;
 import org.apache.log4j.Logger;
 
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Set;
 import java.io.IOException;
 import java.sql.Connection;
@@ -81,17 +79,15 @@ public class XMLProteinHandler extends DefaultHandler
     /* in this list.  The name must be unique within the entire parse tree.  Currently   */
     /* the VALUE part of hashtable is ignored.                                           */
     private String skipMe = null;
-    private Connection _conn;
     private XMLProteinLoader _loader;
     public static final String PROGRAM_PREFIX = "XMLProteinLoader";
     private static Logger _log = Logger.getLogger(XMLProteinHandler.class);
 
     public XMLProteinHandler(Connection conn, XMLProteinLoader loader) throws SAXException, IOException
     {
-        _conn = conn;
+        _parseContext = new ParseContext(conn);
         _loader = loader;
         setProgProperties(REProperties.loadREProperties(PROGRAM_PREFIX + "." + loaderPrefix));
-        setParseTables(new Hashtable<String, ParseActions>());
         setLoaderPackage(
                 this.getClass().getPackage().getName() + "." + getLoaderPrefix() + "."
         );
@@ -195,17 +191,7 @@ public class XMLProteinHandler extends DefaultHandler
     }
 
     /* info about parse state, passed to content handlers */
-    private Hashtable<String,ParseActions> parseTables;
-
-    public Hashtable getParseTables()
-    {
-        return parseTables;
-    }
-
-    public void setParseTables(Hashtable<String, ParseActions> parseTables)
-    {
-        this.parseTables = parseTables;
-    }
+    private ParseContext _parseContext;
 
     public void endDocument() throws SAXException
     {
@@ -233,7 +219,7 @@ public class XMLProteinHandler extends DefaultHandler
             if (p.getComment() == null) p.setComment(_loader.getComment());
             if (p.getCurrentInsertId() == 0 && _loader.getRecoveryId() != 0)
                 p.setCurrentInsertId(_loader.getRecoveryId());
-            p.beginElement(_conn, parseTables, attrs);
+            p.beginElement(_parseContext, attrs);
         }
     }
 
@@ -256,7 +242,7 @@ public class XMLProteinHandler extends DefaultHandler
         {
             if (p.getWhatImParsing() == null) p.setWhatImParsing(_loader.getParseFName());
             if (p.getComment() == null) p.setComment(_loader.getComment());
-            p.endElement(_conn, parseTables);
+            p.endElement(_parseContext);
         }
         _tree.pop();
     }
@@ -273,7 +259,7 @@ public class XMLProteinHandler extends DefaultHandler
         if (p != null)
         {
             if (p.getWhatImParsing() == null) p.setWhatImParsing(_loader.getParseFName());
-            p.characters(_conn, parseTables, ch, start, length);
+            p.characters(_parseContext, ch, start, length);
         }
     }
 

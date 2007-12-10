@@ -1,46 +1,33 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.ms2.protein.AnnotationInsertion" %>
+<%@ page import="org.labkey.api.util.DateUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    Map<String, String> map = ((JspView<Map<String, String>>) HttpView.currentView()).getModelBean();
+    AnnotationInsertion insertion = ((JspView<AnnotationInsertion>) HttpView.currentView()).getModelBean();
 %>
-&nbsp;<br>
-<font size='+1'>
-Annotation Load Details for <%=map.get("filetype")%> file <%=map.get("filename")%> (ID #<%=map.get("insertid")%>)<br>
-</font>
-<br>
-<blockquote style='padding-left: 2.0in'>
-<i>
-<%=h(map.get("comment"))%>
-</i>
-</blockquote>
-<br>
-First entered at <%=h(map.get("insertdate"))%><br><br>
-<table cellspacing='15'>
+<p><%=h(insertion.getComment())%></p>
+<p>Upload started at <%=h(DateUtil.formatDateTime(insertion.getInsertDate()))%>, <%=insertion.getMouthsful()%> batch<%= insertion.getMouthsful() != 1 ? "es" : "" %> processed</p>
+<table>
 <tr>
-   <td>&nbsp;</td><td>Current</td><td align='center'>Most Recent Batch<br><%=h(map.get("changedate"))%></td>
-</tr>
-<tr><td colspan='3'><hr></td></tr>
-<tr>
-   <td align='left'>Records</td><td align='right'><%=map.get("recordsprocessed")%></td><td align='right'><%=map.get("mrmsize")%></td>
+   <td>&nbsp;</td><td align="right" class="ms-searchform"><strong>Total</strong></td><td align='right' class="ms-searchform"><strong>Most Recent Batch</strong></td>
 </tr>
 <tr>
-   <td align='left'>Organisms</td><td align='right'><%=map.get("organismsadded")%></td><td align='right'><%=map.get("mrmorganismsadded")%></td>
+   <td align='left' class="ms-searchform">Completed</td><td align='right'><%=insertion.getCompletionDate() == null ? "Not complete" : h(DateUtil.formatDateTime(insertion.getCompletionDate()))%></td><td align='right'><%=h(DateUtil.formatDateTime(insertion.getChangeDate()))%></td>
 </tr>
 <tr>
-   <td align='left'>Sequences</td><td align='right'><%=map.get("sequencesadded")%></td><td align='right'><%=map.get("mrmsequencesadded")%></td>
+   <td align='left' class="ms-searchform">Records</td><td align='right'><%=insertion.getRecordsProcessed()%></td><td align='right'><%=insertion.getMrmSize()%></td>
 </tr>
 <tr>
-   <td align='left'>Identifiers</td><td align='right'><%=map.get("identifiersadded")%></td><td align='right'><%=map.get("mrmidentifiersadded")%></td>
+   <td align='left' class="ms-searchform">Organisms</td><td align='right'><%=insertion.getOrganismsAdded()%></td><td align='right'><%=insertion.getMrmOrganismsAdded()%></td>
 </tr>
 <tr>
-   <td align='left'>Annotations</td><td align='right'><%=map.get("annotationsadded")%></td><td align='right'><%=map.get("mrmannotationsadded")%></td>
+   <td align='left' class="ms-searchform">Sequences</td><td align='right'><%=insertion.getSequencesAdded()%></td><td align='right'><%=insertion.getMrmSequencesAdded()%></td>
 </tr>
-<tr><td colspan='3'><hr></td></tr>
 <tr>
-   <td align='left'>Batches Processed</td><td align='right'><%=map.get("mouthsful")%></td>
+   <td align='left' class="ms-searchform">Identifiers</td><td align='right'><%=insertion.getIdentifiersAdded()%></td><td align='right'><%=insertion.getMrmIdentifiersAdded()%></td>
+</tr>
+<tr>
+   <td align='left' class="ms-searchform">Annotations</td><td align='right'><%=insertion.getAnnotationsAdded()%></td><td align='right'><%=insertion.getMrmAnnotationsAdded()%></td>
 </tr>
 </table>
-<br><br>
-Completed at <%=map.get("completiondate")%><br>

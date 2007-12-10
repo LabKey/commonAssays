@@ -15,20 +15,16 @@
  */
 package org.labkey.ms2.protein.uniprot;
 
-import java.util.*;
-import java.sql.*;
-
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 
 public class uniprot_entry_keyword extends CharactersParseActions
 {
+    private UniprotIdentifier _currentIdentifier;
 
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
+    public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
-        _accumulated = null;
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
@@ -39,25 +35,18 @@ public class uniprot_entry_keyword extends CharactersParseActions
             throw new SAXException("id is not set");
         }
         _accumulated = "";
-        clearCurItems();
-        Vector idents = (Vector) (((ParseActions) tables.get("ProtIdentifiers")).getCurItem().get("Identifiers"));
-        idents.add(getCurItem());
-        getCurItem().put("identType", "Uniprot_keyword");
-        getCurItem().put("identifier", kwid);
-        getCurItem().put("sequence", tables.get("ProtSequences").getCurItem());
+        _currentIdentifier = new UniprotIdentifier("Uniprot_keyword", kwid, context.getCurrentSequence());
+        context.getIdentifiers().add(_currentIdentifier);
     }
 
-    public void endElement(Connection c, Map<String,ParseActions> tables)
+    public void endElement(ParseContext context)
     {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
 
-        Vector annots = (Vector) (((ParseActions) tables.get("ProtAnnotations")).getCurItem().get("Annotations"));
-        annots.add(getCurItem());
-        getCurItem().put("annot_val", _accumulated);
-        getCurItem().put("annotType", "keyword");
+        UniprotAnnotation annot = new UniprotAnnotation(_accumulated, "keyword", _currentIdentifier);
+        context.getAnnotations().add(annot);
     }
 }

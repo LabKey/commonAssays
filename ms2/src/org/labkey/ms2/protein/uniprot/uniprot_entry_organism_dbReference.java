@@ -15,24 +15,18 @@
  */
 package org.labkey.ms2.protein.uniprot;
 
-import java.util.*;
-import java.sql.*;
-
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 
 public class uniprot_entry_organism_dbReference extends ParseActions
 {
 
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(ParseContext context, Attributes attrs)
     {
-        _accumulated = null;
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
-        ParseActions u = tables.get("Organism");
-        u.getCurItem().put("identID", attrs.getValue("id"));
+        context.getCurrentOrganism().setIdentID(attrs.getValue("id"));
     }
 }

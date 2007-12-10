@@ -84,26 +84,5 @@ public class XMLProteinLoader extends DefaultAnnotationLoader implements Annotat
     public void cleanUp()
     {
     }
-
-    //
-    // MAIN
-    //
-    public static void main(String argv[]) throws SQLException, IOException, SAXException
-    {
-
-        // process arguments
-        if (argv.length == 2)
-        {
-            XMLProteinLoader loader = new XMLProteinLoader(argv[0]);
-            loader.parseFile();
-        }
-        else
-        {
-            System.err.println("Usage: java XMLProteinLoader <xml-filename>");
-            System.exit(1);
-        }
-        // set parser features
-        System.out.println("Done.");
-    } // main(String[])
 } // class XMLProteinLoader
 

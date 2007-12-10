@@ -19,8 +19,6 @@ package org.labkey.ms2.protein.uniprot;
  * User: tholzman
  * Date: Mar 3, 2005
  */
-import java.util.*;
-import java.sql.*;
 
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
@@ -28,21 +26,15 @@ import org.labkey.ms2.protein.*;
 public class uniprot_entry_feature_location_begin extends ParseActions
 {
 
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(ParseContext context, Attributes attrs)
     {
-        _accumulated = null;
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
-        Map surroundingFeature = (Map) ((Vector)tables.get("ProtAnnotations").getCurItem().get("Annotations")).lastElement();
-        if (surroundingFeature == null)
-        {
-            return;
-        }
+        UniprotAnnotation surroundingFeature = context.getAnnotations().get(context.getAnnotations().size() - 1);
         String position = attrs.getValue("position");
         if (position != null)
-            surroundingFeature.put("start_pos", position);
+            surroundingFeature.setStartPos(new Integer(position));
     }
 }

@@ -19,32 +19,40 @@ package org.labkey.ms2.protein.uniprot;
  * User: tholzman
  * Date: Feb 28, 2005
  */
-import java.util.*;
-import java.sql.*;
 
 import org.labkey.ms2.protein.*;
 import org.xml.sax.SAXException;
+import org.xml.sax.Attributes;
 
 public class uniprot_entry_protein_name extends CharactersParseActions
 {
-
-    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
+    public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
 
-        Map<String, Object> curSeq = tables.get("ProtSequences").getCurItem();
+        _accumulated = "";
+    }
+
+
+    public void endElement(ParseContext context) throws SAXException
+    {
+        if (context.isIgnorable())
+        {
+            return;
+        }
+
+        UniprotSequence curSeq = context.getCurrentSequence();
         if (curSeq == null)
         {
             throw new SAXException("Unable to find a current ProtSequences");
         }
 
-        if (!curSeq.containsKey("description"))
+        if (curSeq.getDescription() == null)
         {
-            curSeq.put("description", _accumulated);
+            curSeq.setDescription(_accumulated);
         }
     }
 }

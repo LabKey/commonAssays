@@ -955,6 +955,11 @@ public class ProteinManager
                 new Integer[]{id}, String.class);
     }
 
+    public static String[] getIdentifiersFromId(IdentifierType identType, int id) throws SQLException
+    {
+        return getIdentifiersFromId(identType.toString(), id);
+    }
+
     public static String[] getIdentifiersFromId(String identType, int id) throws SQLException
     {
         return Table.executeArray(getSchema(),

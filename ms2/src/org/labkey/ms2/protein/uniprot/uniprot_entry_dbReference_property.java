@@ -23,49 +23,36 @@ package org.labkey.ms2.protein.uniprot;
 import org.xml.sax.Attributes;
 import org.labkey.ms2.protein.*;
 
-import java.sql.Connection;
 import java.util.*;
 
 public class uniprot_entry_dbReference_property extends ParseActions
 {
 
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(ParseContext context, Attributes attrs)
     {
-        _accumulated = null;
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
         String propType = attrs.getValue("type");
         String propVal = attrs.getValue("value");
-        clearCurItems();
         if (propType.equalsIgnoreCase("term"))
         {
-            Vector surroundingRef = (Vector)tables.get("ProtIdentifiers").getCurItem().get("Identifiers");
+            List<UniprotIdentifier> surroundingRef = context.getIdentifiers();
             if (surroundingRef == null)
             {
                 return;
             }
-            Map sRefContents = (Map) surroundingRef.lastElement();
-            String refType = (String) sRefContents.get("identifier");
+            UniprotIdentifier sRefContents = surroundingRef.get(surroundingRef.size() - 1);
+            String refType = sRefContents.getIdentifier();
             if (refType == null || !refType.startsWith("GO:"))
             {
                 return;
             }
             String annotType = "GO_" + propVal.substring(0, 1);
-            Map curSeq = tables.get("ProtSequences").getCurItem();
-            if (curSeq == null)
-            {
-                return;
-            }
-            Vector annots = (Vector)tables.get("ProtAnnotations").getCurItem().get("Annotations");
-            annots.add(getCurItem());
-            getCurItem().put("annot_val", refType + " " + propVal);
-            getCurItem().put("annotType", annotType);
-            getCurItem().put("sequence", curSeq);
-            getCurItem().put("identType", sRefContents.get("identType"));
-            getCurItem().put("identifier", refType);
+
+            UniprotAnnotation annot = new UniprotAnnotation(refType + " " + propVal, annotType, sRefContents);
+            context.getAnnotations().add(annot);
         }
     }
 }

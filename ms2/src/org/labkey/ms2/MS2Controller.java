@@ -1413,35 +1413,6 @@ public class MS2Controller extends ViewController
     }
 
 
-    HttpView fillInInsertDetails(int insertId) throws Exception
-    {
-        HttpView view = null;
-        ResultSet rs = null;
-        Map<String, String> map = new HashMap<String, String>();
-
-        try
-        {
-            rs = Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE insertId=" + insertId, null);
-            rs.next();
-            ResultSetMetaData rsmd = rs.getMetaData();
-            int colCount = rsmd.getColumnCount();
-            for (int i = 1; i <= colCount; i++)
-            {
-                String name = rsmd.getColumnName(i).toLowerCase();
-                String val = rs.getString(name);
-                map.put(name, val);
-            }
-            view = new JspView<Map<String, String>>("/org/labkey/ms2/annotLoadDetails.jsp", map);            
-            rs.close();
-        }
-        finally
-        {
-            ResultSetUtil.close(rs);
-        }
-        return view;
-    }
-
-
     @Jpf.Action
     protected Forward showAnnotInsertDetails() throws Exception
     {
@@ -1451,8 +1422,15 @@ public class MS2Controller extends ViewController
         ViewURLHelper urlhelp = cloneViewURLHelper();
         String insertIdStr = urlhelp.getParameter("insertId");
         int insertId = Integer.parseInt(insertIdStr);
-        HttpView vv = fillInInsertDetails(insertId);
-        return _renderInTemplate(vv, true, "Annotation Insertion Details", null);
+        AnnotationInsertion[] insertions = Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE insertId=?", new Object[] { insertId }, AnnotationInsertion.class);
+        if (insertions.length == 0)
+        {
+            return HttpView.throwNotFound();
+        }
+        assert insertions.length == 1;
+        AnnotationInsertion insertion = insertions[0];
+        JspView view = new JspView<AnnotationInsertion>("/org/labkey/ms2/annotLoadDetails.jsp", insertion);
+        return _renderInTemplate(view, true, insertion.getFiletype() + " Annotation Insertion Details: " + insertion.getFilename(), null);
     }
 
 
@@ -3548,7 +3526,7 @@ public class MS2Controller extends ViewController
         String SwissProtNames[] = ProteinManager.getIdentifiersFromId("SwissProt", seqId);
         String EnsemblIDs[] = ProteinManager.getIdentifiersFromId("Ensembl", seqId);
         String GIs[] = ProteinManager.getIdentifiersFromId("GI", seqId);
-        String SwissProtAccns[] = ProteinManager.getIdentifiersFromId("SwissProtAccn", seqId);
+        String SwissProtAccns[] = ProteinManager.getIdentifiersFromId(IdentifierType.SwissProtAccn, seqId);
         String GOCategories[] = ProteinManager.getGOCategoriesFromId(seqId);
         String IPIds[] = ProteinManager.getIdentifiersFromId("IPI", seqId);
         String RefSeqIds[] = ProteinManager.getIdentifiersFromId("REFSEQ", seqId);
@@ -3942,6 +3920,7 @@ public class MS2Controller extends ViewController
         searchView.getModelBean().setIdentifier(form.getIdentifier());
         searchView.getModelBean().setIncludeSubfolders(form.isIncludeSubfolders());
         searchView.getModelBean().setExactMatch(form.isExactMatch());
+        searchView.getModelBean().setRestrictProteins(form.isRestrictProteins());
         if (getRequest().getParameter("ProteinSearchResults.GroupProbability~gte") != null)
         {
             try
@@ -4032,7 +4011,10 @@ public class MS2Controller extends ViewController
         proteinsView.setShowCustomizeViewLinkInButtonBar(true);
         SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
         sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
-        sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
+        if (form.isRestrictProteins())
+        {
+            sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
+        }
         proteinsView.setTitle("Matching Proteins");
         return proteinsView;
     }
@@ -4044,6 +4026,7 @@ public class MS2Controller extends ViewController
         private Float _maximumErrorRate;
         private boolean _includeSubfolders;
         private boolean _exactMatch;
+        private boolean _restrictProteins;
 
         public boolean isExactMatch()
         {
@@ -4093,6 +4076,16 @@ public class MS2Controller extends ViewController
         public void setIncludeSubfolders(boolean includeSubfolders)
         {
             _includeSubfolders = includeSubfolders;
+        }
+
+        public boolean isRestrictProteins()
+        {
+            return _restrictProteins;
+        }
+
+        public void setRestrictProteins(boolean restrictProteins)
+        {
+            _restrictProteins = restrictProteins;
         }
     }
 

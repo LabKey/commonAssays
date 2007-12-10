@@ -24,31 +24,22 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.labkey.ms2.protein.*;
 
-import java.sql.Connection;
-import java.util.*;
-
 public class uniprot_entry_dbReference extends ParseActions
 {
 
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
+    public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
-        _accumulated = null;
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
         String curType = attrs.getValue("type");
         String curID = attrs.getValue("id");
-        clearCurItems();
         if (curType == null || curID == null)
         {
             throw new SAXException("type and/or id is not set");
         }
-        Vector idents = (Vector)tables.get("ProtIdentifiers").getCurItem().get("Identifiers");
-        idents.add(getCurItem());
-        getCurItem().put("identType", curType);
-        getCurItem().put("identifier", curID);
-        getCurItem().put("sequence", tables.get("ProtSequences").getCurItem());
+        UniprotIdentifier ident = new UniprotIdentifier(curType, curID, context.getCurrentSequence());
+        context.getIdentifiers().add(ident);
     }
 }

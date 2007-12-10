@@ -15,54 +15,48 @@
  */
 package org.labkey.ms2.protein.uniprot;
 
-import java.util.*;
-import java.sql.*;
-
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 
 public class uniprot_entry_organism_name extends CharactersParseActions
 {
 
-    private String curType = null;
+    private String _curType = null;
 
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
+    public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
-        _accumulated = null;
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
 
-        curType = attrs.getValue("type");
-        clearCurItems();
-        if (curType == null)
+        _curType = attrs.getValue("type");
+
+        if (_curType == null)
         {
             throw new SAXException("type is not set");
         }
         _accumulated = "";
     }
 
-    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
+    public void endElement(ParseContext context) throws SAXException
     {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
 
-        ParseActions u = tables.get("Organism");
-        if (u.getCurItem() == null)
+        UniprotOrganism organism = context.getCurrentOrganism();
+        if (organism == null)
         {
             throw new SAXException("No current organism");
         }
-        if (curType.equalsIgnoreCase("common"))
+        if (_curType.equalsIgnoreCase("common"))
         {
-            u.getCurItem().put("common_name", _accumulated.trim());
+            organism.setCommonName(_accumulated.trim());
             return;
         }
-        if (curType.equalsIgnoreCase("scientific") || curType.equalsIgnoreCase("full"))
+        if (_curType.equalsIgnoreCase("scientific") || _curType.equalsIgnoreCase("full"))
         {
             String together = _accumulated.trim();
             String separate[] = together.split(" ");
@@ -72,30 +66,28 @@ public class uniprot_entry_organism_name extends CharactersParseActions
             }
             if (separate != null && separate.length >= 1)
             {
-                u.getCurItem().put("genus", separate[0].replaceAll("'", ""));
+                organism.setGenus(separate[0].replaceAll("'", ""));
             }
             if (separate != null && separate.length >= 2)
             {
-                u.getCurItem().put("species", separate[1].replaceAll("'", ""));
+                organism.setSpecies(separate[1].replaceAll("'", ""));
             }
-            if (separate != null && (curType.equalsIgnoreCase("full") || separate.length > 2))
+            if (separate != null && (_curType.equalsIgnoreCase("full") || separate.length > 2))
             {
-                u.getCurItem().put("comments", together);
+                organism.setComments(together);
             }
-            Vector annots = (Vector) tables.get("ProtAnnotations").getCurItem().get("Annotations");
-            annots.add(getCurItem());
-
-            getCurItem().put("annot_val", together);
-            Map curSeq = tables.get("ProtSequences").getCurItem();
-            getCurItem().put("sequence", curSeq);
-            if (curType.equalsIgnoreCase("full"))
+            String annotType;
+            if (_curType.equalsIgnoreCase("full"))
             {
-                getCurItem().put("annotType", "FullOrganismName");
+                annotType = "FullOrganismName";
             }
             else
             {
-                getCurItem().put("annotType", "ScientificOrganismName");
+                annotType = "ScientificOrganismName";
             }
+
+            UniprotAnnotation annot = new UniprotAnnotation(together, annotType, context.getCurrentSequence());
+            context.getAnnotations().add(annot);
         }
     }
 }

@@ -15,9 +15,6 @@
  */
 package org.labkey.ms2.protein.uniprot;
 
-import java.util.*;
-import java.sql.*;
-
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 
@@ -26,11 +23,9 @@ public class uniprot_entry_gene_name extends CharactersParseActions
 
     private String curType = null;
 
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs) throws SAXException
+    public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
-        _accumulated = null;
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
@@ -42,18 +37,16 @@ public class uniprot_entry_gene_name extends CharactersParseActions
         }
         curType = nameType;
         _accumulated = "";
-        clearCurItems();
     }
 
-    public void endElement(Connection c, Map<String,ParseActions> tables) throws SAXException
+    public void endElement(ParseContext context) throws SAXException
     {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
 
-        Map<String, Object> curSeq = tables.get("ProtSequences").getCurItem();
+        UniprotSequence curSeq = context.getCurrentSequence();
         if (curSeq == null)
         {
             throw new SAXException("No current ProtSequences is available");
@@ -61,13 +54,9 @@ public class uniprot_entry_gene_name extends CharactersParseActions
         _accumulated = _accumulated.trim();
         if (curType.equalsIgnoreCase("primary") && _accumulated.length() > 0)
         {
-            Vector idents = (Vector) tables.get("ProtIdentifiers").getCurItem().get("Identifiers");
-            idents.add(getCurItem());
-            getCurItem().put("identType", "GeneName");
-            getCurItem().put("identifier", _accumulated);
-            getCurItem().put("sequence", curSeq);
-            curSeq.put("best_name", _accumulated);
-            curSeq.put("best_gene_name", _accumulated);
+            context.getIdentifiers().add(new UniprotIdentifier(IdentifierType.GeneName.toString(), _accumulated, curSeq));
+            curSeq.setBestName(_accumulated);
+            curSeq.setBestGeneName(_accumulated);
         }
     }
 }

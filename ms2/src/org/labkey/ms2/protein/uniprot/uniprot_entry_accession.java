@@ -16,39 +16,29 @@
 
 package org.labkey.ms2.protein.uniprot;
 
-import java.util.*;
-import java.sql.*;
-
 import org.xml.sax.*;
 import org.labkey.ms2.protein.*;
 
 public class uniprot_entry_accession extends CharactersParseActions
 {
 
-    public void beginElement(Connection c, Map<String,ParseActions> tables, Attributes attrs)
+    public void beginElement(ParseContext context, Attributes attrs)
     {
-        _accumulated = null;
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
 
         _accumulated = "";
-        clearCurItems();
     }
 
-    public void endElement(Connection c, Map<String,ParseActions> tables)
+    public void endElement(ParseContext context)
     {
-        uniprot root = (uniprot) tables.get("UniprotRoot");
-        if (root.getSkipEntries() > 0)
+        if (context.isIgnorable())
         {
             return;
         }
-        Vector idents = (Vector)tables.get("ProtIdentifiers").getCurItem().get("Identifiers");
-        idents.add(getCurItem());
-        getCurItem().put("identType", "SwissProtAccn");
-        getCurItem().put("identifier", _accumulated);
-        getCurItem().put("sequence", tables.get("ProtSequences").getCurItem());
+        UniprotIdentifier ident = new UniprotIdentifier(IdentifierType.SwissProtAccn.toString(), _accumulated, context.getCurrentSequence());
+        context.getIdentifiers().add(ident);
     }
 }

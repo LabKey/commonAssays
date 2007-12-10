@@ -851,6 +851,7 @@ ms2/src/org/labkey/ms2/pipeline/setSequestDefaults.gm -text
 ms2/src/org/labkey/ms2/pipeline/setTandemDefaults.gm -text
 ms2/src/org/labkey/ms2/protAnnots.jsp -text
 ms2/src/org/labkey/ms2/protein.jsp -text
+ms2/src/org/labkey/ms2/protein/AnnotationInsertion.java -text
 ms2/src/org/labkey/ms2/protein/AnnotationLoader.java -text
 ms2/src/org/labkey/ms2/protein/AnnotationUploadManager.java -text
 ms2/src/org/labkey/ms2/protein/CharactersParseActions.java -text
@@ -859,7 +860,9 @@ ms2/src/org/labkey/ms2/protein/CustomAnnotationSet.java -text
 ms2/src/org/labkey/ms2/protein/CustomAnnotationType.java -text
 ms2/src/org/labkey/ms2/protein/DefaultAnnotationLoader.java -text
 ms2/src/org/labkey/ms2/protein/FastaDbLoader.java -text
+ms2/src/org/labkey/ms2/protein/IdentifierType.java -text
 ms2/src/org/labkey/ms2/protein/ParseActions.java -text
+ms2/src/org/labkey/ms2/protein/ParseContext.java -text
 ms2/src/org/labkey/ms2/protein/ParserTree.java -text
 ms2/src/org/labkey/ms2/protein/ProteinController.java -text
 ms2/src/org/labkey/ms2/protein/ProteinException.java -text
@@ -888,6 +891,10 @@ ms2/src/org/labkey/ms2/protein/tools/ProteinDictionaryHelpers.java -text
 ms2/src/org/labkey/ms2/protein/tools/ProteinPieDataset.java -text
 ms2/src/org/labkey/ms2/protein/tools/REProperties.java -text
 ms2/src/org/labkey/ms2/protein/tools/bioSeq.java -text
+ms2/src/org/labkey/ms2/protein/uniprot/UniprotAnnotation.java -text
+ms2/src/org/labkey/ms2/protein/uniprot/UniprotIdentifier.java -text
+ms2/src/org/labkey/ms2/protein/uniprot/UniprotOrganism.java -text
+ms2/src/org/labkey/ms2/protein/uniprot/UniprotSequence.java -text
 ms2/src/org/labkey/ms2/protein/uniprot/uniprot.java -text
 ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry.java -text
 ms2/src/org/labkey/ms2/protein/uniprot/uniprot_entry_accession.java -text
