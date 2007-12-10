@@ -1,6 +1,7 @@
 package org.labkey.ms1.pipeline;
 
 import org.apache.commons.beanutils.ConversionException;
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentException;
@@ -39,6 +40,7 @@ import java.util.Map;
 public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 {
     public static final String FEATURES_FILE_EXTENSION = ".features.tsv";
+    public static final String PEPTIDES_FILE_EXTENSION = ".peptides.tsv";
 
     /**
      * This class maps a source column in the features tsv file with its
@@ -66,6 +68,25 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         public String toString()
         {
             return sourceColumn + "->" + targetColumn + " (type: " + jdbcType + ")" + (isRequired ? " Required" : "");
+        }
+
+        public Class getJavaClass()
+        {
+            switch (jdbcType)
+            {
+                case Types.TINYINT:
+                case Types.INTEGER:
+                    return Integer.class;
+                case Types.REAL:
+                    return Double.class;
+                case Types.BOOLEAN:
+                    return Boolean.class;
+                case Types.CHAR:
+                case Types.VARCHAR:
+                    return String.class;
+                default:
+                    throw new IllegalArgumentException("Unexpected java.sql.Type: "+ jdbcType);
+            }
         }
     } //class Binding
 
@@ -324,6 +345,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         //and is located three directories above the data file
         File dataFile = data.getDataFile();
         String dataFileName = dataFile.getName();
+        // This is safe because .features.tsv and .peptides.tsv happen to be the same length
         String baseName = dataFileName.substring(0, dataFileName.length() - FEATURES_FILE_EXTENSION.length());
         File mzxmlFile = new File(dataFile.getParentFile().getParentFile().getParentFile(), baseName + ".mzXML");
         return mzxmlFile.toURI().toString();
@@ -343,7 +365,11 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         {
             binding = _bindingMap.get(coldescr.name);
             if(null != binding)
+            {
                 ret.add(binding);
+                coldescr.clazz = binding.getJavaClass();
+                coldescr.converter = ConvertUtils.lookup(coldescr.clazz);
+            }
             else
                 log.warn("The msInspect Features importer does not recognize the column '" + coldescr.name + "' in this file. Its contents will be ignored.");
         }
@@ -620,7 +646,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
     {
         //we handle only *.features.tvt files
         String fileUrl = data.getDataFileUrl();
-        if(null != fileUrl && fileUrl.endsWith(FEATURES_FILE_EXTENSION))
+        if(null != fileUrl && (fileUrl.toLowerCase().endsWith(FEATURES_FILE_EXTENSION) || fileUrl.toLowerCase().endsWith(PEPTIDES_FILE_EXTENSION)))
             return Priority.MEDIUM;
         else
             return null;

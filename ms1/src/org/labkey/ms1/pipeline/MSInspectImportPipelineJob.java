@@ -82,19 +82,10 @@ public class MSInspectImportPipelineJob extends PipelineJob
         File resultsDir = _featuresFile.getParentFile();
         File msInspectDefFile = new File(resultsDir, "inspect.xml");
 
-        File protocolsDir = resultsDir.getParentFile();
-        if (protocolsDir == null)
-        {
-            throw new IOException("Expected analysis files to be in a subdirectory ./inspect/<protocol_name>/ relative to the .mzXML file");
-        }
-        File analysisRootDir = protocolsDir.getParentFile();
-        if (analysisRootDir == null)
-        {
-            throw new IOException("Expected analysis files to be in a subdirectory ./inspect/<protocol_name>/ relative to the .mzXML file");
-        }
+        // This is safe because .features.tsv and .peptides.tsv happen to be the same length
+        String name = _featuresFile.getName().substring(0, _featuresFile.getName().length() - MSInspectFeaturesDataHandler.FEATURES_FILE_EXTENSION.length());
 
-        String name = _featuresFile.getName().substring(0, _featuresFile.getName().length() - ".features.tsv".length());
-        File mzXMLFile = new File(analysisRootDir, name + ".mzXML");
+        File mzXMLFile = findMzXMLFile(resultsDir, name);
 
         String protocolName = resultsDir.getName();
         
@@ -107,10 +98,6 @@ public class MSInspectImportPipelineJob extends PipelineJob
             //just print a warning to the log and keep going...the experiment run details will already
             //show the file as not available on disk.
             getLogger().warn("No msInspect settings file was found at the expected location: " + msInspectDefFile);
-        }
-        if (!NetworkDrive.exists(mzXMLFile))
-        {
-            throw new IOException("Could not find mzXML file on disk, expected it to be: " + mzXMLFile);
         }
 
         // Build up the XML describing the input files
@@ -145,7 +132,8 @@ public class MSInspectImportPipelineJob extends PipelineJob
         //peaks XML file will be in the same dir as _featuresFile and have the same base name
         //but with an .xml file extension
         String peaksXMLFilePath = PathRelativizer.relativizePathUnix(resultsDir, _featuresFile);
-        peaksXMLFilePath = peaksXMLFilePath.substring(0,peaksXMLFilePath.length() - ".features.tsv".length());
+        // This is safe because .features.tsv and .peptides.tsv happen to be the same length
+        peaksXMLFilePath = peaksXMLFilePath.substring(0,peaksXMLFilePath.length() - MSInspectFeaturesDataHandler.FEATURES_FILE_EXTENSION.length());
         peaksXMLFilePath += ".peaks.xml";
         xarXml = StringUtils.replace(xarXml, "@@PEAKS_FILE_PATH@@", peaksXMLFilePath);
 
@@ -171,6 +159,36 @@ public class MSInspectImportPipelineJob extends PipelineJob
         }
 
         return experimentXMLFile;
+    }
+
+    private File findMzXMLFile(File resultsDir, String name)
+            throws IOException
+    {
+        File result = null;
+        File protocolsDir = resultsDir.getParentFile();
+        if (protocolsDir != null)
+        {
+            File analysisRootDir = protocolsDir.getParentFile();
+            if (analysisRootDir != null)
+            {
+                result = new File(analysisRootDir, name + ".mzXML");
+                if (!NetworkDrive.exists(result))
+                {
+                    result = null;
+                }
+            }
+        }
+
+        if (result == null)
+        {
+            result = new File(resultsDir, name + ".mzXML");
+            if (!NetworkDrive.exists(result))
+            {
+                throw new IOException("Expected analysis files to be in either the same directory as the .mzXML or a subdirectory ./inspect/<protocol_name>/ relative to the .mzXML file");
+            }
+        }
+
+        return result;
     }
 
     public void run()

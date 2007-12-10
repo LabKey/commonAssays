@@ -55,7 +55,10 @@ public class uniprot_entry_gene_name extends CharactersParseActions
         if (curType.equalsIgnoreCase("primary") && _accumulated.length() > 0)
         {
             context.getIdentifiers().add(new UniprotIdentifier(IdentifierType.GeneName.toString(), _accumulated, curSeq));
-            curSeq.setBestName(_accumulated);
+            if (curSeq.getBestName() == null || curSeq.getBestName().trim().equals(""))
+            {
+                curSeq.setBestName(_accumulated);
+            }
             curSeq.setBestGeneName(_accumulated);
         }
     }

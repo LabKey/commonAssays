@@ -15,6 +15,7 @@ public class MS1FileFilter extends PipelineProvider.FileEntryFilter
 {
     public boolean accept(File f)
     {
-        return f.getName().toLowerCase().endsWith(".features.tsv");
+        return f.getName().toLowerCase().endsWith(MSInspectFeaturesDataHandler.FEATURES_FILE_EXTENSION) ||
+               f.getName().toLowerCase().endsWith(MSInspectFeaturesDataHandler.PEPTIDES_FILE_EXTENSION);
     }
 }
