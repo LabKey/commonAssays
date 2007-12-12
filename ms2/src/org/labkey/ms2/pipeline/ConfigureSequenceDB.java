@@ -7,7 +7,7 @@ import org.labkey.api.jsp.FormPage;
  * Date: Dec 13, 2005
  * Time: 1:15:47 PM
  */
-public abstract class ConfigureSequenceDB extends FormPage
+public abstract class ConfigureSequenceDB extends FormPage<PipelineController.SequenceDBRootForm>
 {
     private String _localPathRoot;
     private boolean _allowUpload;
