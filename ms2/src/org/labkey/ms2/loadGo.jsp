@@ -1,5 +1,5 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.OldMS2Controller" %>
 <%@ page import="org.labkey.ms2.protein.tools.GoLoader" %>
 <%
     boolean loaded = GoLoader.isGoLoaded().booleanValue();
@@ -29,5 +29,5 @@ process by refreshing the status information on the next page.<br><br>
 
 If you wish to proceed, click the Continue button. Otherwise click Cancel.<br><br>
 
-<%=PageFlowUtil.buttonLink("Continue", MS2Controller.getLoadGoUrl())%>
-<%=PageFlowUtil.buttonLink("Cancel", MS2Controller.getShowProteinAdminUrl())%>
+<%=PageFlowUtil.buttonLink("Continue", OldMS2Controller.getLoadGoUrl())%>
+<%=PageFlowUtil.buttonLink("Cancel", OldMS2Controller.getShowProteinAdminUrl())%>

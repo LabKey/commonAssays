@@ -11,7 +11,7 @@ import javax.servlet.ServletException;
 import java.sql.SQLException;
 import java.util.*;
 
-import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.OldMS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.PeptidesTableInfo;
@@ -183,12 +183,12 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         return MS2RunViewType.QUERY_PEPTIDES;
     }
 
-    public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form)
+    public GridView createPeptideViewForGrouping(OldMS2Controller.DetailsForm form)
     {
         throw new UnsupportedOperationException();
     }
 
-    public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
+    public String[] getPeptideStringsForGrouping(OldMS2Controller.DetailsForm form) throws SQLException
     {
         throw new UnsupportedOperationException();
     }

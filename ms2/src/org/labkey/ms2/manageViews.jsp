@@ -1,4 +1,4 @@
-<%@ page import="org.labkey.ms2.MS2Controller.ManageViewsBean" %>
+<%@ page import="org.labkey.ms2.OldMS2Controller.ManageViewsBean" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%

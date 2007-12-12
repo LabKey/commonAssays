@@ -11,7 +11,7 @@ import org.labkey.api.util.Formats;
 */
 public class ShowPeptideContext
 {
-    public MS2Controller.DetailsForm form;
+    public OldMS2Controller.DetailsForm form;
     public MS2Run run;
     public final Container container;
     public final User user;
@@ -25,7 +25,7 @@ public class ShowPeptideContext
     public String actualXEnd;
     public String modificationHref;
 
-    ShowPeptideContext(MS2Controller.DetailsForm form, MS2Run run, MS2Peptide peptide, ViewURLHelper url, ViewURLHelper previousUrl, ViewURLHelper nextUrl, ViewURLHelper showGzUrl, String modHref, Container container, User user)
+    ShowPeptideContext(OldMS2Controller.DetailsForm form, MS2Run run, MS2Peptide peptide, ViewURLHelper url, ViewURLHelper previousUrl, ViewURLHelper nextUrl, ViewURLHelper showGzUrl, String modHref, Container container, User user)
     {
         this.form = form;
         this.run = run;

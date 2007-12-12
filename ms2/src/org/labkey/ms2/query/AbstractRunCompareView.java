@@ -9,13 +9,12 @@ import org.labkey.api.data.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.security.ACL;
 import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.OldMS2Controller;
 import org.labkey.ms2.client.CompareResult;
 import org.labkey.ms2.compare.CompareDataRegion;
 
 import javax.servlet.ServletException;
 import java.util.*;
-import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.io.IOException;
 
@@ -33,7 +32,7 @@ public abstract class AbstractRunCompareView  extends QueryView
 
     private List<String> _errors = new ArrayList<String>();
 
-    public AbstractRunCompareView(ViewContext context, MS2Controller controller, int runListIndex, boolean forExport, String tableName) throws ServletException
+    public AbstractRunCompareView(ViewContext context, OldMS2Controller controller, int runListIndex, boolean forExport, String tableName) throws ServletException
     {
         super(new ViewContext(context), new MS2Schema(context.getUser(), context.getContainer()), createSettings(context, tableName));
 

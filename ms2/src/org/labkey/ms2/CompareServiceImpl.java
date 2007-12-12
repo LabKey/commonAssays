@@ -7,17 +7,6 @@ import org.labkey.ms2.query.CompareProteinsView;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.data.TSVGridWriter;
-import org.labkey.api.data.ContainerManager;
-
-import javax.servlet.ServletException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-import java.net.URISyntaxException;
-import java.sql.SQLException;
-import java.io.IOException;
 
 /**
  * User: jeckels
@@ -25,9 +14,9 @@ import java.io.IOException;
  */
 public class CompareServiceImpl extends BaseRemoteService implements CompareService
 {
-    private final MS2Controller _controller;
+    private final OldMS2Controller _controller;
 
-    public CompareServiceImpl(ViewContext context, MS2Controller controller)
+    public CompareServiceImpl(ViewContext context, OldMS2Controller controller)
     {
         super(context);
         _controller = controller;

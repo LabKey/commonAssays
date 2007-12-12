@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.util.*;
 
-import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.OldMS2Controller;
 
 /**
  * User: jeckels
@@ -63,7 +63,7 @@ public abstract class AbstractMS2RunView
         _runs = runs;
     }
 
-    public WebPartView createGridView(MS2Controller.RunForm form) throws ServletException, SQLException
+    public WebPartView createGridView(OldMS2Controller.RunForm form) throws ServletException, SQLException
     {
         String peptideColumnNames = getPeptideColumnNames(form.getColumns());
         return createGridView(form.getExpanded(), peptideColumnNames, form.getProteinColumns(), true);
@@ -77,7 +77,7 @@ public abstract class AbstractMS2RunView
 
     public abstract MS2RunViewType getViewType();
 
-    public abstract SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form);
+    public abstract SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, OldMS2Controller.ChartForm form);
 
     public abstract Map<String, SimpleFilter> getFilter(ViewURLHelper queryUrl, MS2Run run);
 
@@ -397,15 +397,15 @@ public abstract class AbstractMS2RunView
      * Creates a grid view to show the peptides that are part of the grouping assignment
      * that's specified by the form. For example, for a given SeqId or a ProteinProphet ProteinGroup. 
      */
-    public abstract GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form) throws SQLException;
+    public abstract GridView createPeptideViewForGrouping(OldMS2Controller.DetailsForm form) throws SQLException;
 
-    public abstract String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException;
+    public abstract String[] getPeptideStringsForGrouping(OldMS2Controller.DetailsForm form) throws SQLException;
 
-    public abstract void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception;
+    public abstract void exportToTSV(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception;
 
-    public abstract void exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
+    public abstract void exportToAMT(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
 
-    public abstract void exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
+    public abstract void exportToExcel(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
 
     protected class PeptideColumnNameList extends MS2Run.ColumnNameList
     {

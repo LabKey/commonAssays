@@ -1,10 +1,10 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.OldMS2Controller" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.PickNameBean bean = ((JspView<MS2Controller.PickNameBean>) HttpView.currentView()).getModelBean();
+    OldMS2Controller.PickNameBean bean = ((JspView<OldMS2Controller.PickNameBean>) HttpView.currentView()).getModelBean();
 %>
 <form method="get" action="saveView.view" class="dataRegion"><table>
   <tr><td>Name:</td><td class="normal"><input name="name" style="width:200px;">

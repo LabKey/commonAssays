@@ -675,6 +675,7 @@ ms2/src/org/labkey/ms2/GZFileRenderer.java -text
 ms2/src/org/labkey/ms2/GroupNumberDisplayColumn.java -text
 ms2/src/org/labkey/ms2/HideShowScoringColumn.java -text
 ms2/src/org/labkey/ms2/HydrophobicityColumn.java -text
+ms2/src/org/labkey/ms2/MS2Controller.java -text
 ms2/src/org/labkey/ms2/MS2FolderType.java -text
 ms2/src/org/labkey/ms2/MS2GZFileRenderer.java -text
 ms2/src/org/labkey/ms2/MS2Importer.java -text
@@ -705,7 +706,6 @@ ms2/src/org/labkey/ms2/ProteinProphetFile.java -text
 ms2/src/org/labkey/ms2/ProteinProphetImporter.java -text
 ms2/src/org/labkey/ms2/ProteinSummary.java -text
 ms2/src/org/labkey/ms2/Quantitation.java -text
-ms2/src/org/labkey/ms2/RunForm.java -text
 ms2/src/org/labkey/ms2/SequestRun.java -text
 ms2/src/org/labkey/ms2/ShowPeptideContext.java -text
 ms2/src/org/labkey/ms2/Spectrum.java -text

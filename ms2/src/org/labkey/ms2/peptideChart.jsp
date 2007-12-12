@@ -1,11 +1,11 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.OldMS2Controller" %>
 <%@ page import="org.labkey.ms2.protein.tools.ProteinDictionaryHelpers.*" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.GoChartBean bean = ((JspView<MS2Controller.GoChartBean>) HttpView.currentView()).getModelBean();
+    OldMS2Controller.GoChartBean bean = ((JspView<OldMS2Controller.GoChartBean>) HttpView.currentView()).getModelBean();
 %>
 Run: <%=h(bean.run.toString())%><br>
 <%=h(bean.peptideFilterInfo)%><br>

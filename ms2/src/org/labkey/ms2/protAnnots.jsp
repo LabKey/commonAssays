@@ -1,9 +1,9 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.OldMS2Controller" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.AnnotViewBean bean = ((JspView<MS2Controller.AnnotViewBean>) HttpView.currentView()).getModelBean();
+    OldMS2Controller.AnnotViewBean bean = ((JspView<OldMS2Controller.AnnotViewBean>) HttpView.currentView()).getModelBean();
 %>
 <table>
 <tr>

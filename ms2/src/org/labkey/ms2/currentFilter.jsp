@@ -1,5 +1,6 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.common.util.Pair" %>
+<%@ page import="org.labkey.ms2.OldMS2Controller" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%

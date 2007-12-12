@@ -109,7 +109,7 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
                         return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()));
                     }
                 });
-        addController("MS2", MS2Controller.class);
+        addController("ms2", MS2Controller.class);
         addController("protein", ProteinController.class);
         addController("MS2-Pipeline", PipelineController.class);
         addController("MS2-Scoring", ScoringController.class);

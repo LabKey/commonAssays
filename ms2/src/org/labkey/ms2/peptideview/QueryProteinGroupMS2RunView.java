@@ -4,7 +4,7 @@ import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.query.*;
 import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.OldMS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
@@ -130,12 +130,12 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         return MS2RunViewType.QUERY_PROTEIN_GROUPS;
     }
 
-    public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form)
+    public GridView createPeptideViewForGrouping(OldMS2Controller.DetailsForm form)
     {
         throw new UnsupportedOperationException();
     }
 
-    public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
+    public String[] getPeptideStringsForGrouping(OldMS2Controller.DetailsForm form) throws SQLException
     {
         throw new UnsupportedOperationException();
     }

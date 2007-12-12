@@ -1,15 +1,15 @@
 package org.labkey.ms2.protein.tools;
 
-import com.ice.tar.TarInputStream;
 import com.ice.tar.TarEntry;
+import com.ice.tar.TarInputStream;
 import org.apache.log4j.Logger;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.DbScope;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.util.ExceptionUtil;
-import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.FTPUtil;
+import org.labkey.api.util.JobRunner;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.WebPartView;
@@ -17,15 +17,14 @@ import org.labkey.common.tools.TabLoader;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -46,7 +45,6 @@ public abstract class GoLoader
     private static Boolean _goLoaded = null;
     private static GoLoader _currentLoader = null;
 
-    private HttpServletRequest _request;
     private TarInputStream _tis = null;
     private StringBuffer _status = new StringBuffer();  // Can't use StringBuilder -- needs to be synchronized
     private boolean _complete = false;
@@ -70,12 +68,6 @@ public abstract class GoLoader
             return _currentLoader = new FtpGoLoader();
         else
             return null;
-    }
-
-
-    private GoLoader() throws IOException, ServletException
-    {
-        _request = HttpView.getRootContext().getRequest();
     }
 
 
@@ -265,7 +257,7 @@ public abstract class GoLoader
             }
             catch (IOException e)
             {
-                ExceptionUtil.logExceptionToMothership(_request, e);
+                ExceptionUtil.logExceptionToMothership(HttpView.getRootContext().getRequest(), e);
             }
         }
 
@@ -351,12 +343,6 @@ public abstract class GoLoader
         private final static String SERVER = "ftp.geneontology.org";
         private final static String PATH = "godatabase/archive/latest-full";
         private final static String PATTERN = "go_[0-9]{6}-termdb-tables.tar.gz";
-
-        FtpGoLoader() throws IOException, ServletException
-        {
-            super();
-        }
-
 
         protected InputStream getInputStream() throws IOException, ServletException
         {

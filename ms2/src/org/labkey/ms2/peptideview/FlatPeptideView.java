@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.io.IOException;
 
-import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.OldMS2Controller;
 import jxl.write.WritableWorkbook;
 
 /**
@@ -41,7 +41,7 @@ public class FlatPeptideView extends AbstractMS2RunView
     }
 
 
-    public void exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public void exportToAMT(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
     {
         form.setColumns(AMT_PEPTIDE_COLUMN_NAMES);
         form.setExpanded(true);
@@ -49,7 +49,7 @@ public class FlatPeptideView extends AbstractMS2RunView
         exportToTSV(form, response, selectedRows, getAMTFileHeader());
     }
 
-    public void exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public void exportToExcel(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
     {
         List<MS2Run> runs = Arrays.asList(_runs);
         SimpleFilter filter = createFilter(selectedRows);
@@ -195,7 +195,7 @@ public class FlatPeptideView extends AbstractMS2RunView
         return MS2RunViewType.NONE;
     }
 
-    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form)
+    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, OldMS2Controller.ChartForm form)
     {
         SQLFragment fragment = new SQLFragment();
         fragment.append("SELECT DISTINCT SeqId FROM ");
@@ -219,17 +219,17 @@ public class FlatPeptideView extends AbstractMS2RunView
         throw new UnsupportedOperationException();
     }
 
-    public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form)
+    public GridView createPeptideViewForGrouping(OldMS2Controller.DetailsForm form)
     {
         throw new UnsupportedOperationException();
     }
 
-    public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
+    public String[] getPeptideStringsForGrouping(OldMS2Controller.DetailsForm form) throws SQLException
     {
         throw new UnsupportedOperationException();
     }
 
-    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+    public void exportToTSV(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
     {
         List<MS2Run> runs = Arrays.asList(_runs);
         SimpleFilter filter = createFilter(selectedRows);

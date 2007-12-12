@@ -1,9 +1,9 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.OldMS2Controller" %>
 <%
-    MS2Controller.RenameBean bean = ((JspView<MS2Controller.RenameBean>) HttpView.currentView()).getModelBean();
+    OldMS2Controller.RenameBean bean = ((JspView<OldMS2Controller.RenameBean>) HttpView.currentView()).getModelBean();
 %>
 <form action="rename.post" method="post">
 <input type="hidden" name="run" value="<%=bean.run.getRun()%>"/>
