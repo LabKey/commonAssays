@@ -1,27 +1,16 @@
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.jsp.JspBase;
+import org.labkey.api.jsp.FormPage;
 
 /**
  * User: brittp
  * Date: Dec 13, 2005
  * Time: 1:15:47 PM
  */
-public abstract class ConfigureSequenceDB extends JspBase
+public abstract class ConfigureSequenceDB extends FormPage
 {
     private String _localPathRoot;
     private boolean _allowUpload;
-    private String _error;
-
-    public String getError()
-    {
-        return _error;
-    }
-
-    public void setError(String error)
-    {
-        _error = error;
-    }
 
     public boolean isAllowUpload()
     {

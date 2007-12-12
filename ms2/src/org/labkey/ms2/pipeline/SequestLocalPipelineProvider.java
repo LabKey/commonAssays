@@ -82,10 +82,10 @@ public class SequestLocalPipelineProvider extends PipelineProvider implements MS
             if (!AppProps.getInstance().hasPipelineCluster())
             {
                 html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">Sequest specific settings:</td></tr>");
-                ViewURLHelper setDefaultsURL = new ViewURLHelper("MS2-Pipeline", "setSequestDefaults", context.getContainer());
+                ViewURLHelper setDefaultsURL = context.getContainer().urlFor(PipelineController.SetSequestDefaultsAction.class);
                 html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
                     .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
-                    .append(" - Specify the default XML parameters file for Sequest.</td></tr>");
+                    .append(" - Specify the default XML parameters file for Sequest.</td></tr></table>");
             }
             out.write(html.toString());
         }

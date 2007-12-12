@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="tandem-input-style.xsl"?>
 <bioml>
 <note>list path parameters</note>
-  <note type="input" label="list path, default parameters">default_input.xml</note>
+  <note type="input" label="list path, default parameters">sequest_default_input.xml</note>
     <note>This value is ignored when it is present in the default parameter
           list path.</note>
   <note type="input" label="list path, taxonomy information">taxonomy.xml</note>

@@ -367,6 +367,11 @@ public class MassSpecProtocol extends PipelineProtocol
         String sep = "";
 
         int numInputs = xarDoc.getExperimentArchive().getStartingInputDefinitions().sizeOfMaterialArray();
+        if (numInputs != runInfo.getMaterialSourceIds().length)
+        {
+            errorBuilder.append("Template does not match inputs.");
+            return errorBuilder.toString();
+        }
         for (int i = 0; i < numInputs; i++)
         {
             if (null == runInfo.materialSourceIds[i])

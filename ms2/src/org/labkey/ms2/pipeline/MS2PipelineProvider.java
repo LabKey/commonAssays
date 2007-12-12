@@ -63,14 +63,14 @@ public class MS2PipelineProvider extends PipelineProvider
                 return;
             StringBuilder html = new StringBuilder();
             html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">MS2 specific settings:</td></tr>");
-            ViewURLHelper buttonURL = new ViewURLHelper("MS2-Pipeline", "setupClusterSequenceDB", context.getViewURLHelper().getExtraPath());
+            ViewURLHelper buttonURL = context.getContainer().urlFor(PipelineController.SetupClusterSequenceDBAction.class);
             html.append("<tr class=\"normal\"><td>&nbsp;&nbsp;&nbsp;&nbsp;")
                     .append("<a href=\"").append(buttonURL.getLocalURIString()).append("\">Set FASTA root</a>")
                     .append(" - Specify the location on the web server where FASTA sequence files will be located.</td></tr>");
 
             if (MS2PipelineManager.allowSequenceDatabaseUploads(context.getUser(), context.getContainer()))
             {
-                buttonURL = new ViewURLHelper("MS2-Pipeline", "addSequenceDB", context.getViewURLHelper().getExtraPath());
+                buttonURL = context.getContainer().urlFor(PipelineController.AddSequenceDBAction.class);
                 html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
                         .append("<a href=\"").append(buttonURL.getLocalURIString()).append("\">Add FASTA file</a>")
                         .append(" - Add a FASTA sequence file to the current FASTA root location.</td></tr>");

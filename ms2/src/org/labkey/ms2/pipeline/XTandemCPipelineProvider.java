@@ -118,10 +118,10 @@ public class XTandemCPipelineProvider extends PipelineProviderCluster implements
             if (!AppProps.getInstance().hasPipelineCluster())
             {
                 html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">X! Tandem specific settings:</td></tr>");
-                ViewURLHelper setDefaultsURL = new ViewURLHelper("MS2-Pipeline", "setTandemDefaults", context.getContainer());
+                ViewURLHelper setDefaultsURL = context.getContainer().urlFor(PipelineController.SetTandemDefaultsAction.class);
                 html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
                         .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
-                        .append(" - Specify the default XML parameters file for X! Tandem.</td></tr>");
+                        .append(" - Specify the default XML parameters file for X! Tandem.</td></tr></table>");
             }
             out.write(html.toString());
         }

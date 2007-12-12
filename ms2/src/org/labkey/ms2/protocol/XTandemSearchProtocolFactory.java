@@ -79,4 +79,11 @@ public class XTandemSearchProtocolFactory extends AbstractMS2SearchProtocolFacto
 
         return createProtocolInstance(name, description, dbNames, xml);
     }
+
+    protected XTandemSearchProtocol createProtocolInstance(BioMLInputParser parser)
+    {
+        parser.removeInputParameter("protein, taxon");
+
+        return super.createProtocolInstance(parser);
+    }
 }

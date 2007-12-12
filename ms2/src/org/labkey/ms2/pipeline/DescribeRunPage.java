@@ -29,10 +29,9 @@ import java.sql.SQLException;
 abstract public class DescribeRunPage extends JspBase
 {
     protected ExperimentArchiveDocument[] xarDocs;
-    protected PipelineController.MS2ExperimentForm form;
+    protected MS2ExperimentForm form;
     protected Map<File, FileStatus> mzXmlFileStatus;
     protected ExpSampleSet[] sampleSets;
-    protected PipelineController controller;
     private Map<Integer, ExpMaterial[]> _materialSourceMaterials;
 
     private static Set<String> ignoreParams = PageFlowUtil.set(
@@ -46,7 +45,7 @@ abstract public class DescribeRunPage extends JspBase
             "terms.fhcrc.org#XarTemplate.OutputDataFile",
             "terms.fhcrc.org#XarTemplate.OutputMaterialPerInstanceExpression");
 
-    public void setForm(PipelineController.MS2ExperimentForm form)
+    public void setForm(MS2ExperimentForm form)
     {
         this.form = form;
     }
@@ -200,10 +199,10 @@ abstract public class DescribeRunPage extends JspBase
             File parentFile = mzXMLFiles.next().getParentFile();
             if (parentFile != null)
             {
-                PipeRoot root = PipelineService.get().findPipelineRoot(getController().getContainer());
+                PipeRoot root = PipelineService.get().findPipelineRoot(getViewContext().getContainer());
                 if (root != null)
                 {
-                    File rootFile = new File(root.getUri(getController().getContainer()));
+                    File rootFile = new File(root.getUri(getViewContext().getContainer()));
                     String result = PathRelativizer.relativizePathUnix(rootFile, parentFile);
                     if (result.length() > 0)
                     {
@@ -268,7 +267,7 @@ abstract public class DescribeRunPage extends JspBase
         return xarDocs;
     }
 
-    public PipelineController.MS2ExperimentForm getForm()
+    public MS2ExperimentForm getForm()
     {
         return form;
     }
@@ -291,16 +290,6 @@ abstract public class DescribeRunPage extends JspBase
     public void setSampleSets(ExpSampleSet[] sampleSets)
     {
         this.sampleSets = sampleSets;
-    }
-
-    public PipelineController getController()
-    {
-        return controller;
-    }
-
-    public void setController(PipelineController controller)
-    {
-        this.controller = controller;
     }
 
     public void setMaterialSourceMaterials(Map<Integer, ExpMaterial[]> materialSourceMaterials)

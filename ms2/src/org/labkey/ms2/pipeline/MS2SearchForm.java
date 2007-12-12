@@ -15,19 +15,19 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.apache.beehive.netui.pageflow.FormData;
+import org.labkey.api.view.ViewForm;
 
 /**
  * <code>MS2SearchForm</code>
 */
-public class MS2SearchForm extends FormData
+public class MS2SearchForm extends ViewForm
 {
     private String path;
     private String protocol = "";
     private String protocolName = "";
     private String protocolDescription = "";
     private String sequenceDBPath = "";
-    private String[] sequenceDBs = new String[0];
+    private String sequenceDB = "";
     private String configureXml = "";
     private boolean skipDescription;
     private String searchEngine = XTandemCPipelineProvider.name;
@@ -43,14 +43,14 @@ public class MS2SearchForm extends FormData
         this.path = path;
     }
 
-    public String[] getSequenceDBs()
+    public String getSequenceDB()
     {
-        return sequenceDBs;
+        return sequenceDB;
     }
 
-    public void setSequenceDBs(String[] sequenceDBs)
+    public void setSequenceDB(String sequenceDB)
     {
-        this.sequenceDBs = (sequenceDBs == null ? new String[0] : sequenceDBs);
+        this.sequenceDB = (sequenceDB == null ? new String() : sequenceDB);
     }
 
     public String getConfigureXml()

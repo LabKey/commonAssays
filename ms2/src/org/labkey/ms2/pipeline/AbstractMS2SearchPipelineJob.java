@@ -33,7 +33,6 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
     protected File _dirMzXML;
     protected File[] _filesMzXML;
     protected File _dirAnalysis;
-    protected File _filePepXML;
     protected File _fileInputXML;
     protected boolean _fractions;
     protected boolean _fromCluster;
@@ -108,8 +107,6 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         else
             _baseName = FileUtil.getBaseName(filesMzXML[0]);
 
-        _filePepXML = TPPTask.getPepXMLFile(_dirAnalysis, _baseName);
-
         setLogFile(MS2PipelineManager.getLogFile(_dirAnalysis, _baseName), _fromCluster);
 
         boolean cluster = isPerlClusterAware() && AppProps.getInstance().hasPipelineCluster();
@@ -128,7 +125,6 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         _dirMzXML = job._dirMzXML;
         _fractions = job._fractions;
         _dirAnalysis = job._dirAnalysis;
-        _filePepXML = job._filePepXML;
         _fileInputXML = job._fileInputXML;
         _parameters = job._parameters;
         _parametersDefaults = job._parametersDefaults;
@@ -391,11 +387,6 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         return !_fractions || DATATYPE_BOTH.equalsIgnoreCase(getParameters().get("pipeline, data type"));
     }
 
-    public File getPepXMLFile()
-    {
-        return _filePepXML;
-    }
-
     public void setExperimentRowId(int rowId)
     {
         _experimentRowId = rowId;
@@ -448,7 +439,7 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         }
 
         replaceMap.put("PEP_XML_FILE_PATH",
-                PathRelativizer.relativizePathUnix(dirAnalysis, getPepXMLFile()));
+                TPPTask.getPepXMLFile(_dirAnalysis, _baseName).getName());
 
         File fileProtXml = TPPTask.getProtXMLFile(dirAnalysis, baseName);
         if (!NetworkDrive.exists(fileProtXml))
@@ -457,8 +448,7 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
             if (NetworkDrive.exists(fileProtXMLInt))
                 fileProtXml = fileProtXMLInt;
         }
-        replaceMap.put("PEP_PROT_XML_FILE_PATH",
-                PathRelativizer.relativizePathUnix(dirAnalysis, fileProtXml));
+        replaceMap.put("PEP_PROT_XML_FILE_PATH", fileProtXml.getName());
 
         File fileUniquifier = dirAnalysis;
         if (getSpectraFiles().length == 1)

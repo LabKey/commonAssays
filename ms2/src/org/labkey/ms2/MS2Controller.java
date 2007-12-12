@@ -84,6 +84,21 @@ public class MS2Controller extends ViewController
 
     public static final String CAPTION_SCORING_BUTTON = "Compare Scoring";
 
+    public static enum Action
+    {
+        begin,
+        showList
+    }
+
+    public static ViewURLHelper getURL(Action action, Container container)
+    {
+        return PageFlowUtil.urlFor(action, container);
+    }
+
+    public ViewURLHelper getURL(Action action) throws ServletException
+    {
+        return getURL(action, getContainer());
+    }
 
     private ButtonBar getListButtonBar(Container c)
     {

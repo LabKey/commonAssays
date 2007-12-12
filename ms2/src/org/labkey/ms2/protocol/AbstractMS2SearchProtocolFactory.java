@@ -118,6 +118,38 @@ abstract public class AbstractMS2SearchProtocolFactory<T extends MS2SearchPipeli
     public abstract T createProtocolInstance(String name, String description, File dirSeqRoot,
                                                        String dbPath, String[] dbNames, String xml);
 
+    protected T createProtocolInstance(BioMLInputParser parser)
+    {
+        // Remove the pipeline specific parameters.
+        String name = parser.removeInputParameter("pipeline, protocol name");
+        String description = parser.removeInputParameter("pipeline, protocol description");
+        String folder = parser.removeInputParameter("pipeline, load folder");
+        String databases = parser.removeInputParameter("pipeline, database");
+        String email = parser.removeInputParameter("pipeline, email address");
+
+        // Remove the parameters set in the pipeline job.
+        parser.removeInputParameter("list path, default parameters");
+        parser.removeInputParameter("list path, taxonomy information");
+        parser.removeInputParameter("spectrum, path");
+        parser.removeInputParameter("output, path");
+
+        String[] dbNames;
+        if (databases == null)
+        {
+            dbNames = new String[0];
+        }
+        else
+        {
+            dbNames = databases.split(";");
+        }
+
+        T instance = createProtocolInstance(name, description, dbNames, parser.getXML());
+
+        instance.setEmail(email);
+
+        return instance;
+    }
+
     public T load(URI uriRoot, String name) throws IOException
     {
         return loadInstance(getProtocolFile(uriRoot, name));
@@ -169,33 +201,7 @@ abstract public class AbstractMS2SearchProtocolFactory<T extends MS2SearchPipeli
             }
         }
 
-        // Remove the pipeline specific parameters.
-        String name = parser.removeInputParameter("pipeline, protocol name");
-        String description = parser.removeInputParameter("pipeline, protocol description");
-        String folder = parser.removeInputParameter("pipeline, load folder");
-        String databases = parser.removeInputParameter("pipeline, database");
-        String email = parser.removeInputParameter("pipeline, email address");
-
-        // Remove the parameters set in the pipeline job.
-        parser.removeInputParameter("list path, default parameters");
-        parser.removeInputParameter("list path, taxonomy information");
-        parser.removeInputParameter("protein, taxon");
-        parser.removeInputParameter("spectrum, path");
-        parser.removeInputParameter("output, path");
-
-        String[] dbNames;
-        if (databases == null)
-        {
-            dbNames = new String[0];
-        }
-        else
-        {
-            dbNames = databases.split(";");
-        }
-
-        T instance = createProtocolInstance(name, description, dbNames, parser.getXML());
-        instance.setEmail(email);
-        return instance;
+        return createProtocolInstance(parser);
     }
 
     public String getDefaultParametersXML(File dirRoot) throws FileNotFoundException, IOException

@@ -56,8 +56,8 @@ public abstract class MS2SearchPipelineProtocol extends PipelineProtocol
             }
         }
 
-        if (dbNames.length == 0)
-            throw new PipelineValidationException("Select at least one protein database.");
+        if (dbNames.length == 0 || dbNames[0] == null || dbNames[0].length() == 0)
+            throw new PipelineValidationException("Select a sequence database.");
     }
 
     public String getDescription()

@@ -98,9 +98,7 @@ public abstract class QueryNestingOption
 
         QueryPeptideDataRegion ppRgn = new QueryPeptideDataRegion(allColumns, _groupIdColumn.getColumnInfo().getAlias(), url, getResultSetRowLimit(), getOuterGroupLimit());
         // Set the nested button bar as not visible so that we don't render a bunch of nested <form>s which mess up IE.
-        ButtonBar bbarHidden = new ButtonBar();
-        bbarHidden.setVisible(false);
-        ppRgn.setButtonBar(bbarHidden);
+        ppRgn.setButtonBar(ButtonBar.BUTTON_BAR_EMPTY);
         ppRgn.setExpanded(expanded);
         ppRgn.setRecordSelectorValueColumns(_groupIdColumn.getColumnInfo().getAlias());
         DataRegion nestedRgn = new DataRegion();

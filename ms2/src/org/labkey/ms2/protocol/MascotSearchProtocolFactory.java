@@ -73,4 +73,16 @@ public class MascotSearchProtocolFactory extends AbstractMS2SearchProtocolFactor
         protocol.setMascotHTTPProxy(mascotHTTPProxy);
         return protocol;
     }
+
+    protected MascotSearchProtocol createProtocolInstance(BioMLInputParser parser)
+    {
+        String mascotServer = parser.removeInputParameter("pipeline, mascot server");
+        String mascotHTTPProxy = parser.removeInputParameter("pipeline, mascot http proxy");
+
+        MascotSearchProtocol instance = super.createProtocolInstance(parser);
+
+        instance.setMascotServer(mascotServer);
+        instance.setMascotHTTPProxy(mascotHTTPProxy);
+        return instance;
+    }
 }

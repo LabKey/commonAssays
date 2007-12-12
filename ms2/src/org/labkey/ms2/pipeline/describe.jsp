@@ -1,18 +1,29 @@
-<%@page extends="org.labkey.ms2.pipeline.DescribeRunPage" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
-<%@ page import="org.labkey.api.view.ViewURLHelper"%>
-<%@ page import="java.io.File"%>
-<%@ page import="org.fhcrc.cpas.exp.xml.ProtocolBaseType"%>
+<%@ page extends="org.labkey.ms2.pipeline.DescribeRunPage" %>
 <%@ page import="org.fhcrc.cpas.exp.xml.ExperimentArchiveType"%>
-<%@ page import="java.util.Map"%>
-<%@ page import="org.labkey.ms2.pipeline.FileStatus"%>
+<%@ page import="org.fhcrc.cpas.exp.xml.ProtocolBaseType"%>
+<%@ page import="org.labkey.api.exp.api.ExpMaterial"%>
+<%@ page import="org.labkey.api.pipeline.PipelineService"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.ThemeFont"%>
-<%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
+<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.ms2.pipeline.FileStatus" %>
+<%@ page import="org.labkey.ms2.pipeline.MS2ExperimentForm" %>
+<%@ page import="org.labkey.ms2.pipeline.PipelineController" %>
+<%@ page import="java.io.File" %>
+<%@ page import="java.util.Map" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <p/>
-<form method=post action="describeMS2Run.post" name="describeForm">
+<form method=post action="<%=getViewContext().getContainer().urlFor(PipelineController.ShowDescribeMS2RunAction.class)%>" name="describeForm">
 <%
+    MS2ExperimentForm form = getForm();
+
+    ViewURLHelper urlShowCreateMS2Protocol =
+    getViewContext().getContainer().urlFor(PipelineController.ShowCreateMS2ProtocolAction.class);
+    urlShowCreateMS2Protocol.addParameter("path", form.getPath());
+    urlShowCreateMS2Protocol.addParameter("searchEngine", form.getSearchEngine());
+
     int annotFileSize = 0;
-    if ("fractions".equals(getForm().getProtocolSharing()))
+    if (form.isProtocolFractions())
         annotFileSize = getMzXmlFileStatus().size();
     else
     {
@@ -22,13 +33,12 @@
     }
 %>
 <input type="hidden" name="size" value="<%=annotFileSize%>">
-    <input type="hidden" name="protocolSharing" value="<%=getForm().getProtocolSharing()%>">
-    <input type="hidden" name="sharedProtocol" value="<%=getForm().getSharedProtocol()%>">
-    <input type="hidden" name="fractionProtocol" value="<%=getForm().getFractionProtocol()%>">
-    <input type="hidden" name="path" value="<%=h(getForm().getPath())%>">
-<!--WCH:mascotdev-->
-    <input type="hidden" name="searchEngine" value="<%=h(getForm().getSearchEngine())%>">
-<!--END-WCH:mascotdev-->
+<input type="hidden" name="stepString" value="describeSamples">
+<input type="hidden" name="protocolSharingString" value="<%=form.getProtocolSharingString()%>">
+<input type="hidden" name="sharedProtocol" value="<%=form.getSharedProtocol()%>">
+<input type="hidden" name="fractionProtocol" value="<%=form.getFractionProtocol()%>">
+<input type="hidden" name="path" value="<%=h(form.getPath())%>">
+<input type="hidden" name="searchEngine" value="<%=h(form.getSearchEngine())%>">
 <table border="0">
     <tr><td colspan=2 style="font-size:<%=ThemeFont.getThemeFont().getHeader_1Size()%>">
     Before searching describe how each mzXML file was created using the following information<br>
@@ -39,7 +49,7 @@
     </tr>
     <tr>
         <td style="padding-left:10px"><b>Sample Set</b></td>
-        <td class="normal">Set that contains the sample used in this analysis. <a href="<%=getController().getViewURLHelper().relativeUrl("showUploadMaterials.view", "", "Experiment")%>">Upload</a> sample information using the experiment module, and <a href="<%=getController().getViewURLHelper().relativeUrl("listMaterialSources.view", "", "Experiment")%>">set the active sample set</a>. Optional.</td>
+        <td class="normal">Set that contains the sample used in this analysis. <a href="<%=getViewContext().getViewURLHelper().relativeUrl("showUploadMaterials.view", "", "Experiment")%>">Upload</a> sample information using the experiment module, and <a href="<%=getViewContext().getViewURLHelper().relativeUrl("listMaterialSources.view", "", "Experiment")%>">set the active sample set</a>. Optional.</td>
     </tr>
     <tr>
         <td style="padding-left:10px"><b>Sample Id</b></td>
@@ -47,18 +57,16 @@
     </tr>
     <tr>
         <td style="padding-left:10px"><b>Protocol</b> </td>
-<!--WCH:mascotdev-->
-    <td class="normal">Protocol used to prepare sample and run Mass Spec. <a href="showCreateMS2Protocol.view?path=<%=u(getForm().getPath())%>&searchEngine=<%=h(getForm().getSearchEngine())%>">Create</a> a new protocol.</td>
-<!--END-WCH:mascotdev-->
+    <td class="normal">Protocol used to prepare sample and run Mass Spec. <a href="<%=urlShowCreateMS2Protocol%>">Create</a> a new protocol.</td>
     </tr>
     </table>
     <br>
-    <input type=image src="<%=PageFlowUtil.submitSrc()%>">&nbsp;<a href="<%=ViewURLHelper.toPathString("Pipeline", "returnToReferer", getController().getContainer().getPath())%>"><%=PageFlowUtil.buttonImg("Cancel")%></a>
+    <labkey:button text="Submit"/>&nbsp;<labkey:button text="Cancel" href="<%=PipelineService.get().urlReferer(getViewContext().getContainer())%>"/>
     <br/>&nbsp;<br/>
 <table border="0">
 <%
 
-    if ("fractions".equals(getForm().getProtocolSharing()))
+    if (form.isProtocolFractions())
     {
     //todo check to see if already annotated?
 /*
@@ -69,96 +77,95 @@
                 break;   // Already annotated.
             }
 */
-        String protocolName = getForm().getFractionProtocol();
+        String protocolName = form.getFractionProtocol();
         String runName = "MS2 Sample Prep (" + getPathDescription() + "), (" + protocolName + ")";
-        String error = getForm().getError(0);
+        String error = form.getError(0);
 %>
 <tr><td colspan="2" class="heading-1">Run Settings (with Fractionation)</td></tr>
 <tr><td>&nbsp;</td><td>
-   <table border="0">
-<%  if (error != null && error.length() > 0) { %>
-   <tr><td class="labkey-error" colspan="2"><%=error%></td></tr>
-<%  } %>
-   <tr><td class="ms-searchform">Run Name</td>
-     <td class="normal">
-         <%
-             int index = 0;
-             for (File file : getMzXmlFileStatus().keySet())
-             {
-         %>
-         <input type="hidden" name="fileNames[<%=index%>]" value="<%=h(file.getName())%>">
-         <%
-             index++;
-             }
-         %>
-           <input type="hidden" name="protocolNames[0]" value="<%=h(protocolName)%>">
-           <input name="runNames[0]" size=50 value="<%=h(runName)%>"></td></tr>
-           <tr><td colspan="2"><%=renderXarInputs(0, getPathDescription())%>
-     </td></tr>
-   </table>
+  <table border="0">
+<%      if (error != null && error.length() > 0)
+        { %>
+  <tr><td class="labkey-error" colspan="2"><%=error%></td></tr>
+<%      } %>
+  <tr><td class="ms-searchform">Run Name</td>
+    <td class="normal">
+<%
+        int index = 0;
+        for (File file : getMzXmlFileStatus().keySet())
+        { %>
+        <input type="hidden" name="fileNames[<%=index%>]" value="<%=h(file.getName())%>">
+<%
+        index++;
+        }
+%>
+        <input type="hidden" name="protocolNames[0]" value="<%=h(protocolName)%>">
+        <input name="runNames[0]" size=50 value="<%=h(runName)%>"></td></tr>
+    <tr><td colspan="2"><%=renderXarInputs(0, getPathDescription())%></td></tr>
+  </table>
     <%
     }
     else
     {
-        if ("share".equals(getForm().getProtocolSharing()))
+        if (form.isProtocolShare())
         {
-    %>
+%>
     <tr><td colspan="2" class="heading-1">Default Settings for All Runs</td></tr>
     <tr ><td >&nbsp;</td><td>
         <table border="0">
     <tr><td class="ms-searchform">Sample Set</td><td><%=materialSourceSelect(null, "defaults", 0, "defaultMaterialSource(this)")%></td></tr>
-    <%
-        StringBuilder builder = new StringBuilder();
-        int iParam = 0;
-        ExperimentArchiveType xar = xarDocs[0].getExperimentArchive();
-        ProtocolBaseType[] protocols = xar.getProtocolDefinitions().getProtocolArray();
-        for (ProtocolBaseType protocol : protocols)
-        {
-            iParam = renderProtocolParameters(null, "defaults", protocol, builder, iParam, "updateDefaultParam(this)");
-        }
-        out.write(builder.toString());
-    %>
+<%
+            StringBuilder builder = new StringBuilder();
+            int iParam = 0;
+            ExperimentArchiveType xar = xarDocs[0].getExperimentArchive();
+            ProtocolBaseType[] protocols = xar.getProtocolDefinitions().getProtocolArray();
+            for (ProtocolBaseType protocol : protocols)
+            {
+                iParam = renderProtocolParameters(null, "defaults", protocol, builder, iParam, "updateDefaultParam(this)");
+            }
+            out.write(builder.toString());
+%>
         </table>
         </td>
         </tr>
-    <%
-    }
-%>
 <%
-int index = 0;
-for (File file : getMzXmlFileStatus().keySet())
-    {
-    FileStatus status = getMzXmlFileStatus().get(file);
-    if (status != FileStatus.UNKNOWN)
-        continue;   // Already annotated.
+        }
 
-    String protocolName = "";
-    String error = "";
-    String runName = null;
-    if (index < getForm().getRunNames().length)
-    {
-        if (getForm().getRunNames()[index] != null)
+        int index = 0;
+        for (File file : getMzXmlFileStatus().keySet())
         {
-            runName = getForm().getRunNames()[index];
-        }
-        protocolName = getForm().getProtocolNames()[index];
-        error = getForm().getError(index);
-    }
-    if (runName == null)
-    {
-        if ("share".equals(getForm().getProtocolSharing()))
-        {
-            protocolName = getForm().getSharedProtocol();    
-        }
-        runName = "MS2 Sample Prep (" + getStrippedFileName(file) + "), (" + protocolName + ")";
-    }
+            FileStatus status = getMzXmlFileStatus().get(file);
+            if (status != FileStatus.UNKNOWN)
+                continue;   // Already annotated.
+
+            String protocolName = "";
+            String error = "";
+            String runName = null;
+            if (index < form.getRunNames().length)
+            {
+                if (form.getRunNames()[index] != null)
+                {
+                    runName = form.getRunNames()[index];
+                }
+                protocolName = form.getProtocolNames()[index];
+                error = form.getError(index);
+            }
+            if (runName == null)
+            {
+                if (form.isProtocolShare())
+                {
+                    protocolName = form.getSharedProtocol();
+                }
+                runName = "MS2 Sample Prep (" + getStrippedFileName(file) + "), (" + protocolName + ")";
+            }
 %>
   <tr><td colspan="2" class="heading-1"><%=h(file.getName())%></td></tr>
   <tr><td>&nbsp;</td><td>
     <table border="0">
-<%  if (error != null && error.length() > 0) { %>
+<%          if (error != null && error.length() > 0)
+            { %>
     <tr><td class="labkey-error" colspan="2"><%=error%></td></tr>
-<%  } %>
+<%          } %>
     <tr><td class="ms-searchform">Run Name</td>
       <td class="normal"><input type="hidden" name="fileNames[<%=index%>]" value="<%=h(file.getName())%>">
                         <input type="hidden" name="protocolNames[<%=index%>]" value="<%=h(protocolName)%>">
@@ -167,15 +174,15 @@ for (File file : getMzXmlFileStatus().keySet())
       </td></tr>
     </table>
 <%
-        index++;
-        }
-    }%>
+            index++;
+            }
+        }%>
 
     </td>
     </tr>
 
  </table>
-<input type=image src="<%=PageFlowUtil.submitSrc()%>">&nbsp;<a href="<%=ViewURLHelper.toPathString("Pipeline", "returnToReferer", getController().getContainer().getPath())%>"><%=PageFlowUtil.buttonImg("Cancel")%></a>
+<labkey:button text="Submit"/>&nbsp;<labkey:button text="Cancel" href="<%=PipelineService.get().urlReferer(getViewContext().getContainer())%>"/>
 </form>
 <script type="">
     function defaultMaterialSource(sel)
@@ -212,20 +219,20 @@ for (File file : getMzXmlFileStatus().keySet())
     }
 
     var materialSourceMaterials = new Object();
-    <% for (Map.Entry<Integer, ExpMaterial[]> entry : getMaterialSourceMaterials().entrySet())
+<%  for (Map.Entry<Integer, ExpMaterial[]> entry : getMaterialSourceMaterials().entrySet())
     { %>
         var materials = new Object();
-        <%
+<%
         for (int i = 0; i < entry.getValue().length; i++)
         { %>
             var material = new Object();
             material.name = '<%= entry.getValue()[i].getName() %>';
             material.rowId = <%= entry.getValue()[i].getRowId() %>;
             materials[<%= i %>] = material;
-        <% } %>
+<%      } %>
         materials.materialCount = <%= entry.getValue().length %>;
         materialSourceMaterials[<%= entry.getKey() %>] = materials;
-    <% } %>
+<%  } %>
 
     function updateSamples(samplesSelect, sourceSelect, newRadio, existingRadio)
     {

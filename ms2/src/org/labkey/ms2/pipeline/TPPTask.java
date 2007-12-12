@@ -221,7 +221,7 @@ public class TPPTask extends PipelineJob.Task
 
         paramQuant = params.get("pipeline quantitation, mass tolerance");
         if (paramQuant != null)
-            quantOpts.add("-m");
+            quantOpts.add("-m" + paramQuant);
 
         paramQuant = params.get("pipeline quantitation, heavy elutes before light");
         if (paramQuant != null)
