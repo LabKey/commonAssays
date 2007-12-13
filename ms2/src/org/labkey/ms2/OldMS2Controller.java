@@ -85,7 +85,7 @@ public class OldMS2Controller extends ViewController
     @Jpf.Action
     protected Forward begin()
     {
-        return null;
+        return null;        // Placeholder -- we'll never get here, but Beehive compile requires a begin action
     }
 
 
@@ -198,7 +198,13 @@ public class OldMS2Controller extends ViewController
         sb.append("</table>");
         HtmlView view = new HtmlView(sb.toString());
         return _renderInTemplate(view, false, "Error", null,
-                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
+                getBaseNavTree(getContainer()));
+    }
+
+
+    private NavTree getBaseNavTree(Container c)
+    {
+        return new NavTree("MS2 Runs", MS2Controller.getShowListUrl(c));
     }
 
 
@@ -346,8 +352,7 @@ public class OldMS2Controller extends ViewController
 
         MS2Manager.renameRun(form.getRun(), form.getDescription());
 
-        ViewURLHelper url = new ViewURLHelper("MS2", "showRun", getViewURLHelper().getExtraPath());
-        url.addParameter("run", Integer.toString(form.getRun()));
+        ViewURLHelper url = MS2Controller.getShowRunUrl(getContainer(), form.getRun());
         return new ViewForward(url);
     }
 
@@ -467,7 +472,7 @@ public class OldMS2Controller extends ViewController
 
         MS2Run run = MS2Manager.getRun(form.run);
         return _renderInTemplate(pickName, false, "Save View", "viewRun",
-                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())),
+                getBaseNavTree(getContainer()),
                 new NavTree(run.getDescription(), bean.returnUrl));
     }
 
@@ -533,7 +538,7 @@ public class OldMS2Controller extends ViewController
         HttpView manageViews = new JspView<ManageViewsBean>("/org/labkey/ms2/manageViews.jsp", bean);
 
         return _renderInTemplate(manageViews, false, "Manage Views", "viewRun",
-                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())),
+                getBaseNavTree(getContainer()),
                 new NavTree(run.getDescription(), runUrl));
     }
 
@@ -561,9 +566,8 @@ public class OldMS2Controller extends ViewController
 
             PropertyManager.saveProperties(m);
 
-            //NOTE: If names collide between
-            //shared and user-specific view names (unlikely since we append "(Shared)" to project views
-            //only the shared names will be seen and deleted. Local names ending in "(Shared)" are shadowed
+            // NOTE: If names collide between shared and user-specific view names (unlikely since we append "(Shared)" to
+            // project views only the shared names will be seen and deleted. Local names ending in "(Shared)" are shadowed
             if (getContainer().hasPermission(getUser(), ACL.PERM_DELETE))
             {
                 m = PropertyManager.getWritableProperties(0, getContainer().getId(), MS2_VIEWS_CATEGORY, true);
@@ -615,7 +619,7 @@ public class OldMS2Controller extends ViewController
         bean.saveUrl = url;
         bean.saveDefaultUrl = url.clone().addParameter("saveDefault", "1");
         return _renderInTemplate(pickColumns, false, "Pick Peptide Columns", "pickPeptideColumns",
-                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())),
+                getBaseNavTree(getContainer()),
                 new NavTree(run.getDescription(), cloneViewURLHelper().setAction("showRun")));
     }
 
@@ -665,7 +669,7 @@ public class OldMS2Controller extends ViewController
         bean.saveUrl = url;
         bean.saveDefaultUrl = url.clone().addParameter("saveDefault", "1");
         return _renderInTemplate(pickColumns, false, "Pick Protein Columns", "pickProteinColumns",
-                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())),
+                getBaseNavTree(getContainer()),
                 new NavTree(run.getDescription(), cloneViewURLHelper().setAction("showRun")));
     }
 
@@ -1281,7 +1285,7 @@ public class OldMS2Controller extends ViewController
             if (c == null)
                 return HttpView.throwNotFound();
 
-            return new ViewForward(new ViewURLHelper("MS2", "showList", c.getPath()));
+            return new ViewForward(MS2Controller.getShowListUrl(c));
         }
 
         if (null != form.getFileName())
@@ -1316,7 +1320,7 @@ public class OldMS2Controller extends ViewController
                 if (run == -1)
                     return HttpView.throwNotFound();
 
-                url = new ViewURLHelper("MS2", "showList", c.getPath());
+                url = MS2Controller.getShowListUrl(c);
                 url.addParameter(MS2Manager.getDataRegionNameExperimentRuns() + ".Run~eq", Integer.toString(run));
             }
             else if (!AppProps.getInstance().hasPipelineCluster())
@@ -1624,7 +1628,7 @@ public class OldMS2Controller extends ViewController
         html.append("</table>");
 
         return _renderInTemplate(new HtmlView(html.toString()), false, "Move Runs", "ms2RunsList",
-                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
+                getBaseNavTree(getContainer()));
     }
 
 
@@ -1704,7 +1708,7 @@ public class OldMS2Controller extends ViewController
         html.append("</form>");
 
         return _renderInTemplate(new HtmlView(html.toString()), false, "Hierarchy", "ms2RunsList",
-                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
+                getBaseNavTree(getContainer()));
     }
 
 
@@ -2711,7 +2715,7 @@ public class OldMS2Controller extends ViewController
         bean.runList = runListIndex;
 
         return _renderInTemplate(pickView, false, navTreeName, helpTopic,
-                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
+                getBaseNavTree(getContainer()));
     }
 
 
@@ -2915,7 +2919,7 @@ public class OldMS2Controller extends ViewController
             compareView.setResultSet(rgn.getResultSet());
 
             _renderInTemplate(new VBox(filterView, compareView), false, query.getComparisonDescription(), "ms2RunsList",
-                    new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
+                    getBaseNavTree(getContainer()));
         }
 
         return null;
@@ -3117,7 +3121,7 @@ public class OldMS2Controller extends ViewController
         VBox fullPage = new VBox(summaryView, view);
 
         return _renderInTemplate(fullPage, false, "Protein Group Details", "showProteinGroup",
-                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())),
+                getBaseNavTree(getContainer()),
                 new NavTree(MS2Manager.getRun(form.run).getDescription(), getViewURLHelper().clone().setAction("showRun")));
     }
 
@@ -3181,7 +3185,7 @@ public class OldMS2Controller extends ViewController
             ViewURLHelper runUrl = currentUrl.clone();
             runUrl.deleteParameter("seqId");
 
-            navTrail.add(new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())));
+            navTrail.add(getBaseNavTree(getContainer()));
             if (run != null)
             {
                 navTrail.add(new NavTree(run.getDescription(), runUrl.setAction("showRun")));
@@ -3227,7 +3231,7 @@ public class OldMS2Controller extends ViewController
         currentUrl.deleteParameter("peptideId");
 
         return _renderInTemplate(proteinView, false, "Proteins Containing " + peptide, "showProtein",
-                new NavTree("MS2 Runs", new ViewURLHelper("MS2", "showList", getViewURLHelper().getExtraPath())),
+                getBaseNavTree(getContainer()),
                 new NavTree(MS2Manager.getRun(form.run).getDescription(), currentUrl.setAction("showRun")));
     }
 

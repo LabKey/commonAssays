@@ -17,7 +17,6 @@ import org.labkey.ms2.peptideview.MS2RunViewType;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
-import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
@@ -33,40 +32,14 @@ public class MS2Controller extends SpringActionController
 {
     private static DefaultActionResolver _actionResolver = new BeehivePortingActionResolver(OldMS2Controller.class, MS2Controller.class);
     private static Logger _log = Logger.getLogger(MS2Controller.class);
-    public static final String CAPTION_SCORING_BUTTON = "Compare Scoring";
     private static final String MS2_VIEWS_CATEGORY = "MS2Views";
     static final String SHARED_VIEW_SUFFIX = " (Shared)";  // TODO: Make private once Spring conversion is done
-
+    static final String CAPTION_SCORING_BUTTON = "Compare Scoring";
 
     public MS2Controller()
     {
         super();
         setActionResolver(_actionResolver);
-    }
-
-
-    public static enum Action
-    {
-        begin,
-        showList
-    }
-
-
-    public static ViewURLHelper getURL(Action action, Container container)
-    {
-        return PageFlowUtil.urlFor(action, container);
-    }
-
-
-    public ViewURLHelper getURL(Action action) throws ServletException
-    {
-        return getURL(action, getContainer());
-    }
-
-
-    private ViewURLHelper getUrl(String action)
-    {
-        return new ViewURLHelper("ms2", action, getContainer());
     }
 
 
@@ -123,35 +96,32 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
-    public class BeginAction extends RedirectAction
+    public static ViewURLHelper getBeginUrl(Container c)
     {
-        public ViewURLHelper getSuccessURL(Object o)
-        {
-            return getShowListUrl();
-        }
+        return c.urlFor(BeginAction.class);
+    }
 
-        public boolean doAction(Object o, BindException errors) throws Exception
-        {
-            return true;
-        }
 
-        public void validateCommand(Object target, Errors errors)
+    @RequiresPermission(ACL.PERM_READ)
+    public class BeginAction extends SimpleRedirectAction
+    {
+        public ViewURLHelper getRedirectURL(Object o)
         {
+            return getShowListUrl(getContainer());
         }
     }
 
 
     private NavTree appendRootNavTrail(NavTree root)
     {
-        root.addChild("MS2 Runs", getShowListUrl());
+        root.addChild("MS2 Runs", getShowListUrl(getContainer()));
         return root;
     }
 
 
-    private ViewURLHelper getShowListUrl()
+    public static ViewURLHelper getShowListUrl(Container c)
     {
-        return getUrl("showList");
+        return c.urlFor(ShowListAction.class);
     }
 
 
@@ -246,11 +216,9 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private ViewURLHelper getShowRunUrl(int runId)
+    public static ViewURLHelper getShowRunUrl(Container c, int runId)
     {
-        ViewURLHelper url = getUrl("showRun");
-        url.addParameter("run", runId);
-        return url;
+        return c.urlFor(ShowRunAction.class, "run", String.valueOf(runId));
     }
 
 
@@ -332,7 +300,7 @@ public class MS2Controller extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             appendRootNavTrail(root);
-            root.addChild(_run.getDescription(), getShowRunUrl(_run.getRun()));
+            root.addChild(_run.getDescription(), getShowRunUrl(getContainer(), _run.getRun()));
             return root;
         }
     }
