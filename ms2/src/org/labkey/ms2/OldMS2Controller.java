@@ -2819,15 +2819,7 @@ public class OldMS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
         CompareServiceImpl service = new CompareServiceImpl(getViewContext(), this);
-        try
-        {
-            service.doPost(getRequest(), getResponse());
-        }
-        catch (Exception e)
-        {
-            _log.error("Failed to compare", e);
-            throw e;
-        }
+        service.doPost(getRequest(), getResponse());
         return null;
     }
 
