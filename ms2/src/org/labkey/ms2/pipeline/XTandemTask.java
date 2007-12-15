@@ -90,30 +90,15 @@ public class XTandemTask extends PipelineJob.Task
             File fileParameters = new File(dirWork, INPUT_XML);
             File fileTaxonomy = new File(dirWork, TAXONOMY_XML);
 
-            writeRunParameters(fileParameters, fileTaxonomy);
+            writeRunParameters(fileParameters, fileTaxonomy, fileWorkOutputXML);
 
             getJob().runSubProcess(new ProcessBuilder("tandem.exe",
                     INPUT_XML),
                     dirWork);
 
-            // Tandem writes a date-stamped file, so we need to rename it 
-            File[] outputFiles = dirWork.listFiles(new FileFilter()
-            {
-                public boolean accept(File f)
-                {
-                    if (f.isDirectory())
-                        return false;
-                    String name = f.getName();
-                    return name.startsWith("output") && name.endsWith(".xml");
-                }
-            });
-
             // Remove parameters files.
             MS2PipelineManager.removeWorkFile(fileParameters);
             MS2PipelineManager.removeWorkFile(fileTaxonomy);
-
-            // Move output file to predictable name.
-            MS2PipelineManager.moveWorkFile(fileWorkOutputXML, outputFiles[0]);
 
             getJob().runSubProcess(new ProcessBuilder("Tandem2XML",
                     fileWorkOutputXML.getName(),
@@ -140,7 +125,7 @@ public class XTandemTask extends PipelineJob.Task
         }
     }
 
-    public void writeRunParameters(File fileParameters, File fileTaxonomy) throws IOException
+    public void writeRunParameters(File fileParameters, File fileTaxonomy, File fileWorkOutputXML) throws IOException
     {
         Map<String, String> params = new HashMap<String, String>(getJobSupport().getParameters());
         
@@ -157,7 +142,8 @@ public class XTandemTask extends PipelineJob.Task
         params.put("list path, taxonomy information", TAXONOMY_XML);
         params.put("protein, taxon", TAXON_NAME);
         params.put("spectrum, path", getJobSupport().getSearchSpectraFile().getAbsolutePath());
-        params.put("output, path", OUTPUT_XML);
+        params.put("output, path", fileWorkOutputXML.getName());
+        params.put("output, path hashing", "no");        
 
         // Default parameters are just written into this parameters file, so don't need to
         // specify them again.
