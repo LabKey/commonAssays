@@ -16,10 +16,12 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.apache.struts.upload.FormFile;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
-import org.labkey.api.action.*;
+import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.SimpleRedirectAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentPipelineJob;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -28,11 +30,9 @@ import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.jsp.JspLoader;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineValidationException;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
+import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.*;
@@ -56,7 +56,7 @@ import java.util.*;
  */
 public class PipelineController extends SpringActionController
 {
-    private static Logger _log = Logger.getLogger(PipelineController.class);
+//    private static Logger _log = Logger.getLogger(PipelineController.class);
     private static DefaultActionResolver _resolver = new DefaultActionResolver(PipelineController.class);
 
     public static final String DEFAULT_EXPERIMENT_OBJECTID = "DefaultExperiment";
@@ -79,10 +79,9 @@ public class PipelineController extends SpringActionController
         return p;
     }
 
-    public ViewURLHelper urlProjectStart()
+    public ViewURLHelper urlProjectStart(Container container)
     {
-        // TODO: Better way?
-        return new ViewURLHelper("Project", "start", getContainer());
+        return PageFlowUtil.urlProvider(ProjectUrls.class).urlStart(container);
     }
 
     public String getErrorMessage(BindException errors)
@@ -163,7 +162,7 @@ public class PipelineController extends SpringActionController
                     //      after all, this is what the Mascot search processing is doing
                     // mascot .dat result file does not follow that of pipeline
                     protocolName = "none";
-                    dirDataOriginal = file;
+                    // dirDataOriginal = file;
                     description = MS2PipelineManager.
                             getDataDescription(null, file.getName(), protocolName);
                 }
@@ -182,8 +181,7 @@ public class PipelineController extends SpringActionController
                             getDataDescription(dirDataOriginal, baseName, protocolName);
                 }
 
-                PipelineService service = PipelineService.get();
-                ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), file);
+                ViewBackgroundInfo info = getViewBackgroundInfo();
                 try
                 {
                     if (MS2PipelineManager.isSearchExperimentFile(file))
@@ -243,6 +241,21 @@ public class PipelineController extends SpringActionController
         }
     }
 
+    public static ViewURLHelper urlSearch(Container container, MS2PipelineForm form, boolean skipDescription)
+    {
+        return urlSearch(container, form.getPath(), form.getSearchEngine(), skipDescription);
+    }
+
+    public static ViewURLHelper urlSearch(Container container, String path, String searchEngine, boolean skipDescription)
+    {
+        ViewURLHelper url = container.urlFor(SearchAction.class);
+        url.addParameter(MS2PipelineForm.PARAMS.searchEngine, searchEngine);
+        url.addParameter(MS2PipelineForm.PARAMS.path, path);
+        if (skipDescription)
+            url.addParameter(MS2SearchForm.PARAMS.skipDescription, Boolean.toString(skipDescription));
+        return url;
+    }
+
     @RequiresPermission(ACL.PERM_INSERT)
     public class SearchAction extends FormViewAction<MS2SearchForm>
     {
@@ -260,7 +273,7 @@ public class PipelineController extends SpringActionController
         
         public ViewURLHelper getSuccessURL(MS2SearchForm form)
         {
-            return urlProjectStart();
+            return urlProjectStart(getContainer());
         }
 
         public ModelAndView handleRequest(MS2SearchForm form, BindException errors) throws Exception
@@ -440,12 +453,7 @@ public class PipelineController extends SpringActionController
             {
                 // Look for unannotated data.
                 if (status == FileStatus.UNKNOWN && !form.isSkipDescription())
-                {
-                    ViewURLHelper redirectUrl = getContainer().urlFor(ShowDescribeMS2RunAction.class);
-                    redirectUrl.addParameter ("searchEngine", form.getSearchEngine());
-                    redirectUrl.addParameter("path", form.getPath());
-                    return HttpView.redirect(redirectUrl.getLocalURIString());
-                }
+                    return HttpView.redirect(urlShowDescribeMS2Run(getContainer(), form));
             }
 
             Set<ExpRun> creatingRuns = new HashSet<ExpRun>();
@@ -551,7 +559,7 @@ public class PipelineController extends SpringActionController
 
         public ViewURLHelper getSuccessURL(SequenceDBRootForm form)
         {
-            return PipelineService.get().urlSetup(getContainer());
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer());
         }
 
         public ModelAndView getView(SequenceDBRootForm form, boolean reshow, BindException errors) throws Exception
@@ -732,7 +740,7 @@ public class PipelineController extends SpringActionController
 
         public ViewURLHelper getSuccessURL(SetDefaultsForm form)
         {
-            return urlProjectStart();
+            return urlProjectStart(getContainer());
         }
     }
 
@@ -817,13 +825,34 @@ public class PipelineController extends SpringActionController
 
         public ViewURLHelper getSuccessURL(SequenceDBForm form)
         {
-            return urlProjectStart();
+            return urlProjectStart(getContainer());
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
             return root.addChild("Add Sequence Database");
         }
+    }
+
+    public static ViewURLHelper urlShowCreateMS2Protocol(Container container, MS2PipelineForm form)
+    {
+        return urlShowCreateMS2Protocol(container, form.getPath(), form.getSearchEngine());
+    }
+
+    public static ViewURLHelper urlShowCreateMS2Protocol(Container container, String path, String searchEngine)
+    {
+        return urlShowCreateMS2Protocol(container, path, searchEngine, null);
+    }
+
+    public static ViewURLHelper urlShowCreateMS2Protocol(Container container, String path,
+                                                         String searchEngine, String templateName)
+    {
+        ViewURLHelper url = container.urlFor(PipelineController.ShowCreateMS2ProtocolAction.class);
+        if (templateName != null && templateName.length() > 0)
+            url.addParameter(MS2ProtocolForm.PARAMS.templateName, templateName);
+        url.addParameter(MS2PipelineForm.PARAMS.searchEngine, searchEngine);
+        url.addParameter(MS2PipelineForm.PARAMS.path, path);
+        return url;
     }
 
     @RequiresPermission(ACL.PERM_INSERT)
@@ -870,10 +899,7 @@ public class PipelineController extends SpringActionController
 
         public ViewURLHelper getSuccessURL(MS2ProtocolForm form)
         {
-            ViewURLHelper url = getContainer().urlFor(ShowDescribeMS2RunAction.class);
-            url.addParameter("searchEngine", form.getSearchEngine());
-            url.addParameter("path", form.getPath());
-            return url;
+            return urlShowDescribeMS2Run(getContainer(), form);
         }
 
         public ModelAndView getView(MS2ProtocolForm form, boolean reshow, BindException errors) throws Exception
@@ -932,12 +958,8 @@ public class PipelineController extends SpringActionController
             for (String t : templates)
             {
                 out.write("<a href=\"");
-                out.write("showCreateMS2Protocol.view?templateName=");
-                out.write(PageFlowUtil.filter(t));
-                out.write("&path=");
-                out.write(PageFlowUtil.encode(form.getPath()));
-                out.write("&searchEngine=");
-                out.write(PageFlowUtil.encode(form.getSearchEngine()));
+                out.write(urlShowCreateMS2Protocol(getViewContext().getContainer(),
+                        form.getPath(), form.getSearchEngine(), t).getLocalURIString());
                 out.write("\">");
                 out.write(PageFlowUtil.filter(t));
                 out.write("</a><br>\n");
@@ -966,13 +988,13 @@ public class PipelineController extends SpringActionController
             DataRegion dr = new DataRegion();
             dr.setName("protocolRegion");
             dr.addColumn(nameCol);
-            dr.addHiddenFormField("templateName", template.getName());
-            dr.addHiddenFormField("path", form.getPath());
-            dr.addHiddenFormField("searchEngine", form.getSearchEngine());
+            dr.addHiddenFormField(MS2ProtocolForm.PARAMS.templateName, template.getName());
+            dr.addHiddenFormField(MS2PipelineForm.PARAMS.searchEngine, form.getSearchEngine());
+            dr.addHiddenFormField(MS2PipelineForm.PARAMS.path, form.getPath());
             dr.addColumns(template.getSubstitutionFields());
 
             ButtonBar bb = new ButtonBar();
-            ActionButton ab = new ActionButton("showCreateMS2Protocol.post", "Submit");
+            ActionButton ab = new ActionButton(getViewContext().getContainer().urlFor(ShowCreateMS2ProtocolAction.class), "Submit");
             bb.add(ab);
             dr.setButtonBar(bb);
 
@@ -1030,11 +1052,21 @@ public class PipelineController extends SpringActionController
 
         public ViewURLHelper getSuccessURL(MS2ExperimentForm form)
         {
-            ViewURLHelper url = getContainer().urlFor(ShowDescribeMS2RunAction.class);
-            url.addParameter("searchEngine", form.getSearchEngine());
-            url.addParameter("path", form.getPath());
-            return url;
+            return urlShowDescribeMS2Run(getContainer(), form);
         }
+    }
+
+    public static ViewURLHelper urlShowDescribeMS2Run(Container container, MS2PipelineForm form)
+    {
+        return urlShowDescribeMS2Run(container, form.getPath(), form.getSearchEngine());
+    }
+
+    public static ViewURLHelper urlShowDescribeMS2Run(Container container, String path, String searchEngine)
+    {
+        ViewURLHelper url = container.urlFor(ShowDescribeMS2RunAction.class);
+        url.addParameter(MS2PipelineForm.PARAMS.searchEngine, searchEngine);
+        url.addParameter(MS2PipelineForm.PARAMS.path, path);
+        return url;
     }
 
     @RequiresPermission(ACL.PERM_INSERT)
@@ -1146,11 +1178,7 @@ public class PipelineController extends SpringActionController
                 }
 
                 String dataDescription = MS2PipelineManager.getDataDescription(form.getDirData(), baseName, protocol.getName());
-                // The experiment needs to be loaded into the right container for where the mzXML file
-                // lives on disk, not where the generated XAR file sits. This is important for when
-                // the container's pipeline is configured to mirror the file system hierarchy.
-                ViewBackgroundInfo info = PipelineService.get().getJobBackgroundInfo(getViewBackgroundInfo(), mzXMLFile);
-                ExperimentPipelineJob job = new ExperimentPipelineJob(info, fileInstance, dataDescription, false);
+                ExperimentPipelineJob job = new ExperimentPipelineJob(getViewBackgroundInfo(), fileInstance, dataDescription, false);
                 PipelineService.get().queueJob(job);
             }
 
@@ -1159,11 +1187,7 @@ public class PipelineController extends SpringActionController
 
         public ViewURLHelper getSuccessURL(MS2ExperimentForm form)
         {
-            ViewURLHelper url = getContainer().urlFor(SearchAction.class);
-            url.addParameter("skipDescription", "true");
-            url.addParameter("path", form.getPath());
-            url.addParameter("searchEngine", form.getSearchEngine());
-            return url;
+            return urlSearch(getContainer(), form, true);
         }
 
         public ModelAndView getView(MS2ExperimentForm form, boolean reshow, BindException errors) throws Exception
@@ -1253,33 +1277,17 @@ public class PipelineController extends SpringActionController
 
     }
 
-    public static class MS2ProtocolForm extends ViewForm
+    public static class MS2ProtocolForm extends MS2PipelineForm
     {
-        private String searchEngine;
-        private String path;
+        public enum PARAMS
+        {
+            name,
+            templateName
+        }
+        
         private String name;
         private String templateName;
         private String error;
-
-        public String getSearchEngine()
-        {
-            return searchEngine;
-        }
-
-        public void setSearchEngine(String searchEngine)
-        {
-            this.searchEngine = searchEngine;
-        }
-
-        public String getPath()
-        {
-            return path;
-        }
-
-        public void setPath(String path)
-        {
-            this.path = path;
-        }
 
         public String getName()
         {

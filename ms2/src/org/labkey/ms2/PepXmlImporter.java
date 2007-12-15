@@ -455,8 +455,17 @@ public class PepXmlImporter extends MS2Importer
 
         PreparedStatement stmt = (hasProphet || hasQuant ? _stmtWithReselect : _stmt);
 
-        setPeptideParameters(stmt, peptide, peptideProphetSummary);
-        stmt.execute();
+        try
+        {
+            setPeptideParameters(stmt, peptide, peptideProphetSummary);
+            stmt.execute();
+        }
+        catch (SQLException e)
+        {
+            _log.error("Failed to insert scan " + peptide.getScan() + " with charge " + peptide.getCharge());
+            throw e;                    
+        }
+
 
         long peptideId = -1;
         if (hasProphet)

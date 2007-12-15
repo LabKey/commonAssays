@@ -24,6 +24,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.module.FolderType;
+import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
@@ -48,6 +49,15 @@ import java.util.Enumeration;
 public class ProjectController extends SpringActionController
 {
     static DefaultActionResolver _actionResolver = new DefaultActionResolver(ProjectController.class);
+
+    public static class PipelineUrlsImp implements ProjectUrls
+    {
+        public ViewURLHelper urlStart(Container container)
+        {
+            return container.urlFor(StartAction.class);
+        }
+    }
+
 
     public ProjectController() throws Exception
     {

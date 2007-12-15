@@ -2,25 +2,20 @@
 <%@ page import="org.fhcrc.cpas.exp.xml.ExperimentArchiveType"%>
 <%@ page import="org.fhcrc.cpas.exp.xml.ProtocolBaseType"%>
 <%@ page import="org.labkey.api.exp.api.ExpMaterial"%>
-<%@ page import="org.labkey.api.pipeline.PipelineService"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.pipeline.PipelineUrls"%>
 <%@ page import="org.labkey.api.view.ThemeFont"%>
-<%@ page import="org.labkey.api.view.ViewURLHelper"%>
-<%@ page import="org.labkey.ms2.pipeline.FileStatus" %>
-<%@ page import="org.labkey.ms2.pipeline.MS2ExperimentForm" %>
+<%@ page import="org.labkey.ms2.pipeline.FileStatus"%>
+<%@ page import="org.labkey.ms2.pipeline.MS2ExperimentForm"%>
+<%@ page import="org.labkey.ms2.pipeline.MS2PipelineForm" %>
 <%@ page import="org.labkey.ms2.pipeline.PipelineController" %>
-<%@ page import="java.io.File" %>
+<%@ page import="java.io.File"%>
 <%@ page import="java.util.Map" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <p/>
 <form method=post action="<%=getViewContext().getContainer().urlFor(PipelineController.ShowDescribeMS2RunAction.class)%>" name="describeForm">
 <%
     MS2ExperimentForm form = getForm();
-
-    ViewURLHelper urlShowCreateMS2Protocol =
-    getViewContext().getContainer().urlFor(PipelineController.ShowCreateMS2ProtocolAction.class);
-    urlShowCreateMS2Protocol.addParameter("path", form.getPath());
-    urlShowCreateMS2Protocol.addParameter("searchEngine", form.getSearchEngine());
+    PipelineUrls up = urlProvider(PipelineUrls.class);
 
     int annotFileSize = 0;
     if (form.isProtocolFractions())
@@ -37,8 +32,8 @@
 <input type="hidden" name="protocolSharingString" value="<%=form.getProtocolSharingString()%>">
 <input type="hidden" name="sharedProtocol" value="<%=form.getSharedProtocol()%>">
 <input type="hidden" name="fractionProtocol" value="<%=form.getFractionProtocol()%>">
-<input type="hidden" name="path" value="<%=h(form.getPath())%>">
-<input type="hidden" name="searchEngine" value="<%=h(form.getSearchEngine())%>">
+<input type="hidden" name="<%=MS2PipelineForm.PARAMS.path%>" value="<%=h(form.getPath())%>">
+<input type="hidden" name="<%=MS2PipelineForm.PARAMS.searchEngine%>" value="<%=h(form.getSearchEngine())%>">
 <table border="0">
     <tr><td colspan=2 style="font-size:<%=ThemeFont.getThemeFont().getHeader_1Size()%>">
     Before searching describe how each mzXML file was created using the following information<br>
@@ -57,11 +52,11 @@
     </tr>
     <tr>
         <td style="padding-left:10px"><b>Protocol</b> </td>
-    <td class="normal">Protocol used to prepare sample and run Mass Spec. <a href="<%=urlShowCreateMS2Protocol%>">Create</a> a new protocol.</td>
+    <td class="normal">Protocol used to prepare sample and run Mass Spec. <a href="<%=PipelineController.urlShowCreateMS2Protocol(getViewContext().getContainer(), form)%>">Create</a> a new protocol.</td>
     </tr>
     </table>
     <br>
-    <labkey:button text="Submit"/>&nbsp;<labkey:button text="Cancel" href="<%=PipelineService.get().urlReferer(getViewContext().getContainer())%>"/>
+    <labkey:button text="Submit"/>&nbsp;<labkey:button text="Cancel" href="<%=up.urlReferer(getViewContext().getContainer())%>"/>
     <br/>&nbsp;<br/>
 <table border="0">
 <%
@@ -182,7 +177,7 @@
     </tr>
 
  </table>
-<labkey:button text="Submit"/>&nbsp;<labkey:button text="Cancel" href="<%=PipelineService.get().urlReferer(getViewContext().getContainer())%>"/>
+<labkey:button text="Submit"/>&nbsp;<labkey:button text="Cancel" href="<%=up.urlReferer(getViewContext().getContainer())%>"/>
 </form>
 <script type="">
     function defaultMaterialSource(sel)

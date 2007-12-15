@@ -785,6 +785,7 @@ ms2/src/org/labkey/ms2/pipeline/InspectCPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/ListParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2ExperimentForm.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2ImportPipelineJob.java -text
+ms2/src/org/labkey/ms2/pipeline/MS2PipelineForm.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineJobSupport.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineManager.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineProvider.java -text

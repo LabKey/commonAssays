@@ -218,7 +218,9 @@ public class MS2Controller extends SpringActionController
 
     public static ViewURLHelper getShowRunUrl(Container c, int runId)
     {
-        return c.urlFor(ShowRunAction.class, "run", String.valueOf(runId));
+        ViewURLHelper url = c.urlFor(ShowRunAction.class);
+        url.addParameter(OldMS2Controller.RunForm.PARAMS.run, String.valueOf(runId));
+        return url;
     }
 
 

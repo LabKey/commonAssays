@@ -20,9 +20,13 @@ import org.labkey.api.view.ViewForm;
 /**
  * <code>MS2SearchForm</code>
 */
-public class MS2SearchForm extends ViewForm
+public class MS2SearchForm extends MS2PipelineForm
 {
-    private String path;
+    enum PARAMS
+    {
+        skipDescription
+    }
+
     private String protocol = "";
     private String protocolName = "";
     private String protocolDescription = "";
@@ -30,18 +34,7 @@ public class MS2SearchForm extends ViewForm
     private String sequenceDB = "";
     private String configureXml = "";
     private boolean skipDescription;
-    private String searchEngine = XTandemCPipelineProvider.name;
     private boolean saveProtocol = false;
-
-    public String getPath()
-    {
-        return path;
-    }
-
-    public void setPath(String path)
-    {
-        this.path = path;
-    }
 
     public String getSequenceDB()
     {
@@ -111,16 +104,6 @@ public class MS2SearchForm extends ViewForm
     public void setSkipDescription(boolean skipDescription)
     {
         this.skipDescription = skipDescription;
-    }
-
-    public String getSearchEngine()
-    {
-        return searchEngine;
-    }
-
-    public void setSearchEngine(String searchEngine)
-    {
-        this.searchEngine = searchEngine;
     }
 
     public boolean isSaveProtocol()

@@ -1,7 +1,6 @@
 <%@ page import="org.labkey.api.exp.api.ExpRun"%>
-<%@ page import="org.labkey.api.pipeline.PipelineService"%>
+<%@ page import="org.labkey.api.pipeline.PipelineUrls"%>
 <%@ page import="org.labkey.api.util.HelpTopic"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.ThemeFont"%>
 <%@ page import="org.labkey.api.view.ViewURLHelper"%>
 <%@ page import="org.labkey.ms2.pipeline.FileStatus" %>
@@ -14,6 +13,7 @@
 
 <%
 MS2SearchForm form = getForm();
+PipelineUrls up = urlProvider(PipelineUrls.class);
 
 boolean hasWork = false;
 %>
@@ -201,7 +201,7 @@ boolean hasWork = false;
     }
     if (hasWork)
     {
-        %><tr><td colspan="2"><labkey:button text="Search"/>&nbsp;<labkey:button text="Cancel" href="<%=PipelineService.get().urlReferer(getContainer())%>"/></td></tr><%
+        %><tr><td colspan="2"><labkey:button text="Search"/>&nbsp;<labkey:button text="Cancel" href="<%=up.urlReferer(getContainer())%>"/></td></tr><%
     }
 %>
 </table>

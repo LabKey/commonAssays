@@ -37,9 +37,8 @@ import java.util.Map;
 /**
  * <code>MS2ExperimentForm</code>
 */
-public class MS2ExperimentForm extends ViewForm
+public class MS2ExperimentForm extends MS2PipelineForm
 {
-
     public enum Step
     {
         pickProtocol,
@@ -53,8 +52,6 @@ public class MS2ExperimentForm extends ViewForm
         none
     }
 
-    private String searchEngine = XTandemCPipelineProvider.name;
-    private String path = "";
     private Step step = Step.pickProtocol;
     private ProtocolSharing protocolSharing = ProtocolSharing.share;
     private String sharedProtocol;
@@ -149,30 +146,6 @@ public class MS2ExperimentForm extends ViewForm
     public void setError(int i, String error)
     {
         this.errors[i] = error;
-    }
-
-    public String getSearchEngine()
-    {
-        return searchEngine;
-    }
-
-    public void setSearchEngine(String searchEngine)
-    {
-        this.searchEngine = searchEngine;
-    }
-
-    public String getPath()
-    {
-        return path;
-    }
-
-    public void setPath(String path)
-    {
-        if (path == null)
-        {
-            path = "";
-        }
-        this.path = path;
     }
 
     public Step getStep()

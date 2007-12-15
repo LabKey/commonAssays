@@ -123,12 +123,6 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
         {
             return getContainer().getPath();
         }
-
-        public ViewURLHelper urlFor(Enum action) throws ServletException
-        {
-            return PageFlowUtil.urlFor(action, getContainer().getPath());
-        }
-
     }
 
     protected Forward renderInTemplate(HttpView view, FlowObject object, String title, A action) throws Exception

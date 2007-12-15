@@ -17,17 +17,14 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.util.XMLValidationParser;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
-import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.io.File;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.*;
 
 /**
  * BioMLInputParser class
@@ -193,8 +190,10 @@ public class BioMLInputParser extends XMLValidationParser
                 "<bioml>\n" +
                 "</bioml>";
         parser.parse(xmlEmpty);
-        for (Map.Entry<String, String> pair : props.entrySet())
-            parser.setInputParameter(pair.getKey(), pair.getValue());
+        String[] keys = props.keySet().toArray(new String[props.size()]);
+        Arrays.sort(keys);
+        for (String key : keys)
+            parser.setInputParameter(key, props.get(key));
 
         String xml = parser.getXML();
 

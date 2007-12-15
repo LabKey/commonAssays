@@ -8,6 +8,7 @@ import org.apache.struts.action.ActionError;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.DefaultBrowseView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.ExceptionUtil;
@@ -253,10 +254,6 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         }
 
         ViewBackgroundInfo vbi = getViewBackgroundInfo();
-        if (paths.size() > 0)
-        {
-            vbi = PipelineService.get().getJobBackgroundInfo(vbi, paths.get(0));
-        }
         AddRunsJob job = new AddRunsJob(vbi, FlowProtocol.ensureForContainer(getUser(), vbi.getContainer()), paths);
         for (String path : skippedPaths)
         {
@@ -269,8 +266,8 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
     protected Forward showUploadRuns() throws Exception
     {
         requiresPermission(ACL.PERM_INSERT);
-        ViewURLHelper forward = PipelineService.get().urlBrowse(getContainer());
-        forward.addParameter("referer", FlowPipelineProvider.NAME);
+        ViewURLHelper forward = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(),
+                FlowPipelineProvider.NAME);
         return new ViewForward(forward);
     }
 

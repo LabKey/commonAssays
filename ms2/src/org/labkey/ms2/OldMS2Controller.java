@@ -256,12 +256,8 @@ public class OldMS2Controller extends ViewController
 
         if (null != f && f.exists() && f.isFile())
         {
-            ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), f);
-            ProteinProphetPipelineJob job = new ProteinProphetPipelineJob(info, f);
+            ProteinProphetPipelineJob job = new ProteinProphetPipelineJob(getViewBackgroundInfo(), f);
             service.queueJob(job);
-
-            // Be sure to use the job's container for forward.
-            c = info.getContainer();
         }
         else
         {
@@ -1301,7 +1297,7 @@ public class OldMS2Controller extends ViewController
             if (!form.isAuto())
             {
                 PipelineService service = PipelineService.get();
-                ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), f);
+                ViewBackgroundInfo info = getViewBackgroundInfo();
 
                 // TODO: Clean this up.
                 boolean mascotFile = MascotSearchProtocolFactory.get().equals(AbstractMS2SearchProtocolFactory.fromFile(f));
@@ -1332,10 +1328,7 @@ public class OldMS2Controller extends ViewController
             {
                 if (!form.isExperiment())
                 {
-                    PipelineService service = PipelineService.get();
-                    ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), f);
-
-                    int run = MS2Manager.addRunToQueue(info,
+                    int run = MS2Manager.addRunToQueue(getViewBackgroundInfo(),
                             f, form.getDescription(), true).getRunId();
                     if (run == -1)
                         HttpView.throwNotFound();
@@ -1355,7 +1348,6 @@ public class OldMS2Controller extends ViewController
                     if (pr == null)
                         return HttpView.throwUnauthorized();
 
-                    ViewBackgroundInfo info = service.getJobBackgroundInfo(getViewBackgroundInfo(), f);
                     String protocolName = form.getProtocol();
                     File dirData = new File(form.getDataDir());
                     if (!NetworkDrive.exists(dirData))
@@ -1376,7 +1368,7 @@ public class OldMS2Controller extends ViewController
                     else
                     {
                         // Anything that is running or complete.
-                        Map<File, FileStatus> mzXMLFileStatus = MS2PipelineManager.getAnalysisFileStatus(dirData, dirAnalysis, info.getContainer());
+                        Map<File, FileStatus> mzXMLFileStatus = MS2PipelineManager.getAnalysisFileStatus(dirData, dirAnalysis, getContainer());
                         List<File> fileList = new ArrayList<File>();
                         for (File fileMzXML : mzXMLFileStatus.keySet())
                         {
@@ -1392,7 +1384,7 @@ public class OldMS2Controller extends ViewController
 
                     MS2SearchPipelineProtocol protocol = protocolFactory.loadInstance(fileParameters);
 
-                    PipelineJob job = protocol.createPipelineJob(info,
+                    PipelineJob job = protocol.createPipelineJob(getViewBackgroundInfo(),
                             dirSeqRoot,
                             filesMzXML,
                             fileParameters,
@@ -4138,6 +4130,11 @@ public class OldMS2Controller extends ViewController
 
     public static class RunForm extends FormData
     {
+        enum PARAMS
+        {
+            run
+        }
+        
         int run;
         int tryptic;
         boolean expanded;

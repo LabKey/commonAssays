@@ -141,12 +141,6 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
         {
             return getContainer().getPath();
         }
-
-        public ViewURLHelper urlFor(Enum action) throws ServletException
-        {
-            return PageFlowUtil.urlFor(action, getContainer().getPath());
-        }
-
     }
 
 

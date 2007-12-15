@@ -548,15 +548,8 @@ public class MS1Controller extends SpringActionController
             if (null != f && f.exists() && f.isFile())
             {
                 // Assuming we can find the job, put a job in the queue to load this run
-                ViewBackgroundInfo info = new ViewBackgroundInfo(getContainer(), getUser(), getViewContext().getViewURLHelper());
-                info = service.getJobBackgroundInfo(info, f);
-                MSInspectImportPipelineJob job = new MSInspectImportPipelineJob(info, f);
+                MSInspectImportPipelineJob job = new MSInspectImportPipelineJob(getViewBackgroundInfo(), f);
                 service.queueJob(job);
-
-                // Be sure to use the job's container for forwarding.
-                // Depending on the pipeline setup for this container, the job
-                // may actually load the run into a child container
-                c = info.getContainer();
             }
             else
             {
