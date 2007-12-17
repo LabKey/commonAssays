@@ -40,7 +40,6 @@ import org.labkey.api.view.template.DialogTemplate;
 import org.labkey.api.view.template.FastTemplate;
 import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.api.view.template.PrintTemplate;
-import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.util.Pair;
 import org.labkey.ms2.compare.CompareDataRegion;
@@ -54,9 +53,9 @@ import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
-import org.labkey.ms2.protocol.MascotSearchProtocolFactory;
 import org.labkey.ms2.protocol.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.protocol.MS2SearchPipelineProtocol;
+import org.labkey.ms2.protocol.MascotSearchProtocolFactory;
 import org.labkey.ms2.query.*;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
@@ -289,76 +288,14 @@ public class OldMS2Controller extends ViewController
         return includeView(gridView);
     }
 
-    public static class RenameForm extends FormData
-    {
-        private int run;
-        private String description;
-
-        public String getDescription()
-        {
-            return description;
-        }
-
-        public void setDescription(String description)
-        {
-            this.description = description;
-        }
-
-        public int getRun()
-        {
-            return run;
-        }
-
-        public void setRun(int run)
-        {
-            this.run = run;
-        }
-    }
 
     @Jpf.Action
-    protected Forward renameRun(RenameForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-
-        RenameBean bean = new RenameBean();
-
-        MS2Run run = MS2Manager.getRun(form.getRun());
-        String description = form.getDescription();
-        if (description == null || description.length() == 0)
-            description = run.getDescription();
-
-        bean.run = run;
-        bean.description = description;
-
-        HttpView view = new JspView<RenameBean>("/org/labkey/ms2/renameRun.jsp", bean);
-
-        return _renderInTemplate(view, true, "Rename Run", null);
-    }
-
-    public class RenameBean
-    {
-        public MS2Run run;
-        public String description;
-    }
-
-    @Jpf.Action
-    protected Forward rename(RenameForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-
-        MS2Manager.renameRun(form.getRun(), form.getDescription());
-
-        ViewURLHelper url = MS2Controller.getShowRunUrl(getContainer(), form.getRun());
-        return new ViewForward(url);
-    }
-
-    @Jpf.Action
-    protected Forward discriminateScore(RenameForm form) throws Exception
+    protected Forward discriminateScore(RunForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
 
         ViewURLHelper url = new ViewURLHelper("MS2-Scoring", "discriminate", getViewURLHelper().getExtraPath());
-        url.addParameter("runId", Integer.toString(form.getRun()));
+        url.addParameter("runId", form.getRun());
         return new ViewForward(url);
     }
 
@@ -733,13 +670,6 @@ public class OldMS2Controller extends ViewController
     private AbstractMS2RunView getPeptideView(String grouping, MS2Run... runs) throws ServletException
     {
         return MS2RunViewType.getViewType(grouping).createView(getViewContext(), runs);
-    }
-
-
-    public long[] getPeptideIndex(ViewURLHelper currentUrl, MS2Run run) throws SQLException, ServletException
-    {
-        AbstractMS2RunView view = getPeptideView(currentUrl.getParameter("grouping"), run);
-        return view.getPeptideIndex(currentUrl);
     }
 
 
@@ -1887,75 +1817,6 @@ public class OldMS2Controller extends ViewController
     }
 
     @Jpf.Action
-    protected Forward showPeptide(DetailsForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        long peptideId = form.getPeptideIdLong();
-        MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
-
-        if (peptide == null)
-        {
-            return HttpView.throwNotFound("Could not find peptide with RowId " + peptideId);
-        }
-
-        int runId = peptide.getRun();
-
-        if (!isAuthorized(runId))
-            return HttpView.throwUnauthorized();
-
-        ViewURLHelper currentUrl = getViewURLHelper();
-
-        int sqlRowIndex = form.getRowIndex();
-        int rowIndex = sqlRowIndex - 1;  // Switch 1-based, JDBC row index to 0-based row index for array lookup
-
-        MS2Run run = MS2Manager.getRun(runId);
-        long[] peptideIndex = getPeptideIndex(currentUrl, run);
-        rowIndex = MS2Manager.verifyRowIndex(peptideIndex, rowIndex, peptideId);
-
-        peptide.init(form.tolerance, form.xStart, form.xEnd);
-
-        ViewURLHelper previousUrl = null;
-        ViewURLHelper nextUrl = null;
-        ViewURLHelper showGzUrl = null;
-
-        // Display next and previous only if we have a cached index and a valid pointer
-        if (null != peptideIndex && -1 != rowIndex)
-        {
-            if (0 == rowIndex)
-                previousUrl = null;
-            else
-            {
-                previousUrl = cloneViewURLHelper();
-                previousUrl.replaceParameter("peptideId", String.valueOf(peptideIndex[rowIndex - 1]));
-                previousUrl.replaceParameter("rowIndex", String.valueOf(sqlRowIndex - 1));
-            }
-
-            if (rowIndex == (peptideIndex.length - 1))
-                nextUrl = null;
-            else
-            {
-                nextUrl = cloneViewURLHelper();
-                nextUrl.replaceParameter("peptideId", String.valueOf(peptideIndex[rowIndex + 1]));
-                nextUrl.replaceParameter("rowIndex", String.valueOf(sqlRowIndex + 1));
-            }
-
-            showGzUrl = cloneViewURLHelper();
-            showGzUrl.deleteParameter("seqId");
-            showGzUrl.deleteParameter("rowIndex");
-            showGzUrl.setAction("showGZFile");
-        }
-
-        ShowPeptideContext ctx = new ShowPeptideContext(form, run, peptide, currentUrl, previousUrl, nextUrl, showGzUrl, modificationHref(run), getContainer(), getUser());
-        JspView v = new JspView<ShowPeptideContext>("/org/labkey/ms2/showPeptide.jsp", ctx);
-        v.setFrame(WebPartView.FrameType.NONE);
-        includeView(v);
-
-        return null;
-    }
-
-
-    @Jpf.Action
     protected Forward updateShowPeptide() throws Exception
     {
         ViewContext ctx = getViewContext();
@@ -2094,57 +1955,6 @@ public class OldMS2Controller extends ViewController
         return null;
     }
 
-
-    private String modificationHref(MS2Run run)
-    {
-        // Need to make the pop-up window wider on SSL connections since Firefox insists on displaying the full server name
-        // in the status bar and spreads out the content unnecessarily. 
-        int width = ("https".equals(getViewURLHelper().getScheme()) ? 175 : 100);
-
-        StringBuilder href = new StringBuilder();
-        href.append("<a href=\"showModifications.view?run=");
-        href.append(run.getRun());
-        href.append("\" target=\"modifications\" onClick=\"window.open('showModifications.view?run=");
-        href.append(run.getRun());
-        href.append("','modifications','height=300,width=");
-        href.append(width);
-        href.append(",status=yes,toolbar=no,menubar=no,location=no,resizable=yes');return false;\"><img border=0 src=\"");
-        href.append(PageFlowUtil.buttonSrc("Show Modifications"));
-        href.append("\"></a>");
-
-        return href.toString();
-    }
-
-
-    @Jpf.Action
-    protected Forward showModifications(RunForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        if (!isAuthorized(form.run))
-            return null;
-
-        MS2Run run = MS2Manager.getRun(form.run);
-
-        SortedMap<String, String> fixed = new TreeMap<String, String>();
-        SortedMap<String, String> var = new TreeMap<String, String>();
-
-        for (MS2Modification mod : run.getModifications())
-        {
-            if (mod.getVariable())
-                var.put(mod.getAminoAcid() + mod.getSymbol(), Formats.f3.format(mod.getMassDiff()));
-            else
-                fixed.put(mod.getAminoAcid(), Formats.f3.format(mod.getMassDiff()));
-        }
-
-        GroovyView view = new GroovyView("/org/labkey/ms2/modifications.gm");
-        view.setFrame(WebPartView.FrameType.NONE);
-        view.addObject("pageTitle", "Modifications");
-        view.addObject("fixed", fixed);
-        view.addObject("var", var);
-
-        return includeView(view);
-    }
 
     @Jpf.Action
     protected Forward pickExportRunsView() throws Exception

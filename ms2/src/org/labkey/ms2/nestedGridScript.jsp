@@ -1,4 +1,8 @@
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%
+    String dataRegionName = ((JspView<String>)HttpView.currentView()).getModelBean();
+%>
 <script type="text/javascript"><!--
 
 var requestedURLs = new Object();
@@ -9,9 +13,9 @@ function callback(elementName, req, url)
     {
         if (req.status == 200)
         {
-            var rowElement = document.getElementById("${DataRegionName}-Row" + elementName);
-            var toggleElement = document.getElementById("${DataRegionName}-Handle" + elementName);
-            var contentElement = document.getElementById("${DataRegionName}-Content" + elementName);
+            var rowElement = document.getElementById("<%=dataRegionName%>-Row" + elementName);
+            var toggleElement = document.getElementById("<%=dataRegionName%>-Handle" + elementName);
+            var contentElement = document.getElementById("<%=dataRegionName%>-Content" + elementName);
 
             contentElement.innerHTML = req.responseText;
             toggleElement.src = "<%= request.getContextPath() %>/_images/minus.gif";
@@ -26,9 +30,9 @@ function callback(elementName, req, url)
 
 function toggleNestedGrid(url, elementName)
 {
-    var contentElement = document.getElementById("${DataRegionName}-Content" + elementName);
-    var rowElement = document.getElementById("${DataRegionName}-Row" + elementName);
-    var toggleElement = document.getElementById("${DataRegionName}-Handle" + elementName);
+    var contentElement = document.getElementById("<%=dataRegionName%>-Content" + elementName);
+    var rowElement = document.getElementById("<%=dataRegionName%>-Row" + elementName);
+    var toggleElement = document.getElementById("<%=dataRegionName%>-Handle" + elementName);
 
     if (contentElement.innerHTML == "")
     {

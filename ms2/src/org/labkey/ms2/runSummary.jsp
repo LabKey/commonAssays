@@ -1,3 +1,4 @@
+<%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -5,7 +6,9 @@
 <%@ page import="org.labkey.ms2.MS2Run" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.RunSummaryBean bean = ((JspView<MS2Controller.RunSummaryBean>)HttpView.currentView()).getModelBean();
+    JspView<MS2Controller.RunSummaryBean> me = ((JspView<MS2Controller.RunSummaryBean>)HttpView.currentView());
+    Container c = me.getViewContext().getContainer();
+    MS2Controller.RunSummaryBean bean = me.getModelBean();
     MS2Run run = bean.run;
 %>
 <table class="dataRegion">
@@ -28,7 +31,7 @@ if (null != bean.quantAlgorithm)
 
 if (bean.writePermissions)
 { %>
-    <a href="renameRun.view?run=<%=run.getRun()%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Rename")%>"></a><%
+    <a href="<%=h(MS2Controller.getRenameRunUrl(c, run.getRun()))%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Rename")%>"></a><%
 } %>
     <%=bean.modHref%><%
 

@@ -732,9 +732,9 @@ ms2/src/org/labkey/ms2/filterHeader.jsp -text
 ms2/src/org/labkey/ms2/insertAnnots.jsp -text
 ms2/src/org/labkey/ms2/loadGo.jsp -text
 ms2/src/org/labkey/ms2/manageViews.jsp -text
-ms2/src/org/labkey/ms2/modifications.gm -text
+ms2/src/org/labkey/ms2/modifications.jsp -text
 ms2/src/org/labkey/ms2/ms2Admin.jsp -text
-ms2/src/org/labkey/ms2/nestedGridScript.gm -text
+ms2/src/org/labkey/ms2/nestedGridScript.jsp -text
 ms2/src/org/labkey/ms2/peptideChart.jsp -text
 ms2/src/org/labkey/ms2/peptideview/AbstractLegacyProteinMS2RunView.java -text
 ms2/src/org/labkey/ms2/peptideview/AbstractMS2RunView.java -text
@@ -1021,7 +1021,7 @@ portal/module.properties -text
 portal/src/org/labkey/portal/PortalModule.java -text
 portal/src/org/labkey/portal/customizeSearchWebPart.gm -text
 portal/src/org/labkey/portal/customizeWebPart.gm -text
-portal/src/org/labkey/portal/search.gm -text
+portal/src/org/labkey/portal/search.jsp -text
 xarassay/XarAssay.iml -text
 xarassay/build.xml -text
 xarassay/module.properties -text

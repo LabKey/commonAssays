@@ -6,10 +6,12 @@ import org.labkey.api.data.*;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.util.Formats;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.util.Pair;
 import org.labkey.ms2.compare.CompareQuery;
 import org.labkey.ms2.peptideview.AbstractMS2RunView;
@@ -17,6 +19,7 @@ import org.labkey.ms2.peptideview.MS2RunViewType;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
@@ -115,6 +118,14 @@ public class MS2Controller extends SpringActionController
     private NavTree appendRootNavTrail(NavTree root)
     {
         root.addChild("MS2 Runs", getShowListUrl(getContainer()));
+        return root;
+    }
+
+
+    private NavTree appendRunNavTrail(NavTree root, MS2Run run)
+    {
+        appendRootNavTrail(root);
+        root.addChild(run.getDescription(), getShowRunUrl(getContainer(), run.getRun()));
         return root;
     }
 
@@ -259,8 +270,7 @@ public class MS2Controller extends SpringActionController
             }
 
             VBox vBox = new VBox();
-            GroovyView scriptView = new GroovyView("/org/labkey/ms2/nestedGridScript.gm");
-            scriptView.addObject("DataRegionName", dataRegionName);
+            JspView scriptView = new JspView<String>("/org/labkey/ms2/nestedGridScript.jsp", dataRegionName);
             vBox.addView(scriptView);
 
             JspView<RunSummaryBean> runSummary = new JspView<RunSummaryBean>("/org/labkey/ms2/runSummary.jsp", new RunSummaryBean());
@@ -524,5 +534,221 @@ public class MS2Controller extends SpringActionController
         href.append("\"></a>");
 
         return href.toString();
+    }
+
+
+    public static class RenameForm
+    {
+        private int run;
+        private String description;
+
+        public String getDescription()
+        {
+            return description;
+        }
+
+        public void setDescription(String description)
+        {
+            this.description = description;
+        }
+
+        public int getRun()
+        {
+            return run;
+        }
+
+        public void setRun(int run)
+        {
+            this.run = run;
+        }
+    }
+
+
+    public static ViewURLHelper getRenameRunUrl(Container c, int runId)
+    {
+        ViewURLHelper url = c.urlFor(RenameRunAction.class);
+        return url.addParameter("run", String.valueOf(runId));
+    }
+
+
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class RenameRunAction extends FormViewAction<RenameForm>
+    {
+        private MS2Run _run;
+
+        public void validateCommand(RenameForm target, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(RenameForm form, boolean reshow, BindException errors) throws Exception
+        {
+            _run = MS2Manager.getRun(form.getRun());
+            String description = form.getDescription();
+            if (description == null || description.length() == 0)
+                description = _run.getDescription();
+
+            RenameBean bean = new RenameBean();
+            bean.run = _run;
+            bean.description = description;
+
+            PageConfig page = getPageConfig();
+            populatePageConfig(page, "Rename Run", null, false);
+            // TODO: Set focus
+
+            return new JspView<RenameBean>("/org/labkey/ms2/renameRun.jsp", bean);
+        }
+
+        public boolean handlePost(RenameForm form, BindException errors) throws Exception
+        {
+            MS2Manager.renameRun(form.getRun(), form.getDescription());
+            return true;
+        }
+
+        public ViewURLHelper getSuccessURL(RenameForm form)
+        {
+            return getShowRunUrl(getContainer(), form.getRun());
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            NavTree nav = appendRunNavTrail(root, _run);
+            nav.addChild("Rename Run");
+            return nav;
+        }
+    }
+
+
+    public class RenameBean
+    {
+        public MS2Run run;
+        public String description;
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowPeptideAction extends SimpleViewAction<OldMS2Controller.DetailsForm>
+    {
+        public ModelAndView getView(OldMS2Controller.DetailsForm form, BindException errors) throws Exception
+        {
+            long peptideId = form.getPeptideIdLong();
+            MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
+
+            if (peptide == null)
+                return HttpView.throwNotFoundMV("Could not find peptide with RowId " + peptideId);
+
+            int runId = peptide.getRun();
+
+            if (!isAuthorized(runId))
+                return HttpView.throwUnauthorizedMV();
+
+            ViewURLHelper currentUrl = getViewContext().getViewURLHelper();
+
+            int sqlRowIndex = form.getRowIndex();
+            int rowIndex = sqlRowIndex - 1;  // Switch 1-based, JDBC row index to 0-based row index for array lookup
+
+            MS2Run run = MS2Manager.getRun(runId);
+            long[] peptideIndex = getPeptideIndex(currentUrl, run);
+            rowIndex = MS2Manager.verifyRowIndex(peptideIndex, rowIndex, peptideId);
+
+            peptide.init(form.getTolerance(), form.getxStartDouble(), form.getxEnd());
+
+            ViewURLHelper previousUrl = null;
+            ViewURLHelper nextUrl = null;
+            ViewURLHelper showGzUrl = null;
+
+            // Display next and previous only if we have a cached index and a valid pointer
+            if (null != peptideIndex && -1 != rowIndex)
+            {
+                if (0 == rowIndex)
+                    previousUrl = null;
+                else
+                {
+                    previousUrl = getViewContext().cloneViewURLHelper();
+                    previousUrl.replaceParameter("peptideId", String.valueOf(peptideIndex[rowIndex - 1]));
+                    previousUrl.replaceParameter("rowIndex", String.valueOf(sqlRowIndex - 1));
+                }
+
+                if (rowIndex == (peptideIndex.length - 1))
+                    nextUrl = null;
+                else
+                {
+                    nextUrl = getViewContext().cloneViewURLHelper();
+                    nextUrl.replaceParameter("peptideId", String.valueOf(peptideIndex[rowIndex + 1]));
+                    nextUrl.replaceParameter("rowIndex", String.valueOf(sqlRowIndex + 1));
+                }
+
+                showGzUrl = getViewContext().cloneViewURLHelper();
+                showGzUrl.deleteParameter("seqId");
+                showGzUrl.deleteParameter("rowIndex");
+                showGzUrl.setAction("showGZFile");
+            }
+
+            PageConfig page = getPageConfig();
+            populatePageConfig(page, peptide.toString(), null, false);
+            page.setTemplate(PageConfig.Template.Print);
+
+            ShowPeptideContext ctx = new ShowPeptideContext(form, run, peptide, currentUrl, previousUrl, nextUrl, showGzUrl, modificationHref(run), getContainer(), getUser());
+            return new JspView<ShowPeptideContext>("/org/labkey/ms2/showPeptide.jsp", ctx);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+
+    private long[] getPeptideIndex(ViewURLHelper currentUrl, MS2Run run) throws SQLException, ServletException
+    {
+        AbstractMS2RunView view = getPeptideView(currentUrl.getParameter("grouping"), run);
+        return view.getPeptideIndex(currentUrl);
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowModificationsAction extends SimpleViewAction<OldMS2Controller.RunForm>
+    {
+        public ModelAndView getView(OldMS2Controller.RunForm form, BindException errors) throws Exception
+        {
+            if (!isAuthorized(form.run))
+                return null;
+
+            MS2Run run = MS2Manager.getRun(form.run);
+
+            SortedMap<String, String> fixed = new TreeMap<String, String>();
+            SortedMap<String, String> var = new TreeMap<String, String>();
+
+            for (MS2Modification mod : run.getModifications())
+            {
+                if (mod.getVariable())
+                    var.put(mod.getAminoAcid() + mod.getSymbol(), Formats.f3.format(mod.getMassDiff()));
+                else
+                    fixed.put(mod.getAminoAcid(), Formats.f3.format(mod.getMassDiff()));
+            }
+
+            // TODO: Fix template sizing
+            getPageConfig().setTemplate(PageConfig.Template.Print);
+            getPageConfig().setTitle("Modifications");
+
+            ModificationBean bean = new ModificationBean();
+            bean.fixed = fixed;
+            bean.var = var;
+
+            JspView view = new JspView<ModificationBean>("/org/labkey/ms2/modifications.jsp", bean);
+            view.setFrame(WebPartView.FrameType.NONE);
+            return view;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+
+    public static class ModificationBean
+    {
+        public SortedMap<String, String> fixed;
+        public SortedMap<String, String> var;
     }
 }

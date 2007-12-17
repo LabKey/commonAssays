@@ -8,20 +8,13 @@
 <%@ page import="java.text.DecimalFormat"%>
 <%@ page import="org.labkey.api.security.ACL"%>
 <%@ page import="org.labkey.api.util.Formats"%>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
     ShowPeptideContext ctx = me.getModelBean();
     MS2Peptide p = ctx.peptide;
     MS2Fraction fraction = MS2Manager.getFraction(p.getFraction());
 %>
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<%= PageFlowUtil.getStandardIncludes() %>
-<title><%=p%></title>
-</head>
-<body style="margin-top:0px; margin-left:0px; margin-right:0px;">
 <!--OUTER-->
 <table><tr>
 
@@ -311,8 +304,3 @@ No quantitation data available.
 <%
     }
 %>
-
-
-<!--OUTER-->
-</body>
-</html>
