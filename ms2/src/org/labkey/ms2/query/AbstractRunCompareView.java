@@ -125,7 +125,7 @@ public abstract class AbstractRunCompareView  extends QueryView
                 String[] values = line.split("\\t");
                 proteins[index] = values[0];
                 hits[index] = new boolean[_runs.size()];
-                for (int i = 0; i < _runs.size() && i < values.length ; i++)
+                for (int i = 0; i < _runs.size() && i + 1 < values.length ; i++)
                 {
                     hits[index][i] = !"".equals(values[i + 1].trim());
                 }
