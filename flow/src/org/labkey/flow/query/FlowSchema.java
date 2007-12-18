@@ -218,8 +218,8 @@ public class FlowSchema extends UserSchema
             ret.addColumn(ExpRunTable.Column.Flag);
         }
         ret.addColumn(ExpRunTable.Column.Name);
-        ColumnInfo colFilePathRoot = ret.addColumn(ExpRunTable.Column.FilePathRoot);
-        colFilePathRoot.setIsHidden(true);
+        ret.addColumn(ExpRunTable.Column.FilePathRoot).setIsHidden(true);
+        ret.addColumn(ExpRunTable.Column.LSID).setIsHidden(true);
         ret.addColumn(ExpRunTable.Column.ProtocolStep);
         if (type != FlowDataType.FCSFile)
         {
@@ -282,6 +282,7 @@ public class FlowSchema extends UserSchema
         ret.setDataType(type);
         ret.addCondition(dataIdCondition(ExpDataTable.COLUMN_ROWID, type.getObjectType()));
         ret.addColumn(ExpDataTable.Column.RowId);
+        ret.addColumn(ExpDataTable.Column.LSID).setIsHidden(true);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);
         ret.addColumn(ExpDataTable.Column.Created);
