@@ -1,40 +1,38 @@
 package org.labkey.flow.script;
 
-import org.labkey.flow.data.*;
-import org.labkey.flow.data.FlowDataType;
+import org.fhcrc.cpas.exp.xml.DataBaseType;
+import org.fhcrc.cpas.exp.xml.ExperimentRunType;
+import org.fhcrc.cpas.exp.xml.ProtocolApplicationBaseType;
 import org.fhcrc.cpas.flow.script.xml.AnalysisDef;
-import org.fhcrc.cpas.flow.script.xml.SettingsDef;
-import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
-import org.labkey.flow.persist.*;
-import org.fhcrc.cpas.exp.xml.*;
-import org.labkey.api.util.URIUtil;
-import org.labkey.api.data.TableInfo;
+import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.fhcrc.cpas.flow.script.xml.SettingsDef;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
-import org.w3c.dom.Element;
+import org.labkey.api.util.URIUtil;
+import org.labkey.flow.analysis.model.Analysis;
+import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.ScriptSettings;
+import org.labkey.flow.analysis.web.FCSAnalyzer;
+import org.labkey.flow.analysis.web.FCSRef;
+import org.labkey.flow.data.*;
+import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.FlowDataHandler;
+import org.labkey.flow.persist.ObjectType;
+import org.labkey.flow.query.FlowSchema;
 
-import java.util.List;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.net.URI;
-import java.sql.SQLException;
 import java.io.File;
 import java.io.FileWriter;
-
-import org.labkey.flow.analysis.model.CompensationMatrix;
-import org.labkey.flow.analysis.model.Analysis;
-import org.labkey.flow.analysis.model.SampleCriteria;
-import org.labkey.flow.analysis.web.FCSAnalyzer;
-import org.labkey.flow.analysis.web.GraphSpec;
-import org.labkey.flow.analysis.web.FCSRef;
-import org.labkey.flow.query.FlowSchema;
+import java.net.URI;
+import java.sql.SQLException;
+import java.util.List;
 
 public class AnalysisHandler extends BaseHandler
 {
     AnalysisDef _analysis;
     Analysis _groupAnalysis;
-    SampleCriteria _sampleCriteria;
+    ScriptSettings _settings;
     int _wellIndex;
     boolean _getScriptFromWells;
 
@@ -42,13 +40,13 @@ public class AnalysisHandler extends BaseHandler
     {
         super(job, FlowProtocolStep.analysis);
         _analysis = analysis;
+        _settings = ScriptSettings.fromSettingsDef(settings);
         _groupAnalysis = FlowAnalyzer.makeAnalysis(settings, _analysis);
-        _sampleCriteria = SampleCriteria.readChildCriteria((Element) _analysis.getDomNode());
     }
 
     public boolean checkProcessWell(FCSRef ref) throws Exception
     {
-        return FCSAnalyzer.get().matchesCriteria(_sampleCriteria, ref);
+        return FCSAnalyzer.get().matchesCriteria(_settings.getSampleCriteria(), ref);
     }
 
     synchronized public DataBaseType addWell(ExperimentRunType runElement, FlowFCSFile src, FlowCompensationMatrix flowComp, String scriptLSID) throws SQLException
@@ -129,9 +127,9 @@ public class AnalysisHandler extends BaseHandler
                     if (script.getScriptId() != _job._runAnalysisScript.getScriptId())
                     {
                         File file = _job.decideFileName(workingDirectory, URIUtil.getFilename(srcWell.getFCSURI()), FlowDataHandler.EXT_SCRIPT);
-                        FileWriter writer = new FileWriter(file);
-                        writer.write(script.getAnalysisScript());
-                        writer.close();
+                        ScriptDocument doc = script.getAnalysisScriptDocument();
+                        doc.save(file);
+
                         ProtocolApplicationBaseType app = addProtocolApplication(runElement, null);
                         scriptLSID = ExperimentService.get().generateGuidLSID(getContainer(), FlowDataType.Script);
                         DataBaseType dbtScript = app.getOutputDataObjects().addNewData();
@@ -139,7 +137,7 @@ public class AnalysisHandler extends BaseHandler
                         dbtScript.setDataFileUrl(file.toURI().toString());
                         dbtScript.setName(script.getName());
                         dbtScript.setSourceProtocolLSID(_step.getLSID(getContainer()));
-                        ScriptDocument doc = script.getAnalysisScriptDocument();
+
                         ScriptDef scriptDef = doc.getScript();
                         wellAnalysis = FlowAnalyzer.makeAnalysis(scriptDef.getSettings(), scriptDef.getAnalysis());
                     }
@@ -209,6 +207,7 @@ public class AnalysisHandler extends BaseHandler
             }
             return attrSet;
         }
+
         public void run()
         {
             try
@@ -218,10 +217,14 @@ public class AnalysisHandler extends BaseHandler
                     return;
                 FCSRef ref = FlowAnalyzer.getFCSRef(_well);
                 URI uri = ref.getURI();
-                if (!checkProcessWell(ref))
-                    return;
-
                 String description = "well " + iWell + "/" + _wellCount + ":" + _run.getName() + ":" + _well.getName();
+
+                if (!checkProcessWell(ref))
+                {
+                    _job.addStatus("Skipping " + description);
+                    return;
+                }
+
                 AttributeSet attrs = tryCopyAttributes();
                 DataBaseType dbt = addWell(_runElement, _well.getFCSFile(), _flowComp, _scriptLSID);
                 if (attrs != null)

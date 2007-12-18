@@ -1,18 +1,25 @@
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.struts.action.ActionMapping;
 import org.apache.commons.lang.ObjectUtils;
-import org.fhcrc.cpas.flow.script.xml.SettingsDef;
+import org.apache.struts.action.ActionMapping;
+import org.fhcrc.cpas.flow.script.xml.CriteriaDef;
 import org.fhcrc.cpas.flow.script.xml.ParameterDef;
+import org.fhcrc.cpas.flow.script.xml.SettingsDef;
+import org.labkey.common.util.Pair;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class EditSettingsForm extends EditScriptForm
 {
     public String[] ff_parameter;
     public String[] ff_minValue;
 
+    public String[] ff_criteria_keyword = new String[0];
+    public String[] ff_criteria_pattern = new String[0];
 
     public void reset(ActionMapping mapping, HttpServletRequest request)
     {
@@ -29,13 +36,25 @@ public class EditSettingsForm extends EditScriptForm
             {
                 parameters.put(param.getName(), param.getMinValue());
             }
+
+            int criteriaLen = settings.sizeOfCriteriaArray();
+            ff_criteria_keyword = new String[criteriaLen];
+            ff_criteria_pattern = new String[criteriaLen];
+            for (int i = 0; i < criteriaLen; i++)
+            {
+                CriteriaDef crit = settings.getCriteriaArray(i);
+                ff_criteria_keyword[i] = crit.getKeyword();
+                ff_criteria_pattern[i] = crit.getPattern();
+            }
         }
-        ff_parameter = parameters.keySet().toArray(new String[0]);
+
+        ff_parameter = parameters.keySet().toArray(new String[parameters.size()]);
         ff_minValue = new String[ff_parameter.length];
         for (int i = 0; i < ff_parameter.length; i ++)
         {
             ff_minValue[i] = ObjectUtils.toString(parameters.get(ff_parameter[i]));
         }
+
     }
 
     public void setFf_parameter(String[] parameters)
@@ -48,4 +67,13 @@ public class EditSettingsForm extends EditScriptForm
         ff_minValue = values;
     }
 
+    public void setFf_criteria_keyword(String[] keyword)
+    {
+        this.ff_criteria_keyword = keyword;
+    }
+
+    public void setFf_criteria_pattern(String[] pattern)
+    {
+        this.ff_criteria_pattern = pattern;
+    }
 }

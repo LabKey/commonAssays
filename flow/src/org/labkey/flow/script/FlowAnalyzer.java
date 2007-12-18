@@ -108,11 +108,10 @@ public class FlowAnalyzer
             return new GraphSpec(subset, graphElement.getXAxis());
     }
 
-    static public Analysis makeAnalysis(SettingsDef settings, AnalysisDef analysisElement)
+    static public Analysis makeAnalysis(SettingsDef settingsElement, AnalysisDef analysisElement)
     {
         Analysis ret = new Analysis();
-        ret.setSettings(new ScriptSettings());
-        ret.getSettings().merge(settings);
+        ret.setSettings(ScriptSettings.fromSettingsDef(settingsElement));
         if (analysisElement == null)
             return ret;
         Map<String, Gate> gates = getParentGates(analysisElement.getDomNode());
@@ -185,11 +184,10 @@ public class FlowAnalyzer
     }
 
 
-    static public CompensationCalculation makeCompensationCalculation(SettingsDef settings, CompensationCalculationDef compensationCalculationElement)
+    static public CompensationCalculation makeCompensationCalculation(SettingsDef settingsElement, CompensationCalculationDef compensationCalculationElement)
     {
-        org.labkey.flow.analysis.model.CompensationCalculation ret = new org.labkey.flow.analysis.model.CompensationCalculation();
-        ret.setSettings(new ScriptSettings());
-        ret.getSettings().merge(settings);
+        CompensationCalculation ret = new CompensationCalculation();
+        ret.setSettings(ScriptSettings.fromSettingsDef(settingsElement));
         if (compensationCalculationElement == null)
             return ret;
         Map<String, Gate> gates = getParentGates(compensationCalculationElement.getDomNode());
@@ -199,8 +197,8 @@ public class FlowAnalyzer
         }
         for (ChannelDef channel : compensationCalculationElement.getChannelArray())
         {
-            org.labkey.flow.analysis.model.CompensationCalculation.ChannelSubset positive = readSubsetDef(channel.getPositive());
-            org.labkey.flow.analysis.model.CompensationCalculation.ChannelSubset negative = readSubsetDef(channel.getNegative());
+            CompensationCalculation.ChannelSubset positive = readSubsetDef(channel.getPositive());
+            CompensationCalculation.ChannelSubset negative = readSubsetDef(channel.getNegative());
             ret.addChannel(channel.getName(), positive, negative);
         }
         return ret;
@@ -458,7 +456,7 @@ public class FlowAnalyzer
         ScriptComponent group = null;
         if (script != null)
         {
-            ScriptDef scriptElement= script.getAnalysisScriptDocument().getScript();
+            ScriptDef scriptElement = script.getAnalysisScriptDocument().getScript();
             if (step == FlowProtocolStep.calculateCompensation)
             {
                 group = makeCompensationCalculation(scriptElement.getSettings(), scriptElement.getCompensationCalculation());

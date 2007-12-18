@@ -1,13 +1,12 @@
 package org.labkey.flow.analysis.model;
 
+import org.fhcrc.cpas.flow.script.xml.CriteriaDef;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-import java.util.regex.Pattern;
 import java.util.List;
-
-import org.labkey.flow.analysis.web.FCSRef;
+import java.util.regex.Pattern;
 
 /**
  */
@@ -16,6 +15,14 @@ public class SampleCriteria
     String _keyword;
     String _strPattern;
     Pattern _pattern;
+
+    static public SampleCriteria fromCriteriaDef(CriteriaDef criteria)
+    {
+        SampleCriteria ret = new SampleCriteria();
+        ret.setKeyword(criteria.getKeyword());
+        ret.setPattern(criteria.getPattern());
+        return ret;
+    }
 
     static public SampleCriteria readCriteria(Element el)
     {

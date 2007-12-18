@@ -116,7 +116,7 @@ public class ScriptOverview extends Overview
         {
             try
             {
-                Action action = new Action("Show compensation calculation.", _script.urlFor(ScriptController.Action.editCompensationCalculation));
+                Action action = new Action("Show compensation calculation", _script.urlFor(ScriptController.Action.editCompensationCalculation));
                 CompensationCalculation calc = (CompensationCalculation) _script.getCompensationCalcOrAnalysis(FlowProtocolStep.calculateCompensation);
                 action.setDescriptionHTML("The compensation calculation involves " + calc.getChannelCount() + " channels and " + countChildPopulations(calc) + " gates.");
                 ret.addAction(action);

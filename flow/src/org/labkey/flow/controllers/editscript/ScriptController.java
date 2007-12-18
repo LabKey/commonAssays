@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionError;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.upload.FormFile;
+import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlObject;
 import org.fhcrc.cpas.flow.script.xml.*;
 import org.labkey.api.exp.api.ExpData;
@@ -19,15 +20,18 @@ import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.flow.ScriptParser;
-import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
-import org.labkey.flow.gateeditor.client.model.GWTEditingMode;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.model.Polygon;
-import org.labkey.flow.analysis.web.*;
+import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.PlotInfo;
+import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.*;
+import org.labkey.flow.gateeditor.client.model.GWTEditingMode;
+import org.labkey.flow.gateeditor.client.model.GWTGraphOptions;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.w3c.dom.Element;
 
@@ -43,6 +47,8 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class ScriptController extends BaseFlowController
@@ -1248,7 +1254,7 @@ public class ScriptController extends BaseFlowController
     protected Forward editSettings(EditSettingsForm form) throws Exception
     {
         requiresPermission(ACL.PERM_UPDATE);
-        if (isPost())
+        if (isPost() && form.canEdit())
         {
             Forward fwd = updateSettings(form);
             if (fwd != null)
@@ -1266,11 +1272,17 @@ public class ScriptController extends BaseFlowController
         {
             settingsDef = doc.getScript().addNewSettings();
         }
-        while (settingsDef.getParameterArray().length > 0)
-        {
-            settingsDef.removeParameter(0);
+
+        XmlCursor cur = null;
+        try {
+            cur = settingsDef.newCursor();
+            cur.removeXmlContents();
         }
-        for (int i = 0; i < form.ff_parameter.length; i ++)
+        finally {
+            if (cur != null) cur.dispose();
+        }
+
+        for (int i = 0; i < form.ff_parameter.length; i++)
         {
             String value = form.ff_minValue[i];
             if (value != null)
@@ -1291,6 +1303,33 @@ public class ScriptController extends BaseFlowController
                 param.setMinValue(val);
             }
         }
+
+        for (int i = 0; i < form.ff_criteria_keyword.length; i++)
+        {
+            String keyword = form.ff_criteria_keyword[i];
+            String pattern = form.ff_criteria_pattern[i];
+            boolean validPattern = false;
+            if (keyword != null && pattern != null)
+            {
+                try
+                {
+                    Pattern.compile(pattern);
+                    validPattern = true;
+                }
+                catch (PatternSyntaxException ex)
+                {
+                    errors = addError("Error in pattern '" + pattern + "' for keyword '" + keyword + "': " + ex.getDescription());
+                }
+            }
+
+            if (validPattern)
+            {
+                CriteriaDef crit = settingsDef.addNewCriteria();
+                crit.setKeyword(keyword);
+                crit.setPattern(pattern);
+            }
+        }
+
         if (errors)
         {
             return null;

@@ -413,6 +413,22 @@ public class FCSAnalyzer
         return getParameterNames(uriFCS, channelNames);
     }
 
+    /**
+     * Match a FCS header against a list of criteria.
+     * @return true if all criteria matches; false otherwise.
+     */
+    public boolean matchesCriteria(Collection<SampleCriteria> criteria, FCSRef ref) throws IOException
+    {
+        if (criteria == null) return true;
+        FCSKeywordData header = resolveRef(ref);
+        for (SampleCriteria c : criteria)
+        {
+            if (!c.matches(header))
+                return false;
+        }
+        return true;
+    }
+
     public boolean matchesCriteria(SampleCriteria criteria, FCSRef ref) throws Exception
     {
         if (criteria == null) return true;

@@ -1,15 +1,18 @@
 package org.labkey.flow.analysis.model;
 
-import org.fhcrc.cpas.flow.script.xml.SettingsDef;
+import org.fhcrc.cpas.flow.script.xml.CriteriaDef;
 import org.fhcrc.cpas.flow.script.xml.ParameterDef;
+import org.fhcrc.cpas.flow.script.xml.SettingsDef;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ScriptSettings implements Serializable
 {
     Map<String, ParameterInfo> _parameters = new HashMap();
+    Map<String, SampleCriteria> _criteria = new HashMap<String, SampleCriteria>();
 
     static public class ParameterInfo implements Serializable
     {
@@ -70,6 +73,16 @@ public class ScriptSettings implements Serializable
         return ret;
     }
 
+    public SampleCriteria getSampleCriteria(String keyword)
+    {
+        return _criteria.get(keyword);
+    }
+
+    public Collection<SampleCriteria> getSampleCriteria()
+    {
+        return _criteria.values();
+    }
+
     public void merge(ScriptSettings that)
     {
         if (that == null)
@@ -82,7 +95,16 @@ public class ScriptSettings implements Serializable
                 mine.setMinValue(paramInfo.getMinValue());
             }
         }
+
+        for (SampleCriteria criteria : that._criteria.values())
+        {
+            SampleCriteria newCriteria = new SampleCriteria();
+            newCriteria.setKeyword(criteria.getKeyword());
+            newCriteria.setPattern(criteria.getPattern());
+            _criteria.put(newCriteria.getKeyword(), newCriteria);
+        }
     }
+
     public void merge(SettingsDef settings)
     {
         if (settings == null)
@@ -95,7 +117,25 @@ public class ScriptSettings implements Serializable
                 mine.setMinValue(param.getMinValue());
             }
         }
+
+        for (CriteriaDef criteria : settings.getCriteriaArray())
+        {
+            SampleCriteria mine = getSampleCriteria(criteria.getKeyword());
+            if (mine == null)
+            {
+                SampleCriteria sampleCriteria = SampleCriteria.fromCriteriaDef(criteria);
+                _criteria.put(criteria.getKeyword(), sampleCriteria);
+            }
+        }
     }
+
+    public static ScriptSettings fromSettingsDef(SettingsDef settings)
+    {
+        ScriptSettings ret = new ScriptSettings();
+        ret.merge(settings);
+        return ret;
+    }
+
     public SettingsDef toSettingsDef()
     {
         SettingsDef ret = SettingsDef.Factory.newInstance();
@@ -108,6 +148,13 @@ public class ScriptSettings implements Serializable
                 paramDef.setMinValue(info.getMinValue());
             }
         }
+
+        for (SampleCriteria criteria : _criteria.values())
+        {
+            CriteriaDef criteriaDef = ret.addNewCriteria();
+            criteriaDef.setKeyword(criteria.getKeyword());
+            criteriaDef.setPattern(criteria.getPattern());
+        }
         return ret;
     }
 
@@ -119,12 +166,16 @@ public class ScriptSettings implements Serializable
         ScriptSettings that = (ScriptSettings) o;
 
         if (!_parameters.equals(that._parameters)) return false;
+        if (!_criteria.equals(that._criteria)) return false;
 
         return true;
     }
 
     public int hashCode()
     {
-        return _parameters.hashCode();
+        int result;
+        result = _parameters.hashCode();
+        result = 31 * result + _criteria.hashCode();
+        return result;
     }
 }
