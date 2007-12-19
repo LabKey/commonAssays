@@ -196,21 +196,6 @@ if (p.getQuantitation() != null)
     {
         currentCharge = p.getCharge();
     }
-    URLHelper charge1Url = null;
-    if (currentCharge != 1)
-    {
-        charge1Url = ctx.url.clone().replaceParameter("quantitationCharge", "1");
-    }
-    URLHelper charge2Url = null;
-    if (currentCharge != 2)
-    {
-        charge2Url = ctx.url.clone().replaceParameter("quantitationCharge", "2");
-    }
-    URLHelper charge3Url = null;
-    if (currentCharge != 3)
-    {
-        charge3Url = ctx.url.clone().replaceParameter("quantitationCharge", "3");
-    }
     DecimalFormat format = new DecimalFormat();
     ViewURLHelper editUrl = ctx.url.clone();
     editUrl.setAction("editElutionGraph");
@@ -222,13 +207,18 @@ if (p.getQuantitation() != null)
 %>
 <table>
     <tr>
-        <td colspan="2" align="center"><strong><a name="quantitation">Quantitation</a></strong></td>
+        <td colspan="2" align="center"><strong><a name="quantitation">Quantitation (performed on <%= p.getCharge() %>+)</a></strong></td>
     </tr>
     <tr>
-        <td colspan="2" align="center">Currently showing charge <%= currentCharge %>+. Show:
-            <% if (charge1Url != null ) { %><a href="<%= charge1Url %>#quantitation">1+</a><% } %>
-            <% if (charge2Url != null ) { %><a href="<%= charge2Url %>#quantitation">2+</a><% } %>
-            <% if (charge3Url != null ) { %><a href="<%= charge3Url %>#quantitation">3+</a><% } %>
+        <td colspan="2" align="center">Currently showing elution profile for <%= currentCharge %>+. Show:
+            <% for (int i = 1; i <= 6; i++)
+            {
+                if (currentCharge != i)
+                {
+                    URLHelper chargeUrl = ctx.url.clone().replaceParameter("quantitationCharge", Integer.toString(i)); %>
+                    <a href="<%= chargeUrl %>#quantitation"><%= i %>+</a><%
+                }
+            } %>
             <% if (quant.findScanFile() != null && ctx.container.hasPermission(ctx.user, ACL.PERM_UPDATE) && ! "q3".equals(ctx.run.getQuantAnalysisType())) { %><a href="<%= editUrl %>">Edit elution profile selection</a><% } %>
         </td>
     </tr>
@@ -241,11 +231,11 @@ if (p.getQuantitation() != null)
                     <td><font size="-1"><%= quant.getLightFirstScan()%> - <%= quant.getLightLastScan()%></font></td>
                 </tr>
                 <tr>
-                    <td><font size="-1">Mass:</font></td>
+                    <td><font size="-1"><%= p.getCharge() %>+ Mass:</font></td>
                     <td><font size="-1"><%= quant.getLightMass() %></font></td>
                 </tr>
                 <tr>
-                    <td><font size="-1">Area:</font></td>
+                    <td><font size="-1"><%= p.getCharge() %>+ Area:</font></td>
                     <td><font size="-1"><%= format.format(quant.getLightArea()) %></font></td>
                 </tr>
             </table>
@@ -264,11 +254,11 @@ if (p.getQuantitation() != null)
                     <td><font size="-1"><%= quant.getHeavyFirstScan()%> - <%= quant.getHeavyLastScan()%></font></td>
                 </tr>
                 <tr>
-                    <td><font size="-1">Mass:</font></td>
+                    <td><font size="-1"><%= p.getCharge() %>+ Mass:</font></td>
                     <td><font size="-1"><%= quant.getHeavyMass() %></font></td>
                 </tr>
                 <tr>
-                    <td><font size="-1">Area:</font></td>
+                    <td><font size="-1"><%= p.getCharge() %>+ Area:</font></td>
                     <td><font size="-1"><%= format.format(quant.getHeavyArea()) %></font></td>
                 </tr>
             </table>
@@ -283,11 +273,11 @@ if (p.getQuantitation() != null)
             <table align="center">
                 <tr><td colspan="2" align="center"><strong>Combined</strong></td></tr>
                 <tr>
-                    <td><font size="-1">Heavy to light ratio:</font></td>
+                    <td><font size="-1"><%= p.getCharge() %>+ Heavy to light ratio:</font></td>
                     <td><font size="-1"><%= quant.getHeavy2LightRatio()%></font></td>
                 </tr>
                 <tr>
-                    <td><font size="-1">Light to heavy ratio:</font></td>
+                    <td><font size="-1"><%= p.getCharge() %>+ Light to heavy ratio:</font></td>
                     <td><font size="-1"><%= quant.getRatio()%></font></td>
                 </tr>
             </table>

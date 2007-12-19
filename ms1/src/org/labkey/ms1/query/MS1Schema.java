@@ -117,7 +117,7 @@ public class MS1Schema extends UserSchema
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showFeatures.view", getContainer());
-                return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "runId=${RowId}"), "features");
+                return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "runId=${RowId}", true), "features");
             }
         });
         result.addColumn(cinfo);

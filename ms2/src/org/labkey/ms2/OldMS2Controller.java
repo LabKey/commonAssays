@@ -1703,7 +1703,7 @@ public class OldMS2Controller extends ViewController
             {
                 ElutionGraph g = new ElutionGraph();
                 int charge = form.getQuantitationCharge() == Integer.MIN_VALUE ? peptide.getCharge() : form.getQuantitationCharge();
-                if (charge < 1 || charge > 3)
+                if (charge < 1 || charge > Quantitation.MAX_CHARGE)
                 {
                     return renderErrorImage("Invalid charge state: " + charge, response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
                 }

@@ -154,7 +154,7 @@ public class FeaturesTableInfo extends FilteredTable
                 {
                     ViewURLHelper url = _urlBase.clone();
                     url.setAction("showFeatureDetails.view");
-                    UrlColumn uc = new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}"), "details");
+                    UrlColumn uc = new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}", true), "details");
                     uc.setName(COLUMN_DETAILS_LINK);
                     return uc;
                 }
@@ -166,7 +166,7 @@ public class FeaturesTableInfo extends FilteredTable
                 {
                     ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks.view", _container);
                     url.addParameter("runId", _runId);
-                    UrlColumn uc = new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}"), "peaks");
+                    UrlColumn uc = new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}", true), "peaks");
                     uc.setName(COLUMN_PEAKS_LINK);
                     return uc;
                 }

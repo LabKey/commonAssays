@@ -53,20 +53,21 @@ public class ElutionGraph
         XYSeries selectedSeries = new XYSeries("Selected", false, false);
         XYSeries surroundingSeries = new XYSeries("Surrounding", false, false);
 
-        float area = 0;
         Set<Integer> scans = new HashSet<Integer>();
         for (Quantitation.ScanInfo scanInfo : scanInfos)
         {
-            if (scanInfo.getScan() >= firstSelectedScan && scanInfo.getScan() <= lastSelectedScan && !scans.contains(scanInfo.getScan()))
+            if (!scans.contains(scanInfo.getScan()))
             {
-                selectedSeries.add(scanInfo.getScan(), scanInfo.getIntensity());
-                area += scanInfo.getIntensity();
+                if (scanInfo.getScan() >= firstSelectedScan && scanInfo.getScan() <= lastSelectedScan)
+                {
+                    selectedSeries.add(scanInfo.getScan(), scanInfo.getIntensity());
+                }
+                else
+                {
+                    surroundingSeries.add(scanInfo.getScan(), scanInfo.getIntensity());
+                }
+                scans.add(scanInfo.getScan());
             }
-            else
-            {
-                surroundingSeries.add(scanInfo.getScan(), scanInfo.getIntensity());
-            }
-            scans.add(scanInfo.getScan());
         }
         if (!scans.contains(minScan))
         {

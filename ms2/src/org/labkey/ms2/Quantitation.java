@@ -1,18 +1,19 @@
 package org.labkey.ms2;
 
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.common.tools.RelativeQuantAnalysisSummary;
 import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
 import org.labkey.ms2.reader.SimpleScan;
-import org.labkey.common.tools.RelativeQuantAnalysisSummary;
-import org.labkey.api.util.NetworkDrive;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.ArrayList;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * User: jeckels
@@ -51,6 +52,7 @@ public class Quantitation
     private boolean _noScansFound = true;
 
     private MS2Fraction _fraction;
+    public static final int MAX_CHARGE = 10;
 
     public long getPeptideId()
     {
@@ -191,23 +193,9 @@ public class Quantitation
         _decimalRatio = decimalRatio;
     }
 
-    public int calculateLightArea(int charge) throws SQLException, IOException
-    {
-        List<ScanInfo> scanInfos = getLightElutionProfile(charge);
-        int area = 0;
-        for (ScanInfo info : scanInfos)
-        {
-            if (info.getScan() >= getLightFirstScan() && info.getScan() <= getLightLastScan())
-            {
-                area += info.getIntensity();
-            }
-        }
-        return area;
-    }
-
     public List<ScanInfo> getHeavyElutionProfile(int charge) throws IOException, SQLException
     {
-        if (charge < 1 || charge > 3)
+        if (charge < 1 || charge > MAX_CHARGE)
         {
             throw new IllegalArgumentException("Illegal charge state: " + charge);
         }
@@ -217,14 +205,14 @@ public class Quantitation
         }
         if (_heavyProfiles == null)
         {
-            return null;
+            return Collections.emptyList();
         }
         return _heavyProfiles[charge - 1];
     }
 
     public List<ScanInfo> getLightElutionProfile(int charge) throws IOException, SQLException
     {
-        if (charge < 1 || charge > 3)
+        if (charge < 1 || charge > MAX_CHARGE)
         {
             throw new IllegalArgumentException("Illegal charge state: " + charge);
         }
@@ -234,7 +222,7 @@ public class Quantitation
         }
         if (_lightProfiles == null)
         {
-            return null;
+            return Collections.emptyList();
         }
         return _lightProfiles[charge - 1];
     }
@@ -303,14 +291,13 @@ public class Quantitation
 
         int minScan = getMinDisplayScan();
         int maxScan = getMaxDisplayScan();
-        _heavyProfiles = new List[3];
-        _heavyProfiles[0] = new ArrayList<ScanInfo>();
-        _heavyProfiles[1] = new ArrayList<ScanInfo>();
-        _heavyProfiles[2] = new ArrayList<ScanInfo>();
-        _lightProfiles = new List[3];
-        _lightProfiles[0] = new ArrayList<ScanInfo>();
-        _lightProfiles[1] = new ArrayList<ScanInfo>();
-        _lightProfiles[2] = new ArrayList<ScanInfo>();
+        _heavyProfiles = new List[MAX_CHARGE];
+        _lightProfiles = new List[MAX_CHARGE];
+        for (int i = 0; i < MAX_CHARGE; i++)
+        {
+            _heavyProfiles[i] = new ArrayList<ScanInfo>();
+            _lightProfiles[i] = new ArrayList<ScanInfo>();
+        }
 
         RandomAccessMzxmlIterator iterator = null;
         try
@@ -328,7 +315,7 @@ public class Quantitation
                     break;
                 }
 
-                for (int charge = 1; charge <= 3; charge++)
+                for (int charge = 1; charge <= MAX_CHARGE; charge++)
                 {
                     checkScan(_lightMass, charge, _lightProfiles[charge - 1], scan, massTol);
                     checkScan(_heavyMass, charge, _heavyProfiles[charge - 1], scan, massTol);
