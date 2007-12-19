@@ -23,7 +23,7 @@ public class LuminexModule extends DefaultModule implements ContainerManager.Con
 
     public LuminexModule()
     {
-        super(NAME, 2.29, null, true);
+        super(NAME, 2.30, null, true);
 
         addController("Luminex", LuminexController.class);
     }

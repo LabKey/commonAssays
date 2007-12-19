@@ -181,11 +181,18 @@ public abstract class GoLoader
             }
             ResultSetMetaData rsmd = conn.createStatement().executeQuery(typeList).getMetaData();
             HashMap<String, Integer> typeMap = new HashMap<String, Integer>();
+            HashMap<Integer, Integer> limitMap = new HashMap<Integer, Integer>();
             for (int i = 1; i <= rsmd.getColumnCount(); i++)
             {
                 String key = rsmd.getColumnName(i).toUpperCase();
                 Integer val = new Integer(rsmd.getColumnType(i));
                 typeMap.put(key, val);
+
+                if (rsmd.getColumnTypeName(i).equalsIgnoreCase("varchar"))
+                {
+                    int size = rsmd.getColumnDisplaySize(i);
+                    limitMap.put(i, size);
+                }
             }
 
             conn.setAutoCommit(false);
@@ -199,7 +206,20 @@ public abstract class GoLoader
                     String k = (String) key;
                     int kindex = Integer.parseInt(k.substring(6)) + 1;
                     Object val = curRec.get(key);
-                    if (val instanceof String && val.equals("\\N")) continue;
+                    if (val instanceof String)
+                    {
+                        String s = (String)val;
+                        if (s.equals("\\N"))
+                            continue;
+
+                        Integer limit = limitMap.get(kindex);
+
+                        if (null != limit && s.length() > limit.intValue())
+                        {
+                            val = s.substring(0, limit.intValue());
+                            _log.warn(ti + ": value in " + cols[kindex - 1] + " column in row " + (orgLineCount + 1) + " truncated from " + s.length() + " to " + limit + " characters.");
+                        }
+                    }
                     if (val != null)
                     {
                         ps.setObject(kindex, val);

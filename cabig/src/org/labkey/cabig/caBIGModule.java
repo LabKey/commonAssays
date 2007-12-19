@@ -18,7 +18,7 @@ public class caBIGModule extends DefaultModule
 
     public caBIGModule()
     {
-        super(NAME, 2.29, null, true);
+        super(NAME, 2.30, null, true);
         addController("cabig", caBIGController.class);
     }
 

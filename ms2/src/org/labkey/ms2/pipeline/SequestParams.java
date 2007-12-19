@@ -222,8 +222,8 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             "mass_type_parent",                                // the sequest.params property name
             "0=average masses, 1=monoisotopic masses",       // the sequest.params comment
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
-            null,
-            false
+            ParamsValidatorFactory.getBooleanParamsValidator(),
+            true
         ).setInputXmlLabels("sequest, mass_type_parent"));
 
         _params.add(new SequestParam(
