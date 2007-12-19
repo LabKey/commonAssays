@@ -23,11 +23,12 @@ LabKey database.  If you click Continue your LabKey Server will automatically:
 </ul>
 
 Your LabKey Server must be able to connect via the Internet to ftp.geneontology.org. Assuming a reasonably fast
-Internet connection, this  process should take less than five minutes to complete. The loading will take place
+Internet connection, this process should take less than five minutes to complete. The loading will take place
 in the background and you can continue to use your LabKey Server normally. If you want, you can monitor the
 process by refreshing the status information on the next page.<br><br>
 
 If you wish to proceed, click the Continue button. Otherwise click Cancel.<br><br>
-
-<%=PageFlowUtil.buttonLink("Continue", OldMS2Controller.getLoadGoUrl())%>
-<%=PageFlowUtil.buttonLink("Cancel", OldMS2Controller.getShowProteinAdminUrl())%>
+<form action="loadGo.post" method="post">
+    <input type=image src="<%=PageFlowUtil.buttonSrc("Continue")%>">
+    <%=PageFlowUtil.buttonLink("Cancel", OldMS2Controller.getShowProteinAdminUrl())%>
+</form>

@@ -6,6 +6,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.PageFlowUtil;
@@ -17,6 +18,7 @@ import org.labkey.ms2.compare.CompareQuery;
 import org.labkey.ms2.peptideview.AbstractMS2RunView;
 import org.labkey.ms2.peptideview.MS2RunViewType;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -726,9 +728,9 @@ public class MS2Controller extends SpringActionController
                     fixed.put(mod.getAminoAcid(), Formats.f3.format(mod.getMassDiff()));
             }
 
-            // TODO: Fix template sizing
             getPageConfig().setTemplate(PageConfig.Template.Print);
             getPageConfig().setTitle("Modifications");
+            getPageConfig().setMinimumWidth(100);
 
             ModificationBean bean = new ModificationBean();
             bean.fixed = fixed;
@@ -750,5 +752,98 @@ public class MS2Controller extends SpringActionController
     {
         public SortedMap<String, String> fixed;
         public SortedMap<String, String> var;
+    }
+
+
+    public static ViewURLHelper getLoadGoUrl()
+    {
+        return PageFlowUtil.urlFor(LoadGoAction.class, "");
+    }
+
+
+    @RequiresSiteAdmin
+    public class LoadGoAction extends FormViewAction
+    {
+        private String _message = null;
+
+        public void validateCommand(Object target, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
+        {
+            populatePageConfig(getPageConfig(), "Load GO Annotations", "annotations", false);
+
+            return new JspView("/org/labkey/ms2/loadGo.jsp");
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;  // TODO: Admin navtrail
+        }
+
+        public boolean handlePost(Object o, BindException errors) throws Exception
+        {
+            GoLoader loader = GoLoader.getGoLoader();
+
+            if (null != loader)
+            {
+                loader.load();
+                Thread.sleep(2000);
+            }
+            else
+            {
+                _message = "Can't load GO annotations, a GO annotation load is already in progress.  See below for details.";
+            }
+
+            return true;
+        }
+
+        public ViewURLHelper getSuccessURL(Object o)
+        {
+            return getGoStatusUrl(_message);
+        }
+    }
+
+
+    private ViewURLHelper getGoStatusUrl(String message)
+    {
+        ViewURLHelper url = PageFlowUtil.urlFor(GoStatusAction.class, "");
+        if (null != message)
+            url.addParameter("message", message);
+        return url;
+    }
+
+
+    @RequiresSiteAdmin
+    public class GoStatusAction extends SimpleViewAction<GoForm>
+    {
+        public ModelAndView getView(GoForm form, BindException errors) throws Exception
+        {
+            populatePageConfig(getPageConfig(), "GO Load Status", "annotations", false);
+
+            return GoLoader.getCurrentStatus(form.getMessage());
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+
+    private static class GoForm
+    {
+        String _message = null;
+
+        public String getMessage()
+        {
+            return _message;
+        }
+
+        public void setMessage(String message)
+        {
+            _message = message;
+        }
     }
 }

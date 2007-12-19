@@ -883,7 +883,7 @@ public class OldMS2Controller extends ViewController
 
     private static ActionButton NewAnnot = new ActionButton("insertAnnots.post", "Load New Annot File");
     private static ActionButton ReloadSprotOrgMap = new ActionButton("reloadSPOM.post", "Reload SWP Org Map");
-    private static ActionButton ReloadGO = new ActionButton("showLoadGo.view", "Load or Reload GO");
+    private static ActionButton ReloadGO = new ActionButton("loadGo.view", "Load or Reload GO");
     private static ButtonBar annotLoadButtons = new ButtonBar();
 
 
@@ -997,55 +997,6 @@ public class OldMS2Controller extends ViewController
         ProteinDictionaryHelpers.loadProtSprotOrgMap();
 
         return new ViewForward(getShowProteinAdminUrl());
-    }
-
-
-    @Jpf.Action
-    protected Forward showLoadGo() throws Exception
-    {
-        requiresGlobalAdmin();
-
-        JspView view = new JspView("/org/labkey/ms2/loadGo.jsp");
-
-        return _renderInTemplate(view, Template.home, "Load GO Annotations", null, false);
-    }
-
-
-    public static ViewURLHelper getLoadGoUrl()
-    {
-        return new ViewURLHelper("MS2", "loadGo", "");
-    }
-
-
-    @Jpf.Action
-    protected Forward loadGo() throws Exception
-    {
-        requiresGlobalAdmin();
-
-        GoLoader loader = GoLoader.getGoLoader();
-        ViewURLHelper forwardUrl = new ViewURLHelper("MS2", "showGoStatus.view", "");
-
-        if (null != loader)
-        {
-            loader.load();
-            Thread.sleep(2000);
-        }
-        else
-        {
-            forwardUrl.addParameter("message", "<b>Can't load GO annotations, a GO annotation load is already in progress.  See below for details.</b><br>");
-        }
-
-        return new ViewForward(forwardUrl);
-    }
-
-
-    @Jpf.Action
-    protected Forward showGoStatus() throws Exception
-    {
-        requiresGlobalAdmin();
-
-        HttpView view = GoLoader.getCurrentStatus(getViewURLHelper().getParameter("message"));
-        return _renderInTemplate(view, Template.home, "GO Load Status", null, false);
     }
 
 
