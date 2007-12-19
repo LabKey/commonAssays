@@ -726,7 +726,6 @@ ms2/src/org/labkey/ms2/compare/PeptideCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/ProteinCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/ProteinProphetCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/RunColumn.java -text
-ms2/src/org/labkey/ms2/createExperimentXml.gm -text
 ms2/src/org/labkey/ms2/currentFilter.jsp -text
 ms2/src/org/labkey/ms2/editElution.jsp -text
 ms2/src/org/labkey/ms2/filterHeader.jsp -text
