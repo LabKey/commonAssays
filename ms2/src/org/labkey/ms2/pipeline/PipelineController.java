@@ -248,7 +248,7 @@ public class PipelineController extends SpringActionController
 
     public static ViewURLHelper urlSearch(Container container, String path, String searchEngine, boolean skipDescription)
     {
-        ViewURLHelper url = container.urlFor(SearchAction.class);
+        ViewURLHelper url = new ViewURLHelper(SearchAction.class, container);
         url.addParameter(MS2PipelineForm.PARAMS.searchEngine, searchEngine);
         url.addParameter(MS2PipelineForm.PARAMS.path, path);
         if (skipDescription)
@@ -847,7 +847,7 @@ public class PipelineController extends SpringActionController
     public static ViewURLHelper urlShowCreateMS2Protocol(Container container, String path,
                                                          String searchEngine, String templateName)
     {
-        ViewURLHelper url = container.urlFor(PipelineController.ShowCreateMS2ProtocolAction.class);
+        ViewURLHelper url = new ViewURLHelper(PipelineController.ShowCreateMS2ProtocolAction.class, container);
         if (templateName != null && templateName.length() > 0)
             url.addParameter(MS2ProtocolForm.PARAMS.templateName, templateName);
         url.addParameter(MS2PipelineForm.PARAMS.searchEngine, searchEngine);
@@ -994,7 +994,7 @@ public class PipelineController extends SpringActionController
             dr.addColumns(template.getSubstitutionFields());
 
             ButtonBar bb = new ButtonBar();
-            ActionButton ab = new ActionButton(getViewContext().getContainer().urlFor(ShowCreateMS2ProtocolAction.class), "Submit");
+            ActionButton ab = new ActionButton(new ViewURLHelper(ShowCreateMS2ProtocolAction.class, getViewContext().getContainer()), "Submit");
             bb.add(ab);
             dr.setButtonBar(bb);
 
@@ -1063,7 +1063,7 @@ public class PipelineController extends SpringActionController
 
     public static ViewURLHelper urlShowDescribeMS2Run(Container container, String path, String searchEngine)
     {
-        ViewURLHelper url = container.urlFor(ShowDescribeMS2RunAction.class);
+        ViewURLHelper url = new ViewURLHelper(ShowDescribeMS2RunAction.class, container);
         url.addParameter(MS2PipelineForm.PARAMS.searchEngine, searchEngine);
         url.addParameter(MS2PipelineForm.PARAMS.path, path);
         return url;

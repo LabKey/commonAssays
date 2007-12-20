@@ -103,7 +103,7 @@ public class MS2Controller extends SpringActionController
 
     public static ViewURLHelper getBeginUrl(Container c)
     {
-        return c.urlFor(BeginAction.class);
+        return new ViewURLHelper(BeginAction.class, c);
     }
 
 
@@ -134,7 +134,7 @@ public class MS2Controller extends SpringActionController
 
     public static ViewURLHelper getShowListUrl(Container c)
     {
-        return c.urlFor(ShowListAction.class);
+        return new ViewURLHelper(ShowListAction.class, c);
     }
 
 
@@ -231,7 +231,7 @@ public class MS2Controller extends SpringActionController
 
     public static ViewURLHelper getShowRunUrl(Container c, int runId)
     {
-        ViewURLHelper url = c.urlFor(ShowRunAction.class);
+        ViewURLHelper url = new ViewURLHelper(ShowRunAction.class, c);
         url.addParameter(OldMS2Controller.RunForm.PARAMS.run, String.valueOf(runId));
         return url;
     }
@@ -474,7 +474,6 @@ public class MS2Controller extends SpringActionController
     // multi-select normal list box.  postValue determines whether to post the value or the name of selected view(s)
     //
     // Caller is responsible for wrapping this in a <form> and (if desired) a <table>
-
     private StringBuilder renderViewSelect(int height, boolean postValue, int sharedPerm, boolean selectCurrent) throws SQLException, ServletException
     {
         Map<String, Object> m = getViewMap(true, getContainer().hasPermission(getUser(), sharedPerm), postValue);
@@ -568,7 +567,7 @@ public class MS2Controller extends SpringActionController
 
     public static ViewURLHelper getRenameRunUrl(Container c, int runId)
     {
-        ViewURLHelper url = c.urlFor(RenameRunAction.class);
+        ViewURLHelper url = new ViewURLHelper(RenameRunAction.class, c);
         return url.addParameter("run", String.valueOf(runId));
     }
 
@@ -757,7 +756,7 @@ public class MS2Controller extends SpringActionController
 
     public static ViewURLHelper getLoadGoUrl()
     {
-        return PageFlowUtil.urlFor(LoadGoAction.class, "");
+        return new ViewURLHelper(LoadGoAction.class);
     }
 
 
@@ -808,7 +807,7 @@ public class MS2Controller extends SpringActionController
 
     private ViewURLHelper getGoStatusUrl(String message)
     {
-        ViewURLHelper url = PageFlowUtil.urlFor(GoStatusAction.class, "");
+        ViewURLHelper url = new ViewURLHelper(GoStatusAction.class);
         if (null != message)
             url.addParameter("message", message);
         return url;

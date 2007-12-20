@@ -23,10 +23,8 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.WebPartView;
-import org.labkey.ms2.protocol.MS2SearchPipelineProtocol;
-import org.labkey.ms2.protocol.MascotSearchProtocol;
-import org.labkey.ms2.protocol.MascotSearchProtocolFactory;
 import org.labkey.ms2.protocol.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.protocol.MascotSearchProtocolFactory;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -101,7 +99,7 @@ public class MascotCPipelineProvider extends PipelineProviderCluster  implements
             if (!AppProps.getInstance().hasPipelineCluster())
             {
                 html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">Mascot specific settings:</td></tr>");
-                ViewURLHelper setDefaultsURL = context.getContainer().urlFor(PipelineController.SetMascotDefaultsAction.class);
+                ViewURLHelper setDefaultsURL = new ViewURLHelper(PipelineController.SetMascotDefaultsAction.class, context.getContainer());
                 html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
                         .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
                         .append(" - Specify the default XML parameters file for Mascot.</td></tr></table>");

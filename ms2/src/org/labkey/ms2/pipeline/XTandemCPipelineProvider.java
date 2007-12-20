@@ -25,10 +25,8 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.view.WebPartView;
-import org.labkey.ms2.protocol.MS2SearchPipelineProtocol;
-import org.labkey.ms2.protocol.XTandemSearchProtocol;
-import org.labkey.ms2.protocol.XTandemSearchProtocolFactory;
 import org.labkey.ms2.protocol.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.protocol.XTandemSearchProtocolFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -118,7 +116,7 @@ public class XTandemCPipelineProvider extends PipelineProviderCluster implements
             if (!AppProps.getInstance().hasPipelineCluster())
             {
                 html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">X! Tandem specific settings:</td></tr>");
-                ViewURLHelper setDefaultsURL = context.getContainer().urlFor(PipelineController.SetTandemDefaultsAction.class);
+                ViewURLHelper setDefaultsURL = new ViewURLHelper(PipelineController.SetTandemDefaultsAction.class, context.getContainer());  // TODO: Should be method in PipelineController
                 html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
                         .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
                         .append(" - Specify the default XML parameters file for X! Tandem.</td></tr></table>");

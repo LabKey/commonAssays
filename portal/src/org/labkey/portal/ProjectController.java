@@ -54,7 +54,7 @@ public class ProjectController extends SpringActionController
     {
         public ViewURLHelper urlStart(Container container)
         {
-            return container.urlFor(StartAction.class);
+            return new ViewURLHelper(StartAction.class, container);
         }
     }
 

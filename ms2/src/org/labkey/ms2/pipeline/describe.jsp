@@ -12,7 +12,7 @@
 <%@ page import="java.util.Map" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <p/>
-<form method=post action="<%=getViewContext().getContainer().urlFor(PipelineController.ShowDescribeMS2RunAction.class)%>" name="describeForm">
+<form method=post action="<%=urlFor(PipelineController.ShowDescribeMS2RunAction.class)%>" name="describeForm">
 <%
     MS2ExperimentForm form = getForm();
     PipelineUrls up = urlProvider(PipelineUrls.class);
