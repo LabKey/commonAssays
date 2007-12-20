@@ -19,11 +19,11 @@ public class RunEditHelper extends TableEditHelper
         _schema = schema;
     }
 
-    public Forward delete(User user, ViewURLHelper srcURL, QueryUpdateForm form) throws Exception
+    public ViewURLHelper delete(User user, ViewURLHelper srcURL, QueryUpdateForm form) throws Exception
     {
         String[] pks = form.getRequest().getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
         ExperimentService.get().deleteExperimentRunsByRowIds(_schema.getContainer(), user, PageFlowUtil.toInts(pks));
-        return new ViewForward(srcURL);
+        return srcURL;
     }
 
     public boolean hasPermission(User user, int perm)
