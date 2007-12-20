@@ -12,6 +12,7 @@ import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
 import java.util.List;
+import java.util.ArrayList;
 import java.sql.SQLException;
 
 /**
@@ -169,9 +170,11 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         return result;
     }
 
-    protected void addExportFormats(DropDownList exportFormat)
+    protected List<String> getExportFormats()
     {
-        exportFormat.add("Excel");
-        exportFormat.add("TSV");
+        List<String> result = new ArrayList<String>();
+        result.add("Excel");
+        result.add("TSV");
+        return result;
     }
 }

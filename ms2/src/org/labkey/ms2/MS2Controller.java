@@ -10,6 +10,7 @@ import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Cache;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.common.tools.MS2Modification;
@@ -19,10 +20,14 @@ import org.labkey.ms2.peptideview.AbstractMS2RunView;
 import org.labkey.ms2.peptideview.MS2RunViewType;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.tools.GoLoader;
+import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
+import org.labkey.ms2.protein.tools.PieJChartHelper;
+import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
+import org.jfree.chart.imagemap.ImageMapUtilities;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
@@ -106,6 +111,13 @@ public class MS2Controller extends SpringActionController
         return new ViewURLHelper(BeginAction.class, c);
     }
 
+
+    public static ViewURLHelper getPeptideChartUrl(Container c, ProteinDictionaryHelpers.GoTypes chartType)
+    {
+        ViewURLHelper url = new ViewURLHelper(PeptideChartsAction.class, c);
+        url.addParameter("chartType", chartType.toString());
+        return url;
+    }
 
     @RequiresPermission(ACL.PERM_READ)
     public class BeginAction extends SimpleRedirectAction
@@ -844,5 +856,85 @@ public class MS2Controller extends SpringActionController
         {
             _message = message;
         }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class PeptideChartsAction extends SimpleViewAction<OldMS2Controller.ChartForm>
+    {
+        private ProteinDictionaryHelpers.GoTypes _goChartType;
+
+        public ModelAndView getView(OldMS2Controller.ChartForm form, BindException errors) throws Exception
+        {
+            if (!isAuthorized(form.run))
+                return null;
+
+            _goChartType = ProteinDictionaryHelpers.GTypeStringToEnum(form.getChartType());
+
+            MS2Run run = MS2Manager.getRun(form.run);
+
+            ViewContext ctx = getViewContext();
+            ViewURLHelper queryUrl = ctx.cloneViewURLHelper();
+            String queryString = (String) ctx.get("queryString");
+            queryUrl.setRawQuery(queryString);
+
+            AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
+
+            Map<String, SimpleFilter> filters = peptideView.getFilter(queryUrl, run);
+            String peptideFilterInfo = "";
+            String proteinFilterInfo = "";
+            String proteinGroupFilterInfo = "";
+            if (filters != null)
+            {
+                if (filters.containsKey("peptideFilter"))
+                    peptideFilterInfo = "Peptide Filter: " + filters.get("peptideFilter").getFilterText();
+                if (filters.containsKey("proteinFilter"))
+                    proteinFilterInfo = "Protein Filter: " + filters.get("proteinFilter").getFilterText();
+                if (filters.containsKey("proteinGroupFilter"))
+                    proteinFilterInfo = "Protein Group Filter: " + filters.get("proteinGroupFilter").getFilterText();
+            }
+
+            String chartTitle = "GO " + _goChartType + " Classifications";
+            SQLFragment fragment = peptideView.getProteins(queryUrl, run, form);
+            PieJChartHelper pjch = PieJChartHelper.prepareGOPie(chartTitle, fragment, _goChartType);
+            pjch.renderAsPNG(new NullOutputStream());
+
+            GoChartBean bean = new GoChartBean();
+            bean.run = run;
+            bean.chartTitle = chartTitle;
+            bean.goChartType = _goChartType;
+            bean.peptideFilterInfo = peptideFilterInfo;
+            bean.proteinFilterInfo = proteinFilterInfo;
+            bean.proteinGroupFilterInfo = proteinGroupFilterInfo;
+            bean.imageMap = ImageMapUtilities.getImageMap("pie1", pjch.getChartRenderingInfo());
+            bean.queryString = queryString;
+            bean.grouping = form.getGrouping();
+            bean.pieHelperObjName = "piechart-" + (new Random().nextInt(1000000000));
+            bean.chartUrl = new ViewURLHelper("ms2", "doOnePeptideChart", getContainer()).addParameter("ctype", _goChartType.toString()).addParameter("helpername", bean.pieHelperObjName);
+
+            Cache.getShared().put(bean.pieHelperObjName, pjch, Cache.HOUR * 2);
+
+            return new JspView<GoChartBean>("/org/labkey/ms2/peptideChart.jsp", bean);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendRootNavTrail(root).addChild("GO " + _goChartType + " Chart");
+        }
+    }
+
+
+    public static class GoChartBean
+    {
+        public MS2Run run;
+        public ProteinDictionaryHelpers.GoTypes goChartType;
+        public String chartTitle;
+        public String peptideFilterInfo = "";
+        public String proteinFilterInfo = "";
+        public String proteinGroupFilterInfo = "";
+        public String pieHelperObjName;
+        public ViewURLHelper chartUrl;
+        public String imageMap;
+        public String queryString;
+        public String grouping;
     }
 }

@@ -173,7 +173,7 @@ public class FlatPeptideView extends AbstractMS2RunView
 
         setPeptideUrls(rgn, null);
 
-        ButtonBar bb = createButtonBar("exportAllPeptides", "exportSelectedPeptides", "peptides");
+        ButtonBar bb = createButtonBar("exportAllPeptides", "exportSelectedPeptides", "peptides", rgn);
 
         rgn.addHiddenFormField("queryString", _url.getRawQuery());  // Pass query string for exportSelectedToExcel post case... need to display filter & sort to user, and to show the right columns
         rgn.addHiddenFormField(MS2Manager.getDataRegionNamePeptides() + ".sort", _url.getParameter(MS2Manager.getDataRegionNamePeptides() + ".sort"));     // Stick sort on the request as well so DataRegion sees it
@@ -251,12 +251,14 @@ public class FlatPeptideView extends AbstractMS2RunView
         tw.write(response);
     }
 
-    protected void addExportFormats(DropDownList exportFormat)
+    protected List<String> getExportFormats()
     {
-        exportFormat.add("Excel");
-        exportFormat.add("TSV");
-        exportFormat.add("DTA");
-        exportFormat.add("PKL");
-        exportFormat.add("AMT");
+        List<String> result = new ArrayList<String>();
+        result.add("Excel");
+        result.add("TSV");
+        result.add("DTA");
+        result.add("PKL");
+        result.add("AMT");
+        return result;
     }
 }

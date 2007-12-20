@@ -172,12 +172,14 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         ewProtein.write(response);
     }
 
-    protected void addExportFormats(DropDownList exportFormat)
+    protected List<String> getExportFormats()
     {
-        exportFormat.add("Excel");
-        exportFormat.add("TSV");
-        exportFormat.add("DTA");
-        exportFormat.add("PKL");
-        exportFormat.add("AMT");
+        List<String> result = new ArrayList<String>();
+        result.add("Excel");
+        result.add("TSV");
+        result.add("DTA");
+        result.add("PKL");
+        result.add("AMT");
+        return result;
     }
 }

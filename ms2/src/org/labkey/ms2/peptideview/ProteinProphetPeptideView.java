@@ -171,7 +171,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         DataRegion peptideGrid = createPeptideDataRegion(requestedPeptideColumnNames);
         proteinRgn.setNestedRegion(peptideGrid);
 
-        ButtonBar bb = createButtonBar("exportProteinGroups", "exportSelectedProteinGroups", "protein groups");
+        ButtonBar bb = createButtonBar("exportProteinGroups", "exportSelectedProteinGroups", "protein groups", proteinRgn);
 
         proteinRgn.addHiddenFormField("queryString", _url.getRawQuery());
         proteinRgn.addHiddenFormField("run", _url.getParameter("run"));

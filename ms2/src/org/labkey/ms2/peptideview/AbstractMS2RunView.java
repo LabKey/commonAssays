@@ -86,45 +86,52 @@ public abstract class AbstractMS2RunView
         return _container;
     }
 
-    protected ButtonBar createButtonBar(String exportAllAction, String exportSelectedAction, String whatWeAreSelecting)
+    protected ButtonBar createButtonBar(String exportAllAction, String exportSelectedAction, String whatWeAreSelecting, DataRegion dataRegion)
     {
         ButtonBar result = new ButtonBar();
 
-        result.add(ActionButton.BUTTON_SELECT_ALL);
-        result.add(ActionButton.BUTTON_CLEAR_ALL);
 
+        List<String> exportFormats = getExportFormats();
+        
         ViewURLHelper exportUrl = _url.clone();
-
         exportUrl.setAction(exportAllAction);
-        ActionButton exportAll = new ActionButton(exportUrl.getEncodedLocalURIString(), "Export All");
-        exportAll.setActionType(ActionButton.Action.POST);
+        MenuButton exportAll = new MenuButton("Export All");
+        for (String exportFormat : exportFormats)
+        {
+            exportUrl.replaceParameter("exportFormat", exportFormat);
+            exportAll.addMenuItem(exportFormat, "javascript: document.forms[\"" + dataRegion.getName() + "\"].action=\"" + exportUrl.getLocalURIString() + "\"; document.forms[\"" + dataRegion.getName() + "\"].submit();");
+        }
         result.add(exportAll);
 
-        ActionButton exportSelected = new ActionButton("", "Export Selected");
+        MenuButton exportSelected = new MenuButton("Export Selected");
         exportUrl.setAction(exportSelectedAction);
-        exportSelected.setScript("return verifySelected(this.form, \"" + exportUrl.getEncodedLocalURIString() + "\", \"post\", \"" + whatWeAreSelecting + "\")");
-        exportSelected.setActionType(ActionButton.Action.POST);
+        for (String exportFormat : exportFormats)
+        {
+            exportUrl.replaceParameter("exportFormat", exportFormat);
+            exportSelected.addMenuItem(exportFormat, "javascript: if (verifySelected(document.forms[\"" + dataRegion.getName() + "\"], \"" + exportUrl.getEncodedLocalURIString() + "\", \"post\", \"" + whatWeAreSelecting + "\")) { document.forms[\"" + dataRegion.getName() + "\"].submit(); }");
+        }
         result.add(exportSelected);
-
-        DropDownList exportFormat = new DropDownList("exportFormat");
-        addExportFormats(exportFormat);
-        result.add(exportFormat);
 
         // TODO: Temp hack -- need to support GO charts in protein views
         if (getViewType().supportsGOPiechart() && GoLoader.isGoLoaded())
         {
-            result.add(new ActionButton("peptideCharts.post", "GO Piechart"));
-            DropDownList chartType = new DropDownList("chartType");
-            chartType.add(ProteinDictionaryHelpers.GoTypes.CELL_LOCATION.toString());
-            chartType.add(ProteinDictionaryHelpers.GoTypes.FUNCTION.toString());
-            chartType.add(ProteinDictionaryHelpers.GoTypes.PROCESS.toString());
-            result.add(chartType);
+            MenuButton goButton = new MenuButton("Gene Ontology Charts");
+            List<ProteinDictionaryHelpers.GoTypes> types = new ArrayList<ProteinDictionaryHelpers.GoTypes>();
+            types.add(ProteinDictionaryHelpers.GoTypes.CELL_LOCATION);
+            types.add(ProteinDictionaryHelpers.GoTypes.FUNCTION);
+            types.add(ProteinDictionaryHelpers.GoTypes.PROCESS);
+            for (ProteinDictionaryHelpers.GoTypes goType : types)
+            {
+                ViewURLHelper url = MS2Controller.getPeptideChartUrl(getContainer(), goType);
+                goButton.addMenuItem(goType.toString(), "javascript: document.forms[\"" + dataRegion.getName() + "\"].action=\"" + url.getLocalURIString() + "\"; document.forms[\"" + dataRegion.getName() + "\"].submit();");
+            }
+            result.add(goButton);
         }
 
         return result;
     }
 
-    protected abstract void addExportFormats(DropDownList exportFormat);
+    protected abstract List<String> getExportFormats();
 
     public void changePeptideCaptionsForTsv(List<DisplayColumn> displayColumns)
     {

@@ -34,7 +34,6 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     {
         DataRegion proteinRgn = createProteinDataRegion(expanded, requestedPeptideColumnNames, requestedProteinColumnNames);
         proteinRgn.setTable(MS2Manager.getTableInfoProteins());
-        proteinRgn.setName(MS2Manager.getDataRegionNameProteins());
         GridView proteinView = new GridView(proteinRgn);
         proteinView.setResultSet(ProteinManager.getProteinRS(_url, getSingleRun(), null, proteinRgn.getMaxRows()));
         proteinView.setContainer(getContainer());
@@ -57,6 +56,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     private StandardProteinDataRegion createProteinDataRegion(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames) throws SQLException
     {
         StandardProteinDataRegion proteinRgn = new StandardProteinDataRegion(_url);
+        proteinRgn.setName(MS2Manager.getDataRegionNameProteins());
         proteinRgn.addColumns(getProteinDisplayColumns(requestedProteinColumnNames, false));
         proteinRgn.setShowRecordSelectors(true);
         proteinRgn.setExpanded(expanded);
@@ -80,7 +80,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
             proteinColumn.setLinkTarget("prot");
         }
 
-        ButtonBar bb = createButtonBar("exportAllProteins", "exportSelectedProteins", "proteins");
+        ButtonBar bb = createButtonBar("exportAllProteins", "exportSelectedProteins", "proteins", proteinRgn);
         proteinRgn.addHiddenFormField("queryString", _url.getRawQuery());
         proteinRgn.addHiddenFormField("run", _url.getParameter("run"));
         proteinRgn.addHiddenFormField("grouping", _url.getParameter("grouping"));

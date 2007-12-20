@@ -222,10 +222,12 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         return result;
     }
 
-    protected void addExportFormats(DropDownList exportFormat)
+    protected List<String> getExportFormats()
     {
-        exportFormat.add("Excel");
-        exportFormat.add("TSV");
-        exportFormat.add("AMT");
+        List<String> result = new ArrayList<String>();
+        result.add("Excel");
+        result.add("TSV");
+        result.add("AMT");
+        return result;
     }
 }

@@ -96,7 +96,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
         protected void populateButtonBar(DataView view, ButtonBar bar)
         {
             super.populateButtonBar(view, bar);
-            ButtonBar bb = createButtonBar("exportAllPeptides", "exportSelectedPeptides", "peptides");
+            ButtonBar bb = createButtonBar("exportAllPeptides", "exportSelectedPeptides", "peptides", view.getDataRegion());
             for (DisplayElement element : bb.getList())
             {
                 bar.add(element);
