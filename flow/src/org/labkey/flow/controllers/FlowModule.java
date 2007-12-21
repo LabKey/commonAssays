@@ -72,15 +72,15 @@ public class FlowModule extends DefaultModule
                 return new FlowSchema(schema.getUser(), schema.getContainer());
             }
         });
-        addController("Flow", FlowController.class);
-        addController("Flow-ExecuteScript", AnalysisScriptController.class);
-        addController("Flow-Run", RunController.class);
-        addController("Flow-EditScript", ScriptController.class);
-        addController("Flow-Well", WellController.class);
-        addController("Flow-Log", LogController.class);
-        addController("Flow-Compensation", CompensationController.class);
-        addController("Flow-Protocol", ProtocolController.class);
-        addController("Flow-Remote", FlowRemoteController.class);
+        addController("flow", FlowController.class);
+        addController("flow-executescript", AnalysisScriptController.class);
+        addController("flow-run", RunController.class);
+        addController("flow-editscript", ScriptController.class);
+        addController("flow-well", WellController.class);
+        addController("flow-log", LogController.class);
+        addController("flow-compensation", CompensationController.class);
+        addController("flow-protocol", ProtocolController.class);
+        addController("flow-remote", FlowRemoteController.class);
         FlowProperty.register();
         ContainerManager.addContainerListener(new FlowContainerListener());
     }

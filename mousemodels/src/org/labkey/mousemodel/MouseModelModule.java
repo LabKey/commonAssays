@@ -59,10 +59,10 @@ public class MouseModelModule extends DefaultModule implements LsidManager.LsidH
                         return new MouseModelController.MouseModelView();
                     }
                 });
-        addController("MouseModel", MouseModelController.class);
-        addController("MouseModel-Mouse", MouseController.class);
-        addController("MouseModel-Sample", SampleController.class);
-        addController("MouseModel-Necropsy", NecropsyController.class);
+        addController("mousemodel", MouseModelController.class);
+        addController("mousemodel-mouse", MouseController.class);
+        addController("mousemodel-sample", SampleController.class);
+        addController("mousemodel-necropsy", NecropsyController.class);
     }
 
     public Identifiable getObject(Lsid lsid)

@@ -47,7 +47,7 @@ public class PortalModule extends DefaultModule
             new SearchWebPartFactory("Search", null),
             new SearchWebPartFactory("Search", "right")
         );
-        addController("Project", ProjectController.class);
+        addController("project", ProjectController.class);
     }
 
 

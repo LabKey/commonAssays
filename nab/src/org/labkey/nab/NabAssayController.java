@@ -52,7 +52,7 @@ import java.util.List;
 public class NabAssayController extends SpringActionController
 {
     private static final DefaultActionResolver _resolver = new DefaultActionResolver(NabAssayController.class,
-            new Action(NabUploadWizardAction.class)
+            NabUploadWizardAction.class
         );
 
     public NabAssayController()

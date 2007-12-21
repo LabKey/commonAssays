@@ -111,8 +111,8 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
                 });
         addController("ms2", MS2Controller.class);
         addController("protein", ProteinController.class);
-        addController("MS2-Pipeline", PipelineController.class);
-        addController("MS2-Scoring", ScoringController.class);
+        addController("ms2-pipeline", PipelineController.class);
+        addController("ms2-scoring", ScoringController.class);
 
         MS2Schema.register();
         CustomAnnotationSchema.register();

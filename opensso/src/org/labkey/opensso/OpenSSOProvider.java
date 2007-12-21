@@ -59,8 +59,7 @@ public class OpenSSOProvider implements AuthenticationProvider.RequestAuthentica
         }
         catch (SSOException e)
         {
-            SSOException sso = e;
-            // Ignore this -- opensso token is either expired or doesn't exist
+            _log.debug("Invalid, expired, or missing OpenSSO token", e);
         }
 
         return null;

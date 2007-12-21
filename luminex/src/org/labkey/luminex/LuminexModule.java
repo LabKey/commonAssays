@@ -25,7 +25,7 @@ public class LuminexModule extends DefaultModule implements ContainerManager.Con
     {
         super(NAME, 2.30, null, true);
 
-        addController("Luminex", LuminexController.class);
+        addController("luminex", LuminexController.class);
     }
 
     public void containerCreated(Container c)
