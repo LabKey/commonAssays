@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-CREATE SCHEMA microarray
-GO
-
 -- Tables and views used for Microarray module
 EXEC sp_addapprole 'microarray', 'password'
 GO
