@@ -8,7 +8,6 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 
@@ -16,13 +15,13 @@ import java.io.File;
 import java.util.List;
 
 
-public class ArrayPipeline extends PipelineProvider
+public class MicroarrayPipelineProvider extends PipelineProvider
 {
-    private static final Logger _log = Logger.getLogger(ArrayPipeline.class);
+    private static final Logger _log = Logger.getLogger(MicroarrayPipelineProvider.class);
 
     public static String name = "Array";
 
-    public ArrayPipeline()
+    public MicroarrayPipelineProvider()
     {
         super(name);
     }
@@ -40,7 +39,7 @@ public class ArrayPipeline extends PipelineProvider
             {
                 File[] files = entry.listFiles(ArrayPipelineManager.getImageFileFilter());
                 if (files != null)
-                    addAction("Array-Pipeline", "importImageFiles", "Import Images",
+                    addAction("Microarray", "importImageFiles", "Import Images",
                             entry, files);
                 
                 files = entry.listFiles(ArrayPipelineManager.getMageFileFilter());

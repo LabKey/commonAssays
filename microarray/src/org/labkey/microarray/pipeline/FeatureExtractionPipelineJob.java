@@ -1,8 +1,13 @@
 package org.labkey.microarray.pipeline;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.labkey.api.microarray.FeatureExtractionClient;
 import org.labkey.api.pipeline.PipelineJob;
@@ -13,31 +18,25 @@ import org.labkey.api.view.ViewURLHelper;
 
 public class FeatureExtractionPipelineJob extends PipelineJob
 {
-
     protected Integer _extractionRowId;
-    protected File[] _imageFiles;
     protected File _dirImages;
     protected String _protocol;
+    private final URI _uriData;
+    private final String _extractionEngine;
 
     public FeatureExtractionPipelineJob(ViewBackgroundInfo info,
                                         String protocol,
-                                        URI uriRoot,
-                                        URI uriData,
-                                        File imageFiles[]) throws SQLException
+                                        URI uriData, String extractionEngine) throws SQLException
     {
-        super(ArrayPipeline.name, info);
+        super(MicroarrayPipelineProvider.name, info);
 
-        _imageFiles = imageFiles;
-        _dirImages = imageFiles[0].getParentFile();
         _protocol = protocol;
+        _uriData = uriData;
+        _extractionEngine = extractionEngine;
+        _dirImages = new File(uriData).getParentFile();
         setLogFile(ArrayPipelineManager.getExtractionLog(_dirImages, null), false);
 
-        header("Feature extraction for folder " + _dirImages.getName());
-        info("Image files included in this extraction job:");
-        for (File image : _imageFiles)
-        {
-            info(image.getName());
-        }
+        header("Feature extraction for folder " + _dirImages.getAbsolutePath());
     }
 
     public ViewURLHelper getStatusHref()
@@ -64,24 +63,48 @@ public class FeatureExtractionPipelineJob extends PipelineJob
     {
         setStatus("RUNNING");
 
-        int iReturn;
+        boolean completeStatus = false;
         try
         {
+            File dirData = new File(_uriData);
+            if (!dirData.exists())
+            {
+                throw new FileNotFoundException("The specified data directory, " + dirData + ", does not exist.");
+            }
+
             AppProps appProps = AppProps.getInstance();
+            if ("agilent".equalsIgnoreCase(_extractionEngine) && appProps.getMicroarrayFeatureExtractionServer() == null)
+                throw new IllegalArgumentException("Feature extraction server has not been specified in site customization.");
+
+            File[] unprocessedFile = ArrayPipelineManager.getImageFiles(_uriData, _protocol, FileStatus.UNKNOWN, getContainer(), _extractionEngine);
+            List<File> imageFileList = new ArrayList<File>();
+            imageFileList.addAll(Arrays.asList(unprocessedFile));
+            File[] imageFiles = imageFileList.toArray(new File[imageFileList.size()]);
+            if (imageFiles.length == 0)
+                throw new IllegalArgumentException("Feature extraction for this protocol is already complete.");
+
+            info("Image files included in this extraction job:");
+            for (File image : imageFiles)
+            {
+                info(image.getName());
+            }
+
+            int iReturn;
+
             FeatureExtractionClient extractionClient;
             // Here is where there is a specific reference to the Agilent FE Client Implementation
             if ("agilent".equalsIgnoreCase(_protocol))
             {
-                extractionClient = new AgilentFeatureExtractionClientImpl(appProps.getFeatureExtractionServer(), getLogger());
+                extractionClient = new AgilentFeatureExtractionClientImpl(appProps.getMicroarrayFeatureExtractionServer(), getLogger());
             }
             else
             {
                 // we take Agilent as the default case
-                extractionClient = new AgilentFeatureExtractionClientImpl(appProps.getFeatureExtractionServer(), getLogger());
+                extractionClient = new AgilentFeatureExtractionClientImpl(appProps.getMicroarrayFeatureExtractionServer(), getLogger());
             }
             File resultsFile = ArrayPipelineManager.getResultsFile(_dirImages, extractionClient.getTaskId());
             info("Initiating feature extraction process...");
-            iReturn = extractionClient.run(_imageFiles);
+            iReturn = extractionClient.run(imageFiles);
 
             if (iReturn != 0 || !resultsFile.exists())
             {
@@ -103,7 +126,7 @@ public class FeatureExtractionPipelineJob extends PipelineJob
                 }
             }
 
-            //The return code should be zero but 1 is coming back. 
+            //The return code should be zero but 1 is coming back.
             //I am assuming this is due to the "Can't set permissions: Function not implemented" warnings from bsdtar
             if (!resultsFile.exists())
             {
@@ -118,7 +141,7 @@ public class FeatureExtractionPipelineJob extends PipelineJob
                 warn("Delete this file manually to recover disk space.");
             }
 
-            for (File image : _imageFiles)
+            for (File image : imageFiles)
             {
                 boolean removed = image.delete();
                 if (!removed)
@@ -132,17 +155,23 @@ public class FeatureExtractionPipelineJob extends PipelineJob
 
             if (iReturn != 0)
             {
-                error("Failed or partially failed saving processed runs to the database. Check log file for further details.");
+                throw new IOException("Failed or partially failed saving processed runs to the database. Check log file for further details.");
             }
-
+            setStatus(COMPLETE_STATUS);
+            completeStatus = true;
         }
         catch (Exception e)
         {
-            error("Feature Extraction processing exception: ", e);
-            return;
+            error("Feature Extraction processing exception", e);
+        }
+        finally
+        {
+            if (!completeStatus)
+            {
+                setStatus(ERROR_STATUS);
+            }
         }
 
-        setStatus("COMPLETE");
     }
 
 }

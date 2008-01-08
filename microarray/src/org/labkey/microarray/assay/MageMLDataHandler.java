@@ -1,15 +1,15 @@
 package org.labkey.microarray.assay;
 
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.util.URLHelper;
-import org.labkey.api.data.Container;
-import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
 import org.labkey.api.study.assay.ParticipantVisitResolver;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
+import org.labkey.microarray.MicroarrayRun;
+import org.labkey.microarray.MicroarrayManager;
 import org.labkey.common.tools.SimpleXMLStreamReader;
 import org.labkey.common.tools.TabLoader;
 
@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.sql.SQLException;
 
 /**
  * User: jeckels

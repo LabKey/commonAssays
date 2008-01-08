@@ -16,7 +16,7 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.assay.MageMLDataHandler;
-import org.labkey.microarray.pipeline.ArrayPipeline;
+import org.labkey.microarray.pipeline.MicroarrayPipelineProvider;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Collection;
@@ -81,7 +81,7 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());
 
-        PipelineService.get().registerPipelineProvider(new ArrayPipeline());
+        PipelineService.get().registerPipelineProvider(new MicroarrayPipelineProvider());
     }
 
     public Set<String> getSchemaNames()

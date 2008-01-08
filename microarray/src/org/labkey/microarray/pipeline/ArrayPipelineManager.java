@@ -5,15 +5,17 @@ import java.net.URI;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.*;
+import org.labkey.api.view.ViewBackgroundInfo;
 
 
 public class ArrayPipelineManager {
     
-    private static Logger _log = Logger.getLogger(ArrayPipeline.class);
+    private static Logger _log = Logger.getLogger(MicroarrayPipelineProvider.class);
     protected static String _pipelineAgilentXML = "agilent.xml";
     protected static String _pipelineLogExt = ".log";
     protected static String MAGE_EXTENSION = "_MAGEML.xml";
@@ -56,7 +58,8 @@ public class ArrayPipelineManager {
     {
         public boolean accept(File f)
         {
-            return (f.getName().endsWith(".tif") || f.getName().endsWith(".tiff")) && f.isFile();
+            String name = f.getName().toLowerCase();
+            return (name.endsWith(".tif") || name.endsWith(".tiff")) && f.isFile();
         }
     }
 
@@ -306,64 +309,6 @@ public class ArrayPipelineManager {
         return description.toString();
     }
     
-/*    public static void runFeatureExtraction(ViewBackgroundInfo info,
-                                   URI uriRoot,
-                                   URI uriData,
-                                   PipelineProtocol protocol,
-                                   String extractionEngine) throws IOException, SQLException
-    {
-        String protocolName = protocol.getName();
-        File dirData = new File(uriData);
-        if (!dirData.exists())
-        {
-            throw new IllegalArgumentException("The specified data directory does not exist.");
-        }
-
-        AppProps appProps = AppProps.getInstance();
-        if ("agilent".equalsIgnoreCase(extractionEngine) && appProps.getFeatureExtractionServer() == null)
-            throw new IllegalArgumentException("Feature extraction server has not been specified in site customization.");
-
-        File[] unprocessedFile = getImageFiles(uriData, protocolName, FileStatus.UNKNOWN, info.getContainer(), extractionEngine);
-        List<File> imageFileList = new ArrayList<File>();
-        imageFileList.addAll(Arrays.asList(unprocessedFile));
-        File[] imageFiles = imageFileList.toArray(new File[imageFileList.size()]);
-        if (imageFiles.length == 0)
-            throw new IllegalArgumentException("Feature extraction for this protocol is already complete.");
-
-        PipelineService service = PipelineService.get();
-        PipelineJob job = null;
-        job = new FeatureExtractionPipelineJob(info, protocolName, uriRoot, uriData, imageFiles);
-        
-        service.queueJob(job);
-    }
-    
-    public static void runMageLoader(ViewBackgroundInfo info,
-                                   URI uriRoot,
-                                   URI uriData,
-                                   PipelineProtocol protocol) throws IOException, SQLException
-    {
-        String protocolName = protocol.getName();
-        File dirData = new File(uriData);
-        if (!dirData.exists())
-        {
-            throw new IllegalArgumentException("The specified data directory does not exist.");
-        }
-
-        AppProps appProps = AppProps.getInstance();
-        File[] unprocessedFile = getMageFiles(uriData, protocolName, FileStatus.UNKNOWN, info.getContainer());
-        List<File> mageFileList = new ArrayList<File>();
-        mageFileList.addAll(Arrays.asList(unprocessedFile));
-        File[] mageFiles = mageFileList.toArray(new File[mageFileList.size()]);
-        if (mageFiles.length == 0)
-            throw new IllegalArgumentException("Experiment Run creation for this protocol is already complete.");
-
-        PipelineService service = PipelineService.get();
-        PipelineJob job = null;
-        job = new FeatureExtractionPipelineJob(info, protocolName, uriRoot, uriData, mageFiles);
-        
-        service.queueJob(job);
-    }
-  */  
     public static boolean exists(File file, Set<File> knownFiles, Set<File> checkedDirectories)
     {
         File parent = file.getParentFile();
