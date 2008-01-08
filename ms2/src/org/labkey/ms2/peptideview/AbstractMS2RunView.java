@@ -77,7 +77,7 @@ public abstract class AbstractMS2RunView
 
     public abstract MS2RunViewType getViewType();
 
-    public abstract SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, OldMS2Controller.ChartForm form);
+    public abstract SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form);
 
     public abstract Map<String, SimpleFilter> getFilter(ViewURLHelper queryUrl, MS2Run run);
 
@@ -90,10 +90,9 @@ public abstract class AbstractMS2RunView
     {
         ButtonBar result = new ButtonBar();
 
-
         List<String> exportFormats = getExportFormats();
         
-        ViewURLHelper exportUrl = _url.clone();
+        ViewURLHelper exportUrl = _url.clone().deleteParameter("run").deleteParameter("grouping");  // Run & grouping are posted as hidden fields, so need to remove  TODO: get rid of hidden fields in this form
         exportUrl.setAction(exportAllAction);
         MenuButton exportAll = new MenuButton("Export All");
         for (String exportFormat : exportFormats)
@@ -408,11 +407,11 @@ public abstract class AbstractMS2RunView
 
     public abstract String[] getPeptideStringsForGrouping(OldMS2Controller.DetailsForm form) throws SQLException;
 
-    public abstract void exportToTSV(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception;
+    public abstract void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception;
 
-    public abstract void exportToAMT(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
+    public abstract void exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
 
-    public abstract void exportToExcel(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
+    public abstract void exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
 
     protected class PeptideColumnNameList extends MS2Run.ColumnNameList
     {

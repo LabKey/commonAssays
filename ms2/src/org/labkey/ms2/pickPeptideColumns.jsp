@@ -1,10 +1,10 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.OldMS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    OldMS2Controller.PickColumnsBean bean = ((JspView<OldMS2Controller.PickColumnsBean>) HttpView.currentView()).getModelBean();
+    MS2Controller.PickColumnsBean bean = ((JspView<MS2Controller.PickColumnsBean>) HttpView.currentView()).getModelBean();
 %>
 <form method="post" action="<%=h(bean.saveUrl)%>">
 <table class="dataRegion">

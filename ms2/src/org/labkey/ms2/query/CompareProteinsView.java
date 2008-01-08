@@ -3,6 +3,7 @@ package org.labkey.ms2.query;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.OldMS2Controller;
+import org.labkey.ms2.MS2Controller;
 
 import javax.servlet.ServletException;
 
@@ -12,7 +13,7 @@ import javax.servlet.ServletException;
  */
 public class CompareProteinsView extends AbstractRunCompareView
 {
-    public CompareProteinsView(ViewContext context, OldMS2Controller controller, int runListIndex, boolean forExport) throws ServletException
+    public CompareProteinsView(ViewContext context, MS2Controller controller, int runListIndex, boolean forExport) throws ServletException
     {
         super(context, controller, runListIndex, forExport, MS2Schema.COMPARE_PROTEIN_PROPHET_TABLE_NAME);
     }

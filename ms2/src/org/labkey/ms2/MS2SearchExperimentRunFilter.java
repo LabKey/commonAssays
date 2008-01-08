@@ -45,6 +45,6 @@ public class MS2SearchExperimentRunFilter extends ExperimentRunFilter
         exportRuns.setDisplayPermission(ACL.PERM_READ);
         bar.add(exportRuns);
 
-        bar.add(createButton(context, "showHierarchy.view", "Show Hierarchy", ActionButton.Action.LINK));
+        bar.add(createButton(context, "showHierarchy", "Show Hierarchy", ActionButton.Action.LINK));
     }
 }

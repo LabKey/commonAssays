@@ -10,7 +10,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.*;
 import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.OldMS2Controller;
+import org.labkey.ms2.MS2Controller;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
@@ -30,12 +30,12 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
         super(viewContext, columnPropertyName, runs);
     }
 
-    public void exportToTSV(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
     {
         createGridView(form.getExpanded(), "", "", false).exportToTSV(form, response, selectedRows, headers);
     }
 
-    public void exportToAMT(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public void exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
     {
         AbstractQueryMS2RunView.AbstractMS2QueryView ms2QueryView = createGridView(form.getExpanded(), "", "", false);
 
@@ -53,7 +53,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
         ms2QueryView.exportToTSV(form, response, selectedRows, getAMTFileHeader());
     }
 
-    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, OldMS2Controller.ChartForm form)
+    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
         throw new UnsupportedOperationException();
     }
@@ -63,7 +63,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
         throw new UnsupportedOperationException();
     }
 
-    public void exportToExcel(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public void exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
     {
         createGridView(form.getExpanded(), "", "", false).exportToExcel(response, selectedRows);
     }
@@ -116,7 +116,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
             }
         }
 
-        public void exportToTSV(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+        public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
         {
             createRowIdFragment(selectedRows);
             TSVGridWriter tsvWriter = getTsvWriter();

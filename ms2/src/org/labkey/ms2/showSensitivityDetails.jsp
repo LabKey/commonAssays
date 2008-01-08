@@ -3,18 +3,19 @@
 <%@ page import="org.labkey.api.view.ViewContext"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.common.tools.SensitivitySummary"%>
-
-<table>
+<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.api.view.JspView" %>
 <%
+    MS2Controller.PeptideProphetDetailsBean bean = ((JspView<MS2Controller.PeptideProphetDetailsBean>)HttpView.currentView()).getModelBean();
     DecimalFormat df4 = new DecimalFormat("0.0000");
     DecimalFormat df2 = new DecimalFormat("0.00");
     ViewContext me = HttpView.currentContext();
-    ViewURLHelper sensitivityUrl = me.cloneViewURLHelper().setAction((String)me.get("sensitivityPlotAction"));
-    SensitivitySummary summary = (SensitivitySummary)me.get("summary");
-    float[] minProb = summary.getMinProb();
-    float[] sensitivity = summary.getSensitivity();
-    float[] error = summary.getError();
+    ViewURLHelper sensitivityUrl = me.cloneViewURLHelper().setAction(bean.action);
+    float[] minProb = bean.summary.getMinProb();
+    float[] sensitivity = bean.summary.getSensitivity();
+    float[] error = bean.summary.getError();
 %>
+<table>
 <tr>
     <td><img src="<%=sensitivityUrl.getEncodedLocalURIString()%>" alt="Sensitivity Plot"></td>
     <td><table class="dataRegion">

@@ -1,10 +1,10 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.OldMS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    OldMS2Controller.MS2AdminBean bean = ((JspView<OldMS2Controller.MS2AdminBean>)HttpView.currentView()).getModelBean();
+    MS2Controller.MS2AdminBean bean = ((JspView<MS2Controller.MS2AdminBean>)HttpView.currentView()).getModelBean();
 %>
 <table class="dataRegion">
 <tr><td>&nbsp;</td><td><b>MS2 Runs</b></td><td><b>MS2 Peptides</b></td><td><b>MS2 Spectra</b></td></tr>

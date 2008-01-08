@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.labkey.ms2.OldMS2Controller;
+import org.labkey.ms2.MS2Controller;
 
 /**
  * User: jeckels
@@ -193,7 +194,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         return MS2RunViewType.PROTEIN;
     }
 
-    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, OldMS2Controller.ChartForm form)
+    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
         SQLFragment fragment = new SQLFragment();
         fragment.append("SELECT DISTINCT sSeqId AS SeqId FROM ( ");
@@ -243,7 +244,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         return Table.executeArray(ProteinManager.getSchema(), "SELECT Peptide FROM " + MS2Manager.getTableInfoPeptides() + " " + validFilter.getWhereSQL(ProteinManager.getSqlDialect()), validFilter.getWhereParams(MS2Manager.getTableInfoPeptides()).toArray(), String.class);
     }
 
-    public void exportToTSV(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
     {
         String where = createExtraWhere(selectedRows);
 

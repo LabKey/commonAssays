@@ -16,9 +16,9 @@ import org.apache.log4j.Logger;
 public class CompareServiceImpl extends BaseRemoteService implements CompareService
 {
     private static Logger _log = Logger.getLogger(CompareServiceImpl.class);
-    private final OldMS2Controller _controller;
+    private final MS2Controller _controller;
 
-    public CompareServiceImpl(ViewContext context, OldMS2Controller controller)
+    public CompareServiceImpl(ViewContext context, MS2Controller controller)
     {
         super(context);
         _controller = controller;

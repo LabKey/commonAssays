@@ -1,11 +1,11 @@
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="java.util.SortedMap" %>
+<%@ page import="java.util.Map" %>
 <%
     MS2Controller.ModificationBean bean = ((JspView<MS2Controller.ModificationBean>)HttpView.currentView()).getModelBean();
-    SortedMap<String, String> fixed = bean.fixed;
-    SortedMap<String, String> var = bean.var;
+    Map<String, String> fixed = bean.fixed;
+    Map<String, String> var = bean.var;
 %>
 <table style="width:100%;">
 <%  if (0 == (var.size() + fixed.size()))

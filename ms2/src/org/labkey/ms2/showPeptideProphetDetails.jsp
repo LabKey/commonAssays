@@ -5,13 +5,11 @@
 
 <table>
 <%
-    MS2Run run = (MS2Run)me.get("run");
-
     ViewURLHelper dist = me.cloneViewURLHelper().setAction("showPeptideProphetDistributionPlot");
-    ViewURLHelper distCumulative = (ViewURLHelper)dist.clone().addParameter("cumulative", "1");
+    ViewURLHelper distCumulative = dist.clone().addParameter("cumulative", "1");
 
     ViewURLHelper versus = me.cloneViewURLHelper().setAction("showPeptideProphetObservedVsModelPlot");
-    ViewURLHelper versusCumulative = (ViewURLHelper)versus.clone().addParameter("cumulative", "1");
+    ViewURLHelper versusCumulative = versus.clone().addParameter("cumulative", "1");
 
     ViewURLHelper versusPP = me.cloneViewURLHelper().setAction("showPeptideProphetObservedVsPPScorePlot");
 
@@ -27,7 +25,7 @@
     <td><img src="<%=versus.replaceParameter("charge", charge).getEncodedLocalURIString()%>" alt="Charge <%=charge%>+ Observed vs. Model"></td>
     <td><img src="<%=versusCumulative.replaceParameter("charge", charge).getEncodedLocalURIString()%>" alt="Charge <%=charge%>+ Cumulative Observed vs. Model"></td>
 </tr>
-<% if (run.getNegativeHitCount() > run.getPeptideCount() / 3) { %>
+<% if (bean.run.getNegativeHitCount() > bean.run.getPeptideCount() / 3) { %>
 <tr>
     <td><img src="<%=versusPP.replaceParameter("charge", charge).getEncodedLocalURIString()%>" alt="Charge <%=charge%>+ Observed vs. Prophet"></td>
 </tr>

@@ -33,7 +33,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         super(viewContext, columnPropertyName, runs);
     }
 
-    public void exportToAMT(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public void exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
     {
         form.setColumns(AMT_PEPTIDE_COLUMN_NAMES);
         form.setExpanded(true);
@@ -100,7 +100,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         return rgn;
     }
 
-    public void exportToExcel(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public void exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
     {
         String where = createExtraWhere(selectedRows);
 

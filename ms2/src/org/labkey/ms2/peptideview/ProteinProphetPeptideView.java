@@ -103,7 +103,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         return getColumns(_calculatedPeptideColumns, new PeptideColumnNameList(peptideColumnNames), MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoPeptideMemberships());
     }
 
-    public void exportToTSV(OldMS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
     {
         String where = createExtraWhere(selectedRows);
 
@@ -405,7 +405,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         return MS2RunViewType.PROTEIN_PROPHET;
     }
 
-    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, OldMS2Controller.ChartForm form)
+    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
         SQLFragment fragment = new SQLFragment();
         fragment.append("SELECT DISTINCT PGM.SeqId FROM ");

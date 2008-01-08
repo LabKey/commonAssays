@@ -1,10 +1,10 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.OldMS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    OldMS2Controller.PickViewBean bean = ((JspView<OldMS2Controller.PickViewBean>)HttpView.currentView()).getModelBean();
+    MS2Controller.PickViewBean bean = ((JspView<MS2Controller.PickViewBean>)HttpView.currentView()).getModelBean();
 %><table class="dataRegion">
   <tr><td><%=h(bean.viewInstructions)%><br><br>
 To define a view: display a run, filter the run, click "Save View", and pick a name.  The filter you've set up will be saved with the view and the name will then appear in the list below.</td></tr>

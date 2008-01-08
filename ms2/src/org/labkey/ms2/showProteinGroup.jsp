@@ -1,16 +1,11 @@
-<%@ page import="org.labkey.api.view.ViewURLHelper"%>
-<%@ page import="org.labkey.ms2.MS2Run"%>
-<%@ page import="org.labkey.ms2.ProteinGroupWithQuantitation" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.util.Formats"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.Protein" %>
-<%@ page import="org.labkey.api.util.Formats" %>
-
+<%@ page import="org.labkey.ms2.ProteinGroupWithQuantitation" %>
 <%
-    ViewContext me = HttpView.currentContext();
-    ProteinGroupWithQuantitation group = (ProteinGroupWithQuantitation) me.get("proteinGroup");
+    ProteinGroupWithQuantitation group = ((JspView<ProteinGroupWithQuantitation>)HttpView.currentView()).getModelBean();
 %>
-
 <table>
     <tr>
         <td>Group number:</td>

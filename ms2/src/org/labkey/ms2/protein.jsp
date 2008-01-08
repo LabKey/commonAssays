@@ -3,9 +3,10 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.OldMS2Controller" %>
 <%@ page import="java.text.Format" %>
+<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    OldMS2Controller.ProteinViewBean bean = ((JspView<OldMS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
+    MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
     Format intFormat = Formats.commaf0;
     Format percentFormat = Formats.percent;
 %>
