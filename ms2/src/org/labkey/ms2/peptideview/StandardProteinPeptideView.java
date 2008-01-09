@@ -83,8 +83,8 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
         ButtonBar bb = createButtonBar("exportAllProteins", "exportSelectedProteins", "proteins", proteinRgn);
         proteinRgn.addHiddenFormField("queryString", _url.getRawQuery());
-        proteinRgn.addHiddenFormField("run", _url.getParameter("run"));
-        proteinRgn.addHiddenFormField("grouping", _url.getParameter("grouping"));
+        //proteinRgn.addHiddenFormField("run", _url.getParameter("run"));
+        //proteinRgn.addHiddenFormField("grouping", _url.getParameter("grouping"));
 
         proteinRgn.setButtonBar(bb, DataRegion.MODE_GRID);
 

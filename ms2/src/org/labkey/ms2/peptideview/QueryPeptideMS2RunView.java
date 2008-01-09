@@ -138,7 +138,8 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             rgn.addHiddenFormField("queryString", _url.getRawQuery());  // Pass query string for exportSelectedToExcel post case... need to display filter & sort to user, and to show the right columns
             rgn.addHiddenFormField(MS2Manager.getDataRegionNamePeptides() + ".sort", _url.getParameter(MS2Manager.getDataRegionNamePeptides() + ".sort"));     // Stick sort on the request as well so DataRegion sees it
             rgn.addHiddenFormField("columns", _url.getParameter("columns"));
-            rgn.addHiddenFormField("run", _url.getParameter("run"));
+            //rgn.addHiddenFormField("run", _url.getParameter("run"));
+            //rgn.addHiddenFormField("grouping", _url.getParameter("grouping"));
 
             return rgn;
         }

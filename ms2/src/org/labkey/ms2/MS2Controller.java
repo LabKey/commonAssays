@@ -1136,7 +1136,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    // TODO: Store this in session state?  Must provide way for this cache to shrink
+    // TODO: Store this in session state!!  Must provide way for this cache to shrink
 
     // Stash lists of run ids in session state.  Use object Id as index into map, and pass the Id on the URL.  We can't stash these
     // lists on the URL because it could be too large (we support exporting/comparing hundreds of runs).  We can't post the data
@@ -1564,7 +1564,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response) throws Exception
         {
-            exportQueryCompareToTSV(new ComparePeptidesView(getViewContext(), MS2Controller.this, form.getRunList(), true), form.isExportAsWebPage());
+            exportQueryCompareToTSV(new CompareProteinsView(getViewContext(), MS2Controller.this, form.getRunList(), true), form.isExportAsWebPage());
         }
     }
 
@@ -1614,20 +1614,16 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class CompareServiceAction extends FormHandlerAction
+    public class CompareServiceAction extends SimpleViewAction
     {
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
-
-        public boolean handlePost(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             CompareServiceImpl service = new CompareServiceImpl(getViewContext(), MS2Controller.this);
             service.doPost(getViewContext().getRequest(), getViewContext().getResponse());
-            return true;
+            return null;
         }
 
-        public ViewURLHelper getSuccessURL(Object o)
+        public NavTree appendNavTrail(NavTree root)
         {
             return null;
         }

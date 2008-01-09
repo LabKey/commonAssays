@@ -92,7 +92,7 @@ public abstract class AbstractMS2RunView
 
         List<String> exportFormats = getExportFormats();
         
-        ViewURLHelper exportUrl = _url.clone().deleteParameter("run").deleteParameter("grouping");  // Run & grouping are posted as hidden fields, so need to remove  TODO: get rid of hidden fields in this form
+        ViewURLHelper exportUrl = _url.clone(); //.deleteParameter("run").deleteParameter("grouping");  // Run & grouping are posted as hidden fields, so need to remove  TODO: get rid of hidden fields in this form
         exportUrl.setAction(exportAllAction);
         MenuButton exportAll = new MenuButton("Export All");
         for (String exportFormat : exportFormats)
