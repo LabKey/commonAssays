@@ -37,7 +37,8 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
     public static final String NAME = "MS1";
     public static final String CONTROLLER_NAME = "ms1";
     public static final String WEBPART_MS1_RUNS = "MS1 Runs";
-    public static final ExperimentRunFilter EXP_RUN_FILTER = new ExperimentRunFilter("msInspect Feature Finding", MS1Schema.SCHEMA_NAME, MS1Schema.TABLE_FEATURE_RUNS);
+    public static final String PROTOCOL_MS1 = "msInspect Feature Finding Analysis";
+    public static final ExperimentRunFilter EXP_RUN_FILTER = new ExperimentRunFilter(PROTOCOL_MS1, MS1Schema.SCHEMA_NAME, MS1Schema.TABLE_FEATURE_RUNS);
 
     public MS1Module()
     {

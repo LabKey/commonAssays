@@ -48,7 +48,7 @@ public class FeaturesView extends QueryView
         _peaksAvailable = peaksAvailable;
         _forExport = forExport;
 
-        QuerySettings settings = new QuerySettings(ctx.getViewURLHelper(), ctx.getRequest(), QueryView.DATAREGIONNAME_DEFAULT);
+        QuerySettings settings = new QuerySettings(ctx.getViewURLHelper(), QueryView.DATAREGIONNAME_DEFAULT);
         settings.setQueryName(MS1Schema.TABLE_FEATURES);
         settings.setAllowChooseQuery(false);
         setSettings(settings);

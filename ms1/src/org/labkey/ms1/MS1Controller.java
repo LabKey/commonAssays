@@ -14,10 +14,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
-import org.labkey.ms1.model.DataFile;
-import org.labkey.ms1.model.Feature;
-import org.labkey.ms1.model.Peptide;
-import org.labkey.ms1.model.Software;
+import org.labkey.ms1.model.*;
 import org.labkey.ms1.pipeline.MSInspectImportPipelineJob;
 import org.labkey.ms1.query.MS1Schema;
 import org.labkey.ms1.view.*;
@@ -566,6 +563,47 @@ public class MS1Controller extends SpringActionController
             return root; //since the action always redirects, just return what was passed in
         }
     } //class ImportMsInspectAction
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowPepSearchAction extends SimpleViewAction<PepSearchForm>
+    {
+        public ModelAndView getView(PepSearchForm pepSearchForm, BindException errors) throws Exception
+        {
+            PepSearchModel model = new PepSearchModel(getContainer(), pepSearchForm.getPepSeq());
+            JspView<PepSearchModel> view = new JspView<PepSearchModel>("/org/labkey/ms1/view/PepSearchView.jsp", model);
+            return view;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("Find Features with Peptides");
+            return root;
+        }
+    }
+
+    public static class PepSearchForm
+    {
+        public enum Parameters
+        {
+            pepSeq,
+            runIds,
+            starts,
+            ignoreMods
+        }
+
+        private String _pepSeq;
+
+        public String getPepSeq()
+        {
+            return _pepSeq;
+        }
+
+        public void setPepSeq(String pepSeq)
+        {
+            _pepSeq = pepSeq;
+        }
+    }
+
 
     /**
      * Form used by the ImportMsInspectAction
