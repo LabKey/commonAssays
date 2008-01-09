@@ -16,8 +16,8 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.lang.StringUtils;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.util.FileUtil;
+import org.labkey.api.pipeline.*;
+import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 
 import java.io.File;
@@ -35,39 +35,39 @@ import java.util.Map;
  */
 public class TPPTask extends PipelineJob.Task
 {
-    private static final String EXT_PEP_XML = ".pep.xml";
-    private static final String EXT_PEP_XSL = ".pep.xsl";
-    private static final String EXT_PEP_SHTML = ".pep.shtml";
-    private static final String EXT_PROT_XML = ".prot.xml";
-    private static final String EXT_INTERMEDIATE_PROT_XML = ".pep-prot.xml";
-    private static final String EXT_INTERMEDIATE_PROT_XSL = ".pep-prot.xsl";
-    private static final String EXT_INTERMEDIATE_PROT_SHTML = ".pep-prot.shtml";
+    public static final FileType FT_PEP_XML = new FileType(".pep.xml");
+    public static final FileType FT_PROT_XML = new FileType(".prot.xml");
+    public static final FileType FT_INTERMEDIATE_PROT_XML = new FileType(".pep-prot.xml");
+
+    private static final FileType FT_PEP_XSL = new FileType(".pep.xsl");
+    private static final FileType FT_PEP_SHTML = new FileType(".pep.shtml");
+    private static final FileType FT_INTERMEDIATE_PROT_XSL = new FileType(".pep-prot.xsl");
+    private static final FileType FT_INTERMEDIATE_PROT_SHTML = new FileType(".pep-prot.shtml");
 
     public static File getPepXMLFile(File dirAnalysis, String baseName)
     {
-        return new File(dirAnalysis, baseName + EXT_PEP_XML);
+        return FT_PEP_XML.newFile(dirAnalysis, baseName);
     }
 
     public static boolean isPepXMLFile(File file)
     {
-        return file.getName().toLowerCase().endsWith(EXT_PEP_XML);
+        return FT_PEP_XML.isType(file);
     }
 
     public static File getProtXMLFile(File dirAnalysis, String baseName)
     {
-        return new File(dirAnalysis, baseName + EXT_PROT_XML);
+        return FT_PROT_XML.newFile(dirAnalysis, baseName);
     }
 
     public static boolean isProtXMLFile(File file)
     {
-        String nameLc = file.getName().toLowerCase();
-        return (nameLc.endsWith(EXT_PROT_XML) ||
-                nameLc.endsWith(EXT_INTERMEDIATE_PROT_XML));
+        return (FT_PROT_XML.isType(file) ||
+                FT_INTERMEDIATE_PROT_XML.isType(file));
     }
 
     public static File getProtXMLIntermediatFile(File dirAnalysis, String baseName)
     {
-        return new File(dirAnalysis, baseName + EXT_INTERMEDIATE_PROT_XML);
+        return FT_INTERMEDIATE_PROT_XML.newFile(dirAnalysis, baseName);
     }
 
     /**
@@ -92,29 +92,48 @@ public class TPPTask extends PipelineJob.Task
         boolean isRefreshRequired();
     }
 
+    public static class Factory extends AbstractTaskFactory
+    {
+        public Factory()
+        {
+            super(TPPTask.class);
+        }
+
+        public PipelineJob.Task createTask(PipelineJob job)
+        {
+            return new TPPTask(job);
+        }
+
+        public String getStatusName()
+        {
+            return "ANALYSIS";
+        }
+
+        public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
+        {
+            JobSupport support = (JobSupport) job;
+            String baseName = support.getFileBasename();
+            File dirAnalysis = support.getAnalysisDirectory();
+
+            if (!NetworkDrive.exists(getPepXMLFile(dirAnalysis, baseName)))
+                return false;
+
+            if (support.isProphetEnabled() &&
+                    !NetworkDrive.exists(getProtXMLFile(dirAnalysis, baseName)))
+                return false;
+
+            return true;
+        }
+    }
+
+    protected TPPTask(PipelineJob job)
+    {
+        super(job);
+    }
+
     public JobSupport getJobSupport()
     {
         return (JobSupport) getJob();
-    }
-
-    public String getStatusName()
-    {
-        return "ANALYSIS";
-    }
-
-    public boolean isComplete() throws IOException, SQLException
-    {
-        String baseName = getJobSupport().getOutputBasename();
-        File dirAnalysis = getJobSupport().getAnalysisDirectory();
-
-        if (!NetworkDrive.exists(getPepXMLFile(dirAnalysis, baseName)))
-            return false;
-
-        if (getJobSupport().isProphetEnabled() &&
-                !NetworkDrive.exists(getProtXMLFile(dirAnalysis, baseName)))
-            return false;
-
-        return true;
     }
 
     public void run()
@@ -123,14 +142,21 @@ public class TPPTask extends PipelineJob.Task
         {
             Map<String, String> params = getJob().getParameters();
 
-            String baseName = getJobSupport().getOutputBasename();
-            File dirAnalysis = getJobSupport().getAnalysisDirectory();
-            File dirWork = MS2PipelineManager.createWorkingDirectory(dirAnalysis, baseName);
+            WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
+            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport());
 
-            File fileWorkPepXML = getPepXMLFile(dirWork, baseName);
+            // TODO: mzXML files may also be required, and input disk space requirements
+            //          may be too great to copy to a temporary directory.
+            File[] inputFiles = getJobSupport().getInteractInputFiles();
+            for (int i = 0; i < inputFiles.length; i++)
+                inputFiles[i] = wd.inputFile(inputFiles[i]);
+
+            File dirMzXml = getJobSupport().getDataDirectory();
+
+            File fileWorkPepXML = wd.newFile(FT_PEP_XML);
             File fileWorkProtXML = null;
             if (getJobSupport().isProphetEnabled())
-                fileWorkProtXML = getProtXMLIntermediatFile(dirWork, baseName);
+                fileWorkProtXML = wd.newFile(FT_INTERMEDIATE_PROT_XML);
 
             List<String> interactCmd = new ArrayList<String>();
             interactCmd.add("xinteract");
@@ -155,22 +181,31 @@ public class TPPTask extends PipelineJob.Task
                     interactCmd.add("-p" + paramMinProb);
             }
 
-            String quantParam = getQuantitationCmd(params);
+            String quantParam = getQuantitationCmd(params, wd.getRelativePath(dirMzXml));
             if (quantParam != null)
                 interactCmd.add(quantParam);
 
             interactCmd.add("-N" + fileWorkPepXML.getName());
 
-            File[] inputFiles = getJobSupport().getInteractInputFiles();
             for (File fileInput : inputFiles)
-                interactCmd.add(".." + File.separator + fileInput.getName());
+                interactCmd.add(wd.getRelativePath(fileInput));
 
             getJob().runSubProcess(new ProcessBuilder(interactCmd),
-                    dirWork);
+                    wd.getDir());
 
-            MS2PipelineManager.moveWorkToParent(fileWorkPepXML);
+            wd.outputFile(fileWorkPepXML);
             if (fileWorkProtXML != null)
-                MS2PipelineManager.moveWorkFile(getProtXMLFile(dirAnalysis, baseName), fileWorkProtXML);
+            {
+                wd.outputFile(fileWorkProtXML,
+                        FT_PROT_XML.getName(getJobSupport().getFileBasename()));
+            }
+
+            // Deal with possible TPP outputs, if TPP was not XML_ONLY
+            wd.discardFile(wd.newFile(FT_PEP_XSL));
+            wd.discardFile(wd.newFile(FT_PEP_SHTML));
+            wd.discardFile(wd.newFile(FT_INTERMEDIATE_PROT_XSL));
+            wd.discardFile(wd.newFile(FT_INTERMEDIATE_PROT_SHTML));
+            wd.remove();
 
             // If no combined analysis is coming or this is the combined analysis, remove
             // the raw pepXML file(s).
@@ -182,14 +217,6 @@ public class TPPTask extends PipelineJob.Task
                         getJob().warn("Failed to delete intermediat file " + fileInput);
                 }
             }
-
-            // Deal with possible TPP outputs, if TPP was not XML_ONLY
-            MS2PipelineManager.removeWorkFile(FileUtil.newFile(dirWork, baseName, EXT_PEP_XSL));
-            MS2PipelineManager.removeWorkFile(FileUtil.newFile(dirWork, baseName, EXT_PEP_SHTML));
-            MS2PipelineManager.removeWorkFile(FileUtil.newFile(dirWork, baseName, EXT_INTERMEDIATE_PROT_XSL));
-            MS2PipelineManager.removeWorkFile(FileUtil.newFile(dirWork, baseName, EXT_INTERMEDIATE_PROT_SHTML));
-
-            MS2PipelineManager.removeWorkingDirectory(dirWork);
         }
         catch (PipelineJob.RunProcessException erp)
         {
@@ -205,7 +232,7 @@ public class TPPTask extends PipelineJob.Task
         }
     }
 
-    public String getQuantitationCmd(Map<String, String> params)
+    public String getQuantitationCmd(Map<String, String> params, String pathMzXml)
     {
         String paramAlgorithm = params.get("pipeline quantitation, algorithm");
         if (paramAlgorithm == null)
@@ -257,12 +284,7 @@ public class TPPTask extends PipelineJob.Task
                 quantOpts.add("-N");
         }
 
-        String dirMzXMLPathName = getJobSupport().getDataDirectory().toString();
-        // Strip trailing file separater, since on Windows this might be a \, which will
-        // cause escaping difficulties.
-        if (dirMzXMLPathName.endsWith(File.separator))
-            dirMzXMLPathName = dirMzXMLPathName.substring(0, dirMzXMLPathName.length() - 1);
-        quantOpts.add("\"-d" + dirMzXMLPathName + "\"");
+        quantOpts.add("\"-d" + pathMzXml + "\"");
 
         if ("xpress".equals(paramAlgorithm))
             return ("-X" + StringUtils.join(quantOpts.iterator(), ' '));

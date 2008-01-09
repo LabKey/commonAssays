@@ -210,6 +210,8 @@ boolean hasWork = false;
     function changeProtocol(sel)
     {
         var search = document.location.search;
+        if (search.charAt(0) == '?')
+            search = search.substring(1);
         var params = search.split('&');
         var searchNew = "";
         for (var i = 0; i < params.length; i++)
@@ -223,9 +225,9 @@ boolean hasWork = false;
             }
         }
         var opt = sel.options[sel.selectedIndex];
+        searchNew = "searchEngine=<%=h(form.getSearchEngine())%>&" + searchNew;
         if (opt.text.indexOf("<") != 0)
             searchNew += "&protocol=" + opt.text;
-        searchNew += "&searchEngine=<%=h(form.getSearchEngine())%>";
         document.location.search = searchNew;
     }
     <% if (form.getProtocol() == "" && getSequenceDBs().size() > 1)

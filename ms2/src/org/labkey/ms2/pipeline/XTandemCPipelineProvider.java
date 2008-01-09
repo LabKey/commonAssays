@@ -19,6 +19,7 @@ import org.apache.beehive.netui.pageflow.Forward;
 import org.labkey.api.pipeline.PipelineProviderCluster;
 import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.PipelineValidationException;
+import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.view.HttpView;

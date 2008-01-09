@@ -35,7 +35,6 @@ import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineStatusFile;
-import org.labkey.api.pipeline.PipelineStatusManager;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
@@ -91,7 +90,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
         {
             return renderError("Status file not specified.");
         }
-        PipelineStatusFile psf = PipelineStatusManager.getStatusFile(statusFile);
+        PipelineStatusFile psf = PipelineService.get().getStatusFile(statusFile);
         ScriptJob job = findJob(statusFile);
 
         if (PipelineJob.COMPLETE_STATUS.equals(psf.getStatus()))

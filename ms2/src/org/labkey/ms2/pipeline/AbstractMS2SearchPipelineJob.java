@@ -1,7 +1,6 @@
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.util.*;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewURLHelper;
@@ -17,6 +16,16 @@ import java.util.*;
 public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         implements MS2SearchJobSupport, TPPTask.JobSupport, XarGeneratorTask.JobSupport, XarLoaderTask.JobSupport
 {
+    enum Pipelines
+    {
+        finishPerlCluster;
+
+        public TaskId getTaskId()
+        {
+            return new TaskId(getClass().getEnclosingClass(), toString());
+        }
+    }
+
     private static String DATATYPE_SAMPLES = "Samples"; // Default
     private static String DATATYPE_FRACTIONS = "Fractions";
     private static String DATATYPE_BOTH = "Both";
@@ -107,11 +116,9 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         else
             _baseName = FileUtil.getBaseName(filesMzXML[0]);
 
-        setLogFile(MS2PipelineManager.getLogFile(_dirAnalysis, _baseName), _fromCluster);
-
-        boolean cluster = isPerlClusterAware() && AppProps.getInstance().hasPipelineCluster();
-        if (cluster)
-            setStatusFile(MS2PipelineManager.getStatusFile(_dirAnalysis, _baseName));
+        setLogFile(FT_LOG.newFile(_dirAnalysis, _baseName), _fromCluster);
+        if (isPerlClusterAware() && AppProps.getInstance().hasPipelineCluster())
+            setStatusFile(FT_CLUSTER_STATUS.newFile(_dirAnalysis, _baseName));
     }
 
     public AbstractMS2SearchPipelineJob(AbstractMS2SearchPipelineJob job, File fileFraction)
@@ -133,43 +140,21 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         // Change parameters which are specific to the fraction job.
         _filesMzXML = new File[] { fileFraction };
         _baseName = FileUtil.getBaseName(fileFraction);
+        setLogFile(FT_LOG.newFile(_dirAnalysis, _baseName), false);
         if (getStatusFile() != getLogFile())
-            setStatusFile(MS2PipelineManager.getStatusFile(_dirAnalysis, _baseName));
-        setLogFile(MS2PipelineManager.getLogFile(_dirAnalysis, _baseName), false);
+            setStatusFile(FT_CLUSTER_STATUS.newFile(_dirAnalysis, _baseName));
     }
 
-    public String[] getTaskPipeline()
+    public TaskPipeline getTaskPipeline()
     {
-        if (_filesMzXML.length > 1)
-        {
-            return new String[]
-                    {
-                        TPPTask.class.getName(),
-                        XarGeneratorTask.class.getName(),
-                        XarLoaderTask.class.getName()
-                    };
-        }
-        else if (!isSamples())
-        {
-            return new String[]
-                    {
-                            getSearchTaskClass().getName()
-                    };
-        }
+        if (_fromCluster)
+            return PipelineJobService.get().getTaskPipeline(Pipelines.finishPerlCluster.getTaskId());
 
-        return new String[]
-                {
-                    getSearchTaskClass().getName(),
-                    TPPTask.class.getName(),
-                    XarGeneratorTask.class.getName(),
-                    XarLoaderTask.class.getName()
-                };
+        return null;
     }
 
     abstract public String getSearchEngine();
 
-    abstract public Class getSearchTaskClass();
-    
     abstract public AbstractMS2SearchPipelineJob[] getSingleFileJobs();
 
     /**
@@ -184,6 +169,7 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
 
     public void run()
     {
+        // TODO: Get rid of this, and use branch and join instead.
         if (!_fromCluster && getSpectraFiles().length > 1)
         {
             for (PipelineJob job : getSingleFileJobs())
@@ -236,7 +222,7 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         parser.parse(xmlBuffer.toString());
         if (parser.getErrors() != null)
         {
-            XMLValidationParser.Error err = parser.getErrors()[0];
+            InputParser.Error err = parser.getErrors()[0];
             if (err.getLine() == 0)
             {
                 throw new IOException("Failed parsing input xml '" + parametersFile.getPath() + "'.\n" +
@@ -347,7 +333,7 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         return arrFiles.toArray(new File[arrFiles.size()]);
     }
 
-    public String getOutputBasename()
+    public String getFileBasename()
     {
         return _baseName;
     }
@@ -399,7 +385,7 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         File dirRoot = getRootDir();
         File dirAnalysis = getAnalysisDirectory();
         File fileInput = getParametersFile();
-        String baseName = getOutputBasename();
+        String baseName = getFileBasename();
 
         replaceMap.put("SEARCH_NAME", getDescription());
 

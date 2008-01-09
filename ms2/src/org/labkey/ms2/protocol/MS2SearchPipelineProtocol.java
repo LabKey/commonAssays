@@ -5,7 +5,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.util.AppProps;
-import org.labkey.api.util.XMLValidationParser;
+import org.labkey.api.util.InputParser;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.BioMLInputParser;
@@ -138,7 +138,7 @@ public abstract class MS2SearchPipelineProtocol extends PipelineProtocol
         parser.parse(xml);
         if (parser.getErrors() != null)
         {
-            XMLValidationParser.Error err = parser.getErrors()[0];
+            InputParser.Error err = parser.getErrors()[0];
             if (err.getLine() == 0)
                 throw new IllegalArgumentException(err.getMessage());
             else

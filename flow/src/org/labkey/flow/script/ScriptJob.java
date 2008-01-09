@@ -1,34 +1,32 @@
 package org.labkey.flow.script;
 
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineStatusManager;
-import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.flow.data.*;
-import org.labkey.flow.data.FlowDataType;
-import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
-import org.fhcrc.cpas.flow.script.xml.ScriptDef;
-import org.labkey.flow.FlowSettings;
+import org.apache.log4j.Logger;
 import org.fhcrc.cpas.exp.xml.*;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExpProtocolApplication;
-import org.labkey.api.exp.api.ExpMaterial;
+import org.fhcrc.cpas.flow.script.xml.ScriptDef;
+import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
-import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpProtocolApplication;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.DateUtil;
-import org.apache.log4j.Logger;
+import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.ViewURLHelper;
+import org.labkey.flow.FlowSettings;
+import org.labkey.flow.analysis.model.FlowException;
+import org.labkey.flow.controllers.FlowController;
+import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.data.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.io.File;
 import java.sql.SQLException;
-import java.io.*;
-
-import org.labkey.flow.analysis.model.FlowException;
-import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.FlowController;
+import java.util.*;
 
 abstract public class ScriptJob extends PipelineJob
 {
@@ -254,7 +252,7 @@ abstract public class ScriptJob extends PipelineJob
         {
             File statusFile = getLogFile();
             _statusHref = PageFlowUtil.urlFor(FlowController.Action.showStatusJob, getContainer());
-            _statusHref.addParameter(FlowParam.statusFile.toString(), PipelineStatusManager.getStatusFilePath(statusFile.toString()));
+            _statusHref.addParameter(FlowParam.statusFile.toString(), PipelineStatusFile.pathOf(statusFile.toString()));
         }
         return _statusHref;
     }
@@ -778,7 +776,7 @@ abstract public class ScriptJob extends PipelineJob
 
     public String getStatusFilePath()
     {
-        return PipelineStatusManager.getStatusFilePath(getStatusFile().toString());
+        return PipelineStatusFile.pathOf(getStatusFile().getAbsolutePath());
     }
 
     public ViewURLHelper urlCancel()

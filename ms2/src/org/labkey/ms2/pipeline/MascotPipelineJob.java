@@ -15,12 +15,14 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.pipeline.*;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
 
 /**
  * MascotPipelineJob class
@@ -31,6 +33,16 @@ import java.util.*;
  */
 public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements MascotSearchTask.JobSupport
 {
+    enum Pipelines
+    {
+        sample, fraction, fractionGroup;
+
+        public TaskId getTaskId()
+        {
+            return new TaskId(getClass().getEnclosingClass(), toString());
+        }
+    }
+
     private String _mascotServer;
     private String _mascotHTTPProxy;
     private String _mascotUserAccount;
@@ -43,9 +55,9 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
                              File dirSequenceRoot,
                              File filesMzXML[],
                              File fileInputXML,
-                             boolean continued) throws SQLException, IOException
+                             boolean fromCluster) throws SQLException, IOException
     {
-        super(MascotCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML, continued);
+        super(MascotCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML, fromCluster);
 
         AppProps appProps = AppProps.getInstance();
         _mascotServer = appProps.getMascotServer();
@@ -111,9 +123,19 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
         return "mascot";
     }
 
-    public Class getSearchTaskClass()
+    public TaskPipeline getTaskPipeline()
     {
-        return MascotSearchTask.class;
+        TaskPipeline pipeline = super.getTaskPipeline();
+        if (pipeline != null)
+            return pipeline;
+
+        TaskPipelineRegistry registry = PipelineJobService.get();
+        if (_filesMzXML.length > 1)
+            return registry.getTaskPipeline(Pipelines.fractionGroup.getTaskId());
+        if (!isSamples())
+            return PipelineJobService.get().getTaskPipeline(Pipelines.fraction.getTaskId());
+
+        return PipelineJobService.get().getTaskPipeline(Pipelines.sample.getTaskId());
     }
 
     public BioMLInputParser createInputParser()
@@ -143,12 +165,12 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
 
     public File getSearchNativeSpectraFile()
     {
-        return MascotSearchTask.getNativeSpectraFile(getAnalysisDirectory(), getOutputBasename());
+        return MascotSearchTask.getNativeSpectraFile(getAnalysisDirectory(), getFileBasename());
     }
 
     public File getSearchNativeOutputFile()
     {
-        return MascotSearchTask.getNativeOutputFile(getAnalysisDirectory(), getOutputBasename());
+        return MascotSearchTask.getNativeOutputFile(getAnalysisDirectory(), getFileBasename());
     }
 
     public String getXarTemplateResource()

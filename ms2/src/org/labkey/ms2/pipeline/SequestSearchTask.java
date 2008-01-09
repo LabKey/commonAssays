@@ -16,7 +16,8 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.io.FileUtils;
-import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.*;
+import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 
@@ -36,13 +37,13 @@ public class SequestSearchTask extends PipelineJob.Task
     private static final String SEQUEST_PARAMS = "sequest.params";
     private static final String REMOTE_PARAMS = "remote.params";
 
-    private static final String EXT_RAW_XML = ".xml";
-    private static final String EXT_SUMMARY = ".html";
-    private static final String EXT_SPECTRA_ARCHIVE = ".pep.tgz";
+    private static final FileType FT_RAW_XML = new FileType(".xml");
+    private static final FileType FT_SUMMARY = new FileType(".html");
+    private static final FileType FT_SPECTRA_ARCHIVE = new FileType(".pep.tgz");
 
     public static File getNativeOutputFile(File dirData, String baseName)
     {
-        return FileUtil.newFile(dirData, baseName, EXT_SUMMARY);
+        return FT_SUMMARY.newFile(dirData, baseName);
     }
 
     /**
@@ -57,27 +58,46 @@ public class SequestSearchTask extends PipelineJob.Task
         String getSequestServer();
     }
 
+    public static class Factory extends AbstractTaskFactory
+    {
+        public Factory()
+        {
+            super(SequestSearchTask.class);
+        }
+
+        public PipelineJob.Task createTask(PipelineJob job)
+        {
+            return new SequestSearchTask(job);
+        }
+
+        public String getStatusName()
+        {
+            return "SEARCH";
+        }
+
+        public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
+        {
+            JobSupport support = (JobSupport) job;
+            String baseName = support.getFileBasename();
+            File dirAnalysis = support.getAnalysisDirectory();
+
+            // Either raw converted pepXML from Tandem2XML, or completely analyzed pepXML
+            if (!NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) &&
+                    !NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName)))
+                return false;
+
+            return true;
+        }
+    }
+
+    protected SequestSearchTask(PipelineJob job)
+    {
+        super(job);
+    }
+
     public JobSupport getJobSupport()
     {
         return (JobSupport) getJob();
-    }
-
-    public String getStatusName()
-    {
-        return "SEARCH";
-    }
-
-    public boolean isComplete() throws IOException, SQLException
-    {
-        String baseName = getJobSupport().getOutputBasename();
-        File dirAnalysis = getJobSupport().getAnalysisDirectory();
-
-        // Either raw converted pepXML from Tandem2XML, or completely analyzed pepXML
-        if (!NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) &&
-                !NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName)))
-            return false;
-
-        return true;
     }
 
     public void run()
@@ -89,28 +109,28 @@ public class SequestSearchTask extends PipelineJob.Task
             params.put("search, useremail", params.get("pipeline, email address"));
             params.put("search, username", "CPAS User");
 
-            String baseName = getJobSupport().getOutputBasename();
-            File dirAnalysis = getJobSupport().getAnalysisDirectory();
-            File dirWork = MS2PipelineManager.createWorkingDirectory(dirAnalysis, baseName);
+            WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
+            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport());
 
-            File fileParamsLocal = new File(dirAnalysis, SEQUEST_PARAMS);
-            File fileWorkParamsLocal = new File(dirWork, SEQUEST_PARAMS);
+            File fileParamsLocal = new File(getJobSupport().getAnalysisDirectory(), SEQUEST_PARAMS);
+            File fileWorkParamsLocal = wd.newFile(SEQUEST_PARAMS);
             if (!NetworkDrive.exists(fileParamsLocal))
             {
                 // Never write directly to the results directory.  Always write to
                 // a working directory, and rename to results, to avoid file truncation in
                 // case of failure.
                 writeSequestV1ParamFile(fileWorkParamsLocal, params);
-                MS2PipelineManager.moveWorkToParent(fileWorkParamsLocal);
+                wd.outputFile(fileWorkParamsLocal);
             }
             
-            File fileWorkParamsRemote = new File(dirWork, REMOTE_PARAMS);
+            File fileWorkParamsRemote = wd.newFile(REMOTE_PARAMS);
             writeSequestV2ParamFile(fileWorkParamsRemote, params);
 
-            File dirOutputDta = new File(dirWork, baseName);
-            File fileTgz = FileUtil.newFile(dirWork, baseName, EXT_SPECTRA_ARCHIVE);
-            File fileSequestSummary =  getNativeOutputFile(dirWork, baseName);
-            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirWork, baseName);
+            File dirOutputDta = new File(wd.getDir(), getJobSupport().getFileBasename());
+            File fileTgz = wd.newFile(FT_SPECTRA_ARCHIVE);
+            File fileSequestSummary =  wd.newFile(FT_SUMMARY);
+            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(wd.getDir(),
+                    getJobSupport().getFileBasename());
 
             /*
             0. pre-Sequest search: c) translate the mzXML file to dta for Sequest (MzXML2Search)
@@ -126,7 +146,7 @@ public class SequestSearchTask extends PipelineJob.Task
             command.addAll(inputXmlParams);
             command.add(getJobSupport().getSearchSpectraFile().getAbsolutePath());
 
-            getJob().runSubProcess(new ProcessBuilder(command), dirWork);
+            getJob().runSubProcess(new ProcessBuilder(command), wd.getDir());
 
             /*
             1. perform Sequest search
@@ -144,10 +164,10 @@ public class SequestSearchTask extends PipelineJob.Task
                 throw new IOException("Failed running Sequest.");
 
             // TODO: Make Sequest server return pepXML using Out2XML
-            FileUtils.copyFileToDirectory(fileParamsLocal, dirWork);
-            getJob().runSubProcess(new ProcessBuilder("Sequest2Xml", fileSequestSummary.getName()), dirWork);
+            FileUtils.copyFileToDirectory(fileParamsLocal, wd.getDir());
+            getJob().runSubProcess(new ProcessBuilder("Sequest2Xml", fileSequestSummary.getName()), wd.getDir());
 
-            File fileOutputPepXML = FileUtil.newFile(dirWork, baseName, EXT_RAW_XML);
+            File fileOutputPepXML = wd.newFile(FT_RAW_XML);
             if (!fileOutputPepXML.renameTo(fileWorkPepXMLRaw))
                 throw new IOException("Failed to rename " + fileOutputPepXML + " to " + fileWorkPepXMLRaw);
 
@@ -156,15 +176,14 @@ public class SequestSearchTask extends PipelineJob.Task
             if (!FileUtil.deleteDir(dirOutputDta))
                 throw new IOException("Failed to delete DTA directory " + dirOutputDta.getAbsolutePath());
 
-            MS2PipelineManager.removeWorkFile(fileWorkParamsLocal);
-            MS2PipelineManager.removeWorkFile(fileWorkParamsRemote);
-            MS2PipelineManager.removeWorkFile(fileSequestSummary);
-
             // TODO: TGZ file is only required to get spectra loaded into CPAS.  Fix to use mzXML instead.
-            MS2PipelineManager.moveWorkToParent(fileTgz);
-            MS2PipelineManager.moveWorkToParent(fileWorkPepXMLRaw);
+            wd.outputFile(fileTgz);
+            wd.outputFile(fileWorkPepXMLRaw);
 
-            MS2PipelineManager.removeWorkingDirectory(dirWork);
+            wd.discardFile(fileWorkParamsLocal);
+            wd.discardFile(fileWorkParamsRemote);
+            wd.discardFile(fileSequestSummary);
+            wd.remove();
         }
         catch (PipelineJob.RunProcessException e)
         {

@@ -20,6 +20,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
@@ -49,9 +50,6 @@ public class MS2PipelineManager
     protected static String _pipelineThermoRawExt = ".RAW";
     protected static String _pipelineWatersRawExt = ".raw";
     protected static String _pipelineDataAnnotationExt = ".xar.xml";
-    protected static String _pipelineSearchExperimentExt = ".search.xar.xml";
-    protected static String _pipelineLogExt = ".log";
-    protected static String _pipelineStatusExt = ".status";
     protected static String _pipelineWorkExt = ".work";
 
     private static final String ALLOW_SEQUENCE_DB_UPLOAD_KEY = "allowSequenceDbUpload";
@@ -89,31 +87,6 @@ public class MS2PipelineManager
     public static File getLegacyAnnotationFile(File dirData, String baseName)
     {
         return new File(dirData, baseName + _pipelineDataAnnotationExt);
-    }
-
-    public static File getSearchExperimentFile(File dirAnalysis, String baseName)
-    {
-        return new File(dirAnalysis, baseName + _pipelineSearchExperimentExt);
-    }
-
-    public static boolean isSearchExperimentFile(File file)
-    {
-        return file.getName().toLowerCase().endsWith(_pipelineSearchExperimentExt);
-    }
-
-    public static File getStatusFile(File dirAnalysis, String baseName)
-    {
-        return new File(dirAnalysis, baseName + _pipelineStatusExt);
-    }
-
-    public static File getLogFile(File dirAnalysis, String baseName)
-    {
-        return new File(dirAnalysis, baseName + _pipelineLogExt);
-    }
-
-    public static File getLogFile(URI uriRoot, String logPath)
-    {
-        return new File(uriRoot.resolve(logPath));
     }
 
     public static String getDataDescription(File dirData, String baseName, String protocolName)
@@ -154,7 +127,7 @@ public class MS2PipelineManager
                 String basename = FileUtil.getBaseName(file, 2);
                 return !fileExists(TPPTask.getProtXMLFile(parent, basename)) &&
                         !fileExists(TPPTask.getProtXMLIntermediatFile(parent, basename)) &&
-                        !fileExists(getSearchExperimentFile(parent, basename));
+                        !fileExists(XarGeneratorTask.FT_SEARCH_XAR.newFile(parent, basename));
             }
 
             return false;
@@ -190,46 +163,6 @@ public class MS2PipelineManager
     public static PipelineProvider.FileEntryFilter getAnalyzeFilter()
     {
         return new AnalyzeFileFilter();
-    }
-
-    public static File createWorkingDirectory(File dirAnalysis, String baseName) throws IOException
-    {
-        File dirWork = new File(dirAnalysis, baseName + _pipelineWorkExt);
-        if (dirWork.exists())
-        {
-            if (!FileUtil.deleteDirectoryContents(dirWork))
-                throw new IOException("Failed to clean up existing working directory " + dirWork);
-        }
-        else
-        {
-            if (!dirWork.mkdir())
-                throw new IOException("Failed to create working directory " + dirWork);
-        }
-        return dirWork;
-    }
-
-    public static void removeWorkingDirectory(File dirRemove) throws IOException
-    {
-        if (!dirRemove.delete())
-            throw new IOException("Failed to remove working directory " + dirRemove);
-    }
-
-    public static void moveWorkToParent(File fileWork) throws IOException
-    {
-        File fileDest = new File(fileWork.getParentFile().getParentFile(), fileWork.getName());
-        moveWorkFile(fileDest, fileWork);
-    }
-
-    public static void moveWorkFile(File fileDest, File fileWork) throws IOException
-    {
-        if (!fileWork.renameTo(fileDest))
-            throw new IOException("Failed to move file " + fileWork + " to " + fileDest);
-    }
-
-    public static void removeWorkFile(File fileRemove) throws IOException
-    {
-        if (fileRemove.exists() && !fileRemove.delete())
-            throw new IOException("Failed to remove file " + fileRemove);
     }
 
     public static Map<String, String[]> addSequenceDBNames(File dir, String path, Map<String, String[]> m)
@@ -436,8 +369,8 @@ public class MS2PipelineManager
             if (dirAnalysis != null && !NetworkDrive.exists(dirAnalysis))
                 dirAnalysis = null;
 
-            boolean all = exists(getLogFile(dirAnalysis, _allFractionsMzXmlFileBase), knownFiles, checkedDirectories);
-            boolean allComplete = all && exists(getSearchExperimentFile(dirAnalysis, _allFractionsMzXmlFileBase), knownFiles, checkedDirectories);
+            boolean all = exists(PipelineJob.FT_LOG.newFile(dirAnalysis, _allFractionsMzXmlFileBase), knownFiles, checkedDirectories);
+            boolean allComplete = all && exists(XarGeneratorTask.FT_SEARCH_XAR.newFile(dirAnalysis, _allFractionsMzXmlFileBase), knownFiles, checkedDirectories);
 
             ExpData[] allContainerDatas = null;
 
@@ -448,9 +381,9 @@ public class MS2PipelineManager
                 if (dirAnalysis != null)
                 {
                     if (allComplete ||
-                            (!all && exists(getSearchExperimentFile(dirAnalysis, baseName), knownFiles, checkedDirectories)))
+                            (!all && exists(XarGeneratorTask.FT_SEARCH_XAR.newFile(dirAnalysis, baseName), knownFiles, checkedDirectories)))
                         status = FileStatus.COMPLETE;
-                    else if (exists(getLogFile(dirAnalysis, baseName), knownFiles, checkedDirectories))
+                    else if (exists(PipelineJob.FT_LOG.newFile(dirAnalysis, baseName), knownFiles, checkedDirectories))
                         status = FileStatus.RUNNING;
                 }
                 if (status == FileStatus.UNKNOWN)

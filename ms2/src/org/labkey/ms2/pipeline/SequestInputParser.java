@@ -7,4 +7,10 @@ package org.labkey.ms2.pipeline;
  */
 public class SequestInputParser extends BioMLInputParser
 {
+    public void validateDocument()
+    {
+        super.validateDocument();
+
+        /* @todo validate the input parameters. */
+    }    
 }

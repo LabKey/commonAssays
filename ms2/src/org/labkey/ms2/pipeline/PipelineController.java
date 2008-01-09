@@ -184,7 +184,7 @@ public class PipelineController extends SpringActionController
                 ViewBackgroundInfo info = getViewBackgroundInfo();
                 try
                 {
-                    if (MS2PipelineManager.isSearchExperimentFile(file))
+                    if (XarGeneratorTask.FT_SEARCH_XAR.isType(file))
                     {
                         ExperimentPipelineJob job = new ExperimentPipelineJob(info, file, description, false);
                         PipelineService.get().queueJob(job);

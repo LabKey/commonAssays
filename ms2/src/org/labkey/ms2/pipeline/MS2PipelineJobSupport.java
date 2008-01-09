@@ -15,6 +15,8 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.pipeline.FileAnalysisJobSupport;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -22,24 +24,8 @@ import java.io.IOException;
  * <code>MS2PipelineJobSupport</code> Interface for providing MS2 search support to
  * PiplineJob tasks.
  */
-public interface MS2PipelineJobSupport
+public interface MS2PipelineJobSupport extends FileAnalysisJobSupport
 {
-    /**
-     * Base name for the output files.
-     */
-    String getOutputBasename();
-
-    /**
-     * Returns the directory in which the mzXML files reside.
-     */
-    File getDataDirectory();
-
-    /**
-     * Returns the directory where the input files reside, and where the
-     * final analysis should end up.
-     */
-    File getAnalysisDirectory();
-
     /**
      * Returns the root sequence file directory.
      */

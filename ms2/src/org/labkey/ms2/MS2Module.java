@@ -20,9 +20,9 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentRunFilter;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
@@ -54,7 +54,7 @@ import java.util.*;
  * Date: Jul 18, 2005
  * Time: 3:25:52 PM
  */
-public class MS2Module extends DefaultModule implements ContainerManager.ContainerListener
+public class MS2Module extends SpringModule implements ContainerManager.ContainerListener
 {
     private static final Logger _log = Logger.getLogger(MS2Module.class);
 
@@ -127,9 +127,9 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
         PipelineService service = PipelineService.get();
         service.registerPipelineProvider(new MS2PipelineProvider());
         service.registerPipelineProvider(new XTandemCPipelineProvider(), "X!Tandem (Cluster)");
-        service.registerPipelineProvider(new CometCPipelineProvider());
-        service.registerPipelineProvider(new SequestLocalPipelineProvider());
         service.registerPipelineProvider(new MascotCPipelineProvider(), "Mascot (Cluster)");
+        service.registerPipelineProvider(new SequestLocalPipelineProvider());
+        service.registerPipelineProvider(new CometCPipelineProvider());
 
         service.registerPipelineProvider(new InspectCPipelineProvider());
         service.registerPipelineProvider(new ProteinProphetPipelineProvider());
@@ -149,6 +149,10 @@ public class MS2Module extends DefaultModule implements ContainerManager.Contain
         super.startup(context);
     }
 
+    protected String getMuleConfigFiles()
+    {
+        return "org/labkey/ms2/pipeline/mule/config/muleConfig.xml";
+    }
 
     @Override
     public Collection<String> getSummary(Container c)

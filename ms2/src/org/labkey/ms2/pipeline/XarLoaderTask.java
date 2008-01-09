@@ -15,9 +15,10 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.exp.FileXarSource;
 import org.labkey.api.exp.ExperimentPipelineJob;
+import org.labkey.api.exp.FileXarSource;
+import org.labkey.api.pipeline.AbstractTaskFactory;
+import org.labkey.api.pipeline.PipelineJob;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,28 +41,46 @@ public class XarLoaderTask extends PipelineJob.Task
         void setExperimentRowId(int rowId);
     }
 
+    public static class Factory extends AbstractTaskFactory
+    {
+        public Factory()
+        {
+            super(XarLoaderTask.class);
+        }
+
+        public PipelineJob.Task createTask(PipelineJob job)
+        {
+            return new XarLoaderTask(job);
+        }
+
+        public String getStatusName()
+        {
+            return "LOAD EXPERIMENT";
+        }
+
+        public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
+        {
+            // Check parameters to see if loading is required.
+            return ("no".equalsIgnoreCase(job.getParameters().get("pipeline, load")));
+        }
+    }
+
+    protected XarLoaderTask(PipelineJob job)
+    {
+        super(job);
+    }
+
     public JobSupport getJobSupport()
     {
         return (JobSupport) getJob();
     }
 
-    public String getStatusName()
-    {
-        return "LOAD EXPERIMENT";
-    }
-
-    public boolean isComplete() throws IOException, SQLException
-    {
-        // Check parameters to see if loading is required.
-        return ("no".equalsIgnoreCase(getJob().getParameters().get("pipeline, load")));
-    }
-
     public void run()
     {
-        String baseName = getJobSupport().getOutputBasename();
+        String baseName = getJobSupport().getFileBasename();
         File dirAnalysis = getJobSupport().getAnalysisDirectory();
 
-        File fileExperimentXML = MS2PipelineManager.getSearchExperimentFile(dirAnalysis, baseName);
+        File fileExperimentXML = XarGeneratorTask.FT_SEARCH_XAR.newFile(dirAnalysis, baseName);
 
         FileXarSource source = new FileXarSource(fileExperimentXML);
         if (ExperimentPipelineJob.loadExperiment(getJob(), source, false))

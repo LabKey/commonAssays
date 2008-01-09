@@ -20,7 +20,7 @@ import org.labkey.api.pipeline.PipelineProtocolFactory;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.XMLValidationParser;
+import org.labkey.api.util.InputParser;
 import org.labkey.ms2.pipeline.BioMLInputParser;
 import org.labkey.ms2.pipeline.MS2SearchPipelineProvider;
 
@@ -188,7 +188,7 @@ abstract public class AbstractMS2SearchProtocolFactory<T extends MS2SearchPipeli
         parser.parse(xmlBuffer.toString());
         if (parser.getErrors() != null)
         {
-            XMLValidationParser.Error err = parser.getErrors()[0];
+            InputParser.Error err = parser.getErrors()[0];
             if (err.getLine() == 0)
             {
                 throw new IOException("Failed parsing input parameters '" + file + "'.\n" +
@@ -264,7 +264,7 @@ abstract public class AbstractMS2SearchProtocolFactory<T extends MS2SearchPipeli
         parser.parse(xml);
         if (parser.getErrors() != null)
         {
-            XMLValidationParser.Error err = parser.getErrors()[0];
+            InputParser.Error err = parser.getErrors()[0];
             if (err.getLine() == 0)
                 throw new IllegalArgumentException(err.getMessage());
             else

@@ -25,7 +25,7 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.labkey.api.util.XMLValidationParser;
+import org.labkey.api.util.InputParser;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.ms2.SearchClient;
 
@@ -880,7 +880,7 @@ public class MascotClientImpl implements SearchClient
         parser.parse(xmlBuffer.toString());
         if (parser.getErrors() != null)
         {
-            XMLValidationParser.Error err = parser.getErrors()[0];
+            InputParser.Error err = parser.getErrors()[0];
             if (err.getLine() == 0)
                 getLogger().error("Failed parsing Mascot input xml '" + parametersFile.getPath() + "'.\n" +
                         err.getMessage());

@@ -15,18 +15,21 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.FileType;
 
 import java.io.*;
-import java.util.Map;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * <code>XarGeneratorTask</code>
  */
 public class XarGeneratorTask extends PipelineJob.Task
 {
+    public static final FileType FT_SEARCH_XAR = new FileType(".search.xar.xml");
+
     /**
      * Interface for support required from the PipelineJob to run this task,
      * beyond the base PipelineJob methods.
@@ -49,33 +52,51 @@ public class XarGeneratorTask extends PipelineJob.Task
         Map<String, String> getXarTemplateReplacements() throws IOException;
     }
 
+    public static class Factory extends AbstractTaskFactory
+    {
+        public Factory()
+        {
+            super(XarGeneratorTask.class);
+        }
+
+        public PipelineJob.Task createTask(PipelineJob job)
+        {
+            return new XarGeneratorTask(job);
+        }
+
+        public String getStatusName()
+        {
+            return "SAVE EXPERIMENT";
+        }
+
+        public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
+        {
+            JobSupport support = (JobSupport) job;
+            String baseName = support.getFileBasename();
+            File dirAnalysis = support.getAnalysisDirectory();
+
+            return NetworkDrive.exists(FT_SEARCH_XAR.newFile(dirAnalysis, baseName));
+        }
+    }
+
+    protected XarGeneratorTask(PipelineJob job)
+    {
+        super(job);
+    }
+
     public JobSupport getJobSupport()
     {
         return (JobSupport) getJob();
-    }
-
-    public String getStatusName()
-    {
-        return "SAVE EXPERIMENT";
-    }
-
-    public boolean isComplete() throws IOException, SQLException
-    {
-        String baseName = getJobSupport().getOutputBasename();
-        File dirAnalysis = getJobSupport().getAnalysisDirectory();
-
-        return NetworkDrive.exists(MS2PipelineManager.getSearchExperimentFile(dirAnalysis, baseName));
     }
 
     public void run()
     {
         try
         {
-            String baseName = getJobSupport().getOutputBasename();
-            File dirAnalysis = getJobSupport().getAnalysisDirectory();
-            File dirWork = MS2PipelineManager.createWorkingDirectory(dirAnalysis, baseName);
+            WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
+            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport());
 
-            File fileExperimentXML = MS2PipelineManager.getSearchExperimentFile(dirWork, baseName);
+            File fileExperimentXML = wd.newFile(FT_SEARCH_XAR);
 
             InputStream in = getClass().getClassLoader().getResourceAsStream(getJobSupport().getXarTemplateResource());
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -109,8 +130,8 @@ public class XarGeneratorTask extends PipelineJob.Task
                 writer.close();
             }
 
-            MS2PipelineManager.moveWorkToParent(fileExperimentXML);
-            MS2PipelineManager.removeWorkingDirectory(dirWork);
+            wd.outputFile(fileExperimentXML);
+            wd.remove();
         }
         catch (IOException e)
         {

@@ -15,11 +15,12 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.util.*;
-
+import org.labkey.api.pipeline.*;
+import org.labkey.api.util.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -32,6 +33,16 @@ import java.util.ArrayList;
  */
 public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements SequestSearchTask.JobSupport
 {
+    enum Pipelines
+    {
+        sample, fraction, fractionGroup;
+
+        public TaskId getTaskId()
+        {
+            return new TaskId(getClass().getEnclosingClass(), toString());
+        }
+    }
+
     private String _sequestServer;
 
     public SequestPipelineJob(ViewBackgroundInfo info,
@@ -39,9 +50,9 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements 
                               File dirSequenceRoot,
                               File filesMzXML[],
                               File fileInputXML,
-                              boolean continued) throws SQLException, IOException
+                              boolean fromCluster) throws SQLException, IOException
     {
-        super(SequestLocalPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML, continued);
+        super(SequestLocalPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML, fromCluster);
 
         AppProps appProps = AppProps.getInstance();
         _sequestServer = appProps.getSequestServer();
@@ -85,9 +96,19 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements 
         return jobs.toArray(new AbstractMS2SearchPipelineJob[jobs.size()]);
     }
 
-    public Class getSearchTaskClass()
+    public TaskPipeline getTaskPipeline()
     {
-        return SequestSearchTask.class;
+        TaskPipeline pipeline = super.getTaskPipeline();
+        if (pipeline != null)
+            return pipeline;
+
+        TaskPipelineRegistry registry = PipelineJobService.get();
+        if (_filesMzXML.length > 1)
+            return registry.getTaskPipeline(Pipelines.fractionGroup.getTaskId());
+        if (!isSamples())
+            return PipelineJobService.get().getTaskPipeline(Pipelines.fraction.getTaskId());
+
+        return PipelineJobService.get().getTaskPipeline(Pipelines.sample.getTaskId());
     }
 
     public boolean isRefreshRequired()
@@ -97,7 +118,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements 
 
     public File getSearchNativeOutputFile()
     {
-        return SequestSearchTask.getNativeOutputFile(getAnalysisDirectory(), getOutputBasename());
+        return SequestSearchTask.getNativeOutputFile(getAnalysisDirectory(), getFileBasename());
     }
 
     public String getXarTemplateResource()

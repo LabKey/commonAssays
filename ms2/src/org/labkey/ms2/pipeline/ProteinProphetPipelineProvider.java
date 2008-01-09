@@ -43,7 +43,7 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
                 File parent = f.getParentFile();
                 String basename = FileUtil.getBaseName(f, 2);
                 
-                return !fileExists(MS2PipelineManager.getSearchExperimentFile(parent, basename));
+                return !fileExists(XarGeneratorTask.FT_SEARCH_XAR.newFile(parent, basename));
             }
 
             return false;

@@ -16,6 +16,7 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;

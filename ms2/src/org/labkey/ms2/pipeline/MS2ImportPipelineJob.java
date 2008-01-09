@@ -1,15 +1,15 @@
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.exp.XarContext;
 import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineStatusManager;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.ViewURLHelper;
 import org.labkey.ms2.MS2Importer;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.FileUtil;
-import org.labkey.api.exp.XarContext;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -33,17 +33,18 @@ public class MS2ImportPipelineJob extends PipelineJob
         _runInfo = runInfo;
 
         String basename = FileUtil.getBaseName(_file, 2);
-        setLogFile(MS2PipelineManager.getLogFile(_file.getParentFile(), basename), appendLog);
+        setLogFile(FT_LOG.newFile(_file.getParentFile(), basename), appendLog);
 
-        File fileStatus = MS2PipelineManager.getStatusFile(_file.getParentFile(), basename);
+        // If there is a .status file created by the Perl pipeline, then connect this job
+        // to it.
+        File fileStatus = FT_CLUSTER_STATUS.newFile(_file.getParentFile(), basename);
         if (NetworkDrive.exists(fileStatus))
             setStatusFile(fileStatus);
 
         // If there is an existing status file, make sure this job does not
         // overwrite the original provider.  Both Comet and X!Tandem legacy
         // pipeline create these jobs.
-        String filePath = PipelineStatusManager.getStatusFilePath(getStatusFile().getAbsolutePath());
-        PipelineStatusFile sf = PipelineStatusManager.getStatusFile(filePath);
+        PipelineStatusFile sf = PipelineService.get().getStatusFile(getStatusFile().getAbsolutePath());
         if (sf != null)
             setProvider(sf.getProvider());
     }

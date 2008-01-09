@@ -729,8 +729,8 @@ public class OldMS2Controller extends ViewController
         String path = getViewURLHelper().getParameter("path");
         if (path != null)
         {
-            path = PipelineStatusManager.getStatusFilePath(path);
-            PipelineStatusFile sf = PipelineStatusManager.getStatusFile(path);
+            path = PipelineStatusFile.pathOf(path);
+            PipelineStatusFile sf = PipelineService.get().getStatusFile(path);
             if (sf == null)
                 status = "ERROR->path=" + path + ",message=Job not found in database";
 /*            else if (run.getDeleted())

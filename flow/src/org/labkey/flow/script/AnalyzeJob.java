@@ -14,7 +14,6 @@ public class AnalyzeJob extends ScriptJob
     private static Logger _log = Logger.getLogger(AnalyzeJob.class);
 
     int[] _runIds;
-    String _compensationExperimentLSID;
 
     public AnalyzeJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript analysis, FlowProtocolStep step, int[] runIds) throws Exception
     {

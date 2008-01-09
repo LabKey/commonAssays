@@ -15,31 +15,33 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.util.FileUtil;
+import org.labkey.api.pipeline.*;
+import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <code>XTandemTask</code> PipelineJob task that runs X! Tandem on an mzXML
+ * <code>XTandemSearchTask</code> PipelineJob task that runs X! Tandem on an mzXML
  * file, and converts the native output to pepXML.
  */
-public class XTandemTask extends PipelineJob.Task
+public class XTandemSearchTask extends PipelineJob.Task
 {
     private static final String INPUT_XML = "input.xml";
-    private static final String OUTPUT_XML = "output.xml";
     private static final String TAXONOMY_XML = "taxonomy.xml";
     private static final String TAXON_NAME = "sequences";
 
-    private static final String EXT_XTAN_XML = ".xtan.xml";
+    private static final FileType FT_XTAN_XML = new FileType(".xtan.xml");
 
     public static File getNativeOutputFile(File dirAnalysis, String baseName)
     {
-        return FileUtil.newFile(dirAnalysis, baseName, EXT_XTAN_XML);
+        return FT_XTAN_XML.newFile(dirAnalysis, baseName);
     }
 
     /**
@@ -50,66 +52,94 @@ public class XTandemTask extends PipelineJob.Task
     {
     }
 
+    public static class Factory extends AbstractTaskFactory
+    {
+        public Factory()
+        {
+            super(XTandemSearchTask.class);
+        }
+
+        public PipelineJob.Task createTask(PipelineJob job)
+        {
+            return new XTandemSearchTask(job);
+        }
+
+        public String getStatusName()
+        {
+            return "SEARCH";
+        }
+
+        public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
+        {
+            JobSupport support = (JobSupport) job;
+            String baseName = support.getFileBasename();
+            File dirAnalysis = support.getAnalysisDirectory();
+
+            // X! Tandem native output
+            if (!NetworkDrive.exists(getNativeOutputFile(dirAnalysis, baseName)))
+                return false;
+
+            // Either raw converted pepXML from Tandem2XML, or completely analyzed pepXML
+            if (!NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) &&
+                    !NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName)))
+                return false;
+
+            return true;
+        }
+    }
+
+    protected XTandemSearchTask(PipelineJob job)
+    {
+        super(job);
+    }
+
     public JobSupport getJobSupport()
     {
         return (JobSupport) getJob();
-    }
-
-    public String getStatusName()
-    {
-        return "SEARCH";
-    }
-
-    public boolean isComplete() throws IOException, SQLException
-    {
-        String baseName = getJobSupport().getOutputBasename();
-        File dirAnalysis = getJobSupport().getAnalysisDirectory();
-
-        // X! Tandem native output
-        if (!NetworkDrive.exists(getNativeOutputFile(dirAnalysis, baseName)))
-            return false;
-
-        // Either raw converted pepXML from Tandem2XML, or completely analyzed pepXML
-        if (!NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) &&
-                !NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName)))
-            return false;
-
-        return true;
     }
 
     public void run()
     {
         try
         {
-            String baseName = getJobSupport().getOutputBasename();
-            File dirAnalysis = getJobSupport().getAnalysisDirectory();
-            File dirWork = MS2PipelineManager.createWorkingDirectory(dirAnalysis, baseName);
+            WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
+            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport());
 
-            File fileWorkOutputXML = getNativeOutputFile(dirWork, baseName);
-            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirWork, baseName);
-            File fileParameters = new File(dirWork, INPUT_XML);
-            File fileTaxonomy = new File(dirWork, TAXONOMY_XML);
+            // CONSIDER: If the file stays in its original location, the absolute path
+            //           is used, to ensure the loader can find it.  Better way?
+            File fileDataSpectra = getJobSupport().getSearchSpectraFile();
+            File fileInputSpectra = wd.inputFile(fileDataSpectra);
+            String pathSpectra;
+            if (fileInputSpectra.equals(fileDataSpectra))
+                pathSpectra = fileInputSpectra.getAbsolutePath();
+            else
+                pathSpectra = wd.getRelativePath(fileInputSpectra);
 
-            writeRunParameters(fileParameters, fileTaxonomy, fileWorkOutputXML);
+            File fileWorkOutputXML = wd.newFile(FT_XTAN_XML);
+            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(wd.getDir(),
+                    getJobSupport().getFileBasename());
+            File fileWorkParameters = wd.newFile(INPUT_XML);
+            File fileWorkTaxonomy = wd.newFile(TAXONOMY_XML);
+
+            writeRunParameters(pathSpectra, fileWorkParameters, fileWorkTaxonomy, fileWorkOutputXML);
 
             getJob().runSubProcess(new ProcessBuilder("tandem.exe",
                     INPUT_XML),
-                    dirWork);
+                    wd.getDir());
 
             // Remove parameters files.
-            MS2PipelineManager.removeWorkFile(fileParameters);
-            MS2PipelineManager.removeWorkFile(fileTaxonomy);
+            wd.discardFile(fileWorkParameters);
+            wd.discardFile(fileWorkTaxonomy);
 
             getJob().runSubProcess(new ProcessBuilder("Tandem2XML",
                     fileWorkOutputXML.getName(),
                     fileWorkPepXMLRaw.getName()),
-                    dirWork);
+                    wd.getDir());
 
             // Move final outputs to analysis directory.
-            MS2PipelineManager.moveWorkToParent(fileWorkOutputXML);
-            MS2PipelineManager.moveWorkToParent(fileWorkPepXMLRaw);
-
-            MS2PipelineManager.removeWorkingDirectory(dirWork);
+            wd.outputFile(fileWorkOutputXML);
+            wd.outputFile(fileWorkPepXMLRaw);
+            wd.remove();
         }
         catch (PipelineJob.RunProcessException e)
         {
@@ -125,7 +155,7 @@ public class XTandemTask extends PipelineJob.Task
         }
     }
 
-    public void writeRunParameters(File fileParameters, File fileTaxonomy, File fileWorkOutputXML) throws IOException
+    public void writeRunParameters(String pathSpectra, File fileParameters, File fileTaxonomy, File fileWorkOutputXML) throws IOException
     {
         Map<String, String> params = new HashMap<String, String>(getJobSupport().getParameters());
         
@@ -141,7 +171,7 @@ public class XTandemTask extends PipelineJob.Task
 
         params.put("list path, taxonomy information", TAXONOMY_XML);
         params.put("protein, taxon", TAXON_NAME);
-        params.put("spectrum, path", getJobSupport().getSearchSpectraFile().getAbsolutePath());
+        params.put("spectrum, path", pathSpectra);
         params.put("output, path", fileWorkOutputXML.getName());
         params.put("output, path hashing", "no");        
 

@@ -16,8 +16,8 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.io.FileUtils;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.util.FileUtil;
+import org.labkey.api.pipeline.*;
+import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 
 import java.io.*;
@@ -35,22 +35,22 @@ public class MascotSearchTask extends PipelineJob.Task
     private static final String KEY_FILESIZE = "FILESIZE";
     private static final String KEY_TIMESTAMP = "TIMESTAMP";
 
-    private static final String EXT_MASCOT_DAT = ".dat";
-    private static final String EXT_MASCOT_MGF = ".mgf";
+    private static final FileType FT_MASCOT_DAT = new FileType(".dat");
+    private static final FileType FT_MASCOT_MGF = new FileType(".mgf");
 
     public static File getNativeSpectraFile(File dirAnalysis, String baseName)
     {
-        return FileUtil.newFile(dirAnalysis, baseName, EXT_MASCOT_MGF);
+        return FT_MASCOT_MGF.newFile(dirAnalysis, baseName);
     }
 
     public static File getNativeOutputFile(File dirAnalysis, String baseName)
     {
-        return FileUtil.newFile(dirAnalysis, baseName, EXT_MASCOT_DAT);
+        return FT_MASCOT_DAT.newFile(dirAnalysis, baseName);
     }
 
     public static boolean isNativeOutputFile(File file)
     {
-        return file.getName().toLowerCase().endsWith(EXT_MASCOT_DAT);
+        return FT_MASCOT_DAT.isType(file);
     }
 
     /**
@@ -90,32 +90,51 @@ public class MascotSearchTask extends PipelineJob.Task
         void setMascotSequenceRelease(String sequenceRelease);
     }
 
+    public static class Factory extends AbstractTaskFactory
+    {
+        public Factory()
+        {
+            super(MascotSearchTask.class);
+        }
+
+        public PipelineJob.Task createTask(PipelineJob job)
+        {
+            return new MascotSearchTask(job);
+        }
+
+        public String getStatusName()
+        {
+            return "SEARCH";
+        }
+
+        public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
+        {
+            JobSupport support = (JobSupport) job;
+            String baseName = support.getFileBasename();
+            File dirAnalysis = support.getAnalysisDirectory();
+
+            // Mascot input (MGF) and Mascot native output
+            if (!NetworkDrive.exists(getNativeSpectraFile(dirAnalysis, baseName)) ||
+                    !NetworkDrive.exists(getNativeOutputFile(dirAnalysis, baseName)))
+                return false;
+
+            // Either raw converted pepXML from DAT, or completely analyzed pepXML
+            if (!NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) &&
+                    !NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName)))
+                return false;
+
+            return true;
+        }
+    }
+
+    protected MascotSearchTask(PipelineJob job)
+    {
+        super(job);
+    }
+
     public JobSupport getJobSupport()
     {
         return (JobSupport) getJob();
-    }
-
-    public String getStatusName()
-    {
-        return "SEARCH";
-    }
-
-    public boolean isComplete() throws IOException, SQLException
-    {
-        String baseName = getJobSupport().getOutputBasename();
-        File dirAnalysis = getJobSupport().getAnalysisDirectory();
-
-        // Mascot input (MGF) and Mascot native output
-        if (!NetworkDrive.exists(getNativeSpectraFile(dirAnalysis, baseName)) ||
-                !NetworkDrive.exists(getNativeOutputFile(dirAnalysis, baseName)))
-            return false;
-
-        // Either raw converted pepXML from DAT, or completely analyzed pepXML
-        if (!NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) &&
-                !NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName)))
-            return false;
-
-        return true;
     }
 
     public void run()
@@ -124,14 +143,14 @@ public class MascotSearchTask extends PipelineJob.Task
         {
             Map<String, String> params = getJob().getParameters();
 
-            String baseName = getJobSupport().getOutputBasename();
-            File dirAnalysis = getJobSupport().getAnalysisDirectory();
-            File dirWork = MS2PipelineManager.createWorkingDirectory(dirAnalysis, baseName);
+            WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
+            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport());
 
-            File fileWorkSpectra = new File(dirWork, getJobSupport().getSearchSpectraFile().getName());
-            File fileWorkMGF = getNativeSpectraFile(dirWork, baseName);
-            File fileWorkDAT = getNativeOutputFile(dirWork, baseName);
-            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirWork, baseName);
+            File fileWorkSpectra = wd.newFile(getJobSupport().getSearchSpectraFile().getName());
+            File fileWorkMGF = wd.newFile(FT_MASCOT_MGF);
+            File fileWorkDAT = wd.newFile(FT_MASCOT_DAT);
+            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(wd.getDir(),
+                    getJobSupport().getFileBasename());
 
             // Mascot starts with remote sequence file names, so it has to look at the
             // raw parameter, rather than using getJobSupport().getSequenceFiles().
@@ -150,7 +169,7 @@ public class MascotSearchTask extends PipelineJob.Task
 
             params.put("pipeline, user name", "LabKey User");
 
-            File fileWorkInputXML = new File(dirWork, "input.xml");
+            File fileWorkInputXML = wd.newFile("input.xml");
             BioMLInputParser.writeFromMap(params, fileWorkInputXML);
 
             /*
@@ -159,7 +178,7 @@ public class MascotSearchTask extends PipelineJob.Task
             FileUtils.copyFile(getJobSupport().getSearchSpectraFile(), fileWorkSpectra);
             getJob().runSubProcess(new ProcessBuilder("MzXML2Search",
                     "-mgf", fileWorkSpectra.getName()),
-                    dirWork);
+                    wd.getDir());
 
             /*
             1. perform Mascot search
@@ -296,20 +315,19 @@ public class MascotSearchTask extends PipelineJob.Task
                     //     will fail to access protein associated information in mascot run
                     //,"-shortid"
                     ),
-                    dirWork);
+                    wd.getDir());
             
-            File fileOutputPepXML = new File(dirWork, baseName + ".xml");
+            File fileOutputPepXML = wd.newFile(new FileType(".xml"));
             if (!fileOutputPepXML.renameTo(fileWorkPepXMLRaw))
                 throw new IOException("Failed to rename " + fileOutputPepXML + " to " + fileWorkPepXMLRaw);
 
-            MS2PipelineManager.moveWorkToParent(fileWorkPepXMLRaw);
-            MS2PipelineManager.moveWorkToParent(fileWorkDAT);
-            MS2PipelineManager.moveWorkToParent(fileWorkMGF);
+            wd.outputFile(fileWorkPepXMLRaw);
+            wd.outputFile(fileWorkDAT);
+            wd.outputFile(fileWorkMGF);
 
-            MS2PipelineManager.removeWorkFile(fileWorkSpectra);
-            MS2PipelineManager.removeWorkFile(fileWorkInputXML);
-
-            MS2PipelineManager.removeWorkingDirectory(dirWork);
+            wd.discardFile(fileWorkSpectra);
+            wd.discardFile(fileWorkInputXML);
+            wd.remove();
         }
         catch (PipelineJob.RunProcessException e)
         {

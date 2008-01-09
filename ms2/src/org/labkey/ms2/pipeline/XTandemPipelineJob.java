@@ -16,11 +16,13 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.view.ViewBackgroundInfo;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
 
 /**
  * XTandemPipelineJob class
@@ -29,8 +31,18 @@ import java.util.*;
  *
  * @author bmaclean
  */
-public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements XTandemTask.JobSupport
+public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements XTandemSearchTask.JobSupport
 {
+    enum Pipelines
+    {
+        sample, fraction, fractionGroup;
+
+        public TaskId getTaskId()
+        {
+            return new TaskId(getClass().getEnclosingClass(), toString());
+        }
+    }
+
     private static Logger _log = getJobLogger(XTandemPipelineJob.class);
 
     public Logger getClassLogger()
@@ -68,9 +80,19 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
         return "x!tandem";
     }
 
-    public Class getSearchTaskClass()
+    public TaskPipeline getTaskPipeline()
     {
-        return XTandemTask.class;
+        TaskPipeline pipeline = super.getTaskPipeline();
+        if (pipeline != null)
+            return pipeline;
+
+        TaskPipelineRegistry registry = PipelineJobService.get();
+        if (_filesMzXML.length > 1)
+            return registry.getTaskPipeline(Pipelines.fractionGroup.getTaskId());
+        if (!isSamples())
+            return PipelineJobService.get().getTaskPipeline(Pipelines.fraction.getTaskId());
+
+        return PipelineJobService.get().getTaskPipeline(Pipelines.sample.getTaskId());
     }
 
     public BioMLInputParser createInputParser()
@@ -104,7 +126,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
 
     public File getSearchNativeOutputFile()
     {
-        return XTandemTask.getNativeOutputFile(getAnalysisDirectory(), getOutputBasename());
+        return XTandemSearchTask.getNativeOutputFile(getAnalysisDirectory(), getFileBasename());
     }
 
     public String getXarTemplateResource()
