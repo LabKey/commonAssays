@@ -17,33 +17,33 @@
 package org.labkey.ms2;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.*;
-import org.labkey.api.data.Container;
-import org.labkey.api.exp.*;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
-//wch: mascotdev
-import org.labkey.ms2.pipeline.MascotImportPipelineJob;
-//END-wch: mascotdev
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.User;
-import org.labkey.common.tools.MS2Modification;
-import org.labkey.common.tools.PeptideProphetSummary;
-import org.labkey.common.tools.RelativeQuantAnalysisSummary;
-import org.labkey.api.util.Cache;
-import org.labkey.api.util.Formats;
-import org.labkey.api.view.UnauthorizedException;
-import org.labkey.api.view.ViewBackgroundInfo;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
+import org.labkey.api.data.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
+import org.labkey.api.util.Cache;
+import org.labkey.api.util.Formats;
+import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.view.UnauthorizedException;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.common.tools.MS2Modification;
+import org.labkey.common.tools.PeptideProphetSummary;
+import org.labkey.common.tools.RelativeQuantAnalysisSummary;
+import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
+import org.labkey.ms2.pipeline.MascotImportPipelineJob;
+import org.labkey.ms2.protein.ProteinManager;
 
 import javax.xml.stream.XMLStreamException;
 import java.awt.*;
@@ -505,23 +505,24 @@ public class MS2Manager
 
     // We've already verified INSERT permission on newContainer
     // Now, verify DELETE permission on old container(s) and move runs to the new container
-    public static void moveRuns(User user, List<MS2Run> runList, Container newContainer) throws UnauthorizedException
+    public static void moveRuns(User user, List<MS2Run> runList, Container newContainer) throws UnauthorizedException, SQLException
     {
         ResultSet rs = null;
 
-        StringBuilder sb = new StringBuilder();
-        String separator = "";
+        List<Integer> runIds = new ArrayList<Integer>(runList.size());
+
         for (MS2Run run : runList)
-        {
-            sb.append(separator);
-            sb.append(run.getRun());
-            separator = ",";
-        }
-        String runListString = sb.toString();
+            runIds.add(run.getRun());
+
+        SQLFragment selectSQL = new SQLFragment("SELECT DISTINCT Container FROM " + getTableInfoRuns() + " ");
+        SimpleFilter inClause = new SimpleFilter();
+        inClause.addInClause("Run", runIds);
+        SQLFragment runSQL = inClause.getSQLFragment(getSqlDialect());
+        selectSQL.append(runSQL);
 
         try
         {
-            rs = Table.executeQuery(getSchema(), "SELECT DISTINCT Container FROM " + getTableInfoRuns() + " WHERE Run IN (" + runListString + ")", null);
+            rs = Table.executeQuery(getSchema(), selectSQL);
 
             // Check for DELETE permission on all containers holding the requested runs
             // UI only allows moving from containers with DELETE permissions, but one could hack the request
@@ -532,24 +533,16 @@ public class MS2Manager
                     throw new UnauthorizedException();
             }
 
-            Table.execute(getSchema(), "UPDATE " + getTableInfoRuns() + " SET Container=? WHERE Run IN (" + runListString + ")", new Object[]{newContainer.getId()});
-        }
-        catch (SQLException e)
-        {
-            _log.error("moveRuns: " + e);
+            SQLFragment updateSQL = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET Container=? ", newContainer.getId());
+            updateSQL.append(runSQL);
+            Table.execute(getSchema(), updateSQL);
         }
         finally
         {
-            try
-            {
-                if (null != rs) rs.close();
-            }
-            catch (SQLException e)
-            {
-            }
+            ResultSetUtil.close(rs);
         }
 
-        _removeRunsFromCache(runListString);
+        _removeRunsFromCache(runIds);
     }
 
     public static void renameRun(int runId, String newDescription)
@@ -567,25 +560,21 @@ public class MS2Manager
             _log.error("renameRun", e);
         }
 
-        _removeRunsFromCache(Integer.toString(runId));
+        _removeRunsFromCache(Arrays.asList(runId));
     }
 
     // For safety, simply mark runs as deleted.  This allows them to be (manually) restored.
-    public static void markAsDeleted(Integer[] runIds, Container c, User user)
+    public static void markAsDeleted(List<Integer> runIds, Container c, User user)
     {
-        if (runIds.length == 0)
+        if (runIds.isEmpty())
             return;
 
-        StringBuffer runList = new StringBuffer();
         // Save these to delete after we've deleted the runs
         List<Integer> experimentRunsToDelete = new ArrayList<Integer>();
 
-        for (int i = 0; i < runIds.length; i++)
+        for (Integer runId : runIds)
         {
-            if (i > 0) runList.append(",");
-            runList.append(runIds[i]);
-
-            MS2Run run = getRun(runIds[i]);
+            MS2Run run = getRun(runId.intValue());
             if (run != null)
             {
                 try
@@ -616,19 +605,23 @@ public class MS2Manager
             }
         }
 
-        String authorizedRuns = "WHERE Container=? AND Run IN (" + runList + ")";
+        SQLFragment markAsDeleted = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET Deleted=?, Modified=? ", Boolean.TRUE, new Date());
+        SimpleFilter where = new SimpleFilter();
+        where.addCondition("Container", c.getId());
+        where.addInClause("Run", runIds);
+        markAsDeleted.append(where.getSQLFragment(getSqlDialect()));
 
         try
         {
-            Table.execute(getSchema(), "UPDATE " + getTableInfoRuns() + " SET Deleted=?, Modified=? " + authorizedRuns, new Object[]{Boolean.TRUE, new Date(), c.getId()});
+            Table.execute(getSchema(), markAsDeleted);
         }
         catch (SQLException e)
         {
             _log.error("markAsDeleted", e);
         }
 
-        _removeRunsFromCache(runList.toString());
-        computeBasicMS2Stats();  // Update runIds/peptides statistics
+        _removeRunsFromCache(runIds);
+        computeBasicMS2Stats();  // Update runs/peptides statistics
 
         for (Integer experimentRunId : experimentRunsToDelete)
         {
@@ -653,7 +646,7 @@ public class MS2Manager
         try
         {
             Integer[] runIds = Table.executeArray(getSchema(), "SELECT Run FROM " + getTableInfoRuns() + " WHERE Container=?", new Object[]{c.getId()}, Integer.class);
-            markAsDeleted(runIds, c, user);
+            markAsDeleted(Arrays.asList(runIds), c, user);
         }
         catch (SQLException e)
         {
@@ -662,14 +655,12 @@ public class MS2Manager
     }
 
 
-    public static void markAsDeleted(String[] runIds, Container c, User user)
+    public static List<Integer> parseIds(List<String> stringIds)
     {
-        Integer[] deleteRunIds = new Integer[runIds.length];
-        for (int i = 0; i < runIds.length; i++)
-        {
-            deleteRunIds[i] = Integer.parseInt(runIds[i]);
-        }
-        markAsDeleted(deleteRunIds, c, user);
+        List<Integer> integerIds = new ArrayList<Integer>(stringIds.size());
+        for (String runId : stringIds)
+            integerIds.add(Integer.parseInt(runId));
+        return integerIds;
     }
 
 
@@ -969,18 +960,16 @@ public class MS2Manager
     }
 
 
-    private static void _removeRunFromCache(String runId)
+    private static void _removeRunFromCache(Integer runId)
     {
         Cache.getShared().remove(_ms2RunPrefix + runId);
     }
 
 
-    private static void _removeRunsFromCache(String runList)
+    private static void _removeRunsFromCache(List<Integer> runIds)
     {
-        String[] runs = runList.split(",");
-
-        for (String run : runs)
-            _removeRunFromCache(run);
+        for (Integer runId : runIds)
+            _removeRunFromCache(runId);
     }
 
 

@@ -8,6 +8,7 @@ import org.apache.struts.action.ActionMapping;
 import org.jfree.chart.imagemap.ImageMapUtilities;
 import org.labkey.api.action.*;
 import org.labkey.api.data.*;
+import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryService;
@@ -48,12 +49,15 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.List;
 
 /**
  * User: adam
@@ -251,7 +255,7 @@ public class MS2Controller extends SpringActionController
         bb.add(moveRuns);
 
         ActionButton deleteRuns = new ActionButton("", "Delete");
-        deleteRuns.setScript("return verifySelected(this.form, \"deleteRuns.view\", \"get\", \"runs\")");
+        deleteRuns.setScript("return verifySelected(this.form, \"deleteRuns.view\", \"post\", \"runs\")");
         deleteRuns.setActionType(ActionButton.Action.GET);
         deleteRuns.setDisplayPermission(ACL.PERM_DELETE);
         bb.add(deleteRuns);
@@ -298,9 +302,7 @@ public class MS2Controller extends SpringActionController
             {
                 displayColumns = ((GridView)grid).getDataRegion().getDisplayColumnList();
                 dataRegionName = ((GridView)grid).getDataRegion().getName();
-/*                if (form.isExportAsWebPage())
-                    ((GridView)grid).getDataRegion().addHiddenFormField("exportAsWebPage", "true");
-*/            }
+            }
 
             VBox vBox = new VBox();
             JspView scriptView = new JspView<String>("/org/labkey/ms2/nestedGridScript.jsp", dataRegionName);
@@ -3551,5 +3553,119 @@ public class MS2Controller extends SpringActionController
     }
 
 
+    protected void showElutionGraph(HttpServletResponse response, OldMS2Controller.DetailsForm form, boolean showLight, boolean showHeavy) throws Exception
+    {
+        if (!isAuthorized(form.run))
+            return;
 
+        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
+
+        if (null != peptide)
+        {
+            Quantitation quantitation = peptide.getQuantitation();
+            response.setDateHeader("Expires", 0);
+            response.setContentType("image/png");
+
+            File f = quantitation.findScanFile();
+            if (f != null)
+            {
+                ElutionGraph g = new ElutionGraph();
+                int charge = form.getQuantitationCharge() == Integer.MIN_VALUE ? peptide.getCharge() : form.getQuantitationCharge();
+                if (charge < 1 || charge > Quantitation.MAX_CHARGE)
+                {
+                    renderErrorImage("Invalid charge state: " + charge, response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
+                }
+                if (showLight)
+                {
+                    g.addInfo(quantitation.getLightElutionProfile(charge), quantitation.getLightFirstScan(), quantitation.getLightLastScan(), quantitation.getMinDisplayScan(), quantitation.getMaxDisplayScan(), Color.RED);
+                }
+                if (showHeavy)
+                {
+                    g.addInfo(quantitation.getHeavyElutionProfile(charge), quantitation.getHeavyFirstScan(), quantitation.getHeavyLastScan(), quantitation.getMinDisplayScan(), quantitation.getMaxDisplayScan(), Color.BLUE);
+                }
+                if (quantitation.isNoScansFound())
+                {
+                    renderErrorImage("No relevant MS1 scans found in spectra file", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
+                }
+                else
+                {
+                    g.render(response.getOutputStream());
+                }
+            }
+            else
+            {
+                renderErrorImage("Could not open spectra file to get MS1 scans", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
+            }
+        }
+        else
+        {
+            HttpView.throwNotFound("Could not find peptide with id " + form.getPeptideIdLong());
+        }
+    }
+
+    private void renderErrorImage(String errorMessage, HttpServletResponse response, int width, int height)
+            throws IOException
+    {
+        Graph g = new Graph(new float[0], new float[0], width, height)
+        {
+            protected void initializeDataPoints(Graphics2D g) {}
+            protected void renderDataPoint(Graphics2D g, double x, double y) {}
+        };
+        g.setNoDataErrorMessage(errorMessage);
+        g.render(response.getOutputStream());
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowLightElutionGraphAction extends ExportAction<OldMS2Controller.DetailsForm>
+    {
+        public void export(OldMS2Controller.DetailsForm form, HttpServletResponse response) throws Exception
+        {
+            showElutionGraph(response, form, true, false);
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowHeavyElutionGraphAction extends ExportAction<OldMS2Controller.DetailsForm>
+    {
+        public void export(OldMS2Controller.DetailsForm form, HttpServletResponse response) throws Exception
+        {
+            showElutionGraph(response, form, false, true);
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowCombinedElutionGraphAction extends ExportAction<OldMS2Controller.DetailsForm>
+    {
+        public void export(OldMS2Controller.DetailsForm form, HttpServletResponse response) throws Exception
+        {
+            showElutionGraph(response, form, true, true);
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_DELETE)
+    public class DeleteRunsAction extends FormHandlerAction
+    {
+        public void validateCommand(Object target, Errors errors)
+        {
+        }
+
+        public boolean handlePost(Object o, BindException errors) throws Exception
+        {
+            List<String> runIds = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
+
+            if (null != runIds)
+                MS2Manager.markAsDeleted(MS2Manager.parseIds(runIds), getContainer(), getUser());
+
+            return true;
+        }
+
+        public ViewURLHelper getSuccessURL(Object o)
+        {
+            return getShowListUrl(getContainer());
+        }
+    }
 }

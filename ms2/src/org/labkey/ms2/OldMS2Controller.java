@@ -24,7 +24,6 @@ import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 import org.labkey.api.data.*;
-import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.*;
@@ -43,8 +42,10 @@ import org.labkey.ms2.protocol.MascotSearchProtocolFactory;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.awt.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
@@ -805,30 +806,6 @@ public class OldMS2Controller extends ViewController
 
 
     @Jpf.Action
-    protected Forward deleteRuns() throws URISyntaxException, ServletException, IOException
-    {
-        requiresPermission(ACL.PERM_DELETE);
-
-        Container c = getContainer();
-        ViewURLHelper currentUrl = cloneViewURLHelper();
-
-        String[] deleteRuns = currentUrl.getParameters(DataRegion.SELECT_CHECKBOX_NAME);
-
-        if (null != deleteRuns)
-        {
-            MS2Manager.markAsDeleted(deleteRuns, c, getUser());
-        }
-
-        currentUrl.setAction("showList");
-        currentUrl.deleteParameter("x");
-        currentUrl.deleteParameter("y");
-        currentUrl.deleteParameter(DataRegion.SELECT_CHECKBOX_NAME);
-
-        return new ViewForward(currentUrl);
-    }
-
-
-    @Jpf.Action
     protected Forward selectMoveLocation() throws URISyntaxException, ServletException
     {
         requiresPermission(ACL.PERM_DELETE);
@@ -949,91 +926,6 @@ public class OldMS2Controller extends ViewController
         }
 
         return new ViewForward(url);
-    }
-
-    protected Forward showElutionGraph(DetailsForm form, boolean showLight, boolean showHeavy) throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        if (!isAuthorized(form.run))
-            return null;
-
-        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
-
-        HttpServletResponse response = getResponse();
-        if (null != peptide)
-        {
-            Quantitation quantitation = peptide.getQuantitation();
-            response.setDateHeader("Expires", 0);
-            response.setContentType("image/png");
-
-            File f = quantitation.findScanFile();
-            if (f != null)
-            {
-                ElutionGraph g = new ElutionGraph();
-                int charge = form.getQuantitationCharge() == Integer.MIN_VALUE ? peptide.getCharge() : form.getQuantitationCharge();
-                if (charge < 1 || charge > Quantitation.MAX_CHARGE)
-                {
-                    return renderErrorImage("Invalid charge state: " + charge, response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
-                }
-                if (showLight)
-                {
-                    g.addInfo(quantitation.getLightElutionProfile(charge), quantitation.getLightFirstScan(), quantitation.getLightLastScan(), quantitation.getMinDisplayScan(), quantitation.getMaxDisplayScan(), Color.RED);
-                }
-                if (showHeavy)
-                {
-                    g.addInfo(quantitation.getHeavyElutionProfile(charge), quantitation.getHeavyFirstScan(), quantitation.getHeavyLastScan(), quantitation.getMinDisplayScan(), quantitation.getMaxDisplayScan(), Color.BLUE);
-                }
-                if (quantitation.isNoScansFound())
-                {
-                    return renderErrorImage("No relevant MS1 scans found in spectra file", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
-                }
-                else
-                {
-                    g.render(response.getOutputStream());
-                    return null;
-                }
-            }
-            else
-            {
-                return renderErrorImage("Could not open spectra file to get MS1 scans", response, ElutionGraph.WIDTH, ElutionGraph.HEIGHT);
-            }
-        }
-        else
-        {
-            return HttpView.throwNotFound("Could not find peptide with id " + form.getPeptideIdLong());
-        }
-    }
-
-    private Forward renderErrorImage(String errorMessage, HttpServletResponse response, int width, int height)
-            throws IOException
-    {
-        Graph g = new Graph(new float[0], new float[0], width, height)
-        {
-            protected void initializeDataPoints(Graphics2D g) {}
-            protected void renderDataPoint(Graphics2D g, double x, double y) {}
-        };
-        g.setNoDataErrorMessage(errorMessage);
-        g.render(response.getOutputStream());
-        return null;
-    }
-
-    @Jpf.Action
-    protected Forward showLightElutionGraph(DetailsForm form) throws Exception
-    {
-        return showElutionGraph(form, true, false);
-    }
-
-    @Jpf.Action
-    protected Forward showHeavyElutionGraph(DetailsForm form) throws Exception
-    {
-        return showElutionGraph(form, false, true);
-    }
-
-    @Jpf.Action
-    protected Forward showCombinedElutionGraph(DetailsForm form) throws Exception
-    {
-        return showElutionGraph(form, true, true);
     }
 
     @Jpf.Action
@@ -1189,7 +1081,7 @@ public class OldMS2Controller extends ViewController
         forwardUrl.deleteParameter("submit.y");
         forwardUrl.deleteParameter("viewParams");
 
-        // Forward with redirect: this lets struts fill in the form and ensures that the JavaScript sees the showCompare action
+        // Redirect: this lets struts fill in the form and ensures that the JavaScript sees the showCompare action
         return new ViewForward(forwardUrl);
     }
 
@@ -1343,7 +1235,7 @@ public class OldMS2Controller extends ViewController
         SequestClientImpl sequestClient = new SequestClientImpl(form.getSequestServer());
         String html = sequestClient.testConnectivity();
         if (sequestClient.getErrorCode() == 0)
-                html = sequestClient.getEnvironmentConf();
+            html = sequestClient.getEnvironmentConf();
 
         String message;
         if(sequestClient.getErrorCode() != 0)

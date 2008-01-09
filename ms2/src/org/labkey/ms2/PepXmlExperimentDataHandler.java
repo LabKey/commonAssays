@@ -36,6 +36,7 @@ import java.net.URISyntaxException;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.Arrays;
 
 /**
  * User: jeckels
@@ -147,7 +148,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
             {
                 run.setExperimentRunLSID(null);
                 MS2Manager.updateRun(run, null);
-                MS2Manager.markAsDeleted( new Integer[]{ run.getRun() }, container, user);
+                MS2Manager.markAsDeleted(Arrays.asList(run.getRun()), container, user);
             }
         }
         catch (URISyntaxException e)
