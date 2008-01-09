@@ -13,7 +13,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.view.template.PrintTemplate;
+import org.labkey.api.view.template.PageConfig;
 import org.labkey.ms1.model.DataFile;
 import org.labkey.ms1.model.Feature;
 import org.labkey.ms1.model.Peptide;
@@ -104,11 +104,12 @@ public class MS1Controller extends SpringActionController
      * on the value of the format parameter.
      *
      * @param view The view to export
+     * @param config The page configuration object for the action
      * @param format The export format (may be "excel", "tsv", or "print")
      * @return A null ModelAndView suitable for returning from the Action's getView() method
      * @throws Exception Thrown from QueryView's export methods
      */
-    protected ModelAndView exportQueryView(QueryView view, String format) throws Exception
+    protected ModelAndView exportQueryView(QueryView view, PageConfig config, String format) throws Exception
     {
         if(format.equalsIgnoreCase("excel"))
             view.exportToExcel(getViewContext().getResponse());
@@ -117,9 +118,9 @@ public class MS1Controller extends SpringActionController
         else if(format.equalsIgnoreCase("print"))
         {
             view.setPrintView(true);
-            PrintTemplate template = new PrintTemplate(view, view.getTitle());
-            template.getModelBean().setShowPrintDialog(true);
-            HttpView.include(template, getViewContext().getRequest(), getViewContext().getResponse());
+            config.setTemplate(PageConfig.Template.Print);
+            config.setShowPrintDialog(true);
+            return view;
         }
 
         return null;
@@ -195,7 +196,7 @@ public class MS1Controller extends SpringActionController
 
             //if there is an export request, export and return
             if(isExportRequest(form.getExport()))
-                return exportQueryView(featuresView, form.getExport());
+                return exportQueryView(featuresView, getPageConfig(), form.getExport());
 
             //get the corresponding file Id and initialize a software view if there is software info
             //also create a file details view
@@ -297,7 +298,7 @@ public class MS1Controller extends SpringActionController
 
             //if there is an export parameter, do the export and return
             if(isExportRequest(form.getExport()))
-                return exportQueryView(peaksView, form.getExport());
+                return exportQueryView(peaksView, getPageConfig(), form.getExport());
 
             //if software information is available, create and initialize the software view
             //also the data file information view
