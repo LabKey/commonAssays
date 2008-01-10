@@ -1,5 +1,6 @@
 package org.labkey.ms2;
 
+import org.apache.beehive.netui.pageflow.FormData;
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -33,6 +34,8 @@ import org.labkey.ms2.compare.CompareExcelWriter;
 import org.labkey.ms2.compare.CompareQuery;
 import org.labkey.ms2.compare.RunColumn;
 import org.labkey.ms2.peptideview.*;
+import org.labkey.ms2.pipeline.MascotClientImpl;
+import org.labkey.ms2.pipeline.SequestClientImpl;
 import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.ms2.protein.IdentifierType;
 import org.labkey.ms2.protein.ProteinManager;
@@ -3666,6 +3669,293 @@ public class MS2Controller extends SpringActionController
         public ActionURL getSuccessURL(Object o)
         {
             return getShowListUrl(getContainer());
+        }
+    }
+
+
+    @RequiresSiteAdmin
+    public class MascotTestAction extends SimpleViewAction<TestMascotForm>
+    {
+        public ModelAndView getView(TestMascotForm form, BindException errors) throws Exception
+        {
+            String originalMascotServer = form.getMascotServer();
+            MascotClientImpl mascotClient = new MascotClientImpl(form.getMascotServer(), null,
+                form.getUserAccount(), form.getPassword());
+            mascotClient.setProxyURL(form.getHTTPProxyServer());
+            mascotClient.findWorkableSettings(true);
+            form.setStatus(mascotClient.getErrorCode());
+
+            String message;
+            if (0 == mascotClient.getErrorCode())
+            {
+                message = "Test passed.";
+                form.setParameters(mascotClient.getParameters());
+            }
+            else
+            {
+                message = "Test failed.";
+                message = message + "<br>" + mascotClient.getErrorString();
+            }
+
+            form.setMessage(message);
+            form.setMascotServer(originalMascotServer);
+            form.setPassword(("".equals(form.getPassword())) ? "" : "***");  // do not show password in clear
+
+            getPageConfig().setTemplate(PageConfig.Template.Dialog);
+            return new JspView<TestMascotForm>("/org/labkey/ms2/testMascot.jsp", form);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+
+    public static class TestMascotForm extends FormData
+    {
+        private String mascotserver;
+        private String useraccount;
+        private String password;
+        private String httpproxyserver;
+        private int status;
+        private String parameters;
+        private String message;
+
+        private String trimSafe(String s)
+        {
+            return (s == null ? "" : s.trim());
+        }
+
+        public void reset(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
+        {
+            setMascotServer(trimSafe(httpServletRequest.getParameter("mascotServer")));
+            setUserAccount(trimSafe(httpServletRequest.getParameter("mascotUserAccount")));
+            setPassword(trimSafe(httpServletRequest.getParameter("mascotUserPassword")));
+            setHTTPProxyServer(trimSafe(httpServletRequest.getParameter("mascotHTTPProxy")));
+            super.reset(actionMapping, httpServletRequest);
+        }
+
+        public String getUserAccount()
+        {
+            return (null == useraccount ? "" : useraccount);
+        }
+
+        public void setUserAccount(String useraccount)
+        {
+            this.useraccount = useraccount;
+        }
+
+        public String getPassword()
+        {
+            return (null == password ? "" : password);
+        }
+
+        public void setPassword(String password)
+        {
+            this.password = password;
+        }
+
+        public String getMascotServer()
+        {
+            return (null == mascotserver ? "" : mascotserver);
+        }
+
+        public void setMascotServer(String mascotserver)
+        {
+            this.mascotserver = mascotserver;
+        }
+
+        public String getHTTPProxyServer()
+        {
+            return (null == httpproxyserver ? "" : httpproxyserver);
+        }
+
+        public void setHTTPProxyServer(String httpproxyserver)
+        {
+            this.httpproxyserver = httpproxyserver;
+        }
+
+        public String getMessage()
+        {
+            return message;
+        }
+
+        public void setMessage(String message)
+        {
+            this.message = message;
+        }
+
+        public int getStatus()
+        {
+            return status;
+        }
+
+        public void setStatus(int status)
+        {
+            this.status = status;
+        }
+
+        public String getParameters()
+        {
+            return (null == parameters ? "" : parameters);
+        }
+
+        public void setParameters(String parameters)
+        {
+            this.parameters = parameters;
+        }
+    }
+
+
+    @RequiresSiteAdmin
+    public class SequestTestAction extends SimpleViewAction<TestSequestForm>
+    {
+        public ModelAndView getView(TestSequestForm form, BindException errors) throws Exception
+        {
+            String originalSequestServer = form.getSequestServer();
+            SequestClientImpl sequestClient = new SequestClientImpl(form.getSequestServer());
+            String html = sequestClient.testConnectivity();
+            if (sequestClient.getErrorCode() == 0)
+                html = sequestClient.getEnvironmentConf();
+
+            String message;
+            if(sequestClient.getErrorCode() != 0)
+            {
+                form.setStatus(sequestClient.getErrorCode());
+                message = "Test failed.";
+                message = message + "<br>" + html;
+            }
+            else
+            {
+                message = "Connection test passed.";
+                form.setParameters(html);
+            }
+
+            form.setMessage(message);
+            form.setSequestServer(originalSequestServer);
+
+            getPageConfig().setTemplate(PageConfig.Template.Dialog);
+            return new JspView<TestSequestForm>("/org/labkey/ms2/testSequest.jsp", form);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+    
+
+    public static class TestSequestForm extends FormData
+    {
+        private String sequestserver;
+        private int status;
+        private String parameters;
+        private String message;
+
+        public void reset(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
+        {
+            setSequestServer(httpServletRequest.getParameter("sequestServer").trim());
+            super.reset(actionMapping, httpServletRequest);
+        }
+
+        public String getSequestServer()
+        {
+            return (null == sequestserver ? "" : sequestserver);
+        }
+
+        public void setSequestServer(String sequestserver)
+        {
+            this.sequestserver = sequestserver;
+        }
+
+        public String getMessage()
+        {
+            return message;
+        }
+
+        public void setMessage(String message)
+        {
+            this.message = message;
+        }
+
+        public int getStatus()
+        {
+            return status;
+        }
+
+        public void setStatus(int status)
+        {
+            this.status = status;
+        }
+
+        public String getParameters()
+        {
+            return (null == parameters ? "" : parameters);
+        }
+
+        public void setParameters(String parameters)
+        {
+            this.parameters = parameters;
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ApplyRunViewAction extends SimpleRedirectAction<MS2ViewForm>
+    {
+        public ActionURL getRedirectURL(MS2ViewForm form) throws Exception
+        {
+            // Redirect to have Spring fill in the form and ensure that the DataRegion JavaScript sees the showRun action
+            return getApplyViewForwardUrl(form, "showRun");
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ApplyExportRunsViewAction extends SimpleForwardAction<MS2ViewForm>
+    {
+        public ActionURL getForwardURL(MS2ViewForm form) throws Exception
+        {
+            // Forward without redirect: this lets Spring fill in the form but preserves the post data
+            return getApplyViewForwardUrl(form, "exportRuns");
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ApplyCompareViewAction extends SimpleRedirectAction<MS2ViewForm>
+    {
+        public ActionURL getRedirectURL(MS2ViewForm form) throws Exception
+        {
+            ActionURL redirectURL = getApplyViewForwardUrl(form, "showCompare");
+
+            redirectURL.deleteParameter("submit.x");
+            redirectURL.deleteParameter("submit.y");
+            redirectURL.deleteParameter("viewParams");
+
+            return redirectURL;
+        }
+    }
+
+
+    private ActionURL getApplyViewForwardUrl(MS2ViewForm form, String action)
+    {
+        // Add the "view params" (which were posted as a single param) to the URL params.
+        ActionURL forwardUrl = getViewContext().cloneActionURL();
+        forwardUrl.setRawQuery(forwardUrl.getRawQuery() + (null == form.viewParams ? "" : "&" + form.viewParams));
+        return forwardUrl.setAction(action);
+    }
+
+
+    @RequiresSiteAdmin
+    public class ReloadSPOMAction extends SimpleRedirectAction
+    {
+        public ActionURL getRedirectURL(Object o) throws Exception
+        {
+            ProteinDictionaryHelpers.loadProtSprotOrgMap();
+
+            return getShowProteinAdminUrl();
         }
     }
 }

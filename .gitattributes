@@ -998,6 +998,8 @@ ms2/src/org/labkey/ms2/templates/MS2SearchSequestXpress.xml -text
 ms2/src/org/labkey/ms2/templates/MS2SearchXComet.xml -text
 ms2/src/org/labkey/ms2/templates/MS2SearchXCometXpress.xml -text
 ms2/src/org/labkey/ms2/templates/MS2SearchXpress.xml -text
+ms2/src/org/labkey/ms2/testMascot.jsp -text
+ms2/src/org/labkey/ms2/testSequest.jsp -text
 ms2/webapp/MS2/externalData/ProtSprotOrgMap.txt -text
 ms2/webapp/MS2/images/runIcon.gif -text
 ms2/webapp/WEB-INF/ms2/applicationContext.xml -text

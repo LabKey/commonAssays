@@ -24,14 +24,18 @@ import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 import org.labkey.api.data.*;
-import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
-import org.labkey.api.view.template.DialogTemplate;
 import org.labkey.api.view.template.FastTemplate;
 import org.labkey.api.view.template.HomeTemplate;
-import org.labkey.ms2.pipeline.*;
+import org.labkey.ms2.pipeline.FileStatus;
+import org.labkey.ms2.pipeline.MS2PipelineManager;
+import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.protein.*;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
@@ -233,16 +237,6 @@ public class OldMS2Controller extends ViewController
     }
 
     @Jpf.Action
-    protected Forward applyRunView(MS2ViewForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        // Redirect: this lets struts fill in the form and ensures that the JavaScript sees the showRun action
-        return new ViewForward(getApplyViewForwardUrl(form, "showRun"));
-    }
-
-
-    @Jpf.Action
     protected Forward discriminateScore(RunForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
@@ -251,15 +245,6 @@ public class OldMS2Controller extends ViewController
         url.addParameter("runId", form.getRun());
         return new ViewForward(url);
     }
-
-    private ActionURL getApplyViewForwardUrl(MS2ViewForm form, String action)
-    {
-        // Add the "view params" (which were posted as a single param) to the URL params.
-        ActionURL forwardUrl = cloneActionURL();
-        forwardUrl.setRawQuery(forwardUrl.getRawQuery() + (null == form.viewParams ? "" : "&" + form.viewParams));
-        return forwardUrl.setAction(action);
-    }
-
 
     @Jpf.Action
     protected Forward processAnnots(LoadAnnotForm form) throws Exception
@@ -394,17 +379,6 @@ public class OldMS2Controller extends ViewController
                 Thread.sleep(2002);
             }
         }
-
-        return new ViewForward(MS2Controller.getShowProteinAdminUrl());
-    }
-
-
-    @Jpf.Action
-    protected Forward reloadSPOM() throws Exception
-    {
-        requiresGlobalAdmin();
-
-        ProteinDictionaryHelpers.loadProtSprotOrgMap();
 
         return new ViewForward(MS2Controller.getShowProteinAdminUrl());
     }
@@ -867,19 +841,6 @@ public class OldMS2Controller extends ViewController
 
 
     @Jpf.Action
-    protected Forward applyExportRunsView(MS2ViewForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        // Forward without redirect: this lets Spring fill in the form and preserves the post data
-//        return new ViewForward(getApplyViewForwardUrl(form, "exportRuns"), false);
-        ViewServlet.forwardActionURL(getRequest(), getResponse(), getApplyViewForwardUrl(form, "exportRuns"));
-
-        return null;
-    }
-
-
-    @Jpf.Action
     protected Forward editElutionGraph(DetailsForm form) throws Exception
     {
         requiresPermission(ACL.PERM_UPDATE);
@@ -1069,260 +1030,6 @@ public class OldMS2Controller extends ViewController
             url.addParameter(paramName + digit, Formats.chargeFilter.format(value));
     }
 
-
-    @Jpf.Action
-    protected Forward applyCompareView(MS2ViewForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        ActionURL forwardUrl = getApplyViewForwardUrl(form, "showCompare");
-
-        forwardUrl.deleteParameter("submit.x");
-        forwardUrl.deleteParameter("submit.y");
-        forwardUrl.deleteParameter("viewParams");
-
-        // Redirect: this lets struts fill in the form and ensures that the JavaScript sees the showCompare action
-        return new ViewForward(forwardUrl);
-    }
-
-
-    @Jpf.Action
-    protected Forward testMascot(TestMascotForm form) throws Exception
-    {
-        requiresGlobalAdmin();
-
-        String originalMascotServer = form.getMascotServer();
-        MascotClientImpl mascotClient = new MascotClientImpl(form.getMascotServer(), null,
-            form.getUserAccount(), form.getPassword());
-        mascotClient.setProxyURL(form.getHTTPProxyServer());
-        mascotClient.findWorkableSettings(true);
-        form.setStatus(mascotClient.getErrorCode());
-
-        String message;
-        if (0 == mascotClient.getErrorCode())
-        {
-            message = "Test passed.";
-            form.setParameters(mascotClient.getParameters());
-        }
-        else
-        {
-            message = "Test failed.";
-            message = message + "<br>" + mascotClient.getErrorString();
-        }
-
-        form.setMessage(message);
-        form.setMascotServer(originalMascotServer);
-
-        HttpView view = new GroovyView("/org/labkey/core/admin/testMascot.gm");
-        form.setPassword(("".equals(form.getPassword())) ? "" : "***");  // do not show password in clear
-        view.addObject("form", form);
-        return includeView(new DialogTemplate(view));
-    }
-
-    @Jpf.Action
-    protected Forward showMascotTest(TestMascotForm form) throws Exception
-    {
-        return testMascot (form);
-    }
-
-    @Jpf.Action
-    protected Forward showUpgradeMascotTest(TestMascotForm form) throws Exception
-    {
-        return testMascot (form);
-    }
-
-    public static class TestMascotForm extends FormData
-    {
-        private String mascotserver;
-        private String useraccount;
-        private String password;
-        private String httpproxyserver;
-        private int status;
-        private String parameters;
-        private String message;
-
-        private String trimSafe(String s)
-        {
-            return (s == null ? "" : s.trim());
-        }
-
-        public void reset(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
-        {
-            setMascotServer(trimSafe(httpServletRequest.getParameter("mascotServer")));
-            setUserAccount(trimSafe(httpServletRequest.getParameter("mascotUserAccount")));
-            setPassword(trimSafe(httpServletRequest.getParameter("mascotUserPassword")));
-            setHTTPProxyServer(trimSafe(httpServletRequest.getParameter("mascotHTTPProxy")));
-            super.reset(actionMapping, httpServletRequest);
-        }
-
-        public String getUserAccount()
-        {
-            return (null == useraccount ? "" : useraccount);
-        }
-
-        public void setUserAccount(String useraccount)
-        {
-            this.useraccount = useraccount;
-        }
-
-        public String getPassword()
-        {
-            return (null == password ? "" : password);
-        }
-
-        public void setPassword(String password)
-        {
-            this.password = password;
-        }
-
-        public String getMascotServer()
-        {
-            return (null == mascotserver ? "" : mascotserver);
-        }
-
-        public void setMascotServer(String mascotserver)
-        {
-            this.mascotserver = mascotserver;
-        }
-
-        public String getHTTPProxyServer()
-        {
-            return (null == httpproxyserver ? "" : httpproxyserver);
-        }
-
-        public void setHTTPProxyServer(String httpproxyserver)
-        {
-            this.httpproxyserver = httpproxyserver;
-        }
-
-        public String getMessage()
-        {
-            return message;
-        }
-
-        public void setMessage(String message)
-        {
-            this.message = message;
-        }
-
-        public int getStatus()
-        {
-            return status;
-        }
-
-        public void setStatus(int status)
-        {
-            this.status = status;
-        }
-
-        public String getParameters()
-        {
-            return (null == parameters ? "" : parameters);
-        }
-
-        public void setParameters(String parameters)
-        {
-            this.parameters = parameters;
-        }
-    }
-
-    @Jpf.Action
-    protected Forward testSequest(TestSequestForm form) throws Exception
-    {
-        requiresGlobalAdmin();
-
-        String originalSequestServer = form.getSequestServer();
-        SequestClientImpl sequestClient = new SequestClientImpl(form.getSequestServer());
-        String html = sequestClient.testConnectivity();
-        if (sequestClient.getErrorCode() == 0)
-            html = sequestClient.getEnvironmentConf();
-
-        String message;
-        if(sequestClient.getErrorCode() != 0)
-        {
-            form.setStatus(sequestClient.getErrorCode());
-            message = "Test failed.";
-            message = message + "<br>" + html;
-        }
-        else
-        {
-            message = "Connection test passed.";
-            form.setParameters(html);
-        }
-
-        form.setMessage(message);
-        form.setSequestServer(originalSequestServer);
-
-        HttpView view = new GroovyView("org/labkey/core/admin/testSequest.gm");
-        view.addObject("form", form);
-        return includeView(new DialogTemplate(view));
-    }
-
-    @Jpf.Action
-    protected Forward showSequestTest(TestSequestForm form) throws Exception
-    {
-        return testSequest(form);
-    }
-
-    @Jpf.Action
-    protected Forward showUpgradeSequestTest(TestSequestForm form) throws Exception
-    {
-        return testSequest (form);
-    }
-
-    public static class TestSequestForm extends FormData
-    {
-        private String sequestserver;
-        private int status;
-        private String parameters;
-        private String message;
-
-        public void reset(ActionMapping actionMapping, HttpServletRequest httpServletRequest)
-        {
-            setSequestServer(httpServletRequest.getParameter("sequestServer").trim());
-            super.reset(actionMapping, httpServletRequest);
-        }
-
-        public String getSequestServer()
-        {
-            return (null == sequestserver ? "" : sequestserver);
-        }
-
-        public void setSequestServer(String sequestserver)
-        {
-            this.sequestserver = sequestserver;
-        }
-
-        public String getMessage()
-        {
-            return message;
-        }
-
-        public void setMessage(String message)
-        {
-            this.message = message;
-        }
-
-        public int getStatus()
-        {
-            return status;
-        }
-
-        public void setStatus(int status)
-        {
-            this.status = status;
-        }
-
-        public String getParameters()
-        {
-            return (null == parameters ? "" : parameters);
-        }
-
-        public void setParameters(String parameters)
-        {
-            this.parameters = parameters;
-        }
-    }
 
     public static class LoadAnnotForm extends FormData
     {
