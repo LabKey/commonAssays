@@ -79,7 +79,7 @@ public class PipelineController extends SpringActionController
         return p;
     }
 
-    public ViewURLHelper urlProjectStart(Container container)
+    public ActionURL urlProjectStart(Container container)
     {
         return PageFlowUtil.urlProvider(ProjectUrls.class).urlStart(container);
     }
@@ -103,7 +103,7 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class BeginAction extends SimpleRedirectAction
     {
-        public ViewURLHelper getRedirectURL(Object o)
+        public ActionURL getRedirectURL(Object o)
         {
             return MS2Controller.getBeginUrl(getContainer());
         }
@@ -112,7 +112,7 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(ACL.PERM_INSERT)
     public class UploadAction extends RedirectAction<PipelinePathForm>
     {
-        public ViewURLHelper getSuccessURL(PipelinePathForm form)
+        public ActionURL getSuccessURL(PipelinePathForm form)
         {
             return MS2Controller.getShowListUrl(getContainer());
         }
@@ -241,14 +241,14 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    public static ViewURLHelper urlSearch(Container container, MS2PipelineForm form, boolean skipDescription)
+    public static ActionURL urlSearch(Container container, MS2PipelineForm form, boolean skipDescription)
     {
         return urlSearch(container, form.getPath(), form.getSearchEngine(), skipDescription);
     }
 
-    public static ViewURLHelper urlSearch(Container container, String path, String searchEngine, boolean skipDescription)
+    public static ActionURL urlSearch(Container container, String path, String searchEngine, boolean skipDescription)
     {
-        ViewURLHelper url = new ViewURLHelper(SearchAction.class, container);
+        ActionURL url = new ActionURL(SearchAction.class, container);
         url.addParameter(MS2PipelineForm.PARAMS.searchEngine, searchEngine);
         url.addParameter(MS2PipelineForm.PARAMS.path, path);
         if (skipDescription)
@@ -271,7 +271,7 @@ public class PipelineController extends SpringActionController
             return null;
         }
         
-        public ViewURLHelper getSuccessURL(MS2SearchForm form)
+        public ActionURL getSuccessURL(MS2SearchForm form)
         {
             return urlProjectStart(getContainer());
         }
@@ -557,7 +557,7 @@ public class PipelineController extends SpringActionController
             return ret;
         }
 
-        public ViewURLHelper getSuccessURL(SequenceDBRootForm form)
+        public ActionURL getSuccessURL(SequenceDBRootForm form)
         {
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer());
         }
@@ -738,7 +738,7 @@ public class PipelineController extends SpringActionController
             return FormPage.getView(PipelineController.class, form, errors, getJspName());
         }
 
-        public ViewURLHelper getSuccessURL(SetDefaultsForm form)
+        public ActionURL getSuccessURL(SetDefaultsForm form)
         {
             return urlProjectStart(getContainer());
         }
@@ -823,7 +823,7 @@ public class PipelineController extends SpringActionController
             return true;
         }
 
-        public ViewURLHelper getSuccessURL(SequenceDBForm form)
+        public ActionURL getSuccessURL(SequenceDBForm form)
         {
             return urlProjectStart(getContainer());
         }
@@ -834,20 +834,20 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    public static ViewURLHelper urlShowCreateMS2Protocol(Container container, MS2PipelineForm form)
+    public static ActionURL urlShowCreateMS2Protocol(Container container, MS2PipelineForm form)
     {
         return urlShowCreateMS2Protocol(container, form.getPath(), form.getSearchEngine());
     }
 
-    public static ViewURLHelper urlShowCreateMS2Protocol(Container container, String path, String searchEngine)
+    public static ActionURL urlShowCreateMS2Protocol(Container container, String path, String searchEngine)
     {
         return urlShowCreateMS2Protocol(container, path, searchEngine, null);
     }
 
-    public static ViewURLHelper urlShowCreateMS2Protocol(Container container, String path,
+    public static ActionURL urlShowCreateMS2Protocol(Container container, String path,
                                                          String searchEngine, String templateName)
     {
-        ViewURLHelper url = new ViewURLHelper(PipelineController.ShowCreateMS2ProtocolAction.class, container);
+        ActionURL url = new ActionURL(PipelineController.ShowCreateMS2ProtocolAction.class, container);
         if (templateName != null && templateName.length() > 0)
             url.addParameter(MS2ProtocolForm.PARAMS.templateName, templateName);
         url.addParameter(MS2PipelineForm.PARAMS.searchEngine, searchEngine);
@@ -897,7 +897,7 @@ public class PipelineController extends SpringActionController
             return true;
         }
 
-        public ViewURLHelper getSuccessURL(MS2ProtocolForm form)
+        public ActionURL getSuccessURL(MS2ProtocolForm form)
         {
             return urlShowDescribeMS2Run(getContainer(), form);
         }
@@ -994,7 +994,7 @@ public class PipelineController extends SpringActionController
             dr.addColumns(template.getSubstitutionFields());
 
             ButtonBar bb = new ButtonBar();
-            ActionButton ab = new ActionButton(new ViewURLHelper(ShowCreateMS2ProtocolAction.class, getViewContext().getContainer()), "Submit");
+            ActionButton ab = new ActionButton(new ActionURL(ShowCreateMS2ProtocolAction.class, getViewContext().getContainer()), "Submit");
             bb.add(ab);
             dr.setButtonBar(bb);
 
@@ -1050,20 +1050,20 @@ public class PipelineController extends SpringActionController
             return true;
         }
 
-        public ViewURLHelper getSuccessURL(MS2ExperimentForm form)
+        public ActionURL getSuccessURL(MS2ExperimentForm form)
         {
             return urlShowDescribeMS2Run(getContainer(), form);
         }
     }
 
-    public static ViewURLHelper urlShowDescribeMS2Run(Container container, MS2PipelineForm form)
+    public static ActionURL urlShowDescribeMS2Run(Container container, MS2PipelineForm form)
     {
         return urlShowDescribeMS2Run(container, form.getPath(), form.getSearchEngine());
     }
 
-    public static ViewURLHelper urlShowDescribeMS2Run(Container container, String path, String searchEngine)
+    public static ActionURL urlShowDescribeMS2Run(Container container, String path, String searchEngine)
     {
-        ViewURLHelper url = new ViewURLHelper(ShowDescribeMS2RunAction.class, container);
+        ActionURL url = new ActionURL(ShowDescribeMS2RunAction.class, container);
         url.addParameter(MS2PipelineForm.PARAMS.searchEngine, searchEngine);
         url.addParameter(MS2PipelineForm.PARAMS.path, path);
         return url;
@@ -1185,7 +1185,7 @@ public class PipelineController extends SpringActionController
             return true;
         }
 
-        public ViewURLHelper getSuccessURL(MS2ExperimentForm form)
+        public ActionURL getSuccessURL(MS2ExperimentForm form)
         {
             return urlSearch(getContainer(), form, true);
         }

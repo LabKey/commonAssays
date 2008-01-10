@@ -5,7 +5,7 @@ import org.labkey.api.data.Table;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,11 +18,11 @@ import java.util.List;
  */
 public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
 {
-    private ViewURLHelper _currentUrl;
+    private ActionURL _currentUrl;
     private AbstractMS2RunView _peptideView;
     private String _extraWhere;
 
-    public ProteinResultSetSpectrumIterator(List<MS2Run> runs, ViewURLHelper currentUrl, AbstractMS2RunView peptideView, String extraWhere)
+    public ProteinResultSetSpectrumIterator(List<MS2Run> runs, ActionURL currentUrl, AbstractMS2RunView peptideView, String extraWhere)
     {
         _rs = new ProteinSpectrumResultSet(runs);
         _currentUrl = currentUrl;

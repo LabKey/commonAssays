@@ -36,12 +36,12 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
 
     protected FlowScript getScript() throws Exception
     {
-        return FlowScript.fromURL(getViewURLHelper(), getRequest());
+        return FlowScript.fromURL(getActionURL(), getRequest());
     }
 
     public FlowRun getRun() throws Exception
     {
-        FlowRun ret = FlowRun.fromURL(getViewURLHelper());
+        FlowRun ret = FlowRun.fromURL(getActionURL());
         return ret;
     }
 
@@ -51,7 +51,7 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
         PipelineService service = PipelineService.get();
         service.getPipelineQueue().addJob(job);
 
-        ViewURLHelper forward = job.getStatusHref().clone();
+        ActionURL forward = job.getStatusHref().clone();
         putParam(forward, FlowParam.redirect, 1);
         forward.setFragment("end");
         return new ViewForward(forward);
@@ -69,11 +69,11 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
 
         if (context.getContainer().getFolderType() instanceof FlowFolderType)
         {
-            children.add(0, new NavTree("Dashboard", new ViewURLHelper("Project", "begin", context.getContainer())));
+            children.add(0, new NavTree("Dashboard", new ActionURL("Project", "begin", context.getContainer())));
         }
         else
         {
-            ViewURLHelper url = PageFlowUtil.urlFor(FlowController.Action.begin, context.getContainer().getPath());
+            ActionURL url = PageFlowUtil.urlFor(FlowController.Action.begin, context.getContainer().getPath());
             children.add(0, new NavTree(FlowModule.getShortProductName(), url.clone()));
         }
 

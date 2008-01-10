@@ -1,7 +1,7 @@
 package org.labkey.ms2.peptideview;
 
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.*;
 import org.labkey.api.util.CaseInsensitiveHashMap;
 import org.labkey.ms2.*;
@@ -79,7 +79,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         rgn.setShowRecordSelectors(false);
         rgn.setFixedWidthColumns(true);
 
-        ViewURLHelper showUrl = _url.clone();
+        ActionURL showUrl = _url.clone();
         String seqId = showUrl.getParameter("seqId");
         showUrl.deleteParameter("seqId");
         String extraParams = "";
@@ -109,7 +109,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         ServletOutputStream outputStream = ExcelWriter.getOutputStream(response, "MS2Runs");
         WritableWorkbook workbook = ExcelWriter.getWorkbook(outputStream);
 
-        ViewURLHelper currentUrl = _url.clone();
+        ActionURL currentUrl = _url.clone();
 
         AbstractProteinExcelWriter ew = getExcelProteinGridWriter(form.getProteinColumns());
         ew.setSheetName("MS2 Runs");
@@ -156,7 +156,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
 
     protected abstract String createExtraWhere(List<String> selectedRows);
 
-    protected abstract void addGroupingFilterText(List<String> headers, ViewURLHelper currentUrl, boolean handSelected);
+    protected abstract void addGroupingFilterText(List<String> headers, ActionURL currentUrl, boolean handSelected);
 
     protected abstract void setUpExcelProteinGrid(AbstractProteinExcelWriter ewProtein, boolean expanded, String requestedPeptideColumnNames, MS2Run run, String where) throws SQLException;
 

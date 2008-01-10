@@ -15,7 +15,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryViewCustomizer;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.DataView;
@@ -74,7 +74,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                 ExpProtocol protocol = run.getProtocol();
                 if (protocol == null)
                     return null;
-                ViewURLHelper dataURL = new ViewURLHelper("NabAssay", "details", run.getContainer()).addParameter("rowId", run.getRowId());
+                ActionURL dataURL = new ActionURL("NabAssay", "details", run.getContainer()).addParameter("rowId", run.getRowId());
                 return dataURL.getLocalURIString();
             }
         });
@@ -269,7 +269,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         return PropertyType.INTEGER;
     }
     
-    public ViewURLHelper publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
     {
         try
         {
@@ -398,9 +398,9 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         }
     }
 
-    public ViewURLHelper getUploadWizardURL(Container container, ExpProtocol protocol)
+    public ActionURL getUploadWizardURL(Container container, ExpProtocol protocol)
     {
-        ViewURLHelper url = new ViewURLHelper("NabAssay", "nabUploadWizard.view", container);
+        ActionURL url = new ActionURL("NabAssay", "nabUploadWizard.view", container);
         url.addParameter("rowId", protocol.getRowId());
         return url;
     }
@@ -429,7 +429,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                     Object runId = ctx.getRow().get(_idColumn);
                     if (runId != null)
                     {
-                        ViewURLHelper url = new ViewURLHelper("NabAssay", "details", ctx.getContainer()).addParameter("rowId", "" + runId);
+                        ActionURL url = new ActionURL("NabAssay", "details", ctx.getContainer()).addParameter("rowId", "" + runId);
                         out.write("[<a href=\"" + url.getLocalURIString() + "\" title=\"View run details\">run&nbsp;details</a>]");
                     }
                 }
@@ -452,7 +452,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                 view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
                 view.getDataRegion().addHiddenFormField("protocolId", "" + protocol.getRowId());
                 ButtonBar bbar = view.getDataRegion().getButtonBar(DataRegion.MODE_GRID);
-                ViewURLHelper graphSelectedURL = new ViewURLHelper("NabAssay", "graphSelected", container);
+                ActionURL graphSelectedURL = new ActionURL("NabAssay", "graphSelected", container);
                 ActionButton graphSelectedButton = new ActionButton("button", "Graph Selected");
                 graphSelectedButton.setScript("return verifySelected(this.form, \"" + graphSelectedURL.getLocalURIString() + "\", \"get\", \"rows\")");
                 graphSelectedButton.setActionType(ActionButton.Action.GET);

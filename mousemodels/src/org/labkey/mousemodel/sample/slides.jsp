@@ -1,21 +1,21 @@
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.api.attachments.DownloadUrlHelper" %>
+<%@ page import="org.labkey.api.attachments.DownloadURL" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <table border=0>
 <%
     ViewContext context = HttpView.currentContext();
     Map[] slides = (Map[]) context.get("slides");
-    ViewURLHelper deleteUrl = (ViewURLHelper) context.get("deleteURL");
+    ActionURL deleteUrl = (ActionURL) context.get("deleteURL");
 
     int index = 0;
 
     for (Map slide : slides)
     {
-        String downloadUrl = new DownloadUrlHelper("MouseModel-Sample", context.getContainer().getPath(), (String) slide.get("slideEntityId"), (String) slide.get("DocumentName")).getEncodedLocalURIString();
-        String sampleUrl = new ViewURLHelper("MouseModel-Sample", "details.view", context.getContainer())
+        String downloadUrl = new DownloadURL("MouseModel-Sample", context.getContainer().getPath(), (String) slide.get("slideEntityId"), (String) slide.get("DocumentName")).getEncodedLocalURIString();
+        String sampleUrl = new ActionURL("MouseModel-Sample", "details.view", context.getContainer())
             .addParameter("sampleId", (String)slide.get("sampleId"))
             .addParameter("modelId", String.valueOf(slide.get("modelId")))
             .getEncodedLocalURIString();
@@ -49,7 +49,7 @@
     if ((index %3) != 0)
         out.print("</tr>");
 
-    String insertUrl = new ViewURLHelper("MouseModel-Sample", "showInsertSlides.view", context.getContainer())
+    String insertUrl = new ActionURL("MouseModel-Sample", "showInsertSlides.view", context.getContainer())
         .addParameter("modelId", String.valueOf(context.get("modelId")))
         .addParameter("sampleId", (String)context.get("sampleId"))
         .getEncodedLocalURIString();

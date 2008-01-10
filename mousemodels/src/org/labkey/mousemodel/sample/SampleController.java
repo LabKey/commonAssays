@@ -84,7 +84,7 @@ public class SampleController extends ViewController
         rgn.getDisplayColumn(1).setVisible(false);
         rgn.setShowRecordSelectors(true);
         rgn.setFixedWidthColumns(false);
-        ViewURLHelper urlhelp = cloneViewURLHelper();
+        ActionURL urlhelp = cloneActionURL();
 
         urlhelp.deleteParameters();
         urlhelp.setAction("details");
@@ -127,7 +127,7 @@ public class SampleController extends ViewController
         Sample sample = form.getBean();
         String sampleId = sample.getSampleId();
         Sample[] samples = null;
-        ViewURLHelper url = cloneViewURLHelper();
+        ActionURL url = cloneActionURL();
         url.deleteParameter("sampleId");
 
         if (null != sampleId)
@@ -175,7 +175,7 @@ public class SampleController extends ViewController
                 out.write("No samples found.");
             else
             {
-                ViewURLHelper url = currentContext().cloneViewURLHelper();
+                ActionURL url = currentContext().cloneActionURL();
                 url.setAction("details.view");
                 out.printf("<table><tr><td class='header'>Sample</td></tr>\n");
                 for (Sample samp : samples)
@@ -222,7 +222,7 @@ public class SampleController extends ViewController
         form.setBean(sample);
         DataRegion dr = getDataRegion();
 
-        ViewURLHelper toggleUsedURL = cloneViewURLHelper().setAction("toggleUsed.view");
+        ActionURL toggleUsedURL = cloneActionURL().setAction("toggleUsed.view");
         ActionButton usedButton = new ActionButton("toggleUsed", sample.getFrozenUsed() ? "Mark Unused" : "Mark Used");
         usedButton.setURL(toggleUsedURL.getLocalURIString());
         usedButton.setActionType(ActionButton.Action.LINK);
@@ -230,7 +230,7 @@ public class SampleController extends ViewController
         ActionButton showMouseButton = new ActionButton("showMouse", "Show Mouse");
         showMouseButton.setActionType(ActionButton.Action.LINK);
 
-        showMouseButton.setURL(getViewURLHelper().relativeUrl("details.view", PageFlowUtil.map("modelId", modelId, "entityId", "${organismId}"), "MouseModel-Mouse", true));
+        showMouseButton.setURL(getActionURL().relativeUrl("details.view", PageFlowUtil.map("modelId", modelId, "entityId", "${organismId}"), "MouseModel-Mouse", true));
         ButtonBar bb = new ButtonBar()
                 .add(ActionButton.BUTTON_SHOW_UPDATE)
                 .add(ActionButton.BUTTON_SHOW_GRID)
@@ -248,7 +248,7 @@ public class SampleController extends ViewController
         locationView.setTitle("Location");
 
         SlidesView slidesView = new SlidesView(model, sample, getViewContext());
-        HttpView discussionView = DiscussionService.get().getDisussionArea(getViewContext(), getContainer(), getUser(), sample.getLSID(), getViewContext().cloneViewURLHelper(), sample.getSampleId(), true);
+        HttpView discussionView = DiscussionService.get().getDisussionArea(getViewContext(), getContainer(), getUser(), sample.getLSID(), getViewContext().cloneActionURL(), sample.getSampleId(), true);
 
         VBox vbox = new VBox(new HBox(new HttpView[]{detailsView, locationView}), slidesView, discussionView);
         _renderInTemplate(vbox, modelId);
@@ -287,7 +287,7 @@ public class SampleController extends ViewController
         sample.setFrozenUsed(!sample.getFrozenUsed());
         SampleManager.update(getUser(), sample);
 
-        return new ViewForward(cloneViewURLHelper().setAction("details"));
+        return new ViewForward(cloneActionURL().setAction("details"));
     }
 
     @Jpf.Action
@@ -295,7 +295,7 @@ public class SampleController extends ViewController
     {
         requiresPermission(ACL.PERM_UPDATE);
 
-        ViewURLHelper forwardUrl = cloneViewURLHelper().setAction("begin.view");
+        ActionURL forwardUrl = cloneActionURL().setAction("begin.view");
         forwardUrl.addParameter("modelId", String.valueOf(MouseModelController.getModelId(form)));
         forwardUrl.addParameter(DataRegion.LAST_FILTER_PARAM, "true");
         ViewForward forward = new ViewForward(forwardUrl);
@@ -354,7 +354,7 @@ public class SampleController extends ViewController
         if (null != selectedRows)
             for (String selectedRow : selectedRows)
                 SampleManager.deleteSample(selectedRow, getContainer());
-        ViewURLHelper helper = cloneViewURLHelper();
+        ActionURL helper = cloneActionURL();
         helper.setAction("begin.view");
         helper.replaceParameter(DataRegion.LAST_FILTER_PARAM, "1");
         URI uri = new URI(helper.getLocalURIString());
@@ -428,7 +428,7 @@ public class SampleController extends ViewController
             }
         }
 
-        ViewURLHelper url = cloneViewURLHelper().setAction("showInsertSlides.view")
+        ActionURL url = cloneActionURL().setAction("showInsertSlides.view")
                 .addParameter("modelId", String.valueOf(form.getModelId()))
                 .addParameter("sampleId", form.getSampleId())
                 .addParameter("success", String.valueOf(Boolean.TRUE));
@@ -448,7 +448,7 @@ public class SampleController extends ViewController
 
         SampleManager.deleteSlide(getContainer(), slide);
 
-        ViewURLHelper url = cloneViewURLHelper();
+        ActionURL url = cloneActionURL();
         url.setAction("details");
         url.addParameter("LSID", slide.getSampleLSID());
         if (null != form.getModelId())
@@ -640,7 +640,7 @@ public class SampleController extends ViewController
         }
 
 
-        HttpView.throwRedirect(getViewContext().getViewURLHelper().relativeUrl("showEnterSampleLocations", "modelId=" + MouseModelController.getModelId(form) + "&success=true"));
+        HttpView.throwRedirect(getViewContext().getActionURL().relativeUrl("showEnterSampleLocations", "modelId=" + MouseModelController.getModelId(form) + "&success=true"));
         return null;
     }
 
@@ -850,7 +850,7 @@ public class SampleController extends ViewController
             addObject("modelId", model.getModelId());
             if (context.getContainer().hasPermission(context.getUser(),  ACL.PERM_DELETE))
             {
-                ViewURLHelper deleteURL = context.cloneViewURLHelper();
+                ActionURL deleteURL = context.cloneActionURL();
                 deleteURL.setPageFlow("MouseModel-Sample").setAction("deleteSlide");
                 deleteURL.deleteParameters();
                 deleteURL.replaceParameter("modelId", String.valueOf(model.getModelId()));

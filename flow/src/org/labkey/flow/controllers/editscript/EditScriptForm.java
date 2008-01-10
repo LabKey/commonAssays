@@ -1,7 +1,7 @@
 package org.labkey.flow.controllers.editscript;
 
 import org.labkey.api.view.ViewForm;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.flow.data.*;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.flow.query.FlowSchema;
@@ -16,8 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
-import org.labkey.flow.analysis.web.FCSRef;
-import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.controllers.FlowParam;
 
@@ -45,12 +43,12 @@ public class EditScriptForm extends ViewForm
             analysisScript = FlowScript.fromScriptId(Integer.valueOf(request.getParameter("scriptId")));
             _runCount = analysisScript.getRunCount();
             step = FlowProtocolStep.fromRequest(request);
-            _run = FlowRun.fromURL(getContext().getViewURLHelper(), getRequest());
+            _run = FlowRun.fromURL(getContext().getActionURL(), getRequest());
             if (_run != null)
             {
                 FlowPreference.editScriptRunId.setValue(request, Integer.toString(_run.getRunId()));
             }
-            _comp = FlowCompensationMatrix.fromURL(getContext().getViewURLHelper(), getRequest());
+            _comp = FlowCompensationMatrix.fromURL(getContext().getActionURL(), getRequest());
             if (_comp != null)
             {
                 FlowPreference.editScriptCompId.setValue(request, Integer.toString(_comp.getRowId()));
@@ -231,9 +229,9 @@ public class EditScriptForm extends ViewForm
         return ret;
     }
 
-    public ViewURLHelper urlFor(ScriptController.Action action)
+    public ActionURL urlFor(ScriptController.Action action)
     {
-        ViewURLHelper url = analysisScript.urlFor(action);
+        ActionURL url = analysisScript.urlFor(action);
         if (step != null)
         {
             step.addParams(url);

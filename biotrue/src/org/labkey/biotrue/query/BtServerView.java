@@ -8,7 +8,6 @@ import org.labkey.api.view.DataView;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ActionButton;
-import org.labkey.api.data.Sort;
 import org.labkey.api.security.ACL;
 
 /**
@@ -34,7 +33,7 @@ public class BtServerView extends QueryView
         {
             ButtonBar bar = view.getDataRegion().getButtonBar(DataRegion.MODE_GRID);
 
-            ActionButton adminButton = new ActionButton(_context.cloneViewURLHelper().setAction("admin.view").getEncodedLocalURIString(), "Admin", DataRegion.MODE_GRID, ActionButton.Action.LINK);
+            ActionButton adminButton = new ActionButton(_context.cloneActionURL().setAction("admin.view").getEncodedLocalURIString(), "Admin", DataRegion.MODE_GRID, ActionButton.Action.LINK);
             adminButton.setDisplayPermission(ACL.PERM_ADMIN);
             bar.add(adminButton);
             view.getDataRegion().setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);

@@ -4,7 +4,7 @@ import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.GroupedResultSet;
 import org.labkey.api.data.DataRegion;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class QueryPeptideDataRegion extends AbstractProteinDataRegion
     private final int _resultSetRowLimit;
     private final int _outerGroupLimit;
 
-    public QueryPeptideDataRegion(List<DisplayColumn> allColumns, String groupingColumnName, ViewURLHelper url, int resultSetRowLimit, int outerGroupLimit)
+    public QueryPeptideDataRegion(List<DisplayColumn> allColumns, String groupingColumnName, ActionURL url, int resultSetRowLimit, int outerGroupLimit)
     {
         super(groupingColumnName, url);
         _allColumns = allColumns;

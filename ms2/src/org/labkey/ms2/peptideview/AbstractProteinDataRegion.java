@@ -1,7 +1,7 @@
 package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.*;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -22,10 +22,10 @@ public abstract class AbstractProteinDataRegion extends DataRegion
     private final String _groupURL;
     protected GroupedResultSet _groupedRS = null;
 
-    protected AbstractProteinDataRegion(String uniqueColumnName, ViewURLHelper urlHelper)
+    protected AbstractProteinDataRegion(String uniqueColumnName, ActionURL url)
     {
         _uniqueColumnName = uniqueColumnName;
-        ViewURLHelper groupURL = urlHelper.clone();
+        ActionURL groupURL = url.clone();
         groupURL.setAction("getProteinGroupingPeptides.view");
         groupURL.deleteParameter("proteinGroupingId");
 

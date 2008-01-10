@@ -2,7 +2,7 @@ package org.labkey.flow.data;
 
 import org.labkey.api.exp.api.*;
 import org.labkey.api.security.User;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.flow.persist.FlowManager;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.log4j.Logger;
@@ -33,12 +33,12 @@ public class FlowWell extends FlowDataObject
         return getRun().getLog(type);
     }
 
-    static public FlowWell fromURL(ViewURLHelper url) throws Exception
+    static public FlowWell fromURL(ActionURL url) throws Exception
     {
         return fromURL(url, null);
     }
 
-    static public FlowWell fromURL(ViewURLHelper url, HttpServletRequest request) throws Exception
+    static public FlowWell fromURL(ActionURL url, HttpServletRequest request) throws Exception
     {
         int wellId = getIntParam(url, request, FlowParam.wellId);
         if (wellId == 0)
@@ -134,15 +134,15 @@ public class FlowWell extends FlowDataObject
         map.put(FlowParam.wellId, getWellId());
     }
 
-    public ViewURLHelper urlShow()
+    public ActionURL urlShow()
     {
         return addParams(pfURL(WellController.Action.showWell));
     }
 
-    public ViewURLHelper urlEditAnalysisScript() throws Exception
+    public ActionURL urlEditAnalysisScript() throws Exception
     {
         FlowScript analysisScript = getScript();
-        ViewURLHelper ret = analysisScript.urlFor(ScriptController.Action.begin);
+        ActionURL ret = analysisScript.urlFor(ScriptController.Action.begin);
         addParams(ret);
         return ret;
     }

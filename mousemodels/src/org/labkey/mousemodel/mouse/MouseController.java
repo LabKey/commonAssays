@@ -27,7 +27,7 @@ import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.attachments.Attachment;
 import org.labkey.api.attachments.AttachmentForm;
 import org.labkey.api.attachments.AttachmentService;
-import org.labkey.api.attachments.DownloadUrlHelper;
+import org.labkey.api.attachments.DownloadURL;
 import org.labkey.api.data.*;
 import org.labkey.api.sample.*;
 import org.labkey.api.security.ACL;
@@ -63,7 +63,7 @@ public class MouseController extends ViewController
         rgn.addColumns(MouseSchema.getMouseView().getColumns("BirthDate,StartDate,DeathDate,Weeks"));
         rgn.addColumns(getCustomColumns(MouseModelController.getModel(form)));
         rgn.getDisplayColumn(0).setVisible(false);
-        ViewURLHelper urlhelp = cloneViewURLHelper();
+        ActionURL urlhelp = cloneActionURL();
         urlhelp.setAction("details");
         rgn.getDisplayColumn(1).setURL(urlhelp.getLocalURIString() + "&entityId=${entityId}");
         rgn.setShowRecordSelectors(true);
@@ -106,7 +106,7 @@ public class MouseController extends ViewController
         bb.add(new ActionButton("print.view", "Print View"));
 
         Mouse mouse = (Mouse) form.getBean();
-        ViewURLHelper urlhelp = cloneViewURLHelper();
+        ActionURL urlhelp = cloneActionURL();
         if (!mouse.getNecropsyComplete())
         {
             ActionButton ab = new ActionButton("necropsy", "Necropsy");
@@ -248,7 +248,7 @@ public class MouseController extends ViewController
 
         HttpView discussionView = DiscussionService.get().getDisussionArea(
                 getViewContext(), getContainer(), getUser(),
-                mouse.getEntityId(), getViewContext().cloneViewURLHelper(), mouse.getMouseNo(), true);
+                mouse.getEntityId(), getViewContext().cloneActionURL(), mouse.getMouseNo(), true);
 
         GridView sampleView = new GridView(getSamplesGridRegion(mouse));
         SimpleFilter filter = new SimpleFilter("organismId", form.getEntityId());
@@ -263,7 +263,7 @@ public class MouseController extends ViewController
         Attachment[] attachments = AttachmentService.get().getAttachments(mouse);
 //        photoView.addObject("parent", form.get("entityId"));
         photoView.addObject("attachments", attachments);
-        DownloadUrlHelper deleteUrl = new DownloadUrlHelper("MouseModel-Mouse", getContainer().getPath(), mouse.getEntityId(), null);
+        DownloadURL deleteUrl = new DownloadURL("MouseModel-Mouse", getContainer().getPath(), mouse.getEntityId(), null);
         deleteUrl.setAction("showConfirmDelete.view");
         photoView.addObject("deleteUrl", deleteUrl);
         photoView.addObject("canDelete", getViewContext().hasPermission(ACL.PERM_UPDATE));
@@ -345,7 +345,7 @@ public class MouseController extends ViewController
     {
         Mouse mouse = getMouse(form, ACL.PERM_UPDATE);  // TODO: Shouldn't this be DELETE?  But it's UPDATE above...
 
-        return includeView(AttachmentService.get().getConfirmDeleteView(getContainer(), getViewURLHelper(), mouse, form.getName()));
+        return includeView(AttachmentService.get().getConfirmDeleteView(getContainer(), getActionURL(), mouse, form.getName()));
     }
 
 
@@ -367,7 +367,7 @@ public class MouseController extends ViewController
         rgn.addColumn(new TrueFalseColumn(getSampleTable().getColumn("FrozenUsed"), "Used", "Unused"));
         rgn.getDisplayColumn(0).setVisible(false);
         rgn.getDisplayColumn(1).setVisible(false);
-        ViewURLHelper urlhelp = cloneViewURLHelper();
+        ActionURL urlhelp = cloneActionURL();
 
         urlhelp.deleteParameters();
         urlhelp.setPageFlow("MouseModel-Sample");
@@ -549,7 +549,7 @@ public class MouseController extends ViewController
             {
                 String path = (String) getViewContext().get("path");
                 if (null == path)
-                    path = getViewContext().getViewURLHelper().getExtraPath();
+                    path = getViewContext().getActionURL().getExtraPath();
                 _c = ContainerManager.getForPath(path);
             }
 
@@ -560,7 +560,7 @@ public class MouseController extends ViewController
             }
 
             if (_c.hasPermission(getViewContext().getUser(), ACL.PERM_UPDATE))
-                setTitleHref(ViewURLHelper.toPathString("Mouse", "showSamples", _c.getPath()));
+                setTitleHref(ActionURL.toPathString("Mouse", "showSamples", _c.getPath()));
         }
 
 
@@ -610,7 +610,7 @@ public class MouseController extends ViewController
             {
                 String path = (String) getViewContext().get("path");
                 if (null == path)
-                    path = getViewContext().getViewURLHelper().getExtraPath();
+                    path = getViewContext().getActionURL().getExtraPath();
                 _c = ContainerManager.getForPath(path);
             }
 
@@ -619,13 +619,13 @@ public class MouseController extends ViewController
                 setVisible(false);
                 return;
             }
-            ViewURLHelper urlhelp = getViewContext().cloneViewURLHelper();
+            ActionURL urlhelp = getViewContext().cloneActionURL();
             urlhelp.setAction(null);
             urlhelp.setPageFlow("Mouse");
             urlhelp.deleteParameters();
             getDataRegion().setPageFlowUrl(urlhelp.getURIString());
             if (_c.hasPermission(getViewContext().getUser(), ACL.PERM_UPDATE))
-                setTitleHref(ViewURLHelper.toPathString("Mouse", "begin", _c.getPath()));
+                setTitleHref(ActionURL.toPathString("Mouse", "begin", _c.getPath()));
         }
 
 

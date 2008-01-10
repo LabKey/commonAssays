@@ -2,24 +2,21 @@ package org.labkey.flow.data;
 
 import org.labkey.api.security.User;
 
-import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpProtocolApplication;
-import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.labkey.api.data.*;
 import org.fhcrc.cpas.flow.script.xml.*;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.FlowDataHandler;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.util.*;
-import java.net.URI;
 import java.io.File;
 
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -54,7 +51,7 @@ public class FlowScript extends FlowDataObject
         return new FlowScript(data);
     }
 
-    static public FlowScript fromURL(ViewURLHelper url) throws ServletException
+    static public FlowScript fromURL(ActionURL url) throws ServletException
     {
         return fromURL(url, null);
     }
@@ -65,7 +62,7 @@ public class FlowScript extends FlowDataObject
     }
 
 
-    static public FlowScript fromURL(ViewURLHelper url, HttpServletRequest request) throws ServletException
+    static public FlowScript fromURL(ActionURL url, HttpServletRequest request) throws ServletException
     {
         FlowScript ret = FlowScript.fromScriptId(getIntParam(url, request, FlowParam.scriptId));
         if (ret == null)
@@ -193,7 +190,7 @@ public class FlowScript extends FlowDataObject
         return getRun() != null;
     }
 
-    public ViewURLHelper urlShow()
+    public ActionURL urlShow()
     {
         return urlFor(AnalysisScriptController.Action.begin);
     }
@@ -307,9 +304,9 @@ public class FlowScript extends FlowDataObject
         return ret.toString();
     }
 
-    public ViewURLHelper urlFor(Enum action, FlowProtocolStep step)
+    public ActionURL urlFor(Enum action, FlowProtocolStep step)
     {
-        ViewURLHelper ret = super.urlFor(action);
+        ActionURL ret = super.urlFor(action);
         step.addParams(ret);
         return ret;
     }

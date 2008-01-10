@@ -1,7 +1,7 @@
 package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.*;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.ViewContext;
@@ -45,7 +45,7 @@ public abstract class AbstractMS2RunView
 
     private final Container _container;
     private final User _user;
-    protected final ViewURLHelper _url;
+    protected final ActionURL _url;
     protected final ViewContext _viewContext;
     protected final MS2Run[] _runs;
     protected int _maxPeptideRows = 1000; // Limit peptides returned to 1,000 rows
@@ -58,7 +58,7 @@ public abstract class AbstractMS2RunView
         _container = viewContext.getContainer();
         _user = viewContext.getUser();
         _columnPropertyName = columnPropertyName;
-        _url = viewContext.getViewURLHelper();
+        _url = viewContext.getActionURL();
         _viewContext = viewContext;
         _runs = runs;
     }
@@ -77,9 +77,9 @@ public abstract class AbstractMS2RunView
 
     public abstract MS2RunViewType getViewType();
 
-    public abstract SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form);
+    public abstract SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form);
 
-    public abstract Map<String, SimpleFilter> getFilter(ViewURLHelper queryUrl, MS2Run run);
+    public abstract Map<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run);
 
     public Container getContainer()
     {
@@ -92,7 +92,7 @@ public abstract class AbstractMS2RunView
 
         List<String> exportFormats = getExportFormats();
         
-        ViewURLHelper exportUrl = _url.clone();
+        ActionURL exportUrl = _url.clone();
         exportUrl.setAction(exportAllAction);
         MenuButton exportAll = new MenuButton("Export All");
         for (String exportFormat : exportFormats)
@@ -121,7 +121,7 @@ public abstract class AbstractMS2RunView
             types.add(ProteinDictionaryHelpers.GoTypes.PROCESS);
             for (ProteinDictionaryHelpers.GoTypes goType : types)
             {
-                ViewURLHelper url = MS2Controller.getPeptideChartUrl(getContainer(), goType);
+                ActionURL url = MS2Controller.getPeptideChartUrl(getContainer(), goType);
                 goButton.addMenuItem(goType.toString(), "javascript: document.forms[\"" + dataRegion.getName() + "\"].action=\"" + url.getLocalURIString() + "\"; document.forms[\"" + dataRegion.getName() + "\"].submit();");
             }
             result.add(goButton);
@@ -214,7 +214,7 @@ public abstract class AbstractMS2RunView
 
     public void setPeptideUrls(DataRegion rgn, String extraPeptideUrlParams)
     {
-        ViewURLHelper showUrl = _url.clone();
+        ActionURL showUrl = _url.clone();
         showUrl.setAction("showPeptide");
         String peptideUrlString = showUrl.getLocalURIString() + "&peptideId=${RowId}";
 
@@ -339,7 +339,7 @@ public abstract class AbstractMS2RunView
     }
 
 
-    public long[] getPeptideIndex(ViewURLHelper url) throws SQLException
+    public long[] getPeptideIndex(ActionURL url) throws SQLException
     {
         String lookup = getIndexLookup(url);
         long[] index = MS2Manager.getPeptideIndex(lookup);
@@ -360,7 +360,7 @@ public abstract class AbstractMS2RunView
 
 
     // Generate signature used to cache & retrieve the peptide index 
-    protected String getIndexLookup(ViewURLHelper url)
+    protected String getIndexLookup(ActionURL url)
     {
         return "Filter:" + getPeptideFilter(url).toSQLString(MS2Manager.getSqlDialect()) + "|Sort:" + getPeptideSort().getSortText();
     }
@@ -372,13 +372,13 @@ public abstract class AbstractMS2RunView
     }
 
 
-    private SimpleFilter getPeptideFilter(ViewURLHelper url)
+    private SimpleFilter getPeptideFilter(ActionURL url)
     {
         return ProteinManager.getPeptideFilter(url, ProteinManager.ALL_FILTERS, _runs[0]);
     }
 
 
-    protected Long[] generatePeptideIndex(ViewURLHelper url) throws SQLException
+    protected Long[] generatePeptideIndex(ActionURL url) throws SQLException
     {
         Sort sort = ProteinManager.getPeptideBaseSort();
         sort.insertSort(getPeptideSort());
@@ -470,7 +470,7 @@ public abstract class AbstractMS2RunView
         return null;
     }
 
-    protected void addPeptideFilterText(List<String> headers, MS2Run run, ViewURLHelper currentUrl)
+    protected void addPeptideFilterText(List<String> headers, MS2Run run, ActionURL currentUrl)
     {
         headers.add("");
         headers.add("Peptide Filter: " + ProteinManager.getPeptideFilter(currentUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run).getFilterText());

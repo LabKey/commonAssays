@@ -5,7 +5,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.GroupNumberDisplayColumn;
 import org.labkey.ms2.ProteinListDisplayColumn;
@@ -157,7 +157,7 @@ public class ProteinGroupTableInfo extends FilteredTable
                         DataColumn result = new DataColumn(colInfo);
                         result.setLinkTarget("prot");
 
-                        ViewURLHelper url = new ViewURLHelper("MS2", "showProtein.view", _schema.getContainer());
+                        ActionURL url = new ActionURL("MS2", "showProtein.view", _schema.getContainer());
                         if (_runs != null && _runs.length == 1)
                         {
                             url.addParameter("run", Integer.toString(_runs[0].getRun()));

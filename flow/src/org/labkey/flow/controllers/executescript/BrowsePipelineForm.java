@@ -3,7 +3,7 @@ package org.labkey.flow.controllers.executescript;
 import org.labkey.api.pipeline.browse.BrowseForm;
 import org.labkey.api.pipeline.browse.FileFilter;
 import org.labkey.api.pipeline.browse.BrowseFile;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import java.util.Map;
 import java.util.LinkedHashMap;
@@ -15,7 +15,7 @@ public class BrowsePipelineForm extends BrowseForm
         return "Upload Workspace";
     }
 
-    public ViewURLHelper getActionURL()
+    public ActionURL getActionURL()
     {
         return getContainer().urlFor(AnalysisScriptController.Action.uploadWorkspaceBrowse);
     }

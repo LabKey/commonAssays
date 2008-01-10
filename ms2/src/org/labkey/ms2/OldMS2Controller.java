@@ -134,7 +134,7 @@ public class OldMS2Controller extends ViewController
                 success = true;
             else
             {
-                ViewURLHelper url = getViewURLHelper().clone();
+                ActionURL url = getActionURL().clone();
                 url.setExtraPath(ContainerManager.getForId(run.getContainer()).getPath());
                 HttpView.throwRedirect(url);
             }
@@ -228,7 +228,7 @@ public class OldMS2Controller extends ViewController
             HttpView.throwNotFound("Unable to open the file '" + form.getPath() + "' to load as a ProteinProphet file");
         }
 
-        ViewURLHelper url = new ViewURLHelper("Project", "begin", c.getPath());
+        ActionURL url = new ActionURL("Project", "begin", c.getPath());
         return new ViewForward(url);
     }
 
@@ -247,15 +247,15 @@ public class OldMS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        ViewURLHelper url = new ViewURLHelper("MS2-Scoring", "discriminate", getViewURLHelper().getExtraPath());
+        ActionURL url = new ActionURL("MS2-Scoring", "discriminate", getActionURL().getExtraPath());
         url.addParameter("runId", form.getRun());
         return new ViewForward(url);
     }
 
-    private ViewURLHelper getApplyViewForwardUrl(MS2ViewForm form, String action)
+    private ActionURL getApplyViewForwardUrl(MS2ViewForm form, String action)
     {
         // Add the "view params" (which were posted as a single param) to the URL params.
-        ViewURLHelper forwardUrl = cloneViewURLHelper();
+        ActionURL forwardUrl = cloneActionURL();
         forwardUrl.setRawQuery(forwardUrl.getRawQuery() + (null == form.viewParams ? "" : "&" + form.viewParams));
         return forwardUrl.setAction(action);
     }
@@ -429,7 +429,7 @@ public class OldMS2Controller extends ViewController
         Container c = ContainerManager.getForPath("home");
         if (!c.hasPermission(getUser(), ACL.PERM_READ))
             HttpView.throwUnauthorized();
-        ViewURLHelper urlhelp = cloneViewURLHelper();
+        ActionURL urlhelp = cloneActionURL();
         String insertIdStr = urlhelp.getParameter("insertId");
         int insertId = Integer.parseInt(insertIdStr);
         AnnotationInsertion[] insertions = Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE insertId=?", new Object[] { insertId }, AnnotationInsertion.class);
@@ -530,7 +530,7 @@ public class OldMS2Controller extends ViewController
     protected Forward addRun(AddRunForm form) throws Exception
     {
         Container c = null;
-        ViewURLHelper url;
+        ActionURL url;
         File f = null;
 
         try
@@ -542,7 +542,7 @@ public class OldMS2Controller extends ViewController
             // null container handled below
         }
 
-        if ("Show Runs".equals(getViewURLHelper().getParameter("list")))
+        if ("Show Runs".equals(getActionURL().getParameter("list")))
         {
             if (c == null)
                 return HttpView.throwNotFound();
@@ -587,7 +587,7 @@ public class OldMS2Controller extends ViewController
             }
             else if (!AppProps.getInstance().hasPipelineCluster())
             {
-                url = new ViewURLHelper("MS2", "addFileRunStatus", "");
+                url = new ActionURL("MS2", "addFileRunStatus", "");
                 url.addParameter("error", "Automated upload disabled.");
             }
             else
@@ -599,13 +599,13 @@ public class OldMS2Controller extends ViewController
                     if (run == -1)
                         HttpView.throwNotFound();
 
-                    url = new ViewURLHelper("MS2", "addFileRunStatus", "");
+                    url = new ActionURL("MS2", "addFileRunStatus", "");
                     url.addParameter("run", Integer.toString(run));
                 }
                 else
                 {
                     // Make sure container exists.
-                    c = ContainerManager.ensureContainer(getViewURLHelper().getExtraPath());
+                    c = ContainerManager.ensureContainer(getActionURL().getExtraPath());
                     if (null == c)
                         return HttpView.throwNotFound();
 
@@ -658,14 +658,14 @@ public class OldMS2Controller extends ViewController
 
                     PipelineService.get().queueJob(job);
 
-                    url = new ViewURLHelper("MS2", "addFileRunStatus", "");
+                    url = new ActionURL("MS2", "addFileRunStatus", "");
                     url.addParameter("path", job.getLogFile().getAbsolutePath());
                 }
             }
         }
         else
         {
-            url = new ViewURLHelper("MS2", "addFileRunStatus", "");
+            url = new ActionURL("MS2", "addFileRunStatus", "");
         }
 
         return new ViewForward(url);
@@ -727,7 +727,7 @@ public class OldMS2Controller extends ViewController
         HttpServletResponse response = getResponse();
         response.setContentType("text/plain");
 
-        String path = getViewURLHelper().getParameter("path");
+        String path = getActionURL().getParameter("path");
         if (path != null)
         {
             path = PipelineStatusFile.pathOf(path);
@@ -752,15 +752,15 @@ public class OldMS2Controller extends ViewController
                 status = sb.toString();
             }
         }
-        else if (getViewURLHelper().getParameter("error") != null)
+        else if (getActionURL().getParameter("error") != null)
         {
-            status = "ERROR->message=" + getViewURLHelper().getParameter("error");            
+            status = "ERROR->message=" + getActionURL().getParameter("error");
         }
         else
         {
             // Old MS2-only code.  Still supports Comet searches.
             int runId = 0;
-            String runParam = getViewURLHelper().getParameter("run");
+            String runParam = getActionURL().getParameter("run");
             if (runParam != null)
             {
                 try
@@ -810,7 +810,7 @@ public class OldMS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_DELETE);
 
-        ViewURLHelper currentUrl = cloneViewURLHelper();
+        ActionURL currentUrl = cloneActionURL();
         String[] moveRuns = getRequest().getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
 
         currentUrl.setAction("pickMoveLocation");
@@ -829,12 +829,12 @@ public class OldMS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_DELETE);
 
-        ViewURLHelper currentUrl = cloneViewURLHelper();
+        ActionURL currentUrl = cloneActionURL();
         currentUrl.setAction("moveRuns");
         final Container originalContainer = getContainer();
         ContainerTree ct = new ContainerTree("/", getUser(), ACL.PERM_INSERT, currentUrl)
         {
-            protected void renderCellContents(StringBuilder html, Container c, ViewURLHelper url)
+            protected void renderCellContents(StringBuilder html, Container c, ActionURL url)
             {
                 boolean hasRoot = false;
                 try
@@ -890,7 +890,7 @@ public class OldMS2Controller extends ViewController
         MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
         Quantitation quant = peptide.getQuantitation();
 
-        EditElutionGraphContext ctx = new EditElutionGraphContext(quant.getLightElutionProfile(peptide.getCharge()), quant.getHeavyElutionProfile(peptide.getCharge()), quant, getViewURLHelper(), peptide);
+        EditElutionGraphContext ctx = new EditElutionGraphContext(quant.getLightElutionProfile(peptide.getCharge()), quant.getHeavyElutionProfile(peptide.getCharge()), quant, getActionURL(), peptide);
         JspView v = new JspView<EditElutionGraphContext>("/org/labkey/ms2/editElution.jsp", ctx);
         includeView(v);
         return null;
@@ -918,7 +918,7 @@ public class OldMS2Controller extends ViewController
         boolean validRanges = quant.resetRanges(form.getLightFirstScan(), form.getLightLastScan(), form.getHeavyFirstScan(), form.getHeavyLastScan(), peptide.getCharge());
         Table.update(getUser(), MS2Manager.getTableInfoQuantitation(), quant, quant.getPeptideId(), null);
 
-        ViewURLHelper url = getViewURLHelper().clone();
+        ActionURL url = getActionURL().clone();
         url.setAction("showPeptide.view");
         if (!validRanges)
         {
@@ -933,7 +933,7 @@ public class OldMS2Controller extends ViewController
     {
         ViewContext ctx = getViewContext();
 
-        ViewURLHelper fwdUrl = cloneViewURLHelper().setAction("showPeptide");
+        ActionURL fwdUrl = cloneActionURL().setAction("showPeptide");
         String queryString = (String)ctx.get("queryString");
         fwdUrl.setRawQuery(queryString);
 
@@ -989,7 +989,7 @@ public class OldMS2Controller extends ViewController
         {
             // This should only happen if an old, cached link is being used... a saved favorite or google bot with fraction=x&scan=y&charge=z instead of peptideId
             // Log an error just to make sure.
-            _log.error("Couldn't find peptide " + form.getPeptideIdLong() + ". " + getViewURLHelper().toString());
+            _log.error("Couldn't find peptide " + form.getPeptideIdLong() + ". " + getActionURL().toString());
             return _renderError("Peptide not found");
         }
 
@@ -1014,7 +1014,7 @@ public class OldMS2Controller extends ViewController
         requiresPermission(ACL.PERM_READ);
 
         ViewContext ctx = getViewContext();
-        ViewURLHelper url = cloneViewURLHelper();
+        ActionURL url = cloneActionURL();
         url.setAction("showRun.view");
 
         MS2Run run = MS2Manager.getRun(getRequest().getParameter("run"));
@@ -1048,7 +1048,7 @@ public class OldMS2Controller extends ViewController
 
 
     // Parse parameter to float, returning 0 for any parsing exceptions
-    private void parseChargeScore(ViewContext ctx, ViewURLHelper url, String digit, String paramName)
+    private void parseChargeScore(ViewContext ctx, ActionURL url, String digit, String paramName)
     {
         float value = 0;
         String score = (String)ctx.get("charge" + digit);
@@ -1075,7 +1075,7 @@ public class OldMS2Controller extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
-        ViewURLHelper forwardUrl = getApplyViewForwardUrl(form, "showCompare");
+        ActionURL forwardUrl = getApplyViewForwardUrl(form, "showCompare");
 
         forwardUrl.deleteParameter("submit.x");
         forwardUrl.deleteParameter("submit.y");

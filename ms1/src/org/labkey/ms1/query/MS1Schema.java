@@ -6,7 +6,7 @@ import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.util.StringExpressionFactory;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.query.FeaturesTableInfo;
 import org.labkey.ms1.query.FilesTableInfo;
 import org.labkey.ms1.MS1Manager;
@@ -116,7 +116,7 @@ public class MS1Schema extends UserSchema
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showFeatures.view", getContainer());
+                ActionURL url = new ActionURL(MS1Module.CONTROLLER_NAME, "showFeatures.view", getContainer());
                 return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "runId=${RowId}", true), "features");
             }
         });

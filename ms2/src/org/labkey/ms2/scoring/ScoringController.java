@@ -75,7 +75,7 @@ public class ScoringController extends ViewController
         requiresPermission(ACL.PERM_READ);
 
         Container c = getContainer();
-        ViewURLHelper currentUrl = cloneViewURLHelper();
+        ActionURL currentUrl = cloneActionURL();
 
         String[] compareRunIds = null;
 
@@ -253,7 +253,7 @@ public class ScoringController extends ViewController
         requiresPermission(ACL.PERM_READ);
 
         Container c = getContainer();
-        ViewURLHelper currentUrl = cloneViewURLHelper();
+        ActionURL currentUrl = cloneActionURL();
 
         /* @todo: error handling. */
 
@@ -311,7 +311,7 @@ public class ScoringController extends ViewController
         requiresPermission(ACL.PERM_READ);
 
         Container c = getContainer();
-        ViewURLHelper currentUrl = cloneViewURLHelper();
+        ActionURL currentUrl = cloneActionURL();
 
         /* @todo: error handling. */
 
@@ -473,7 +473,7 @@ public class ScoringController extends ViewController
         requiresPermission(ACL.PERM_READ);
 
         Container c = getContainer();
-        ViewURLHelper currentUrl = cloneViewURLHelper();
+        ActionURL currentUrl = cloneActionURL();
 
         String error = "";
 
@@ -485,23 +485,23 @@ public class ScoringController extends ViewController
         if (run.getNegativeHitCount() < run.getPeptideCount() / 3)
             error = "Insufficient negative hit data to perform analysis.";
 
-        ViewURLHelper runUrl = new ViewURLHelper("MS2-Scoring", "chartDiscriminate", getContainer());
+        ActionURL runUrl = new ActionURL("MS2-Scoring", "chartDiscriminate", getContainer());
         runUrl.deleteParameters();
         runUrl.addParameter("runId", Integer.toString(form.getRunId()));
         runUrl.addParameter("width", Integer.toString(form.getWidth()));
         runUrl.addParameter("height", Integer.toString(form.getHeight()));
         runUrl.addParameter("percentAACorrect", Double.toString(form.getPercentAACorrect()));
 
-        ViewURLHelper urlC1 = runUrl.clone();
+        ActionURL urlC1 = runUrl.clone();
         urlC1.addParameter("charge", "1");
         urlC1.addParameter("buckets[0]", Double.toString(form.getBuckets()[0]));
         urlC1.addParameter("scaleFactors[0]", Integer.toString(form.getScaleFactors()[0]));
-        ViewURLHelper urlC2 = runUrl.clone();
+        ActionURL urlC2 = runUrl.clone();
         urlC2.addParameter("charge", "2");
         urlC2.addParameter("expressions[1]", form.getExpressions()[1]);
         urlC2.addParameter("buckets[1]", Double.toString(form.getBuckets()[1]));
         urlC2.addParameter("scaleFactors[1]", Integer.toString(form.getScaleFactors()[1]));
-        ViewURLHelper urlC3 = runUrl.clone();
+        ActionURL urlC3 = runUrl.clone();
         urlC3.addParameter("charge", "3");
         urlC3.addParameter("expressions[2]", form.getExpressions()[2]);
         urlC3.addParameter("buckets[2]", Double.toString(form.getBuckets()[2]));
@@ -514,7 +514,7 @@ public class ScoringController extends ViewController
             urlC3.addParameter("title", form.title + " (charge 3)");
         }
 
-        ViewURLHelper urlROC = new ViewURLHelper("MS2-Scoring", "chartDiscriminateROC", getContainer());
+        ActionURL urlROC = new ActionURL("MS2-Scoring", "chartDiscriminateROC", getContainer());
         urlROC.addParameter("runId", Integer.toString(form.getRunId()));
         urlROC.addParameter("width", Integer.toString(form.getWidth()));
         urlROC.addParameter("height", Integer.toString(form.getHeight()));
@@ -543,7 +543,7 @@ public class ScoringController extends ViewController
         requiresPermission(ACL.PERM_READ);
 
         Container c = getContainer();
-        ViewURLHelper currentUrl = cloneViewURLHelper();
+        ActionURL currentUrl = cloneActionURL();
 
         /* @todo: error handling. */
 
@@ -582,7 +582,7 @@ public class ScoringController extends ViewController
         requiresPermission(ACL.PERM_READ);
 
         Container c = getContainer();
-        ViewURLHelper currentUrl = cloneViewURLHelper();
+        ActionURL currentUrl = cloneActionURL();
 
         /* @todo: error handling. */
 

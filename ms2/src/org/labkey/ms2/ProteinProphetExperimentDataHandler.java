@@ -5,7 +5,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.Container;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
 import org.labkey.ms2.pipeline.TPPTask;
@@ -67,7 +67,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         {
             return null;
         }
-        ViewURLHelper result = new ViewURLHelper("MS2", "showRun", container.getPath());
+        ActionURL result = new ActionURL("MS2", "showRun", container.getPath());
         result.addParameter("run", Integer.toString(run.getRun()));
         result.addParameter("expanded", "1");
         result.addParameter("grouping", "proteinprophet");

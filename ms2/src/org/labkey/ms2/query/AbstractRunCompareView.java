@@ -7,7 +7,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.client.CompareResult;
@@ -36,7 +36,7 @@ public abstract class AbstractRunCompareView  extends QueryView
     {
         super(new ViewContext(context), new MS2Schema(context.getUser(), context.getContainer()), createSettings(context, tableName));
 
-        _viewContext.setViewURLHelper(context.getViewURLHelper());
+        _viewContext.setActionURL(context.getActionURL());
 
         _runs = controller.getCachedRuns(runListIndex, _errors, false);
 
@@ -73,7 +73,7 @@ public abstract class AbstractRunCompareView  extends QueryView
 
     private static QuerySettings createSettings(ViewContext context, String tableName)
     {
-        QuerySettings settings = new QuerySettings(context.cloneViewURLHelper(), context.getRequest(), "Compare");
+        QuerySettings settings = new QuerySettings(context.cloneActionURL(), context.getRequest(), "Compare");
         settings.setQueryName(tableName);
         settings.setAllowChooseQuery(false);
         return settings;
@@ -112,7 +112,7 @@ public abstract class AbstractRunCompareView  extends QueryView
             int runIndex = 0;
             for (MS2Run run : _runs)
             {
-                ViewURLHelper runURL = new ViewURLHelper("MS2", "showRun.view", ContainerManager.getForId(run.getContainer()));
+                ActionURL runURL = new ActionURL("MS2", "showRun.view", ContainerManager.getForId(run.getContainer()));
                 runURL.addParameter("run", run.getRun());
                 runURLs[runIndex] = runURL.getLocalURIString();
                 runNames[runIndex++] = run.getDescription();
@@ -170,9 +170,9 @@ public abstract class AbstractRunCompareView  extends QueryView
                         for (MS2Run run : _runs)
                         {
                             String newParam = urlParam.replace("Run%2F", "Run" + run.getRun() + "%2F");
-                            ViewURLHelper newURL = result.getRenderContext().getViewContext().cloneViewURLHelper();
+                            ActionURL newURL = result.getRenderContext().getViewContext().cloneActionURL();
                             newURL.deleteParameters();
-                            newURL = new ViewURLHelper(newURL + newParam);
+                            newURL = new ActionURL(newURL + newParam);
                             SimpleFilter newFilter = new SimpleFilter(newURL, getSettings().getDataRegionName());
                             for (SimpleFilter.FilterClause newClause : newFilter.getClauses())
                             {
@@ -214,7 +214,7 @@ public abstract class AbstractRunCompareView  extends QueryView
         List<String> headings = new ArrayList<String>();
         for (MS2Run run : _runs)
         {
-            ViewURLHelper url = new ViewURLHelper("MS2", "showRun.view", ContainerManager.getForId(run.getContainer()));
+            ActionURL url = new ActionURL("MS2", "showRun.view", ContainerManager.getForId(run.getContainer()));
             url.addParameter("run", run.getRun());
             headings.add("<a href=\"" + url.getLocalURIString() + "\">" + PageFlowUtil.filter(run.getDescription()) + "</a>");
         }
@@ -297,13 +297,13 @@ public abstract class AbstractRunCompareView  extends QueryView
     {
         super.populateButtonBar(view, bar);
 
-        ViewURLHelper excelURL = getViewContext().cloneViewURLHelper();
+        ActionURL excelURL = getViewContext().cloneActionURL();
         excelURL.setAction(getExcelExportActionName());
         excelURL.addParameter("runList", Integer.toString(_runListIndex));
         ActionButton excelButton = new ActionButton("Export to Excel", excelURL);
         bar.add(excelButton);
 
-        ViewURLHelper tsvURL = getViewContext().cloneViewURLHelper();
+        ActionURL tsvURL = getViewContext().cloneActionURL();
         tsvURL.setAction(getTSVExportActionName());
         excelURL.addParameter("runList", Integer.toString(_runListIndex));
         ActionButton tsvButton = new ActionButton("Export to TSV", tsvURL);

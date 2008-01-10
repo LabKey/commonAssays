@@ -10,7 +10,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PathRelativizer;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import java.io.*;
 import java.net.URLEncoder;
@@ -36,7 +36,7 @@ public class MSInspectImportPipelineJob extends PipelineJob
         setLogFile(new File(_featuresFile.getParentFile(), _featuresFile.getName() + ".log"));
     }
 
-    public ViewURLHelper getStatusHref()
+    public ActionURL getStatusHref()
     {
         // No custom viewing for status while loading
         return null;

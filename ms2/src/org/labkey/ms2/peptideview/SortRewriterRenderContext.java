@@ -2,7 +2,7 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.*;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 /**
  * User: jeckels
@@ -19,7 +19,7 @@ public class SortRewriterRenderContext extends RenderContext
     }
 
 
-    protected Sort buildSort(TableInfo tinfo, ViewURLHelper url, String name)
+    protected Sort buildSort(TableInfo tinfo, ActionURL url, String name)
     {
         Sort standardSort = super.buildSort(tinfo, url, name);
         if (_nestingOption != null)
@@ -52,7 +52,7 @@ public class SortRewriterRenderContext extends RenderContext
     }
 
 
-    protected SimpleFilter buildFilter(TableInfo tinfo, ViewURLHelper url, String name)
+    protected SimpleFilter buildFilter(TableInfo tinfo, ActionURL url, String name)
     {
         SimpleFilter result = super.buildFilter(tinfo, url, name);
         if (_nestingOption != null)

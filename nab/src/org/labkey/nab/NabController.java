@@ -64,7 +64,7 @@ public class NabController extends ViewController
     protected Forward begin(BeginForm form) throws Exception
     {
         if (!getUser().isGuest() && !getContainer().hasPermission(getUser(), ACL.PERM_INSERT))
-            return new ViewForward(cloneViewURLHelper().setAction("runs"));
+            return new ViewForward(cloneActionURL().setAction("runs"));
         requiresPermission(ACL.PERM_INSERT);
 
         UploadAssayForm assayForm;
@@ -196,11 +196,11 @@ public class NabController extends ViewController
             // this is a hacky way to deal with a file format problem, but it lets us get away with
             // only reading the xls once, rather than the double-read that would be required to validate
             // the file format in our validate method.
-            return new ViewForward(getViewURLHelper().relativeUrl("begin", "error=" + PageFlowUtil.encode("Data file format error: " + e.getMessage())));
+            return new ViewForward(getActionURL().relativeUrl("begin", "error=" + PageFlowUtil.encode("Data file format error: " + e.getMessage())));
         }
 
         _cachedAssay = assay;
-        ViewURLHelper displayURL = cloneViewURLHelper();
+        ActionURL displayURL = cloneActionURL();
         displayURL.deleteParameters();
         displayURL.setAction("display");
         displayURL.addParameter("rowId", Integer.toString(assay.getRunRowId()));
@@ -226,7 +226,7 @@ public class NabController extends ViewController
             return _renderInTemplate(assayView, "NAB Run Details: " + assay.getName(), null, true);
         else
         {
-            ViewURLHelper printURL = cloneViewURLHelper();
+            ActionURL printURL = cloneActionURL();
             printURL.addParameter("print", "true");
             printURL.deleteParameter("newRun");
             return _renderInTemplate(assayView, "NAB Run Details", printURL, false, assay.getPlate());
@@ -287,7 +287,7 @@ public class NabController extends ViewController
 
         public HttpView getDiscussionView(ViewContext context)
         {
-            ViewURLHelper pageUrl = new ViewURLHelper("Nab", "display", _assay.getPlate().getContainer());
+            ActionURL pageUrl = new ActionURL("Nab", "display", _assay.getPlate().getContainer());
             pageUrl.addParameter("rowId", "" + _assay.getRunRowId());
             String discussionTitle = "Discuss Run " + _assay.getRunRowId() + ": " + _assay.getName();
             String entityId = _assay.getPlate().getEntityId();
@@ -354,7 +354,7 @@ public class NabController extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
         if (assayForm.getRowId() < 0)
-            return new ViewForward(getViewURLHelper().relativeUrl("begin", null));
+            return new ViewForward(getActionURL().relativeUrl("begin", null));
         return renderDetailPage(getCachedAssay(assayForm.getRowId()), assayForm.isNewRun(), assayForm.isPrint());
     }
 
@@ -437,10 +437,10 @@ public class NabController extends ViewController
         JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/legacyGraph.jsp",
                 new GraphSelectedBean(summaries, cutoffList));
 
-        ViewURLHelper printLink = null;
+        ActionURL printLink = null;
         if (!form.isPrint())
         {
-            printLink = cloneViewURLHelper();
+            printLink = cloneActionURL();
             printLink.addParameter("print", "true");
             for (int id : wellGroupIds)
                 printLink.addParameter("id", Integer.toString(id));
@@ -644,9 +644,9 @@ public class NabController extends ViewController
             }
         }
         if (form.getRunId() != null)
-            return new ViewForward(getViewURLHelper().relativeUrl("display", "rowId=" + form.getRunId()));
+            return new ViewForward(getActionURL().relativeUrl("display", "rowId=" + form.getRunId()));
         else
-            return new ViewForward(getViewURLHelper().relativeUrl("runs", null));
+            return new ViewForward(getActionURL().relativeUrl("runs", null));
     }
 
     @Jpf.Action(validationErrorForward = @Jpf.Forward(path = "publishVerify.do", name = "validate"))
@@ -717,7 +717,7 @@ public class NabController extends ViewController
             if (!sampleProperties.isEmpty())
             {
                 List<String> errors = new ArrayList<String>();
-                ViewURLHelper helper = AssayPublishService.get().publishAssayData(getUser(), getContainer(), targetContainer,
+                ActionURL helper = AssayPublishService.get().publishAssayData(getUser(), getContainer(), targetContainer,
                         "NAB", null, sampleProperties.toArray(new Map[sampleProperties.size()]),
                         NabManager.get().getPropertyTypes(plates),
                         NabManager.PlateProperty.VirusId.name(), errors);
@@ -1199,7 +1199,7 @@ public class NabController extends ViewController
     {
         requiresPermission(ACL.PERM_DELETE);
         NabManager.get().deletePlate(getContainer(), form.getRowId());
-        return new ViewForward(getViewURLHelper().relativeUrl("begin", null));
+        return new ViewForward(getActionURL().relativeUrl("begin", null));
     }
 
     @Jpf.Action
@@ -1239,19 +1239,19 @@ public class NabController extends ViewController
         return _renderInTemplate(view, title, null, false, null);
     }
 
-    private Forward _renderInTemplate(HttpView view, String title, ViewURLHelper printLink, boolean isPrintView) throws Exception
+    private Forward _renderInTemplate(HttpView view, String title, ActionURL printLink, boolean isPrintView) throws Exception
     {
         return _renderInTemplate(view, title, printLink, isPrintView, null);
     }
 
-    private Forward _renderInTemplate(HttpView view, String title, ViewURLHelper printLink, boolean isPrintView, Plate dataFilePlate) throws Exception
+    private Forward _renderInTemplate(HttpView view, String title, ActionURL printLink, boolean isPrintView, Plate dataFilePlate) throws Exception
     {
         HttpView template;
         if (isPrintView)
             template = new PrintTemplate(view, title);
         else
         {
-            ViewURLHelper customizeLink = null;
+            ActionURL customizeLink = null;
             if (view instanceof PlateQueryView)
                 customizeLink = ((PlateQueryView) view).getCustomizeURL();
             JspView<HeaderBean> headerView = new JspView<HeaderBean>("/org/labkey/nab/header.jsp",
@@ -1268,12 +1268,12 @@ public class NabController extends ViewController
 
     public static class HeaderBean
     {
-        private ViewURLHelper _printURL;
-        private ViewURLHelper _datafileURL;
-        private ViewURLHelper _customizeURL;
+        private ActionURL _printURL;
+        private ActionURL _datafileURL;
+        private ActionURL _customizeURL;
         private boolean _writer;
 
-        public HeaderBean(ViewContext context, ViewURLHelper printLink, ViewURLHelper dataFileLink, ViewURLHelper customizeLink)
+        public HeaderBean(ViewContext context, ActionURL printLink, ActionURL dataFileLink, ActionURL customizeLink)
         {
             _printURL = printLink;
             _datafileURL = dataFileLink;
@@ -1286,12 +1286,12 @@ public class NabController extends ViewController
             return _printURL != null;
         }
 
-        public ViewURLHelper getPrintURL()
+        public ActionURL getPrintURL()
         {
             return _printURL;
         }
 
-        public ViewURLHelper getDatafileURL()
+        public ActionURL getDatafileURL()
         {
             return _datafileURL;
         }
@@ -1301,7 +1301,7 @@ public class NabController extends ViewController
             return _writer;
         }
 
-        public ViewURLHelper getCustomizeURL()
+        public ActionURL getCustomizeURL()
         {
             return _customizeURL;
         }

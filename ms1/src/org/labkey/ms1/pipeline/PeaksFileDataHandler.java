@@ -5,7 +5,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.util.URLHelper;
@@ -129,7 +129,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
 
     public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
     {
-        ViewURLHelper url = new ViewURLHelper("ms1", "showPeaks.view", container);
+        ActionURL url = new ActionURL("ms1", "showPeaks.view", container);
         url.addParameter("dataRowId", Integer.toString(data.getRowId()));
         return url;
     } //getContentURL()

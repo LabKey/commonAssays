@@ -55,7 +55,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
     protected Forward begin() throws Exception
     {
         requiresPermission(ACL.PERM_READ);
-        FlowScript script = FlowScript.fromURL(getViewURLHelper(), getRequest());
+        FlowScript script = FlowScript.fromURL(getActionURL(), getRequest());
         if (script == null)
         {
             return new ViewForward(getContainer().urlFor(FlowController.Action.begin));
@@ -266,7 +266,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
     protected Forward showUploadRuns() throws Exception
     {
         requiresPermission(ACL.PERM_INSERT);
-        ViewURLHelper forward = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(),
+        ActionURL forward = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(),
                 FlowPipelineProvider.NAME);
         return new ViewForward(forward);
     }
@@ -404,7 +404,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             PageFlowUtil.getActionErrors(getRequest(), true).add(form.getActionErrors());
             return browseForWorkspace(form);
         }
-        ViewURLHelper url = getContainer().urlFor(Action.uploadWorkspaceChooseAnalysis);
+        ActionURL url = getContainer().urlFor(Action.uploadWorkspaceChooseAnalysis);
         url.addParameter("workspace.path", files[0]);
         return new ViewForward(url);
     }

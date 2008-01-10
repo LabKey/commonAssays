@@ -4,7 +4,7 @@
 <%@ page import="org.labkey.flow.controllers.FlowModule" %>
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
@@ -15,7 +15,7 @@
         {
             return "Ungated";
         }
-        ViewURLHelper ret = form.analysisScript.urlFor(ScriptController.Action.gateEditor, FlowProtocolStep.calculateCompensation);
+        ActionURL ret = form.analysisScript.urlFor(ScriptController.Action.gateEditor, FlowProtocolStep.calculateCompensation);
         ret.addParameter("subset", subset);
         return "<a href=\"" + h(ret) + "\">" + h(subset) + "</a>";
     }

@@ -1,7 +1,7 @@
 package org.labkey.flow.data;
 
 import org.labkey.api.data.*;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.security.User;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.DataType;
@@ -34,7 +34,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     }
     abstract public FlowObject getParent();
     abstract public void addParams(Map<FlowParam, Object> map);
-    abstract public ViewURLHelper urlShow();
+    abstract public ActionURL urlShow();
     public String getLSID()
     {
         return _expObject.getLSID();
@@ -55,17 +55,17 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         return _expObject.getContainer().getId();
     }
 
-    protected ViewURLHelper pfURL(Enum action)
+    protected ActionURL pfURL(Enum action)
     {
         return PageFlowUtil.urlFor(action, getContainerPath());
     }
 
-    public ViewURLHelper urlFor(Enum action)
+    public ActionURL urlFor(Enum action)
     {
         return addParams(pfURL(action));
     }
 
-    final public ViewURLHelper addParams(ViewURLHelper url)
+    final public ActionURL addParams(ActionURL url)
     {
         EnumMap<FlowParam, Object> map = new EnumMap(FlowParam.class);
         addParams(map);
@@ -95,13 +95,13 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         return params.values().iterator().next();
     }
 
-    public void checkContainer(ViewURLHelper url) throws ServletException
+    public void checkContainer(ActionURL url) throws ServletException
     {
         if (!getContainerPath().equals(url.getExtraPath()))
             throw new ServletException("Wrong container");
     }
 
-    static public String getParam(ViewURLHelper url, HttpServletRequest request, FlowParam param)
+    static public String getParam(ActionURL url, HttpServletRequest request, FlowParam param)
     {
         String ret = url.getParameter(param.toString());
         if (ret != null)
@@ -115,7 +115,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         return null;
     }
 
-    static public int getIntParam(ViewURLHelper url, HttpServletRequest request, FlowParam param)
+    static public int getIntParam(ActionURL url, HttpServletRequest request, FlowParam param)
     {
         String str = getParam(url, request, param);
         if (str == null || str.length() == 0)

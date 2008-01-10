@@ -2,7 +2,7 @@ package org.labkey.ms2.query;
 
 import org.labkey.api.query.*;
 import org.labkey.api.data.*;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.ms2.*;
@@ -23,15 +23,15 @@ public class PeptidesTableInfo extends FilteredTable
 
     public PeptidesTableInfo(MS2Schema schema)
     {
-        this(schema, null, new ViewURLHelper("MS2", "someAction.view", schema.getContainer()), true);
+        this(schema, null, new ActionURL("MS2", "someAction.view", schema.getContainer()), true);
     }
 
     public PeptidesTableInfo(MS2Schema schema, boolean includeFeatureFk)
     {
-        this(schema, null, new ViewURLHelper("MS2", "someAction.view", schema.getContainer()), includeFeatureFk);
+        this(schema, null, new ActionURL("MS2", "someAction.view", schema.getContainer()), includeFeatureFk);
     }
 
-    public PeptidesTableInfo(MS2Schema schema, final MS2Run[] runs, ViewURLHelper url, boolean includeFeatureFk)
+    public PeptidesTableInfo(MS2Schema schema, final MS2Run[] runs, ActionURL url, boolean includeFeatureFk)
     {
         super(MS2Manager.getTableInfoPeptidesData());
         _schema = schema;
@@ -134,7 +134,7 @@ public class PeptidesTableInfo extends FilteredTable
         peptideProphetData.setKeyField(false);
         addColumn(peptideProphetData);
 
-        ViewURLHelper showProteinURL = url.clone();
+        ActionURL showProteinURL = url.clone();
         showProteinURL.setAction("showProtein.view");
         showProteinURL.deleteParameter("seqId");
         showProteinURL.deleteParameter("protein");
@@ -142,7 +142,7 @@ public class PeptidesTableInfo extends FilteredTable
 
         setupProteinColumns(showProteinURLString);
 
-        ViewURLHelper showPeptideURL = url.clone();
+        ActionURL showPeptideURL = url.clone();
         showPeptideURL.setAction("showPeptide.view");
         showPeptideURL.deleteParameter("peptideId");
         String showPeptideURLString = showPeptideURL.getLocalURIString() + "&peptideId=${RowId}";

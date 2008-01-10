@@ -2,14 +2,14 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.ms1.model.DataFile" %>
 <%
     JspView<DataFile> me = (JspView<DataFile>) HttpView.currentView();
     DataFile dataFile = me.getModelBean();
     ExpData expData = (null == dataFile ? null : dataFile.getExpData());
 
-    ViewURLHelper urlDownload = new ViewURLHelper("Experiment", "showFile", me.getViewContext().getContainer());
+    ActionURL urlDownload = new ActionURL("Experiment", "showFile", me.getViewContext().getContainer());
 
 %>
 <% if(null != dataFile && null != expData) { %>

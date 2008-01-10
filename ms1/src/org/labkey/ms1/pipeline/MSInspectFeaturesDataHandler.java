@@ -11,7 +11,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.security.User;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.common.tools.TabLoader;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.MS1Module;
@@ -579,7 +579,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      */
     public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
     {
-        ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showFeatures.view", container);
+        ActionURL url = new ActionURL(MS1Module.CONTROLLER_NAME, "showFeatures.view", container);
         url.addParameter("runId", Integer.toString(data.getRun().getRowId()));
         return url;
     }

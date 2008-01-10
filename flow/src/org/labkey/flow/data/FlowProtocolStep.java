@@ -1,18 +1,14 @@
 package org.labkey.flow.data;
 
-import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpProtocolAction;
 import org.labkey.api.security.User;
 import org.labkey.api.data.*;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.SQLException;
 import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.Serializable;
 
@@ -71,7 +67,7 @@ public class FlowProtocolStep implements Serializable
         return actionSequence;
     }
 
-    public void addParams(ViewURLHelper url)
+    public void addParams(ActionURL url)
     {
         url.addParameter(FlowParam.actionSequence.toString(), Integer.toString(getDefaultActionSequence()));
     }
@@ -133,7 +129,7 @@ public class FlowProtocolStep implements Serializable
         return null;
     }
 
-    public ViewURLHelper urlShow()
+    public ActionURL urlShow()
     {
         throw new UnsupportedOperationException();
     }

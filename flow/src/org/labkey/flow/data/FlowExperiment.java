@@ -3,7 +3,7 @@ package org.labkey.flow.data;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.*;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
@@ -128,12 +128,12 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return FlowWorkspaceExperimentName;
     }
 
-    static public FlowExperiment fromURL(ViewURLHelper url) throws ServletException
+    static public FlowExperiment fromURL(ActionURL url) throws ServletException
     {
         return fromURL(url, null);
     }
 
-    static public FlowExperiment fromURL(ViewURLHelper url, HttpServletRequest request) throws ServletException
+    static public FlowExperiment fromURL(ActionURL url, HttpServletRequest request) throws ServletException
     {
         FlowExperiment ret = fromExperimentId(getIntParam(url, request, FlowParam.experimentId));
         if (ret == null)
@@ -171,9 +171,9 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return ret;
     }
 
-    public ViewURLHelper urlShow()
+    public ActionURL urlShow()
     {
-        ViewURLHelper ret = getFlowSchema(null).urlFor(QueryAction.executeQuery, FlowTableType.Runs);
+        ActionURL ret = getFlowSchema(null).urlFor(QueryAction.executeQuery, FlowTableType.Runs);
         addParams(ret);
         return ret;
     }

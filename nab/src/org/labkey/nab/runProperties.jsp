@@ -5,7 +5,7 @@
 <%@ page import="org.labkey.nab.RunSettings"%>
 <%@ page import="org.labkey.api.study.PlateTemplate" %>
 <%@ page import="org.labkey.api.study.WellGroup" %>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.study.PlateService" %>
 <%@ page import="org.labkey.api.study.WellGroupTemplate" %>
 <%@ page import="java.util.List" %>
@@ -27,7 +27,7 @@
             specimenWellGroups.add(groupTemplate);
     }
 
-    ViewURLHelper choosePlateURL = new ViewURLHelper("Plate", "plateTemplateList", me.getViewContext().getContainer());
+    ActionURL choosePlateURL = new ActionURL("Plate", "plateTemplateList", me.getViewContext().getContainer());
 
     String errorParameter = request.getParameter("error");
     if (errorParameter != null)

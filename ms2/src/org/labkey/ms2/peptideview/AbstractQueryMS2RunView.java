@@ -3,7 +3,7 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.DisplayElement;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
@@ -53,12 +53,12 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
         ms2QueryView.exportToTSV(form, response, selectedRows, getAMTFileHeader());
     }
 
-    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form)
+    public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
         throw new UnsupportedOperationException();
     }
 
-    public HashMap<String, SimpleFilter> getFilter(ViewURLHelper queryUrl, MS2Run run)
+    public HashMap<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
         throw new UnsupportedOperationException();
     }

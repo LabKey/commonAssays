@@ -13,7 +13,7 @@ import org.labkey.api.microarray.FeatureExtractionClient;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 
 public class FeatureExtractionPipelineJob extends PipelineJob
@@ -39,11 +39,11 @@ public class FeatureExtractionPipelineJob extends PipelineJob
         header("Feature extraction for folder " + _dirImages.getAbsolutePath());
     }
 
-    public ViewURLHelper getStatusHref()
+    public ActionURL getStatusHref()
     {
         if (_extractionRowId != null)
         {
-            ViewURLHelper ret = getViewURLHelper().clone();
+            ActionURL ret = getActionURL().clone();
             ret.setPageFlow("Experiment");
             ret.setAction("details");
             ret.setExtraPath(getContainer().getPath());

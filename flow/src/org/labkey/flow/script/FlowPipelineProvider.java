@@ -8,7 +8,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -113,8 +113,8 @@ public class FlowPipelineProvider extends PipelineProvider
             return;
         }
 
-        ViewURLHelper url = PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer());
-        String srcURL = context.getViewURLHelper().toString();
+        ActionURL url = PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer());
+        String srcURL = context.getActionURL().toString();
         url.replaceParameter("srcURL", srcURL);
 
         boolean hasFlowDir = false;
@@ -160,7 +160,7 @@ public class FlowPipelineProvider extends PipelineProvider
 
     class UploadRunAction extends FileAction
     {
-        UploadRunAction(String label, ViewURLHelper url, File dir)
+        UploadRunAction(String label, ActionURL url, File dir)
         {
             super(label, url, new File[] {dir});
         }

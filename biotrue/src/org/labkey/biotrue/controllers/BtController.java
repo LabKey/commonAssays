@@ -28,7 +28,6 @@ import org.labkey.biotrue.soapmodel.Entityinfo;
 import org.labkey.biotrue.task.*;
 
 import javax.xml.rpc.Service;
-import javax.servlet.jsp.JspPage;
 import java.io.File;
 import java.net.URL;
 
@@ -54,9 +53,9 @@ public class BtController extends ViewController
         scheduledSync,
         configurePassword,
         cancelSynchronization;
-        public ViewURLHelper url(Container container)
+        public ActionURL url(Container container)
         {
-            return new ViewURLHelper("biotrue", toString(), container);
+            return new ActionURL("biotrue", toString(), container);
         }
     }
 
@@ -68,7 +67,7 @@ public class BtController extends ViewController
 
         if (BtManager.get().getServers(getContainer()).length > 0)
         {
-            QuerySettings settings = new QuerySettings(getViewURLHelper(), getRequest(), "Server");
+            QuerySettings settings = new QuerySettings(getActionURL(), getRequest(), "Server");
             settings.setQueryName("Servers");
             settings.setAllowChooseQuery(false);
             view.addView(new BtServerView(getViewContext(), new BtSchema(getUser(), getContainer()), settings));
@@ -95,7 +94,7 @@ public class BtController extends ViewController
         StringBuilder html = new StringBuilder();
         for (Entityinfo entity : resp.getData().getAllContent())
         {
-            ViewURLHelper url = cloneViewURLHelper();
+            ActionURL url = cloneActionURL();
             if ("sample".equals(entity.getType()))
             {
                 url.setAction("download");
@@ -138,7 +137,7 @@ public class BtController extends ViewController
         }
         BtThreadPool.get();
 
-        ViewURLHelper forward = QueryService.get().urlFor(getContainer(), QueryAction.executeQuery, BtSchema.name, BtSchema.TableType.Tasks.toString());
+        ActionURL forward = QueryService.get().urlFor(getContainer(), QueryAction.executeQuery, BtSchema.name, BtSchema.TableType.Tasks.toString());
         return new ViewForward(forward);
     }
 
@@ -146,7 +145,7 @@ public class BtController extends ViewController
     protected Forward showServers(ViewForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
-        QuerySettings settings = new QuerySettings(getViewURLHelper(), getRequest(), "Server");
+        QuerySettings settings = new QuerySettings(getActionURL(), getRequest(), "Server");
         settings.setQueryName("Servers");
         settings.setAllowChooseQuery(false);
         return renderInTemplate(new QueryView(getViewContext(), new BtSchema(getUser(), getContainer()), settings), getContainer(), "BioTrue Servers");
@@ -301,7 +300,7 @@ public class BtController extends ViewController
         BtManager.get().updateServer(getUser(), server);
         ScheduledTask.setTask(getUser(), server, null);
 
-        ViewURLHelper url = cloneViewURLHelper();
+        ActionURL url = cloneActionURL();
         url.setAction("admin");
         return new ViewForward(url);
     }
@@ -326,7 +325,7 @@ public class BtController extends ViewController
                 }
             }
         }
-        ViewURLHelper url = cloneViewURLHelper();
+        ActionURL url = cloneActionURL();
         url.setAction("admin");
         return new ViewForward(url);
     }
@@ -347,7 +346,7 @@ public class BtController extends ViewController
         server.setPassword(form.getPassword());
         BtManager.get().updateServer(getUser(), server);
 
-        ViewURLHelper url = cloneViewURLHelper();
+        ActionURL url = cloneActionURL();
         url.setAction("admin");
         return new ViewForward(url);
     }
@@ -356,7 +355,7 @@ public class BtController extends ViewController
     protected Forward cancelSynchronization(ServerForm form) throws Exception
     {
         BtTaskManager.get().cancelTasks(form.getServer());
-        ViewURLHelper url = cloneViewURLHelper();
+        ActionURL url = cloneActionURL();
         url.setAction("admin");
         return new ViewForward(url);
     }

@@ -3,7 +3,7 @@
 <%@ page import="org.labkey.flow.script.ScriptJob"%>
 <%@ page import="java.util.List"%>
 <%@ page import="java.util.ArrayList"%>
-<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.view.ActionURL"%>
 <%@ page import="org.labkey.api.pipeline.PipelineJobData" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
@@ -31,10 +31,10 @@
 %>
     <tr><td><a href="<%=h(job.urlStatus())%>"><%=h(job.getStatusText())%></a></td>
         <td><%=h(job.getDescription())%></td>
-        <td><a href="<%=h(new ViewURLHelper("Project", "begin", job.getContainer()))%>"><%=h(job.getContainer().getPath())%></a></td>
+        <td><a href="<%=h(new ActionURL("Project", "begin", job.getContainer()))%>"><%=h(job.getContainer().getPath())%></a></td>
         <td><%=h(String.valueOf(job.getUser()))%></td><td><labkey:button text="Cancel" href="<%=job.urlCancel()%>"/></tr>
 <% } %>
 </table>
 <% } %>
-<labkey:link href="<%=h(new ViewURLHelper("Pipeline-Status", "showList", getContainer()))%>" text="all jobs in this folder (including completed ones)"/>
+<labkey:link href="<%=h(new ActionURL("Pipeline-Status", "showList", getContainer()))%>" text="all jobs in this folder (including completed ones)"/>
 

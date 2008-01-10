@@ -1,7 +1,7 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.ms2.search.ProteinSearchBean" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -10,12 +10,12 @@
     JspView<ProteinSearchBean> me = (JspView<ProteinSearchBean>) HttpView.currentView();
     ProteinSearchBean bean = me.getModelBean();
     ViewContext ctx = me.getViewContext();
-    ViewURLHelper url = ctx.getViewURLHelper().clone();
+    ActionURL url = ctx.getActionURL().clone();
     url.setPageFlow("MS2");
     url.setAction("doProteinSearch.view");
     url.deleteParameters();
 
-    ViewURLHelper annotationsURL = ctx.getViewURLHelper().clone();
+    ActionURL annotationsURL = ctx.getActionURL().clone();
     annotationsURL.setPageFlow("protein");
     annotationsURL.setAction("begin.view");
     annotationsURL.deleteParameters();

@@ -6,7 +6,7 @@ import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.security.ACL;
 
 /**
@@ -22,7 +22,7 @@ public class MS2SearchExperimentRunFilter extends ExperimentRunFilter
 
     private ActionButton createButton(ViewContext context, String actionName, String description, ActionButton.Action method)
     {
-        ViewURLHelper url = context.getViewURLHelper().clone();
+        ActionURL url = context.getActionURL().clone();
         url.deleteParameters();
         url.setPageFlow("MS2");
         url.setAction(actionName + ".view");
@@ -36,7 +36,7 @@ public class MS2SearchExperimentRunFilter extends ExperimentRunFilter
         bar.add(createButton(context, "compare", "Compare", ActionButton.Action.POST));
 
         ActionButton exportRuns = new ActionButton("button", "MS2 Export");
-        ViewURLHelper url = context.getViewURLHelper().clone();
+        ActionURL url = context.getActionURL().clone();
         url.deleteParameters();
         url.setPageFlow("MS2");
         url.setAction("pickExportRunsView.view");

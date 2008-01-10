@@ -3,7 +3,7 @@
 <%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.flow.data.*" %>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ page import="org.labkey.flow.controllers.FlowParam" %>
 <%@ page import="java.util.Map" %>
@@ -22,13 +22,13 @@
         GraphSpec spec = new GraphSpec(null, param);
         if (well.getGraphBytes(spec) == null)
             return "N/A";
-        ViewURLHelper urlGraph = well.urlFor(WellController.Action.showGraph);
+        ActionURL urlGraph = well.urlFor(WellController.Action.showGraph);
         urlGraph.addParameter(FlowParam.graph.toString(), spec.toString());
         return "<img class=\"flow-graph\" border=\"0\" src=\"" + h(urlGraph) + "\">";
     }
 %>
 <%
-    final FlowCompensationMatrix flowComp = FlowCompensationMatrix.fromURL(getViewContext().getViewURLHelper(), request);
+    final FlowCompensationMatrix flowComp = FlowCompensationMatrix.fromURL(getViewContext().getActionURL(), request);
     if (null == flowComp)
     {
         %><font color="red">compensation matrix definition not found</font><%

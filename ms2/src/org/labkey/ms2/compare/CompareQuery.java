@@ -3,7 +3,7 @@ package org.labkey.ms2.compare;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.*;
 import org.labkey.api.util.CaseInsensitiveHashSet;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.common.util.Pair;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
@@ -23,7 +23,7 @@ import java.util.Set;
  */
 public abstract class CompareQuery extends SQLFragment
 {
-    protected ViewURLHelper _currentUrl;
+    protected ActionURL _currentUrl;
     protected String _compareColumn;
     protected List<RunColumn> _gridColumns = new ArrayList<RunColumn>();
     protected int _columnsPerRun;
@@ -33,7 +33,7 @@ public abstract class CompareQuery extends SQLFragment
     private String _header;
     protected static final String HEADER_PREFIX = "Numbers below represent ";
 
-    public static CompareQuery getCompareQuery(String compareColumn /* TODO: Get this from url? */, ViewURLHelper currentUrl, List<MS2Run> runs)
+    public static CompareQuery getCompareQuery(String compareColumn /* TODO: Get this from url? */, ActionURL currentUrl, List<MS2Run> runs)
     {
         if ("Peptide".equals(compareColumn))
             return new PeptideCompareQuery(currentUrl, runs);
@@ -45,7 +45,7 @@ public abstract class CompareQuery extends SQLFragment
             return null;
     }
 
-    protected CompareQuery(ViewURLHelper currentUrl, String compareColumn, List<MS2Run> runs)
+    protected CompareQuery(ActionURL currentUrl, String compareColumn, List<MS2Run> runs)
     {
         _currentUrl = currentUrl;
         _compareColumn = compareColumn;
@@ -287,7 +287,7 @@ public abstract class CompareQuery extends SQLFragment
     }
 
     /** @return link filter */
-    protected abstract String setupComparisonColumnLink(ViewURLHelper linkURL, String columnName, String runPrefix);
+    protected abstract String setupComparisonColumnLink(ActionURL linkURL, String columnName, String runPrefix);
 
     public int getColumnsPerRun()
     {
@@ -301,7 +301,7 @@ public abstract class CompareQuery extends SQLFragment
         TableInfo ti = MS2Manager.getTableInfoCompare();
         rgn.addColumn(getComparisonCommonColumn(ti));
 
-        ViewURLHelper originalLinkURL = this._currentUrl.clone();
+        ActionURL originalLinkURL = this._currentUrl.clone();
         originalLinkURL.deleteFilterParameters(".select");
         originalLinkURL.deleteParameter("column");
         originalLinkURL.deleteParameter("total");
@@ -317,7 +317,7 @@ public abstract class CompareQuery extends SQLFragment
 
         for (int i = 0; i < _runs.size(); i++)
         {
-            ViewURLHelper linkURL = originalLinkURL.clone();
+            ActionURL linkURL = originalLinkURL.clone();
             linkURL.setExtraPath(ContainerManager.getForId(_runs.get(i).getContainer()).getPath());
             linkURL.replaceParameter("run", String.valueOf(_runs.get(i).getRun()));
 
@@ -346,7 +346,7 @@ public abstract class CompareQuery extends SQLFragment
 
         ButtonBar bb = new ButtonBar();
 
-        ViewURLHelper excelUrl = _currentUrl.clone();
+        ActionURL excelUrl = _currentUrl.clone();
         ActionButton exportAll = new ActionButton("ExportAll", "Export to Excel");
         excelUrl.setAction("exportCompareToExcel");
         exportAll.setURL(excelUrl.getEncodedLocalURIString());
@@ -358,7 +358,7 @@ public abstract class CompareQuery extends SQLFragment
         return rgn;
     }
 
-    protected DisplayColumn createColumn(ViewURLHelper linkURL, RunColumn column, String runPrefix, String columnName, TableInfo ti, ResultSetMetaData md, CompareDataRegion rgn)
+    protected DisplayColumn createColumn(ActionURL linkURL, RunColumn column, String runPrefix, String columnName, TableInfo ti, ResultSetMetaData md, CompareDataRegion rgn)
         throws SQLException
     {
         String columnFilter = setupComparisonColumnLink(linkURL, column.getLabel(), runPrefix);

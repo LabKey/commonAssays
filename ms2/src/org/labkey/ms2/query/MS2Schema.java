@@ -9,7 +9,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.ProteinGroupProteins;
 import org.labkey.ms2.MS2Run;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.CaseInsensitiveHashSet;
 
@@ -215,7 +215,7 @@ public class MS2Schema extends UserSchema
         fractionName.setWidth("200");
         result.addColumn(fractionName);
 
-        ViewURLHelper url = new ViewURLHelper("MS2", "showRun.view", getContainer());
+        ActionURL url = new ActionURL("MS2", "showRun.view", getContainer());
         result.getColumn("Run").setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {
             public TableInfo getLookupTableInfo()
@@ -249,7 +249,7 @@ public class MS2Schema extends UserSchema
                 "\nWHERE ms2Runs.ExperimentRunLSID = " + ExprColumn.STR_TABLE_ALIAS + ".LSID)");
         ColumnInfo ms2DetailsColumn = new ExprColumn(result, alias, sql, Types.INTEGER);
         ms2DetailsColumn.setName("MS2Details");
-        ViewURLHelper url = new ViewURLHelper("MS2", "showRun.view", getContainer());
+        ActionURL url = new ActionURL("MS2", "showRun.view", getContainer());
         ms2DetailsColumn.setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {
             public TableInfo getLookupTableInfo()
@@ -340,7 +340,7 @@ public class MS2Schema extends UserSchema
 
         public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
         {
-            ViewURLHelper graphURL = new ViewURLHelper("MS2", "showRun.view", ctx.getContainer());
+            ActionURL graphURL = new ActionURL("MS2", "showRun.view", ctx.getContainer());
             Object runId = ctx.getRow().get(getColumnInfo().getAlias());
             if (runId != null)
             {

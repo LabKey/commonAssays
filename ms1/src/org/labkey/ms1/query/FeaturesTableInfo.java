@@ -7,7 +7,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.util.StringExpressionFactory;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.MS1Module;
 
@@ -133,7 +133,7 @@ public class FeaturesTableInfo extends FilteredTable
         setDefaultVisibleColumns(visibleColumns);
     } //c-tor
 
-    public void addRunIdCondition(int runId, Container container, ViewURLHelper urlBase, boolean peaksAvailable, boolean forExport)
+    public void addRunIdCondition(int runId, Container container, ActionURL urlBase, boolean peaksAvailable, boolean forExport)
     {
         _container = container;
         _runId = runId;
@@ -152,7 +152,7 @@ public class FeaturesTableInfo extends FilteredTable
             {
                 public DisplayColumn createRenderer(ColumnInfo colInfo)
                 {
-                    ViewURLHelper url = _urlBase.clone();
+                    ActionURL url = _urlBase.clone();
                     url.setAction("showFeatureDetails.view");
                     UrlColumn uc = new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}", true), "details");
                     uc.setName(COLUMN_DETAILS_LINK);
@@ -164,7 +164,7 @@ public class FeaturesTableInfo extends FilteredTable
             {
                 public DisplayColumn createRenderer(ColumnInfo colInfo)
                 {
-                    ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks.view", _container);
+                    ActionURL url = new ActionURL(MS1Module.CONTROLLER_NAME, "showPeaks.view", _container);
                     url.addParameter("runId", _runId);
                     UrlColumn uc = new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}", true), "peaks");
                     uc.setName(COLUMN_PEAKS_LINK);
@@ -184,7 +184,7 @@ public class FeaturesTableInfo extends FilteredTable
         if(!forExport)
         {
             //make the ms2 scan a hyperlink to showPeptide view
-            ViewURLHelper urlPep = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showMS2Peptide", container);
+            ActionURL urlPep = new ActionURL(MS1Module.CONTROLLER_NAME, "showMS2Peptide", container);
             DisplayColumnFactory factory = new DisplayColumnFactory()
             {
                 public DisplayColumn createRenderer(ColumnInfo colInfo)
@@ -204,6 +204,6 @@ public class FeaturesTableInfo extends FilteredTable
     // Protected Data Members
     protected MS1Schema _schema;
     protected Container _container;
-    protected ViewURLHelper _urlBase;
+    protected ActionURL _urlBase;
     protected int _runId = 0;
 } //class FeaturesTableInfo

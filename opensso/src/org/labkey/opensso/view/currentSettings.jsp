@@ -20,5 +20,5 @@
     }
 %>
 </table><br>
-<%=PageFlowUtil.buttonLink("Update", OpenSSOController.getConfigureUrl(getViewContext().getViewURLHelper()))%>
+<%=PageFlowUtil.buttonLink("Update", OpenSSOController.getConfigureUrl(getViewContext().getActionURL()))%>
 <%=PageFlowUtil.buttonLink("Done", bean.getReturnUrl())%>

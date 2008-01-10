@@ -9,13 +9,10 @@ import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.view.FlowQueryView;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.persist.FlowManager;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewForward;
 import org.labkey.api.view.Portal;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.PageFlowUtil;
-import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.ServletException;
@@ -48,8 +45,8 @@ public class FlowSchema extends UserSchema
     public FlowSchema(ViewContext context) throws ServletException
     {
         this(context.getUser(), context.getContainer());
-        setExperiment(FlowExperiment.fromURL(context.getViewURLHelper(), context.getRequest()));
-        setRun(FlowRun.fromURL(context.getViewURLHelper()));
+        setExperiment(FlowExperiment.fromURL(context.getActionURL(), context.getRequest()));
+        setRun(FlowRun.fromURL(context.getActionURL()));
     }
 
     public FlowSchema detach()
@@ -155,26 +152,26 @@ public class FlowSchema extends UserSchema
         return _run;
     }
 
-    public ViewURLHelper urlFor(QueryAction action, FlowTableType type)
+    public ActionURL urlFor(QueryAction action, FlowTableType type)
     {
         return urlFor(action, getQueryDefForTable(type.name()));
     }
 
-    public ViewURLHelper urlFor(QueryAction action)
+    public ActionURL urlFor(QueryAction action)
     {
-        ViewURLHelper ret = super.urlFor(action);
+        ActionURL ret = super.urlFor(action);
         addParams(ret);
         return ret;
     }
 
-    public ViewURLHelper urlFor(QueryAction action, QueryDefinition queryDef)
+    public ActionURL urlFor(QueryAction action, QueryDefinition queryDef)
     {
-        ViewURLHelper ret = super.urlFor(action, queryDef);
+        ActionURL ret = super.urlFor(action, queryDef);
         addParams(ret);
         return ret;
     }
 
-    public void addParams(ViewURLHelper url)
+    public void addParams(ActionURL url)
     {
         if (_run != null)
         {
@@ -510,14 +507,14 @@ public class FlowSchema extends UserSchema
         if (compensationProtocol != null)
         {
             ColumnInfo colCompensationCount = ret.createRunCountColumn("CompensationRunCount", null, compensationProtocol.getProtocol());
-            ViewURLHelper detailsURL = FlowTableType.Runs.urlFor(getContainer(), "ProtocolStep", FlowProtocolStep.calculateCompensation.getName());
+            ActionURL detailsURL = FlowTableType.Runs.urlFor(getContainer(), "ProtocolStep", FlowProtocolStep.calculateCompensation.getName());
             colCompensationCount.setURL(detailsURL + "&" + FlowParam.experimentId.toString() + "=${RowId}");
             ret.addColumn(colCompensationCount);
         }
         if (analysisProtocol != null)
         {
             ColumnInfo colAnalysisRunCount = ret.createRunCountColumn("AnalysisRunCount", null, analysisProtocol.getProtocol());
-            ViewURLHelper detailsURL = FlowTableType.Runs.urlFor(getContainer(), "ProtocolStep", FlowProtocolStep.analysis.getName());
+            ActionURL detailsURL = FlowTableType.Runs.urlFor(getContainer(), "ProtocolStep", FlowProtocolStep.analysis.getName());
             colAnalysisRunCount.setURL(detailsURL + "&" + FlowParam.experimentId.toString() + "=${RowId}");
             ret.addColumn(colAnalysisRunCount);
         }
@@ -529,7 +526,7 @@ public class FlowSchema extends UserSchema
         return ret;
     }
 
-    public FlowQuerySettings getSettings(ViewURLHelper url, HttpServletRequest request, String dataRegionName)
+    public FlowQuerySettings getSettings(ActionURL url, HttpServletRequest request, String dataRegionName)
     {
         return new FlowQuerySettings(url, request, dataRegionName);
     }

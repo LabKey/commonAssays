@@ -1,6 +1,6 @@
 package org.labkey.ms2.compare;
 
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.common.util.Pair;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
@@ -24,7 +24,7 @@ public class PeptideCompareQuery extends CompareQuery
 {
     public static final String COMPARISON_DESCRIPTION = "Compare Peptides";
 
-    public PeptideCompareQuery(ViewURLHelper currentUrl, List<MS2Run> runs)
+    public PeptideCompareQuery(ActionURL currentUrl, List<MS2Run> runs)
     {
         super(currentUrl, "Peptide", runs);
         
@@ -81,7 +81,7 @@ public class PeptideCompareQuery extends CompareQuery
         filter.addAllClauses(peptideFilter);
     }
 
-    protected String setupComparisonColumnLink(ViewURLHelper linkURL, String columnName, String runPrefix)
+    protected String setupComparisonColumnLink(ActionURL linkURL, String columnName, String runPrefix)
     {
         linkURL.setAction("showRun");
         linkURL.deleteParameter("view");  // Always link to Peptide view (the default)
@@ -102,7 +102,7 @@ public class PeptideCompareQuery extends CompareQuery
         return result;
     }
 
-    protected DisplayColumn createColumn(ViewURLHelper linkURL, RunColumn column, String runPrefix, String columnName, TableInfo ti, ResultSetMetaData md, CompareDataRegion rgn)
+    protected DisplayColumn createColumn(ActionURL linkURL, RunColumn column, String runPrefix, String columnName, TableInfo ti, ResultSetMetaData md, CompareDataRegion rgn)
         throws SQLException
     {
         DisplayColumn result = super.createColumn(linkURL, column, runPrefix, columnName, ti, md, rgn);

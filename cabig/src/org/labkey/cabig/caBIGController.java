@@ -37,9 +37,9 @@ public class caBIGController extends SpringActionController
     }
 
 
-    public static ViewURLHelper getCaBigUrl(String action, Container c, ViewURLHelper returnUrl)
+    public static ActionURL getCaBigUrl(String action, Container c, ActionURL returnUrl)
     {
-        ViewURLHelper url = new ViewURLHelper("cabig", action, c);
+        ActionURL url = new ActionURL("cabig", action, c);
         return url.addParameter("returnUrl", returnUrl.getLocalURIString());
     }
 
@@ -73,9 +73,9 @@ public class caBIGController extends SpringActionController
 
         protected abstract void doAction() throws Exception;
 
-        public ViewURLHelper getSuccessURL(ReturnUrlForm form)
+        public ActionURL getSuccessURL(ReturnUrlForm form)
         {
-            return form.getReturnViewURLHelper();
+            return form.getReturnActionURL();
         }
     }
 
@@ -162,7 +162,7 @@ public class caBIGController extends SpringActionController
     {
         public ModelAndView getView(ReturnUrlForm form, BindException errors) throws Exception
         {
-            ViewURLHelper currentUrl = getViewContext().getViewURLHelper();
+            ActionURL currentUrl = getViewContext().getActionURL();
             caBIGHierarchyTree tree = new caBIGHierarchyTree(getContainer().getPath(), getUser(), ACL.PERM_ADMIN, currentUrl);
 
             StringBuilder html = new StringBuilder();
@@ -177,7 +177,7 @@ public class caBIGController extends SpringActionController
             html.append("\"><table class=\"dataRegion\" cellspacing=\"0\" cellpadding=\"1\">");
             tree.render(html);
             html.append("</table><br>");
-            renderHierarchyButtonBar(html, form.getReturnViewURLHelper());
+            renderHierarchyButtonBar(html, form.getReturnActionURL());
             html.append("</form>");
 
             return new HtmlView(html.toString());
@@ -190,7 +190,7 @@ public class caBIGController extends SpringActionController
     }
 
 
-    private void renderHierarchyButtonBar(StringBuilder html, ViewURLHelper returnUrl) throws IOException, ServletException
+    private void renderHierarchyButtonBar(StringBuilder html, ActionURL returnUrl) throws IOException, ServletException
     {
         ButtonBar bb = new ButtonBar();
 
@@ -237,9 +237,9 @@ public class caBIGController extends SpringActionController
     {
         private static caBIGManager _caBIG = caBIGManager.get();
         private static String _unauthorizedButton = PageFlowUtil.buttonImg("Not Authorized", "disabled");
-        private ViewURLHelper _currentUrl;
+        private ActionURL _currentUrl;
 
-        private caBIGHierarchyTree(String rootPath, User user, int perm, ViewURLHelper currentUrl)
+        private caBIGHierarchyTree(String rootPath, User user, int perm, ActionURL currentUrl)
         {
             super(rootPath, user, perm, currentUrl);
             _currentUrl = currentUrl;
@@ -247,7 +247,7 @@ public class caBIGController extends SpringActionController
 
 
         @Override
-        protected void renderNodeStart(StringBuilder html, Container c, ViewURLHelper url, boolean isAuthorized, int level)
+        protected void renderNodeStart(StringBuilder html, Container c, ActionURL url, boolean isAuthorized, int level)
         {
             html.append("<tr><td>");
             appendButton(html, c, isAuthorized, _currentUrl);
@@ -258,7 +258,7 @@ public class caBIGController extends SpringActionController
         }
 
 
-        private static void appendButton(StringBuilder html, Container c, boolean isAuthorized, ViewURLHelper returnUrl)
+        private static void appendButton(StringBuilder html, Container c, boolean isAuthorized, ActionURL returnUrl)
         {
             if (!isAuthorized)
             {
@@ -267,7 +267,7 @@ public class caBIGController extends SpringActionController
             else
             {
                 boolean isPublished = isPublished(c);
-                ViewURLHelper publishUrl = getCaBigUrl(isPublished ? "unpublish" : "publish", c, returnUrl);
+                ActionURL publishUrl = getCaBigUrl(isPublished ? "unpublish" : "publish", c, returnUrl);
                 html.append(PageFlowUtil.buttonLink(isPublished ? "Unpublish" : "Publish", publishUrl));
             }
         }

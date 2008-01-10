@@ -2,7 +2,7 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
@@ -203,13 +203,13 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     }
 
     // Need to add proteinGroupId to signature
-    protected String getIndexLookup(ViewURLHelper url)
+    protected String getIndexLookup(ActionURL url)
     {
         return super.getIndexLookup(url) + "|GroupId=" + url.getParameter("proteinGroupId");
     }
 
     // Default behavior doesn't work for ProteinProphet groupings -- need to add in GroupId by joining to PeptideMemberships table
-    protected Long[] generatePeptideIndex(ViewURLHelper url) throws SQLException
+    protected Long[] generatePeptideIndex(ActionURL url) throws SQLException
     {
         String groupIdString = url.getParameter("proteinGroupId");
         if (groupIdString == null)
@@ -405,7 +405,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         return MS2RunViewType.PROTEIN_PROPHET;
     }
 
-    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form)
+    public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
         SQLFragment fragment = new SQLFragment();
         fragment.append("SELECT DISTINCT PGM.SeqId FROM ");
@@ -415,7 +415,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         return fragment;
     }
 
-    public HashMap<String, SimpleFilter> getFilter(ViewURLHelper queryUrl, MS2Run run)
+    public HashMap<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
         HashMap<String, SimpleFilter> map = new HashMap<String, SimpleFilter>();
         map.put("peptideFilter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run));
@@ -434,7 +434,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         return view;
     }
 
-    protected void addGroupingFilterText(List<String> headers, ViewURLHelper currentUrl, boolean handSelected)
+    protected void addGroupingFilterText(List<String> headers, ActionURL currentUrl, boolean handSelected)
     {
         headers.add((_runs.length > 1 ? "Multiple runs" : "One run") + " showing " + (handSelected ? "hand selected" : "all") + " protein groups matching the following query:");
         headers.add("Protein Group Filter: " + new SimpleFilter(currentUrl, MS2Manager.getTableInfoProteinGroupsWithQuantitation().getName()).getFilterText());

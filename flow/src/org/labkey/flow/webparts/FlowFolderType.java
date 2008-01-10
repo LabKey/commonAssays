@@ -1,7 +1,7 @@
 package org.labkey.flow.webparts;
 
 import org.labkey.api.module.DefaultFolderType;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.security.User;
@@ -21,9 +21,9 @@ public class FlowFolderType extends DefaultFolderType
                 getDefaultModuleSet(module, getModule("Pipeline")), module);
     }
 
-    public ViewURLHelper getStartURL(Container c, User user)
+    public ActionURL getStartURL(Container c, User user)
     {
-        ViewURLHelper ret = super.getStartURL(c, user);
+        ActionURL ret = super.getStartURL(c, user);
         ret.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
         return ret;
     }

@@ -183,7 +183,7 @@ public class MouseModelController extends ViewController
         HBox hbox = new HBox(new HttpView[]{dashboardView, startNecropsyView, locateSampleView});
         HttpView discussionView = DiscussionService.get().getDisussionArea(
                 getViewContext(), getContainer(), getUser(),
-                model.getEntityId(), getViewContext().cloneViewURLHelper(), model.getName(), true);
+                model.getEntityId(), getViewContext().cloneActionURL(), model.getName(), true);
 
         MouseModelTemplateView v = new MouseModelTemplateView(form, 0, new VBox(hbox, discussionView));
 
@@ -209,7 +209,7 @@ public class MouseModelController extends ViewController
 
         ActionButton addPairButton = new ActionButton("showAddPair");
         addPairButton.setCaption("Add Breeding Pair");
-        ViewURLHelper helper = cloneViewURLHelper();
+        ActionURL helper = cloneActionURL();
         helper.setAction("showAddPair");
         helper.deleteParameters();
         helper.addParameter("modelId", (String) form.get("modelId"));
@@ -334,7 +334,7 @@ public class MouseModelController extends ViewController
         DataRegion dr = new DataRegion();
         dr.addColumns(MouseSchema.getMouseModel().getColumns("name,mouseStrainId,targetGeneId,tumorType,location,investigator"));
 
-        ViewURLHelper urlhelp = context.cloneViewURLHelper();
+        ActionURL urlhelp = context.cloneActionURL();
         urlhelp.deleteParameters();
         urlhelp.setPageFlow("MouseModel");
         urlhelp.setAction("details");
@@ -364,7 +364,7 @@ public class MouseModelController extends ViewController
         MouseModel model = form.getBean();
         model.setContainer(getContainer().getId());
         MouseModelManager.insertModel(getUser(), model);
-        HttpView.throwRedirect(getViewURLHelper().relativeUrl("details.view", "modelId=" + model.getModelId()));
+        HttpView.throwRedirect(getActionURL().relativeUrl("details.view", "modelId=" + model.getModelId()));
 
         return null;
     }
@@ -403,7 +403,7 @@ public class MouseModelController extends ViewController
             modelId = (Integer) form.getRequest().getSession().getAttribute("modelId");
 
         if (null == modelId)
-            HttpView.throwRedirect(form.getContext().getViewURLHelper().relativeUrl("begin", "message=Your session may have timed out. Please select a mouse model.", "MouseModel"));
+            HttpView.throwRedirect(form.getContext().getActionURL().relativeUrl("begin", "message=Your session may have timed out. Please select a mouse model.", "MouseModel"));
 
         return modelId;
     }
@@ -452,7 +452,7 @@ public class MouseModelController extends ViewController
 
         private Pair[] getTabs()
         {
-            ViewURLHelper urlhelper = getViewContext().cloneViewURLHelper();
+            ActionURL urlhelper = getViewContext().cloneActionURL();
             urlhelper.deleteParameters();
             urlhelper.replaceParameter("modelId", (String) String.valueOf(_modelId));
             Pair[] tabs = new Pair[]
@@ -518,7 +518,7 @@ public class MouseModelController extends ViewController
             DataRegion dr = new DataRegion();
             dr.addColumns(MouseSchema.getMouseModel().getColumns("name,mouseStrainId,targetGeneId,tumorType,location,investigator"));
 
-            ViewURLHelper urlhelp = context.cloneViewURLHelper();
+            ActionURL urlhelp = context.cloneActionURL();
             urlhelp.deleteParameters();
             urlhelp.setPageFlow("MouseModel");
             urlhelp.setAction("details");
@@ -544,20 +544,20 @@ public class MouseModelController extends ViewController
             {
                 String path = (String) getViewContext().get("path");
                 if (null == path)
-                    path = getViewContext().getViewURLHelper().getExtraPath();
+                    path = getViewContext().getActionURL().getExtraPath();
                 _c = ContainerManager.getForPath(path);
             }
 
             if (null == _c || !_c.hasPermission(getViewContext().getUser(), ACL.PERM_READ))
                 return;
 
-            ViewURLHelper urlhelp = getViewContext().cloneViewURLHelper();
+            ActionURL urlhelp = getViewContext().cloneActionURL();
             urlhelp.setAction(null);
             urlhelp.setPageFlow("MouseModel");
             urlhelp.deleteParameters();
             getGridRegion(getViewContext()).setPageFlowUrl(urlhelp.getURIString());
             if (_c.hasPermission(getViewContext().getUser(), ACL.PERM_UPDATE))
-                setTitleHref(ViewURLHelper.toPathString("MouseModel", "begin", _c.getPath()));
+                setTitleHref(ActionURL.toPathString("MouseModel", "begin", _c.getPath()));
         }
 
 

@@ -6,7 +6,7 @@ import org.labkey.ms2.query.ComparePeptidesView;
 import org.labkey.ms2.query.CompareProteinsView;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.apache.log4j.Logger;
 
 /**
@@ -28,10 +28,10 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
     {
         try
         {
-            ViewURLHelper url = new ViewURLHelper(originalURL);
+            ActionURL url = new ActionURL(originalURL);
             int runList = Integer.parseInt(url.getParameter("runList"));
             ViewContext queryContext = new ViewContext(_context);
-            queryContext.setViewURLHelper(url);
+            queryContext.setActionURL(url);
 
             CompareProteinsView view = new CompareProteinsView(queryContext, _controller, runList, false);
             return view.createCompareResult();
@@ -45,10 +45,10 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
 
     public CompareResult getPeptideComparison(String originalURL) throws Exception
     {
-        ViewURLHelper url = new ViewURLHelper(originalURL);
+        ActionURL url = new ActionURL(originalURL);
         int runList = Integer.parseInt(url.getParameter("runList"));
         ViewContext queryContext = new ViewContext(_context);
-        queryContext.setViewURLHelper(url);
+        queryContext.setActionURL(url);
 
         ComparePeptidesView view = new ComparePeptidesView(queryContext, _controller, runList, false);
         return view.createCompareResult();

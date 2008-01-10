@@ -55,7 +55,7 @@
     </table>
     <table class="normal">
         <tr><td>
-            <%=PageFlowUtil.buttonLink("Back to BioTrue", context.cloneViewURLHelper().setAction("begin.view"))%>&nbsp;
+            <%=PageFlowUtil.buttonLink("Back to BioTrue", context.cloneActionURL().setAction("begin.view"))%>&nbsp;
             <input type="image" src="<%=PageFlowUtil.buttonSrc("Delete Selected Servers")%>">&nbsp;
         </td></tr>
         <tr><td>&nbsp;</td></tr>

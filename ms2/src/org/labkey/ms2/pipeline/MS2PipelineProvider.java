@@ -16,11 +16,10 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.WebPartView;
 
 import java.io.PrintWriter;
@@ -64,14 +63,14 @@ public class MS2PipelineProvider extends PipelineProvider
                 return;
             StringBuilder html = new StringBuilder();
             html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">MS2 specific settings:</td></tr>");
-            ViewURLHelper buttonURL = new ViewURLHelper(PipelineController.SetupClusterSequenceDBAction.class, context.getContainer());
+            ActionURL buttonURL = new ActionURL(PipelineController.SetupClusterSequenceDBAction.class, context.getContainer());
             html.append("<tr class=\"normal\"><td>&nbsp;&nbsp;&nbsp;&nbsp;")
                     .append("<a href=\"").append(buttonURL.getLocalURIString()).append("\">Set FASTA root</a>")
                     .append(" - Specify the location on the web server where FASTA sequence files will be located.</td></tr>");
 
             if (MS2PipelineManager.allowSequenceDatabaseUploads(context.getUser(), context.getContainer()))
             {
-                buttonURL = new ViewURLHelper(PipelineController.AddSequenceDBAction.class, context.getContainer());
+                buttonURL = new ActionURL(PipelineController.AddSequenceDBAction.class, context.getContainer());
                 html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
                         .append("<a href=\"").append(buttonURL.getLocalURIString()).append("\">Add FASTA file</a>")
                         .append(" - Add a FASTA sequence file to the current FASTA root location.</td></tr>");

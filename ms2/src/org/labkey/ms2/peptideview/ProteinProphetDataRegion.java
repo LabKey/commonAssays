@@ -2,7 +2,7 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.TotalFilteredPeptidesColumn;
 import org.labkey.ms2.UniqueFilteredPeptidesColumn;
 
@@ -19,9 +19,9 @@ import java.util.Set;
  */
 public class ProteinProphetDataRegion extends AbstractProteinDataRegion
 {
-    public ProteinProphetDataRegion(ViewURLHelper urlHelper)
+    public ProteinProphetDataRegion(ActionURL url)
     {
-        super("ProteinGroupId", urlHelper);
+        super("ProteinGroupId", url);
         setShadeAlternatingRows(true);
     }
 

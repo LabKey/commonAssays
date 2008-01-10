@@ -4,7 +4,7 @@
 <%@ page import="org.labkey.flow.data.FlowScript" %>
 <%@ page import="org.labkey.flow.controllers.well.ChooseGraphForm" %>
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix" %>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ page import="org.labkey.flow.data.FlowWell" %>
 <%@ page import="java.util.*" %>
@@ -177,7 +177,7 @@
             params = new String[]{form.getXaxis()};
         }
         GraphSpec graphspec = new GraphSpec(SubsetSpec.fromString(form.getSubset()), params);
-        ViewURLHelper urlGenerateGraph = org.labkey.api.util.PageFlowUtil.urlFor(WellController.Action.generateGraph, getContainer());
+        ActionURL urlGenerateGraph = org.labkey.api.util.PageFlowUtil.urlFor(WellController.Action.generateGraph, getContainer());
         well.addParams(urlGenerateGraph);
         if (script != null)
         {

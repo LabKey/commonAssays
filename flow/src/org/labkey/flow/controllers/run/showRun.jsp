@@ -1,6 +1,6 @@
 <%@ page buffer="none" %>
 <%@ page import="org.labkey.flow.data.FlowLog" %>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.controllers.run.RunForm"%>
 <%@ page import="org.labkey.flow.view.FlowQueryView"%>
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix"%>
@@ -51,7 +51,7 @@
     { %>
     <labkey:link text="Show Compensation" href="<%=comp.urlFor(CompensationController.Action.showCompensation)%>"/><br>
     <% } %>
-    <%  ViewURLHelper urlShowRunGraph = new ViewURLHelper("Experiment", "showRunGraph", getContainer());
+    <%  ActionURL urlShowRunGraph = new ActionURL("Experiment", "showRunGraph", getContainer());
         urlShowRunGraph.addParameter("rowId", Integer.toString(getRun().getRunId()));
     %>
     <labkey:link href="<%=h(urlShowRunGraph)%>" text="Experiment Run Graph"/><br>

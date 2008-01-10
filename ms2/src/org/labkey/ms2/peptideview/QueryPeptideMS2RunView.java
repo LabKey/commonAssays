@@ -54,7 +54,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             view.setColumns(fieldKeys);
             view.save(getUser(), _viewContext.getRequest());
             settings.setViewName("columns");
-            ViewURLHelper url = _url.clone();
+            ActionURL url = _url.clone();
             url.deleteParameter("columns");
             url.addParameter(DATA_REGION_NAME + ".viewName", "columns");
             throw new RedirectException(url.toString());

@@ -1,5 +1,5 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
-<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.view.ActionURL"%>
 <%@ page import="org.labkey.api.view.ThemeFont"%>
 <% StringBuffer params = new StringBuffer(); %>
 <form method=get action="compare.post">

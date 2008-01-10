@@ -1,7 +1,7 @@
 package org.labkey.ms2;
 
 import org.labkey.api.data.*;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 
@@ -26,15 +26,15 @@ public class GroupNumberDisplayColumn extends DataColumn
         _container = c;
     }
 
-    public GroupNumberDisplayColumn(ColumnInfo col, ViewURLHelper url, String groupNumber, String collectionId)
+    public GroupNumberDisplayColumn(ColumnInfo col, ActionURL url, String groupNumber, String collectionId)
     {
         super(col);
         setName("ProteinGroup");
         _groupNumber = groupNumber;
         _collectionId = collectionId;
-        ViewURLHelper urlHelper = url.clone();
-        urlHelper.setAction("showProteinGroup.view");
-        setURL(urlHelper.toString() + "&groupNumber=${" + _groupNumber + "}&indistinguishableCollectionId=${" + _collectionId + "}");
+        ActionURL actionURL = url.clone();
+        actionURL.setAction("showProteinGroup.view");
+        setURL(actionURL.toString() + "&groupNumber=${" + _groupNumber + "}&indistinguishableCollectionId=${" + _collectionId + "}");
         setWidth("50");
     }
 
@@ -102,8 +102,8 @@ public class GroupNumberDisplayColumn extends DataColumn
             ColumnInfo groupIdCol = cols.get(groupIdKey);
             columns.add(groupIdCol);
 
-            ViewURLHelper urlHelper = new ViewURLHelper("MS2", "showProteinGroup.view", _container);
-            setURL(urlHelper.toString() + "&grouping=proteinprophet&proteinGroupId=${" + groupIdCol.getAlias() + "}");
+            ActionURL url = new ActionURL("MS2", "showProteinGroup.view", _container);
+            setURL(url.toString() + "&grouping=proteinprophet&proteinGroupId=${" + groupIdCol.getAlias() + "}");
         }
     }
 }

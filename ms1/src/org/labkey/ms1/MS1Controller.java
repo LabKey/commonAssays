@@ -48,9 +48,9 @@ public class MS1Controller extends SpringActionController
      * @param action Name of action
      * @return URL helper for the action in this controller and current container
      */
-    protected ViewURLHelper getViewURLHelper(String action)
+    protected ActionURL getActionURL(String action)
     {
-        return new ViewURLHelper(MS1Module.CONTROLLER_NAME, action, getContainer());
+        return new ActionURL(MS1Module.CONTROLLER_NAME, action, getContainer());
     }
 
     /**
@@ -61,7 +61,7 @@ public class MS1Controller extends SpringActionController
      */
     protected NavTree addBeginChild(NavTree root)
     {
-        return root.addChild("MS1 Runs", getViewURLHelper("begin.view"));
+        return root.addChild("MS1 Runs", getActionURL("begin.view"));
     }
 
     /**
@@ -73,7 +73,7 @@ public class MS1Controller extends SpringActionController
      */
     protected NavTree addFeaturesChild(NavTree root, int runId)
     {
-        ViewURLHelper url = getViewURLHelper("showFeatures.view");
+        ActionURL url = getActionURL("showFeatures.view");
         url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
         url.addParameter(".lastFilter", "true");
         return root.addChild("Features from Run", url);
@@ -89,7 +89,7 @@ public class MS1Controller extends SpringActionController
      */
     protected NavTree addPeaksChild(NavTree root, int runId, int featureId)
     {
-        ViewURLHelper url = getViewURLHelper("showPeaks.view");
+        ActionURL url = getActionURL("showPeaks.view");
         url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
         url.addParameter(ShowPeaksAction.PARAM_FEATUREID, featureId);
         url.addParameter(".lastFilter", "true"); 
@@ -154,9 +154,9 @@ public class MS1Controller extends SpringActionController
             return root.addChild("MS1 Runs", getUrl());
         }
 
-        public ViewURLHelper getUrl()
+        public ActionURL getUrl()
         {
-            return new ViewURLHelper(MS1Module.CONTROLLER_NAME, "begin.view", getContainer());
+            return new ActionURL(MS1Module.CONTROLLER_NAME, "begin.view", getContainer());
         }
     } //class BeginAction
 
@@ -173,7 +173,7 @@ public class MS1Controller extends SpringActionController
         {
             _form = null;
             if(-1 == form.getRunId())
-                return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
+                return HttpView.redirect(MS1Controller.this.getActionURL("begin"));
 
             //ensure that the experiment run is valid and exists within the current container
             ExpRun run = ExperimentService.get().getExpRun(form.getRunId());
@@ -245,9 +245,9 @@ public class MS1Controller extends SpringActionController
             return new BeginAction().appendNavTrail(root).addChild("Features", getUrl(runId));
         }
 
-        public ViewURLHelper getUrl(int runId)
+        public ActionURL getUrl(int runId)
         {
-            ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showFeatures.view", getContainer());
+            ActionURL url = new ActionURL(MS1Module.CONTROLLER_NAME, "showFeatures.view", getContainer());
             url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
             url.addParameter(".lastFilter", "true");
             return url;
@@ -266,7 +266,7 @@ public class MS1Controller extends SpringActionController
         public ModelAndView getView(PeaksViewForm form, BindException errors) throws Exception
         {
             if(-1 == form.getRunId() && -1 == form.getFeatureId())
-                return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
+                return HttpView.redirect(MS1Controller.this.getActionURL("begin"));
 
             MS1Manager mgr = MS1Manager.get();
 
@@ -344,9 +344,9 @@ public class MS1Controller extends SpringActionController
                     getUrl(runId, featureId));
         }
 
-        public ViewURLHelper getUrl(int runId, int featureId)
+        public ActionURL getUrl(int runId, int featureId)
         {
-            ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showPeaks.view", getContainer());
+            ActionURL url = new ActionURL(MS1Module.CONTROLLER_NAME, "showPeaks.view", getContainer());
             url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
             url.addParameter(ShowPeaksAction.PARAM_FEATUREID, featureId);
             url.addParameter(".lastFilter", "true"); 
@@ -363,7 +363,7 @@ public class MS1Controller extends SpringActionController
         public ModelAndView getView(MS2PeptideForm form, BindException errors) throws Exception
         {
             if(null == form || form.getFeatureId() < 0)
-                return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
+                return HttpView.redirect(MS1Controller.this.getActionURL("begin"));
 
             //get the feature
             Feature feature = MS1Manager.get().getFeature(form.getFeatureId());
@@ -375,7 +375,7 @@ public class MS1Controller extends SpringActionController
                 return new HtmlView("The corresponding MS2 peptide information was not found in the database. Ensure that it has been imported before attempting to view the MS2 peptide.");
 
             Peptide pepFirst = peptides[0];
-            ViewURLHelper url = new ViewURLHelper("MS2", "showPeptide", getContainer());
+            ActionURL url = new ActionURL("MS2", "showPeptide", getContainer());
             url.addParameter("run", String.valueOf(pepFirst.getRun()));
             url.addParameter("peptideId", String.valueOf(pepFirst.getRowId()));
             url.addParameter("rowIndex", 1);
@@ -404,7 +404,7 @@ public class MS1Controller extends SpringActionController
         public ModelAndView getView(FeatureIdForm form, BindException errors) throws Exception
         {
             if(null == form || form.getFeatureId() < 0 || form.getRunId() < 0)
-                return HttpView.redirect(MS1Controller.this.getViewURLHelper("begin"));
+                return HttpView.redirect(MS1Controller.this.getActionURL("begin"));
 
             //get the feature
             Feature feature = MS1Manager.get().getFeature(form.getFeatureId());
@@ -445,9 +445,9 @@ public class MS1Controller extends SpringActionController
                     getUrl(runId, featureId));
         }
 
-        public ViewURLHelper getUrl(int runId, int featureId)
+        public ActionURL getUrl(int runId, int featureId)
         {
-            ViewURLHelper url = new ViewURLHelper(MS1Module.CONTROLLER_NAME, "showFeatureDetails.view", getContainer());
+            ActionURL url = new ActionURL(MS1Module.CONTROLLER_NAME, "showFeatureDetails.view", getContainer());
             url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
             url.addParameter(ShowPeaksAction.PARAM_FEATUREID, featureId);
             return url;
@@ -554,7 +554,7 @@ public class MS1Controller extends SpringActionController
                 throw new FileNotFoundException("Unable to open the msInspect feature file '" + form.getPath() + "'.");
             }
 
-            ViewURLHelper url = new ViewURLHelper("Project", "begin", c.getPath());
+            ActionURL url = new ActionURL("Project", "begin", c.getPath());
             return HttpView.redirect(url);
         }
 

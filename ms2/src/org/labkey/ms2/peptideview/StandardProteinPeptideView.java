@@ -2,7 +2,7 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.data.*;
@@ -72,7 +72,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         GroupedResultSet peptideResultSet = createPeptideResultSet(columnNames, run, _maxGroupingRows, null);
         proteinRgn.setGroupedResultSet(peptideResultSet);
 
-        ViewURLHelper proteinUrl = _url.clone();
+        ActionURL proteinUrl = _url.clone();
         proteinUrl.setAction("showProtein");
         DisplayColumn proteinColumn = proteinRgn.getDisplayColumn("Protein");
         if (proteinColumn != null)
@@ -194,7 +194,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         return MS2RunViewType.PROTEIN;
     }
 
-    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form)
+    public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
         SQLFragment fragment = new SQLFragment();
         fragment.append("SELECT DISTINCT sSeqId AS SeqId FROM ( ");
@@ -203,7 +203,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         return fragment;
     }
 
-    public HashMap<String, SimpleFilter> getFilter(ViewURLHelper queryUrl, MS2Run run)
+    public HashMap<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
         HashMap<String, SimpleFilter> map = new HashMap<String, SimpleFilter>();
         map.put("peptideFilter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run));
@@ -289,7 +289,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         return where;
     }
 
-    protected void addGroupingFilterText(List<String> headers, ViewURLHelper currentUrl, boolean handSelected)
+    protected void addGroupingFilterText(List<String> headers, ActionURL currentUrl, boolean handSelected)
     {
         headers.add((_runs.length > 1 ? "Multiple runs" : "One run") + " showing " + (handSelected ? "hand selected" : "all") + " proteins matching the following query:");
         headers.add("Protein Filter: " + new SimpleFilter(currentUrl, MS2Manager.getDataRegionNameProteins()).getFilterText());

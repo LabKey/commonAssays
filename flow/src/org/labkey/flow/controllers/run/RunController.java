@@ -54,7 +54,7 @@ public class RunController extends BaseFlowController<RunController.Action>
     protected Page getPage(String name) throws Exception
     {
         Page ret = (Page) getFlowPage(name);
-        ret.setRun(FlowRun.fromURL(getViewURLHelper()));
+        ret.setRun(FlowRun.fromURL(getActionURL()));
         return ret;
     }
 
@@ -124,8 +124,8 @@ public class RunController extends BaseFlowController<RunController.Action>
     @Jpf.Action
     protected Forward details() throws Exception
     {
-        ViewURLHelper forward = PageFlowUtil.urlFor(Action.showRun, getContainer());
-        forward.addParameter(FlowParam.runId.toString(), getViewURLHelper().getParameter("Runs.RunId~eq"));
+        ActionURL forward = PageFlowUtil.urlFor(Action.showRun, getContainer());
+        forward.addParameter(FlowParam.runId.toString(), getActionURL().getParameter("Runs.RunId~eq"));
         return new ViewForward(forward);
     }
 

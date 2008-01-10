@@ -16,7 +16,7 @@
 package org.labkey.flow.view;
 
 import org.labkey.api.view.DataView;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.RenderContext;
@@ -48,7 +48,7 @@ public class GraphView extends GridView
         try
         {
             int wellId = (Integer) ctx.getRow().get("RowId");
-            ViewURLHelper src = PageFlowUtil.urlFor(WellController.Action.showGraph, ctx.getContainer().getPath());
+            ActionURL src = PageFlowUtil.urlFor(WellController.Action.showGraph, ctx.getContainer().getPath());
             src.addParameter("wellId", Integer.toString(wellId));
             src.addParameter("graph", description);
             out.write("<img src=\"" + src + "\">");

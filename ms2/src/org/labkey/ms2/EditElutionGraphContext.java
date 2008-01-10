@@ -1,6 +1,6 @@
 package org.labkey.ms2;
 
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ public class EditElutionGraphContext
 {
     private final List<Quantitation.ScanInfo> _lightElutionProfile;
     private final List<Quantitation.ScanInfo> _heavyElutionProfile;
-    private final ViewURLHelper _url;
+    private final ActionURL _url;
     private final MS2Peptide _peptide;
 
     public float getMaxLightIntensity()
@@ -35,7 +35,7 @@ public class EditElutionGraphContext
 
     private Quantitation _quantitation;
 
-    public EditElutionGraphContext(List<Quantitation.ScanInfo> lightElutionProfile, List<Quantitation.ScanInfo> heavyElutionProfile, Quantitation quant, ViewURLHelper url, MS2Peptide peptide)
+    public EditElutionGraphContext(List<Quantitation.ScanInfo> lightElutionProfile, List<Quantitation.ScanInfo> heavyElutionProfile, Quantitation quant, ActionURL url, MS2Peptide peptide)
     {
         _lightElutionProfile = lightElutionProfile;
         _heavyElutionProfile = heavyElutionProfile;
@@ -47,7 +47,7 @@ public class EditElutionGraphContext
     }
 
 
-    public ViewURLHelper getUrl()
+    public ActionURL getUrl()
     {
         return _url;
     }

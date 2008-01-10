@@ -11,7 +11,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ViewForward;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.flow.data.FlowObject;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
@@ -41,13 +41,13 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
 
     protected FlowScript getScript() throws Exception
     {
-        return FlowScript.fromURL(getViewURLHelper(), getRequest());
+        return FlowScript.fromURL(getActionURL(), getRequest());
     }
 
     public FlowRun getRun() throws Exception
     {
         FlowRun ret;
-        ret = FlowRun.fromURL(getViewURLHelper());
+        ret = FlowRun.fromURL(getActionURL());
         return ret;
     }
 
@@ -57,7 +57,7 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
         PipelineService service = PipelineService.get();
         service.getPipelineQueue().addJob(job);
 
-        ViewURLHelper forward = job.getStatusHref().clone();
+        ActionURL forward = job.getStatusHref().clone();
         putParam(forward, FlowParam.redirect, 1);
         forward.setFragment("end");
         return new ViewForward(forward);
@@ -102,11 +102,11 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
         NavTree project;
         if (context.getContainer().getFolderType() instanceof FlowFolderType)
         {
-            project = new NavTree("Dashboard", new ViewURLHelper("Project", "begin", context.getContainer()));
+            project = new NavTree("Dashboard", new ActionURL("Project", "begin", context.getContainer()));
         }
         else
         {
-            ViewURLHelper url = PageFlowUtil.urlFor(FlowController.Action.begin, context.getContainer().getPath());
+            ActionURL url = PageFlowUtil.urlFor(FlowController.Action.begin, context.getContainer().getPath());
             project = new NavTree(FlowModule.getShortProductName(), url.clone());
         }
         return project;
@@ -144,7 +144,7 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
     }
 
 
-    public ViewURLHelper urlFor(Enum action)
+    public ActionURL urlFor(Enum action)
     {
         return PageFlowUtil.urlFor(action, getContainer());
     }
@@ -163,14 +163,14 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
         return getRequest().getParameter(param.toString());
     }
 
-    protected void putParam(ViewURLHelper helper, Enum param, String value)
+    protected void putParam(ActionURL url, Enum param, String value)
     {
-        helper.replaceParameter(param.toString(), value);
+        url.replaceParameter(param.toString(), value);
     }
 
-    protected void putParam(ViewURLHelper helper, Enum param, int value)
+    protected void putParam(ActionURL url, Enum param, int value)
     {
-        putParam(helper, param, Integer.toString(value));
+        putParam(url, param, Integer.toString(value));
     }
 
     protected boolean hasParameter(String name)
@@ -184,7 +184,7 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
 
     public String getContainerPath()
     {
-        return getViewURLHelper().getExtraPath();
+        return getActionURL().getExtraPath();
     }
 
     public HttpServletRequest getRequest()
@@ -192,8 +192,8 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
         return getViewContext().getRequest();
     }
 
-    public ViewURLHelper getViewURLHelper()
+    public ActionURL getActionURL()
     {
-        return getViewContext().getViewURLHelper();
+        return getViewContext().getActionURL();
     }
 }

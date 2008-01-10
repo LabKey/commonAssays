@@ -1,13 +1,13 @@
 <%@ page import="org.labkey.api.attachments.Attachment" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <table border=0>
     <%
         ViewContext ctx = HttpView.currentContext();
         Attachment[] attachments = (Attachment[]) ctx.get("attachments");
         boolean canDelete = (Boolean) ctx.get("canDelete");
-        ViewURLHelper deleteUrl = (ViewURLHelper)ctx.get("deleteUrl");
+        ActionURL deleteUrl = (ActionURL)ctx.get("deleteUrl");
 
         int index = 0;
 

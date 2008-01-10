@@ -49,7 +49,7 @@ public class WellController extends BaseFlowController
 
     public FlowWell getWell() throws Exception
     {
-        return FlowWell.fromURL(getViewURLHelper(), getRequest());
+        return FlowWell.fromURL(getActionURL(), getRequest());
     }
 
     public Page getPage(String name) throws Exception
@@ -163,7 +163,7 @@ public class WellController extends BaseFlowController
             if (!(obj instanceof FlowWell))
                 return null;
             well = (FlowWell) obj;
-            well.checkContainer(getViewURLHelper());
+            well.checkContainer(getActionURL());
         }
         String graph = getParam(FlowParam.graph);
         byte[] bytes = well.getGraphBytes(new GraphSpec(graph));
@@ -191,14 +191,14 @@ public class WellController extends BaseFlowController
     protected Forward showFCS() throws Exception
     {
         requiresPermission(ACL.PERM_READ);
-        String mode = getViewURLHelper().getParameter("mode");
+        String mode = getActionURL().getParameter("mode");
         FlowWell well = getWell();
 
         try
         {
             if (mode.equals("raw"))
             {
-                String strEventCount = getViewURLHelper().getParameter("eventCount");
+                String strEventCount = getActionURL().getParameter("eventCount");
                 int maxEventCount = Integer.MAX_VALUE;
                 if (strEventCount != null)
                 {

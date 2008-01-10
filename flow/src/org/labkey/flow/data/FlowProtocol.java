@@ -5,7 +5,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.data.*;
 import org.labkey.api.util.PageFlowUtil;
@@ -54,7 +54,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return getForContainer(container, DEFAULT_PROTOCOL_NAME);
     }
 
-    static public FlowProtocol fromURL(User user, ViewURLHelper url, HttpServletRequest request) throws ServletException
+    static public FlowProtocol fromURL(User user, ActionURL url, HttpServletRequest request) throws ServletException
     {
         FlowProtocol ret = fromProtocolId(getIntParam(url, request, FlowParam.experimentId));
         if (ret == null)
@@ -116,7 +116,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return null;
     }
 
-    public ViewURLHelper urlShow()
+    public ActionURL urlShow()
     {
         return urlFor(ProtocolController.Action.showProtocol);
     }
@@ -185,9 +185,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         setProperty(user, ExperimentProperty.SampleSetLSID.getPropertyDescriptor(), getSampleSetLSID());
     }
 
-    public ViewURLHelper urlUploadSamples()
+    public ActionURL urlUploadSamples()
     {
-        ViewURLHelper ret = new ViewURLHelper("Experiment", "showUploadMaterials", getContainerPath());
+        ActionURL ret = new ActionURL("Experiment", "showUploadMaterials", getContainerPath());
         ret.addParameter("name", SAMPLESET_NAME);
         ret.addParameter("nameReadOnly", "true");
         return ret;
@@ -503,7 +503,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         String value = getFCSAnalysisFilterString();
         if (value != null)
         {
-            ViewURLHelper url = new ViewURLHelper();
+            ActionURL url = new ActionURL();
             url.setRawQuery(value);
             ret.addUrlFilters(url, null);
         }

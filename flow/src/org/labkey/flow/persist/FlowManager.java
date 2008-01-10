@@ -12,7 +12,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.*;
 import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.query.AttributeCache;
@@ -516,7 +516,7 @@ public class FlowManager
             MultiMap map = new MultiValueMap();
             ResultSet rs = null;
 
-            ViewURLHelper url = new ViewURLHelper("flow-well", "showWell", "");
+            ActionURL url = new ActionURL("flow-well", "showWell", "");
             StringBuilder link = new StringBuilder(200);
 
             try

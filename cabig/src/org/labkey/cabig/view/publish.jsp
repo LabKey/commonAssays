@@ -2,15 +2,15 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.ViewContext" %>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.cabig.caBIGController" %>
 <%@ page import="org.labkey.cabig.caBIGManager" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ViewContext ctx = HttpView.currentContext();
     boolean isPublished = caBIGManager.get().isPublished(ctx.getContainer());
-    String publishButton = PageFlowUtil.buttonLink(isPublished ? "Unpublish" : "Publish", caBIGController.getCaBigUrl(isPublished ? "unpublish" : "publish", ctx.getContainer(), ctx.getViewURLHelper()));
-    ViewURLHelper adminUrl = caBIGController.getCaBigUrl("admin", ctx.getContainer(), ctx.getViewURLHelper());
+    String publishButton = PageFlowUtil.buttonLink(isPublished ? "Unpublish" : "Publish", caBIGController.getCaBigUrl(isPublished ? "unpublish" : "publish", ctx.getContainer(), ctx.getActionURL()));
+    ActionURL adminUrl = caBIGController.getCaBigUrl("admin", ctx.getContainer(), ctx.getActionURL());
 
     if (isPublished)
     {
@@ -33,7 +33,7 @@ this folder to caBIG&trade;.  If you do this then all experiment data in this fo
     if (isPublished)
     {
 %>
-<br><br>If you've followed the default configuration and installed the caBIG&trade; web application (named "publish") on the same server as LabKey, then you can <a href="<%=h(ctx.getViewURLHelper().getBaseServerURI())%>/publish/Happy.jsp">click here</a> to test it.
+<br><br>If you've followed the default configuration and installed the caBIG&trade; web application (named "publish") on the same server as LabKey, then you can <a href="<%=h(ctx.getActionURL().getBaseServerURI())%>/publish/Happy.jsp">click here</a> to test it.
 <%
     }
 %>

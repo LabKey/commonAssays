@@ -49,7 +49,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
                     {
                         QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MS1Module.EXP_RUN_FILTER, true);
                         view.setTitle("MS1 Runs");
-                        ViewURLHelper url = portalCtx.getViewURLHelper().clone();
+                        ActionURL url = portalCtx.getActionURL().clone();
                         url.setPageFlow(CONTROLLER_NAME);
                         url.setAction("begin");
                         view.setTitleHref(url.getLocalURIString());

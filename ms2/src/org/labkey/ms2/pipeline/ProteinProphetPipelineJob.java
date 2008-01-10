@@ -1,7 +1,7 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.*;
 import org.labkey.api.exp.ExperimentException;
@@ -29,7 +29,7 @@ public class ProteinProphetPipelineJob extends PipelineJob
         setLogFile(new File(_file.getParentFile(), _file.getName() + ".log"));
     }
 
-    public ViewURLHelper getStatusHref()
+    public ActionURL getStatusHref()
     {
         return null;
     }

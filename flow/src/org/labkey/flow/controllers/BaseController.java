@@ -1,12 +1,12 @@
 package org.labkey.flow.controllers;
 
 import org.labkey.api.view.ViewController;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.PageFlowUtil;
 
 abstract public class BaseController<A extends Enum, P extends Enum> extends ViewController
 {
-    public ViewURLHelper urlFor(Enum action)
+    public ActionURL urlFor(Enum action)
     {
         return PageFlowUtil.urlFor(action, getContainerPath());
     }
@@ -24,12 +24,12 @@ abstract public class BaseController<A extends Enum, P extends Enum> extends Vie
         return getRequest().getParameter(param.toString());
     }
 
-    protected void putParam(ViewURLHelper helper, Enum param, String value)
+    protected void putParam(ActionURL helper, Enum param, String value)
     {
         helper.replaceParameter(param.toString(), value);
     }
 
-    protected void putParam(ViewURLHelper helper, Enum param, int value)
+    protected void putParam(ActionURL helper, Enum param, int value)
     {
         putParam(helper, param, Integer.toString(value));
     }
@@ -45,6 +45,6 @@ abstract public class BaseController<A extends Enum, P extends Enum> extends Vie
 
     public String getContainerPath()
     {
-        return getViewURLHelper().getExtraPath();
+        return getActionURL().getExtraPath();
     }
 }

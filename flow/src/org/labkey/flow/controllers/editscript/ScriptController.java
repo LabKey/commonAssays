@@ -101,7 +101,7 @@ public class ScriptController extends BaseFlowController
                 error = validateScript(script);
                 if (error == null)
                 {
-                    ViewURLHelper forward = form.urlFor(Action.editScript);
+                    ActionURL forward = form.urlFor(Action.editScript);
                     return new ViewForward(forward);
                 }
             }
@@ -183,7 +183,7 @@ public class ScriptController extends BaseFlowController
         FlowScript script = FlowScript.create(getUser(), getContainer(), form.ff_name, doc.toString());
 
 
-        ViewURLHelper forward = script.urlShow();
+        ActionURL forward = script.urlShow();
         putParam(forward, FlowParam.scriptId, script.getScriptId());
         return new ViewForward(forward);
     }
@@ -212,7 +212,7 @@ public class ScriptController extends BaseFlowController
         }
         catch (Exception e)
         {
-            ViewURLHelper redirect = analysisScript.urlFor(Action.editScript);
+            ActionURL redirect = analysisScript.urlFor(Action.editScript);
             redirect.addParameter("checkSyntax", "1");
             HttpView.throwRedirect(redirect.toString());
             return null;
@@ -341,7 +341,7 @@ public class ScriptController extends BaseFlowController
         return renderInTemplate(new JspView(templatePage), getContainer(), ntc);
     }
 
-    public ViewURLHelper urlFor(Enum action)
+    public ActionURL urlFor(Enum action)
     {
         // Methods in ScriptController should use form.urlFor().
         throw new UnsupportedOperationException();
@@ -445,7 +445,7 @@ public class ScriptController extends BaseFlowController
         {
             return urlFor(action).toString();
         }
-        public ViewURLHelper urlFor(Action action)
+        public ActionURL urlFor(Action action)
         {
             return form.urlFor(action);
         }
@@ -820,7 +820,7 @@ public class ScriptController extends BaseFlowController
 
         public FlowWell getWell() throws Exception
         {
-            return FlowWell.fromURL(getContext().getViewURLHelper(), getRequest());
+            return FlowWell.fromURL(getContext().getActionURL(), getRequest());
         }
     }
 
@@ -1233,7 +1233,7 @@ public class ScriptController extends BaseFlowController
             addChild(script, src.getAnalysis());
         }
         FlowScript newAnalysisScript = FlowScript.create(getUser(), getContainer(), form.name, doc.toString());
-        ViewURLHelper forward = newAnalysisScript.urlShow();
+        ActionURL forward = newAnalysisScript.urlShow();
         return new ViewForward(forward);
     }
 

@@ -4,7 +4,7 @@
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.ms2.Quantitation"%>
 <%@ page import="java.text.DecimalFormat"%>
-<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.view.ActionURL"%>
 <%@ page import="org.labkey.ms2.MS2Peptide"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.ms2.EditElutionGraphContext" %>
@@ -17,7 +17,7 @@
     DecimalFormat format = new DecimalFormat();
     DecimalFormat decimalRatioFormat = new DecimalFormat();
     decimalRatioFormat.setMaximumFractionDigits(2);
-    ViewURLHelper saveUrl = ctx.getUrl().clone();
+    ActionURL saveUrl = ctx.getUrl().clone();
     saveUrl.setAction("saveElutionProfile.post");
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">

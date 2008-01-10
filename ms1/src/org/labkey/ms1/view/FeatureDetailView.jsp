@@ -3,7 +3,7 @@
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.text.Format" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.ms1.*" %>
 <%@ page import="org.labkey.ms1.model.Feature" %>
 <%@ page import="org.labkey.ms1.view.FeatureDetailsViewContext" %>
@@ -47,8 +47,8 @@
     DecimalFormat fmtDouble = new DecimalFormat("#,##0.0000");
     DecimalFormat fmtPercent = new DecimalFormat("0%");
 
-    ViewURLHelper url = me.getViewContext().getViewURLHelper();
-    ViewURLHelper urlPeaksView = url.clone();
+    ActionURL url = me.getViewContext().getActionURL();
+    ActionURL urlPeaksView = url.clone();
     urlPeaksView.setAction("showPeaks.view");
     urlPeaksView.deleteParameters();
     urlPeaksView.addParameter("runId", feature.getRunId());
@@ -56,7 +56,7 @@
     urlPeaksView.addParameter("scanFirst", feature.getScanFirst() + scanWindowLow);
     urlPeaksView.addParameter("scanLast", feature.getScanLast() + scanWindowHigh);
 
-    ViewURLHelper urlMs2Scan = url.clone();
+    ActionURL urlMs2Scan = url.clone();
     urlMs2Scan.deleteParameters();
     urlMs2Scan.setAction("showMS2Peptide");
     urlMs2Scan.addParameter("featureId", feature.getFeatureId());
@@ -251,7 +251,7 @@
                 String nextFeatureCaption = "Next Feature >>";
 
                 //clone the current url and remove anything specific to the feature
-                ViewURLHelper urlFeature = url.clone();
+                ActionURL urlFeature = url.clone();
                 urlFeature.deleteParameter("scan");
 
                 if(ctx.getPrevFeatureId() < 0)
@@ -366,7 +366,7 @@
                     <td>
                         <%
                             {
-                                ViewURLHelper urlShowPep = url.clone();
+                                ActionURL urlShowPep = url.clone();
                                 urlShowPep.setAction("showPeptide.view");
                                 urlShowPep.setPageFlow("MS2");
                                 urlShowPep.deleteParameters();
@@ -409,7 +409,7 @@
                     out.print(PageFlowUtil.buttonImg(prevScanCaption, "disabled"));
                 else
                 {
-                    ViewURLHelper urlPrev = url.clone();
+                    ActionURL urlPrev = url.clone();
                     urlPrev.deleteParameter("scan");
                     urlPrev.addParameter("scan", prevNextScans[0].intValue());
                     out.print("<a href=\"" + urlPrev.getLocalURIString() + "\">" + PageFlowUtil.buttonImg(prevScanCaption) + "</a>");
@@ -421,7 +421,7 @@
                     out.print(PageFlowUtil.buttonImg(nextScanCaption, "disabled"));
                 else
                 {
-                    ViewURLHelper urlPrev = url.clone();
+                    ActionURL urlPrev = url.clone();
                     urlPrev.deleteParameter("scan");
                     urlPrev.addParameter("scan", prevNextScans[1].intValue());
                     out.print("<a href=\"" + urlPrev.getLocalURIString() + "\">" + PageFlowUtil.buttonImg(nextScanCaption) + "</a>");

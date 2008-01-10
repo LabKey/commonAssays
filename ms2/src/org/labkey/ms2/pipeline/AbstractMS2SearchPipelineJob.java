@@ -3,7 +3,7 @@ package org.labkey.ms2.pipeline;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.util.*;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import java.io.*;
 import java.sql.SQLException;
@@ -343,11 +343,11 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         return "xpress".equalsIgnoreCase(getParameters().get("pipeline quantitation, algorithm"));
     }
 
-    public ViewURLHelper getStatusHref()
+    public ActionURL getStatusHref()
     {
         if (_experimentRowId != null)
         {
-            ViewURLHelper ret = getViewURLHelper().clone();
+            ActionURL ret = getActionURL().clone();
             ret.setPageFlow("Experiment");
             ret.setAction("details");
             ret.setExtraPath(getContainer().getPath());

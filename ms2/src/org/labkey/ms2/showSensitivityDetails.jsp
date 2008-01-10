@@ -1,5 +1,5 @@
 <%@ page import="java.text.DecimalFormat"%>
-<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.view.ActionURL"%>
 <%@ page import="org.labkey.api.view.ViewContext"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.common.tools.SensitivitySummary"%>
@@ -10,7 +10,7 @@
     DecimalFormat df4 = new DecimalFormat("0.0000");
     DecimalFormat df2 = new DecimalFormat("0.00");
     ViewContext me = HttpView.currentContext();
-    ViewURLHelper sensitivityUrl = me.cloneViewURLHelper().setAction(bean.action);
+    ActionURL sensitivityUrl = me.cloneActionURL().setAction(bean.action);
     float[] minProb = bean.summary.getMinProb();
     float[] sensitivity = bean.summary.getSensitivity();
     float[] error = bean.summary.getError();

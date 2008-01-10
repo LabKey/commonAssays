@@ -2,9 +2,8 @@ package org.labkey.flow.query;
 
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.view.FlowQueryView;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.QueryAction;
-import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
@@ -13,7 +12,6 @@ import org.labkey.api.data.CompareType;
 import org.labkey.api.util.PageFlowUtil;
 
 import java.util.Map;
-import java.util.Set;
 
 public enum FlowTableType
 {
@@ -45,19 +43,19 @@ public enum FlowTableType
         return _description;
     }
 
-    public ViewURLHelper urlFor(Container container, QueryAction action)
+    public ActionURL urlFor(Container container, QueryAction action)
     {
         return QueryService.get().urlFor(container, action, FlowSchema.SCHEMANAME, toString());
     }
 
-    public ViewURLHelper urlFor(Container container, SimpleFilter filter)
+    public ActionURL urlFor(Container container, SimpleFilter filter)
     {
         return urlFor(container, filter, null);
     }
 
-    public ViewURLHelper urlFor(Container container, SimpleFilter filter, Sort sort)
+    public ActionURL urlFor(Container container, SimpleFilter filter, Sort sort)
     {
-        ViewURLHelper ret = urlFor(container, QueryAction.executeQuery);
+        ActionURL ret = urlFor(container, QueryAction.executeQuery);
         if (filter != null)
         {
             String strQuery = filter.toQueryString(FlowQueryView.DATAREGIONNAME_DEFAULT);
@@ -73,13 +71,13 @@ public enum FlowTableType
         return ret;
     }
 
-    public ViewURLHelper urlFor(Container container, String colName, Object value)
+    public ActionURL urlFor(Container container, String colName, Object value)
     {
         SimpleFilter filter = new SimpleFilter(colName, value);
         return urlFor(container, filter);
     }
 
-    public ViewURLHelper urlFor(Container container, String colName, CompareType compare, Object value)
+    public ActionURL urlFor(Container container, String colName, CompareType compare, Object value)
     {
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(colName, value, compare);

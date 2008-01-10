@@ -1,28 +1,21 @@
 package org.labkey.nab;
 
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.SamplePropertyHelper;
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.InsertView;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -142,7 +135,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
             return super.afterRunCreation(form, run);
         else
         {
-            HttpView.throwRedirect(new ViewURLHelper("NabAssay", "details",
+            HttpView.throwRedirect(new ActionURL("NabAssay", "details",
                     run.getContainer()).addParameter("rowId", run.getRowId()).addParameter("newRun", "true"));
             return null;
         }

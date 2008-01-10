@@ -7,7 +7,7 @@ import org.labkey.api.data.CompareType;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineJobData;
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.Overview;
 import org.labkey.api.query.QueryAction;
 import org.labkey.api.exp.api.ExpSampleSet;
@@ -128,7 +128,7 @@ public class FlowOverview extends Overview
         StringBuilder description = new StringBuilder("The pipeline root tells " + FlowModule.getLongProductName() + " where in the file system FCS files are permitted to be loaded from.");
         if (_canSetPipelineRoot)
         {
-            ViewURLHelper urlPipelineRoot = new ViewURLHelper("Pipeline", "setup", getContainer());
+            ActionURL urlPipelineRoot = new ActionURL("Pipeline", "setup", getContainer());
             if (_hasPipelineRoot)
             {
                 Action ret = new Action("Change pipeline root", urlPipelineRoot);
@@ -152,13 +152,13 @@ public class FlowOverview extends Overview
     private Action getBrowseForFCSFilesAction()
     {
         if (!_hasPipelineRoot || !_canInsert) return null;
-        ViewURLHelper urlUploadFCSFiles = new ViewURLHelper("Pipeline", "browse", getContainer());
+        ActionURL urlUploadFCSFiles = new ActionURL("Pipeline", "browse", getContainer());
         return new Action(_fcsFileCount == 0 ? "Browse for FCS files to be loaded" : "Browse for more FCS files to be loaded", urlUploadFCSFiles);
     }
 
     private Action getUploadFlowJoAnalysisAction()
     {
-        ViewURLHelper urlUploadFlowJoAnalysis = getContainer().urlFor(AnalysisScriptController.Action.showUploadWorkspace);
+        ActionURL urlUploadFlowJoAnalysis = getContainer().urlFor(AnalysisScriptController.Action.showUploadWorkspace);
         Action ret = new Action("Upload FlowJo Workspace", urlUploadFlowJoAnalysis);
         ret.setExplanatoryHTML("You can also upload results that have been calculated in FlowJo");
         return ret;
@@ -170,9 +170,9 @@ public class FlowOverview extends Overview
         if (_fcsFileCount != 0)
         {
             StringBuilder status = new StringBuilder();
-            ViewURLHelper urlShowFCSFiles = FlowTableType.FCSFiles.urlFor(getContainer(), QueryAction.executeQuery);
+            ActionURL urlShowFCSFiles = FlowTableType.FCSFiles.urlFor(getContainer(), QueryAction.executeQuery);
             status.append("<a href=\"" + h(urlShowFCSFiles) + "\">" + _fcsFileCount + " FCS files</a> have been loaded.");
-            ViewURLHelper urlShowRuns = FlowTableType.Runs.urlFor(getContainer(), "FCSFileCount", CompareType.NEQ, 0);
+            ActionURL urlShowRuns = FlowTableType.Runs.urlFor(getContainer(), "FCSFileCount", CompareType.NEQ, 0);
             if (_fcsRunCount == 1)
             {
                 status.append(" These are in <a href=\"" + h(urlShowRuns) + "\">1 run</a>");
@@ -294,7 +294,7 @@ public class FlowOverview extends Overview
             {
                 statusHTML.append("<br>");
             }
-            ViewURLHelper urlFlowComp = PageFlowUtil.urlFor(CompensationController.Action.begin, getContainer());
+            ActionURL urlFlowComp = PageFlowUtil.urlFor(CompensationController.Action.begin, getContainer());
             statusHTML.append("There are <a href=\"" + h(urlFlowComp.getLocalURIString()) + "\">" + _compensationMatrixCount + " compensation matrices</a>.");
             if (_compensationRunCount != 0)
             {
@@ -349,7 +349,7 @@ public class FlowOverview extends Overview
             }
             else
             {
-                ViewURLHelper urlShowRuns = FlowTableType.Runs.urlFor(getContainer(), "FCSAnalysisCount", CompareType.NEQ, 0);
+                ActionURL urlShowRuns = FlowTableType.Runs.urlFor(getContainer(), "FCSAnalysisCount", CompareType.NEQ, 0);
                 statusHTML.append("<a href=\"" + h(FlowTableType.FCSAnalyses.urlFor(getContainer(), QueryAction.executeQuery)) + "\">" + _fcsAnalysisCount + " FCS files</a> have been analyzed in " + "<a href=\"" + h(urlShowRuns) + "\">" + _fcsAnalysisRunCount + " runs</a>.");
             }
         }

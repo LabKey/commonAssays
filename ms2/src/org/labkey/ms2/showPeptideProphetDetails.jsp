@@ -1,17 +1,17 @@
-<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.view.ActionURL"%>
 <%@ page import="org.labkey.ms2.MS2Run"%>
 
 <%@ include file="showSensitivityDetails.jsp" %>
 
 <table>
 <%
-    ViewURLHelper dist = me.cloneViewURLHelper().setAction("showPeptideProphetDistributionPlot");
-    ViewURLHelper distCumulative = dist.clone().addParameter("cumulative", "1");
+    ActionURL dist = me.cloneActionURL().setAction("showPeptideProphetDistributionPlot");
+    ActionURL distCumulative = dist.clone().addParameter("cumulative", "1");
 
-    ViewURLHelper versus = me.cloneViewURLHelper().setAction("showPeptideProphetObservedVsModelPlot");
-    ViewURLHelper versusCumulative = versus.clone().addParameter("cumulative", "1");
+    ActionURL versus = me.cloneActionURL().setAction("showPeptideProphetObservedVsModelPlot");
+    ActionURL versusCumulative = versus.clone().addParameter("cumulative", "1");
 
-    ViewURLHelper versusPP = me.cloneViewURLHelper().setAction("showPeptideProphetObservedVsPPScorePlot");
+    ActionURL versusPP = me.cloneActionURL().setAction("showPeptideProphetObservedVsPPScorePlot");
 
     for (int i=1; i<4; i++)
     {

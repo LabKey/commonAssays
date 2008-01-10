@@ -26,7 +26,7 @@ public class ProtocolForm extends ViewForm
     {
         if (_protocol != null)
             return _protocol;
-        _protocol = FlowProtocol.fromURL(getUser(), getContext().getViewURLHelper(), getRequest());
+        _protocol = FlowProtocol.fromURL(getUser(), getContext().getActionURL(), getRequest());
         return _protocol;
     }
 

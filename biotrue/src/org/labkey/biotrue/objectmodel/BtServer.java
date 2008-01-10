@@ -7,7 +7,7 @@ import org.labkey.biotrue.soapmodel.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.apache.axis.client.Service;
 import org.apache.axis.client.Call;
 import org.apache.axis.encoding.ser.BeanSerializerFactory;
@@ -236,14 +236,14 @@ public class BtServer extends BtObject
         return getName();
     }
 
-    public ViewURLHelper detailsURL()
+    public ActionURL detailsURL()
     {
         return urlFor(BtController.Action.showServer);
     }
 
-    public ViewURLHelper urlFor(BtController.Action action)
+    public ActionURL urlFor(BtController.Action action)
     {
-        ViewURLHelper ret = action.url(getContainer());
+        ActionURL ret = action.url(getContainer());
         ret.addParameter("serverId", Integer.toString(getRowId()));
         return ret;
     }

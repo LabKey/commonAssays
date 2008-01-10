@@ -340,7 +340,7 @@ public class NecropsyController extends ViewController
 
         MouseModelManager.commitTransaction();
 
-        ViewURLHelper urlhelp = cloneViewURLHelper();
+        ActionURL urlhelp = cloneActionURL();
         urlhelp.setPageFlow("MouseModel-Necropsy").setAction("begin.view");
         urlhelp.deleteParameters();
         urlhelp.replaceParameter("modelId", String.valueOf(MouseModelController.getModelId(form)));

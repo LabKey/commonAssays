@@ -17,7 +17,7 @@
         <tr><td class=ms-vb align=center><div class="ms-searchform"><b>Set Server Password</b></div></td></tr>
         <tr><td>Server:&nbsp;<%=server.getName()%></td><td><input name="password" value="<%=server.getPassword()%>"></td></tr>
         <tr><td colspan="2">
-            <%=PageFlowUtil.buttonLink("Cancel", form.getContext().cloneViewURLHelper().setAction("admin.view"))%>&nbsp;
+            <%=PageFlowUtil.buttonLink("Cancel", form.getContext().cloneActionURL().setAction("admin.view"))%>&nbsp;
             <input type="image" src="<%=PageFlowUtil.buttonSrc("Update")%>">&nbsp;
         </td></tr>
         <tr><td>&nbsp;</td></tr>

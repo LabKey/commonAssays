@@ -3,7 +3,7 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.data.*;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Run;
 
 import java.util.List;
@@ -77,7 +77,7 @@ public abstract class QueryNestingOption
         return _rowIdColumnName;
     }
 
-    public QueryPeptideDataRegion createDataRegion(List<DisplayColumn> originalColumns, MS2Run[] runs, ViewURLHelper url, String dataRegionName, boolean expanded)
+    public QueryPeptideDataRegion createDataRegion(List<DisplayColumn> originalColumns, MS2Run[] runs, ActionURL url, String dataRegionName, boolean expanded)
     {
         List<DisplayColumn> innerColumns = new ArrayList<DisplayColumn>();
         List<DisplayColumn> outerColumns = new ArrayList<DisplayColumn>();

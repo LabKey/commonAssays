@@ -84,7 +84,7 @@ public class MouseModelModule extends DefaultModule implements LsidManager.LsidH
         if ("Mouse".equals(objectType))
         {
             Mouse mouse = MouseModelManager.getMouse(Integer.parseInt(lsid.getObjectId()));
-            ViewURLHelper url = new ViewURLHelper();
+            ActionURL url = new ActionURL();
             url.setExtraPath(ContainerManager.getForId(mouse.getContainer()).getPath());
 
             return url.relativeUrl("details.view", PageFlowUtil.map("entityId", mouse.getEntityId(), "modelId", mouse.getModelId()), "MouseModel-Mouse", false);
@@ -95,7 +95,7 @@ public class MouseModelModule extends DefaultModule implements LsidManager.LsidH
             if (null == sample)
                 return null;
 
-            ViewURLHelper url = new ViewURLHelper();
+            ActionURL url = new ActionURL();
             Container c = ContainerManager.getForId(sample.getContainer());
             url.setExtraPath(c.getPath());
             Mouse mouse = MouseModelManager.getMouse(c, sample.getOrganismId());

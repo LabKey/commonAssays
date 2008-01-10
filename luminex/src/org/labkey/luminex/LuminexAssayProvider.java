@@ -24,7 +24,7 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -71,7 +71,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 ExpProtocol protocol = expRun.getProtocol();
                 if (protocol == null)
                     return null;
-                ViewURLHelper dataURL = AssayService.get().getAssayDataURL(expRun.getContainer(), protocol, expRun.getRowId());
+                ActionURL dataURL = AssayService.get().getAssayDataURL(expRun.getContainer(), protocol, expRun.getRowId());
                 return dataURL.getLocalURIString();
             }
         });
@@ -191,9 +191,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return new HtmlView("Currently the only supported file type is the multi-sheet BioPlex Excel file format.");
     }
 
-    public ViewURLHelper getUploadWizardURL(Container container, ExpProtocol protocol)
+    public ActionURL getUploadWizardURL(Container container, ExpProtocol protocol)
     {
-        ViewURLHelper url = new ViewURLHelper("Luminex", "luminexUploadWizard.view", container);
+        ActionURL url = new ActionURL("Luminex", "luminexUploadWizard.view", container);
         url.addParameter("rowId", protocol.getRowId());
         return url;
     }
@@ -236,7 +236,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return FieldKey.fromParts("Description");
     }
 
-    public ViewURLHelper publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
     {
         try
         {

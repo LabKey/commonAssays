@@ -1,6 +1,6 @@
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
-<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.view.ActionURL"%>
 <%@ page import="org.labkey.ms2.*"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.ms2.ShowPeptideContext"%>
@@ -62,7 +62,7 @@
 
     <tr><td valign=top height="100%">
 <%
-    ViewURLHelper graphUrl = ctx.url.clone();
+    ActionURL graphUrl = ctx.url.clone();
 
     graphUrl.setAction("showGraph");
     graphUrl.deleteParameter("rowIndex");
@@ -180,7 +180,7 @@
 if (p.getQuantitation() != null)
 {
     Quantitation quant = p.getQuantitation();
-    ViewURLHelper elutionGraphUrl = ctx.url.clone();
+    ActionURL elutionGraphUrl = ctx.url.clone();
     String errorMessage = ctx.url.getParameter("elutionProfileError");
 
     elutionGraphUrl.setAction("showLightElutionGraph");
@@ -197,7 +197,7 @@ if (p.getQuantitation() != null)
         currentCharge = p.getCharge();
     }
     DecimalFormat format = new DecimalFormat();
-    ViewURLHelper editUrl = ctx.url.clone();
+    ActionURL editUrl = ctx.url.clone();
     editUrl.setAction("editElutionGraph");
 
     if (errorMessage != null)

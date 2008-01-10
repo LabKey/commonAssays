@@ -46,7 +46,7 @@ public class ProteinController extends ViewController
         buttonBar.add(addButton);
 
         ActionButton deleteButton = new ActionButton("", "Delete selected");
-        ViewURLHelper deleteURL = new ViewURLHelper("protein", "deleteCustomAnnotationSets.view", getContainer());
+        ActionURL deleteURL = new ActionURL("protein", "deleteCustomAnnotationSets.view", getContainer());
         deleteButton.setScript("return verifySelected(this.form, \"" + deleteURL.getLocalURIString() + "\", \"post\", \"Custom Annotation Sets\")");
         deleteButton.setActionType(ActionButton.Action.POST);
         deleteButton.setDisplayPermission(ACL.PERM_DELETE);
@@ -58,7 +58,7 @@ public class ProteinController extends ViewController
 
         if (!getContainer().isProject())
         {
-            ViewURLHelper link = cloneViewURLHelper();
+            ActionURL link = cloneActionURL();
             link.setExtraPath(getContainer().getProject().getPath());
             HtmlView noteView = new HtmlView("This list only shows annotation sets that have been loaded into this folder. When constructing queries, <a href=\"" + link + "\">annotations in the project</a> are visible from all the folders in that project.");
             box.addView(noteView);
@@ -78,7 +78,7 @@ public class ProteinController extends ViewController
         throws Exception
     {
         UserSchema schema = new CustomAnnotationSchema(getUser(), getContainer(), showSequences);
-        QuerySettings settings = new QuerySettings(getViewURLHelper(), getRequest(), "CustomAnnotation");
+        QuerySettings settings = new QuerySettings(getActionURL(), getRequest(), "CustomAnnotation");
 
         settings.getQueryDef(schema);
         settings.setAllowChooseQuery(true);
@@ -108,7 +108,7 @@ public class ProteinController extends ViewController
         queryView.setShowCustomizeViewLinkInButtonBar(true);
         queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
 
-        ViewURLHelper url = cloneViewURLHelper();
+        ActionURL url = cloneActionURL();
         url.deleteParameters();
 
         String header;
@@ -131,8 +131,8 @@ public class ProteinController extends ViewController
         VBox box = new VBox(linkView, queryView);
 
         NavTrailConfig config = new NavTrailConfig(getViewContext());
-        ViewURLHelper listURL = new ViewURLHelper("protein", "begin.view", getContainer());
-        config.setExtraChildren(new NavTree("MS2", new ViewURLHelper("MS2", "begin.view", getContainer())), new NavTree("Custom Annotation Sets", listURL));
+        ActionURL listURL = new ActionURL("protein", "begin.view", getContainer());
+        config.setExtraChildren(new NavTree("MS2", new ActionURL("MS2", "begin.view", getContainer())), new NavTree("Custom Annotation Sets", listURL));
         config.setTitle("Custom Annotation Set: " + settings.getQueryName());
         return renderInTemplate(box, getContainer(), config);
     }
@@ -166,8 +166,8 @@ public class ProteinController extends ViewController
         JspView<UploadAnnotationsForm> view = new JspView<UploadAnnotationsForm>("/org/labkey/ms2/protein/uploadCustomProteinAnnotations.jsp", form);
 
         NavTrailConfig config = new NavTrailConfig(getViewContext());
-        ViewURLHelper listURL = new ViewURLHelper("protein", "begin.view", getContainer());
-        config.setExtraChildren(new NavTree("MS2", new ViewURLHelper("MS2", "begin.view", getContainer())), new NavTree("Custom Annotation Sets", listURL));
+        ActionURL listURL = new ActionURL("protein", "begin.view", getContainer());
+        config.setExtraChildren(new NavTree("MS2", new ActionURL("MS2", "begin.view", getContainer())), new NavTree("Custom Annotation Sets", listURL));
         config.setTitle("Upload Custom Protein Annotations");
 
         return renderInTemplate(view, getContainer(), config);

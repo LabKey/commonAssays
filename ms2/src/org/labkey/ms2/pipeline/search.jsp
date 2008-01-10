@@ -2,7 +2,7 @@
 <%@ page import="org.labkey.api.pipeline.PipelineUrls"%>
 <%@ page import="org.labkey.api.util.HelpTopic"%>
 <%@ page import="org.labkey.api.view.ThemeFont"%>
-<%@ page import="org.labkey.api.view.ViewURLHelper"%>
+<%@ page import="org.labkey.api.view.ActionURL"%>
 <%@ page import="org.labkey.ms2.pipeline.FileStatus" %>
 <%@ page import="org.labkey.ms2.pipeline.MS2SearchForm" %>
 <%@ page import="org.labkey.ms2.pipeline.PipelineController" %>
@@ -288,7 +288,7 @@ if (!getCreatingRuns().isEmpty())
 <%
     for (ExpRun run : getCreatingRuns())
     {
-        ViewURLHelper runURL = new ViewURLHelper("Experiment", "showRunGraph.view", getContainer());
+        ActionURL runURL = new ActionURL("Experiment", "showRunGraph.view", getContainer());
         %><li><a href="<%= runURL %>rowId=<%= run.getRowId() %>"><%= run.getName() %></a></li><%
     }
 %>
@@ -302,7 +302,7 @@ else
 
 if (!getCreatingRuns().isEmpty() || !getAnnotationFiles().isEmpty())
 {
-    ViewURLHelper urlRedescribe = urlFor(PipelineController.RedescribeFilesAction.class);
+    ActionURL urlRedescribe = urlFor(PipelineController.RedescribeFilesAction.class);
     urlRedescribe.addParameter("path", form.getPath());
     urlRedescribe.addParameter("searchEngine", form.getSearchEngine());
 %>

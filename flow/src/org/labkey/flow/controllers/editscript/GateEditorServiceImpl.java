@@ -2,7 +2,7 @@ package org.labkey.flow.controllers.editscript;
 
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.ACL;
@@ -401,7 +401,7 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             }
             PlotInfo plotInfo = FCSAnalyzer.get().generateDesignGraph(FlowAnalyzer.getFCSUri(well), comp == null ? null : comp.getCompensationMatrix(), group, graphSpec, graphOptions.width, graphOptions.height, false);
             GWTGraphInfo graphInfo = makeGraphInfo(plotInfo);
-            ViewURLHelper url = script.urlFor(ScriptController.Action.graphImage);
+            ActionURL url = script.urlFor(ScriptController.Action.graphImage);
             well.addParams(url);
             if (comp != null)
             {

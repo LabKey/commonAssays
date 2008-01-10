@@ -3,22 +3,19 @@ package org.labkey.flow.query;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.Portal;
-import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.security.User;
-import org.labkey.api.data.PropertyManager;
-import org.labkey.flow.controllers.FlowParam;
+import org.labkey.api.view.ActionURL;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class FlowQuerySettings extends QuerySettings
 {
     private boolean _showGraphs;
-    public FlowQuerySettings(ViewURLHelper url, HttpServletRequest request, String dataRegionName)
+    public FlowQuerySettings(ActionURL url, HttpServletRequest request, String dataRegionName)
     {
         super(url, request, dataRegionName);
     }
 
-    protected void init(ViewURLHelper url)
+    protected void init(ActionURL url)
     {
         super.init(url);
         _showGraphs = url.getParameter(param("showGraphs")) != null;

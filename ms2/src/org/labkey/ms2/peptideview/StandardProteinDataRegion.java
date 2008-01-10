@@ -3,7 +3,7 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.ms2.Protein;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class StandardProteinDataRegion extends AbstractProteinDataRegion
 {
     private int _peptideIndex = -1;
 
-    public StandardProteinDataRegion(ViewURLHelper url)
+    public StandardProteinDataRegion(ActionURL url)
     {
         super("Protein", url);
         setShadeAlternatingRows(true);

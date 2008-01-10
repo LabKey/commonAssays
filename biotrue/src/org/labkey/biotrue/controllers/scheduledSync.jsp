@@ -30,7 +30,7 @@
             </select>
         <tr><td></td></tr>
         <tr><td>
-            <%=PageFlowUtil.buttonLink("Cancel", form.getContext().cloneViewURLHelper().setAction("admin.view"))%>&nbsp;
+            <%=PageFlowUtil.buttonLink("Cancel", form.getContext().cloneActionURL().setAction("admin.view"))%>&nbsp;
             <input type="image" src="<%=PageFlowUtil.buttonSrc("Update")%>">&nbsp;
         </td></tr>
         <tr><td>&nbsp;</td></tr>

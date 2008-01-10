@@ -12,7 +12,7 @@ import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
@@ -63,10 +63,10 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
     {
         PlateService.get().registerDetailsLinkResolver(new PlateService.PlateDetailsResolver()
         {
-            public ViewURLHelper getDetailsURL(Plate plate)
+            public ActionURL getDetailsURL(Plate plate)
             {
                 // for 2.0, we'll accept all plate types: only NAB uses the plate service.
-                ViewURLHelper url = new ViewURLHelper("Nab", "display", plate.getContainer());
+                ActionURL url = new ActionURL("Nab", "display", plate.getContainer());
                 url.addParameter("rowId", "" + plate.getRowId());
                 return url;
             }
@@ -86,15 +86,15 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
         return result;
     }
 
-    public ViewURLHelper getTabURL(Container c, User user)
+    public ActionURL getTabURL(Container c, User user)
     {
-        ViewURLHelper defaultURL = super.getTabURL(c, user);
+        ActionURL defaultURL = super.getTabURL(c, user);
 
         // this is a bit of a hack: while we're supporting both old and new assay-based NAB
         // implementations, it's less confusing to the user if the NAB tab keeps them from switching
         // from the new implementation to the old, so we swap out the pageflow of the tab URL:
         ViewContext context = HttpView.getRootContext();
-        String pageFlow = context != null ? context.getViewURLHelper().getPageFlow() : null;
+        String pageFlow = context != null ? context.getActionURL().getPageFlow() : null;
         if ("assay".equals(pageFlow) || "NabAssay".equals(pageFlow))
             defaultURL.setPageFlow("assay");
 

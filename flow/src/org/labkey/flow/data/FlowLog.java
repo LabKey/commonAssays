@@ -1,8 +1,7 @@
 package org.labkey.flow.data;
 
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.exp.api.ExpData;
-import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.apache.commons.lang.StringUtils;
 
 import java.sql.SQLException;
@@ -26,14 +25,14 @@ public class FlowLog extends FlowDataObject
         super(data);
     }
 
-    public Map<FlowParam,Object> getParams(ViewURLHelper url)
+    public Map<FlowParam,Object> getParams(ActionURL url)
     {
         EnumMap<FlowParam,Object> ret = new EnumMap(FlowParam.class);
         ret.put(FlowParam.logId, getRowId());
         return ret;
     }
 
-    public ViewURLHelper urlShow()
+    public ActionURL urlShow()
     {
         return urlFor(LogController.Action.showLog);
     }

@@ -6,7 +6,7 @@ import com.iplanet.sso.SSOTokenManager;
 import org.apache.log4j.Logger;
 import org.labkey.api.security.AuthenticationProvider;
 import org.labkey.api.security.ValidEmail;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,7 +35,7 @@ public class OpenSSOProvider implements AuthenticationProvider.RequestAuthentica
         return "OpenSSO";
     }
 
-    public ViewURLHelper getConfigurationLink(ViewURLHelper returnUrl)
+    public ActionURL getConfigurationLink(ActionURL returnUrl)
     {
         return OpenSSOController.getCurrentSettingsUrl(returnUrl);
     }

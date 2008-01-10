@@ -2,7 +2,7 @@ package org.labkey.flow.data;
 
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.flow.persist.AttributeSet;
@@ -12,7 +12,6 @@ import org.labkey.flow.analysis.web.StatisticSpec;
 
 import java.util.*;
 import java.sql.SQLException;
-import java.net.URI;
 import java.io.File;
 import java.io.Serializable;
 
@@ -34,7 +33,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
         return (FlowCompensationMatrix) FlowDataObject.fromRowId(id);
     }
 
-    static public FlowCompensationMatrix fromURL(ViewURLHelper url, HttpServletRequest request) throws Exception
+    static public FlowCompensationMatrix fromURL(ActionURL url, HttpServletRequest request) throws Exception
     {
         FlowCompensationMatrix ret = fromCompId(getIntParam(url, request, FlowParam.compId));
         if (ret != null)
@@ -124,7 +123,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
         return ret;
     }
 
-    public ViewURLHelper urlShow()
+    public ActionURL urlShow()
     {
         return urlFor(CompensationController.Action.showCompensation);
     }

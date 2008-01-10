@@ -4,7 +4,7 @@ import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.CaseInsensitiveHashMap;
 
@@ -127,7 +127,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
             int groupId = ((Number) groupIdObject).intValue();
             List<ProteinSummary> summaryList = _proteins.getSummaries(groupId, ctx, _columnName);
 
-            ViewURLHelper url = ctx.getViewContext().cloneViewURLHelper();
+            ActionURL url = ctx.getViewContext().cloneActionURL();
             url.setAction("showProtein.view");
 
             if (summaryList != null)
@@ -150,7 +150,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         set.add(_columnInfo);
     }
 
-    private void writeInfo(ProteinSummary summary, Writer out, ViewURLHelper url, int groupId) throws IOException
+    private void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
     {
         if (_sequenceColumn.equalsIgnoreCase("Protein"))
         {

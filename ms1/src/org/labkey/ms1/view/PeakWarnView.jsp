@@ -1,9 +1,9 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.ViewURLHelper" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%
     JspView me = (JspView)HttpView.currentView();
-    ViewURLHelper urlPipeline = new ViewURLHelper("Pipeline", "begin", me.getViewContext().getContainer());
+    ActionURL urlPipeline = new ActionURL("Pipeline", "begin", me.getViewContext().getContainer());
 %>
 <table cellpadding="2px" width="100%">
     <tr>

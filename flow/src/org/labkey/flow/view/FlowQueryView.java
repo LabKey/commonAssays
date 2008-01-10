@@ -78,7 +78,7 @@ public class FlowQueryView extends QueryView
         {
             if (showGraphs())
             {
-                ViewURLHelper urlHide = getViewContext().cloneViewURLHelper();
+                ActionURL urlHide = getViewContext().cloneActionURL();
                 urlHide.deleteParameter(param("showGraphs"));
                 out.write(textLink("Hide Graphs", urlHide));
                 JspView view = new JspView(JspLoader.createPage(getViewContext().getRequest(), FlowQueryView.class, "setGraphSize.jsp"));
@@ -87,7 +87,7 @@ public class FlowQueryView extends QueryView
             }
             else
             {
-                ViewURLHelper urlShow = getViewContext().cloneViewURLHelper();
+                ActionURL urlShow = getViewContext().cloneActionURL();
                 urlShow.addParameter(param("showGraphs"), "true");
                 out.write(textLink("Show Graphs", urlShow));
                 out.write("&nbsp;");
@@ -105,9 +105,9 @@ public class FlowQueryView extends QueryView
         return getSettings().getShowGraphs();
     }
 
-    protected ViewURLHelper urlChangeView()
+    protected ActionURL urlChangeView()
     {
-        ViewURLHelper ret = super.urlChangeView();
+        ActionURL ret = super.urlChangeView();
         ret.deleteParameter(FlowParam.experimentId.toString());
         return ret;
     }
@@ -178,7 +178,7 @@ public class FlowQueryView extends QueryView
         List<NavTree> children = new ArrayList<NavTree>();
         if (getContainer().getFolderType() instanceof FlowFolderType)
         {
-            children.add(0, new NavTree("Flow Dashboard", new ViewURLHelper("Project", "begin", getContainer())));
+            children.add(0, new NavTree("Flow Dashboard", new ActionURL("Project", "begin", getContainer())));
         }
         else
         {

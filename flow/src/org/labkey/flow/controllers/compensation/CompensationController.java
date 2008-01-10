@@ -48,9 +48,9 @@ public class CompensationController extends SpringFlowController<CompensationCon
     }
 
 
-    private ViewURLHelper actionURL(Action action)
+    private ActionURL actionURL(Action action)
     {
-        return new ViewURLHelper("flow-compensation", action.name(), getContainer());
+        return new ActionURL("flow-compensation", action.name(), getContainer());
     }
 
 
@@ -65,13 +65,13 @@ public class CompensationController extends SpringFlowController<CompensationCon
     {
         public ModelAndView getView(QueryForm form, BindException errors) throws Exception
         {
-            QuerySettings settings = getFlowSchema().getSettings(getViewContext().getViewURLHelper(), getViewContext().getRequest(), "comp");
+            QuerySettings settings = getFlowSchema().getSettings(getViewContext().getActionURL(), getViewContext().getRequest(), "comp");
             return new CompensationListView(settings);
         }
 
-        public ViewURLHelper queryURL()
+        public ActionURL queryURL()
         {
-            ViewURLHelper q = new ViewURLHelper("query", "executeQuery", CompensationController.this.getContainer());
+            ActionURL q = new ActionURL("query", "executeQuery", CompensationController.this.getContainer());
             q.addParameter("schemaName", "flow");
             q.addParameter("query.queryName", "CompensationMatrices");
             return q;            
@@ -157,7 +157,7 @@ public class CompensationController extends SpringFlowController<CompensationCon
             return true;
         }
 
-        public ViewURLHelper getSuccessURL(UploadCompensationForm uploadCompensationForm)
+        public ActionURL getSuccessURL(UploadCompensationForm uploadCompensationForm)
         {
             return _flowComp.urlShow();
         }
@@ -176,7 +176,7 @@ public class CompensationController extends SpringFlowController<CompensationCon
 
         public ModelAndView getView(ViewForm form, BindException errors) throws Exception
         {
-            _comp = FlowCompensationMatrix.fromURL(getViewURLHelper(), getRequest());
+            _comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest());
             return FormPage.getView(CompensationController.class, form, "showCompensation.jsp");
         }
 
@@ -204,7 +204,7 @@ public class CompensationController extends SpringFlowController<CompensationCon
 
         public ModelAndView getConfirmView(ViewForm form, BindException errors) throws Exception
         {
-            FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getViewURLHelper(), getRequest());
+            FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest());
             if (null == comp)
                 HttpView.throwNotFound();
             return FormPage.getView(CompensationController.class, form, "delete.jsp");
@@ -212,7 +212,7 @@ public class CompensationController extends SpringFlowController<CompensationCon
 
         public boolean handlePost(ViewForm viewForm, BindException errors) throws Exception
         {
-            FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getViewURLHelper(), getRequest());
+            FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest());
             if (null == comp)
             {
                 HttpView.throwNotFound();
@@ -245,12 +245,12 @@ public class CompensationController extends SpringFlowController<CompensationCon
         }
 
 
-        public ViewURLHelper getFailURL(ViewForm viewForm, BindException errors)
+        public ActionURL getFailURL(ViewForm viewForm, BindException errors)
         {
             return urlFor(Action.begin);
         }
 
-        public ViewURLHelper getSuccessURL(ViewForm viewForm)
+        public ActionURL getSuccessURL(ViewForm viewForm)
         {
             return urlFor(Action.begin);
         }

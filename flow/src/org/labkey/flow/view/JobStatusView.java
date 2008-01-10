@@ -6,8 +6,7 @@ import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.script.ScriptJob;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.pipeline.PipelineStatusFile;
 
 import java.io.PrintWriter;
@@ -105,7 +104,7 @@ public class JobStatusView extends HttpView
         out.write("</tr></table>");
         if (_job != null)
         {
-            ViewURLHelper cancelURL = new ViewURLHelper("Flow", "cancelJob", getViewContext().getContainer());
+            ActionURL cancelURL = new ActionURL("Flow", "cancelJob", getViewContext().getContainer());
             cancelURL.addParameter("statusFile", _psf.getFilePath());
             out.write("<br>" + PageFlowUtil.buttonLink("Cancel Job", cancelURL));
         }

@@ -3,7 +3,7 @@ package org.labkey.ms2;
 import org.labkey.api.util.ContainerTree;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.security.User;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.DataRegion;
@@ -21,13 +21,13 @@ public class MS2RunHierarchyTree extends ContainerTree
 {
     private static Logger _log = Logger.getLogger(MS2RunHierarchyTree.class);
 
-    public MS2RunHierarchyTree(String rootPath, User user, int perm, ViewURLHelper url)
+    public MS2RunHierarchyTree(String rootPath, User user, int perm, ActionURL url)
     {
         super(rootPath, user, perm, url);
     }
 
     @Override
-    protected void renderNode(StringBuilder html, Container parent, ViewURLHelper url, boolean isAuthorized, int level)
+    protected void renderNode(StringBuilder html, Container parent, ActionURL url, boolean isAuthorized, int level)
     {
         html.append("<tr>");
         String firstTd = "<td style=\"padding-left:" + 20 * level + "\">";
@@ -60,7 +60,7 @@ public class MS2RunHierarchyTree extends ContainerTree
 
                 if (moreRuns)
                 {
-                    ViewURLHelper runUrl = url.clone();
+                    ActionURL runUrl = url.clone();
                     runUrl.setAction("showRun");
 
                     html.append("<tr>");

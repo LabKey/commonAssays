@@ -44,7 +44,7 @@
     </tr>
     <tr>
         <td style="padding-left:10px"><b>Sample Set</b></td>
-        <td class="normal">Set that contains the sample used in this analysis. <a href="<%=getViewContext().getViewURLHelper().relativeUrl("showUploadMaterials.view", "", "Experiment")%>">Upload</a> sample information using the experiment module, and <a href="<%=getViewContext().getViewURLHelper().relativeUrl("listMaterialSources.view", "", "Experiment")%>">set the active sample set</a>. Optional.</td>
+        <td class="normal">Set that contains the sample used in this analysis. <a href="<%=getViewContext().getActionURL().relativeUrl("showUploadMaterials.view", "", "Experiment")%>">Upload</a> sample information using the experiment module, and <a href="<%=getViewContext().getActionURL().relativeUrl("listMaterialSources.view", "", "Experiment")%>">set the active sample set</a>. Optional.</td>
     </tr>
     <tr>
         <td style="padding-left:10px"><b>Sample Id</b></td>

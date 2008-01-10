@@ -6,7 +6,7 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.common.util.Pair;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -21,7 +21,7 @@ public class ProteinProphetCompareQuery extends CompareQuery
 {
     public static final String COMPARISON_DESCRIPTION = "Compare ProteinProphet Proteins";
 
-    protected ProteinProphetCompareQuery(ViewURLHelper currentUrl, List<MS2Run> runs)
+    protected ProteinProphetCompareQuery(ActionURL currentUrl, List<MS2Run> runs)
     {
         super(currentUrl, "SeqId", runs);
 
@@ -117,7 +117,7 @@ public class ProteinProphetCompareQuery extends CompareQuery
         append(" seq ON grouped.SeqId = seq.SeqId");
     }
 
-    protected String setupComparisonColumnLink(ViewURLHelper linkURL, String columnName, String runPrefix)
+    protected String setupComparisonColumnLink(ActionURL linkURL, String columnName, String runPrefix)
     {
         linkURL.setAction("showRun");
         linkURL.replaceParameter("expanded", "1");
@@ -127,7 +127,7 @@ public class ProteinProphetCompareQuery extends CompareQuery
         return paramName + "~eq=${" + runPrefix + "GroupNumber}";
     }
 
-    protected DisplayColumn createColumn(ViewURLHelper linkURL, RunColumn column, String runPrefix, String columnName, TableInfo ti, ResultSetMetaData md, CompareDataRegion rgn)
+    protected DisplayColumn createColumn(ActionURL linkURL, RunColumn column, String runPrefix, String columnName, TableInfo ti, ResultSetMetaData md, CompareDataRegion rgn)
         throws SQLException
     {
         if (column.getLabel().equals("CollectionId"))
@@ -155,7 +155,7 @@ public class ProteinProphetCompareQuery extends CompareQuery
     protected ColumnInfo getComparisonCommonColumn(TableInfo ti)
     {
         ColumnInfo result = ti.getColumn("Protein");
-        ViewURLHelper linkURL = _currentUrl.clone();
+        ActionURL linkURL = _currentUrl.clone();
         linkURL.setAction("showProtein");
         linkURL.deleteParameter("seqId");
         result.setURL(linkURL.getLocalURIString() + "&seqId=${SeqId}");

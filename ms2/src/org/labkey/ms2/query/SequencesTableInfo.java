@@ -2,7 +2,7 @@ package org.labkey.ms2.query;
 
 import org.labkey.api.query.*;
 import org.labkey.api.data.*;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.security.User;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.StringExpressionFactory;
@@ -48,7 +48,7 @@ public class SequencesTableInfo extends FilteredTable
         getColumn("SourceId").setIsHidden(true);
 
 
-        ViewURLHelper url = new ViewURLHelper("MS2", "showProtein.view", _container);
+        ActionURL url = new ActionURL("MS2", "showProtein.view", _container);
         getColumn("BestName").setURL(url + "seqId=${SeqId}");
 
         ColumnInfo annotationColumn = wrapColumn("CustomAnnotations", _rootTable.getColumn("SeqId"));

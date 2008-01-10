@@ -52,9 +52,9 @@ public class ProjectController extends SpringActionController
 
     public static class PipelineUrlsImp implements ProjectUrls
     {
-        public ViewURLHelper urlStart(Container container)
+        public ActionURL urlStart(Container container)
         {
-            return new ViewURLHelper(StartAction.class, container);
+            return new ActionURL(StartAction.class, container);
         }
     }
 
@@ -65,14 +65,14 @@ public class ProjectController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    ViewURLHelper homeUrl()
+    ActionURL homeUrl()
     {
-        return new ViewURLHelper("Project", "begin", ContainerManager.HOME_PROJECT_PATH);
+        return new ActionURL("Project", "begin", ContainerManager.HOME_PROJECT_PATH);
     }
 
-    ViewURLHelper projectUrl(String action)
+    ActionURL projectUrl(String action)
     {
-        return new ViewURLHelper("Project", action, getContainer());
+        return new ActionURL("Project", action, getContainer());
 
     }
 
@@ -138,7 +138,7 @@ public class ProjectController extends SpringActionController
             else
                 title = c.getName();
 
-            ViewURLHelper url = getViewContext().getViewURLHelper();
+            ActionURL url = getViewContext().getActionURL();
             if (null == url || url.getExtraPath().equals("/"))
                 return HttpView.redirect(homeUrl());
 
@@ -244,7 +244,7 @@ public class ProjectController extends SpringActionController
             return true;
         }
 
-        public ViewURLHelper getSuccessURL(MovePortletForm movePortletForm)
+        public ActionURL getSuccessURL(MovePortletForm movePortletForm)
         {
             return projectUrl("begin");
         }
@@ -283,7 +283,7 @@ public class ProjectController extends SpringActionController
             return true;
         }
 
-        public ViewURLHelper getSuccessURL(AddWebPartForm form)
+        public ActionURL getSuccessURL(AddWebPartForm form)
         {
             if (null != _desc && _desc.isEditable() && _desc.showCustomizeOnInsert())
             {
@@ -333,7 +333,7 @@ public class ProjectController extends SpringActionController
             return true;
         }
 
-        public ViewURLHelper getSuccessURL(CustomizePortletForm customizePortletForm)
+        public ActionURL getSuccessURL(CustomizePortletForm customizePortletForm)
         {
             return projectUrl("begin");
         }
@@ -513,7 +513,7 @@ public class ProjectController extends SpringActionController
             }
         }
 
-        public ViewURLHelper getSuccessURL(CustomizePortletForm customizePortletForm)
+        public ActionURL getSuccessURL(CustomizePortletForm customizePortletForm)
         {
             return projectUrl("begin");
         }
@@ -543,9 +543,9 @@ public class ProjectController extends SpringActionController
     }
 
 
-    public static ViewURLHelper getSearchUrl(Container c)
+    public static ActionURL getSearchUrl(Container c)
     {
-        return new ViewURLHelper("Project", "search", c);
+        return new ActionURL("Project", "search", c);
     }
 
 
@@ -588,7 +588,7 @@ public class ProjectController extends SpringActionController
         {
             super.prepareWebPart(model);
             Container c = getViewContext().getContainer(ACL.PERM_UPDATE);
-            addObject("postURL", ViewURLHelper.toPathString("Project", "customizeSearchWebPart", c.getPath()));  // TODO: Change to custom post action once subclassing of actions works
+            addObject("postURL", ActionURL.toPathString("Project", "customizeSearchWebPart", c.getPath()));  // TODO: Change to custom post action once subclassing of actions works
         }
     }
 

@@ -15,7 +15,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.*;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -333,7 +333,7 @@ public class NabManager
         }
     }
 
-    public ViewURLHelper getDataFileDownloadLink(Plate plate)
+    public ActionURL getDataFileDownloadLink(Plate plate)
     {
         return PlateService.get().getDataFileURL(plate, "Nab");
     }

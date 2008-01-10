@@ -1,7 +1,6 @@
 package org.labkey.flow.controllers;
 
 import org.labkey.api.jsp.JspBase;
-import org.labkey.api.view.ViewURLHelper;
 import org.labkey.api.util.AppProps;
 
 import java.util.List;

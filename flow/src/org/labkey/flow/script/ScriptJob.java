@@ -16,7 +16,7 @@ import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.controllers.FlowController;
@@ -56,7 +56,7 @@ abstract public class ScriptJob extends PipelineJob
     FlowProtocol _protocol;
 
     private transient ScriptHandlerGroup _handlers;
-    private transient ViewURLHelper _statusHref;
+    private transient ActionURL _statusHref;
 
     class RunData
     {
@@ -229,7 +229,7 @@ abstract public class ScriptJob extends PipelineJob
         return FlowExperiment.fromLSID(_experimentLSID);
     }
 
-    public ViewURLHelper urlRedirect()
+    public ActionURL urlRedirect()
     {
         if (!isComplete())
             return null;
@@ -238,7 +238,7 @@ abstract public class ScriptJob extends PipelineJob
         return urlData();
     }
 
-    public ViewURLHelper urlData()
+    public ActionURL urlData()
     {
         FlowExperiment experiment = getExperiment();
         if (experiment == null)
@@ -246,7 +246,7 @@ abstract public class ScriptJob extends PipelineJob
         return experiment.urlShow();
     }
 
-    public ViewURLHelper urlStatus()
+    public ActionURL urlStatus()
     {
         if (_statusHref == null)
         {
@@ -309,9 +309,9 @@ abstract public class ScriptJob extends PipelineJob
         return compRun.getCompensationMatrix();
     }
 
-    public ViewURLHelper getStatusHref()
+    public ActionURL getStatusHref()
     {
-        ViewURLHelper ret = urlRedirect();
+        ActionURL ret = urlRedirect();
         if (ret != null)
         {
             return ret;
@@ -319,7 +319,7 @@ abstract public class ScriptJob extends PipelineJob
         return urlStatus().clone();
     }
 
-    public ViewURLHelper getStatusHref(HttpServletRequest request)
+    public ActionURL getStatusHref(HttpServletRequest request)
         {
         return getStatusHref();
         }
@@ -779,9 +779,9 @@ abstract public class ScriptJob extends PipelineJob
         return PipelineStatusFile.pathOf(getStatusFile().getAbsolutePath());
     }
 
-    public ViewURLHelper urlCancel()
+    public ActionURL urlCancel()
     {
-        ViewURLHelper ret = PageFlowUtil.urlFor(FlowController.Action.cancelJob, getContainer());
+        ActionURL ret = PageFlowUtil.urlFor(FlowController.Action.cancelJob, getContainer());
         ret.addParameter(FlowParam.statusFile.toString(), getStatusFilePath());
         return ret;
     }

@@ -4,12 +4,10 @@ import org.labkey.api.exp.api.TableEditHelper;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.labkey.api.security.ACL;
-import org.labkey.api.view.ViewURLHelper;
-import org.labkey.api.view.ViewForward;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.QueryUpdateForm;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.util.PageFlowUtil;
-import org.apache.beehive.netui.pageflow.Forward;
 
 public class RunEditHelper extends TableEditHelper
 {
@@ -19,7 +17,7 @@ public class RunEditHelper extends TableEditHelper
         _schema = schema;
     }
 
-    public ViewURLHelper delete(User user, ViewURLHelper srcURL, QueryUpdateForm form) throws Exception
+    public ActionURL delete(User user, ActionURL srcURL, QueryUpdateForm form) throws Exception
     {
         String[] pks = form.getRequest().getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
         ExperimentService.get().deleteExperimentRunsByRowIds(_schema.getContainer(), user, PageFlowUtil.toInts(pks));

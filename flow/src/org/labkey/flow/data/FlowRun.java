@@ -4,7 +4,7 @@ import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.data.*;
 import org.labkey.api.security.User;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.QueryService;
 import org.apache.log4j.Logger;
 
@@ -182,11 +182,11 @@ public class FlowRun extends FlowObject<ExpRun>
         return new FlowRun(run);
     }
 
-    static public FlowRun fromURL(ViewURLHelper url) throws ServletException
+    static public FlowRun fromURL(ActionURL url) throws ServletException
     {
         return fromURL(url, null);
     }
-    static public FlowRun fromURL(ViewURLHelper url, HttpServletRequest request) throws ServletException
+    static public FlowRun fromURL(ActionURL url, HttpServletRequest request) throws ServletException
     {
         FlowRun ret = fromRunId(getIntParam(url, request, FlowParam.runId));
         if (ret != null)
@@ -226,7 +226,7 @@ public class FlowRun extends FlowObject<ExpRun>
         map.put(FlowParam.runId, getRunId());
     }
 
-    public ViewURLHelper urlShow()
+    public ActionURL urlShow()
     {
         return addParams(pfURL(RunController.Action.showRun));
     }

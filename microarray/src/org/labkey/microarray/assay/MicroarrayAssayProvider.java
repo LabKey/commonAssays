@@ -7,7 +7,7 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Container;
@@ -125,7 +125,7 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         throw new UnsupportedOperationException();
     }
 
-    public ViewURLHelper publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
     {
         throw new UnsupportedOperationException();
     }

@@ -6,7 +6,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
@@ -49,7 +49,7 @@ public class MicroarrayPipelineProvider extends PipelineProvider
                     {
                         if (AssayService.get().getProvider(protocol) instanceof MicroarrayAssayProvider)
                         {
-                            ViewURLHelper url = AssayService.get().getUploadWizardURL(context.getContainer(), protocol);
+                            ActionURL url = AssayService.get().getUploadWizardURL(context.getContainer(), protocol);
                             url.addParameter(".pipelinePath", root.relativePath(new File(entry.getURI())));
                             addAction(url, "Import MAGEML using " + protocol.getName(),
                                     entry, files);

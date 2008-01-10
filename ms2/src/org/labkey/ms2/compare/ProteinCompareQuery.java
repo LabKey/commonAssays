@@ -1,6 +1,6 @@
 package org.labkey.ms2.compare;
 
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.common.util.Pair;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
@@ -21,7 +21,7 @@ public class ProteinCompareQuery extends CompareQuery
 {
     public static final String COMPARISON_DESCRIPTION = "Compare Search Engine Proteins";
 
-    public ProteinCompareQuery(ViewURLHelper currentUrl, List<MS2Run> runs)
+    public ProteinCompareQuery(ActionURL currentUrl, List<MS2Run> runs)
     {
         super(currentUrl, "SeqId", runs);
 
@@ -141,7 +141,7 @@ public class ProteinCompareQuery extends CompareQuery
         append(" seq ON grouped.SeqId = seq.SeqId");
     }
 
-    protected String setupComparisonColumnLink(ViewURLHelper linkURL, String columnName, String runPrefix)
+    protected String setupComparisonColumnLink(ActionURL linkURL, String columnName, String runPrefix)
     {
         linkURL.setAction("showProtein");   // Could target the "prot" window instead of using the main window
         return "protein=${Protein}&seqId=${SeqId}";

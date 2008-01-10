@@ -7,7 +7,7 @@ import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Importer;
 import org.labkey.ms2.MS2Manager;
 
@@ -49,7 +49,7 @@ public class MS2ImportPipelineJob extends PipelineJob
             setProvider(sf.getProvider());
     }
 
-    public ViewURLHelper getStatusHref()
+    public ActionURL getStatusHref()
     {
         return null;
     }

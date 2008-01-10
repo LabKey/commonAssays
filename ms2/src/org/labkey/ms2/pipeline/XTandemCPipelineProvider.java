@@ -19,12 +19,11 @@ import org.apache.beehive.netui.pageflow.Forward;
 import org.labkey.api.pipeline.PipelineProviderCluster;
 import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.PipelineValidationException;
-import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.protocol.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.protocol.XTandemSearchProtocolFactory;
@@ -117,7 +116,7 @@ public class XTandemCPipelineProvider extends PipelineProviderCluster implements
             if (!AppProps.getInstance().hasPipelineCluster())
             {
                 html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">X! Tandem specific settings:</td></tr>");
-                ViewURLHelper setDefaultsURL = new ViewURLHelper(PipelineController.SetTandemDefaultsAction.class, context.getContainer());  // TODO: Should be method in PipelineController
+                ActionURL setDefaultsURL = new ActionURL(PipelineController.SetTandemDefaultsAction.class, context.getContainer());  // TODO: Should be method in PipelineController
                 html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
                         .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
                         .append(" - Specify the default XML parameters file for X! Tandem.</td></tr></table>");

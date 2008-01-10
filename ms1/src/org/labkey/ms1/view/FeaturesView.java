@@ -8,7 +8,7 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.query.FeaturesTableInfo;
 import org.labkey.ms1.query.MS1Schema;
 
@@ -48,7 +48,7 @@ public class FeaturesView extends QueryView
         _peaksAvailable = peaksAvailable;
         _forExport = forExport;
 
-        QuerySettings settings = new QuerySettings(ctx.getViewURLHelper(), QueryView.DATAREGIONNAME_DEFAULT);
+        QuerySettings settings = new QuerySettings(ctx.getActionURL(), QueryView.DATAREGIONNAME_DEFAULT);
         settings.setQueryName(MS1Schema.TABLE_FEATURES);
         settings.setAllowChooseQuery(false);
         setSettings(settings);
@@ -100,7 +100,7 @@ public class FeaturesView extends QueryView
 
         FeaturesTableInfo tinfo = _ms1Schema.getFeaturesTableInfo();
         if(_runId >= 0)
-            tinfo.addRunIdCondition(_runId, getContainer(), getViewContext().getViewURLHelper(), _peaksAvailable, _forExport);
+            tinfo.addRunIdCondition(_runId, getContainer(), getViewContext().getActionURL(), _peaksAvailable, _forExport);
         return tinfo;
     }
 
@@ -148,7 +148,7 @@ public class FeaturesView extends QueryView
 
     protected void addExportButton(ButtonBar bar, String format, String caption)
     {
-        ViewURLHelper url = getViewContext().getViewURLHelper().clone();
+        ActionURL url = getViewContext().getActionURL().clone();
         url.replaceParameter("export", format);
         bar.add(new ActionButton(url.getEncodedLocalURIString(), caption, DataRegion.MODE_ALL, ActionButton.Action.LINK));
     }

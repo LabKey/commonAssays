@@ -21,7 +21,7 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.protocol.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.protocol.MascotSearchProtocolFactory;
@@ -99,7 +99,7 @@ public class MascotCPipelineProvider extends PipelineProviderCluster  implements
             if (!AppProps.getInstance().hasPipelineCluster())
             {
                 html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">Mascot specific settings:</td></tr>");
-                ViewURLHelper setDefaultsURL = new ViewURLHelper(PipelineController.SetMascotDefaultsAction.class, context.getContainer());
+                ActionURL setDefaultsURL = new ActionURL(PipelineController.SetMascotDefaultsAction.class, context.getContainer());
                 html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
                         .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
                         .append(" - Specify the default XML parameters file for Mascot.</td></tr></table>");

@@ -72,7 +72,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
     {
         if (getContainer().getFolderType() instanceof FlowFolderType)
         {
-            ViewURLHelper forward = new ViewURLHelper("Project", "begin", getContainer());
+            ActionURL forward = new ActionURL("Project", "begin", getContainer());
             forward.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
             return new ViewForward(forward);
         }
@@ -100,7 +100,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
                 String redirect = psf.getDataUrl();
                 if (redirect != null)
                 {
-                    return new ViewForward(new ViewURLHelper(psf.getDataUrl()));
+                    return new ViewForward(new ActionURL(psf.getDataUrl()));
                 }
             }
         }
@@ -119,7 +119,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
             {
                 refresh ++;
             }
-            ViewURLHelper helper = cloneViewURLHelper();
+            ActionURL helper = cloneActionURL();
             helper.replaceParameter("refresh", Integer.toString(refresh));
             helper.setFragment("end");
             getResponse().setHeader("Refresh", refresh + ";URL=" + helper.toString());
@@ -256,7 +256,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
                 }
             }
         }
-        ViewURLHelper forward = PageFlowUtil.urlFor(Action.begin, destContainer);
+        ActionURL forward = PageFlowUtil.urlFor(Action.begin, destContainer);
         return new ViewForward(forward);
     }
 
@@ -310,7 +310,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
         {
             return null;
         }
-        return new ViewForward(new ViewURLHelper("admin", "begin", ""));
+        return new ViewForward(new ActionURL("admin", "begin", ""));
     }
 
     @Jpf.Action

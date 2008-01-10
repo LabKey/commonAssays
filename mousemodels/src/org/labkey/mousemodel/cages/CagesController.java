@@ -65,7 +65,7 @@ public class CagesController extends ViewController
         drCages.addColumns(_tinfo.getColumns("CageName,Sex"));
         drCages.getDisplayColumn(0).setWidth("80px");
         drCages.getDisplayColumn(1).setWidth("40px");
-        ViewURLHelper urlhelp = cloneViewURLHelper();
+        ActionURL urlhelp = cloneActionURL();
         urlhelp.deleteParameters();
         urlhelp.setPageFlow("MouseModel-Necropsy").setAction("addTasks");
         urlhelp.replaceParameter("modelId", (String) form.get("modelId"));

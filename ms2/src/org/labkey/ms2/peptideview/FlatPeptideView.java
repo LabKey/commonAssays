@@ -6,7 +6,7 @@ import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
@@ -60,7 +60,7 @@ public class FlatPeptideView extends AbstractMS2RunView
         ServletOutputStream outputStream = ExcelWriter.getOutputStream(response, "MS2Runs");
         WritableWorkbook workbook = ExcelWriter.getWorkbook(outputStream);
 
-        ViewURLHelper currentUrl = _url.clone();
+        ActionURL currentUrl = _url.clone();
 
         ExcelWriter ew = new ExcelWriter();
         ew.setSheetName("MS2 Runs");
@@ -196,7 +196,7 @@ public class FlatPeptideView extends AbstractMS2RunView
         return MS2RunViewType.NONE;
     }
 
-    public SQLFragment getProteins(ViewURLHelper queryUrl, MS2Run run, MS2Controller.ChartForm form)
+    public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
         SQLFragment fragment = new SQLFragment();
         fragment.append("SELECT DISTINCT SeqId FROM ");
@@ -208,7 +208,7 @@ public class FlatPeptideView extends AbstractMS2RunView
         return fragment;
     }
 
-    public HashMap<String, SimpleFilter> getFilter(ViewURLHelper queryUrl, MS2Run run)
+    public HashMap<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
         HashMap<String, SimpleFilter> map = new HashMap<String, SimpleFilter>();
         map.put("peptideFilter", ProteinManager.getPeptideFilter(queryUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run));

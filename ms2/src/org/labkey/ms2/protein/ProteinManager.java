@@ -18,7 +18,7 @@ package org.labkey.ms2.protein;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.ms2.*;
@@ -232,7 +232,7 @@ public class ProteinManager
 
     private static final NumberFormat generalFormat = new DecimalFormat("0.0#");
 
-    public static void addExtraFilter(SimpleFilter filter, MS2Run run, ViewURLHelper currentUrl)
+    public static void addExtraFilter(SimpleFilter filter, MS2Run run, ActionURL currentUrl)
     {
         String columnName = run.getChargeFilterColumnName();
         String paramName = run.getChargeFilterParamName();
@@ -535,7 +535,7 @@ public class ProteinManager
         return baseSort;
     }
 
-    public static SimpleFilter getPeptideFilter(ViewURLHelper currentUrl, List<MS2Run> runs, int mask)
+    public static SimpleFilter getPeptideFilter(ActionURL currentUrl, List<MS2Run> runs, int mask)
     {
         // Cop-out for now... we've already checked to make sure all runs are the same type
         // TODO: Allow runs of different type, by one of the following:
@@ -602,27 +602,27 @@ public class ProteinManager
         return validSort;
     }
 
-    public static SimpleFilter getPeptideFilter(ViewURLHelper currentUrl, int mask, MS2Run... runs)
+    public static SimpleFilter getPeptideFilter(ActionURL currentUrl, int mask, MS2Run... runs)
     {
         return getPeptideFilter(currentUrl, mask, null, runs);
     }
 
-    public static SimpleFilter getPeptideFilter(ViewURLHelper currentUrl, int mask, String runTableName, MS2Run... runs)
+    public static SimpleFilter getPeptideFilter(ActionURL currentUrl, int mask, String runTableName, MS2Run... runs)
     {
         return getTableFilter(currentUrl, mask, runTableName, MS2Manager.getDataRegionNamePeptides(), runs);
     }
 
-    public static SimpleFilter getProteinFilter(ViewURLHelper currentUrl, int mask, String runTableName, MS2Run... runs)
+    public static SimpleFilter getProteinFilter(ActionURL currentUrl, int mask, String runTableName, MS2Run... runs)
     {
         return getTableFilter(currentUrl, mask, runTableName, MS2Manager.getDataRegionNameProteins(), runs);
     }
 
-    public static SimpleFilter getProteinGroupFilter(ViewURLHelper currentUrl, int mask, String runTableName, MS2Run... runs)
+    public static SimpleFilter getProteinGroupFilter(ActionURL currentUrl, int mask, String runTableName, MS2Run... runs)
     {
         return getTableFilter(currentUrl, mask, runTableName, MS2Manager.getDataRegionNameProteinGroups(), runs);
     }
 
-    public static SimpleFilter getTableFilter(ViewURLHelper currentUrl, int mask, String runTableName, String dataRegionName, MS2Run... runs)
+    public static SimpleFilter getTableFilter(ActionURL currentUrl, int mask, String runTableName, String dataRegionName, MS2Run... runs)
     {
         SimpleFilter filter = new SimpleFilter();
 
@@ -674,7 +674,7 @@ public class ProteinManager
     }
 
 
-    public static void addProteinQuery(SQLFragment sql, MS2Run run, ViewURLHelper currentUrl, String extraPeptideWhere, int maxRows, boolean peptideQuery)
+    public static void addProteinQuery(SQLFragment sql, MS2Run run, ActionURL currentUrl, String extraPeptideWhere, int maxRows, boolean peptideQuery)
     {
         // SELECT (TOP n) Protein, SequenceMass, etc.
         StringBuilder proteinSql = new StringBuilder("SELECT Protein");
@@ -734,14 +734,14 @@ public class ProteinManager
         sql.append(proteinSql);
     }
 
-    public static ResultSet getProteinRS(ViewURLHelper currentUrl, MS2Run run, String extraPeptideWhere, int maxRows) throws SQLException
+    public static ResultSet getProteinRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows) throws SQLException
     {
         SQLFragment sql = getProteinSql(currentUrl, run, extraPeptideWhere, maxRows);
 
         return Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray(), maxRows);
     }
 
-    public static SQLFragment getProteinSql(ViewURLHelper currentUrl, MS2Run run, String extraPeptideWhere, int maxRows)
+    public static SQLFragment getProteinSql(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows)
     {
         SQLFragment sql = new SQLFragment();
 
@@ -761,7 +761,7 @@ public class ProteinManager
         return sql;
     }
 
-    public static ResultSet getProteinProphetRS(ViewURLHelper currentUrl, MS2Run run, String extraPeptideWhere, int maxRows) throws SQLException
+    public static ResultSet getProteinProphetRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows) throws SQLException
     {
         return new ResultSetCollapser(getProteinProphetPeptideRS(currentUrl, run, extraPeptideWhere, maxRows, "Scan"), "ProteinGroupId", maxRows);
     }
@@ -769,7 +769,7 @@ public class ProteinManager
     // Combine protein sort and peptide sort into a single ORDER BY.  Must sort by "Protein" before sorting peptides to ensure
     // grouping of peptides is in sync with protein query.  We add the columns in least to most significant order (peptide sort
     // + protein column + protein sort) and the Sort class ensures that only the most significant "Protein" column remains.
-    public static String getCombinedOrderBy(ViewURLHelper currentUrl, String orderByColumnName)
+    public static String getCombinedOrderBy(ActionURL currentUrl, String orderByColumnName)
     {
         Sort peptideSort = ProteinManager.getPeptideBaseSort();
         peptideSort.applyURLSort(currentUrl, MS2Manager.getDataRegionNamePeptides());
@@ -785,7 +785,7 @@ public class ProteinManager
     // Combine protein sort and peptide sort into a single ORDER BY.  Must sort by "Protein" before sorting peptides to ensure
     // grouping of peptides is in sync with protein query.  We add the columns in least to most significant order (peptide sort
     // + protein column + protein sort) and the Sort class ensures that only the most significant "Protein" column remains.
-    public static String getProteinGroupCombinedOrderBy(ViewURLHelper currentUrl, String orderByColumnName)
+    public static String getProteinGroupCombinedOrderBy(ActionURL currentUrl, String orderByColumnName)
     {
         Sort peptideSort = ProteinManager.getPeptideBaseSort();
         peptideSort.applyURLSort(currentUrl, MS2Manager.getDataRegionNamePeptides());
@@ -800,7 +800,7 @@ public class ProteinManager
 
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static GroupedResultSet getPeptideRS(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames) throws SQLException
+    public static GroupedResultSet getPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames) throws SQLException
     {
         SQLFragment sql = getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames);
 
@@ -808,13 +808,13 @@ public class ProteinManager
         return new GroupedResultSet(rs, "Protein");
     }
 
-    public static SQLFragment getPeptideSql(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames)
+    public static SQLFragment getPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames)
     {
         return getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, true);
     }
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static SQLFragment getPeptideSql(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, boolean addOrderBy)
+    public static SQLFragment getPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, boolean addOrderBy)
     {
         SQLFragment sql = new SQLFragment();
 
@@ -843,20 +843,20 @@ public class ProteinManager
     }
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static Table.TableResultSet getProteinProphetPeptideRS(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames) throws SQLException
+    public static Table.TableResultSet getProteinProphetPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames) throws SQLException
     {
         SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames);
 
         return (Table.TableResultSet)Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray(), 0, maxProteinRows != 0, maxProteinRows == 0);
     }
 
-    public static SQLFragment getProteinProphetPeptideSql(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames)
+    public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames)
     {
         return getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, true);
     }
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static SQLFragment getProteinProphetPeptideSql(ViewURLHelper currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, boolean addOrderBy)
+    public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, boolean addOrderBy)
     {
         SQLFragment sql = new SQLFragment("SELECT ");
         sql.append(MS2Manager.getTableInfoPeptideMemberships());

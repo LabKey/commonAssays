@@ -13,7 +13,6 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.URIUtil;
-import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
@@ -32,9 +31,9 @@ public class MicroarrayController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    public static ViewURLHelper getRunsURL(Container c)
+    public static ActionURL getRunsURL(Container c)
     {
-        return new ViewURLHelper(ShowRunsAction.class, c);
+        return new ActionURL(ShowRunsAction.class, c);
     }
 
     @RequiresPermission(ACL.PERM_READ)
@@ -146,7 +145,7 @@ public class MicroarrayController extends SpringActionController
                 PipelineJob job = new FeatureExtractionPipelineJob(getViewBackgroundInfo(), form.getProtocolName(), uriData, form.getExtractionEngine());
                 PipelineService.get().queueJob(job);
 
-                HttpView.throwRedirect(ViewURLHelper.toPathString("Project", "begin", c.getPath()));
+                HttpView.throwRedirect(ActionURL.toPathString("Project", "begin", c.getPath()));
             }
             catch (FileNotFoundException e)
             {

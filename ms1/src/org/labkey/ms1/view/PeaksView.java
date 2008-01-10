@@ -6,7 +6,7 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewURLHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DisplayElement;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.ms1.query.MS1Schema;
@@ -47,7 +47,7 @@ public class PeaksView extends QueryView
         _scanFirst = scanFirst;
         _scanLast = scanLast;
 
-        QuerySettings settings = new QuerySettings(ctx.getViewURLHelper(), QueryView.DATAREGIONNAME_DEFAULT);
+        QuerySettings settings = new QuerySettings(ctx.getActionURL(), QueryView.DATAREGIONNAME_DEFAULT);
         settings.setQueryName(MS1Schema.TABLE_PEAKS);
         settings.setAllowChooseQuery(false);
         setSettings(settings);
@@ -100,7 +100,7 @@ public class PeaksView extends QueryView
             ButtonBar bar = region.getButtonBar(DataRegion.MODE_GRID);
             assert null != bar : "Coun't get the button bar during FeaturesView.createDataView()!";
 
-            bar.add(0, new ScanFilter(_feature, getViewContext().getViewURLHelper()));
+            bar.add(0, new ScanFilter(_feature, getViewContext().getActionURL()));
             addExportButton(bar, "excel", CAPTION_EXPORT_ALL_EXCEL);
             addExportButton(bar, "tsv", CAPTION_EXPORT_ALL_TSV);
             addExportButton(bar, "print", CAPTION_PRINT_ALL);
@@ -108,7 +108,7 @@ public class PeaksView extends QueryView
             //if feature is valid, add a button to view the feature details
             if(null != _feature)
             {
-                ViewURLHelper urlFeatureDetails = getViewContext().getViewURLHelper().clone();
+                ActionURL urlFeatureDetails = getViewContext().getActionURL().clone();
                 urlFeatureDetails.deleteFilterParameters(QueryView.DATAREGIONNAME_DEFAULT);
                 urlFeatureDetails.setAction("showFeatureDetails.view");
                 bar.add(new ActionButton(urlFeatureDetails.getEncodedLocalURIString(), "Feature Details", DataRegion.MODE_ALL, ActionButton.Action.LINK));
@@ -120,7 +120,7 @@ public class PeaksView extends QueryView
 
     protected void addExportButton(ButtonBar bar, String format, String caption)
     {
-        ViewURLHelper url = getViewContext().getViewURLHelper().clone();
+        ActionURL url = getViewContext().getActionURL().clone();
         url.replaceParameter("export", format);
         bar.add(new ActionButton(url.getEncodedLocalURIString(), caption, DataRegion.MODE_ALL, ActionButton.Action.LINK));
     }
@@ -129,7 +129,7 @@ public class PeaksView extends QueryView
     {
         private static final String SCAN_FILTER = "query.ScanId/Scan~eq";
 
-        public ScanFilter(Feature feature, ViewURLHelper url)
+        public ScanFilter(Feature feature, ActionURL url)
         {
             _url = url;
             _feature = feature;
@@ -139,7 +139,7 @@ public class PeaksView extends QueryView
             if(null == _feature)
                 return;
 
-            ViewURLHelper url = _url.clone();
+            ActionURL url = _url.clone();
             url.deleteParameter(SCAN_FILTER);
 
             out.write("<select onchange=\"document.location.href=this.options[this.selectedIndex].value\">");
@@ -154,7 +154,7 @@ public class PeaksView extends QueryView
             out.write("</select>");
         }
 
-        private ViewURLHelper _url = null;
+        private ActionURL _url = null;
         private Feature _feature = null;
     }
 
