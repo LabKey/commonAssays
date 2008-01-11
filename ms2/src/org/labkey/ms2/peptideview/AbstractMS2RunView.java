@@ -50,6 +50,7 @@ public abstract class AbstractMS2RunView
     protected final MS2Run[] _runs;
     protected int _maxPeptideRows = 1000; // Limit peptides returned to 1,000 rows
     protected int _maxGroupingRows = 250; // Limit proteins returned to 250 rows
+    protected long _offset = 0;
 
     private String _columnPropertyName;
 
@@ -265,13 +266,14 @@ public abstract class AbstractMS2RunView
         }
     }
 
-    public DataRegion getPeptideGrid(String peptideColumnNames, int maxRows) throws SQLException
+    public DataRegion getPeptideGrid(String peptideColumnNames, int maxRows, long offset) throws SQLException
     {
         DataRegion rgn = new DataRegion();
 
         rgn.setName(MS2Manager.getDataRegionNamePeptides());
         rgn.setDisplayColumnList(getPeptideDisplayColumns(peptideColumnNames));
         rgn.setMaxRows(maxRows);
+        rgn.setOffset(offset);
 
         return rgn;
     }

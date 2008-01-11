@@ -65,7 +65,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
     {
         String columnNames = getPeptideColumnNames(requestedPeptideColumnNames);
 
-        DataRegion rgn = getPeptideGrid(columnNames, _maxPeptideRows);
+        DataRegion rgn = getPeptideGrid(columnNames, _maxPeptideRows, _offset);
 
         if (selectSeqId && null == rgn.getDisplayColumn("SeqId"))
         {

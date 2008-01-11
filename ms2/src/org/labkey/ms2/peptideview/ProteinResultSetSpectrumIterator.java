@@ -44,12 +44,12 @@ public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
 
             if (_peptideView instanceof StandardProteinPeptideView)
             {
-                sql = ProteinManager.getPeptideSql(_currentUrl, _iter.next(), _extraWhere, 0, "Charge, PrecursorMass, MZ, Spectrum");
+                sql = ProteinManager.getPeptideSql(_currentUrl, _iter.next(), _extraWhere, 0, 0, "Charge, PrecursorMass, MZ, Spectrum");
                 joinSql = sql.toString().replaceFirst("RIGHT OUTER JOIN", "INNER JOIN (SELECT Run AS fRun, Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + ") spec ON Run=fRun AND Scan = fScan\nRIGHT OUTER JOIN");
             }
             else
             {
-                sql = ProteinManager.getProteinProphetPeptideSql(_currentUrl, _iter.next(), _extraWhere, 0, "Charge, PrecursorMass, MZ, Spectrum");
+                sql = ProteinManager.getProteinProphetPeptideSql(_currentUrl, _iter.next(), _extraWhere, 0, 0, "Charge, PrecursorMass, MZ, Spectrum");
                 joinSql = sql.toString().replaceFirst("WHERE", ", (SELECT s.Run AS fRun, s.Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + " s) spec WHERE ms2.simplepeptides.Run=fRun AND Scan = fScan AND ");
             }
 

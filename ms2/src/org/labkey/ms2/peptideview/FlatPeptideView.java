@@ -152,7 +152,7 @@ public class FlatPeptideView extends AbstractMS2RunView
     private void setupExcelPeptideGrid(ExcelWriter ew, SimpleFilter filter, String requestedPeptideColumns, MS2Run run) throws ServletException, SQLException, IOException
     {
         String columnNames = getPeptideColumnNames(requestedPeptideColumns);
-        DataRegion rgn = getPeptideGrid(columnNames, ExcelWriter.MAX_ROWS);
+        DataRegion rgn = getPeptideGrid(columnNames, ExcelWriter.MAX_ROWS, 0);
         Container c = getContainer();
         ProteinManager.replaceRunCondition(filter, null, run);
 
@@ -167,7 +167,7 @@ public class FlatPeptideView extends AbstractMS2RunView
 
     private DataRegion getPeptideGridForDisplay(String columnNames) throws SQLException
     {
-        DataRegion rgn = getPeptideGrid(columnNames, _maxPeptideRows);
+        DataRegion rgn = getPeptideGrid(columnNames, _maxPeptideRows, _offset);
 
         rgn.setShowRecordSelectors(true);
         rgn.setFixedWidthColumns(true);

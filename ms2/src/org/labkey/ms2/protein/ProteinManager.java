@@ -350,7 +350,7 @@ public class ProteinManager
         {
             throw new RuntimeSQLException(e);
         }
-        
+
         try
         {
             getSchema().getScope().beginTransaction();
@@ -674,7 +674,7 @@ public class ProteinManager
     }
 
 
-    public static void addProteinQuery(SQLFragment sql, MS2Run run, ActionURL currentUrl, String extraPeptideWhere, int maxRows, boolean peptideQuery)
+    public static void addProteinQuery(SQLFragment sql, MS2Run run, ActionURL currentUrl, String extraPeptideWhere, int maxRows, long offset, boolean peptideQuery)
     {
         // SELECT (TOP n) Protein, SequenceMass, etc.
         StringBuilder proteinSql = new StringBuilder("SELECT Protein");
@@ -728,27 +728,27 @@ public class ProteinManager
             proteinOrderBy = proteinOrderBy.replaceAll("Description", "prot.Description");
             proteinSql.append(proteinOrderBy);
 
-            getSqlDialect().limitRows(proteinSql, maxRows + 1);
+            getSqlDialect().limitRows(proteinSql, maxRows + 1, offset);
         }
 
         sql.append(proteinSql);
     }
 
-    public static ResultSet getProteinRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows) throws SQLException
+    public static ResultSet getProteinRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, long offset) throws SQLException
     {
-        SQLFragment sql = getProteinSql(currentUrl, run, extraPeptideWhere, maxRows);
+        SQLFragment sql = getProteinSql(currentUrl, run, extraPeptideWhere, maxRows, offset);
 
-        return Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray(), maxRows);
+        return Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray());
     }
 
-    public static SQLFragment getProteinSql(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows)
+    public static SQLFragment getProteinSql(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, long offset)
     {
         SQLFragment sql = new SQLFragment();
 
         // Join the selected proteins to ProteinSequences to get the actual Sequence for computing AA coverage
         // We need to do a second join to ProteinSequences because we can't GROUP BY Sequence, a text data type
         sql.append("SELECT Protein, SequenceMass, Peptides, UniquePeptides, SeqId, ProtSequence AS Sequence, Description, BestName, BestGeneName FROM\n(");
-        addProteinQuery(sql, run, currentUrl, extraPeptideWhere, maxRows, false);
+        addProteinQuery(sql, run, currentUrl, extraPeptideWhere, maxRows, offset, false);
         sql.append("\n) X LEFT OUTER JOIN ");
         sql.append(getTableInfoSequences());
         sql.append(" seq ON seq.SeqId = sSeqId\n");
@@ -761,9 +761,9 @@ public class ProteinManager
         return sql;
     }
 
-    public static ResultSet getProteinProphetRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows) throws SQLException
+    public static ResultSet getProteinProphetRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, long offset) throws SQLException
     {
-        return new ResultSetCollapser(getProteinProphetPeptideRS(currentUrl, run, extraPeptideWhere, maxRows, "Scan"), "ProteinGroupId", maxRows);
+        return new ResultSetCollapser(getProteinProphetPeptideRS(currentUrl, run, extraPeptideWhere, maxRows, offset, "Scan"), "ProteinGroupId", maxRows);
     }
 
     // Combine protein sort and peptide sort into a single ORDER BY.  Must sort by "Protein" before sorting peptides to ensure
@@ -800,21 +800,21 @@ public class ProteinManager
 
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static GroupedResultSet getPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames) throws SQLException
+    public static GroupedResultSet getPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, long offset, String columnNames) throws SQLException
     {
-        SQLFragment sql = getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames);
+        SQLFragment sql = getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, offset, columnNames);
 
         ResultSet rs = Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray());
         return new GroupedResultSet(rs, "Protein");
     }
 
-    public static SQLFragment getPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames)
+    public static SQLFragment getPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, long offset, String columnNames)
     {
-        return getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, true);
+        return getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, offset, columnNames, true);
     }
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static SQLFragment getPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, boolean addOrderBy)
+    public static SQLFragment getPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, long offset, String columnNames, boolean addOrderBy)
     {
         SQLFragment sql = new SQLFragment();
 
@@ -825,7 +825,7 @@ public class ProteinManager
         sql.append(MS2Manager.getTableInfoPeptides());
         sql.append(" RIGHT OUTER JOIN\n(");
 
-        ProteinManager.addProteinQuery(sql, run, currentUrl, extraWhere, maxProteinRows, true);
+        ProteinManager.addProteinQuery(sql, run, currentUrl, extraWhere, maxProteinRows, offset, true);
         sql.append(") s ON ");
         sql.append(MS2Manager.getTableInfoPeptides());
         sql.append(".SeqId = sSeqId\n");
@@ -843,20 +843,20 @@ public class ProteinManager
     }
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static Table.TableResultSet getProteinProphetPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames) throws SQLException
+    public static Table.TableResultSet getProteinProphetPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, long offset, String columnNames) throws SQLException
     {
-        SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames);
+        SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, offset, columnNames);
 
         return (Table.TableResultSet)Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray(), 0, maxProteinRows != 0, maxProteinRows == 0);
     }
 
-    public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames)
+    public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, long offset, String columnNames)
     {
-        return getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, true);
+        return getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, offset, columnNames, true);
     }
 
     // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, boolean addOrderBy)
+    public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, long offset, String columnNames, boolean addOrderBy)
     {
         SQLFragment sql = new SQLFragment("SELECT ");
         sql.append(MS2Manager.getTableInfoPeptideMemberships());
@@ -931,7 +931,7 @@ public class ProteinManager
             sql.append(getProteinGroupCombinedOrderBy(currentUrl, MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId"));
         if (maxProteinRows > 0)
         {
-            getSqlDialect().limitRows(sql, maxProteinRows + 1);
+            getSqlDialect().limitRows(sql, maxProteinRows + 1, offset);
         }
 
         return sql;

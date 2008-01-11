@@ -24,8 +24,9 @@ public class MultiRunRenderContext extends RenderContext
         _runs = runs;
     }
 
-    protected ResultSet selectForDisplay(TableInfo table, ColumnInfo[] columns, SimpleFilter filter, Sort sort, int maxRows, boolean async) throws SQLException
+    protected ResultSet selectForDisplay(TableInfo table, ColumnInfo[] columns, SimpleFilter filter, Sort sort, int maxRows, long offset, boolean async) throws SQLException
     {
+        // XXX: we're ignoring offset for now
         return new MultiRunResultSet(_runs, table, columns, filter, sort, maxRows, getCache());
     }
 
@@ -50,7 +51,8 @@ public class MultiRunRenderContext extends RenderContext
         ResultSet getNextResultSet() throws SQLException
         {
             ProteinManager.replaceRunCondition(_filter, null, _iter.next());
-            return Table.selectForDisplay(_table, _columns, _filter, _sort, _maxRows, _cache);
+            // XXX: we're ignoring offset for now
+            return Table.selectForDisplay(_table, _columns, _filter, _sort, _maxRows, 0, _cache);
         }
     }
 }
