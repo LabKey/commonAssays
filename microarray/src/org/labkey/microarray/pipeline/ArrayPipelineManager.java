@@ -284,31 +284,6 @@ public class ArrayPipelineManager {
         return mageFileMap;
     }
     
-    public static String getDataDescription(File dirData, String baseName, String protocolName)
-    {
-        String dataName = "";
-        if (dirData != null)
-        {
-            dataName = dirData.getName();
-            if ("xml".equals(dataName))
-            {
-                dirData = dirData.getParentFile();
-                if (dirData != null)
-                    dataName = dirData.getName();
-            }
-        }
-
-        StringBuffer description = new StringBuffer(dataName);
-        if (baseName != null)
-        {
-            if (description.length() > 0)
-                description.append("/");
-            description.append(baseName);
-        }
-        description.append(" (").append(protocolName).append(")");
-        return description.toString();
-    }
-    
     public static boolean exists(File file, Set<File> knownFiles, Set<File> checkedDirectories)
     {
         File parent = file.getParentFile();

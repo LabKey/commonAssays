@@ -8,29 +8,25 @@ import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.HttpClient;
 import org.labkey.api.microarray.FeatureExtractionClient;
+import org.labkey.api.microarray.ExtractionException;
+import org.labkey.api.microarray.ExtractionConfigException;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
-import org.labkey.microarray.FeatureExtractionRun;
-import org.labkey.microarray.MicroarrayManager;
+import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.microarray.MicroarrayModule;
 
 import java.util.*;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.io.*;
-import javax.xml.xpath.*;
-
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
 
 
 public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClient
 {
     private Logger _instanceLogger = null;
     private String _url;
-    private int _errorCode = 0;
     private String _taskId;
-    private String _errorString = "";
     private static volatile int _lastWorkingSet = 0;
     private static volatile String _lastWorkingUrl = "";
     private static volatile String _lastProvidedUrl = "";
@@ -52,22 +48,10 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
             _instanceLogger = instanceLogger;
         }
         _instanceLogger = instanceLogger;
-        _errorCode = 0;
-        _errorString = "";
 
         // initalize a TaskID to submit the job for this client
         _instanceLogger.info("Creating FeatureExtraction client taskId...");
         _taskId = Long.toString(new Date().getTime());
-    }
-
-    public int getErrorCode()
-    {
-        return _errorCode;
-    }
-
-    public String getErrorString()
-    {
-        return _errorString;
     }
 
     public boolean setProxyURL(String proxyURL)
@@ -75,32 +59,14 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         return false;
     }
 
-    public String testConnectivity()
+    public void testConnectivity() throws ExtractionException
     {
         // to test and report connectivity problem
-        _errorCode = 0;
-        _errorString = "";
         startSession();
-        if (0 == _errorCode)
-        {
-            return "";
-        }
-        else
-        {
-            return (("".equals(_errorString)) ? "Fail to contact Feature Extraction server at " + _url : _errorString);
-        }
     }
 
-    public void findWorkableSettings(boolean notUsed)
+    public void findWorkableSettings() throws ExtractionConfigException
     {
-        findWorkableSettings();
-    }
-
-    public void findWorkableSettings()
-    {
-        _errorCode = 0;
-        _errorString = "";
-
         if (_lastWorkingSet > 0)
         {
             if (_lastProvidedUrl.equals(_url))
@@ -145,33 +111,24 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
             for (String testUrl : possibleURLs)
             {
                 _url = testUrl;
-                startSessionInternal();
-                int attemptStatus = getErrorCode();
-                String attemptMessage = getErrorString();
-
-                _errorCode = attemptStatus;
-                _errorString = attemptMessage;
-                if (!(1 == attemptStatus || 2 == attemptStatus))
+                try
                 {
-                    if (0 == attemptStatus)
-                    {
-                        if (!url.toString().equals(testUrl))
-                            _errorString = "Test passed ONLY when feature extraction server is set to " + alternativeLink.toString();
+                    startSessionInternal();
 
-                        _lastWorkingSet = 2;
-                        _lastWorkingUrl = testUrl;
-                        _lastProvidedUrl = originalUrl;
-                        break;
-                    }
-                    else
-                    {
-                        _errorCode = attemptStatus;
-                        _errorString = "FeatureExtraction server responded on " + testUrl + " with \"" + attemptMessage + "\"";
+                    _lastWorkingSet = 2;
+                    _lastWorkingUrl = testUrl;
+                    _lastProvidedUrl = originalUrl;
 
-                        _lastWorkingSet = 1;
-                        _lastWorkingUrl = testUrl;
-                        _lastProvidedUrl = originalUrl;
+                    if (!testUrl.equals(originalUrl))
+                    {
+                        throw new ExtractionConfigException("Test passed ONLY when feature extraction server is set to " + alternativeLink);
                     }
+
+                    break;
+                }
+                catch (ExtractionException e)
+                {
+                    
                 }
             }
             if (_lastWorkingSet > 0)
@@ -179,39 +136,20 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         }
         catch (MalformedURLException x)
         {
-            _instanceLogger.error("connect(" + _url + ")", x);
-            //Fail to parseFeatureExtraction Server URL
-            _errorCode = 1;
-            _errorString = "Fail to parse FeatureExtraction Server URL";
+            throw new ExtractionConfigException("Failed to parse FeatureExtraction Server URL" + _url, x);
         }
     }
 
-    public String startSession()
+    public void startSession() throws ExtractionException
     {
         findWorkableSettings();
-
-        if (0 == _errorCode)
-            return startSessionInternal();
-        else
-            return "";
+        startSessionInternal();
     }
 
-    private String startSessionInternal()
+    private void startSessionInternal() throws ExtractionException
     {
-        Properties results;
-
-        _errorCode = 0;
-        _errorString = "";
         Properties parameters = new Properties();
-        results = request(parameters);
-        if ("0".equals(results.getProperty("error", "0")))
-            return "";
-        else
-        {
-            if (results.containsKey("error"))
-                _errorCode = Integer.parseInt(results.getProperty("error", "0"));
-            return "";
-        }
+        request(parameters);
     }
 
     public String getTaskId()
@@ -219,11 +157,8 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         return _taskId;
     }
 
-    protected String getTaskStatus(String taskId)
+    protected String getTaskStatus(String taskId) throws ExtractionException
     {
-        _errorCode = 0;
-        _errorString = "";
-
         if ("".equals(taskId))
             return "";
 
@@ -234,18 +169,12 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         return results.getProperty("HTTPContent", "");
     }
 
-    public int run(File[] imageFiles)
+    public int run(File[] imageFiles) throws ExtractionException
     {
-        _errorCode = 0;
-        _errorString = "";
-
-        _instanceLogger.info("Creating FeatureExtraction session...");
+        _taskId = "1199843396163";
+        return 0;
+/*        _instanceLogger.info("Creating FeatureExtraction session...");
         startSession();
-        if (0 != getErrorCode())
-        {
-            _instanceLogger.info("Failed to start FeatureExtraction session");
-            return 2;
-        }
 
         int returnCode = 0;
         final int delayAfterSubmitSec = 30;
@@ -301,21 +230,32 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
                 else
                 {
                     _instanceLogger.info("Retrieving FeatureExtraction job result...");
-                    if (getResultFile(_taskId, resultsFile))
+                    try
                     {
+                        getResultFile(_taskId, resultsFile);
                         _instanceLogger.info("FeatureExtraction job results retrieved.");
                         _instanceLogger.info("Retrieving remote log file.");
                         getLogFile(_taskId);
                         _instanceLogger.info("Finished retrieving remote log file.");
                         _instanceLogger.info("Cleaning extraction files from remote feature extraction server.");
-                        clean(_taskId);
+                        try
+                        {
+                            clean(_taskId);
+                        }
+                        // Remove this catch for production
+                        catch (ExtractionException e2) {}
                         break;
                     }
-                    else
+                    catch (ExtractionException e)
                     {
-                        _instanceLogger.info("Attempt to retrieve results file failed.");
+                        _instanceLogger.info("Attempt to retrieve results file failed.", e);
                         _instanceLogger.info("Retreiving remote log file.");
-                        getLogFile(_taskId);
+                        try
+                        {
+                            getLogFile(_taskId);
+                        }
+                        // Remove this catch for production
+                        catch (ExtractionException e2) {}
                         _instanceLogger.info("Finished retrieving remote log file.");
                         returnCode = 5;
                     }
@@ -323,15 +263,12 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
             }
         }
         _instanceLogger.info("Feature Extraction session ended.");
-
         return returnCode;
+*/
     }
 
     protected boolean submitFiles(String taskId, File[] imageFiles)
     {
-        _errorCode = 0;
-        _errorString = "";
-
         if ("".equals(taskId) || null == imageFiles || imageFiles.length == 0)
             return false;
 
@@ -426,12 +363,10 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         return uploadFinished;
     }
 
-    protected boolean getResultFile(String taskId, File resultsFile)
+    protected void getResultFile(String taskId, File resultsFile) throws ExtractionException
     {
-        _errorCode = 0;
-        _errorString = "";
         if ("".equals(taskId))
-            return false;
+            return;
 
         Properties parameters = new Properties();
         parameters.setProperty("cmd", "retrieve");
@@ -439,8 +374,6 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         parameters.setProperty("taskId", taskId);
         InputStream in = getRequestResultStream(parameters);
 
-        if (null == in)
-            return false;
         BufferedInputStream reader = new BufferedInputStream(in);
         FileOutputStream out = null;
 
@@ -457,15 +390,10 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
             reader.close();
             out.close();
         }
-        catch (FileNotFoundException e)
-        {
-            // output file cannot be created!
-            _instanceLogger.error("getResultFile(result=" + resultsFile.getAbsolutePath() + ",taskid=" + taskId + ")", e);
-        }
         catch (IOException e)
         {
             // a read or write error occurred
-            _instanceLogger.error("getResultFile(result=" + resultsFile.getAbsolutePath() + ",taskid=" + taskId + ")", e);
+            throw new ExtractionException(e);
         }
         finally
         {
@@ -479,17 +407,13 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
             {
             }
         }
-
-        return resultsFile.exists();
     }
 
-    protected boolean getLogFile(String taskId)
+    protected void getLogFile(String taskId) throws ExtractionException
     {
-        _errorCode = 0;
-        _errorString = "";
         //sessionID is optional
         if ("".equals(taskId))
-            return false;
+            return;
 
         Properties parameters = new Properties();
         parameters.setProperty("cmd", "retrieve");
@@ -498,8 +422,7 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
 
         // Open a stream to the file using the URL.
         InputStream in = getRequestResultStream(parameters);
-        if (null == in)
-            return false;
+
         BufferedReader dis =
                 new BufferedReader(new InputStreamReader(in));
         boolean ioError = false;
@@ -514,8 +437,7 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         catch (IOException e)
         {
             // a read or write error occurred
-            ioError = true;
-            _instanceLogger.error("getLogFile(taskid=" + taskId + ")", e);
+            throw new ExtractionException(e);
         }
         finally
         {
@@ -527,8 +449,6 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
             {
             }
         }
-
-        return !ioError;
     }
 
     public int saveProcessedRuns(User u, Container c, File outputDir)
@@ -539,7 +459,7 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         int runs = 0;
         int retVal = 0;
 
-        XPathFactory factory = XPathFactory.newInstance();
+/*        XPathFactory factory = XPathFactory.newInstance();
         XPath xPath = factory.newXPath();
         XPathExpression xPathDescriptionNode, xPathDescriptionProducer, xPathDescriptionVersion;
         XPathExpression xPathSoftwareApplicationsNode, xPathProtocol, xPathGrid, xPathBarcode;
@@ -566,12 +486,14 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
             _instanceLogger.error("Error creating XPathExpression for parsing MAGE output...\n", ee);
             return 2;
         }
+        */
         for (File mage : mageFiles)
         {
-            FeatureExtractionRun feRun = new FeatureExtractionRun();
-
             try
             {
+                AbstractAssayProvider.createData(u, c, mage, MicroarrayModule.MAGE_ML_DATA_TYPE);
+                /*
+                FeatureExtractionRun feRun = new FeatureExtractionRun();
                 Node descriptionParentNode = (Node) xPathDescriptionNode.evaluate(new InputSource(new FileInputStream(mage)), XPathConstants.NODE);
                 Node softwareApplicationParentNode = (Node) xPathSoftwareApplicationsNode.evaluate(new InputSource(new FileInputStream(mage)), XPathConstants.NODE);
                 String descriptionProducer = xPathDescriptionProducer.evaluate(descriptionParentNode);
@@ -607,6 +529,7 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
                     feRun.setAlignment(alignment.getName());
 
                 MicroarrayManager.get().saveRun(u, null);
+                */
                 runs++;
             }
             catch (Exception e)
@@ -621,11 +544,8 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         return retVal;
     }
 
-    protected String clean(String taskId)
+    protected String clean(String taskId) throws ExtractionException
     {
-        _errorCode = 0;
-        _errorString = "";
-
         if ("".equals(taskId))
             return "";
 
@@ -659,23 +579,21 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         }
 
         return statusString;
-
     }
 
 
-    public String getEnvironmentConf()
+    public String getEnvironmentConf() throws ExtractionException
     {
         // retrieve the the configuation of FeatureExtractionServer
         Properties parameters = new Properties();
         parameters.setProperty("cmd", "admin");
-        String results = request(parameters).getProperty("HTTPContent", getErrorString());
+        String results = request(parameters).getProperty("HTTPContent");
 
-        if (!results.contains("----FEATURE EXTRACTION EXECUTABLE----") && getErrorCode() == 0)
+        if (!results.contains("----FEATURE EXTRACTION EXECUTABLE----"))
         {
-            _errorCode = 3;
-            return "Failed to interact with FeatureExtractionQueue application: Unexpected content returned.";
+            throw new ExtractionException("Failed to interact with FeatureExtractionQueue application: Unexpected content returned.");
         }
-        return request(parameters).getProperty("HTTPContent", getErrorString());
+        return results;
     }
 
     private String requestURL(Properties parameters)
@@ -717,7 +635,7 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         return requestURLLSB.toString();
     }
 
-    private Properties request(Properties parameters)
+    private Properties request(Properties parameters) throws ExtractionException
     {
         // connect to the FeatureExtraction Server to send request
         // report the results as a property set, i.e. key=value pairs
@@ -742,24 +660,16 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         }
         catch (MalformedURLException x)
         {
-            _instanceLogger.error("Exception " + x.getClass() + " connect(" + _url + ")=" + feRequestURL);
-            _errorCode = 1;
-            _errorString = "Fail to parse FeatureExtraction Server URL: " + x.getMessage();
-            results.setProperty("error", "1");
-            results.setProperty("errorstring", _errorString);
+            throw new ExtractionConfigException(x);
         }
         catch (Exception x)
         {
-            _instanceLogger.error("Exception " + x.getClass() + " connect(" + _url + "," + ")=" + feRequestURL);
-            _errorCode = 2;
-            _errorString = "Failed to interact with FeatureExtractionQueue application: " + x.getMessage();
-            results.setProperty("error", "2");
-            results.setProperty("errorstring", _errorString);
+            throw new ExtractionException(x);
         }
         return results;
     }
 
-    private InputStream getRequestResultStream(Properties parameters)
+    private InputStream getRequestResultStream(Properties parameters) throws ExtractionException
     {
         // connect to the FeatureExtraction Server to send request
         // return the reply as a stream
@@ -772,14 +682,11 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         }
         catch (MalformedURLException x)
         {
-            _instanceLogger.error("Exception " + x.getClass() + " connect(" + _url + ")=" + feRequestURL, x);
-            _errorCode = 1;
+            throw new ExtractionConfigException("Failed for URL" + feRequestURL, x);
         }
         catch (Exception x)
         {
-            _instanceLogger.error("Exception " + x.getClass() + " on connect(" + _url + "," + feRequestURL, x);
-            _errorCode = 2;
+            throw new ExtractionException("Failed for URL " + feRequestURL, x);
         }
-        return null;
     }
 }

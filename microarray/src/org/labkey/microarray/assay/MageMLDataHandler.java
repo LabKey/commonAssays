@@ -1,15 +1,12 @@
 package org.labkey.microarray.assay;
 
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.Lsid;
 import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
 import org.labkey.api.study.assay.ParticipantVisitResolver;
-import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.microarray.pipeline.ArrayPipelineManager;
-import org.labkey.microarray.MicroarrayRun;
-import org.labkey.microarray.MicroarrayManager;
+import org.labkey.microarray.MicroarrayModule;
 import org.labkey.common.tools.SimpleXMLStreamReader;
 import org.labkey.common.tools.TabLoader;
 
@@ -28,8 +25,7 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
 {
     public Priority getPriority(ExpData data)
     {
-        File f = data.getFile();
-        if (f != null && ArrayPipelineManager.isMageFile(f))
+        if (MicroarrayModule.MAGE_ML_DATA_TYPE.matches(new Lsid(data.getLSID())))
         {
             return Priority.HIGH;
         }

@@ -448,6 +448,7 @@ microarray/src/org/labkey/microarray/MicroarrayManager.java -text
 microarray/src/org/labkey/microarray/MicroarrayModule.java -text
 microarray/src/org/labkey/microarray/MicroarrayRun.java -text
 microarray/src/org/labkey/microarray/MicroarraySchema.java -text
+microarray/src/org/labkey/microarray/PendingMageMLFilesView.java -text
 microarray/src/org/labkey/microarray/assay/MageMLDataHandler.java -text
 microarray/src/org/labkey/microarray/assay/MicroarrayAssayProvider.java -text
 microarray/src/org/labkey/microarray/assay/TrimmedFileInputStream.java -text

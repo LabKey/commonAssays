@@ -11,6 +11,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.view.*;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.ExperimentRunFilter;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.pipeline.PipelineService;
@@ -27,7 +28,12 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
 {
     public static final String NAME = "Microarray";
     public static final String WEBPART_MICROARRAY_RUNS = "Microarray Runs";
+    public static final String WEBPART_PENDING_FILES = "Pending MAGE-ML Files";
     private static final String CONTROLLER_NAME = "microarray";
+
+    public static final DataType MAGE_ML_DATA_TYPE = new DataType("MicroarrayAssayData");
+    public static final DataType QC_REPORT_DATA_TYPE = new DataType("MicroarrayQCData");
+    public static final DataType IMAGE_DATA_TYPE = new DataType("MicroarrayImageData");
 
     public static final ExperimentRunFilter EXP_RUN_FILTER = new ExperimentRunFilter("Microarray", MicroarraySchema.SCHEMA_NAME, MicroarraySchema.TABLE_RUNS);
 
@@ -39,12 +45,22 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
                         QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MicroarrayModule.EXP_RUN_FILTER, true);
-                        view.setTitle("Microarray Runs");
+                        view.setTitle(WEBPART_MICROARRAY_RUNS);
+                        view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
+                        return view;
+                    }
+                },
+                new WebPartFactory(WEBPART_PENDING_FILES)
+                {
+                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                    {
+                        QueryView view = new PendingMageMLFilesView(portalCtx);
+                        view.setTitle(WEBPART_PENDING_FILES);
                         view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
                         return view;
                     }
                 }
-                );
+        );
         addController(CONTROLLER_NAME, MicroarrayController.class);
 
         MicroarraySchema.register();

@@ -590,10 +590,6 @@ public class MS2Manager
                         }
                     }
                 }
-                catch (SQLException e)
-                {
-                    _log.error("markAsDeleted", e);
-                }
                 catch (MalformedURLException e)
                 {
                     _log.error("markAsDeleted", e);

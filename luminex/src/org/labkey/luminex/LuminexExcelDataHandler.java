@@ -29,7 +29,7 @@ import java.util.*;
  */
 public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
 {
-    static final String LUMINEX_DATA_LSID_PREFIX = "LuminexDataFile";
+    public static final DataType LUMINEX_DATA_TYPE = new DataType("LuminexDataFile");
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
@@ -864,7 +864,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());
-        if (LUMINEX_DATA_LSID_PREFIX.equals(lsid.getNamespacePrefix()))
+        if (LUMINEX_DATA_TYPE.matches(lsid))
         {
             return Priority.HIGH;
         }

@@ -16,9 +16,11 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
+import org.labkey.microarray.MicroarrayModule;
 
 import java.util.*;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * User: jeckels
@@ -26,17 +28,12 @@ import java.io.File;
  */
 public class MicroarrayAssayProvider extends AbstractAssayProvider
 {
-    public static final String ASSAY_DOMAIN_ANALYTE = ExpProtocol.ASSAY_DOMAIN_PREFIX + "Analyte";
-    public static final String ASSAY_DOMAIN_EXCEL_RUN = ExpProtocol.ASSAY_DOMAIN_PREFIX + "ExcelRun";
     public static final String PROTOCOL_PREFIX = "MicroarrayAssayProtocol";
     public static final String NAME = "Microarray";
 
-    private static final String MICROARRAY_IMAGE_DATA_PREFIX = "MicroarrayImageData";
-    private static final String MICROARRAY_QC_DATA_PREFIX = "MicroarrayQCData";
-
     public MicroarrayAssayProvider()
     {
-        super(PROTOCOL_PREFIX, "MicroarrayAssayRun", "MicroarrayAssayData");
+        super(PROTOCOL_PREFIX, "MicroarrayAssayRun", MicroarrayModule.MAGE_ML_DATA_TYPE);
     }
 
     public ExpData getDataForDataRow(Object dataRowId)
@@ -90,33 +87,35 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
 
     protected void addOutputDatas(AssayRunUploadContext context, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
-        super.addOutputDatas(context, outputDatas, resolverType);
-        assert outputDatas.size() == 1;
-        for (Map.Entry<ExpData, String> entry : new HashMap<ExpData, String>(outputDatas).entrySet())
+        try
         {
-            String name = entry.getValue();
-            ExpData data = entry.getKey();
-            File f = data.getFile();
-            if (f != null)
-            {
-                String baseName = ArrayPipelineManager.getBaseMageName(f.getName());
-                if (baseName != null)
-                {
-                    File imageFile = new File(f.getParentFile(), baseName + ".jpg");
-                    if (NetworkDrive.exists(imageFile))
-                    {
-                        ExpData imageData = createData(imageFile, MICROARRAY_IMAGE_DATA_PREFIX, context.getContainer());
-                        outputDatas.put(imageData, name + "Image");
-                    }
+            Map<String, File> files = context.getUploadedData();
+            assert files.size() == 1;
+            File mageMLFile = files.values().iterator().next();
+            ExpData mageData = createData(context.getUser(), context.getContainer(), mageMLFile, MicroarrayModule.MAGE_ML_DATA_TYPE);
 
-                    File qcFile = new File(f.getParentFile(), baseName + ".pdf");
-                    if (NetworkDrive.exists(qcFile))
-                    {
-                        ExpData qcData = createData(qcFile, MICROARRAY_QC_DATA_PREFIX, context.getContainer());
-                        outputDatas.put(qcData, name + "QC");
-                    }
+            outputDatas.put(mageData, "MageML");
+            String baseName = ArrayPipelineManager.getBaseMageName(mageMLFile.getName());
+            if (baseName != null)
+            {
+                File imageFile = new File(mageMLFile.getParentFile(), baseName + ".jpg");
+                if (NetworkDrive.exists(imageFile))
+                {
+                    ExpData imageData = createData(context.getUser(), context.getContainer(), imageFile, MicroarrayModule.IMAGE_DATA_TYPE);
+                    outputDatas.put(imageData, "ThumbnailImage");
+                }
+
+                File qcFile = new File(mageMLFile.getParentFile(), baseName + ".pdf");
+                if (NetworkDrive.exists(qcFile))
+                {
+                    ExpData qcData = createData(context.getUser(), context.getContainer(), qcFile, MicroarrayModule.QC_REPORT_DATA_TYPE);
+                    outputDatas.put(qcData, "QCReport");
                 }
             }
+        }
+        catch (IOException e)
+        {
+            throw new ExperimentException(e);
         }
     }
 
@@ -132,11 +131,12 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
 
     public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles)
     {
-        return Collections.<AssayDataCollector>singletonList(new PipelineDataCollector(new ArrayPipelineManager.MageFileFilter()));
+        return Collections.<AssayDataCollector>singletonList(new PipelineDataCollector());
     }
 
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
         return Arrays.asList(new StudyParticipantVisitResolverType(), new ThawListResolverType());
     }
+
 }

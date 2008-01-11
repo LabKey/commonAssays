@@ -28,7 +28,7 @@ import jxl.read.biff.BiffException;
  */
 public class NabDataHandler extends AbstractExperimentDataHandler
 {
-    public static final String NAB_DATA_LSID_PREFIX = "AssayRunNabData";
+    public static final DataType NAB_DATA_TYPE = new DataType("AssayRunNabData");
     public static final String NAB_DATA_ROW_LSID_PREFIX = "AssayRunNabDataRow";
     public static final String NAB_PROPERTY_LSID_PREFIX = "NabProperty";
     public static final String NAB_INPUT_MATERIAL_DATA_PROPERTY = "SpecimenLsid";
@@ -153,7 +153,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
     {
         if (run == null)
             return null;
-        ExpData[] outputDatas = run.getOutputDatas(new DataType(NAB_DATA_LSID_PREFIX));
+        ExpData[] outputDatas = run.getOutputDatas(NAB_DATA_TYPE);
         if (outputDatas == null || outputDatas.length != 1)
             throw new IllegalStateException("Nab runs should have a single data output.");
         File dataFile = outputDatas[0].getFile();
@@ -412,7 +412,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());
-        if (NAB_DATA_LSID_PREFIX.equals(lsid.getNamespacePrefix()))
+        if (NAB_DATA_TYPE.matches(lsid))
         {
             return Priority.HIGH;
         }

@@ -54,7 +54,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
 
     public NabAssayProvider()
     {
-        super("NabAssayProtocol", "NabAssayRun", NabDataHandler.NAB_DATA_LSID_PREFIX);
+        super("NabAssayProtocol", "NabAssayRun", NabDataHandler.NAB_DATA_TYPE);
     }
 
     protected void registerLsidHandler()

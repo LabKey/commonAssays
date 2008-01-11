@@ -6,20 +6,30 @@ import org.labkey.api.view.*;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DataRegion;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.URIUtil;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
+import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
 import org.apache.beehive.netui.pageflow.FormData;
 
 import java.net.URI;
 import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 public class MicroarrayController extends SpringActionController
 {
@@ -36,12 +46,138 @@ public class MicroarrayController extends SpringActionController
         return new ActionURL(ShowRunsAction.class, c);
     }
 
+    public static ActionURL getPendingMageMLFilesURL(Container c)
+    {
+        return new ActionURL(ShowPendingMageMLFilesAction.class, c);
+    }
+
+    public static ActionURL getUploadRedirectAction(Container c, ExpProtocol protocol)
+    {
+        ActionURL url = new ActionURL(UploadRedirectAction.class, c);
+        url.addParameter("protocolId", protocol.getRowId());
+        return url;
+    }
+
+    public static ActionURL getUploadRedirectAction(Container c, ExpProtocol protocol, String pipelinePath)
+    {
+        return getUploadRedirectAction(c, protocol).addParameter("path", pipelinePath);
+    }
+
+    public static class UploadRedirectForm
+    {
+        private int _protocolId;
+        private String _path;
+
+        public int getProtocolId()
+        {
+            return _protocolId;
+        }
+
+        public ExpProtocol getProtocol()
+        {
+            ExpProtocol result = ExperimentService.get().getExpProtocol(_protocolId);
+            if (result == null)
+            {
+                HttpView.throwNotFound("Could not find protocol");
+            }
+            return result;
+        }
+
+        public void setProtocolId(int protocolId)
+        {
+            _protocolId = protocolId;
+        }
+
+        public String getPath()
+        {
+            return _path;
+        }
+
+        public void setPath(String path)
+        {
+            _path = path;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_INSERT)
+    public class UploadRedirectAction extends SimpleViewAction<UploadRedirectForm>
+    {
+        public ModelAndView getView(UploadRedirectForm form, BindException errors) throws Exception
+        {
+            int[] dataIds = PageFlowUtil.parseInts(getViewContext().getRequest().getParameterValues(DataRegion.SELECT_CHECKBOX_NAME));
+            List<Map<String, File>> files = new ArrayList<Map<String, File>>();
+            for (int dataId : dataIds)
+            {
+                ExpData data = ExperimentService.get().getExpData(dataId);
+                if (data == null || !data.getContainer().equals(getContainer()))
+                {
+                    HttpView.throwNotFound("Could not find all selected datas");
+                }
+
+                File f = data.getFile();
+                if (f != null && f.isFile())
+                {
+                    files.add(Collections.singletonMap("File", f));
+                }
+            }
+            if (form.getPath() != null)
+            {
+                PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+                if (root == null)
+                {
+                    throw new IllegalStateException("No pipeline root is available");
+                }
+                File f = root.resolvePath(form.getPath());
+                if (!NetworkDrive.exists(f))
+                {
+                    throw new IOException("Unable to find file: " + form.getPath());
+                }
+
+                File[] selectedFiles = f.listFiles(ArrayPipelineManager.getMageFileFilter());
+                if (selectedFiles != null)
+                {
+                    for (File selectedFile : selectedFiles)
+                    {
+                        files.add(Collections.singletonMap("File", selectedFile));
+                    }
+                }
+            }
+            if (files.isEmpty())
+            {
+                HttpView.throwNotFound("Could not find any matching files");
+            }
+            PipelineDataCollector.setFileCollection(getViewContext().getRequest().getSession(true), getContainer(), form.getProtocol(), files);
+            HttpView.throwRedirect(AssayService.get().getUploadWizardURL(getContainer(), form.getProtocol()));
+            return null;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+
     @RequiresPermission(ACL.PERM_READ)
     public class ShowRunsAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             return ExperimentService.get().createExperimentRunWebPart(getViewContext(), MicroarrayModule.EXP_RUN_FILTER, true);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowPendingMageMLFilesAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            return new PendingMageMLFilesView(getViewContext());
         }
 
         public NavTree appendNavTrail(NavTree root)

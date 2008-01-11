@@ -1,6 +1,5 @@
 package org.labkey.microarray.pipeline;
 
-import org.apache.log4j.Logger;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipeRoot;
@@ -9,21 +8,22 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
+import org.labkey.microarray.MicroarrayController;
 
 import java.io.File;
 import java.util.List;
+import java.sql.SQLException;
 
 
 public class MicroarrayPipelineProvider extends PipelineProvider
 {
-    private static final Logger _log = Logger.getLogger(MicroarrayPipelineProvider.class);
-
-    public static String name = "Array";
+    public static final String NAME = "Array";
 
     public MicroarrayPipelineProvider()
     {
-        super(name);
+        super(NAME);
     }
 
     public void updateFileProperties(ViewContext context, List<FileEntry> entries)
@@ -34,7 +34,6 @@ public class MicroarrayPipelineProvider extends PipelineProvider
         try
         {
             PipeRoot root = PipelineService.get().findPipelineRoot(context.getContainer());
-            File rootDir = root.getRootPath();
             for (FileEntry entry : entries)
             {
                 File[] files = entry.listFiles(ArrayPipelineManager.getImageFileFilter());
@@ -49,8 +48,7 @@ public class MicroarrayPipelineProvider extends PipelineProvider
                     {
                         if (AssayService.get().getProvider(protocol) instanceof MicroarrayAssayProvider)
                         {
-                            ActionURL url = AssayService.get().getUploadWizardURL(context.getContainer(), protocol);
-                            url.addParameter(".pipelinePath", root.relativePath(new File(entry.getURI())));
+                            ActionURL url = MicroarrayController.getUploadRedirectAction(context.getContainer(), protocol, root.relativePath(new File(entry.getURI())));
                             addAction(url, "Import MAGEML using " + protocol.getName(),
                                     entry, files);
                         }
@@ -58,9 +56,9 @@ public class MicroarrayPipelineProvider extends PipelineProvider
                 }
             }
         }
-        catch (Exception e)
+        catch (SQLException e)
         {
-            _log.error("Exception", e);
+            throw new RuntimeSQLException(e);
         }
     }
 
