@@ -92,7 +92,7 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
             Map<String, File> files = context.getUploadedData();
             assert files.size() == 1;
             File mageMLFile = files.values().iterator().next();
-            ExpData mageData = createData(context.getUser(), context.getContainer(), mageMLFile, MicroarrayModule.MAGE_ML_DATA_TYPE);
+            ExpData mageData = createData(context.getContainer(), mageMLFile, MicroarrayModule.MAGE_ML_DATA_TYPE);
 
             outputDatas.put(mageData, "MageML");
             String baseName = ArrayPipelineManager.getBaseMageName(mageMLFile.getName());
@@ -101,14 +101,14 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
                 File imageFile = new File(mageMLFile.getParentFile(), baseName + ".jpg");
                 if (NetworkDrive.exists(imageFile))
                 {
-                    ExpData imageData = createData(context.getUser(), context.getContainer(), imageFile, MicroarrayModule.IMAGE_DATA_TYPE);
+                    ExpData imageData = createData(context.getContainer(), imageFile, MicroarrayModule.IMAGE_DATA_TYPE);
                     outputDatas.put(imageData, "ThumbnailImage");
                 }
 
                 File qcFile = new File(mageMLFile.getParentFile(), baseName + ".pdf");
                 if (NetworkDrive.exists(qcFile))
                 {
-                    ExpData qcData = createData(context.getUser(), context.getContainer(), qcFile, MicroarrayModule.QC_REPORT_DATA_TYPE);
+                    ExpData qcData = createData(context.getContainer(), qcFile, MicroarrayModule.QC_REPORT_DATA_TYPE);
                     outputDatas.put(qcData, "QCReport");
                 }
             }

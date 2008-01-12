@@ -13,6 +13,7 @@ import org.labkey.api.microarray.ExtractionConfigException;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.microarray.MicroarrayModule;
 
 import java.util.*;
@@ -491,7 +492,8 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         {
             try
             {
-                AbstractAssayProvider.createData(u, c, mage, MicroarrayModule.MAGE_ML_DATA_TYPE);
+                ExpData data = AbstractAssayProvider.createData(c, mage, MicroarrayModule.MAGE_ML_DATA_TYPE);
+                data.save(u);
                 /*
                 FeatureExtractionRun feRun = new FeatureExtractionRun();
                 Node descriptionParentNode = (Node) xPathDescriptionNode.evaluate(new InputSource(new FileInputStream(mage)), XPathConstants.NODE);
