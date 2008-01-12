@@ -24,38 +24,28 @@ import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 import org.labkey.api.data.*;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.security.ACL;
-import org.labkey.api.util.*;
+import org.labkey.api.util.ContainerTree;
+import org.labkey.api.util.Formats;
+import org.labkey.api.util.HelpTopic;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.FastTemplate;
 import org.labkey.api.view.template.HomeTemplate;
-import org.labkey.ms2.pipeline.FileStatus;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
-import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.protein.*;
-import org.labkey.ms2.protein.tools.PieJChartHelper;
-import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
-import org.labkey.ms2.protocol.AbstractMS2SearchProtocolFactory;
-import org.labkey.ms2.protocol.MS2SearchPipelineProtocol;
-import org.labkey.ms2.protocol.MascotSearchProtocolFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 
 @Jpf.Controller(longLived = true)
@@ -184,58 +174,6 @@ public class OldMS2Controller extends ViewController
     }
 
 
-    public static class ImportProteinProphetForm extends ViewForm
-    {
-        protected String _path;
-
-        public String getPath()
-        {
-            return _path;
-        }
-
-        public void setPath(String path)
-        {
-            _path = path;
-        }
-    }
-
-
-    @Jpf.Action
-    protected Forward importProteinProphet(ImportProteinProphetForm form) throws Exception
-    {
-        Container c = getContainer(ACL.PERM_INSERT);
-        PipelineService service = PipelineService.get();
-
-        File f = null;
-        String path = form.getPath();
-        if (path != null)
-        {
-            PipeRoot pr = service.findPipelineRoot(c);
-            if (pr != null)
-            {
-                URI uriData = URIUtil.resolve(pr.getUri(c), path);
-                if (uriData != null)
-                {
-                    f = new File(uriData);
-                }
-            }
-        }
-
-
-        if (null != f && f.exists() && f.isFile())
-        {
-            ProteinProphetPipelineJob job = new ProteinProphetPipelineJob(getViewBackgroundInfo(), f);
-            service.queueJob(job);
-        }
-        else
-        {
-            HttpView.throwNotFound("Unable to open the file '" + form.getPath() + "' to load as a ProteinProphet file");
-        }
-
-        ActionURL url = new ActionURL("Project", "begin", c.getPath());
-        return new ViewForward(url);
-    }
-
     @Jpf.Action
     protected Forward discriminateScore(RunForm form) throws Exception
     {
@@ -299,36 +237,6 @@ public class OldMS2Controller extends ViewController
         requiresGlobalAdmin();
         HttpView v = new JspView<LoadAnnotForm>("/org/labkey/ms2/insertAnnots.jsp", form);
         return _renderInTemplate(v, true, "Load Protein Annotations", null);
-    }
-
-
-    @Jpf.Action
-    protected Forward doOnePeptideChart() throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        HttpServletRequest req = getRequest();
-        HttpServletResponse response = getResponse();
-        response.setContentType("image/png");
-        OutputStream out = response.getOutputStream();
-
-        String helperName = req.getParameter("helpername");
-        PieJChartHelper pjch = (PieJChartHelper) Cache.getShared().get(helperName);
-
-        try
-        {
-            pjch.renderAsPNG(out);
-        }
-        catch (Exception e)
-        {
-            _log.error("Chart rendering failed: " + e);
-        }
-        finally
-        {
-            Cache.getShared().remove(helperName);
-        }
-
-        return null;
     }
 
 
@@ -415,234 +323,6 @@ public class OldMS2Controller extends ViewController
         AnnotationInsertion insertion = insertions[0];
         JspView view = new JspView<AnnotationInsertion>("/org/labkey/ms2/annotLoadDetails.jsp", insertion);
         return _renderInTemplate(view, true, insertion.getFiletype() + " Annotation Insertion Details: " + insertion.getFilename(), null);
-    }
-
-
-    public static class AddRunForm extends ViewForm
-    {
-        private String fileName;
-        private String protocol;
-        private String dataDir;
-        private String description;
-        private String error;
-        private boolean auto;
-        private boolean experiment;
-
-        public String getFileName()
-        {
-            return fileName;
-        }
-
-        public void setFileName(String fileName)
-        {
-            this.fileName = fileName;
-        }
-
-        public String getDescription()
-        {
-            return description;
-        }
-
-        public void setDescription(String description)
-        {
-            this.description = description;
-        }
-
-        public boolean isAuto()
-        {
-            return auto;
-        }
-
-        public void setAuto(boolean auto)
-        {
-            this.auto = auto;
-        }
-
-        public String getError()
-        {
-            return error;
-        }
-
-        public void setError(String error)
-        {
-            this.error = error;
-        }
-
-        public String getProtocol()
-        {
-            return protocol;
-        }
-
-        public void setProtocol(String protocol)
-        {
-            this.protocol = protocol;
-        }
-
-        public boolean isExperiment()
-        {
-            return experiment;
-        }
-
-        public void setExperiment(boolean experiment)
-        {
-            this.experiment = experiment;
-        }
-
-        public String getDataDir()
-        {
-            return dataDir;
-        }
-
-        public void setDataDir(String dataDir)
-        {
-            this.dataDir = dataDir;
-        }
-    }
-
-
-    @Jpf.Action
-    protected Forward addRun(AddRunForm form) throws Exception
-    {
-        Container c = null;
-        ActionURL url;
-        File f = null;
-
-        try
-        {
-            c = getContainer();
-        }
-        catch (ServletException e)
-        {
-            // null container handled below
-        }
-
-        if ("Show Runs".equals(getActionURL().getParameter("list")))
-        {
-            if (c == null)
-                return HttpView.throwNotFound();
-
-            return new ViewForward(MS2Controller.getShowListUrl(c));
-        }
-
-        if (null != form.getFileName())
-        {
-            f = new File(form.getFileName());
-
-            if (!f.exists())
-                NetworkDrive.ensureDrive(f.getPath());
-        }
-
-        if (null != f && f.exists())
-        {
-            if (!form.isAuto())
-            {
-                PipelineService service = PipelineService.get();
-                ViewBackgroundInfo info = getViewBackgroundInfo();
-
-                // TODO: Clean this up.
-                boolean mascotFile = MascotSearchProtocolFactory.get().equals(AbstractMS2SearchProtocolFactory.fromFile(f));
-                int run;
-                if (mascotFile)
-                {
-                    run = MS2Manager.addMascotRunToQueue(info,
-                            f, form.getDescription(), false).getRunId();
-                }
-                else
-                {
-                    run = MS2Manager.addRunToQueue(info,
-                            f, form.getDescription(), false).getRunId();
-                }
-
-                if (run == -1)
-                    return HttpView.throwNotFound();
-
-                url = MS2Controller.getShowListUrl(c);
-                url.addParameter(MS2Manager.getDataRegionNameExperimentRuns() + ".Run~eq", Integer.toString(run));
-            }
-            else if (!AppProps.getInstance().hasPipelineCluster())
-            {
-                url = new ActionURL("MS2", "addFileRunStatus", "");
-                url.addParameter("error", "Automated upload disabled.");
-            }
-            else
-            {
-                if (!form.isExperiment())
-                {
-                    int run = MS2Manager.addRunToQueue(getViewBackgroundInfo(),
-                            f, form.getDescription(), true).getRunId();
-                    if (run == -1)
-                        HttpView.throwNotFound();
-
-                    url = new ActionURL("MS2", "addFileRunStatus", "");
-                    url.addParameter("run", Integer.toString(run));
-                }
-                else
-                {
-                    // Make sure container exists.
-                    c = ContainerManager.ensureContainer(getActionURL().getExtraPath());
-                    if (null == c)
-                        return HttpView.throwNotFound();
-
-                    PipelineService service = PipelineService.get();
-                    PipeRoot pr = service.findPipelineRoot(c);
-                    if (pr == null)
-                        return HttpView.throwUnauthorized();
-
-                    String protocolName = form.getProtocol();
-                    File dirData = new File(form.getDataDir());
-                    if (!NetworkDrive.exists(dirData))
-                        return HttpView.throwNotFound();
-
-                    AbstractMS2SearchProtocolFactory protocolFactory = AbstractMS2SearchProtocolFactory.fromFile(f);
-
-                    File dirSeqRoot = new File(MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer()));
-                    File dirAnalysis = protocolFactory.getAnalysisDir(dirData, protocolName);
-                    File fileParameters = protocolFactory.getParametersFile(dirData, protocolName);
-                    String baseName = FileUtil.getBaseName(f, 2);
-
-                    File[] filesMzXML;
-                    if (!"all".equals(baseName))
-                    {
-                        filesMzXML = new File[] { MS2PipelineManager.getMzXMLFile(dirData, baseName) };
-                    }
-                    else
-                    {
-                        // Anything that is running or complete.
-                        Map<File, FileStatus> mzXMLFileStatus = MS2PipelineManager.getAnalysisFileStatus(dirData, dirAnalysis, getContainer());
-                        List<File> fileList = new ArrayList<File>();
-                        for (File fileMzXML : mzXMLFileStatus.keySet())
-                        {
-                            FileStatus status = mzXMLFileStatus.get(fileMzXML);
-                            if (status.equals(FileStatus.COMPLETE) || status.equals(FileStatus.RUNNING))
-                                fileList.add(fileMzXML);
-                        }
-                        filesMzXML = fileList.toArray(new File[fileList.size()]);
-
-                        if (filesMzXML.length == 0)
-                            return HttpView.throwNotFound();
-                    }
-
-                    MS2SearchPipelineProtocol protocol = protocolFactory.loadInstance(fileParameters);
-
-                    PipelineJob job = protocol.createPipelineJob(getViewBackgroundInfo(),
-                            dirSeqRoot,
-                            filesMzXML,
-                            fileParameters,
-                            true);
-
-                    PipelineService.get().queueJob(job);
-
-                    url = new ActionURL("MS2", "addFileRunStatus", "");
-                    url.addParameter("path", job.getLogFile().getAbsolutePath());
-                }
-            }
-        }
-        else
-        {
-            url = new ActionURL("MS2", "addFileRunStatus", "");
-        }
-
-        return new ViewForward(url);
     }
 
 
@@ -858,38 +538,6 @@ public class OldMS2Controller extends ViewController
     }
 
     @Jpf.Action
-    protected Forward saveElutionProfile(ElutionProfileForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-
-        if (!isAuthorized(form.run))
-            return null;
-
-        MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
-        if (peptide == null)
-        {
-            throw new NotFoundException();
-        }
-        Quantitation quant = peptide.getQuantitation();
-        if (quant == null)
-        {
-            throw new NotFoundException();
-        }
-
-        boolean validRanges = quant.resetRanges(form.getLightFirstScan(), form.getLightLastScan(), form.getHeavyFirstScan(), form.getHeavyLastScan(), peptide.getCharge());
-        Table.update(getUser(), MS2Manager.getTableInfoQuantitation(), quant, quant.getPeptideId(), null);
-
-        ActionURL url = getActionURL().clone();
-        url.setAction("showPeptide.view");
-        if (!validRanges)
-        {
-            url.addParameter("elutionProfileError", "Invalid elution profile range");
-        }
-
-        return new ViewForward(url);
-    }
-
-    @Jpf.Action
     protected Forward updateShowPeptide() throws Exception
     {
         ViewContext ctx = getViewContext();
@@ -966,68 +614,6 @@ public class OldMS2Controller extends ViewController
         }
 
         return null;
-    }
-
-
-    @Jpf.Action
-    protected Forward addExtraFilter() throws URISyntaxException, ServletException
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        ViewContext ctx = getViewContext();
-        ActionURL url = cloneActionURL();
-        url.setAction("showRun.view");
-
-        MS2Run run = MS2Manager.getRun(getRequest().getParameter("run"));
-        String paramName = run.getChargeFilterParamName();
-
-        // Stick posted values onto showRun URL and forward.  URL shouldn't have any rawScores or tryptic (they are
-        // deleted from the button URL and get posted instead).  Don't bother adding "0" since it's the default.
-
-        // Verify that charge filter scroes are valid floats and, if so, add as URL params
-        parseChargeScore(ctx, url, "1", paramName);
-        parseChargeScore(ctx, url, "2", paramName);
-        parseChargeScore(ctx, url, "3", paramName);
-
-        String tryptic = (String) ctx.get("tryptic");
-
-        if (!"0".equals(tryptic))
-            url.addParameter("tryptic", tryptic);
-
-        if (getRequest().getParameter("grouping") != null)
-        {
-            url.addParameter("grouping", getRequest().getParameter("grouping"));
-        }
-
-        if (getRequest().getParameter("expanded") != null)
-        {
-            url.addParameter("expanded", "1");
-        }
-
-        return new ViewForward(url);
-    }
-
-
-    // Parse parameter to float, returning 0 for any parsing exceptions
-    private void parseChargeScore(ViewContext ctx, ActionURL url, String digit, String paramName)
-    {
-        float value = 0;
-        String score = (String)ctx.get("charge" + digit);
-
-        try
-        {
-            if (score != null)
-            {
-                value = Float.parseFloat(score);
-            }
-        }
-        catch(NumberFormatException e)
-        {
-            // Can't parse... just use default
-        }
-
-        if (0.0 != value)
-            url.addParameter(paramName + digit, Formats.chargeFilter.format(value));
     }
 
 
@@ -1218,54 +804,6 @@ public class OldMS2Controller extends ViewController
         public void setProteinGroupingId(String proteinGroupingId)
         {
             this.proteinGroupingId = proteinGroupingId;
-        }
-    }
-
-    public static class ElutionProfileForm extends DetailsForm
-    {
-        private int _lightFirstScan;
-        private int _lightLastScan;
-        private int _heavyFirstScan;
-        private int _heavyLastScan;
-
-        public int getLightFirstScan()
-        {
-            return _lightFirstScan;
-        }
-
-        public void setLightFirstScan(int lightFirstScan)
-        {
-            _lightFirstScan = lightFirstScan;
-        }
-
-        public int getLightLastScan()
-        {
-            return _lightLastScan;
-        }
-
-        public void setLightLastScan(int lightLastScan)
-        {
-            _lightLastScan = lightLastScan;
-        }
-
-        public int getHeavyFirstScan()
-        {
-            return _heavyFirstScan;
-        }
-
-        public void setHeavyFirstScan(int heavyFirstScan)
-        {
-            _heavyFirstScan = heavyFirstScan;
-        }
-
-        public int getHeavyLastScan()
-        {
-            return _heavyLastScan;
-        }
-
-        public void setHeavyLastScan(int heavyLastScan)
-        {
-            _heavyLastScan = heavyLastScan;
         }
     }
 
@@ -1475,71 +1013,6 @@ public class OldMS2Controller extends ViewController
         public void setQuantitationCharge(int quantitationCharge)
         {
             this.quantitationCharge = quantitationCharge;
-        }
-
-    }
-
-
-    public static class MS2ViewForm extends FormData
-    {
-        private String viewParams;
-        private String returnUrl;
-        private String name;
-        private int run;
-        private boolean shared;
-
-        public void setName(String name)
-        {
-            this.name = name;
-        }
-
-        public String getName()
-        {
-            return this.name;
-        }
-
-        public void setReturnUrl(String returnUrl)
-        {
-            this.returnUrl = returnUrl;
-        }
-
-        public String getReturnUrl()
-        {
-            return this.returnUrl;
-        }
-
-        public void setViewParams(String viewParams)
-        {
-            this.viewParams = viewParams;
-        }
-
-        public String getViewParams()
-        {
-            return this.viewParams;
-        }
-
-        public void setRun(String run)
-        {
-            try
-            {
-                this.run = Integer.parseInt(run);
-            }
-            catch (NumberFormatException e) {}
-        }
-
-        public String getRun()
-        {
-            return Integer.toString(run);
-        }
-
-        public boolean isShared()
-        {
-            return shared;
-        }
-
-        public void setShared(boolean shared)
-        {
-            this.shared = shared;
         }
     }
 }
