@@ -428,4 +428,37 @@ public class MS1Manager
         return sb.toString();
     }
 
+    /**
+     * Returns true if any of the peptide sequences passed contain any modifiers
+     *
+     * @param peptideSequences Array of peptide sequences
+     * @return True if any contain modifiers
+     */
+    public boolean containsModifiers(String[] peptideSequences)
+    {
+        for(String seq : peptideSequences)
+        {
+            if(containsModifiers(seq))
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the passed peptide sequence contains any modifiers
+     * @param peptideSequence the sequence to examine
+     * @return true if peptideSequence contains modifiers
+     */
+    public boolean containsModifiers(String peptideSequence)
+    {
+        char ch = 0;
+        for(int idx = 0; idx < peptideSequence.length(); ++idx)
+        {
+            ch = peptideSequence.charAt(idx);
+            if(ch < 'A' || ch > 'Z')
+                return true;
+        }
+        return false;
+    }
+
 } //class MS1Manager

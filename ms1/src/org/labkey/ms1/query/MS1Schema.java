@@ -80,7 +80,7 @@ public class MS1Schema extends UserSchema
 
     public FeaturesTableInfo getFeaturesTableInfo(boolean includePepFk)
     {
-        return new FeaturesTableInfo(this, getContainer(), includePepFk);
+        return new FeaturesTableInfo(this, includePepFk);
     } //getFeaturesTableInfo()
 
     public PeaksTableInfo getPeaksTableInfo()

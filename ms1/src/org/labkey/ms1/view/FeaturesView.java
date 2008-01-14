@@ -1,20 +1,19 @@
 package org.labkey.ms1.view;
 
 import org.labkey.api.data.*;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.query.QuerySettings;
 import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ActionURL;
-import org.labkey.ms1.query.FeaturesTableInfo;
-import org.labkey.ms1.query.MS1Schema;
+import org.labkey.ms1.query.*;
 
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implements a query view over the features data, allows filtering for features from a specific run
@@ -26,38 +25,62 @@ import java.sql.SQLException;
  */
 public class FeaturesView extends QueryView
 {
+    public static final String DATAREGION_NAME = "features";
+
     //Localizable strings
     private static final String CAPTION_EXPORT_ALL_EXCEL = "Export All to Excel";
     private static final String CAPTION_EXPORT_ALL_TSV = "Export All to Text";
     private static final String CAPTION_PRINT_ALL = "Print";
 
-    /**
-     * Constructs a new FeaturesView given a ViewContext and the experiment run id. The view
-     * will automatically filter the list of Features to just those belonging to the specified run.
-     * @param ctx       The view context
-     * @param schema    The MS1Schema to use
-     * @param runId     The id of the experiment run
-     * @param peaksAvailable Pass true if peak data is available
-     * @param forExport Pass true if this is being created for export to excel/tsv/print
-     */
-    public FeaturesView(ViewContext ctx, MS1Schema schema, int runId, boolean peaksAvailable, boolean forExport)
+    private List<FeaturesFilter> _baseFilters = null;
+    private MS1Schema _ms1Schema = null;
+    private boolean _forExport = false;
+
+    public FeaturesView(MS1Schema schema)
+    {
+        this(schema, new ArrayList<FeaturesFilter>());
+    }
+
+    public FeaturesView(MS1Schema schema, Container container)
+    {
+        this(schema);
+        _baseFilters.add(new ContainerFilter(container));
+    }
+
+    public FeaturesView(MS1Schema schema, List<FeaturesFilter> baseFilters)
     {
         super(schema);
         _ms1Schema = schema;
-        _runId = runId;
-        _peaksAvailable = peaksAvailable;
-        _forExport = forExport;
+        _baseFilters = baseFilters;
 
-        QuerySettings settings = new QuerySettings(ctx.getActionURL(), QueryView.DATAREGIONNAME_DEFAULT);
-        settings.setQueryName(MS1Schema.TABLE_FEATURES);
+        QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), DATAREGION_NAME);
+        settings.setQueryName(MS1Schema.TABLE_PEAKS);
         settings.setAllowChooseQuery(false);
         setSettings(settings);
 
-        ExpRun run = ExperimentService.get().getExpRun(runId);
-        setTitle("MS1 Features from " + (null != run ? run.getName() : "(Invalid Run)"));
         setShowCustomizeViewLinkInButtonBar(true);
         setShowRecordSelectors(false);
         setShowExportButtons(false);
+    }
+
+    public List<FeaturesFilter> getBaseFilters()
+    {
+        return _baseFilters;
+    }
+
+    public void setBaseFilters(List<FeaturesFilter> baseFilters)
+    {
+        _baseFilters = baseFilters;
+    }
+
+    public boolean isForExport()
+    {
+        return _forExport;
+    }
+
+    public void setForExport(boolean forExport)
+    {
+        _forExport = forExport;
     }
 
     public int[] getPrevNextFeature(int featureIdCur) throws SQLException, IOException
@@ -99,8 +122,16 @@ public class FeaturesView extends QueryView
         assert null != _ms1Schema : "MS1 Schema was not set in FeaturesView class!";
 
         FeaturesTableInfo tinfo = _ms1Schema.getFeaturesTableInfo();
-        if(_runId >= 0)
-            tinfo.addRunIdCondition(_runId, getContainer(), getViewContext().getActionURL(), _peaksAvailable, _forExport);
+
+        //apply base filters
+        if(null != _baseFilters)
+        {
+            for(FeaturesFilter filter : _baseFilters)
+            {
+                filter.setFilters(tinfo);
+            }
+        }
+
         return tinfo;
     }
 
@@ -115,7 +146,7 @@ public class FeaturesView extends QueryView
 
         //if this is for export, remove the details and peaks links
         if(_forExport)
-            region.removeColumnsFromDisplayColumnList(FeaturesTableInfo.COLUMN_DETAILS_LINK, FeaturesTableInfo.COLUMN_PEAKS_LINK);
+            region.removeColumnsFromDisplayColumnList(PeaksAvailableColumnInfo.COLUMN_NAME);
         return region;
     }
 
@@ -157,11 +188,4 @@ public class FeaturesView extends QueryView
     {
         return new Sort("Scan,MZ");
     }
-
-
-    //Data members
-    private MS1Schema _ms1Schema;
-    private int _runId = -1;
-    private boolean _peaksAvailable = false;
-    private boolean _forExport = false;
 } //class FeaturesView

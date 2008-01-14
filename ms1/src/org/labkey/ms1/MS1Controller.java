@@ -16,7 +16,7 @@ import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.ms1.model.*;
 import org.labkey.ms1.pipeline.MSInspectImportPipelineJob;
-import org.labkey.ms1.query.MS1Schema;
+import org.labkey.ms1.query.*;
 import org.labkey.ms1.view.*;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -24,6 +24,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
+import java.util.ArrayList;
 
 /**
  * This controller is the entry point for all web pages specific to the MS1
@@ -74,7 +75,7 @@ public class MS1Controller extends SpringActionController
     protected NavTree addFeaturesChild(NavTree root, int runId)
     {
         ActionURL url = getActionURL("showFeatures.view");
-        url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
+        url.addParameter(ShowFeaturesForm.ParamNames.runId.name(), runId);
         url.addParameter(".lastFilter", "true");
         return root.addChild("Features from Run", url);
     }
@@ -90,7 +91,7 @@ public class MS1Controller extends SpringActionController
     protected NavTree addPeaksChild(NavTree root, int runId, int featureId)
     {
         ActionURL url = getActionURL("showPeaks.view");
-        url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
+        url.addParameter(ShowFeaturesForm.ParamNames.runId.name(), runId);
         url.addParameter(ShowPeaksAction.PARAM_FEATUREID, featureId);
         url.addParameter(".lastFilter", "true"); 
         return root.addChild("Peaks from Feature", url);
@@ -161,18 +162,58 @@ public class MS1Controller extends SpringActionController
     } //class BeginAction
 
     /**
+     * Form class for the ShowFeaturesAction
+     */
+    public static class ShowFeaturesForm
+    {
+        public enum ParamNames
+        {
+            runId,
+            export
+        }
+
+        private int _runId = -1;
+        private String _export = "";
+
+        public int getRunId()
+        {
+            return _runId;
+        }
+
+        public void setRunId(int runId)
+        {
+            _runId = runId;
+        }
+
+        public String getExport()
+        {
+            return _export;
+        }
+
+        public void setExport(String export)
+        {
+            _export = export;
+        }
+
+        public boolean runSpecified()
+        {
+            return _runId >= 0;
+        }
+    }
+
+    /**
      * Action to show the features for a given experiment run
      */
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowFeaturesAction extends SimpleViewAction<RunIdForm>
+    public class ShowFeaturesAction extends SimpleViewAction<ShowFeaturesForm>
     {
         public static final String PARAM_RUNID = "runId";
-        private RunIdForm _form;
+        private ShowFeaturesForm _form;
 
-        public ModelAndView getView(RunIdForm form, BindException errors) throws Exception
+        public ModelAndView getView(ShowFeaturesForm form, BindException errors) throws Exception
         {
-            _form = null;
-            if(-1 == form.getRunId())
+            //this action requires that a sepcific experiment run has been specified
+            if(!form.runSpecified())
                 return HttpView.redirect(MS1Controller.this.getActionURL("begin"));
 
             //ensure that the experiment run is valid and exists within the current container
@@ -186,14 +227,20 @@ public class MS1Controller extends SpringActionController
             MS1Manager.PeakAvailability peakAvail = mgr.isPeakDataAvailable(form.getRunId());
 
             //create the features view
-            FeaturesView featuresView = new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                                            form.getRunId(),
-                                                            (peakAvail == MS1Manager.PeakAvailability.Available),
-                                                            isExportRequest(form.getExport()));
+            ArrayList<FeaturesFilter> baseFilters = new ArrayList<FeaturesFilter>();
+            baseFilters.add(new RunFilter(form.getRunId()));
+            baseFilters.add(new ContainerFilter(getContainer()));
+            FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getContainer()),
+                                                        baseFilters);
+            
+            featuresView.setTitle("Features from " + run.getName());
 
             //if there is an export request, export and return
             if(isExportRequest(form.getExport()))
+            {
+                featuresView.setForExport(true);
                 return exportQueryView(featuresView, getPageConfig(), form.getExport());
+            }
 
             //get the corresponding file Id and initialize a software view if there is software info
             //also create a file details view
@@ -248,7 +295,7 @@ public class MS1Controller extends SpringActionController
         public ActionURL getUrl(int runId)
         {
             ActionURL url = new ActionURL(MS1Module.CONTROLLER_NAME, "showFeatures.view", getContainer());
-            url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
+            url.addParameter(ShowFeaturesForm.ParamNames.runId.name(), runId);
             url.addParameter(".lastFilter", "true");
             return url;
         }
@@ -260,12 +307,12 @@ public class MS1Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowPeaksAction extends SimpleViewAction<PeaksViewForm>
     {
+        public static final String ACTION_NAME = "showPeaks";
         public static final String PARAM_FEATUREID = "featureId";
-        private PeaksViewForm _form;
 
         public ModelAndView getView(PeaksViewForm form, BindException errors) throws Exception
         {
-            if(-1 == form.getRunId() && -1 == form.getFeatureId())
+            if(-1 == form.getFeatureId())
                 return HttpView.redirect(MS1Controller.this.getActionURL("begin"));
 
             MS1Manager mgr = MS1Manager.get();
@@ -277,9 +324,8 @@ public class MS1Controller extends SpringActionController
                 throw new NotFoundException("Feature " + form.getFeatureId() + " does not exist within " + getViewContext().getContainer().getPath());
 
             ExpRun expRun = feature.getExpRun();
-            if(null == expRun || !(expRun.getContainer().equals(getViewContext().getContainer()))
-                    || expRun.getRowId() != form.getRunId())
-                throw new NotFoundException("The experiment run " + form.getRunId() + " was not found in " + getViewContext().getContainer().getPath());
+            if(null == expRun || !(expRun.getContainer().equals(getViewContext().getContainer())))
+                throw new NotFoundException("The experiment run was not found in " + getViewContext().getContainer().getPath());
 
             //ensure that we have a scanFirst and scanLast value for this feature
             //if we don't, we can't filter the peaks to a reasonable subset
@@ -319,9 +365,6 @@ public class MS1Controller extends SpringActionController
                 }
             }
 
-            //save the form so we have access to the params when we build the nav trail
-            _form = form;
-
             //build up the views and return
             VBox views = new VBox();
             if(null != fileDetailsView)
@@ -335,22 +378,7 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendNavTrail(root, _form.getRunId(), _form.getFeatureId());
-        }
-
-        public NavTree appendNavTrail(NavTree root, int runId, int featureId)
-        {
-            return new ShowFeaturesAction().appendNavTrail(new BeginAction().appendNavTrail(root), runId).addChild("Peaks",
-                    getUrl(runId, featureId));
-        }
-
-        public ActionURL getUrl(int runId, int featureId)
-        {
-            ActionURL url = new ActionURL(MS1Module.CONTROLLER_NAME, "showPeaks.view", getContainer());
-            url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
-            url.addParameter(ShowPeaksAction.PARAM_FEATUREID, featureId);
-            url.addParameter(".lastFilter", "true"); 
-            return url;
+            return new BeginAction().appendNavTrail(root).addChild("Peaks for Feature");
         }
     } //class ShowFeaturesAction
 
@@ -400,10 +428,11 @@ public class MS1Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowFeatureDetailsAction extends SimpleViewAction<FeatureIdForm>
     {
+        public static final String ACTION_NAME = "showFeatureDetails";
 
         public ModelAndView getView(FeatureIdForm form, BindException errors) throws Exception
         {
-            if(null == form || form.getFeatureId() < 0 || form.getRunId() < 0)
+            if(null == form || form.getFeatureId() < 0)
                 return HttpView.redirect(MS1Controller.this.getActionURL("begin"));
 
             //get the feature
@@ -414,46 +443,27 @@ public class MS1Controller extends SpringActionController
             //ensure that the run for this feature exists within the current container
             //and that the runid parameter matches
             ExpRun run = feature.getExpRun();
-            if(null == run || run.getRowId() != form.getRunId() || !(run.getContainer().equals(getViewContext().getContainer())))
-                    throw new NotFoundException("Experiment run " + form.getRunId() + " does not exist within " + getViewContext().getContainer().getPath());
+            if(null == run || !(run.getContainer().equals(getViewContext().getContainer())))
+                    throw new NotFoundException("The Feature's experiment run does not exist within " + getViewContext().getContainer().getPath());
 
             //create and initialize a new features view so that we can know which features
             //are immediately before and after the current one
             //this gives the illusion to the user that they are stepping through the same list of
             //features they were viewing on the previous screen (the showFeatures action)
-            FeaturesView featuresView = new FeaturesView(getViewContext(), new MS1Schema(getUser(), getContainer()),
-                                                            form.getRunId(), false, true);
+            FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getContainer()),
+                    FeaturesFilterFactory.createFilters(getViewContext().getActionURL()));
 
             //get the previous and next feature ids (ids will be -1 if there isn't a prev or next)
             int[] prevNextFeatureIds = featuresView.getPrevNextFeature(form.getFeatureId());
             FeatureDetailsViewContext ctx = new FeatureDetailsViewContext(feature, prevNextFeatureIds[0], prevNextFeatureIds[1]);
-
-            //save the form for the nav trail
-            _form = form;
 
             return new JspView<FeatureDetailsViewContext>("/org/labkey/ms1/view/FeatureDetailView.jsp", ctx);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendNavTrail(root, _form.getRunId(), _form.getFeatureId());
+            return new BeginAction().appendNavTrail(root).addChild("Feature Details");
         }
-
-        public NavTree appendNavTrail(NavTree root, int runId, int featureId)
-        {
-            return new ShowFeaturesAction().appendNavTrail(new BeginAction().appendNavTrail(root), runId).addChild("Feature Details",
-                    getUrl(runId, featureId));
-        }
-
-        public ActionURL getUrl(int runId, int featureId)
-        {
-            ActionURL url = new ActionURL(MS1Module.CONTROLLER_NAME, "showFeatureDetails.view", getContainer());
-            url.addParameter(ShowFeaturesAction.PARAM_RUNID, runId);
-            url.addParameter(ShowPeaksAction.PARAM_FEATUREID, featureId);
-            return url;
-        }
-
-        private FeatureIdForm _form;
     }
 
     /**
@@ -517,6 +527,84 @@ public class MS1Controller extends SpringActionController
     }
 
     /**
+     * Form used for SearchFeaturesAction
+     */
+    public static class SearchFeaturesForm
+    {
+        public enum ParamNames
+        {
+            pepSeq,
+            exact,
+            export
+        }
+
+        private String _pepSeq = "";
+        private boolean _exact = false;
+        private String _export = "";
+
+        public String getPepSeq()
+        {
+            return _pepSeq;
+        }
+
+        public void setPepSeq(String pepSeq)
+        {
+            _pepSeq = pepSeq;
+        }
+
+        public boolean isExact()
+        {
+            return _exact;
+        }
+
+        public void setExact(boolean exact)
+        {
+            _exact = exact;
+        }
+
+        public String getExport()
+        {
+            return _export;
+        }
+
+        public void setExport(String export)
+        {
+            _export = export;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class SearchFeaturesAction extends SimpleViewAction<SearchFeaturesForm>
+    {
+        public ModelAndView getView(SearchFeaturesForm form, BindException errors) throws Exception
+        {
+            //create the features view
+            FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getContainer()));
+            featuresView.getBaseFilters().add(new ContainerFilter(getContainer()));
+            featuresView.getBaseFilters().add(new PeptideFilter(form.getPepSeq(), form.isExact()));
+            featuresView.setTitle("Search Results");
+
+            //if there is an export request, export and return
+            if(isExportRequest(form.getExport()))
+            {
+                featuresView.setForExport(true);
+                return exportQueryView(featuresView, getPageConfig(), form.getExport());
+            }
+
+            PepSearchModel searchModel = new PepSearchModel(getContainer(), form.getPepSeq(), form.isExact());
+            JspView<PepSearchModel> searchView = new JspView<PepSearchModel>("/org/labkey/ms1/view/PepSearchView.jsp", searchModel);
+            searchView.setTitle("Search Criteria");
+
+            return new VBox(searchView, featuresView);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Feature Search Results");
+        }
+    }
+
+    /**
      * Action to import an msInspect TSV features file
      */
     @RequiresPermission(ACL.PERM_INSERT)
@@ -564,47 +652,6 @@ public class MS1Controller extends SpringActionController
         }
     } //class ImportMsInspectAction
 
-    @RequiresPermission(ACL.PERM_READ)
-    public class ShowPepSearchAction extends SimpleViewAction<PepSearchForm>
-    {
-        public ModelAndView getView(PepSearchForm pepSearchForm, BindException errors) throws Exception
-        {
-            PepSearchModel model = new PepSearchModel(getContainer(), pepSearchForm.getPepSeq());
-            JspView<PepSearchModel> view = new JspView<PepSearchModel>("/org/labkey/ms1/view/PepSearchView.jsp", model);
-            return view;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            root.addChild("Find Features with Peptides");
-            return root;
-        }
-    }
-
-    public static class PepSearchForm
-    {
-        public enum Parameters
-        {
-            pepSeq,
-            runIds,
-            starts,
-            ignoreMods
-        }
-
-        private String _pepSeq;
-
-        public String getPepSeq()
-        {
-            return _pepSeq;
-        }
-
-        public void setPepSeq(String pepSeq)
-        {
-            _pepSeq = pepSeq;
-        }
-    }
-
-
     /**
      * Form used by the ImportMsInspectAction
      */
@@ -623,39 +670,9 @@ public class MS1Controller extends SpringActionController
         }
     } //class ImportForm
 
-    /**
-     * Form used by the ShowFeaturesAction
-     */
-    public static class RunIdForm
-    {
-        private int _runId = -1;
-        private String _export = null;
-
-        public int getRunId()
-        {
-            return _runId;
-        }
-
-        public void setRunId(int runId)
-        {
-            _runId = runId;
-        }
-
-        public String getExport()
-        {
-            return _export;
-        }
-
-        public void setExport(String export)
-        {
-            _export = export;
-        }
-    } //class RunIDForm
-
     public static class FeatureIdForm
     {
         private int _featureId = -1;
-        private int _runId = -1;
         private String _export = null;
 
         public int getFeatureId()
@@ -666,16 +683,6 @@ public class MS1Controller extends SpringActionController
         public void setFeatureId(int featureId)
         {
             _featureId = featureId;
-        }
-
-        public int getRunId()
-        {
-            return _runId;
-        }
-
-        public void setRunId(int runId)
-        {
-            _runId = runId;
         }
 
         public String getExport()
@@ -707,7 +714,6 @@ public class MS1Controller extends SpringActionController
     public static class PeaksViewForm
     {
         private int _featureId = -1;
-        private int _runId = -1;
         private String _export = null;
         private Integer _scanFirst = null;
         private Integer _scanLast = null;
@@ -720,16 +726,6 @@ public class MS1Controller extends SpringActionController
         public void setFeatureId(int featureId)
         {
             _featureId = featureId;
-        }
-
-        public int getRunId()
-        {
-            return _runId;
-        }
-
-        public void setRunId(int runId)
-        {
-            _runId = runId;
         }
 
         public String getExport()

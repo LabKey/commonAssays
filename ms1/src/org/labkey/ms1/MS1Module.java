@@ -21,6 +21,7 @@ import org.labkey.ms1.pipeline.MSInspectPipelineProvider;
 import org.labkey.ms1.pipeline.MSInspectFeaturesDataHandler;
 import org.labkey.ms1.pipeline.PeaksFileDataHandler;
 import org.labkey.ms1.query.MS1Schema;
+import org.labkey.ms1.model.PepSearchModel;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Set;
@@ -37,6 +38,7 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
     public static final String NAME = "MS1";
     public static final String CONTROLLER_NAME = "ms1";
     public static final String WEBPART_MS1_RUNS = "MS1 Runs";
+    public static final String WEBPART_PEP_SEARCH = "Peptide Search";
     public static final String PROTOCOL_MS1 = "msInspect Feature Finding Analysis";
     public static final ExperimentRunFilter EXP_RUN_FILTER = new ExperimentRunFilter(PROTOCOL_MS1, MS1Schema.SCHEMA_NAME, MS1Schema.TABLE_FEATURE_RUNS);
 
@@ -53,6 +55,16 @@ public class MS1Module extends DefaultModule implements ContainerManager.Contain
                         url.setPageFlow(CONTROLLER_NAME);
                         url.setAction("begin");
                         view.setTitleHref(url.getLocalURIString());
+                        return view;
+                    }
+                },
+                new WebPartFactory(WEBPART_PEP_SEARCH)
+                {
+                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                    {
+                        PepSearchModel model = new PepSearchModel(portalCtx.getContainer());
+                        JspView<PepSearchModel> view = new JspView<PepSearchModel>("/org/labkey/ms1/view/PepSearchView.jsp", model);
+                        view.setTitle(WEBPART_PEP_SEARCH);
                         return view;
                     }
                 }

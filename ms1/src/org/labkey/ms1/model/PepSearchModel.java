@@ -18,7 +18,9 @@ package org.labkey.ms1.model;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.MS1Module;
+import org.labkey.ms1.MS1Controller;
 
 /**
  * Model for the PepSearchView.jsp
@@ -30,28 +32,25 @@ import org.labkey.ms1.MS1Module;
  */
 public class PepSearchModel
 {
-    private String _pepSequence;
-    private Container _container;
+    private String _resultsUri;
+    private String _pepSeq = "";
+    private boolean _exact = false;
 
-    public PepSearchModel(Container container, String pepSequence)
+    public PepSearchModel(Container container)
     {
-        _container = container;
-        _pepSequence = null == pepSequence ? "" : pepSequence;
+        _resultsUri = new ActionURL(MS1Controller.SearchFeaturesAction.class, container).getLocalURIString();
     }
 
-    public String getPepSequence()
+    public PepSearchModel(Container container, String pepSeq, boolean exact)
     {
-        return _pepSequence;
+        this(container);
+        _pepSeq = pepSeq;
+        _exact = exact;
     }
 
-    public void setPepSequence(String pepSequence)
+    public String getResultsUri()
     {
-        _pepSequence = pepSequence;
-    }
-
-    public Container getContainer()
-    {
-        return _container;
+        return _resultsUri;
     }
 
     public ExpRun[] getRuns(Container container)
@@ -60,4 +59,23 @@ public class PepSearchModel
         return expSvc.getExpRuns(container, expSvc.getExpProtocol(container, MS1Module.PROTOCOL_MS1), null);
     }
 
+    public String getPepSeq()
+    {
+        return _pepSeq;
+    }
+
+    public void setPepSeq(String pepSeq)
+    {
+        _pepSeq = pepSeq;
+    }
+
+    public boolean isExact()
+    {
+        return _exact;
+    }
+
+    public void setExact(boolean exact)
+    {
+        _exact = exact;
+    }
 }

@@ -76,7 +76,7 @@
         <ns:column columnName="Description"/>
         <ns:column columnName="MS2Scan"/>
         <ns:column columnName="MS2ConnectivityProbability">
-            <ns:formatString>0%</ns:formatString>
+            <ns:formatString>0.00</ns:formatString>
             <ns:columnTitle>MS2 Prob</ns:columnTitle>
         </ns:column>
       </ns:columns>
