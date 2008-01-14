@@ -98,7 +98,7 @@ public class FeaturesTableInfo extends FilteredTable
         });
 
         //mandate a filter that excludes deleted and not fully-imported features
-        addCondition(new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files WHERE Imported=1 AND Deleted=0)"), "FileId");
+        addCondition(new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files WHERE Imported=? AND Deleted=?)", true, false), "FileId");
 
         //add new columns for the peaks and details links
         addColumn(new PeaksAvailableColumnInfo(this));

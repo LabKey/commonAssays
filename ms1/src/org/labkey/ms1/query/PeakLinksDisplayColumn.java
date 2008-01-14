@@ -48,7 +48,7 @@ public class PeakLinksDisplayColumn extends DataColumn
         if(null == _basePeaksUrl || null == _baseDetailsUrl)
             setBaseUrls(ctx.getViewContext().getActionURL());
 
-        Integer peaksAvailable = (Integer)ctx.get(PeaksAvailableColumnInfo.COLUMN_NAME);
+        Number peaksAvailable = (Number)ctx.get(PeaksAvailableColumnInfo.COLUMN_NAME);
         Integer featureId = (Integer)ctx.get("FeatureId");
 
         if(null != peaksAvailable && 0 != peaksAvailable.intValue() && null != featureId)
