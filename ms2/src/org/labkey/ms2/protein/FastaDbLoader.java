@@ -16,28 +16,30 @@
 
 package org.labkey.ms2.protein;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import org.apache.log4j.Logger;
 import org.labkey.api.data.Table;
-import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.exp.XarContext;
 import org.labkey.api.util.HashHelpers;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.common.tools.FastaLoader;
+import org.labkey.common.tools.IdPattern;
+import org.labkey.common.tools.Protein;
+import org.labkey.common.tools.FastaValidator;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.fasta.FastaDbHelper;
 import org.labkey.ms2.protein.fasta.FastaFile;
-import org.labkey.ms2.protein.organism.*;
-import org.labkey.common.tools.FastaLoader;
-import org.labkey.common.tools.Protein;
-import org.labkey.common.tools.IdPattern;
-import org.labkey.api.exp.XarContext;
-import org.apache.log4j.Logger;
+import org.labkey.ms2.protein.organism.GuessOrgByParsing;
+import org.labkey.ms2.protein.organism.GuessOrgBySharedIdents;
+import org.labkey.ms2.protein.organism.OrganismGuessStrategy;
 
-import java.util.*;
-import java.util.Date;
-import java.sql.*;
-import java.io.IOException;
 import java.io.File;
 import java.io.FileNotFoundException;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
+import java.util.Date;
 
 public class FastaDbLoader extends DefaultAnnotationLoader implements AnnotationLoader
 {
@@ -150,7 +152,8 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
                 }
                 finally
                 {
-                    try { ProteinManager.getSchema().getScope().releaseConnection(conn); } catch (SQLException e) {}
+                    if (null != conn)
+                        try { ProteinManager.getSchema().getScope().releaseConnection(conn); } catch (SQLException e) {}
                 }
             }
             _log.info("Finished loading protein annotations");
@@ -606,7 +609,24 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
     public void parse() throws IOException, SQLException
     {
-        FastaLoader curLoader = new FastaLoader(new File(getParseFName()));
+        File fastaFile = new File(getParseFName());
+        FastaValidator validator = new FastaValidator(fastaFile);
+        List<String> errors = validator.validate();
+
+        if (!errors.isEmpty())
+        {
+            _log.error("This FASTA file has " + errors.size() + " duplicate protein name" + (1 == errors.size() ? "" : "s") + ", listed below.  " +
+                    "Search engines and the Trans-Proteomic Pipeline use these names to link to specific protein sequeces so they must be unique.  " +
+                    "You should remove or otherwise disambiguate the duplicate entries from this FASTA file and re-run your search.");
+
+            for (String error : errors)
+                _log.error(error);
+
+            throw new RuntimeException("Invalid FASTA file");
+        }
+
+        FastaLoader curLoader = new FastaLoader(fastaFile);
+
         conn = ProteinManager.getSchema().getScope().getConnection();
         //conn.setAutoCommit(false);
         //Determine whether this file has ever been
