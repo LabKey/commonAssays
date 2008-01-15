@@ -273,7 +273,8 @@ public class MS2Schema extends UserSchema
                 {
                     public DisplayColumn createRenderer(ColumnInfo colInfo)
                     {
-                        return new IconLinksDisplayColumn(colInfo);
+                        ActionURL linkURL = new ActionURL("MS2", "showRun.view", getContainer());
+                        return new IconDisplayColumn(colInfo, 18, 18, linkURL, "run", AppProps.getInstance().getContextPath() + "/MS2/images/runIcon.gif");
                     }
                 });
                 result.addColumn(iconColumn);
@@ -318,42 +319,4 @@ public class MS2Schema extends UserSchema
     {
         return _runs;
     }
-
-    public static class IconLinksDisplayColumn extends DataColumn
-    {
-        public IconLinksDisplayColumn(ColumnInfo info)
-        {
-            super(info);
-            setCaption("");
-            setWidth("18");
-        }
-
-        public boolean isFilterable()
-        {
-            return false;
-        }
-
-        public boolean isSortable()
-        {
-            return false;
-        }
-
-        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-        {
-            ActionURL graphURL = new ActionURL("MS2", "showRun.view", ctx.getContainer());
-            Object runId = ctx.getRow().get(getColumnInfo().getAlias());
-            if (runId != null)
-            {
-                graphURL.addParameter("run", runId.toString());
-                out.write("<a href=\"" + graphURL.getLocalURIString() + "\" title=\"MS2 run data\"><img src=\"" + AppProps.getInstance().getContextPath() + "/MS2/images/runIcon.gif\" height=\"18\" width=\"18\"/></a>");
-            }
-        }
-
-        public void addQueryColumns(Set<ColumnInfo> columns)
-        {
-            super.addQueryColumns(columns);
-        }
-    }
-
-
 }

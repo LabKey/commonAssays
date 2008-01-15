@@ -34,6 +34,8 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
     public static final DataType MAGE_ML_DATA_TYPE = new DataType("MicroarrayAssayData");
     public static final DataType QC_REPORT_DATA_TYPE = new DataType("MicroarrayQCData");
     public static final DataType IMAGE_DATA_TYPE = new DataType("MicroarrayImageData");
+    public static final DataType FEATURES_DATA_TYPE = new DataType("MicroarrayFeaturesData");
+    public static final DataType GRID_DATA_TYPE = new DataType("MicroarrayGridData");
 
     public static final ExperimentRunFilter EXP_RUN_FILTER = new ExperimentRunFilter("Microarray", MicroarraySchema.SCHEMA_NAME, MicroarraySchema.TABLE_RUNS);
 

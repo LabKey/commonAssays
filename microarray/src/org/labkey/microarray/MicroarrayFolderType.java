@@ -17,7 +17,8 @@ public class MicroarrayFolderType extends DefaultFolderType
                 "Import and analyze microarray data",
             Arrays.asList(
                 Portal.getPortalPart("Data Pipeline").createWebPart(),
-                Portal.getPortalPart(MicroarrayModule.WEBPART_MICROARRAY_RUNS).createWebPart()
+                Portal.getPortalPart(MicroarrayModule.WEBPART_MICROARRAY_RUNS).createWebPart(),
+                Portal.getPortalPart(MicroarrayModule.WEBPART_PENDING_FILES).createWebPart()
             ), null,
             getDefaultModuleSet(module, getModule(MicroarrayModule.NAME), getModule("Pipeline")),
             module);

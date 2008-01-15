@@ -38,17 +38,17 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return super.getView(assayRunUploadForm, errors);
     }
 
-    protected void addRunActionButtons(InsertView insertView, ButtonBar bbar)
+    protected void addRunActionButtons(LuminexRunUploadForm newRunForm, InsertView insertView, ButtonBar bbar)
     {
         PropertyDescriptor[] analyteColumns = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         if (analyteColumns.length == 0)
         {
-            super.addRunActionButtons(insertView, bbar);
+            super.addRunActionButtons(newRunForm, insertView, bbar);
         }
         else
         {
             addNextButton(bbar);
-            addResetButton(insertView, bbar);
+            addResetButton(newRunForm, insertView, bbar);
         }
     }
 
@@ -150,8 +150,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         addHiddenUploadSetProperties(form, view);
 
         ButtonBar bbar = new ButtonBar();
-        addFinishButtons(view, bbar);
-        addResetButton(view, bbar);
+        addFinishButtons(form, view, bbar);
+        addResetButton(form, view, bbar);
 
         ActionButton cancelButton = new ActionButton("Cancel", getSummaryLink(_protocol));
         bbar.add(cancelButton);

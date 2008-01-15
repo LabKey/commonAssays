@@ -17,6 +17,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.labkey.microarray.MicroarrayModule;
+import org.labkey.microarray.MicroarraySchema;
 
 import java.util.*;
 import java.io.File;
@@ -41,6 +42,11 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         throw new UnsupportedOperationException();
     }
 
+    protected Domain createUploadSetDomain(Container c, User user)
+    {
+        return PropertyService.get().createDomain(c, getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_UPLOAD_SET), "Upload Set Properties");
+    }
+
     public String getName()
     {
         return NAME;
@@ -48,7 +54,7 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
 
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("The MAGEML data file is an XML file.");
+        return new HtmlView("The MAGEML data file is an XML file that contains the results of the microarray run.");
     }
 
     public TableInfo createDataTable(QuerySchema schema, String alias, ExpProtocol protocol)
@@ -111,6 +117,20 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
                     ExpData qcData = createData(context.getContainer(), qcFile, MicroarrayModule.QC_REPORT_DATA_TYPE);
                     outputDatas.put(qcData, "QCReport");
                 }
+
+                File featuresFile = new File(mageMLFile.getParentFile(), baseName + "_feat.csv");
+                if (NetworkDrive.exists(featuresFile))
+                {
+                    ExpData featuresData = createData(context.getContainer(), featuresFile, MicroarrayModule.FEATURES_DATA_TYPE);
+                    outputDatas.put(featuresData, "Features");
+                }
+
+                File gridFile = new File(mageMLFile.getParentFile(), baseName + "_grid.csv");
+                if (NetworkDrive.exists(gridFile))
+                {
+                    ExpData gridData = createData(context.getContainer(), gridFile, MicroarrayModule.GRID_DATA_TYPE);
+                    outputDatas.put(gridData, "Grid");
+                }
             }
         }
         catch (IOException e)
@@ -139,4 +159,17 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         return Arrays.asList(new StudyParticipantVisitResolverType(), new ThawListResolverType());
     }
 
+    public ExpRunTable createRunTable(QuerySchema schema, String alias, ExpProtocol protocol)
+    {
+        ExpRunTable result = new MicroarraySchema(schema.getUser(), schema.getContainer()).createRunsTable(alias);
+        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        defaultCols.add(FieldKey.fromParts(ExpRunTable.Column.Flag.name()));
+        defaultCols.add(FieldKey.fromParts(ExpRunTable.Column.Links.name()));
+        defaultCols.add(FieldKey.fromParts(MicroarraySchema.THUMBNAIL_IMAGE_COLUMN_NAME));
+        defaultCols.add(FieldKey.fromParts(MicroarraySchema.QC_REPORT_COLUMN_NAME));
+        defaultCols.add(FieldKey.fromParts(ExpRunTable.Column.Name.name()));
+        result.setDefaultVisibleColumns(defaultCols);
+
+        return result;
+    }
 }
