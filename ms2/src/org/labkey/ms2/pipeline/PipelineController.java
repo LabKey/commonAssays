@@ -40,7 +40,11 @@ import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.protocol.*;
+import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
+import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
+import org.labkey.ms2.pipeline.sequest.SequestLocalPipelineProvider;
+import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
+import org.labkey.ms2.pipeline.tandem.XTandemSearchProtocolFactory;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
@@ -597,9 +601,10 @@ public class PipelineController extends SpringActionController
             return XTandemCPipelineProvider.name;
         }
 
-        public String getJspName()
+        public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return "setTandemDefaults.jsp";
+            return FormPage.getView(XTandemCPipelineProvider.class, form, errors,
+                    "setTandemDefaults.jsp");
         }
 
         public HelpTopic getHelpTopic()
@@ -621,9 +626,10 @@ public class PipelineController extends SpringActionController
             return MascotCPipelineProvider.name;
         }
 
-        public String getJspName()
+        public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return "setMascotDefaults.jsp";
+            return FormPage.getView(MascotCPipelineProvider.class, form, errors,
+                    "setMascotDefaults.jsp");
         }
 
         public HelpTopic getHelpTopic()
@@ -645,9 +651,10 @@ public class PipelineController extends SpringActionController
             return SequestLocalPipelineProvider.name;
         }
 
-        public String getJspName()
+        public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return "setSequestDefaults.jsp";
+            return FormPage.getView(SequestLocalPipelineProvider.class, form, errors,
+                    "setSequestDefaults.jsp");
         }
 
         public HelpTopic getHelpTopic()
@@ -683,7 +690,7 @@ public class PipelineController extends SpringActionController
 
         public abstract String getProviderName();
         public abstract HelpTopic getHelpTopic();
-        public abstract String getJspName();
+        public abstract ModelAndView getJspView(SetDefaultsForm form, BindException errors);
 
         public ModelAndView handleRequest(SetDefaultsForm setDefaultsForm, BindException errors) throws Exception
         {
@@ -735,7 +742,7 @@ public class PipelineController extends SpringActionController
             setHelpTopic(getHelpTopic());
             if (!reshow)
                 form.setConfigureXml(_provider.getProtocolFactory().getDefaultParametersXML(_dirRoot));
-            return FormPage.getView(PipelineController.class, form, errors, getJspName());
+            return getJspView(form, errors);
         }
 
         public ActionURL getSuccessURL(SetDefaultsForm form)

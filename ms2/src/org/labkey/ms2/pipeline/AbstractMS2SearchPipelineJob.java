@@ -188,12 +188,12 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         return _fileInputXML;
     }
 
-    public BioMLInputParser getInputParameters() throws IOException
+    public ParamParser getInputParameters() throws IOException
     {
         return getInputParameters(_fileInputXML);
     }
 
-    public BioMLInputParser getInputParameters(File parametersFile) throws IOException
+    public ParamParser getInputParameters(File parametersFile) throws IOException
     {
         BufferedReader inputReader = null;
         StringBuffer xmlBuffer = new StringBuffer();
@@ -218,11 +218,11 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
             }
         }
 
-        BioMLInputParser parser = createInputParser();
+        ParamParser parser = createParamParser();
         parser.parse(xmlBuffer.toString());
         if (parser.getErrors() != null)
         {
-            InputParser.Error err = parser.getErrors()[0];
+            ParamParser.Error err = parser.getErrors()[0];
             if (err.getLine() == 0)
             {
                 throw new IOException("Failed parsing input xml '" + parametersFile.getPath() + "'.\n" +
@@ -237,9 +237,9 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         return parser;
     }
 
-    public BioMLInputParser createInputParser()
+    public ParamParser createParamParser()
     {
-        return new BioMLInputParser();
+        return PipelineJobService.get().createParamParser();
     }
 
     public Map<String, String> getParametersOverrides()

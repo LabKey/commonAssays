@@ -40,9 +40,7 @@ public class MascotRun extends MS2Run
 
     public String getParamsFileName()
     {
-//wch: mascotdev
         return "mascot.xml";
-//END-wch: mascotdev
     }
 
 

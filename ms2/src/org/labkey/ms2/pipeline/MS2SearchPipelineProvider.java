@@ -16,8 +16,7 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineValidationException;
-import org.labkey.ms2.protocol.MS2SearchPipelineProtocol;
-import org.labkey.ms2.protocol.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 
 import java.io.IOException;
 import java.net.URI;

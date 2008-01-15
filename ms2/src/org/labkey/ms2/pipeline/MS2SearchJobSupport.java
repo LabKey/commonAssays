@@ -15,6 +15,8 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.pipeline.ParamParser;
+
 import java.io.File;
 import java.util.Map;
 
@@ -24,6 +26,11 @@ import java.util.Map;
  */
 public interface MS2SearchJobSupport extends MS2PipelineJobSupport
 {
+    /**
+     * Returns a parameter parser object for writing parameters to a file.
+     */
+    ParamParser createParamParser();
+    
     /**
      * Returns name-value map of the BioML parameters.
      */

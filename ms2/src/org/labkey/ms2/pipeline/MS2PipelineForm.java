@@ -16,6 +16,7 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.view.ViewForm;
+import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
 
 /**
  * <code>MS2PipelineForm</code> base class for MS2 pipeline forms.

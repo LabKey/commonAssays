@@ -21,9 +21,8 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ViewForm;
-import org.labkey.ms2.protocol.MassSpecProtocol;
-import org.labkey.ms2.protocol.MassSpecProtocolFactory;
+import org.labkey.ms2.pipeline.MassSpecProtocol;
+import org.labkey.ms2.pipeline.MassSpecProtocolFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;

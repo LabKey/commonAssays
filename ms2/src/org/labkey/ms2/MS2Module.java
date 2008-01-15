@@ -34,6 +34,10 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.pipeline.*;
+import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
+import org.labkey.ms2.pipeline.sequest.*;
+import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
+import org.labkey.ms2.pipeline.comet.CometCPipelineProvider;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.protein.ProteinManager;
@@ -131,7 +135,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         service.registerPipelineProvider(new SequestLocalPipelineProvider());
         service.registerPipelineProvider(new CometCPipelineProvider());
 
-        service.registerPipelineProvider(new InspectCPipelineProvider());
         service.registerPipelineProvider(new ProteinProphetPipelineProvider());
 
         ExperimentService.get().registerExperimentRunFilter(_samplePrepRunFilter);
@@ -298,14 +301,14 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     public Set<Class<? extends TestCase>> getJUnitTests()
     {
         return new HashSet<Class<? extends TestCase>>(Arrays.asList(
-            org.labkey.ms2.pipeline.SequestParamsBuilder.TestCase.class,
-            org.labkey.ms2.pipeline.PositiveDoubleParamsValidator.TestCase.class,
-            org.labkey.ms2.pipeline.NaturalNumberParamsValidator.TestCase.class,
-            org.labkey.ms2.pipeline.NaturalNumberParamsValidator.TestCase.class,
-            org.labkey.ms2.pipeline.RealNumberParamsValidator.TestCase.class,
-            org.labkey.ms2.pipeline.BooleanParamsValidator.TestCase.class,
-            org.labkey.ms2.pipeline.PositiveIntegerParamsValidator.TestCase.class,
-            org.labkey.ms2.pipeline.ListParamsValidator.TestCase.class,
+            SequestParamsBuilder.TestCase.class,
+            PositiveDoubleParamsValidator.TestCase.class,
+            NaturalNumberParamsValidator.TestCase.class,
+            NaturalNumberParamsValidator.TestCase.class,
+            RealNumberParamsValidator.TestCase.class,
+            BooleanParamsValidator.TestCase.class,
+            PositiveIntegerParamsValidator.TestCase.class,
+            ListParamsValidator.TestCase.class,
             org.labkey.ms2.protein.FastaDbLoader.TestCase.class,                
             org.labkey.ms2.reader.RandomAccessMzxmlIterator.TestCase.class));
     }

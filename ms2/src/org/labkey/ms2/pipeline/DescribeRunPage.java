@@ -7,7 +7,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.PathRelativizer;
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.ms2.protocol.MassSpecProtocol;
+import org.labkey.ms2.pipeline.MassSpecProtocol;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.apache.commons.lang.StringUtils;

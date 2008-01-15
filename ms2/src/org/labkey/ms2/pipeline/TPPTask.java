@@ -178,7 +178,7 @@ public class TPPTask extends PipelineJob.Task
 
                 String paramMinProb = params.get("pipeline prophet, min probability");
                 if (paramMinProb != null && paramMinProb.length() > 0)
-                    interactCmd.add("-p" + paramMinProb);
+                    interactCmd.add("-pp" + paramMinProb);
             }
 
             String quantParam = getQuantitationCmd(params, wd.getRelativePath(dirMzXml));

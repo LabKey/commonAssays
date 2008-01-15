@@ -42,7 +42,7 @@ import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.RelativeQuantAnalysisSummary;
 import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
-import org.labkey.ms2.pipeline.MascotImportPipelineJob;
+import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.xml.stream.XMLStreamException;

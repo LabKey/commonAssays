@@ -4,9 +4,9 @@
     <bean id="ms2PipelineRegistry" class="org.labkey.api.pipeline.TaskPipelineRegistrar">
         <property name="factories">
             <list>
-                <bean class="org.labkey.ms2.pipeline.XTandemSearchTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.MascotSearchTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.SequestSearchTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.tandem.XTandemSearchTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.mascot.MascotSearchTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.sequest.SequestSearchTask$Factory"/>
                 <bean class="org.labkey.ms2.pipeline.TPPTask$Factory"/>
                 <bean class="org.labkey.ms2.pipeline.XarGeneratorTask$Factory"/>
                 <bean class="org.labkey.ms2.pipeline.XarLoaderTask$Factory"/>
@@ -16,11 +16,11 @@
             <list>
                 <!-- X! Tandem search pipelines -->
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.XTandemPipelineJob"/>
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.tandem.XTandemPipelineJob"/>
                     <constructor-arg value="sample"/>
                     <constructor-arg>
                         <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XTandemSearchTask</value>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemSearchTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
@@ -28,16 +28,16 @@
                     </constructor-arg>
                 </bean>
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.XTandemPipelineJob"/>
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.tandem.XTandemPipelineJob"/>
                     <constructor-arg value="fraction"/>
                     <constructor-arg>
                         <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XTandemSearchTask</value>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemSearchTask</value>
                         </list>
                     </constructor-arg>
                 </bean>
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.XTandemPipelineJob"/>
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.tandem.XTandemPipelineJob"/>
                     <constructor-arg value="fractionGroup"/>
                     <constructor-arg>
                         <list>
@@ -50,11 +50,11 @@
 
                 <!-- Mascot search pipelines -->
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.MascotPipelineJob"/>
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.mascot.MascotPipelineJob"/>
                     <constructor-arg value="sample"/>
                     <constructor-arg>
                         <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.MascotSearchTask</value>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.mascot.MascotSearchTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
@@ -62,16 +62,16 @@
                     </constructor-arg>
                 </bean>
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.MascotPipelineJob"/>
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.mascot.MascotPipelineJob"/>
                     <constructor-arg value="fraction"/>
                     <constructor-arg>
                         <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.MascotSearchTask</value>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.mascot.MascotSearchTask</value>
                         </list>
                     </constructor-arg>
                 </bean>
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.MascotPipelineJob"/>
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.mascot.MascotPipelineJob"/>
                     <constructor-arg value="fractionGroup"/>
                     <constructor-arg>
                         <list>
@@ -84,11 +84,11 @@
 
                 <!-- Sequest search pipelines -->
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.SequestPipelineJob"/>
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.sequest.SequestPipelineJob"/>
                     <constructor-arg value="sample"/>
                     <constructor-arg>
                         <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.SequestSearchTask</value>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.sequest.SequestSearchTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
@@ -96,16 +96,16 @@
                     </constructor-arg>
                 </bean>
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.SequestPipelineJob"/>
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.sequest.SequestPipelineJob"/>
                     <constructor-arg value="fraction"/>
                     <constructor-arg>
                         <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.SequestSearchTask</value>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.sequest.SequestSearchTask</value>
                         </list>
                     </constructor-arg>
                 </bean>
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.SequestPipelineJob"/>
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.sequest.SequestPipelineJob"/>
                     <constructor-arg value="fractionGroup"/>
                     <constructor-arg>
                         <list>
