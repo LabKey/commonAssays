@@ -16,6 +16,7 @@
 package org.labkey.ms1.query;
 
 import org.labkey.ms1.MS1Manager;
+import org.labkey.ms1.MS1Controller;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.query.FieldKey;
 
@@ -31,9 +32,6 @@ import java.util.ArrayList;
  */
 public class PeptideFilter implements FeaturesFilter
 {
-    public static final String NAME = "pepSeq";
-    public static final String NAME_EXACT = "exact";
-
     private String[] _sequences;
     private boolean _exact = false;
 

@@ -16,8 +16,12 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
+
+import java.util.Set;
 
 /**
  * Use with FeaturesView and TableInfo to filter on a given set of containers
@@ -29,20 +33,7 @@ import org.labkey.api.data.ContainerManager;
  */
 public class ContainerFilter implements FeaturesFilter
 {
-    public static final String NAME = "container";
-
     private Container[] _containers;
-
-    public ContainerFilter(String containerList)
-    {
-        String[] ids = containerList.split(",");
-        _containers = new Container[ids.length];
-
-        for(int idx = 0; idx < ids.length; ++idx)
-        {
-            _containers[idx] = ContainerManager.getForId(ids[idx]);
-        }
-    }
 
     public ContainerFilter(Container container)
     {
@@ -52,6 +43,19 @@ public class ContainerFilter implements FeaturesFilter
     public ContainerFilter(Container[] containers)
     {
         _containers = containers;
+    }
+
+    public ContainerFilter(Container container, boolean includeDescendants, User user)
+    {
+        if(includeDescendants)
+        {
+            Set<Container> containers = ContainerManager.getAllChildren(container, user, ACL.PERM_READ);
+            containers.add(container);
+            _containers = new Container[containers.size()];
+            containers.toArray(_containers);
+        }
+        else
+            _containers = new Container[]{container};
     }
 
     public void setFilters(FeaturesTableInfo tinfo)

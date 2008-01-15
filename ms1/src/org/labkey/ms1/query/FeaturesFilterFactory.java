@@ -16,7 +16,11 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.Container;
+import org.labkey.api.security.User;
 import org.labkey.common.util.Pair;
+import org.labkey.ms1.MS1Controller;
 
 import java.util.ArrayList;
 
@@ -31,49 +35,32 @@ public class FeaturesFilterFactory
 {
     public static final String NAMESPACE = "fvf";
     public static final String NAMESPACE_PREFIX = NAMESPACE + ".";
+    public static final String PARAM_SOURCE_CONTAINER = "sc";
 
-    public static ArrayList<FeaturesFilter> createFilters(ActionURL url)
+    public static ArrayList<FeaturesFilter> createFilters(ActionURL url, User user)
     {
-        Pair<String,String>[] params = url.getParameters();
-        ArrayList<FeaturesFilter> filters = new ArrayList<FeaturesFilter>(params.length);
+        ArrayList<FeaturesFilter> filters = new ArrayList<FeaturesFilter>();
 
-        for(Pair<String,String> param : params)
-        {
-            if(param.getKey().startsWith(NAMESPACE_PREFIX))
-            {
-                FeaturesFilter filter = loadFilter(param, url);
-                if(null != filter)
-                    filters.add(filter);
-            }
-        }
+        //start with the container filter
+        String scParam = url.getParameter(NAMESPACE_PREFIX + PARAM_SOURCE_CONTAINER);
+        String subfoldersParam = url.getParameter(NAMESPACE_PREFIX + MS1Controller.SearchFeaturesForm.ParamNames.subfolders.name());
+        Container root = null != scParam && scParam.length() > 0 
+                ? ContainerManager.getForPath(scParam)
+                : ContainerManager.getForPath(url.getExtraPath());
+        filters.add(new ContainerFilter(root, null != subfoldersParam && subfoldersParam.length() > 0, user));
+
+        //RunFilter
+        String runParam = url.getParameter(NAMESPACE_PREFIX + MS1Controller.ShowFeaturesForm.ParamNames.runId.name());
+        if(null != runParam && runParam.length() > 0)
+            filters.add(new RunFilter(runParam));
+
+        //PeptideFilter
+        String pepParam = url.getParameter(NAMESPACE_PREFIX + MS1Controller.SearchFeaturesForm.ParamNames.pepSeq.name());
+        String exactParam = url.getParameter(MS1Controller.SearchFeaturesForm.ParamNames.exact.name());
+        if(null != pepParam && pepParam.length() > 0)
+            filters.add(new PeptideFilter(pepParam, null != exactParam && exactParam.length() > 0));
 
         return filters;
-    }
-
-    private static FeaturesFilter loadFilter(Pair<String, String> param, ActionURL url)
-    {
-        //CONSIDER: generalize this more with a registry of known filters
-        //and methods on the FeaturesFilter interface to load/persist from
-        //URL parameters.
-        //NOTE: some filters use multiple parameters
-
-        String name = param.getKey().substring(NAMESPACE_PREFIX.length());
-        if(name.equalsIgnoreCase(RunFilter.NAME))
-        {
-            return new RunFilter(param.getValue());
-        }
-        else if(name.equalsIgnoreCase(PeptideFilter.NAME))
-        {
-            return new PeptideFilter(param.getValue(),
-                            url.getParameter(PeptideFilter.NAME_EXACT) != null);
-        }
-        else if(name.equalsIgnoreCase(ContainerFilter.NAME))
-        {
-            return new ContainerFilter(param.getValue());
-        }
-
-        //unknown filter
-        return null;
     }
 
 }

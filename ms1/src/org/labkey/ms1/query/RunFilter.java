@@ -16,6 +16,7 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.SQLFragment;
+import org.labkey.ms1.MS1Controller;
 
 /**
  * Use with the FeaturesView and TableInfo to filter on one or more runs
@@ -27,8 +28,6 @@ import org.labkey.api.data.SQLFragment;
  */
 public class RunFilter extends ListFilterBase implements FeaturesFilter
 {
-    public static final String NAME = "runId";
-
     private int[] _runIds = null;
 
     public RunFilter(String runIds)

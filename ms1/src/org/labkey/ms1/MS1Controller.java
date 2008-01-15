@@ -49,52 +49,9 @@ public class MS1Controller extends SpringActionController
      * @param action Name of action
      * @return URL helper for the action in this controller and current container
      */
-    protected ActionURL getActionURL(String action)
+    public ActionURL getActionURL(String action)
     {
         return new ActionURL(MS1Module.CONTROLLER_NAME, action, getContainer());
-    }
-
-    /**
-     * Adds the begin step to a NavTree
-     *
-     * @param root The root of the NavTree
-     * @return Modified NavTree
-     */
-    protected NavTree addBeginChild(NavTree root)
-    {
-        return root.addChild("MS1 Runs", getActionURL("begin.view"));
-    }
-
-    /**
-     * Adds the Features view step to a NavTree
-     *
-     * @param root The root of the NavTree
-     * @param runId The runId parameter
-     * @return Modified NavTree
-     */
-    protected NavTree addFeaturesChild(NavTree root, int runId)
-    {
-        ActionURL url = getActionURL("showFeatures.view");
-        url.addParameter(ShowFeaturesForm.ParamNames.runId.name(), runId);
-        url.addParameter(".lastFilter", "true");
-        return root.addChild("Features from Run", url);
-    }
-
-    /**
-     * Adds a the peaks view step to the NavTree
-     *
-     * @param root  The root of the NavTree
-     * @param runId The runId parameter
-     * @param featureId  The featureId parameter
-     * @return Modified NavTree
-     */
-    protected NavTree addPeaksChild(NavTree root, int runId, int featureId)
-    {
-        ActionURL url = getActionURL("showPeaks.view");
-        url.addParameter(ShowFeaturesForm.ParamNames.runId.name(), runId);
-        url.addParameter(ShowPeaksAction.PARAM_FEATUREID, featureId);
-        url.addParameter(".lastFilter", "true"); 
-        return root.addChild("Peaks from Feature", url);
     }
 
     /**
@@ -227,11 +184,9 @@ public class MS1Controller extends SpringActionController
             MS1Manager.PeakAvailability peakAvail = mgr.isPeakDataAvailable(form.getRunId());
 
             //create the features view
-            ArrayList<FeaturesFilter> baseFilters = new ArrayList<FeaturesFilter>();
-            baseFilters.add(new RunFilter(form.getRunId()));
-            baseFilters.add(new ContainerFilter(getContainer()));
             FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getContainer()),
-                                                        baseFilters);
+                                                        getContainer());
+            featuresView.getBaseFilters().add(new RunFilter(form.getRunId()));
             
             featuresView.setTitle("Features from " + run.getName());
 
@@ -324,8 +279,18 @@ public class MS1Controller extends SpringActionController
                 throw new NotFoundException("Feature " + form.getFeatureId() + " does not exist within " + getViewContext().getContainer().getPath());
 
             ExpRun expRun = feature.getExpRun();
-            if(null == expRun || !(expRun.getContainer().equals(getViewContext().getContainer())))
-                throw new NotFoundException("The experiment run was not found in " + getViewContext().getContainer().getPath());
+            if(null == expRun)
+                throw new NotFoundException("Could not find the experiment run for feature id '" + form.getFeatureId() + "'.");
+
+            //because we are now showing features from sub-folders in search results, the specified
+            //feature/run may exist in a different container than the current one. If so, redirect to
+            //the appropriate container
+            if(!(expRun.getContainer().equals(getViewContext().getContainer())))
+            {
+                ActionURL redir = getViewContext().getActionURL().clone();
+                redir.setExtraPath(expRun.getContainer().getPath());
+                return HttpView.redirect(redir);
+            }
 
             //ensure that we have a scanFirst and scanLast value for this feature
             //if we don't, we can't filter the peaks to a reasonable subset
@@ -443,15 +408,25 @@ public class MS1Controller extends SpringActionController
             //ensure that the run for this feature exists within the current container
             //and that the runid parameter matches
             ExpRun run = feature.getExpRun();
-            if(null == run || !(run.getContainer().equals(getViewContext().getContainer())))
-                    throw new NotFoundException("The Feature's experiment run does not exist within " + getViewContext().getContainer().getPath());
+            if(null == run)
+                throw new NotFoundException("Could not find the experiment run for feature id '" + form.getFeatureId() + "'.");
+
+            //because we are now showing features from sub-folders in search results, the specified
+            //feature/run may exist in a different container than the current one. If so, redirect to
+            //the appropriate container
+            if(!(run.getContainer().equals(getViewContext().getContainer())))
+            {
+                ActionURL redir = getViewContext().getActionURL().clone();
+                redir.setExtraPath(run.getContainer().getPath());
+                return HttpView.redirect(redir);
+            }
 
             //create and initialize a new features view so that we can know which features
             //are immediately before and after the current one
             //this gives the illusion to the user that they are stepping through the same list of
             //features they were viewing on the previous screen (the showFeatures action)
             FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getContainer()),
-                    FeaturesFilterFactory.createFilters(getViewContext().getActionURL()));
+                    FeaturesFilterFactory.createFilters(getViewContext().getActionURL(), getUser()));
 
             //get the previous and next feature ids (ids will be -1 if there isn't a prev or next)
             int[] prevNextFeatureIds = featuresView.getPrevNextFeature(form.getFeatureId());
@@ -535,12 +510,14 @@ public class MS1Controller extends SpringActionController
         {
             pepSeq,
             exact,
+            subfolders,
             export
         }
 
         private String _pepSeq = "";
         private boolean _exact = false;
         private String _export = "";
+        private boolean _subfolders = false;
 
         public String getPepSeq()
         {
@@ -571,6 +548,16 @@ public class MS1Controller extends SpringActionController
         {
             _export = export;
         }
+
+        public boolean isSubfolders()
+        {
+            return _subfolders;
+        }
+
+        public void setSubfolders(boolean subfolders)
+        {
+            _subfolders = subfolders;
+        }
     }
 
     @RequiresPermission(ACL.PERM_READ)
@@ -578,10 +565,26 @@ public class MS1Controller extends SpringActionController
     {
         public ModelAndView getView(SearchFeaturesForm form, BindException errors) throws Exception
         {
+            //create the search view
+            PepSearchModel searchModel = new PepSearchModel(getContainer(), form.getPepSeq(), form.isExact(), form.isSubfolders());
+            JspView<PepSearchModel> searchView = new JspView<PepSearchModel>("/org/labkey/ms1/view/PepSearchView.jsp", searchModel);
+            searchView.setTitle("Search Criteria");
+
+            //if no search terms were specified, return just the search view
+            if(searchModel.noSearchTerms())
+            {
+                searchModel.setErrorMsg("You must specify at least one of the folliowing search terms: Peptide Sequence, ...."); //TODO: fill in rest
+                return searchView;
+            }
+
             //create the features view
-            FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getContainer()));
-            featuresView.getBaseFilters().add(new ContainerFilter(getContainer()));
-            featuresView.getBaseFilters().add(new PeptideFilter(form.getPepSeq(), form.isExact()));
+            ArrayList<FeaturesFilter> baseFilters = new ArrayList<FeaturesFilter>();
+            baseFilters.add(new ContainerFilter(getContainer(), form.isSubfolders(), getUser()));
+            if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
+                baseFilters.add(new PeptideFilter(form.getPepSeq(), form.isExact()));
+
+            FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getContainer(),
+                                            !(form.isSubfolders())), baseFilters);
             featuresView.setTitle("Search Results");
 
             //if there is an export request, export and return
@@ -590,10 +593,6 @@ public class MS1Controller extends SpringActionController
                 featuresView.setForExport(true);
                 return exportQueryView(featuresView, getPageConfig(), form.getExport());
             }
-
-            PepSearchModel searchModel = new PepSearchModel(getContainer(), form.getPepSeq(), form.isExact());
-            JspView<PepSearchModel> searchView = new JspView<PepSearchModel>("/org/labkey/ms1/view/PepSearchView.jsp", searchModel);
-            searchView.setTitle("Search Criteria");
 
             return new VBox(searchView, featuresView);
         }

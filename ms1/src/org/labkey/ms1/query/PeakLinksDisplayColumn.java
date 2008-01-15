@@ -95,6 +95,12 @@ public class PeakLinksDisplayColumn extends DataColumn
             else
                 baseDetailsUrl.addParameter(FeaturesFilterFactory.NAMESPACE_PREFIX + param.getKey(), param.getValue());
         }
+
+        //add one for the current container
+        //results from sub-containers will need to know the container from which the search
+        //occurred so that they can re-initialize the search list for prev/next buttons
+        baseDetailsUrl.addParameter(FeaturesFilterFactory.NAMESPACE_PREFIX + FeaturesFilterFactory.PARAM_SOURCE_CONTAINER,
+                baseUrl.getExtraPath());
     }
 
     public boolean isFilterable()

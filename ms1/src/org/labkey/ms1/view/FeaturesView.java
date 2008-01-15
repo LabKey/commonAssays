@@ -54,7 +54,7 @@ public class FeaturesView extends QueryView
         _baseFilters = baseFilters;
 
         QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), DATAREGION_NAME);
-        settings.setQueryName(MS1Schema.TABLE_PEAKS);
+        settings.setQueryName(MS1Schema.TABLE_FEATURES);
         settings.setAllowChooseQuery(false);
         setSettings(settings);
 

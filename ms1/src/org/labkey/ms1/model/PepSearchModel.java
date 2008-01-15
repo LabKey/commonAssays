@@ -33,19 +33,22 @@ import org.labkey.ms1.MS1Controller;
 public class PepSearchModel
 {
     private String _resultsUri;
-    private String _pepSeq = "";
+    private String _pepSeq = null;
     private boolean _exact = false;
+    private boolean _subfolders = false;
+    private String _errorMsg = null;
 
     public PepSearchModel(Container container)
     {
         _resultsUri = new ActionURL(MS1Controller.SearchFeaturesAction.class, container).getLocalURIString();
     }
 
-    public PepSearchModel(Container container, String pepSeq, boolean exact)
+    public PepSearchModel(Container container, String pepSeq, boolean exact, boolean includeSubfolders)
     {
         this(container);
         _pepSeq = pepSeq;
         _exact = exact;
+        _subfolders = includeSubfolders;
     }
 
     public String getResultsUri()
@@ -61,7 +64,7 @@ public class PepSearchModel
 
     public String getPepSeq()
     {
-        return _pepSeq;
+        return null != _pepSeq ? _pepSeq : "";
     }
 
     public void setPepSeq(String pepSeq)
@@ -77,5 +80,38 @@ public class PepSearchModel
     public void setExact(boolean exact)
     {
         _exact = exact;
+    }
+
+    public void setIncludeSubfolders(boolean subfolders)
+    {
+        _subfolders = subfolders;
+    }
+
+    public boolean includeSubfolders()
+    {
+        if(_pepSeq != null && _pepSeq.length() > 0)
+            return _subfolders;
+        else
+            return true; //forces it on by default for a new search
+    }
+
+    public boolean noSearchTerms()
+    {
+        return (null == _pepSeq || _pepSeq.length() == 0);
+    }
+
+    public String getErrorMsg()
+    {
+        return _errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg)
+    {
+        _errorMsg = errorMsg;
+    }
+
+    public boolean hasErrorMsg()
+    {
+        return (null != _errorMsg && _errorMsg.length() > 0);
     }
 }

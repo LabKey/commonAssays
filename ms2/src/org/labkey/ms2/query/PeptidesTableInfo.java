@@ -23,15 +23,15 @@ public class PeptidesTableInfo extends FilteredTable
 
     public PeptidesTableInfo(MS2Schema schema)
     {
-        this(schema, null, new ActionURL("MS2", "someAction.view", schema.getContainer()), true);
+        this(schema, null, new ActionURL("MS2", "someAction.view", schema.getContainer()), true, true);
     }
 
-    public PeptidesTableInfo(MS2Schema schema, boolean includeFeatureFk)
+    public PeptidesTableInfo(MS2Schema schema, boolean includeFeatureFk, boolean restrictContainer)
     {
-        this(schema, null, new ActionURL("MS2", "someAction.view", schema.getContainer()), includeFeatureFk);
+        this(schema, null, new ActionURL("MS2", "someAction.view", schema.getContainer()), includeFeatureFk, restrictContainer);
     }
 
-    public PeptidesTableInfo(MS2Schema schema, final MS2Run[] runs, ActionURL url, boolean includeFeatureFk)
+    public PeptidesTableInfo(MS2Schema schema, final MS2Run[] runs, ActionURL url, boolean includeFeatureFk, boolean restrictContainer)
     {
         super(MS2Manager.getTableInfoPeptidesData());
         _schema = schema;
@@ -187,9 +187,13 @@ public class PeptidesTableInfo extends FilteredTable
         sql.append(MS2Manager.getTableInfoFractions());
         sql.append(" WHERE Run IN (SELECT Run FROM ");
         sql.append(MS2Manager.getTableInfoRuns());
-        sql.append(" WHERE Container = ? AND Deleted = ?");
-        sql.add(_schema.getContainer().getId());
+        sql.append(" WHERE Deleted = ?");
         sql.add(Boolean.FALSE);
+        if(restrictContainer)
+        {
+            sql.append(" AND Container = ?"); 
+            sql.add(_schema.getContainer().getId());
+        }
         if (runs != null)
         {
             List<Integer> params = new ArrayList<Integer>(runs.length);

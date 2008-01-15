@@ -35,12 +35,14 @@ public class FilesTableInfo extends FilteredTable
             }
         });
 
-        //add a condition that limits the files returned to just those existing in the
-        //current container. The FilteredTable class supports this automatically only if
-        //the underlying table contains a column named "Container," which our Files table
-        //does not, so we need to use a SQL fragment here that uses a sub-select.
-        SQLFragment sf = new SQLFragment("Imported=? AND Deleted=? AND ExpDataFileId IN (SELECT RowId FROM Exp.Data WHERE Container=?)",
+        //add a condition that excludes deleted and not full-imported files
+        //also limit to the passed container if not null
+        SQLFragment sf;
+        if(null != container)
+            sf = new SQLFragment("Imported=? AND Deleted=? AND ExpDataFileId IN (SELECT RowId FROM Exp.Data WHERE Container=?)",
                                             true, false, container.getId());
+        else
+            sf = new SQLFragment("Imported=? AND Deleted=?", true, false);
         addCondition(sf, "FileId");
 
     }

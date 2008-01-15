@@ -42,13 +42,26 @@ public class MS1Schema extends UserSchema
     }
 
     private ExpSchema _expSchema;
+    private boolean _restrictContainer = true;
 
     public MS1Schema(User user, Container container)
     {
-        super(SCHEMA_NAME, user, container, MS1Manager.get().getSchema());  //ExperimentService.get().getSchema());
-        _expSchema = new ExpSchema(user, container);
+        this(user, container, true);
     }
-    
+
+    public MS1Schema(User user, Container container, boolean restrictContainer)
+    {
+        super(SCHEMA_NAME, user, container, MS1Manager.get().getSchema());
+        _expSchema = new ExpSchema(user, container);
+        _expSchema.setRestrictContainer(restrictContainer);
+        _restrictContainer = restrictContainer;
+    }
+
+    public boolean isRestrictContainer()
+    {
+        return _restrictContainer;
+    }
+
     public Set<String> getTableNames()
     {
         HashSet<String> ret = new HashSet<String>();
@@ -90,7 +103,7 @@ public class MS1Schema extends UserSchema
 
     public FilesTableInfo getFilesTableInfo()
     {
-        return new FilesTableInfo(_expSchema, getContainer());
+        return new FilesTableInfo(_expSchema, _restrictContainer ? getContainer() : null);
     }
 
     public ScansTableInfo getScansTableInfo()

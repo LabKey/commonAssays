@@ -33,12 +33,12 @@ public class MS2ServiceImpl implements MS2Service.Service
 
     public TableInfo createPeptidesTableInfo(User user, Container container)
     {
-        return createPeptidesTableInfo(user, container, true);
+        return createPeptidesTableInfo(user, container, true, true);
     }
 
-    public TableInfo createPeptidesTableInfo(User user, Container container, boolean includeFeatureFk)
+    public TableInfo createPeptidesTableInfo(User user, Container container, boolean includeFeatureFk, boolean restrictContainer)
     {
-        return new PeptidesTableInfo(new MS2Schema(user, container), includeFeatureFk);
+        return new PeptidesTableInfo(new MS2Schema(user, container), includeFeatureFk, restrictContainer);
     }
 
 }
