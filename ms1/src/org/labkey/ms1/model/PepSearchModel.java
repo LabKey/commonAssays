@@ -40,7 +40,7 @@ public class PepSearchModel
 
     public PepSearchModel(Container container)
     {
-        _resultsUri = new ActionURL(MS1Controller.SearchFeaturesAction.class, container).getLocalURIString();
+        _resultsUri = new ActionURL(MS1Controller.PepSearchAction.class, container).getLocalURIString();
     }
 
     public PepSearchModel(Container container, String pepSeq, boolean exact, boolean includeSubfolders)

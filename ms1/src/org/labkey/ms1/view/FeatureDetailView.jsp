@@ -386,8 +386,8 @@
                                     out.print(peptides[idx].getPeptide());
                                     out.print("</a>");
 
-                                    ActionURL urlPepSearch = new ActionURL(MS1Controller.SearchFeaturesAction.class, me.getViewContext().getContainer());
-                                    urlPepSearch.addParameter(MS1Controller.SearchFeaturesForm.ParamNames.pepSeq.name(), peptides[idx].getTrimmedPeptide());
+                                    ActionURL urlPepSearch = new ActionURL(MS1Controller.PepSearchAction.class, me.getViewContext().getContainer());
+                                    urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.pepSeq.name(), peptides[idx].getTrimmedPeptide());
                                     out.print("&nbsp;[<a href=\"" + urlPepSearch.getLocalURIString() + "\">");
                                     out.print("features with same</a>]");
                                 }

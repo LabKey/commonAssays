@@ -517,9 +517,9 @@ public class MS1Controller extends SpringActionController
     }
 
     /**
-     * Form used for SearchFeaturesAction
+     * Form used for PepSearchAction
      */
-    public static class SearchFeaturesForm
+    public static class PepSearchForm
     {
         public enum ParamNames
         {
@@ -576,9 +576,9 @@ public class MS1Controller extends SpringActionController
     }
 
     @RequiresPermission(ACL.PERM_READ)
-    public class SearchFeaturesAction extends SimpleViewAction<SearchFeaturesForm>
+    public class PepSearchAction extends SimpleViewAction<PepSearchForm>
     {
-        public ModelAndView getView(SearchFeaturesForm form, BindException errors) throws Exception
+        public ModelAndView getView(PepSearchForm form, BindException errors) throws Exception
         {
             //create the search view
             PepSearchModel searchModel = new PepSearchModel(getContainer(), form.getPepSeq(), form.isExact(), form.isSubfolders());
@@ -588,7 +588,7 @@ public class MS1Controller extends SpringActionController
             //if no search terms were specified, return just the search view
             if(searchModel.noSearchTerms())
             {
-                searchModel.setErrorMsg("You must specify at least one of the folliowing search terms: Peptide Sequence, ...."); //TODO: fill in rest
+                searchModel.setErrorMsg("You must specify at least one Peptide Sequence");
                 return searchView;
             }
 

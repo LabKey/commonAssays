@@ -13,16 +13,16 @@
 <% } %>
 <form action="<%=model.getResultsUri()%>" method="get">
     <p>Peptide Sequence:
-        <input type="text" name="<%=MS1Controller.SearchFeaturesForm.ParamNames.pepSeq.name()%>"
+        <input type="text" name="<%=MS1Controller.PepSearchForm.ParamNames.pepSeq.name()%>"
                value="<%=model.getPepSeq()%>" size="40"/>
         <%=helpPopup("Peptide Sequence", "Enter the peptide sequence to find, or multiple sequences separated by commas. If you enter a sequence containing modifiers, an exact match will be assumed.")%>
         &nbsp;
-        <input id="cbxExact" type="checkbox" name="<%=MS1Controller.SearchFeaturesForm.ParamNames.exact.name()%>"
+        <input id="cbxExact" type="checkbox" name="<%=MS1Controller.PepSearchForm.ParamNames.exact.name()%>"
                style="vertical-align:middle" <%=model.isExact() ? "checked=\"1\"" : ""%> />
         <label for="cbxExact">Exact Match</label>
         <%=helpPopup("Exact Match", "If checked, the search will match the peptides exactly; if unchecked, it will match any peptide that starts with the specified sequence and ignore modifications.")%>
         &nbsp;
-        <input id="cbxSubfolders" type="checkbox" name="<%=MS1Controller.SearchFeaturesForm.ParamNames.subfolders.name()%>"
+        <input id="cbxSubfolders" type="checkbox" name="<%=MS1Controller.PepSearchForm.ParamNames.subfolders.name()%>"
                style="vertical-align:middle" <%=model.includeSubfolders() ? "checked" : ""%> />
         <label for="cbxSubfolders">Search Subfolders</label>
         <%=helpPopup("Search Subfolders", "Check to search this folder and all of its descendants.")%>
