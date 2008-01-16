@@ -114,7 +114,7 @@ public class MS1Controller extends SpringActionController
 
         public ActionURL getUrl()
         {
-            return new ActionURL(MS1Module.CONTROLLER_NAME, "begin.view", getContainer());
+            return new ActionURL(MS1Controller.BeginAction.class, getContainer());
         }
     } //class BeginAction
 
@@ -244,12 +244,18 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root, int runId)
         {
-            return new BeginAction().appendNavTrail(root).addChild("Features", getUrl(runId));
+            return appendNavTrail(root, runId, null);
         }
 
-        public ActionURL getUrl(int runId)
+        public NavTree appendNavTrail(NavTree root, int runId, Container container)
         {
-            ActionURL url = new ActionURL(MS1Module.CONTROLLER_NAME, "showFeatures.view", getContainer());
+            return new BeginAction().appendNavTrail(root).addChild("Features from Run", getUrl(runId, container));
+        }
+
+        public ActionURL getUrl(int runId, Container container)
+        {
+            ActionURL url = new ActionURL(MS1Controller.ShowFeaturesAction.class,
+                    null == container ? getContainer() : container);
             url.addParameter(ShowFeaturesForm.ParamNames.runId.name(), runId);
             url.addParameter(".lastFilter", "true");
             return url;
@@ -263,7 +269,8 @@ public class MS1Controller extends SpringActionController
     public class ShowPeaksAction extends SimpleViewAction<PeaksViewForm>
     {
         public static final String ACTION_NAME = "showPeaks";
-        public static final String PARAM_FEATUREID = "featureId";
+
+        private int _runId = -1;
 
         public ModelAndView getView(PeaksViewForm form, BindException errors) throws Exception
         {
@@ -330,6 +337,9 @@ public class MS1Controller extends SpringActionController
                 }
             }
 
+            //cache the run id so we can build the nav trail
+            _runId = expRun.getRowId();
+
             //build up the views and return
             VBox views = new VBox();
             if(null != fileDetailsView)
@@ -343,7 +353,7 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return new BeginAction().appendNavTrail(root).addChild("Peaks for Feature");
+            return new ShowFeaturesAction().appendNavTrail(root, _runId).addChild("Peaks for Feature");
         }
     } //class ShowFeaturesAction
 
@@ -395,6 +405,8 @@ public class MS1Controller extends SpringActionController
     {
         public static final String ACTION_NAME = "showFeatureDetails";
 
+        private int _runId = -1;
+
         public ModelAndView getView(FeatureIdForm form, BindException errors) throws Exception
         {
             if(null == form || form.getFeatureId() < 0)
@@ -432,12 +444,15 @@ public class MS1Controller extends SpringActionController
             int[] prevNextFeatureIds = featuresView.getPrevNextFeature(form.getFeatureId());
             FeatureDetailsViewContext ctx = new FeatureDetailsViewContext(feature, prevNextFeatureIds[0], prevNextFeatureIds[1]);
 
+            //cache the experiment run id so we can build the nav trail
+            _runId = run.getRowId();
+
             return new JspView<FeatureDetailsViewContext>("/org/labkey/ms1/view/FeatureDetailView.jsp", ctx);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return new BeginAction().appendNavTrail(root).addChild("Feature Details");
+            return new ShowFeaturesAction().appendNavTrail(root, _runId).addChild("Feature Details");
         }
     }
 

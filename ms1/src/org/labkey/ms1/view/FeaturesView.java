@@ -28,8 +28,9 @@ public class FeaturesView extends QueryView
     public static final String DATAREGION_NAME = "features";
 
     //Localizable strings
-    private static final String CAPTION_EXPORT_ALL_EXCEL = "Export All to Excel";
-    private static final String CAPTION_EXPORT_ALL_TSV = "Export All to Text";
+    private static final String CAPTION_EXPORT = "Export";
+    private static final String CAPTION_EXPORT_ALL_EXCEL = "Export All to Excel (.xls)";
+    private static final String CAPTION_EXPORT_ALL_TSV = "Export All to Text (.txt)";
     private static final String CAPTION_PRINT_ALL = "Print";
 
     private List<FeaturesFilter> _baseFilters = null;
@@ -169,19 +170,22 @@ public class FeaturesView extends QueryView
             ButtonBar bar = region.getButtonBar(DataRegion.MODE_GRID);
             assert null != bar : "Coun't get the button bar during FeaturesView.createDataView()!";
 
-            addExportButton(bar, "excel", CAPTION_EXPORT_ALL_EXCEL);
-            addExportButton(bar, "tsv", CAPTION_EXPORT_ALL_TSV);
-            addExportButton(bar, "print", CAPTION_PRINT_ALL);
+            MenuButton exportButton = new MenuButton(CAPTION_EXPORT);
+            exportButton.addMenuItem(CAPTION_EXPORT_ALL_EXCEL, getExportUrl("excel"));
+            exportButton.addMenuItem(CAPTION_EXPORT_ALL_TSV, getExportUrl("tsv"));
+            bar.add(exportButton);
+
+            bar.add(new ActionButton(getExportUrl("print"), CAPTION_PRINT_ALL, DataRegion.MODE_ALL, ActionButton.Action.LINK));
         }
 
         return view;
     } //createDataView()
 
-    protected void addExportButton(ButtonBar bar, String format, String caption)
+    protected String getExportUrl(String format)
     {
         ActionURL url = getViewContext().getActionURL().clone();
         url.replaceParameter("export", format);
-        bar.add(new ActionButton(url.getEncodedLocalURIString(), caption, DataRegion.MODE_ALL, ActionButton.Action.LINK));
+        return url.getLocalURIString();
     }
 
     protected Sort getBaseSort()

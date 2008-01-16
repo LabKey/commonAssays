@@ -12,6 +12,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.ms1.query.MS1Schema;
 import org.labkey.ms1.model.Feature;
 import org.labkey.ms1.query.PeaksTableInfo;
+import org.labkey.ms1.MS1Controller;
 
 import java.sql.SQLException;
 import java.io.Writer;
@@ -27,8 +28,9 @@ import java.io.IOException;
 public class PeaksView extends QueryView
 {
     //Localizable strings
-    private static final String CAPTION_EXPORT_ALL_EXCEL = "Export All to Excel";
-    private static final String CAPTION_EXPORT_ALL_TSV = "Export All to Text";
+    private static final String CAPTION_EXPORT = "Export";
+    private static final String CAPTION_EXPORT_ALL_EXCEL = "Export All to Excel (.xls)";
+    private static final String CAPTION_EXPORT_ALL_TSV = "Export All to Text (.txt)";
     private static final String CAPTION_PRINT_ALL = "Print";
 
     public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Feature feature) throws SQLException
@@ -101,16 +103,20 @@ public class PeaksView extends QueryView
             assert null != bar : "Coun't get the button bar during FeaturesView.createDataView()!";
 
             bar.add(0, new ScanFilter(_feature, getViewContext().getActionURL()));
-            addExportButton(bar, "excel", CAPTION_EXPORT_ALL_EXCEL);
-            addExportButton(bar, "tsv", CAPTION_EXPORT_ALL_TSV);
-            addExportButton(bar, "print", CAPTION_PRINT_ALL);
 
+            MenuButton exportButton = new MenuButton(CAPTION_EXPORT);
+            exportButton.addMenuItem(CAPTION_EXPORT_ALL_EXCEL, getExportUrl("excel"));
+            exportButton.addMenuItem(CAPTION_EXPORT_ALL_TSV, getExportUrl("tsv"));
+            bar.add(exportButton);
+
+            bar.add(new ActionButton(getExportUrl("print"), CAPTION_PRINT_ALL, DataRegion.MODE_ALL, ActionButton.Action.LINK));
+            
             //if feature is valid, add a button to view the feature details
             if(null != _feature)
             {
                 ActionURL urlFeatureDetails = getViewContext().getActionURL().clone();
                 urlFeatureDetails.deleteFilterParameters(QueryView.DATAREGIONNAME_DEFAULT);
-                urlFeatureDetails.setAction("showFeatureDetails.view");
+                urlFeatureDetails.setAction(MS1Controller.ShowFeatureDetailsAction.ACTION_NAME);
                 bar.add(new ActionButton(urlFeatureDetails.getEncodedLocalURIString(), "Feature Details", DataRegion.MODE_ALL, ActionButton.Action.LINK));
             }
         }
@@ -118,11 +124,11 @@ public class PeaksView extends QueryView
         return view;
     } //createDataView()
 
-    protected void addExportButton(ButtonBar bar, String format, String caption)
+    protected String getExportUrl(String format)
     {
         ActionURL url = getViewContext().getActionURL().clone();
         url.replaceParameter("export", format);
-        bar.add(new ActionButton(url.getEncodedLocalURIString(), caption, DataRegion.MODE_ALL, ActionButton.Action.LINK));
+        return url.getEncodedLocalURIString();
     }
 
     public static class ScanFilter extends DisplayElement
