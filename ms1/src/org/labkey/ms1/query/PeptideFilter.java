@@ -15,8 +15,6 @@
  */
 package org.labkey.ms1.query;
 
-import org.labkey.ms1.MS1Manager;
-import org.labkey.ms1.MS1Controller;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.query.FieldKey;
 
@@ -47,8 +45,40 @@ public class PeptideFilter implements FeaturesFilter
         _exact = exact;
     }
 
+    private String normalizeSequence(String sequence)
+    {
+        //strip off the bits outside the first and last .
+        //and remove all non-alpha characters
+        char[] trimmed = new char[sequence.length()];
+        int len = 0;
+        char ch;
+
+        for(int idx = Math.max(0, sequence.indexOf('.') + 1);
+            idx < sequence.length() && sequence.charAt(idx) != '.';
+            ++idx)
+        {
+            ch = sequence.charAt(idx);
+            if((ch >= 'A' && ch <= 'Z') || '?' == ch || '*' == ch) //allow wildcards
+            {
+                //translate user wildcards to SQL
+                if('?' == ch)
+                    ch = '_';
+                if('*' == ch)
+                    ch = '%';
+                
+                trimmed[len] = ch;
+                ++len;
+            }
+        }
+        
+        return new String(trimmed, 0, len);
+    }
+
     public void setFilters(FeaturesTableInfo tinfo)
     {
+        if(null == _sequences)
+            return;
+
         //add a condition that selects only features that match the given peptide sequence
         StringBuilder sql = new StringBuilder("FeatureId IN (SELECT fe.FeatureId" +
                 " FROM ms2.PeptidesData AS pd" +
@@ -59,34 +89,13 @@ public class PeptideFilter implements FeaturesFilter
                 " INNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)" +
                 " WHERE ");
 
-        if(_exact || MS1Manager.get().containsModifiers(_sequences))
+        // OR together the sequence conditions
+        for(int idx = 0; idx < _sequences.length; ++idx)
         {
-            sql.append("pd.Peptide IN (");
+            if(idx > 0)
+                sql.append(" OR ");
 
-            for(int idx = 0; idx < _sequences.length; ++idx)
-            {
-                if(idx > 0)
-                    sql.append(",");
-
-                sql.append("'");
-                sql.append(_sequences[idx]);
-                sql.append("'");
-            }
-
-            sql.append(")");
-        }
-        else
-        {
-            //need to append multiple LIKE clauses against TrimmedPeptide
-            for(int idx = 0; idx < _sequences.length; ++idx)
-            {
-                if(idx > 0)
-                    sql.append(" OR ");
-
-                sql.append("pd.TrimmedPeptide LIKE '");
-                sql.append(_sequences[idx]);
-                sql.append("%'");
-            }
+            sql.append(genSeqPredicate(_sequences[idx]));
         }
 
         sql.append(")"); //end paren for sub-select
@@ -104,6 +113,37 @@ public class PeptideFilter implements FeaturesFilter
         visibleColumns.remove(FieldKey.fromParts("Peaks"));
         visibleColumns.remove(FieldKey.fromParts("TotalIntensity"));
         tinfo.setDefaultVisibleColumns(visibleColumns);
+    }
+
+    private String genSeqPredicate(String sequence)
+    {
+        //always add a condition for pd.TrimmedPeptide using normalized version of sequence
+        StringBuilder sql = new StringBuilder("(pd.TrimmedPeptide");
+
+        if(_exact)
+        {
+            sql.append("='");
+            sql.append(normalizeSequence(sequence));
+            sql.append("'");
+        }
+        else
+        {
+            sql.append(" LIKE '");
+            sql.append(normalizeSequence(sequence));
+            sql.append("%'");
+        }
+
+        //if _exact, AND another contains condition against pd.Peptide
+        if(_exact)
+        {
+            sql.append(" AND pd.Peptide LIKE '%");
+            sql.append(sequence.trim());
+            sql.append("%'");
+        }
+
+        sql.append(")");
+
+        return sql.toString();
     }
 
 }

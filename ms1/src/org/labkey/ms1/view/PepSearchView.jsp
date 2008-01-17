@@ -15,7 +15,7 @@
     <p>Peptide Sequence:
         <input type="text" name="<%=MS1Controller.PepSearchForm.ParamNames.pepSeq.name()%>"
                value="<%=model.getPepSeq()%>" size="40"/>
-        <%=helpPopup("Peptide Sequence", "Enter the peptide sequence to find, or multiple sequences separated by commas. If you enter a sequence containing modifiers, an exact match will be assumed.")%>
+        <%=helpPopup("Peptide Sequence", "Enter the peptide sequence to find, or multiple sequences separated by commas.")%>
         &nbsp;
         <input id="cbxExact" type="checkbox" name="<%=MS1Controller.PepSearchForm.ParamNames.exact.name()%>"
                style="vertical-align:middle" <%=model.isExact() ? "checked=\"1\"" : ""%> />
