@@ -34,7 +34,7 @@ public abstract class AbstractRunCompareView  extends QueryView
 
     public AbstractRunCompareView(ViewContext context, MS2Controller controller, int runListIndex, boolean forExport, String tableName) throws ServletException
     {
-        super(new ViewContext(context), new MS2Schema(context.getUser(), context.getContainer()), createSettings(context, tableName));
+        super(new MS2Schema(context.getUser(), context.getContainer()), createSettings(context, tableName));
 
         _viewContext.setActionURL(context.getActionURL());
 
@@ -74,6 +74,7 @@ public abstract class AbstractRunCompareView  extends QueryView
     private static QuerySettings createSettings(ViewContext context, String tableName)
     {
         QuerySettings settings = new QuerySettings(context.cloneActionURL(), context.getRequest(), "Compare");
+        settings.setSchemaName(MS2Schema.SCHEMA_NAME);
         settings.setQueryName(tableName);
         settings.setAllowChooseQuery(false);
         return settings;
@@ -221,6 +222,8 @@ public abstract class AbstractRunCompareView  extends QueryView
         rgn.setMultiColumnCaptions(headings);
         rgn.setColSpan((displayColumns.size() - offset) / _runs.size());
         rgn.setMaxRows(getMaxRows());
+        rgn.setOffset(getOffset());
+        rgn.setSelectionKey(getSelectionKey());
         rgn.setShowRecordSelectors(showRecordSelectors());
         rgn.setName(getDataRegionName());
         rgn.setDisplayColumnList(displayColumns);

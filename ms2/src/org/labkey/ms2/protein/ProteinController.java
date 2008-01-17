@@ -78,8 +78,8 @@ public class ProteinController extends ViewController
         throws Exception
     {
         UserSchema schema = new CustomAnnotationSchema(getUser(), getContainer(), showSequences);
-        QuerySettings settings = new QuerySettings(getActionURL(), getRequest(), "CustomAnnotation");
-
+        QuerySettings settings = new QuerySettings(getActionURL(), "CustomAnnotation");
+        settings.setSchemaName(schema.getSchemaName());
         settings.getQueryDef(schema);
         settings.setAllowChooseQuery(true);
         settings.setAllowChooseView(true);

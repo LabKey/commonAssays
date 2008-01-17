@@ -67,10 +67,12 @@ public class BtController extends ViewController
 
         if (BtManager.get().getServers(getContainer()).length > 0)
         {
-            QuerySettings settings = new QuerySettings(getActionURL(), getRequest(), "Server");
+            BtSchema schema = new BtSchema(getUser(), getContainer());
+            QuerySettings settings = new QuerySettings(getActionURL(), "Server");
+            settings.setSchemaName(schema.getSchemaName());
             settings.setQueryName("Servers");
             settings.setAllowChooseQuery(false);
-            view.addView(new BtServerView(getViewContext(), new BtSchema(getUser(), getContainer()), settings));
+            view.addView(new BtServerView(getViewContext(), schema, settings));
         }
         return renderInTemplate(view, getContainer(), "BioTrue Connector");
     }
@@ -145,10 +147,12 @@ public class BtController extends ViewController
     protected Forward showServers(ViewForm form) throws Exception
     {
         requiresPermission(ACL.PERM_READ);
-        QuerySettings settings = new QuerySettings(getActionURL(), getRequest(), "Server");
+        BtSchema schema = new BtSchema(getUser(), getContainer());
+        QuerySettings settings = new QuerySettings(getActionURL(), "Server");
+        settings.setSchemaName(schema.getSchemaName());
         settings.setQueryName("Servers");
         settings.setAllowChooseQuery(false);
-        return renderInTemplate(new QueryView(getViewContext(), new BtSchema(getUser(), getContainer()), settings), getContainer(), "BioTrue Servers");
+        return renderInTemplate(new QueryView(getViewContext(), schema, settings), getContainer(), "BioTrue Servers");
     }
 
     @Jpf.Action

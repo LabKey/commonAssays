@@ -18,6 +18,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresPermission;
@@ -2027,10 +2028,12 @@ public class MS2Controller extends SpringActionController
 
     private QueryView createProteinGroupSearchView(final ProteinSearchForm form) throws ServletException
     {
-        QuerySettings groupsSettings = new QuerySettings(getViewContext().getActionURL(), getViewContext().getRequest(), "ProteinSearchResults");
+        UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
+        QuerySettings groupsSettings = new QuerySettings(getViewContext().getActionURL(), "ProteinSearchResults");
+        groupsSettings.setSchemaName(schema.getSchemaName());
         groupsSettings.setQueryName(MS2Schema.PROTEIN_GROUPS_FOR_SEARCH_TABLE_NAME);
         groupsSettings.setAllowChooseQuery(false);
-        QueryView groupsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), groupsSettings)
+        QueryView groupsView = new QueryView(getViewContext(), schema, groupsSettings)
         {
             protected TableInfo createTable()
             {
@@ -2068,10 +2071,11 @@ public class MS2Controller extends SpringActionController
     private QueryView createProteinSearchView(ProteinSearchForm form)
         throws ServletException
     {
-        QuerySettings proteinsSettings = new QuerySettings(getViewContext().getActionURL(), getViewContext().getRequest(), "PotentialProteins");
+        UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
+        QuerySettings proteinsSettings = schema.getSettings(getViewContext().getActionURL(), getViewContext().getRequest(), "PotentialProteins");
         proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);
         proteinsSettings.setAllowChooseQuery(false);
-        QueryView proteinsView = new QueryView(getViewContext(), QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME), proteinsSettings)
+        QueryView proteinsView = new QueryView(getViewContext(), schema, proteinsSettings)
         {
             protected void populateButtonBar(DataView view, ButtonBar bar)
             {

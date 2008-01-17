@@ -26,7 +26,8 @@ public class PendingMageMLFilesView extends QueryView
 {
     public PendingMageMLFilesView(ViewContext context)
     {
-        super(new ExpSchema(context.getUser(), context.getContainer()), createSettings(context));
+        super(new ExpSchema(context.getUser(), context.getContainer()));
+        setSettings(createSettings(context));
         setShowExportButtons(false);
         setShowRecordSelectors(true);
         setShowDetailsColumn(false);
@@ -34,9 +35,10 @@ public class PendingMageMLFilesView extends QueryView
         setShowCustomizeViewLinkInButtonBar(true);
     }
 
-    private static QuerySettings createSettings(ViewContext context)
+    private QuerySettings createSettings(ViewContext context)
     {
         QuerySettings result = new QuerySettings(context.getActionURL(), "PendingMageMLFiles");
+        result.setSchemaName(getSchema().getSchemaName());
         result.setAllowChooseQuery(false);
         result.setQueryName(ExpSchema.TableType.Datas.name());
         return result;

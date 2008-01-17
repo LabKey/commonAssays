@@ -47,6 +47,8 @@ public class ChooseRunsView extends FlowQueryView
         List<DisplayColumn> displayColumns = getDisplayColumns();
         DataRegion rgn = new ChooseRunsRegion(_form);
         rgn.setMaxRows(getMaxRows());
+        rgn.setOffset(getOffset());
+        rgn.setSelectionKey(getSelectionKey());
         rgn.setShowRecordSelectors(showRecordSelectors());
         rgn.setName(getDataRegionName());
         rgn.setDisplayColumnList(displayColumns);

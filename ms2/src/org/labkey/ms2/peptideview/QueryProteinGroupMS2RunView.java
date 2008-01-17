@@ -30,9 +30,10 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
 
     protected QuerySettings createQuerySettings(UserSchema schema, int maxRows) throws RedirectException
     {
-        QuerySettings settings = new QuerySettings(_url, _viewContext.getRequest(), DATA_REGION_NAME);
+        QuerySettings settings = new QuerySettings(_url, DATA_REGION_NAME);
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
+        settings.setSchemaName(schema.getSchemaName());
         settings.setQueryName(MS2Schema.PROTEIN_GROUPS_FOR_RUN_TABLE_NAME);
         settings.setMaxRows(maxRows);
 
@@ -79,6 +80,8 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
                 rgn.setDisplayColumnList(originalColumns);
             }
             rgn.setMaxRows(getMaxRows());
+            rgn.setOffset(getOffset());
+            rgn.setSelectionKey(getSelectionKey());
             rgn.setShowRecordSelectors(showRecordSelectors());
             rgn.setName(getDataRegionName());
 

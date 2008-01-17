@@ -31,9 +31,10 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
     protected QuerySettings createQuerySettings(String tableName, MS2Schema schema, int maxRows) throws RedirectException
     {
-        QuerySettings settings = new QuerySettings(_url, _viewContext.getRequest(), DATA_REGION_NAME);
+        QuerySettings settings = new QuerySettings(_url, DATA_REGION_NAME);
         settings.setAllowChooseQuery(false);
         settings.setAllowChooseView(true);
+        settings.setSchemaName(schema.getSchemaName());
         settings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
         settings.setDataRegionName(MS2Manager.getDataRegionNamePeptides());
         String columnNames = _url.getParameter("columns");
@@ -127,6 +128,8 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
                 getSettings().setMaxRows(1000);
             }
             rgn.setMaxRows(getMaxRows());
+            rgn.setOffset(getOffset());
+            rgn.setSelectionKey(getSelectionKey());
             rgn.setShowRecordSelectors(showRecordSelectors());
             rgn.setName(getDataRegionName());
 
