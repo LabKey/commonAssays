@@ -526,14 +526,18 @@ public class FlowSchema extends UserSchema
         return ret;
     }
 
-    public FlowQuerySettings getSettings(ActionURL url, HttpServletRequest request, String dataRegionName)
+    public FlowQuerySettings getSettings(ActionURL url, String dataRegionName)
     {
-        return new FlowQuerySettings(url, request, dataRegionName);
+        FlowQuerySettings settings = new FlowQuerySettings(url, dataRegionName);
+        settings.setSchemaName(getSchemaName());
+        return settings;
     }
 
     public FlowQuerySettings getSettings(Portal.WebPart webPart, ViewContext context)
     {
-        return new FlowQuerySettings(webPart, context);
+        FlowQuerySettings settings = new FlowQuerySettings(webPart, context);
+        settings.setSchemaName(getSchemaName());
+        return settings;
     }
 
     public QueryDefinition getQueryDefForTable(String name)
