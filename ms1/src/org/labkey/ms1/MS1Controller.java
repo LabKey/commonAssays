@@ -616,6 +616,178 @@ public class MS1Controller extends SpringActionController
         {
             return root.addChild("Feature Search Results");
         }
+    } //PepSearchAction
+
+    public static class SimilarSearchForm
+    {
+        public enum ParamNames
+        {
+            featureId,
+            mzOffset,
+            mzUnits,
+            timeOffset,
+            timeUnits,
+            subfolders
+        }
+
+        public enum MzOffsetUnits
+        {
+            ppm,
+            mz
+        }
+
+        public enum TimeOffsetUnits
+        {
+            rt,
+            scans
+        }
+
+        private int _featureId = -1;
+        private double _mzOffset = 0;
+        private MzOffsetUnits _mzUnits = MzOffsetUnits.ppm;
+        private double _timeOffset = 30;
+        private TimeOffsetUnits _timeUnits = TimeOffsetUnits.rt;
+        private boolean _subfolders = false;
+        private String _export;
+
+        public int getFeatureId()
+        {
+            return _featureId;
+        }
+
+        public void setFeatureId(int featureId)
+        {
+            _featureId = featureId;
+        }
+
+        public double getMzOffset()
+        {
+            return _mzOffset;
+        }
+
+        public void setMzOffset(double mzOffset)
+        {
+            _mzOffset = mzOffset;
+        }
+
+        public MzOffsetUnits getMzUnits()
+        {
+            return _mzUnits;
+        }
+
+        public void setMzUnits(MzOffsetUnits mzUnits)
+        {
+            _mzUnits = mzUnits;
+        }
+
+        public double getTimeOffset()
+        {
+            return _timeOffset;
+        }
+
+        public void setTimeOffset(double timeOffset)
+        {
+            _timeOffset = timeOffset;
+        }
+
+        public TimeOffsetUnits getTimeUnits()
+        {
+            return _timeUnits;
+        }
+
+        public void setTimeUnits(TimeOffsetUnits timeUnits)
+        {
+            _timeUnits = timeUnits;
+        }
+
+        public boolean isSubfolders()
+        {
+            return _subfolders;
+        }
+
+        public void setSubfolders(boolean subfolders)
+        {
+            _subfolders = subfolders;
+        }
+
+        public String getExport()
+        {
+            return _export;
+        }
+
+        public void setExport(String export)
+        {
+            _export = export;
+        }
+
+        /**
+         * Returns a url with default parameter values for mzOffset, mzUnits,
+         * timeOffset, and timeUnits. Callers can then add the featureId
+         * parameter.
+         *
+         * @param container The current container
+         * @return A default ActionURL
+         */
+        public static ActionURL getDefaultUrl(Container container)
+        {
+            ActionURL ret = new ActionURL(SimilarSearchAction.class, container);
+            ret.addParameter(ParamNames.mzOffset.name(), 5);
+            ret.addParameter(ParamNames.mzUnits.name(), MzOffsetUnits.ppm.name());
+            ret.addParameter(ParamNames.timeOffset.name(), 30);
+            ret.addParameter(ParamNames.timeUnits.name(), TimeOffsetUnits.rt.name());
+            return ret;
+        }
+    } //SimilarSearchForm
+
+    /**
+     * Action for finding features similar to a specified feature id
+     */
+    @RequiresPermission(ACL.PERM_READ)
+    public class SimilarSearchAction extends SimpleViewAction<SimilarSearchForm>
+    {
+        public ModelAndView getView(SimilarSearchForm form, BindException errors) throws Exception
+        {
+            //if no feature id was passed, redir to begin
+            if(form.getFeatureId() < 0)
+                return HttpView.redirect(new BeginAction().getUrl());
+
+            //get the source feature
+            Feature feature = MS1Manager.get().getFeature(form.getFeatureId());
+            if(null == feature)
+                throw new NotFoundException("Invalid feature id");
+
+            SimilarSearchModel searchModel = new SimilarSearchModel(feature, getContainer(),
+                    form.getMzOffset(), form.getMzUnits(), form.getTimeOffset(), form.getTimeUnits(),
+                    form.isSubfolders());
+            JspView<SimilarSearchModel> searchView = new JspView<SimilarSearchModel>("/org/labkey/ms1/view/SimilarSearchView.jsp", searchModel);
+
+            //create the features view
+            ArrayList<FeaturesFilter> baseFilters = new ArrayList<FeaturesFilter>();
+            baseFilters.add(new ContainerFilter(getContainer(), form.isSubfolders(), getUser()));
+            baseFilters.add(new MzFilter(feature.getMz().doubleValue(), form.getMzOffset(), form.getMzUnits()));
+            if(SimilarSearchForm.TimeOffsetUnits.rt == form.getTimeUnits())
+                baseFilters.add(new RetentionTimeFilter(feature, form.getTimeOffset()));
+            else
+                baseFilters.add(new ScanFilter(feature, (int)(form.getTimeOffset())));
+
+            FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getContainer(),
+                                            !(form.isSubfolders())), baseFilters);
+            featuresView.setTitle("Search Results");
+
+            //if there is an export request, export and return
+            if(isExportRequest(form.getExport()))
+            {
+                featuresView.setForExport(true);
+                return exportQueryView(featuresView, getPageConfig(), form.getExport());
+            }
+
+            return new VBox(searchView, featuresView);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Find Similar Features");
+        }
     }
 
     /**

@@ -62,6 +62,8 @@
     urlMs2Scan.addParameter("featureId", feature.getFeatureId());
 
     String contextPath = request.getContextPath();
+    ActionURL findSimilarUrl = MS1Controller.SimilarSearchForm.getDefaultUrl(me.getViewContext().getContainer());
+    findSimilarUrl.addParameter(MS1Controller.SimilarSearchForm.ParamNames.featureId.name(), ctx.getFeature().getFeatureId());
 %>
 <%!
     public String formatNumber(Object number, Format formatter)
@@ -292,7 +294,9 @@
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">m/z</td>
-                    <td><%=formatNumber(feature.getMz(), fmtDouble)%></td>
+                    <td><%=formatNumber(feature.getMz(), fmtDouble)%>
+                        &nbsp;[<a href="<%=findSimilarUrl%>">find&nbsp;similar</a>] 
+                    </td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Accurate</td>

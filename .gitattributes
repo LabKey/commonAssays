@@ -520,6 +520,7 @@ ms1/src/org/labkey/ms1/model/MinMaxScanInfo.java -text
 ms1/src/org/labkey/ms1/model/PepSearchModel.java -text
 ms1/src/org/labkey/ms1/model/Peptide.java -text
 ms1/src/org/labkey/ms1/model/Scan.java -text
+ms1/src/org/labkey/ms1/model/SimilarSearchModel.java -text
 ms1/src/org/labkey/ms1/model/Software.java -text
 ms1/src/org/labkey/ms1/model/SoftwareParam.java -text
 ms1/src/org/labkey/ms1/pipeline/MS1FileFilter.java -text
@@ -534,13 +535,17 @@ ms1/src/org/labkey/ms1/query/FeaturesFilter.java -text
 ms1/src/org/labkey/ms1/query/FeaturesFilterFactory.java -text
 ms1/src/org/labkey/ms1/query/FeaturesTableInfo.java -text
 ms1/src/org/labkey/ms1/query/FilesTableInfo.java -text
+ms1/src/org/labkey/ms1/query/FindSimilarDisplayColumn.java -text
 ms1/src/org/labkey/ms1/query/ListFilterBase.java -text
 ms1/src/org/labkey/ms1/query/MS1Schema.java -text
+ms1/src/org/labkey/ms1/query/MzFilter.java -text
 ms1/src/org/labkey/ms1/query/PeakLinksDisplayColumn.java -text
 ms1/src/org/labkey/ms1/query/PeaksAvailableColumnInfo.java -text
 ms1/src/org/labkey/ms1/query/PeaksTableInfo.java -text
 ms1/src/org/labkey/ms1/query/PeptideFilter.java -text
+ms1/src/org/labkey/ms1/query/RetentionTimeFilter.java -text
 ms1/src/org/labkey/ms1/query/RunFilter.java -text
+ms1/src/org/labkey/ms1/query/ScanFilter.java -text
 ms1/src/org/labkey/ms1/query/ScansTableInfo.java -text
 ms1/src/org/labkey/ms1/view/AdminView.jsp -text
 ms1/src/org/labkey/ms1/view/AdminViewContext.java -text
@@ -554,6 +559,7 @@ ms1/src/org/labkey/ms1/view/PeakWarnView.jsp -text
 ms1/src/org/labkey/ms1/view/PeaksView.java -text
 ms1/src/org/labkey/ms1/view/PepSearchView.jsp -text
 ms1/src/org/labkey/ms1/view/RetentionMassChart.java -text
+ms1/src/org/labkey/ms1/view/SimilarSearchView.jsp -text
 ms1/src/org/labkey/ms1/view/SpectrumChart.java -text
 ms1/src/org/labkey/ms1/view/softwareView.jsp -text
 ms2/gwtsrc/MS2GWT.iml -text

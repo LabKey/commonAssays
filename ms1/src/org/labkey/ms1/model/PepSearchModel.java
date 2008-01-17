@@ -89,10 +89,7 @@ public class PepSearchModel
 
     public boolean includeSubfolders()
     {
-        if(_pepSeq != null && _pepSeq.length() > 0)
-            return _subfolders;
-        else
-            return true; //forces it on by default for a new search
+        return _subfolders;
     }
 
     public boolean noSearchTerms()

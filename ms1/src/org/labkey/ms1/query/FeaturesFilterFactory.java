@@ -20,8 +20,11 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.ms1.MS1Controller;
+import org.labkey.ms1.MS1Manager;
+import org.labkey.ms1.model.Feature;
 
 import java.util.ArrayList;
+import java.sql.SQLException;
 
 /**
  * Can be used to recreate a set of features filters based on a set of query string parameters
@@ -58,6 +61,51 @@ public class FeaturesFilterFactory
         String exactParam = url.getParameter(MS1Controller.PepSearchForm.ParamNames.exact.name());
         if(null != pepParam && pepParam.length() > 0)
             filters.add(new PeptideFilter(pepParam, null != exactParam && exactParam.length() > 0));
+
+        //find similar filters (requires knowledge of the source feature)
+        String srcFeatureParam = url.getParameter(NAMESPACE_PREFIX + MS1Controller.SimilarSearchForm.ParamNames.featureId.name());
+        if(null != srcFeatureParam && srcFeatureParam.length() > 0)
+        {
+            try
+            {
+                Feature feature = MS1Manager.get().getFeature(Integer.parseInt(srcFeatureParam));
+                if(null != feature)
+                {
+                    //mz filter
+                    String mzOffsetParam = url.getParameter(NAMESPACE_PREFIX + MS1Controller.SimilarSearchForm.ParamNames.mzOffset.name());
+                    if(null != mzOffsetParam && mzOffsetParam.length() > 0)
+                        filters.add(new MzFilter(feature.getMz().doubleValue(), Double.parseDouble(mzOffsetParam),
+                                MS1Controller.SimilarSearchForm.MzOffsetUnits.valueOf(
+                                        url.getParameter(NAMESPACE_PREFIX + MS1Controller.SimilarSearchForm.ParamNames.mzUnits.name()))));
+
+                    //time offsets and units
+                    String timeUnitsParam = url.getParameter(NAMESPACE_PREFIX + MS1Controller.SimilarSearchForm.ParamNames.timeUnits.name());
+                    String timeOffsetParam = url.getParameter(NAMESPACE_PREFIX + MS1Controller.SimilarSearchForm.ParamNames.timeOffset.name());
+                    if(null != timeUnitsParam && timeUnitsParam.length() > 0 &&
+                            null != timeOffsetParam && timeOffsetParam.length() > 0 &&
+                            timeUnitsParam.equals(MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt.name()))
+                    {
+                        //retention time filter
+                        filters.add(new RetentionTimeFilter(feature.getTime().doubleValue() - Double.parseDouble(timeOffsetParam),
+                                feature.getTime().doubleValue() + Double.parseDouble(timeOffsetParam)));
+                    }
+
+                    //scan filter
+                    if(null != timeUnitsParam && timeUnitsParam.length() > 0 &&
+                            null != timeOffsetParam && timeOffsetParam.length() > 0 &&
+                            timeUnitsParam.equals(MS1Controller.SimilarSearchForm.TimeOffsetUnits.scans.name()))
+                    {
+                        //retention time filter
+                        filters.add(new ScanFilter(feature.getScan().intValue() - Integer.parseInt(timeOffsetParam),
+                                feature.getScan().intValue() + Integer.parseInt(timeOffsetParam)));
+                    }
+                }
+            }
+            catch(SQLException e)
+            {
+                //if we can't get the feature, we can't set the filters, and the view is going to fail anyway
+            }
+        }
 
         return filters;
     }

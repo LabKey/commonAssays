@@ -27,6 +27,7 @@ import java.util.List;
 public class FeaturesTableInfo extends FilteredTable
 {
     public static final String COLUMN_PEPTIDE_INFO = "Related Peptide";
+    public static final String COLUMN_FIND_SIMILAR_LINK = "FindSimilarLink";
 
     //Data Members
     private MS1Schema _schema;
@@ -103,6 +104,16 @@ public class FeaturesTableInfo extends FilteredTable
         //add new columns for the peaks and details links
         addColumn(new PeaksAvailableColumnInfo(this));
 
+        //add a column for the find similar link
+        ColumnInfo similarLinkCol = addColumn(new ColumnInfo(COLUMN_FIND_SIMILAR_LINK, this));
+        similarLinkCol.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new FindSimilarDisplayColumn();
+            }
+        });
+
         //only display a subset of the columns by by default
         ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(getDefaultVisibleColumns());
         visibleColumns.remove(FieldKey.fromParts("FeatureId"));
@@ -118,6 +129,10 @@ public class FeaturesTableInfo extends FilteredTable
         //move peak and detail links column to first position
         visibleColumns.remove(FieldKey.fromParts(PeaksAvailableColumnInfo.COLUMN_NAME));
         visibleColumns.add(0, FieldKey.fromParts(PeaksAvailableColumnInfo.COLUMN_NAME));
+
+        //move find similar link column to second position
+        visibleColumns.remove(FieldKey.fromParts(COLUMN_FIND_SIMILAR_LINK));
+        visibleColumns.add(1, FieldKey.fromParts(COLUMN_FIND_SIMILAR_LINK));
 
         setDefaultVisibleColumns(visibleColumns);
     } //c-tor
