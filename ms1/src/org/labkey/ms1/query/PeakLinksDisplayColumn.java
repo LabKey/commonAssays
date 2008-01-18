@@ -71,36 +71,23 @@ public class PeakLinksDisplayColumn extends DataColumn
 
     private void setBaseUrls(ActionURL baseUrl)
     {
-        _basePeaksUrl = baseUrl.clone();
-        _basePeaksUrl.setPageFlow(MS1Module.CONTROLLER_NAME);
-        _basePeaksUrl.setAction(MS1Controller.ShowPeaksAction.ACTION_NAME);
-        _basePeaksUrl.deleteParameters();
+        Container container = ContainerManager.getForPath(baseUrl.getExtraPath());
 
-        _baseDetailsUrl = baseUrl.clone();
-        _baseDetailsUrl.setPageFlow(MS1Module.CONTROLLER_NAME);
-        _baseDetailsUrl.setAction(MS1Controller.ShowFeatureDetailsAction.ACTION_NAME);
-        _baseDetailsUrl.deleteParameters();
-        addDetailsParams(_baseDetailsUrl, baseUrl);
+        _basePeaksUrl = new ActionURL(MS1Controller.ShowPeaksAction.class, container);
 
+        _baseDetailsUrl = new ActionURL(MS1Controller.ShowFeatureDetailsAction.class, container);
+        _baseDetailsUrl.addParameter(MS1Controller.FeatureDetailsForm.ParamNames.srcUrl.name(), baseUrl.getLocalURIString());
+        addQueryParams(_baseDetailsUrl, baseUrl);
     }
 
-    private void addDetailsParams(ActionURL baseDetailsUrl, ActionURL baseUrl)
+    private void addQueryParams(ActionURL url, ActionURL baseUrl)
     {
-        //add all query params as is, but prefix all the other params with
-        //the features filter factory namespace prefix
+        String queryParamPrefix = FeaturesView.DATAREGION_NAME + ".";
         for(Pair<String,String> param : baseUrl.getParameters())
         {
-            if(param.getKey().startsWith(FeaturesView.DATAREGION_NAME))
-                baseDetailsUrl.addParameter(param.getKey(), param.getValue());
-            else
-                baseDetailsUrl.addParameter(FeaturesFilterFactory.NAMESPACE_PREFIX + param.getKey(), param.getValue());
+            if(param.getKey().startsWith(queryParamPrefix))
+                url.addParameter(param.getKey(), param.getValue());
         }
-
-        //add one for the current container
-        //results from sub-containers will need to know the container from which the search
-        //occurred so that they can re-initialize the search list for prev/next buttons
-        baseDetailsUrl.addParameter(FeaturesFilterFactory.NAMESPACE_PREFIX + FeaturesFilterFactory.PARAM_SOURCE_CONTAINER,
-                baseUrl.getExtraPath());
     }
 
     public boolean isFilterable()

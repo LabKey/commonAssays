@@ -14,11 +14,12 @@ import java.sql.SQLException;
  */
 public class FeatureDetailsViewContext
 {
-    public FeatureDetailsViewContext(Feature feature, int prevFeatureId, int nextFeatureId)
+    public FeatureDetailsViewContext(Feature feature, int prevFeatureId, int nextFeatureId, String srcUrl)
     {
         _feature = feature;
         _prevFeatureId = prevFeatureId;
         _nextFeatureId = nextFeatureId;
+        _srcUrl = srcUrl;
     }
 
     public Feature getFeature()
@@ -52,7 +53,13 @@ public class FeatureDetailsViewContext
                                                 scanFirst, scanLast, scan);
     }
 
+    public String getSrcUrl()
+    {
+        return _srcUrl;
+    }
+
     private Feature _feature;
     private int _prevFeatureId = -1;
     private int _nextFeatureId = -1;
+    private String _srcUrl;
 }

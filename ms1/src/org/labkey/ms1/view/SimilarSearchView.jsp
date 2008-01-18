@@ -57,7 +57,7 @@
                     </tr>
                     <tr>
                         <td class="ms-searchform">Search Subfolders</td>
-                        <td></td>
+                        <td>:</td>
                         <td><input id="cbxSubfolders" name="<%=MS1Controller.SimilarSearchForm.ParamNames.subfolders.name()%>"
                                    type="checkbox" style="vertical-align:middle"
                                     <%=model.searchSubfolders() ? "checked=\"1\"" : "" %>/>

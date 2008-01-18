@@ -399,6 +399,10 @@
                         %>
                     </td>
                 </tr>
+                <tr>
+                    <td bgcolor="#EEEEEE">Experiment Run</td>
+                    <td><%=PageFlowUtil.filter(feature.getExpRun().getName())%></td>
+                </tr>
             </table>
         </td>
 
@@ -472,8 +476,7 @@
                 <tr>
                     <td colspan="3" style="text-align:center">
                         <form id="frmMzWindowFilter" action="showFeatureDetails.view" method="GET">
-                            <input type="hidden" name=".lastFilter" value="true"/>
-                            <input type="hidden" name="runId" value="<%=feature.getRunId()%>"/>
+                            <input type="hidden" name="srcUrl" value="<%=ctx.getSrcUrl()%>"/>
                             <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
                             <input type="hidden" name="scan" value="<%=scan%>"/>
                             <input type="hidden" name="scanWindowLow" value="<%=scanWindowLow%>"/>
@@ -546,8 +549,7 @@
                 <tr>
                     <td style="text-align:center">
                         <form id="frmScanWindowFilter" action="showFeatureDetails.view" method="GET">
-                            <input type="hidden" name=".lastFilter" value="true"/>
-                            <input type="hidden" name="runId" value="<%=feature.getRunId()%>"/>
+                            <input type="hidden" name="srcUrl" value="<%=ctx.getSrcUrl()%>"/>
                             <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
                             <input type="hidden" name="scan" value="<%=scan%>"/>
                             <input type="hidden" name="mzWindowLow" value="<%=mzWindowLow%>"/>

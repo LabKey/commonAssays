@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class FeaturesView extends QueryView
 {
-    public static final String DATAREGION_NAME = "features";
+    public static final String DATAREGION_NAME = "fv";
 
     //Localizable strings
     private static final String CAPTION_EXPORT = "Export";
@@ -90,6 +90,7 @@ public class FeaturesView extends QueryView
         ResultSet rs = null;
         int prevFeatureId = -1;
         int nextFeatureId = -1;
+        int id = -1;
         try
         {
             RenderContext ctx = new RenderContext(getViewContext());
@@ -97,14 +98,17 @@ public class FeaturesView extends QueryView
             rs = createDataRegion().getResultSet(ctx);
             while(rs.next())
             {
-                if(rs.getInt("FeatureId") == featureIdCur)
+                id = rs.getInt("FeatureId");
+                assert !rs.wasNull() : "Got a null FeatureId back from rs.getInt()!";
+
+                if(id == featureIdCur)
                 {
                     if(rs.next())
                         nextFeatureId = rs.getInt("FeatureId");
                     break;
                 }
 
-                prevFeatureId = rs.getInt("FeatureId");
+                prevFeatureId = id;
             }
 
             return new int[] {prevFeatureId, nextFeatureId};
