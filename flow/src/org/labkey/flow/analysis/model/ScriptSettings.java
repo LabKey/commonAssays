@@ -3,6 +3,7 @@ package org.labkey.flow.analysis.model;
 import org.fhcrc.cpas.flow.script.xml.CriteriaDef;
 import org.fhcrc.cpas.flow.script.xml.ParameterDef;
 import org.fhcrc.cpas.flow.script.xml.SettingsDef;
+import org.fhcrc.cpas.flow.script.xml.FilterDef;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -118,13 +119,17 @@ public class ScriptSettings implements Serializable
             }
         }
 
-        for (CriteriaDef criteria : settings.getCriteriaArray())
+        FilterDef filter = settings.getFilter();
+        if (filter != null)
         {
-            SampleCriteria mine = getSampleCriteria(criteria.getKeyword());
-            if (mine == null)
+            for (CriteriaDef criteria : filter.getCriteriaArray())
             {
-                SampleCriteria sampleCriteria = SampleCriteria.fromCriteriaDef(criteria);
-                _criteria.put(criteria.getKeyword(), sampleCriteria);
+                SampleCriteria mine = getSampleCriteria(criteria.getKeyword());
+                if (mine == null)
+                {
+                    SampleCriteria sampleCriteria = SampleCriteria.fromCriteriaDef(criteria);
+                    _criteria.put(criteria.getKeyword(), sampleCriteria);
+                }
             }
         }
     }
@@ -149,11 +154,15 @@ public class ScriptSettings implements Serializable
             }
         }
 
-        for (SampleCriteria criteria : _criteria.values())
+        if (_criteria.size() > 0)
         {
-            CriteriaDef criteriaDef = ret.addNewCriteria();
-            criteriaDef.setKeyword(criteria.getKeyword());
-            criteriaDef.setPattern(criteria.getPattern());
+            FilterDef filterDef = ret.addNewFilter();
+            for (SampleCriteria criteria : _criteria.values())
+            {
+                CriteriaDef criteriaDef = filterDef.addNewCriteria();
+                criteriaDef.setKeyword(criteria.getKeyword());
+                criteriaDef.setPattern(criteria.getPattern());
+            }
         }
         return ret;
     }

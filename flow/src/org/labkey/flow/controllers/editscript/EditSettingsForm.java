@@ -5,6 +5,7 @@ import org.apache.struts.action.ActionMapping;
 import org.fhcrc.cpas.flow.script.xml.CriteriaDef;
 import org.fhcrc.cpas.flow.script.xml.ParameterDef;
 import org.fhcrc.cpas.flow.script.xml.SettingsDef;
+import org.fhcrc.cpas.flow.script.xml.FilterDef;
 import org.labkey.common.util.Pair;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,14 +38,18 @@ public class EditSettingsForm extends EditScriptForm
                 parameters.put(param.getName(), param.getMinValue());
             }
 
-            int criteriaLen = settings.sizeOfCriteriaArray();
-            ff_criteria_keyword = new String[criteriaLen];
-            ff_criteria_pattern = new String[criteriaLen];
-            for (int i = 0; i < criteriaLen; i++)
+            FilterDef filterDef = settings.getFilter();
+            if (filterDef != null)
             {
-                CriteriaDef crit = settings.getCriteriaArray(i);
-                ff_criteria_keyword[i] = crit.getKeyword();
-                ff_criteria_pattern[i] = crit.getPattern();
+                int criteriaLen = filterDef.sizeOfCriteriaArray();
+                ff_criteria_keyword = new String[criteriaLen];
+                ff_criteria_pattern = new String[criteriaLen];
+                for (int i = 0; i < criteriaLen; i++)
+                {
+                    CriteriaDef crit = filterDef.getCriteriaArray(i);
+                    ff_criteria_keyword[i] = crit.getKeyword();
+                    ff_criteria_pattern[i] = crit.getPattern();
+                }
             }
         }
 

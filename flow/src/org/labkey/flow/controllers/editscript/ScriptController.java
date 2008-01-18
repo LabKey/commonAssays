@@ -1304,6 +1304,7 @@ public class ScriptController extends BaseFlowController
             }
         }
 
+        FilterDef filterDef = null;
         for (int i = 0; i < form.ff_criteria_keyword.length; i++)
         {
             String keyword = form.ff_criteria_keyword[i];
@@ -1324,7 +1325,9 @@ public class ScriptController extends BaseFlowController
 
             if (validPattern)
             {
-                CriteriaDef crit = settingsDef.addNewCriteria();
+                if (filterDef == null)
+                    filterDef = settingsDef.addNewFilter();
+                CriteriaDef crit = filterDef.addNewCriteria();
                 crit.setKeyword(keyword);
                 crit.setPattern(pattern);
             }

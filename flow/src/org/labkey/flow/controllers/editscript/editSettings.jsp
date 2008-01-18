@@ -13,7 +13,7 @@ String contextPath = request.getContextPath();
 
     <p>
         <b>Filter experimental wells by keyword/value pairs:</b><br/>
-        You may enter a set of keyword and value pairs which are <i>must</i> be present in the
+        You may enter a set of keyword and value pairs which <i>must</i> be present in the
         FCS header to be included in the calculated compensation matrix and the analysis.  The
         value is a regex pattern as used by Java's
         <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">Pattern</a> class.
