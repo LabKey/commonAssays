@@ -34,6 +34,7 @@ public class SequencesTableInfo extends FilteredTable
         {
             setAlias(alias);
         }
+        setTitleColumn("BestName");
         wrapAllColumns(true);
 
         getColumn("OrgId").setFk(new LookupForeignKey("OrgId", "Description")

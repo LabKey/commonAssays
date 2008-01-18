@@ -15,10 +15,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.query.QueryService;
-import org.labkey.api.query.QuerySettings;
-import org.labkey.api.query.QueryView;
-import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresPermission;
@@ -1022,7 +1019,7 @@ public class MS2Controller extends SpringActionController
     {
         public ActionURL nextUrl;
         public StringBuilder select;
-        public String extraHtml;
+        public HttpView extraOptionsView;
         public String viewInstructions;
         public int runList;
     }
@@ -1031,57 +1028,18 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class CompareAction extends SimpleViewAction
     {
+        private static final String SPECTRA_COUNT_PEPTIDES_FILTER = "PeptidesFilter";
+
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            StringBuilder sb = new StringBuilder();
+            QuerySettings peptideSettings = new QuerySettings(new ActionURL(), SPECTRA_COUNT_PEPTIDES_FILTER);
+            peptideSettings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
+            QueryView peptidesView = new QueryView(new MS2Schema(getUser(), getContainer()), peptideSettings);
 
-            sb.append("<tr><td>");
-            sb.append("<p>Choose a way to compare the runs:</p>");
-            sb.append("<input type=\"radio\" name=\"column\" value=\"ProteinProphet\" checked /><b>Protein Prophet</b><br/>");
-            sb.append("<div style=\"padding-left: 20px;\">Choose what columns should appear in the grid:<br/>\n");
-            sb.append("<div style=\"padding-left: 20px;\"><input type=\"checkbox\" name=\"proteinGroup\" value=\"1\" checked=\"checked\" disabled>Protein Group<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"groupProbability\" value=\"1\" checked=\"checked\">Group Probability<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"light2HeavyRatioMean\" value=\"1\">Light to Heavy Quantitation<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"heavy2LightRatioMean\" value=\"1\">Heavy to Light Quantitation<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"totalPeptides\" value=\"1\">Total Peptides<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"uniquePeptides\" value=\"1\">Unique Peptides<br/>\n");
-            sb.append("</div></div><br/>");
-
-            sb.append("<input type=\"radio\" name=\"column\" value=\"Protein\" /><b>Search Engine Protein Assignment</b><br/>");
-            sb.append("<div style=\"padding-left: 20px;\">Choose what columns should appear in the grid:<br/>\n");
-            sb.append("<div style=\"padding-left: 20px;\"><input type=\"checkbox\" name=\"unique\" value=\"1\" checked=\"checked\">Unique Peptides<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"total\" value=\"1\">Total Peptides<br/>\n");
-//        sb.append("<input type=\"checkbox\" name=\"sumLightArea-Protein\" value=\"1\">Total light area (quantitation)<br/>\n");
-//        sb.append("<input type=\"checkbox\" name=\"sumHeavyArea-Protein\" value=\"1\">Total heavy area (quantitation)<br/>\n");
-//        sb.append("<input type=\"checkbox\" name=\"avgDecimalRatio-Protein\" value=\"1\">Average decimal ratio (quantitation)<br/>\n");
-//        sb.append("<input type=\"checkbox\" name=\"maxDecimalRatio-Protein\" value=\"1\">Maximum decimal ratio (quantitation)<br/>\n");
-//        sb.append("<input type=\"checkbox\" name=\"minDecimalRatio-Protein\" value=\"1\">Minimum decimal ratio (quantitation)<br/>\n");
-            sb.append("</div></div><br/>");
-
-            sb.append("<input type=\"radio\" name=\"column\" value=\"Peptide\" /><b>Peptide</b><br/>");
-            sb.append("<div style=\"padding-left: 20px;\">Choose what columns should appear in the grid:<br/>\n");
-            sb.append("<div style=\"padding-left: 20px;\"><input type=\"checkbox\" name=\"peptideCount\" value=\"1\" checked=\"checked\" disabled>Count<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"maxPeptideProphet\" value=\"1\" checked=\"checked\">Maximum Peptide Prophet Probability<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"avgPeptideProphet\" value=\"1\" checked=\"checked\">Average Peptide Prophet Probability<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"minPeptideProphetErrorRate\" value=\"1\">Minimum Peptide Prophet Error Rate<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"avgPeptideProphetErrorRate\" value=\"1\">Average Peptide Prophet Error Rate<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"sumLightArea-Peptide\" value=\"1\">Total light area (quantitation)<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"sumHeavyArea-Peptide\" value=\"1\">Total heavy area (quantitation)<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"avgDecimalRatio-Peptide\" value=\"1\">Average decimal ratio (quantitation)<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"maxDecimalRatio-Peptide\" value=\"1\">Maximum decimal ratio (quantitation)<br/>\n");
-            sb.append("<input type=\"checkbox\" name=\"minDecimalRatio-Peptide\" value=\"1\">Minimum decimal ratio (quantitation)<br/>\n");
-            sb.append("</div></div><br/>");
-            sb.append("<hr>");
-            sb.append("<input type=\"radio\" name=\"column\" value=\"Query\" /><b>Query (beta)</b><br/>");
-            sb.append("<div style=\"padding-left: 20px;\">The query-based comparison does not use the view selected above. Instead, please follow the instructions at the top of the comparison page to customize the results. It is based on ProteinProphet protein groups, so the runs must be associated with ProteinProphet data.</div>");
-            sb.append("<hr>");
-
-//        sb.append("<input type=\"radio\" name=\"column\" value=\"QueryPeptides\" /><b>Query Peptides (beta)</b><br/>");
-//        sb.append("<hr>");
-            sb.append("</td></tr>\n");
+            JspView<QueryView> extraCompareOptions = new JspView<QueryView>("/org/labkey/ms2/extraCompareOptions.jsp", peptidesView);
 
             ActionURL nextUrl = getViewContext().cloneActionURL().setAction("applyCompareView");
-            return pickView(nextUrl, "Select a view to apply a filter to all the runs.", sb.toString(), false);
+            return pickView(nextUrl, "Select a view to apply a filter to all the runs.", extraCompareOptions, false);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -1092,10 +1050,22 @@ public class MS2Controller extends SpringActionController
 
 
     // extraFormHtml gets inserted between the view dropdown and the button.
-    private HttpView pickView(ActionURL nextUrl, String viewInstructions, String extraFormHtml, boolean requireSameType) throws Exception
+    private HttpView pickView(ActionURL nextUrl, String viewInstructions, HttpView embeddedView, boolean requireSameType) throws Exception
     {
         List<String> errors = new ArrayList<String>();
-        int runListIndex = cacheSelectedRuns(errors, requireSameType);
+        ActionURL currentURL = getViewContext().getActionURL();
+        int runListIndex;
+        if (currentURL.getParameter("runList") == null)
+        {
+            runListIndex = cacheSelectedRuns(errors, requireSameType);
+            ActionURL redirectURL = currentURL.clone();
+            redirectURL.addParameter("runList", Integer.toString(runListIndex));
+            HttpView.throwRedirect(redirectURL);
+        }
+        else
+        {
+            runListIndex = Integer.parseInt(currentURL.getParameter("runList"));
+        }
 
         if (!errors.isEmpty())
             return _renderErrors(errors);
@@ -1110,7 +1080,7 @@ public class MS2Controller extends SpringActionController
 
         bean.nextUrl = nextUrl;
         bean.select = renderViewSelect(0, true, ACL.PERM_READ, false);
-        bean.extraHtml = extraFormHtml;
+        bean.extraOptionsView = embeddedView;
         bean.viewInstructions = viewInstructions;
         bean.runList = runListIndex;
 
@@ -1123,16 +1093,8 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            String extraFormHtml =
-                "<tr><td><br>Choose an export format:</td></tr>\n" +
-                "<tr><td><input type=\"radio\" name=\"exportFormat\" value=\"Excel\" checked=\"checked\">Excel (limited to 65,535 rows)</td></tr>\n" +
-                "<tr><td><input type=\"radio\" name=\"exportFormat\" value=\"ExcelBare\">Excel with minimal header text (limited to 65,535 rows)</td></tr>\n" +
-                "<tr><td><input type=\"radio\" name=\"exportFormat\" value=\"TSV\">TSV</td></tr>\n" +
-                "<tr><td><input type=\"radio\" name=\"exportFormat\" value=\"DTA\">Spectra as DTA</td></tr>\n" +
-                "<tr><td><input type=\"radio\" name=\"exportFormat\" value=\"PKL\">Spectra as PKL</td></tr>\n" +
-                "<tr><td><input type=\"radio\" name=\"exportFormat\" value=\"AMT\">AMT (Accurate Mass &amp; Time) file</td></tr>\n";
-
-            return pickView(getViewContext().cloneActionURL().setAction("applyExportRunsView"), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraFormHtml, true);
+            JspView extraExportView = new JspView("/org/labkey/ms2/extraExportOptions.jsp");
+            return pickView(getViewContext().cloneActionURL().setAction("applyExportRunsView"), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraExportView, true);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -1435,6 +1397,7 @@ public class MS2Controller extends SpringActionController
         String column = currentUrl.getParameter("column");            // TODO: add to form
         boolean isQueryProteinProphet = "query".equalsIgnoreCase(column);
         boolean isQueryPeptides = "querypeptides".equalsIgnoreCase(column);
+        boolean isSpectraCount = "spectraCount".equalsIgnoreCase(column);
 
         if (isQueryProteinProphet || isQueryPeptides)
         {
@@ -1461,6 +1424,38 @@ public class MS2Controller extends SpringActionController
 
         if (!errors.isEmpty())
             return _renderErrors(errors);
+
+        if (isSpectraCount)
+        {
+            QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), "SpectraCount");
+            settings.setAllowChooseQuery(false);
+            boolean groupByPeptide = "on".equals(currentUrl.getParameter("spectaGroupByPeptide"));
+            boolean groupByCharge = "on".equals(currentUrl.getParameter("spectaGroupByCharge"));
+            boolean groupByProtein = "on".equals(currentUrl.getParameter("spectaGroupByProtein"));
+            boolean useProteinProphet = "proteinProphet".equals(currentUrl.getParameter("spectraProteinAssignment"));
+
+            String viewName = currentUrl.getParameter(CompareAction.SPECTRA_COUNT_PEPTIDES_FILTER + "." + QueryParam.viewName.toString());
+            if ("".equals(viewName))
+            {
+                viewName = null;
+            }
+            final String peptideViewName = viewName;
+            final MS2Schema.SpectraCountConfiguration config = new MS2Schema.SpectraCountConfiguration(groupByCharge, groupByPeptide, groupByProtein, useProteinProphet);
+            final MS2Schema schema = new MS2Schema(getUser(), getContainer());
+
+            settings.setQueryName(config.getTableName());
+            schema.setRuns(runs.toArray(new MS2Run[runs.size()]));
+            QueryView view = new QueryView(schema, settings)
+            {
+                protected TableInfo createTable()
+                {
+                    return schema.createSpectraCountTable(config, getViewContext().getRequest(), peptideViewName);
+                }
+            };
+            view.setShowRReportButton(true);
+            view.setTitle("Spectra Counts");
+            return view;
+        }
 
         for (MS2Run run : runs)
         {

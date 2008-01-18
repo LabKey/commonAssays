@@ -71,7 +71,7 @@ public class FlowQueryView extends QueryView
         return getViewContext().getUser();
     }
 
-    protected void renderCustomizeLinks(PrintWriter out) throws Exception
+    public void renderCustomizeLinks(PrintWriter out) throws Exception
     {
         super.renderCustomizeLinks(out);
         if (hasGraphs())

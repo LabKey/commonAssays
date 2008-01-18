@@ -2,6 +2,7 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.WebPartView;
 import org.labkey.api.data.*;
 import org.labkey.api.util.CaseInsensitiveHashMap;
 import org.labkey.ms2.*;
@@ -17,7 +18,7 @@ import jxl.write.WritableWorkbook;
  * User: jeckels
  * Date: Apr 27, 2007
  */
-public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
+public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView<WebPartView>
 {
     protected static Map<String, Class<? extends DisplayColumn>> _calculatedProteinColumns = new CaseInsensitiveHashMap<Class<? extends DisplayColumn>>();
 

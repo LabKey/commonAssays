@@ -26,7 +26,7 @@ import org.labkey.ms2.OldMS2Controller;
  * User: jeckels
  * Date: Feb 22, 2006
  */
-public abstract class AbstractMS2RunView
+public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 {
     private static Logger _log = Logger.getLogger(AbstractMS2RunView.class);
 
@@ -70,7 +70,7 @@ public abstract class AbstractMS2RunView
         return createGridView(form.getExpanded(), peptideColumnNames, form.getProteinColumns(), true);
     }
 
-    public abstract WebPartView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException, SQLException;
+    public abstract WebPartType createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException, SQLException;
 
     public abstract GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException;
 

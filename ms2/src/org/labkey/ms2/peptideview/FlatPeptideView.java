@@ -7,6 +7,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.WebPartView;
 import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
@@ -24,7 +25,7 @@ import jxl.write.WritableWorkbook;
  * User: jeckels
  * Date: Mar 6, 2006
  */
-public class FlatPeptideView extends AbstractMS2RunView
+public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
 {
     public FlatPeptideView(ViewContext viewContext, MS2Run[] runs)
     {

@@ -772,6 +772,8 @@ ms2/src/org/labkey/ms2/compare/ProteinProphetCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/RunColumn.java -text
 ms2/src/org/labkey/ms2/currentFilter.jsp -text
 ms2/src/org/labkey/ms2/editElution.jsp -text
+ms2/src/org/labkey/ms2/extraCompareOptions.jsp -text
+ms2/src/org/labkey/ms2/extraExportOptions.jsp -text
 ms2/src/org/labkey/ms2/filterHeader.jsp -text
 ms2/src/org/labkey/ms2/insertAnnots.jsp -text
 ms2/src/org/labkey/ms2/loadGo.jsp -text
@@ -986,6 +988,7 @@ ms2/src/org/labkey/ms2/query/MS2Schema.java -text
 ms2/src/org/labkey/ms2/query/OrganismTableInfo.java -text
 ms2/src/org/labkey/ms2/query/PeptideAggregrationDisplayColumn.java -text
 ms2/src/org/labkey/ms2/query/PeptideCountCoverageColumn.java -text
+ms2/src/org/labkey/ms2/query/PeptideCountTableInfo.java -text
 ms2/src/org/labkey/ms2/query/PeptidesTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinGroupTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinProphetFileTableInfo.java -text

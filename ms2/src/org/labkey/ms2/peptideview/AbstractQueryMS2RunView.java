@@ -23,7 +23,7 @@ import java.sql.SQLException;
  * User: jeckels
  * Date: Apr 27, 2007
  */
-public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
+public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<AbstractQueryMS2RunView.AbstractMS2QueryView>
 {
     public AbstractQueryMS2RunView(ViewContext viewContext, String columnPropertyName, MS2Run... runs)
     {
@@ -37,7 +37,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
 
     public void exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
     {
-        AbstractQueryMS2RunView.AbstractMS2QueryView ms2QueryView = createGridView(form.getExpanded(), "", "", false);
+        AbstractMS2QueryView ms2QueryView = createGridView(form.getExpanded(), "", "", false);
 
         List<FieldKey> keys = new ArrayList<FieldKey>();
         keys.add(FieldKey.fromParts("Fraction", "Run", "Run"));
@@ -67,8 +67,6 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView
     {
         createGridView(form.getExpanded(), "", "", false).exportToExcel(response, selectedRows);
     }
-
-    public abstract AbstractMS2QueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException, SQLException;
 
     public abstract class AbstractMS2QueryView extends QueryView
     {

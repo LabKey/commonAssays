@@ -12,11 +12,11 @@ import org.labkey.ms2.MS2Run;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.CaseInsensitiveHashSet;
+import org.labkey.api.util.PageFlowUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.sql.Types;
-import java.io.Writer;
-import java.io.IOException;
 
 /**
  * User: jeckels
@@ -46,6 +46,15 @@ public class MS2Schema extends UserSchema
     private static final String SAMPLE_PREP_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.PreSearch.%";
 
     private static final Set<String> HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("PeptideId");
+
+    private static final Set<SpectraCountConfiguration> SPECTRA_COUNT_CONFIGS = PageFlowUtil.set(
+            new SpectraCountConfiguration(true, true, true, true),
+            new SpectraCountConfiguration(true, true, true, false),
+            new SpectraCountConfiguration(false, true, true, true),
+            new SpectraCountConfiguration(false, true, false, false),
+            new SpectraCountConfiguration(true, true, true, true),
+            new SpectraCountConfiguration(true, true, true, true)
+    );
 
     private ProteinGroupProteins _proteinGroupProteins = new ProteinGroupProteins();
     private MS2Run[] _runs;
@@ -108,7 +117,7 @@ public class MS2Schema extends UserSchema
         }
         else if (GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createSearchTable(alias, XTANDEM_PROTOCOL_PATTERN, MASCOT_PROTOCOL_PATTERN,SEQUEST_PROTOCOL_PATTERN);
+            return createRunsTable(alias);
         }
         else if (PEPTIDES_TABLE_NAME.equalsIgnoreCase(name))
         {
@@ -142,8 +151,26 @@ public class MS2Schema extends UserSchema
         }
         else
         {
-            return super.getTable(name, alias);
+            for (SpectraCountConfiguration config : SPECTRA_COUNT_CONFIGS)
+            {
+                if (config.getTableName().equalsIgnoreCase((name)))
+                {
+                    return createSpectraCountTable(config, null, null);
+                }
+            }
         }
+
+        return super.getTable(name, alias);
+    }
+
+    public TableInfo createRunsTable(String alias)
+    {
+        return createSearchTable(alias, XTANDEM_PROTOCOL_PATTERN, MASCOT_PROTOCOL_PATTERN,SEQUEST_PROTOCOL_PATTERN);
+    }
+
+    public PeptideCountTableInfo createSpectraCountTable(SpectraCountConfiguration config, HttpServletRequest request, String peptideViewName)
+    {
+        return new PeptideCountTableInfo(this, config, request, peptideViewName);
     }
 
     public ProteinGroupTableInfo createProteinGroupsForSearchTable(String alias)
@@ -227,12 +254,12 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    private SequencesTableInfo createSequencesTable(String aliasName)
+    public SequencesTableInfo createSequencesTable(String aliasName)
     {
         return new SequencesTableInfo(aliasName, this);
     }
 
-    private TableInfo createPeptidesTable(final String alias)
+    public TableInfo createPeptidesTable(final String alias)
     {
         PeptidesTableInfo result = new PeptidesTableInfo(this);
         result.setAlias(alias);
@@ -319,4 +346,98 @@ public class MS2Schema extends UserSchema
     {
         return _runs;
     }
+
+    public static class SpectraCountConfiguration
+    {
+        final private boolean _groupedByCharge;
+        final private boolean _groupedByPeptide;
+        final private boolean _groupedByProtein;
+
+        final private boolean _usingProteinProphet;
+
+        final private String _tableName;
+
+        public SpectraCountConfiguration(boolean groupedByCharge, boolean groupedByPeptide, boolean groupedByProtein, boolean usingProteinProphet)
+        {
+            _groupedByCharge = groupedByCharge;
+            _groupedByPeptide = groupedByPeptide;
+            _groupedByProtein = groupedByProtein;
+            _usingProteinProphet = usingProteinProphet;
+
+            StringBuilder queryName = new StringBuilder("SpectraCount");
+            if (_groupedByPeptide)
+            {
+                queryName.append("Peptide");
+            }
+            if (_groupedByCharge)
+            {
+                queryName.append("Charge");
+            }
+            if (_groupedByProtein)
+            {
+                queryName.append("Protein");
+            }
+            if (_usingProteinProphet)
+            {
+                queryName.append("PP");
+            }
+
+            assert _groupedByCharge || _groupedByPeptide || _groupedByProtein : "Must group by at least one column";
+            assert !_usingProteinProphet || _groupedByProtein : "To use ProteinProphet info you must group by protein";
+
+            _tableName = queryName.toString();
+        }
+
+        public boolean isGroupedByCharge()
+        {
+            return _groupedByCharge;
+        }
+
+        public boolean isGroupedByPeptide()
+        {
+            return _groupedByPeptide;
+        }
+
+        public boolean isGroupedByProtein()
+        {
+            return _groupedByProtein;
+        }
+
+        public boolean isUsingProteinProphet()
+        {
+            return _usingProteinProphet;
+        }
+
+        public String getTableName()
+        {
+            return _tableName;
+        }
+
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            SpectraCountConfiguration that = (SpectraCountConfiguration) o;
+
+            if (_groupedByCharge != that._groupedByCharge) return false;
+            if (_groupedByPeptide != that._groupedByPeptide) return false;
+            if (_groupedByProtein != that._groupedByProtein) return false;
+            if (_usingProteinProphet != that._usingProteinProphet) return false;
+
+            return true;
+        }
+
+        public int hashCode()
+        {
+            int result;
+            result = (_groupedByCharge ? 1 : 0);
+            result = 31 * result + (_groupedByPeptide ? 1 : 0);
+            result = 31 * result + (_groupedByProtein ? 1 : 0);
+            result = 31 * result + (_usingProteinProphet ? 1 : 0);
+            return result;
+        }
+    }
+
+
 }

@@ -31,7 +31,7 @@ public class ChooseRunsView extends FlowQueryView
         return Collections.EMPTY_LIST;
     }
 
-    protected void renderCustomizeLinks(PrintWriter out) throws Exception
+    public void renderCustomizeLinks(PrintWriter out) throws Exception
     {
         return;
     }
