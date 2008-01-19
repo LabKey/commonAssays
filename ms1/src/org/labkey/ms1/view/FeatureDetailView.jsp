@@ -379,6 +379,7 @@
                             <input type="hidden" name="scan" value="<%=model.getScan()%>"/>
                             <input type="hidden" name="scanWindowLow" value="<%=model.getScanWindowLow()%>"/>
                             <input type="hidden" name="scanWindowHigh" value="<%=model.getScanWindowHigh()%>"/>
+                            <%=model.getQueryFiltersAsInputs()%>
                             <input type="submit" value="Filter" style="display:none;"/>
 
                             <input type="text" id="txtMzWindowLow" name="mzWindowLow" size="4" onchange="_slider.setValueLow(this.value);" tabindex="2"/>
@@ -452,6 +453,7 @@
                             <input type="hidden" name="scan" value="<%=model.getScan()%>"/>
                             <input type="hidden" name="mzWindowLow" value="<%=model.getMzWindowLow()%>"/>
                             <input type="hidden" name="mzWindowHigh" value="<%=model.getMzWindowHigh()%>"/>
+                            <%=model.getQueryFiltersAsInputs()%>
                             <input type="submit" value="Filter" style="display:none;"/>
 
                             <input type="text" id="txtScanWindowLow" name="scanWindowLow" size="3" onchange="_sliderScan.setValueLow(this.value)" tabindex="102"/>

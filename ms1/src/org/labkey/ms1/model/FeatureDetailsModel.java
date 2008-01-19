@@ -3,8 +3,11 @@ package org.labkey.ms1.model;
 import org.labkey.ms1.model.Feature;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.MS1Controller;
+import org.labkey.ms1.view.FeaturesView;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.common.util.Pair;
 
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -293,6 +296,23 @@ public class FeatureDetailsModel
     public String getScanWindow()
     {
         return formatWindowExtent(_scanWindowLow, true) + "/" + formatWindowExtent(_scanWindowHigh);
+    }
+
+    public String getQueryFiltersAsInputs()
+    {
+        StringBuilder sb = new StringBuilder();
+        for(Pair<String,String> param : _url.getParameters())
+        {
+            if(param.getKey().startsWith(FeaturesView.DATAREGION_NAME + "."))
+            {
+                sb.append("<input type=\"hidden\" name=\"");
+                sb.append(param.getKey());
+                sb.append("\" value=\"");
+                sb.append(param.getValue());
+                sb.append("\"/>");
+            }
+        }
+        return sb.toString();
     }
 
 }
