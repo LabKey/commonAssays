@@ -238,8 +238,13 @@ public class Feature
 
     public ExpRun getExpRun() throws SQLException
     {
-        Integer runId = getRunId();
-        return null == runId ? null : ExperimentService.get().getExpRun(getRunId().intValue());
+        if(null == _run)
+        {
+            Integer runId = getRunId();
+            _run = null == runId ? null : ExperimentService.get().getExpRun(getRunId().intValue());
+        }
+
+        return _run;
     }
 
     public Peptide[] getMatchingPeptides() throws SQLException
@@ -277,4 +282,5 @@ public class Feature
     private Integer _ms2Scan;
     private Double _ms2ConnectivityProbability;
     private Integer _runId = null;
+    private ExpRun _run = null;
 }

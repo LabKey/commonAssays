@@ -281,7 +281,7 @@ public class MS1Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root, int runId)
         {
-            return appendNavTrail(root, runId, null);
+            return appendNavTrail(root, runId, getContainer());
         }
 
         public NavTree appendNavTrail(NavTree root, int runId, Container container)
@@ -291,8 +291,7 @@ public class MS1Controller extends SpringActionController
 
         public ActionURL getUrl(int runId, Container container)
         {
-            ActionURL url = new ActionURL(MS1Controller.ShowFeaturesAction.class,
-                    null == container ? getViewContext().getContainer() : container);
+            ActionURL url = new ActionURL(MS1Controller.ShowFeaturesAction.class, container);
             url.addParameter(ShowFeaturesForm.ParamNames.runId.name(), runId);
             url.addParameter(".lastFilter", "true");
             return url;
@@ -478,13 +477,15 @@ public class MS1Controller extends SpringActionController
 
             //get the previous and next feature ids (ids will be -1 if there isn't a prev or next)
             int[] prevNextFeatureIds = featuresView.getPrevNextFeature(form.getFeatureId());
-            FeatureDetailsViewContext ctx = new FeatureDetailsViewContext(feature, prevNextFeatureIds[0],
-                    prevNextFeatureIds[1], form.getSrcUrl());
+            FeatureDetailsModel model = new FeatureDetailsModel(feature, prevNextFeatureIds[0],
+                    prevNextFeatureIds[1], form.getSrcUrl(), form.getMzWindowLow(), form.getMzWindowHigh(),
+                    form.getScanWindowLow(), form.getScanWindowHigh(), form.getScan(), 
+                    getViewContext().getContainer(), getViewContext().getActionURL());
 
             //cache the form so we can build the nav trail
             _form = form;
 
-            return new JspView<FeatureDetailsViewContext>("/org/labkey/ms1/view/FeatureDetailView.jsp", ctx);
+            return new JspView<FeatureDetailsModel>("/org/labkey/ms1/view/FeatureDetailView.jsp", model);
         }
 
         private FeaturesView getSourceFeaturesView(ActionURL url) throws Exception
@@ -938,11 +939,22 @@ public class MS1Controller extends SpringActionController
         public enum ParamNames
         {
             featureId,
-            srcUrl
+            srcUrl,
+            mzWindowLow,
+            mzWindowHigh,
+            scanWindowLow,
+            scanWindowHigh,
+            scan
         }
 
         private int _featureId = -1;
         private String _srcUrl;
+        private double _mzWindowLow = -1;
+        private double _mzWindowHigh = 5;
+        private int _scanWindowLow = 0;
+        private int _scanWindowHigh = 0;
+        private int _scan = -1;
+
 
         public int getFeatureId()
         {
@@ -968,7 +980,57 @@ public class MS1Controller extends SpringActionController
         {
             return new ActionURL(_srcUrl);
         }
-    }
+
+        public double getMzWindowLow()
+        {
+            return _mzWindowLow;
+        }
+
+        public void setMzWindowLow(double mzWindowLow)
+        {
+            _mzWindowLow = mzWindowLow;
+        }
+
+        public double getMzWindowHigh()
+        {
+            return _mzWindowHigh;
+        }
+
+        public void setMzWindowHigh(double mzWindowHigh)
+        {
+            _mzWindowHigh = mzWindowHigh;
+        }
+
+        public int getScanWindowLow()
+        {
+            return _scanWindowLow;
+        }
+
+        public void setScanWindowLow(int scanWindowLow)
+        {
+            _scanWindowLow = scanWindowLow;
+        }
+
+        public int getScanWindowHigh()
+        {
+            return _scanWindowHigh;
+        }
+
+        public void setScanWindowHigh(int scanWindowHigh)
+        {
+            _scanWindowHigh = scanWindowHigh;
+        }
+
+        public int getScan()
+        {
+            return _scan;
+        }
+
+        public void setScan(int scan)
+        {
+            _scan = scan;
+        }
+    } //FeatureDetailsForm
 
     public static class MS2PeptideForm
     {

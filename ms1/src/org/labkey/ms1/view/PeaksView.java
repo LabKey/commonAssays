@@ -113,13 +113,13 @@ public class PeaksView extends QueryView
             bar.add(new ActionButton(getExportUrl("print"), CAPTION_PRINT_ALL, DataRegion.MODE_ALL, ActionButton.Action.LINK));
             
             //if feature is valid, add a button to view the feature details
-            if(null != _feature)
-            {
-                ActionURL urlFeatureDetails = getViewContext().getActionURL().clone();
-                urlFeatureDetails.deleteFilterParameters(QueryView.DATAREGIONNAME_DEFAULT);
-                urlFeatureDetails.setAction(MS1Controller.ShowFeatureDetailsAction.ACTION_NAME);
-                bar.add(new ActionButton(urlFeatureDetails.getEncodedLocalURIString(), "Feature Details", DataRegion.MODE_ALL, ActionButton.Action.LINK));
-            }
+//            if(null != _feature)
+//            {
+//                ActionURL urlFeatureDetails = new ActionURL(MS1Controller.ShowFeatureDetailsAction.class, getContainer());
+//                urlFeatureDetails.deleteFilterParameters(QueryView.DATAREGIONNAME_DEFAULT);
+//                urlFeatureDetails.setAction(MS1Controller.ShowFeatureDetailsAction.ACTION_NAME);
+//                bar.add(new ActionButton(urlFeatureDetails.getEncodedLocalURIString(), "Feature Details", DataRegion.MODE_ALL, ActionButton.Action.LINK));
+//            }
         }
 
         return view;

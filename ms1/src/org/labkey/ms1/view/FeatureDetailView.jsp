@@ -6,91 +6,16 @@
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.ms1.*" %>
 <%@ page import="org.labkey.ms1.model.Feature" %>
-<%@ page import="org.labkey.ms1.view.FeatureDetailsViewContext" %>
+<%@ page import="org.labkey.ms1.model.FeatureDetailsModel" %>
 <%@ page import="org.labkey.ms1.model.Peptide" %>
 <%
-    JspView<FeatureDetailsViewContext> me = (JspView<FeatureDetailsViewContext>) HttpView.currentView();
-    FeatureDetailsViewContext ctx = me.getModelBean();
-    Feature feature = ctx.getFeature();
+    JspView<FeatureDetailsModel> me = (JspView<FeatureDetailsModel>) HttpView.currentView();
+    FeatureDetailsModel model = me.getModelBean();
+    Feature feature = model.getFeature();
     me.setTitle("Feature Details");
 
-    int scan = feature.getScan().intValue();
-    String scanParam = me.getViewContext().getRequest().getParameter("scan");
-    if (null != scanParam && scanParam.length() > 0)
-        scan = Integer.parseInt(scanParam);
-
-    double mzWindowLow = -1;
-    double mzWindowHigh = 5;
-    int scanWindowLow = 0;
-    int scanWindowHigh = 0;
-
-    String paramVal = me.getViewContext().getRequest().getParameter("mzWindowLow");
-    if (null != paramVal && paramVal.length() > 0)
-        mzWindowLow = Double.parseDouble(paramVal);
-
-    paramVal = me.getViewContext().getRequest().getParameter("mzWindowHigh");
-    if (null != paramVal && paramVal.length() > 0)
-        mzWindowHigh = Double.parseDouble(paramVal);
-
-    paramVal = me.getViewContext().getRequest().getParameter("scanWindowLow");
-    if (null != paramVal && paramVal.length() > 0)
-        scanWindowLow = Integer.parseInt(paramVal);
-
-    paramVal = me.getViewContext().getRequest().getParameter("scanWindowHigh");
-    if (null != paramVal && paramVal.length() > 0)
-        scanWindowHigh = Integer.parseInt(paramVal);
-
-    //adjust scan so that it is within the scan window
-    scan = Math.max(scan, feature.getScanFirst() + scanWindowLow);
-    scan = Math.min(scan, feature.getScanLast() + scanWindowHigh);
-    
-    DecimalFormat fmtDouble = new DecimalFormat("#,##0.0000");
-    DecimalFormat fmtPercent = new DecimalFormat("0%");
-
-    ActionURL url = me.getViewContext().getActionURL();
-    ActionURL urlPeaksView = url.clone();
-    urlPeaksView.setAction("showPeaks.view");
-    urlPeaksView.deleteParameters();
-    urlPeaksView.addParameter("runId", feature.getRunId());
-    urlPeaksView.addParameter("featureId", feature.getFeatureId());
-    urlPeaksView.addParameter("scanFirst", feature.getScanFirst() + scanWindowLow);
-    urlPeaksView.addParameter("scanLast", feature.getScanLast() + scanWindowHigh);
-
-    ActionURL urlMs2Scan = url.clone();
-    urlMs2Scan.deleteParameters();
-    urlMs2Scan.setAction("showMS2Peptide");
-    urlMs2Scan.addParameter("featureId", feature.getFeatureId());
-
     String contextPath = request.getContextPath();
-    ActionURL findSimilarUrl = MS1Controller.SimilarSearchForm.getDefaultUrl(me.getViewContext().getContainer());
-    findSimilarUrl.addParameter(MS1Controller.SimilarSearchForm.ParamNames.featureId.name(), ctx.getFeature().getFeatureId());
 %>
-<%!
-    public String formatNumber(Object number, Format formatter)
-    {
-        if(null == number)
-            return "&nbsp;";
-        if(null == formatter)
-            return number.toString();
-        return formatter.format(number);
-    }
-
-    public String formatWindowExtent(Number number, boolean zeroAsNeg)
-    {
-        if(0 == number.doubleValue() && zeroAsNeg)
-            return "-" + number.toString();
-        else if(number.doubleValue() >= 0)
-            return "+" + number.toString();
-        else
-            return number.toString();
-    }
-
-    public String formatWindowExtent(Number number)
-    {
-        return formatWindowExtent(number, false);
-    }
-%>
-
 <!-- Client-side scripts -->
 <script type="text/javascript">
     var _oldMzLow = 0;
@@ -106,8 +31,8 @@
 
         if("none" == filterbox.style.display)
         {
-            _oldMzLow = <%=mzWindowLow%>;
-            _oldMzHigh = <%=mzWindowHigh%>;
+            _oldMzLow = <%=model.getMzWindowLow()%>;
+            _oldMzHigh = <%=model.getMzWindowHigh()%>;
             filterbox.style.display="";
             _slider.recalculate();
 
@@ -172,8 +97,8 @@
 
         if("none" == filterbox.style.display)
         {
-            _oldScanLow = <%=scanWindowLow%>;
-            _oldScanHigh = <%=scanWindowHigh%>;
+            _oldScanLow = <%=model.getScanWindowLow()%>;
+            _oldScanHigh = <%=model.getScanWindowHigh()%>;
 
             setElemDisplay("scanFilterUI", "")
             setElemDisplay("scanFilterCol-1", "");
@@ -252,27 +177,17 @@
                 String prevFeatureCaption = "<< Previous Feature";
                 String nextFeatureCaption = "Next Feature >>";
 
-                //clone the current url and remove anything specific to the feature
-                ActionURL urlFeature = url.clone();
-                urlFeature.deleteParameter("scan");
-
-                if(ctx.getPrevFeatureId() < 0)
+                if(model.getPrevFeatureId() < 0)
                     out.write(PageFlowUtil.buttonImg(prevFeatureCaption, "disabled"));
                 else
-                {
-                    urlFeature.replaceParameter("featureId", String.valueOf(ctx.getPrevFeatureId()));
-                    out.print("<a href=\"" + urlFeature.getLocalURIString() + "\">" + PageFlowUtil.buttonImg(prevFeatureCaption) + "</a>");
-                }
+                    out.print("<a href=\"" + model.getPrevFeatureUrl() + "\">" + PageFlowUtil.buttonImg(prevFeatureCaption) + "</a>");
 
                 out.write("&nbsp;");
 
-                if(ctx.getNextFeatureId() < 0)
+                if(model.getNextFeatureId() < 0)
                     out.write(PageFlowUtil.buttonImg(nextFeatureCaption, "disabled"));
                 else
-                {
-                    urlFeature.replaceParameter("featureId", String.valueOf(ctx.getNextFeatureId()));
-                    out.print("<a href=\"" + urlFeature.getLocalURIString() + "\">" + PageFlowUtil.buttonImg(nextFeatureCaption) + "</a>");
-                }
+                    out.print("<a href=\"" + model.getNextFeatureUrl() + "\">" + PageFlowUtil.buttonImg(nextFeatureCaption) + "</a>");
             %>
         </td>
 
@@ -290,12 +205,12 @@
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Time</td>
-                    <td><%=formatNumber(feature.getTime(), fmtDouble)%></td>
+                    <td><%=model.formatNumber(feature.getTime())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">m/z</td>
-                    <td><%=formatNumber(feature.getMz(), fmtDouble)%>
-                        &nbsp;[<a href="<%=findSimilarUrl%>">find&nbsp;similar</a>] 
+                    <td><%=model.formatNumber(feature.getMz())%>
+                        &nbsp;[<a href="<%=model.getFindSimilarUrl()%>">find&nbsp;similar</a>]
                     </td>
                 </tr>
                 <tr>
@@ -304,11 +219,11 @@
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Mass</td>
-                    <td><%=formatNumber(feature.getMass(), fmtDouble)%></td>
+                    <td><%=model.formatNumber(feature.getMass())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Intensity</td>
-                    <td><%=formatNumber(feature.getIntensity(), fmtDouble)%></td>
+                    <td><%=model.formatNumber(feature.getIntensity())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Charge</td>
@@ -320,15 +235,15 @@
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">KL</td>
-                    <td><%=formatNumber(feature.getKl(), fmtDouble)%></td>
+                    <td><%=model.formatNumber(feature.getKl())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Background</td>
-                    <td><%=formatNumber(feature.getBackground(), fmtDouble)%></td>
+                    <td><%=model.formatNumber(feature.getBackground())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Median</td>
-                    <td><%=formatNumber(feature.getMedian(), fmtDouble)%></td>
+                    <td><%=model.formatNumber(feature.getMedian())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Peaks</td>
@@ -344,7 +259,7 @@
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Total Intensity</td>
-                    <td><%=formatNumber(feature.getTotalIntensity(), fmtDouble)%></td>
+                    <td><%=model.formatNumber(feature.getTotalIntensity())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">MS2 Scan</td>
@@ -352,7 +267,7 @@
                         <%
                             if(feature.getMs2Scan() != null)
                             {
-                                out.print("<a href=\"" + urlMs2Scan + "\" target=\"peptide\">");
+                                out.print("<a href=\"" + model.getPepUrl() + "\" target=\"peptide\">");
                                 out.print(feature.getMs2Scan());
                                 out.print("</a>");
                             }
@@ -363,36 +278,29 @@
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">MS2 Probability</td>
-                    <td><%=formatNumber(feature.getMs2ConnectivityProbability(), fmtPercent)%></td>
+                    <td><%=model.formatNumber(feature.getMs2ConnectivityProbability())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Matching Peptides</td>
                     <td>
                         <%
                             {
-                                ActionURL urlShowPep = url.clone();
-                                urlShowPep.setAction("showPeptide.view");
-                                urlShowPep.setPageFlow("MS2");
-                                urlShowPep.deleteParameters();
-
                                 Peptide[] peptides = feature.getMatchingPeptides();
+                                Peptide pep = null;
                                 for(int idx = 0; idx < peptides.length; ++idx)
                                 {
                                     if(idx > 0)
                                         out.print(", ");
 
-                                    urlShowPep.deleteParameters();
-                                    urlShowPep.addParameter("run", peptides[idx].getRun());
-                                    urlShowPep.addParameter("peptideId", String.valueOf(peptides[idx].getRowId()));
-                                    urlShowPep.addParameter("rowIndex", idx+1);
+                                    pep = peptides[idx];
 
-                                    out.print("<a href=\"" + urlShowPep + "&MS2Peptides.Scan~eq=" + peptides[idx].getScan() + "\" target=\"peptide\">");
-                                    out.print(peptides[idx].getPeptide());
+                                    out.print("<a href=\"");
+                                    out.print(model.getPepUrl(pep.getRun(), pep.getRowId(), idx+1, pep.getScan()));
+                                    out.print("\" target=\"peptide\">");
+                                    out.print(pep.getPeptide());
                                     out.print("</a>");
 
-                                    ActionURL urlPepSearch = new ActionURL(MS1Controller.PepSearchAction.class, me.getViewContext().getContainer());
-                                    urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.pepSeq.name(), peptides[idx].getTrimmedPeptide());
-                                    out.print("&nbsp;[<a href=\"" + urlPepSearch.getLocalURIString() + "\">");
+                                    out.print("&nbsp;[<a href=\"" + model.getPepSearchUrl(pep.getTrimmedPeptide()) + "\">");
                                     out.print("features with same</a>]");
                                 }
                             }
@@ -415,40 +323,30 @@
             <%
                 String prevScanCaption = "<< Previous Scan";
                 String nextScanCaption = "Next Scan >>";
-                Integer[] prevNextScans = ctx.getPrevNextScans(scan, feature.getMz() + mzWindowLow, feature.getMz() + mzWindowHigh,
-                                                                feature.getScanFirst() + scanWindowLow, feature.getScanLast() + scanWindowHigh);
+                String prevScanUrl = model.getPrevScanUrl();
+                String nextScanUrl = model.getNextScanUrl();
 
-                if (null == prevNextScans || 0 == prevNextScans.length || null == prevNextScans[0])
+                if (null == prevScanUrl)
                     out.print(PageFlowUtil.buttonImg(prevScanCaption, "disabled"));
                 else
-                {
-                    ActionURL urlPrev = url.clone();
-                    urlPrev.deleteParameter("scan");
-                    urlPrev.addParameter("scan", prevNextScans[0].intValue());
-                    out.print("<a href=\"" + urlPrev.getLocalURIString() + "\">" + PageFlowUtil.buttonImg(prevScanCaption) + "</a>");
-                }
+                    out.print("<a href=\"" + prevScanUrl + "\">" + PageFlowUtil.buttonImg(prevScanCaption) + "</a>");
 
                 out.print("&nbsp;");
 
-                if (null == prevNextScans || 0 == prevNextScans.length || null == prevNextScans[1])
+                if (null == nextScanUrl)
                     out.print(PageFlowUtil.buttonImg(nextScanCaption, "disabled"));
                 else
-                {
-                    ActionURL urlPrev = url.clone();
-                    urlPrev.deleteParameter("scan");
-                    urlPrev.addParameter("scan", prevNextScans[1].intValue());
-                    out.print("<a href=\"" + urlPrev.getLocalURIString() + "\">" + PageFlowUtil.buttonImg(nextScanCaption) + "</a>");
-                }
+                    out.print("<a href=\"" + nextScanUrl + "\">" + PageFlowUtil.buttonImg(nextScanCaption) + "</a>");
 
             %>
             <!-- m/z and intensity peaks mass chart -->
             <br/>
-            <a href="<%=urlPeaksView.getLocalURIString() + "&query.ScanId/Scan~eq=" + scan + "&query.MZ~gte=" + (feature.getMz()+mzWindowLow) + "&query.MZ~lte=" + (feature.getMz()+mzWindowHigh)%>">
-            <img width="425" height="300" src="showChart.view?type=spectrum&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scan=<%=scan%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>" alt="Spectrum chart" title="Click to see tabular data"/>
+            <a href="<%=model.getPeaksUrl(true)%>">
+            <img width="425" height="300" src="<%=model.getChartUrl("spectrum")%>" alt="Spectrum chart" title="Click to see tabular data"/>
             </a>
             <br/>Intensities of peaks with a
             <a href="javascript:{}" onclick="showMzFilter(this);" title="Click to adjust">
-            similar m/z as the feature (<%=formatWindowExtent(mzWindowLow,true)%>/<%=formatWindowExtent(mzWindowHigh)%> <b>[adjust]</b>)</a>,
+            similar m/z as the feature (<%=model.getMzWindow()%> <b>[adjust]</b>)</a>,
             for a particular scan.
         </td>
     </tr>
@@ -476,11 +374,11 @@
                 <tr>
                     <td colspan="3" style="text-align:center">
                         <form id="frmMzWindowFilter" action="showFeatureDetails.view" method="GET">
-                            <input type="hidden" name="srcUrl" value="<%=ctx.getSrcUrl()%>"/>
+                            <input type="hidden" name="srcUrl" value="<%=model.getSrcUrl()%>"/>
                             <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
-                            <input type="hidden" name="scan" value="<%=scan%>"/>
-                            <input type="hidden" name="scanWindowLow" value="<%=scanWindowLow%>"/>
-                            <input type="hidden" name="scanWindowHigh" value="<%=scanWindowHigh%>"/>
+                            <input type="hidden" name="scan" value="<%=model.getScan()%>"/>
+                            <input type="hidden" name="scanWindowLow" value="<%=model.getScanWindowLow()%>"/>
+                            <input type="hidden" name="scanWindowHigh" value="<%=model.getScanWindowHigh()%>"/>
                             <input type="submit" value="Filter" style="display:none;"/>
 
                             <input type="text" id="txtMzWindowLow" name="mzWindowLow" size="4" onchange="_slider.setValueLow(this.value);" tabindex="2"/>
@@ -504,8 +402,8 @@
                                    document.getElementById("txtMzWindowHigh"));
                 _slider.setMinimum(-50);
                 _slider.setMaximum(50);
-                _slider.setValueLow(<%=mzWindowLow%>);
-                _slider.setValueHigh(<%=mzWindowHigh%>);
+                _slider.setValueLow(<%=model.getMzWindowLow()%>);
+                _slider.setValueHigh(<%=model.getMzWindowHigh()%>);
                 _slider.setPrecision(1);
             </script>
 
@@ -517,13 +415,13 @@
             <!-- retention time and intensity peaks elution chart -->
             <% /*Note that this chart does not use the mzWindow* values since it is supposed to show the closest peak values within a fine tolerance*/ %>
 
-            <a href="<%=urlPeaksView.getLocalURIString() + "&query.MZ~gte=" + (feature.getMz()-0.02) + "&query.MZ~lte=" + (feature.getMz()+0.02)%>">
-            <img width="425" heigh="300" src="showChart.view?type=elution&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst() + scanWindowLow%>&scanLast=<%=feature.getScanLast() + scanWindowHigh%>&mzLow=<%=feature.getMz()-0.02%>&mzHigh=<%=feature.getMz()+0.02%>" alt="Elution chart" title="Click to see tabular data"/>
+            <a href="<%=model.getPeaksUrl(-0.02, 0.02, false)%>">
+            <img width="425" height="300" src="<%=model.getChartUrl("elution")%>" alt="Elution chart" title="Click to see tabular data"/>
             </a>
 
             <br/>Intensity of the peaks with the closest m/z value to the feature, across
             <a href="javascript:{}" onclick="showScanFilter();">
-                all scans within the feature's range (<%=formatWindowExtent(scanWindowLow, true)%>/<%=formatWindowExtent(scanWindowHigh)%> scans <b>[adjust]</b>)
+                all scans within the feature's range (<%=model.getScanWindow()%> scans <b>[adjust]</b>)
             </a>.
         </td>
 
@@ -549,11 +447,11 @@
                 <tr>
                     <td style="text-align:center">
                         <form id="frmScanWindowFilter" action="showFeatureDetails.view" method="GET">
-                            <input type="hidden" name="srcUrl" value="<%=ctx.getSrcUrl()%>"/>
+                            <input type="hidden" name="srcUrl" value="<%=model.getSrcUrl()%>"/>
                             <input type="hidden" name="featureId" value="<%=feature.getFeatureId()%>"/>
-                            <input type="hidden" name="scan" value="<%=scan%>"/>
-                            <input type="hidden" name="mzWindowLow" value="<%=mzWindowLow%>"/>
-                            <input type="hidden" name="mzWindowHigh" value="<%=mzWindowHigh%>"/>
+                            <input type="hidden" name="scan" value="<%=model.getScan()%>"/>
+                            <input type="hidden" name="mzWindowLow" value="<%=model.getMzWindowLow()%>"/>
+                            <input type="hidden" name="mzWindowHigh" value="<%=model.getMzWindowHigh()%>"/>
                             <input type="submit" value="Filter" style="display:none;"/>
 
                             <input type="text" id="txtScanWindowLow" name="scanWindowLow" size="3" onchange="_sliderScan.setValueLow(this.value)" tabindex="102"/>
@@ -579,8 +477,8 @@
                                     "vertical");
                 _sliderScan.setMinimum(-100);
                 _sliderScan.setMaximum(100);
-                _sliderScan.setValueLow(<%=scanWindowLow%>);
-                _sliderScan.setValueHigh(<%=scanWindowHigh%>);
+                _sliderScan.setValueLow(<%=model.getScanWindowLow()%>);
+                _sliderScan.setValueHigh(<%=model.getScanWindowHigh()%>);
             </script>
 
         </td>
@@ -588,17 +486,17 @@
 
             <!-- retention time and m/z bubble chart -->
 
-            <a href="<%=urlPeaksView.getLocalURIString() + "&query.MZ~gte=" + (feature.getMz()+mzWindowLow) + "&query.MZ~lte=" + (feature.getMz()+mzWindowHigh)%>">
-            <img width="425" height="300" src="showChart.view?type=bubble&featureId=<%=feature.getFeatureId()%>&runId=<%=feature.getRunId()%>&scanFirst=<%=feature.getScanFirst() + scanWindowLow%>&scanLast=<%=feature.getScanLast() + scanWindowHigh%>&mzLow=<%=feature.getMz() + mzWindowLow%>&mzHigh=<%=feature.getMz() + mzWindowHigh%>&scan=<%=scan%>"
+            <a href="<%=model.getPeaksUrl(false)%>">
+            <img width="425" height="300" src="<%=model.getChartUrl("bubble")%>"
                  alt="Intesities Bubble chart" title="Click to see tabular data"/>
             </a>
 
             <br/>Peaks with a
             <a href="javascript:{}" onclick="showMzFilter(this);" title="Click to adjust">
-            similar m/z as the feature (<%=formatWindowExtent(mzWindowLow,true)%>/<%=formatWindowExtent(mzWindowHigh)%> <b>[adjust]</b>)</a>,
+            similar m/z as the feature (<%=model.getMzWindow()%> <b>[adjust]</b>)</a>,
             across
             <a href="javascript:{}" onclick="showScanFilter();">
-                all scans within the feature's range (<%=formatWindowExtent(scanWindowLow, true)%>/<%=formatWindowExtent(scanWindowHigh)%> scans <b>[adjust]</b>)
+                all scans within the feature's range (<%=model.getScanWindow()%> scans <b>[adjust]</b>)
             </a>. The size and color of the bubbles represent the peak's relative intensity.
         </td>
     </tr>
