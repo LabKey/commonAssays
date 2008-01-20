@@ -61,7 +61,7 @@ public class XTandemCPipelineProvider extends PipelineProviderCluster implements
         return super.isStatusViewableFile(name, basename);
     }
 
-    public Forward handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf)
+    public ActionURL handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf)
             throws HandlerException
     {
         if ("Retry".equals(name) &&
