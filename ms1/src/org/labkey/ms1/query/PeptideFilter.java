@@ -106,7 +106,6 @@ public class PeptideFilter implements FeaturesFilter
         //change the default visible columnset
         ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(tinfo.getDefaultVisibleColumns());
         visibleColumns.add(2, FieldKey.fromParts("FileId","ExpDataFileId","Run","Name"));
-        visibleColumns.add(2, FieldKey.fromParts("FileId","ExpDataFileId","Run","Name"));
         visibleColumns.remove(FieldKey.fromParts("AccurateMz"));
         visibleColumns.remove(FieldKey.fromParts("Mass"));
         visibleColumns.remove(FieldKey.fromParts("Charge"));

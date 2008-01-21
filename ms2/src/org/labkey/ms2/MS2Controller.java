@@ -23,6 +23,7 @@ import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.api.ms2.MS2Urls;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.SensitivitySummary;
@@ -4385,6 +4386,14 @@ public class MS2Controller extends SpringActionController
         public void setPath(String path)
         {
             _path = path;
+        }
+    }
+
+    public static class MS2UrlsImpl implements MS2Urls
+    {
+        public ActionURL getShowPeptideUrl(Container container)
+        {
+            return new ActionURL(MS2Controller.ShowPeptideAction.class, container);
         }
     }
 }

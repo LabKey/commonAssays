@@ -1,13 +1,13 @@
 package org.labkey.ms1.model;
 
-import org.labkey.ms1.model.Feature;
-import org.labkey.ms1.MS1Manager;
-import org.labkey.ms1.MS1Controller;
-import org.labkey.ms1.view.FeaturesView;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
+import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
 import org.labkey.common.util.Pair;
+import org.labkey.ms1.MS1Controller;
+import org.labkey.ms1.MS1Manager;
+import org.labkey.ms1.view.FeaturesView;
 
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -24,8 +24,7 @@ public class FeatureDetailsModel
     private Feature _feature;
     private int _prevFeatureId = -1;
     private int _nextFeatureId = -1;
-    private int _prevScan = -1;
-    private int _nextScan = -1;
+    private Integer[] _prevNextScans;
     private String _srcUrl;
     private double _mzWindowLow = 0;
     private double _mzWindowHigh = 0;
@@ -85,12 +84,7 @@ public class FeatureDetailsModel
 
         _pepSearchUrl = new ActionURL(MS1Controller.PepSearchAction.class, container);
 
-        Integer[] scans = getPrevNextScans();
-        if(null != scans && scans.length > 0 && null != scans[0] && null != scans[1])
-        {
-            _prevScan = scans[0].intValue();
-            _nextScan = scans[1].intValue();
-        }
+        _prevNextScans = getPrevNextScans();
     }
 
     public Feature getFeature()
@@ -181,7 +175,10 @@ public class FeatureDetailsModel
 
     public String getPepUrl(int runId, long peptideId, int rowIndex, int scan)
     {
-        ActionURL url = new ActionURL("ms2", "showPeptide.view", _container);
+        MS2Urls ms2urls = PageFlowUtil.urlProvider(MS2Urls.class);
+        assert null != ms2urls : "Couldn't get the MS2 Url Provider!";
+
+        ActionURL url = ms2urls.getShowPeptideUrl(_container);
         url.addParameter("run", runId);
         url.addParameter("peptideId", String.valueOf(peptideId));
         url.addParameter("rowIndex", rowIndex);
@@ -246,10 +243,11 @@ public class FeatureDetailsModel
 
     public String getPrevScanUrl()
     {
-        if(_prevScan > 0)
+        if(null != _prevNextScans && null != _prevNextScans[0])
         {
             ActionURL url = _url.clone();
-            url.replaceParameter(MS1Controller.FeatureDetailsForm.ParamNames.scan.name(), String.valueOf(_prevScan));
+            url.replaceParameter(MS1Controller.FeatureDetailsForm.ParamNames.scan.name(),
+                    String.valueOf(_prevNextScans[0].intValue()));
             return url.getLocalURIString();
         }
         else
@@ -258,10 +256,11 @@ public class FeatureDetailsModel
 
     public String getNextScanUrl()
     {
-        if(_nextScan > 0)
+        if(null != _prevNextScans && null != _prevNextScans[1])
         {
             ActionURL url = _url.clone();
-            url.replaceParameter(MS1Controller.FeatureDetailsForm.ParamNames.scan.name(), String.valueOf(_nextScan));
+            url.replaceParameter(MS1Controller.FeatureDetailsForm.ParamNames.scan.name(),
+                    String.valueOf(_prevNextScans[1]));
             return url.getLocalURIString();
         }
         else

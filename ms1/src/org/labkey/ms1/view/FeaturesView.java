@@ -195,6 +195,6 @@ public class FeaturesView extends QueryView
 
     protected Sort getBaseSort()
     {
-        return new Sort("Scan,MZ");
+        return new Sort("FileId/ExpDataFileId/Run,Scan,MZ");
     }
 } //class FeaturesView

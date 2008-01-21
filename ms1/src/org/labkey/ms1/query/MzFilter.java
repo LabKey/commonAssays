@@ -16,7 +16,10 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.query.FieldKey;
 import org.labkey.ms1.MS1Controller;
+
+import java.util.ArrayList;
 
 /**
  * Features filter for mz values
@@ -51,5 +54,15 @@ public class MzFilter implements FeaturesFilter
     public void setFilters(FeaturesTableInfo tinfo)
     {
         tinfo.addCondition(new SQLFragment("MZ BETWEEN " + _mzLow + " AND " + _mzHigh), "MZ");
+        
+        //change the default visible columnset
+        ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(tinfo.getDefaultVisibleColumns());
+        visibleColumns.add(2, FieldKey.fromParts("FileId","ExpDataFileId","Run","Name"));
+        visibleColumns.remove(FieldKey.fromParts("AccurateMz"));
+        visibleColumns.remove(FieldKey.fromParts("Mass"));
+        visibleColumns.remove(FieldKey.fromParts("Charge"));
+        visibleColumns.remove(FieldKey.fromParts("Peaks"));
+        visibleColumns.remove(FieldKey.fromParts("TotalIntensity"));
+        tinfo.setDefaultVisibleColumns(visibleColumns);
     }
 }
