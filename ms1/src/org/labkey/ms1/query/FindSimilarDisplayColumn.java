@@ -50,6 +50,6 @@ public class FindSimilarDisplayColumn extends SimpleDisplayColumn
 
         out.write("[<a href=\"");
         out.write(_url.getLocalURIString());
-        out.write("\">find&nbsp;similar</a>]");
+        out.write("\">similar</a>]");
     }
 }

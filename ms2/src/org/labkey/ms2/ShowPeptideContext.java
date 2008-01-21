@@ -4,6 +4,8 @@ import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.Formats;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.ms1.MS1Urls;
 
 /**
  * User: jeckels
@@ -24,6 +26,7 @@ public class ShowPeptideContext
     public String actualXStart;
     public String actualXEnd;
     public String modificationHref;
+    public String pepSearchHref;
 
     ShowPeptideContext(OldMS2Controller.DetailsForm form, MS2Run run, MS2Peptide peptide, ActionURL url, ActionURL previousUrl, ActionURL nextUrl, ActionURL showGzUrl, String modHref, Container container, User user)
     {
@@ -38,6 +41,10 @@ public class ShowPeptideContext
         this.nextUrl = nextUrl;
         this.showGzUrl = showGzUrl;
         this.modificationHref = modHref;
+
+        MS1Urls ms1Urls = PageFlowUtil.urlProvider(MS1Urls.class);
+        if(null != ms1Urls)
+            pepSearchHref = ms1Urls.getPepSearchUrl(container, peptide.getTrimmedPeptide()).getLocalURIString();
 
         calcXRange();
     }

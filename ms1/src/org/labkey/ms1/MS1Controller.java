@@ -15,6 +15,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.api.ms1.MS1Urls;
 import org.labkey.ms1.model.*;
 import org.labkey.ms1.pipeline.MSInspectImportPipelineJob;
 import org.labkey.ms1.query.*;
@@ -1209,4 +1210,19 @@ public class MS1Controller extends SpringActionController
         }
     }
 
+    public static class MS1UrlsImpl implements MS1Urls
+    {
+        public ActionURL getPepSearchUrl(Container container)
+        {
+            return getPepSearchUrl(container, null);
+        }
+
+        public ActionURL getPepSearchUrl(Container container, String sequence)
+        {
+            ActionURL url = new ActionURL(PepSearchAction.class, container);
+            if(null != sequence)
+                url.addParameter(PepSearchForm.ParamNames.pepSeq.name(), sequence);
+            return url;
+        }
+    }
 } //class MS1Controller

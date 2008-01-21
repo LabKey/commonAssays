@@ -57,6 +57,9 @@
     }
     out.print(ctx.modificationHref);
 %>
+        <% if(null != ctx.pepSearchHref && ctx.pepSearchHref.length() > 0) { %>
+        <a href="<%=ctx.pepSearchHref%>" target="pepSearch"><%=PageFlowUtil.buttonImg("Find Features")%></a>
+        <% } %>
 
     </td></tr>
 

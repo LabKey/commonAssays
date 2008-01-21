@@ -55,6 +55,20 @@ public class FeaturesTableInfo extends FilteredTable
             }
         });
 
+        //URL and display factory for the scan and peptide columns
+        String urlPep = new ActionURL(MS1Controller.ShowMS2PeptideAction.class, schema.getContainer()).getLocalURIString()
+                + "featureId=${FeatureId}";
+
+        DisplayColumnFactory dcfPep = new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                DataColumn dataColumn = new DataColumn(colInfo);
+                dataColumn.setLinkTarget("peptide");
+                return dataColumn;
+            }
+        };
+
         if(includePepFk)
         {
             //add an expression column that finds the corresponding peptide id based on
@@ -70,10 +84,9 @@ public class FeaturesTableInfo extends FilteredTable
                     " WHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId)");
 
             ColumnInfo ciPepId = addColumn(new ExprColumn(this, COLUMN_PEPTIDE_INFO, sqlPepJoin, java.sql.Types.INTEGER, getColumn("FeatureId")));
-            ciPepId.setIsUnselectable(true);
 
             //tell query that this new column is an FK to the peptides data table
-            ciPepId.setFk(new LookupForeignKey("RowId")
+            ciPepId.setFk(new LookupForeignKey("RowId", "Peptide")
             {
                 public TableInfo getLookupTableInfo()
                 {
@@ -81,22 +94,15 @@ public class FeaturesTableInfo extends FilteredTable
                             false, _schema.isRestrictContainer());
                 }
             });
+            
+            ciPepId.setURL(urlPep);
+            ciPepId.setDisplayColumnFactory(dcfPep);
         } //if(includePepFk)
 
         //make the ms2 scan a hyperlink to showPeptide view
         ColumnInfo ciMS2Scan = getColumn("MS2Scan");
-        ActionURL urlPep = new ActionURL(MS1Module.CONTROLLER_NAME, "showMS2Peptide", schema.getContainer());
-        ciMS2Scan.setURL(urlPep.getLocalURIString() + "featureId=${FeatureId}");
-
-        ciMS2Scan.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                DataColumn dataColumn = new DataColumn(colInfo);
-                dataColumn.setLinkTarget("peptide");
-                return dataColumn;
-            }
-        });
+        ciMS2Scan.setURL(urlPep);
+        ciMS2Scan.setDisplayColumnFactory(dcfPep);
 
         //mandate a filter that excludes deleted and not fully-imported features
         addCondition(new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files WHERE Imported=? AND Deleted=?)", true, false), "FileId");
@@ -124,8 +130,7 @@ public class FeaturesTableInfo extends FilteredTable
         visibleColumns.remove(FieldKey.fromParts("KL"));
         visibleColumns.remove(FieldKey.fromParts("ScanCount"));
         visibleColumns.remove(FieldKey.fromParts("ChargeStates"));
-        visibleColumns.add(FieldKey.fromParts(COLUMN_PEPTIDE_INFO, "Peptide"));
-        
+
         //move peak and detail links column to first position
         visibleColumns.remove(FieldKey.fromParts(PeaksAvailableColumnInfo.COLUMN_NAME));
         visibleColumns.add(0, FieldKey.fromParts(PeaksAvailableColumnInfo.COLUMN_NAME));
