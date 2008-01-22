@@ -1025,52 +1025,127 @@ public class MS2Controller extends SpringActionController
         public int runList;
     }
 
-
-    @RequiresPermission(ACL.PERM_READ)
-    public class CompareAction extends SimpleViewAction
+    public abstract class LegacyCompareSetupAction extends AbstractRunListAction
     {
-        private static final String SPECTRA_COUNT_PEPTIDES_FILTER = "PeptidesFilter";
+        private String _optionsJSP;
+        private String _description;
 
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public LegacyCompareSetupAction(String optionsJSP, String description)
         {
-            QuerySettings peptideSettings = new QuerySettings(new ActionURL(), SPECTRA_COUNT_PEPTIDES_FILTER);
-            peptideSettings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
-            QueryView peptidesView = new QueryView(new MS2Schema(getUser(), getContainer()), peptideSettings);
+            super(true);
+            _optionsJSP = optionsJSP;
+            _description = description;
+        }
 
-            JspView<QueryView> extraCompareOptions = new JspView<QueryView>("/org/labkey/ms2/extraCompareOptions.jsp", peptidesView);
+        protected ModelAndView getView(Object o, BindException errors, int runListId) throws Exception
+        {
+            JspView<CompareOptionsBean> extraCompareOptions = new JspView<CompareOptionsBean>(_optionsJSP);
 
             ActionURL nextUrl = getViewContext().cloneActionURL().setAction("applyCompareView");
-            return pickView(nextUrl, "Select a view to apply a filter to all the runs.", extraCompareOptions, false);
+            return pickView(nextUrl, "Select a view to apply a filter to all the runs.", extraCompareOptions, runListId);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendRootNavTrail(root, "Compare Runs", getPageConfig(), "compareRuns");
+            return root.addChild(_description);
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ComparePeptidesSetupAction extends LegacyCompareSetupAction
+    {
+        public ComparePeptidesSetupAction()
+        {
+            super("/org/labkey/ms2/compare/comparePeptidesOptions.jsp", "Compare Peptides Setup");
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class CompareSearchEngineProteinSetupAction extends LegacyCompareSetupAction
+    {
+        public CompareSearchEngineProteinSetupAction()
+        {
+            super("/org/labkey/ms2/compare/compareSearchEngineProteinOptions.jsp", "Compare Search Engine Protein Setup");
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class CompareProteinProphetSetupAction extends LegacyCompareSetupAction
+    {
+        public CompareProteinProphetSetupAction()
+        {
+            super("/org/labkey/ms2/compare/compareProteinProphetOptions.jsp", "Compare ProteinProphet Setup");
         }
     }
 
 
-    // extraFormHtml gets inserted between the view dropdown and the button.
-    private HttpView pickView(ActionURL nextUrl, String viewInstructions, HttpView embeddedView, boolean requireSameType) throws Exception
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class CompareProteinProphetQuerySetupAction extends AbstractRunListAction
     {
-        List<String> errors = new ArrayList<String>();
-        ActionURL currentURL = getViewContext().getActionURL();
-        int runListIndex;
-        if (currentURL.getParameter("runList") == null)
+        protected static final String COMPARE_PROTEIN_PROPHET_PEPTIDES_FILTER = "ComparePeptidesPeptidesFilter";
+
+        public CompareProteinProphetQuerySetupAction()
         {
-            runListIndex = cacheSelectedRuns(errors, requireSameType);
-            ActionURL redirectURL = currentURL.clone();
-            redirectURL.addParameter("runList", Integer.toString(runListIndex));
-            HttpView.throwRedirect(redirectURL);
-        }
-        else
-        {
-            runListIndex = Integer.parseInt(currentURL.getParameter("runList"));
+            super(false);
         }
 
-        if (!errors.isEmpty())
-            return _renderErrors(errors);
+        public ModelAndView getView(Object o, BindException errors, int runListId) throws Exception
+        {
+            QuerySettings peptidesSettings = new QuerySettings(new ActionURL(), COMPARE_PROTEIN_PROPHET_PEPTIDES_FILTER);
+            peptidesSettings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
+            QueryView peptidesView = new QueryView(new MS2Schema(getUser(), getContainer()), peptidesSettings);
 
+            CompareOptionsBean bean = new CompareOptionsBean(peptidesView, new ActionURL(CompareProteinProphetQueryAction.class, getContainer()), runListId);
+
+            return (JspView<CompareOptionsBean>) new JspView("/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp", bean);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Compare ProteinProphet (Query) Options");
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_NONE)
+    public class CompareProteinProphetQueryAction extends RunListHandlerAction<RunListForm, CompareProteinsView>
+    {
+        public CompareProteinProphetQueryAction()
+        {
+            super(RunListForm.class);
+        }
+
+        protected ModelAndView getHtmlView(RunListForm form, BindException errors) throws Exception
+        {
+            CompareProteinsView view = createInitializedQueryView(form, errors, false);
+            if (!view.getErrors().isEmpty())
+                return _renderErrors(view.getErrors());
+
+            HtmlView helpView = new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein-specific columns, or expand <em>Run</em> to see the values associated with individual runs, like probability. To set a filter, select the Filter tab, add column, and filter it based on the desired threshold.</p></div>");
+
+            Map<String, String> props = new HashMap<String, String>();
+            props.put("originalURL", getViewContext().getActionURL().toString());
+            props.put("comparisonName", view.getComparisonName());
+            GWTView gwtView = new GWTView("org.labkey.ms2.RunComparator", props);
+
+            return new VBox(gwtView, helpView, view);
+        }
+
+        protected CompareProteinsView createQueryView(RunListForm form, BindException errors, boolean forExport) throws Exception
+        {
+            String viewName = getViewContext().getActionURL().getParameter(CompareProteinProphetQuerySetupAction.COMPARE_PROTEIN_PROPHET_PEPTIDES_FILTER + "." + QueryParam.viewName.toString());
+            return new CompareProteinsView(getViewContext(), MS2Controller.this, form.getRunList(), forExport, viewName);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Compare ProteinProphet (Query)");
+        }
+    }
+
+    // extraFormHtml gets inserted between the view dropdown and the button.
+    private HttpView pickView(ActionURL nextUrl, String viewInstructions, HttpView embeddedView, int runListId) throws Exception
+    {
         JspView<PickViewBean> pickView = new JspView<PickViewBean>("/org/labkey/ms2/pickView.jsp", new PickViewBean());
 
         PickViewBean bean = pickView.getModelBean();
@@ -1083,19 +1158,24 @@ public class MS2Controller extends SpringActionController
         bean.select = renderViewSelect(0, true, ACL.PERM_READ, false);
         bean.extraOptionsView = embeddedView;
         bean.viewInstructions = viewInstructions;
-        bean.runList = runListIndex;
+        bean.runList = runListId;
 
         return pickView;
     }
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class PickExportRunsView extends SimpleViewAction
+    public class PickExportRunsView extends AbstractRunListAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public PickExportRunsView()
+        {
+            super(true);
+        }
+
+        public ModelAndView getView(Object o, BindException errors, int runListId) throws Exception
         {
             JspView extraExportView = new JspView("/org/labkey/ms2/extraExportOptions.jsp");
-            return pickView(getViewContext().cloneActionURL().setAction("applyExportRunsView"), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraExportView, true);
+            return pickView(getViewContext().cloneActionURL().setAction("applyExportRunsView"), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraExportView, runListId);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -1105,19 +1185,23 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    // TODO: Store this in session state!!  Must provide way for this cache to shrink
-
-    // Stash lists of run ids in session state.  Use object Id as index into map, and pass the Id on the URL.  We can't stash these
-    // lists on the URL because it could be too large (we support exporting/comparing hundreds of runs).  We can't post the data
-    // and forward through the applyView process because we must redirect to end up on the right action (otherwise the filter box
-    // JavaScript will call the wrong action).  Plus, DataRegion sorting uses GET, so we'd lose the list of runs after sorting.
-    private static Map<Integer, List<Integer>> _runListCache = new HashMap <Integer, List<Integer>>(10);
-
     private static final String NO_RUNS_MESSAGE = "Run list is empty; session may have timed out.  Please reselect the runs.";
+    private static final String RUN_LIST_CACHE_KEY = MS2Controller.class.getName() + ":RunListCache";
+
+    private Map<Integer, List<Integer>> getRunListCache()
+    {
+        Map<Integer, List<Integer>> cache = (Map<Integer, List<Integer>>)getViewContext().getRequest().getSession(true).getAttribute(RUN_LIST_CACHE_KEY);
+        if (cache == null)
+        {
+            cache = new HashMap<Integer, List<Integer>>();
+            getViewContext().getRequest().getSession(true).setAttribute(RUN_LIST_CACHE_KEY, cache);
+        }
+        return cache;
+    }
 
     public List<MS2Run> getCachedRuns(int index, List<String> errors, boolean requireSameType) throws ServletException
     {
-        List<Integer> runIds = _runListCache.get(index);
+        List<Integer> runIds = getRunListCache().get(index);
 
         if (null == runIds)
         {
@@ -1127,6 +1211,8 @@ public class MS2Controller extends SpringActionController
 
         return getRuns(runIds, errors, requireSameType);
     }
+
+    private static int RUN_LIST_ID = 0;
 
     // We cache just the list of run IDs, not the runs themselves.  This keeps things small and eases mem tracking.  Even though we're
     // just caching the list, we do all error & security checks upfront to alert the user early.
@@ -1142,8 +1228,9 @@ public class MS2Controller extends SpringActionController
         for (MS2Run run : runs)
             runIds.add(run.getRun());
 
-        int index = runIds.hashCode();
-        _runListCache.put(index, runIds);
+        int index = RUN_LIST_ID++;
+
+        getRunListCache().put(index, runIds);
         return index;
     }
 
@@ -1305,7 +1392,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ExportRunsAction extends ExportAction<ExportForm>   // TODO: Convert to ExportAction
+    public class ExportRunsAction extends ExportAction<ExportForm>
     {
         public void export(ExportForm form, HttpServletResponse response) throws Exception
         {
@@ -1313,7 +1400,11 @@ public class MS2Controller extends SpringActionController
             List<MS2Run> runs = getCachedRuns(form.getRunList(), errorStrings, true);
 
             if (!errorStrings.isEmpty())
+            {
                 _renderErrors(errorStrings);  // TODO: throw
+                return;
+            }
+
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), runs.toArray(new MS2Run[runs.size()]));
             ActionURL currentUrl = getViewContext().cloneActionURL();
@@ -1372,7 +1463,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(ExportForm form, BindException errors) throws Exception
         {
-            return compareRuns(form.getRunList(), false, _title);
+            return compareRuns(form.getRunList(), false, _title, form.getColumn());
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -1387,65 +1478,154 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response) throws Exception
         {
-            compareRuns(form.getRunList(), true, null);
+            compareRuns(form.getRunList(), true, null, form.getColumn());
         }
     }
 
-
-    private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title) throws Exception
+    public static class RunListForm extends QueryViewAction.QueryExportForm
     {
-        ActionURL currentUrl = getViewContext().getActionURL();
-        String column = currentUrl.getParameter("column");            // TODO: add to form
-        boolean isQueryProteinProphet = "query".equalsIgnoreCase(column);
-        boolean isQueryPeptides = "querypeptides".equalsIgnoreCase(column);
-        boolean isSpectraCount = "spectraCount".equalsIgnoreCase(column);
+        private int _runList;
 
-        if (isQueryProteinProphet || isQueryPeptides)
+        public int getRunList()
         {
-            AbstractRunCompareView view = isQueryPeptides ? new ComparePeptidesView(getViewContext(), this, runListIndex, false) : new CompareProteinsView(getViewContext(), this, runListIndex, false);
-
-            if (!view.getErrors().isEmpty())
-                return _renderErrors(view.getErrors());
-
-            HtmlView helpView = new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein-specific columns, or expand <em>Run</em> to see the values associated with individual runs, like probability. To set a filter, select the Filter tab, add column, and filter it based on the desired threshold.</p></div>");
-
-            Map<String, String> props = new HashMap<String, String>();
-            props.put("originalURL", getViewContext().getActionURL().toString());
-            props.put("comparisonName", view.getComparisonName());
-            GWTView gwtView = new GWTView("org.labkey.ms2.RunComparator", props);
-            VBox vbox = new VBox(gwtView, helpView, view);
-
-            title.append("Compare Runs");
-
-            return vbox;
+            return _runList;
         }
 
-        List<String> errors = new ArrayList<String>();
-        List<MS2Run> runs = getCachedRuns(runListIndex, errors, false);
+        public void setRunList(int runList)
+        {
+            _runList = runList;
+        }
+    }
 
-        if (!errors.isEmpty())
-            return _renderErrors(errors);
+    public static class SpectraCountForm extends RunListForm
+    {
+        private String _spectraConfig;
 
-        if (isSpectraCount)
+        public String getSpectraConfig()
+        {
+            return _spectraConfig;
+        }
+
+        public void setSpectraConfig(String spectraConfig)
+        {
+            _spectraConfig = spectraConfig;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public abstract class AbstractRunListAction extends SimpleViewAction
+    {
+        private final boolean _requiresSameType;
+
+        protected AbstractRunListAction(boolean requiresSameType)
+        {
+            _requiresSameType = requiresSameType;
+        }
+
+        public final ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            List<String> errorMessages = new ArrayList<String>();
+            ActionURL currentURL = getViewContext().getActionURL();
+            int runListId;
+            if (currentURL.getParameter("runList") == null)
+            {
+                runListId = cacheSelectedRuns(errorMessages, _requiresSameType);
+                ActionURL redirectURL = currentURL.clone();
+                redirectURL.addParameter("runList", Integer.toString(runListId));
+                HttpView.throwRedirect(redirectURL);
+            }
+            else
+            {
+                runListId = Integer.parseInt(currentURL.getParameter("runList"));
+            }
+
+            if (!errorMessages.isEmpty())
+                return _renderErrors(errorMessages);
+
+            return getView(o, errors, runListId);
+        }
+
+        protected abstract ModelAndView getView(Object o, BindException errors, int runListId) throws Exception;
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class SpectraCountSetupAction extends AbstractRunListAction
+    {
+        private static final String SPECTRA_COUNT_PEPTIDES_FILTER = "SpectraCountPeptidesFilter";
+
+        public SpectraCountSetupAction()
+        {
+            super(false);
+        }
+
+        public ModelAndView getView(Object o, BindException errors, int runListId) throws Exception
+        {
+            QuerySettings spectraCountSettings = new QuerySettings(new ActionURL(), SPECTRA_COUNT_PEPTIDES_FILTER);
+            spectraCountSettings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
+            QueryView spectraCountView = new QueryView(new MS2Schema(getUser(), getContainer()), spectraCountSettings);
+
+            CompareOptionsBean bean = new CompareOptionsBean(spectraCountView, new ActionURL(SpectraCountAction.class, getContainer()), runListId);
+
+            return (JspView<CompareOptionsBean>) new JspView("/org/labkey/ms2/compare/spectraCountOptions.jsp", bean);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Spectra Count Options");
+        }
+    }
+
+    public abstract class RunListHandlerAction<FormType extends RunListForm, ViewType extends QueryView> extends QueryViewAction<FormType, ViewType>
+    {
+        protected List<MS2Run> _runs;
+
+        protected RunListHandlerAction(Class<FormType> formClass)
+        {
+            super(formClass);
+        }
+
+        public ModelAndView getView(FormType form, BindException errors) throws Exception
+        {
+            List<String> runErrors = new ArrayList<String>();
+            _runs = getCachedRuns(form.getRunList(), runErrors, false);
+            if (!runErrors.isEmpty())
+            {
+                return _renderErrors(runErrors);
+            }
+            return super.getView(form, errors);
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_NONE)
+    public class SpectraCountAction extends RunListHandlerAction<SpectraCountForm, QueryView>
+    {
+        public SpectraCountAction()
+        {
+            super(SpectraCountForm.class);
+        }
+
+        protected QueryView createQueryView(SpectraCountForm form, BindException errors, boolean forExport) throws Exception
         {
             QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), "SpectraCount");
             settings.setAllowChooseQuery(false);
-            boolean groupByPeptide = "on".equals(currentUrl.getParameter("spectaGroupByPeptide"));
-            boolean groupByCharge = "on".equals(currentUrl.getParameter("spectaGroupByCharge"));
-            boolean groupByProtein = "on".equals(currentUrl.getParameter("spectaGroupByProtein"));
-            boolean useProteinProphet = "proteinProphet".equals(currentUrl.getParameter("spectraProteinAssignment"));
+            final SpectraCountConfiguration config = SpectraCountConfiguration.findByTableName(form.getSpectraConfig());
+            if (config == null)
+            {
+                HttpView.throwNotFound("Could not find spectra count config: " + form.getSpectraConfig());
+            }
 
-            String viewName = currentUrl.getParameter(CompareAction.SPECTRA_COUNT_PEPTIDES_FILTER + "." + QueryParam.viewName.toString());
+            String viewName = getViewContext().getActionURL().getParameter(SpectraCountSetupAction.SPECTRA_COUNT_PEPTIDES_FILTER + "." + QueryParam.viewName.toString());
             if ("".equals(viewName))
             {
                 viewName = null;
             }
             final String peptideViewName = viewName;
-            final MS2Schema.SpectraCountConfiguration config = new MS2Schema.SpectraCountConfiguration(groupByCharge, groupByPeptide, groupByProtein, useProteinProphet);
+
             final MS2Schema schema = new MS2Schema(getUser(), getContainer());
 
             settings.setQueryName(config.getTableName());
-            schema.setRuns(runs.toArray(new MS2Run[runs.size()]));
+
+            schema.setRuns(_runs.toArray(new MS2Run[_runs.size()]));
             QueryView view = new QueryView(schema, settings)
             {
                 protected TableInfo createTable()
@@ -1455,8 +1635,26 @@ public class MS2Controller extends SpringActionController
             };
             view.setShowRReportButton(true);
             view.setTitle("Spectra Counts");
+            // ExcelWebQueries won't be part of the same HTTP session so we won't have access to the run list anymore
+            view.setAllowExcelWebQuery(false);
             return view;
         }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root;
+        }
+    }
+
+    private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column) throws Exception
+    {
+        ActionURL currentUrl = getViewContext().getActionURL();
+
+        List<String> errors = new ArrayList<String>();
+        List<MS2Run> runs = getCachedRuns(runListIndex, errors, false);
+
+        if (!errors.isEmpty())
+            return _renderErrors(errors);
 
         for (MS2Run run : runs)
         {
@@ -1526,70 +1724,6 @@ public class MS2Controller extends SpringActionController
         }
 
         return null;
-    }
-
-
-    @RequiresPermission(ACL.PERM_NONE)  // CompareProteinsView does permissions checking on all runs
-    public class ExportQueryProteinProphetCompareToExcelAction extends ExportAction<ExportForm>
-    {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
-        {
-            exportQueryCompareToExcel(new CompareProteinsView(getViewContext(), MS2Controller.this, form.getRunList(), true));
-        }
-    }
-
-
-    @RequiresPermission(ACL.PERM_NONE)  // CompareProteinsView does permissions checking on all runs
-    public class ExportQueryProteinProphetCompareToTSVAction extends ExportAction<ExportForm>
-    {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
-        {
-            exportQueryCompareToTSV(new CompareProteinsView(getViewContext(), MS2Controller.this, form.getRunList(), true), form.isExportAsWebPage());
-        }
-    }
-
-
-    @RequiresPermission(ACL.PERM_NONE)  // CompareProteinsView does permissions checking on all runs
-    public class ExportQueryPeptideCompareToExcelAction extends ExportAction<ExportForm>
-    {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
-        {
-            exportQueryCompareToExcel(new ComparePeptidesView(getViewContext(), MS2Controller.this, form.getRunList(), true));
-        }
-    }
-
-
-    @RequiresPermission(ACL.PERM_NONE)  // CompareProteinsView does permissions checking on all runs
-    public class ExportQueryPeptideCompareToTSVAction extends ExportAction<ExportForm>
-    {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
-        {
-            exportQueryCompareToTSV(new ComparePeptidesView(getViewContext(), MS2Controller.this, form.getRunList(), true), form.isExportAsWebPage());
-        }
-    }
-
-
-    private void exportQueryCompareToExcel(AbstractRunCompareView view) throws Exception
-    {
-        if (!view.getErrors().isEmpty())
-            _renderErrorsForward(view.getErrors());
-
-        ExcelWriter excelWriter = view.getExcelWriter();
-        excelWriter.setFilenamePrefix("CompareRuns");
-        excelWriter.write(getViewContext().getResponse());
-    }
-
-
-    private void exportQueryCompareToTSV(AbstractRunCompareView view, boolean exportAsWebPage) throws Exception
-    {
-        if (!view.getErrors().isEmpty())
-            _renderErrorsForward(view.getErrors());
-
-        TSVGridWriter tsvWriter = view.getTsvWriter();
-        tsvWriter.setExportAsWebPage(exportAsWebPage);
-        tsvWriter.setFilenamePrefix("CompareRuns");
-        tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
-        tsvWriter.write(getViewContext().getResponse());
     }
 
 
@@ -2314,6 +2448,7 @@ public class MS2Controller extends SpringActionController
     @Deprecated
     private HttpView _renderErrors(List<String> messages) throws Exception
     {
+        getViewContext().requiresPermission(ACL.PERM_READ);
         StringBuilder sb = new StringBuilder("<table class=\"DataRegion\">");
 
         for (String message : messages)
@@ -2344,27 +2479,38 @@ public class MS2Controller extends SpringActionController
 
     public static class ExportForm extends OldMS2Controller.RunForm
     {
-        private String exportFormat;
-        private int runList;
+        private String _column;
+        private String _exportFormat;
+        private int _runList;
 
         public String getExportFormat()
         {
-            return exportFormat;
+            return _exportFormat;
         }
 
         public void setExportFormat(String exportFormat)
         {
-            this.exportFormat = exportFormat;
+            _exportFormat = exportFormat;
         }
 
         public int getRunList()
         {
-            return runList;
+            return _runList;
         }
 
         public void setRunList(int runList)
         {
-            this.runList = runList;
+            _runList = runList;
+        }
+
+        public String getColumn()
+        {
+            return _column;
+        }
+
+        public void setColumn(String column)
+        {
+            _column = column;
         }
     }
 
@@ -4394,6 +4540,34 @@ public class MS2Controller extends SpringActionController
         public ActionURL getShowPeptideUrl(Container container)
         {
             return new ActionURL(MS2Controller.ShowPeptideAction.class, container);
+        }
+    }
+    public class CompareOptionsBean
+    {
+        private final QueryView _peptideView;
+        private final ActionURL _targetURL;
+        private final int _runList;
+
+        public CompareOptionsBean(QueryView peptideView, ActionURL targetURL, int runList)
+        {
+            _peptideView = peptideView;
+            _targetURL = targetURL;
+            _runList = runList;
+        }
+
+        public QueryView getPeptideView()
+        {
+            return _peptideView;
+        }
+
+        public ActionURL getTargetURL()
+        {
+            return _targetURL;
+        }
+
+        public int getRunList()
+        {
+            return _runList;
         }
     }
 }

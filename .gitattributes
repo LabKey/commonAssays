@@ -770,9 +770,13 @@ ms2/src/org/labkey/ms2/compare/PeptideCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/ProteinCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/ProteinProphetCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/RunColumn.java -text
+ms2/src/org/labkey/ms2/compare/comparePeptidesOptions.jsp -text
+ms2/src/org/labkey/ms2/compare/compareProteinProphetOptions.jsp -text
+ms2/src/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp -text
+ms2/src/org/labkey/ms2/compare/compareSearchEngineProteinOptions.jsp -text
+ms2/src/org/labkey/ms2/compare/spectraCountOptions.jsp -text
 ms2/src/org/labkey/ms2/currentFilter.jsp -text
 ms2/src/org/labkey/ms2/editElution.jsp -text
-ms2/src/org/labkey/ms2/extraCompareOptions.jsp -text
 ms2/src/org/labkey/ms2/extraExportOptions.jsp -text
 ms2/src/org/labkey/ms2/filterHeader.jsp -text
 ms2/src/org/labkey/ms2/insertAnnots.jsp -text
@@ -988,7 +992,6 @@ ms2/src/org/labkey/ms2/query/MS2Schema.java -text
 ms2/src/org/labkey/ms2/query/OrganismTableInfo.java -text
 ms2/src/org/labkey/ms2/query/PeptideAggregrationDisplayColumn.java -text
 ms2/src/org/labkey/ms2/query/PeptideCountCoverageColumn.java -text
-ms2/src/org/labkey/ms2/query/PeptideCountTableInfo.java -text
 ms2/src/org/labkey/ms2/query/PeptidesTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinGroupTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinProphetFileTableInfo.java -text
@@ -996,6 +999,8 @@ ms2/src/org/labkey/ms2/query/ProteinQuantitationTable.java -text
 ms2/src/org/labkey/ms2/query/QueryAACoverageColumn.java -text
 ms2/src/org/labkey/ms2/query/RunTableInfo.java -text
 ms2/src/org/labkey/ms2/query/SequencesTableInfo.java -text
+ms2/src/org/labkey/ms2/query/SpectraCountConfiguration.java -text
+ms2/src/org/labkey/ms2/query/SpectraCountTableInfo.java -text
 ms2/src/org/labkey/ms2/query/UniquePeptideCountCoverageColumn.java -text
 ms2/src/org/labkey/ms2/reader/AbstractMzxmlIterator.java -text
 ms2/src/org/labkey/ms2/reader/RandomAccessMzxmlIterator.java -text

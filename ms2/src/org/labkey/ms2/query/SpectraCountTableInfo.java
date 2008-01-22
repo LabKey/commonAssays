@@ -17,11 +17,11 @@ import java.util.ArrayList;
  * User: jeckels
  * Date: Jan 16, 2008
  */
-public class PeptideCountTableInfo extends VirtualTable
+public class SpectraCountTableInfo extends VirtualTable
 {
     private final MS2Schema _ms2Schema;
 
-    private final MS2Schema.SpectraCountConfiguration _config;
+    private final SpectraCountConfiguration _config;
     private final HttpServletRequest _request;
     private final String _peptideViewName;
 
@@ -67,7 +67,7 @@ public class PeptideCountTableInfo extends VirtualTable
             sql.append("\n");
         }
 
-        public void addColumn(PeptideCountTableInfo table)
+        public void addColumn(SpectraCountTableInfo table)
         {
             if (_max) { table.addColumn(new ExprColumn(table, "Max" + _key.getName(), new SQLFragment("Max" + _key.getName()), Types.FLOAT)); }
             if (_min) { table.addColumn(new ExprColumn(table, "Min" + _key.getName(), new SQLFragment("Min" + _key.getName()), Types.FLOAT)); }
@@ -92,7 +92,7 @@ public class PeptideCountTableInfo extends VirtualTable
         }
     }
 
-    public PeptideCountTableInfo(MS2Schema ms2Schema, MS2Schema.SpectraCountConfiguration config, HttpServletRequest request, String peptideViewName)
+    public SpectraCountTableInfo(MS2Schema ms2Schema, SpectraCountConfiguration config, HttpServletRequest request, String peptideViewName)
     {
         super(MS2Manager.getSchema());
         _ms2Schema = ms2Schema;
@@ -234,17 +234,6 @@ public class PeptideCountTableInfo extends VirtualTable
         sql.append("INNER JOIN " + MS2Manager.getTableInfoFractions() + " f ON (r.run = f.run)\n");
 
         sql.append("INNER JOIN (");
-        QueryDefinition queryDef = QueryService.get().createQueryDefForTable(_ms2Schema, MS2Schema.PEPTIDES_TABLE_NAME);
-        SimpleFilter filter = new SimpleFilter();
-        CustomView view = queryDef.getCustomView(_ms2Schema.getUser(), _request, _peptideViewName);
-        if (view != null)
-        {
-            ActionURL url = new ActionURL();
-            view.applyFilterAndSortToURL(url, "InternalName");
-            filter.addUrlFilters(url, "InternalName");
-        }
-
-        TableInfo peptidesTable = _ms2Schema.createPeptidesTable("PeptidesAlias");
 
         List<FieldKey> peptideFieldKeys = new ArrayList<FieldKey>();
         for (PeptideAggregate aggregate : _aggregates)
@@ -258,9 +247,7 @@ public class PeptideCountTableInfo extends VirtualTable
         peptideFieldKeys.add(FieldKey.fromParts("RowId"));
         peptideFieldKeys.add(FieldKey.fromParts("Charge"));
 
-        ColumnInfo[] peptideCols = QueryService.get().getColumns(peptidesTable, peptideFieldKeys).values().toArray(new ColumnInfo[0]);
-
-        SQLFragment peptidesSQL = Table.getSelectSQL(peptidesTable, peptideCols, filter, new Sort());
+        SQLFragment peptidesSQL = _ms2Schema.getPeptideSelectSQL(_request, _peptideViewName, peptideFieldKeys);
         sql.append(peptidesSQL);
         sql.append(") pd ON (f.fraction = pd.fraction)\n");
 

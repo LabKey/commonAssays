@@ -9,8 +9,10 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.sql.Types;
 
 /**
@@ -22,14 +24,18 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
     private final MS2Schema _schema;
     private final List<MS2Run> _runs;
     private final boolean _forExport;
+    private final HttpServletRequest _request;
+    private final String _peptideViewName;
 
-    public CompareProteinProphetTableInfo(String alias, MS2Schema schema, List<MS2Run> runs, boolean forExport)
+    public CompareProteinProphetTableInfo(String alias, MS2Schema schema, List<MS2Run> runs, boolean forExport, HttpServletRequest request, String peptideViewName)
     {
         super(alias, schema);
 
         _schema = schema;
         _runs = runs;
         _forExport = forExport;
+        _request = request;
+        _peptideViewName = peptideViewName;
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("BestName"));
@@ -168,8 +174,12 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
         result.append(" ppf, ");
         result.append(MS2Manager.getTableInfoProteinGroups());
         result.append(" pg, ");
+        result.append(MS2Manager.getTableInfoPeptideMemberships());
+        result.append(" pm, ");
         result.append(MS2Manager.getTableInfoProteinGroupMemberships());
-        result.append(" pgm WHERE ppf.Run IN(");
+        result.append(" pgm, (");
+        result.append(_schema.getPeptideSelectSQL(_request, _peptideViewName, Collections.singletonList(FieldKey.fromParts("RowId"))));
+        result.append(" ) pep WHERE ppf.Run IN (");
         String separator = "";
         for (MS2Run run : _runs)
         {
@@ -177,7 +187,8 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
             separator = ", ";
             result.append(run.getRun());
         }
-        result.append(") AND ppf.RowId = pg.ProteinProphetFileId AND pg.RowId = pgm.ProteinGroupId GROUP BY Run, SeqId) x GROUP BY InnerSeqId)\n");
+        result.append(") AND ppf.RowId = pg.ProteinProphetFileId AND pg.RowId = pgm.ProteinGroupId AND pep.RowId = pm.PeptideId AND pm.ProteinGroupId = pg.RowId\n");
+        result.append("GROUP BY Run, SeqId) x GROUP BY InnerSeqId)\n");
         result.append(" AS RunProteinGroups WHERE RunProteinGroups.InnerSeqId = ");
         result.append(innerAlias);
         result.append(".SeqId) AS ");

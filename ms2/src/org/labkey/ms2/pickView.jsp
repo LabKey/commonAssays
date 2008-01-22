@@ -11,7 +11,7 @@
 <form method="get" action="<%=h(bean.nextUrl)%>">
     <input type="hidden" name="runList" value="<%=bean.runList%>">
     <%=bean.select%><br/>
-
+    <br/><br/>
     <% out.flush(); bean.extraOptionsView.render(request, response); %><br/>
     <input type="image" src="<%=PageFlowUtil.buttonSrc("Go")%>" name="submit">
 </form>

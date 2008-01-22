@@ -35,11 +35,11 @@ public abstract class CompareQuery extends SQLFragment
 
     public static CompareQuery getCompareQuery(String compareColumn /* TODO: Get this from url? */, ActionURL currentUrl, List<MS2Run> runs)
     {
-        if ("Peptide".equals(compareColumn))
+        if ("Peptide".equalsIgnoreCase(compareColumn))
             return new PeptideCompareQuery(currentUrl, runs);
-        else if ("Protein".equals(compareColumn))
+        else if ("Protein".equalsIgnoreCase(compareColumn))
             return new ProteinCompareQuery(currentUrl, runs);
-        else if ("ProteinProphet".equals(compareColumn))
+        else if ("ProteinProphet".equalsIgnoreCase(compareColumn))
             return new ProteinProphetCompareQuery(currentUrl, runs);
         else
             return null;

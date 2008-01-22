@@ -2,7 +2,6 @@ package org.labkey.ms2.query;
 
 import org.labkey.api.data.*;
 import org.labkey.api.view.ViewContext;
-import org.labkey.ms2.OldMS2Controller;
 import org.labkey.ms2.MS2Controller;
 
 import javax.servlet.ServletException;
@@ -13,9 +12,9 @@ import javax.servlet.ServletException;
  */
 public class ComparePeptidesView extends AbstractRunCompareView
 {
-    public ComparePeptidesView(ViewContext context, MS2Controller controller, int runListIndex, boolean forExport) throws ServletException
+    public ComparePeptidesView(ViewContext context, MS2Controller controller, int runListIndex, boolean forExport, String peptideViewName) throws ServletException
     {
-        super(context, controller, runListIndex, forExport, MS2Schema.COMPARE_PEPTIDES_TABLE_NAME);
+        super(context, controller, runListIndex, forExport, MS2Schema.COMPARE_PEPTIDES_TABLE_NAME, peptideViewName);
     }
 
     protected String getGroupingColumnName()
@@ -28,16 +27,6 @@ public class ComparePeptidesView extends AbstractRunCompareView
         return "Peptide Information";
     }
 
-    protected String getTSVExportActionName()
-    {
-        return "exportQueryPeptideCompareToTSV.view";
-    }
-
-    protected String getExcelExportActionName()
-    {
-        return "exportQueryPeptideCompareToExcel.view";
-    }
-
     public String getComparisonName()
     {
         return "Peptides";
@@ -45,6 +34,6 @@ public class ComparePeptidesView extends AbstractRunCompareView
 
     protected TableInfo createTable()
     {
-        return new ComparePeptideTableInfo(getSchema(), _runs, _forExport);
+        return getSchema().createPeptidesCompareTable(_forExport, getViewContext().getRequest(), _peptideViewName);
     }
 }

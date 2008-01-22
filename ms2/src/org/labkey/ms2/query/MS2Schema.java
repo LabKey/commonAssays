@@ -47,15 +47,6 @@ public class MS2Schema extends UserSchema
 
     private static final Set<String> HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("PeptideId");
 
-    private static final Set<SpectraCountConfiguration> SPECTRA_COUNT_CONFIGS = PageFlowUtil.set(
-            new SpectraCountConfiguration(true, true, true, true),
-            new SpectraCountConfiguration(true, true, true, false),
-            new SpectraCountConfiguration(false, true, true, true),
-            new SpectraCountConfiguration(false, true, false, false),
-            new SpectraCountConfiguration(true, true, true, true),
-            new SpectraCountConfiguration(true, true, true, true)
-    );
-
     private ProteinGroupProteins _proteinGroupProteins = new ProteinGroupProteins();
     private MS2Run[] _runs;
 
@@ -143,24 +134,34 @@ public class MS2Schema extends UserSchema
         }
         else if (COMPARE_PROTEIN_PROPHET_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return new CompareProteinProphetTableInfo(alias, this, null, false);
+            return createProteinProphetCompareTable(alias, null, null);
         }
         else if (COMPARE_PEPTIDES_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return new ComparePeptideTableInfo(this, null, false);
+            ComparePeptideTableInfo result = createPeptidesCompareTable(false, null, null);
+            result.setAlias(alias);
+            return result;
         }
         else
         {
-            for (SpectraCountConfiguration config : SPECTRA_COUNT_CONFIGS)
+            SpectraCountConfiguration config = SpectraCountConfiguration.findByTableName(name);
+            if (config != null)
             {
-                if (config.getTableName().equalsIgnoreCase((name)))
-                {
-                    return createSpectraCountTable(config, null, null);
-                }
+                return createSpectraCountTable(config, null, null);
             }
         }
 
         return super.getTable(name, alias);
+    }
+
+    public ComparePeptideTableInfo createPeptidesCompareTable(boolean forExport, HttpServletRequest request, String peptideViewName)
+    {
+        return new ComparePeptideTableInfo(this, _runs == null ? null : Arrays.asList(_runs), forExport, request, peptideViewName);
+    }
+
+    public CompareProteinProphetTableInfo createProteinProphetCompareTable(String alias, HttpServletRequest request, String peptideViewName)
+    {
+        return new CompareProteinProphetTableInfo(alias, this, _runs == null ? null : Arrays.asList(_runs), false, request, peptideViewName);
     }
 
     public TableInfo createRunsTable(String alias)
@@ -168,9 +169,9 @@ public class MS2Schema extends UserSchema
         return createSearchTable(alias, XTANDEM_PROTOCOL_PATTERN, MASCOT_PROTOCOL_PATTERN,SEQUEST_PROTOCOL_PATTERN);
     }
 
-    public PeptideCountTableInfo createSpectraCountTable(SpectraCountConfiguration config, HttpServletRequest request, String peptideViewName)
+    public SpectraCountTableInfo createSpectraCountTable(SpectraCountConfiguration config, HttpServletRequest request, String peptideViewName)
     {
-        return new PeptideCountTableInfo(this, config, request, peptideViewName);
+        return new SpectraCountTableInfo(this, config, request, peptideViewName);
     }
 
     public ProteinGroupTableInfo createProteinGroupsForSearchTable(String alias)
@@ -347,97 +348,22 @@ public class MS2Schema extends UserSchema
         return _runs;
     }
 
-    public static class SpectraCountConfiguration
+    protected SQLFragment getPeptideSelectSQL(HttpServletRequest request, String viewName, Collection<FieldKey> fieldKeys)
     {
-        final private boolean _groupedByCharge;
-        final private boolean _groupedByPeptide;
-        final private boolean _groupedByProtein;
-
-        final private boolean _usingProteinProphet;
-
-        final private String _tableName;
-
-        public SpectraCountConfiguration(boolean groupedByCharge, boolean groupedByPeptide, boolean groupedByProtein, boolean usingProteinProphet)
+        QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, MS2Schema.PEPTIDES_TABLE_NAME);
+        SimpleFilter filter = new SimpleFilter();
+        CustomView view = queryDef.getCustomView(getUser(), request, viewName);
+        if (view != null)
         {
-            _groupedByCharge = groupedByCharge;
-            _groupedByPeptide = groupedByPeptide;
-            _groupedByProtein = groupedByProtein;
-            _usingProteinProphet = usingProteinProphet;
-
-            StringBuilder queryName = new StringBuilder("SpectraCount");
-            if (_groupedByPeptide)
-            {
-                queryName.append("Peptide");
-            }
-            if (_groupedByCharge)
-            {
-                queryName.append("Charge");
-            }
-            if (_groupedByProtein)
-            {
-                queryName.append("Protein");
-            }
-            if (_usingProteinProphet)
-            {
-                queryName.append("PP");
-            }
-
-            assert _groupedByCharge || _groupedByPeptide || _groupedByProtein : "Must group by at least one column";
-            assert !_usingProteinProphet || _groupedByProtein : "To use ProteinProphet info you must group by protein";
-
-            _tableName = queryName.toString();
+            ActionURL url = new ActionURL();
+            view.applyFilterAndSortToURL(url, "InternalName");
+            filter.addUrlFilters(url, "InternalName");
         }
 
-        public boolean isGroupedByCharge()
-        {
-            return _groupedByCharge;
-        }
+        TableInfo peptidesTable = createPeptidesTable("PeptidesAlias");
 
-        public boolean isGroupedByPeptide()
-        {
-            return _groupedByPeptide;
-        }
+        ColumnInfo[] peptideCols = QueryService.get().getColumns(peptidesTable, fieldKeys).values().toArray(new ColumnInfo[0]);
 
-        public boolean isGroupedByProtein()
-        {
-            return _groupedByProtein;
-        }
-
-        public boolean isUsingProteinProphet()
-        {
-            return _usingProteinProphet;
-        }
-
-        public String getTableName()
-        {
-            return _tableName;
-        }
-
-        public boolean equals(Object o)
-        {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            SpectraCountConfiguration that = (SpectraCountConfiguration) o;
-
-            if (_groupedByCharge != that._groupedByCharge) return false;
-            if (_groupedByPeptide != that._groupedByPeptide) return false;
-            if (_groupedByProtein != that._groupedByProtein) return false;
-            if (_usingProteinProphet != that._usingProteinProphet) return false;
-
-            return true;
-        }
-
-        public int hashCode()
-        {
-            int result;
-            result = (_groupedByCharge ? 1 : 0);
-            result = 31 * result + (_groupedByPeptide ? 1 : 0);
-            result = 31 * result + (_groupedByProtein ? 1 : 0);
-            result = 31 * result + (_usingProteinProphet ? 1 : 0);
-            return result;
-        }
+        return Table.getSelectSQL(peptidesTable, peptideCols, filter, new Sort());
     }
-
-
 }

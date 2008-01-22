@@ -6,13 +6,14 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.VirtualTable;
-import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.LookupForeignKey;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.sql.Types;
 
 /**
@@ -23,15 +24,17 @@ public class ComparePeptideTableInfo extends VirtualTable
 {
     private final MS2Schema _schema;
     private final List<MS2Run> _runs;
-    private final boolean _forExport;
+    private final HttpServletRequest _request;
+    private final String _peptideViewName;
 
-    public ComparePeptideTableInfo(MS2Schema schema, List<MS2Run> runs, boolean forExport)
+    public ComparePeptideTableInfo(MS2Schema schema, List<MS2Run> runs, boolean forExport, HttpServletRequest request, String peptideViewName)
     {
         super(MS2Manager.getSchema());
 
         _schema = schema;
         _runs = runs;
-        _forExport = forExport;
+        _request = request;
+        _peptideViewName = peptideViewName;
 
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("PeptideSequence"));
@@ -57,7 +60,7 @@ public class ComparePeptideTableInfo extends VirtualTable
                         return new PeptidesTableInfo(_schema);
                     }
                 };
-                if (!_forExport)
+                if (!forExport)
                 {
                     fk.setPrefixColumnCaption(false);
                 }
@@ -143,8 +146,14 @@ public class ComparePeptideTableInfo extends VirtualTable
         }
         result.append( "\nFROM ");
         result.append(MS2Manager.getTableInfoFractions());
-        result.append(" f, ");
-        result.append(MS2Manager.getTableInfoPeptidesData());
+        result.append(" f, (");
+        List<FieldKey> fieldKeys = Arrays.asList(
+                FieldKey.fromParts("Fraction"),
+                FieldKey.fromParts("Peptide"),
+                FieldKey.fromParts("RowId")
+        );
+        result.append(_schema.getPeptideSelectSQL(_request, _peptideViewName, fieldKeys));
+        result.append(") ");
         result.append(" p WHERE f.Run IN(");
         String separator = "";
         for (MS2Run run : _runs)

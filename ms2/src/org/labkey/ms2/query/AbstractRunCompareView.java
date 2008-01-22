@@ -22,7 +22,7 @@ import java.util.*;
  * User: jeckels
  * Date: Jun 21, 2007
  */
-public abstract class AbstractRunCompareView  extends QueryView
+public abstract class AbstractRunCompareView extends QueryView
 {
     protected final List<MS2Run> _runs;
     private int _runListIndex;
@@ -31,10 +31,12 @@ public abstract class AbstractRunCompareView  extends QueryView
     private List<FieldKey> _columns;
 
     private List<String> _errors = new ArrayList<String>();
+    protected final String _peptideViewName;
 
-    public AbstractRunCompareView(ViewContext context, MS2Controller controller, int runListIndex, boolean forExport, String tableName) throws ServletException
+    public AbstractRunCompareView(ViewContext context, MS2Controller controller, int runListIndex, boolean forExport, String tableName, String peptideViewName) throws ServletException
     {
         super(new MS2Schema(context.getUser(), context.getContainer()), createSettings(context, tableName));
+        _peptideViewName = peptideViewName;
 
         _viewContext.setActionURL(context.getActionURL());
 
@@ -57,8 +59,9 @@ public abstract class AbstractRunCompareView  extends QueryView
             _forExport = forExport;
 
             setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
-            setShowExportButtons(false);
         }
+        // ExcelWebQueries won't be part of the same HTTP session so we won't have access to the run list anymore
+        setAllowExcelWebQuery(false);
     }
 
     public List<MS2Run> getRuns()
@@ -295,27 +298,6 @@ public abstract class AbstractRunCompareView  extends QueryView
 
         return ret;
     }
-
-    protected void populateButtonBar(DataView view, ButtonBar bar)
-    {
-        super.populateButtonBar(view, bar);
-
-        ActionURL excelURL = getViewContext().cloneActionURL();
-        excelURL.setAction(getExcelExportActionName());
-        excelURL.addParameter("runList", Integer.toString(_runListIndex));
-        ActionButton excelButton = new ActionButton("Export to Excel", excelURL);
-        bar.add(excelButton);
-
-        ActionURL tsvURL = getViewContext().cloneActionURL();
-        tsvURL.setAction(getTSVExportActionName());
-        excelURL.addParameter("runList", Integer.toString(_runListIndex));
-        ActionButton tsvButton = new ActionButton("Export to TSV", tsvURL);
-        bar.add(tsvButton);
-    }
-
-    protected abstract String getTSVExportActionName();
-
-    protected abstract String getExcelExportActionName();
 
     public abstract String getComparisonName();
 }
