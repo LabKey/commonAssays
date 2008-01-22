@@ -536,7 +536,6 @@ ms1/src/org/labkey/ms1/query/FeaturesFilter.java -text
 ms1/src/org/labkey/ms1/query/FeaturesFilterFactory.java -text
 ms1/src/org/labkey/ms1/query/FeaturesTableInfo.java -text
 ms1/src/org/labkey/ms1/query/FilesTableInfo.java -text
-ms1/src/org/labkey/ms1/query/FindSimilarDisplayColumn.java -text
 ms1/src/org/labkey/ms1/query/ListFilterBase.java -text
 ms1/src/org/labkey/ms1/query/MS1Schema.java -text
 ms1/src/org/labkey/ms1/query/MzFilter.java -text

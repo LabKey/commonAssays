@@ -93,9 +93,9 @@ public class FeaturesView extends QueryView
         int id = -1;
         try
         {
-            RenderContext ctx = new RenderContext(getViewContext());
-            ctx.setBaseSort(getBaseSort());
-            rs = createDataRegion().getResultSet(ctx);
+            //make sure we get all rows and not just the current page
+            getSettings().setShowAllRows(true);
+            rs = getResultset();
             while(rs.next())
             {
                 id = rs.getInt("FeatureId");
@@ -152,7 +152,10 @@ public class FeaturesView extends QueryView
 
         //if this is for export, remove the details and peaks links
         if(_forExport)
-            region.removeColumnsFromDisplayColumnList(PeaksAvailableColumnInfo.COLUMN_NAME);
+        {
+            region.removeColumnsFromDisplayColumnList(PeaksAvailableColumnInfo.COLUMN_NAME,
+                    FeaturesTableInfo.COLUMN_FIND_SIMILAR_LINK);
+        }
         return region;
     }
 
