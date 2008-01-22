@@ -6,6 +6,7 @@ import org.labkey.api.data.Container;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 import java.sql.SQLException;
 
 
@@ -29,7 +30,7 @@ public class NabPlateTypeHandler implements PlateTypeHandler
 
     public PlateTemplate createPlate(String templateTypeName, Container container) throws SQLException
     {
-        PlateTemplate template = PlateService.get().createPlateTemplate(container);
+        PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType());
         for (NabManager.PlateProperty prop : NabManager.PlateProperty.values())
             template.setProperty(prop.name(), "");
 
@@ -60,5 +61,12 @@ public class NabPlateTypeHandler implements PlateTypeHandler
             }
         }
         return template;
+    }
+
+    public WellGroup.Type[] getWellGroupTypes()
+    {
+        return new WellGroup.Type[]{
+                WellGroup.Type.CONTROL, WellGroup.Type.SPECIMEN,
+                WellGroup.Type.REPLICATE, WellGroup.Type.OTHER};
     }
 }
