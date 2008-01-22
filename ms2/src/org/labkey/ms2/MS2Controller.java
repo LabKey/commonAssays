@@ -28,10 +28,7 @@ import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.SensitivitySummary;
 import org.labkey.common.util.Pair;
-import org.labkey.ms2.compare.CompareDataRegion;
-import org.labkey.ms2.compare.CompareExcelWriter;
-import org.labkey.ms2.compare.CompareQuery;
-import org.labkey.ms2.compare.RunColumn;
+import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
 import org.labkey.ms2.pipeline.*;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
@@ -1626,13 +1623,7 @@ public class MS2Controller extends SpringActionController
             settings.setQueryName(config.getTableName());
 
             schema.setRuns(_runs.toArray(new MS2Run[_runs.size()]));
-            QueryView view = new QueryView(schema, settings)
-            {
-                protected TableInfo createTable()
-                {
-                    return schema.createSpectraCountTable(config, getViewContext().getRequest(), peptideViewName);
-                }
-            };
+            QueryView view = new SpectraCountQueryView(schema, settings, config, peptideViewName, form.getRunList());
             view.setShowRReportButton(true);
             view.setTitle("Spectra Counts");
             // ExcelWebQueries won't be part of the same HTTP session so we won't have access to the run list anymore
@@ -1644,6 +1635,7 @@ public class MS2Controller extends SpringActionController
         {
             return root;
         }
+
     }
 
     private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column) throws Exception
@@ -4570,4 +4562,5 @@ public class MS2Controller extends SpringActionController
             return _runList;
         }
     }
+
 }

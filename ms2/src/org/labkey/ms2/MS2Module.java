@@ -33,6 +33,7 @@ import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
+import org.labkey.api.reports.ReportService;
 import org.labkey.ms2.pipeline.*;
 import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.*;
@@ -45,6 +46,7 @@ import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
+import org.labkey.ms2.compare.SpectraCountRReport;
 
 import java.beans.PropertyChangeEvent;
 import java.io.File;
@@ -149,6 +151,9 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         //We are the first creator of this...
         ContainerManager.addContainerListener(this);
         ModuleLoader.getInstance().registerFolderType(new MS2FolderType(this));
+
+        ReportService.get().registerReport(SpectraCountRReport.TYPE, SpectraCountRReport.class);
+
         super.startup(context);
     }
 

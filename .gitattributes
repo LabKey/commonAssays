@@ -784,6 +784,8 @@ ms2/src/org/labkey/ms2/compare/PeptideCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/ProteinCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/ProteinProphetCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/RunColumn.java -text
+ms2/src/org/labkey/ms2/compare/SpectraCountQueryView.java -text
+ms2/src/org/labkey/ms2/compare/SpectraCountRReport.java -text
 ms2/src/org/labkey/ms2/compare/comparePeptidesOptions.jsp -text
 ms2/src/org/labkey/ms2/compare/compareProteinProphetOptions.jsp -text
 ms2/src/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp -text
