@@ -2,14 +2,12 @@ package org.labkey.elispot;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.security.User;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AssayService;
-import org.labkey.api.util.PageFlowUtil;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Collection;
@@ -22,7 +20,7 @@ public class ElispotModule extends DefaultModule implements ContainerManager.Con
 
     public ElispotModule()
     {
-        super(NAME, 0.01, null, true);
+        super(NAME, 0.01, null, false);
         addController("elispot", ElispotController.class);
     }
 
