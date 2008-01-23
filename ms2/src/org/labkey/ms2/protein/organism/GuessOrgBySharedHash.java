@@ -28,7 +28,7 @@ public class GuessOrgBySharedHash extends Timer implements OrganismGuessStrategy
                 " WHERE c.orgid IN " +
                 "   (SELECT a.orgid FROM " + ProteinManager.getTableInfoSequences() + " a JOIN " + ProteinManager.getTableInfoOrganisms() + " b ON (a.orgid=b.orgid) WHERE a.hash=?) " +
                 " GROUP BY d.orgid,d.genus,d.species ORDER BY COUNT(*) DESC");
-        _schema.getSqlDialect().limitRows(sb, 1, 0);
+        _schema.getSqlDialect().limitRows(sb, 1);
         HASHCMD = sb.toString();
     }
 

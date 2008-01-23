@@ -728,7 +728,7 @@ public class ProteinManager
             proteinOrderBy = proteinOrderBy.replaceAll("Description", "prot.Description");
             proteinSql.append(proteinOrderBy);
 
-            getSqlDialect().limitRows(proteinSql, maxRows + 1, offset);
+            getSqlDialect().limitRows(proteinSql, maxRows + 1);
         }
 
         sql.append(proteinSql);
@@ -931,7 +931,7 @@ public class ProteinManager
             sql.append(getProteinGroupCombinedOrderBy(currentUrl, MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId"));
         if (maxProteinRows > 0)
         {
-            getSqlDialect().limitRows(sql, maxProteinRows + 1, offset);
+            getSqlDialect().limitRows(sql, maxProteinRows + 1);
         }
 
         return sql;
