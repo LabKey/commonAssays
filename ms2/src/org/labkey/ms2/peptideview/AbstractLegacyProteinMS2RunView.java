@@ -6,6 +6,7 @@ import org.labkey.api.view.WebPartView;
 import org.labkey.api.data.*;
 import org.labkey.api.util.CaseInsensitiveHashMap;
 import org.labkey.ms2.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletOutputStream;
@@ -34,12 +35,12 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         super(viewContext, columnPropertyName, runs);
     }
 
-    public void exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public ModelAndView exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
     {
         form.setColumns(AMT_PEPTIDE_COLUMN_NAMES);
         form.setExpanded(true);
         form.setProteinColumns("");
-        exportToTSV(form, response, selectedRows, getAMTFileHeader());
+        return exportToTSV(form, response, selectedRows, getAMTFileHeader());
     }
 
     protected abstract List<DisplayColumn> getProteinDisplayColumns(String requestedProteinColumnNames, boolean forExport) throws SQLException;
@@ -101,7 +102,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         return rgn;
     }
 
-    public void exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
     {
         String where = createExtraWhere(selectedRows);
 
@@ -153,6 +154,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         }
 
         ExcelWriter.closeWorkbook(workbook, outputStream);
+        return null;
     }
 
     protected abstract String createExtraWhere(List<String> selectedRows);

@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 import org.labkey.ms2.OldMS2Controller;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * User: jeckels
@@ -409,11 +410,11 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     public abstract String[] getPeptideStringsForGrouping(OldMS2Controller.DetailsForm form) throws SQLException;
 
-    public abstract void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception;
+    public abstract ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception;
 
-    public abstract void exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
+    public abstract ModelAndView exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
 
-    public abstract void exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
+    public abstract ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception;
 
     protected class PeptideColumnNameList extends MS2Run.ColumnNameList
     {

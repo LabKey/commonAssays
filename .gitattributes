@@ -765,6 +765,7 @@ ms2/src/org/labkey/ms2/ProteinProphetFile.java -text
 ms2/src/org/labkey/ms2/ProteinProphetImporter.java -text
 ms2/src/org/labkey/ms2/ProteinSummary.java -text
 ms2/src/org/labkey/ms2/Quantitation.java -text
+ms2/src/org/labkey/ms2/RunListException.java -text
 ms2/src/org/labkey/ms2/SequestRun.java -text
 ms2/src/org/labkey/ms2/ShowPeptideContext.java -text
 ms2/src/org/labkey/ms2/Spectrum.java -text

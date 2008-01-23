@@ -10,6 +10,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.RunListException;
 import org.labkey.ms2.client.CompareResult;
 import org.labkey.ms2.compare.CompareDataRegion;
 
@@ -24,7 +25,7 @@ import java.util.*;
  */
 public abstract class AbstractRunCompareView extends QueryView
 {
-    protected final List<MS2Run> _runs;
+    protected List<MS2Run> _runs;
     private int _runListIndex;
     protected boolean _forExport;
     private SimpleFilter _runFilter = new SimpleFilter();
@@ -40,7 +41,15 @@ public abstract class AbstractRunCompareView extends QueryView
 
         _viewContext.setActionURL(context.getActionURL());
 
-        _runs = controller.getCachedRuns(runListIndex, _errors, false);
+        try
+        {
+            _runs = controller.getCachedRuns(runListIndex, false);
+        }
+        catch (RunListException e)
+        {
+            _runs = null;
+            _errors = e.getMessages();
+        }
 
         if (_runs != null)
         {

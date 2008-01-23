@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.HashMap;
 
 import org.labkey.ms2.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -103,7 +104,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         return getColumns(_calculatedPeptideColumns, new PeptideColumnNameList(peptideColumnNames), MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoPeptideMemberships());
     }
 
-    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+    public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
     {
         String where = createExtraWhere(selectedRows);
 
@@ -120,6 +121,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
             exportTSVProteinGrid(tw, form.getColumns(), run, where);
 
         tw.close();
+        return null;
     }
 
     protected String createExtraWhere(List<String> selectedRows)

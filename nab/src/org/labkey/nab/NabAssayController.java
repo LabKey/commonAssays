@@ -419,7 +419,7 @@ public class NabAssayController extends SpringActionController
     {
         public NabDetailsHeaderView(ExpProtocol protocol, AssayProvider provider, int runId)
         {
-            super(protocol, provider);
+            super(protocol, provider, false);
             if (getViewContext().hasPermission(ACL.PERM_INSERT))
                 _links.put("new run", provider.getUploadWizardURL(getContainer(), protocol));
             ActionURL downloadURL = new ActionURL("NabAssay", "downloadDatafile", getContainer()).addParameter("rowId", runId);
@@ -608,7 +608,7 @@ public class NabAssayController extends SpringActionController
             JspView<GraphSelectedBean> multiGraphView = new JspView<GraphSelectedBean>("/org/labkey/nab/multiRunGraph.jsp",
                     new GraphSelectedBean(getViewContext(), _protocol, summaries.toArray(new DilutionSummary[summaries.size()]), toArray(cutoffSet), objectIds));
 
-            return new VBox(new AssayHeaderView(_protocol, AssayService.get().getProvider(_protocol)), multiGraphView);
+            return new VBox(new AssayHeaderView(_protocol, AssayService.get().getProvider(_protocol), false), multiGraphView);
         }
 
         public NavTree appendNavTrail(NavTree root)

@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import org.labkey.ms2.OldMS2Controller;
 import org.labkey.ms2.MS2Controller;
+import org.springframework.web.servlet.ModelAndView;
 import jxl.write.WritableWorkbook;
 
 /**
@@ -43,15 +44,15 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
     }
 
 
-    public void exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public ModelAndView exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
     {
         form.setColumns(AMT_PEPTIDE_COLUMN_NAMES);
         form.setExpanded(true);
         form.setProteinColumns("");
-        exportToTSV(form, response, selectedRows, getAMTFileHeader());
+        return exportToTSV(form, response, selectedRows, getAMTFileHeader());
     }
 
-    public void exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
+    public ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws Exception
     {
         List<MS2Run> runs = Arrays.asList(_runs);
         SimpleFilter filter = createFilter(selectedRows);
@@ -128,6 +129,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         
 
         ExcelWriter.closeWorkbook(workbook, outputStream);
+        return null;
     }
 
     private SimpleFilter createFilter(List<String> selectedRows)
@@ -231,7 +233,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         throw new UnsupportedOperationException();
     }
 
-    public void exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
+    public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception
     {
         List<MS2Run> runs = Arrays.asList(_runs);
         SimpleFilter filter = createFilter(selectedRows);
@@ -251,6 +253,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         tw.setFilenamePrefix("MS2Runs");
         tw.setFileHeader(headers);   // Used for AMT file export
         tw.write(response);
+        return null;
     }
 
     protected List<String> getExportFormats()

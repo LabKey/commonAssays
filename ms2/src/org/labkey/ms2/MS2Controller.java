@@ -179,7 +179,6 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            ButtonBar bb = getListButtonBar(getContainer());
             ActionURL currentUrl = getViewContext().cloneActionURL();
             DataRegion rgn = new DataRegion();
             rgn.setName(MS2Manager.getDataRegionNameExperimentRuns());
@@ -187,7 +186,6 @@ public class MS2Controller extends SpringActionController
             for (int i = 4; i < rgn.getDisplayColumnList().size(); i++)
                 rgn.getDisplayColumn(i).setVisible(false);
 
-            rgn.addColumn(new HideShowScoringColumn(bb));
 
             currentUrl.setAction("showRun");
             currentUrl.deleteParameters();
@@ -195,12 +193,15 @@ public class MS2Controller extends SpringActionController
             // TODO: What does this do?
             rgn.setFixedWidthColumns(false);
             rgn.setShowRecordSelectors(true);
-            rgn.setButtonBar(bb, DataRegion.MODE_GRID);
 
             GridView gridView = new GridView(rgn);
             gridView.setTitle("MS2 Runs");
             gridView.setFilter(new SimpleFilter("Deleted", Boolean.FALSE));
             gridView.setSort(MS2Manager.getRunsBaseSort());
+
+            ButtonBar bb = getListButtonBar(getContainer(), gridView);
+            rgn.addColumn(new HideShowScoringColumn(bb));
+            rgn.setButtonBar(bb, DataRegion.MODE_GRID);
 
             ProteinSearchWebPart searchView = new ProteinSearchWebPart(true);
 
@@ -218,16 +219,60 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    public static MenuButton createCompareMenu(Container container, DataView view, boolean experimentRunIds)
+    {
+        MenuButton compareMenu = new MenuButton("Compare");
+        compareMenu.setDisplayPermission(ACL.PERM_READ);
 
-    private ButtonBar getListButtonBar(Container c)
+        ActionURL proteinProphetURL = new ActionURL(MS2Controller.CompareProteinProphetSetupAction.class, container);
+        String selectionKey = view.getDataRegion().getSelectionKey();
+        proteinProphetURL.addParameter("selectionKey", selectionKey);
+        if (experimentRunIds)
+        {
+            proteinProphetURL.addParameter("experimentRunIds", "true");
+        }
+        compareMenu.addMenuItem("ProteinProphet", createVerifySelectedScript(view, proteinProphetURL));
+
+        ActionURL searchEngineURL = new ActionURL(MS2Controller.CompareSearchEngineProteinSetupAction.class, container);
+        if (experimentRunIds)
+        {
+            searchEngineURL.addParameter("experimentRunIds", "true");
+        }
+        compareMenu.addMenuItem("Search Engine Protein", createVerifySelectedScript(view, searchEngineURL));
+
+        ActionURL peptidesURL = new ActionURL(MS2Controller.ComparePeptidesSetupAction.class, container);
+        if (experimentRunIds)
+        {
+            peptidesURL.addParameter("experimentRunIds", "true");
+        }
+        compareMenu.addMenuItem("Peptide", createVerifySelectedScript(view, peptidesURL));
+
+        ActionURL proteinProphetQueryURL = new ActionURL(MS2Controller.CompareProteinProphetQuerySetupAction.class, container);
+        if (experimentRunIds)
+        {
+            proteinProphetQueryURL.addParameter("experimentRunIds", "true");
+        }
+        compareMenu.addMenuItem("ProteinProphet (Query)", createVerifySelectedScript(view, proteinProphetQueryURL));
+
+        ActionURL spectraURL = new ActionURL(MS2Controller.SpectraCountSetupAction.class, container);
+        if (experimentRunIds)
+        {
+            spectraURL.addParameter("experimentRunIds", "true");
+        }
+        compareMenu.addMenuItem("Spectra Count", createVerifySelectedScript(view, spectraURL));
+        return compareMenu;
+    }
+
+    public static String createVerifySelectedScript(DataView view, ActionURL url)
+    {
+        return "javascript: if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"post\", \"runs\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); }";
+    }
+
+    private ButtonBar getListButtonBar(Container c, GridView view)
     {
         ButtonBar bb = new ButtonBar();
 
-        ActionButton compareRuns = new ActionButton("button", "Compare");
-        compareRuns.setScript("return verifySelected(this.form, \"compare.view\", \"post\", \"runs\")");
-        compareRuns.setActionType(ActionButton.Action.GET);
-        compareRuns.setDisplayPermission(ACL.PERM_READ);
-        bb.add(compareRuns);
+        bb.add(createCompareMenu(c, view, false));
 
         ActionButton compareScoring = new ActionButton("", CAPTION_SCORING_BUTTON);
         compareScoring.setScript("return verifySelected(this.form, \"" + ActionURL.toPathString("MS2-Scoring", "compare", c.getPath())+ "\", \"get\", \"runs\")");
@@ -436,7 +481,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private Map<String, Object> getViewMap(boolean includeUser, boolean includeShared, boolean mapValue) throws SQLException, ServletException
+    private Map<String, Object> getViewMap(boolean includeUser, boolean includeShared, boolean mapValue)
     {
         Map<String, Object> m = new HashMap<String, Object>();
 
@@ -504,7 +549,7 @@ public class MS2Controller extends SpringActionController
     // multi-select normal list box.  postValue determines whether to post the value or the name of selected view(s)
     //
     // Caller is responsible for wrapping this in a <form> and (if desired) a <table>
-    private StringBuilder renderViewSelect(int height, boolean postValue, int sharedPerm, boolean selectCurrent) throws SQLException, ServletException
+    private StringBuilder renderViewSelect(int height, boolean postValue, int sharedPerm, boolean selectCurrent)
     {
         Map<String, Object> m = getViewMap(true, getContainer().hasPermission(getUser(), sharedPerm), postValue);
 
@@ -1022,7 +1067,7 @@ public class MS2Controller extends SpringActionController
         public int runList;
     }
 
-    public abstract class LegacyCompareSetupAction extends AbstractRunListAction
+    public abstract class LegacyCompareSetupAction extends AbstractRunListCreationAction
     {
         private String _optionsJSP;
         private String _description;
@@ -1034,7 +1079,7 @@ public class MS2Controller extends SpringActionController
             _description = description;
         }
 
-        protected ModelAndView getView(Object o, BindException errors, int runListId) throws Exception
+        protected ModelAndView getView(Object o, BindException errors, int runListId)
         {
             JspView<CompareOptionsBean> extraCompareOptions = new JspView<CompareOptionsBean>(_optionsJSP);
 
@@ -1078,7 +1123,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class CompareProteinProphetQuerySetupAction extends AbstractRunListAction
+    public class CompareProteinProphetQuerySetupAction extends AbstractRunListCreationAction
     {
         protected static final String COMPARE_PROTEIN_PROPHET_PEPTIDES_FILTER = "ComparePeptidesPeptidesFilter";
 
@@ -1087,7 +1132,7 @@ public class MS2Controller extends SpringActionController
             super(false);
         }
 
-        public ModelAndView getView(Object o, BindException errors, int runListId) throws Exception
+        public ModelAndView getView(Object o, BindException errors, int runListId)
         {
             QuerySettings peptidesSettings = new QuerySettings(new ActionURL(), COMPARE_PROTEIN_PROPHET_PEPTIDES_FILTER);
             peptidesSettings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
@@ -1141,7 +1186,7 @@ public class MS2Controller extends SpringActionController
     }
 
     // extraFormHtml gets inserted between the view dropdown and the button.
-    private HttpView pickView(ActionURL nextUrl, String viewInstructions, HttpView embeddedView, int runListId) throws Exception
+    private HttpView pickView(ActionURL nextUrl, String viewInstructions, HttpView embeddedView, int runListId)
     {
         JspView<PickViewBean> pickView = new JspView<PickViewBean>("/org/labkey/ms2/pickView.jsp", new PickViewBean());
 
@@ -1162,14 +1207,14 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class PickExportRunsView extends AbstractRunListAction
+    public class PickExportRunsView extends AbstractRunListCreationAction
     {
         public PickExportRunsView()
         {
             super(true);
         }
 
-        public ModelAndView getView(Object o, BindException errors, int runListId) throws Exception
+        public ModelAndView getView(Object o, BindException errors, int runListId)
         {
             JspView extraExportView = new JspView("/org/labkey/ms2/extraExportOptions.jsp");
             return pickView(getViewContext().cloneActionURL().setAction("applyExportRunsView"), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraExportView, runListId);
@@ -1196,34 +1241,77 @@ public class MS2Controller extends SpringActionController
         return cache;
     }
 
-    public List<MS2Run> getCachedRuns(int index, List<String> errors, boolean requireSameType) throws ServletException
+    public List<MS2Run> getCachedRuns(int index, boolean requireSameType) throws RunListException, ServletException
     {
         List<Integer> runIds = getRunListCache().get(index);
 
         if (null == runIds)
         {
-            errors.add(NO_RUNS_MESSAGE);
-            return null;
+            throw new RunListException(NO_RUNS_MESSAGE);
         }
 
-        return getRuns(runIds, errors, requireSameType);
+        return lookupRuns(runIds, requireSameType);
     }
 
     private static int RUN_LIST_ID = 0;
 
     // We cache just the list of run IDs, not the runs themselves.  This keeps things small and eases mem tracking.  Even though we're
     // just caching the list, we do all error & security checks upfront to alert the user early.
-    private int cacheSelectedRuns(List<String> errors, boolean requireSameType) throws ServletException
+    private int cacheSelectedRuns(boolean requireSameType, RunListForm form) throws ServletException, RunListException
     {
-        List<MS2Run> runs = getSelectedRuns(errors, requireSameType);
+        ViewContext ctx = getViewContext();
+        Set<String> stringIds = DataRegionSelection.getSelected(ctx, true);
 
-        if (errors.size() > 0)
-            return 0;
+        if (null == stringIds)
+        {
+            throw new RunListException(NO_RUNS_MESSAGE);
+        }
 
-        List<Integer> runIds = new ArrayList<Integer>(runs.size());
+        List<Integer> runIds = new ArrayList<Integer>(stringIds.size());
 
-        for (MS2Run run : runs)
-            runIds.add(run.getRun());
+        List<String> parseErrors = new ArrayList<String>();
+        for (String stringId : stringIds)
+        {
+            try
+            {
+                int id = Integer.parseInt(stringId);
+                if (form.isExperimentRunIds())
+                {
+                    ExpRun expRun = ExperimentService.get().getExpRun(id);
+                    if (expRun != null)
+                    {
+                        MS2Run run = MS2Manager.getRunByExperimentRunLSID(expRun.getLSID());
+                        if (run == null)
+                        {
+                            parseErrors.add("Could not find run with id " + id);
+                        }
+                        else
+                        {
+                            runIds.add(run.getRun());
+                        }
+                    }
+                    else
+                    {
+                        parseErrors.add("Could not find experiment run with RowId " + id);
+                    }
+                }
+                else
+                {
+                    runIds.add(id);
+                }
+            }
+            catch (NumberFormatException e)
+            {
+                _log.error("getSelectedRuns", e);
+                parseErrors.add("Run " + stringId + ": Number format error");
+            }
+        }
+        if (!parseErrors.isEmpty())
+        {
+            throw new RunListException(parseErrors);
+        }
+
+        lookupRuns(runIds, requireSameType);
 
         int index = RUN_LIST_ID++;
 
@@ -1232,57 +1320,15 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private List<MS2Run> getSelectedRuns(List<String> errors, boolean requireSameType) throws ServletException
+    private List<MS2Run> lookupRuns(List<Integer> runIds, boolean requireSameType) throws ServletException, RunListException
     {
-        ViewContext ctx = getViewContext();
-        List<String> stringIds = ctx.getList(DataRegion.SELECT_CHECKBOX_NAME);
-
-        if (null == stringIds)
-        {
-            errors.add(NO_RUNS_MESSAGE);
-            return null;
-        }
-
-        List<Integer> runIds = new ArrayList<Integer>(stringIds.size());
-
-        for (String stringId : stringIds)
-        {
-            try
-            {
-                runIds.add(Integer.parseInt(stringId));
-            }
-            catch (NumberFormatException e)
-            {
-                _log.error("getSelectedRuns", e);
-                errors.add("Run " + stringId + ": Number format error");
-            }
-        }
-
-        return getRuns(runIds, errors, requireSameType);
-    }
-
-
-    private List<MS2Run> getRuns(List<Integer> runIds, List<String> errors, boolean requireSameType) throws ServletException
-    {
+        List<String> errors = new ArrayList<String>();
         List<MS2Run> runs = new ArrayList<MS2Run>(runIds.size());
-        boolean experimentRunIds = "true".equals(getViewContext().getRequest().getParameter("ExperimentRunIds"));
         String type = null;
 
         for (Integer runId : runIds)
         {
-            MS2Run run = null;
-            if (experimentRunIds)
-            {
-                ExpRun expRun = ExperimentService.get().getExpRun(runId.intValue());
-                if (expRun != null)
-                {
-                    run = MS2Manager.getRunByExperimentRunLSID(expRun.getLSID());
-                }
-            }
-            else
-            {
-                run = MS2Manager.getRun(runId);
-            }
+            MS2Run run = MS2Manager.getRun(runId.intValue());
 
             if (null == run)
             {
@@ -1328,6 +1374,11 @@ public class MS2Controller extends SpringActionController
             runs.add(run);
         }
 
+        if (!errors.isEmpty())
+        {
+            throw new RunListException(errors);
+        }
+
         return runs;
     }
 
@@ -1345,7 +1396,7 @@ public class MS2Controller extends SpringActionController
             {
                 ids.add(new Integer(idString));
             }
-            List<MS2Run> runs = getRuns(ids, new ArrayList<String>(), false);
+            List<MS2Run> runs = lookupRuns(ids, false);
             List<ExpRun> expRuns = new ArrayList<ExpRun>();
             Container sourceContainer = null;
             for (Iterator<MS2Run> iter = runs.iterator(); iter.hasNext(); )
@@ -1393,12 +1444,14 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ExportForm form, HttpServletResponse response) throws Exception
         {
-            List<String> errorStrings = new ArrayList<String>();
-            List<MS2Run> runs = getCachedRuns(form.getRunList(), errorStrings, true);
-
-            if (!errorStrings.isEmpty())
+            List<MS2Run> runs;
+            try
             {
-                _renderErrors(errorStrings);  // TODO: throw
+                runs = getCachedRuns(form.getRunList(), true);
+            }
+            catch (RunListException e)
+            {
+                _renderErrors(e.getMessages());  // TODO: throw
                 return;
             }
 
@@ -1410,11 +1463,13 @@ public class MS2Controller extends SpringActionController
             if (form.getExportFormat() != null && form.getExportFormat().startsWith("Excel"))
             {
                 peptideView.exportToExcel(form, response, null);
+                return;
             }
 
             if ("TSV".equals(form.getExportFormat()))
             {
                 peptideView.exportToTSV(form, response, null, null);
+                return;
             }
 
             if ("DTA".equals(form.getExportFormat()) || "PKL".equals(form.getExportFormat()))
@@ -1423,12 +1478,16 @@ public class MS2Controller extends SpringActionController
                     exportSpectra(runs, currentUrl, peptideFilter, form.getExportFormat().toLowerCase());
                 else
                     exportProteinsAsSpectra(runs, currentUrl, form.getExportFormat().toLowerCase(), peptideView, null);
+                return;
             }
 
             if ("AMT".equals(form.getExportFormat()))
             {
                 peptideView.exportToAMT(form, response, null);
+                return;
             }
+
+            throw new IllegalArgumentException("Unsupported export type: " + form.getExportFormat());
         }
     }
 
@@ -1481,16 +1540,27 @@ public class MS2Controller extends SpringActionController
 
     public static class RunListForm extends QueryViewAction.QueryExportForm
     {
-        private int _runList;
+        private Integer _runList;
+        private boolean _experimentRunIds;
 
-        public int getRunList()
+        public Integer getRunList()
         {
             return _runList;
         }
 
-        public void setRunList(int runList)
+        public void setRunList(Integer runList)
         {
             _runList = runList;
+        }
+
+        public boolean isExperimentRunIds()
+        {
+            return _experimentRunIds;
+        }
+
+        public void setExperimentRunIds(boolean experimentRunIds)
+        {
+            _experimentRunIds = experimentRunIds;
         }
     }
 
@@ -1510,43 +1580,50 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ACL.PERM_READ)
-    public abstract class AbstractRunListAction extends SimpleViewAction
+    public abstract class AbstractRunListCreationAction extends SimpleViewAction<RunListForm>
     {
         private final boolean _requiresSameType;
 
-        protected AbstractRunListAction(boolean requiresSameType)
+        protected AbstractRunListCreationAction(boolean requiresSameType)
         {
             _requiresSameType = requiresSameType;
         }
 
-        public final ModelAndView getView(Object o, BindException errors) throws Exception
+        public final ModelAndView getView(RunListForm form, BindException errors) throws ServletException
         {
             List<String> errorMessages = new ArrayList<String>();
             ActionURL currentURL = getViewContext().getActionURL();
             int runListId;
-            if (currentURL.getParameter("runList") == null)
+            if (form.getRunList() == null)
             {
-                runListId = cacheSelectedRuns(errorMessages, _requiresSameType);
-                ActionURL redirectURL = currentURL.clone();
-                redirectURL.addParameter("runList", Integer.toString(runListId));
-                HttpView.throwRedirect(redirectURL);
+                try
+                {
+                    runListId = cacheSelectedRuns(_requiresSameType, form);
+                    ActionURL redirectURL = currentURL.clone();
+                    redirectURL.addParameter("runList", Integer.toString(runListId));
+                    HttpView.throwRedirect(redirectURL);
+                }
+                catch (RunListException e)
+                {
+                    return _renderErrors(e.getMessages());
+                }
             }
             else
             {
-                runListId = Integer.parseInt(currentURL.getParameter("runList"));
+                runListId = form.getRunList().intValue();
             }
 
             if (!errorMessages.isEmpty())
                 return _renderErrors(errorMessages);
 
-            return getView(o, errors, runListId);
+            return getView(form, errors, runListId);
         }
 
-        protected abstract ModelAndView getView(Object o, BindException errors, int runListId) throws Exception;
+        protected abstract ModelAndView getView(Object o, BindException errors, int runListId);
     }
 
     @RequiresPermission(ACL.PERM_READ)
-    public class SpectraCountSetupAction extends AbstractRunListAction
+    public class SpectraCountSetupAction extends AbstractRunListCreationAction
     {
         private static final String SPECTRA_COUNT_PEPTIDES_FILTER = "SpectraCountPeptidesFilter";
 
@@ -1555,7 +1632,7 @@ public class MS2Controller extends SpringActionController
             super(false);
         }
 
-        public ModelAndView getView(Object o, BindException errors, int runListId) throws Exception
+        public ModelAndView getView(Object o, BindException errors, int runListId)
         {
             QuerySettings spectraCountSettings = new QuerySettings(new ActionURL(), SPECTRA_COUNT_PEPTIDES_FILTER);
             spectraCountSettings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
@@ -1583,11 +1660,13 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(FormType form, BindException errors) throws Exception
         {
-            List<String> runErrors = new ArrayList<String>();
-            _runs = getCachedRuns(form.getRunList(), runErrors, false);
-            if (!runErrors.isEmpty())
+            try
             {
-                return _renderErrors(runErrors);
+                getCachedRuns(form.getRunList(), false);
+            }
+            catch (RunListException e)
+            {
+                return _renderErrors(e.getMessages());
             }
             return super.getView(form, errors);
         }
@@ -1638,15 +1717,20 @@ public class MS2Controller extends SpringActionController
 
     }
 
-    private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column) throws Exception
+    private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column) throws ServletException, SQLException
     {
         ActionURL currentUrl = getViewContext().getActionURL();
 
-        List<String> errors = new ArrayList<String>();
-        List<MS2Run> runs = getCachedRuns(runListIndex, errors, false);
 
-        if (!errors.isEmpty())
-            return _renderErrors(errors);
+        List<MS2Run> runs = null;
+        try
+        {
+            runs = getCachedRuns(runListIndex, false);
+        }
+        catch (RunListException e)
+        {
+            return _renderErrors(e.getMessages());
+        }
 
         for (MS2Run run : runs)
         {
@@ -1661,6 +1745,7 @@ public class MS2Controller extends SpringActionController
         if (query == null)
             return _renderError("You must specify a comparison type");
 
+        List<String> errors = new ArrayList<String>();
         query.checkForErrors(errors);
 
         if (errors.size() > 0)
@@ -2438,7 +2523,7 @@ public class MS2Controller extends SpringActionController
 
 
     @Deprecated
-    private HttpView _renderErrors(List<String> messages) throws Exception
+    private HttpView _renderErrors(List<String> messages) throws ServletException
     {
         getViewContext().requiresPermission(ACL.PERM_READ);
         StringBuilder sb = new StringBuilder("<table class=\"DataRegion\">");
@@ -2456,18 +2541,10 @@ public class MS2Controller extends SpringActionController
 
 
     @Deprecated
-    private HttpView _renderError(String message) throws Exception
+    private HttpView _renderError(String message) throws ServletException
     {
         return _renderErrors(Arrays.asList(message));
     }
-
-
-    @Deprecated
-    private Forward _renderErrorsForward(List<String> messages) throws Exception
-    {
-        return null;
-    }
-
 
     public static class ExportForm extends OldMS2Controller.RunForm
     {

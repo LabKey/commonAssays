@@ -2,10 +2,7 @@ package org.labkey.ms2;
 
 import org.labkey.api.exp.ExperimentRunFilter;
 import org.labkey.ms2.query.MS2Schema;
-import org.labkey.api.data.ActionButton;
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.ButtonBar;
-import org.labkey.api.data.MenuButton;
+import org.labkey.api.data.*;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -35,27 +32,7 @@ public class MS2SearchExperimentRunFilter extends ExperimentRunFilter
 
     public void populateButtonBar(ViewContext context, ButtonBar bar, DataView view)
     {
-        MenuButton compareMenu = new MenuButton("Compare");
-
-        ActionURL proteinProphetURL = new ActionURL(MS2Controller.CompareProteinProphetSetupAction.class, context.getContainer());
-        proteinProphetURL.addParameter("ExperimentRunIds", "true");
-        compareMenu.addMenuItem("ProteinProphet", createScript(view, proteinProphetURL));
-
-        ActionURL searchEngineURL = new ActionURL(MS2Controller.CompareSearchEngineProteinSetupAction.class, context.getContainer());
-        searchEngineURL.addParameter("ExperimentRunIds", "true");
-        compareMenu.addMenuItem("Search Engine Protein", createScript(view, searchEngineURL));
-
-        ActionURL peptidesURL = new ActionURL(MS2Controller.ComparePeptidesSetupAction.class, context.getContainer());
-        peptidesURL.addParameter("ExperimentRunIds", "true");
-        compareMenu.addMenuItem("Peptide", createScript(view, peptidesURL));
-
-        ActionURL proteinProphetQueryURL = new ActionURL(MS2Controller.CompareProteinProphetQuerySetupAction.class, context.getContainer());
-        proteinProphetQueryURL.addParameter("ExperimentRunIds", "true");
-        compareMenu.addMenuItem("ProteinProphet (Query)", createScript(view, proteinProphetQueryURL));
-
-        ActionURL spectraURL = new ActionURL(MS2Controller.SpectraCountSetupAction.class, context.getContainer());
-        spectraURL.addParameter("ExperimentRunIds", "true");
-        compareMenu.addMenuItem("Spectra Count", createScript(view, spectraURL));
+        MenuButton compareMenu = MS2Controller.createCompareMenu(context.getContainer(), view, true);
 
         bar.add(compareMenu);
 
@@ -64,16 +41,11 @@ public class MS2SearchExperimentRunFilter extends ExperimentRunFilter
         url.deleteParameters();
         url.setPageFlow("MS2");
         url.setAction("pickExportRunsView.view");
-        exportRuns.setScript("return verifySelected(this.form, \"" + url.getLocalURIString() + "ExperimentRunIds=true\", \"post\", \"runs\")");
+        exportRuns.setScript("return verifySelected(this.form, \"" + url.getLocalURIString() + "experimentRunIds=true\", \"post\", \"runs\")");
         exportRuns.setActionType(ActionButton.Action.GET);
         exportRuns.setDisplayPermission(ACL.PERM_READ);
         bar.add(exportRuns);
 
         bar.add(createButton(context, "showHierarchy", "Show Hierarchy", ActionButton.Action.LINK));
-    }
-
-    private String createScript(DataView view, ActionURL url)
-    {
-        return "javascript: if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"post\", \"runs\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); }";
     }
 }
