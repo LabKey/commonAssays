@@ -70,9 +70,9 @@ public class NabSchema extends UserSchema
         return super.getTable(name, alias);
     }
 
-    public static TableInfo getDataRowTable(User user, ExpProtocol protocol, String alias)
+    public static TableInfo getDataRowTable(Container container, User user, ExpProtocol protocol, String alias)
     {
-        return new NabSchema(user, protocol.getContainer()).getTable(getTableName(protocol), alias);        
+        return new NabSchema(user, container).getTable(getTableName(protocol), alias);        
     }
 
     public static PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol) throws SQLException
