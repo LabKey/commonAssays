@@ -8,6 +8,9 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.security.User;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.elispot.plate.ElispotPlateReaderService;
+import org.labkey.elispot.plate.ExcelPlateReader;
+import org.labkey.elispot.plate.TextPlateReader;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Collection;
@@ -50,6 +53,9 @@ public class ElispotModule extends DefaultModule implements ContainerManager.Con
         PlateService.get().registerPlateTypeHandler(new ElispotPlateTypeHandler());
         ExperimentService.get().registerExperimentDataHandler(new ElispotDataHandler());
         AssayService.get().registerAssayProvider(new ElispotAssayProvider());
+
+        ElispotPlateReaderService.registerProvider(new ExcelPlateReader());
+        ElispotPlateReaderService.registerProvider(new TextPlateReader());
     }
 
     public Set<String> getModuleDependencies()

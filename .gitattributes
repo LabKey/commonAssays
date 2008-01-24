@@ -91,6 +91,9 @@ elispot/src/org/labkey/elispot/ElispotRunUploadForm.java -text
 elispot/src/org/labkey/elispot/ElispotSchema.java -text
 elispot/src/org/labkey/elispot/ElispotUploadWizardAction.java -text
 elispot/src/org/labkey/elispot/PlateAntigenPropertyHelper.java -text
+elispot/src/org/labkey/elispot/plate/ElispotPlateReaderService.java -text
+elispot/src/org/labkey/elispot/plate/ExcelPlateReader.java -text
+elispot/src/org/labkey/elispot/plate/TextPlateReader.java -text
 elispot/src/org/labkey/elispot/query/ElispotRunDataTable.java -text
 elispot/src/org/labkey/elispot/view/plateSummary.jsp -text
 flow/FlowGWT.iml -text

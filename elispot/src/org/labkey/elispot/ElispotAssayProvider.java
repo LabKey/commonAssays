@@ -22,6 +22,9 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ActionURL;
+import org.labkey.elispot.plate.ExcelPlateReader;
+import org.labkey.elispot.plate.TextPlateReader;
+import org.labkey.elispot.plate.ElispotPlateReaderService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -131,7 +134,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
         addProperty(runDomain, "ExperimentDate", "Experiment Date", PropertyType.DATE_TIME);
 
         ListDefinition plateReaderList = createPlateReaderList(c, user);
-        DomainProperty reader = addProperty(runDomain, READER_PROPERTY_CAPTION, READER_PROPERTY_CAPTION, PropertyType.STRING);
+        DomainProperty reader = addProperty(runDomain, READER_PROPERTY_NAME, READER_PROPERTY_CAPTION, PropertyType.STRING);
         reader.setLookup(new Lookup(c.getProject(), "lists", plateReaderList.getName()));
         reader.setRequired(true);
 
@@ -140,29 +143,18 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
 
     private ListDefinition createPlateReaderList(Container c, User user)
     {
-        Container lookupContainer = c.getProject();
-        Map<String, ListDefinition> lists = ListService.get().getLists(lookupContainer);
-        ListDefinition readerList = lists.get("ElispotPlateReader");
+        ListDefinition readerList = ElispotPlateReaderService.getPlateReaderList(c);
         if (readerList == null)
         {
-            readerList = ListService.get().createList(lookupContainer, "ElispotPlateReader");
+            readerList = ElispotPlateReaderService.createPlateReaderList(c, user);
 
-            DomainProperty nameProperty = addProperty(readerList.getDomain(), "PlateReader", PropertyType.STRING);
-            nameProperty.setPropertyURI(readerList.getDomain().getTypeURI() + "#" + "PlateReader");
-            DomainProperty typeProperty = addProperty(readerList.getDomain(), "FileType", PropertyType.STRING);
-            typeProperty.setPropertyURI(readerList.getDomain().getTypeURI() + "#" + "FileType");
-
-            readerList.setKeyName(nameProperty.getName());
-            readerList.setKeyType(ListDefinition.KeyType.Varchar);
-            readerList.setDescription("Elispot Plate Reader Types");
-            readerList.setTitleColumn("PlateReader");
+            DomainProperty nameProperty = readerList.getDomain().getPropertyByName(ElispotPlateReaderService.PLATE_READER_PROPERTY);
+            DomainProperty typeProperty = readerList.getDomain().getPropertyByName(ElispotPlateReaderService.READER_TYPE_PROPERTY);
 
             try {
-                readerList.save(user);
-
-                addItem(readerList, user, "Cellular Technology Ltd. (CTL)", nameProperty, "xls", typeProperty);
-                addItem(readerList, user, "AID", nameProperty, "txt", typeProperty);
-                addItem(readerList, user, "Zeiss", nameProperty, "txt", typeProperty);
+                addItem(readerList, user, "Cellular Technology Ltd. (CTL)", nameProperty, ExcelPlateReader.TYPE, typeProperty);
+                addItem(readerList, user, "AID", nameProperty, TextPlateReader.TYPE, typeProperty);
+                addItem(readerList, user, "Zeiss", nameProperty, TextPlateReader.TYPE, typeProperty);
             }
             catch (Exception e)
             {
