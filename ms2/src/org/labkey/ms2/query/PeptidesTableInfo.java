@@ -273,10 +273,10 @@ public class PeptidesTableInfo extends FilteredTable
     private void addScoreColumns(TableInfo info)
     {
         Map<String, List<Pair<MS2RunType,Integer>>> columnMap = new HashMap<String, List<Pair<MS2RunType, Integer>>>();
-        MS2Run[] runs = _schema.getRuns();
+        List<MS2Run> runs = _schema.getRuns();
 
         Collection<MS2RunType> runTypes;
-        if (runs != null && runs.length > 0)
+        if (runs != null && runs.size() > 0)
         {
             runTypes = new HashSet<MS2RunType>();
             for (MS2Run run : runs)
@@ -373,10 +373,10 @@ public class PeptidesTableInfo extends FilteredTable
         List<FieldKey> result = new ArrayList<FieldKey>();
         result.add(FieldKey.fromParts("Scan"));
         result.add(FieldKey.fromParts("Charge"));
-        MS2Run[] runs = _schema.getRuns();
-        if (runs != null && runs.length > 0)
+        List<MS2Run> runs = _schema.getRuns();
+        if (runs != null && runs.size() > 0)
         {
-            for (String name : runs[0].getRunType().getScoreColumnList())
+            for (String name : runs.get(0).getRunType().getScoreColumnList())
             {
                 result.add(FieldKey.fromParts(name));
             }

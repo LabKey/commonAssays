@@ -96,22 +96,22 @@ public abstract class QueryNestingOption
             }
         }
 
-        QueryPeptideDataRegion ppRgn = new QueryPeptideDataRegion(allColumns, _groupIdColumn.getColumnInfo().getAlias(), url, getResultSetRowLimit(), getOuterGroupLimit());
+        QueryPeptideDataRegion dataRegion = new QueryPeptideDataRegion(allColumns, _groupIdColumn.getColumnInfo().getAlias(), url, getResultSetRowLimit(), getOuterGroupLimit());
         // Set the nested button bar as not visible so that we don't render a bunch of nested <form>s which mess up IE.
-        ppRgn.setButtonBar(ButtonBar.BUTTON_BAR_EMPTY);
-        ppRgn.setExpanded(expanded);
-        ppRgn.setRecordSelectorValueColumns(_groupIdColumn.getColumnInfo().getAlias());
+        dataRegion.setButtonBar(ButtonBar.BUTTON_BAR_EMPTY);
+        dataRegion.setExpanded(expanded);
+        dataRegion.setRecordSelectorValueColumns(_groupIdColumn.getColumnInfo().getAlias());
         DataRegion nestedRgn = new DataRegion();
         nestedRgn.setName(dataRegionName);
         nestedRgn.setButtonBarPosition(DataRegion.ButtonBarPosition.NONE);
         nestedRgn.setDisplayColumnList(innerColumns);
-        ppRgn.setNestedRegion(nestedRgn);
+        dataRegion.setNestedRegion(nestedRgn);
         for (DisplayColumn column : outerColumns)
         {
             column.setCaption(column.getColumnInfo().getCaption());
         }
-        ppRgn.setDisplayColumnList(outerColumns);
+        dataRegion.setDisplayColumnList(outerColumns);
 
-        return ppRgn;
+        return dataRegion;
     }
 }

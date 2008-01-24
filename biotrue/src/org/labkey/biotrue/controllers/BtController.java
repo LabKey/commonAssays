@@ -152,7 +152,7 @@ public class BtController extends ViewController
         settings.setSchemaName(schema.getSchemaName());
         settings.setQueryName("Servers");
         settings.setAllowChooseQuery(false);
-        return renderInTemplate(new QueryView(getViewContext(), schema, settings), getContainer(), "BioTrue Servers");
+        return renderInTemplate(new QueryView(schema, settings), getContainer(), "BioTrue Servers");
     }
 
     @Jpf.Action

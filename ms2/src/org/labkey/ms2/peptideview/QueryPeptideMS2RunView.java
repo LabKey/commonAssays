@@ -81,7 +81,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
     {
         public PeptideQueryView(ViewContext context, MS2Schema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
         {
-            super(context, schema, settings, expanded, allowNesting);
+            super(schema, settings, expanded, allowNesting);
         }
 
         public List<DisplayColumn> getDisplayColumns()

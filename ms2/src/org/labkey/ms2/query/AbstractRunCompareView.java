@@ -8,9 +8,10 @@ import org.labkey.api.view.DataView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
-import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.RunListException;
+import org.labkey.ms2.RunListCache;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.client.CompareResult;
 import org.labkey.ms2.compare.CompareDataRegion;
 
@@ -26,7 +27,6 @@ import java.util.*;
 public abstract class AbstractRunCompareView extends QueryView
 {
     protected List<MS2Run> _runs;
-    private int _runListIndex;
     protected boolean _forExport;
     private SimpleFilter _runFilter = new SimpleFilter();
     private List<FieldKey> _columns;
@@ -34,7 +34,7 @@ public abstract class AbstractRunCompareView extends QueryView
     private List<String> _errors = new ArrayList<String>();
     protected final String _peptideViewName;
 
-    public AbstractRunCompareView(ViewContext context, MS2Controller controller, int runListIndex, boolean forExport, String tableName, String peptideViewName) throws ServletException
+    public AbstractRunCompareView(ViewContext context, int runListIndex, boolean forExport, String tableName, String peptideViewName) throws ServletException
     {
         super(new MS2Schema(context.getUser(), context.getContainer()), createSettings(context, tableName));
         _peptideViewName = peptideViewName;
@@ -43,7 +43,7 @@ public abstract class AbstractRunCompareView extends QueryView
 
         try
         {
-            _runs = controller.getCachedRuns(runListIndex, false);
+            _runs = RunListCache.getCachedRuns(runListIndex, false, context);
         }
         catch (RunListException e)
         {
@@ -62,9 +62,8 @@ public abstract class AbstractRunCompareView extends QueryView
                 }
             }
 
-            getSchema().setRuns(_runs.toArray(new MS2Run[_runs.size()]));
+            getSchema().setRuns(_runs);
 
-            _runListIndex = runListIndex;
             _forExport = forExport;
 
             setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
@@ -85,7 +84,7 @@ public abstract class AbstractRunCompareView extends QueryView
 
     private static QuerySettings createSettings(ViewContext context, String tableName)
     {
-        QuerySettings settings = new QuerySettings(context.cloneActionURL(), context.getRequest(), "Compare");
+        QuerySettings settings = new QuerySettings(context.cloneActionURL(), "Compare");
         settings.setSchemaName(MS2Schema.SCHEMA_NAME);
         settings.setQueryName(tableName);
         settings.setAllowChooseQuery(false);
@@ -125,8 +124,7 @@ public abstract class AbstractRunCompareView extends QueryView
             int runIndex = 0;
             for (MS2Run run : _runs)
             {
-                ActionURL runURL = new ActionURL("MS2", "showRun.view", ContainerManager.getForId(run.getContainer()));
-                runURL.addParameter("run", run.getRun());
+                ActionURL runURL = MS2Controller.getShowRunUrl(ContainerManager.getForId(run.getContainer()), run.getRun());
                 runURLs[runIndex] = runURL.getLocalURIString();
                 runNames[runIndex++] = run.getDescription();
             }
@@ -227,8 +225,7 @@ public abstract class AbstractRunCompareView extends QueryView
         List<String> headings = new ArrayList<String>();
         for (MS2Run run : _runs)
         {
-            ActionURL url = new ActionURL("MS2", "showRun.view", ContainerManager.getForId(run.getContainer()));
-            url.addParameter("run", run.getRun());
+            ActionURL url = MS2Controller.getShowRunUrl(ContainerManager.getForId(run.getContainer()), run.getRun());
             headings.add("<a href=\"" + url.getLocalURIString() + "\">" + PageFlowUtil.filter(run.getDescription()) + "</a>");
         }
         rgn.setMultiColumnCaptions(headings);
@@ -244,12 +241,11 @@ public abstract class AbstractRunCompareView extends QueryView
 
     public List<DisplayColumn> getDisplayColumns()
     {
-        List<DisplayColumn> ret = new ArrayList();
+        List<DisplayColumn> ret = new ArrayList<DisplayColumn>();
         TableInfo table = getTable();
         if (table == null)
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
 
-        Collection<ColumnInfo> columns;
         CustomView view = getCustomView();
         List<FieldKey> cols;
 

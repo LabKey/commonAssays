@@ -12,9 +12,9 @@ import javax.servlet.ServletException;
  */
 public class CompareProteinsView extends AbstractRunCompareView
 {
-    public CompareProteinsView(ViewContext context, MS2Controller controller, int runListIndex, boolean forExport, String peptideViewName) throws ServletException
+    public CompareProteinsView(ViewContext context, int runListIndex, boolean forExport, String peptideViewName) throws ServletException
     {
-        super(context, controller, runListIndex, forExport, MS2Schema.COMPARE_PROTEIN_PROPHET_TABLE_NAME, peptideViewName);
+        super(context, runListIndex, forExport, MS2Schema.COMPARE_PROTEIN_PROPHET_TABLE_NAME, peptideViewName);
     }
 
     protected String getGroupingColumnName()

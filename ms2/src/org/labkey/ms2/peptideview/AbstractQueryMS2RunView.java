@@ -14,11 +14,9 @@ import org.labkey.ms2.MS2Controller;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.sql.SQLException;
 
 /**
  * User: jeckels
@@ -80,9 +78,9 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
         protected List<Integer> _selectedRows;
         protected List<FieldKey> _overrideColumns;
 
-        public AbstractMS2QueryView(ViewContext context, UserSchema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
+        public AbstractMS2QueryView(UserSchema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
         {
-            super(context, schema, settings);
+            super(schema, settings);
             _expanded = expanded;
             _allowNesting = allowNesting;
             _buttonBarPosition = DataRegion.ButtonBarPosition.BOTTOM;

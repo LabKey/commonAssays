@@ -56,7 +56,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
     {
         public ProteinGroupQueryView(ViewContext context, UserSchema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
         {
-            super(context, schema, settings, expanded, allowNesting);
+            super(schema, settings, expanded, allowNesting);
         }
 
         protected DataRegion createDataRegion()

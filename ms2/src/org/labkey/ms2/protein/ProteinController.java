@@ -84,7 +84,7 @@ public class ProteinController extends ViewController
         settings.setAllowChooseQuery(true);
         settings.setAllowChooseView(true);
 
-        QueryView queryView = new QueryView(getViewContext(), schema, settings)
+        QueryView queryView = new QueryView(schema, settings)
         {
             protected DataView createDataView()
             {

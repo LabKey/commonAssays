@@ -21,7 +21,7 @@ public class BtServerView extends QueryView
 
     public BtServerView(ViewContext context, UserSchema schema, QuerySettings settings)
     {
-        super(context, schema, settings);
+        super(schema, settings);
         _context = context;
     }
 

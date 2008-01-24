@@ -9,10 +9,10 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.ProteinGroupProteins;
 import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.CaseInsensitiveHashSet;
-import org.labkey.api.util.PageFlowUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -48,7 +48,7 @@ public class MS2Schema extends UserSchema
     private static final Set<String> HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("PeptideId");
 
     private ProteinGroupProteins _proteinGroupProteins = new ProteinGroupProteins();
-    private MS2Run[] _runs;
+    private List<MS2Run> _runs;
 
     static public void register()
     {
@@ -156,12 +156,12 @@ public class MS2Schema extends UserSchema
 
     public ComparePeptideTableInfo createPeptidesCompareTable(boolean forExport, HttpServletRequest request, String peptideViewName)
     {
-        return new ComparePeptideTableInfo(this, _runs == null ? null : Arrays.asList(_runs), forExport, request, peptideViewName);
+        return new ComparePeptideTableInfo(this, _runs, forExport, request, peptideViewName);
     }
 
     public CompareProteinProphetTableInfo createProteinProphetCompareTable(String alias, HttpServletRequest request, String peptideViewName)
     {
-        return new CompareProteinProphetTableInfo(alias, this, _runs == null ? null : Arrays.asList(_runs), false, request, peptideViewName);
+        return new CompareProteinProphetTableInfo(alias, this, _runs, false, request, peptideViewName);
     }
 
     public TableInfo createRunsTable(String alias)
@@ -243,7 +243,7 @@ public class MS2Schema extends UserSchema
         fractionName.setWidth("200");
         result.addColumn(fractionName);
 
-        ActionURL url = new ActionURL("MS2", "showRun.view", getContainer());
+        ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
         result.getColumn("Run").setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {
             public TableInfo getLookupTableInfo()
@@ -277,7 +277,7 @@ public class MS2Schema extends UserSchema
                 "\nWHERE ms2Runs.ExperimentRunLSID = " + ExprColumn.STR_TABLE_ALIAS + ".LSID)");
         ColumnInfo ms2DetailsColumn = new ExprColumn(result, alias, sql, Types.INTEGER);
         ms2DetailsColumn.setName("MS2Details");
-        ActionURL url = new ActionURL("MS2", "showRun.view", getContainer());
+        ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
         ms2DetailsColumn.setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {
             public TableInfo getLookupTableInfo()
@@ -301,7 +301,7 @@ public class MS2Schema extends UserSchema
                 {
                     public DisplayColumn createRenderer(ColumnInfo colInfo)
                     {
-                        ActionURL linkURL = new ActionURL("MS2", "showRun.view", getContainer());
+                        ActionURL linkURL = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
                         return new IconDisplayColumn(colInfo, 18, 18, linkURL, "run", AppProps.getInstance().getContextPath() + "/MS2/images/runIcon.gif");
                     }
                 });
@@ -340,10 +340,15 @@ public class MS2Schema extends UserSchema
 
     public void setRuns(MS2Run[] runs)
     {
+        _runs = Arrays.asList(runs);
+    }
+
+    public void setRuns(List<MS2Run> runs)
+    {
         _runs = runs;
     }
     
-    public MS2Run[] getRuns()
+    public List<MS2Run> getRuns()
     {
         return _runs;
     }

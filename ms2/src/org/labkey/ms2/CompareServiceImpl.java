@@ -16,12 +16,10 @@ import org.apache.log4j.Logger;
 public class CompareServiceImpl extends BaseRemoteService implements CompareService
 {
     private static Logger _log = Logger.getLogger(CompareServiceImpl.class);
-    private final MS2Controller _controller;
 
-    public CompareServiceImpl(ViewContext context, MS2Controller controller)
+    public CompareServiceImpl(ViewContext context)
     {
         super(context);
-        _controller = controller;
     }
 
     public CompareResult getProteinProphetComparison(String originalURL) throws Exception
@@ -30,11 +28,11 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         {
             ActionURL url = new ActionURL(originalURL);
             int runList = Integer.parseInt(url.getParameter("runList"));
-            String viewName = url.getParameter(MS2Controller.CompareProteinProphetQuerySetupAction.COMPARE_PROTEIN_PROPHET_PEPTIDES_FILTER + "." + QueryParam.viewName.toString());
+            String viewName = url.getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME);
             ViewContext queryContext = new ViewContext(_context);
             queryContext.setActionURL(url);
 
-            CompareProteinsView view = new CompareProteinsView(queryContext, _controller, runList, false, viewName);
+            CompareProteinsView view = new CompareProteinsView(queryContext, runList, false, viewName);
             return view.createCompareResult();
         }
         catch (Exception e)

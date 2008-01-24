@@ -37,7 +37,7 @@ public class FlowQueryView extends QueryView
 
     public FlowQueryView(ViewContext context, FlowSchema schema, FlowQuerySettings settings)
     {
-        super(context, schema, settings);
+        super(schema, settings);
         setShowChartButton(true);
         setShowRReportButton(true);
     }

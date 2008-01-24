@@ -65,7 +65,7 @@ public class CompensationController extends SpringFlowController<CompensationCon
     {
         public ModelAndView getView(QueryForm form, BindException errors) throws Exception
         {
-            QuerySettings settings = getFlowSchema().getSettings(getViewContext().getActionURL(), getViewContext().getRequest(), "comp");
+            QuerySettings settings = getFlowSchema().getSettings(getViewContext().getActionURL(), "comp");
             return new CompensationListView(settings);
         }
 

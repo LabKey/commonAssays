@@ -38,6 +38,7 @@ import org.labkey.api.util.Formats;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.HttpView;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.RelativeQuantAnalysisSummary;
@@ -46,6 +47,7 @@ import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.xml.stream.XMLStreamException;
+import javax.servlet.ServletException;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -1614,5 +1616,67 @@ public class MS2Manager
         }
 
         return collection;
+    }
+
+    public static List<MS2Run> lookupRuns(List<Integer> runIds, boolean requireSameType, User user) throws ServletException, RunListException
+    {
+        List<String> errors = new ArrayList<String>();
+        List<MS2Run> runs = new ArrayList<MS2Run>(runIds.size());
+        String type = null;
+
+        for (Integer runId : runIds)
+        {
+            MS2Run run = MS2Manager.getRun(runId.intValue());
+
+            if (null == run)
+            {
+                errors.add("Run " + runId + ": Not found");
+                continue;
+            }
+
+            // Authorize this run
+            Container c = ContainerManager.getForId(run.getContainer());
+
+            if (!c.hasPermission(user, ACL.PERM_READ))
+            {
+                if (user.isGuest())
+                    HttpView.throwUnauthorized();
+
+                errors.add("Run " + runId + ": Not authorized");
+                continue;
+            }
+
+            if (run.getStatusId() == MS2Importer.STATUS_RUNNING)
+            {
+                errors.add(run.getDescription() + " is still loading");
+                continue;
+            }
+
+            if (run.getStatusId() == MS2Importer.STATUS_FAILED)
+            {
+                errors.add(run.getDescription() + " did not load successfully");
+                continue;
+            }
+
+            if (requireSameType)
+            {
+                if (null == type)
+                    type = run.getType();
+                else if (!type.equals(run.getType()))
+                {
+                    errors.add("Can't mix " + type + " and " + run.getType() + " runs.");
+                    continue;
+                }
+            }
+
+            runs.add(run);
+        }
+
+        if (!errors.isEmpty())
+        {
+            throw new RunListException(errors);
+        }
+
+        return runs;
     }
 }
