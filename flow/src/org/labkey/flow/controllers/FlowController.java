@@ -63,7 +63,6 @@ public class FlowController extends BaseFlowController<FlowController.Action>
         newFolder,
         errors,
         setFlag,
-        flagWait,
         savePreferences
     }
 
