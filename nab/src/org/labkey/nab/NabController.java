@@ -422,7 +422,7 @@ public class NabController extends ViewController
             wellGroupIds = form.getId();
         else
         {
-            List<String> wellgroupIdStrings = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
+            Set<String> wellgroupIdStrings = DataRegionSelection.getSelected(getViewContext(), false);
             if (wellgroupIdStrings == null || wellgroupIdStrings.size() == 0)
                 return null;
             wellGroupIds = new int[wellgroupIdStrings.size()];
@@ -629,7 +629,7 @@ public class NabController extends ViewController
     protected Forward deleteRuns(RunIdForm form) throws Exception
     {
         requiresPermission(ACL.PERM_DELETE);
-        List<String> rowids = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
+        Set<String> rowids = DataRegionSelection.getSelected(getViewContext(), true);
         if (rowids != null)
         {
             for (String rowidStr : rowids)
@@ -802,7 +802,7 @@ public class NabController extends ViewController
 
     private List<Integer> getCheckboxIds()
     {
-        List<String> idStrings = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
+        Set<String> idStrings = DataRegionSelection.getSelected(getViewContext(), false);
         List<Integer> ids = new ArrayList<Integer>();
         if (idStrings == null)
             return ids;

@@ -188,12 +188,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
         String[] values = getRequest().getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
         if (values == null)
             return new int[0];
-        int[] ret = new int[values.length];
-        for (int i = 0; i < values.length; i ++)
-        {
-            ret[i] = Integer.valueOf(values[i]);
-        }
-        return ret;
+        return PageFlowUtil.toInts(values);
     }
 
     public String getAnalysisLSID()

@@ -589,7 +589,7 @@ public class NabAssayController extends SpringActionController
                 objectIds = form.getId();
             else
             {
-                List<String> objectIdStrings = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
+                Set<String> objectIdStrings = DataRegionSelection.getSelected(getViewContext(), false);
                 if (objectIdStrings == null || objectIdStrings.size() == 0)
                     HttpView.throwNotFound("No samples specified.");
                 objectIds = new int[objectIdStrings.size()];
