@@ -1,16 +1,16 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.OldMS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<OldMS2Controller.LoadAnnotForm> me = (JspView<OldMS2Controller.LoadAnnotForm>) HttpView.currentView();
-    OldMS2Controller.LoadAnnotForm bean = me.getModelBean();
+    JspView<MS2Controller.LoadAnnotForm> me = (JspView<MS2Controller.LoadAnnotForm>) HttpView.currentView();
+    MS2Controller.LoadAnnotForm bean = me.getModelBean();
 %>
 <labkey:errors />
 <br>
-<form method="post" action="processAnnots.post" enctype="multipart/form-data">
+<form method="post" action="insertAnnots.post" enctype="multipart/form-data">
 <table border="0">
     <tr>
       <td>Full file path:</td>

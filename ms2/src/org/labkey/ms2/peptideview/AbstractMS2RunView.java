@@ -1,27 +1,28 @@
 package org.labkey.ms2.peptideview;
 
+import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.GridView;
-import org.labkey.api.view.WebPartView;
-import org.labkey.api.view.ViewContext;
-import org.labkey.ms2.*;
 import org.labkey.api.security.User;
 import org.labkey.api.util.CaseInsensitiveHashMap;
-import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
-import org.labkey.ms2.protein.tools.GoLoader;
-import org.labkey.common.util.Pair;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.GridView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartView;
 import org.labkey.common.tools.MS2Modification;
-import org.apache.log4j.Logger;
+import org.labkey.common.util.Pair;
+import org.labkey.ms2.*;
+import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.tools.GoLoader;
+import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
-import java.util.*;
-
-import org.labkey.ms2.OldMS2Controller;
-import org.springframework.web.servlet.ModelAndView;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -65,7 +66,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         _runs = runs;
     }
 
-    public WebPartView createGridView(OldMS2Controller.RunForm form) throws ServletException, SQLException
+    public WebPartView createGridView(MS2Controller.RunForm form) throws ServletException, SQLException
     {
         String peptideColumnNames = getPeptideColumnNames(form.getColumns());
         return createGridView(form.getExpanded(), peptideColumnNames, form.getProteinColumns(), true);
@@ -406,9 +407,9 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
      * Creates a grid view to show the peptides that are part of the grouping assignment
      * that's specified by the form. For example, for a given SeqId or a ProteinProphet ProteinGroup. 
      */
-    public abstract GridView createPeptideViewForGrouping(OldMS2Controller.DetailsForm form) throws SQLException;
+    public abstract GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form) throws SQLException;
 
-    public abstract String[] getPeptideStringsForGrouping(OldMS2Controller.DetailsForm form) throws SQLException;
+    public abstract String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException;
 
     public abstract ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws Exception;
 

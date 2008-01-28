@@ -1,7 +1,6 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.ms2.OldMS2Controller" %>
-<%@ page import="org.labkey.ms2.protein.tools.GoLoader" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.protein.tools.GoLoader" %>
 <%
     boolean loaded = GoLoader.isGoLoaded().booleanValue();
 %>

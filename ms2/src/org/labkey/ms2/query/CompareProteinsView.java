@@ -1,6 +1,6 @@
 package org.labkey.ms2.query;
 
-import org.labkey.api.data.*;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 

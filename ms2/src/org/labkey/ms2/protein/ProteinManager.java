@@ -1094,4 +1094,14 @@ public class ProteinManager
 
         Table.execute(getSchema(), "DELETE FROM " + getTableInfoFastaFiles() + " WHERE FastaId = ?", new Object[]{fastaId});
     }
+
+
+    public static void deleteAnnotationEntries(List<Integer> ids) throws SQLException
+    {
+        SimpleFilter where = new SimpleFilter().addInClause("InsertId", ids);
+        SQLFragment sql = new SQLFragment("DELETE FROM " + ProteinManager.getTableInfoAnnotInsertions() + " ");
+        sql.append(where.getSQLFragment(getSqlDialect()));
+
+        Table.execute(ProteinManager.getSchema(), sql);
+    }
 }

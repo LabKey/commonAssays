@@ -1,13 +1,12 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<%@ page import="org.labkey.ms2.OldMS2Controller"%>
-<%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.api.view.HttpView"%>
-<%@ page import="org.labkey.ms2.Quantitation"%>
-<%@ page import="java.text.DecimalFormat"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.ActionURL"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.JspView"%>
+<%@ page import="org.labkey.ms2.EditElutionGraphContext"%>
 <%@ page import="org.labkey.ms2.MS2Peptide"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.ms2.EditElutionGraphContext" %>
+<%@ page import="org.labkey.ms2.Quantitation"%>
+<%@ page import="java.text.DecimalFormat" %>
 <%
     JspView<EditElutionGraphContext> me = (JspView<EditElutionGraphContext>) HttpView.currentView();
     org.labkey.ms2.EditElutionGraphContext ctx = me.getModelBean();

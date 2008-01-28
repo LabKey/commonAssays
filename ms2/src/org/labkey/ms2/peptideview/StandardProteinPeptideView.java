@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.labkey.ms2.OldMS2Controller;
 import org.labkey.ms2.MS2Controller;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -229,7 +228,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         return view;
     }
 
-    public GridView createPeptideViewForGrouping(OldMS2Controller.DetailsForm form) throws SQLException
+    public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form) throws SQLException
     {
         DataRegion rgn = getNestedPeptideGrid(getSingleRun(), form.getColumns(), true);
         GridView gridView = new GridView(rgn);
@@ -239,7 +238,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         return gridView;
     }
 
-    public String[] getPeptideStringsForGrouping(OldMS2Controller.DetailsForm form) throws SQLException
+    public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
     {
         SimpleFilter coverageFilter = ProteinManager.getPeptideFilter(_url, ProteinManager.ALL_FILTERS, getSingleRun());
         SimpleFilter validFilter = ProteinManager.reduceToValidColumns(coverageFilter, MS2Manager.getTableInfoPeptides());

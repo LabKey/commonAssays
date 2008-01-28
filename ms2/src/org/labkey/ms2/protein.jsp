@@ -1,9 +1,8 @@
 <%@ page import="org.labkey.api.util.Formats" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.OldMS2Controller" %>
-<%@ page import="java.text.Format" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="java.text.Format" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();

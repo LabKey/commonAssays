@@ -246,7 +246,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         }
     }
 
-    public GridView createPeptideViewForGrouping(OldMS2Controller.DetailsForm form) throws SQLException
+    public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form) throws SQLException
     {
         GridView peptidesGridView;
         DataRegion rgn = getNestedPeptideGrid(getSingleRun(), form.getColumns(), false);
@@ -265,7 +265,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         return peptidesGridView;
     }
 
-    public String[] getPeptideStringsForGrouping(OldMS2Controller.DetailsForm form) throws SQLException
+    public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
     {
         SimpleFilter coverageFilter = null;
         if (form.getSeqIdInt() != 0)

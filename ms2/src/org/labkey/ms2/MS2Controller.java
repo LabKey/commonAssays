@@ -1,11 +1,11 @@
 package org.labkey.ms2;
 
 import org.apache.beehive.netui.pageflow.FormData;
-import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.action.ActionMessage;
 import org.jfree.chart.imagemap.ImageMapUtilities;
 import org.labkey.api.action.*;
 import org.labkey.api.data.*;
@@ -15,6 +15,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.query.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresLogin;
@@ -34,9 +35,7 @@ import org.labkey.ms2.pipeline.*;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
 import org.labkey.ms2.pipeline.sequest.SequestClientImpl;
-import org.labkey.ms2.protein.FastaDbLoader;
-import org.labkey.ms2.protein.IdentifierType;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.*;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
@@ -65,7 +64,7 @@ import java.util.List;
  */
 public class MS2Controller extends SpringActionController
 {
-    private static DefaultActionResolver _actionResolver = new BeehivePortingActionResolver(OldMS2Controller.class, MS2Controller.class);
+    private static DefaultActionResolver _actionResolver = new DefaultActionResolver(MS2Controller.class);
     private static Logger _log = Logger.getLogger(MS2Controller.class);
     private static final String MS2_VIEWS_CATEGORY = "MS2Views";
     private static final int MAX_INSERTIONS_DISPLAY_ROWS = 1000; // Limit annotation table insertions to 1000 rows
@@ -135,6 +134,28 @@ public class MS2Controller extends SpringActionController
         if (null != title)
             root.addChild(title);
         return root;
+    }
+
+
+    private NavTree appendAdminNavTrail(NavTree root, String adminPageTitle, ActionURL adminPageURL, String title, PageConfig page, String helpTopic)
+    {
+        page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic, HelpTopic.Area.CPAS));
+        root.addChild("Admin Console", new ActionURL("admin", "showAdmin", ""));
+        root.addChild(adminPageTitle, adminPageURL);
+        root.addChild(title);
+        return root;
+    }
+
+
+    private NavTree appendProteinAdminNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
+    {
+        return appendAdminNavTrail(root, "Protein Database Admin", getShowProteinAdminUrl(), title, page, helpTopic);
+    }
+
+
+    private NavTree appendMS2AdminNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
+    {
+        return appendAdminNavTrail(root, "MS2 Admin", getShowMS2AdminURL(null), title, page, helpTopic);
     }
 
 
@@ -311,17 +332,17 @@ public class MS2Controller extends SpringActionController
     public static ActionURL getShowRunUrl(Container c, int runId)
     {
         ActionURL url = new ActionURL(ShowRunAction.class, c);
-        url.addParameter(OldMS2Controller.RunForm.PARAMS.run, String.valueOf(runId));
+        url.addParameter(RunForm.PARAMS.run, String.valueOf(runId));
         return url;
     }
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowRunAction extends SimpleViewAction<OldMS2Controller.RunForm>
+    public class ShowRunAction extends SimpleViewAction<RunForm>
     {
         private MS2Run _run;
 
-        public ModelAndView getView(OldMS2Controller.RunForm form, BindException errors) throws Exception
+        public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
             if (errors.hasErrors())
                 return new SimpleErrorView(errors);
@@ -407,7 +428,7 @@ public class MS2Controller extends SpringActionController
 
     private class FilterHeaderView extends JspView<FilterHeaderBean>
     {
-        private FilterHeaderView(ActionURL currentUrl, OldMS2Controller.RunForm form, MS2Run run) throws ServletException, SQLException
+        private FilterHeaderView(ActionURL currentUrl, RunForm form, MS2Run run) throws ServletException, SQLException
         {
             super("/org/labkey/ms2/filterHeader.jsp", new FilterHeaderBean());
 
@@ -698,9 +719,9 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowPeptideAction extends SimpleViewAction<OldMS2Controller.DetailsForm>
+    public class ShowPeptideAction extends SimpleViewAction<DetailsForm>
     {
-        public ModelAndView getView(OldMS2Controller.DetailsForm form, BindException errors) throws Exception
+        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             long peptideId = form.getPeptideIdLong();
             MS2Peptide peptide = MS2Manager.getPeptide(peptideId);
@@ -777,9 +798,9 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowModificationsAction extends SimpleViewAction<OldMS2Controller.RunForm>
+    public class ShowModificationsAction extends SimpleViewAction<RunForm>
     {
-        public ModelAndView getView(OldMS2Controller.RunForm form, BindException errors) throws Exception
+        public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return null;
@@ -999,9 +1020,9 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_NONE)
-    public class GetProteinGroupingPeptides extends SimpleViewAction<OldMS2Controller.RunForm>
+    public class GetProteinGroupingPeptides extends SimpleViewAction<RunForm>
     {
-        public ModelAndView getView(OldMS2Controller.RunForm form, BindException errors) throws Exception
+        public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
             MS2Run run = MS2Manager.getRun(form.getRun());
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
@@ -1336,7 +1357,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private Forward exportSpectra(List<MS2Run> runs, ActionURL currentUrl, SimpleFilter filter, String extension) throws IOException
+    private void exportSpectra(List<MS2Run> runs, ActionURL currentUrl, SimpleFilter filter, String extension) throws IOException
     {
         Sort sort = ProteinManager.getPeptideBaseSort();
         sort.applyURLSort(currentUrl, MS2Manager.getDataRegionNamePeptides());
@@ -1351,8 +1372,6 @@ public class MS2Controller extends SpringActionController
 
         sr.render(iter);
         sr.close();
-
-        return null;
     }
 
 
@@ -1646,6 +1665,70 @@ public class MS2Controller extends SpringActionController
     }
 
 
+/*    @RequiresPermission(ACL.PERM_NONE)  // CompareProteinsView does permissions checking on all runs
+    public class ExportQueryProteinProphetCompareToExcelAction extends ExportAction<ExportForm>
+    {
+        public void export(ExportForm form, HttpServletResponse response) throws Exception
+        {
+            exportQueryCompareToExcel(new CompareProteinsView(getViewContext(), MS2Controller.this, form.getRunList(), true));
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_NONE)  // CompareProteinsView does permissions checking on all runs
+    public class ExportQueryProteinProphetCompareToTSVAction extends ExportAction<ExportForm>
+    {
+        public void export(ExportForm form, HttpServletResponse response) throws Exception
+        {
+            exportQueryCompareToTSV(new CompareProteinsView(getViewContext(), MS2Controller.this, form.getRunList(), true), form.isExportAsWebPage());
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_NONE)  // CompareProteinsView does permissions checking on all runs
+    public class ExportQueryPeptideCompareToExcelAction extends ExportAction<ExportForm>
+    {
+        public void export(ExportForm form, HttpServletResponse response) throws Exception
+        {
+            exportQueryCompareToExcel(new ComparePeptidesView(getViewContext(), MS2Controller.this, form.getRunList(), true));
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_NONE)  // CompareProteinsView does permissions checking on all runs
+    public class ExportQueryPeptideCompareToTSVAction extends ExportAction<ExportForm>
+    {
+        public void export(ExportForm form, HttpServletResponse response) throws Exception
+        {
+            exportQueryCompareToTSV(new ComparePeptidesView(getViewContext(), MS2Controller.this, form.getRunList(), true), form.isExportAsWebPage());
+        }
+    }
+
+
+    private void exportQueryCompareToExcel(AbstractRunCompareView view) throws Exception
+    {
+        if (!view.getErrors().isEmpty())
+            _renderErrors(view.getErrors());
+
+        ExcelWriter excelWriter = view.getExcelWriter();
+        excelWriter.setFilenamePrefix("CompareRuns");
+        excelWriter.write(getViewContext().getResponse());
+    }
+
+
+    private void exportQueryCompareToTSV(AbstractRunCompareView view, boolean exportAsWebPage) throws Exception
+    {
+        if (!view.getErrors().isEmpty())
+            _renderErrors(view.getErrors());
+
+        TSVGridWriter tsvWriter = view.getTsvWriter();
+        tsvWriter.setExportAsWebPage(exportAsWebPage);
+        tsvWriter.setFilenamePrefix("CompareRuns");
+        tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
+        tsvWriter.write(getViewContext().getResponse());
+    }
+*/
+
     @RequiresPermission(ACL.PERM_READ)
     public class CompareServiceAction extends SimpleViewAction
     {
@@ -1678,9 +1761,9 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowGraphAction extends ExportAction<OldMS2Controller.DetailsForm>
+    public class ShowGraphAction extends ExportAction<DetailsForm>
     {
-        public void export(OldMS2Controller.DetailsForm form, HttpServletResponse response) throws Exception
+        public void export(DetailsForm form, HttpServletResponse response) throws Exception
         {
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
 
@@ -1844,8 +1927,12 @@ public class MS2Controller extends SpringActionController
         delete.setActionType(ActionButton.Action.GET);
         bb.add(delete);
 
-        bb.add(new ActionButton("insertAnnots.post", "Load New Annot File"));
+        ActionButton insertAnnots = new ActionButton("insertAnnots.view", "Load New Annot File");
+        insertAnnots.setActionType(ActionButton.Action.LINK);
+        bb.add(insertAnnots);
+
         bb.add(new ActionButton("reloadSPOM.post", "Reload SWP Org Map"));
+
         ActionButton reloadGO = new ActionButton("loadGo.view", "Load or Reload GO");
         reloadGO.setActionType(ActionButton.Action.LINK);
         bb.add(reloadGO);
@@ -1923,7 +2010,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private Forward exportProteinsAsSpectra(List<MS2Run> runs, ActionURL currentUrl, String extension, AbstractMS2RunView peptideView, String where) throws IOException
+    private void exportProteinsAsSpectra(List<MS2Run> runs, ActionURL currentUrl, String extension, AbstractMS2RunView peptideView, String where) throws IOException
     {
         SpectrumIterator iter = new ProteinResultSetSpectrumIterator(runs, currentUrl, peptideView, where);
 
@@ -1936,8 +2023,6 @@ public class MS2Controller extends SpringActionController
 
         sr.render(iter);
         sr.close();
-
-        return null;
     }
 
 
@@ -2301,10 +2386,10 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private Forward exportPeptides(ExportForm form, HttpServletResponse response, boolean selected) throws Exception
+    private void exportPeptides(ExportForm form, HttpServletResponse response, boolean selected) throws Exception
     {
         if (!isAuthorized(form.run))
-            return null;
+            return;
 
         MS2Run run = MS2Manager.getRun(form.run);
 
@@ -2339,28 +2424,26 @@ public class MS2Controller extends SpringActionController
         if ("Excel".equals(form.getExportFormat()))
         {
             peptideView.exportToExcel(form, response, exportRows);
-            return null;
+            return;
         }
 
         if ("TSV".equals(form.getExportFormat()))
         {
             peptideView.exportToTSV(form, response, exportRows, null);
-            return null;
+            return;
         }
 
         if ("AMT".equals(form.getExportFormat()))
         {
             peptideView.exportToAMT(form, response, exportRows);
-            return null;
+            return;
         }
 
         // Add URL filter manually
         baseFilter.addAllClauses(ProteinManager.getPeptideFilter(currentUrl, ProteinManager.URL_FILTER, run));
 
         if ("DTA".equals(form.getExportFormat()) || "PKL".equals(form.getExportFormat()))
-            return exportSpectra(Arrays.asList(run), currentUrl, baseFilter, form.getExportFormat().toLowerCase());
-
-        return null;
+            exportSpectra(Arrays.asList(run), currentUrl, baseFilter, form.getExportFormat().toLowerCase());
     }
 
 
@@ -2388,7 +2471,8 @@ public class MS2Controller extends SpringActionController
         return _renderErrors(Arrays.asList(message));
     }
 
-    public static class ExportForm extends OldMS2Controller.RunForm
+
+    public static class ExportForm extends RunForm
     {
         private String _column;
         private String _exportFormat;
@@ -2484,7 +2568,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static class PeptideProphetForm extends OldMS2Controller.RunForm
+    public static class PeptideProphetForm extends RunForm
     {
         private int charge;
         private boolean cumulative = false;
@@ -2518,11 +2602,11 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowPeptideProphetDetailsAction extends SimpleViewAction<OldMS2Controller.RunForm>
+    public class ShowPeptideProphetDetailsAction extends SimpleViewAction<RunForm>
     {
         private MS2Run _run;
 
-        public ModelAndView getView(OldMS2Controller.RunForm form, BindException errors) throws Exception
+        public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return null;
@@ -2557,9 +2641,9 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowProteinProphetSensitivityPlotAction extends ExportAction<OldMS2Controller.RunForm>
+    public class ShowProteinProphetSensitivityPlotAction extends ExportAction<RunForm>
     {
-        public void export(OldMS2Controller.RunForm form, HttpServletResponse response) throws Exception
+        public void export(RunForm form, HttpServletResponse response) throws Exception
         {
             if (!isAuthorized(form.run))
                 return;
@@ -2572,11 +2656,11 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowProteinProphetDetailsAction extends SimpleViewAction<OldMS2Controller.RunForm>
+    public class ShowProteinProphetDetailsAction extends SimpleViewAction<RunForm>
     {
         private MS2Run _run;
 
-        public ModelAndView getView(OldMS2Controller.RunForm form, BindException errors) throws Exception
+        public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return null;
@@ -2600,12 +2684,7 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getSuccessURL(Object o)
         {
-            ActionURL url = getViewContext().cloneActionURL();
-            url.setAction("showMS2Admin");
-            url.deleteParameters();
-            url.addParameter("days", String.valueOf(_days));
-
-            return url;
+            return getShowMS2AdminURL(_days);
         }
 
         public boolean doAction(Object o, BindException errors) throws Exception
@@ -2620,6 +2699,17 @@ public class MS2Controller extends SpringActionController
         public void validateCommand(Object target, Errors errors)
         {
         }
+    }
+
+
+    public static ActionURL getShowMS2AdminURL(Integer days)
+    {
+        ActionURL url = new ActionURL(ShowMS2AdminAction.class);
+
+        if (null != days)
+            url.addParameter("days", days.intValue());
+
+        return url;
     }
 
 
@@ -2867,11 +2957,11 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class PickPeptideColumnsAction extends SimpleViewAction<OldMS2Controller.RunForm>
+    public class PickPeptideColumnsAction extends SimpleViewAction<RunForm>
     {
         private MS2Run _run;
 
-        public ModelAndView getView(OldMS2Controller.RunForm form, BindException errors) throws Exception
+        public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
             ActionURL url = getViewContext().cloneActionURL();
             _run = MS2Manager.getRun(form.run);
@@ -2924,11 +3014,11 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class PickProteinColumnsAction extends SimpleViewAction<OldMS2Controller.RunForm>
+    public class PickProteinColumnsAction extends SimpleViewAction<RunForm>
     {
         private MS2Run _run;
 
-        public ModelAndView getView(OldMS2Controller.RunForm form, BindException errors) throws Exception
+        public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
             // TODO: NavTrail URL: cloneActionURL().setAction("showRun")
             ActionURL url = getViewContext().cloneActionURL();
@@ -2968,7 +3058,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static class ChartForm extends OldMS2Controller.RunForm
+    public static class ChartForm extends RunForm
     {
         private String chartType;
 
@@ -3111,12 +3201,12 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowProteinAction extends SimpleViewAction<OldMS2Controller.DetailsForm>
+    public class ShowProteinAction extends SimpleViewAction<DetailsForm>
     {
         private MS2Run _run;
         private Protein _protein;
 
-        public ModelAndView getView(OldMS2Controller.DetailsForm form, BindException errors) throws Exception
+        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             int runId;
             int seqId;
@@ -3188,9 +3278,9 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowAllProteinsAction extends SimpleViewAction<OldMS2Controller.DetailsForm>
+    public class ShowAllProteinsAction extends SimpleViewAction<DetailsForm>
     {
-        public ModelAndView getView(OldMS2Controller.DetailsForm form, BindException errors) throws Exception
+        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return null;
@@ -3224,11 +3314,11 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowProteinGroupAction extends SimpleViewAction<OldMS2Controller.DetailsForm>
+    public class ShowProteinGroupAction extends SimpleViewAction<DetailsForm>
     {
         private MS2Run _run;
 
-        public ModelAndView getView(OldMS2Controller.DetailsForm form, BindException errors) throws Exception
+        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             // May have a runId, a group number, and an indistinguishableGroupId, or might just have a
             // proteinGroupId
@@ -3296,7 +3386,7 @@ public class MS2Controller extends SpringActionController
 
     private static class ProteinsView extends VBox
     {
-        private ProteinsView(ActionURL currentUrl, MS2Run run, OldMS2Controller.DetailsForm form, Protein[] proteins, String[] peptides, AbstractMS2RunView peptideView) throws Exception
+        private ProteinsView(ActionURL currentUrl, MS2Run run, DetailsForm form, Protein[] proteins, String[] peptides, AbstractMS2RunView peptideView) throws Exception
         {
             // Limit to 100 proteins
             int proteinCount = Math.min(100, proteins.length);
@@ -3591,7 +3681,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    protected void showElutionGraph(HttpServletResponse response, OldMS2Controller.DetailsForm form, boolean showLight, boolean showHeavy) throws Exception
+    protected void showElutionGraph(HttpServletResponse response, DetailsForm form, boolean showLight, boolean showHeavy) throws Exception
     {
         if (!isAuthorized(form.run))
             return;
@@ -3655,9 +3745,9 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowLightElutionGraphAction extends ExportAction<OldMS2Controller.DetailsForm>
+    public class ShowLightElutionGraphAction extends ExportAction<DetailsForm>
     {
-        public void export(OldMS2Controller.DetailsForm form, HttpServletResponse response) throws Exception
+        public void export(DetailsForm form, HttpServletResponse response) throws Exception
         {
             showElutionGraph(response, form, true, false);
         }
@@ -3665,9 +3755,9 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowHeavyElutionGraphAction extends ExportAction<OldMS2Controller.DetailsForm>
+    public class ShowHeavyElutionGraphAction extends ExportAction<DetailsForm>
     {
-        public void export(OldMS2Controller.DetailsForm form, HttpServletResponse response) throws Exception
+        public void export(DetailsForm form, HttpServletResponse response) throws Exception
         {
             showElutionGraph(response, form, false, true);
         }
@@ -3675,9 +3765,9 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class ShowCombinedElutionGraphAction extends ExportAction<OldMS2Controller.DetailsForm>
+    public class ShowCombinedElutionGraphAction extends ExportAction<DetailsForm>
     {
-        public void export(OldMS2Controller.DetailsForm form, HttpServletResponse response) throws Exception
+        public void export(DetailsForm form, HttpServletResponse response) throws Exception
         {
             showElutionGraph(response, form, true, true);
         }
@@ -4119,7 +4209,7 @@ public class MS2Controller extends SpringActionController
                 if (c == null)
                     HttpView.throwNotFound();
                 else
-                    return MS2Controller.getShowListUrl(c);
+                    return getShowListUrl(c);
             }
 
             if (null != form.getFileName())
@@ -4153,7 +4243,7 @@ public class MS2Controller extends SpringActionController
                     if (run == -1)
                         HttpView.throwNotFound();
 
-                    url = MS2Controller.getShowListUrl(c);
+                    url = getShowListUrl(c);
                     url.addParameter(MS2Manager.getDataRegionNameExperimentRuns() + ".Run~eq", Integer.toString(run));
                 }
                 else if (!AppProps.getInstance().hasPipelineCluster())
@@ -4343,7 +4433,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static class ElutionProfileForm extends OldMS2Controller.DetailsForm
+    public static class ElutionProfileForm extends DetailsForm
     {
         private int _lightFirstScan;
         private int _lightLastScan;
@@ -4446,6 +4536,944 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class DiscriminateScoreAction extends SimpleRedirectAction<RunForm>
+    {
+        public ActionURL getRedirectURL(RunForm form) throws Exception
+        {
+            ActionURL url = new ActionURL("MS2-Scoring", "discriminate", getContainer());
+            url.addParameter("runId", form.getRun());
+            return url;
+        }
+    }
+
+
+    public static class RunForm extends FormData
+    {
+        enum PARAMS
+        {
+            run
+        }
+
+        int run;
+        int tryptic;
+        boolean expanded;
+        boolean exportAsWebPage;
+        String grouping;
+        String columns;
+        String proteinColumns;
+        String proteinGroupingId;
+
+        ArrayList<String> errors;
+
+        // Set form default values; will be overwritten by any params included on the url
+        public void reset(ActionMapping arg0, HttpServletRequest arg1)
+        {
+            super.reset(arg0, arg1);
+            run = 0;
+            expanded = false;
+            errors = new ArrayList<String>();
+        }
+
+        private int toInt(String s, String field)
+        {
+            try
+            {
+                return Integer.parseInt(s);
+            }
+            catch (NumberFormatException e)
+            {
+                errors.add("Error: " + s + " is not a valid value for " + field + ".");
+                return 0;
+            }
+        }
+
+        public List<String> getErrors()
+        {
+            return errors;
+        }
+
+        public void setExpanded(boolean expanded)
+        {
+            this.expanded = expanded;
+        }
+
+        public boolean getExpanded()
+        {
+            return this.expanded;
+        }
+
+        public void setRun(String run)
+        {
+            this.run = toInt(run, "Run");
+        }
+
+        public String getRun()
+        {
+            return String.valueOf(this.run);
+        }
+
+        public void setTryptic(String tryptic)
+        {
+            this.tryptic = toInt(tryptic, "Tryptic");
+        }
+
+        public String getTryptic()
+        {
+            return null;
+        }
+
+        public void setGrouping(String grouping)
+        {
+            this.grouping = grouping;
+        }
+
+        public String getGrouping()
+        {
+            return grouping;
+        }
+
+        public void setExportAsWebPage(boolean exportAsWebPage)
+        {
+            this.exportAsWebPage = exportAsWebPage;
+        }
+
+        public boolean isExportAsWebPage()
+        {
+            return exportAsWebPage;
+        }
+
+        public String getColumns()
+        {
+            return columns;
+        }
+
+        public void setColumns(String columns)
+        {
+            this.columns = columns;
+        }
+
+        public String getProteinColumns()
+        {
+            return proteinColumns;
+        }
+
+        public void setProteinColumns(String proteinColumns)
+        {
+            this.proteinColumns = proteinColumns;
+        }
+
+        public String getProteinGroupingId()
+        {
+            return proteinGroupingId;
+        }
+
+        public void setProteinGroupingId(String proteinGroupingId)
+        {
+            this.proteinGroupingId = proteinGroupingId;
+        }
+    }
+
+
+    @RequiresSiteAdmin
+    public class InsertAnnotsAction extends FormViewAction<LoadAnnotForm>
+    {
+        public void validateCommand(LoadAnnotForm target, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(LoadAnnotForm form, boolean reshow, BindException errors) throws Exception
+        {
+            return new JspView<LoadAnnotForm>("/org/labkey/ms2/insertAnnots.jsp", form);
+        }
+
+        public boolean handlePost(LoadAnnotForm form, BindException errors) throws Exception
+        {
+            String fname = form.getFileName();
+            String comment = form.getComment();
+
+            DefaultAnnotationLoader loader;
+
+            //TODO: this style of dealing with different file types must be repaired.
+            if ("uniprot".equalsIgnoreCase(form.getFileType()))
+            {
+                loader = new XMLProteinLoader(fname);
+            }
+            else if ("fasta".equalsIgnoreCase(form.getFileType()))
+            {
+                FastaDbLoader fdbl = new FastaDbLoader(new File(fname));
+                fdbl.setDefaultOrganism(form.getDefaultOrganism());
+                fdbl.setOrganismIsToGuessed(form.getShouldGuess() != null);
+                loader = fdbl;
+            }
+            else
+            {
+                throw new IllegalArgumentException("Unknown annotation file type: " + form.getFileType());
+            }
+
+            loader.setComment(comment);
+
+            try
+            {
+                loader.validate();
+            }
+            catch (IOException e)
+            {
+                PageFlowUtil.getActionErrors(getViewContext().getRequest(), true).add("main", new ActionMessage(e.getMessage()));        // TODO: Fix this
+                return false;
+            }
+
+            loader.parseInBackground();
+
+            return true;
+        }
+
+        public ActionURL getSuccessURL(LoadAnnotForm loadAnnotForm)
+        {
+            return getShowProteinAdminUrl();
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            appendProteinAdminNavTrail(root, "Load Protein Annotations", getPageConfig(), null);
+            return root;
+        }
+    }
+
+
+    public static class LoadAnnotForm extends FormData
+    {
+        private String fileType;
+
+        public void setFileType(String ft)
+        {
+            this.fileType = ft;
+        }
+
+        public String getFileType()
+        {
+            return this.fileType;
+        }
+
+        private String fileName;
+
+        public void setFileName(String file)
+        {
+            this.fileName = file;
+        }
+
+        public String getFileName()
+        {
+            return this.fileName;
+        }
+
+        private String comment;
+
+        public void setComment(String s)
+        {
+            this.comment = s;
+        }
+
+        public String getComment()
+        {
+            return this.comment;
+        }
+
+        private String defaultOrganism = "Unknown unknown";
+
+        public String getDefaultOrganism()
+        {
+            return this.defaultOrganism;
+        }
+
+        public void setDefaultOrganism(String o)
+        {
+            this.defaultOrganism = o;
+        }
+
+        private String shouldGuess = "1";
+
+        public String getShouldGuess()
+        {
+            return shouldGuess;
+        }
+
+        public void setShouldGuess(String shouldGuess)
+        {
+            this.shouldGuess = shouldGuess;
+        }
+    }
+
+
+    @RequiresSiteAdmin
+    public class DeleteAnnotInsertEntriesAction extends SimpleRedirectAction
+    {
+        public ActionURL getRedirectURL(Object o) throws Exception
+        {
+            List<String> postedList = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);   // TODO: Use a form bean array?
+            List<Integer> idList = new ArrayList<Integer>(postedList.size());
+
+            for (String id : postedList)
+                idList.add(Integer.parseInt(id));
+
+            ProteinManager.deleteAnnotationEntries(idList);
+
+            return getShowProteinAdminUrl();
+        }
+    }
+
+
+    @RequiresSiteAdmin
+    public class ShowAnnotInsertDetailsAction extends SimpleViewAction
+    {
+        AnnotationInsertion _insertion;
+
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            ActionURL urlhelp = getViewContext().cloneActionURL();
+            String insertIdStr = urlhelp.getParameter("insertId");
+            int insertId = Integer.parseInt(insertIdStr);
+            AnnotationInsertion[] insertions = Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=?", new Object[] { insertId }, AnnotationInsertion.class);
+            if (insertions.length == 0)
+            {
+                return HttpView.throwNotFoundMV();
+            }
+            assert insertions.length == 1;
+            _insertion = insertions[0];
+
+            return new JspView<AnnotationInsertion>("/org/labkey/ms2/annotLoadDetails.jsp", _insertion);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            appendProteinAdminNavTrail(root, _insertion.getFiletype() + " Annotation Insertion Details: " + _insertion.getFilename(), getPageConfig(), null);
+            return null;
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_NONE)
+    public class AddFileRunStatusAction extends ExportAction
+    {
+        public void export(Object o, HttpServletResponse response) throws Exception
+        {
+            ActionURL url = getViewContext().getActionURL();
+            String status = null;
+            response.setContentType("text/plain");
+
+            String path = url.getParameter("path");
+            if (path != null)
+            {
+                path = PipelineStatusFile.pathOf(path);
+                PipelineStatusFile sf = PipelineService.get().getStatusFile(path);
+                if (sf == null)
+                    status = "ERROR->path=" + path + ",message=Job not found in database";
+/*            else if (run.getDeleted())
+                status = "ERROR->run=" + runId + ",message=Run deleted"; */
+                else
+                {
+                    String[] parts = (sf.getInfo() == null ?
+                            new String[0] : sf.getInfo().split(","));
+                    StringBuffer sb = new StringBuffer(sf.getStatus());
+                    sb.append("->path=").append(sf.getFilePath());
+                    for (String part : parts)
+                    {
+                        if (part.startsWith("path="))
+                            continue;
+                        sb.append(",").append(part);
+                    }
+
+                    status = sb.toString();
+                }
+            }
+            else if (url.getParameter("error") != null)
+            {
+                status = "ERROR->message=" + url.getParameter("error");
+            }
+            else
+            {
+                // Old MS2-only code.  Still supports Comet searches.
+                int runId = 0;
+                String runParam = url.getParameter("run");
+                if (runParam != null)
+                {
+                    try
+                    {
+                        runId = Integer.parseInt(runParam);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        _log.error(e);
+                    }
+                }
+
+                if (runId > 0)
+                {
+                    TableInfo info = MS2Manager.getTableInfoRuns();
+                    RunStatus run = Table.selectObject(info, runId, RunStatus.class);
+                    if (run == null)
+                        status = "ERROR->run=" + runId + ",message=Run not found in database";
+                    else if (run.getDeleted())
+                        status = "ERROR->run=" + runId + ",message=Run deleted";
+                    else if (run.getStatusId() == 1)
+                        status = "SUCCESS->run=" + runId;
+                    else if (run.getStatusId() == 2)
+                        status = "FAILED->run=" + runId;
+                    else if (run.getStatusId() == 0)
+                    {
+                        status = "LOADING->run=" + runId + ",status=" + run.getStatus()
+                                + ",description=" + run.getDescription();
+                    }
+                }
+            }
+
+            if (status == null)
+            {
+                response.setStatus(400);    // Bad request.
+                status = "ERROR->File not found";
+            }
+
+            response.getWriter().println(status);
+        }
+    }
+
+
+    public static class RunStatus
+    {
+        int statusId;
+        String status;
+        String description;
+        boolean deleted;
+
+        public int getStatusId()
+        {
+            return statusId;
+        }
+
+        public void setStatusId(int statusId)
+        {
+            this.statusId = statusId;
+        }
+
+        public String getStatus()
+        {
+            return status;
+        }
+
+        public void setStatus(String status)
+        {
+            this.status = status;
+        }
+
+        public String getDescription()
+        {
+            return description;
+        }
+
+        public void setDescription(String description)
+        {
+            this.description = description;
+        }
+
+        public boolean getDeleted()
+        {
+            return deleted;
+        }
+
+        public void setDeleted(boolean deleted)
+        {
+            this.deleted = deleted;
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_DELETE)
+    public class SelectMoveLocationAction extends SimpleRedirectAction
+    {
+        public ActionURL getRedirectURL(Object o) throws Exception
+        {
+            List<String> moveRuns = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
+
+            ActionURL url = new ActionURL(SelectMoveLocationAction.class, getContainer()).addParameter("moveRuns", StringUtils.join(moveRuns, ','));
+
+            if ("true".equals(getViewContext().getRequest().getParameter("ExperimentRunIds")))
+                url.addParameter("ExperimentRunIds", "true");
+
+            return url;
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_DELETE)
+    public class PickMoveLocationAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            ActionURL moveURL = new ActionURL(MoveRunsAction.class);
+            final Container originalContainer = getContainer();
+            ContainerTree ct = new ContainerTree("/", getUser(), ACL.PERM_INSERT, moveURL)
+            {
+                protected void renderCellContents(StringBuilder html, Container c, ActionURL url)
+                {
+                    boolean hasRoot = false;
+                    try
+                    {
+                        hasRoot = PipelineService.get().findPipelineRoot(c) != null;
+                    }
+                    catch (SQLException e)
+                    {
+                        _log.error("Unable to determine pipeline root", e);
+                    }
+
+                    if (hasRoot && !c.equals(originalContainer))
+                    {
+                        super.renderCellContents(html, c, url);
+                    }
+                    else
+                    {
+                        html.append(PageFlowUtil.filter(c.getName()));
+                    }
+                }
+            };
+
+            StringBuilder html = new StringBuilder("<table class=\"dataRegion\"><tr><td>Please select the destination folder. Folders that are not configured with a pipeline root are not valid destinations. They are shown in the list, but are not linked.</td></tr><tr><td>&nbsp;</td></tr>");
+            ct.render(html);
+            html.append("</table>");
+
+            getPageConfig().setTitle("Move Runs");
+            getPageConfig().setTemplate(PageConfig.Template.Dialog);
+
+            return new HtmlView(html.toString());
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+
+/*    @RequiresPermission(ACL.PERM_INSERT)
+    public class MoveRunsAction extends SimpleRedirectAction
+    {
+        public ActionURL getRedirectURL(Object o) throws Exception
+        {
+            ActionURL currentUrl = getViewContext().cloneActionURL();
+            String moveRuns = currentUrl.getParameter("moveRuns");
+            String[] idStrings = moveRuns.split(",");
+            List<Integer> ids = new ArrayList<Integer>();
+            for (String idString : idStrings)
+            {
+                ids.add(new Integer(idString));
+            }
+            List<MS2Run> runs = getRuns(ids, new ArrayList<String>(), false);
+            List<ExpRun> expRuns = new ArrayList<ExpRun>();
+            Container sourceContainer = null;
+            for (Iterator<MS2Run> iter = runs.iterator(); iter.hasNext(); )
+            {
+                MS2Run run = iter.next();
+                if (run.getExperimentRunLSID() != null)
+                {
+                    ExpRun expRun = ExperimentService.get().getExpRun(run.getExperimentRunLSID());
+                    if (expRun != null && expRun.getContainer().getId().equals(run.getContainer()))
+                    {
+                        sourceContainer = expRun.getContainer();
+                        expRuns.add(expRun);
+                        iter.remove();
+                    }
+                }
+            }
+            if (runs.size() > 0)
+            {
+                MS2Manager.moveRuns(getUser(), runs, getContainer());
+            }
+            if (expRuns.size() > 0)
+            {
+                ViewBackgroundInfo info = getViewBackgroundInfo();
+                info.setContainer(getContainer());
+                try
+                {
+                    ExperimentService.get().moveRuns(info, sourceContainer, expRuns);
+                }
+                catch (FileNotFoundException e)
+                {
+                    HttpView.throwNotFound(e.getMessage());
+                }
+            }
+
+            currentUrl.setAction("showList");
+            currentUrl.deleteParameter("moveRuns");
+
+            return currentUrl;
+        }
+    }
+*/
+
+    @RequiresSiteAdmin
+    public class AnnotThreadControlAction extends SimpleRedirectAction
+    {
+        public ActionURL getRedirectURL(Object o) throws Exception
+        {
+            HttpServletRequest req = getViewContext().getRequest();
+            String commandType = req.getParameter("button");
+            int threadId = Integer.parseInt(req.getParameter("id"));
+
+            AnnotationLoader annotLoader = AnnotationUploadManager.getInstance().getActiveLoader(threadId);
+
+            if (annotLoader != null)
+            {
+                if (commandType.equalsIgnoreCase("kill"))
+                {
+                    annotLoader.requestThreadState(AnnotationLoader.Status.KILLED);
+                }
+
+                if (commandType.equalsIgnoreCase("pause"))
+                {
+                    annotLoader.requestThreadState(AnnotationLoader.Status.PAUSED);
+                }
+
+                if (commandType.equalsIgnoreCase("continue"))
+                {
+                    annotLoader.requestThreadState(AnnotationLoader.Status.RUNNING);
+                }
+            }
+
+            if (commandType.equalsIgnoreCase("recover"))
+            {
+                String fnameToRecover = Table.executeSingleton(ProteinManager.getSchema(), "SELECT FileName FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=" + threadId, null, String.class);
+                String ftypeToRecover = Table.executeSingleton(ProteinManager.getSchema(), "SELECT FileType FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=" + threadId, null, String.class);
+                //TODO:  Major kludge.  This will have to be done correctly.  Possibly with generics, which is what they're for
+                if (ftypeToRecover.equalsIgnoreCase("uniprot"))
+                {
+                    XMLProteinLoader xpl = new XMLProteinLoader(fnameToRecover);
+                    xpl.parseInBackground(threadId);
+                    Thread.sleep(2000);
+                }
+                if (ftypeToRecover.equalsIgnoreCase("fasta"))
+                {
+                    FastaDbLoader fdbl = new FastaDbLoader(new File(fnameToRecover));
+                    fdbl.parseInBackground(threadId);
+                    Thread.sleep(2000);
+                }
+            }
+
+            return getShowProteinAdminUrl();
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowParamsFileAction extends ExportAction<DetailsForm>
+    {
+        public void export(DetailsForm form, HttpServletResponse response) throws Exception
+        {
+            MS2Run run = MS2Manager.getRun(form.getRun());
+
+            try
+            {
+                // TODO: Ensure drive?
+                PageFlowUtil.streamFile(response, run.getPath() + "/" + run.getParamsFileName(), false);
+            }
+            catch (Exception e)
+            {
+                response.getWriter().print("Error retrieving file: " + e.getMessage());
+            }
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_NONE)
+    public class UpdateShowPeptideAction extends SimpleRedirectAction
+    {
+        public ActionURL getRedirectURL(Object o) throws Exception
+        {
+            ViewContext ctx = getViewContext();
+
+            ActionURL redirectURL = ctx.cloneActionURL().setAction("showPeptide");
+            String queryString = (String)ctx.get("queryString");
+            redirectURL.setRawQuery(queryString);
+
+            String xStart = (String)ctx.get("xStart");
+            String xEnd = (String)ctx.get("xEnd");
+
+            if ("".equals(xStart))
+                redirectURL.deleteParameter("xStart");
+            else
+                redirectURL.replaceParameter("xStart", xStart);
+
+            if ("".equals(xEnd))
+                redirectURL.deleteParameter("xEnd");
+            else
+                redirectURL.replaceParameter("xEnd", xEnd);
+
+            return redirectURL;
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowGZFileAction extends ExportAction<DetailsForm>
+    {
+        public void export(DetailsForm form, HttpServletResponse response) throws Exception
+        {
+            if (!isAuthorized(form.run))
+                return;
+
+            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
+
+            if (null == peptide)
+            {
+                // This should only happen if an old, cached link is being used... a saved favorite or google bot with fraction=x&scan=y&charge=z instead of peptideId
+                throw new NotFoundException("Couldn't find peptide " + form.getPeptideIdLong() + ". " + getViewContext().getActionURL().toString());
+            }
+
+            response.setContentType("text/plain");
+            PrintWriter out = response.getWriter();
+
+            MS2GZFileRenderer renderer = new MS2GZFileRenderer(peptide, form.getExtension());
+
+            if (!renderer.render(out))
+            {
+                MS2GZFileRenderer.renderFileHeader(out, MS2GZFileRenderer.getFileNameInGZFile(MS2Manager.getFraction(peptide.getFraction()), peptide.getScan(), peptide.getCharge(), form.extension));
+                out.println(renderer.getLastErrorMessage());
+            }
+        }
+    }
+
+
+    public static class DetailsForm extends RunForm
+    {
+        private long peptideId;
+        private int rowIndex;
+        private int height;
+        private int width;
+        private double tolerance;
+        private double xEnd;
+        private double xStart;
+        private int seqId;
+        private String extension;
+        private String protein;
+        private int quantitationCharge;
+        private int groupNumber;
+        private int indistinguishableCollectionId;
+        private Integer proteinGroupId;
+
+        public Integer getProteinGroupId()
+        {
+            return proteinGroupId;
+        }
+
+        public void setProteinGroupId(Integer proteinGroupId)
+        {
+            this.proteinGroupId = proteinGroupId;
+        }
+
+        public int getGroupNumber()
+        {
+            return groupNumber;
+        }
+
+        public void setGroupNumber(int groupNumber)
+        {
+            this.groupNumber = groupNumber;
+        }
+
+        public int getIndistinguishableCollectionId()
+        {
+            return indistinguishableCollectionId;
+        }
+
+        public void setIndistinguishableCollectionId(int indistinguishableCollectionId)
+        {
+            this.indistinguishableCollectionId = indistinguishableCollectionId;
+        }
+
+        public void setPeptideId(String peptideId)
+        {
+            try
+            {
+                this.peptideId = Long.parseLong(peptideId);
+            }
+            catch (NumberFormatException e) {}
+        }
+
+        public String getPeptideId()
+        {
+            return Long.toString(peptideId);
+        }
+
+        public long getPeptideIdLong()
+        {
+            return this.peptideId;
+        }
+
+        public void setxStart(String xStart)
+        {
+            try
+            {
+                this.xStart = Double.parseDouble(xStart);
+            }
+            catch (NumberFormatException e) {}
+        }
+
+        public String getxStart()
+        {
+            return Double.toString(xStart);
+        }
+
+        public double getxStartDouble()
+        {
+            return this.xStart;
+        }
+
+        public String getStringXStart()
+        {
+            return Double.MIN_VALUE == xStart ? "" : Formats.fv2.format(xStart);
+        }
+
+        public void setxEnd(double xEnd)
+        {
+            this.xEnd = xEnd;
+        }
+
+        public double getxEnd()
+        {
+            return this.xEnd;
+        }
+
+        public String getStringXEnd()
+        {
+            return Double.MAX_VALUE == xEnd ? "" : Formats.fv2.format(xEnd);
+        }
+
+        public void setTolerance(double tolerance)
+        {
+            this.tolerance = tolerance;
+        }
+
+        public double getTolerance()
+        {
+            return this.tolerance;
+        }
+
+        public void setWidth(int width)
+        {
+            this.width = width;
+        }
+
+        public int getWidth()
+        {
+            return this.width;
+        }
+
+        public void setHeight(int height)
+        {
+            this.height = height;
+        }
+
+        public int getHeight()
+        {
+            return this.height;
+        }
+
+        // Set form default values for graphs and peptides; these will be overwritten by
+        // any params included on the url
+        public void reset(ActionMapping arg0, HttpServletRequest arg1)
+        {
+            super.reset(arg0, arg1);
+            rowIndex = -1;
+            xStart = Double.MIN_VALUE;
+            xEnd = Double.MAX_VALUE;
+            tolerance = 1.0;
+            height = 400;
+            width = 600;
+            quantitationCharge = Integer.MIN_VALUE;
+        }
+
+        public void setRowIndex(int rowIndex)
+        {
+            this.rowIndex = rowIndex;
+        }
+
+        public int getRowIndex()
+        {
+            return this.rowIndex;
+        }
+
+        public void setSeqId(String seqId)
+        {
+            try
+            {
+                this.seqId = Integer.parseInt(seqId);
+            }
+            catch (NumberFormatException e) {}
+        }
+
+        public String getSeqId()
+        {
+            return Integer.toString(this.seqId);
+        }
+
+        public int getSeqIdInt()
+        {
+            return this.seqId;
+        }
+
+        public String getExtension()
+        {
+            return extension;
+        }
+
+        public void setExtension(String extension)
+        {
+            this.extension = extension;
+        }
+
+        public String getProtein()
+        {
+            return protein;
+        }
+
+        public void setProtein(String protein)
+        {
+            this.protein = protein;
+        }
+
+        public int getQuantitationCharge()
+        {
+            return quantitationCharge;
+        }
+
+        public void setQuantitationCharge(int quantitationCharge)
+        {
+            this.quantitationCharge = quantitationCharge;
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class EditElutionGraphAction extends SimpleViewAction<DetailsForm>
+    {
+        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
+        {
+            if (!isAuthorized(form.run))
+                return null;
+
+            MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
+            Quantitation quant = peptide.getQuantitation();
+
+            EditElutionGraphContext ctx = new EditElutionGraphContext(quant.getLightElutionProfile(peptide.getCharge()), quant.getHeavyElutionProfile(peptide.getCharge()), quant, getViewContext().getActionURL(), peptide);
+            return new JspView<EditElutionGraphContext>("/org/labkey/ms2/editElution.jsp", ctx);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
+
     public static class MS2UrlsImpl implements MS2Urls
     {
         public ActionURL getShowPeptideUrl(Container container)
@@ -4453,6 +5481,8 @@ public class MS2Controller extends SpringActionController
             return new ActionURL(MS2Controller.ShowPeptideAction.class, container);
         }
     }
+
+
     public class CompareOptionsBean
     {
         private final QueryView _peptideView;
@@ -4481,5 +5511,4 @@ public class MS2Controller extends SpringActionController
             return _runList;
         }
     }
-
 }

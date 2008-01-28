@@ -17,7 +17,6 @@ import java.sql.SQLException;
 import java.util.*;
 import java.io.IOException;
 
-import org.labkey.ms2.OldMS2Controller;
 import org.labkey.ms2.MS2Controller;
 import org.springframework.web.servlet.ModelAndView;
 import jxl.write.WritableWorkbook;
@@ -223,12 +222,12 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         throw new UnsupportedOperationException();
     }
 
-    public GridView createPeptideViewForGrouping(OldMS2Controller.DetailsForm form)
+    public GridView createPeptideViewForGrouping(MS2Controller.DetailsForm form)
     {
         throw new UnsupportedOperationException();
     }
 
-    public String[] getPeptideStringsForGrouping(OldMS2Controller.DetailsForm form) throws SQLException
+    public String[] getPeptideStringsForGrouping(MS2Controller.DetailsForm form) throws SQLException
     {
         throw new UnsupportedOperationException();
     }
