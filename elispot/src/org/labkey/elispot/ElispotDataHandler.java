@@ -36,6 +36,9 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
     public static final String ELISPOT_PROPERTY_LSID_PREFIX = "ElispotProperty";
     public static final String ELISPOT_INPUT_MATERIAL_DATA_PROPERTY = "SpecimenLsid";
 
+    public static final String SFU_PROPERTY_NAME = "SFU";
+    public static final String WELLGROUP_PROPERTY_NAME = "WellgroupName";
+
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         ExpRun run = data.getRun();
@@ -48,86 +51,75 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
         {
             if (ElispotAssayProvider.READER_PROPERTY_NAME.equals(property.getName()))
             {
-                ListDefinition list = ElispotPlateReaderService.getPlateReaderList(info.getContainer());
-                if (list != null)
-                {
-                    DomainProperty prop = list.getDomain().getPropertyByName(ElispotPlateReaderService.READER_TYPE_PROPERTY);
-                    ListItem item = list.getListItem(property.getStringValue());
-                    if (item != null && prop != null)
-                    {
-                        Object value = item.getProperty(prop);
-                        ElispotPlateReaderService.I reader = ElispotPlateReaderService.getPlateReader(String.valueOf(value));
-                        if (reader != null)
-                        {
-                            double[][] cellValues = reader.loadFile(template, dataFile);
-                            insertPlateData(data, info, cellValues);
-                            return;
-                        }
-                    }
-                }
+                ElispotPlateReaderService.I reader = getPlateReaderFromName(property.getStringValue(), info.getContainer());
+                Plate plate = initializePlate(dataFile, template, reader);
+
+                insertPlateData(data, info, plate);
+                return;
             }
         }
         throw new ExperimentException("Unable to load data file: Plate reader type not found");
     }
 
-    private void insertPlateData(ExpData data, ViewBackgroundInfo info, double[][] cellValues) throws ExperimentException
+    public static ElispotPlateReaderService.I getPlateReaderFromName(String readerName, Container c)
+    {
+        ListDefinition list = ElispotPlateReaderService.getPlateReaderList(c);
+        if (list != null)
+        {
+            DomainProperty prop = list.getDomain().getPropertyByName(ElispotPlateReaderService.READER_TYPE_PROPERTY);
+            ListItem item = list.getListItem(readerName);
+            if (item != null && prop != null)
+            {
+                Object value = item.getProperty(prop);
+                return ElispotPlateReaderService.getPlateReader(String.valueOf(value));
+            }
+        }
+        return null;
+    }
+
+    public static Plate initializePlate(File dataFile, PlateTemplate template, ElispotPlateReaderService.I reader) throws ExperimentException
+    {
+        if (reader != null)
+        {
+            double[][] cellValues = reader.loadFile(template, dataFile);
+            return PlateService.get().createPlate(template, cellValues);
+        }
+        return null;
+    }
+    
+    private void insertPlateData(ExpData data, ViewBackgroundInfo info, Plate plate) throws ExperimentException
     {
         ExpRun run = data.getRun();
         ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
         Container container = data.getContainer();
         AssayProvider provider = AssayService.get().getProvider(protocol);
-        PlateTemplate template = provider.getPlateTemplate(container, protocol);
 
-        Plate plate = PlateService.get().createPlate(template, cellValues);
-        boolean ownTransaction = !ExperimentService.get().isTransactionActive();
-        try {
-            if (ownTransaction)
+        try
+        {
+            List<ObjectProperty> results = new ArrayList<ObjectProperty>();
+            Map<String, ExpMaterial> materialMap = new HashMap<String, ExpMaterial>();
+            for (ExpMaterial material : run.getMaterialInputs().keySet())
+                materialMap.put(material.getName(), material);
+
+            for (WellGroup group : plate.getWellGroups(WellGroup.Type.SPECIMEN))
             {
-                ExperimentService.get().beginTransaction();
-            }
-
-            try
-            {
-                List<ObjectProperty> results = new ArrayList<ObjectProperty>();
-                List<? extends WellGroup> antigens = plate.getWellGroups(WellGroup.Type.ANTIGEN);
-
-                Map<String, ExpMaterial> materialMap = new HashMap<String, ExpMaterial>();
-                for (ExpMaterial material : run.getMaterialInputs().keySet())
-                    materialMap.put(material.getName(), material);
-
-                for (WellGroup group : plate.getWellGroups(WellGroup.Type.SPECIMEN))
+                for (Position pos : group.getPositions())
                 {
-                    for (Position pos : group.getPositions())
+                    results.clear();
+                    Well well = plate.getWell(pos.getRow(), pos.getColumn());
+                    ExpMaterial material = materialMap.get(group.getName());
+                    if (material != null)
                     {
-                        results.clear();
-                        Well well = plate.getWell(pos.getRow(), pos.getColumn());
+                        Lsid dataRowLsid = getDataRowLsid(data.getLSID(), pos);
 
-                        // find the antigen group associated with this well
-                        WellGroup antigen = getAntigenGroup(antigens, pos);
+                        results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID(), PropertyType.STRING));
+                        results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), SFU_PROPERTY_NAME, well.getValue(), PropertyType.DOUBLE, "0.0"));
+                        results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "WellgroupName", group.getName(), PropertyType.STRING));
+                        results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "WellLocation", pos.toString(), PropertyType.STRING));
 
-                        ExpMaterial material = materialMap.get(group.getName());
-                        if (material != null)
-                        {
-                            Lsid dataRowLsid = new Lsid(data.getLSID());
-                            dataRowLsid.setNamespacePrefix(ELISPOT_DATA_ROW_LSID_PREFIX);
-                            dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + pos.getRow() + ':' + pos.getColumn());
-
-                            results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID(), PropertyType.STRING));
-                            results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "SFU", well.getValue(), PropertyType.DOUBLE, "0.0"));
-                            results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "WellgroupName", group.getName(), PropertyType.STRING));
-                            results.add(getResultObjectProperty(container, protocol, dataRowLsid.toString(), "WellLocation", pos.toString(), PropertyType.STRING));
-
-                            OntologyManager.ensureObject(container.getId(), dataRowLsid.toString(),  data.getLSID());
-                            OntologyManager.insertProperties(container.getId(), results.toArray(new ObjectProperty[results.size()]), dataRowLsid.toString());
-                        }
+                        OntologyManager.ensureObject(container.getId(), dataRowLsid.toString(),  data.getLSID());
+                        OntologyManager.insertProperties(container.getId(), results.toArray(new ObjectProperty[results.size()]), dataRowLsid.toString());
                     }
-                }
-            }
-            finally
-            {
-                if (ownTransaction)
-                {
-                    ExperimentService.get().rollbackTransaction();
                 }
             }
         }
@@ -137,23 +129,27 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    private WellGroup getAntigenGroup(List<? extends WellGroup> groups, Position pos)
+    public static Lsid getDataRowLsid(String dataLsid, Position pos)
     {
-        for (WellGroup group : groups)
-        {
-            if (group.contains(pos))
-                return group;
-        }
-        return null;
+        return getDataRowLsid(dataLsid, pos.getRow(), pos.getColumn());
     }
 
-    private ObjectProperty getResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
+    public static Lsid getDataRowLsid(String dataLsid, int row, int col)
+    {
+        Lsid dataRowLsid = new Lsid(dataLsid);
+        dataRowLsid.setNamespacePrefix(ELISPOT_DATA_ROW_LSID_PREFIX);
+        dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + row + ':' + col);
+
+        return dataRowLsid;
+    }
+
+    public static ObjectProperty getResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
                                                    String propertyName, Object value, PropertyType type)
     {
         return getResultObjectProperty(container, protocol, objectURI, propertyName, value, type, null);
     }
 
-    private ObjectProperty getResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
+    public static ObjectProperty getResultObjectProperty(Container container, ExpProtocol protocol, String objectURI,
                                                    String propertyName, Object value, PropertyType type, String format)
     {
         Lsid propertyURI = new Lsid(ELISPOT_PROPERTY_LSID_PREFIX, protocol.getName(), propertyName);
@@ -170,7 +166,7 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
     public void deleteData(ExpData data, Container container, User user) throws ExperimentException
     {
         try {
-            OntologyManager.deleteOntologyObject(container.getId(), data.getLSID());
+            OntologyManager.deleteOntologyObject(data.getLSID(), container, true);
         }
         catch (SQLException e)
         {

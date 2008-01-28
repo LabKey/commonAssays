@@ -4,8 +4,7 @@ import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
-import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
@@ -14,11 +13,14 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.study.WellGroup;
+import org.labkey.api.study.Position;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.springframework.web.servlet.ModelAndView;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMessage;
@@ -26,9 +28,7 @@ import org.apache.struts.action.ActionMessage;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -133,31 +133,36 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         return view;        
     }
 
-    private ModelAndView getPlateSummary(ElispotRunUploadForm form, boolean reshow)
+    private ModelAndView getPlateSummary(ElispotRunUploadForm form, ExpRun run)
     {
-/*
         try {
             AssayProvider provider = form.getProvider();
             PlateTemplate template = provider.getPlateTemplate(form.getContainer(), form.getProtocol());
 
-            File dataFile = form.getUploadedData().get("uploadedFile");
-            if (dataFile != null)
+            if (run != null)
             {
-                Plate plate = ElispotDataHandler.loadDataFile(dataFile, template);
-                ModelAndView view = new JspView<ElispotRunUploadForm>("/org/labkey/elispot/view/plateSummary.jsp", form);
-                view.addObject("plate", plate);
+                ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
+                assert(data.length == 1);
 
+/*
+                Lsid dataRowLsid = new Lsid(data[0].getLSID());
+                dataRowLsid.setNamespacePrefix(ElispotDataHandler.ELISPOT_DATA_ROW_LSID_PREFIX);
+                dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + "1" + ':' + "1");
+
+                Map<String, ObjectProperty> props = OntologyManager.getPropertyObjects(form.getContainer().getId(), dataRowLsid.toString());
+*/
+                ModelAndView view = new JspView<ElispotRunUploadForm>("/org/labkey/elispot/view/plateSummary.jsp", form);
+                view.addObject("plateTemplate", template);
+                view.addObject("dataLsid", data[0].getLSID());
                 return view;
             }
 
         }
-        catch (ExperimentException e)
+        catch (Exception e)
         {
             throw new RuntimeException(e);
         }
-*/
         return null;
-
     }
 
     protected StepHandler getRunStepHandler()
@@ -234,17 +239,85 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
         protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form) throws SQLException, ServletException
         {
+            ExpRun run = null;
             try {
                 AssayProvider provider = form.getProvider();
-                provider.saveExperimentRun(form);
+                run = provider.saveExperimentRun(form);
 
                 saveDefaultValues(_postedAntigenProperties, form.getRequest(), provider, getName());
+
+                ExperimentService.get().getSchema().getScope().beginTransaction();
+                ExpData[] data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
+                if (data.length != 1)
+                    throw new ExperimentException("Elispot should only upload a single file per run.");
+
+                PlateTemplate template = provider.getPlateTemplate(form.getContainer(), form.getProtocol());
+                Plate plate = null;
+
+                for (Map.Entry<PropertyDescriptor, String> entry : form.getRunProperties().entrySet())
+                {
+                    if (ElispotAssayProvider.READER_PROPERTY_NAME.equals(entry.getKey().getName()))
+                    {
+                        ElispotPlateReaderService.I reader = ElispotDataHandler.getPlateReaderFromName(entry.getValue(), form.getContainer());
+                        plate = ElispotDataHandler.initializePlate(data[0].getDataFile(), template, reader);
+                        break;
+                    }
+                }
+
+                PropertyDescriptor[] antigenProps = AbstractAssayProvider.getPropertiesForDomainPrefix(form.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+                Map<String, String> postedPropMap = new HashMap<String, String>();
+
+                for (Map.Entry<PropertyDescriptor, String> entry : _postedAntigenProperties.entrySet())
+                    postedPropMap.put(entry.getKey().getName(), entry.getValue());
+
+
+                if (plate != null)
+                {
+                    // we want to 'collapse' all the antigen well groups to 'per well'
+                    List<ObjectProperty> results = new ArrayList<ObjectProperty>();
+                    for (WellGroup group : plate.getWellGroups(WellGroup.Type.ANTIGEN))
+                    {
+                        for (Position pos : group.getPositions())
+                        {
+                            results.clear();
+                            Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data[0].getLSID(), pos);
+
+                            for (PropertyDescriptor pd : antigenProps)
+                            {
+                                String key = group.getName().replaceAll(" ", "") + "_" + pd.getName();
+                                if (postedPropMap.containsKey(key))
+                                {
+                                    ObjectProperty op = ElispotDataHandler.getResultObjectProperty(form.getContainer(),
+                                            form.getProtocol(),
+                                            dataRowLsid.toString(),
+                                            pd.getName(),
+                                            postedPropMap.get(key),
+                                            pd.getPropertyType(),
+                                            pd.getFormat());
+
+                                    results.add(op);
+                                }
+                            }
+
+                            if (!results.isEmpty())
+                            {
+                                OntologyManager.ensureObject(form.getContainer().getId(), dataRowLsid.toString(),  data[0].getLSID());
+                                OntologyManager.insertProperties(form.getContainer().getId(), results.toArray(new ObjectProperty[results.size()]), dataRowLsid.toString());
+                            }
+                        }
+                    }
+                }
+                ExperimentService.get().getSchema().getScope().commitTransaction();
             }
             catch (ExperimentException e)
             {
                 ActionErrors strutsErrors = PageFlowUtil.getActionErrors(getViewContext().getRequest(), true);
                 strutsErrors.add("main", new ActionMessage("Error", e.getMessage()));
                 return getAntigenView(form, true);
+            }
+            finally
+            {
+                ExperimentService.get().getSchema().getScope().closeConnection();
             }
             return runUploadComplete(form);
         }

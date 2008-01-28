@@ -1,9 +1,9 @@
 package org.labkey.elispot;
 
-import org.labkey.api.data.Container;
-import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
@@ -16,12 +16,14 @@ import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySchema;
+import org.labkey.api.query.QueryViewCustomizer;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
 import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
@@ -30,6 +32,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
+import java.io.Writer;
+import java.io.IOException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -60,6 +64,8 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
     public static final String ANTIGENID_PROPERTY_CAPTION = "Antigen ID";
     public static final String ANTIGENNAME_PROPERTY_NAME = "AntigenName";
     public static final String ANTIGENNAME_PROPERTY_CAPTION = "Antigen Name";
+    public static final String PEPTIDE_CONCENTRATION_NAME = "PeptideConcentration";
+    public static final String PEPTIDE_CONCENTRATION_CAPTION = "Peptide Concentration (ug/ml)";
 
 
     public ElispotAssayProvider()
@@ -119,6 +125,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
         addProperty(antigenWellGroupDomain, ANTIGENID_PROPERTY_NAME, ANTIGENID_PROPERTY_CAPTION, PropertyType.INTEGER);
         addProperty(antigenWellGroupDomain, ANTIGENNAME_PROPERTY_NAME, ANTIGENNAME_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(antigenWellGroupDomain, CELLWELL_PROPERTY_NAME, CELLWELL_PROPERTY_CAPTION, PropertyType.INTEGER);
+        addProperty(antigenWellGroupDomain, PEPTIDE_CONCENTRATION_NAME, PEPTIDE_CONCENTRATION_CAPTION, PropertyType.DOUBLE);
 
         return antigenWellGroupDomain;
     }
@@ -223,4 +230,37 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
     {
         return getPropertiesForDomainPrefix(protocol, ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
     }
+
+    public static class ElispotRunsViewCustomizer implements QueryViewCustomizer
+    {
+        private String _idColumn;
+
+        public ElispotRunsViewCustomizer(String idColumn)
+        {
+            _idColumn = idColumn;
+        }
+
+        public void customize(DataView view)
+        {
+            DataRegion rgn = view.getDataRegion();
+            rgn.addColumn(0, new SimpleDisplayColumn()
+            {
+                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                {
+                    Object runId = ctx.getRow().get(_idColumn);
+                    if (runId != null)
+                    {
+                        ActionURL url = new ActionURL(ElispotController.RunDetailsAction.class, ctx.getContainer()).addParameter("rowId", "" + runId);
+                        out.write("[<a href=\"" + url.getLocalURIString() + "\" title=\"View run details\">run&nbsp;details</a>]");
+                    }
+                }
+            });
+        }
+    }
+
+    public QueryViewCustomizer getRunsViewCustomizer(Container container, ExpProtocol protocol)
+    {
+        return new ElispotRunsViewCustomizer(ExpRunTable.Column.RowId.toString());
+    }
+
 }
