@@ -607,7 +607,7 @@ abstract public class ScriptJob extends PipelineJob
             try
             {
                 ScriptXarSource source = new ScriptXarSource(xardoc, root, workingDirectory);
-                ExperimentService.get().loadExperiment(source, this, true);
+                ExperimentService.get().loadXar(source, this, true);
             }
             catch (Throwable t)
             {

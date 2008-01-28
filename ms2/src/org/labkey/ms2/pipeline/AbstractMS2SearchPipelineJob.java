@@ -4,6 +4,9 @@ import org.labkey.api.pipeline.*;
 import org.labkey.api.util.*;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.exp.api.ExperimentUrls;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 
 import java.io.*;
 import java.sql.SQLException;
@@ -35,7 +38,7 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         return new File(dirAnalysis, baseName + "_raw.pep.xml");
     }
 
-    protected Integer _experimentRowId;
+    protected Integer _experimentRunRowId;
     protected String _protocolName;
     protected String _baseName;
     protected File _dirSequenceRoot;
@@ -126,7 +129,7 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         super(job);
 
         // Copy some parameters from the parent job.
-        _experimentRowId = job._experimentRowId;
+        _experimentRunRowId = job._experimentRunRowId;
         _protocolName = job._protocolName;
         _dirSequenceRoot = job._dirSequenceRoot;
         _dirMzXML = job._dirMzXML;
@@ -345,15 +348,13 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
 
     public ActionURL getStatusHref()
     {
-        if (_experimentRowId != null)
+        if (_experimentRunRowId != null)
         {
-            ActionURL ret = getActionURL().clone();
-            ret.setPageFlow("Experiment");
-            ret.setAction("details");
-            ret.setExtraPath(getContainer().getPath());
-            ret.deleteParameters();
-            ret.addParameter("rowId", _experimentRowId.toString());
-            return ret;
+            ExpRun run = ExperimentService.get().getExpRun(_experimentRunRowId.intValue());
+            if (run != null)
+            {
+                return PageFlowUtil.urlProvider(ExperimentUrls.class).getRunGraphURL(getContainer(), run);
+            }
         }
         return null;
     }
@@ -373,9 +374,9 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         return !_fractions || DATATYPE_BOTH.equalsIgnoreCase(getParameters().get("pipeline, data type"));
     }
 
-    public void setExperimentRowId(int rowId)
+    public void setExperimentRunRowId(int rowId)
     {
-        _experimentRowId = rowId;
+        _experimentRunRowId = rowId;
     }
 
     public Map<String, String> getXarTemplateReplacements() throws IOException

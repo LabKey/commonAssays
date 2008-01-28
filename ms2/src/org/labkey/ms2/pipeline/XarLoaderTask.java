@@ -17,6 +17,7 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.exp.ExperimentPipelineJob;
 import org.labkey.api.exp.FileXarSource;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.PipelineJob;
 
@@ -36,9 +37,9 @@ public class XarLoaderTask extends PipelineJob.Task
     public interface JobSupport extends MS2SearchJobSupport
     {
         /**
-         * Sets the rowId of the loaded experiment on the PipelineJob.
+         * Sets the rowId of the loaded run on the PipelineJob.
          */
-        void setExperimentRowId(int rowId);
+        void setExperimentRunRowId(int rowId);
     }
 
     public static class Factory extends AbstractTaskFactory
@@ -85,9 +86,9 @@ public class XarLoaderTask extends PipelineJob.Task
         FileXarSource source = new FileXarSource(fileExperimentXML);
         if (ExperimentPipelineJob.loadExperiment(getJob(), source, false))
         {
-            Integer rowId = source.getExperimentRowId();
-            assert rowId != null;   // Status was successful
-            getJobSupport().setExperimentRowId(rowId.intValue());
+            ExpRun run = source.getExperimentRun();
+            assert run != null;   // Status was successful
+            getJobSupport().setExperimentRunRowId(run.getRowId());
         }
     }
 }

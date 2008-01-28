@@ -2,16 +2,14 @@ package org.labkey.microarray;
 
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.QuerySettings;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpSchema;
-import org.labkey.api.exp.api.ExpDataTable;
-import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.*;
 import org.labkey.api.view.*;
 import org.labkey.api.data.*;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 
 import java.util.List;
@@ -102,7 +100,7 @@ public class PendingMageMLFilesView extends QueryView
         }
 
         ActionButton deleteButton = new ActionButton("placeholder", "Delete selected");
-        ActionURL deleteURL = ExperimentService.get().getDeleteDatasURL(view.getViewContext().getContainer(), view.getViewContext().getActionURL());
+        ActionURL deleteURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getDeleteDatasURL(view.getViewContext().getContainer(), view.getViewContext().getActionURL());
         deleteButton.setScript("if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + deleteURL + "\", \"post\", \"MageML files\")) {document.forms[\"" + view.getDataRegion().getName() + "\"].submit();} return false;"); 
         deleteButton.setDisplayPermission(ACL.PERM_DELETE);
         bar.add(deleteButton);
