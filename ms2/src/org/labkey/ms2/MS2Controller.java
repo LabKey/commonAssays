@@ -1665,70 +1665,6 @@ public class MS2Controller extends SpringActionController
     }
 
 
-/*    @RequiresPermission(ACL.PERM_NONE)  // CompareProteinsView does permissions checking on all runs
-    public class ExportQueryProteinProphetCompareToExcelAction extends ExportAction<ExportForm>
-    {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
-        {
-            exportQueryCompareToExcel(new CompareProteinsView(getViewContext(), MS2Controller.this, form.getRunList(), true));
-        }
-    }
-
-
-    @RequiresPermission(ACL.PERM_NONE)  // CompareProteinsView does permissions checking on all runs
-    public class ExportQueryProteinProphetCompareToTSVAction extends ExportAction<ExportForm>
-    {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
-        {
-            exportQueryCompareToTSV(new CompareProteinsView(getViewContext(), MS2Controller.this, form.getRunList(), true), form.isExportAsWebPage());
-        }
-    }
-
-
-    @RequiresPermission(ACL.PERM_NONE)  // CompareProteinsView does permissions checking on all runs
-    public class ExportQueryPeptideCompareToExcelAction extends ExportAction<ExportForm>
-    {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
-        {
-            exportQueryCompareToExcel(new ComparePeptidesView(getViewContext(), MS2Controller.this, form.getRunList(), true));
-        }
-    }
-
-
-    @RequiresPermission(ACL.PERM_NONE)  // CompareProteinsView does permissions checking on all runs
-    public class ExportQueryPeptideCompareToTSVAction extends ExportAction<ExportForm>
-    {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
-        {
-            exportQueryCompareToTSV(new ComparePeptidesView(getViewContext(), MS2Controller.this, form.getRunList(), true), form.isExportAsWebPage());
-        }
-    }
-
-
-    private void exportQueryCompareToExcel(AbstractRunCompareView view) throws Exception
-    {
-        if (!view.getErrors().isEmpty())
-            _renderErrors(view.getErrors());
-
-        ExcelWriter excelWriter = view.getExcelWriter();
-        excelWriter.setFilenamePrefix("CompareRuns");
-        excelWriter.write(getViewContext().getResponse());
-    }
-
-
-    private void exportQueryCompareToTSV(AbstractRunCompareView view, boolean exportAsWebPage) throws Exception
-    {
-        if (!view.getErrors().isEmpty())
-            _renderErrors(view.getErrors());
-
-        TSVGridWriter tsvWriter = view.getTsvWriter();
-        tsvWriter.setExportAsWebPage(exportAsWebPage);
-        tsvWriter.setFilenamePrefix("CompareRuns");
-        tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
-        tsvWriter.write(getViewContext().getResponse());
-    }
-*/
-
     @RequiresPermission(ACL.PERM_READ)
     public class CompareServiceAction extends SimpleViewAction
     {
@@ -5053,62 +4989,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
-/*    @RequiresPermission(ACL.PERM_INSERT)
-    public class MoveRunsAction extends SimpleRedirectAction
-    {
-        public ActionURL getRedirectURL(Object o) throws Exception
-        {
-            ActionURL currentUrl = getViewContext().cloneActionURL();
-            String moveRuns = currentUrl.getParameter("moveRuns");
-            String[] idStrings = moveRuns.split(",");
-            List<Integer> ids = new ArrayList<Integer>();
-            for (String idString : idStrings)
-            {
-                ids.add(new Integer(idString));
-            }
-            List<MS2Run> runs = getRuns(ids, new ArrayList<String>(), false);
-            List<ExpRun> expRuns = new ArrayList<ExpRun>();
-            Container sourceContainer = null;
-            for (Iterator<MS2Run> iter = runs.iterator(); iter.hasNext(); )
-            {
-                MS2Run run = iter.next();
-                if (run.getExperimentRunLSID() != null)
-                {
-                    ExpRun expRun = ExperimentService.get().getExpRun(run.getExperimentRunLSID());
-                    if (expRun != null && expRun.getContainer().getId().equals(run.getContainer()))
-                    {
-                        sourceContainer = expRun.getContainer();
-                        expRuns.add(expRun);
-                        iter.remove();
-                    }
-                }
-            }
-            if (runs.size() > 0)
-            {
-                MS2Manager.moveRuns(getUser(), runs, getContainer());
-            }
-            if (expRuns.size() > 0)
-            {
-                ViewBackgroundInfo info = getViewBackgroundInfo();
-                info.setContainer(getContainer());
-                try
-                {
-                    ExperimentService.get().moveRuns(info, sourceContainer, expRuns);
-                }
-                catch (FileNotFoundException e)
-                {
-                    HttpView.throwNotFound(e.getMessage());
-                }
-            }
-
-            currentUrl.setAction("showList");
-            currentUrl.deleteParameter("moveRuns");
-
-            return currentUrl;
-        }
-    }
-*/
 
     @RequiresSiteAdmin
     public class AnnotThreadControlAction extends SimpleRedirectAction

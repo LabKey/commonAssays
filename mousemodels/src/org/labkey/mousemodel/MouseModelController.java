@@ -182,8 +182,8 @@ public class MouseModelController extends ViewController
 
         HBox hbox = new HBox(new HttpView[]{dashboardView, startNecropsyView, locateSampleView});
         HttpView discussionView = DiscussionService.get().getDisussionArea(
-                getViewContext(), getContainer(), getUser(),
-                model.getEntityId(), getViewContext().cloneActionURL(), model.getName(), true);
+                getViewContext(),
+                model.getEntityId(), getViewContext().cloneActionURL(), model.getName(), true, false);
 
         MouseModelTemplateView v = new MouseModelTemplateView(form, 0, new VBox(hbox, discussionView));
 

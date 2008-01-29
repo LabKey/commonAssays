@@ -292,8 +292,8 @@ public class NabController extends ViewController
             String discussionTitle = "Discuss Run " + _assay.getRunRowId() + ": " + _assay.getName();
             String entityId = _assay.getPlate().getEntityId();
             DiscussionService.Service service = DiscussionService.get();
-            return service.getDisussionArea(context, context.getContainer(), context.getUser(),
-                    entityId, pageUrl, discussionTitle, true);
+            return service.getDisussionArea(context,
+                    entityId, pageUrl, discussionTitle, true, false);
         }
     }
 
