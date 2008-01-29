@@ -25,7 +25,7 @@ package org.labkey.ms1.query;
  */
 public class ListFilterBase
 {
-    public String genListSQL(int[] values)
+    protected String genListSQL(int[] values)
     {
         StringBuilder sql = new StringBuilder();
 
@@ -41,12 +41,12 @@ public class ListFilterBase
     }
 
 
-    public String genListSQL(Object[] values)
+    protected String genListSQL(Object[] values)
     {
         return genListSQL(values, true);
     }
 
-    public String genListSQL(Object[] values, boolean quoteValues)
+    protected String genListSQL(Object[] values, boolean quoteValues)
     {
         StringBuilder sql = new StringBuilder();
 

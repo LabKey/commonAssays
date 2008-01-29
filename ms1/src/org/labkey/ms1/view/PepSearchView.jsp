@@ -12,10 +12,11 @@
 <p class="error"><%=model.getErrorMsg()%></p>
 <% } %>
 <form action="<%=model.getResultsUri()%>" method="get">
+    <input type="hidden" name="<%=MS1Controller.PepSearchForm.ParamNames.runIds.name()%>" value="<%=model.getRunIds()%>"/>
     <p>Peptide Sequence:
         <input type="text" name="<%=MS1Controller.PepSearchForm.ParamNames.pepSeq.name()%>"
                value="<%=model.getPepSeq()%>" size="40"/>
-        <%=helpPopup("Peptide Sequence", "Enter the peptide sequence to find, or multiple sequences separated by commas.")%>
+        <%=helpPopup("Peptide Sequence", "Enter the peptide sequence to find, or multiple sequences separated by commas. Use * to match any sequence of characters.")%>
         &nbsp;
         <input id="cbxExact" type="checkbox" name="<%=MS1Controller.PepSearchForm.ParamNames.exact.name()%>"
                style="vertical-align:middle" <%=model.isExact() ? "checked=\"1\"" : ""%> />

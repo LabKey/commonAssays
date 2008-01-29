@@ -3,13 +3,16 @@ package org.labkey.ms1;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.action.QueryViewAction;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.URIUtil;
@@ -29,6 +32,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.List;
 import java.sql.SQLException;
 
 /**
@@ -583,13 +588,15 @@ public class MS1Controller extends SpringActionController
             pepSeq,
             exact,
             subfolders,
-            export
+            export,
+            runIds
         }
 
         private String _pepSeq = "";
         private boolean _exact = false;
         private String _export = "";
         private boolean _subfolders = false;
+        private String _runIds = null;
 
         public String getPepSeq()
         {
@@ -630,6 +637,16 @@ public class MS1Controller extends SpringActionController
         {
             _subfolders = subfolders;
         }
+
+        public String getRunIds()
+        {
+            return _runIds;
+        }
+
+        public void setRunIds(String runIds)
+        {
+            _runIds = runIds;
+        }
     }
 
     @RequiresPermission(ACL.PERM_READ)
@@ -641,6 +658,8 @@ public class MS1Controller extends SpringActionController
             baseFilters.add(new ContainerFilter(getViewContext().getContainer(), form.isSubfolders(), getUser()));
             if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
                 baseFilters.add(new PeptideFilter(form.getPepSeq(), form.isExact()));
+            if(null != form.getRunIds() && form.getRunIds().length() > 0)
+                baseFilters.add(new RunFilter(form.getRunIds()));
 
             FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getViewContext().getContainer(),
                                             !(form.isSubfolders())), baseFilters);
@@ -651,7 +670,8 @@ public class MS1Controller extends SpringActionController
         public ModelAndView getView(PepSearchForm form, BindException errors) throws Exception
         {
             //create the search view
-            PepSearchModel searchModel = new PepSearchModel(getViewContext().getContainer(), form.getPepSeq(), form.isExact(), form.isSubfolders());
+            PepSearchModel searchModel = new PepSearchModel(getViewContext().getContainer(), form.getPepSeq(),
+                    form.isExact(), form.isSubfolders(), form.getRunIds());
             JspView<PepSearchModel> searchView = new JspView<PepSearchModel>("/org/labkey/ms1/view/PepSearchView.jsp", searchModel);
             searchView.setTitle("Search Criteria");
 
@@ -866,6 +886,36 @@ public class MS1Controller extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             return root.addChild("Find Similar Features");
+        }
+    }
+
+    public static class CompareRunsForm extends QueryViewAction.QueryExportForm
+    {
+    }
+
+    @RequiresPermission(ACL.PERM_NONE)
+    public class CompareRunsAction extends QueryViewAction<CompareRunsForm,CompareRunsView>
+    {
+        public CompareRunsAction()
+        {
+            super(CompareRunsForm.class);
+        }
+
+        protected CompareRunsView createQueryView(CompareRunsForm form, BindException errors, boolean forExport) throws Exception
+        {
+            Set<String> selectedRuns = DataRegionSelection.getSelected(getViewContext(), false);
+            if(null == selectedRuns || selectedRuns.size() < 2)
+                throw new RedirectException(new BeginAction().getUrl().getLocalURIString());
+            
+            ArrayList<Integer> runIds = new ArrayList<Integer>(selectedRuns.size());
+            for(String run : selectedRuns)
+                runIds.add(Integer.valueOf(run));
+            return new CompareRunsView(new MS1Schema(getUser(), getViewContext().getContainer()), runIds);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Compare Runs");
         }
     }
 

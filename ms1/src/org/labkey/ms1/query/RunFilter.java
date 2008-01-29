@@ -18,6 +18,11 @@ package org.labkey.ms1.query;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.ms1.MS1Controller;
 
+import java.util.List;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * Use with the FeaturesView and TableInfo to filter on one or more runs
  *
@@ -28,32 +33,49 @@ import org.labkey.ms1.MS1Controller;
  */
 public class RunFilter extends ListFilterBase implements FeaturesFilter
 {
-    private int[] _runIds = null;
+    private Integer[] _runIds = null;
 
     public RunFilter(String runIds)
     {
         //comma-delimited list
         String[] ids = runIds.split(",");
-        _runIds =  new int[ids.length];
+        _runIds =  new Integer[ids.length];
 
         for(int idx = 0; idx < ids.length; ++idx)
-            _runIds[idx] = Integer.parseInt(ids[idx]);
+            _runIds[idx] = new Integer(ids[idx]);
     }
 
     public RunFilter(int runId)
     {
-        _runIds = new int[]{runId};
+        _runIds = new Integer[]{runId};
     }
 
-    public RunFilter(int[] runIds)
+    public RunFilter(Integer[] runIds)
     {
         _runIds = runIds;
+    }
+
+    public RunFilter(List<Integer> runIds)
+    {
+        if(null != runIds)
+        {
+            _runIds = new Integer[runIds.size()];
+            _runIds = runIds.toArray(_runIds);
+        }
+    }
+
+    public String getRunIdList()
+    {
+        if(null == _runIds)
+            return "";
+        else
+            return genListSQL(_runIds, false);
     }
 
     public void setFilters(FeaturesTableInfo tinfo)
     {
         if(null != _runIds)
-            tinfo.addCondition(new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.RunId IN(" + genListSQL(_runIds) +"))"),
+            tinfo.addCondition(new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.RunId IN(" + genListSQL(_runIds, false) +"))"),
                                 "FileId");
     }
 

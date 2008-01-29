@@ -53,6 +53,7 @@
         </ns:column>
         <ns:column columnName="Charge">
             <ns:columnTitle>Z</ns:columnTitle>
+            <ns:formatString>#+</ns:formatString>
         </ns:column>
         <ns:column columnName="ChargeStates">
             <ns:columnTitle>Z States</ns:columnTitle>

@@ -37,29 +37,25 @@ public class PepSearchModel
     private boolean _exact = false;
     private boolean _subfolders = false;
     private String _errorMsg = null;
+    private String _runIds = null;
 
     public PepSearchModel(Container container)
     {
         _resultsUri = new ActionURL(MS1Controller.PepSearchAction.class, container).getLocalURIString();
     }
 
-    public PepSearchModel(Container container, String pepSeq, boolean exact, boolean includeSubfolders)
+    public PepSearchModel(Container container, String pepSeq, boolean exact, boolean includeSubfolders, String runIds)
     {
         this(container);
         _pepSeq = pepSeq;
         _exact = exact;
         _subfolders = includeSubfolders;
+        _runIds = runIds;
     }
 
     public String getResultsUri()
     {
         return _resultsUri;
-    }
-
-    public ExpRun[] getRuns(Container container)
-    {
-        ExperimentService.Interface expSvc = ExperimentService.get();
-        return expSvc.getExpRuns(container, expSvc.getExpProtocol(container, MS1Module.PROTOCOL_MS1), null);
     }
 
     public String getPepSeq()
@@ -110,5 +106,10 @@ public class PepSearchModel
     public boolean hasErrorMsg()
     {
         return (null != _errorMsg && _errorMsg.length() > 0);
+    }
+
+    public String getRunIds()
+    {
+        return _runIds;
     }
 }

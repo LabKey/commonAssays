@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class FeaturesTableInfo extends FilteredTable
 {
-    public static final String COLUMN_PEPTIDE_INFO = "Related Peptide";
+    public static final String COLUMN_PEPTIDE_INFO = "RelatedPeptide";
     public static final String COLUMN_FIND_SIMILAR_LINK = "FindSimilarLink";
 
     //Data Members
@@ -111,7 +111,7 @@ public class FeaturesTableInfo extends FilteredTable
         addColumn(new PeaksAvailableColumnInfo(this));
 
         //add a column for the find similar link
-        ColumnInfo similarLinkCol = addColumn(new ColumnInfo(COLUMN_FIND_SIMILAR_LINK));
+        ColumnInfo similarLinkCol = addColumn(new ColumnInfo(COLUMN_FIND_SIMILAR_LINK, this));
         similarLinkCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)

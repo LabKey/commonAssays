@@ -1,23 +1,25 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.*;
-import org.labkey.api.exp.api.ExpSchema;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpRunTable;
-import org.labkey.api.query.*;
+import org.labkey.api.exp.api.ExpSchema;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.DefaultSchema;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QuerySchema;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
-import org.labkey.ms1.query.FeaturesTableInfo;
-import org.labkey.ms1.query.FilesTableInfo;
+import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
-import org.labkey.ms1.query.PeaksTableInfo;
-import org.labkey.ms1.query.ScansTableInfo;
-import org.labkey.ms1.MS1Module;
+import org.labkey.ms1.view.FeaturesView;
 
-import java.util.Set;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Provides a customized experiment run grid with features specific to MS1 runs.
@@ -30,6 +32,7 @@ public class MS1Schema extends UserSchema
     public static final String TABLE_PEAKS = "Peaks";
     public static final String TABLE_FILES = "Files";
     public static final String TABLE_SCANS = "Scans";
+    public static final String TABLE_COMPARE_PEP = "ComparePeptide";
 
     static public void register()
     {
@@ -67,6 +70,10 @@ public class MS1Schema extends UserSchema
         HashSet<String> ret = new HashSet<String>();
         ret.add(TABLE_FEATURE_RUNS);
         ret.add(TABLE_FEATURES);
+        ret.add(TABLE_FILES);
+        ret.add(TABLE_PEAKS);
+        ret.add(TABLE_SCANS);
+        ret.add(TABLE_COMPARE_PEP);
         return ret;
     }
 
@@ -82,9 +89,66 @@ public class MS1Schema extends UserSchema
             return getFilesTableInfo();
         else if(TABLE_SCANS.equalsIgnoreCase(name))
             return getScansTableInfo();
+        else if(TABLE_COMPARE_PEP.equalsIgnoreCase(name))
+            return getComparePeptideTableInfo(null);
         else
             return super.getTable(name, alias);
     } //getTable()
+
+    public CrosstabTableInfo getComparePeptideTableInfo(List<Integer> runIds)
+    {
+        RunFilter runFilter = new RunFilter(runIds);
+        FeaturesTableInfo tinfo = getFeaturesTableInfo();
+        runFilter.setFilters(tinfo);
+
+        ActionURL urlPepSearch = new ActionURL(MS1Controller.PepSearchAction.class, getContainer());
+        urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.exact.name(), "on");
+        urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.runIds.name(), runFilter.getRunIdList());
+
+        //filter out features that don't have an associated peptide
+        tinfo.addCondition(new SQLFragment("MS2Scan IS NOT NULL"), "MS2Scan");
+
+        CrosstabSettings settings = new CrosstabSettings(tinfo);
+
+        CrosstabDimension rowDim = new CrosstabDimension(tinfo, FieldKey.fromParts(FeaturesTableInfo.COLUMN_PEPTIDE_INFO, "Peptide"));
+        rowDim.setUrl(urlPepSearch.getLocalURIString() + "&pepSeq=${Peptide}");
+        settings.getRowAxis().getDimensions().add(rowDim);
+
+        CrosstabDimension colDim = new CrosstabDimension(tinfo, FieldKey.fromParts("FileId", "ExpDataFileId", "Run", "RowId"));
+        colDim.setUrl(new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()).getLocalURIString() + "runId=" + CrosstabMember.VALUE_TOKEN);
+        settings.getColumnAxis().getDimensions().add(colDim);
+
+        CrosstabMeasure numFeaturesMeasure = new CrosstabMeasure(tinfo.getColumn("FeatureId"), CrosstabMeasure.AggregateFunction.COUNT);
+        numFeaturesMeasure.setCaption("Num Features");
+        settings.getMeasures().add(numFeaturesMeasure);
+        settings.getMeasures().add(new CrosstabMeasure(tinfo.getColumn("Intensity"), CrosstabMeasure.AggregateFunction.AVG));
+        
+        String measureUrl = new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()).getLocalURIString()
+                + MS1Controller.ShowFeaturesForm.ParamNames.runId.name() + "=" + CrosstabMember.VALUE_TOKEN
+                + "&" + FeaturesView.DATAREGION_NAME + ".RelatedPeptide/Peptide~eq=${Peptide}";
+        for(CrosstabMeasure measure : settings.getMeasures())
+            measure.setUrl(measureUrl);
+
+        settings.setInstanceCountCaption("Num Runs");
+        settings.getRowAxis().setCaption("Peptide Information");
+        settings.getColumnAxis().setCaption("Runs");
+
+        if(null != runIds)
+        {
+            ArrayList<CrosstabMember> members = new ArrayList<CrosstabMember>();
+            for(Integer runId : runIds)
+            {
+                if(null == runId)
+                    continue;
+
+                ExpRun run = ExperimentService.get().getExpRun(runId.intValue());
+                members.add(new CrosstabMember(runId, null == run ? null : run.getName()));
+            }
+            settings.getColumnAxis().getDimensions().get(0).setMembers(members);
+        }
+        
+        return new CrosstabTableInfo(settings, null == runIds);
+    }
 
     public FeaturesTableInfo getFeaturesTableInfo()
     {
@@ -129,7 +193,7 @@ public class MS1Schema extends UserSchema
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                ActionURL url = new ActionURL(MS1Module.CONTROLLER_NAME, "showFeatures.view", getContainer());
+                ActionURL url = new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer());
                 return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "runId=${RowId}", true), "features");
             }
         });
