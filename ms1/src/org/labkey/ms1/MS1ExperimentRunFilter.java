@@ -43,6 +43,7 @@ public class MS1ExperimentRunFilter extends ExperimentRunFilter
         super.populateButtonBar(context, bar, view);
 
         ActionURL compareUrl = new ActionURL(MS1Controller.CompareRunsAction.class, context.getContainer());
-        bar.add(new ActionButton(compareUrl.getLocalURIString(), "Compare", DataRegion.MODE_ALL, ActionButton.Action.POST));
+        bar.add(new ActionButton(MS1Controller.createVerifySelectedScript(view, compareUrl),
+                "Compare", DataRegion.MODE_ALL, ActionButton.Action.LINK));
     }
 }

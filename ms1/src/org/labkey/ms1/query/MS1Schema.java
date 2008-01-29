@@ -14,7 +14,6 @@ import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
-import org.labkey.ms1.view.FeaturesView;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -97,35 +96,32 @@ public class MS1Schema extends UserSchema
 
     public CrosstabTableInfo getComparePeptideTableInfo(List<Integer> runIds)
     {
+        //OK if runIds is null
         RunFilter runFilter = new RunFilter(runIds);
         FeaturesTableInfo tinfo = getFeaturesTableInfo();
         runFilter.setFilters(tinfo);
+
+        //filter out features that don't have an associated peptide
+        tinfo.addCondition(new SQLFragment("MS2Scan IS NOT NULL"), "MS2Scan");
 
         ActionURL urlPepSearch = new ActionURL(MS1Controller.PepSearchAction.class, getContainer());
         urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.exact.name(), "on");
         urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.runIds.name(), runFilter.getRunIdList());
 
-        //filter out features that don't have an associated peptide
-        tinfo.addCondition(new SQLFragment("MS2Scan IS NOT NULL"), "MS2Scan");
-
         CrosstabSettings settings = new CrosstabSettings(tinfo);
 
-        CrosstabDimension rowDim = new CrosstabDimension(tinfo, FieldKey.fromParts(FeaturesTableInfo.COLUMN_PEPTIDE_INFO, "Peptide"));
+        CrosstabDimension rowDim = settings.getRowAxis().addDimension(FieldKey.fromParts(FeaturesTableInfo.COLUMN_PEPTIDE_INFO, "Peptide"));
         rowDim.setUrl(urlPepSearch.getLocalURIString() + "&pepSeq=${Peptide}");
-        settings.getRowAxis().getDimensions().add(rowDim);
 
-        CrosstabDimension colDim = new CrosstabDimension(tinfo, FieldKey.fromParts("FileId", "ExpDataFileId", "Run", "RowId"));
+        CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("FileId", "ExpDataFileId", "Run", "RowId"));
         colDim.setUrl(new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()).getLocalURIString() + "runId=" + CrosstabMember.VALUE_TOKEN);
-        settings.getColumnAxis().getDimensions().add(colDim);
 
-        CrosstabMeasure numFeaturesMeasure = new CrosstabMeasure(tinfo.getColumn("FeatureId"), CrosstabMeasure.AggregateFunction.COUNT);
-        numFeaturesMeasure.setCaption("Num Features");
-        settings.getMeasures().add(numFeaturesMeasure);
-        settings.getMeasures().add(new CrosstabMeasure(tinfo.getColumn("Intensity"), CrosstabMeasure.AggregateFunction.AVG));
+        settings.addMeasure(FieldKey.fromParts("FeatureId"), CrosstabMeasure.AggregateFunction.COUNT, "Num Features");
+        settings.addMeasure(FieldKey.fromParts("Intensity"), CrosstabMeasure.AggregateFunction.AVG);
         
         String measureUrl = new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()).getLocalURIString()
                 + MS1Controller.ShowFeaturesForm.ParamNames.runId.name() + "=" + CrosstabMember.VALUE_TOKEN
-                + "&" + FeaturesView.DATAREGION_NAME + ".RelatedPeptide/Peptide~eq=${Peptide}";
+                + "&" + MS1Controller.ShowFeaturesForm.ParamNames.pepSeq.name() + "=${Peptide}";
         for(CrosstabMeasure measure : settings.getMeasures())
             measure.setUrl(measureUrl);
 
@@ -135,6 +131,7 @@ public class MS1Schema extends UserSchema
 
         if(null != runIds)
         {
+            //build up the list of column memebers so we can avoid an extra query to the database
             ArrayList<CrosstabMember> members = new ArrayList<CrosstabMember>();
             for(Integer runId : runIds)
             {

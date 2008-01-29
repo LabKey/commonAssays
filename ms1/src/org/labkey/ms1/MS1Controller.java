@@ -136,11 +136,13 @@ public class MS1Controller extends SpringActionController
         public enum ParamNames
         {
             runId,
-            export
+            export,
+            pepSeq
         }
 
         private int _runId = -1;
         private String _export = "";
+        private String _pepSeq = null;
 
         public int getRunId()
         {
@@ -165,6 +167,16 @@ public class MS1Controller extends SpringActionController
         public boolean runSpecified()
         {
             return _runId >= 0;
+        }
+
+        public String getPepSeq()
+        {
+            return _pepSeq;
+        }
+
+        public void setPepSeq(String pepSeq)
+        {
+            _pepSeq = pepSeq;
         }
     }
 
@@ -209,6 +221,8 @@ public class MS1Controller extends SpringActionController
             FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getViewContext().getContainer()),
                                                         getViewContext().getContainer());
             featuresView.getBaseFilters().add(new RunFilter(form.getRunId()));
+            if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
+                featuresView.getBaseFilters().add(new PeptideFilter(form.getPepSeq(), true));
             return featuresView;
         }
 
@@ -904,7 +918,7 @@ public class MS1Controller extends SpringActionController
         protected CompareRunsView createQueryView(CompareRunsForm form, BindException errors, boolean forExport) throws Exception
         {
             Set<String> selectedRuns = DataRegionSelection.getSelected(getViewContext(), false);
-            if(null == selectedRuns || selectedRuns.size() < 2)
+            if(null == selectedRuns || selectedRuns.size() < 1)
                 throw new RedirectException(new BeginAction().getUrl().getLocalURIString());
             
             ArrayList<Integer> runIds = new ArrayList<Integer>(selectedRuns.size());
@@ -1275,4 +1289,11 @@ public class MS1Controller extends SpringActionController
             return url;
         }
     }
+
+    public static String createVerifySelectedScript(DataView view, ActionURL url)
+    {
+        //copied from MS2Controller--perhaps we should move this to API?
+        return "javascript: if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"get\", \"runs\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); }";
+    }
+
 } //class MS1Controller
