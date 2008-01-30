@@ -94,7 +94,7 @@ public class MS1Schema extends UserSchema
             return super.getTable(name, alias);
     } //getTable()
 
-    public CrosstabTableInfo getComparePeptideTableInfo(List<Integer> runIds)
+    public CrosstabTableInfo getComparePeptideTableInfo(int[] runIds)
     {
         //OK if runIds is null
         RunFilter runFilter = new RunFilter(runIds);
@@ -106,7 +106,7 @@ public class MS1Schema extends UserSchema
 
         ActionURL urlPepSearch = new ActionURL(MS1Controller.PepSearchAction.class, getContainer());
         urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.exact.name(), "on");
-        urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.runIds.name(), runFilter.getRunIdList());
+        urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.runIds.name(), runFilter.getRunIdString());
 
         CrosstabSettings settings = new CrosstabSettings(tinfo);
 
@@ -118,7 +118,8 @@ public class MS1Schema extends UserSchema
 
         settings.addMeasure(FieldKey.fromParts("FeatureId"), CrosstabMeasure.AggregateFunction.COUNT, "Num Features");
         settings.addMeasure(FieldKey.fromParts("Intensity"), CrosstabMeasure.AggregateFunction.AVG);
-        
+        settings.addMeasure(FieldKey.fromParts("FeatureId"), CrosstabMeasure.AggregateFunction.MIN, "First Feature");
+
         String measureUrl = new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()).getLocalURIString()
                 + MS1Controller.ShowFeaturesForm.ParamNames.runId.name() + "=" + CrosstabMember.VALUE_TOKEN
                 + "&" + MS1Controller.ShowFeaturesForm.ParamNames.pepSeq.name() + "=${Peptide}";
@@ -131,20 +132,17 @@ public class MS1Schema extends UserSchema
 
         if(null != runIds)
         {
-            //build up the list of column memebers so we can avoid an extra query to the database
             ArrayList<CrosstabMember> members = new ArrayList<CrosstabMember>();
-            for(Integer runId : runIds)
+            //build up the list of column members
+            for(int runId : runIds)
             {
-                if(null == runId)
-                    continue;
-
-                ExpRun run = ExperimentService.get().getExpRun(runId.intValue());
-                members.add(new CrosstabMember(runId, null == run ? null : run.getName()));
+                ExpRun run = ExperimentService.get().getExpRun(runId);
+                members.add(new CrosstabMember(Integer.valueOf(runId), colDim , null == run ? null : run.getName()));
             }
-            settings.getColumnAxis().getDimensions().get(0).setMembers(members);
+            return new CrosstabTableInfo(settings, members);
         }
-        
-        return new CrosstabTableInfo(settings, null == runIds);
+        else
+            return new CrosstabTableInfo(settings);
     }
 
     public FeaturesTableInfo getFeaturesTableInfo()

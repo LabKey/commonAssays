@@ -16,6 +16,7 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.ms1.MS1Controller;
 
 import java.util.List;
@@ -33,49 +34,36 @@ import java.util.Collections;
  */
 public class RunFilter extends ListFilterBase implements FeaturesFilter
 {
-    private Integer[] _runIds = null;
+    private int[] _runIds = null;
 
     public RunFilter(String runIds)
     {
         //comma-delimited list
-        String[] ids = runIds.split(",");
-        _runIds =  new Integer[ids.length];
-
-        for(int idx = 0; idx < ids.length; ++idx)
-            _runIds[idx] = new Integer(ids[idx]);
+        _runIds = PageFlowUtil.toInts(runIds.split(","));
     }
 
     public RunFilter(int runId)
     {
-        _runIds = new Integer[]{runId};
+        _runIds = new int[]{runId};
     }
 
-    public RunFilter(Integer[] runIds)
+    public RunFilter(int[] runIds)
     {
         _runIds = runIds;
     }
 
-    public RunFilter(List<Integer> runIds)
-    {
-        if(null != runIds)
-        {
-            _runIds = new Integer[runIds.size()];
-            _runIds = runIds.toArray(_runIds);
-        }
-    }
-
-    public String getRunIdList()
+    public String getRunIdString()
     {
         if(null == _runIds)
             return "";
         else
-            return genListSQL(_runIds, false);
+            return genListSQL(_runIds);
     }
 
     public void setFilters(FeaturesTableInfo tinfo)
     {
         if(null != _runIds)
-            tinfo.addCondition(new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.RunId IN(" + genListSQL(_runIds, false) +"))"),
+            tinfo.addCondition(new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.RunId IN(" + genListSQL(_runIds) +"))"),
                                 "FileId");
     }
 

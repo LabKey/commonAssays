@@ -37,9 +37,9 @@ import java.util.List;
 public class CompareRunsView extends CrosstabView
 {
     private MS1Schema _schema = null;
-    private List<Integer> _runIds = null;
+    private int[] _runIds = null;
 
-    public CompareRunsView(MS1Schema schema, List<Integer> runIds)
+    public CompareRunsView(MS1Schema schema, int[] runIds)
     {
         super(schema);
         _schema = schema;
@@ -49,10 +49,10 @@ public class CompareRunsView extends CrosstabView
         settings.setSchemaName(schema.getSchemaName());
         settings.setQueryName(MS1Schema.TABLE_COMPARE_PEP);
         settings.setAllowChooseQuery(false);
-        settings.setAllowChooseView(false);
+        settings.setAllowChooseView(true);
         setSettings(settings);
 
-        setShowCustomizeViewLinkInButtonBar(false);
+        setShowCustomizeViewLinkInButtonBar(true);
         setShowRecordSelectors(false);
     }
 

@@ -12,10 +12,10 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.URIUtil;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.api.ms1.MS1Urls;
@@ -903,8 +903,62 @@ public class MS1Controller extends SpringActionController
         }
     }
 
+    public static class CompareRunsSetupForm
+    {
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class CompareRunsSetupAction extends SimpleViewAction<CompareRunsSetupForm>
+    {
+        public ModelAndView getView(CompareRunsSetupForm compareRunsSetupForm, BindException errors) throws Exception
+        {
+            Set<String> selectedRuns = DataRegionSelection.getSelected(getViewContext(), true);
+            if(null == selectedRuns || selectedRuns.size() < 1)
+                return HttpView.redirect(new BeginAction().getUrl().getLocalURIString());
+
+            ActionURL url = new ActionURL(CompareRunsAction.class, getViewContext().getContainer());
+            StringBuilder runIds = new StringBuilder();
+            String sep = "";
+            for(String run : selectedRuns)
+            {
+                runIds.append(sep);
+                runIds.append(run);
+                sep = ",";
+            }
+
+            url.addParameter(CompareRunsForm.ParamNames.runIds.name(), runIds.toString());
+            return HttpView.redirect(url);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
     public static class CompareRunsForm extends QueryViewAction.QueryExportForm
     {
+        public enum ParamNames
+        {
+            runIds
+        }
+
+        private String _runIds = null;
+
+        public String getRunIds()
+        {
+            return _runIds;
+        }
+
+        public void setRunIds(String runIds)
+        {
+            this._runIds = runIds;
+        }
+
+        public int[] getRunIdArray()
+        {
+            return PageFlowUtil.toInts(_runIds.split(","));
+        }
     }
 
     @RequiresPermission(ACL.PERM_NONE)
@@ -917,14 +971,7 @@ public class MS1Controller extends SpringActionController
 
         protected CompareRunsView createQueryView(CompareRunsForm form, BindException errors, boolean forExport) throws Exception
         {
-            Set<String> selectedRuns = DataRegionSelection.getSelected(getViewContext(), false);
-            if(null == selectedRuns || selectedRuns.size() < 1)
-                throw new RedirectException(new BeginAction().getUrl().getLocalURIString());
-            
-            ArrayList<Integer> runIds = new ArrayList<Integer>(selectedRuns.size());
-            for(String run : selectedRuns)
-                runIds.add(Integer.valueOf(run));
-            return new CompareRunsView(new MS1Schema(getUser(), getViewContext().getContainer()), runIds);
+            return new CompareRunsView(new MS1Schema(getUser(), getViewContext().getContainer()), form.getRunIdArray());
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -1293,7 +1340,7 @@ public class MS1Controller extends SpringActionController
     public static String createVerifySelectedScript(DataView view, ActionURL url)
     {
         //copied from MS2Controller--perhaps we should move this to API?
-        return "javascript: if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"get\", \"runs\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); }";
+        return "javascript: if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"post\", \"runs\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); }";
     }
 
 } //class MS1Controller
