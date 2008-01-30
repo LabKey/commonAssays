@@ -20,9 +20,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileUtil;
@@ -38,6 +36,9 @@ import java.util.*;
 /**
  * MS2PipelineManager class
  * <p/>
+ * This whole class should probably go away, and be moved onto
+ * <code>AbstractMS2SearchPipelineJob</code> or somewhere similar.
+ * <p/>
  * Created: Sep 21, 2005
  *
  * @author bmaclean
@@ -47,11 +48,7 @@ public class MS2PipelineManager
     private static Logger _log = Logger.getLogger(MS2PipelineProvider.class);
     protected static String _pipelineDBDir = "databases";
 
-    protected static String _pipelineMzXMLExt = ".mzXML";
-    protected static String _pipelineThermoRawExt = ".RAW";
-    protected static String _pipelineWatersRawExt = ".raw";
     protected static String _pipelineDataAnnotationExt = ".xar.xml";
-    protected static String _pipelineWorkExt = ".work";
 
     private static final String ALLOW_SEQUENCE_DB_UPLOAD_KEY = "allowSequenceDbUpload";
     public static final String SEQUENCE_DB_ROOT_TYPE = "SEQUENCE_DATABASE";
@@ -61,22 +58,27 @@ public class MS2PipelineManager
 
     public static File getMzXMLFile(File dirData, String baseName)
     {
-        return new File(dirData, baseName + _pipelineMzXMLExt);
+        return AbstractMS2SearchProtocol.FT_MZXML.newFile(dirData, baseName);
     }
 
     public static boolean isMzXMLFile(File file)
     {
-        return file.getName().endsWith(_pipelineMzXMLExt);
+        return AbstractMS2SearchProtocol.FT_MZXML.isType(file);
     }
 
     public static boolean isThermoRawFile(File file)
     {
-        return file.getName().endsWith(_pipelineThermoRawExt) && file.isFile();
+        return AbstractMS2SearchProtocol.FT_THERMO_RAW.isType(file) && file.isFile();
     }
 
     public static boolean isWatersRawDir(File file)
     {
-        return file.getName().endsWith(_pipelineWatersRawExt) && file.isDirectory();
+        return AbstractMS2SearchProtocol.FT_WATERS_RAW.isType(file) && file.isDirectory();
+    }
+
+    public static File getAnnotationFile(File dirData)
+    {
+        return getAnnotationFile(dirData, _allFractionsMzXmlFileBase);
     }
 
     public static File getAnnotationFile(File dirData, String baseName)
@@ -85,34 +87,14 @@ public class MS2PipelineManager
         return new File(xarDir, baseName + _pipelineDataAnnotationExt);
     }
 
+    public static File getLegacyAnnotationFile(File dirData)
+    {
+        return getLegacyAnnotationFile(dirData, _allFractionsMzXmlFileBase);
+    }
+
     public static File getLegacyAnnotationFile(File dirData, String baseName)
     {
         return new File(dirData, baseName + _pipelineDataAnnotationExt);
-    }
-
-    public static String getDataDescription(File dirData, String baseName, String protocolName)
-    {
-        String dataName = "";
-        if (dirData != null)
-        {
-            dataName = dirData.getName();
-            if ("xml".equals(dataName))
-            {
-                dirData = dirData.getParentFile();
-                if (dirData != null)
-                    dataName = dirData.getName();
-            }
-        }
-
-        StringBuffer description = new StringBuffer(dataName);
-        if (baseName != null && !_allFractionsMzXmlFileBase.equals(baseName))
-        {
-            if (description.length() > 0)
-                description.append("/");
-            description.append(baseName);
-        }
-        description.append(" (").append(protocolName).append(")");
-        return description.toString();
     }
 
     public static class UploadFileFilter extends PipelineProvider.FileEntryFilter
@@ -290,9 +272,9 @@ public class MS2PipelineManager
         if (dbRoot == null)
         {
             // return default root
-            URI root = PipelineService.get().getPipelineRootSetting(container);
+            PipeRoot root = PipelineService.get().getPipelineRootSetting(container);
             if (root != null)
-                dbRoot = new File(root.getPath(), _pipelineDBDir).toURI();
+                dbRoot = getSequenceDatabaseRoot(root);
         }
         return dbRoot;
     }
@@ -302,8 +284,8 @@ public class MS2PipelineManager
         PipelineService service = PipelineService.get();
 
         // If the new root is just the default, then clear the entry.
-        URI root = service.getPipelineRootSetting(container);
-        if (rootSeq != null && root != null && rootSeq.equals(new File(root.getPath(), _pipelineDBDir).toURI()))
+        PipeRoot root = service.getPipelineRootSetting(container);
+        if (rootSeq != null && root != null && rootSeq.equals(getSequenceDatabaseRoot(root)))
              rootSeq = null;
 
         service.setPipelineRoot(user, container, rootSeq, SEQUENCE_DB_ROOT_TYPE);
@@ -311,6 +293,11 @@ public class MS2PipelineManager
             service.setPipelineProperty(container, ALLOW_SEQUENCE_DB_UPLOAD_KEY, allowUpload ? "true" : "false");
         else
             service.setPipelineProperty(container, ALLOW_SEQUENCE_DB_UPLOAD_KEY, null);
+    }
+
+    private static URI getSequenceDatabaseRoot(PipeRoot root)
+    {
+        return root.resolvePath(_pipelineDBDir).toURI();
     }
 
     public static boolean allowSequenceDatabaseUploads(User user, Container container) throws SQLException
@@ -370,8 +357,15 @@ public class MS2PipelineManager
             if (dirAnalysis != null && !NetworkDrive.exists(dirAnalysis))
                 dirAnalysis = null;
 
-            boolean all = exists(PipelineJob.FT_LOG.newFile(dirAnalysis, _allFractionsMzXmlFileBase), knownFiles, checkedDirectories);
-            boolean allComplete = all && exists(XarGeneratorTask.FT_SEARCH_XAR.newFile(dirAnalysis, _allFractionsMzXmlFileBase), knownFiles, checkedDirectories);
+            String baseNameDataSet = AbstractFileAnalysisProtocol.getDataSetBaseName(dirData);
+            File fileDataSetLog = PipelineJob.FT_LOG.newFile(dirAnalysis, baseNameDataSet);
+            boolean all = exists(fileDataSetLog, knownFiles, checkedDirectories);
+            boolean allComplete = all;
+            if (allComplete)
+            {
+                File fileDataSetXar = XarGeneratorTask.FT_SEARCH_XAR.newFile(dirAnalysis, baseNameDataSet);
+                allComplete = exists(fileDataSetXar, knownFiles, checkedDirectories);
+            }
 
             ExpData[] allContainerDatas = null;
 
@@ -454,7 +448,7 @@ public class MS2PipelineManager
         {
             return annotationFile;
         }
-        annotationFile = getAnnotationFile(dirData, _allFractionsMzXmlFileBase);
+        annotationFile = getAnnotationFile(dirData);
         if (exists(annotationFile, knownFiles, checkedDirectories))
         {
             return annotationFile;
@@ -464,7 +458,7 @@ public class MS2PipelineManager
         {
             return annotationFile;
         }
-        annotationFile = getLegacyAnnotationFile(dirData, _allFractionsMzXmlFileBase);
+        annotationFile = getLegacyAnnotationFile(dirData);
         if (exists(annotationFile, knownFiles, checkedDirectories))
         {
             return annotationFile;

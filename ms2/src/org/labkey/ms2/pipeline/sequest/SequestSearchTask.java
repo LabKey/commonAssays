@@ -16,14 +16,17 @@
 package org.labkey.ms2.pipeline.sequest;
 
 import org.apache.commons.io.FileUtils;
-import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.WorkDirFactory;
+import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
+import org.labkey.ms2.pipeline.AbstractMS2SearchTaskFactory;
 import org.labkey.ms2.pipeline.MS2SearchJobSupport;
 import org.labkey.ms2.pipeline.TPPTask;
-import org.labkey.ms2.pipeline.sequest.Mzxml2SearchParams;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,7 +65,7 @@ public class SequestSearchTask extends PipelineJob.Task
         String getSequestServer();
     }
 
-    public static class Factory extends AbstractTaskFactory
+    public static class Factory extends AbstractMS2SearchTaskFactory
     {
         public Factory()
         {
@@ -74,15 +77,10 @@ public class SequestSearchTask extends PipelineJob.Task
             return new SequestSearchTask(job);
         }
 
-        public String getStatusName()
-        {
-            return "SEARCH";
-        }
-
         public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
         {
             JobSupport support = (JobSupport) job;
-            String baseName = support.getFileBasename();
+            String baseName = support.getBaseName();
             File dirAnalysis = support.getAnalysisDirectory();
 
             // Either raw converted pepXML from Tandem2XML, or completely analyzed pepXML
@@ -130,11 +128,11 @@ public class SequestSearchTask extends PipelineJob.Task
             File fileWorkParamsRemote = wd.newFile(REMOTE_PARAMS);
             writeSequestV2ParamFile(fileWorkParamsRemote, params);
 
-            File dirOutputDta = new File(wd.getDir(), getJobSupport().getFileBasename());
+            File dirOutputDta = new File(wd.getDir(), getJobSupport().getBaseName());
             File fileTgz = wd.newFile(FT_SPECTRA_ARCHIVE);
             File fileSequestSummary =  wd.newFile(FT_SUMMARY);
             File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(wd.getDir(),
-                    getJobSupport().getFileBasename());
+                    getJobSupport().getBaseName());
 
             /*
             0. pre-Sequest search: c) translate the mzXML file to dta for Sequest (MzXML2Search)

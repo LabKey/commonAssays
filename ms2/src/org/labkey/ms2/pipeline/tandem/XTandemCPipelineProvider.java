@@ -15,16 +15,19 @@
  */
 package org.labkey.ms2.pipeline.tandem;
 
-import org.apache.beehive.netui.pageflow.Forward;
-import org.labkey.api.pipeline.PipelineProviderCluster;
+import org.labkey.api.pipeline.PipelineProtocol;
+import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineStatusFile;
-import org.labkey.api.pipeline.PipelineValidationException;
+import org.labkey.api.pipeline.PipelinePerlClusterSupport;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
-import org.labkey.api.view.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
-import org.labkey.ms2.pipeline.MS2SearchPipelineProvider;
+import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
 
 import java.io.File;
@@ -43,13 +46,29 @@ import java.util.Map;
  *
  * @author bmaclean
  */
-public class XTandemCPipelineProvider extends PipelineProviderCluster implements MS2SearchPipelineProvider
+public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     public static String name = "X! Tandem";
+
+    public PipelinePerlClusterSupport _clusterSupport;
 
     public XTandemCPipelineProvider()
     {
         super(name);
+
+        _clusterSupport = new PipelinePerlClusterSupport();
+    }
+
+    public void preDeleteStatusFile(PipelineStatusFile sf) throws StatusUpdateException
+    {
+        super.preDeleteStatusFile(sf);
+        _clusterSupport.preDeleteStatusFile(sf);
+    }
+
+    public void preCompleteStatusFile(PipelineStatusFile sf) throws StatusUpdateException
+    {
+        super.preCompleteStatusFile(sf);
+        _clusterSupport.preCompleteStatusFile(sf);
     }
 
     public boolean isStatusViewableFile(String name, String basename)
@@ -58,7 +77,17 @@ public class XTandemCPipelineProvider extends PipelineProviderCluster implements
         if (nameParameters.equals(name) || (nameParameters + ".err").equals(name))
             return true;
 
+        if (_clusterSupport.isStatusViewableFile(name, basename))
+            return true;
+
         return super.isStatusViewableFile(name, basename);
+    }
+
+    public List<StatusAction> addStatusActions()
+    {
+        List<StatusAction> actions = super.addStatusActions();
+        _clusterSupport.addStatusActions(actions);
+        return actions;
     }
 
     public ActionURL handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf)
@@ -75,6 +104,10 @@ public class XTandemCPipelineProvider extends PipelineProviderCluster implements
             tandemErr.renameTo(tandemXml);
         }
 
+        ActionURL url = _clusterSupport.handleStatusAction(ctx, name, sf);
+        if (url != null)
+            return url;
+
         return super.handleStatusAction(ctx, name, sf);
     }
 
@@ -88,7 +121,7 @@ public class XTandemCPipelineProvider extends PipelineProviderCluster implements
                 continue;
             }
 
-            addAction("MS2-Pipeline", "searchXTandem", "X!Tandem Peptide Search",
+            addAction("ms2-pipeline", "searchXTandem", "X!Tandem Peptide Search",
                     entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter()));
         }
     }
@@ -139,7 +172,7 @@ public class XTandemCPipelineProvider extends PipelineProviderCluster implements
         return "pipelineXTandem";
     }
 
-    public void ensureEnabled() throws PipelineValidationException
+    public void ensureEnabled() throws PipelineProtocol.PipelineValidationException
     {
         // Always enabled.
     }

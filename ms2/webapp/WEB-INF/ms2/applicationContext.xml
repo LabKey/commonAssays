@@ -18,114 +18,114 @@
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.tandem.XTandemPipelineJob"/>
                     <constructor-arg value="sample"/>
-                    <constructor-arg>
+                    <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemSearchTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
                         </list>
-                    </constructor-arg>
+                    </property>
                 </bean>
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.tandem.XTandemPipelineJob"/>
                     <constructor-arg value="fraction"/>
-                    <constructor-arg>
+                    <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemSearchTask</value>
                         </list>
-                    </constructor-arg>
+                    </property>
                 </bean>
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.tandem.XTandemPipelineJob"/>
                     <constructor-arg value="fractionGroup"/>
-                    <constructor-arg>
+                    <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
                         </list>
-                    </constructor-arg>
+                    </property>
                 </bean>
 
                 <!-- Mascot search pipelines -->
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.mascot.MascotPipelineJob"/>
                     <constructor-arg value="sample"/>
-                    <constructor-arg>
+                    <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.mascot.MascotSearchTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
                         </list>
-                    </constructor-arg>
+                    </property>
                 </bean>
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.mascot.MascotPipelineJob"/>
                     <constructor-arg value="fraction"/>
-                    <constructor-arg>
+                    <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.mascot.MascotSearchTask</value>
                         </list>
-                    </constructor-arg>
+                    </property>
                 </bean>
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.mascot.MascotPipelineJob"/>
                     <constructor-arg value="fractionGroup"/>
-                    <constructor-arg>
+                    <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
                         </list>
-                    </constructor-arg>
+                    </property>
                 </bean>
 
                 <!-- Sequest search pipelines -->
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.sequest.SequestPipelineJob"/>
                     <constructor-arg value="sample"/>
-                    <constructor-arg>
+                    <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.sequest.SequestSearchTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
                         </list>
-                    </constructor-arg>
+                    </property>
                 </bean>
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.sequest.SequestPipelineJob"/>
                     <constructor-arg value="fraction"/>
-                    <constructor-arg>
+                    <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.sequest.SequestSearchTask</value>
                         </list>
-                    </constructor-arg>
+                    </property>
                 </bean>
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.sequest.SequestPipelineJob"/>
                     <constructor-arg value="fractionGroup"/>
-                    <constructor-arg>
+                    <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
                         </list>
-                    </constructor-arg>
+                    </property>
                 </bean>
 
                 <!-- MS2 pipeline for finishing a search on the Perl Cluster Pipeline -->
                 <bean class="org.labkey.api.pipeline.TaskPipelineSpec">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob"/>
                     <constructor-arg value="finishPerlCluster"/>
-                    <constructor-arg>
+                    <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
                         </list>
-                    </constructor-arg>
+                    </property>
                 </bean>
             </list>
         </property>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 LabKey Software Foundation
+ * Copyright (c) 2008 LabKey Software Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,26 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.PipelineValidationException;
-import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.Map;
+import org.labkey.api.pipeline.AbstractTaskFactory;
+import org.labkey.api.util.FileType;
 
 /**
- * <code>MS2SearchPipelineProvider</code>
+ * <code>AbstractMS2SearchTaskFactory</code>
  */
-public interface MS2SearchPipelineProvider
+abstract public class AbstractMS2SearchTaskFactory extends AbstractTaskFactory
 {
-    String getName();
+    protected AbstractMS2SearchTaskFactory(Class namespaceClass)
+    {
+        super(namespaceClass);
+    }
 
-    void ensureEnabled() throws PipelineValidationException;
+    public FileType getInputType()
+    {
+        return AbstractMS2SearchProtocol.FT_MZXML;
+    }
 
-    AbstractMS2SearchProtocolFactory getProtocolFactory();
-
-    Map<String, String[]> getSequenceFiles(URI sequenceRoot) throws IOException;
-
-    String getHelpTopic();
+    public String getStatusName()
+    {
+        return "SEARCH";
+    }
 }

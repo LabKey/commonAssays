@@ -16,17 +16,13 @@
 package org.labkey.ms2.pipeline.tandem;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.pipeline.TaskId;
-import org.labkey.api.pipeline.TaskPipeline;
-import org.labkey.api.pipeline.TaskPipelineRegistry;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 /**
  * XTandemPipelineJob class
@@ -54,19 +50,17 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
         return _log;
     }
 
-    public XTandemPipelineJob(ViewBackgroundInfo info,
+    public XTandemPipelineJob(XTandemSearchProtocol protocol,
+                              ViewBackgroundInfo info,
                               String name,
                               File dirSequenceRoot,
                               File filesMzXML[],
                               File fileInputXML,
                               boolean fromCluster) throws SQLException, IOException
     {
-        super(XTandemCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML, fromCluster);
+        super(protocol, XTandemCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML, fromCluster);
 
-        if (filesMzXML.length > 1)
-            header("X! Tandem search for " + _dirMzXML.getName());
-        else
-            header("X! Tandem search for " + filesMzXML[0].getName());
+        header("X! Tandem search for " + getBaseName());
     }
 
     public XTandemPipelineJob(XTandemPipelineJob job, File fileFraction)
@@ -84,30 +78,23 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
         return "x!tandem";
     }
 
-    public TaskPipeline getTaskPipeline()
+    public TaskId getTaskPipelineId()
     {
-        TaskPipeline pipeline = super.getTaskPipeline();
-        if (pipeline != null)
-            return pipeline;
+        TaskId tid = super.getTaskPipelineId();
+        if (tid != null)
+            return tid;
 
-        TaskPipelineRegistry registry = PipelineJobService.get();
-        if (_filesMzXML.length > 1)
-            return registry.getTaskPipeline(Pipelines.fractionGroup.getTaskId());
+        if (getInputFiles().length > 1)
+            return Pipelines.fractionGroup.getTaskId();
         if (!isSamples())
-            return PipelineJobService.get().getTaskPipeline(Pipelines.fraction.getTaskId());
+            return Pipelines.fraction.getTaskId();
 
-        return PipelineJobService.get().getTaskPipeline(Pipelines.sample.getTaskId());
+        return Pipelines.sample.getTaskId();
     }
 
-    public AbstractMS2SearchPipelineJob[] getSingleFileJobs()
+    public AbstractFileAnalysisJob createSingleFileJob(File file)
     {
-        if (getSpectraFiles().length == 1)
-            return new AbstractMS2SearchPipelineJob[0];
-        
-        ArrayList<AbstractMS2SearchPipelineJob> jobs = new ArrayList<AbstractMS2SearchPipelineJob>();
-        for (File fileSpectra : getSpectraFiles())
-            jobs.add(new XTandemPipelineJob(this, fileSpectra));
-        return jobs.toArray(new AbstractMS2SearchPipelineJob[jobs.size()]);
+        return new XTandemPipelineJob(this, file);
     }
 
     public boolean isProphetEnabled()
@@ -125,13 +112,13 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
 
     public File getSearchNativeOutputFile()
     {
-        return XTandemSearchTask.getNativeOutputFile(getAnalysisDirectory(), getFileBasename());
+        return XTandemSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName());
     }
 
     public String getXarTemplateResource()
     {
         StringBuilder templateResource = new StringBuilder("org/labkey/ms2/pipeline/tandem/templates/MS2Search");
-        if (getSpectraFiles().length > 1)
+        if (getInputFiles().length > 1)
         {
             templateResource.append("Fractions");
         }

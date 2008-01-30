@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 LabKey Software Foundation
+ * Copyright (c) 2008 LabKey Software Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,122 +15,20 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.apache.log4j.Logger;
-import org.labkey.api.pipeline.*;
-import org.labkey.api.util.NetworkDrive;
-import org.labkey.ms2.pipeline.MS2SearchPipelineProvider;
-import org.labkey.ms2.pipeline.tandem.XTandemSearchProtocolFactory;
+import org.labkey.api.pipeline.AbstractFileAnalysisProtocolFactory;
+import org.labkey.api.pipeline.ParamParser;
 
 import java.io.*;
-import java.net.URI;
-import java.util.List;
 
 /**
  * <code>AbstractMS2SearchProtocolFactory</code>
  */
-abstract public class AbstractMS2SearchProtocolFactory<T extends MS2SearchPipelineProtocol> extends PipelineProtocolFactory<T>
+abstract public class AbstractMS2SearchProtocolFactory extends AbstractFileAnalysisProtocolFactory<AbstractMS2SearchProtocol>
 {
-    private static Logger _log = Logger.getLogger(AbstractMS2SearchProtocolFactory.class);
-    
-    /**
-     * Get the file name used for MS2 search parameters in analysis directories.
-     *
-     * @return file name
-     */
-    public String getParametersFileName()
-    {
-        return getName() + ".xml";
-    }
-
-    /**
-     * Get the file name for the default MS2 search parameters for all protocols of this type.
-     * 
-     * @return file name
-     */
-    public String getDefaultParametersFileName()
-    {
-        return getName() + "_default_input.xml";
-    }
-
-    /**
-     * Get the analysis directory location, given a directory containing the mass spec data.
-     *
-     * @param dirData mass spec data directory
-     * @param protocolName name of protocol for analysis
-     * @return analysis directory
-     */
-    public File getAnalysisDir(File dirData, String protocolName)
-    {
-        return new File(new File(dirData, getName()), protocolName);
-    }
-
-    /**
-     * Returns true if the file uses the type of protocol created by this factory.
-     */
-    public boolean isProtocolTypeFile(File file)
-    {
-        return NetworkDrive.exists(new File(file.getParent(), getParametersFileName()));
-    }
-
-    /**
-     * Get the parameters file location, given a directory containing the mass spec data.
-     *
-     * @param dirData mass spec data directory
-     * @param protocolName name of protocol for analysis
-     * @return parameters file
-     */
-    public File getParametersFile(File dirData, String protocolName)
-    {
-        return new File(getAnalysisDir(dirData, protocolName), getParametersFileName());
-    }
-
-    /**
-     * Get the default parameters file, given the pipeline root directory.
-     *
-     * @param dirRoot pipeline root directory
-     * @return default parameters file
-     */
-    public File getDefaultParametersFile(File dirRoot)
-    {
-        return new File(dirRoot, getDefaultParametersFileName());
-    }
-
-    /**
-     * Make sure default parameters for this protocol type exist.
-     *
-     * @param dirRoot pipeline root directory
-     */
-    public void ensureDefaultParameters(File dirRoot) throws IOException
-    {
-        if (!NetworkDrive.exists(getDefaultParametersFile(dirRoot)))
-            setDefaultParametersXML(dirRoot, getDefaultParametersXML(dirRoot));
-    }
-
-    /**
-     * Override to set a custom validator.
-     *
-     * @return a parser for working with a parameter stream
-     */
-    public ParamParser createParamParser()
-    {
-        return PipelineJobService.get().createParamParser();
-    }
-
-    public abstract String getDefaultParametersResource();
-
-    public abstract T createProtocolInstance(String name, String description, String[] dbNames, String xml);
-
-    public abstract T createProtocolInstance(String name, String description, File dirSeqRoot,
-                                                       String dbPath, String[] dbNames, String xml);
-
-    protected T createProtocolInstance(ParamParser parser)
+    protected AbstractMS2SearchProtocol createProtocolInstance(ParamParser parser)
     {
         // Remove the pipeline specific parameters.
-        String name = parser.removeInputParameter("pipeline, protocol name");
-        String description = parser.removeInputParameter("pipeline, protocol description");
-        String folder = parser.removeInputParameter("pipeline, load folder");
         String databases = parser.removeInputParameter("pipeline, database");
-        String email = parser.removeInputParameter("pipeline, email address");
 
         // Remove the parameters set in the pipeline job.
         parser.removeInputParameter("list path, default parameters");
@@ -148,177 +46,30 @@ abstract public class AbstractMS2SearchProtocolFactory<T extends MS2SearchPipeli
             dbNames = databases.split(";");
         }
 
-        T instance = createProtocolInstance(name, description, dbNames, parser.getXML());
+        AbstractMS2SearchProtocol instance = super.createProtocolInstance(parser);
 
-        instance.setEmail(email);
+        instance.setDbNames(dbNames);
 
         return instance;
     }
 
-    public T load(URI uriRoot, String name) throws IOException
-    {
-        return loadInstance(getProtocolFile(uriRoot, name));
-    }
-
-    public T loadInstance(File file) throws IOException
-    {
-        BufferedReader inputReader = null;
-        StringBuffer xmlBuffer = new StringBuffer();
-        try
-        {
-            inputReader = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = inputReader.readLine()) != null)
-                xmlBuffer.append(line).append("\n");
-        }
-        catch (IOException eio)
-        {
-            throw new IOException("Failed to load protocol file '" + file + "'.");
-        }
-        finally
-        {
-            if (inputReader != null)
-            {
-                try
-                {
-                    inputReader.close();
-                }
-                catch (IOException eio)
-                {
-                }
-            }
-        }
-
-        ParamParser parser = createParamParser();
-        parser.parse(xmlBuffer.toString());
-        if (parser.getErrors() != null)
-        {
-            ParamParser.Error err = parser.getErrors()[0];
-            if (err.getLine() == 0)
-            {
-                throw new IOException("Failed parsing input parameters '" + file + "'.\n" +
-                        err.getMessage());
-            }
-            else
-            {
-                throw new IOException("Failed parsing input parameters '" + file + "'.\n" +
-                        "Line " + err.getLine() + ": " + err.getMessage());
-            }
-        }
-
-        return createProtocolInstance(parser);
-    }
+    public abstract String getDefaultParametersResource();
 
     public String getDefaultParametersXML(File dirRoot) throws FileNotFoundException, IOException
     {
-        BufferedReader reader = null;
-        try
-        {
-            File fileDefault = getDefaultParametersFile(dirRoot);
-
-            if (fileDefault.exists())
-            {
-                reader = new BufferedReader(new FileReader(fileDefault));
-            }
-            else
-            {
-                String resourceStream = getDefaultParametersResource();
-                InputStream is = getClass().getClassLoader().getResourceAsStream(resourceStream);
-                reader = new BufferedReader(new InputStreamReader(is));
-            }
-
-            StringBuffer defaults = new StringBuffer();
-            String line;
-            while ((line = reader.readLine()) != null)
-            {
-                defaults.append(line).append("\n");
-            }
-            return defaults.toString();
-        }
-        catch (FileNotFoundException enf)
-        {
-            _log.error("Default parameters file missing. Check product setup.", enf);
-            throw enf;
-        }
-        catch (IOException eio)
-        {
-            _log.error("Error reading default parameters file.", eio);
-            throw eio;
-        }
-        finally
-        {
-            if (reader != null)
-            {
-                try
-                {
-                    reader.close();
-                }
-                catch (IOException eio)
-                {
-                }
-            }
-        }
+        String xml = super.getDefaultParametersXML(dirRoot);
+        if (xml != null)
+            return xml;
+        return new ResourceDefaultsReader().readXML();
     }
 
-    public void setDefaultParametersXML(File dirRoot, String xml) throws IOException
+    protected class ResourceDefaultsReader extends DefaultsReader
     {
-        if (xml == null || xml.length() == 0)
-            throw new IllegalArgumentException("You must supply default parameters for " + getName() + ".");
-
-        ParamParser parser = createParamParser();
-        parser.parse(xml);
-        if (parser.getErrors() != null)
+        public Reader createReader() throws IOException
         {
-            ParamParser.Error err = parser.getErrors()[0];
-            if (err.getLine() == 0)
-                throw new IllegalArgumentException(err.getMessage());
-            else
-                throw new IllegalArgumentException("Line " + err.getLine() + ": " + err.getMessage());
+            String resourceStream = getDefaultParametersResource();
+            InputStream is = getClass().getClassLoader().getResourceAsStream(resourceStream);
+            return new InputStreamReader(is);
         }
-
-        File fileDefault = getDefaultParametersFile(dirRoot);
-
-        BufferedWriter writer = null;
-        try
-        {
-            writer = new BufferedWriter(new FileWriter(fileDefault));
-            writer.write(xml, 0, xml.length());
-        }
-        catch (IOException eio)
-        {
-            _log.error("Error writing default parameters file.", eio);
-            throw eio;
-        }
-        finally
-        {
-            if (writer != null)
-            {
-                try
-                {
-                    writer.close();
-                }
-                catch (IOException eio)
-                {
-                    _log.error("Error writing default parameters file.", eio);
-                    throw eio;
-                }
-            }
-        }
-    }
-
-    public static AbstractMS2SearchProtocolFactory fromFile(File file)
-    {
-        List<PipelineProvider> providers = PipelineService.get().getPipelineProviders();
-        for (PipelineProvider provider : providers)
-        {
-            if (!(provider instanceof MS2SearchPipelineProvider))
-                continue;
-
-            MS2SearchPipelineProvider mprovider = (MS2SearchPipelineProvider) provider;
-            if (mprovider.getProtocolFactory().isProtocolTypeFile(file))
-                return mprovider.getProtocolFactory();
-        }
-
-        return XTandemSearchProtocolFactory.get();
     }
 }

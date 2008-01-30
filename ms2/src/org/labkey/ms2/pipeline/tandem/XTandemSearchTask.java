@@ -15,12 +15,13 @@
  */
 package org.labkey.ms2.pipeline.tandem;
 
-import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.WorkDirFactory;
+import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
-import org.labkey.ms2.pipeline.MS2SearchJobSupport;
-import org.labkey.ms2.pipeline.TPPTask;
+import org.labkey.ms2.pipeline.*;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -55,7 +56,7 @@ public class XTandemSearchTask extends PipelineJob.Task
     {
     }
 
-    public static class Factory extends AbstractTaskFactory
+    public static class Factory extends AbstractMS2SearchTaskFactory
     {
         public Factory()
         {
@@ -67,15 +68,10 @@ public class XTandemSearchTask extends PipelineJob.Task
             return new XTandemSearchTask(job);
         }
 
-        public String getStatusName()
-        {
-            return "SEARCH";
-        }
-
         public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
         {
             JobSupport support = (JobSupport) job;
-            String baseName = support.getFileBasename();
+            String baseName = support.getBaseName();
             File dirAnalysis = support.getAnalysisDirectory();
 
             // X! Tandem native output
@@ -120,7 +116,7 @@ public class XTandemSearchTask extends PipelineJob.Task
 
             File fileWorkOutputXML = wd.newFile(FT_XTAN_XML);
             File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(wd.getDir(),
-                    getJobSupport().getFileBasename());
+                    getJobSupport().getBaseName());
             File fileWorkParameters = wd.newFile(INPUT_XML);
             File fileWorkTaxonomy = wd.newFile(TAXONOMY_XML);
 

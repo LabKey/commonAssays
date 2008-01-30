@@ -27,21 +27,6 @@ import java.util.Map;
 public interface MS2SearchJobSupport extends MS2PipelineJobSupport
 {
     /**
-     * Returns a parameter parser object for writing parameters to a file.
-     */
-    ParamParser createParamParser();
-    
-    /**
-     * Returns name-value map of the BioML parameters.
-     */
-    Map<String, String> getParameters();
-    
-    /**
-     * Returns the parameters input file used to drive the pipeline.
-     */
-    File getParametersFile();
-
-    /**
      * Returns the native output file for the search.
      */
     File getSearchNativeOutputFile();
@@ -57,8 +42,4 @@ public interface MS2SearchJobSupport extends MS2PipelineJobSupport
      */
     File getSearchNativeSpectraFile();
 
-    /**
-     * Returns an array of all spectra files analyzed.
-     */
-    File[] getSpectraFiles();
 }

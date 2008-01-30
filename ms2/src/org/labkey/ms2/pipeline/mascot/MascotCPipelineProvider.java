@@ -15,16 +15,21 @@
  */
 package org.labkey.ms2.pipeline.mascot;
 
-import org.labkey.api.pipeline.PipelineProviderCluster;
-import org.labkey.api.pipeline.PipelineValidationException;
+import org.labkey.api.pipeline.PipelineProtocol;
+import org.labkey.api.pipeline.PipelinePerlClusterSupport;
+import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
-import org.labkey.api.view.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
-import org.labkey.ms2.pipeline.MS2SearchPipelineProvider;
+import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
@@ -39,18 +44,37 @@ import java.util.Map;
  *
  * @author bmaclean
  */
-public class MascotCPipelineProvider extends PipelineProviderCluster  implements MS2SearchPipelineProvider
+public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     public static String name = "Mascot";
+
+    public PipelinePerlClusterSupport _clusterSupport;
 
     public MascotCPipelineProvider()
     {
         super(name);
+
+        _clusterSupport = new PipelinePerlClusterSupport();
+    }
+
+    public void preDeleteStatusFile(PipelineStatusFile sf) throws StatusUpdateException
+    {
+        super.preDeleteStatusFile(sf);
+        _clusterSupport.preDeleteStatusFile(sf);
+    }
+
+    public void preCompleteStatusFile(PipelineStatusFile sf) throws StatusUpdateException
+    {
+        super.preCompleteStatusFile(sf);
+        _clusterSupport.preCompleteStatusFile(sf);
     }
 
     public boolean isStatusViewableFile(String name, String basename)
     {
         if ("mascot.xml".equals(name))
+            return true;
+
+        if (_clusterSupport.isStatusViewableFile(name, basename))
             return true;
 
         return super.isStatusViewableFile(name, basename);
@@ -69,9 +93,25 @@ public class MascotCPipelineProvider extends PipelineProviderCluster  implements
                 continue;
             }
 
-            addAction("MS2-Pipeline", "searchMascot", "Mascot Peptide Search",
+            addAction("ms2-pipeline", "searchMascot", "Mascot Peptide Search",
                     entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter()));
         }
+    }
+
+    public List<StatusAction> addStatusActions()
+    {
+        List<StatusAction> actions = super.addStatusActions();
+        _clusterSupport.addStatusActions(actions);
+        return actions;
+    }
+
+    public ActionURL handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf) throws HandlerException
+    {
+        ActionURL url = _clusterSupport.handleStatusAction(ctx, name, sf);
+        if (url != null)
+            return url;
+
+        return super.handleStatusAction(ctx, name, sf);
     }
 
     public HttpView getSetupWebPart()
@@ -138,11 +178,11 @@ public class MascotCPipelineProvider extends PipelineProviderCluster  implements
         return "pipelineMascot";
     }
 
-    public void ensureEnabled() throws PipelineValidationException
+    public void ensureEnabled() throws PipelineProtocol.PipelineValidationException
     {
         AppProps appProps = AppProps.getInstance();
         String mascotServer = appProps.getMascotServer();
         if ((!appProps.hasMascotServer() || 0==mascotServer.length()))
-            throw new PipelineValidationException("Mascot server has not been specified in site customization.");
+            throw new PipelineProtocol.PipelineValidationException("Mascot server has not been specified in site customization.");
     }
 }

@@ -135,7 +135,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         service.registerPipelineProvider(new XTandemCPipelineProvider(), "X!Tandem (Cluster)");
         service.registerPipelineProvider(new MascotCPipelineProvider(), "Mascot (Cluster)");
         service.registerPipelineProvider(new SequestLocalPipelineProvider());
-        service.registerPipelineProvider(new CometCPipelineProvider());
+        service.registerPipelineProvider(new CometCPipelineProvider(), "Comet (Cluster)");
 
         service.registerPipelineProvider(new ProteinProphetPipelineProvider());
 

@@ -104,6 +104,11 @@ public class TPPTask extends PipelineJob.Task
             return new TPPTask(job);
         }
 
+        public FileType getInputType()
+        {
+            return FT_PEP_XML;
+        }
+
         public String getStatusName()
         {
             return "ANALYSIS";
@@ -112,7 +117,7 @@ public class TPPTask extends PipelineJob.Task
         public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
         {
             JobSupport support = (JobSupport) job;
-            String baseName = support.getFileBasename();
+            String baseName = support.getBaseName();
             File dirAnalysis = support.getAnalysisDirectory();
 
             if (!NetworkDrive.exists(getPepXMLFile(dirAnalysis, baseName)))
@@ -197,7 +202,7 @@ public class TPPTask extends PipelineJob.Task
             if (fileWorkProtXML != null)
             {
                 wd.outputFile(fileWorkProtXML,
-                        FT_PROT_XML.getName(getJobSupport().getFileBasename()));
+                        FT_PROT_XML.getName(getJobSupport().getBaseName()));
             }
 
             // Deal with possible TPP outputs, if TPP was not XML_ONLY

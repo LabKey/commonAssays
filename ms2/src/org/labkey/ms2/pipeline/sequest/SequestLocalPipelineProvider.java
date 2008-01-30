@@ -2,17 +2,18 @@ package org.labkey.ms2.pipeline.sequest;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.view.*;
-import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
+import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
-import org.labkey.ms2.pipeline.MS2SearchPipelineProvider;
+import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.File;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.Map;
  * Date: Aug 24, 2006
  * Time: 12:45:45 PM
  */
-public class SequestLocalPipelineProvider extends PipelineProvider implements MS2SearchPipelineProvider
+public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
     private static Logger _log = Logger.getLogger(SequestLocalPipelineProvider.class);
 
@@ -38,7 +39,6 @@ public class SequestLocalPipelineProvider extends PipelineProvider implements MS
     public boolean isStatusViewableFile(String name, String basename)
     {
         return "sequest.xml".equals(name) || super.isStatusViewableFile(name, basename);
-
     }
 
     public void updateFileProperties(ViewContext context, List<FileEntry> entries)
@@ -54,7 +54,7 @@ public class SequestLocalPipelineProvider extends PipelineProvider implements MS
                 continue;
             }
 
-            addAction("MS2-Pipeline", "searchSequest", "Sequest Peptide Search",
+            addAction("ms2-pipeline", "searchSequest", "Sequest Peptide Search",
                 entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter()));
         }
     }
@@ -104,10 +104,10 @@ public class SequestLocalPipelineProvider extends PipelineProvider implements MS
         return "pipelineSequest";
     }
 
-    public void ensureEnabled() throws PipelineValidationException
+    public void ensureEnabled() throws PipelineProtocol.PipelineValidationException
     {
         AppProps appProps = AppProps.getInstance();
         if (!appProps.hasSequest())
-            throw new PipelineValidationException("Sequest server has not been specified in site customization.");
+            throw new PipelineProtocol.PipelineValidationException("Sequest server has not been specified in site customization.");
     }
 }

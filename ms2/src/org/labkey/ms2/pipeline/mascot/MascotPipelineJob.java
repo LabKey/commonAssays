@@ -15,10 +15,7 @@
  */
 package org.labkey.ms2.pipeline.mascot;
 
-import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.pipeline.TaskId;
-import org.labkey.api.pipeline.TaskPipeline;
-import org.labkey.api.pipeline.TaskPipelineRegistry;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
@@ -27,7 +24,6 @@ import org.labkey.ms2.pipeline.MS2PipelineManager;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 /**
  * MascotPipelineJob class
@@ -55,14 +51,15 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
     private String _mascotSequenceDB;
     private String _mascotSequenceRelease;
 
-    public MascotPipelineJob(ViewBackgroundInfo info,
+    public MascotPipelineJob(MascotSearchProtocol protocol,
+                             ViewBackgroundInfo info,
                              String name,
                              File dirSequenceRoot,
                              File filesMzXML[],
                              File fileInputXML,
                              boolean fromCluster) throws SQLException, IOException
     {
-        super(MascotCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML, fromCluster);
+        super(protocol, MascotCPipelineProvider.name, info, name, dirSequenceRoot, fileInputXML, filesMzXML, fromCluster);
 
         AppProps appProps = AppProps.getInstance();
         _mascotServer = appProps.getMascotServer();
@@ -70,10 +67,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
         _mascotUserAccount = appProps.getMascotUserAccount();
         _mascotUserPassword = appProps.getMascotUserPassword();
 
-        if (filesMzXML.length > 0)
-            header("Mascot search for " + _dirMzXML.getName());
-        else
-            header("Mascot search for " + filesMzXML[0].getName());
+        header("Mascot search for " + getBaseName());
     }
 
     public MascotPipelineJob(MascotPipelineJob job, File fileFraction)
@@ -128,30 +122,23 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
         return "mascot";
     }
 
-    public TaskPipeline getTaskPipeline()
+    public TaskId getTaskPipelineId()
     {
-        TaskPipeline pipeline = super.getTaskPipeline();
-        if (pipeline != null)
-            return pipeline;
+        TaskId tid = super.getTaskPipelineId();
+        if (tid != null)
+            return tid;
 
-        TaskPipelineRegistry registry = PipelineJobService.get();
-        if (_filesMzXML.length > 1)
-            return registry.getTaskPipeline(Pipelines.fractionGroup.getTaskId());
+        if (getInputFiles().length > 1)
+            return Pipelines.fractionGroup.getTaskId();
         if (!isSamples())
-            return PipelineJobService.get().getTaskPipeline(Pipelines.fraction.getTaskId());
+            return Pipelines.fraction.getTaskId();
 
-        return PipelineJobService.get().getTaskPipeline(Pipelines.sample.getTaskId());
+        return Pipelines.sample.getTaskId();
     }
 
-    public AbstractMS2SearchPipelineJob[] getSingleFileJobs()
+    public AbstractFileAnalysisJob createSingleFileJob(File file)
     {
-        if (getSpectraFiles().length == 1)
-            return new AbstractMS2SearchPipelineJob[0];
-
-        ArrayList<AbstractMS2SearchPipelineJob> jobs = new ArrayList<AbstractMS2SearchPipelineJob>();
-        for (File fileSpectra : getSpectraFiles())
-            jobs.add(new MascotPipelineJob(this, fileSpectra));
-        return jobs.toArray(new AbstractMS2SearchPipelineJob[jobs.size()]);
+        return new MascotPipelineJob(this, file);
     }
 
     public File[] getSequenceFiles()
@@ -165,18 +152,18 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
 
     public File getSearchNativeSpectraFile()
     {
-        return MascotSearchTask.getNativeSpectraFile(getAnalysisDirectory(), getFileBasename());
+        return MascotSearchTask.getNativeSpectraFile(getAnalysisDirectory(), getBaseName());
     }
 
     public File getSearchNativeOutputFile()
     {
-        return MascotSearchTask.getNativeOutputFile(getAnalysisDirectory(), getFileBasename());
+        return MascotSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName());
     }
 
     public String getXarTemplateResource()
      {
          StringBuilder templateResource = new StringBuilder("org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascot");
-         if (getSpectraFiles().length > 1)
+         if (getInputFiles().length > 1)
          {
              templateResource.append("Fractions");
          }

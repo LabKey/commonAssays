@@ -16,11 +16,9 @@
 package org.labkey.ms2.pipeline.mascot;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.pipeline.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
-import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
-import org.labkey.ms2.pipeline.mascot.MascotPipelineJob;
-import org.labkey.ms2.pipeline.MS2SearchPipelineProtocol;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,16 +32,16 @@ import java.util.Map;
  *
  * @author bmaclean
  */
-public class MascotSearchProtocol extends MS2SearchPipelineProtocol
+public class MascotSearchProtocol extends AbstractMS2SearchProtocol<MascotPipelineJob>
 {
     private static Logger _log = Logger.getLogger(MascotSearchProtocol.class);
 
     private String mascotServer;
     private String mascotHTTPProxy;
 
-    public MascotSearchProtocol(String name, String description, String[] dbNames, String xml)
+    public MascotSearchProtocol(String name, String description, String xml)
     {
-        super(name, description, dbNames, xml);
+        super(name, description, xml);
     }
 
     public String getMascotServer ()
@@ -66,7 +64,7 @@ public class MascotSearchProtocol extends MS2SearchPipelineProtocol
         this.mascotHTTPProxy = mascotHTTPProxy;
     }
 
-    public AbstractMS2SearchProtocolFactory getFactory()
+    public AbstractFileAnalysisProtocolFactory getFactory()
     {
         return MascotSearchProtocolFactory.get();
     }
@@ -82,13 +80,13 @@ public class MascotSearchProtocol extends MS2SearchPipelineProtocol
         super.save(file, addParams);
     }
 
-    public AbstractMS2SearchPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                                          File dirSequenceRoot,
-                                                          File[] mzXMLFiles,
+    public MascotPipelineJob createPipelineJob(ViewBackgroundInfo info,
+                                                          File[] filesInput,
                                                           File fileParameters,
                                                           boolean fromCluster)
             throws SQLException, IOException
     {
-        return new MascotPipelineJob(info, getName(), dirSequenceRoot, mzXMLFiles, fileParameters, fromCluster);
+        return new MascotPipelineJob(this, info, getName(), getDirSeqRoot(),
+                filesInput, fileParameters, fromCluster);
     }
 }

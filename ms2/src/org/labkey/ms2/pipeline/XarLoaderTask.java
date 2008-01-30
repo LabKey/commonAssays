@@ -20,6 +20,7 @@ import org.labkey.api.exp.FileXarSource;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.util.FileType;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +55,11 @@ public class XarLoaderTask extends PipelineJob.Task
             return new XarLoaderTask(job);
         }
 
+        public FileType getInputType()
+        {
+            return XarGeneratorTask.FT_SEARCH_XAR;
+        }
+
         public String getStatusName()
         {
             return "LOAD EXPERIMENT";
@@ -78,7 +84,7 @@ public class XarLoaderTask extends PipelineJob.Task
 
     public void run()
     {
-        String baseName = getJobSupport().getFileBasename();
+        String baseName = getJobSupport().getBaseName();
         File dirAnalysis = getJobSupport().getAnalysisDirectory();
 
         File fileExperimentXML = XarGeneratorTask.FT_SEARCH_XAR.newFile(dirAnalysis, baseName);

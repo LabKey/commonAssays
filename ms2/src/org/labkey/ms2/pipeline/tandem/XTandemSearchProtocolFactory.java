@@ -17,6 +17,7 @@ package org.labkey.ms2.pipeline.tandem;
 
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
 import java.io.File;
 
@@ -27,13 +28,18 @@ import java.io.File;
  *
  * @author bmaclean
  */
-public class XTandemSearchProtocolFactory extends AbstractMS2SearchProtocolFactory<XTandemSearchProtocol>
+public class XTandemSearchProtocolFactory extends AbstractMS2SearchProtocolFactory
 {
     public static XTandemSearchProtocolFactory instance = new XTandemSearchProtocolFactory();
 
     public static XTandemSearchProtocolFactory get()
     {
         return instance;
+    }
+
+    private XTandemSearchProtocolFactory()
+    {
+        // Use the get() function.
     }
 
     public String getName()
@@ -46,7 +52,7 @@ public class XTandemSearchProtocolFactory extends AbstractMS2SearchProtocolFacto
         return "tandem.xml";
     }
 
-    public String getDefaultParametersFileName()
+    public String getLegacyDefaultParametersFileName()
     {
         return "default_input.xml";
     }
@@ -56,26 +62,12 @@ public class XTandemSearchProtocolFactory extends AbstractMS2SearchProtocolFacto
         return "org/labkey/ms2/pipeline/tandem/XTandemDefaults.xml";
     }
 
-    public XTandemSearchProtocol createProtocolInstance(String name, String description, String[] dbNames, String xml)
+    public XTandemSearchProtocol createProtocolInstance(String name, String description, String xml)
     {
-        return new XTandemSearchProtocol(name, description, dbNames, xml);
+        return new XTandemSearchProtocol(name, description, xml);
     }
 
-    public XTandemSearchProtocol createProtocolInstance(String name, String description, File dirSeqRoot,
-                                                        String dbPath, String[] dbNames, String xml)
-    {
-        if (dbPath != null && dbPath.length() > 0)
-        {
-            String[] dbPaths = new String[dbNames.length];
-            for (int i = 0; i < dbNames.length; i++)
-                dbPaths[i] = dbPath + dbNames[i];
-            dbNames = dbPaths;
-        }
-
-        return createProtocolInstance(name, description, dbNames, xml);
-    }
-
-    protected XTandemSearchProtocol createProtocolInstance(ParamParser parser)
+    protected AbstractMS2SearchProtocol createProtocolInstance(ParamParser parser)
     {
         parser.removeInputParameter("protein, taxon");
 

@@ -843,7 +843,10 @@ ms2/src/org/labkey/ms2/pickPeptideColumns.jsp -text
 ms2/src/org/labkey/ms2/pickProteinColumns.jsp -text
 ms2/src/org/labkey/ms2/pickView.jsp -text
 ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchPipelineJob.java -text
+ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchPipelineProvider.java -text
+ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchProtocol.java -text
 ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchProtocolFactory.java -text
+ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchTaskFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.java -text
 ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.jsp -text
 ms2/src/org/labkey/ms2/pipeline/DescribeRunPage.java -text
@@ -856,8 +859,6 @@ ms2/src/org/labkey/ms2/pipeline/MS2PipelineManager.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2SearchForm.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2SearchJobSupport.java -text
-ms2/src/org/labkey/ms2/pipeline/MS2SearchPipelineProtocol.java -text
-ms2/src/org/labkey/ms2/pipeline/MS2SearchPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/MassSpecProtocol.java -text
 ms2/src/org/labkey/ms2/pipeline/MassSpecProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/PipelineController.java -text

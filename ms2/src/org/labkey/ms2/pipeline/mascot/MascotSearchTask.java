@@ -19,10 +19,7 @@ import org.apache.commons.io.FileUtils;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
-import org.labkey.ms2.pipeline.MS2SearchJobSupport;
-import org.labkey.ms2.pipeline.TPPTask;
+import org.labkey.ms2.pipeline.*;
 
 import java.io.*;
 import java.sql.SQLException;
@@ -94,7 +91,7 @@ public class MascotSearchTask extends PipelineJob.Task
         void setMascotSequenceRelease(String sequenceRelease);
     }
 
-    public static class Factory extends AbstractTaskFactory
+    public static class Factory extends AbstractMS2SearchTaskFactory
     {
         public Factory()
         {
@@ -106,15 +103,10 @@ public class MascotSearchTask extends PipelineJob.Task
             return new MascotSearchTask(job);
         }
 
-        public String getStatusName()
-        {
-            return "SEARCH";
-        }
-
         public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
         {
             JobSupport support = (JobSupport) job;
-            String baseName = support.getFileBasename();
+            String baseName = support.getBaseName();
             File dirAnalysis = support.getAnalysisDirectory();
 
             // Mascot input (MGF) and Mascot native output
@@ -154,7 +146,7 @@ public class MascotSearchTask extends PipelineJob.Task
             File fileWorkMGF = wd.newFile(FT_MASCOT_MGF);
             File fileWorkDAT = wd.newFile(FT_MASCOT_DAT);
             File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(wd.getDir(),
-                    getJobSupport().getFileBasename());
+                    getJobSupport().getBaseName());
 
             // Mascot starts with remote sequence file names, so it has to look at the
             // raw parameter, rather than using getJobSupport().getSequenceFiles().

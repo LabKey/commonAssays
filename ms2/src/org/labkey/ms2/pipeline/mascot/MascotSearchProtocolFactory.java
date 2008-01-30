@@ -18,6 +18,7 @@ package org.labkey.ms2.pipeline.mascot;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.util.AppProps;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
 import java.io.File;
 
@@ -28,13 +29,18 @@ import java.io.File;
  *
  * @author bmaclean
  */
-public class MascotSearchProtocolFactory extends AbstractMS2SearchProtocolFactory<MascotSearchProtocol>
+public class MascotSearchProtocolFactory extends AbstractMS2SearchProtocolFactory
 {
     public static MascotSearchProtocolFactory instance = new MascotSearchProtocolFactory();
 
     public static MascotSearchProtocolFactory get()
     {
         return instance;
+    }
+
+    private MascotSearchProtocolFactory()
+    {
+        // Use the get() function.
     }
 
     public String getName()
@@ -47,13 +53,7 @@ public class MascotSearchProtocolFactory extends AbstractMS2SearchProtocolFactor
         return "org/labkey/ms2/pipeline/mascot/MascotDefaults.xml";
     }
 
-    public MascotSearchProtocol createProtocolInstance(String name, String description, String[] dbNames, String xml)
-    {
-        return new MascotSearchProtocol(name, description, dbNames, xml);
-    }
-
-    public MascotSearchProtocol createProtocolInstance(String name, String description, File dirSeqRoot,
-                                                       String dbPath, String[] dbNames, String xml)
+    public MascotSearchProtocol createProtocolInstance(String name, String description, String xml)
     {
         AppProps appProps = AppProps.getInstance();
         String mascotServer = appProps.getMascotServer();
@@ -61,20 +61,19 @@ public class MascotSearchProtocolFactory extends AbstractMS2SearchProtocolFactor
         if (!appProps.hasMascotServer() || 0 == mascotServer.length())
             throw new IllegalArgumentException("Mascot server has not been specified in site customization.");
 
-        MascotSearchProtocol protocol = createProtocolInstance(name,
-                description, dbNames, xml);
+        MascotSearchProtocol protocol = new MascotSearchProtocol(name, description, xml);
 
         protocol.setMascotServer(mascotServer);
         protocol.setMascotHTTPProxy(mascotHTTPProxy);
         return protocol;
     }
 
-    protected MascotSearchProtocol createProtocolInstance(ParamParser parser)
+    protected AbstractMS2SearchProtocol createProtocolInstance(ParamParser parser)
     {
         String mascotServer = parser.removeInputParameter("pipeline, mascot server");
         String mascotHTTPProxy = parser.removeInputParameter("pipeline, mascot http proxy");
 
-        MascotSearchProtocol instance = super.createProtocolInstance(parser);
+        MascotSearchProtocol instance = (MascotSearchProtocol) super.createProtocolInstance(parser);
 
         instance.setMascotServer(mascotServer);
         instance.setMascotHTTPProxy(mascotHTTPProxy);

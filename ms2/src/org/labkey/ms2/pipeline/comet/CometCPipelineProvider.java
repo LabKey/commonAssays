@@ -15,7 +15,18 @@
  */
 package org.labkey.ms2.pipeline.comet;
 
-import org.labkey.api.pipeline.PipelineProviderCluster;
+import org.labkey.api.pipeline.PipelinePerlClusterSupport;
+import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.pipeline.PipelineProtocol;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewContext;
+import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
+
+import java.util.Map;
+import java.util.List;
+import java.net.URI;
+import java.io.IOException;
 
 /**
  * CometCPipelineProvider class
@@ -24,13 +35,29 @@ import org.labkey.api.pipeline.PipelineProviderCluster;
  *
  * @author bmaclean
  */
-public class CometCPipelineProvider extends PipelineProviderCluster
+public class CometCPipelineProvider extends AbstractMS2SearchPipelineProvider
 {
-    public static String name = "Comet (Cluster)";
+    public static String name = "Comet";
+
+    public PipelinePerlClusterSupport _clusterSupport;
 
     public CometCPipelineProvider()
     {
         super(name);
+
+        _clusterSupport = new PipelinePerlClusterSupport();
+    }
+
+    public void preDeleteStatusFile(PipelineStatusFile sf) throws StatusUpdateException
+    {
+        super.preDeleteStatusFile(sf);
+        _clusterSupport.preDeleteStatusFile(sf);
+    }
+
+    public void preCompleteStatusFile(PipelineStatusFile sf) throws StatusUpdateException
+    {
+        super.preCompleteStatusFile(sf);
+        _clusterSupport.preCompleteStatusFile(sf);
     }
 
     public boolean isStatusViewableFile(String name, String basename)
@@ -38,6 +65,49 @@ public class CometCPipelineProvider extends PipelineProviderCluster
         if ("comet.def".equals(name))
             return true;
 
+        if (_clusterSupport.isStatusViewableFile(name, basename))
+            return true;
+
         return super.isStatusViewableFile(name, basename);
+    }
+
+    public List<StatusAction> addStatusActions()
+    {
+        List<StatusAction> actions = super.addStatusActions();
+        _clusterSupport.addStatusActions(actions);
+        return actions;
+    }
+
+    public ActionURL handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf) throws HandlerException
+    {
+        ActionURL url = _clusterSupport.handleStatusAction(ctx, name, sf);
+        if (url != null)
+            return url;
+
+        return super.handleStatusAction(ctx, name, sf);
+    }
+
+    public AbstractMS2SearchProtocolFactory getProtocolFactory()
+    {
+        // Never actually create a protocol based job.
+        return null;
+    }
+
+    public void ensureEnabled() throws PipelineProtocol.PipelineValidationException
+    {
+        // Nothing to do.
+        throw new UnsupportedOperationException("Comet does not support search job creation.");
+    }
+
+    public Map<String, String[]> getSequenceFiles(URI sequenceRoot) throws IOException
+    {
+        // No user interface for this search type.
+        throw new UnsupportedOperationException("Comet does not support search job creation.");
+    }
+
+    public String getHelpTopic()
+    {
+        // No user interface for this search type.
+        throw new UnsupportedOperationException("Comet does not support search job creation.");
     }
 }

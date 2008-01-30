@@ -64,6 +64,11 @@ public class XarGeneratorTask extends PipelineJob.Task
             return new XarGeneratorTask(job);
         }
 
+        public FileType getInputType()
+        {
+            return null;
+        }
+
         public String getStatusName()
         {
             return "SAVE EXPERIMENT";
@@ -72,7 +77,7 @@ public class XarGeneratorTask extends PipelineJob.Task
         public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
         {
             JobSupport support = (JobSupport) job;
-            String baseName = support.getFileBasename();
+            String baseName = support.getBaseName();
             File dirAnalysis = support.getAnalysisDirectory();
 
             return NetworkDrive.exists(FT_SEARCH_XAR.newFile(dirAnalysis, baseName));

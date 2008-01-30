@@ -12,9 +12,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.query.*;
 import org.labkey.api.security.ACL;
@@ -4163,9 +4161,11 @@ public class MS2Controller extends SpringActionController
                     ViewBackgroundInfo info = getViewBackgroundInfo();
 
                     // TODO: Clean this up.
-                    boolean mascotFile = MascotSearchProtocolFactory.get().equals(AbstractMS2SearchProtocolFactory.fromFile(f));
+                    AbstractMS2SearchProtocolFactory protocolFactory =
+                            AbstractMS2SearchProtocolFactory.fromFile(AbstractMS2SearchPipelineProvider.class, f);
+
                     int run;
-                    if (mascotFile)
+                    if (MascotSearchProtocolFactory.get().getClass().equals(protocolFactory.getClass()))
                     {
                         run = MS2Manager.addMascotRunToQueue(info,
                                 f, form.getDescription(), false).getRunId();
@@ -4216,11 +4216,13 @@ public class MS2Controller extends SpringActionController
                         if (!NetworkDrive.exists(dirData))
                             HttpView.throwNotFound();
 
-                        AbstractMS2SearchProtocolFactory protocolFactory = AbstractMS2SearchProtocolFactory.fromFile(f);
+                        AbstractMS2SearchProtocolFactory protocolFactory =
+                                AbstractMS2SearchProtocolFactory.fromFile(AbstractMS2SearchPipelineProvider.class, f);
 
                         File dirSeqRoot = new File(MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer()));
                         File dirAnalysis = protocolFactory.getAnalysisDir(dirData, protocolName);
                         File fileParameters = protocolFactory.getParametersFile(dirData, protocolName);
+                        AbstractMS2SearchProtocol protocol = protocolFactory.loadInstance(fileParameters);
                         String baseName = FileUtil.getBaseName(f, 2);
 
                         File[] filesMzXML;
@@ -4245,18 +4247,26 @@ public class MS2Controller extends SpringActionController
                                 HttpView.throwNotFound();
                         }
 
-                        MS2SearchPipelineProtocol protocol = protocolFactory.loadInstance(fileParameters);
+                        protocol.setDirSeqRoot(dirSeqRoot);
+                        try
+                        {
+                            protocol.validate(pr.getUri(c));
 
-                        PipelineJob job = protocol.createPipelineJob(getViewBackgroundInfo(),
-                                dirSeqRoot,
-                                filesMzXML,
-                                fileParameters,
-                                true);
+                            PipelineJob job = protocol.createPipelineJob(getViewBackgroundInfo(),
+                                    filesMzXML,
+                                    fileParameters,
+                                    true);
 
-                        PipelineService.get().queueJob(job);
+                            PipelineService.get().queueJob(job);
 
-                        url = new ActionURL("MS2", "addFileRunStatus", "");
-                        url.addParameter("path", job.getLogFile().getAbsolutePath());
+                            url = new ActionURL("MS2", "addFileRunStatus", "");
+                            url.addParameter("path", job.getLogFile().getAbsolutePath());
+                        }
+                        catch (PipelineProtocol.PipelineValidationException e)
+                        {
+                            url = new ActionURL("MS2", "addFileRunStatus", "");
+                            url.addParameter("error", e.getMessage());
+                        }
                     }
                 }
             }

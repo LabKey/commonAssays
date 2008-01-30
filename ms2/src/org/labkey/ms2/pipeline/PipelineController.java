@@ -167,7 +167,7 @@ public class PipelineController extends SpringActionController
                     // mascot .dat result file does not follow that of pipeline
                     protocolName = "none";
                     // dirDataOriginal = file;
-                    description = MS2PipelineManager.
+                    description = AbstractFileAnalysisJob.
                             getDataDescription(null, file.getName(), protocolName);
                 }
                 else
@@ -181,7 +181,7 @@ public class PipelineController extends SpringActionController
                     {
                         dirDataOriginal = dirDataOriginal.getParentFile();
                     }
-                    description = MS2PipelineManager.
+                    description = AbstractFileAnalysisJob.
                             getDataDescription(dirDataOriginal, baseName, protocolName);
                 }
 
@@ -218,6 +218,11 @@ public class PipelineController extends SpringActionController
         }
     }
 
+    public static ActionURL urlSearchXTandem(Container container)
+    {
+        return new ActionURL(SearchXTandemAction.class, container);
+    }
+
     @RequiresPermission(ACL.PERM_INSERT)
     public class SearchXTandemAction extends SearchAction
     {
@@ -227,6 +232,11 @@ public class PipelineController extends SpringActionController
         }
     }
 
+    public static ActionURL urlSearchMascot(Container container)
+    {
+        return new ActionURL(SearchMascotAction.class, container);
+    }
+
     @RequiresPermission(ACL.PERM_INSERT)
     public class SearchMascotAction extends SearchAction
     {
@@ -234,6 +244,11 @@ public class PipelineController extends SpringActionController
         {
             return MascotCPipelineProvider.name;
         }
+    }
+
+    public static ActionURL urlSearchSequest(Container container)
+    {
+        return new ActionURL(SearchSequestAction.class, container);
     }
 
     @RequiresPermission(ACL.PERM_INSERT)
@@ -267,8 +282,8 @@ public class PipelineController extends SpringActionController
         private File _dirSeqRoot;
         private File _dirData;
         private File _dirAnalysis;
-        private MS2SearchPipelineProvider provider;
-        private MS2SearchPipelineProtocol protocol;
+        private AbstractMS2SearchPipelineProvider _provider;
+        private AbstractMS2SearchProtocol _protocol;
 
         public String getProviderName()
         {
@@ -300,13 +315,13 @@ public class PipelineController extends SpringActionController
             if (getProviderName() != null)
                 form.setSearchEngine(getProviderName());
 
-            provider = (MS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(form.getSearchEngine());
-            if (provider == null)
+            _provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(form.getSearchEngine());
+            if (_provider == null)
                 return HttpView.throwNotFoundMV();
 
-            setHelpTopic(getHelpTopic(provider.getHelpTopic()));
+            setHelpTopic(getHelpTopic(_provider.getHelpTopic()));
 
-            AbstractMS2SearchProtocolFactory protocolFactory = provider.getProtocolFactory();
+            AbstractMS2SearchProtocolFactory protocolFactory = _provider.getProtocolFactory();
 
             String protocolName = form.getProtocol();
 
@@ -319,20 +334,20 @@ public class PipelineController extends SpringActionController
                     File protocolFile = protocolFactory.getParametersFile(_dirData, protocolName);
                     if (NetworkDrive.exists(protocolFile))
                     {
-                        protocol = protocolFactory.loadInstance(protocolFile);
+                        _protocol = protocolFactory.loadInstance(protocolFile);
 
                         // Don't allow the instance file to override the protocol name.
-                        protocol.setName(protocolName);
+                        _protocol.setName(protocolName);
                     }
                     else
                     {
-                        protocol = protocolFactory.load(uriRoot, protocolName);
+                        _protocol = protocolFactory.load(uriRoot, protocolName);
                     }
 
-                    form.setProtocolName(protocol.getName());
-                    form.setProtocolDescription(protocol.getDescription());
-                    String[] seqDbNames = protocol.getDbNames();
-                    form.setConfigureXml(protocol.getXml());
+                    form.setProtocolName(_protocol.getName());
+                    form.setProtocolDescription(_protocol.getDescription());
+                    String[] seqDbNames = _protocol.getDbNames();
+                    form.setConfigureXml(_protocol.getXml());
                     if (seqDbNames == null || seqDbNames.length == 0)
                         errors.reject(ERROR_MSG, "Protocol must have specify a FASTA file.");
                     else if (seqDbNames.length > 1)
@@ -357,24 +372,30 @@ public class PipelineController extends SpringActionController
         {
             try
             {
-                provider.ensureEnabled();   // throws exception if not enabled
+                _provider.ensureEnabled();   // throws exception if not enabled
 
                 // If not a saved protocol, create one from the information in the form.
-                if ("".equals(form.getProtocol()))
+                if (!"".equals(form.getProtocol()))
                 {
-                    protocol = provider.getProtocolFactory().createProtocolInstance(
+                    _protocol.setDirSeqRoot(_dirSeqRoot);
+                    _protocol.setDbPath(form.getSequenceDBPath());
+                    _protocol.setDbNames(new String[] {form.getSequenceDB()});
+                }
+                else
+                {
+                    _protocol = _provider.getProtocolFactory().createProtocolInstance(
                             form.getProtocolName(),
                             form.getProtocolDescription(),
-                            _dirSeqRoot,
-                            form.getSequenceDBPath(),
-                            new String[] {form.getSequenceDB()},
                             form.getConfigureXml());
 
-                    protocol.setEmail(getUser().getEmail());
-                    protocol.validate(_dirRoot.toURI());
+                    _protocol.setDirSeqRoot(_dirSeqRoot);
+                    _protocol.setDbPath(form.getSequenceDBPath());
+                    _protocol.setDbNames(new String[] {form.getSequenceDB()});
+                    _protocol.setEmail(getUser().getEmail());
+                    _protocol.validateToSave(_dirRoot.toURI());
                     if (form.isSaveProtocol())
                     {
-                        protocol.saveDefinition(_dirRoot.toURI());
+                        _protocol.saveDefinition(_dirRoot.toURI());
                     }
                 }
 
@@ -388,18 +409,18 @@ public class PipelineController extends SpringActionController
                 if (mzXMLFiles.length == 0)
                     throw new IllegalArgumentException("Analysis for this protocol is already complete.");
 
-                protocol.getFactory().ensureDefaultParameters(_dirRoot);
+                _protocol.getFactory().ensureDefaultParameters(_dirRoot);
 
-                File fileParameters = protocol.getParametersFile(_dirData);
+                File fileParameters = _protocol.getParametersFile(_dirData);
                 // Make sure configure.xml file exists for the job when it runs.
                 if (!fileParameters.exists())
                 {
-                    protocol.setEmail(getUser().getEmail());
-                    protocol.saveInstance(fileParameters, getContainer());
+                    _protocol.setEmail(getUser().getEmail());
+                    _protocol.saveInstance(fileParameters, getContainer());
                 }
 
                 AbstractMS2SearchPipelineJob job =
-                        protocol.createPipelineJob(getViewBackgroundInfo(), _dirSeqRoot, mzXMLFiles, fileParameters, false);
+                        _protocol.createPipelineJob(getViewBackgroundInfo(), mzXMLFiles, fileParameters, false);
 
                 boolean hasStatusFile = (job.getStatusFile() != job.getLogFile());
 
@@ -407,7 +428,7 @@ public class PipelineController extends SpringActionController
                 // will do the work, then create the single-file child jobs.
                 if (mzXMLFiles.length > 1)
                 {
-                    for (AbstractMS2SearchPipelineJob jobSingle : job.getSingleFileJobs())
+                    for (AbstractFileAnalysisJob jobSingle : job.getSingleFileJobs())
                     {
                         // If fractions or for a Perl cluster, just create a placeholder for the status.
                         if (job.isFractions() || hasStatusFile)
@@ -432,7 +453,7 @@ public class PipelineController extends SpringActionController
                 errors.reject(ERROR_MSG, e.getMessage());
                 return false;
             }
-            catch (PipelineValidationException e)
+            catch (PipelineProtocol.PipelineValidationException e)
             {
                 errors.reject(ERROR_MSG, e.getMessage());
                 return false;
@@ -505,7 +526,7 @@ public class PipelineController extends SpringActionController
             {
                 try
                 {
-                    sequenceDBs = provider.getSequenceFiles(_dirSeqRoot.toURI());
+                    sequenceDBs = _provider.getSequenceFiles(_dirSeqRoot.toURI());
                     if (0 == sequenceDBs.size())
                         errors.reject(ERROR_MSG, "No databases available for searching.");
                 }
@@ -515,7 +536,7 @@ public class PipelineController extends SpringActionController
                 }
             }
 
-            String[] protocolNames = provider.getProtocolFactory().getProtocolNames(_dirRoot.toURI());
+            String[] protocolNames = _provider.getProtocolFactory().getProtocolNames(_dirRoot.toURI());
 
             SearchPage page = (SearchPage) FormPage.get(PipelineController.class, form, "search.jsp");
 
@@ -686,7 +707,7 @@ public class PipelineController extends SpringActionController
     protected abstract class SetDefaultsActionBase extends FormViewAction<SetDefaultsForm>
     {
         private File _dirRoot;
-        private MS2SearchPipelineProvider _provider;
+        private AbstractMS2SearchPipelineProvider _provider;
 
         public abstract String getProviderName();
         public abstract HelpTopic getHelpTopic();
@@ -694,12 +715,12 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView handleRequest(SetDefaultsForm setDefaultsForm, BindException errors) throws Exception
         {
-            URI uriRoot = PipelineService.get().getPipelineRootSetting(getContainer());
-            if (uriRoot == null)
+            PipeRoot pr = PipelineService.get().getPipelineRootSetting(getContainer());
+            if (pr == null)
                 return HttpView.throwNotFoundMV("A pipeline root is not set on this folder.");
 
-            _dirRoot = new File(uriRoot);
-            _provider = (MS2SearchPipelineProvider)
+            _dirRoot = new File(pr.getUri());
+            _provider = (AbstractMS2SearchPipelineProvider)
                     PipelineService.get().getPipelineProvider(getProviderName());
 
             return super.handleRequest(setDefaultsForm, errors);
@@ -883,9 +904,9 @@ public class PipelineController extends SpringActionController
             MassSpecProtocol protocol = new MassSpecProtocol(form.getName(), form.getTemplateName(), form.getTokenReplacements());
             try
             {
-                protocol.validate(uriRoot);
+                protocol.validateToSave(uriRoot);
             }
-            catch (PipelineValidationException e)
+            catch (PipelineProtocol.PipelineValidationException e)
             {
                 errors.reject(ERROR_MSG, e.getMessage());
                 return false;
@@ -1161,14 +1182,13 @@ public class PipelineController extends SpringActionController
 
                 runInfo.setRunFileName(form.getFileNames()[i]);
 
-                File mzXMLFile = new File(form.getDirData(), form.getFileNames()[i]);
+                File dirData = form.getDirData();
+                File mzXMLFile = new File(dirData, form.getFileNames()[i]);
                 String baseName = FileUtil.getBaseName(mzXMLFile);
 
-                // quick hack to get the search to go forward.
-                if (form.isProtocolFractions())
-                    baseName = MS2PipelineManager._allFractionsMzXmlFileBase;
-
-                File fileInstance = MS2PipelineManager.getAnnotationFile(form.getDirData(), baseName);
+                File fileInstance = (form.isProtocolFractions() ?
+                        MS2PipelineManager.getAnnotationFile(form.getDirData()) :
+                        MS2PipelineManager.getAnnotationFile(form.getDirData(), baseName));
                 try
                 {
                     protocol.saveInstance(form.getDirRoot().toURI(), fileInstance, runInfo);
@@ -1184,7 +1204,7 @@ public class PipelineController extends SpringActionController
                     return false;
                 }
 
-                String dataDescription = MS2PipelineManager.getDataDescription(form.getDirData(), baseName, protocol.getName());
+                String dataDescription = AbstractFileAnalysisJob.getDataDescription(form.getDirData(), baseName, protocol.getName());
                 ExperimentPipelineJob job = new ExperimentPipelineJob(getViewBackgroundInfo(), fileInstance, dataDescription, false);
                 PipelineService.get().queueJob(job);
             }

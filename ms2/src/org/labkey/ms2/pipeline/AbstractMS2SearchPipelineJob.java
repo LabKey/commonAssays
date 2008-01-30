@@ -1,14 +1,18 @@
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.*;
-import org.labkey.api.util.*;
-import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExperimentUrls;
+import org.labkey.api.pipeline.AbstractFileAnalysisJob;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.TaskId;
+import org.labkey.api.util.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewBackgroundInfo;
 
-import java.io.*;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -16,7 +20,7 @@ import java.util.*;
  * User: brendanx
  * Date: Nov 11, 2007
  */
-public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
+public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJob
         implements MS2SearchJobSupport, TPPTask.JobSupport, XarGeneratorTask.JobSupport, XarLoaderTask.JobSupport
 {
     enum Pipelines
@@ -42,52 +46,22 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
     protected String _protocolName;
     protected String _baseName;
     protected File _dirSequenceRoot;
-    protected File _dirMzXML;
-    protected File[] _filesMzXML;
-    protected File _dirAnalysis;
-    protected File _fileInputXML;
     protected boolean _fractions;
     protected boolean _fromCluster;
 
-    private Map<String, String> _parametersDefaults;
-    private Map<String, String> _parametersOverrides;
-
-    private transient Map<String, String> _parameters;
-
-    public AbstractMS2SearchPipelineJob(String providerName,
+    public AbstractMS2SearchPipelineJob(AbstractMS2SearchProtocol protocol,
+                                        String providerName,
                                         ViewBackgroundInfo info,
                                         String protocolName,
                                         File dirSequenceRoot,
-                                        File fileInputXML,
-                                        File filesMzXML[],
+                                        File fileParameters,
+                                        File filesInput[],
                                         boolean fromCluster) throws SQLException, IOException
     {
-        super(providerName, info);
-        _filesMzXML = filesMzXML;
-        _dirMzXML = filesMzXML[0].getParentFile();
-        _protocolName = protocolName;
+        super(protocol, providerName, info, protocolName, fileParameters, filesInput, fromCluster);
+
         _dirSequenceRoot = dirSequenceRoot;
-
-        _fileInputXML = fileInputXML;
-        _dirAnalysis = _fileInputXML.getParentFile();
         _fromCluster = fromCluster;
-
-        // Load parameter files
-        _parametersOverrides = getInputParameters().getInputParameters();
-
-        // Check for explicitly set default parameters.  Otherwise use the default.
-        String paramDefaults = _parametersOverrides.get("list path, default parameters");
-        File fileDefaults;
-        if (paramDefaults != null)
-            fileDefaults = new File(getRootDir().toURI().resolve(paramDefaults));
-        else
-        {
-            MS2SearchPipelineProvider provider =(MS2SearchPipelineProvider)
-                    PipelineService.get().getPipelineProvider(providerName);
-            fileDefaults = provider.getProtocolFactory().getDefaultParametersFile(getRootDir());
-        }
-
-        _parametersDefaults = getInputParameters(fileDefaults).getInputParameters();
 
         // Make sure a sequence file is specified.
         String paramDatabase = getParameters().get("pipeline, database");
@@ -95,15 +69,14 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
             throw new IOException("Missing required input parameter 'pipeline, database'");
 
         // Set the fractions attribute correctly.
-        String all = MS2PipelineManager._allFractionsMzXmlFileBase;
-        _fractions = (filesMzXML.length > 1);
+        _fractions = (filesInput.length > 1);
         if (_fractions)
         {
             String paramDataType = getParameters().get("pipeline, data type");
             if (!DATATYPE_BOTH.equalsIgnoreCase(paramDataType))
             {
-                if (!NetworkDrive.exists(MS2PipelineManager.getAnnotationFile(_dirMzXML, all)) &&
-                        !NetworkDrive.exists(MS2PipelineManager.getLegacyAnnotationFile(_dirMzXML, all)))
+                if (!NetworkDrive.exists(MS2PipelineManager.getAnnotationFile(getDataDirectory())) &&
+                        !NetworkDrive.exists(MS2PipelineManager.getLegacyAnnotationFile(getDataDirectory())))
                 {
                     _fractions = DATATYPE_FRACTIONS.equalsIgnoreCase(paramDataType);
                 }
@@ -114,51 +87,34 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
             }
         }
 
-        if (isFractions())
-            _baseName = all;
-        else
-            _baseName = FileUtil.getBaseName(filesMzXML[0]);
-
-        setLogFile(FT_LOG.newFile(_dirAnalysis, _baseName), _fromCluster);
         if (isPerlClusterAware() && AppProps.getInstance().hasPipelineCluster())
-            setStatusFile(FT_CLUSTER_STATUS.newFile(_dirAnalysis, _baseName));
+            setStatusFile(FT_CLUSTER_STATUS.newFile(getAnalysisDirectory(), getBaseName()));
     }
 
     public AbstractMS2SearchPipelineJob(AbstractMS2SearchPipelineJob job, File fileFraction)
     {
-        super(job);
+        super(job, fileFraction);
 
         // Copy some parameters from the parent job.
         _experimentRunRowId = job._experimentRunRowId;
         _protocolName = job._protocolName;
         _dirSequenceRoot = job._dirSequenceRoot;
-        _dirMzXML = job._dirMzXML;
         _fractions = job._fractions;
-        _dirAnalysis = job._dirAnalysis;
-        _fileInputXML = job._fileInputXML;
-        _parameters = job._parameters;
-        _parametersDefaults = job._parametersDefaults;
-        _parametersOverrides = job._parametersOverrides;
 
         // Change parameters which are specific to the fraction job.
-        _filesMzXML = new File[] { fileFraction };
-        _baseName = FileUtil.getBaseName(fileFraction);
-        setLogFile(FT_LOG.newFile(_dirAnalysis, _baseName), false);
         if (getStatusFile() != getLogFile())
-            setStatusFile(FT_CLUSTER_STATUS.newFile(_dirAnalysis, _baseName));
+            setStatusFile(FT_CLUSTER_STATUS.newFile(getAnalysisDirectory(), getBaseName()));
     }
 
-    public TaskPipeline getTaskPipeline()
+    public TaskId getTaskPipelineId()
     {
         if (_fromCluster)
-            return PipelineJobService.get().getTaskPipeline(Pipelines.finishPerlCluster.getTaskId());
+            return Pipelines.finishPerlCluster.getTaskId();
 
         return null;
     }
 
     abstract public String getSearchEngine();
-
-    abstract public AbstractMS2SearchPipelineJob[] getSingleFileJobs();
 
     /**
      * Returns true, if this job supports a Perl based pipeline driven by pipe.pl.
@@ -173,7 +129,7 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
     public void run()
     {
         // TODO: Get rid of this, and use branch and join instead.
-        if (!_fromCluster && getSpectraFiles().length > 1)
+        if (!_fromCluster && getInputFiles().length > 1)
         {
             for (PipelineJob job : getSingleFileJobs())
             {
@@ -184,81 +140,6 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
 
         if (getErrors() == 0)
             super.run();
-    }
-
-    public File getParametersFile()
-    {
-        return _fileInputXML;
-    }
-
-    public ParamParser getInputParameters() throws IOException
-    {
-        return getInputParameters(_fileInputXML);
-    }
-
-    public ParamParser getInputParameters(File parametersFile) throws IOException
-    {
-        BufferedReader inputReader = null;
-        StringBuffer xmlBuffer = new StringBuffer();
-        try
-        {
-            inputReader = new BufferedReader(new FileReader(parametersFile));
-            String line;
-            while ((line = inputReader.readLine()) != null)
-                xmlBuffer.append(line).append("\n");
-        }
-        finally
-        {
-            if (inputReader != null)
-            {
-                try
-                {
-                    inputReader.close();
-                }
-                catch (IOException eio)
-                {
-                }
-            }
-        }
-
-        ParamParser parser = createParamParser();
-        parser.parse(xmlBuffer.toString());
-        if (parser.getErrors() != null)
-        {
-            ParamParser.Error err = parser.getErrors()[0];
-            if (err.getLine() == 0)
-            {
-                throw new IOException("Failed parsing input xml '" + parametersFile.getPath() + "'.\n" +
-                        err.getMessage());
-            }
-            else
-            {
-                throw new IOException("Failed parsing input xml '" + parametersFile.getPath() + "'.\n" +
-                        "Line " + err.getLine() + ": " + err.getMessage());
-            }
-        }
-        return parser;
-    }
-
-    public ParamParser createParamParser()
-    {
-        return PipelineJobService.get().createParamParser();
-    }
-
-    public Map<String, String> getParametersOverrides()
-    {
-        return _parametersOverrides;
-    }
-
-    public Map<String, String> getParameters()
-    {
-        if (_parameters == null)
-        {
-            _parameters = new HashMap<String, String>(_parametersDefaults);
-            _parameters.putAll(_parametersOverrides);
-        }
-
-        return _parameters;
     }
 
     /**
@@ -279,22 +160,12 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         return false;
     }
 
-    public File getDataDirectory()
-    {
-        return _dirMzXML;
-    }
-
-    public File getAnalysisDirectory()
-    {
-        return _dirAnalysis;
-    }
-
     public File[] getInteractInputFiles()
     {
         ArrayList<File> files = new ArrayList<File>();
-        for (File fileSpectra : getSpectraFiles())
+        for (File fileSpectra : getInputFiles())
         {
-            files.add(getPepXMLConvertFile(_dirAnalysis,
+            files.add(getPepXMLConvertFile(getAnalysisDirectory(),
                     FileUtil.getBaseName(fileSpectra)));
         }
         return files.toArray(new File[files.size()]);
@@ -302,18 +173,13 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
 
     public File getSearchSpectraFile()
     {
-        assert _filesMzXML.length == 1;
-        return _filesMzXML[0];
+        assert getInputFiles().length == 1;
+        return getInputFiles()[0];
     }
 
     public File getSearchNativeSpectraFile()
     {
         return null;    // No spectra conversion by default.
-    }
-
-    public File[] getSpectraFiles()
-    {
-        return _filesMzXML;
     }
 
     public File getSequenceRootDirectory()
@@ -336,11 +202,6 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         return arrFiles.toArray(new File[arrFiles.size()]);
     }
 
-    public String getFileBasename()
-    {
-        return _baseName;
-    }
-
     public boolean isXPressQuantitation()
     {
         return "xpress".equalsIgnoreCase(getParameters().get("pipeline quantitation, algorithm"));
@@ -359,11 +220,6 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         return null;
     }
 
-    public String getDescription()
-    {
-        return MS2PipelineManager.getDataDescription(_dirMzXML, _baseName, _protocolName);
-    }
-
     public boolean isFractions()
     {
         return _fractions;
@@ -374,6 +230,9 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         return !_fractions || DATATYPE_BOTH.equalsIgnoreCase(getParameters().get("pipeline, data type"));
     }
 
+/////////////////////////////////////////////////////////////////////////////
+//  Experiment writing
+    
     public void setExperimentRunRowId(int rowId)
     {
         _experimentRunRowId = rowId;
@@ -386,7 +245,7 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         File dirRoot = getRootDir();
         File dirAnalysis = getAnalysisDirectory();
         File fileInput = getParametersFile();
-        String baseName = getFileBasename();
+        String baseName = getBaseName();
 
         replaceMap.put("SEARCH_NAME", getDescription());
 
@@ -401,7 +260,7 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         StringBuilder mzxmlStartingInputsSB = new StringBuilder();
         StringBuilder instanceDetailsSB = new StringBuilder();
 
-        File[] spectraFiles = getSpectraFiles();
+        File[] spectraFiles = getInputFiles();
         for (File fileSpectra : spectraFiles)
         {
             mzxmlStartingInputsSB.append(getStartingInputDataSnippet(fileSpectra, dirAnalysis));
@@ -426,7 +285,7 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         }
 
         replaceMap.put("PEP_XML_FILE_PATH",
-                TPPTask.getPepXMLFile(_dirAnalysis, _baseName).getName());
+                TPPTask.getPepXMLFile(getAnalysisDirectory(), getBaseName()).getName());
 
         File fileProtXml = TPPTask.getProtXMLFile(dirAnalysis, baseName);
         if (!NetworkDrive.exists(fileProtXml))
@@ -438,7 +297,7 @@ public abstract class AbstractMS2SearchPipelineJob extends PipelineJob
         replaceMap.put("PEP_PROT_XML_FILE_PATH", fileProtXml.getName());
 
         File fileUniquifier = dirAnalysis;
-        if (getSpectraFiles().length == 1)
+        if (getInputFiles().length == 1)
             fileUniquifier = new File(fileUniquifier, baseName);
         String uniquifier = PageFlowUtil.encode(
                 PathRelativizer.relativizePathUnix(dirRoot, fileUniquifier)).replaceAll("%2F", "/");
