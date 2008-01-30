@@ -19,7 +19,10 @@ import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentRunFilter;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
@@ -66,8 +69,20 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public static final String NAME = "MS2";
 
-    private static MS2SearchExperimentRunFilter _ms2SearchRunFilter = new MS2SearchExperimentRunFilter("MS2 Searches", MS2Schema.GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME);
-    private static ExperimentRunFilter _samplePrepRunFilter = new ExperimentRunFilter("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.SAMPLE_PREP_EXPERIMENT_RUNS_TABLE_NAME);
+    private static MS2SearchExperimentRunFilter _ms2SearchRunFilter = new MS2SearchExperimentRunFilter("MS2 Searches", MS2Schema.GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME, Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX);
+    private static ExperimentRunFilter _samplePrepRunFilter = new ExperimentRunFilter("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.SAMPLE_PREP_EXPERIMENT_RUNS_TABLE_NAME)
+    {
+        public Priority getPriority(ExpProtocol protocol)
+        {
+            Lsid lsid = new Lsid(protocol.getLSID());
+            String objectId = lsid.getObjectId();
+            if (objectId.startsWith(MS2Schema.SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX))
+            {
+                return Priority.HIGH;
+            }
+            return null;
+        }
+    };
 
     public static final String MS2_SAMPLE_PREPARATION_RUNS_NAME = "MS2 Sample Preparation Runs";
     public static final String MS2_RUNS_ENHANCED_NAME = "MS2 Runs (Enhanced)";
@@ -141,9 +156,9 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         ExperimentService.get().registerExperimentRunFilter(_samplePrepRunFilter);
         ExperimentService.get().registerExperimentRunFilter(_ms2SearchRunFilter);
-        ExperimentService.get().registerExperimentRunFilter(new MS2SearchExperimentRunFilter("X!Tandem Searches", MS2Schema.XTANDEM_SEARCH_EXPERIMENT_RUNS_TABLE_NAME));
-        ExperimentService.get().registerExperimentRunFilter(new MS2SearchExperimentRunFilter("Mascot Searches", MS2Schema.MASCOT_SEARCH_EXPERIMENT_RUNS_TABLE_NAME));
-        ExperimentService.get().registerExperimentRunFilter(new MS2SearchExperimentRunFilter("Sequest Searches", MS2Schema.SEQUEST_SEARCH_EXPERIMENT_RUNS_TABLE_NAME));
+        ExperimentService.get().registerExperimentRunFilter(new MS2SearchExperimentRunFilter("X!Tandem Searches", MS2Schema.XTANDEM_SEARCH_EXPERIMENT_RUNS_TABLE_NAME, Handler.Priority.HIGH, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX));
+        ExperimentService.get().registerExperimentRunFilter(new MS2SearchExperimentRunFilter("Mascot Searches", MS2Schema.MASCOT_SEARCH_EXPERIMENT_RUNS_TABLE_NAME, Handler.Priority.HIGH, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX));
+        ExperimentService.get().registerExperimentRunFilter(new MS2SearchExperimentRunFilter("Sequest Searches", MS2Schema.SEQUEST_SEARCH_EXPERIMENT_RUNS_TABLE_NAME, Handler.Priority.HIGH, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX));
 
         ExperimentService.get().registerExperimentDataHandler(new PepXmlExperimentDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new ProteinProphetExperimentDataHandler());

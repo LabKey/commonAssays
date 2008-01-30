@@ -63,8 +63,6 @@ public class PipelineController extends SpringActionController
 //    private static Logger _log = Logger.getLogger(PipelineController.class);
     private static DefaultActionResolver _resolver = new DefaultActionResolver(PipelineController.class);
 
-    public static final String DEFAULT_EXPERIMENT_OBJECTID = "DefaultExperiment";
-
     private static HelpTopic getHelpTopic(String topic)
     {
         return new HelpTopic(topic, HelpTopic.Area.CPAS);

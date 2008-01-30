@@ -214,7 +214,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
             ExpRun run = ExperimentService.get().getExpRun(_experimentRunRowId.intValue());
             if (run != null)
             {
-                return PageFlowUtil.urlProvider(ExperimentUrls.class).getRunGraphURL(getContainer(), run);
+                return PageFlowUtil.urlProvider(ExperimentUrls.class).getRunGraphURL(run);
             }
         }
         return null;

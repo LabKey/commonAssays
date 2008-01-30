@@ -16,13 +16,14 @@
 package org.labkey.ms1;
 
 import org.labkey.api.exp.ExperimentRunFilter;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.DataRegionSelection;
 import org.labkey.ms1.query.MS1Schema;
 
 /**
@@ -45,5 +46,14 @@ public class MS1ExperimentRunFilter extends ExperimentRunFilter
         ActionURL compareUrl = new ActionURL(MS1Controller.CompareRunsAction.class, context.getContainer());
         bar.add(new ActionButton(MS1Controller.createVerifySelectedScript(view, compareUrl),
                 "Compare", DataRegion.MODE_ALL, ActionButton.Action.LINK));
+    }
+
+    public Priority getPriority(ExpProtocol protocol)
+    {
+        if ("MS1.msInspectFeatureFindingAnalysis".equals(new Lsid(protocol.getLSID()).getObjectId()))
+        {
+            return Priority.HIGH;
+        }
+        return null;
     }
 }

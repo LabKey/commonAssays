@@ -1,6 +1,8 @@
 package org.labkey.ms2;
 
 import org.labkey.api.exp.ExperimentRunFilter;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ViewContext;
@@ -14,9 +16,14 @@ import org.labkey.api.security.ACL;
  */
 public class MS2SearchExperimentRunFilter extends ExperimentRunFilter
 {
-    public MS2SearchExperimentRunFilter(String name, String tableName)
+    private Priority _priority;
+    private String[] _protocolPrefixes;
+
+    public MS2SearchExperimentRunFilter(String name, String tableName, Priority priority, String... protocolPrefixes)
     {
         super(name, MS2Schema.SCHEMA_NAME, tableName);
+        _priority = priority;
+        _protocolPrefixes = protocolPrefixes;
     }
 
     private ActionButton createButton(ViewContext context, String actionName, String description, ActionButton.Action method)
@@ -47,5 +54,19 @@ public class MS2SearchExperimentRunFilter extends ExperimentRunFilter
         bar.add(exportRuns);
 
         bar.add(createButton(context, "showHierarchy", "Show Hierarchy", ActionButton.Action.LINK));
+    }
+
+    public Priority getPriority(ExpProtocol protocol)
+    {
+        Lsid lsid = new Lsid(protocol.getLSID());
+        String objectId = lsid.getObjectId();
+        for (String protocolPrefix : _protocolPrefixes)
+        {
+            if (objectId.startsWith(protocolPrefix))
+            {
+                return _priority;
+            }
+        }
+        return null;
     }
 }

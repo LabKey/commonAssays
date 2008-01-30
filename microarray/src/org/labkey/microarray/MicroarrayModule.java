@@ -12,7 +12,9 @@ import org.labkey.api.view.*;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.ExperimentRunFilter;
+import org.labkey.api.exp.Lsid;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
@@ -37,7 +39,17 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
     public static final DataType FEATURES_DATA_TYPE = new DataType("MicroarrayFeaturesData");
     public static final DataType GRID_DATA_TYPE = new DataType("MicroarrayGridData");
 
-    public static final ExperimentRunFilter EXP_RUN_FILTER = new ExperimentRunFilter("Microarray", MicroarraySchema.SCHEMA_NAME, MicroarraySchema.TABLE_RUNS);
+    public static final ExperimentRunFilter EXP_RUN_FILTER = new ExperimentRunFilter("Microarray", MicroarraySchema.SCHEMA_NAME, MicroarraySchema.TABLE_RUNS)
+    {
+        public Priority getPriority(ExpProtocol protocol)
+        {
+            if (MicroarrayAssayProvider.PROTOCOL_PREFIX.equals(new Lsid(protocol.getLSID()).getNamespacePrefix()))
+            {
+                return Priority.HIGH;
+            }
+            return null;
+        }
+    };
 
     public MicroarrayModule()
     {

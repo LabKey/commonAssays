@@ -40,10 +40,12 @@ public class MS2Schema extends UserSchema
     public static final String COMPARE_PROTEIN_PROPHET_TABLE_NAME = "CompareProteinProphet";
     public static final String COMPARE_PEPTIDES_TABLE_NAME = "ComparePeptides";
 
-    private static final String MASCOT_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.Mascot%";
-    private static final String SEQUEST_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.Sequest%";
-    private static final String XTANDEM_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.XTandem%";
-    private static final String SAMPLE_PREP_PROTOCOL_PATTERN = "urn:lsid:%:Protocol.%:MS2.PreSearch.%";
+    private static final String PROTOCOL_PATTERN_PREFIX = "urn:lsid:%:Protocol.%:";
+
+    public static final String MASCOT_PROTOCOL_OBJECT_PREFIX = "MS2.Mascot";
+    public static final String SEQUEST_PROTOCOL_OBJECT_PREFIX = "MS2.Sequest";
+    public static final String XTANDEM_PROTOCOL_OBJECT_PREFIX = "MS2.XTandem";
+    public static final String SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX = "MS2.PreSearch.";
 
     private static final Set<String> HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("PeptideId");
 
@@ -91,20 +93,20 @@ public class MS2Schema extends UserSchema
         if (SAMPLE_PREP_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
             ExpRunTable result = _expSchema.createRunsTable(alias);
-            result.setProtocolPatterns(SAMPLE_PREP_PROTOCOL_PATTERN);
+            result.setProtocolPatterns(PROTOCOL_PATTERN_PREFIX + SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX + "%");
             return result;
         }
         else if (XTANDEM_SEARCH_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createSearchTable(alias, XTANDEM_PROTOCOL_PATTERN);
+            return createSearchTable(alias, XTANDEM_PROTOCOL_OBJECT_PREFIX);
         }
         else if (MASCOT_SEARCH_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createSearchTable(alias, MASCOT_PROTOCOL_PATTERN);
+            return createSearchTable(alias, MASCOT_PROTOCOL_OBJECT_PREFIX);
         }
         else if (SEQUEST_SEARCH_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createSearchTable(alias, SEQUEST_PROTOCOL_PATTERN);
+            return createSearchTable(alias, SEQUEST_PROTOCOL_OBJECT_PREFIX);
         }
         else if (GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
@@ -166,7 +168,7 @@ public class MS2Schema extends UserSchema
 
     public TableInfo createRunsTable(String alias)
     {
-        return createSearchTable(alias, XTANDEM_PROTOCOL_PATTERN, MASCOT_PROTOCOL_PATTERN,SEQUEST_PROTOCOL_PATTERN);
+        return createSearchTable(alias, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX);
     }
 
     public SpectraCountTableInfo createSpectraCountTable(SpectraCountConfiguration config, HttpServletRequest request, String peptideViewName)
@@ -267,10 +269,15 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    private TableInfo createSearchTable(String alias, String... protocolPattern)
+    private TableInfo createSearchTable(String alias, String... protocolObjectPrefix)
     {
         final ExpRunTable result = _expSchema.createRunsTable(alias);
-        result.setProtocolPatterns(protocolPattern);
+        String[] protocolPatterns = new String[protocolObjectPrefix.length];
+        for (int i = 0; i < protocolObjectPrefix.length; i++)
+        {
+            protocolPatterns[i] = PROTOCOL_PATTERN_PREFIX + protocolObjectPrefix[i] + "%";
+        }
+        result.setProtocolPatterns(protocolPatterns);
 
         SQLFragment sql = new SQLFragment("(SELECT MIN(ms2Runs.run)\n" +
                 "\nFROM " + MS2Manager.getTableInfoRuns() + " ms2Runs " +
