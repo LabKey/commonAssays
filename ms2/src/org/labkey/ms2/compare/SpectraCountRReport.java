@@ -66,11 +66,9 @@ public class SpectraCountRReport extends RReport
         return context.getActionURL().getParameter(RUN_LIST_NAME);
     }
 
-    public ReportDescriptor createDescriptor()
+    public String getType()
     {
-        ReportDescriptor result = super.createDescriptor();
-        result.setReportType(TYPE);
-        return result;
+        return TYPE;
     }
 
     public ActionURL getRunReportURL(ViewContext context)
