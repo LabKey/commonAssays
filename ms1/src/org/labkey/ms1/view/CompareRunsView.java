@@ -64,7 +64,7 @@ public class CompareRunsView extends CrosstabView
     protected DataView createDataView()
     {
         DataView view = super.createDataView();
-        String sortString = CrosstabTableInfo.getDefaultSortString() + ",Peptide";
+        String sortString = CrosstabTableInfo.getDefaultSortString() + "," + FeaturesTableInfo.COLUMN_PEPTIDE_INFO + "_Peptide";
         view.getRenderContext().setBaseSort(new Sort(sortString));
         return view;
     }
