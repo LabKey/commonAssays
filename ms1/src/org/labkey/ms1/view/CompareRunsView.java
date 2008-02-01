@@ -22,11 +22,8 @@ import org.labkey.api.query.CrosstabView;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.view.DataView;
-import org.labkey.ms1.query.MS1Schema;
 import org.labkey.ms1.query.FeaturesTableInfo;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.labkey.ms1.query.MS1Schema;
 
 /**
  * Created by IntelliJ IDEA.

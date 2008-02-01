@@ -5,10 +5,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.query.DefaultSchema;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QuerySchema;
-import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
@@ -111,10 +108,21 @@ public class MS1Schema extends UserSchema
         CrosstabSettings settings = new CrosstabSettings(tinfo);
 
         CrosstabDimension rowDim = settings.getRowAxis().addDimension(FieldKey.fromParts(FeaturesTableInfo.COLUMN_PEPTIDE_INFO, "Peptide"));
-        rowDim.setUrl(urlPepSearch.getLocalURIString() + "&pepSeq=${Peptide}");
+        rowDim.setUrl(urlPepSearch.getLocalURIString() + "&pepSeq=${RelatedPeptide_Peptide}");
 
         CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("FileId", "ExpDataFileId", "Run", "RowId"));
         colDim.setUrl(new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()).getLocalURIString() + "runId=" + CrosstabMember.VALUE_TOKEN);
+
+        //setup the feature id column as an FK to itself so that the first feature measure will allow
+        //users to add other info from the features table.
+        ColumnInfo featureIdCol = tinfo.getColumn("FeatureId");
+        featureIdCol.setFk(new LookupForeignKey("FeatureId", "MZ")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return getFeaturesTableInfo(false);
+            }
+        });
 
         settings.addMeasure(FieldKey.fromParts("FeatureId"), CrosstabMeasure.AggregateFunction.COUNT, "Num Features");
         settings.addMeasure(FieldKey.fromParts("Intensity"), CrosstabMeasure.AggregateFunction.AVG);
@@ -122,7 +130,7 @@ public class MS1Schema extends UserSchema
 
         String measureUrl = new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()).getLocalURIString()
                 + MS1Controller.ShowFeaturesForm.ParamNames.runId.name() + "=" + CrosstabMember.VALUE_TOKEN
-                + "&" + MS1Controller.ShowFeaturesForm.ParamNames.pepSeq.name() + "=${Peptide}";
+                + "&" + MS1Controller.ShowFeaturesForm.ParamNames.pepSeq.name() + "=${RelatedPeptide_Peptide}";
         for(CrosstabMeasure measure : settings.getMeasures())
             measure.setUrl(measureUrl);
 
