@@ -584,11 +584,13 @@ ms1/src/org/labkey/ms1/view/softwareView.jsp -text
 ms2/gwtsrc/MS2GWT.iml -text
 ms2/gwtsrc/org/labkey/ms2/RunComparator.gwt.xml -text
 ms2/gwtsrc/org/labkey/ms2/client/CompareResult.java -text
+ms2/gwtsrc/org/labkey/ms2/client/CompareRunGroup.java -text
 ms2/gwtsrc/org/labkey/ms2/client/CompareService.java -text
 ms2/gwtsrc/org/labkey/ms2/client/CompareServiceAsync.java -text
+ms2/gwtsrc/org/labkey/ms2/client/GWTExperimentRun.java -text
+ms2/gwtsrc/org/labkey/ms2/client/GWTRunGroup.java -text
 ms2/gwtsrc/org/labkey/ms2/client/RunComparator.java -text
 ms2/gwtsrc/org/labkey/ms2/client/RunComparatorView.java -text
-ms2/gwtsrc/org/labkey/ms2/client/RunGroup.java -text
 ms2/gwtsrc/org/labkey/ms2/client/RunGroupDialogBox.java -text
 ms2/module.properties -text
 ms2/src/META-INF/ms2.xml -text

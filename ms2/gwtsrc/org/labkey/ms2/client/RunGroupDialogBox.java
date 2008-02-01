@@ -17,7 +17,7 @@ public abstract class RunGroupDialogBox extends DialogBox
     private RadioButton _requireAnyRadioButton;
 
 
-    public RunGroupDialogBox(String[] runNames, RunGroup runGroup)
+    public RunGroupDialogBox(String[] runNames, CompareRunGroup runGroup)
     {
         super(false);
         setText("Select the runs to be included in the group");
@@ -94,7 +94,7 @@ public abstract class RunGroupDialogBox extends DialogBox
                     }
                 }
 
-                commit(new RunGroup(result, _requireAllRadioButton.isChecked()));
+//                commit(new CompareRunGroup(result, _requireAllRadioButton.isChecked()));
                 hide();
             }
         });
@@ -120,5 +120,5 @@ public abstract class RunGroupDialogBox extends DialogBox
         WindowUtil.centerDialog(this);
     }
 
-    public abstract void commit(RunGroup runGroup);
+    public abstract void commit(CompareRunGroup runGroup);
 }

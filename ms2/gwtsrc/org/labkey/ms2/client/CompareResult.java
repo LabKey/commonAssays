@@ -8,26 +8,19 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class CompareResult implements IsSerializable
 {
-    private String[] _proteinNames;
-    private String[] _runNames;
-    private String[] _runURLs;
+    private GWTExperimentRun[] _runs;
+    private GWTRunGroup[] _runGroups;
     private boolean[][] _hits;
 
     public CompareResult()
     {
     }
 
-    public CompareResult(String[] proteinNames, String[] runNames, String[] runURLs, boolean[][] hits)
+    public CompareResult(GWTExperimentRun[] runs, GWTRunGroup[] runGroups, boolean[][] hits)
     {
-        _proteinNames = proteinNames;
-        _runNames = runNames;
-        _runURLs = runURLs;
+        _runs = runs;
+        _runGroups = runGroups;
         _hits = hits;
-    }
-
-    public String[] getProteinNames()
-    {
-        return _proteinNames;
     }
 
     public boolean[][] getHits()
@@ -35,13 +28,13 @@ public class CompareResult implements IsSerializable
         return _hits;
     }
 
-    public String[] getRunNames()
+    public GWTExperimentRun[] getRuns()
     {
-        return _runNames;
+        return _runs;
     }
 
-    public String[] getRunURLs()
+    public GWTRunGroup[] getRunGroups()
     {
-        return _runURLs;
+        return _runGroups;
     }
 }

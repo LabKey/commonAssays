@@ -6,7 +6,6 @@ import org.labkey.ms2.query.CompareProteinsView;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.query.QueryParam;
 import org.apache.log4j.Logger;
 
 /**

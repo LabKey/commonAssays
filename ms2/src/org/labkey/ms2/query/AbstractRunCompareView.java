@@ -8,11 +8,14 @@ import org.labkey.api.view.DataView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.RunListException;
-import org.labkey.ms2.RunListCache;
-import org.labkey.ms2.MS2Controller;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExpExperiment;
+import org.labkey.api.exp.api.ExperimentUrls;
+import org.labkey.ms2.*;
 import org.labkey.ms2.client.CompareResult;
+import org.labkey.ms2.client.GWTExperimentRun;
+import org.labkey.ms2.client.GWTRunGroup;
 import org.labkey.ms2.compare.CompareDataRegion;
 
 import javax.servlet.ServletException;
@@ -116,17 +119,43 @@ public abstract class AbstractRunCompareView extends QueryView
 
             StringTokenizer lines = new StringTokenizer(sb.toString(), "\n");
             int proteinCount = lines.countTokens();
-            String[] proteins = new String[proteinCount];
-            String[] runNames = new String[_runs.size()];
-            String[] runURLs = new String[_runs.size()];
+            GWTExperimentRun[] gwtRuns = new GWTExperimentRun[_runs.size()];
+            Map<Integer, GWTRunGroup> runGroups = new HashMap<Integer, GWTRunGroup>();
             boolean[][] hits = new boolean[proteinCount][];
 
-            int runIndex = 0;
-            for (MS2Run run : _runs)
+            for (int runIndex = 0; runIndex < _runs.size(); runIndex++)
             {
+                MS2Run run = _runs.get(runIndex);
                 ActionURL runURL = MS2Controller.getShowRunUrl(ContainerManager.getForId(run.getContainer()), run.getRun());
-                runURLs[runIndex] = runURL.getLocalURIString();
-                runNames[runIndex++] = run.getDescription();
+                String lsid = run.getExperimentRunLSID();
+                ExpRun expRun = null;
+                if (lsid != null)
+                {
+                    expRun = ExperimentService.get().getExpRun(lsid);
+                }
+                GWTExperimentRun gwtRun = new GWTExperimentRun();
+                gwtRun.setName(run.getDescription());
+                gwtRun.setUrl(runURL.toString());
+                if (expRun != null)
+                {
+                    gwtRun.setRowId(expRun.getRowId());
+                    gwtRun.setLsid(expRun.getLSID());
+                    ExpExperiment[] experiments = expRun.getExperiments();
+                    for (ExpExperiment experiment : experiments)
+                    {
+                        GWTRunGroup runGroup = runGroups.get(experiment.getRowId());
+                        if (runGroup == null)
+                        {
+                            runGroup = new GWTRunGroup();
+                            runGroup.setURL(PageFlowUtil.urlProvider(ExperimentUrls.class).getExperimentDetailsURL(experiment.getContainer(), experiment).toString());
+                            runGroup.setRowId(experiment.getRowId());
+                            runGroup.setName(experiment.getName());
+                            runGroups.put(experiment.getRowId(), runGroup);
+                        }
+                        runGroup.addRun(gwtRun);
+                    }
+                }
+                gwtRuns[runIndex] = gwtRun; 
             }
 
             int index = 0;
@@ -134,7 +163,6 @@ public abstract class AbstractRunCompareView extends QueryView
             {
                 String line = lines.nextToken();
                 String[] values = line.split("\\t");
-                proteins[index] = values[0];
                 hits[index] = new boolean[_runs.size()];
                 for (int i = 0; i < _runs.size() && i + 1 < values.length ; i++)
                 {
@@ -142,7 +170,7 @@ public abstract class AbstractRunCompareView extends QueryView
                 }
                 index++;
             }
-            return new CompareResult(proteins, runNames, runURLs, hits);
+            return new CompareResult(gwtRuns, runGroups.values().toArray(new GWTRunGroup[0]), hits);
         }
         finally
         {

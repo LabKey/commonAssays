@@ -1188,6 +1188,9 @@ public class MS2Controller extends SpringActionController
             props.put("originalURL", getViewContext().getActionURL().toString());
             props.put("comparisonName", view.getComparisonName());
             GWTView gwtView = new GWTView("org.labkey.ms2.RunComparator", props);
+            gwtView.setTitle("Comparison Overview");
+            gwtView.setFrame(WebPartView.FrameType.PORTAL);
+            gwtView.enableExpandCollapse("ProteinProphetQueryCompare", true);
 
             return new VBox(gwtView, helpView, view);
         }

@@ -3,10 +3,13 @@
   <component name="FacetManager">
     <facet type="gwt" name="GWT">
       <configuration>
-        <setting name="gwtSdkUrl" value="" />
+        <setting name="gwtSdkUrl" value="file://$GWT_HOME$" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
         <setting name="runGwtCompilerOnMake" value="true" />
         <setting name="compilerMaxHeapSize" value="128" />
+        <packaging>
+          <module name="org.labkey.ms2.RunComparator" path="/org.labkey.ms2.RunComparator" />
+        </packaging>
       </configuration>
     </facet>
   </component>
@@ -30,6 +33,7 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="library" name="gwt-user" level="project" />
     <orderEntryProperties />
   </component>
 </module>

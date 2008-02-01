@@ -4,20 +4,19 @@ package org.labkey.ms2.client;
  * User: jeckels
  * Date: Jun 12, 2007
  */
-public class RunGroup
+public class CompareRunGroup
 {
     private int[] _runIndices;
     private boolean _requireAll;
+    private String _name;
+    private String _url;
 
-    public RunGroup()
+    public CompareRunGroup(String name, String url, int[] runIndices, boolean requireAll)
     {
-        this(new int[0], false);
-    }
-
-    public RunGroup(int[] runIndices, boolean requireAll)
-    {
+        _name = name;
         _requireAll = requireAll;
         _runIndices = runIndices;
+        _url = url;
     }
 
     public boolean isRequireAll()
@@ -75,5 +74,15 @@ public class RunGroup
             }
         }
         return result;
+    }
+
+    public String getName()
+    {
+        return _name;
+    }
+
+    public String getUrl()
+    {
+        return _url;
     }
 }

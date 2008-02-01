@@ -165,6 +165,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo
             result.append(",\n");
             result.append("\tCASE WHEN Run=");
             result.append(run.getRun());
+            // There should only be one matching protein group, but we have to aggregate to get it past the GROUP BY clause
             result.append(" THEN MAX(pg.RowId) ELSE NULL END AS Run");
             result.append(run.getRun());
             result.append("ProteinGroupId");
