@@ -53,8 +53,11 @@ public class RunController extends BaseFlowController<RunController.Action>
 
     protected Page getPage(String name) throws Exception
     {
+        FlowRun run = FlowRun.fromURL(getActionURL());
+        if (null == run)
+            HttpView.throwNotFound();
         Page ret = (Page) getFlowPage(name);
-        ret.setRun(FlowRun.fromURL(getActionURL()));
+        ret.setRun(run);
         return ret;
     }
 
