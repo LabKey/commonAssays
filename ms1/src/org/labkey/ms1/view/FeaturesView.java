@@ -8,6 +8,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms1.query.*;
+import org.labkey.ms1.MS1Manager;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -36,6 +37,7 @@ public class FeaturesView extends QueryView
     private List<FeaturesFilter> _baseFilters = null;
     private MS1Schema _ms1Schema = null;
     private boolean _forExport = false;
+    private Boolean _peaksAvailable = null;
 
     public FeaturesView(MS1Schema schema)
     {
@@ -44,8 +46,15 @@ public class FeaturesView extends QueryView
 
     public FeaturesView(MS1Schema schema, Container container)
     {
-        this(schema);
+        this(schema, new ArrayList<FeaturesFilter>());
         _baseFilters.add(new ContainerFilter(container));
+    }
+
+    public FeaturesView(MS1Schema schema, int runId) throws SQLException
+    {
+        this(schema, new ArrayList<FeaturesFilter>());
+        _baseFilters.add(new RunFilter(runId));
+        _peaksAvailable = Boolean.valueOf(MS1Manager.get().isPeakDataAvailable(runId) == MS1Manager.PeakAvailability.Available);
     }
 
     public FeaturesView(MS1Schema schema, List<FeaturesFilter> baseFilters)
@@ -90,7 +99,7 @@ public class FeaturesView extends QueryView
         ResultSet rs = null;
         int prevFeatureId = -1;
         int nextFeatureId = -1;
-        int id = -1;
+        int id;
         try
         {
             //make sure we get all rows and not just the current page
@@ -127,7 +136,7 @@ public class FeaturesView extends QueryView
     {
         assert null != _ms1Schema : "MS1 Schema was not set in FeaturesView class!";
 
-        FeaturesTableInfo tinfo = _ms1Schema.getFeaturesTableInfo();
+        FeaturesTableInfo tinfo = _ms1Schema.getFeaturesTableInfo(true, _peaksAvailable);
 
         //apply base filters
         if(null != _baseFilters)

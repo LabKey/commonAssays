@@ -15,9 +15,8 @@
  */
 package org.labkey.ms1.query;
 
-import org.labkey.api.query.ExprColumn;
 import org.labkey.api.data.*;
-import org.labkey.api.view.ActionURL;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.ms1.MS1Manager;
 
 /**
@@ -30,6 +29,14 @@ public class PeaksAvailableColumnInfo extends ExprColumn implements DisplayColum
 {
     public static final String COLUMN_NAME = "PeaksAvailable";
 
+    /**
+     * Use this constructor if you don't know if peaks are available for all features or not.
+     * This constructor will use a sub-query to determine if the peaks are available for each
+     * feature, so it will be a little less efficient, but it will also display the links
+     * conditionally on a row-by-row basis.
+     *
+     * @param parent parent table info.
+     */
     public PeaksAvailableColumnInfo(TableInfo parent)
     {
         super(parent, COLUMN_NAME,
@@ -41,7 +48,28 @@ public class PeaksAvailableColumnInfo extends ExprColumn implements DisplayColum
                 "WHERE f.FileId=" + ExprColumn.STR_TABLE_ALIAS + ".FileId))"),
                 java.sql.Types.INTEGER, parent.getColumn("FeatureId"));
 
-        setCaption("");
+        commonInit();
+    }
+
+    /**
+     * Use this constructor when you know if the peaks are available or not for all features
+     * that will be displayed (e.g., when filtering on an given experiment run).
+     *
+     * @param parent parent table info
+     * @param peaksAvailable pass true if you know that peaks are available, or false if you know they are not
+     */
+    public PeaksAvailableColumnInfo(TableInfo parent, boolean peaksAvailable)
+    {
+        super(parent, COLUMN_NAME,
+                new SQLFragment(peaksAvailable ? "(1)" : "(0)"),
+                java.sql.Types.INTEGER);
+
+        commonInit();
+    }
+
+    protected void commonInit()
+    {
+        setCaption("Details and Peaks Links");
         setDisplayColumnFactory(this);
     }
 

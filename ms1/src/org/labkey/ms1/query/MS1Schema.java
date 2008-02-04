@@ -163,6 +163,11 @@ public class MS1Schema extends UserSchema
         return new FeaturesTableInfo(this, includePepFk);
     } //getFeaturesTableInfo()
 
+    public FeaturesTableInfo getFeaturesTableInfo(boolean includePepFk, Boolean peaksAvailable)
+    {
+        return new FeaturesTableInfo(this, includePepFk, peaksAvailable);
+    } //getFeaturesTableInfo()
+
     public PeaksTableInfo getPeaksTableInfo()
     {
         return new PeaksTableInfo(this, getContainer());

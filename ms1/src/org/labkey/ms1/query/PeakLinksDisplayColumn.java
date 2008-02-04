@@ -25,6 +25,7 @@ import org.labkey.common.util.Pair;
 
 import java.io.Writer;
 import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -67,6 +68,12 @@ public class PeakLinksDisplayColumn extends DataColumn
             out.write(peaksUrl.getLocalURIString());
             out.write("\">peaks</a>]");
         }
+    }
+
+    public void renderTitle(RenderContext ctx, Writer out) throws IOException
+    {
+        //don't render the caption
+        out.write("&nbsp;");
     }
 
     private void setBaseUrls(ActionURL baseUrl)

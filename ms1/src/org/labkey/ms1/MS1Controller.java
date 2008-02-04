@@ -219,8 +219,7 @@ public class MS1Controller extends SpringActionController
         protected FeaturesView getFeaturesView(ShowFeaturesForm form) throws Exception
         {
             FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getViewContext().getContainer()),
-                                                        getViewContext().getContainer());
-            featuresView.getBaseFilters().add(new RunFilter(form.getRunId()));
+                                                        form.getRunId());
             if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
                 featuresView.getBaseFilters().add(new PeptideFilter(form.getPepSeq(), true));
             return featuresView;

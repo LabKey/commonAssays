@@ -39,6 +39,11 @@ public class FeaturesTableInfo extends FilteredTable
 
     public FeaturesTableInfo(MS1Schema schema, boolean includePepFk)
     {
+        this(schema, includePepFk, null);
+    }
+
+    public FeaturesTableInfo(MS1Schema schema, boolean includePepFk, Boolean peaksAvailable)
+    {
         super(MS1Manager.get().getTable(MS1Manager.TABLE_FEATURES));
 
         _schema = schema;
@@ -108,7 +113,10 @@ public class FeaturesTableInfo extends FilteredTable
         addCondition(new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files WHERE Imported=? AND Deleted=?)", true, false), "FileId");
 
         //add new columns for the peaks and details links
-        addColumn(new PeaksAvailableColumnInfo(this));
+        if(null != peaksAvailable)
+            addColumn(new PeaksAvailableColumnInfo(this, peaksAvailable.booleanValue()));
+        else
+            addColumn(new PeaksAvailableColumnInfo(this));
 
         //add a column for the find similar link
         ColumnInfo similarLinkCol = addColumn(new ColumnInfo(COLUMN_FIND_SIMILAR_LINK, this));
