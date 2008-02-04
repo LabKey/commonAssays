@@ -38,6 +38,7 @@ public class TPPTask extends PipelineJob.Task
     public static final FileType FT_PEP_XML = new FileType(".pep.xml");
     public static final FileType FT_PROT_XML = new FileType(".prot.xml");
     public static final FileType FT_INTERMEDIATE_PROT_XML = new FileType(".pep-prot.xml");
+    public static final FileType FT_TPP_PROT_XML = new FileType("-prot.xml");
 
     private static final FileType FT_PEP_XSL = new FileType(".pep.xsl");
     private static final FileType FT_PEP_SHTML = new FileType(".pep.shtml");
@@ -62,7 +63,25 @@ public class TPPTask extends PipelineJob.Task
     public static boolean isProtXMLFile(File file)
     {
         return (FT_PROT_XML.isType(file) ||
-                FT_INTERMEDIATE_PROT_XML.isType(file));
+                FT_INTERMEDIATE_PROT_XML.isType(file) ||
+                FT_TPP_PROT_XML.isType(file));
+    }
+
+    public static FileType getProtXMLFileType(File file)
+    {
+        if (FT_PROT_XML.isType(file))
+        {
+            return FT_PROT_XML;
+        }
+        if (FT_INTERMEDIATE_PROT_XML.isType(file))
+        {
+            return FT_INTERMEDIATE_PROT_XML;
+        }
+        if (FT_TPP_PROT_XML.isType(file))
+        {
+            return FT_TPP_PROT_XML;
+        }
+        return null;
     }
 
     public static File getProtXMLIntermediatFile(File dirAnalysis, String baseName)

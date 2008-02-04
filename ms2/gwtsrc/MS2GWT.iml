@@ -8,7 +8,7 @@
         <setting name="runGwtCompilerOnMake" value="true" />
         <setting name="compilerMaxHeapSize" value="128" />
         <packaging>
-          <module name="org.labkey.ms2.RunComparator" path="/org.labkey.ms2.RunComparator" />
+          <module name="org.labkey.ms2.MS2VennDiagramView" path="/org.labkey.ms2.MS2VennDiagramView" />
         </packaging>
       </configuration>
     </facet>

@@ -11,12 +11,17 @@
 <%
 JspView<MS2Controller.CompareOptionsBean> view = (JspView<MS2Controller.CompareOptionsBean>) HttpView.currentView();
 MS2Controller.CompareOptionsBean bean = view.getModelBean();
+MS2Controller.PeptideFilteringComparisonForm form = bean.getForm();
 %>
 <form action="<%= bean.getTargetURL() %>">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
-    <p>Please follow the instructions at the top of the comparison page to customize the results. It is based on ProteinProphet protein groups, so the runs must be associated with ProteinProphet data.</p>
-    <p>
-        You may use a customized Peptides view to establish criteria for which peptides to include in the comparison.
+    <p>This comparison view is based on ProteinProphet data so the runs must be associated with ProteinProphet data.
+        All proteins in all ProteinProphet protein groups will be shown in the comparison, subject to the filter criteria.</p>
+    <p>There are three options for filtering the peptides that contribute evidence to the protein groups:</p>
+    <p><input type="radio" name="peptideFilterType" value="none" <%= form.isNoPeptideFilter() ? "checked=\"true\"" : "" %> /> Use all the peptides</p>
+    <p><input type="radio" name="peptideFilterType" value="peptideProphet" <%= form.isPeptideProphetFilter() ? "checked=\"true\"" : "" %>/> All peptides with PeptideProphet probability &ge; <input type="text" size="2" name="peptideProphetProbability" value="<%= form.getPeptideProphetProbability() == null ? "" : form.getPeptideProphetProbability() %>" /></p>
+    <p><input type="radio" name="peptideFilterType" value="customView" <%= form.isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>
+        Use a customized Peptides view to establish criteria for which peptides to include in the comparison.
         <%
         QueryPicker picker = bean.getPeptideView().getColumnListPicker(request);
         picker.setAutoRefresh(false);

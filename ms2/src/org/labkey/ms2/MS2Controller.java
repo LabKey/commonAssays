@@ -1086,19 +1086,19 @@ public class MS2Controller extends SpringActionController
         public int runList;
     }
 
-    public abstract class LegacyCompareSetupAction extends AbstractRunListCreationAction
+    public abstract class LegacyCompareSetupAction extends AbstractRunListCreationAction<RunListForm>
     {
         private String _optionsJSP;
         private String _description;
 
         public LegacyCompareSetupAction(String optionsJSP, String description)
         {
-            super(true);
+            super(RunListForm.class, true);
             _optionsJSP = optionsJSP;
             _description = description;
         }
 
-        protected ModelAndView getView(Object o, BindException errors, int runListId)
+        protected ModelAndView getView(RunListForm form, BindException errors, int runListId)
         {
             JspView<CompareOptionsBean> extraCompareOptions = new JspView<CompareOptionsBean>(_optionsJSP);
 
@@ -1142,22 +1142,22 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class CompareProteinProphetQuerySetupAction extends AbstractRunListCreationAction
+    public class CompareProteinProphetQuerySetupAction extends AbstractRunListCreationAction<PeptideFilteringComparisonForm>
     {
         protected static final String COMPARE_PROTEIN_PROPHET_PEPTIDES_FILTER = "ComparePeptidesPeptidesFilter";
 
         public CompareProteinProphetQuerySetupAction()
         {
-            super(false);
+            super(PeptideFilteringComparisonForm.class, false);
         }
 
-        public ModelAndView getView(Object o, BindException errors, int runListId)
+        public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
         {
             QuerySettings peptidesSettings = new QuerySettings(new ActionURL(), PEPTIDES_FILTER);
             peptidesSettings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
             QueryView peptidesView = new QueryView(new MS2Schema(getUser(), getContainer()), peptidesSettings);
 
-            CompareOptionsBean bean = new CompareOptionsBean(peptidesView, new ActionURL(CompareProteinProphetQueryAction.class, getContainer()), runListId);
+            CompareOptionsBean bean = new CompareOptionsBean(peptidesView, new ActionURL(OldCompareProteinProphetQueryAction.class, getContainer()), runListId, form);
 
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp", bean);
         }
@@ -1168,15 +1168,61 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_NONE)
-    public class CompareProteinProphetQueryAction extends RunListHandlerAction<RunListForm, CompareProteinsView>
+    public static class PeptideFilteringComparisonForm extends RunListForm
     {
-        public CompareProteinProphetQueryAction()
+        private String _peptideFilterType = "none";
+        private Float _peptideProphetProbability;
+
+        public String getPeptideFilterType()
         {
-            super(RunListForm.class);
+            return _peptideFilterType;
         }
 
-        protected ModelAndView getHtmlView(RunListForm form, BindException errors) throws Exception
+        public boolean isNoPeptideFilter()
+        {
+            return !isCustomViewPeptideFilter() && !isPeptideProphetFilter();
+        }
+
+        public boolean isPeptideProphetFilter()
+        {
+            return "peptideProphet".equals(getPeptideFilterType());
+        }
+
+        public boolean isCustomViewPeptideFilter()
+        {
+            return "customView".equals(getPeptideFilterType());
+        }
+
+        public void setPeptideFilterType(String peptideFilterType)
+        {
+            _peptideFilterType = peptideFilterType;
+        }
+
+        public Float getPeptideProphetProbability()
+        {
+            return _peptideProphetProbability;
+        }
+
+        public void setPeptideProphetProbability(Float peptideProphetProbability)
+        {
+            _peptideProphetProbability = peptideProphetProbability;
+        }
+
+        public String getCustomViewName(ViewContext context)
+        {
+            return context.getActionURL().getParameter(CompareProteinProphetQuerySetupAction.COMPARE_PROTEIN_PROPHET_PEPTIDES_FILTER);
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_NONE)
+    public class OldCompareProteinProphetQueryAction extends RunListHandlerAction<PeptideFilteringComparisonForm, CompareProteinsView>
+    {
+        public OldCompareProteinProphetQueryAction()
+        {
+            super(PeptideFilteringComparisonForm.class);
+        }
+
+        protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
         {
             CompareProteinsView view = createInitializedQueryView(form, errors, false);
             if (!view.getErrors().isEmpty())
@@ -1187,7 +1233,7 @@ public class MS2Controller extends SpringActionController
             Map<String, String> props = new HashMap<String, String>();
             props.put("originalURL", getViewContext().getActionURL().toString());
             props.put("comparisonName", view.getComparisonName());
-            GWTView gwtView = new GWTView("org.labkey.ms2.RunComparator", props);
+            GWTView gwtView = new GWTView("org.labkey.ms2.MS2VennDiagramView", props);
             gwtView.setTitle("Comparison Overview");
             gwtView.setFrame(WebPartView.FrameType.PORTAL);
             gwtView.enableExpandCollapse("ProteinProphetQueryCompare", true);
@@ -1195,7 +1241,7 @@ public class MS2Controller extends SpringActionController
             return new VBox(gwtView, helpView, view);
         }
 
-        protected CompareProteinsView createQueryView(RunListForm form, BindException errors, boolean forExport) throws Exception
+        protected CompareProteinsView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport) throws Exception
         {
             String viewName = getViewContext().getActionURL().getParameter(CompareProteinProphetQuerySetupAction.COMPARE_PROTEIN_PROPHET_PEPTIDES_FILTER);
             return new CompareProteinsView(getViewContext(), form.getRunList(), forExport, viewName);
@@ -1203,9 +1249,64 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
+            return root.addChild("Compare ProteinProphet (OldQuery)");
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_NONE)
+    public class CompareProteinProphetQueryAction extends RunListHandlerAction<PeptideFilteringComparisonForm, ProteinProphetCrosstabView>
+    {
+        private PeptideFilteringComparisonForm _form;
+
+        public CompareProteinProphetQueryAction()
+        {
+            super(PeptideFilteringComparisonForm.class);
+        }
+
+        protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
+        {
+            _form = form;
+            
+            ProteinProphetCrosstabView view = createInitializedQueryView(form, errors, false);
+//            if (!view.getErrors().isEmpty())
+//                return _renderErrors(view.getErrors());
+
+            HtmlView helpView = new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein-specific columns, or expand <em>Run</em> to see the values associated with individual runs, like probability. To set a filter, select the Filter tab, add column, and filter it based on the desired threshold.</p></div>");
+
+            Map<String, String> props = new HashMap<String, String>();
+            props.put("originalURL", getViewContext().getActionURL().toString());
+            props.put("comparisonName", "Proteins");
+            GWTView gwtView = new GWTView("org.labkey.ms2.MS2VennDiagramView", props);
+            gwtView.setTitle("Comparison Overview");
+            gwtView.setFrame(WebPartView.FrameType.PORTAL);
+            gwtView.enableExpandCollapse("ProteinProphetQueryCompare", true);
+
+            return new VBox(gwtView, helpView, view);
+        }
+
+        protected ProteinProphetCrosstabView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport) throws Exception
+        {
+            MS2Schema schema = new MS2Schema(getUser(), getContainer());
+            List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList(), false, getViewContext());
+            schema.setRuns(runs);
+            return new ProteinProphetCrosstabView(schema, form);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            ActionURL setupURL = new ActionURL(CompareProteinProphetQuerySetupAction.class, getContainer());
+            setupURL.addParameter("peptideFilterType", _form.getPeptideFilterType());
+            if (_form.getPeptideProphetProbability() != null)
+            {
+                setupURL.addParameter("peptideProphetProbability", _form.getPeptideProphetProbability().toString());
+            }
+            setupURL.addParameter("runList", _form.getRunList());
+            root.addChild("MS2 Dashboard");
+            root.addChild("Setup Compare ProteinProphet", setupURL);
             return root.addChild("Compare ProteinProphet (Query)");
         }
     }
+
 
     // extraFormHtml gets inserted between the view dropdown and the button.
     private HttpView pickView(ActionURL nextUrl, String viewInstructions, HttpView embeddedView, int runListId)
@@ -1229,14 +1330,14 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class PickExportRunsView extends AbstractRunListCreationAction
+    public class PickExportRunsView extends AbstractRunListCreationAction<RunListForm>
     {
         public PickExportRunsView()
         {
-            super(true);
+            super(RunListForm.class, true);
         }
 
-        public ModelAndView getView(Object o, BindException errors, int runListId)
+        public ModelAndView getView(RunListForm form, BindException errors, int runListId)
         {
             JspView extraExportView = new JspView("/org/labkey/ms2/extraExportOptions.jsp");
             return pickView(getViewContext().cloneActionURL().setAction("applyExportRunsView"), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraExportView, runListId);
@@ -1447,16 +1548,17 @@ public class MS2Controller extends SpringActionController
     public static final String PEPTIDES_FILTER_VIEW_NAME = PEPTIDES_FILTER + "." + QueryParam.viewName.toString();
     
     @RequiresPermission(ACL.PERM_READ)
-    public abstract class AbstractRunListCreationAction extends SimpleViewAction<RunListForm>
+    public abstract class AbstractRunListCreationAction<FormType extends RunListForm> extends SimpleViewAction<FormType>
     {
         private final boolean _requiresSameType;
 
-        protected AbstractRunListCreationAction(boolean requiresSameType)
+        protected AbstractRunListCreationAction(Class<FormType> formClass, boolean requiresSameType)
         {
+            super(formClass);
             _requiresSameType = requiresSameType;
         }
 
-        public final ModelAndView getView(RunListForm form, BindException errors) throws ServletException
+        public final ModelAndView getView(FormType form, BindException errors) throws ServletException
         {
             List<String> errorMessages = new ArrayList<String>();
             ActionURL currentURL = getViewContext().getActionURL();
@@ -1486,24 +1588,24 @@ public class MS2Controller extends SpringActionController
             return getView(form, errors, runListId);
         }
 
-        protected abstract ModelAndView getView(Object o, BindException errors, int runListId);
+        protected abstract ModelAndView getView(FormType form, BindException errors, int runListId);
     }
 
     @RequiresPermission(ACL.PERM_READ)
-    public class SpectraCountSetupAction extends AbstractRunListCreationAction
+    public class SpectraCountSetupAction extends AbstractRunListCreationAction<PeptideFilteringComparisonForm>
     {
         public SpectraCountSetupAction()
         {
-            super(false);
+            super(PeptideFilteringComparisonForm.class, false);
         }
 
-        public ModelAndView getView(Object o, BindException errors, int runListId)
+        public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
         {
             QuerySettings spectraCountSettings = new QuerySettings(new ActionURL(), PEPTIDES_FILTER);
             spectraCountSettings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
             QueryView spectraCountView = new QueryView(new MS2Schema(getUser(), getContainer()), spectraCountSettings);
 
-            CompareOptionsBean bean = new CompareOptionsBean(spectraCountView, new ActionURL(SpectraCountAction.class, getContainer()), runListId);
+            CompareOptionsBean bean = new CompareOptionsBean(spectraCountView, new ActionURL(SpectraCountAction.class, getContainer()), runListId, form);
 
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/spectraCountOptions.jsp", bean);
         }
@@ -3720,7 +3822,7 @@ public class MS2Controller extends SpringActionController
 
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
-            List<String> runIds = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
+            Set<String> runIds = DataRegionSelection.getSelected(getViewContext(), true);
 
             if (null != runIds)
                 MS2Manager.markAsDeleted(MS2Manager.parseIds(runIds), getContainer(), getUser());
@@ -5373,6 +5475,16 @@ public class MS2Controller extends SpringActionController
         {
             return new ActionURL(MS2Controller.ShowPeptideAction.class, container);
         }
+
+        public ActionURL getShowRunUrl(MS2Run run)
+        {
+            return new ActionURL(MS2Controller.ShowPeptideAction.class, ContainerManager.getForId(run.getContainer())).addParameter("run", run.getRun());
+        }
+
+        public static MS2UrlsImpl get()
+        {
+            return (MS2UrlsImpl) PageFlowUtil.urlProvider(MS2Urls.class);
+        }
     }
 
 
@@ -5381,12 +5493,14 @@ public class MS2Controller extends SpringActionController
         private final QueryView _peptideView;
         private final ActionURL _targetURL;
         private final int _runList;
+        private final PeptideFilteringComparisonForm _form;
 
-        public CompareOptionsBean(QueryView peptideView, ActionURL targetURL, int runList)
+        public CompareOptionsBean(QueryView peptideView, ActionURL targetURL, int runList, PeptideFilteringComparisonForm form)
         {
             _peptideView = peptideView;
             _targetURL = targetURL;
             _runList = runList;
+            _form = form;
         }
 
         public QueryView getPeptideView()
@@ -5402,6 +5516,11 @@ public class MS2Controller extends SpringActionController
         public int getRunList()
         {
             return _runList;
+        }
+
+        public PeptideFilteringComparisonForm getForm()
+        {
+            return _form;
         }
     }
 }

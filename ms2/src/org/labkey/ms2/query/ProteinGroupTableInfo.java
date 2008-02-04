@@ -25,7 +25,7 @@ public class ProteinGroupTableInfo extends FilteredTable
     private static final Set<String> HIDDEN_PROTEIN_GROUP_COLUMN_NAMES = new CaseInsensitiveHashSet(Arrays.asList("RowId", "GroupNumber", "IndistinguishableCollectionId", "Deleted", "HasPeptideProphet"));
     private static final Set<String> HIDDEN_PROTEIN_GROUP_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("ProteinGroupId", "SeqId");
     private final MS2Schema _schema;
-    private MS2Run[] _runs;
+    private List<MS2Run> _runs;
 
     public ProteinGroupTableInfo(String alias, MS2Schema schema)
     {
@@ -158,9 +158,9 @@ public class ProteinGroupTableInfo extends FilteredTable
                         result.setLinkTarget("prot");
 
                         ActionURL url = new ActionURL("MS2", "showProtein.view", _schema.getContainer());
-                        if (_runs != null && _runs.length == 1)
+                        if (_runs != null && _runs.size() == 1)
                         {
-                            url.addParameter("run", Integer.toString(_runs[0].getRun()));
+                            url.addParameter("run", Integer.toString(_runs.get(0).getRun()));
                         }
                         result.setURL(url.getLocalURIString() + "&proteinGroupId=${RowId}&seqId=${" + colInfo.getAlias() + "}");
                         return result;
@@ -329,7 +329,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         addCondition(sql);
     }
 
-    public void setRunFilter(MS2Run[] runs)
+    public void setRunFilter(List<MS2Run> runs)
     {
         _runs = runs;
         SQLFragment sql = new SQLFragment();
@@ -342,13 +342,13 @@ public class ProteinGroupTableInfo extends FilteredTable
         sql.add(Boolean.FALSE);
         if (runs != null)
         {
-            List<Integer> params = new ArrayList<Integer>(runs.length);
+            List<Integer> params = new ArrayList<Integer>(runs.size());
             for (MS2Run run : runs)
             {
                 params.add(run.getRun());
             }
 
-            assert runs.length > 0 : "Doesn't make sense to filter to no runs";
+            assert !runs.isEmpty() : "Doesn't make sense to filter to no runs";
             sql.append(" AND Run IN (?");
             sql.append(StringUtils.repeat(", ?", params.size() - 1));
             sql.append(")");

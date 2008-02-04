@@ -3,6 +3,7 @@ package org.labkey.ms2.pipeline;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.FileType;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 
 import java.io.File;
@@ -38,10 +39,11 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
     {
         public boolean accept(File f)
         {
-            if (TPPTask.isProtXMLFile(f))
+            FileType fileType = TPPTask.getProtXMLFileType(f);
+            if (fileType != null)
             {
                 File parent = f.getParentFile();
-                String basename = FileUtil.getBaseName(f, 2);
+                String basename = fileType.getBaseName(f);
                 
                 return !fileExists(XarGeneratorTask.FT_SEARCH_XAR.newFile(parent, basename));
             }

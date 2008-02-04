@@ -1,7 +1,7 @@
 package org.labkey.ms2;
 
 import org.labkey.ms2.client.CompareService;
-import org.labkey.ms2.client.CompareResult;
+import org.labkey.api.gwt.client.model.GWTComparisonResult;
 import org.labkey.ms2.query.CompareProteinsView;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.view.ViewContext;
@@ -21,7 +21,7 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         super(context);
     }
 
-    public CompareResult getProteinProphetComparison(String originalURL) throws Exception
+    public GWTComparisonResult getProteinProphetComparison(String originalURL) throws Exception
     {
         try
         {
@@ -41,7 +41,7 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         }
     }
 
-    public CompareResult getPeptideComparison(String originalURL) throws Exception
+    public GWTComparisonResult getPeptideComparison(String originalURL) throws Exception
     {
 /*        ActionURL url = new ActionURL(originalURL);
         int runList = Integer.parseInt(url.getParameter("runList"));
@@ -50,7 +50,7 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         queryContext.setActionURL(url);
 
         ComparePeptidesView view = new ComparePeptidesView(queryContext, _controller, runList, false, viewName);
-        return view.createCompareResult();
+        return view.createComparisonResult();
         */
         throw new UnsupportedOperationException();
     }

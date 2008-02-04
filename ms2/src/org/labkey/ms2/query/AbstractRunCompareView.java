@@ -12,10 +12,10 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExperimentUrls;
+import org.labkey.api.gwt.client.model.GWTComparisonMember;
+import org.labkey.api.gwt.client.model.GWTComparisonGroup;
+import org.labkey.api.gwt.client.model.GWTComparisonResult;
 import org.labkey.ms2.*;
-import org.labkey.ms2.client.CompareResult;
-import org.labkey.ms2.client.GWTExperimentRun;
-import org.labkey.ms2.client.GWTRunGroup;
 import org.labkey.ms2.compare.CompareDataRegion;
 
 import javax.servlet.ServletException;
@@ -101,7 +101,7 @@ public abstract class AbstractRunCompareView extends QueryView
 
     protected abstract String getGroupingColumnName();
 
-    public CompareResult createCompareResult()
+    public GWTComparisonResult createCompareResult()
             throws SQLException, IOException, ServletException
     {
         List<FieldKey> cols = new ArrayList<FieldKey>();
@@ -119,10 +119,26 @@ public abstract class AbstractRunCompareView extends QueryView
 
             StringTokenizer lines = new StringTokenizer(sb.toString(), "\n");
             int proteinCount = lines.countTokens();
-            GWTExperimentRun[] gwtRuns = new GWTExperimentRun[_runs.size()];
-            Map<Integer, GWTRunGroup> runGroups = new HashMap<Integer, GWTRunGroup>();
-            boolean[][] hits = new boolean[proteinCount][];
+            GWTComparisonMember[] gwtRuns = new GWTComparisonMember[_runs.size()];
+            Map<Integer, GWTComparisonGroup> runGroups = new HashMap<Integer, GWTComparisonGroup>();
+            boolean[][] hits = new boolean[_runs.size()][];
+            for (int i = 0; i < _runs.size(); i++)
+            {
+                hits[i] = new boolean[proteinCount];
+            }
 
+            int index = 0;
+            while (lines.hasMoreTokens())
+            {
+                String line = lines.nextToken();
+                String[] values = line.split("\\t");
+                for (int i = 0; i < _runs.size() && i + 1 < values.length ; i++)
+                {
+                    hits[i][index] = !"".equals(values[i + 1].trim());
+                }
+                index++;
+            }
+            
             for (int runIndex = 0; runIndex < _runs.size(); runIndex++)
             {
                 MS2Run run = _runs.get(runIndex);
@@ -133,44 +149,29 @@ public abstract class AbstractRunCompareView extends QueryView
                 {
                     expRun = ExperimentService.get().getExpRun(lsid);
                 }
-                GWTExperimentRun gwtRun = new GWTExperimentRun();
-                gwtRun.setName(run.getDescription());
+                GWTComparisonMember gwtRun = new GWTComparisonMember(run.getDescription(), hits[runIndex]);
                 gwtRun.setUrl(runURL.toString());
                 if (expRun != null)
                 {
-                    gwtRun.setRowId(expRun.getRowId());
-                    gwtRun.setLsid(expRun.getLSID());
                     ExpExperiment[] experiments = expRun.getExperiments();
                     for (ExpExperiment experiment : experiments)
                     {
-                        GWTRunGroup runGroup = runGroups.get(experiment.getRowId());
-                        if (runGroup == null)
+                        GWTComparisonGroup comparisonGroup = runGroups.get(experiment.getRowId());
+                        if (comparisonGroup == null)
                         {
-                            runGroup = new GWTRunGroup();
-                            runGroup.setURL(PageFlowUtil.urlProvider(ExperimentUrls.class).getExperimentDetailsURL(experiment.getContainer(), experiment).toString());
-                            runGroup.setRowId(experiment.getRowId());
-                            runGroup.setName(experiment.getName());
-                            runGroups.put(experiment.getRowId(), runGroup);
+                            comparisonGroup = new GWTComparisonGroup();
+                            comparisonGroup.setURL(PageFlowUtil.urlProvider(ExperimentUrls.class).getExperimentDetailsURL(experiment.getContainer(), experiment).toString());
+                            comparisonGroup.setRowId(experiment.getRowId());
+                            comparisonGroup.setName(experiment.getName());
+                            runGroups.put(experiment.getRowId(), comparisonGroup);
                         }
-                        runGroup.addRun(gwtRun);
+                        comparisonGroup.addMember(gwtRun);
                     }
                 }
                 gwtRuns[runIndex] = gwtRun; 
             }
 
-            int index = 0;
-            while (lines.hasMoreTokens())
-            {
-                String line = lines.nextToken();
-                String[] values = line.split("\\t");
-                hits[index] = new boolean[_runs.size()];
-                for (int i = 0; i < _runs.size() && i + 1 < values.length ; i++)
-                {
-                    hits[index][i] = !"".equals(values[i + 1].trim());
-                }
-                index++;
-            }
-            return new CompareResult(gwtRuns, runGroups.values().toArray(new GWTRunGroup[0]), hits);
+            return new GWTComparisonResult(gwtRuns, runGroups.values().toArray(new GWTComparisonGroup[runGroups.size()]), proteinCount, "Runs");
         }
         finally
         {

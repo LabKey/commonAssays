@@ -13,6 +13,7 @@ import org.labkey.common.util.Pair;
 import javax.servlet.ServletException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.sql.SQLException;
 
 /**
@@ -119,7 +120,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         protected ProteinGroupTableInfo createTable()
         {
             ProteinGroupTableInfo result = ((MS2Schema)getSchema()).createProteinGroupsForRunTable(null, false);
-            result.setRunFilter(_runs);
+            result.setRunFilter(Arrays.asList(_runs));
             return result;
         }
     }

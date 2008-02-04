@@ -653,7 +653,7 @@ public class MS2Manager
     }
 
 
-    public static List<Integer> parseIds(List<String> stringIds)
+    public static List<Integer> parseIds(Collection<String> stringIds)
     {
         List<Integer> integerIds = new ArrayList<Integer>(stringIds.size());
         for (String runId : stringIds)
