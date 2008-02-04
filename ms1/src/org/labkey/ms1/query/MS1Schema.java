@@ -116,7 +116,7 @@ public class MS1Schema extends UserSchema
         //setup the feature id column as an FK to itself so that the first feature measure will allow
         //users to add other info from the features table.
         ColumnInfo featureIdCol = tinfo.getColumn("FeatureId");
-        featureIdCol.setFk(new LookupForeignKey("FeatureId", "MZ")
+        featureIdCol.setFk(new LookupForeignKey("FeatureId", "FeatureId")
         {
             public TableInfo getLookupTableInfo()
             {
@@ -126,7 +126,7 @@ public class MS1Schema extends UserSchema
 
         settings.addMeasure(FieldKey.fromParts("FeatureId"), CrosstabMeasure.AggregateFunction.COUNT, "Num Features");
         settings.addMeasure(FieldKey.fromParts("Intensity"), CrosstabMeasure.AggregateFunction.AVG);
-        settings.addMeasure(FieldKey.fromParts("FeatureId"), CrosstabMeasure.AggregateFunction.MIN, "First Feature");
+        CrosstabMeasure firstFeature = settings.addMeasure(FieldKey.fromParts("FeatureId"), CrosstabMeasure.AggregateFunction.MIN, "First Feature");
 
         String measureUrl = new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()).getLocalURIString()
                 + MS1Controller.ShowFeaturesForm.ParamNames.runId.name() + "=" + CrosstabMember.VALUE_TOKEN
@@ -138,6 +138,7 @@ public class MS1Schema extends UserSchema
         settings.getRowAxis().setCaption("Peptide Information");
         settings.getColumnAxis().setCaption("Runs");
 
+        CrosstabTableInfo cti = null;
         if(null != runIds)
         {
             ArrayList<CrosstabMember> members = new ArrayList<CrosstabMember>();
@@ -147,10 +148,24 @@ public class MS1Schema extends UserSchema
                 ExpRun run = ExperimentService.get().getExpRun(runId);
                 members.add(new CrosstabMember(Integer.valueOf(runId), colDim , null == run ? null : run.getName()));
             }
-            return new CrosstabTableInfo(settings, members);
+            cti = new CrosstabTableInfo(settings, members);
         }
         else
-            return new CrosstabTableInfo(settings);
+            cti = new CrosstabTableInfo(settings);
+
+        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
+        defaultCols.add(rowDim.getFieldKey());
+        defaultCols.add(FieldKey.fromParts(CrosstabTableInfo.COL_INSTANCE_COUNT));
+
+        for(CrosstabMeasure measure : settings.getMeasures())
+            if(measure != firstFeature)
+                defaultCols.add(measure.getFieldKey());
+        
+        defaultCols.add(FieldKey.fromParts(firstFeature.getName(), "Time"));
+        defaultCols.add(FieldKey.fromParts(firstFeature.getName(), "MZ"));
+        cti.setDefaultVisibleColumns(defaultCols);
+        
+        return cti;
     }
 
     public FeaturesTableInfo getFeaturesTableInfo()
