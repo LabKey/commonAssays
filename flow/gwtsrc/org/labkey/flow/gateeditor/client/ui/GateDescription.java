@@ -28,6 +28,13 @@ public class GateDescription extends GateComponent
             save();
         }
     };
+    ImageButton btnScale = new ImageButton("Resize")
+    {
+        public void onClick(Widget sender)
+        {
+            showResizeDialog(sender);
+        }
+    };
     GateEditorListener listener = new GateEditorListener()
     {
         public void onGateChanged()
@@ -183,6 +190,11 @@ public class GateDescription extends GateComponent
         {
             widget.setWidget(++row, 0, btnClearAllPoints);
             widget.getFlexCellFormatter().setColSpan(row, 0, 2);
+            if (gate instanceof GWTPolygonGate)
+            {
+                widget.setWidget(++row, 0, btnScale);
+                widget.getFlexCellFormatter().setColSpan(row, 0, 2);
+            }
             if (canSave(gate))
             {
                 widget.setWidget(++row, 0, btnSave);
@@ -277,6 +289,7 @@ public class GateDescription extends GateComponent
         setValue(listbox, curValue);
     }
 
+
     public void save()
     {
         GWTGate gate = getGate();
@@ -312,6 +325,107 @@ public class GateDescription extends GateComponent
             getEditor().save(getEditor().getState().getScript());
         }
         setGate(gate);
+    }
 
+
+    public void showResizeDialog(Widget sender)
+    {
+        if (null == editor || null == editor.getState() || null == editor.getState().getGate())
+            return;
+        if (!(editor.getState().getGate() instanceof GWTPolygonGate))
+            return;
+        GWTPolygonGate gate = (GWTPolygonGate)editor.getState().getGate();
+
+        ResizeDialog d = new ResizeDialog(editor, gate);
+        d.setPopupPosition(sender.getAbsoluteLeft(), sender.getAbsoluteTop()+sender.getOffsetHeight());
+        d.show();
+    }
+
+
+    public class ResizeDialog extends DialogBox
+    {
+        GateEditor _editor;
+        GWTPolygonGate _gate;
+        ListBox _axisList;
+        TextBox _scaleText;
+
+        public ResizeDialog(GateEditor editor, GWTPolygonGate gate)
+        {
+            super(true,true);
+
+            _gate = gate;
+            _editor = editor;
+
+            setText("resize polygon");
+            Panel p = new HorizontalPanel();
+
+            p.add(new Label("scale axis "));
+            _axisList = new ListBox();
+            String y = gate.getYAxis();
+            String x = gate.getXAxis();
+            if (x != null && y != null && x.length() >= 3 && y.length() >= 3)
+            {
+                if (!y.substring(1,3).equals("SC") && x.substring(1,3).equals("SC"))
+                {
+                    String t = x; x = y; y = t;
+                }
+            }
+            if (y != null)
+                _axisList.addItem(y);
+            if (x != null)
+                _axisList.addItem(x);
+            p.add(_axisList);
+            p.add(new Label(" by "));
+            _scaleText = new TextBox();
+            _scaleText.setWidth("50px");
+            _scaleText.setText("64");
+            p.add(_scaleText);
+            p.add(new Label(" "));
+
+            ImageButton btn = new ImageButton("go")
+            {
+                public void onClick(Widget sender)
+                {
+                    go();
+                }
+            };
+            p.add(btn);
+            setWidget(p);
+        }
+
+
+        void go()
+        {
+            double s = -1;
+            String axisName = null;
+            try
+            {
+                s = Double.parseDouble(_scaleText.getText());
+                axisName = _axisList.getValue(_axisList.getSelectedIndex());
+            }
+            catch (Exception x)
+            {
+            }
+            if (s > 0 && s != 1 && _gate == _editor.getState().getGate())
+                scaleGate(axisName, s);
+            ResizeDialog.this.hide();
+        }
+
+
+        void scaleGate(String axis, double scale)
+        {
+//            GWTPolygonGate g = new GWTPolygonGate(_gate.getXAxis(), _gate.getArrX().clone(), _gate.getYAxis(), _gate.getArrY().clone());
+            double[] arr = null;
+            if (_gate.getXAxis().equals(axis))
+                arr = _gate.getArrX();
+            else if (_gate.getYAxis().equals(axis))
+                arr = _gate.getArrY();
+            if (null == arr)
+                return;
+            for (int i=0 ; i<arr.length ; i++)
+                arr[i] = arr[i] * scale;
+            _gate.setDirty(true);
+            _editor.getState().setGate(_gate);
+        }
     }
 }
