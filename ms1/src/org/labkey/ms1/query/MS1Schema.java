@@ -138,7 +138,7 @@ public class MS1Schema extends UserSchema
         settings.getRowAxis().setCaption("Peptide Information");
         settings.getColumnAxis().setCaption("Runs");
 
-        CrosstabTableInfo cti = null;
+        CrosstabTableInfo cti;
         if(null != runIds)
         {
             ArrayList<CrosstabMember> members = new ArrayList<CrosstabMember>();
@@ -153,14 +153,7 @@ public class MS1Schema extends UserSchema
         else
             cti = new CrosstabTableInfo(settings);
 
-        List<FieldKey> defaultCols = new ArrayList<FieldKey>();
-        defaultCols.add(rowDim.getFieldKey());
-        defaultCols.add(FieldKey.fromParts(CrosstabTableInfo.COL_INSTANCE_COUNT));
-
-        for(CrosstabMeasure measure : settings.getMeasures())
-            if(measure != firstFeature)
-                defaultCols.add(measure.getFieldKey());
-        
+        List<FieldKey> defaultCols = cti.getDefaultVisibleColumns();
         defaultCols.add(FieldKey.fromParts(firstFeature.getName(), "Time"));
         defaultCols.add(FieldKey.fromParts(firstFeature.getName(), "MZ"));
         cti.setDefaultVisibleColumns(defaultCols);
