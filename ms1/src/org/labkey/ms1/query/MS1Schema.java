@@ -95,7 +95,7 @@ public class MS1Schema extends UserSchema
     {
         //OK if runIds is null
         RunFilter runFilter = new RunFilter(runIds);
-        FeaturesTableInfo tinfo = getFeaturesTableInfo();
+        FeaturesTableInfo tinfo = getFeaturesTableInfo(true, true);
         runFilter.setFilters(tinfo);
 
         //filter out features that don't have an associated peptide
@@ -120,7 +120,7 @@ public class MS1Schema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                return getFeaturesTableInfo(false);
+                return getFeaturesTableInfo(false, true);
             }
         });
 

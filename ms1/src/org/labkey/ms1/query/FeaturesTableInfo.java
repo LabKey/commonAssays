@@ -8,12 +8,10 @@ import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
-import org.labkey.ms1.MS1Manager;
-import org.labkey.ms1.MS1Module;
 import org.labkey.ms1.MS1Controller;
+import org.labkey.ms1.MS1Manager;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Provides a filtered table implementation for the Features table, allowing clients
