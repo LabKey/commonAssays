@@ -3,9 +3,11 @@ package org.labkey.ms2.query;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.ComparisonCrosstabView;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.CrosstabTableInfo;
 import org.labkey.api.data.Sort;
+import org.labkey.api.data.AggregateColumnInfo;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.gwt.client.model.GWTComparisonResult;
@@ -60,6 +62,11 @@ public class ProteinProphetCrosstabView extends ComparisonCrosstabView
         String sortString = CrosstabTableInfo.getDefaultSortString() + ",SeqId/BestName";
         view.getRenderContext().setBaseSort(new Sort(sortString));
         return view;
+    }
+
+    protected FieldKey getComparisonColumn()
+    {
+        return FieldKey.fromParts(AggregateColumnInfo.NAME_PREFIX + "MIN_ProteinGroupId", "Group");
     }
 
     protected GWTComparisonResult createComparisonResult(boolean[][] hits, CrosstabTableInfo table)

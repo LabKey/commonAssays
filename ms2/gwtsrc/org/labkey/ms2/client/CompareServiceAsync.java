@@ -8,7 +8,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public interface CompareServiceAsync
 {
+
     void getProteinProphetComparison(String originalURL, AsyncCallback async);
 
     void getPeptideComparison(String originalURL, AsyncCallback async);
+
+    void getProteinProphetCrosstabComparison(String originalURL, AsyncCallback async);
 }

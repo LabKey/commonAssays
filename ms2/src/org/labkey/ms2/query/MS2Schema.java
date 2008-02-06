@@ -210,7 +210,7 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    protected TableInfo createProteinGroupMembershipTable(MS2Controller.PeptideFilteringComparisonForm form, ViewContext context)
+    protected TableInfo createProteinGroupMembershipTable(final MS2Controller.PeptideFilteringComparisonForm form, final ViewContext context)
     {
         FilteredTable result = new FilteredTable(MS2Manager.getTableInfoProteinGroupMemberships());
         result.wrapAllColumns(true);
@@ -219,7 +219,46 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                return createProteinGroupsForRunTable(null);
+                ProteinGroupTableInfo result = createProteinGroupsForRunTable(null);
+
+                SQLFragment totalSQL;
+                SQLFragment uniqueSQL;
+
+                if (form != null && form.isPeptideProphetFilter() && form.getPeptideProphetProbability() != null)
+                {
+                    totalSQL = new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".RowId IS NULL THEN NULL ELSE (SELECT COUNT(pd.RowId) FROM " + MS2Manager.getTableInfoPeptidesData() + " pd, ");
+                    totalSQL.append(MS2Manager.getTableInfoPeptideMemberships() + " pm WHERE pd.RowId = pm.PeptideId AND pd.PeptideProphet >= " + form.getPeptideProphetProbability() + " AND pm.ProteinGroupId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId) END)");
+
+                    uniqueSQL = new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".RowId IS NULL THEN NULL ELSE (SELECT COUNT(DISTINCT TrimmedPeptide) FROM " + MS2Manager.getTableInfoPeptidesData() + " pd, ");
+                    uniqueSQL.append(MS2Manager.getTableInfoPeptideMemberships() + " pm WHERE pd.RowId = pm.PeptideId AND pd.PeptideProphet >= " + form.getPeptideProphetProbability() + " AND pm.ProteinGroupId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId) END)");
+                }
+                else if (form != null && form.isCustomViewPeptideFilter())
+                {
+                    totalSQL = new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".RowId IS NULL THEN NULL ELSE (SELECT COUNT(p.RowId) FROM " + MS2Manager.getTableInfoPeptideMemberships() + " pm, ");
+                    totalSQL.append("(");
+                    totalSQL.append(getPeptideSelectSQL(context.getRequest(), form.getCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId"), FieldKey.fromParts("TrimmedPeptide"))));
+                    totalSQL.append(") p ");
+                    totalSQL.append("WHERE p.RowId = pm.PeptideId AND pm.ProteinGroupId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId) END)");
+
+                    uniqueSQL = new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".RowId IS NULL THEN NULL ELSE (SELECT COUNT(DISTINCT p.TrimmedPeptide) FROM " + MS2Manager.getTableInfoPeptideMemberships() + " pm, ");
+                    uniqueSQL.append("(");
+                    uniqueSQL.append(getPeptideSelectSQL(context.getRequest(), form.getCustomViewName(context), Arrays.asList(FieldKey.fromParts("RowId"), FieldKey.fromParts("TrimmedPeptide"))));
+                    uniqueSQL.append(") p ");
+                    uniqueSQL.append("WHERE p.RowId = pm.PeptideId AND pm.ProteinGroupId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId) END)");
+                }
+                else
+                {
+                    totalSQL = new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".RowId IS NULL THEN NULL ELSE (SELECT COUNT(pd.RowId) FROM " + MS2Manager.getTableInfoPeptidesData() + " pd, ");
+                    totalSQL.append(MS2Manager.getTableInfoPeptideMemberships() + " pm WHERE pd.RowId = pm.PeptideId AND pm.ProteinGroupId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId) END)");
+
+                    uniqueSQL = new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".RowId IS NULL THEN NULL ELSE (SELECT COUNT(DISTINCT TrimmedPeptide) FROM " + MS2Manager.getTableInfoPeptidesData() + " pd, ");
+                    uniqueSQL.append(MS2Manager.getTableInfoPeptideMemberships() + " pm WHERE pd.RowId = pm.PeptideId AND pm.ProteinGroupId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId) END)");
+                }
+
+                result.addColumn(new ExprColumn(result, "TotalFilteredPeptides", totalSQL, Types.BIGINT));
+                result.addColumn(new ExprColumn(result, "UniqueFilteredPeptides", uniqueSQL, Types.BIGINT));
+
+                return result;
             }
         });
 
@@ -445,32 +484,21 @@ public class MS2Schema extends UserSchema
         return Table.getSelectSQL(peptidesTable, peptideCols, filter, new Sort());
     }
 
-    public TableInfo createProteinProphetCrosstabTable(MS2Controller.PeptideFilteringComparisonForm form, ViewContext context)
+    public CrosstabTableInfo createProteinProphetCrosstabTable(MS2Controller.PeptideFilteringComparisonForm form, ViewContext context)
     {
         TableInfo baseTable = createProteinGroupMembershipTable(form, context);
 
-//        ActionURL urlPepSearch = new ActionURL(MS1Controller.PepSearchAction.class, getContainer());
-//        urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.exact.name(), "on");
-//        urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.runIds.name(), runFilter.getRunIdString());
+        ActionURL urlPepSearch = new ActionURL(MS2Controller.ShowProteinAction.class, getContainer());
 
         CrosstabSettings settings = new CrosstabSettings(baseTable);
 
         CrosstabDimension rowDim = settings.getRowAxis().addDimension(FieldKey.fromParts("SeqId"));
-//        rowDim.setUrl(urlPepSearch.getLocalURIString() + "&pepSeq=${Peptide}");
+        rowDim.setUrl(urlPepSearch.getLocalURIString() + "&seqId=${SeqId}");
 
         CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
-//        colDim.setUrl(new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()).getLocalURIString() + "runId=" + CrosstabMember.VALUE_TOKEN);
+        colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "run=" + CrosstabMember.VALUE_TOKEN);
 
-        settings.addMeasure(FieldKey.fromParts("ProteinGroupId"), CrosstabMeasure.AggregateFunction.MIN, "Protein Group");
-//        settings.addMeasure(FieldKey.fromParts("Intensity"), CrosstabMeasure.AggregateFunction.AVG);
-//        settings.addMeasure(FieldKey.fromParts("FeatureId"), CrosstabMeasure.AggregateFunction.MIN, "First Feature");
-
-//            String measureUrl = PageFlowUtil.urlProvider(MS2Urls.class).getShowPeptideUrl()
-//            new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer()).getLocalURIString()
-//                    + MS1Controller.ShowFeaturesForm.ParamNames.runId.name() + "=" + CrosstabMember.VALUE_TOKEN
-//                    + "&" + MS1Controller.ShowFeaturesForm.ParamNames.pepSeq.name() + "=${Peptide}";
-//            for(CrosstabMeasure measure : settings.getMeasures())
-//                measure.setUrl(measureUrl);
+        CrosstabMeasure proteinGroupMeasure = settings.addMeasure(FieldKey.fromParts("ProteinGroupId"), CrosstabMeasure.AggregateFunction.MIN, "Protein Group");
 
         settings.setInstanceCountCaption("Num Runs");
         settings.getRowAxis().setCaption("Protein Information");
@@ -495,8 +523,8 @@ public class MS2Schema extends UserSchema
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("SeqId"));
         defaultCols.add(FieldKey.fromParts(CrosstabTableInfo.COL_INSTANCE_COUNT));
-        defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.NAME_PREFIX + "MIN_ProteinGroupId", "Group"));
-        defaultCols.add(FieldKey.fromParts(AggregateColumnInfo.NAME_PREFIX + "MIN_ProteinGroupId", "GroupProbability"));
+        defaultCols.add(FieldKey.fromParts(proteinGroupMeasure.getName(), "Group"));
+        defaultCols.add(FieldKey.fromParts(proteinGroupMeasure.getName(), "GroupProbability"));
         result.setDefaultVisibleColumns(defaultCols);
         return result;
     }

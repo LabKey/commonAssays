@@ -1144,8 +1144,6 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class CompareProteinProphetQuerySetupAction extends AbstractRunListCreationAction<PeptideFilteringComparisonForm>
     {
-        protected static final String COMPARE_PROTEIN_PROPHET_PEPTIDES_FILTER = "ComparePeptidesPeptidesFilter";
-
         public CompareProteinProphetQuerySetupAction()
         {
             super(PeptideFilteringComparisonForm.class, false);
@@ -1210,7 +1208,7 @@ public class MS2Controller extends SpringActionController
 
         public String getCustomViewName(ViewContext context)
         {
-            return context.getActionURL().getParameter(CompareProteinProphetQuerySetupAction.COMPARE_PROTEIN_PROPHET_PEPTIDES_FILTER);
+            return context.getActionURL().getParameter(PEPTIDES_FILTER_VIEW_NAME);
         }
     }
 
@@ -1243,7 +1241,7 @@ public class MS2Controller extends SpringActionController
 
         protected CompareProteinsView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport) throws Exception
         {
-            String viewName = getViewContext().getActionURL().getParameter(CompareProteinProphetQuerySetupAction.COMPARE_PROTEIN_PROPHET_PEPTIDES_FILTER);
+            String viewName = form.getCustomViewName(getViewContext());
             return new CompareProteinsView(getViewContext(), form.getRunList(), forExport, viewName);
         }
 
@@ -1263,10 +1261,14 @@ public class MS2Controller extends SpringActionController
             super(PeptideFilteringComparisonForm.class);
         }
 
-        protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
+        public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
         {
             _form = form;
-            
+            return super.getView(form, errors);
+        }
+
+        protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
+        {
             ProteinProphetCrosstabView view = createInitializedQueryView(form, errors, false);
 //            if (!view.getErrors().isEmpty())
 //                return _renderErrors(view.getErrors());
@@ -1275,7 +1277,7 @@ public class MS2Controller extends SpringActionController
 
             Map<String, String> props = new HashMap<String, String>();
             props.put("originalURL", getViewContext().getActionURL().toString());
-            props.put("comparisonName", "Proteins");
+            props.put("comparisonName", "ProteinProphetCrosstab");
             GWTView gwtView = new GWTView("org.labkey.ms2.MS2VennDiagramView", props);
             gwtView.setTitle("Comparison Overview");
             gwtView.setFrame(WebPartView.FrameType.PORTAL);

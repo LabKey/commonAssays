@@ -42,6 +42,10 @@ public class MS2VennDiagramView extends VennDiagramView implements EntryPoint
         {
             getService().getProteinProphetComparison(originalURL, callbackHandler);
         }
+        else if ("ProteinProphetCrosstab".equalsIgnoreCase(comparisonGroup))
+        {
+            getService().getProteinProphetCrosstabComparison(originalURL, callbackHandler);
+        }
         else
         {
             throw new IllegalArgumentException("Unknown comparison group: " + comparisonGroup);
