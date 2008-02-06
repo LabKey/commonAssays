@@ -18,6 +18,7 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.MicroarraySchema;
+import org.labkey.microarray.MicroarrayUploadWizardAction;
 
 import java.util.*;
 import java.io.File;
@@ -171,5 +172,12 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         result.setDefaultVisibleColumns(defaultCols);
 
         return result;
+    }
+
+    public ActionURL getUploadWizardURL(Container container, ExpProtocol protocol)
+    {
+        ActionURL url = new ActionURL(MicroarrayUploadWizardAction.class, container);
+        url.addParameter("rowId", protocol.getRowId());
+        return url;
     }
 }

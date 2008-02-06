@@ -6,7 +6,8 @@ import org.labkey.api.view.*;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DataRegionSelection;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpData;
@@ -19,6 +20,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.PipelineDataCollector;
+import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.springframework.web.servlet.ModelAndView;
@@ -33,12 +35,63 @@ import java.util.*;
 
 public class MicroarrayController extends SpringActionController
 {
-    static DefaultActionResolver _actionResolver = new DefaultActionResolver(MicroarrayController.class);
+    static DefaultActionResolver _actionResolver = new DefaultActionResolver(MicroarrayController.class, MicroarrayUploadWizardAction.class);
 
     public MicroarrayController() throws Exception
     {
         super();
         setActionResolver(_actionResolver);
+    }
+
+    public static class DesignerForm extends ProtocolIdForm
+    {
+        public boolean isCopy()
+        {
+            return _copy;
+        }
+
+        public void setCopy(boolean copy)
+        {
+            _copy = copy;
+        }
+
+        private boolean _copy;
+    }
+    
+    @RequiresPermission(ACL.PERM_INSERT)
+    public class DesignerAction extends SimpleViewAction<DesignerForm>
+    {
+        private DesignerForm _form;
+
+        public ModelAndView getView(DesignerForm form, BindException errors) throws Exception
+        {
+            _form = form;
+            Integer rowId = form.getRowId();
+            Map<String, String> properties = new HashMap<String, String>();
+            if (rowId != null)
+            {
+                properties.put("protocolId", "" + rowId);
+                properties.put("copy", Boolean.toString(form.isCopy()));
+            }
+            properties.put("providerName", form.getProviderName());
+
+            // hack for 4404 : Lookup picker performance is terrible when there are many containers
+            ContainerManager.getAllChildren(ContainerManager.getRoot());
+
+            return new GWTView("org.labkey.assay.designer.AssayDesigner", properties);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            if (!_form.isCopy() && _form.getRowId() != null && _form.getProtocol() != null)
+            {
+                ExpProtocol protocol = _form.getProtocol(!_form.isCopy());
+                root.addChild(protocol.getName(), AssayService.get().getAssayRunsURL(getContainer(), protocol));
+            }
+            root.addChild("Assay Designer");
+            return root;
+        }
+
     }
 
     public static ActionURL getRunsURL(Container c)
@@ -104,7 +157,7 @@ public class MicroarrayController extends SpringActionController
     {
         public ModelAndView getView(UploadRedirectForm form, BindException errors) throws Exception
         {
-            int[] dataIds = PageFlowUtil.parseInts(getViewContext().getRequest().getParameterValues(DataRegion.SELECT_CHECKBOX_NAME));
+            int[] dataIds = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
             List<Map<String, File>> files = new ArrayList<Map<String, File>>();
             for (int dataId : dataIds)
             {

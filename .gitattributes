@@ -457,6 +457,8 @@ luminex/src/org/labkey/luminex/LuminexUploadWizardAction.java -text
 luminex/src/org/labkey/luminex/LuminexWell.java -text
 microarray/Microarray.iml -text
 microarray/build.xml -text
+microarray/gwtsrc/org/labkey/microarray/Microarray.gwt.xml -text
+microarray/gwtsrc/org/labkey/microarray/client/MicroarrayAssayDesigner.java -text
 microarray/module.properties -text
 microarray/src/META-INF/microarray.xml -text
 microarray/src/META-INF/microarray/scripts/postgresql/microarray-0.00-0.01.sql -text
@@ -468,6 +470,7 @@ microarray/src/org/labkey/microarray/MicroarrayManager.java -text
 microarray/src/org/labkey/microarray/MicroarrayModule.java -text
 microarray/src/org/labkey/microarray/MicroarrayRun.java -text
 microarray/src/org/labkey/microarray/MicroarraySchema.java -text
+microarray/src/org/labkey/microarray/MicroarrayUploadWizardAction.java -text
 microarray/src/org/labkey/microarray/PendingMageMLFilesView.java -text
 microarray/src/org/labkey/microarray/assay/MageMLDataHandler.java -text
 microarray/src/org/labkey/microarray/assay/MicroarrayAssayProvider.java -text

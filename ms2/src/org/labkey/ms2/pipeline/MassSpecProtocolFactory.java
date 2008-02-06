@@ -109,11 +109,11 @@ public class MassSpecProtocolFactory extends PipelineProtocolFactory<MassSpecPro
             String resourceName;
             if (DEFAULT_FRACTIONATION_TEMPLATE_NAME.equals(name))
             {
-                resourceName = "/org/labkey/ms2/pipeline/templates/MassSpecFractionationProtocol.xml";
+                resourceName = "org/labkey/ms2/pipeline/templates/MassSpecFractionationProtocol.xml";
             }
             else
             {
-                resourceName = "/org/labkey/ms2/pipeline/templates/MassSpecProtocol.xml";
+                resourceName = "org/labkey/ms2/pipeline/templates/MassSpecProtocol.xml";
             }
             try
             {

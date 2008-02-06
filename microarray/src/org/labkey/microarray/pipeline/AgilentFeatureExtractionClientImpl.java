@@ -15,7 +15,13 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.microarray.MicroarrayModule;
+import org.xml.sax.InputSource;
+import org.w3c.dom.Document;
 
+import javax.xml.xpath.*;
+import javax.xml.soap.Node;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
 import java.util.*;
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -460,50 +466,17 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         int runs = 0;
         int retVal = 0;
 
-/*        XPathFactory factory = XPathFactory.newInstance();
-        XPath xPath = factory.newXPath();
-        XPathExpression xPathDescriptionNode, xPathDescriptionProducer, xPathDescriptionVersion;
-        XPathExpression xPathSoftwareApplicationsNode, xPathProtocol, xPathGrid, xPathBarcode;
-
-        try
-        {
-            xPathDescriptionNode = xPath.compile(
-                    "/MAGE-ML/Descriptions_assnlist/Description/Annotations_assnlist");
-            xPathDescriptionProducer = xPath.compile(
-                    "OntologyEntry[@category='Producer']/@value");
-            xPathDescriptionVersion = xPath.compile(
-                    "OntologyEntry[@category='Version']/@value");
-            xPathSoftwareApplicationsNode = xPath.compile(
-                    "/MAGE-ML/BioAssay_package/BioAssay_assnlist/MeasuredBioAssay/FeatureExtraction_assn/FeatureExtraction/ProtocolApplications_assnlist/ProtocolApplication/SoftwareApplications_assnlist/SoftwareApplication/ParameterValues_assnlist");
-            xPathProtocol = xPath.compile(
-                    "ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:Protocol_Name']/@value");
-            xPathGrid = xPath.compile(
-                    "ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:Grid_Name']/@value");
-            xPathBarcode = xPath.compile(
-                    "ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:FeatureExtractor_Barcode']/@value");
-        }
-        catch (XPathExpressionException ee)
-        {
-            _instanceLogger.error("Error creating XPathExpression for parsing MAGE output...\n", ee);
-            return 2;
-        }
-        */
         for (File mage : mageFiles)
         {
             try
             {
                 ExpData data = AbstractAssayProvider.createData(c, mage, MicroarrayModule.MAGE_ML_DATA_TYPE);
                 data.save(u);
-                /*
-                FeatureExtractionRun feRun = new FeatureExtractionRun();
-                Node descriptionParentNode = (Node) xPathDescriptionNode.evaluate(new InputSource(new FileInputStream(mage)), XPathConstants.NODE);
-                Node softwareApplicationParentNode = (Node) xPathSoftwareApplicationsNode.evaluate(new InputSource(new FileInputStream(mage)), XPathConstants.NODE);
-                String descriptionProducer = xPathDescriptionProducer.evaluate(descriptionParentNode);
-                String descriptionVersion = xPathDescriptionVersion.evaluate(descriptionParentNode);
-                String description = descriptionProducer + " Version " + descriptionVersion;
-                String protocol = xPathProtocol.evaluate(softwareApplicationParentNode);
-                String grid = xPathGrid.evaluate(softwareApplicationParentNode);
-                String barcode = xPathBarcode.evaluate(softwareApplicationParentNode);
+
+//                FeatureExtractionRun feRun = new FeatureExtractionRun();
+
+//                Node descriptionParentNode = (Node) xPathDescriptionNode.evaluate(input, XPathConstants.NODE);
+//                Node softwareApplicationParentNode = (Node) xPathSoftwareApplicationsNode.evaluate(input, XPathConstants.NODE);
 
                 String fileBase = mage.getAbsolutePath().substring(0,
                         mage.getAbsolutePath().lastIndexOf(ArrayPipelineManager.MAGE_EXTENSION));
@@ -512,26 +485,26 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
                 File feature = featureFiles[0];
                 File alignment = alignmentFiles[0];
 
-                feRun.setDescription(description);
-                feRun.setProtocol(protocol);
-                feRun.setGrid(grid);
-                feRun.setBarcode(barcode);
-                feRun.setStatusId(1);
-
-                if (null != mage && mage.exists())
-                    feRun.setPath(mage.getParent());
-                feRun.setMageML(mage.getName());
-                if (null != loResImage && loResImage.exists())
-                    feRun.setLowResImage(loResImage.getName());
-                if (null != qcReport && qcReport.exists())
-                    feRun.setQcReport(qcReport.getName());
-                if (null != feature && feature.exists())
-                    feRun.setFeature(feature.getName());
-                if (null != alignment && alignment.exists())
-                    feRun.setAlignment(alignment.getName());
-
-                MicroarrayManager.get().saveRun(u, null);
-                */
+//                feRun.setDescription(description);
+//                feRun.setProtocol(protocol);
+//                feRun.setGrid(grid);
+//                feRun.setBarcode(barcode);
+//                feRun.setStatusId(1);
+//
+//                if (null != mage && mage.exists())
+//                    feRun.setPath(mage.getParent());
+//                feRun.setMageML(mage.getName());
+//                if (null != loResImage && loResImage.exists())
+//                    feRun.setLowResImage(loResImage.getName());
+//                if (null != qcReport && qcReport.exists())
+//                    feRun.setQcReport(qcReport.getName());
+//                if (null != feature && feature.exists())
+//                    feRun.setFeature(feature.getName());
+//                if (null != alignment && alignment.exists())
+//                    feRun.setAlignment(alignment.getName());
+//
+//                MicroarrayManager.get().saveRun(u, null);
+                
                 runs++;
             }
             catch (Exception e)

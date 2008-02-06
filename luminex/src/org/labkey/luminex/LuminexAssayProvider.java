@@ -193,7 +193,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public ActionURL getUploadWizardURL(Container container, ExpProtocol protocol)
     {
-        ActionURL url = new ActionURL("Luminex", "luminexUploadWizard.view", container);
+        ActionURL url = new ActionURL(LuminexUploadWizardAction.class, container);
         url.addParameter("rowId", protocol.getRowId());
         return url;
     }
