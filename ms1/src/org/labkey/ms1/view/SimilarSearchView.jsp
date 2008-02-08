@@ -22,7 +22,7 @@
                         <td>=</td>
                         <td><%=model.formatNumber(model.getFeature().getMz())%></td>
                         <td>&#177;<input name="<%=MS1Controller.SimilarSearchForm.ParamNames.mzOffset.name()%>"
-                                         value="<%=model.getMzOffset()%>" size="7"/>
+                                         value="<%=PageFlowUtil.filter(model.getMzOffset())%>" size="7"/>
                             <select name="<%=MS1Controller.SimilarSearchForm.ParamNames.mzUnits.name()%>">
                                 <option value="<%=MS1Controller.SimilarSearchForm.MzOffsetUnits.ppm.name()%>"
                                         <%=model.getMzUnits() == MS1Controller.SimilarSearchForm.MzOffsetUnits.ppm ? "selected=\"1\"" : ""%>
@@ -44,7 +44,7 @@
                             (<%=model.getFeature().getScan()%>)
                         </td>
                         <td>&#177;<input name="<%=MS1Controller.SimilarSearchForm.ParamNames.timeOffset.name()%>"
-                                         value="<%=model.getTimeOffset()%>" size="7"/>
+                                         value="<%=PageFlowUtil.filter(model.getTimeOffset())%>" size="7"/>
                             <select name="<%=MS1Controller.SimilarSearchForm.ParamNames.timeUnits.name()%>">
                                 <option value="<%=MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt.name()%>"
                                         <%=model.getTimeUnits() == MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt ? "selected=\"1\"" : ""%>

@@ -110,6 +110,6 @@ public class PepSearchModel
 
     public String getRunIds()
     {
-        return _runIds;
+        return null == _runIds ? "" : _runIds;
     }
 }
