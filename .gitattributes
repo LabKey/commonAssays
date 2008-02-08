@@ -459,6 +459,7 @@ microarray/Microarray.iml -text
 microarray/build.xml -text
 microarray/gwtsrc/org/labkey/microarray/Microarray.gwt.xml -text
 microarray/gwtsrc/org/labkey/microarray/client/MicroarrayAssayDesigner.java -text
+microarray/gwtsrc/org/labkey/microarray/client/MicroarrayDesignerMainPanel.java -text
 microarray/module.properties -text
 microarray/src/META-INF/microarray.xml -text
 microarray/src/META-INF/microarray/scripts/postgresql/microarray-0.00-0.01.sql -text

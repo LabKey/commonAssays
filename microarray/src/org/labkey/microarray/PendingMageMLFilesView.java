@@ -82,7 +82,7 @@ public class PendingMageMLFilesView extends QueryView
         {
             ExpProtocol protocol = protocols.get(0);
             ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
-            ActionButton button = new ActionButton(url, "Upload using " + protocol.getName());
+            ActionButton button = new ActionButton(url, "Upload selected using " + protocol.getName());
             button.setDisplayPermission(ACL.PERM_INSERT);
             button.setScript("if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); } return false;");
             bar.add(button);

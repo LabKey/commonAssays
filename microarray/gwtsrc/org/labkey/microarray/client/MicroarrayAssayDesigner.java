@@ -3,7 +3,7 @@ package org.labkey.microarray.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.labkey.api.gwt.client.util.PropertyUtil;
-import org.labkey.api.gwt.client.assay.AssayView;
+import org.labkey.api.gwt.client.assay.AssayDesignerMainPanel;
 
 /**
  * User: brittp
@@ -21,7 +21,7 @@ public class MicroarrayAssayDesigner implements EntryPoint
             String providerName = PropertyUtil.getServerProperty("providerName");
             String copyStr = PropertyUtil.getServerProperty("copy");
             boolean copyAssay = copyStr != null && Boolean.TRUE.toString().equals(copyStr);
-            AssayView view = new AssayView(panel, providerName, protocolIdStr != null ? new Integer(Integer.parseInt(protocolIdStr)) : null, copyAssay);
+            MicroarrayDesignerMainPanel view = new MicroarrayDesignerMainPanel(panel, providerName, protocolIdStr != null ? new Integer(Integer.parseInt(protocolIdStr)) : null, copyAssay);
             view.showAsync();
         }
     }
