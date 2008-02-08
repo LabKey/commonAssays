@@ -462,7 +462,8 @@ public class PepXmlImporter extends MS2Importer
         }
         catch (SQLException e)
         {
-            _log.error("Failed to insert scan " + peptide.getScan() + " with charge " + peptide.getCharge());
+            _log.error("Failed to insert scan " + peptide.getScan() + " with charge " +
+                    peptide.getCharge() + " from " + _gzFileName);
             throw e;                    
         }
 
@@ -472,12 +473,21 @@ public class PepXmlImporter extends MS2Importer
         {
             peptideId = getPeptideId(stmt);
             int index = 1;
-            _prophetStmt.setLong(index++, peptideId);
-            _prophetStmt.setFloat(index++, pp.getProphetFval());
-            _prophetStmt.setFloat(index++, pp.getProphetDeltaMass());
-            _prophetStmt.setInt(index++, pp.getProphetNumTrypticTerm());
-            _prophetStmt.setInt(index++, pp.getProphetNumMissedCleav());
-            _prophetStmt.executeUpdate();
+            try
+            {
+                _prophetStmt.setLong(index++, peptideId);
+                _prophetStmt.setFloat(index++, pp.getProphetFval());
+                _prophetStmt.setFloat(index++, pp.getProphetDeltaMass());
+                _prophetStmt.setInt(index++, pp.getProphetNumTrypticTerm());
+                _prophetStmt.setInt(index++, pp.getProphetNumMissedCleav());
+                _prophetStmt.executeUpdate();
+            }
+            catch (SQLException e)
+            {
+                _log.error("Failed to insert prophet info for scan " + peptide.getScan() + " with charge " +
+                        peptide.getCharge() + " from " + _gzFileName);
+                throw e;
+            }
         }
         if (hasQuant)
         {
@@ -495,44 +505,53 @@ public class PepXmlImporter extends MS2Importer
                     quant.setQuantId(summary.getQuantId());
 
                     int index = 1;
-                    _quantStmt.setLong(index++, quant.getPeptideId());
-                    _quantStmt.setInt(index++, quant.getLightFirstscan());
-                    _quantStmt.setInt(index++, quant.getLightLastscan());
-                    _quantStmt.setFloat(index++, quant.getLightMass());
-                    _quantStmt.setInt(index++, quant.getHeavyFirstscan());
-                    _quantStmt.setInt(index++, quant.getHeavyLastscan());
-                    _quantStmt.setFloat(index++, quant.getHeavyMass());
-                    if (quant instanceof XPressHandler.XPressResult)
+                    try
                     {
-                        XPressHandler.XPressResult xpressQuant = (XPressHandler.XPressResult)quant;
-                        if (xpressQuant.getRatio() != null)
+                        _quantStmt.setLong(index++, quant.getPeptideId());
+                        _quantStmt.setInt(index++, quant.getLightFirstscan());
+                        _quantStmt.setInt(index++, quant.getLightLastscan());
+                        _quantStmt.setFloat(index++, quant.getLightMass());
+                        _quantStmt.setInt(index++, quant.getHeavyFirstscan());
+                        _quantStmt.setInt(index++, quant.getHeavyLastscan());
+                        _quantStmt.setFloat(index++, quant.getHeavyMass());
+                        if (quant instanceof XPressHandler.XPressResult)
                         {
-                            _quantStmt.setString(index++, xpressQuant.getRatio());
+                            XPressHandler.XPressResult xpressQuant = (XPressHandler.XPressResult)quant;
+                            if (xpressQuant.getRatio() != null)
+                            {
+                                _quantStmt.setString(index++, xpressQuant.getRatio());
+                            }
+                            else
+                            {
+                                _quantStmt.setNull(index++, Types.VARCHAR);
+                            }
+                            if (xpressQuant.getHeavy2lightRatio() != null)
+                            {
+                                _quantStmt.setString(index++, xpressQuant.getHeavy2lightRatio());
+                            }
+                            else
+                            {
+                                _quantStmt.setNull(index++, Types.VARCHAR);
+                            }
                         }
                         else
                         {
                             _quantStmt.setNull(index++, Types.VARCHAR);
-                        }
-                        if (xpressQuant.getHeavy2lightRatio() != null)
-                        {
-                            _quantStmt.setString(index++, xpressQuant.getHeavy2lightRatio());
-                        }
-                        else
-                        {
                             _quantStmt.setNull(index++, Types.VARCHAR);
                         }
-                    }
-                    else
-                    {
-                        _quantStmt.setNull(index++, Types.VARCHAR);
-                        _quantStmt.setNull(index++, Types.VARCHAR);
-                    }
-                    _quantStmt.setFloat(index++, quant.getLightArea());
-                    _quantStmt.setFloat(index++, quant.getHeavyArea());
-                    _quantStmt.setFloat(index++, quant.getDecimalRatio());
-                    _quantStmt.setInt(index++, quant.getQuantId());
+                        _quantStmt.setFloat(index++, quant.getLightArea());
+                        _quantStmt.setFloat(index++, quant.getHeavyArea());
+                        _quantStmt.setFloat(index++, quant.getDecimalRatio());
+                        _quantStmt.setInt(index++, quant.getQuantId());
 
-                    _quantStmt.executeUpdate();
+                        _quantStmt.executeUpdate();
+                    }
+                    catch (SQLException e)
+                    {
+                        _log.error("Failed to insert quantitation info for scan " + peptide.getScan() +
+                                " with charge " + peptide.getCharge() + " from " + _gzFileName);
+                        throw e;
+                    }
                 }
             }
         }

@@ -51,7 +51,7 @@ abstract public class AbstractMS2SearchPipelineProvider
     public AbstractMS2SearchProtocolFactory getProtocolFactory(File fileParams)
     {
         AbstractMS2SearchProtocolFactory factory = getProtocolFactory();
-        if (factory.isProtocolTypeFile(fileParams))
+        if (factory != null && factory.isProtocolTypeFile(fileParams))
             return factory;
         return null; 
     }

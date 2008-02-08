@@ -86,8 +86,7 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
     public List<StatusAction> addStatusActions()
     {
         List<StatusAction> actions = super.addStatusActions();
-        _clusterSupport.addStatusActions(actions);
-        return actions;
+        return _clusterSupport.addStatusActions(actions);
     }
 
     public ActionURL handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf)

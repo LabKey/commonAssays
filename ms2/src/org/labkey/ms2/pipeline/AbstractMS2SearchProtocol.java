@@ -98,9 +98,10 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
         super.save(file, addParams);        
     }
 
-    public FileType getInputType()
+    public FileType[] getInputTypes()
     {
-        return FT_MZXML;
+        // TODO: Make this based on installed converters.
+        return new FileType[] { FT_MZXML, FT_THERMO_RAW, FT_WATERS_RAW };
     }
 
     public void validate(URI uriRoot) throws PipelineValidationException
