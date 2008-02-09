@@ -1,4 +1,4 @@
-package org.labkey.microarray.client;
+package org.labkey.microarray.designer.client;
 
 import org.labkey.api.gwt.client.assay.AssayDesignerMainPanel;
 import org.labkey.api.gwt.client.ui.PropertiesEditor;

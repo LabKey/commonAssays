@@ -53,7 +53,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     }
 
 
-    protected Map<String, String> getDefaultValues(String suffix, LuminexRunUploadForm form)
+    protected Map<String, String> getDefaultValues(String suffix, LuminexRunUploadForm form) throws ExperimentException
     {
         if (!form.isResetDefaultValues() && AnalyteStepHandler.NAME.equals(suffix))
         {

@@ -22,8 +22,8 @@ public class FeatureExtractionPipelineJob extends PipelineJob
     protected Integer _extractionRowId;
     protected File _dirImages;
     protected String _protocol;
-    private final URI _uriData;
-    private final String _extractionEngine;
+    private URI _uriData;
+    private String _extractionEngine;
 
     public FeatureExtractionPipelineJob(ViewBackgroundInfo info,
                                         String protocol,

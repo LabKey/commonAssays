@@ -24,8 +24,8 @@ public class MicroarraySchema extends UserSchema
     public static final String TABLE_RUNS = "MicroarrayRuns";
 
     private ExpSchema _expSchema;
-    public static final String QC_REPORT_COLUMN_NAME = "QC Report";
-    public static final String THUMBNAIL_IMAGE_COLUMN_NAME = "Thumbnail Image";
+    public static final String QC_REPORT_COLUMN_NAME = "QCReport";
+    public static final String THUMBNAIL_IMAGE_COLUMN_NAME = "ThumbnailImage";
 
     public MicroarraySchema(User user, Container container)
     {

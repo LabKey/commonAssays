@@ -14,11 +14,13 @@ import org.labkey.api.data.Container;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
+import org.labkey.api.security.ACL;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.MicroarraySchema;
 import org.labkey.microarray.MicroarrayUploadWizardAction;
+import org.labkey.microarray.sampleset.client.SampleInfo;
 
 import java.util.*;
 import java.io.File;
@@ -32,6 +34,8 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
 {
     public static final String PROTOCOL_PREFIX = "MicroarrayAssayProtocol";
     public static final String NAME = "Microarray";
+
+    public static final int SAMPLE_COUNT = 2;
 
     public MicroarrayAssayProvider()
     {
@@ -80,6 +84,16 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
     public FieldKey getVisitIDFieldKey(Container targetStudy)
     {
         throw new UnsupportedOperationException();
+    }
+
+    public FieldKey getSpecimenIDFieldKey()
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean canPublish()
+    {
+        return false;
     }
 
     public FieldKey getRunIdFieldKeyFromDataRow()
@@ -140,11 +154,6 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         }
     }
 
-    public FieldKey getSpecimenIDFieldKey()
-    {
-        throw new UnsupportedOperationException();
-    }
-
     public ActionURL publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
     {
         throw new UnsupportedOperationException();
@@ -179,5 +188,36 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         ActionURL url = new ActionURL(MicroarrayUploadWizardAction.class, container);
         url.addParameter("rowId", protocol.getRowId());
         return url;
+    }
+
+    protected void addInputMaterials(AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
+    {
+        for (int i = 0; i < SAMPLE_COUNT; i++)
+        {
+            String lsid = context.getRequest().getParameter(SampleInfo.getLsidFormElementID(i));
+            String name = context.getRequest().getParameter(SampleInfo.getNameFormElementID(i));
+            ExpMaterial material;
+            if (lsid != null && !"".equals(lsid))
+            {
+                material = ExperimentService.get().getExpMaterial(lsid);
+                if (material != null && !material.getContainer().hasPermission(context.getUser(), ACL.PERM_READ))
+                {
+                    throw new ExperimentException("You do not have permission to reference the sample with LSID " + lsid);
+                }
+            }
+            else
+            {
+                if (name == null)
+                {
+                    name = "Unknown";
+                }
+                material = createSampleMaterial(context.getContainer(), context.getProtocol(), name);
+            }
+            if (inputMaterials.containsKey(material))
+            {
+                throw new ExperimentException("The same material cannot be used multiple times");
+            }
+            inputMaterials.put(material, "Sample " + (i + 1));
+        }
     }
 }

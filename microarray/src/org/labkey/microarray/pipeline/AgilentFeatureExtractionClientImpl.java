@@ -15,13 +15,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.microarray.MicroarrayModule;
-import org.xml.sax.InputSource;
-import org.w3c.dom.Document;
 
-import javax.xml.xpath.*;
-import javax.xml.soap.Node;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
 import java.util.*;
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -54,7 +48,6 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         {
             _instanceLogger = instanceLogger;
         }
-        _instanceLogger = instanceLogger;
 
         // initalize a TaskID to submit the job for this client
         _instanceLogger.info("Creating FeatureExtraction client taskId...");
@@ -178,9 +171,10 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
 
     public int run(File[] imageFiles) throws ExtractionException
     {
-        _taskId = "1199843396163";
-        return 0;
-/*        _instanceLogger.info("Creating FeatureExtraction session...");
+//        _taskId = "1199843396163";
+//        return 0;
+
+        _instanceLogger.info("Creating FeatureExtraction session...");
         startSession();
 
         int returnCode = 0;
@@ -271,7 +265,6 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         }
         _instanceLogger.info("Feature Extraction session ended.");
         return returnCode;
-*/
     }
 
     protected boolean submitFiles(String taskId, File[] imageFiles)
@@ -393,9 +386,6 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
             {
                 out.write(buf, 0, bytesRead);
             }
-            in.close();
-            reader.close();
-            out.close();
         }
         catch (IOException e)
         {
@@ -404,15 +394,9 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         }
         finally
         {
-            try
-            {
-                if (in != null) in.close();
-                if (reader != null) reader.close();
-                if (out != null) out.close();
-            }
-            catch (IOException e)
-            {
-            }
+            if (in != null) { try { in.close(); } catch (IOException e) {} }
+            if (out != null) { try { out.close(); } catch (IOException e) {} }
+            try { reader.close(); } catch (IOException e) {}
         }
     }
 
@@ -432,7 +416,7 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
 
         BufferedReader dis =
                 new BufferedReader(new InputStreamReader(in));
-        boolean ioError = false;
+
         try
         {
             String line;
@@ -448,21 +432,13 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         }
         finally
         {
-            try
-            {
-                in.close();
-            }
-            catch (IOException e)
-            {
-            }
+            if (in != null) { try { in.close(); } catch (IOException e) {} }
         }
     }
 
     public int saveProcessedRuns(User u, Container c, File outputDir)
     {
         File[] mageFiles = outputDir.listFiles(ArrayPipelineManager.getMageFileFilter());
-        File[] featureFiles = outputDir.listFiles(ArrayPipelineManager.getFeatureFileFilter());
-        File[] alignmentFiles = outputDir.listFiles(ArrayPipelineManager.getAlignmentFileFilter());
         int runs = 0;
         int retVal = 0;
 
@@ -473,38 +449,6 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
                 ExpData data = AbstractAssayProvider.createData(c, mage, MicroarrayModule.MAGE_ML_DATA_TYPE);
                 data.save(u);
 
-//                FeatureExtractionRun feRun = new FeatureExtractionRun();
-
-//                Node descriptionParentNode = (Node) xPathDescriptionNode.evaluate(input, XPathConstants.NODE);
-//                Node softwareApplicationParentNode = (Node) xPathSoftwareApplicationsNode.evaluate(input, XPathConstants.NODE);
-
-                String fileBase = mage.getAbsolutePath().substring(0,
-                        mage.getAbsolutePath().lastIndexOf(ArrayPipelineManager.MAGE_EXTENSION));
-                File loResImage = new File(fileBase + ArrayPipelineManager._pipelineLoResImageExt);
-                File qcReport = new File(fileBase + ArrayPipelineManager._pipelineQCReportExt);
-                File feature = featureFiles[0];
-                File alignment = alignmentFiles[0];
-
-//                feRun.setDescription(description);
-//                feRun.setProtocol(protocol);
-//                feRun.setGrid(grid);
-//                feRun.setBarcode(barcode);
-//                feRun.setStatusId(1);
-//
-//                if (null != mage && mage.exists())
-//                    feRun.setPath(mage.getParent());
-//                feRun.setMageML(mage.getName());
-//                if (null != loResImage && loResImage.exists())
-//                    feRun.setLowResImage(loResImage.getName());
-//                if (null != qcReport && qcReport.exists())
-//                    feRun.setQcReport(qcReport.getName());
-//                if (null != feature && feature.exists())
-//                    feRun.setFeature(feature.getName());
-//                if (null != alignment && alignment.exists())
-//                    feRun.setAlignment(alignment.getName());
-//
-//                MicroarrayManager.get().saveRun(u, null);
-                
                 runs++;
             }
             catch (Exception e)

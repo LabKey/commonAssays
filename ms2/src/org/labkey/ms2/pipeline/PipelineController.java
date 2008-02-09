@@ -1247,7 +1247,7 @@ public class PipelineController extends SpringActionController
                 Map<Integer, ExpMaterial[]> materialSourceMaterials = new HashMap<Integer, ExpMaterial[]>();
                 for (ExpSampleSet source : materialSources)
                 {
-                    ExpMaterial[] materials = ExperimentService.get().getMaterialsForSampleSet(source.getMaterialLSIDPrefix(), source.getContainer());
+                    ExpMaterial[] materials = source.getSamples();
                     materialSourceMaterials.put(source.getRowId(), materials);
                 }
                 drv.setSampleSets(materialSources);

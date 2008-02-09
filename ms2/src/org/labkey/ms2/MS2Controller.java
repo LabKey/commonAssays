@@ -1278,7 +1278,7 @@ public class MS2Controller extends SpringActionController
             Map<String, String> props = new HashMap<String, String>();
             props.put("originalURL", getViewContext().getActionURL().toString());
             props.put("comparisonName", "ProteinProphetCrosstab");
-            GWTView gwtView = new GWTView("org.labkey.ms2.MS2VennDiagramView", props);
+            GWTView gwtView = new GWTView(org.labkey.ms2.client.MS2VennDiagramView.class, props);
             gwtView.setTitle("Comparison Overview");
             gwtView.setFrame(WebPartView.FrameType.PORTAL);
             gwtView.enableExpandCollapse("ProteinProphetQueryCompare", true);

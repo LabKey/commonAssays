@@ -1,9 +1,8 @@
-package org.labkey.microarray.client;
+package org.labkey.microarray.designer.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.labkey.api.gwt.client.util.PropertyUtil;
-import org.labkey.api.gwt.client.assay.AssayDesignerMainPanel;
 
 /**
  * User: brittp

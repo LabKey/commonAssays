@@ -5,6 +5,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.view.*;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.ContainerManager;
@@ -21,6 +22,7 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.study.actions.ProtocolIdForm;
+import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.springframework.web.servlet.ModelAndView;
@@ -216,7 +218,7 @@ public class MicroarrayController extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return ExperimentService.get().createExperimentRunWebPart(getViewContext(), MicroarrayModule.EXP_RUN_FILTER, true);
+            return ExperimentService.get().createExperimentRunWebPart(getViewContext(), MicroarrayRunFilter.INSTANCE, true);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -342,6 +344,15 @@ public class MicroarrayController extends SpringActionController
                 throw new ExperimentException("Import image process failed", e);
             }
             return null;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class SampleSetServiceAction extends GWTServiceAction
+    {
+        protected BaseRemoteService createService()
+        {
+            return new SampleSetServiceImpl(getViewContext());
         }
     }
 

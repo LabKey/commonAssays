@@ -112,13 +112,13 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                         return result;
                     }
                 },
-                new WebPartFactory("MS2 Statistics","right"){
+                new WebPartFactory("MS2 Statistics",WebPartFactory.LOCATION_RIGHT){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
                         return new MS2StatsWebPart();
                     }
                 },
-                new WebPartFactory(ProteinSearchWebPart.NAME, "right"){
+                new WebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_RIGHT){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
                         return new ProteinSearchWebPart(!"right".equalsIgnoreCase(webPart.getLocation()));

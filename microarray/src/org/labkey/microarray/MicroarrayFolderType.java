@@ -2,6 +2,8 @@ package org.labkey.microarray;
 
 import org.labkey.api.module.DefaultFolderType;
 import org.labkey.api.view.Portal;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.exp.api.ExperimentService;
 
 import java.util.Arrays;
 
@@ -18,9 +20,10 @@ public class MicroarrayFolderType extends DefaultFolderType
             Arrays.asList(
                 Portal.getPortalPart("Data Pipeline").createWebPart(),
                 Portal.getPortalPart(MicroarrayModule.WEBPART_MICROARRAY_RUNS).createWebPart(),
-                Portal.getPortalPart(MicroarrayModule.WEBPART_PENDING_FILES).createWebPart()
+                Portal.getPortalPart(MicroarrayModule.WEBPART_PENDING_FILES).createWebPart(),
+                Portal.getPortalPart(MicroarrayModule.WEBPART_MICROARRAY_STATISTICS).createWebPart()
             ), null,
-            getDefaultModuleSet(module, getModule(MicroarrayModule.NAME), getModule("Pipeline")),
+            getDefaultModuleSet(module, getModule(MicroarrayModule.NAME), getModule(PipelineService.MODULE_NAME), getModule(ExperimentService.MODULE_NAME)),
             module);
     }
 }

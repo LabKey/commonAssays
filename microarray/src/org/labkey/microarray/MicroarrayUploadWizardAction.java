@@ -5,9 +5,19 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.ACL;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SimpleDisplayColumn;
+import org.labkey.api.view.InsertView;
+import org.labkey.api.view.GWTView;
+import org.labkey.microarray.sampleset.client.SampleChooser;
+import org.labkey.microarray.sampleset.client.SampleInfo;
+import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -23,6 +33,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Writer;
 
 /**
  * User: jeckels
@@ -32,7 +43,7 @@ import java.io.IOException;
 public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUploadForm>
 {
 
-    protected Map<String, String> getDefaultValues(String suffix, AssayRunUploadForm form)
+    protected Map<String, String> getDefaultValues(String suffix, AssayRunUploadForm form) throws ExperimentException
     {
         Map<String, String> result = super.getDefaultValues(suffix, form);
 
@@ -51,13 +62,15 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
             try
             {
                 PropertyDescriptor[] runPDs = getProvider(form).getRunPropertyColumns(form.getProtocol());
+                StringBuilder errors = new StringBuilder();
                 for (PropertyDescriptor runPD : runPDs)
                 {
-                    if (runPD.getDescription() != null)
+                    String expression = runPD.getDescription();
+                    if (expression != null)
                     {
                         try
                         {
-                            XPathExpression expression = xPath.compile(runPD.getDescription());
+                            XPathExpression xPathExpression = xPath.compile(expression);
                             if (input == null)
                             {
                                 DocumentBuilderFactory dbfact = DocumentBuilderFactory.newInstance();
@@ -65,15 +78,25 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
                                 DocumentBuilder builder = dbfact.newDocumentBuilder();
                                 input = builder.parse(new InputSource(new FileInputStream(dataCollector.createData(form).values().iterator().next())));
                             }
-                            String value = expression.evaluate(input);
+                            String value = xPathExpression.evaluate(input);
                             result.put(ColumnInfo.propNameFromName(runPD.getName()), value);
                         }
                         catch (XPathExpressionException e)
                         {
-                            // TODO - show error to user here?
+                            errors.append("Error parsing XPath expression '").append(expression).append("'. ");
+                            if (e.getMessage() != null)
+                            {
+                                errors.append(e.getMessage());
+                            }
                         }
                     }
                 }
+
+                if (errors.length() > 0)
+                {
+                    throw new ExperimentException(errors.toString());
+                }
+
 //                XPathExpression xPathDescriptionProducer = xPath.compile(
 //                        "/MAGE-ML/Descriptions_assnlist/Description/Annotations_assnlist/OntologyEntry[@category='Producer']/@value");
 //                XPathExpression xPathDescriptionVersion = xPath.compile(
@@ -94,22 +117,70 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
             }
             catch (IOException e)
             {
-                throw new RuntimeException("Error parsing MAGE output", e);
+                throw new ExperimentException("Error parsing MAGE output", e);
             }
             catch (SAXException e)
             {
-                throw new RuntimeException("Error parsing MAGE output", e);
+                throw new ExperimentException("Error parsing MAGE output", e);
             }
             catch (ParserConfigurationException e)
             {
-                throw new RuntimeException("Error parsing MAGE output", e);
-            }
-            catch (ExperimentException e)
-            {
-                throw new RuntimeException(e);
+                throw new ExperimentException("Error parsing MAGE output", e);
             }
         }
 
         return result;
+    }
+
+    protected void addSampleInputColumns(ExpProtocol protocol, InsertView insertView)
+    {
+        insertView.getDataRegion().addColumn(new SampleChooserDisplayColumn(MicroarrayAssayProvider.SAMPLE_COUNT));
+    }
+
+    private class SampleChooserDisplayColumn extends SimpleDisplayColumn
+    {
+        private final int _count;
+
+        public SampleChooserDisplayColumn(int count)
+        {
+            _count = count;
+            setCaption("Samples");
+        }
+
+        public boolean isEditable()
+        {
+            return true;
+        }
+
+        public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
+        {
+            Map<String, String> props = new HashMap<String, String>();
+
+            for (int i = 0; i < _count; i++)
+            {
+                String lsidID = SampleInfo.getLsidFormElementID(i);
+                String nameID = SampleInfo.getNameFormElementID(i);
+                out.write("<input type=\"hidden\" name=\"" + lsidID + "\" id=\"" + lsidID + "\"/>\n");
+                out.write("<input type=\"hidden\" name=\"" + nameID + "\" id=\"" + nameID + "\"/>\n");
+            }
+
+            props.put(SampleChooser.PROP_NAME_SAMPLE_COUNT, Integer.toString(_count));
+            ExpSampleSet sampleSet = ExperimentService.get().lookupActiveSampleSet(ctx.getContainer());
+            if (sampleSet != null)
+            {
+                props.put(SampleChooser.PROP_NAME_DEFAULT_SAMPLE_SET_LSID, sampleSet.getLSID());
+                props.put(SampleChooser.PROP_NAME_DEFAULT_SAMPLE_SET_NAME, sampleSet.getName());
+                props.put(SampleChooser.PROP_NAME_DEFAULT_SAMPLE_ROW_ID, Integer.toString(sampleSet.getRowId()));
+            }
+            GWTView view = new GWTView(SampleChooser.class, props);
+            try
+            {
+                view.render(ctx.getRequest(), ctx.getViewContext().getResponse());
+            }
+            catch (Exception e)
+            {
+                throw (IOException)new IOException().initCause(e);
+            }
+        }
     }
 }
