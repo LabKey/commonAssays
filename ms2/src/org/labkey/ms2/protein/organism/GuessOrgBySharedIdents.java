@@ -53,7 +53,8 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
         //  it associated with? Very slow!  Good for sprot fastas
 
         String pName = p.getProtein().getLookup();
-         Map<String, Set<String>> possibleIdents = Protein.identParse(pName);
+        String wholeHeader=p.getProtein().getHeader();
+         Map<String, Set<String>> possibleIdents = Protein.identParse(pName, wholeHeader);
 
         if (null == possibleIdents)
             return null;
