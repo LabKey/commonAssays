@@ -20,10 +20,12 @@ public class ParseContext
     private UniprotOrganism _currentOrganism;
     private Map<String, UniprotOrganism> _organisms = new HashMap<String, UniprotOrganism>();
     private final Connection _conn;
+    private boolean _clearExisting;
 
-    public ParseContext(Connection conn)
+    public ParseContext(Connection conn, boolean clearExisting)
     {
         _conn = conn;
+        _clearExisting = clearExisting;
     }
 
     public uniprot getUniprotRoot()
@@ -123,5 +125,15 @@ public class ParseContext
     public Connection getConnection()
     {
         return _conn;
+    }
+
+    public boolean isClearExisting()
+    {
+        return _clearExisting;
+    }
+
+    public void setClearExisting(boolean clearExisting)
+    {
+        _clearExisting = clearExisting;
     }
 }

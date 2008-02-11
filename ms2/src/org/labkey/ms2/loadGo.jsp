@@ -30,5 +30,5 @@ process by refreshing the status information on the next page.<br><br>
 If you wish to proceed, click the Continue button. Otherwise click Cancel.<br><br>
 <form action="loadGo.post" method="post">
     <input type=image src="<%=PageFlowUtil.buttonSrc("Continue")%>">
-    <%=PageFlowUtil.buttonLink("Cancel", MS2Controller.getShowProteinAdminUrl())%>
+    <%=PageFlowUtil.buttonLink("Cancel", MS2Controller.MS2UrlsImpl.get().getShowProteinAdminUrl())%>
 </form>

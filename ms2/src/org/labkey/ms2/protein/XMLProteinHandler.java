@@ -85,7 +85,7 @@ public class XMLProteinHandler extends DefaultHandler
 
     public XMLProteinHandler(Connection conn, XMLProteinLoader loader) throws SAXException, IOException
     {
-        _parseContext = new ParseContext(conn);
+        _parseContext = new ParseContext(conn, loader.isClearExisting());
         _loader = loader;
         setProgProperties(REProperties.loadREProperties(PROGRAM_PREFIX + "." + loaderPrefix));
         setLoaderPackage(

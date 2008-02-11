@@ -157,6 +157,8 @@ public class uniprot extends ParseActions
     private String _insertOrgIDCommand = null;
     private String _updateOrgCommand = null;
     private String _insertIntoSeqCommand = null;
+    private String _clearExistingIdentifiersCommand;
+    private String _clearExistingAnnotationsCommand;
     private String _updateSeqTableCommand = null;
     private String _insertIdentTypesCommand = null;
     private String _insertIntoIdentsCommand = null;
@@ -282,6 +284,13 @@ public class uniprot extends ParseActions
                         "WHERE a.genus=b.genus AND a.species=b.species AND " +
                         "  c.identtypeid=" + taxonomyTypeIndex + " AND " +
                         "  c.identifier=b.identID";
+
+        _clearExistingIdentifiersCommand =
+                "DELETE FROM " + ProteinManager.getTableInfoIdentifiers() + " WHERE SeqId IN (SELECT seq_id FROM " + _iTableName + ")";
+
+        _clearExistingAnnotationsCommand =
+                "DELETE FROM " + ProteinManager.getTableInfoAnnotations() + " WHERE SeqId IN (SELECT seq_id FROM " + _aTableName + ")";
+
         _insertIntoSeqCommand =
                 "INSERT INTO " + ProteinManager.getTableInfoSequences() + " (ProtSequence,hash,description," +
                         "SourceChangeDate,SourceInsertDate,mass,length,OrgId," +
@@ -301,7 +310,7 @@ public class uniprot extends ParseActions
 
         _updateSeqTableCommand =
                 "UPDATE "+ ProteinManager.getTableInfoSequences() +
-                        " SET description=a.description, bestname=a.best_name, bestgenename=a.best_gene_name " +
+                        " SET description=a.description, bestgenename=a.best_gene_name " +
                         " FROM " + _sTableName + " a, "+ProteinManager.getTableInfoOrganisms() + " b " +
                         " WHERE " + ProteinManager.getTableInfoSequences()+".hash = a.hash AND " +
                         ProteinManager.getTableInfoSequences()+".orgid=b.orgid AND UPPER(a.genus)=UPPER(b.genus) AND " +
@@ -414,10 +423,38 @@ public class uniprot extends ParseActions
 
         int seqsAdded = insertSequences(context, conn);
         handleThreadStateChangeRequests();
-        int identsAdded = insertIdentifiers(context, conn);
-        handleThreadStateChangeRequests();
+        int identsAdded;
+        int annotsAdded;
+        try
+        {
+            int identsProcessed = insertIdentifiers(context, conn);
+            _log.debug("Inserted " + identsProcessed + " identifiers into temp table");
+            handleThreadStateChangeRequests();
 
-        int annotsAdded = insertAnnotations(context, conn);
+            try
+            {
+                int annotsProcessed = insertAnnotations(context, conn);
+                _log.debug("Inserted " + annotsProcessed + " annotations into temp table");
+
+                identsAdded = mergeIdentifiers(context, conn);
+                annotsAdded = mergeAnnotations(context, conn);
+            }
+            finally
+            {
+                try { executeUpdate(_dialect.getDropIndexCommand(_aTableName, "aAnnot_val"), conn); } catch (SQLException e) {}
+                try { executeUpdate(_dialect.getDropIndexCommand(_aTableName, "aAnnotType"), conn); } catch (SQLException e) {}
+                try { executeUpdate(_dialect.getDropIndexCommand(_aTableName, "aHashGenusSpecies"), conn); } catch (SQLException e) {}
+                try { executeUpdate("TRUNCATE TABLE " + _aTableName, conn, "TRUNCATE TABLE " + _aTableName); } catch (SQLException e) {}
+            }
+        }
+        finally
+        {
+            try { executeUpdate(_dialect.getDropIndexCommand(_iTableName, "iIdentifier"), conn); } catch (SQLException e) {}
+            try { executeUpdate(_dialect.getDropIndexCommand(_iTableName, "iIdenttype"), conn); } catch (SQLException e) {}
+            try { executeUpdate(_dialect.getDropIndexCommand(_iTableName, "iSpeciesGenusHash"), conn); } catch (SQLException e) {}
+            try { executeUpdate("TRUNCATE TABLE " + _iTableName, conn, "TRUNCATE TABLE " + _iTableName); } catch (SQLException e) {}
+        }
+
         conn.setAutoCommit(true);
         handleThreadStateChangeRequests();
         _log.info(new java.util.Date() + " Added: " +
@@ -536,7 +573,7 @@ public class uniprot extends ParseActions
 
         //Process current mouthful of sequences
         _log.debug(new java.util.Date() + " Processing sequences");
-        for (org.labkey.ms2.protein.uniprot.UniprotSequence curSeq : context.getSequences())
+        for (UniprotSequence curSeq : context.getSequences())
         {
             transactionCount++;
             _addSeq.setString(1, curSeq.getProtSequence());
@@ -687,13 +724,19 @@ public class uniprot extends ParseActions
         executeUpdate(_insertIdentTypesCommand, conn, "InsertIdentTypes");
 
         executeUpdate(_updateIdentsWithSeqsCommand, conn, "UpdateIdentsWithSeqs");
+        return context.getIdentifiers().size();
+    }
+
+    private int mergeIdentifiers(ParseContext context, Connection conn) throws SQLException
+    {
+        if (context.isClearExisting())
+        {
+            // Clear these after the annotations that reference them have already been deleted
+            int identifiersDeleted = executeUpdate(_clearExistingIdentifiersCommand, conn, "DeleteExistingIdents");
+            _log.debug("Deleted " + identifiersDeleted + " existing identifiers");
+        }
 
         int result = executeUpdate(_insertIntoIdentsCommand, conn, "InsertIntoIdents");
-
-        executeUpdate(_dialect.getDropIndexCommand(_iTableName, "iIdentifier"), conn);
-        executeUpdate(_dialect.getDropIndexCommand(_iTableName, "iIdenttype"), conn);
-        executeUpdate(_dialect.getDropIndexCommand(_iTableName, "iSpeciesGenusHash"), conn);
-        executeUpdate("TRUNCATE TABLE " + _iTableName, conn, "TRUNCATE TABLE " + _iTableName);
 
         _log.debug("Done with identifiers");
         return result;
@@ -806,14 +849,20 @@ public class uniprot extends ParseActions
 
         executeUpdate(_updateAnnotsWithSeqsCommand, conn, "UpdateAnnotsWithSeqs");
 
+        if (context.isClearExisting())
+        {
+            int annotationsDeleted = executeUpdate(_clearExistingAnnotationsCommand, conn, "DeleteExistingAnnots");
+            _log.debug("Deleted " + annotationsDeleted + " existing annotations.");
+        }
+
+        return context.getAnnotations().size();
+    }
+
+    private int mergeAnnotations(ParseContext context, Connection conn) throws SQLException
+    {
         executeUpdate(_updateAnnotsWithIdentsCommand, conn, "UpdateAnnotsWithIdents");
 
         int result = executeUpdate(_insertIntoAnnotsCommand, conn, "InsertIntoAnnots");
-
-        executeUpdate(_dialect.getDropIndexCommand(_aTableName, "aAnnot_val"), conn);
-        executeUpdate(_dialect.getDropIndexCommand(_aTableName, "aAnnotType"), conn);
-        executeUpdate(_dialect.getDropIndexCommand(_aTableName, "aHashGenusSpecies"), conn);
-        executeUpdate("TRUNCATE TABLE " + _aTableName, conn, "TRUNCATE TABLE " + _aTableName);
 
         _log.debug("Done with annotations");
         return result;

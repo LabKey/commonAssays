@@ -1096,11 +1096,10 @@ public class ProteinManager
     }
 
 
-    public static void deleteAnnotationEntries(List<Integer> ids) throws SQLException
+    public static void deleteAnnotationInsertion(int id) throws SQLException
     {
-        SimpleFilter where = new SimpleFilter().addInClause("InsertId", ids);
-        SQLFragment sql = new SQLFragment("DELETE FROM " + ProteinManager.getTableInfoAnnotInsertions() + " ");
-        sql.append(where.getSQLFragment(getSqlDialect()));
+        SQLFragment sql = new SQLFragment("DELETE FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?");
+        sql.add(id);
 
         Table.execute(ProteinManager.getSchema(), sql);
     }

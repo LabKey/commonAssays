@@ -21,11 +21,11 @@ public class AnnotationInsertion
     private int _annotationsAdded;
     private int _identifiersAdded;
     private int _organismsAdded;
-    private int _mrmSize;
-    private int _mrmSequencesAdded;
-    private int _mrmAnnotationsAdded;
-    private int _mrmIdentifiersAdded;
-    private int _mrmOrganismsAdded;
+    private Integer _mrmSize;
+    private Integer _mrmSequencesAdded;
+    private Integer _mrmAnnotationsAdded;
+    private Integer _mrmIdentifiersAdded;
+    private Integer _mrmOrganismsAdded;
     private String _defaultOrganism;
     private boolean _organismShouldBeGuessed;
 
@@ -159,52 +159,52 @@ public class AnnotationInsertion
         _organismsAdded = organismsAdded;
     }
 
-    public int getMrmSize()
+    public Integer getMrmSize()
     {
         return _mrmSize;
     }
 
-    public void setMrmSize(int mrmSize)
+    public void setMrmSize(Integer mrmSize)
     {
         _mrmSize = mrmSize;
     }
 
-    public int getMrmSequencesAdded()
+    public Integer getMrmSequencesAdded()
     {
         return _mrmSequencesAdded;
     }
 
-    public void setMrmSequencesAdded(int mrmSequencesAdded)
+    public void setMrmSequencesAdded(Integer mrmSequencesAdded)
     {
         _mrmSequencesAdded = mrmSequencesAdded;
     }
 
-    public int getMrmAnnotationsAdded()
+    public Integer getMrmAnnotationsAdded()
     {
         return _mrmAnnotationsAdded;
     }
 
-    public void setMrmAnnotationsAdded(int mrmAnnotationsAdded)
+    public void setMrmAnnotationsAdded(Integer mrmAnnotationsAdded)
     {
         _mrmAnnotationsAdded = mrmAnnotationsAdded;
     }
 
-    public int getMrmIdentifiersAdded()
+    public Integer getMrmIdentifiersAdded()
     {
         return _mrmIdentifiersAdded;
     }
 
-    public void setMrmIdentifiersAdded(int mrmIdentifiersAdded)
+    public void setMrmIdentifiersAdded(Integer mrmIdentifiersAdded)
     {
         _mrmIdentifiersAdded = mrmIdentifiersAdded;
     }
 
-    public int getMrmOrganismsAdded()
+    public Integer getMrmOrganismsAdded()
     {
         return _mrmOrganismsAdded;
     }
 
-    public void setMrmOrganismsAdded(int mrmOrganismsAdded)
+    public void setMrmOrganismsAdded(Integer mrmOrganismsAdded)
     {
         _mrmOrganismsAdded = mrmOrganismsAdded;
     }

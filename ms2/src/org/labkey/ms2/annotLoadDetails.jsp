@@ -16,18 +16,18 @@
    <td align='left' class="ms-searchform">Completed</td><td align='right'><%=insertion.getCompletionDate() == null ? "Not complete" : h(DateUtil.formatDateTime(insertion.getCompletionDate()))%></td><td align='right'><%=h(DateUtil.formatDateTime(insertion.getChangeDate()))%></td>
 </tr>
 <tr>
-   <td align='left' class="ms-searchform">Records</td><td align='right'><%=insertion.getRecordsProcessed()%></td><td align='right'><%=insertion.getMrmSize()%></td>
+   <td align='left' class="ms-searchform">Records</td><td align='right'><%=h(insertion.getRecordsProcessed())%></td><td align='right'><%=h(insertion.getMrmSize())%></td>
 </tr>
 <tr>
-   <td align='left' class="ms-searchform">Organisms</td><td align='right'><%=insertion.getOrganismsAdded()%></td><td align='right'><%=insertion.getMrmOrganismsAdded()%></td>
+   <td align='left' class="ms-searchform">Organisms</td><td align='right'><%=h(insertion.getOrganismsAdded())%></td><td align='right'><%=h(insertion.getMrmOrganismsAdded())%></td>
 </tr>
 <tr>
-   <td align='left' class="ms-searchform">Sequences</td><td align='right'><%=insertion.getSequencesAdded()%></td><td align='right'><%=insertion.getMrmSequencesAdded()%></td>
+   <td align='left' class="ms-searchform">Sequences</td><td align='right'><%=h(insertion.getSequencesAdded())%></td><td align='right'><%=h(insertion.getMrmSequencesAdded())%></td>
 </tr>
 <tr>
-   <td align='left' class="ms-searchform">Identifiers</td><td align='right'><%=insertion.getIdentifiersAdded()%></td><td align='right'><%=insertion.getMrmIdentifiersAdded()%></td>
+   <td align='left' class="ms-searchform">Identifiers</td><td align='right'><%=h(insertion.getIdentifiersAdded())%></td><td align='right'><%=h(insertion.getMrmIdentifiersAdded())%></td>
 </tr>
 <tr>
-   <td align='left' class="ms-searchform">Annotations</td><td align='right'><%=insertion.getAnnotationsAdded()%></td><td align='right'><%=insertion.getMrmAnnotationsAdded()%></td>
+   <td align='left' class="ms-searchform">Annotations</td><td align='right'><%=h(insertion.getAnnotationsAdded())%></td><td align='right'><%=h(insertion.getMrmAnnotationsAdded())%></td>
 </tr>
 </table>

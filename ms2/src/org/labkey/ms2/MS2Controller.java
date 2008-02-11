@@ -147,7 +147,7 @@ public class MS2Controller extends SpringActionController
 
     private NavTree appendProteinAdminNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
     {
-        return appendAdminNavTrail(root, "Protein Database Admin", getShowProteinAdminUrl(), title, page, helpTopic);
+        return appendAdminNavTrail(root, "Protein Database Admin", MS2UrlsImpl.get().getShowProteinAdminUrl(), title, page, helpTopic);
     }
 
 
@@ -250,41 +250,36 @@ public class MS2Controller extends SpringActionController
         {
             proteinProphetURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("ProteinProphet", createVerifySelectedScript(view, proteinProphetURL));
+        compareMenu.addMenuItem("ProteinProphet", view.createVerifySelectedScript(proteinProphetURL, "runs"));
 
         ActionURL searchEngineURL = new ActionURL(MS2Controller.CompareSearchEngineProteinSetupAction.class, container);
         if (experimentRunIds)
         {
             searchEngineURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("Search Engine Protein", createVerifySelectedScript(view, searchEngineURL));
+        compareMenu.addMenuItem("Search Engine Protein", view.createVerifySelectedScript(searchEngineURL, "runs"));
 
         ActionURL peptidesURL = new ActionURL(MS2Controller.ComparePeptidesSetupAction.class, container);
         if (experimentRunIds)
         {
             peptidesURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("Peptide", createVerifySelectedScript(view, peptidesURL));
+        compareMenu.addMenuItem("Peptide", view.createVerifySelectedScript(peptidesURL, "runs"));
 
         ActionURL proteinProphetQueryURL = new ActionURL(MS2Controller.CompareProteinProphetQuerySetupAction.class, container);
         if (experimentRunIds)
         {
             proteinProphetQueryURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("ProteinProphet (Query)", createVerifySelectedScript(view, proteinProphetQueryURL));
+        compareMenu.addMenuItem("ProteinProphet (Query)", view.createVerifySelectedScript(proteinProphetQueryURL, "runs"));
 
         ActionURL spectraURL = new ActionURL(MS2Controller.SpectraCountSetupAction.class, container);
         if (experimentRunIds)
         {
             spectraURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("Spectra Count", createVerifySelectedScript(view, spectraURL));
+        compareMenu.addMenuItem("Spectra Count", view.createVerifySelectedScript(spectraURL, "runs"));
         return compareMenu;
-    }
-
-    public static String createVerifySelectedScript(DataView view, ActionURL url)
-    {
-        return "javascript: if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"post\", \"runs\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); }";
     }
 
     private ButtonBar getListButtonBar(Container c, GridView view)
@@ -1850,7 +1845,7 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getSuccessURL(Object o)
         {
-            return getShowProteinAdminUrl();
+            return MS2UrlsImpl.get().getShowProteinAdminUrl();
         }
     }
 
@@ -1877,14 +1872,8 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getSuccessURL(Object o)
         {
-            return getShowProteinAdminUrl();
+            return MS2UrlsImpl.get().getShowProteinAdminUrl();
         }
-    }
-
-
-    public static ActionURL getShowProteinAdminUrl()
-    {
-        return new ActionURL(ShowProteinAdminAction.class);
     }
 
 
@@ -1893,7 +1882,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            GridView grid = new GridView(getFastaAdminGrid());
+            GridView grid = getFastaAdminGrid();
             grid.setTitle("FASTA Files");
 
             grid.getViewContext().setPermissions(ACL.PERM_READ);
@@ -1906,6 +1895,89 @@ public class MS2Controller extends SpringActionController
             return new VBox(grid, annots);
         }
 
+        private DataRegion getAnnotInsertsGrid()
+        {
+            String columnNames = "InsertId, FileName, FileType, Comment, InsertDate, CompletionDate, RecordsProcessed";
+            DataRegion rgn = new DataRegion();
+
+            DisplayColumn threadControl1 = new DisplayThreadStatusColumn();
+            threadControl1.setName("threadControl");
+            threadControl1.setCaption("State");
+            rgn.addColumns(ProteinManager.getTableInfoAnnotInsertions(), columnNames);
+            rgn.getDisplayColumn("fileType").setWidth("20");
+            rgn.getDisplayColumn("insertId").setCaption("ID");
+            rgn.getDisplayColumn("insertId").setWidth("5");
+            ActionURL showUrl = getViewContext().cloneActionURL();
+            showUrl.setAction("showAnnotInsertDetails");
+            showUrl.deleteParameters();
+            String detailUrl = showUrl.getLocalURIString() + "insertId=${InsertId}";
+            rgn.getDisplayColumn("insertId").setURL(detailUrl);
+            rgn.addColumn(threadControl1);
+            rgn.setMaxRows(MAX_INSERTIONS_DISPLAY_ROWS);
+            rgn.setShowRecordSelectors(true);
+
+            ButtonBar bb = new ButtonBar();
+
+            ActionButton delete = new ActionButton("", "Delete Selected");
+            delete.setScript("alert(\"Note: this will not delete actual annotations,\\njust the entries on this list.\"); return verifySelected(this.form, \"deleteAnnotInsertEntries.post\", \"post\", \"annotations\")");
+            delete.setActionType(ActionButton.Action.GET);
+            bb.add(delete);
+
+            ActionButton insertAnnots = new ActionButton(new ActionURL(InsertAnnotsAction.class, getContainer()), "Load New Annot File");
+            insertAnnots.setActionType(ActionButton.Action.LINK);
+            bb.add(insertAnnots);
+
+            bb.add(new ActionButton("reloadSPOM.post", "Reload SWP Org Map"));
+
+            ActionButton reloadGO = new ActionButton("loadGo.view", "Load or Reload GO");
+            reloadGO.setActionType(ActionButton.Action.LINK);
+            bb.add(reloadGO);
+
+            rgn.setButtonBar(bb);
+            return rgn;
+        }
+
+        private GridView getFastaAdminGrid()
+        {
+            DataRegion rgn = new DataRegion();
+            rgn.setColumns(ProteinManager.getTableInfoFastaAdmin().getColumns("FileName, Loaded, FastaId, Runs"));
+            String runsUrl = ActionURL.toPathString("MS2", "showAllRuns", (String)null) + "?" + MS2Manager.getDataRegionNameRuns() + ".FastaId~eq=${FastaId}";
+            rgn.getDisplayColumn("Runs").setURL(runsUrl);
+            rgn.setFixedWidthColumns(false);
+            rgn.setShowRecordSelectors(true);
+
+            GridView result = new GridView(rgn);
+
+            ButtonBar bb = new ButtonBar();
+
+            ActionButton delete = new ActionButton("", "Delete");
+            delete.setScript("return verifySelected(this.form, \"deleteDataBases.post\", \"post\", \"databases\")");
+            delete.setActionType(ActionButton.Action.GET);
+            bb.add(delete);
+
+            ActionButton update = new ActionButton("button", "Reload FASTA");
+            update.setScript("return verifySelected(this.form, \"updateSeqIds.post\", \"post\", \"databases\")");
+            update.setActionType(ActionButton.Action.GET);
+            bb.add(update);
+
+            MenuButton setBestNameMenu = new MenuButton("Set Protein BestName...");
+            ActionURL setBestNameURL = new ActionURL(SetBestNameAction.class, getContainer());
+
+            setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.LOOKUP_STRING.toString());
+            setBestNameMenu.addMenuItem("to name from FASTA", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.IPI.toString());
+            setBestNameMenu.addMenuItem("to IPI (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.SWISS_PROT.toString());
+            setBestNameMenu.addMenuItem("to SwissProt (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.SWISS_PROT_ACCN.toString());
+            setBestNameMenu.addMenuItem("to SwissProtAccn (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+
+            bb.add(setBestNameMenu);
+
+            rgn.setButtonBar(bb, DataRegion.MODE_GRID);
+            return result;
+        }
+
         public NavTree appendNavTrail(NavTree root)
         {
             setTitle("Protein Database Admin");  // TODO: Admin nav trail
@@ -1913,73 +1985,87 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
-    private DataRegion getFastaAdminGrid()
+    public static class SetBestNameForm
     {
-        DataRegion rgn = new DataRegion();
-        rgn.setColumns(ProteinManager.getTableInfoFastaAdmin().getColumns("FileName, Loaded, FastaId, Runs"));
-        String runsUrl = ActionURL.toPathString("MS2", "showAllRuns", (String)null) + "?" + MS2Manager.getDataRegionNameRuns() + ".FastaId~eq=${FastaId}";
-        rgn.getDisplayColumn("Runs").setURL(runsUrl);
-        rgn.setFixedWidthColumns(false);
-        rgn.setShowRecordSelectors(true);
+        private enum NameType
+        { LOOKUP_STRING, IPI, SWISS_PROT, SWISS_PROT_ACCN };
 
-        ButtonBar bb = new ButtonBar();
+        private String _nameType;
 
-        ActionButton delete = new ActionButton("", "Delete");
-        delete.setScript("return verifySelected(this.form, \"deleteDataBases.post\", \"post\", \"databases\")");
-        delete.setActionType(ActionButton.Action.GET);
-        bb.add(delete);
+        public String getNameType()
+        {
+            return _nameType;
+        }
 
-        ActionButton update = new ActionButton("button", "Update SeqIds");
-        update.setScript("return verifySelected(this.form, \"updateSeqIds.post\", \"post\", \"databases\")");
-        update.setActionType(ActionButton.Action.GET);
-        bb.add(update);
+        public NameType lookupNameType()
+        {
+            return NameType.valueOf(getNameType());
+        }
 
-        rgn.setButtonBar(bb, DataRegion.MODE_GRID);
-        return rgn;
+        public void setNameType(String nameType)
+        {
+            _nameType = nameType;
+        }
     }
 
-
-    private DataRegion getAnnotInsertsGrid()
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class SetBestNameAction extends FormHandlerAction<SetBestNameForm>
     {
-        String columnNames = "InsertId, FileName, FileType, Comment, InsertDate, CompletionDate, RecordsProcessed";
-        DataRegion rgn = new DataRegion();
+        public void validateCommand(SetBestNameForm form, Errors errors)
+        {
+        }
 
-        DisplayColumn threadControl1 = new DisplayThreadStatusColumn();
-        threadControl1.setName("threadControl");
-        threadControl1.setCaption("State");
-        rgn.addColumns(ProteinManager.getTableInfoAnnotInsertions(), columnNames);
-        rgn.getDisplayColumn("fileType").setWidth("20");
-        rgn.getDisplayColumn("insertId").setCaption("ID");
-        rgn.getDisplayColumn("insertId").setWidth("5");
-        ActionURL showUrl = getViewContext().cloneActionURL();
-        showUrl.setAction("showAnnotInsertDetails");
-        showUrl.deleteParameters();
-        String detailUrl = showUrl.getLocalURIString() + "insertId=${InsertId}";
-        rgn.getDisplayColumn("insertId").setURL(detailUrl);
-        rgn.addColumn(threadControl1);
-        rgn.setMaxRows(MAX_INSERTIONS_DISPLAY_ROWS);
-        rgn.setShowRecordSelectors(true);
+        public boolean handlePost(SetBestNameForm form, BindException errors) throws Exception
+        {
+            int[] fastaIds = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
 
-        ButtonBar bb = new ButtonBar();
+            for (int fastaId : fastaIds)
+            {
+                SQLFragment identifierSQL;
+                switch (form.lookupNameType())
+                {
+                    case IPI:
+                        identifierSQL = new SQLFragment();
+                        identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinManager.getTableInfoIdentifiers() + " i, ");
+                        identifierSQL.append(ProteinManager.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
+                        identifierSQL.append(IdentifierType.IPI + "' AND " + ProteinManager.getTableInfoSequences() + ".SeqId = i.SeqId");
+                        break;
+                    case SWISS_PROT:
+                        identifierSQL = new SQLFragment();
+                        identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinManager.getTableInfoIdentifiers() + " i, ");
+                        identifierSQL.append(ProteinManager.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
+                        identifierSQL.append(IdentifierType.SwissProt + "' AND " + ProteinManager.getTableInfoSequences() + ".SeqId = i.SeqId");
+                        break;
+                    case SWISS_PROT_ACCN:
+                        identifierSQL = new SQLFragment();
+                        identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinManager.getTableInfoIdentifiers() + " i, ");
+                        identifierSQL.append(ProteinManager.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
+                        identifierSQL.append(IdentifierType.SwissProtAccn + "' AND " + ProteinManager.getTableInfoSequences() + ".SeqId = i.SeqId");
+                        break;
+                    case LOOKUP_STRING:
+                        identifierSQL = new SQLFragment();
+                        identifierSQL.append("SELECT MAX(fs.LookupString) FROM " + ProteinManager.getTableInfoFastaSequences() + " fs ");
+                        identifierSQL.append(" WHERE fs.SeqId = " + ProteinManager.getTableInfoSequences() + ".SeqId");
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unexpected NameType: " + form.lookupNameType());
+                }
 
-        ActionButton delete = new ActionButton("", "Delete Selected");
-        delete.setScript("alert(\"Note: this will not delete actual annotations,\\njust the entries on this list.\"); return verifySelected(this.form, \"deleteAnnotInsertEntries.post\", \"post\", \"annotations\")");
-        delete.setActionType(ActionButton.Action.GET);
-        bb.add(delete);
+                SQLFragment sql = new SQLFragment("UPDATE " + ProteinManager.getTableInfoSequences() + " SET BestName = (");
+                sql.append(identifierSQL);
+                sql.append(") WHERE " + ProteinManager.getTableInfoSequences() + ".SeqId IN (SELECT fs.SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " fs WHERE FastaId = " + fastaId + ") AND ");
+                sql.append("(");
+                sql.append(identifierSQL);
+                sql.append(") IS NOT NULL");
+                Table.execute(ProteinManager.getSchema(), sql);
+            }
+            return true;
+        }
 
-        ActionButton insertAnnots = new ActionButton("insertAnnots.view", "Load New Annot File");
-        insertAnnots.setActionType(ActionButton.Action.LINK);
-        bb.add(insertAnnots);
-
-        bb.add(new ActionButton("reloadSPOM.post", "Reload SWP Org Map"));
-
-        ActionButton reloadGO = new ActionButton("loadGo.view", "Load or Reload GO");
-        reloadGO.setActionType(ActionButton.Action.LINK);
-        bb.add(reloadGO);
-
-        rgn.setButtonBar(bb);
-        return rgn;
+        public ActionURL getSuccessURL(SetBestNameForm form)
+        {
+            return MS2UrlsImpl.get().getShowProteinAdminUrl();
+        }
     }
 
 
@@ -4121,7 +4207,7 @@ public class MS2Controller extends SpringActionController
         {
             ProteinDictionaryHelpers.loadProtSprotOrgMap();
 
-            return getShowProteinAdminUrl();
+            return MS2UrlsImpl.get().getShowProteinAdminUrl();
         }
     }
 
@@ -4751,7 +4837,7 @@ public class MS2Controller extends SpringActionController
             //TODO: this style of dealing with different file types must be repaired.
             if ("uniprot".equalsIgnoreCase(form.getFileType()))
             {
-                loader = new XMLProteinLoader(fname);
+                loader = new XMLProteinLoader(fname, form.isClearExisting());
             }
             else if ("fasta".equalsIgnoreCase(form.getFileType()))
             {
@@ -4784,7 +4870,7 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getSuccessURL(LoadAnnotForm loadAnnotForm)
         {
-            return getShowProteinAdminUrl();
+            return MS2UrlsImpl.get().getShowProteinAdminUrl();
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -4795,66 +4881,73 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static class LoadAnnotForm extends FormData
+    public static class LoadAnnotForm
     {
-        private String fileType;
+        private String _fileType = "uniprot";
+        private String _comment;
+        private String _fileName;
+        private String _defaultOrganism = "Unknown unknown";
+        private String _shouldGuess = "1";
+        private boolean _clearExisting;
 
         public void setFileType(String ft)
         {
-            this.fileType = ft;
+            _fileType = ft;
         }
 
         public String getFileType()
         {
-            return this.fileType;
+            return _fileType;
         }
-
-        private String fileName;
 
         public void setFileName(String file)
         {
-            this.fileName = file;
+            _fileName = file;
         }
 
         public String getFileName()
         {
-            return this.fileName;
+            return _fileName;
         }
-
-        private String comment;
 
         public void setComment(String s)
         {
-            this.comment = s;
+            _comment = s;
         }
 
         public String getComment()
         {
-            return this.comment;
+            return _comment;
         }
-
-        private String defaultOrganism = "Unknown unknown";
 
         public String getDefaultOrganism()
         {
-            return this.defaultOrganism;
+            return _defaultOrganism;
         }
 
         public void setDefaultOrganism(String o)
         {
-            this.defaultOrganism = o;
+            _defaultOrganism = o;
         }
-
-        private String shouldGuess = "1";
 
         public String getShouldGuess()
         {
-            return shouldGuess;
+            return _shouldGuess;
         }
 
         public void setShouldGuess(String shouldGuess)
         {
-            this.shouldGuess = shouldGuess;
+            _shouldGuess = shouldGuess;
+        }
+
+        public boolean isClearExisting()
+        {
+            return _clearExisting;
+        }
+
+        public void setClearExisting(boolean clearExisting)
+        {
+            _clearExisting = clearExisting;
         }
     }
 
@@ -4864,30 +4957,39 @@ public class MS2Controller extends SpringActionController
     {
         public ActionURL getRedirectURL(Object o) throws Exception
         {
-            List<String> postedList = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);   // TODO: Use a form bean array?
-            List<Integer> idList = new ArrayList<Integer>(postedList.size());
+            int[] ids = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
 
-            for (String id : postedList)
-                idList.add(Integer.parseInt(id));
+            for (int id : ids)
+                ProteinManager.deleteAnnotationInsertion(id);
 
-            ProteinManager.deleteAnnotationEntries(idList);
-
-            return getShowProteinAdminUrl();
+            return MS2UrlsImpl.get().getShowProteinAdminUrl();
         }
     }
 
 
+    public static class AnnotationInsertionForm
+    {
+        private int _insertId;
+
+        public int getInsertId()
+        {
+            return _insertId;
+        }
+
+        public void setInsertId(int insertId)
+        {
+            _insertId = insertId;
+        }
+    }
+
     @RequiresSiteAdmin
-    public class ShowAnnotInsertDetailsAction extends SimpleViewAction
+    public class ShowAnnotInsertDetailsAction extends SimpleViewAction<AnnotationInsertionForm>
     {
         AnnotationInsertion _insertion;
 
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(AnnotationInsertionForm form, BindException errors) throws Exception
         {
-            ActionURL urlhelp = getViewContext().cloneActionURL();
-            String insertIdStr = urlhelp.getParameter("insertId");
-            int insertId = Integer.parseInt(insertIdStr);
-            AnnotationInsertion[] insertions = Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=?", new Object[] { insertId }, AnnotationInsertion.class);
+            AnnotationInsertion[] insertions = Table.executeQuery(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=?", new Object[] { form.getInsertId() }, AnnotationInsertion.class);
             if (insertions.length == 0)
             {
                 return HttpView.throwNotFoundMV();
@@ -5155,7 +5257,7 @@ public class MS2Controller extends SpringActionController
                 }
             }
 
-            return getShowProteinAdminUrl();
+            return MS2UrlsImpl.get().getShowProteinAdminUrl();
         }
     }
 
@@ -5482,6 +5584,13 @@ public class MS2Controller extends SpringActionController
         {
             return new ActionURL(MS2Controller.ShowPeptideAction.class, ContainerManager.getForId(run.getContainer())).addParameter("run", run.getRun());
         }
+
+        public ActionURL getShowProteinAdminUrl()
+        {
+            return new ActionURL(ShowProteinAdminAction.class);
+        }
+
+
 
         public static MS2UrlsImpl get()
         {

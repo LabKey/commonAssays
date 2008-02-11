@@ -31,6 +31,8 @@ import java.sql.SQLException;
 
 public class XMLProteinLoader extends DefaultAnnotationLoader implements AnnotationLoader
 {
+    private final boolean _clearExisting;
+
     public int getId()
     {
         return 0;
@@ -43,10 +45,21 @@ public class XMLProteinLoader extends DefaultAnnotationLoader implements Annotat
 
     public XMLProteinLoader(String fileName)
     {
+        this(fileName, false);
+    }
+
+    public XMLProteinLoader(String fileName, boolean clearExisting)
+    {
+        _clearExisting = clearExisting;
         // Declare which package our individual parsers belong
         // to.  We assume that the package is a child of the
         // current package with the loaderPrefix appended
         _parseFName = fileName;
+    }
+
+    public boolean isClearExisting()
+    {
+        return _clearExisting;
     }
 
     public void parseFile() throws SQLException, IOException, SAXException

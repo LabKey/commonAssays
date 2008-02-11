@@ -23,7 +23,7 @@
     <tr>
       <td>Type:</td>
       <td>
-       <select name='fileType' onchange="document.getElementById('fastaOnly').style.display = 'fasta' == this.value ? 'block' : 'none';">
+       <select name='fileType' onchange="document.getElementById('fastaOnly').style.display = 'fasta' == this.value ? 'block' : 'none'; document.getElementById('uniprotOnly').style.display = 'uniprot' == this.value ? 'block' : 'none';">
           <option value='uniprot' <% if ("uniprot".equals(bean.getFileType())) { %>selected<% } %>>uniprot</option>
           <option value='fasta' <% if ("fasta".equals(bean.getFileType())) { %>selected<% } %>>fasta</option>
        </select>
@@ -40,6 +40,12 @@
                 <tr>
                    <td>Default Organism:</td>
                    <td><input type='text' name='defaultOrganism' size='50' value='<%= bean.getDefaultOrganism() %>'></td>
+                </tr>
+            </table>
+            <table id="uniprotOnly" style="display: <%= "uniprot".equals(bean.getFileType()) ? "block" : "none" %>;">
+                <tr>
+                   <td>Clear existing identifiers and annotations?</td>
+                   <td><input type='checkbox' name='clearExisting' <%= bean.isClearExisting() ? "checked" : ""%>><%= helpPopup("Clear Existing", "By default, LabKey Server will merge protein identifiers and annotations with the ones it has already loaded. By checking this box, you can make the server clear out any existing identifiers and annotations it might have, so that the ones in the new file replace them.")%></td>
                 </tr>
             </table>
         </td>
