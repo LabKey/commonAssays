@@ -1107,6 +1107,7 @@ opensso/src/org/labkey/opensso/OpenSSOProvider.java -text
 opensso/src/org/labkey/opensso/clientDefault.properties -text
 opensso/src/org/labkey/opensso/view/configure.jsp -text
 opensso/src/org/labkey/opensso/view/currentSettings.jsp -text
+opensso/src/org/labkey/opensso/view/referrerPrefix.jsp -text
 portal/module.properties -text
 portal/src/org/labkey/portal/PortalModule.java -text
 portal/src/org/labkey/portal/customizeSearchWebPart.gm -text

@@ -692,7 +692,7 @@ public abstract class MS2Importer
         {
             Integer current = getPercentComplete();
 
-            if (current == _previous)
+            if (current.equals(_previous))
                 return null;
 
             _previous = current;

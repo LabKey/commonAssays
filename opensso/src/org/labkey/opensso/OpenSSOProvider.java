@@ -4,9 +4,11 @@ import com.iplanet.sso.SSOException;
 import com.iplanet.sso.SSOToken;
 import com.iplanet.sso.SSOTokenManager;
 import org.apache.log4j.Logger;
+import org.labkey.api.security.AuthenticationManager;
 import org.labkey.api.security.AuthenticationProvider;
 import org.labkey.api.security.ValidEmail;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.RedirectException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 public class OpenSSOProvider implements AuthenticationProvider.RequestAuthenticationProvider
 {
     private static final Logger _log = Logger.getLogger(OpenSSOProvider.class);
+    public static final String NAME = "OpenSSO";
 
     public boolean isPermanent()
     {
@@ -32,19 +35,16 @@ public class OpenSSOProvider implements AuthenticationProvider.RequestAuthentica
 
     public String getName()
     {
-        return "OpenSSO";
+        return NAME;
     }
 
     public ActionURL getConfigurationLink(ActionURL returnUrl)
     {
-        return OpenSSOController.getCurrentSettingsUrl(returnUrl);
+        return OpenSSOController.getCurrentSettingsURL(returnUrl);
     }
 
-    public ValidEmail authenticate(HttpServletRequest request, HttpServletResponse response) throws ValidEmail.InvalidEmailException
+    public ValidEmail authenticate(HttpServletRequest request, HttpServletResponse response) throws ValidEmail.InvalidEmailException, RedirectException
     {
-        // TODO: If no valid opensso cookie look for opensso param and automatically redirect
-        // ... if not, return null, and rely on login screen to present link to opensso
-
         try
         {
             SSOTokenManager manager = SSOTokenManager.getInstance();
@@ -62,8 +62,34 @@ public class OpenSSOProvider implements AuthenticationProvider.RequestAuthentica
             _log.debug("Invalid, expired, or missing OpenSSO token", e);
         }
 
-        return null;
+        String referrerPrefix = OpenSSOManager.get().getReferrerPrefix();
+
+        if (null != referrerPrefix)
+        {
+            // Note to developers: this is difficult to test/debug because (in my experience) "referer" is null when linking
+            // to http://localhost.  Use an actual domain name to test this code (e.g., http://dhcp155191.fhcrc.org).
+            String referer = request.getHeader("Referer");
+
+            if (null != referer && referer.startsWith(referrerPrefix))
+            {
+                AuthenticationManager.LinkFactory factory = AuthenticationManager.getLinkFactory(NAME);
+
+                if (null != factory)
+                {
+                    String returnURL = request.getParameter("URI");
+
+                    if (null != returnURL)
+                    {
+                        String url = factory.getURL(new ActionURL(returnURL));
+                        throw new RedirectException(url);
+                    }
+                }
+            }
+        }
+
+        return null;     // Rely on login screen to present link to OpenSSO
     }
+
 
     public void logout(HttpServletRequest request)
     {

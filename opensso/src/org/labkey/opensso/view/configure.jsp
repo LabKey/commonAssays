@@ -14,7 +14,7 @@
     {
         String value = bean.props.get(key);
 %>
-<tr><td><%=key%></td><td><input type="text" name="<%=key%>" value="<%=value%>" style="width:400px;"></td></tr><%
+<tr><td class="ms-searchform"><%=key%></td><td><input type="text" name="<%=key%>" value="<%=value%>" style="width:400px;"></td></tr><%
     }
 %>
 </table><br>

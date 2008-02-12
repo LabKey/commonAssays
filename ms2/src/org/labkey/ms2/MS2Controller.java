@@ -2924,17 +2924,28 @@ public class MS2Controller extends SpringActionController
             ContainerDisplayColumn cdc = new ContainerDisplayColumn(MS2Manager.getTableInfoRuns().getColumn("Container"));
             cdc.setCaption("Folder");
 
-            ActionURL containerUrl = getViewContext().cloneActionURL().setAction("showList");
+            ActionURL containerURL = getViewContext().cloneActionURL().setAction("showList");
 
             // We don't want ActionURL to encode ${ContainerPath}, so set a dummy value and use string substitution
-            String urlString = containerUrl.setExtraPath("ContainerPath").getLocalURIString().replaceFirst("/ContainerPath/", "\\$\\{ContainerPath}/");
+            String urlString = containerURL.setExtraPath("ContainerPath").getLocalURIString().replaceFirst("/ContainerPath/", "\\$\\{ContainerPath}/");
             cdc.setURL(urlString);
             rgn.addColumn(cdc);
-            rgn.addColumns(MS2Manager.getTableInfoRuns().getColumns("Description, Path, Created, Deleted, StatusId, Status, PeptideCount, SpectrumCount, FastaId"));
 
+            DataColumn descriptionColumn = new DataColumn(MS2Manager.getTableInfoRuns().getColumn("Description")) {
+                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                {
+                    if (null != ctx.get("ContainerPath"))
+                        super.renderGridCellContents(ctx, out);
+                    else
+                        out.write(getFormattedValue(ctx));
+                }
+            };
             ActionURL showRunUrl = new ActionURL("MS2", "showRun", "ContainerPath");
             String showUrlString = showRunUrl.getLocalURIString().replaceFirst("/ContainerPath/", "\\$\\{ContainerPath}/") + "run=${Run}";
-            rgn.getDisplayColumn("Description").setURL(showUrlString);
+            descriptionColumn.setURL(showUrlString);
+            rgn.addColumn(descriptionColumn);
+
+            rgn.addColumns(MS2Manager.getTableInfoRuns().getColumns("Path, Created, Deleted, StatusId, Status, PeptideCount, SpectrumCount, FastaId"));
 
             GridView gridView = new GridView(rgn);
             gridView.getRenderContext().setUseContainerFilter(false);

@@ -9,16 +9,17 @@
     ConfigProperties bean = me.getModelBean();
 %>
 <table>
-    <tr><td colspan="2"><a href="<%=bean.authLogoUrl%>">Pick a logo and link to use for OpenSSO sign in</a></td></tr>
+    <tr><td colspan="2">[<a href="<%=bean.authLogoURL%>">Pick a logo and link to use for OpenSSO sign in</a>]</td></tr>
+    <tr><td colspan="2">[<a href="<%=bean.pickRefererPrefixURL%>">Enter a referrer URL prefix that will automatically redirect to the OpenSSO link</a>]</td></tr>
     <tr><td colspan="2">&nbsp;</td></tr><%
 
     for (String key : bean.props.keySet())
     {
         String value = bean.props.get(key);
 %>
-<tr><td><%=key%></td><td><%=value%></td></tr><%
+<tr><td class="ms-searchform"><%=key%></td><td><%=value%></td></tr><%
     }
 %>
 </table><br>
-<%=PageFlowUtil.buttonLink("Update", OpenSSOController.getConfigureUrl(getViewContext().getActionURL()))%>
+<%=PageFlowUtil.buttonLink("Update", OpenSSOController.getConfigureURL(getViewContext().getActionURL()))%>
 <%=PageFlowUtil.buttonLink("Done", bean.getReturnUrl())%>

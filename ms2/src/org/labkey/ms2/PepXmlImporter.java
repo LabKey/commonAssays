@@ -23,6 +23,7 @@ import org.labkey.api.exp.XarContext;
 import org.labkey.api.security.User;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.ResultSetUtil;
 import org.labkey.common.tools.*;
 import org.labkey.common.tools.PepXmlLoader.FractionIterator;
 import org.labkey.common.tools.PepXmlLoader.PepXmlFraction;
@@ -441,8 +442,7 @@ public class PepXmlImporter extends MS2Importer
         }
         finally
         {
-            if (null != rs)
-                rs.close();
+            ResultSetUtil.close(rs);
         }
     }
 
