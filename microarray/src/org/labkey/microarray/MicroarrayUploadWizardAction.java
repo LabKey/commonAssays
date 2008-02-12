@@ -134,16 +134,18 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
 
     protected void addSampleInputColumns(ExpProtocol protocol, InsertView insertView)
     {
-        insertView.getDataRegion().addColumn(new SampleChooserDisplayColumn(MicroarrayAssayProvider.SAMPLE_COUNT));
+        insertView.getDataRegion().addColumn(new SampleChooserDisplayColumn(MicroarrayAssayProvider.MIN_SAMPLE_COUNT, MicroarrayAssayProvider.MAX_SAMPLE_COUNT));
     }
 
     private class SampleChooserDisplayColumn extends SimpleDisplayColumn
     {
-        private final int _count;
+        private final int _minCount;
+        private final int _maxCount;
 
-        public SampleChooserDisplayColumn(int count)
+        public SampleChooserDisplayColumn(int minCount, int maxCount)
         {
-            _count = count;
+            _minCount = minCount;
+            _maxCount = maxCount;
             setCaption("Samples");
         }
 
@@ -156,7 +158,9 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
         {
             Map<String, String> props = new HashMap<String, String>();
 
-            for (int i = 0; i < _count; i++)
+            out.write("<input type=\"hidden\" name=\"" + SampleChooser.SAMPLE_COUNT_ELEMENT_NAME + "\" id=\"" + SampleChooser.SAMPLE_COUNT_ELEMENT_NAME + "\"/>\n");
+
+            for (int i = 0; i < _maxCount; i++)
             {
                 String lsidID = SampleInfo.getLsidFormElementID(i);
                 String nameID = SampleInfo.getNameFormElementID(i);
@@ -164,7 +168,8 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
                 out.write("<input type=\"hidden\" name=\"" + nameID + "\" id=\"" + nameID + "\"/>\n");
             }
 
-            props.put(SampleChooser.PROP_NAME_SAMPLE_COUNT, Integer.toString(_count));
+            props.put(SampleChooser.PROP_NAME_MAX_SAMPLE_COUNT, Integer.toString(_maxCount));
+            props.put(SampleChooser.PROP_NAME_MIN_SAMPLE_COUNT, Integer.toString(_minCount));
             ExpSampleSet sampleSet = ExperimentService.get().lookupActiveSampleSet(ctx.getContainer());
             if (sampleSet != null)
             {

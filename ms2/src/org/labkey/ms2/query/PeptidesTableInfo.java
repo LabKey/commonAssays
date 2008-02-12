@@ -170,6 +170,20 @@ public class PeptidesTableInfo extends FilteredTable
             }
         });
 
+        SQLFragment trypticSQL = new SQLFragment();
+        trypticSQL.append("((CASE WHEN (");
+        trypticSQL.append(strippedPeptideSQL);
+        trypticSQL.append(" " + dialect.getCharClassLikeOperator() + " '[KR][^P]%' OR ");
+        trypticSQL.append(strippedPeptideSQL);
+        trypticSQL.append(" " + dialect.getCharClassLikeOperator() + " '-%') THEN 1 ELSE 0 END) + ");
+        trypticSQL.append("(CASE WHEN (");
+        trypticSQL.append(strippedPeptideSQL);
+        trypticSQL.append(" " + dialect.getCharClassLikeOperator() + " '%[KR][^P]' OR ");
+        trypticSQL.append(strippedPeptideSQL);
+        trypticSQL.append(" " + dialect.getCharClassLikeOperator() + " '%-') THEN 1 ELSE 0 END))");
+        ExprColumn trypricEndsColumn = new ExprColumn(this, "TrypticEnds", trypticSQL, Types.INTEGER);
+        addColumn(trypricEndsColumn);
+
         SQLFragment spectrumSQL = new SQLFragment();
         spectrumSQL.append("(SELECT Spectrum FROM ");
         spectrumSQL.append(MS2Manager.getTableInfoSpectraData());

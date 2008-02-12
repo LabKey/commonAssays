@@ -128,63 +128,53 @@ public class FeatureExtractionPipelineJob extends PipelineJob
             }
 
             info("Initiating feature extraction process...");
-            iReturn = extractionClient.run(imageFiles);
-
-            File resultsFile = ArrayPipelineManager.getResultsFile(_dirImages, extractionClient.getTaskId());
-            if (iReturn != 0 || !resultsFile.exists())
-            {
-                error("Failed running Feature Extraction process, error code " + iReturn);
-                return;
-            }
-
-            if (resultsFile.exists())
-            {
-                info("Extracting data from results file archive.");
-                GZIPInputStream zIn = null;
-                TarInputStream tIn = null;
-                try
-                {
-                    zIn = new GZIPInputStream(new FileInputStream(resultsFile));
-                    tIn = new TarInputStream(zIn);
-                    TarEntry entry;
-                    while((entry = tIn.getNextEntry()) != null)
-                    {
-                        File extractedFile = new File(_dirImages, entry.getName());
-                        if (entry.isDirectory())
-                        {
-                            extractedFile.mkdirs();
-                        }
-                        else
-                        {
-                            FileOutputStream fOut = null;
-                            try
-                            {
-                                fOut = new FileOutputStream(extractedFile);
-                                byte[] b = new byte[4096];
-                                int count;
-                                while ((count = tIn.read(b, 0, b.length)) >= 0)
-                                {
-                                    fOut.write(b, 0, count);
-                                }
-                            }
-                            finally
-                            {
-                                if (fOut != null) { try { fOut.close(); } catch (IOException e) {} }
-                            }
-                        }
-                    }
-                }
-                finally
-                {
-                    if (tIn != null) { try { tIn.close(); } catch (IOException e) {} }
-                    if (zIn != null) { try { zIn.close(); } catch (IOException e) {} }
-                }
-            }
+            File resultsFile = extractionClient.run(imageFiles);
 
             if (!resultsFile.exists())
             {
-                error("Failed to extract results archive. Results file does not exist.");
+                error("Failed running Feature Extraction process, results file was expected at " + resultsFile);
                 return;
+            }
+
+            info("Extracting data from results file archive.");
+            GZIPInputStream zIn = null;
+            TarInputStream tIn = null;
+            try
+            {
+                zIn = new GZIPInputStream(new FileInputStream(resultsFile));
+                tIn = new TarInputStream(zIn);
+                TarEntry entry;
+                while((entry = tIn.getNextEntry()) != null)
+                {
+                    File extractedFile = new File(_dirImages, entry.getName());
+                    if (entry.isDirectory())
+                    {
+                        extractedFile.mkdirs();
+                    }
+                    else
+                    {
+                        FileOutputStream fOut = null;
+                        try
+                        {
+                            fOut = new FileOutputStream(extractedFile);
+                            byte[] b = new byte[4096];
+                            int count;
+                            while ((count = tIn.read(b, 0, b.length)) >= 0)
+                            {
+                                fOut.write(b, 0, count);
+                            }
+                        }
+                        finally
+                        {
+                            if (fOut != null) { try { fOut.close(); } catch (IOException e) {} }
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                if (tIn != null) { try { tIn.close(); } catch (IOException e) {} }
+                if (zIn != null) { try { zIn.close(); } catch (IOException e) {} }
             }
 
             info("Deleting results archive '" + resultsFile.getAbsolutePath() + "'");

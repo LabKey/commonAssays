@@ -2,7 +2,6 @@ package org.labkey.microarray.sampleset.client;
 
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import org.labkey.microarray.sampleset.client.model.GWTSampleSet;
 import org.labkey.microarray.sampleset.client.model.GWTMaterial;
 import org.labkey.api.gwt.client.ui.FormUtil;
@@ -13,18 +12,23 @@ import org.labkey.api.gwt.client.ui.FormUtil;
  */
 public class SampleInfo
 {
+    private Label _label;
     private ListBox _sampleSetListBox;
     private ListBox _materialListBox;
     private TextBox _materialTextBox;
     private String _name;
     private SampleCache _cache;
     private int _index;
+    private boolean _selected;
+    private GWTSampleSet _sampleSet;
 
     public SampleInfo(int index, SampleCache cache)
     {
         _name = "Sample " + (index + 1);
         _index = index;
         _cache = cache;
+
+        _label = new Label(_name);
 
         _sampleSetListBox = new ListBox();
         _materialListBox = new ListBox();
@@ -82,6 +86,11 @@ public class SampleInfo
         return _name;
     }
 
+    public Label getLabel()
+    {
+        return _label;
+    }
+
     public ListBox getSampleSetListBox()
     {
         return _sampleSetListBox;
@@ -119,21 +128,44 @@ public class SampleInfo
     private void updateMaterialListBox(final GWTSampleSet sampleSet)
     {
         _materialListBox.clear();
-        if (SampleChooser.NONE_SAMPLE_SET.equals(sampleSet))
+        _sampleSet = sampleSet;
+
+        if (!SampleChooser.NONE_SAMPLE_SET.equals(_sampleSet))
         {
-            _materialListBox.setVisible(false);
-            // Do this to prevent layout changes
-            DOM.setStyleAttribute(_materialTextBox.getElement(), "visibility", "visible");
+            populateMaterials(_cache.getMaterials(_sampleSet));
+        }
+        refreshVisibility();
+    }
+
+    private void refreshVisibility()
+    {
+        if (_selected)
+        {
+            DOM.setStyleAttribute(_label.getElement(), "visibility", "visible");
+            DOM.setStyleAttribute(_sampleSetListBox.getElement(), "visibility", "visible");
+            DOM.setStyleAttribute(_materialListBox.getElement(), "visibility", "visible");
+
+            if (SampleChooser.NONE_SAMPLE_SET.equals(_sampleSet))
+            {
+                _materialListBox.setVisible(false);
+                // Do this to prevent layout changes
+                DOM.setStyleAttribute(_materialTextBox.getElement(), "visibility", "visible");
+            }
+            else
+            {
+                populateMaterials(_cache.getMaterials(_sampleSet));
+
+                _materialListBox.setVisible(true);
+                // Do this to prevent layout changes
+                DOM.setStyleAttribute(_materialTextBox.getElement(), "visibility", "hidden");
+            }
         }
         else
         {
-            populateMaterials(_cache.getMaterials(sampleSet));
-
-            _materialListBox.setVisible(true);
-            // Do this to prevent layout changes
-            DOM.setStyleAttribute(_materialTextBox.getElement(), "visibility", "hidden");
+            DOM.setStyleAttribute(_label.getElement(), "visibility", "hidden");
+            DOM.setStyleAttribute(_sampleSetListBox.getElement(), "visibility", "hidden");
+            DOM.setStyleAttribute(_materialListBox.getElement(), "visibility", "hidden");
         }
-
     }
 
     private void populateMaterials(GWTMaterial[] materials)
@@ -187,5 +219,11 @@ public class SampleInfo
     public static String getNameFormElementID(int index)
     {
         return "__sample" + index + "Name";
+    }
+
+    public void setVisible(boolean selected)
+    {
+        _selected = selected;
+        refreshVisibility();
     }
 }

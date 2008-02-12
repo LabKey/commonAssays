@@ -507,17 +507,17 @@ public class ProteinManager
 
         private String nTerm(SqlDialect dialect)
         {
-            return "(Peptide " + dialect.getCharClassLikeOperator() + " '[KR].[^P]%' OR Peptide " + dialect.getCharClassLikeOperator() + " '-.%')";
+            return "(StrippedPeptide " + dialect.getCharClassLikeOperator() + " '[KR][^P]%' OR StrippedPeptide " + dialect.getCharClassLikeOperator() + " '-%')";
         }
 
         private String cTerm(SqlDialect dialect)
         {
-            return "(Peptide " + dialect.getCharClassLikeOperator() + " '%[KR].[^P]' OR Peptide " + dialect.getCharClassLikeOperator() + " '%.-')";
+            return "(StrippedPeptide " + dialect.getCharClassLikeOperator() + " '%[KR][^P]' OR StrippedPeptide " + dialect.getCharClassLikeOperator() + " '%-')";
         }
 
         public List<String> getColumnNames()
         {
-            return Arrays.asList("Peptide");
+            return Arrays.asList("StrippedPeptide");
         }
 
         @Override

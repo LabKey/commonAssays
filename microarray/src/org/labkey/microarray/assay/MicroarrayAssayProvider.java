@@ -21,6 +21,7 @@ import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.MicroarraySchema;
 import org.labkey.microarray.MicroarrayUploadWizardAction;
 import org.labkey.microarray.sampleset.client.SampleInfo;
+import org.labkey.microarray.sampleset.client.SampleChooser;
 
 import java.util.*;
 import java.io.File;
@@ -35,7 +36,8 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
     public static final String PROTOCOL_PREFIX = "MicroarrayAssayProtocol";
     public static final String NAME = "Microarray";
 
-    public static final int SAMPLE_COUNT = 2;
+    public static final int MAX_SAMPLE_COUNT = 2;
+    public static final int MIN_SAMPLE_COUNT = 1;
 
     public MicroarrayAssayProvider()
     {
@@ -67,11 +69,18 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         return new RunDataTable(schema, alias, protocol);
     }
 
+    protected Domain createRunDomain(Container c, User user)
+    {
+        Domain result = super.createRunDomain(c, user);
+        result.setDescription(result.getDescription() + " You may enter an XPath expression in the description for the property. If you do, when uploading a run the server will look in the MAGEML file for the value.");
+        return result;
+    }
+
     public List<Domain> createDefaultDomains(Container c, User user)
     {
         List<Domain> result = super.createDefaultDomains(c, user);
         Domain dataDomain = PropertyService.get().createDomain(c, "urn:lsid:${LSIDAuthority}:" + ExpProtocol.ASSAY_DOMAIN_DATA + ".Folder-${Container.RowId}:" + ASSAY_NAME_SUBSTITUTION, "Data Properties");
-        dataDomain.setDescription("The user is prompted to select a MAGEML file that contains the data values.");
+        dataDomain.setDescription("The user is prompted to select a MAGEML file that contains the data values. If the spot-level data within the file contains a column that matches the data column name here, it will be imported.");
         result.add(dataDomain);
         return result;
     }
@@ -192,7 +201,25 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
 
     protected void addInputMaterials(AssayRunUploadContext context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
-        for (int i = 0; i < SAMPLE_COUNT; i++)
+        String countString = context.getRequest().getParameter(SampleChooser.SAMPLE_COUNT_ELEMENT_NAME);
+        int count;
+        if (countString != null)
+        {
+            try
+            {
+                count = Integer.parseInt(countString);
+            }
+            catch (NumberFormatException e)
+            {
+                count = MAX_SAMPLE_COUNT;
+            }
+        }
+        else
+        {
+            count = MAX_SAMPLE_COUNT;
+        }
+
+        for (int i = 0; i < count; i++)
         {
             String lsid = context.getRequest().getParameter(SampleInfo.getLsidFormElementID(i));
             String name = context.getRequest().getParameter(SampleInfo.getNameFormElementID(i));

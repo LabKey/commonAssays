@@ -31,6 +31,9 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
     private static volatile int _lastWorkingSet = 0;
     private static volatile String _lastWorkingUrl = "";
     private static volatile String _lastProvidedUrl = "";
+    private static final int MAX_RETRIES = 3;
+    private static final int PING_DELAY = 30; // In seconds
+
 
     public AgilentFeatureExtractionClientImpl(String url)
     {
@@ -169,16 +172,17 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         return results.getProperty("HTTPContent", "");
     }
 
-    public int run(File[] imageFiles) throws ExtractionException
+    public File run(File[] imageFiles) throws ExtractionException
     {
 //        _taskId = "1199843396163";
-//        return 0;
+        File resultsFile = ArrayPipelineManager.getResultsFile(imageFiles[0].getParentFile(), _taskId);
+//        if (1 == 1)
+//        {
+//            return resultsFile;
+//        }
 
         _instanceLogger.info("Creating FeatureExtraction session...");
         startSession();
-
-        int returnCode = 0;
-        final int delayAfterSubmitSec = 30;
 
         // submit job to feature extraction server
         _instanceLogger.info("Submitting job to FeatureExtraction server (taskId=" + _taskId + ").");
@@ -188,83 +192,92 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
             _instanceLogger.info("Retrieving remote log file.");
             getLogFile(_taskId);
             _instanceLogger.info("Finished retrieving remote log file.");
-            returnCode = 3;
+            throw new ExtractionException("Failed to submit job to Feature Extraction server.");
         }
-        else
-        {
-            String prevExtractionStatus = null;
-            String extractionStatus;
-            File resultsFile = ArrayPipelineManager.getResultsFile(imageFiles[0].getParentFile(), _taskId);
-            int retryCount = 0;
-            while (retryCount++ < 3)
-            {
-                if (retryCount > 1)
-                    _instanceLogger.warn("Trying to download results file again; try number " + retryCount);
-                while (true)
-                {
-                    try
-                    {
-                        Thread.sleep(delayAfterSubmitSec * 1000);
-                    }
-                    catch (InterruptedException e)
-                    {
-                    }
 
-                    extractionStatus = getTaskStatus(_taskId);
-                    if (null == prevExtractionStatus || !extractionStatus.equals(prevExtractionStatus))
-                        _instanceLogger.info("Feature Extraction job status: " + extractionStatus);
-                    prevExtractionStatus = extractionStatus;
-                    if (!extractionStatus.toLowerCase().contains("waiting") &&
-                            !extractionStatus.toLowerCase().contains("extracting"))
-                    {
-                        break;
-                    }
-                }
-                if (!extractionStatus.toLowerCase().contains("complete"))
+        String prevExtractionStatus = null;
+        String extractionStatus;
+        int retryCount = 0;
+        ExtractionException previousFailure = null;
+
+        while (retryCount++ < MAX_RETRIES)
+        {
+            if (retryCount > 1)
+                _instanceLogger.warn("Trying to download results file again; try number " + retryCount);
+
+            extractionStatus = waitForCompletion(prevExtractionStatus);
+
+            if (!extractionStatus.toLowerCase().contains("complete"))
+            {
+                _instanceLogger.info("Bad status returned '" + extractionStatus + "'.");
+                _instanceLogger.info("Retrieving remote log file.");
+                getLogFile(_taskId);
+                _instanceLogger.info("Finished retrieving remote log file.");
+                previousFailure = new ExtractionException("Bad status returned '" + extractionStatus + "'.");
+            }
+            else
+            {
+                _instanceLogger.info("Retrieving FeatureExtraction job result...");
+                try
                 {
-                    _instanceLogger.info("Bad status returned '" + extractionStatus + "'.");
+                    getResultFile(_taskId, resultsFile);
+                    _instanceLogger.info("FeatureExtraction job results retrieved.");
                     _instanceLogger.info("Retrieving remote log file.");
                     getLogFile(_taskId);
                     _instanceLogger.info("Finished retrieving remote log file.");
-                    returnCode = 4;
-                }
-                else
-                {
-                    _instanceLogger.info("Retrieving FeatureExtraction job result...");
+                    _instanceLogger.info("Cleaning extraction files from remote feature extraction server.");
                     try
                     {
-                        getResultFile(_taskId, resultsFile);
-                        _instanceLogger.info("FeatureExtraction job results retrieved.");
-                        _instanceLogger.info("Retrieving remote log file.");
-                        getLogFile(_taskId);
-                        _instanceLogger.info("Finished retrieving remote log file.");
-                        _instanceLogger.info("Cleaning extraction files from remote feature extraction server.");
-                        try
-                        {
-                            clean(_taskId);
-                        }
-                        // Remove this catch for production
-                        catch (ExtractionException e2) {}
-                        break;
+                        clean(_taskId);
                     }
-                    catch (ExtractionException e)
+                    // Remove this catch for production
+                    catch (ExtractionException e2)
                     {
-                        _instanceLogger.info("Attempt to retrieve results file failed.", e);
-                        _instanceLogger.info("Retreiving remote log file.");
-                        try
-                        {
-                            getLogFile(_taskId);
-                        }
-                        // Remove this catch for production
-                        catch (ExtractionException e2) {}
-                        _instanceLogger.info("Finished retrieving remote log file.");
-                        returnCode = 5;
+                        _instanceLogger.warn("Failed to clean up", e2);
                     }
+                    return resultsFile;
+                }
+                catch (ExtractionException e)
+                {
+                    _instanceLogger.info("Attempt to retrieve results file failed.", e);
+                    _instanceLogger.info("Retreiving remote log file.");
+                    try
+                    {
+                        getLogFile(_taskId);
+                    }
+                    // Remove this catch for production
+                    catch (ExtractionException e2) {}
+                    _instanceLogger.info("Finished retrieving remote log file.");
+                    previousFailure = e;
                 }
             }
         }
-        _instanceLogger.info("Feature Extraction session ended.");
-        return returnCode;
+        throw new ExtractionException("Failed after " + retryCount + " attempts", previousFailure);
+    }
+
+    private String waitForCompletion(String prevExtractionStatus) throws ExtractionException
+    {
+        String extractionStatus;
+        while (true)
+        {
+            try
+            {
+                Thread.sleep(PING_DELAY * 1000);
+            }
+            catch (InterruptedException e)
+            {
+            }
+
+            extractionStatus = getTaskStatus(_taskId);
+            if (null == prevExtractionStatus || !extractionStatus.equals(prevExtractionStatus))
+                _instanceLogger.info("Feature Extraction job status: " + extractionStatus);
+            prevExtractionStatus = extractionStatus;
+            if (!extractionStatus.toLowerCase().contains("waiting") &&
+                    !extractionStatus.toLowerCase().contains("extracting"))
+            {
+                return extractionStatus;
+            }
+        }
     }
 
     protected boolean submitFiles(String taskId, File[] imageFiles)
@@ -562,30 +575,42 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         Properties results = new Properties();
         String feRequestURL = requestURL(parameters);
         _instanceLogger.info("Submitting URL '" + feRequestURL + "'.");
-        try
+        int attemptCount = 1;
+        while (true)
         {
-            URL feURL = new URL(feRequestURL);
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(feURL.openStream()));
-            String str;
-            StringBuffer reply = new StringBuffer();
-            while ((str = in.readLine()) != null)
+            try
             {
-                reply.append(str);
-                reply.append("\n");
+                URL feURL = new URL(feRequestURL);
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(feURL.openStream()));
+                String str;
+                StringBuffer reply = new StringBuffer();
+                while ((str = in.readLine()) != null)
+                {
+                    reply.append(str);
+                    reply.append("\n");
+                }
+                results.setProperty("HTTPContent", reply.toString());
+                in.close();
+                return results;
             }
-            results.setProperty("HTTPContent", reply.toString());
-            in.close();
+            catch (MalformedURLException x)
+            {
+                throw new ExtractionConfigException(x);
+            }
+            catch (IOException e)
+            {
+                if (e.getMessage() != null && e.getMessage().indexOf("502") != -1)
+                {
+                    if (attemptCount > MAX_RETRIES)
+                    {
+                        throw new ExtractionException(e);
+                    }
+                    _instanceLogger.warn("Request failed on attempt " + attemptCount + ", " + e);
+                    attemptCount++;
+                }
+            }
         }
-        catch (MalformedURLException x)
-        {
-            throw new ExtractionConfigException(x);
-        }
-        catch (Exception x)
-        {
-            throw new ExtractionException(x);
-        }
-        return results;
     }
 
     private InputStream getRequestResultStream(Properties parameters) throws ExtractionException

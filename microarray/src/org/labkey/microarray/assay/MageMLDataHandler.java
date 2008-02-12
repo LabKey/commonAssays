@@ -32,8 +32,17 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
         return null;
     }
 
+    protected boolean allowEmptyData()
+    {
+        return true;
+    }
+
     protected Map<String, Object>[] loadFileData(PropertyDescriptor[] columns, File dataFile, ParticipantVisitResolver resolver) throws IOException, ExperimentException
     {
+        if (columns.length == 0)
+        {
+            return new Map[0];
+        }
         FileInputStream fIn = null;
         try
         {
