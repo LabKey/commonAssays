@@ -5,12 +5,10 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.exp.ExperimentRunFilter;
-import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
@@ -19,11 +17,11 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SystemMaintenance;
 import org.labkey.api.view.*;
 import org.labkey.ms1.maintenance.PurgeTask;
-import org.labkey.ms1.pipeline.MSInspectPipelineProvider;
+import org.labkey.ms1.model.PepSearchModel;
 import org.labkey.ms1.pipeline.MSInspectFeaturesDataHandler;
+import org.labkey.ms1.pipeline.MSInspectPipelineProvider;
 import org.labkey.ms1.pipeline.PeaksFileDataHandler;
 import org.labkey.ms1.query.MS1Schema;
-import org.labkey.ms1.model.PepSearchModel;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Set;
@@ -34,7 +32,7 @@ import java.util.Set;
  * it provides with CPAS.
  */
 
-public class MS1Module extends DefaultModule implements ContainerManager.ContainerListener
+public class MS1Module extends SpringModule implements ContainerManager.ContainerListener
 {
     private static final Logger _log = Logger.getLogger(MS1Module.class);
     public static final String NAME = "MS1";

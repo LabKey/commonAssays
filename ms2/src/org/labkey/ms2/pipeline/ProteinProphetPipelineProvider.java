@@ -1,10 +1,9 @@
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.exp.pipeline.XarGeneratorId;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.FileType;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
 
 import java.io.File;
 import java.util.List;
@@ -45,7 +44,7 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
                 File parent = f.getParentFile();
                 String basename = fileType.getBaseName(f);
                 
-                return !fileExists(XarGeneratorTask.FT_SEARCH_XAR.newFile(parent, basename));
+                return !fileExists(XarGeneratorId.FT_SEARCH_XAR.newFile(parent, basename));
             }
 
             return false;

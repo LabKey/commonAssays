@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package org.labkey.ms2;
+package org.labkey.ms2.pipeline.comet;
+
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.MS2RunType;
 
 /**
  * User: arauch

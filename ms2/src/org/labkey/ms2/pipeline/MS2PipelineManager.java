@@ -20,7 +20,9 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.pipeline.XarGeneratorId;
 import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileUtil;
@@ -110,7 +112,7 @@ public class MS2PipelineManager
                 String basename = FileUtil.getBaseName(file, 2);
                 return !fileExists(TPPTask.getProtXMLFile(parent, basename)) &&
                         !fileExists(TPPTask.getProtXMLIntermediatFile(parent, basename)) &&
-                        !fileExists(XarGeneratorTask.FT_SEARCH_XAR.newFile(parent, basename));
+                        !fileExists(XarGeneratorId.FT_SEARCH_XAR.newFile(parent, basename));
             }
 
             return false;
@@ -363,7 +365,7 @@ public class MS2PipelineManager
             boolean allComplete = all;
             if (allComplete)
             {
-                File fileDataSetXar = XarGeneratorTask.FT_SEARCH_XAR.newFile(dirAnalysis, baseNameDataSet);
+                File fileDataSetXar = XarGeneratorId.FT_SEARCH_XAR.newFile(dirAnalysis, baseNameDataSet);
                 allComplete = exists(fileDataSetXar, knownFiles, checkedDirectories);
             }
 
@@ -376,7 +378,7 @@ public class MS2PipelineManager
                 if (dirAnalysis != null)
                 {
                     if (allComplete ||
-                            (!all && exists(XarGeneratorTask.FT_SEARCH_XAR.newFile(dirAnalysis, baseName), knownFiles, checkedDirectories)))
+                            (!all && exists(XarGeneratorId.FT_SEARCH_XAR.newFile(dirAnalysis, baseName), knownFiles, checkedDirectories)))
                         status = FileStatus.COMPLETE;
                     else if (exists(PipelineJob.FT_LOG.newFile(dirAnalysis, baseName), knownFiles, checkedDirectories))
                         status = FileStatus.RUNNING;

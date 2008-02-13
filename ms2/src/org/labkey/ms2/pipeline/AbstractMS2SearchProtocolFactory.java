@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.AbstractFileAnalysisProtocolFactory;
+import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.pipeline.ParamParser;
 
 import java.io.*;

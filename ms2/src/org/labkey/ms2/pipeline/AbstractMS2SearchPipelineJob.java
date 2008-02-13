@@ -3,7 +3,9 @@ package org.labkey.ms2.pipeline;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
-import org.labkey.api.pipeline.AbstractFileAnalysisJob;
+import org.labkey.api.exp.pipeline.XarGeneratorId;
+import org.labkey.api.exp.pipeline.XarLoaderId;
+import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.util.*;
@@ -21,7 +23,7 @@ import java.util.*;
  * Date: Nov 11, 2007
  */
 public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJob
-        implements MS2SearchJobSupport, TPPTask.JobSupport, XarGeneratorTask.JobSupport, XarLoaderTask.JobSupport
+        implements MS2SearchJobSupport, TPPTask.JobSupport, XarGeneratorId.JobSupport, XarLoaderId.JobSupport
 {
     enum Pipelines
     {
@@ -112,6 +114,22 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
             return Pipelines.finishPerlCluster.getTaskId();
 
         return null;
+    }
+
+    public File findInputFile(String name)
+    {
+        if (getInputType().isType(name))
+            return new File(getDataDirectory(), name);
+        
+        return new File(getAnalysisDirectory(), name);
+    }
+
+    public File findOutputFile(String name)
+    {
+        if (AbstractMS2SearchProtocol.FT_MZXML.isType(name))
+            return new File(getDataDirectory(), name);
+        
+        return new File(getAnalysisDirectory(), name);
     }
 
     abstract public String getSearchEngine();

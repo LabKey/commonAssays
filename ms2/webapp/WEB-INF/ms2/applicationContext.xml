@@ -8,8 +8,6 @@
                 <bean class="org.labkey.ms2.pipeline.mascot.MascotSearchTask$Factory"/>
                 <bean class="org.labkey.ms2.pipeline.sequest.SequestSearchTask$Factory"/>
                 <bean class="org.labkey.ms2.pipeline.TPPTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.XarGeneratorTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.XarLoaderTask$Factory"/>
             </list>
         </property>
         <property name="pipelines">
@@ -22,8 +20,8 @@
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemSearchTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarGeneratorId</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarLoaderId</value>
                         </list>
                     </property>
                 </bean>
@@ -42,8 +40,8 @@
                     <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarGeneratorId</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarLoaderId</value>
                         </list>
                     </property>
                 </bean>
@@ -56,8 +54,8 @@
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.mascot.MascotSearchTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarGeneratorId</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarLoaderId</value>
                         </list>
                     </property>
                 </bean>
@@ -76,8 +74,8 @@
                     <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarGeneratorId</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarLoaderId</value>
                         </list>
                     </property>
                 </bean>
@@ -90,8 +88,8 @@
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.sequest.SequestSearchTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarGeneratorId</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarLoaderId</value>
                         </list>
                     </property>
                 </bean>
@@ -110,8 +108,8 @@
                     <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarGeneratorId</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarLoaderId</value>
                         </list>
                     </property>
                 </bean>
@@ -122,8 +120,8 @@
                     <constructor-arg value="finishPerlCluster"/>
                     <property name="taskProgressionSpec">
                         <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarGeneratorTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.XarLoaderTask</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarGeneratorId</value>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarLoaderId</value>
                         </list>
                     </property>
                 </bean>

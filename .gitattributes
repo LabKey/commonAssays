@@ -597,6 +597,7 @@ ms1/src/org/labkey/ms1/view/RetentionMassChart.java -text
 ms1/src/org/labkey/ms1/view/SimilarSearchView.jsp -text
 ms1/src/org/labkey/ms1/view/SpectrumChart.java -text
 ms1/src/org/labkey/ms1/view/softwareView.jsp -text
+ms1/webapp/WEB-INF/ms1/applicationContext.xml -text
 ms2/gwtsrc/MS2GWT.iml -text
 ms2/gwtsrc/org/labkey/ms2/MS2VennDiagramView.gwt.xml -text
 ms2/gwtsrc/org/labkey/ms2/client/CompareService.java -text
@@ -740,7 +741,6 @@ ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-2.01-2.02.sql -text
 ms2/src/META-INF/prot.xml -text
 ms2/src/org/labkey/ms2/AACoverageColumn.java -text
 ms2/src/org/labkey/ms2/BeanXMLStreamReader.java -text
-ms2/src/org/labkey/ms2/CometRun.java -text
 ms2/src/org/labkey/ms2/CompareServiceImpl.java -text
 ms2/src/org/labkey/ms2/DeltaScanColumn.java -text
 ms2/src/org/labkey/ms2/DisplayThreadStatusColumn.java -text
@@ -766,11 +766,9 @@ ms2/src/org/labkey/ms2/MS2ServiceImpl.java -text
 ms2/src/org/labkey/ms2/MS2StatsWebPart.java -text
 ms2/src/org/labkey/ms2/MS2WebPart.java -text
 ms2/src/org/labkey/ms2/MascotDatImporter.java -text
-ms2/src/org/labkey/ms2/MascotRun.java -text
 ms2/src/org/labkey/ms2/PepXmlExperimentDataHandler.java -text
 ms2/src/org/labkey/ms2/PepXmlImporter.java -text
 ms2/src/org/labkey/ms2/PeptideProphetGraphs.java -text
-ms2/src/org/labkey/ms2/PhenyxRun.java -text
 ms2/src/org/labkey/ms2/PklSpectrumRenderer.java -text
 ms2/src/org/labkey/ms2/PlainTextRenderer.java -text
 ms2/src/org/labkey/ms2/Protein.java -text
@@ -786,7 +784,6 @@ ms2/src/org/labkey/ms2/ProteinSummary.java -text
 ms2/src/org/labkey/ms2/Quantitation.java -text
 ms2/src/org/labkey/ms2/RunListCache.java -text
 ms2/src/org/labkey/ms2/RunListException.java -text
-ms2/src/org/labkey/ms2/SequestRun.java -text
 ms2/src/org/labkey/ms2/ShowPeptideContext.java -text
 ms2/src/org/labkey/ms2/Spectrum.java -text
 ms2/src/org/labkey/ms2/SpectrumIterator.java -text
@@ -794,9 +791,6 @@ ms2/src/org/labkey/ms2/SpectrumLoader.java -text
 ms2/src/org/labkey/ms2/SpectrumRenderer.java -text
 ms2/src/org/labkey/ms2/TotalFilteredPeptidesColumn.java -text
 ms2/src/org/labkey/ms2/UniqueFilteredPeptidesColumn.java -text
-ms2/src/org/labkey/ms2/XCometRun.java -text
-ms2/src/org/labkey/ms2/XTandemRun.java -text
-ms2/src/org/labkey/ms2/XTandemcometRun.java -text
 ms2/src/org/labkey/ms2/annotLoadDetails.jsp -text
 ms2/src/org/labkey/ms2/compare/CompareDataRegion.java -text
 ms2/src/org/labkey/ms2/compare/CompareExcelWriter.java -text
@@ -880,11 +874,10 @@ ms2/src/org/labkey/ms2/pipeline/ProteinProphetPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/ProteinProphetPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/SearchPage.java -text
 ms2/src/org/labkey/ms2/pipeline/TPPTask.java -text
-ms2/src/org/labkey/ms2/pipeline/XarGeneratorTask.java -text
-ms2/src/org/labkey/ms2/pipeline/XarLoaderTask.java -text
 ms2/src/org/labkey/ms2/pipeline/XarTemplate.java -text
 ms2/src/org/labkey/ms2/pipeline/addSequenceDB.jsp -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometCPipelineProvider.java -text
+ms2/src/org/labkey/ms2/pipeline/comet/CometRun.java -text
 ms2/src/org/labkey/ms2/pipeline/describe.jsp -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotCPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotClientImpl.java -text
@@ -900,6 +893,8 @@ ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascotFractions.xml -t
 ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascotFractionsXpress.xml -text
 ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascotXpress.xml -text
 ms2/src/org/labkey/ms2/pipeline/mule/config/muleConfig.xml -text
+ms2/src/org/labkey/ms2/pipeline/phenyx/MascotRun.java -text
+ms2/src/org/labkey/ms2/pipeline/phenyx/PhenyxRun.java -text
 ms2/src/org/labkey/ms2/pipeline/pickProtocol.jsp -text
 ms2/src/org/labkey/ms2/pipeline/search.jsp -text
 ms2/src/org/labkey/ms2/pipeline/sequest/BooleanParamsValidator.java -text
@@ -933,6 +928,7 @@ ms2/src/org/labkey/ms2/pipeline/sequest/SequestParamsV1Builder.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestParamsV2.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestParamsV2Builder.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestPipelineJob.java -text
+ms2/src/org/labkey/ms2/pipeline/sequest/SequestRun.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestSearchProtocol.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/SequestSearchTask.java -text
@@ -941,12 +937,15 @@ ms2/src/org/labkey/ms2/pipeline/sequest/templates/MS2SearchSequest.xml -text
 ms2/src/org/labkey/ms2/pipeline/sequest/templates/MS2SearchSequestFractions.xml -text
 ms2/src/org/labkey/ms2/pipeline/sequest/templates/MS2SearchSequestFractionsXpress.xml -text
 ms2/src/org/labkey/ms2/pipeline/sequest/templates/MS2SearchSequestXpress.xml -text
+ms2/src/org/labkey/ms2/pipeline/tandem/XCometRun.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemCPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemDefaults.xml -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemPipelineJob.java -text
+ms2/src/org/labkey/ms2/pipeline/tandem/XTandemRun.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemSearchProtocol.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemSearchTask.java -text
+ms2/src/org/labkey/ms2/pipeline/tandem/XTandemcometRun.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/setTandemDefaults.jsp -text
 ms2/src/org/labkey/ms2/pipeline/tandem/templates/MS2Search.xml -text
 ms2/src/org/labkey/ms2/pipeline/tandem/templates/MS2SearchFractions.xml -text

@@ -30,6 +30,7 @@ import org.labkey.common.util.Pair;
 import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
 import org.labkey.ms2.pipeline.*;
+import org.labkey.ms2.pipeline.tandem.XTandemRun;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
 import org.labkey.ms2.pipeline.sequest.SequestClientImpl;

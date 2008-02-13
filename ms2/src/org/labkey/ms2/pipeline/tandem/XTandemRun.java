@@ -14,60 +14,50 @@
  * limitations under the License.
  */
 
-package org.labkey.ms2;
+package org.labkey.ms2.pipeline.tandem;
 
-import java.util.Map;
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.MS2RunType;
 
 /**
  * User: arauch
- * Date: Jul 21, 2005
- * Time: 10:19:11 PM
+ * Date: Sep 16, 2004
+ * Time: 10:36:11 PM
  */
-public class MascotRun extends MS2Run
+public class XTandemRun extends MS2Run
 {
-    @Override
-    public void adjustScores(Map<String, String> map)
-    {
-        // Mascot exported pepXML can exclude "homologyscore"
-        if (null == map.get("homologyscore"))
-            map.put("homologyscore", "-1");
-    }
-
     public MS2RunType getRunType()
     {
-        return MS2RunType.Mascot;
+        return MS2RunType.XTandem;
     }
 
     public String getParamsFileName()
     {
-        return "mascot.xml";
+        return "tandem.xml";
     }
-
 
     public String getChargeFilterColumnName()
     {
-        return "Ion";
+        return "Hyper";
     }
-
 
     public String getChargeFilterParamName()
     {
-        return "ion";
+        return "hyper";
     }
 
     public String getDiscriminateExpressions()
     {
-        return "-Identity";
+        return "-PeptideProphet, Expect, Next - Hyper, (Next/Hyper) - 1, -Hyper";
     }
 
     protected String getPepXmlScoreNames()
     {
-        return "ionscore, identityscore, homologyscore, null, expect";  // TODO: star score?  qmatch?
+        return "hyperscore, nextscore, bscore, yscore, expect";
     }
-
 
     public String[] getGZFileExtensions()
     {
-        return new String[]{"out", "dta"};
+        return new String[]{};
     }
 }

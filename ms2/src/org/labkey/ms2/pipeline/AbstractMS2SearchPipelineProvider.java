@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.AbstractFileAnalysisProvider;
+import org.labkey.api.pipeline.file.AbstractFileAnalysisProvider;
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.TaskPipeline;
 
@@ -28,7 +28,7 @@ import java.util.Map;
  * <code>AbstractMS2SearchPipelineProvider</code>
  */
 abstract public class AbstractMS2SearchPipelineProvider
-        extends AbstractFileAnalysisProvider<AbstractMS2SearchProtocolFactory>
+        extends AbstractFileAnalysisProvider<AbstractMS2SearchProtocolFactory, TaskPipeline>
 {
     public AbstractMS2SearchPipelineProvider(String name)
     {

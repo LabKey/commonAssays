@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.ms2;
+package org.labkey.ms2.pipeline.tandem;
+
+import org.labkey.ms2.pipeline.tandem.XCometRun;
+import org.labkey.ms2.MS2RunType;
 
 /**
  * XTandemcometRun class

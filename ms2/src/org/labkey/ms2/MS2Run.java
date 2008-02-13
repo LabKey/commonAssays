@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.api.util.MemTracker;
+import org.labkey.ms2.pipeline.tandem.XTandemRun;
 
 import java.io.Serializable;
 import java.util.*;

@@ -1,5 +1,13 @@
 package org.labkey.ms2;
 
+import org.labkey.ms2.pipeline.tandem.XCometRun;
+import org.labkey.ms2.pipeline.tandem.XTandemcometRun;
+import org.labkey.ms2.pipeline.tandem.XTandemRun;
+import org.labkey.ms2.pipeline.phenyx.PhenyxRun;
+import org.labkey.ms2.pipeline.phenyx.MascotRun;
+import org.labkey.ms2.pipeline.comet.CometRun;
+import org.labkey.ms2.pipeline.sequest.SequestRun;
+
 import java.util.Arrays;
 import java.util.List;
 

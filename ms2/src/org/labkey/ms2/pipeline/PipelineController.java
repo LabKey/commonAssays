@@ -28,9 +28,11 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.pipeline.XarGeneratorId;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.ACL;
@@ -186,7 +188,7 @@ public class PipelineController extends SpringActionController
                 ViewBackgroundInfo info = getViewBackgroundInfo();
                 try
                 {
-                    if (XarGeneratorTask.FT_SEARCH_XAR.isType(file))
+                    if (XarGeneratorId.FT_SEARCH_XAR.isType(file))
                     {
                         ExperimentPipelineJob job = new ExperimentPipelineJob(info, file, description, false);
                         PipelineService.get().queueJob(job);

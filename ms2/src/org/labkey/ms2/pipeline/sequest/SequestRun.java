@@ -14,47 +14,54 @@
  * limitations under the License.
  */
 
-package org.labkey.ms2;
+package org.labkey.ms2.pipeline.sequest;
+
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.MS2RunType;
 
 /**
  * User: arauch
  * Date: Sep 16, 2004
  * Time: 10:36:11 PM
  */
-public class XTandemRun extends MS2Run
+public class SequestRun extends MS2Run
 {
     public MS2RunType getRunType()
     {
-        return MS2RunType.XTandem;
+        return MS2RunType.Sequest;
     }
 
     public String getParamsFileName()
     {
-        return "tandem.xml";
+        return "sequest.params";
     }
+
 
     public String getChargeFilterColumnName()
     {
-        return "Hyper";
+        return "XCorr";
     }
+
 
     public String getChargeFilterParamName()
     {
-        return "hyper";
+        return "xCorr";
     }
 
     public String getDiscriminateExpressions()
     {
-        return "-PeptideProphet, Expect, Next - Hyper, (Next/Hyper) - 1, -Hyper";
+        return "-SpRank, -DeltaCn, -XCorr";
     }
+
 
     protected String getPepXmlScoreNames()
     {
-        return "hyperscore, nextscore, bscore, yscore, expect";
+        return "spscore, deltacn, xcorr, sprank";
     }
+
 
     public String[] getGZFileExtensions()
     {
-        return new String[]{};
+        return new String[]{"out", "dta"};
     }
 }

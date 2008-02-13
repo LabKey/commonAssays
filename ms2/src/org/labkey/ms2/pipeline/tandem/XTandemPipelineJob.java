@@ -17,6 +17,7 @@ package org.labkey.ms2.pipeline.tandem;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 
