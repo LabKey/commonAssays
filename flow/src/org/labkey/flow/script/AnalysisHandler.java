@@ -23,7 +23,6 @@ import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowSchema;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.List;
@@ -42,11 +41,6 @@ public class AnalysisHandler extends BaseHandler
         _analysis = analysis;
         _settings = ScriptSettings.fromSettingsDef(settings);
         _groupAnalysis = FlowAnalyzer.makeAnalysis(settings, _analysis);
-    }
-
-    public boolean checkProcessWell(FCSRef ref) throws Exception
-    {
-        return FCSAnalyzer.get().matchesCriteria(_settings.getSampleCriteria(), ref);
     }
 
     synchronized public DataBaseType addWell(ExperimentRunType runElement, FlowFCSFile src, FlowCompensationMatrix flowComp, String scriptLSID) throws SQLException
@@ -97,7 +91,7 @@ public class AnalysisHandler extends BaseHandler
             }
             else
             {
-                wells = run.getFCSFilesToBeAnalyzed(_job.getProtocol());
+                wells = run.getFCSFilesToBeAnalyzed(_job.getProtocol(), _settings);
             }
             if (wells.length == 0)
             {
@@ -108,7 +102,7 @@ public class AnalysisHandler extends BaseHandler
                 }
                 else
                 {
-                    _job.addStatus("This run contains FCS files but they are all excluded by the Protocol's FCS Analysis Filter");
+                    _job.addStatus("This run contains FCS files but they are all excluded by either the Protocol's or Analysis Script's FCS Filter");
                 }
                 return;
             }
@@ -218,12 +212,6 @@ public class AnalysisHandler extends BaseHandler
                 FCSRef ref = FlowAnalyzer.getFCSRef(_well);
                 URI uri = ref.getURI();
                 String description = "well " + iWell + "/" + _wellCount + ":" + _run.getName() + ":" + _well.getName();
-
-                if (!checkProcessWell(ref))
-                {
-                    _job.addStatus("Skipping " + description);
-                    return;
-                }
 
                 AttributeSet attrs = tryCopyAttributes();
                 DataBaseType dbt = addWell(_runElement, _well.getFCSFile(), _flowComp, _scriptLSID);

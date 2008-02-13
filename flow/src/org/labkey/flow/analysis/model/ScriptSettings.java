@@ -1,19 +1,18 @@
 package org.labkey.flow.analysis.model;
 
-import org.fhcrc.cpas.flow.script.xml.CriteriaDef;
-import org.fhcrc.cpas.flow.script.xml.ParameterDef;
-import org.fhcrc.cpas.flow.script.xml.SettingsDef;
-import org.fhcrc.cpas.flow.script.xml.FilterDef;
+import org.fhcrc.cpas.flow.script.xml.*;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.query.FieldKey;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ScriptSettings implements Serializable
 {
     Map<String, ParameterInfo> _parameters = new HashMap();
-    Map<String, SampleCriteria> _criteria = new HashMap<String, SampleCriteria>();
+    Map<String, FilterInfo> _filters = new HashMap<String, FilterInfo>();
 
     static public class ParameterInfo implements Serializable
     {
@@ -62,6 +61,67 @@ public class ScriptSettings implements Serializable
         }
     }
 
+    public static class FilterInfo implements Serializable
+    {
+        FieldKey field;
+        CompareType op;
+        String value;
+
+        public FilterInfo(FieldKey field, CompareType op, String value)
+        {
+            this.field = field;
+            this.op = op;
+            this.value = value;
+        }
+
+        public FieldKey getField()
+        {
+            return field;
+        }
+
+        public CompareType getOp()
+        {
+            return op;
+        }
+
+        public String getValue()
+        {
+            return value;
+        }
+
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            FilterInfo that = (FilterInfo) o;
+
+            if (field != null ? !field.equals(that.field) : that.field != null) return false;
+            if (op != that.op) return false;
+            if (value != null ? !value.equals(that.value) : that.value != null) return false;
+
+            return true;
+        }
+
+        public int hashCode()
+        {
+            int result;
+            result = (field != null ? field.hashCode() : 0);
+            result = 31 * result + (op != null ? op.hashCode() : 0);
+            result = 31 * result + (value != null ? value.hashCode() : 0);
+            return result;
+        }
+
+        public static FilterInfo fromFilterDef(FilterDef filter)
+        {
+            FieldKey field = FieldKey.fromString(filter.getField());
+            CompareType op = CompareType.getByURLKey(filter.getOp().toString());
+            String value = filter.getValue();
+
+            return new FilterInfo(field, op, value);
+        }
+    }
+
     public ParameterInfo getParameterInfo(String name, boolean create)
     {
         ParameterInfo ret = _parameters.get(name);
@@ -74,14 +134,19 @@ public class ScriptSettings implements Serializable
         return ret;
     }
 
-    public SampleCriteria getSampleCriteria(String keyword)
+    public FilterInfo getFilter(String field)
     {
-        return _criteria.get(keyword);
+        return _filters.get(field);
     }
 
-    public Collection<SampleCriteria> getSampleCriteria()
+    public SimpleFilter getFilter()
     {
-        return _criteria.values();
+        SimpleFilter ret = new SimpleFilter();
+        for (FilterInfo filter : _filters.values())
+        {
+            ret.addCondition(filter.getField().toString(), filter.getValue(), filter.getOp());
+        }
+        return ret;
     }
 
     public void merge(ScriptSettings that)
@@ -97,12 +162,10 @@ public class ScriptSettings implements Serializable
             }
         }
 
-        for (SampleCriteria criteria : that._criteria.values())
+        for (FilterInfo filterInfo : that._filters.values())
         {
-            SampleCriteria newCriteria = new SampleCriteria();
-            newCriteria.setKeyword(criteria.getKeyword());
-            newCriteria.setPattern(criteria.getPattern());
-            _criteria.put(newCriteria.getKeyword(), newCriteria);
+            FilterInfo mine = new FilterInfo(filterInfo.getField(), filterInfo.getOp(), filterInfo.getValue());
+            _filters.put(mine.getField().toString(), mine);
         }
     }
 
@@ -119,16 +182,16 @@ public class ScriptSettings implements Serializable
             }
         }
 
-        FilterDef filter = settings.getFilter();
-        if (filter != null)
+        FiltersDef filters = settings.getFilters();
+        if (filters != null)
         {
-            for (CriteriaDef criteria : filter.getCriteriaArray())
+            for (FilterDef filter : filters.getFilterArray())
             {
-                SampleCriteria mine = getSampleCriteria(criteria.getKeyword());
+                FilterInfo mine = getFilter(filter.getField());
                 if (mine == null)
                 {
-                    SampleCriteria sampleCriteria = SampleCriteria.fromCriteriaDef(criteria);
-                    _criteria.put(criteria.getKeyword(), sampleCriteria);
+                    mine = FilterInfo.fromFilterDef(filter);
+                    _filters.put(filter.getField(), mine);
                 }
             }
         }
@@ -154,14 +217,16 @@ public class ScriptSettings implements Serializable
             }
         }
 
-        if (_criteria.size() > 0)
+        if (_filters.size() > 0)
         {
-            FilterDef filterDef = ret.addNewFilter();
-            for (SampleCriteria criteria : _criteria.values())
+            FiltersDef filtersDef = ret.addNewFilters();
+            for (FilterInfo filter : _filters.values())
             {
-                CriteriaDef criteriaDef = filterDef.addNewCriteria();
-                criteriaDef.setKeyword(criteria.getKeyword());
-                criteriaDef.setPattern(criteria.getPattern());
+                FilterDef filterDef = filtersDef.addNewFilter();
+                filterDef.setField(filter.getField().toString());
+                filterDef.setOp(OpDef.Enum.forString(filter.getOp().getUrlKey()));
+                if (filter.getValue() != null)
+                    filterDef.setValue(filter.getValue());
             }
         }
         return ret;
@@ -175,7 +240,7 @@ public class ScriptSettings implements Serializable
         ScriptSettings that = (ScriptSettings) o;
 
         if (!_parameters.equals(that._parameters)) return false;
-        if (!_criteria.equals(that._criteria)) return false;
+        if (!_filters.equals(that._filters)) return false;
 
         return true;
     }
@@ -184,7 +249,7 @@ public class ScriptSettings implements Serializable
     {
         int result;
         result = _parameters.hashCode();
-        result = 31 * result + _criteria.hashCode();
+        result = 31 * result + _filters.hashCode();
         return result;
     }
 }

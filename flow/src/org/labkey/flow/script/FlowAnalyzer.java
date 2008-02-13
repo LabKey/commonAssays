@@ -1,24 +1,22 @@
 package org.labkey.flow.script;
 
-import org.fhcrc.cpas.flow.script.xml.*;
-import org.labkey.flow.data.*;
-import org.labkey.flow.FlowSettings;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.apache.xmlbeans.XmlException;
+import org.fhcrc.cpas.flow.script.xml.*;
+import org.labkey.flow.FlowSettings;
+import org.labkey.flow.analysis.model.*;
+import org.labkey.flow.analysis.model.Polygon;
+import org.labkey.flow.analysis.web.*;
+import org.labkey.flow.data.*;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import java.awt.*;
+import java.io.File;
 import java.net.URI;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
-import java.io.File;
-import java.sql.SQLException;
-import java.awt.*;
-
-import org.labkey.flow.analysis.model.*;
-import org.labkey.flow.analysis.web.*;
-import org.labkey.flow.analysis.model.CompensationCalculation;
-import org.labkey.flow.analysis.model.Polygon;
 
 public class FlowAnalyzer
 {
@@ -125,7 +123,6 @@ public class FlowAnalyzer
         }
         for (StatisticDef statElement : analysisElement.getStatisticArray())
         {
-
             ret.addStatistic(makeStatisticSpec(statElement));
         }
         for (GraphDef graphElement : analysisElement.getGraphArray())

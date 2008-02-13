@@ -1,66 +1,88 @@
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.query.FieldKey" %>
 <%@ page import="org.labkey.flow.controllers.editscript.EditSettingsForm" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
+<%@ page import="org.labkey.flow.data.FlowProtocol" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib"%>
 <% EditSettingsForm form = (EditSettingsForm) this.form;
-boolean canEdit = form.canEdit();
-String contextPath = request.getContextPath();
+    boolean canEdit = form.canEdit();
+    String contextPath = request.getContextPath();
+    Map<FieldKey, String> fieldOptions = form.getFieldOptions();
+    Map<String, String> opOptions = form.getOpOptions();
+    int clauseCount = Math.max(form.ff_filter_field.length + 2, 4);
+
+    FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
 %>
 <labkey:errors/>
 <form action="<%=form.urlFor(ScriptController.Action.editSettings)%>" method="POST">
-    <p>These settings apply to both the compensation and analysis steps.</p>
-
-    <p>
-        <b>Filter experimental wells by keyword/value pairs:</b><br/>
-        You may enter a set of keyword and value pairs which <i>must</i> be present in the
-        FCS header to be included in the calculated compensation matrix and the analysis.  The
-        value is a regex pattern as used by Java's
-        <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">Pattern</a> class.
-    </p>
     <table>
-        <tbody id="criteria.table">
-            <tr><th></th><th>Keyword</th><th>Pattern</th></tr>
-        <% if (form.ff_criteria_keyword.length == 0) { %>
-            <tr id="no_criteria"><td colspan="2"><i>No criteria defined.</i></td></tr>
-        <% } else {
-            for (int i = 0; i < form.ff_criteria_keyword.length; i++)
+        <tr class="wpHeader"><td class="wpTitle">Filter FCS files by keyword:</td></tr>
+        <tr><td>
+            Filters may be applied to this analysis script.  The set of keyword and
+            value pairs <i>must</i> all match in the FCS header to be included in the analysis.
+        <% if (protocol != null) { %>
+            Alternatively, you may
+            <a href="<%= protocol.urlFor(ProtocolController.Action.editFCSAnalysisFilter) %>">create protocol filters</a>
+            that will be applied to all analysis scripts in the project folder.
+        <% } %>
+        </td></tr>
+    </table>
+    <table>
+        <tr><th/><th>Keyword</th><th/><th>Value</th></tr>
+        <%
+        for (int i = 0; i < clauseCount; i++)
+        {
+            FieldKey field = null;
+            String op = null;
+            String value = null;
+
+            if (i < form.ff_filter_field.length)
             {
-                String keyword = form.ff_criteria_keyword[i];
-                String pattern = form.ff_criteria_pattern[i];
-                %>
-                <tr>
-                <% if (canEdit) { %>
-                    <td><img src="<%=contextPath%>/_images/partdelete.gif" title="Delete Criteria" alt="delete" onclick="deleteCriteria(this);"/></td>
-                    <td><input type="text" name="ff_criteria_keyword" value="<%=h(keyword)%>"></td>
-                    <td><input type="text" name="ff_criteria_pattern" value="<%=h(pattern)%>"></td>
-                <% } else { %>
-                    <td/>
-                    <td><%=h(keyword)%></td>
-                    <td><%=h(pattern)%></td>
-                <% } %>
-                </tr>
-                <%
+                field = form.ff_filter_field[i];
+                op = form.ff_filter_op[i];
+                value = form.ff_filter_value[i];
             }
-        } %>
-        </tbody>
+
+            if (!canEdit && field == null)
+                continue;
+
+            %>
+            <tr>
+                <td class="normal"><%= i == 0 ? "" : "and" %></td>
+            <% if (canEdit) { %>
+                <td class="normal"><select name="ff_filter_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /></select></td>
+                <td class="normal"><select name="ff_filter_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
+                <td class="normal"><input type="text" name="ff_filter_value" value="<%=h(value)%>"></td>
+            <% } else { %>
+                <td class="normal"><%=fieldOptions.get(field)%></td>
+                <td class="normal"><%=opOptions.get(op)%></td>
+                <td class="normal"><%=h(value)%></td>
+            <% } %>
+            </tr>
+            <%
+        }
+        %>
     </table>
 
     <% if (canEdit) { %>
-
-        <labkey:button text="Add Criteria" onclick="addNewCriteria();return false;" href="#"/>
         <labkey:button text="Update" />
         <labkey:button text="Cancel" href="<%=form.urlFor(ScriptController.Action.begin)%>" />
     <% } else { %>
         <labkey:button text="Go Back" href="<%=form.urlFor(ScriptController.Action.begin)%>" />
     <% } %>
 
-    <p>
-        <b>Edit Minimum Values:</b><br/>
+    <p/>
+    
+    <table>
+        <tr class="wpHeader"><td class="wpTitle">Edit Minimum Values:</td></tr>
+        <tr><td>
         For each parameter, specify the minimum value.  This value will be used when drawing graphs.
         Also, for the purpose of calculating statistics, and applying gates, values will be constrained to be greater than
         or equal to this minimum value.
-    </p>
+        </td></tr>
+    </table>
     <table>
         <tr><th>Parameter</th><th>Minimum Value</th></tr>
         <% for (int i = 0; i < form.ff_parameter.length; i ++) {
@@ -90,4 +112,3 @@ String contextPath = request.getContextPath();
 <script type="text/javascript">
     var contextPath = <%=q(contextPath)%>;
 </script>
-<script type="text/javascript" src="<%=request.getContextPath()%>/Flow/editSettings.js"></script>

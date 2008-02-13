@@ -1,16 +1,17 @@
 package org.labkey.flow.controllers.editscript;
 
 import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionMapping;
-import org.fhcrc.cpas.flow.script.xml.CriteriaDef;
+import org.fhcrc.cpas.flow.script.xml.FilterDef;
+import org.fhcrc.cpas.flow.script.xml.FiltersDef;
 import org.fhcrc.cpas.flow.script.xml.ParameterDef;
 import org.fhcrc.cpas.flow.script.xml.SettingsDef;
-import org.fhcrc.cpas.flow.script.xml.FilterDef;
-import org.labkey.common.util.Pair;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.query.FieldKey;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -19,8 +20,9 @@ public class EditSettingsForm extends EditScriptForm
     public String[] ff_parameter;
     public String[] ff_minValue;
 
-    public String[] ff_criteria_keyword = new String[0];
-    public String[] ff_criteria_pattern = new String[0];
+    public FieldKey[] ff_filter_field = new FieldKey[0];
+    public String[] ff_filter_op = new String[0];
+    public String[] ff_filter_value = new String[0];
 
     public void reset(ActionMapping mapping, HttpServletRequest request)
     {
@@ -31,6 +33,7 @@ public class EditSettingsForm extends EditScriptForm
         {
             parameters.put(param, null);
         }
+
         if (settings != null)
         {
             for (ParameterDef param: settings.getParameterArray())
@@ -38,17 +41,19 @@ public class EditSettingsForm extends EditScriptForm
                 parameters.put(param.getName(), param.getMinValue());
             }
 
-            FilterDef filterDef = settings.getFilter();
-            if (filterDef != null)
+            FiltersDef filtersDef = settings.getFilters();
+            if (filtersDef != null)
             {
-                int criteriaLen = filterDef.sizeOfCriteriaArray();
-                ff_criteria_keyword = new String[criteriaLen];
-                ff_criteria_pattern = new String[criteriaLen];
-                for (int i = 0; i < criteriaLen; i++)
+                int filterLen = filtersDef.sizeOfFilterArray();
+                ff_filter_field = new FieldKey[filterLen];
+                ff_filter_op = new String[filterLen];
+                ff_filter_value = new String[filterLen];
+                for (int i = 0; i < filterLen; i++)
                 {
-                    CriteriaDef crit = filterDef.getCriteriaArray(i);
-                    ff_criteria_keyword[i] = crit.getKeyword();
-                    ff_criteria_pattern[i] = crit.getPattern();
+                    FilterDef crit = filtersDef.getFilterArray(i);
+                    ff_filter_field[i] = FieldKey.fromString(crit.getField());
+                    ff_filter_op[i] = crit.getOp().toString();
+                    ff_filter_value[i] = crit.isSetValue() ? crit.getValue() : "";
                 }
             }
         }
@@ -72,13 +77,56 @@ public class EditSettingsForm extends EditScriptForm
         ff_minValue = values;
     }
 
-    public void setFf_criteria_keyword(String[] keyword)
+    public void setFf_filter_field(String[] fields)
     {
-        this.ff_criteria_keyword = keyword;
+        ff_filter_field = new FieldKey[fields.length];
+        for (int i = 0; i < fields.length; i ++)
+        {
+            if (StringUtils.isEmpty(fields[i]))
+                continue;
+            ff_filter_field[i] = FieldKey.fromString(fields[i]);
+        }
     }
 
-    public void setFf_criteria_pattern(String[] pattern)
+    public void setFf_filter_op(String[] op)
     {
-        this.ff_criteria_pattern = pattern;
+        this.ff_filter_op = op;
+    }
+
+    public void setFf_filter_value(String[] value)
+    {
+        this.ff_filter_value = value;
+    }
+
+    public Map<FieldKey, String> getFieldOptions()
+    {
+        Map<FieldKey, String> options = new LinkedHashMap<FieldKey, String>();
+        options.put(null, "");
+        options.put(FieldKey.fromParts("Name"), "FCS file name");
+        options.put(FieldKey.fromParts("Run", "Name"), "Run name");
+
+        FieldKey keyKeyword = FieldKey.fromParts("Keyword");
+        for (String keyword : getAvailableKeywords())
+        {
+            options.put(new FieldKey(keyKeyword, keyword), keyword);
+        }
+        return options;
+    }
+
+    public Map<String, String> getOpOptions()
+    {
+        Map<String, String> options = new LinkedHashMap<String, String>();
+        addCompare(options, CompareType.EQUAL);
+        addCompare(options, CompareType.NEQ_OR_NULL);
+        addCompare(options, CompareType.ISBLANK);
+        addCompare(options, CompareType.NONBLANK);
+        addCompare(options, CompareType.STARTS_WITH);
+        addCompare(options, CompareType.CONTAINS);
+        return options;
+    }
+
+    private void addCompare(Map<String, String> options, CompareType ct)
+    {
+        options.put(ct.getUrlKey(), ct.getDisplayValue());
     }
 }

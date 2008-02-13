@@ -13,6 +13,7 @@ import org.fhcrc.cpas.flow.script.xml.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.jsp.FormPage;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
@@ -47,8 +48,6 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class ScriptController extends BaseFlowController
@@ -1304,32 +1303,21 @@ public class ScriptController extends BaseFlowController
             }
         }
 
-        FilterDef filterDef = null;
-        for (int i = 0; i < form.ff_criteria_keyword.length; i++)
+        FiltersDef filtersDef = null;
+        for (int i = 0; i < form.ff_filter_field.length; i++)
         {
-            String keyword = form.ff_criteria_keyword[i];
-            String pattern = form.ff_criteria_pattern[i];
-            boolean validPattern = false;
-            if (keyword != null && pattern != null)
+            FieldKey field = form.ff_filter_field[i];
+            String op = form.ff_filter_op[i];
+            String value = form.ff_filter_value[i];
+            if (field != null && op != null)
             {
-                try
-                {
-                    Pattern.compile(pattern);
-                    validPattern = true;
-                }
-                catch (PatternSyntaxException ex)
-                {
-                    errors = addError("Error in pattern '" + pattern + "' for keyword '" + keyword + "': " + ex.getDescription());
-                }
-            }
-
-            if (validPattern)
-            {
-                if (filterDef == null)
-                    filterDef = settingsDef.addNewFilter();
-                CriteriaDef crit = filterDef.addNewCriteria();
-                crit.setKeyword(keyword);
-                crit.setPattern(pattern);
+                if (filtersDef == null)
+                    filtersDef = settingsDef.addNewFilters();
+                FilterDef filter = filtersDef.addNewFilter();
+                filter.setField(field.toString());
+                filter.setOp(OpDef.Enum.forString(op));
+                if (value != null)
+                    filter.setValue(value);
             }
         }
 

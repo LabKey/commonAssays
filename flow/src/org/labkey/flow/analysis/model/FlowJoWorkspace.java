@@ -1,34 +1,33 @@
 package org.labkey.flow.analysis.model;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Document;
 import org.apache.commons.lang.StringUtils;
+import org.fhcrc.cpas.flow.script.xml.ScriptDef;
+import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.labkey.api.data.Container;
+import org.labkey.api.exp.api.*;
+import org.labkey.api.security.User;
+import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.data.*;
+import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.ObjectType;
+import org.labkey.flow.script.FlowAnalyzer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.File;
-import java.util.*;
 import java.net.URI;
-
-import org.labkey.flow.analysis.web.SubsetSpec;
-import org.labkey.flow.persist.AttributeSet;
-import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.data.*;
-import org.labkey.flow.script.FlowAnalyzer;
-import org.labkey.api.security.User;
-import org.labkey.api.data.Container;
-import org.labkey.api.exp.api.*;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
-import org.fhcrc.cpas.flow.script.xml.ScriptDef;
+import java.util.*;
 
 abstract public class FlowJoWorkspace implements Serializable
 {
@@ -98,6 +97,10 @@ abstract public class FlowJoWorkspace implements Serializable
             if (_compensationMatrices.size() == 1)
             {
                 return _compensationMatrices.get(0);
+            }
+            if (_compensationMatrices.size() < id)
+            {
+                return null;
             }
             return _compensationMatrices.get(id - 1);
         }

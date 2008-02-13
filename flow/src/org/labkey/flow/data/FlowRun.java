@@ -1,31 +1,29 @@
 package org.labkey.flow.data;
 
-import org.labkey.api.exp.*;
+import org.apache.log4j.Logger;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.*;
-import org.labkey.api.data.*;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.query.QueryService;
-import org.apache.log4j.Logger;
-
-import java.sql.SQLException;
-import java.sql.ResultSet;
-import java.util.*;
-import java.net.URI;
-
-import org.labkey.flow.controllers.run.RunController;
+import org.labkey.flow.analysis.model.*;
+import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
-import org.labkey.flow.analysis.model.FCSKeywordData;
-import org.labkey.flow.analysis.model.PopulationSet;
-import org.labkey.flow.analysis.model.CompensationCalculation;
-import org.labkey.flow.analysis.model.SampleCriteria;
-import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.script.FlowAnalyzer;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import java.net.URI;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 public class FlowRun extends FlowObject<ExpRun>
 {
@@ -299,16 +297,22 @@ public class FlowRun extends FlowObject<ExpRun>
         return null;
     }
 
-    public FlowFCSFile[] getFCSFilesToBeAnalyzed(FlowProtocol protocol) throws SQLException
+    public FlowFCSFile[] getFCSFilesToBeAnalyzed(FlowProtocol protocol, ScriptSettings settings) throws SQLException
     {
-        if (protocol == null)
+        if (protocol == null && settings == null)
             return getFCSFiles();
         FlowSchema schema = new FlowSchema(null, getContainer());
         schema.setRun(this);
         TableInfo table = schema.createFCSFileTable("FCSFiles");
         ColumnInfo colRowId = table.getColumn("RowId");
         List<FlowFCSFile> ret = new ArrayList();
-        ResultSet rs = QueryService.get().select(table, new ColumnInfo[] { colRowId }, protocol.getFCSAnalysisFilter(), null);
+
+        SimpleFilter filter = new SimpleFilter();
+        if (protocol != null)
+            filter.addAllClauses(protocol.getFCSAnalysisFilter());
+        if (settings != null)
+            filter.addAllClauses(settings.getFilter());
+        ResultSet rs = QueryService.get().select(table, new ColumnInfo[] { colRowId }, filter, null);
         while (rs.next())
         {
             FlowWell well = FlowWell.fromWellId(colRowId.getIntValue(rs));
@@ -343,13 +347,13 @@ public class FlowRun extends FlowObject<ExpRun>
         }
     }
 
-    public Map<Integer, String> getWells(FlowProtocol protocol, PopulationSet popset, FlowProtocolStep step) throws Exception
+    public Map<Integer, String> getWells(FlowProtocol protocol, ScriptComponent scriptComponent, FlowProtocolStep step) throws Exception
     {
         FlowWell[] wells = getWells(true);
         Map<Integer, String> ret = new LinkedHashMap();
         if (step == FlowProtocolStep.calculateCompensation)
         {
-            CompensationCalculation calc = (CompensationCalculation) popset;
+            CompensationCalculation calc = (CompensationCalculation) scriptComponent;
             FCSKeywordData[] keywordData = new FCSKeywordData[wells.length];
             for (int i = 0; i < keywordData.length; i ++)
             {
@@ -372,7 +376,7 @@ public class FlowRun extends FlowObject<ExpRun>
         {
             if (protocol != null)
             {
-                FlowWell[] wellsToBeAnalyzed = getFCSFilesToBeAnalyzed(protocol);
+                FlowWell[] wellsToBeAnalyzed = getFCSFilesToBeAnalyzed(protocol, scriptComponent.getSettings());
                 for (FlowWell well : wellsToBeAnalyzed)
                 {
                     ret.put(well.getRowId(), protocol.getFCSAnalysisName(well));

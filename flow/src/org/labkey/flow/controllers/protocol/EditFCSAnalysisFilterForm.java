@@ -1,15 +1,15 @@
 package org.labkey.flow.controllers.protocol;
 
-import org.apache.struts.action.ActionMapping;
 import org.apache.commons.lang.StringUtils;
+import org.apache.struts.action.ActionMapping;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.PageFlowUtil;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletException;
-import java.util.Map;
-import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class EditFCSAnalysisFilterForm extends ProtocolForm
 {
@@ -29,7 +29,7 @@ public class EditFCSAnalysisFilterForm extends ProtocolForm
             for (Map.Entry<String, String> entry : PageFlowUtil.fromQueryString(prop))
             {
                 String[] parts = StringUtils.split(entry.getKey(), "~");
-                if (parts.length != 0)
+                if (parts.length != 2)
                 {
                     continue;
                 }

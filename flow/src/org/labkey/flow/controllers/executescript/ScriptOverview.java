@@ -1,18 +1,24 @@
 package org.labkey.flow.controllers.executescript;
 
-import org.labkey.api.view.Overview;
-import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.data.FlowProtocolStep;
-import org.labkey.flow.data.FlowCompensationMatrix;
-import org.labkey.flow.data.FlowRun;
-import org.labkey.flow.controllers.editscript.ScriptController;
-import org.labkey.flow.analysis.model.CompensationCalculation;
-import org.labkey.flow.analysis.model.PopulationSet;
-import org.labkey.flow.analysis.model.Population;
-import org.labkey.flow.analysis.model.Analysis;
-import org.labkey.api.security.User;
-import org.labkey.api.security.ACL;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryAction;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.Overview;
+import org.labkey.flow.analysis.model.Analysis;
+import org.labkey.flow.analysis.model.CompensationCalculation;
+import org.labkey.flow.analysis.model.Population;
+import org.labkey.flow.analysis.model.PopulationSet;
+import org.labkey.flow.controllers.editscript.ScriptController;
+import org.labkey.flow.data.FlowCompensationMatrix;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.query.FlowTableType;
 
 import java.util.List;
 
@@ -37,6 +43,10 @@ public class ScriptOverview extends Overview
         _script = script;
         _runCount = _script.getRunCount();
         _canEdit = _runCount == 0 && hasPermission(ACL.PERM_UPDATE);
+
+        ActionURL runsUrl = FlowTableType.Runs.urlFor(container, QueryAction.executeQuery);
+        runsUrl.addFilter("query", FieldKey.fromString("AnalysisScript/Name"), CompareType.EQUAL, _script.getName());
+
         setTitle("Analysis script '" + h(_script.getName()) + "'");
         StringBuilder explanatoryHTML = new StringBuilder();
         //explanatoryHTML.append("An analysis script tells " + FlowModule.getLongProductName() + " how to calculate the compensation matrix, what gates to apply, statistics to calculate, and graphs to draw.<br>");
@@ -51,7 +61,7 @@ public class ScriptOverview extends Overview
         }
         else
         {
-            setStatusHTML("This script has been used " + _runCount + " times.  For this reason, it cannot be edited.");
+            setStatusHTML("This script has been used <a href=\"" + PageFlowUtil.filter(runsUrl) + "\">" + _runCount + " times</a>.  For this reason, it cannot be edited.");
         }
 
         addStep(getCompensationCalculationStep());
@@ -62,7 +72,7 @@ public class ScriptOverview extends Overview
             Action action = new Action("Make a copy of this analysis script", _script.urlFor(ScriptController.Action.copy));
             if (_runCount != 0)
             {
-                action.setDescriptionHTML("This script cannot be edited anymore because it has been used.");
+                action.setDescriptionHTML("This script cannot be edited anymore because it has been used <a href=\"" + PageFlowUtil.filter(runsUrl) + "\">" + _runCount + " times</a>.");
             }
             addAction(action);
         }
@@ -259,7 +269,7 @@ public class ScriptOverview extends Overview
         }
         else
         {
-            ret.setExplanatoryHTML("This script must have either a compensation calculation or an analysis before it can be edited.");
+            ret.setExplanatoryHTML("This script must have either a compensation calculation or an analysis before it can be executed.");
         }
         return ret;
     }

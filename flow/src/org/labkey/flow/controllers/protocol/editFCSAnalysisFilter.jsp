@@ -1,9 +1,9 @@
+<%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.api.query.FieldKey" %>
 <%@ page import="org.labkey.flow.controllers.protocol.EditFCSAnalysisFilterForm" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
-<%@ page import="org.labkey.api.query.FieldKey" %>
-<%@ page import="java.util.Map" %>
 <%@ page import="java.util.LinkedHashMap" %>
-<%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%! void addCompare(Map<String, String> options, CompareType ct)
@@ -25,15 +25,17 @@
 %>
 <labkey:errors />
 <p>
-    Use this page to specify which FCS files should be analyzed.
+    Filters may be applied to all analyses in the project folder.  The set of keyword and
+    value pairs <i>must</i> all match in the FCS header to be included in the analysis.
+    Alternatively, you may create filters on individual analysis scripts.
 </p>
 <form action="<%=form.getProtocol().urlFor(ProtocolController.Action.editFCSAnalysisFilter)%>" method="POST">
     <table>
-        <tr class="wpHeader"><th colspan="3" class="wpTitle" align="left">Only process FCS files where:</th></tr>
+        <tr class="wpHeader"><th colspan="3" class="wpTitle" align="left">Filter FCS files by keyword:</th></tr>
         <% for (int i = 0; i < clauseCount; i ++) {
         FieldKey field = null;
         String op = null;
-            String value = null;
+        String value = null;
 
         if (i < form.ff_field.length)
         {
