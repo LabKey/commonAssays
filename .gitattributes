@@ -623,6 +623,7 @@ ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.23-2.24.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.24-2.25.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.30-2.31.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.31-2.32.sql -text
+ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.32-2.33.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-1.00-1.01.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-1.01-1.02.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-1.10-1.11.sql -text
@@ -683,6 +684,7 @@ ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.23-2.24.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.24-2.25.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.30-2.31.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.31-2.32.sql -text
+ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.32-2.33.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-drop.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.62.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.63.sql -text
@@ -967,6 +969,7 @@ ms2/src/org/labkey/ms2/protein/CustomAnnotationSet.java -text
 ms2/src/org/labkey/ms2/protein/CustomAnnotationType.java -text
 ms2/src/org/labkey/ms2/protein/DefaultAnnotationLoader.java -text
 ms2/src/org/labkey/ms2/protein/FastaDbLoader.java -text
+ms2/src/org/labkey/ms2/protein/FastaReloader.java -text
 ms2/src/org/labkey/ms2/protein/IdentifierType.java -text
 ms2/src/org/labkey/ms2/protein/ParseActions.java -text
 ms2/src/org/labkey/ms2/protein/ParseContext.java -text

@@ -1819,7 +1819,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresSiteAdmin
-    public class UpdateSeqIdsAction extends FormHandlerAction
+    public class ReloadFastaAction extends FormHandlerAction
     {
         public void validateCommand(Object target, Errors errors)
         {
@@ -1827,17 +1827,7 @@ public class MS2Controller extends SpringActionController
 
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
-            HttpServletRequest request = getViewContext().getRequest();
-            String[] fastaIds = request.getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
-
-            List<Integer> ids = new ArrayList<Integer>(fastaIds.length);
-
-            for (String fastaId : fastaIds)
-            {
-                int id = Integer.parseInt(fastaId);
-                if (0 != id)
-                    ids.add(id);
-            }
+            int[] ids = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
 
             FastaDbLoader.updateSeqIds(ids);
 
@@ -1861,7 +1851,7 @@ public class MS2Controller extends SpringActionController
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
             HttpServletRequest request = getViewContext().getRequest();
-            String[] fastaIds = request.getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
+            Set<String> fastaIds = DataRegionSelection.getSelected(getViewContext(), true);
             String idList = StringUtils.join(fastaIds, ',');
             Integer[] validIds = Table.executeArray(ProteinManager.getSchema(), "SELECT FastaId FROM " + ProteinManager.getTableInfoFastaAdmin() + " WHERE (FastaId <> 0) AND (Runs IS NULL) AND (FastaId IN (" + idList + "))", new Object[]{}, Integer.class);
 
@@ -1948,18 +1938,19 @@ public class MS2Controller extends SpringActionController
             rgn.setShowRecordSelectors(true);
 
             GridView result = new GridView(rgn);
+            result.getRenderContext().setBaseSort(new Sort("FastaId"));
 
             ButtonBar bb = new ButtonBar();
 
             ActionButton delete = new ActionButton("", "Delete");
-            delete.setScript("return verifySelected(this.form, \"deleteDataBases.post\", \"post\", \"databases\")");
+            delete.setScript(result.createVerifySelectedScript(new ActionURL(DeleteDataBasesAction.class, getContainer()), "FASTA files"));
             delete.setActionType(ActionButton.Action.GET);
             bb.add(delete);
 
-            ActionButton update = new ActionButton("button", "Reload FASTA");
-            update.setScript("return verifySelected(this.form, \"updateSeqIds.post\", \"post\", \"databases\")");
-            update.setActionType(ActionButton.Action.GET);
-            bb.add(update);
+            ActionButton reload = new ActionButton("button", "Reload FASTA");
+            reload.setScript(result.createVerifySelectedScript(new ActionURL(ReloadFastaAction.class, getContainer()), "FASTA files"));
+            reload.setActionType(ActionButton.Action.GET);
+            bb.add(reload);
 
             MenuButton setBestNameMenu = new MenuButton("Set Protein BestName...");
             ActionURL setBestNameURL = new ActionURL(SetBestNameAction.class, getContainer());

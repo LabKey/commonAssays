@@ -29,6 +29,7 @@ import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
+import org.labkey.api.security.UserManager;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
@@ -89,7 +90,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public MS2Module()
     {
-        super(NAME, 2.32, "/org/labkey/ms2", true,
+        super(NAME, 2.33, "/org/labkey/ms2", true,
                 new WebPartFactory("MS2 Runs"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {

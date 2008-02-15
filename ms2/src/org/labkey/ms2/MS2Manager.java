@@ -359,7 +359,7 @@ public class MS2Manager
         catch (SQLException e)
         {
             _log.error("getRuns", e);
-            return null;
+            throw new RuntimeSQLException(e);
         }
         finally
         {
@@ -426,6 +426,10 @@ public class MS2Manager
             throw new IOException("Unable to load file type '" + file + "'.");
     }
 
+    public static MS2Run[] getRunsForFastaId(int fastaId)
+    {
+        return getRuns("runs.FastaId = ?", fastaId);
+    }
 
     public static MS2Run getRun(String runId)
     {

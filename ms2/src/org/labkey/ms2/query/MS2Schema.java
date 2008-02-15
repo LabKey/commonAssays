@@ -452,12 +452,31 @@ public class MS2Schema extends UserSchema
 
     public void setRuns(MS2Run[] runs)
     {
-        _runs = Arrays.asList(runs);
+        setRuns(Arrays.asList(runs));
     }
 
     public void setRuns(List<MS2Run> runs)
     {
         _runs = runs;
+        Collections.sort(_runs, new Comparator<MS2Run>()
+        {
+            public int compare(MS2Run run1, MS2Run run2)
+            {
+                if (run1.getDescription() == null && run2.getDescription() == null)
+                {
+                    return 0;
+                }
+                if (run1.getDescription() == null)
+                {
+                    return 1;
+                }
+                if (run2.getDescription() == null)
+                {
+                    return -1;
+                }
+                return run1.getDescription().compareTo(run2.getDescription());
+            }
+        });
     }
     
     public List<MS2Run> getRuns()

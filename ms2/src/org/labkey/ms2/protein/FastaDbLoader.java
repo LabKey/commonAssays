@@ -160,6 +160,10 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             long seconds = (System.currentTimeMillis() - startTime) / 1000;
             _log.info("Loading took " + seconds + " seconds"); 
         }
+        else
+        {
+            throw new IOException("Could not locate file: " + getParseFName());
+        }
     }
 
     public int getFastaId()
@@ -818,55 +822,12 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
     }
 
 
-    // Update the SeqIds in ProteinSequences table for a previously loaded FASTA file.  This is to help fix up
-    // null SeqIds that, up until CPAS 1.4, occurred when a single mouthful contained two or more identical
-    // sequences.
-    private static void updateSeqIds(int fastaId) throws SQLException, IOException
+    public static void updateSeqIds(int[] fastaIds)
     {
-        Map fasta = Table.selectObject(ProteinManager.getTableInfoFastaFiles(), fastaId, Map.class);
-        String filename = (String)fasta.get("FileName");
-
-        FastaDbLoader fdbl = new FastaDbLoader(new File(filename), (String)fasta.get("filechecksum"));
-        fdbl.setComment(new java.util.Date() + " " + filename);
-        fdbl.setDefaultOrganism(UNKNOWN_ORGANISM);
-        fdbl.setOrganismIsToGuessed(true);
-        fdbl.parseFile();
-
-        Table.execute(MS2Manager.getSchema(), "UPDATE " + MS2Manager.getTableInfoRuns() + " SET FastaID = ? WHERE FastaID = ?", new Object[] { fdbl.getFastaId(), fastaId } );
-        ProteinManager.deleteFastaFile(fastaId);
-    }
-
-
-    public static void updateSeqIds(List<Integer> fastaIds)
-    {
-        Thread thread = new Thread(new SeqIdUpdater(fastaIds));
+        Thread thread = new Thread(new FastaReloader(fastaIds));
         thread.start();
     }
 
-    private static class SeqIdUpdater implements Runnable
-    {
-        private List<Integer> _fastaIds;
-
-        SeqIdUpdater(List<Integer> fastaIds)
-        {
-            _fastaIds = fastaIds;
-        }
-
-        public void run()
-        {
-            for (Integer fastaId : _fastaIds)
-            {
-                try
-                {
-                    updateSeqIds(fastaId.intValue());
-                }
-                catch(Exception e)
-                {
-                    _log.error("Exception while updating SeqIds for FASTA id " + fastaId, e);
-                }
-            }
-        }
-    }
     //JUnit TestCase
     public static class TestCase extends junit.framework.TestCase
     {

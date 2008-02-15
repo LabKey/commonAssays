@@ -34,6 +34,6 @@ public class CompareProteinsView extends AbstractRunCompareView
 
     protected TableInfo createTable()
     {
-        return getSchema().createProteinProphetCompareTable(null, getViewContext().getRequest(), null);
+        return getSchema().createProteinProphetCompareTable(null, getViewContext().getRequest(), getViewContext().getRequest().getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME));
     }
 }
