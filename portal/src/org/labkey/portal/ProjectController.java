@@ -17,13 +17,12 @@
 package org.labkey.portal;
 
 import org.apache.beehive.netui.pageflow.FormData;
-import org.labkey.api.action.FormViewAction;
-import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.action.SpringActionController;
+import org.labkey.api.action.*;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.module.FolderType;
+import org.labkey.api.module.Module;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
@@ -44,6 +43,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Set;
+import java.util.Map;
 
 
 public class ProjectController extends SpringActionController
@@ -676,6 +677,30 @@ public class ProjectController extends SpringActionController
         public void setPath(String path)
         {
             this.path = path;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class GetWebPartAction extends ApiAction
+    {
+        public static final String PARAM_WEBPART = "webpart.name";
+
+        public ApiResponse execute(Object form, BindException errors) throws Exception
+        {
+            HttpServletRequest request = getViewContext().getRequest();
+            String webPartName = request.getParameter(PARAM_WEBPART);
+
+            if(null == webPartName || webPartName.isEmpty())
+                throw new IllegalArgumentException("You must provide a value for the " + PARAM_WEBPART + " parameter!");
+
+            WebPartFactory factory = Portal.getPortalPartCaseInsensitive(webPartName);
+            Portal.WebPart part = factory.createWebPart();
+            WebPartView view = factory.getWebPartViewSafe(getViewContext(), part);
+
+            //view.prepare(view.getModelBean());
+
+            view.render(request, getViewContext().getResponse());
+            return null;
         }
     }
 }
