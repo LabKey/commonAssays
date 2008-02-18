@@ -690,7 +690,7 @@ public class ProjectController extends SpringActionController
             HttpServletRequest request = getViewContext().getRequest();
             String webPartName = request.getParameter(PARAM_WEBPART);
 
-            if(null == webPartName || webPartName.isEmpty())
+            if(null == webPartName || webPartName.length() == 0)
                 throw new IllegalArgumentException("You must provide a value for the " + PARAM_WEBPART + " parameter!");
 
             WebPartFactory factory = Portal.getPortalPartCaseInsensitive(webPartName);
