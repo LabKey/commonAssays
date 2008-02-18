@@ -2,9 +2,12 @@ package org.labkey.ms1.pipeline;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Table;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.security.User;
 import org.labkey.ms1.MS1Manager;
+import org.labkey.ms1.query.MS1Schema;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -32,6 +35,40 @@ public class PeaksFileImporter extends DefaultHandler
         _user = user;
     }
 
+    protected void beginTransaction() throws SAXException
+    {
+        try
+        {
+            DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().beginTransaction();
+        }
+        catch(SQLException e)
+        {
+            throw new SAXException(e);
+        }
+    }
+
+    protected void commitTransaction() throws SAXException
+    {
+        try
+        {
+            DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().commitTransaction();
+        }
+        catch(SQLException e)
+        {
+            throw new SAXException(e);
+        }
+    }
+
+    protected void rollbackTransaction()
+    {
+        DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().rollbackTransaction();
+    }
+
+    protected boolean isTransactionActive()
+    {
+        return DbSchema.get(MS1Manager.SCHEMA_NAME).getScope().isTransactionActive();
+    }
+
     public void startDocument() throws SAXException
     {
         _log.info("Starting to parse and import peaks file " + _expData.getFile().toURI());
@@ -39,6 +76,9 @@ public class PeaksFileImporter extends DefaultHandler
 
         //parsing state initialization
         clear();
+
+        //begin a transaction--we will commit in chunks for better performance
+        beginTransaction();
     }
 
     public void endDocument() throws SAXException
@@ -49,9 +89,14 @@ public class PeaksFileImporter extends DefaultHandler
             HashMap<String,Object> map = new HashMap<String,Object>();
             map.put("Imported", Boolean.TRUE);
             Table.update(_user, MS1Manager.get().getTable(MS1Manager.TABLE_FILES), map, _idFile, null);
+
+            if(isTransactionActive())
+                commitTransaction();
         }
         catch(SQLException e)
         {
+            if(isTransactionActive())
+                rollbackTransaction();
             throw new SAXException(MS1Manager.get().getAllErrors(e));
         }
 
@@ -84,6 +129,8 @@ public class PeaksFileImporter extends DefaultHandler
         }
         catch(SQLException e)
         {
+            if(isTransactionActive())
+                rollbackTransaction();
             throw new SAXException(MS1Manager.get().getAllErrors(e));
         }
     }
@@ -182,6 +229,12 @@ public class PeaksFileImporter extends DefaultHandler
         Table.insert(_user, MS1Manager.get().getTable(MS1Manager.TABLE_PEAKS_TO_FAMILIES), mapP2F);
 
         ++_numPeaks;
+
+        if(_numPeaks % 1000 == 0)
+        {
+            commitTransaction();
+            beginTransaction();
+        }
 
         if((_numPeaks % 5000) == 0)
             _log.info("Imported " + _numPeaks + " peaks so far....");
