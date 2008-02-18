@@ -307,8 +307,9 @@ public class FlowAnalyzer
         }
     }
 
-    static public void makeCompensationCalculationDef(ScriptDef script, CompensationCalculation compensationCalculation)
+    static public void makeCompensationCalculationDef(ScriptDocument doc, CompensationCalculation compensationCalculation)
     {
+        ScriptDef script = doc.getScript();
         ScriptSettings settings = new ScriptSettings();
         settings.merge(script.getSettings());
         if (compensationCalculation != null)

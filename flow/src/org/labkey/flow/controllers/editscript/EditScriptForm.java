@@ -239,17 +239,16 @@ public class EditScriptForm extends ViewForm
 
         return url;
     }
-    
+
     public String[] getAvailableKeywords()
     {
         HashSet<String> keywords = new HashSet();
         try
         {
             FlowRun run = getRun();
-            if (run == null)
-                return new String[0];
             FlowSchema schema = new FlowSchema(getUser(), getContainer());
-            schema.setRun(run);
+            if (run != null)
+                schema.setRun(run);
             FlowPropertySet fps = new FlowPropertySet(schema.createFCSFileTable("foo"));
             keywords.addAll(fps.getKeywordProperties().keySet());
         }

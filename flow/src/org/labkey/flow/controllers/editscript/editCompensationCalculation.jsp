@@ -1,13 +1,54 @@
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
-<%@ page import="java.util.*" %>
-<%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace"%>
-<%@ page import="org.labkey.flow.analysis.model.Analysis"%>
 <%@ page import="org.apache.commons.collections.map.MultiValueMap" %>
+<%@ page import="org.labkey.api.query.FieldKey" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.flow.analysis.model.Analysis"%>
+<%@ page import="org.labkey.flow.analysis.model.AutoCompensationScript"%>
+<%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace" %>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
+<%@ page import="java.util.Collection" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.Set" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
+<%
+    boolean canEdit = form.canEdit();
+    Map<FieldKey, String> fieldOptions = form.getFieldOptions();
+    Map<String, String> opOptions = form.getOpOptions();
+    int clauseCount = Math.max(form.ff_filter_field.length + 2, 4);
+%>
 <script type="text/javascript" src="<%=request.getContextPath()%>/Flow/editCompensationCalculation.js"></script>
 <script type="text/javascript">
 function o() { var o = {}; for (var i = 0; i < arguments.length; i += 2) o[arguments[i]] = arguments[i + 1]; return o; }
+var parameters = <%=javascriptArray(form.parameters)%>
+var AutoComp = {};
+<%
+    for (AutoCompensationScript autoComp : form.workspace.getAutoCompensationScripts())
+    {
+        %>AutoComp['<%=autoComp.getName()%>']={<%
+
+        // 'criteria' : [ primarykKeyword, secondaryKeyword, secondaryValue ]
+        AutoCompensationScript.MatchingCriteria criteria = autoComp.getCriteria();
+        if (criteria != null)
+        {
+        %>'criteria' : <%=javascriptArray(criteria.getPrimaryKeyword(), criteria.getSecondaryKeyword(), criteria.getSecondaryValue())%>,
+        <%
+        }
+
+        %>'params' : {<%
+        // params : { 'param name' : [ searchKeyword, searchValue, positiveSubset, negativeSubset ] }
+        String and = "\n";
+        for (AutoCompensationScript.ParameterDefinition param : autoComp.getParameters().values())
+        {
+            %><%=and%>'<%= param.getParameterName()%>' : <%=javascriptArray(
+                param.getSearchKeyword(), param.getSearchValue(), param.getPositiveGate(), param.getNegativeGate())%><%
+            and = ",\n";
+        }
+        %>}
+        };<%
+        out.println();
+    }
+%>
 var SS = []; // SUBSETS
 <%
     // these arrays are duplicated a lot so only output each one once
@@ -53,10 +94,15 @@ var KV = {}; // KEYWORD->VALUE->SUBSET
 %>
 var keywordValueSubsetListMap = KV;
 </script>
-<p><b>Instructions:</b></p>
-<p>
+<p><h2>Instructions:</h2>
     For each parameter which requires compensation, specify the keyword name and value
     which are to be used to identify the compensation control in experiment runs.
+    If your FlowJo workspace uses AutoCompensation scripts, you can select the script
+    from the drop down below to quickly populate the form fields.
+</p>
+<p>
+    Filters may be applied to this analysis script.  The set of keyword and
+    value pairs <i>must</i> all match in the FCS header to be included in the analysis.
 </p>
 <p>
     <b>If you do not see the keyword you are looking for:</b><br>
@@ -68,15 +114,72 @@ var keywordValueSubsetListMap = KV;
 </p>
 
 <form method="POST" action="<%=formAction(ScriptController.Action.editCompensationCalculation)%>">
-    <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form.workspace)%>">
-    <table class="normal" border="1"><tr><th rowspan="2">Channel</th><th colspan="3">Positive</th><th colspan="3">
-        Negative</th></tr>
+
+    <p>
+    <b>AutoCompensation script:</b><br/>
+    <select name="selectAutoCompScript" onchange="populateAutoComp(this);">
+    <%
+        %><option value="" selected></option><%
+        for (AutoCompensationScript autoComp : form.workspace.getAutoCompensationScripts())
+        {
+            %>
+            <option value="<%=autoComp.getName()%>"><%=autoComp.getName()%></option><%
+        }
+    %>
+    </select>
+    </p>
+
+    <p>
+    <b>Filter FCS files by keyword:</b><br/>
+    <table class="normal">
+        <tr><th/><th>Keyword</th><th/><th>Value</th></tr>
+        <%
+        for (int i = 0; i < clauseCount; i++)
+        {
+            FieldKey field = null;
+            String op = null;
+            String value = null;
+
+            if (i < form.ff_filter_field.length)
+            {
+                field = form.ff_filter_field[i];
+                op = form.ff_filter_op[i];
+                value = form.ff_filter_value[i];
+            }
+
+            if (!canEdit && field == null)
+                continue;
+
+            %>
+            <tr>
+                <td class="normal"><%= i == 0 ? "" : "and" %></td>
+            <% if (canEdit) { %>
+                <td class="normal"><select name="ff_filter_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /></select></td>
+                <td class="normal"><select name="ff_filter_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
+                <td class="normal"><input type="text" name="ff_filter_value" value="<%=h(value)%>"></td>
+            <% } else { %>
+                <td class="normal"><%=fieldOptions.get(field)%></td>
+                <td class="normal"><%=opOptions.get(op)%></td>
+                <td class="normal"><%=h(value)%></td>
+            <% } %>
+            </tr>
+            <%
+        }
+        %>
+    </table>
+    </p>
+
+    <p>
+    <b>Select Compensation:</b><br/>
+    <table class="normal" border="1">
+        <tr><th rowspan="2">Channel</th><th colspan="3">Positive</th><th colspan="3">Negative</th></tr>
         <tr><th>Keyword</th><th>Value</th><th>Subset</th><th>Keyword</th><th>Value</th><th>Subset</th></tr>
         <% for (int i = 0; i < form.parameters.length; i ++)
         {
             String parameter = form.parameters[i];
         %>
-        <tr><td><%=h(parameter)%></td>
+        <tr id="<%=h(parameter)%>">
+            <td><%=h(parameter)%></td>
             <td><%=selectKeywordNames(Sign.positive, i)%></td>
             <td><%=selectKeywordValues(Sign.positive, i)%></td>
             <td><%=selectSubsets(Sign.positive, i)%></td>
@@ -89,6 +192,9 @@ var keywordValueSubsetListMap = KV;
         </tr>
         <% } %>
     </table>
+    </p>
+    
+    <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form.workspace)%>">
     <input type="Submit" value="Submit">
 </form>
 

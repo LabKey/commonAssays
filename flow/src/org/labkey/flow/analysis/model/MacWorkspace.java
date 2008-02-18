@@ -1,17 +1,16 @@
 package org.labkey.flow.analysis.model;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
 import org.apache.commons.lang.StringUtils;
-
-import java.util.*;
-
-import org.labkey.flow.analysis.web.SubsetSpec;
-import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.ObjectType;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.util.*;
 
 public class MacWorkspace extends FlowJoWorkspace
 {
@@ -42,6 +41,7 @@ public class MacWorkspace extends FlowJoWorkspace
     public MacWorkspace(Element elDoc) throws Exception
     {
         readCompensationMatrices(elDoc);
+        readAutoCompensationScripts(elDoc);
         readCalibrationTables(elDoc);
         readSamples(elDoc);
         readSampleAnalyses(elDoc);
@@ -68,6 +68,19 @@ public class MacWorkspace extends FlowJoWorkspace
             for (Element elCompensationMatrix : getElementsByTagName(elCompensationMatrices, "CompensationMatrix"))
             {
                 _compensationMatrices.add(new CompensationMatrix(elCompensationMatrix));
+            }
+        }
+    }
+
+    public void readAutoCompensationScripts(Element elDoc)
+    {
+        for (Element elAutoCompScripts : getElementsByTagName(elDoc, "AutoCompensationScripts"))
+        {
+            for (Element elAutoCompScript : getElementsByTagName(elAutoCompScripts, "Script"))
+            {
+                AutoCompensationScript script = AutoCompensationScript.readAutoComp(elAutoCompScript);
+                if (script != null)
+                    _autoCompensationScripts.add(script);
             }
         }
     }

@@ -679,11 +679,13 @@ public class ScriptController extends BaseFlowController
         CompensationCalculationPage page = (CompensationCalculationPage) getPage(pageName, form);
         return renderInTemplate(page, "Compensation Calculation Editor", Action.editCompensationCalculation);
     }
+    
     protected Forward doEditCompensationCalculation(EditCompensationCalculationForm form) throws Exception
     {
         FlowJoWorkspace workspace = handleCompWorkspaceUpload(form);
         if (workspace != null)
         {
+            form.initSettings();
             form.setWorkspace(workspace);
             return null;
         }
@@ -717,9 +719,13 @@ public class ScriptController extends BaseFlowController
             }
             return null;
         }
-        ScriptDef script = form.analysisDocument.getScript();
-        FlowAnalyzer.makeCompensationCalculationDef(script, calc);
-        if (!safeSetAnalysisScript(form.analysisScript, form.analysisDocument.toString()))
+
+        ScriptDocument doc = form.analysisDocument;
+        if (!updateSettingsFilter(form, doc))
+            return null;
+
+        FlowAnalyzer.makeCompensationCalculationDef(doc, calc);
+        if (!safeSetAnalysisScript(form.analysisScript, doc.toString()))
             return null;
         return new ViewForward(form.urlFor(Action.editCompensationCalculation));
     }
@@ -1157,7 +1163,7 @@ public class ScriptController extends BaseFlowController
     {
         if (popset instanceof CompensationCalculation)
         {
-            FlowAnalyzer.makeCompensationCalculationDef(doc.getScript(), (CompensationCalculation) popset);
+            FlowAnalyzer.makeCompensationCalculationDef(doc, (CompensationCalculation) popset);
         }
         else
         {
@@ -1255,31 +1261,26 @@ public class ScriptController extends BaseFlowController
         requiresPermission(ACL.PERM_UPDATE);
         if (isPost() && form.canEdit())
         {
-            Forward fwd = updateSettings(form);
-            if (fwd != null)
-                return fwd;
+            ScriptDocument doc = form.analysisDocument;
+            if (updateSettingsMinValues(form, doc) &&
+                updateSettingsFilter(form, doc) &&
+                safeSetAnalysisScript(form.analysisScript, doc.toString()))
+            {
+                    return new ViewForward(form.urlFor(Action.begin));
+            }
         }
         return renderInTemplate(getPage("editSettings.jsp", form), "Edit Settings", Action.editSettings);
     }
 
-    protected Forward updateSettings(EditSettingsForm form) throws Exception
+    protected boolean updateSettingsMinValues(EditSettingsForm form, ScriptDocument doc)
     {
-        boolean errors = false;
-        ScriptDocument doc = form.analysisScript.getAnalysisScriptDocument();
+        boolean success = true;
         SettingsDef settingsDef = doc.getScript().getSettings();
         if (settingsDef == null)
-        {
             settingsDef = doc.getScript().addNewSettings();
-        }
 
-        XmlCursor cur = null;
-        try {
-            cur = settingsDef.newCursor();
-            cur.removeXmlContents();
-        }
-        finally {
-            if (cur != null) cur.dispose();
-        }
+        while (settingsDef.sizeOfParameterArray() > 0)
+            settingsDef.removeParameter(0);
 
         for (int i = 0; i < form.ff_parameter.length; i++)
         {
@@ -1293,7 +1294,8 @@ public class ScriptController extends BaseFlowController
                 }
                 catch (Exception e)
                 {
-                    errors = addError("Error converting '" + value + "' to a number.");
+                    addError("Error converting '" + value + "' to a number.");
+                    success = false;
                     continue;
                 }
                 String name = form.ff_parameter[i];
@@ -1303,7 +1305,32 @@ public class ScriptController extends BaseFlowController
             }
         }
 
+        return success;
+    }
+
+    protected boolean updateSettingsFilter(EditSettingsForm form, ScriptDocument doc) throws Exception
+    {
+        boolean success = true;
+        SettingsDef settingsDef = doc.getScript().getSettings();
+        if (settingsDef == null)
+            settingsDef = doc.getScript().addNewSettings();
+
         FiltersDef filtersDef = null;
+        XmlCursor cur = null;
+        try
+        {
+            filtersDef = settingsDef.getFilters();
+            if (filtersDef != null)
+            {
+                cur = filtersDef.newCursor();
+                cur.removeXmlContents();
+            }
+        }
+        finally
+        {
+            if (cur != null) cur.dispose();
+        }
+
         for (int i = 0; i < form.ff_filter_field.length; i++)
         {
             FieldKey field = form.ff_filter_field[i];
@@ -1321,12 +1348,7 @@ public class ScriptController extends BaseFlowController
             }
         }
 
-        if (errors)
-        {
-            return null;
-        }
-        safeSetAnalysisScript(form.analysisScript, doc.toString());
-        return new ViewForward(form.urlFor(Action.begin));
+        return success;
     }
 
     @Jpf.Action

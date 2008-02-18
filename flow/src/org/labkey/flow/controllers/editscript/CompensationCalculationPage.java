@@ -1,14 +1,13 @@
 package org.labkey.flow.controllers.editscript;
 
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.apache.commons.lang.StringUtils;
+import org.fhcrc.cpas.flow.script.xml.*;
 import org.labkey.flow.analysis.model.Analysis;
+import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.Population;
 import org.labkey.flow.analysis.web.SubsetSpec;
 
 import java.util.*;
-
-import org.apache.commons.lang.StringUtils;
-import org.fhcrc.cpas.flow.script.xml.*;
 
 abstract public class CompensationCalculationPage extends ScriptController.Page<EditCompensationCalculationForm>
 {
@@ -152,7 +151,8 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         }
         return keywordValueSubsetListMap;
     }
-    public String javascriptArray(String[] strings)
+
+    public String javascriptArray(String... strings)
     {
         if (strings.length == 0)
             return "[]";
@@ -281,7 +281,9 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
                 }
             }
         }
+        
         SubsetSpec current = SubsetSpec.fromString(getSubset(sign, index));
+
         ret.append("<select name=\"" + sign + "Subset[" + index + "]\">");
         ret.append(option("", "Ungated", ""));
         for (String subset : subsets)

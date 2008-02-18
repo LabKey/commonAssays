@@ -27,6 +27,11 @@ public class EditSettingsForm extends EditScriptForm
     public void reset(ActionMapping mapping, HttpServletRequest request)
     {
         super.reset(mapping, request);
+        initSettings();
+    }
+
+    protected void initSettings()
+    {
         SettingsDef settings = analysisDocument.getScript().getSettings();
         Map<String, Double> parameters = new TreeMap();
         for (String param : getParameterNames(getRun(), new String[0]).keySet())

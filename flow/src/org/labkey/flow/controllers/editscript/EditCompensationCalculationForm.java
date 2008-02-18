@@ -1,23 +1,22 @@
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.struts.upload.FormFile;
 import org.apache.struts.action.ActionMapping;
-import org.apache.log4j.Logger;
-import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
+import org.apache.struts.upload.FormFile;
 import org.fhcrc.cpas.flow.script.xml.ChannelDef;
 import org.fhcrc.cpas.flow.script.xml.ChannelSubsetDef;
+import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
 import org.fhcrc.cpas.flow.script.xml.CriteriaDef;
-import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.labkey.flow.data.FlowProtocolStep;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-public class EditCompensationCalculationForm extends EditScriptForm
+public class EditCompensationCalculationForm extends EditSettingsForm
 {
     public FormFile workspaceFile;
     public int selectedRunId;

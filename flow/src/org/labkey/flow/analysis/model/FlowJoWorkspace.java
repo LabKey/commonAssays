@@ -40,6 +40,7 @@ abstract public class FlowJoWorkspace implements Serializable
     protected ScriptSettings _settings = new ScriptSettings();
     protected List<String> _warnings;
     protected List<CompensationMatrix> _compensationMatrices = new ArrayList();
+    protected List<AutoCompensationScript> _autoCompensationScripts = new ArrayList();
 
     public class SampleInfo implements Serializable
     {
@@ -197,6 +198,11 @@ abstract public class FlowJoWorkspace implements Serializable
             ret.add(comp);
         }
         return ret;
+    }
+
+    public List<? extends AutoCompensationScript> getAutoCompensationScripts()
+    {
+        return _autoCompensationScripts;
     }
 
     static List<Element> getElementsByTagName(Element parent, String tagName)

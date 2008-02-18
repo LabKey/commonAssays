@@ -1,8 +1,6 @@
 package org.labkey.flow.controllers.executescript;
 
-import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryAction;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
@@ -45,7 +43,6 @@ public class ScriptOverview extends Overview
         _canEdit = _runCount == 0 && hasPermission(ACL.PERM_UPDATE);
 
         ActionURL runsUrl = FlowTableType.Runs.urlFor(container, QueryAction.executeQuery);
-        runsUrl.addFilter("query", FieldKey.fromString("AnalysisScript/Name"), CompareType.EQUAL, _script.getName());
 
         setTitle("Analysis script '" + h(_script.getName()) + "'");
         StringBuilder explanatoryHTML = new StringBuilder();
