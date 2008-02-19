@@ -694,11 +694,20 @@ public class ProjectController extends SpringActionController
                 throw new IllegalArgumentException("You must provide a value for the " + PARAM_WEBPART + " parameter!");
 
             WebPartFactory factory = Portal.getPortalPartCaseInsensitive(webPartName);
+            if(null == factory)
+                throw new RuntimeException("Couldn't get the web part factory for web part '" + webPartName + "'!");
+
             Portal.WebPart part = factory.createWebPart();
+            if(null == part)
+                throw new RuntimeException("Couldn't create web part '" + webPartName + "'!");
+
+            part.setProperties(getViewContext().getRequest().getQueryString());
+
             WebPartView view = factory.getWebPartViewSafe(getViewContext(), part);
+            if(null == view)
+                throw new RuntimeException("Couldn't create web part view for part '" + webPartName + "'!");
 
-            //view.prepare(view.getModelBean());
-
+            
             view.render(request, getViewContext().getResponse());
             return null;
         }
