@@ -44,7 +44,7 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
 
     public MS1Module()
     {
-        super(NAME, 2.30, "/org/labkey/ms1", true,
+        super(NAME, 2.31, "/org/labkey/ms1", true,
                 new WebPartFactory(WEBPART_MS1_RUNS)
                 {
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)

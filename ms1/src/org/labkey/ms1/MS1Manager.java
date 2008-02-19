@@ -286,21 +286,22 @@ public class MS1Manager
             Table.execute(getSchema(), sql.toString(), null);
             scope.commitTransaction();
             _log.info("Finished purging peak families for file " + String.valueOf(fileId) + ".");
-        }
-        catch(SQLException e)
-        {
-            if(scope.isTransactionActive())
-                scope.rollbackTransaction();
-            throw e;
-        }
 
-        //purge peaks differently due to PostgreSQL problem when deleting
-        //lots of rows via a sub-select
-        purgePeaks(fileId);
+            //now delete the peaks themselves
+            sql = new StringBuilder("DELETE FROM ");
+            sql.append(getSQLTableName(TABLE_PEAKS));
+            sql.append(" WHERE ScanId IN (");
+            sql.append(genScanListSQL(fileId));
+            sql.append(")");
 
-        try
-        {
-            StringBuilder sql = new StringBuilder("DELETE FROM ");
+            _log.info("Purging peaks for file " + String.valueOf(fileId) + "...");
+            scope.beginTransaction();
+            Table.execute(getSchema(), sql.toString(), null);
+            scope.commitTransaction();
+            _log.info("Finished purging peaks for file " + String.valueOf(fileId) + ".");
+
+            //now the rest of it
+            sql = new StringBuilder("DELETE FROM ");
             sql.append(getSQLTableName(TABLE_CALIBRATION_PARAMS));
             sql.append(" WHERE ScanId IN (");
             sql.append(genScanListSQL(fileId));
