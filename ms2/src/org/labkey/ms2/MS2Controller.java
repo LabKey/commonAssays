@@ -12,8 +12,8 @@ import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.*;
-import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.query.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresLogin;
@@ -22,7 +22,6 @@ import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
-import org.labkey.api.ms2.MS2Urls;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.SensitivitySummary;
@@ -30,10 +29,10 @@ import org.labkey.common.util.Pair;
 import org.labkey.ms2.compare.*;
 import org.labkey.ms2.peptideview.*;
 import org.labkey.ms2.pipeline.*;
-import org.labkey.ms2.pipeline.tandem.XTandemRun;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
 import org.labkey.ms2.pipeline.sequest.SequestClientImpl;
+import org.labkey.ms2.pipeline.tandem.XTandemRun;
 import org.labkey.ms2.protein.*;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.NullOutputStream;
@@ -43,6 +42,7 @@ import org.labkey.ms2.query.*;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
@@ -839,7 +839,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static ActionURL getLoadGoUrl()
+    public static ActionURL getLoadGoURL()
     {
         return new ActionURL(LoadGoAction.class);
     }
@@ -856,19 +856,30 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
         {
-            return new JspView("/org/labkey/ms2/loadGo.jsp");
+            return new GoView();
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            setTitle("Load GO Annotations");
+            setTitle((GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " GO Annotations");
             setHelpTopic(new HelpTopic("annotations", HelpTopic.Area.CPAS));
             return null;  // TODO: Admin navtrail
         }
 
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
-            GoLoader loader = GoLoader.getGoLoader();
+            GoLoader loader;
+
+            if ("1".equals(getViewContext().get("manual")))
+            {
+                Map<String, MultipartFile> fileMap = getFileMap();
+                MultipartFile goFile = fileMap.get("gofile");                       // TODO: Check for NULL and display error
+                loader = GoLoader.getStreamLoader(goFile.getInputStream());
+            }
+            else
+            {
+                loader = GoLoader.getFtpLoader();
+            }
 
             if (null != loader)
             {
@@ -885,12 +896,28 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getSuccessURL(Object o)
         {
-            return getGoStatusUrl(_message);
+            return getGoStatusURL(_message);
+        }
+
+        private class GoView extends TabStripView
+        {
+            protected List<TabInfo> getTabList()
+            {
+                return Arrays.asList(new TabInfo("Automatic", "automatic", getLoadGoURL()), new TabInfo("Manual", "manual", getLoadGoURL()));
+            }
+
+            protected HttpView getTabView(String tabId) throws Exception
+            {
+                if ("manual".equals(tabId))
+                    return new JspView("/org/labkey/ms2/loadGoManual.jsp");
+                else
+                    return new JspView("/org/labkey/ms2/loadGoAutomatic.jsp");
+            }
         }
     }
 
 
-    private ActionURL getGoStatusUrl(String message)
+    private ActionURL getGoStatusURL(String message)
     {
         ActionURL url = new ActionURL(GoStatusAction.class);
         if (null != message)
@@ -939,17 +966,18 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(ChartForm form, BindException errors) throws Exception
         {
-            if (!isAuthorized(form.run))
-                return null;
-
-            _goChartType = ProteinDictionaryHelpers.GTypeStringToEnum(form.getChartType());
-
-            MS2Run run = MS2Manager.getRun(form.run);
-
             ViewContext ctx = getViewContext();
             ActionURL queryUrl = ctx.cloneActionURL();
             String queryString = (String) ctx.get("queryString");
             queryUrl.setRawQuery(queryString);
+            int runId = Integer.parseInt(queryUrl.getParameter("run"));
+
+            if (!isAuthorized(runId))
+                return null;
+
+            MS2Run run = MS2Manager.getRun(runId);
+
+            _goChartType = ProteinDictionaryHelpers.GTypeStringToEnum(form.getChartType());
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
@@ -1920,7 +1948,7 @@ public class MS2Controller extends SpringActionController
 
             bb.add(new ActionButton("reloadSPOM.post", "Reload SWP Org Map"));
 
-            ActionButton reloadGO = new ActionButton("loadGo.view", "Load or Reload GO");
+            ActionButton reloadGO = new ActionButton("loadGo.view", (GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " GO");
             reloadGO.setActionType(ActionButton.Action.LINK);
             bb.add(reloadGO);
 

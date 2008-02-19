@@ -4,8 +4,10 @@
 <%
     boolean loaded = GoLoader.isGoLoaded().booleanValue();
 %>
+<br>
+<table><tr><td>
 You are about to <%=loaded ? "reload" : "load"%> the latest Gene Ontology (GO) annotation files into your
-LabKey database.  If you click Continue your LabKey Server will automatically:
+LabKey database.  If you click "Continue" your LabKey Server will automatically:
 
 <ul>
     <li>Download the latest GO annotation files from ftp.geneontology.org</li><%
@@ -27,8 +29,9 @@ Internet connection, this process should take less than five minutes to complete
 in the background and you can continue to use your LabKey Server normally. If you want, you can monitor the
 process by refreshing the status information on the next page.<br><br>
 
-If you wish to proceed, click the Continue button. Otherwise click Cancel.<br><br>
+If you wish to proceed, click the "Continue" button. Otherwise click "Cancel".<br><br>
 <form action="loadGo.post" method="post">
     <input type=image src="<%=PageFlowUtil.buttonSrc("Continue")%>">
     <%=PageFlowUtil.buttonLink("Cancel", MS2Controller.MS2UrlsImpl.get().getShowProteinAdminUrl())%>
 </form>
+</td></tr></table>

@@ -30,6 +30,7 @@ import org.labkey.common.util.Pair;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.api.announcements.DiscussionService;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -181,7 +182,7 @@ public class MouseModelController extends ViewController
         locateSampleView.setTitle("Locate Sample");
 
         HBox hbox = new HBox(new HttpView[]{dashboardView, startNecropsyView, locateSampleView});
-        HttpView discussionView = DiscussionService.get().getDisussionArea(
+        ModelAndView discussionView = DiscussionService.get().getDisussionArea(
                 getViewContext(),
                 model.getEntityId(), getViewContext().cloneActionURL(), model.getName(), true, false);
 

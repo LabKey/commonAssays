@@ -563,7 +563,7 @@ public class ProjectController extends SpringActionController
             HttpView results = new SearchResultsView(c, Search.ALL_SEARCHABLES, searchTerm, getSearchUrl(c), getUser(), includeSubfolders, true);
 
             PageConfig config = getPageConfig();
-            config.setFocus("forms[0].search");
+            config.setFocusId("search");
             config.setTitle("Search Results");
             config.setHelpTopic(new HelpTopic("search", HelpTopic.Area.DEFAULT));
             return results;

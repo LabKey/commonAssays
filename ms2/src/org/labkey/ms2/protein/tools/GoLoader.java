@@ -3,10 +3,7 @@ package org.labkey.ms2.protein.tools;
 import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
 import org.apache.log4j.Logger;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.DbScope;
-import org.labkey.api.data.Table;
-import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.*;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.FTPUtil;
 import org.labkey.api.util.JobRunner;
@@ -20,8 +17,8 @@ import javax.servlet.ServletException;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,21 +48,36 @@ public abstract class GoLoader
 
     public static WebPartView getCurrentStatus(String message)
     {
-        StringBuilder html = new StringBuilder(null == message ? "" : message + "<br>");
+        StringBuilder html = new StringBuilder(null == message ? "" : message + "<br><br>");
 
         if (null == _currentLoader)
             html.append("No GO annotation loads have been attempted during this server session");
         else
+        {
+            html.append("Refresh this page to update status<br><br>\n");
             html.append(_currentLoader.getStatus());
+        }
 
         return new HtmlView("GO Annotation Load Status", html.toString());
     }
 
 
-    public static synchronized GoLoader getGoLoader() throws IOException, ServletException
+    public static GoLoader getFtpLoader() throws IOException, ServletException
+    {
+        return ensureOneLoader(new FtpGoLoader());
+    }
+
+
+    public static GoLoader getStreamLoader(InputStream is) throws IOException, ServletException
+    {
+        return ensureOneLoader(new StreamGoLoader(is));
+    }
+
+
+    private static synchronized GoLoader ensureOneLoader(GoLoader newLoader)
     {
         if (null == _currentLoader || _currentLoader.isComplete())
-            return _currentLoader = new FtpGoLoader();
+            return _currentLoader = newLoader;
         else
             return null;
     }
@@ -95,8 +107,7 @@ public abstract class GoLoader
                     complete();
                 }
             }
-        }
-        );
+        });
     }
 
 
@@ -160,51 +171,36 @@ public abstract class GoLoader
             conn = scope.getConnection();
             String SQLCommand = "INSERT INTO " + ti + "(";
             String QMarkPart = "VALUES (";
-            String typeList = "SELECT ";
+
             for (int i = 0; i < cols.length; i++)
             {
                 SQLCommand += cols[i];
-                typeList += cols[i];
                 QMarkPart += "?";
                 if (i < (cols.length - 1))
                 {
                     SQLCommand += ",";
                     QMarkPart += ",";
-                    typeList += ",";
                 }
                 else
                 {
                     SQLCommand += ") ";
                     QMarkPart += ") ";
-                    typeList += " FROM " + ti + " WHERE 1=0";
                 }
             }
-            ResultSetMetaData rsmd = conn.createStatement().executeQuery(typeList).getMetaData();
-            HashMap<String, Integer> typeMap = new HashMap<String, Integer>();
-            HashMap<Integer, Integer> limitMap = new HashMap<Integer, Integer>();
-            for (int i = 1; i <= rsmd.getColumnCount(); i++)
-            {
-                String key = rsmd.getColumnName(i).toUpperCase();
-                Integer val = new Integer(rsmd.getColumnType(i));
-                typeMap.put(key, val);
 
-                if (rsmd.getColumnTypeName(i).equalsIgnoreCase("varchar"))
-                {
-                    int size = rsmd.getColumnDisplaySize(i);
-                    limitMap.put(i, size);
-                }
-            }
+            ColumnInfo[] columns = ti.getColumns();
 
             conn.setAutoCommit(false);
             ps = conn.prepareStatement(SQLCommand + QMarkPart);
             for (it = t.iterator(); it.hasNext();)
             {
                 Map curRec = (Map)it.next();
-                for (int i = 1; i <= cols.length; i++) ps.setNull(i, typeMap.get(cols[i - 1].toUpperCase()).intValue());
+                for (int i = 0; i < cols.length; i++)
+                    ps.setNull(i + 1, columns[i].getSqlTypeInt());
+
                 for (Object key : curRec.keySet())
                 {
-                    String k = (String) key;
-                    int kindex = Integer.parseInt(k.substring(6)) + 1;
+                    int kindex = Integer.parseInt(((String) key).substring(6));
                     Object val = curRec.get(key);
                     if (val instanceof String)
                     {
@@ -212,17 +208,22 @@ public abstract class GoLoader
                         if (s.equals("\\N"))
                             continue;
 
-                        Integer limit = limitMap.get(kindex);
+                        ColumnInfo column = columns[kindex];
 
-                        if (null != limit && s.length() > limit.intValue())
+                        if (column.getSqlTypeInt() == Types.VARCHAR)
                         {
-                            val = s.substring(0, limit.intValue());
-                            _log.warn(ti + ": value in " + cols[kindex - 1] + " column in row " + (orgLineCount + 1) + " truncated from " + s.length() + " to " + limit + " characters.");
+                            int limit = column.getScale();
+
+                            if (s.length() > limit)
+                            {
+                                val = s.substring(0, column.getScale());
+                                _log.warn(ti + ": value in " + cols[kindex] + " column in row " + (orgLineCount + 1) + " truncated from " + s.length() + " to " + limit + " characters.");
+                            }
                         }
                     }
                     if (val != null)
                     {
-                        ps.setObject(kindex, val);
+                        ps.setObject(kindex + 1, val);
                     }
                 }
                 ps.addBatch();
@@ -302,7 +303,9 @@ public abstract class GoLoader
         if (message.length() > 0)
             _log.debug(message);
 
-        _status.append(message + "<br>");  // Use concatenation to keep this append atomic
+        message += "<br>\n";
+
+        _status.append(message);
     }
 
 
@@ -379,6 +382,22 @@ public abstract class GoLoader
             logStatus("");
 
             return new FileInputStream(file);
+        }
+    }
+
+
+    private static class StreamGoLoader extends GoLoader
+    {
+        private InputStream _is;
+
+        private StreamGoLoader(InputStream is)
+        {
+            _is = is;
+        }
+
+        protected InputStream getInputStream() throws IOException, ServletException
+        {
+            return _is;
         }
     }
 }

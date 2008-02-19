@@ -813,7 +813,8 @@ ms2/src/org/labkey/ms2/editElution.jsp -text
 ms2/src/org/labkey/ms2/extraExportOptions.jsp -text
 ms2/src/org/labkey/ms2/filterHeader.jsp -text
 ms2/src/org/labkey/ms2/insertAnnots.jsp -text
-ms2/src/org/labkey/ms2/loadGo.jsp -text
+ms2/src/org/labkey/ms2/loadGoAutomatic.jsp -text
+ms2/src/org/labkey/ms2/loadGoManual.jsp -text
 ms2/src/org/labkey/ms2/manageViews.jsp -text
 ms2/src/org/labkey/ms2/modifications.jsp -text
 ms2/src/org/labkey/ms2/ms2Admin.jsp -text
