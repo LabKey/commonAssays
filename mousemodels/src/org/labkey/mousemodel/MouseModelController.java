@@ -553,7 +553,7 @@ public class MouseModelController extends ViewController
                 return;
 
             ActionURL urlhelp = getViewContext().cloneActionURL();
-            urlhelp.setAction(null);
+            urlhelp.setAction((String)null);
             urlhelp.setPageFlow("MouseModel");
             urlhelp.deleteParameters();
             getGridRegion(getViewContext()).setPageFlowUrl(urlhelp.getURIString());

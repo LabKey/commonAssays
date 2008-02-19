@@ -67,7 +67,7 @@
 <%
     ActionURL graphUrl = ctx.url.clone();
 
-    graphUrl.setAction("showGraph");
+    graphUrl.setAction(MS2Controller.ShowGraphAction.class);
     graphUrl.deleteParameter("rowIndex");
     graphUrl.addParameter("width", "600");
     graphUrl.addParameter("height", "400");
@@ -186,7 +186,7 @@ if (p.getQuantitation() != null)
     ActionURL elutionGraphUrl = ctx.url.clone();
     String errorMessage = ctx.url.getParameter("elutionProfileError");
 
-    elutionGraphUrl.setAction("showLightElutionGraph");
+    elutionGraphUrl.setAction(MS2Controller.ShowLightElutionGraphAction.class);
     elutionGraphUrl.deleteParameter("rowIndex");
 
     elutionGraphUrl.addParameter("tolerance", String.valueOf(ctx.form.getTolerance()));
@@ -201,7 +201,7 @@ if (p.getQuantitation() != null)
     }
     DecimalFormat format = new DecimalFormat();
     ActionURL editUrl = ctx.url.clone();
-    editUrl.setAction("editElutionGraph");
+    editUrl.setAction(MS2Controller.EditElutionGraphAction.class);
 
     if (errorMessage != null)
     { %>
@@ -246,7 +246,7 @@ if (p.getQuantitation() != null)
         <td><img src="<%=elutionGraphUrl.getEncodedLocalURIString()%>" alt="Light Elution Graph"/></td>
     </tr>
     <%
-        elutionGraphUrl.setAction("showHeavyElutionGraph");
+        elutionGraphUrl.setAction(MS2Controller.ShowHeavyElutionGraphAction.class);
     %>
     <tr>
         <td>
@@ -269,7 +269,7 @@ if (p.getQuantitation() != null)
         <td><img src="<%=elutionGraphUrl.getEncodedLocalURIString()%>" alt="Heavy Elution Graph"/></td>
     </tr>
     <%
-        elutionGraphUrl.setAction("showCombinedElutionGraph");
+        elutionGraphUrl.setAction(MS2Controller.ShowCombinedElutionGraphAction.class);
     %>
     <tr>
         <td>

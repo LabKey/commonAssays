@@ -22,6 +22,7 @@ import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.SensitivitySummary;
@@ -1795,18 +1796,11 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class CompareServiceAction extends SimpleViewAction
+    public class CompareServiceAction extends GWTServiceAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        protected BaseRemoteService createService()
         {
-            CompareServiceImpl service = new CompareServiceImpl(getViewContext());
-            service.doPost(getViewContext().getRequest(), getViewContext().getResponse());
-            return null;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return null;
+            return new CompareServiceImpl(getViewContext());
         }
     }
 

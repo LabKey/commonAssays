@@ -620,7 +620,7 @@ public class MouseController extends ViewController
                 return;
             }
             ActionURL urlhelp = getViewContext().cloneActionURL();
-            urlhelp.setAction(null);
+            urlhelp.setAction((String)null);
             urlhelp.setPageFlow("Mouse");
             urlhelp.deleteParameters();
             getDataRegion().setPageFlowUrl(urlhelp.getURIString());
