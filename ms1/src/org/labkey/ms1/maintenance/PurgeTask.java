@@ -19,6 +19,7 @@ public class PurgeTask implements SystemMaintenance.MaintenanceTask
     {
         try
         {
+            long msStart = System.currentTimeMillis();
             _log.info("MS1 Purge Task starting cycle...");
 
             MS1Manager mgr = MS1Manager.get();
@@ -33,7 +34,7 @@ public class PurgeTask implements SystemMaintenance.MaintenanceTask
                 fileId = mgr.getNextPurgeFile();
             }
 
-            _log.info("MS1 Purge Task finished cycle.");
+            _log.info("MS1 Purge Task finished cycle in " + String.valueOf((System.currentTimeMillis() - msStart) / 1000) + " seconds.");
         }
         catch(SQLException e)
         {

@@ -1,15 +1,15 @@
 package org.labkey.ms1;
 
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.SchemaTableInfo;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Table;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.util.ResultSetUtil;
 import org.labkey.ms1.model.*;
 import org.labkey.ms1.maintenance.PurgeTask;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.sql.ResultSet;
 import java.util.Map;
 
 public class MS1Manager
@@ -31,6 +31,7 @@ public class MS1Manager
     public static final int FILETYPE_PEAKS = 2;
 
     private Thread _purgeThread = null;
+    private static final Logger _log = Logger.getLogger(MS1Manager.class);
 
     private MS1Manager()
     {
@@ -262,56 +263,160 @@ public class MS1Manager
 
     public void purgePeakData(int fileId) throws SQLException
     {
-        StringBuilder sql = new StringBuilder("DELETE FROM ");
-        sql.append(getSQLTableName(TABLE_PEAKS_TO_FAMILIES));
-        sql.append(" WHERE PeakId IN (");
-        sql.append(genPeakListSQL(fileId));
-        sql.append(");");
+        DbSchema schema = getSchema();
+        DbScope scope = schema.getScope();
 
-        sql.append("DELETE FROM ");
+        try
+        {
+            StringBuilder sql = new StringBuilder("DELETE FROM ");
+            sql.append(getSQLTableName(TABLE_PEAKS_TO_FAMILIES));
+            sql.append(" WHERE PeakFamilyId IN (");
+            sql.append(genPeakFamilyListSQL(fileId));
+            sql.append("); ");
+
+            sql.append("DELETE FROM ");
+            sql.append(getSQLTableName(TABLE_PEAK_FAMILIES));
+            sql.append(" WHERE ScanId IN (");
+            sql.append(genScanListSQL(fileId));
+            sql.append(")");
+
+            //execute this much
+            _log.info("Purging peak families for file " + String.valueOf(fileId) + "...");
+            scope.beginTransaction();
+            Table.execute(getSchema(), sql.toString(), null);
+            scope.commitTransaction();
+            _log.info("Finished purging peak families for file " + String.valueOf(fileId) + ".");
+        }
+        catch(SQLException e)
+        {
+            if(scope.isTransactionActive())
+                scope.rollbackTransaction();
+            throw e;
+        }
+
+        //purge peaks differently due to PostgreSQL problem when deleting
+        //lots of rows via a sub-select
+        purgePeaks(fileId);
+
+        try
+        {
+            StringBuilder sql = new StringBuilder("DELETE FROM ");
+            sql.append(getSQLTableName(TABLE_CALIBRATION_PARAMS));
+            sql.append(" WHERE ScanId IN (");
+            sql.append(genScanListSQL(fileId));
+            sql.append(");");
+
+            sql.append("DELETE FROM ");
+            sql.append(getSQLTableName(TABLE_SCANS));
+            sql.append(" WHERE FileId=");
+            sql.append(fileId);
+            sql.append(";");
+
+            sql.append("DELETE FROM ");
+            sql.append(getSQLTableName(TABLE_SOFTWARE_PARAMS));
+            sql.append(" WHERE SoftwareId IN (");
+            sql.append(genSoftwareListSQL(fileId));
+            sql.append(");");
+
+            sql.append("DELETE FROM ");
+            sql.append(getSQLTableName(TABLE_SOFTWARE));
+            sql.append(" WHERE FileId=");
+            sql.append(fileId);
+            sql.append(";");
+
+            sql.append("DELETE FROM ");
+            sql.append(getSQLTableName(TABLE_FILES));
+            sql.append(" WHERE FileId=");
+            sql.append(String.valueOf(fileId));
+            sql.append(";");
+
+            _log.info("Purging scans and related file data for file " + String.valueOf(fileId) + "...");
+            scope.beginTransaction();
+            Table.execute(getSchema(), sql.toString(), null);
+            scope.commitTransaction();
+            _log.info("Finished purging scans and related file data for file " + String.valueOf(fileId) + ".");
+        }
+        catch(SQLException e)
+        {
+            if(scope.isTransactionActive())
+                scope.rollbackTransaction();
+            throw e;
+        }
+    } //deletePeakData
+
+    protected void purgePeaks(int fileId) throws SQLException
+    {
+        //NOTE: This is not ideal, but seems to be necessary for PostgreSQL.
+        //On SQL Server, a simple delete statement with a nested sub-select will delete
+        //several hundreds of thousands of rows quickly and without issue, but on PostgreSQL,
+        //the same query will literally take *hours* to run. Splitting it up into
+        //a query per scan reduced this from several hours to a couple of minutes on my dev machine.
+        //Clearly PostgreSQL is doing something truly awful here, but until they fix it on their
+        //side, we'll have to delete peaks on a per-scan basis.
+        _log.info("Purging peaks for file " + String.valueOf(fileId) + "...");
+        DbSchema schema = getSchema();
+        DbScope scope = schema.getScope();
+        ResultSet rs = null;
+        try
+        {
+            rs = Table.executeQuery(getSchema(), "SELECT ScanId FROM ms1.Scans WHERE FileId=" + String.valueOf(fileId),
+                    null, 0, false);
+
+            int scanId = 0;
+            long numScans = 0;
+            scope.beginTransaction();
+
+            while(rs.next())
+            {
+                scanId = rs.getInt(1);
+                if(!rs.wasNull())
+                    purgePeaksForScan(scanId);
+                ++numScans;
+
+                //commit after every 10 scans
+                if(numScans % 10 == 0)
+                {
+                    scope.commitTransaction();
+                    scope.beginTransaction();
+                }
+            }
+
+            //final commit if necessary
+            if(scope.isTransactionActive())
+                scope.commitTransaction();
+
+            _log.info("Finished purging peaks for file " + String.valueOf(fileId) + ".");
+        }
+        catch(SQLException e)
+        {
+            if(scope.isTransactionActive())
+                scope.rollbackTransaction();
+            throw e;
+        }
+        finally
+        {
+            ResultSetUtil.close(rs);
+        }
+    }
+
+    protected void purgePeaksForScan(int scanId) throws SQLException
+    {
+        _log.info("Purging peaks for scan " + String.valueOf(scanId) + "...");
+        String sql = "DELETE FROM ms1.Peaks WHERE ScanId=" + String.valueOf(scanId);
+        Table.execute(getSchema(), sql, null);
+        _log.info("Finished purging peaks for scan " + String.valueOf(scanId) + ".");
+    }
+
+    protected String genPeakFamilyListSQL(int fileId)
+    {
+        StringBuilder sql = new StringBuilder("SELECT PeakFamilyId FROM ");
         sql.append(getSQLTableName(TABLE_PEAK_FAMILIES));
         sql.append(" WHERE ScanId IN (");
         sql.append(genScanListSQL(fileId));
-        sql.append(");");
+        sql.append(")");
+        return sql.toString();
 
-        sql.append("DELETE FROM ");
-        sql.append(getSQLTableName(TABLE_PEAKS));
-        sql.append(" WHERE ScanId IN (");
-        sql.append(genScanListSQL(fileId));
-        sql.append(");");
-
-        sql.append("DELETE FROM ");
-        sql.append(getSQLTableName(TABLE_CALIBRATION_PARAMS));
-        sql.append(" WHERE ScanId IN (");
-        sql.append(genScanListSQL(fileId));
-        sql.append(");");
-
-        sql.append("DELETE FROM ");
-        sql.append(getSQLTableName(TABLE_SCANS));
-        sql.append(" WHERE FileId=");
-        sql.append(fileId);
-        sql.append(";");
-
-        sql.append("DELETE FROM ");
-        sql.append(getSQLTableName(TABLE_SOFTWARE_PARAMS));
-        sql.append(" WHERE SoftwareId IN (");
-        sql.append(genSoftwareListSQL(fileId));
-        sql.append(");");
-
-        sql.append("DELETE FROM ");
-        sql.append(getSQLTableName(TABLE_SOFTWARE));
-        sql.append(" WHERE FileId=");
-        sql.append(fileId);
-        sql.append(";");
-
-        sql.append("DELETE FROM ");
-        sql.append(getSQLTableName(TABLE_FILES));
-        sql.append(" WHERE FileId=");
-        sql.append(String.valueOf(fileId));
-        sql.append(";");
-
-        Table.execute(getSchema(), sql.toString(), null);
-    } //deletePeakData
+    }
 
     protected String genPeakListSQL(int fileId)
     {
