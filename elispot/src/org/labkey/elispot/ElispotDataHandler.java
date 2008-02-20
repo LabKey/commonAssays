@@ -36,7 +36,7 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
     public static final String ELISPOT_PROPERTY_LSID_PREFIX = "ElispotProperty";
     public static final String ELISPOT_INPUT_MATERIAL_DATA_PROPERTY = "SpecimenLsid";
 
-    public static final String SFU_PROPERTY_NAME = "SFU";
+    public static final String SFU_PROPERTY_NAME = "SpotCount";
     public static final String WELLGROUP_PROPERTY_NAME = "WellgroupName";
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException

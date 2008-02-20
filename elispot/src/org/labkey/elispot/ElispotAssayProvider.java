@@ -1,9 +1,7 @@
 package org.labkey.elispot;
 
 import org.labkey.api.data.*;
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExpRunTable;
+import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
@@ -14,12 +12,14 @@ import org.labkey.api.exp.list.ListItem;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.QueryViewCustomizer;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
+import org.labkey.api.study.TimepointType;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ActionURL;
@@ -27,13 +27,13 @@ import org.labkey.api.view.DataView;
 import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
+import org.labkey.elispot.query.ElispotRunDataTable;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.Map;
+import javax.servlet.ServletException;
+import java.util.*;
 import java.io.Writer;
 import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -75,7 +75,15 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
 
     public ExpData getDataForDataRow(Object dataRowId)
     {
-        throw new UnsupportedOperationException();
+        if (!(dataRowId instanceof Integer))
+            return null;
+        OntologyObject dataRow = OntologyManager.getOntologyObject((Integer) dataRowId);
+        if (dataRow == null)
+            return null;
+        OntologyObject dataRowParent = OntologyManager.getOntologyObject(dataRow.getOwnerObjectId());
+        if (dataRowParent == null)
+            return null;
+        return ExperimentService.get().getExpData(dataRowParent.getObjectURI());
     }
 
     public String getName()
@@ -98,7 +106,6 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
     public TableInfo createDataTable(QuerySchema schema, String alias, ExpProtocol protocol)
     {
         return ElispotSchema.getDataRowTable(schema, protocol, alias);
-        //return new ElispotSchema(schema.getUser(), schema.getContainer(), protocol).createDataRowTable(alias, schema);
     }
 
     protected Domain createSampleWellGroupDomain(Container c, User user)
@@ -110,8 +117,8 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
         addProperty(sampleWellGroupDomain, VISITID_PROPERTY_NAME, VISITID_PROPERTY_CAPTION, PropertyType.DOUBLE);
         addProperty(sampleWellGroupDomain, DATE_PROPERTY_NAME, DATE_PROPERTY_CAPTION, PropertyType.DATE_TIME);
         addProperty(sampleWellGroupDomain, SAMPLE_DESCRIPTION_PROPERTY_NAME, SAMPLE_DESCRIPTION_PROPERTY_CAPTION, PropertyType.STRING);
-        addProperty(sampleWellGroupDomain, EFFECTOR_PROPERTY_NAME, EFFECTOR_PROPERTY_CAPTION, PropertyType.STRING);
-        addProperty(sampleWellGroupDomain, STCL_PROPERTY_NAME, STCL_PROPERTY_CAPTION, PropertyType.STRING);
+        //addProperty(sampleWellGroupDomain, EFFECTOR_PROPERTY_NAME, EFFECTOR_PROPERTY_CAPTION, PropertyType.STRING);
+        //addProperty(sampleWellGroupDomain, STCL_PROPERTY_NAME, STCL_PROPERTY_CAPTION, PropertyType.STRING);
 
         return sampleWellGroupDomain;
     }
@@ -125,7 +132,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
         addProperty(antigenWellGroupDomain, ANTIGENID_PROPERTY_NAME, ANTIGENID_PROPERTY_CAPTION, PropertyType.INTEGER);
         addProperty(antigenWellGroupDomain, ANTIGENNAME_PROPERTY_NAME, ANTIGENNAME_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(antigenWellGroupDomain, CELLWELL_PROPERTY_NAME, CELLWELL_PROPERTY_CAPTION, PropertyType.INTEGER);
-        addProperty(antigenWellGroupDomain, PEPTIDE_CONCENTRATION_NAME, PEPTIDE_CONCENTRATION_CAPTION, PropertyType.DOUBLE);
+        //addProperty(antigenWellGroupDomain, PEPTIDE_CONCENTRATION_NAME, PEPTIDE_CONCENTRATION_CAPTION, PropertyType.DOUBLE);
 
         return antigenWellGroupDomain;
     }
@@ -183,23 +190,27 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
 
     public FieldKey getParticipantIDFieldKey()
     {
-        throw new UnsupportedOperationException();
+        return FieldKey.fromParts("Properties",
+                ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property", PARTICIPANTID_PROPERTY_NAME);
     }
 
     public FieldKey getVisitIDFieldKey(Container targetStudy)
     {
-        throw new UnsupportedOperationException();
+        if (AssayPublishService.get().getTimepointType(targetStudy) == TimepointType.VISIT)
+            return FieldKey.fromParts("Properties",
+                    ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property", VISITID_PROPERTY_NAME);
+        else
+            return FieldKey.fromParts("Properties",
+                    ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property", DATE_PROPERTY_NAME);
     }
 
     public FieldKey getRunIdFieldKeyFromDataRow()
     {
-        //return FieldKey.fromParts("Data", "Run", "RowId");
         return FieldKey.fromParts("Run", "RowId");
     }
 
     public FieldKey getDataRowIdFieldKey()
     {
-//        return FieldKey.fromParts("RowId");
         return FieldKey.fromParts("ObjectId");
     }
 
@@ -211,7 +222,138 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
 
     public ActionURL publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
     {
-        throw new UnsupportedOperationException();
+        try {
+            int rowIndex = 0;
+
+            TimepointType studyType = AssayPublishService.get().getTimepointType(study);
+
+            Map<Integer, ExpRun> runCache = new HashMap<Integer, ExpRun>();
+            Map<Integer, Map<String, Object>> runPropertyCache = new HashMap<Integer, Map<String, Object>>();
+
+            List<PropertyDescriptor> runPDs = new ArrayList<PropertyDescriptor>();
+            runPDs.addAll(Arrays.asList(getRunPropertyColumns(protocol)));
+            runPDs.addAll(Arrays.asList(getUploadSetColumns(protocol)));
+
+            PropertyDescriptor[] samplePDs = getSampleWellGroupColumns(protocol);
+            PropertyDescriptor[] dataPDs = ElispotSchema.getExistingDataProperties(protocol);
+            Map<Object, AssayPublishKey> dataIdToPublishKey = new HashMap<Object, AssayPublishKey>();
+
+            List<Object> ids = new ArrayList<Object>();
+            for (AssayPublishKey dataKey : dataKeys)
+            {
+                ids.add(dataKey.getDataId());
+                dataIdToPublishKey.put(dataKey.getDataId(), dataKey);
+            }
+
+            SimpleFilter filter = new SimpleFilter();
+            filter.addInClause(getDataRowIdFieldKey().toString(), ids);
+
+            // get the selected rows from the copy to study wizard
+            OntologyObject[] dataRows = Table.select(OntologyManager.getTinfoObject(), Table.ALL_COLUMNS, filter,
+                    new Sort(getDataRowIdFieldKey().toString()), OntologyObject.class);
+
+            Map<String, Object>[] dataMaps = new HashMap[dataRows.length];
+            Set<PropertyDescriptor> typeSet = new LinkedHashSet<PropertyDescriptor>();
+            typeSet.add(createPublishPropertyDescriptor(study, getDataRowIdFieldKey().toString(), PropertyType.INTEGER));
+            typeSet.add(createPublishPropertyDescriptor(study, "SourceLSID", PropertyType.INTEGER));
+
+            Container sourceContainer = null;
+
+            for (OntologyObject row : dataRows)
+            {
+                Map<String, Object> dataMap = new HashMap<String, Object>();
+                Map<String, Object> rowProperties = OntologyManager.getProperties(row.getContainer(), row.getObjectURI());
+
+                // add the data (or antigen group) properties
+                String materialLsid = null;
+                for (PropertyDescriptor pd : dataPDs)
+                {
+                    Object value = rowProperties.get(pd.getPropertyURI());
+                    if (!ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY.equals(pd.getName()))
+                        addProperty(pd, value, dataMap, typeSet);
+                    else
+                        materialLsid = (String) value;
+                }
+
+                // add the specimen group properties
+                ExpMaterial material = ExperimentService.get().getExpMaterial(materialLsid);
+                if (material != null)
+                {
+                    for (PropertyDescriptor pd : samplePDs)
+                    {
+                        if (!PARTICIPANTID_PROPERTY_NAME.equals(pd.getName()) &&
+                                !VISITID_PROPERTY_NAME.equals(pd.getName()) &&
+                                !DATE_PROPERTY_NAME.equals(pd.getName()))
+                        {
+                            addProperty(pd, material.getProperty(pd), dataMap, typeSet);
+                        }
+                    }
+                }
+
+                ExpRun run = runCache.get(row.getOwnerObjectId());
+                if (run == null)
+                {
+                    OntologyObject dataRowParent = OntologyManager.getOntologyObject(row.getOwnerObjectId());
+                    ExpData data = ExperimentService.get().getExpData(dataRowParent.getObjectURI());
+                    run = data.getRun();
+                    sourceContainer = run.getContainer();
+                    runCache.put(row.getOwnerObjectId(), run);
+                }
+
+                // add the run level properties
+                Map<String, Object> runProperties = runPropertyCache.get(run.getRowId());
+                if (runProperties == null)
+                {
+                    runProperties = OntologyManager.getProperties(run.getContainer().getId(), run.getLSID());
+                    runPropertyCache.put(run.getRowId(), runProperties);
+                }
+
+                for (PropertyDescriptor pd : runPDs)
+                {
+                    if (!TARGET_STUDY_PROPERTY_NAME.equals(pd.getName()) &&
+                            !PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(pd.getName()))
+                    {
+                        PropertyDescriptor publishPd = pd.clone();
+                        publishPd.setName("Run " + pd.getName());
+                        addProperty(publishPd, runProperties.get(pd.getPropertyURI()), dataMap, typeSet);
+                    }
+                }
+
+                AssayPublishKey publishKey = dataIdToPublishKey.get(row.getObjectId());
+                dataMap.put("ParticipantID", publishKey.getParticipantId());
+                dataMap.put("SequenceNum", publishKey.getVisitId());
+                if (TimepointType.DATE == studyType)
+                {
+                    dataMap.put("Date", publishKey.getDate());
+                }
+                dataMap.put("SourceLSID", run.getLSID());
+                dataMap.put(getDataRowIdFieldKey().toString(), publishKey.getDataId());
+                addProperty(study, "Run Name", run.getName(), dataMap, typeSet);
+                addProperty(study, "Run Comments", run.getComments(), dataMap, typeSet);
+                addProperty(study, "Run CreatedOn", run.getCreated(), dataMap, typeSet);
+                User createdBy = run.getCreatedBy();
+                addProperty(study, "Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(), dataMap, typeSet);
+
+                dataMaps[rowIndex++] = dataMap;
+            }
+            return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol,
+                    dataMaps, new ArrayList<PropertyDescriptor>(typeSet), getDataRowIdFieldKey().toString(), errors);
+        }
+        catch (SQLException se)
+        {
+            errors.add(se.getMessage());
+            return null;
+        }
+        catch (IOException e)
+        {
+            errors.add(e.getMessage());
+            return null;
+        }
+        catch (ServletException e)
+        {
+            errors.add(e.getMessage());
+            return null;
+        }
     }
 
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
@@ -229,6 +371,17 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
     public PropertyDescriptor[] getAntigenWellGroupColumns(ExpProtocol protocol)
     {
         return getPropertiesForDomainPrefix(protocol, ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+    }
+
+    public QueryViewCustomizer getDataViewCustomizer(final Container container, final ExpProtocol protocol)
+    {
+        return new QueryViewCustomizer()
+        {
+            public void customize(DataView view)
+            {
+                view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
+            }
+        };
     }
 
     public static class ElispotRunsViewCustomizer implements QueryViewCustomizer

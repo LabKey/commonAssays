@@ -138,7 +138,11 @@ public class ElispotController extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Plate Summary");
+            ActionURL assayListURL = AssayService.get().getAssayListURL(_run.getContainer());
+            ActionURL runListURL = AssayService.get().getAssayRunsURL(_run.getContainer(), _protocol);
+            ActionURL runDataURL = AssayService.get().getAssayDataURL(_run.getContainer(), _protocol, _run.getRowId());
+            return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
+                    " Runs", runListURL).addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _run.getRowId() + " Details");
         }
     }
 
