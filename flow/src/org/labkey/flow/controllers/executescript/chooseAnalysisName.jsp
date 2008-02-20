@@ -1,11 +1,10 @@
-<%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToAnalyzeForm"%>
-<%@ page import="org.labkey.api.data.DataRegion"%>
+<%@ page import="org.apache.commons.lang.StringUtils"%>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController.Action"%>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController.Action" %>
+<%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToAnalyzeForm" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
-<%@ page import="java.util.Set" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="java.util.HashSet" %>
+<%@ page import="java.util.Set" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% ChooseRunsToAnalyzeForm form = (ChooseRunsToAnalyzeForm) __form; %>
 <form method="POST" action="analyzeSelectedRuns.post">
@@ -35,10 +34,8 @@
 
     <labkey:button text="Analyze runs" action="<%=Action.analyzeSelectedRuns%>"/>
     <labkey:button text="Go back" action="<%=Action.chooseRunsToAnalyze%>"/>
-    <% for (int runid : form.getSelectedRunIds()) { %>
-    <input type="hidden" name="<%=DataRegion.SELECT_CHECKBOX_NAME%>" value="<%=runid%>">
+    <input type="hidden" name="dataRegionSelectionKey" value="<%=form.getDataRegionSelectionKey()%>">
     <input type="hidden" name="scriptId" value="<%=form.getProtocol().getScriptId()%>">
     <input type="hidden" name="actionSequence" value="<%=form.getProtocolStep().getDefaultActionSequence()%>">
     <input type="hidden" name="ff_compensationMatrixOption" value="<%=h(form.ff_compensationMatrixOption)%>">
-    <% } %>
 </form>

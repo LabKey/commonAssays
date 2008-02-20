@@ -5,6 +5,7 @@ import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionError;
+import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
@@ -95,6 +96,9 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         {
             return chooseAnalysisName(form);
         }
+
+        DataRegionSelection.clearAll(getViewContext());
+
         FlowExperiment experiment = FlowExperiment.fromLSID(experimentLSID);
         String experimentName = form.ff_analysisName;
         if (experiment != null)

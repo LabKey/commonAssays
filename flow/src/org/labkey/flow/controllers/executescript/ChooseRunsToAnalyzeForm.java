@@ -1,26 +1,24 @@
 package org.labkey.flow.controllers.executescript;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.apache.struts.action.ActionError;
+import org.labkey.api.data.DataRegionSelection;
+import org.labkey.api.data.Filter;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.UserSchema;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.data.*;
 import org.labkey.flow.query.FlowQueryForm;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
-import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.data.*;
-import org.labkey.api.query.QuerySettings;
-import org.labkey.api.query.UserSchema;
-import org.apache.struts.action.ActionError;
-import org.apache.struts.action.ActionMapping;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 
 import java.util.*;
 
-import org.labkey.flow.analysis.model.PopulationSet;
-
-import javax.servlet.http.HttpServletRequest;
-
-public class ChooseRunsToAnalyzeForm extends FlowQueryForm
+public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegionSelection.DataSelectionKeyForm
 {
     static private final Logger _log = Logger.getLogger(ChooseRunsToAnalyzeForm.class);
 
@@ -32,6 +30,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
     private FlowScript _analysisScript;
     private FlowProtocolStep _step;
     private boolean _targetExperimentSet;
+    private String _dataRegionSelectionKey;
 
     protected FlowSchema createSchema()
     {
@@ -185,7 +184,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
 
     public int[] getSelectedRunIds()
     {
-        String[] values = getRequest().getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
+        Set<String> values = DataRegionSelection.getSelected(getViewContext(), false);
         if (values == null)
             return new int[0];
         return PageFlowUtil.toInts(values);
@@ -284,5 +283,15 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm
             ret.put(COMPOPTION_COMPID +  comp.getCompId(), label);
         }
         return ret;
+    }
+
+    public String getDataRegionSelectionKey()
+    {
+        return _dataRegionSelectionKey;
+    }
+
+    public void setDataRegionSelectionKey(String key)
+    {
+        _dataRegionSelectionKey = key;
     }
 }

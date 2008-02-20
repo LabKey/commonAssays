@@ -1,16 +1,16 @@
 package org.labkey.flow.controllers.executescript;
 
 import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowRun;
 
-import java.io.Writer;
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.SQLException;
 
 public class ChooseRunsRegion extends DataRegion
@@ -30,7 +30,7 @@ public class ChooseRunsRegion extends DataRegion
 
     protected void renderFormHeader(Writer out, int mode) throws IOException
     {
-        return;
+        renderHiddenFormFields(out, mode);
     }
 
     protected boolean isRecordSelectorEnabled(RenderContext ctx)
