@@ -10,6 +10,7 @@ import org.labkey.biotrue.datamodel.BtManager;
 import org.labkey.biotrue.datamodel.Task;
 import org.labkey.biotrue.objectmodel.BtServer;
 
+import javax.servlet.ServletContextEvent;
 import java.util.*;
 
 /**
@@ -120,7 +121,7 @@ public class ScheduledTask extends TimerTask implements ShutdownListener
         }
     }
 
-    public void shutdownStarted()
+    public void shutdownStarted(ServletContextEvent servletContextEvent)
     {
         ContextListener.removeShutdownListener(this);
         _timer.cancel();

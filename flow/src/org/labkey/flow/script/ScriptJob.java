@@ -10,7 +10,7 @@ import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
@@ -252,7 +252,7 @@ abstract public class ScriptJob extends PipelineJob
         {
             File statusFile = getLogFile();
             _statusHref = PageFlowUtil.urlFor(FlowController.Action.showStatusJob, getContainer());
-            _statusHref.addParameter(FlowParam.statusFile.toString(), PipelineStatusFile.pathOf(statusFile.toString()));
+            _statusHref.addParameter(FlowParam.statusFile.toString(), PipelineJobService.statusPathOf(statusFile.toString()));
         }
         return _statusHref;
     }
@@ -776,7 +776,7 @@ abstract public class ScriptJob extends PipelineJob
 
     public String getStatusFilePath()
     {
-        return PipelineStatusFile.pathOf(getStatusFile().getAbsolutePath());
+        return PipelineJobService.statusPathOf(getStatusFile().getAbsolutePath());
     }
 
     public ActionURL urlCancel()

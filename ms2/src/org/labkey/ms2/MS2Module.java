@@ -173,11 +173,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         super.startup(context);
     }
 
-    protected String getMuleConfigFiles()
-    {
-        return "org/labkey/ms2/pipeline/mule/config/muleConfig.xml";
-    }
-
     @Override
     public Collection<String> getSummary(Container c)
     {

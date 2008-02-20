@@ -1,15 +1,11 @@
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.pipeline.XarGeneratorId;
 import org.labkey.api.exp.pipeline.XarLoaderId;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.util.*;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
@@ -44,9 +40,6 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         return new File(dirAnalysis, baseName + "_raw.pep.xml");
     }
 
-    protected Integer _experimentRunRowId;
-    protected String _protocolName;
-    protected String _baseName;
     protected File _dirSequenceRoot;
     protected boolean _fractions;
     protected boolean _fromCluster;
@@ -98,8 +91,6 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         super(job, fileFraction);
 
         // Copy some parameters from the parent job.
-        _experimentRunRowId = job._experimentRunRowId;
-        _protocolName = job._protocolName;
         _dirSequenceRoot = job._dirSequenceRoot;
         _fractions = job._fractions;
 
@@ -225,19 +216,6 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         return "xpress".equalsIgnoreCase(getParameters().get("pipeline quantitation, algorithm"));
     }
 
-    public ActionURL getStatusHref()
-    {
-        if (_experimentRunRowId != null)
-        {
-            ExpRun run = ExperimentService.get().getExpRun(_experimentRunRowId.intValue());
-            if (run != null)
-            {
-                return PageFlowUtil.urlProvider(ExperimentUrls.class).getRunGraphURL(run);
-            }
-        }
-        return null;
-    }
-
     public boolean isFractions()
     {
         return _fractions;
@@ -251,11 +229,6 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
 /////////////////////////////////////////////////////////////////////////////
 //  Experiment writing
     
-    public void setExperimentRunRowId(int rowId)
-    {
-        _experimentRunRowId = rowId;
-    }
-
     public Map<String, String> getXarTemplateReplacements() throws IOException
     {
         Map<String, String> replaceMap = new HashMap<String, String>();

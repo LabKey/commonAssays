@@ -897,7 +897,6 @@ ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascot.xml -text
 ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascotFractions.xml -text
 ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascotFractionsXpress.xml -text
 ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascotXpress.xml -text
-ms2/src/org/labkey/ms2/pipeline/mule/config/muleConfig.xml -text
 ms2/src/org/labkey/ms2/pipeline/phenyx/MascotRun.java -text
 ms2/src/org/labkey/ms2/pipeline/phenyx/PhenyxRun.java -text
 ms2/src/org/labkey/ms2/pipeline/pickProtocol.jsp -text
