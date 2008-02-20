@@ -300,7 +300,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         map.put("FileId",null);
         map.put("ExpDataFileId", new Integer(data.getRowId()));
         map.put("Type", new Integer(MS1Manager.FILETYPE_FEATURES));
-        map.put("MzXmlURL", getMzXmlFilePath(data));
+        map.put("MzXmlURL", PeaksFileDataHandler.getMzXmlFilePath(data));
         map.put("Imported", Boolean.TRUE);
 
         map = Table.insert(user, schema.getTable(MS1Manager.TABLE_FILES), map);
@@ -333,23 +333,6 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
             Table.insert(user, schema.getTable(MS1Manager.TABLE_SOFTWARE_PARAMS), softwareParam);
         }
     } //insertSoftwareInfo()
-
-    /**
-     * Returns the master mzXML file path for the data file
-     * @param data  Experiment data object
-     * @return      Path to the mzXML File
-     */
-    protected String getMzXmlFilePath(ExpData data)
-    {
-        //by convention, the mzXML has the same base name as the data file (minus the ".features.tsv")
-        //and is located three directories above the data file
-        File dataFile = data.getDataFile();
-        String dataFileName = dataFile.getName();
-        // This is safe because .features.tsv and .peptides.tsv happen to be the same length
-        String baseName = dataFileName.substring(0, dataFileName.length() - FEATURES_FILE_EXTENSION.length());
-        File mzxmlFile = new File(dataFile.getParentFile().getParentFile().getParentFile(), baseName + ".mzXML");
-        return mzxmlFile.toURI().toString();
-    } //getMzXmlFilePath()
 
     /**
      * Selects the appropriate column bindings based on the passed column descriptors

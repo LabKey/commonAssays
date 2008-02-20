@@ -2,6 +2,7 @@ package org.labkey.ms1.pipeline;
 
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -85,14 +86,22 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
      * @param data  Experiment data object
      * @return      Path to the mzXML File
      */
-    protected String getMzXmlFilePath(ExpData data)
+    protected static String getMzXmlFilePath(ExpData data)
     {
-        //by convention, the mzXML has the same base name as the data file (minus the ".peaks.xml")
-        //and is located three directories above the data file
-        File dataFile = data.getDataFile();
-        String dataFileName = dataFile.getName().substring(0, dataFile.getName().length() - ".peaks.xml".length());
-        File mzxmlFile = new File(dataFile.getParentFile().getParentFile().getParentFile(), dataFileName + ".mzXML");
-        return mzxmlFile.toURI().toString();
+        ExpRun run = data.getRun();
+        if(null == run)
+            return null;
+
+        ExpData[] inputs = run.getInputDatas(null, null);
+        if(null == inputs)
+            return null;
+        
+        for(ExpData input : inputs)
+        {
+            if(input.getDataFileUrl().toLowerCase().endsWith(".mzxml"))
+                return input.getDataFileUrl();
+        }
+        return null;
     } //getMzXmlFilePath()
 
     public void deleteData(ExpData data, Container container, User user) throws ExperimentException
