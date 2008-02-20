@@ -19,17 +19,21 @@ import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentRunFilter;
-import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.Handler;
-import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.reports.Report;
+import org.labkey.api.reports.ReportService;
+import org.labkey.api.reports.report.RReportDescriptor;
+import org.labkey.api.reports.report.ReportDescriptor;
+import org.labkey.api.reports.report.view.ChartUtil;
 import org.labkey.api.security.User;
-import org.labkey.api.security.UserManager;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
@@ -37,12 +41,14 @@ import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
-import org.labkey.api.reports.ReportService;
-import org.labkey.ms2.pipeline.*;
-import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
-import org.labkey.ms2.pipeline.sequest.*;
-import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
+import org.labkey.ms2.compare.SpectraCountRReport;
+import org.labkey.ms2.pipeline.MS2PipelineProvider;
+import org.labkey.ms2.pipeline.PipelineController;
+import org.labkey.ms2.pipeline.ProteinProphetPipelineProvider;
 import org.labkey.ms2.pipeline.comet.CometCPipelineProvider;
+import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
+import org.labkey.ms2.pipeline.sequest.*;
+import org.labkey.ms2.pipeline.tandem.XTandemCPipelineProvider;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.protein.ProteinManager;
@@ -50,7 +56,6 @@ import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
-import org.labkey.ms2.compare.SpectraCountRReport;
 
 import java.beans.PropertyChangeEvent;
 import java.io.File;
@@ -236,6 +241,35 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         {
             TableInfo table = ProteinManager.getTableInfoFastaFiles();
             updateHashes(table, "FileName", "FastaId", user, hashes);
+        }
+
+        //updateDefaultRReports(viewContext);
+    }
+
+    private void updateDefaultRReports(ViewContext context)
+    {
+        // somewhat ugly, need to ensure the report is registered with the service before an
+        // instance can be created.
+        ReportService.get().registerReport(new SpectraCountRReport());
+
+        String script = "write.table(labkey.data, file = \"${tsvout:tsvfile}\", sep = \"\\t\", qmethod = \"double\", col.names=NA)";
+        Report r = ReportService.get().createReportInstance(new SpectraCountRReport().getType());
+
+        ReportDescriptor descriptor = r.getDescriptor();
+        descriptor.setProperty(RReportDescriptor.Prop.script, script);
+        descriptor.setFlags(ReportDescriptor.FLAG_INHERITABLE);
+        descriptor.setProperty(ReportDescriptor.Prop.schemaName, MS2Schema.SCHEMA_NAME);
+        descriptor.setProperty(ReportDescriptor.Prop.queryName, "SpectraCountPeptide");
+        descriptor.setReportName("Default MS2 report");
+
+        String key = ChartUtil.getReportKey(MS2Schema.SCHEMA_NAME, "SpectraCountPeptide");
+        try {
+            context.setContainer(ContainerManager.getSharedContainer());
+            ReportService.get().saveReport(context, key, r);
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
         }
     }
 
