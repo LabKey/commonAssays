@@ -639,7 +639,7 @@ abstract public class FlowJoWorkspace implements Serializable
         assert multiplier == 64;
         for (int i = 0; i < values.size(); i++)
         {
-            if (values.get(i) > 4096)
+            if (values.get(i) > 4096 * 1.05) // small fudge factor for gates nudged above scale
                 return;
         }
         for (int i = 0; i < values.size(); i ++)
