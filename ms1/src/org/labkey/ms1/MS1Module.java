@@ -25,6 +25,7 @@ import org.labkey.ms1.query.MS1Schema;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Set;
+import java.util.HashSet;
 
 
 /**
@@ -125,5 +126,14 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
     public Set<DbSchema> getSchemasToTest()
     {
         return PageFlowUtil.set(MS1Manager.get().getSchema());
+    }
+
+    @Override
+    public Set<String> getModuleDependencies()
+    {
+        Set<String> result = new HashSet<String>();
+        result.add("Pipeline");
+        result.add("Experiment");
+        return result;
     }
 }

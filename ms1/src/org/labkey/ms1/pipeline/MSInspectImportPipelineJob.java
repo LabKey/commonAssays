@@ -8,7 +8,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.PathRelativizer;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
 
@@ -107,7 +107,7 @@ public class MSInspectImportPipelineJob extends PipelineJob
         mzxmlStartingInputsSB.append(getStartingInputDataSnippet(mzXMLFile, resultsDir));
         instanceDetailsSB.append(getInstanceDetailsSnippet(mzXMLFile, resultsDir, msInspectDefFile));
 
-        String mzXMLPath = PathRelativizer.relativizePathUnix(resultsDir, mzXMLFile);
+        String mzXMLPath = FileUtil.relativizeUnix(resultsDir, mzXMLFile);
 
         Container c = getContainer();
         PipelineService service = PipelineService.get();
@@ -123,22 +123,22 @@ public class MSInspectImportPipelineJob extends PipelineJob
         xarXml = StringUtils.replace(xarXml, "@@MZXML_STARTING_INPUTS@@", mzxmlStartingInputsSB.toString());
         xarXml = StringUtils.replace(xarXml, "@@MZXML_PATH@@", mzXMLPath);
         xarXml = StringUtils.replace(xarXml, "@@MSINSPECT_XML_FILE_PATH@@",
-                PathRelativizer.relativizePathUnix(resultsDir, msInspectDefFile));
+                FileUtil.relativizeUnix(resultsDir, msInspectDefFile));
 
-        String pepXMLFilePath = PathRelativizer.relativizePathUnix(resultsDir, _featuresFile);
+        String pepXMLFilePath = FileUtil.relativizeUnix(resultsDir, _featuresFile);
         xarXml = StringUtils.replace(xarXml, "@@FEATURES_FILE_PATH@@",
                 pepXMLFilePath);
 
         //peaks XML file will be in the same dir as _featuresFile and have the same base name
         //but with an .xml file extension
-        String peaksXMLFilePath = PathRelativizer.relativizePathUnix(resultsDir, _featuresFile);
+        String peaksXMLFilePath = FileUtil.relativizeUnix(resultsDir, _featuresFile);
         // This is safe because .features.tsv and .peptides.tsv happen to be the same length
         peaksXMLFilePath = peaksXMLFilePath.substring(0,peaksXMLFilePath.length() - MSInspectFeaturesDataHandler.FEATURES_FILE_EXTENSION.length());
         peaksXMLFilePath += ".peaks.xml";
         xarXml = StringUtils.replace(xarXml, "@@PEAKS_FILE_PATH@@", peaksXMLFilePath);
 
         //File uniquifierFile = resultsDir.getParentFile();
-        String uniquifier = PathRelativizer.relativizePathUnix(containerRoot, resultsDir) + "/" + name;
+        String uniquifier = FileUtil.relativizeUnix(containerRoot, resultsDir) + "/" + name;
         try {uniquifier = URLEncoder.encode(uniquifier, "UTF-8");}
         catch(UnsupportedEncodingException ignore) {} //if this doesn't work, just ignore
 
@@ -233,10 +233,10 @@ public class MSInspectImportPipelineJob extends PipelineJob
         sb.append("                      <exp:InstanceDetails>\n");
         sb.append("                        <exp:InstanceInputs>\n");
         sb.append("                          <exp:DataLSID DataFileUrl=\"");
-        sb.append(PathRelativizer.relativizePathUnix(analysisDir, mzXMLFile));
+        sb.append(FileUtil.relativizeUnix(analysisDir, mzXMLFile));
         sb.append("\">${AutoFileLSID}</exp:DataLSID>\n");
         sb.append("                          <exp:DataLSID DataFileUrl=\"");
-        sb.append(PathRelativizer.relativizePathUnix(analysisDir, msInspectConfigFile));
+        sb.append(FileUtil.relativizeUnix(analysisDir, msInspectConfigFile));
         sb.append("\">${AutoFileLSID}</exp:DataLSID>\n");
         sb.append("                        </exp:InstanceInputs>\n");
         sb.append("                      </exp:InstanceDetails>\n");
@@ -252,7 +252,7 @@ public class MSInspectImportPipelineJob extends PipelineJob
         sb.append("</exp:Name>\n");
         sb.append("\t\t\t<exp:CpasType>Data</exp:CpasType>\n");
         sb.append("\t\t\t<exp:DataFileUrl>");
-        sb.append(PathRelativizer.relativizePath(analysisDir, f));
+        sb.append(FileUtil.relativize(analysisDir, f));
         sb.append("</exp:DataFileUrl>\n");
         sb.append("\t\t</exp:Data>\n");
         return sb.toString();

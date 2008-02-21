@@ -4,10 +4,27 @@
     <bean id="ms1PipelineRegistry" class="org.labkey.api.pipeline.TaskPipelineRegistrar">
         <property name="pipelines">
             <list>
-                <bean class="org.labkey.api.pipeline.file.FileAnalysisTaskPipelineSpec">
+                <bean class="org.labkey.api.pipeline.file.FileAnalysisTaskPipelineSettings">
                     <constructor-arg value="ms1FeaturePipeline"/>
-                    <property name="description" value="Process MS1 Peaks"/>
-                    <property name="protocolFactoryName" value="features"/>
+                    <property name="description" value="Find MS1 Features"/>
+                    <property name="protocolFactoryName" value="inspect"/>
+                    <!-- bogus XAR file for this pipeline -->
+                    <property name="xarGeneratorSupport">
+                        <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport"/>
+                    </property>
+                    <property name="taskProgressionSpec">
+                        <list>
+                            <ref bean="msInspectFactory"/>
+                            <ref bean="expGeneratorFeatures"/>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarImportTaskId</value>
+                        </list>
+                    </property>
+                </bean>
+                
+                <bean class="org.labkey.api.pipeline.file.FileAnalysisTaskPipelineSettings">
+                    <constructor-arg value="ms1FeaturePeptidePipeline"/>
+                    <property name="description" value="Match MS1 Features to Peptides"/>
+                    <property name="protocolFactoryName" value="ms1peptides"/>
                     <property name="initialInputExt" value=".pep.xml"/>
                     <property name="inputExtHeirarchy">
                         <map>
@@ -16,16 +33,31 @@
                             </entry>
                         </map>
                     </property>
+                    <property name="xarGeneratorSupport">
+                        <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport"/>
+                    </property>
                     <property name="taskProgressionSpec">
                         <list>
-                            <ref bean="peakabooFactory"/>
+<!--                            <ref bean="peakabooFactory"/> -->
                             <ref bean="msInspectFactory"/>
                             <ref bean="ms1PeptideParserFactory"/>
+                            <ref bean="expGeneratorPeptides"/>
+                            <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarImportTaskId</value>
                         </list>
                     </property>
                 </bean>
             </list>
         </property>
+    </bean>
+
+    <bean id="expGeneratorFeatures" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
+        <constructor-arg value="expGeneratorFeatures"/>
+        <property name="inputExt" value=".features.tsv"/>
+    </bean>
+
+    <bean id="expGeneratorPeptides" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
+        <constructor-arg value="expGeneratorPeptides"/>
+        <property name="inputExt" value=".peptides.tsv"/>
     </bean>
 
     <bean id="unixCompactSwitch" class="org.labkey.api.pipeline.cmd.UnixCompactSwitchFormat"/>
@@ -38,7 +70,7 @@
         <property name="min" value="1"/>
     </bean>
     
-    <bean id="peakabooFactory" class="org.labkey.api.pipeline.cmd.CommandTask$Factory">
+    <bean id="peakabooFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
         <constructor-arg value="peakabooFactory"/>
         <property name="inputExtension" value=".mzXML"/>
         <property name="outputExtension" value=".peaks.xml"/>
@@ -95,7 +127,7 @@
         </property>
     </bean>
 
-    <bean id="msInspectFactory" class="org.labkey.api.pipeline.cmd.CommandTask$Factory">
+    <bean id="msInspectFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
         <constructor-arg value="msInspectFactory"/>
         <property name="inputExtension" value=".mzXML"/>
         <property name="outputExtension" value=".features.tsv"/>
@@ -177,14 +209,15 @@
         </property>
     </bean>
 
-    <bean id="ms1PeptideParserFactory" class="org.labkey.api.pipeline.cmd.CommandTask$Factory">
+    <bean id="ms1PeptideParserFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
         <constructor-arg value="ms1PeptideParserFactory"/>
-        <property name="inputExtension" value=".pep.xml"/>
+        <property name="removeInput" value="true"/>
+        <property name="inputExtension" value=".features.tsv"/>
         <property name="inputPaths">
             <map>
-                <entry key="input-features">
+                <entry key="input-peptides">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <constructor-arg value=".features.tsv"/>
+                        <constructor-arg value=".pep.xml"/>
                     </bean>
                 </entry>
             </map>
@@ -196,10 +229,10 @@
                 <bean class="org.labkey.api.pipeline.cmd.RequiredInLine">
                     <property name="value" value="MS1PeptideParser"/>
                 </bean>
-                <bean class="org.labkey.api.pipeline.cmd.PathInLine"/>
                 <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                    <property name="key" value="input-features"/>
+                    <property name="key" value="input-peptides"/>
                 </bean>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine"/>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
                     <property name="parameter" value="ms1 peptides, window"/>
                     <property name="switchName" value="w"/>

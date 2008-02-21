@@ -565,6 +565,7 @@ ms1/src/org/labkey/ms1/pipeline/MS1FileFilter.java -text
 ms1/src/org/labkey/ms1/pipeline/MSInspectFeaturesDataHandler.java -text
 ms1/src/org/labkey/ms1/pipeline/MSInspectImportPipelineJob.java -text
 ms1/src/org/labkey/ms1/pipeline/MSInspectPipelineProvider.java -text
+ms1/src/org/labkey/ms1/pipeline/MSInspectXarGeneratorSupport.java -text
 ms1/src/org/labkey/ms1/pipeline/PeaksFileDataHandler.java -text
 ms1/src/org/labkey/ms1/pipeline/PeaksFileImporter.java -text
 ms1/src/org/labkey/ms1/pipeline/templates/msInspectFeatureFinding.xml -text
@@ -889,6 +890,7 @@ ms2/src/org/labkey/ms2/pipeline/mascot/MascotClientImpl.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotDefaults.xml -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotImportPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotPipelineJob.java -text
+ms2/src/org/labkey/ms2/pipeline/mascot/MascotRun.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotSearchProtocol.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotSearchTask.java -text
@@ -897,7 +899,6 @@ ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascot.xml -text
 ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascotFractions.xml -text
 ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascotFractionsXpress.xml -text
 ms2/src/org/labkey/ms2/pipeline/mascot/templates/MS2SearchMascotXpress.xml -text
-ms2/src/org/labkey/ms2/pipeline/phenyx/MascotRun.java -text
 ms2/src/org/labkey/ms2/pipeline/phenyx/PhenyxRun.java -text
 ms2/src/org/labkey/ms2/pipeline/pickProtocol.jsp -text
 ms2/src/org/labkey/ms2/pipeline/search.jsp -text

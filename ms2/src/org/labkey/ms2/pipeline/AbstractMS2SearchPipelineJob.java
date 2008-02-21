@@ -1,7 +1,5 @@
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.exp.pipeline.XarGeneratorId;
-import org.labkey.api.exp.pipeline.XarLoaderId;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.TaskId;
@@ -19,7 +17,7 @@ import java.util.*;
  * Date: Nov 11, 2007
  */
 public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJob
-        implements MS2SearchJobSupport, TPPTask.JobSupport, XarGeneratorId.JobSupport, XarLoaderId.JobSupport
+        implements MS2SearchJobSupport, TPPTask.JobSupport
 {
     enum Pipelines
     {
@@ -235,7 +233,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
 
         File dirRoot = getRootDir();
         File dirAnalysis = getAnalysisDirectory();
-        File fileInput = getParametersFile();
+        File fileParameters = getParametersFile();
         String baseName = getBaseName();
 
         replaceMap.put("SEARCH_NAME", getDescription());
@@ -243,7 +241,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         File[] databaseFiles = getSequenceFiles();
         StringBuilder databaseSB = new StringBuilder();
         for (File fileDatabase : databaseFiles)
-            databaseSB.append(getStartingInputDataSnippet(fileDatabase, getAnalysisDirectory()));
+            databaseSB.append(getStartingInputDataSnippet(fileDatabase));
 
         replaceMap.put("PROTEIN_DATABASES", databaseSB.toString());
         replaceMap.put("PROTEIN_DATABASE_DATALSIDS", getDataLSIDSnippet(databaseFiles, dirAnalysis, "FASTA"));
@@ -254,25 +252,24 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         File[] spectraFiles = getInputFiles();
         for (File fileSpectra : spectraFiles)
         {
-            mzxmlStartingInputsSB.append(getStartingInputDataSnippet(fileSpectra, dirAnalysis));
-            instanceDetailsSB.append(getInstanceDetailsSnippet(fileSpectra, dirAnalysis, databaseFiles, fileInput));
+            mzxmlStartingInputsSB.append(getStartingInputDataSnippet(fileSpectra));
+            instanceDetailsSB.append(getInstanceDetailsSnippet(fileSpectra));
         }
 
         replaceMap.put("INSTANCE_DETAILS", instanceDetailsSB.toString());
         replaceMap.put("MZXML_DATALSIDS", getDataLSIDSnippet(spectraFiles, dirAnalysis, "mzXML"));
         replaceMap.put("MZXML_STARTING_INPUTS", mzxmlStartingInputsSB.toString());
         replaceMap.put("MZXML_PATHS", getSpectraFilePaths(dirAnalysis, spectraFiles));
-        replaceMap.put("INPUT_XML_FILE_PATH",
-                PathRelativizer.relativizePathUnix(dirAnalysis, fileInput));
+        replaceMap.put("INPUT_XML_FILE_PATH", getXarPath(fileParameters));
         if (spectraFiles.length == 1)
         {
             File f = getSearchNativeSpectraFile();
             if (f != null)
-                replaceMap.put("SPECTRA_CONVERT_FILE_PATH",  PathRelativizer.relativizePathUnix(dirAnalysis, f));
+                replaceMap.put("SPECTRA_CONVERT_FILE_PATH",  getXarPath(f));
 
             f = getSearchNativeOutputFile();
             if (f != null)
-                replaceMap.put("SEARCH_OUTPUT_FILE_PATH", PathRelativizer.relativizePathUnix(dirAnalysis, f));
+                replaceMap.put("SEARCH_OUTPUT_FILE_PATH", getXarPath(f));
         }
 
         replaceMap.put("PEP_XML_FILE_PATH",
@@ -286,51 +283,15 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                 fileProtXml = fileProtXMLInt;
         }
         replaceMap.put("PEP_PROT_XML_FILE_PATH", fileProtXml.getName());
-
-        File fileUniquifier = dirAnalysis;
-        if (getInputFiles().length == 1)
-            fileUniquifier = new File(fileUniquifier, baseName);
-        String uniquifier = PageFlowUtil.encode(
-                PathRelativizer.relativizePathUnix(dirRoot, fileUniquifier)).replaceAll("%2F", "/");
-
-        replaceMap.put("RUN-UNIQUIFIER", uniquifier);
+        replaceMap.put("RUN-UNIQUIFIER", getExperimentRunUniquifier());
         return replaceMap;
     }
 
-    protected String getInstanceDetailsSnippet(File mzXMLFile, File analysisDir, File[] databaseFiles, File configFile) throws IOException
+    protected String getExtraDataSnippets() throws IOException
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("                      <exp:InstanceDetails>\n");
-        sb.append("                        <exp:InstanceInputs>\n");
-        sb.append("                          <exp:DataLSID DataFileUrl=\"");
-        sb.append(PathRelativizer.relativizePathUnix(analysisDir, mzXMLFile));
-        sb.append("\">${AutoFileLSID}</exp:DataLSID>\n");
-        sb.append("                          <exp:DataLSID DataFileUrl=\"");
-        sb.append(PathRelativizer.relativizePathUnix(analysisDir, configFile));
-        sb.append("\">${AutoFileLSID}</exp:DataLSID>\n");
-        for (File dbFile : databaseFiles)
-        {
-            sb.append("                          <exp:DataLSID DataFileUrl=\"");
-            sb.append(PathRelativizer.relativizePathUnix(analysisDir, dbFile));
-            sb.append("\">${AutoFileLSID}</exp:DataLSID>\n");
-        }
-        sb.append("                        </exp:InstanceInputs>\n");
-        sb.append("                      </exp:InstanceDetails>\n");
-        return sb.toString();
-    }
-
-    protected String getStartingInputDataSnippet(File f, File analysisDir) throws IOException
-    {
-        StringBuilder sb = new StringBuilder();
-        sb.append("\t\t<exp:Data rdf:about=\"${AutoFileLSID}\">\n");
-        sb.append("\t\t\t<exp:Name>");
-        sb.append(f.getName());
-        sb.append("</exp:Name>\n");
-        sb.append("\t\t\t<exp:CpasType>Data</exp:CpasType>\n");
-        sb.append("\t\t\t<exp:DataFileUrl>");
-        sb.append(PathRelativizer.relativizePath(analysisDir, f));
-        sb.append("</exp:DataFileUrl>\n");
-        sb.append("\t\t</exp:Data>\n");
+        for (File seqFile : getSequenceFiles())
+            sb.append(getAutoFileLSID(seqFile));
         return sb.toString();
     }
 
@@ -340,7 +301,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         for (File file : files)
         {
             sb.append("                                <exp:DataLSID DataFileUrl=\"");
-            sb.append(PathRelativizer.relativizePathUnix(analysisDir, file));
+            sb.append(FileUtil.relativizeUnix(analysisDir, file));
             sb.append("\" RoleName=\"");
             sb.append(baseRoleName);
             sb.append("\">${AutoFileLSID}</exp:DataLSID>\n");
@@ -365,7 +326,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         Set<File> fileSet2 = new HashSet<File>(Arrays.asList(jobSpectraFiles));
         if (fileSet1.equals(fileSet2))
         {
-            result.append(PathRelativizer.relativizePathUnix(analysisDir, dirData));
+            result.append(FileUtil.relativizeUnix(analysisDir, dirData));
             result.append("*.mzxml");
         }
         else
@@ -376,7 +337,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                 {
                     result.append(";");
                 }
-                result.append(PathRelativizer.relativizePathUnix(analysisDir, f));
+                result.append(FileUtil.relativizeUnix(analysisDir, f));
             }
         }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.ms2.pipeline.phenyx;
+package org.labkey.ms2.pipeline.mascot;
 
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;

@@ -94,7 +94,7 @@ public class XTandemSearchTask extends PipelineJob.Task
 
     public JobSupport getJobSupport()
     {
-        return (JobSupport) getJob();
+        return getJob().getJobSupport(JobSupport.class);
     }
 
     public void run()

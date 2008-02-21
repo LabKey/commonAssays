@@ -4,7 +4,7 @@ import org.fhcrc.cpas.exp.xml.*;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.PathRelativizer;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.ms2.pipeline.MassSpecProtocol;
@@ -203,7 +203,7 @@ abstract public class DescribeRunPage extends JspBase
                 if (root != null)
                 {
                     File rootFile = new File(root.getUri(getViewContext().getContainer()));
-                    String result = PathRelativizer.relativizePathUnix(rootFile, parentFile);
+                    String result = FileUtil.relativizeUnix(rootFile, parentFile);
                     if (result.length() > 0)
                     {
                         return "root/" + result;
