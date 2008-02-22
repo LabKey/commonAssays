@@ -79,11 +79,11 @@ public class FeaturesTableInfo extends FilteredTable
             //Since we're not matching on charge, we could get multiple rows back, so use MIN to
             //select just the first matching one.
             SQLFragment sqlPepJoin = new SQLFragment("(SELECT MIN(pd.rowid) AS PeptideId" +
-                    " FROM ms2.PeptidesData AS pd" +
-                    " INNER JOIN ms2.Fractions AS fr ON (fr.fraction=pd.fraction)" +
-                    " INNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl)" +
-                    " INNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)" +
-                    " WHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId)");
+                    "\nFROM ms2.PeptidesData AS pd" +
+                    "\nINNER JOIN ms2.Fractions AS fr ON (fr.fraction=pd.fraction)" +
+                    "\nINNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl)" +
+                    "\nINNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)" +
+                    "\nWHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId)");
 
             ColumnInfo ciPepId = addColumn(new ExprColumn(this, COLUMN_PEPTIDE_INFO, sqlPepJoin, java.sql.Types.INTEGER, getColumn("FeatureId")));
 
