@@ -335,19 +335,14 @@ public class MS2Manager
             while (rs.next())
             {
                 String type = rs.getString("Type");
-                if (type == null)
-                {
-                    _log.debug("MS2RunType \"" + type + "\" not found");
-                    return null;
-                }
-                try
-                {
-                    MS2RunType runType = MS2RunType.valueOf(type);
 
+                MS2RunType runType = MS2RunType.lookupType(type);
+                if (runType != null)
+                {
                     BeanObjectFactory<MS2Run> bof = new BeanObjectFactory<MS2Run>((Class<MS2Run>)runType.getRunClass());
                     runs.add(bof.handle(rs));
                 }
-                catch (IllegalArgumentException e)
+                else
                 {
                     _log.debug("MS2RunType \"" + type + "\" not found");
                     return null;
@@ -438,7 +433,17 @@ public class MS2Manager
         if (null != run)
             return run;
 
-        MS2Run[] runs = getRuns("Run = ?", Integer.parseInt(runId));
+        int runIdInt;
+        try
+        {
+            runIdInt = Integer.parseInt(runId);
+        }
+        catch (NumberFormatException e)
+        {
+            return null;
+        }
+
+        MS2Run[] runs = getRuns("Run = ?", runIdInt);
 
         if (runs != null && runs.length == 1)
         {

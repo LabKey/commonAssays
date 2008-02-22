@@ -102,7 +102,7 @@ public class GroupNumberDisplayColumn extends DataColumn
             ColumnInfo groupIdCol = cols.get(groupIdKey);
             columns.add(groupIdCol);
 
-            ActionURL url = new ActionURL("MS2", "showProteinGroup.view", _container);
+            ActionURL url = new ActionURL(MS2Controller.ShowProteinGroupAction.class, _container);
             setURL(url.toString() + "&grouping=proteinprophet&proteinGroupId=${" + groupIdCol.getAlias() + "}");
         }
     }

@@ -1180,7 +1180,7 @@ public class MS2Controller extends SpringActionController
             peptidesSettings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
             QueryView peptidesView = new QueryView(new MS2Schema(getUser(), getContainer()), peptidesSettings);
 
-            CompareOptionsBean bean = new CompareOptionsBean(peptidesView, new ActionURL(OldCompareProteinProphetQueryAction.class, getContainer()), runListId, form);
+            CompareOptionsBean bean = new CompareOptionsBean(peptidesView, new ActionURL(CompareProteinProphetQueryAction.class, getContainer()), runListId, form);
 
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp", bean);
         }
@@ -1195,6 +1195,7 @@ public class MS2Controller extends SpringActionController
     {
         private String _peptideFilterType = "none";
         private Float _peptideProphetProbability;
+        private boolean _orCriteriaForEachRun;
 
         public String getPeptideFilterType()
         {
@@ -1234,6 +1235,16 @@ public class MS2Controller extends SpringActionController
         public String getCustomViewName(ViewContext context)
         {
             return context.getActionURL().getParameter(PEPTIDES_FILTER_VIEW_NAME);
+        }
+
+        public boolean isOrCriteriaForEachRun()
+        {
+            return _orCriteriaForEachRun;
+        }
+
+        public void setOrCriteriaForEachRun(boolean orCriteriaForEachRun)
+        {
+            _orCriteriaForEachRun = orCriteriaForEachRun;
         }
     }
 
@@ -3512,6 +3523,10 @@ public class MS2Controller extends SpringActionController
                 return HttpView.throwNotFoundMV();
             }
             ProteinGroupWithQuantitation group = proteinProphet.lookupGroup(form.getGroupNumber(), form.getIndistinguishableCollectionId());
+            if (group == null)
+            {
+                return HttpView.throwNotFoundMV();
+            }
             Protein[] proteins = group.lookupProteins();
 
             AbstractMS2RunView peptideView = new ProteinProphetPeptideView(getViewContext(), _run);

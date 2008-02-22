@@ -95,7 +95,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public MS2Module()
     {
-        super(NAME, 2.33, "/org/labkey/ms2", true,
+        super(NAME, 2.34, "/org/labkey/ms2", true,
                 new WebPartFactory("MS2 Runs"){
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {

@@ -20,7 +20,6 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.api.util.MemTracker;
-import org.labkey.ms2.pipeline.tandem.XTandemRun;
 
 import java.io.Serializable;
 import java.util.*;
@@ -253,61 +252,27 @@ public abstract class MS2Run implements Serializable
 
     public static MS2Run getRunFromTypeString(String type)
     {
-        String lower = type.toLowerCase();
-        StringBuffer filteredType = new StringBuffer();
-
-        // Eliminate all non-letter characters
-        for (int i = 0; i < type.length(); i++)
+        MS2RunType runType = MS2RunType.lookupType(type);
+        if (runType == null)
         {
-            char c = lower.charAt(i);
-
-            if (Character.isLowerCase(c) || Character.isDigit(c))
-                filteredType.append(c);
+            _log.error("Unrecognized run type: " + type);
+            return null;
         }
-
-        filteredType.setCharAt(0, Character.toUpperCase(filteredType.charAt(0)));
-        Class clazz = null;
 
         try
         {
-            clazz = Class.forName(MS2Manager._ms2RunPackage + filteredType.toString() + "Run");
+            MS2Run run = runType.getRunClass().newInstance();
+            run.setType(runType.name());
+            return run;
         }
-        catch (ClassNotFoundException e)
+        catch (IllegalAccessException e)
         {
-            filteredType.setCharAt(1, Character.toUpperCase(filteredType.charAt(1)));
-
-            try
-            {
-                clazz = Class.forName(MS2Manager._ms2RunPackage + filteredType.toString() + "Run");
-            }
-            catch (ClassNotFoundException e1)
-            {
-                // If it was created by X!Tandem, then use the X!Tandem default class.
-                if (!type.startsWith("X!"))
-                    _log.error(e1);
-                else
-                {
-                    clazz = XTandemRun.class;
-                    filteredType.replace(0, filteredType.length(), "XTandem");
-                }
-            }
+            throw new RuntimeException(e);
         }
-
-        if (null != clazz)
+        catch (InstantiationException e)
         {
-            try
-            {
-                MS2Run run = (MS2Run) clazz.newInstance();
-                run.setType(filteredType.toString());
-                return run;
-            }
-            catch (Exception e)
-            {
-                _log.error(e);
-            }
+            throw new RuntimeException(e);
         }
-
-        return null;
     }
 
 

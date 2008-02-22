@@ -130,8 +130,15 @@ public class MS2Peptide
                         {
                             SimpleScan scan = iter.next();
                             float[][] data = scan.getData();
-                            _spectrumMZ = data[0];
-                            _spectrumIntensity = data[1];
+                            if (data != null)
+                            {
+                                _spectrumMZ = data[0];
+                                _spectrumIntensity = data[1];
+                            }
+                            else
+                            {
+                                _spectrumErrorMessage = "Could not find spectra for scan " + getScan() + " in " + f.getName();
+                            }
                         }
                         else
                         {

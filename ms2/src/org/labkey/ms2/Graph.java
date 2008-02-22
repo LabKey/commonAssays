@@ -104,25 +104,25 @@ public abstract class Graph
 
     public double getXStart()
     {
-        if (Double.MIN_VALUE != _xStart)
+        // Don't let the user scroll off the end of the graph
+        double scaledMin = _xMin < Double.MAX_VALUE ? _bigTickIncrement * Math.floor(_xMin / _bigTickIncrement) : 0;  
+
+        if (Double.MIN_VALUE != _xStart && _xStart >= scaledMin)
             return _xStart;
 
-        if (_xMin < Double.MAX_VALUE)
-            return _bigTickIncrement * Math.floor(_xMin / _bigTickIncrement);
-
-        return 0;
+        return scaledMin;
     }
 
 
     public double getXEnd()
     {
-        if (Double.MAX_VALUE != _xEnd)
+        // Don't let the user scroll off the end of the graph
+        double scaledMax = _xMax > Double.MIN_VALUE ? _bigTickIncrement * Math.ceil(_xMax / _bigTickIncrement) : 1000;
+
+        if (Double.MAX_VALUE != _xEnd && _xEnd <= scaledMax)
             return _xEnd;
 
-        if (_xMax > Double.MIN_VALUE)
-            return _bigTickIncrement * Math.ceil(_xMax / _bigTickIncrement);
-
-        return 1000;
+        return scaledMax;
     }
 
 

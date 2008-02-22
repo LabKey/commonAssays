@@ -58,4 +58,39 @@ public enum MS2RunType
     {
         return _scoreColumnList;
     }
+
+    public static MS2RunType lookupType(String type)
+    {
+        if (type == null)
+        {
+            return null;
+        }
+
+        type = type.toLowerCase();
+        StringBuffer filteredType = new StringBuffer();
+
+        // Eliminate all non-letter characters
+        for (int i = 0; i < type.length(); i++)
+        {
+            char c = type.charAt(i);
+
+            if (Character.isLowerCase(c) || Character.isDigit(c))
+                filteredType.append(c);
+        }
+
+        for (MS2RunType runType : values())
+        {
+            if (runType.name().toLowerCase().equals(type))
+            {
+                return runType;
+            }
+        }
+
+        // If it was created by X!Tandem, then use the X!Tandem default class.
+        if (type != null && type.startsWith("x!"))
+        {
+            return XTandem;
+        }
+        return null;
+    }
 }

@@ -210,7 +210,7 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    protected TableInfo createProteinGroupMembershipTable(final MS2Controller.PeptideFilteringComparisonForm form, final ViewContext context)
+    protected FilteredTable createProteinGroupMembershipTable(final MS2Controller.PeptideFilteringComparisonForm form, final ViewContext context)
     {
         FilteredTable result = new FilteredTable(MS2Manager.getTableInfoProteinGroupMemberships());
         result.wrapAllColumns(true);
@@ -220,6 +220,9 @@ public class MS2Schema extends UserSchema
             public TableInfo getLookupTableInfo()
             {
                 ProteinGroupTableInfo result = createProteinGroupsForRunTable(null);
+
+                result.removeColumn(result.getColumn("Proteins"));
+                result.removeColumn(result.getColumn("FirstProtein"));
 
                 SQLFragment totalSQL;
                 SQLFragment uniqueSQL;
@@ -267,7 +270,8 @@ public class MS2Schema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                return createSequencesTable(null);
+                SequencesTableInfo result = createSequencesTable(null);
+                return result;
             }
         });
 
@@ -505,7 +509,7 @@ public class MS2Schema extends UserSchema
 
     public CrosstabTableInfo createProteinProphetCrosstabTable(MS2Controller.PeptideFilteringComparisonForm form, ViewContext context)
     {
-        TableInfo baseTable = createProteinGroupMembershipTable(form, context);
+        FilteredTable baseTable = createProteinGroupMembershipTable(form, context);
 
         ActionURL urlPepSearch = new ActionURL(MS2Controller.ShowProteinAction.class, getContainer());
 
@@ -538,6 +542,10 @@ public class MS2Schema extends UserSchema
         else
         {
             result = new CrosstabTableInfo(settings);
+        }
+        if (form != null)
+        {
+            result.setOrAggFitlers(form.isOrCriteriaForEachRun());
         }
         List<FieldKey> defaultCols = new ArrayList<FieldKey>();
         defaultCols.add(FieldKey.fromParts("SeqId"));

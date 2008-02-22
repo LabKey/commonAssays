@@ -72,10 +72,10 @@
     graphUrl.addParameter("width", "600");
     graphUrl.addParameter("height", "400");
 
-    if (Double.MIN_VALUE != ctx.form.getxStartDouble()) graphUrl.addParameter("xStart", ctx.form.getStringXStart());
-    if (Double.MAX_VALUE != ctx.form.getxEnd()) graphUrl.addParameter("xEnd", ctx.form.getStringXEnd());
+    if (Double.MIN_VALUE != ctx.form.getxStartDouble()) graphUrl.replaceParameter("xStart", ctx.form.getStringXStart());
+    if (Double.MAX_VALUE != ctx.form.getxEnd()) graphUrl.replaceParameter("xEnd", ctx.form.getStringXEnd());
 
-    graphUrl.addParameter("tolerance", String.valueOf(ctx.form.getTolerance()));
+    graphUrl.replaceParameter("tolerance", String.valueOf(ctx.form.getTolerance()));
 %>
     <img src="<%=graphUrl.getEncodedLocalURIString()%>" alt="Spectrum Graph">
     <form method=get action="updateShowPeptide.post">
