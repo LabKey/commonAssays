@@ -161,8 +161,18 @@ function populateAutoComp(selectAutoCompScript)
     var universalNegative = script.params["Universal Negative"];
     if (universalNegative)
     {
-        populateAutoCompParameter(universalNegative, "Universal Negative", 0);
+        populateUniversalNegative(universalNegative);
     }
+}
+
+function populateUniversalNegative(param)
+{
+    var keyword = param[0];
+    var value = param[1];
+    var negativeSubset = param[3];
+
+    populateAutoCompValues("negative", 0, keyword, value, negativeSubset);
+    universalNegative();
 }
 
 function populateAutoCompParameter(param, paramName, paramIndex)
@@ -172,22 +182,14 @@ function populateAutoCompParameter(param, paramName, paramIndex)
     var positiveSubset = param[2];
     var negativeSubset = param[3];
 
-    if (paramName == "Universal Negative")
+    if (positiveSubset)
     {
-        populateAutoCompValues("negative", 0, keyword, value, negativeSubset);
-        universalNegative();
+        populateAutoCompValues("positive", paramIndex, keyword, value, positiveSubset);
     }
-    else
-    {
-        if (positiveSubset)
-        {
-            populateAutoCompValues("positive", paramIndex, keyword, value, positiveSubset);
-        }
 
-        if (negativeSubset)
-        {
-            populateAutoCompValues("negative", paramIndex, keyword, value, negativeSubset);
-        }
+    if (negativeSubset)
+    {
+        populateAutoCompValues("negative", paramIndex, keyword, value, negativeSubset);
     }
 }
 

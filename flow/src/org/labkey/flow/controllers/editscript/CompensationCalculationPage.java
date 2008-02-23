@@ -2,7 +2,9 @@ package org.labkey.flow.controllers.editscript;
 
 import org.apache.commons.lang.StringUtils;
 import org.fhcrc.cpas.flow.script.xml.*;
+import org.labkey.api.query.FieldKey;
 import org.labkey.flow.analysis.model.Analysis;
+import org.labkey.flow.analysis.model.AutoCompensationScript;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.Population;
 import org.labkey.flow.analysis.web.SubsetSpec;
@@ -59,7 +61,8 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         }
         return null;
     }
-    public Map<String,Map<String, FlowJoWorkspace.SampleInfo>> keywordValueSampleMap;
+
+    public Map<String,Map<String, List<String>>> keywordValueSampleMap;
 
     public void setForm(EditCompensationCalculationForm form)
     {
@@ -79,14 +82,14 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         }
     }
 
-    public String[] getSubsetNames(Analysis analysis)
+    public List<String> getSubsetNames(Analysis analysis)
     {
         List<String> ret = new ArrayList();
         for (Population pop : analysis.getPopulations())
         {
             addSubsetNames(pop, null, ret);
         }
-        return ret.toArray(new String[0]);
+        return ret;
     }
 
     protected boolean isValidCompKeyword(String keyword)
@@ -104,11 +107,12 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
      * Walks all of the samples in the workspace, looking for keyword/value pairs that uniquely identify a sample.
      * For each pair that is found, returns the list of subset names.
      * @param workspace
+     * @return Keyword -> Value -> Subsets
      */
-    public Map<String, Map<String, FlowJoWorkspace.SampleInfo>> getKeywordValueSampleMap(FlowJoWorkspace workspace)
+    public Map<String, Map<String, List<String>>> getKeywordValueSampleMap(FlowJoWorkspace workspace)
     {
         Set<String> keywordsSet = new TreeSet();
-        Map<FlowJoWorkspace.SampleInfo,String[]> sampleSubsetMap = new HashMap();
+        Map<FlowJoWorkspace.SampleInfo, List<String>> sampleSubsetMap = new HashMap();
         for (FlowJoWorkspace.SampleInfo sample : workspace.getSamples()) {
             Analysis analysis = workspace.getSampleAnalysis(sample);
             if (analysis == null)
@@ -116,7 +120,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
             sampleSubsetMap.put(sample, getSubsetNames(analysis));
             keywordsSet.addAll(sample.getKeywords().keySet());
         }
-        Map<String,Map<String, FlowJoWorkspace.SampleInfo>> keywordValueSubsetListMap = new LinkedHashMap();
+        Map<String, Map<String, List<String>>> keywordValueSubsetListMap = new LinkedHashMap();
         for (String keyword : keywordsSet)
         {
             if (!isValidCompKeyword(keyword))
@@ -136,20 +140,58 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
                     list.add(sample);
                 }
             }
-            Map<String, FlowJoWorkspace.SampleInfo> valueSampleMap = new TreeMap();
+            Map<String, List<String>> valueSampleMap = new TreeMap();
             for (Map.Entry<String, List<FlowJoWorkspace.SampleInfo>> entry : sampleMap.entrySet())
             {
                 if (entry.getValue().size() != 1)
                     continue;
-
-                valueSampleMap.put(entry.getKey(), entry.getValue().get(0));
+                List<String> subsets = sampleSubsetMap.get(entry.getValue().get(0));
+                valueSampleMap.put(entry.getKey(), subsets);
             }
             if (valueSampleMap.size() > 0)
             {
                 keywordValueSubsetListMap.put(keyword, valueSampleMap);
             }
         }
+
+        // always add keywords, values, and subsets from autocomp scripts
+        for (AutoCompensationScript autoComp : workspace.getAutoCompensationScripts())
+        {
+            //AutoCompensationScript.MatchingCriteria criteria = autoComp.getCriteria();
+            for (AutoCompensationScript.ParameterDefinition param : autoComp.getParameters().values())
+            {
+                Map<String, List<String>> valueSampleMap =
+                    keywordValueSubsetListMap.get(param.getSearchKeyword());
+                if (valueSampleMap == null)
+                {
+                    valueSampleMap = new TreeMap();
+                    keywordValueSubsetListMap.put(param.getSearchKeyword(), valueSampleMap);
+                }
+
+                List<String> subsets = valueSampleMap.get(param.getSearchValue());
+                if (subsets == null)
+                {
+                    subsets = new ArrayList<String>();
+                    valueSampleMap.put(param.getSearchValue(), subsets);
+                }
+
+                // XXX: insert the gate into the proper position
+                if (StringUtils.isNotEmpty(param.getPositiveGate()) && !subsets.contains(param.getPositiveGate()))
+                    subsets.add(param.getPositiveGate());
+
+                if (StringUtils.isNotEmpty(param.getNegativeGate()) && !subsets.contains(param.getNegativeGate()))
+                    subsets.add(param.getNegativeGate());
+            }
+        }
+
         return keywordValueSubsetListMap;
+    }
+
+    public String javascriptArray(List<String> strings)
+    {
+        if (strings == null || strings.size() == 0)
+            return "[]";
+        return "['" + StringUtils.join(strings, "',\n'") + "']";
     }
 
     public String javascriptArray(String... strings)
@@ -201,7 +243,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
     public String selectKeywordValues(Sign sign, int index)
     {
         StringBuilder ret = new StringBuilder();
-        Map<String, FlowJoWorkspace.SampleInfo> valueSubsetMap = this.keywordValueSampleMap.get(getKeywordName(sign, index));
+        Map<String, List<String>> valueSubsetMap = this.keywordValueSampleMap.get(getKeywordName(sign, index));
         String current = getKeywordValue(sign, index);
         String[] options;
         if (valueSubsetMap == null)
@@ -264,21 +306,17 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
     public String selectSubsets(Sign sign, int index)
     {
         StringBuilder ret = new StringBuilder();
-        Map<String, FlowJoWorkspace.SampleInfo> valueSubsetMap = this.keywordValueSampleMap.get(getKeywordName(sign, index));
-        String[] subsets = new String[0];
+        Map<String, List<String>> valueSubsetMap = this.keywordValueSampleMap.get(getKeywordName(sign, index));
+        List<String> subsets = Collections.emptyList();
         if (valueSubsetMap == null)
         {
         }
         else
         {
-            FlowJoWorkspace.SampleInfo sample = valueSubsetMap.get(getKeywordValue(sign, index));
-            if (sample != null)
+            List<String> valueSubsets = valueSubsetMap.get(getKeywordValue(sign, index));
+            if (valueSubsets != null)
             {
-                Analysis analysis = form.workspace.getSampleAnalysis(sample);
-                if (analysis != null)
-                {
-                    subsets = getSubsetNames(analysis);
-                }
+                subsets = valueSubsets;
             }
         }
         
@@ -299,5 +337,35 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         }
         ret.append("</select>");
         return ret.toString();
+    }
+
+    public Map<FieldKey, String> getFieldOptions()
+    {
+        Map<FieldKey, String> options = form.getFieldOptions();
+
+        FieldKey keyKeyword = FieldKey.fromParts("Keyword");
+        for (String keyword : keywordValueSampleMap.keySet())
+        {
+            addOption(options, keyKeyword, keyword);
+        }
+
+        for (AutoCompensationScript script : form.workspace.getAutoCompensationScripts())
+        {
+            AutoCompensationScript.MatchingCriteria criteria = script.getCriteria();
+            if (criteria == null)
+                continue;
+            if (criteria.getPrimaryKeyword() != null)
+                addOption(options, keyKeyword, criteria.getPrimaryKeyword());
+            if (criteria.getSecondaryKeyword() != null)
+                addOption(options, keyKeyword, criteria.getSecondaryKeyword());
+        }
+        return options;
+    }
+    
+    private void addOption(Map<FieldKey, String> options, FieldKey keyKeyword, String keyword)
+    {
+        FieldKey key = new FieldKey(keyKeyword, keyword);
+        if (!options.containsKey(key))
+            options.put(key, keyword);
     }
 }

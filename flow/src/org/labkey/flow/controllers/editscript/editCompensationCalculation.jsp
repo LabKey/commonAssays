@@ -1,19 +1,15 @@
-<%@ page import="org.apache.commons.collections.map.MultiValueMap" %>
 <%@ page import="org.labkey.api.query.FieldKey" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.flow.analysis.model.Analysis"%>
-<%@ page import="org.labkey.flow.analysis.model.AutoCompensationScript"%>
-<%@ page import="org.labkey.flow.analysis.model.FlowJoWorkspace" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
-<%@ page import="java.util.Collection" %>
-<%@ page import="java.util.HashMap" %>
+<%@ page import="org.labkey.flow.analysis.model.AutoCompensationScript" %>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
+<%@ page import="java.util.List"%>
 <%@ page import="java.util.Map" %>
-<%@ page import="java.util.Set" %>
+<%@ page import="java.util.TreeMap" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     boolean canEdit = form.canEdit();
-    Map<FieldKey, String> fieldOptions = form.getFieldOptions();
+    Map<FieldKey, String> fieldOptions = getFieldOptions();
     Map<String, String> opOptions = form.getOpOptions();
     int clauseCount = Math.max(form.ff_filter_field.length + 2, 4);
 %>
@@ -23,6 +19,7 @@ function o() { var o = {}; for (var i = 0; i < arguments.length; i += 2) o[argum
 var parameters = <%=javascriptArray(form.parameters)%>
 var AutoComp = {};
 <%
+    boolean hasAutoCompScripts = form.workspace.getAutoCompensationScripts().size() > 0;
     for (AutoCompensationScript autoComp : form.workspace.getAutoCompensationScripts())
     {
         %>AutoComp['<%=autoComp.getName()%>']={<%
@@ -51,72 +48,58 @@ var AutoComp = {};
 %>
 var SS = []; // SUBSETS
 <%
-    // these arrays are duplicated a lot so only output each one once
-    MultiValueMap arrays = new MultiValueMap();
-    for (FlowJoWorkspace.SampleInfo sample : form.workspace.getSamples())
-    {
-        Analysis analysis = form.workspace.getSampleAnalysis(sample);
-        if (analysis != null)
-        {
-            String array = javascriptArray(getSubsetNames(analysis));
-            arrays.put(array,sample.getSampleId());
-        }
-    }
-    HashMap<String,Integer> sampleToSubsetArray = new HashMap<String,Integer>();
+    Map<Integer, Integer> hashToIndexMap = new TreeMap();
     Integer index = 0;
-    for (String jsArray : (Set<String>)arrays.keySet())
+    for (Map<String, List<String>> valueSubsets : keywordValueSampleMap.values())
     {
-        %>SS.push(<%=jsArray%>);<%
-        out.println();
-        Collection<String> sampleids = (Collection<String>)arrays.get(jsArray);
-        for (String sampleid : sampleids)
-            sampleToSubsetArray.put(sampleid,index);
-        index = index.intValue() + 1;
+        for (List<String> subsets : valueSubsets.values())
+        {
+            int subsetHash = subsets.hashCode();
+            if (!hashToIndexMap.containsKey(subsetHash))
+            {
+                hashToIndexMap.put(subsetHash, index);
+                index = index.intValue() + 1;
+                %>SS.push(<%=javascriptArray(subsets)%>);<%
+                out.println();
+            }
+        }
     }
 %>
 var KV = {}; // KEYWORD->VALUE->SUBSET
 <%
-    for (Map.Entry<String, Map<String, FlowJoWorkspace.SampleInfo>> keywordEntry : keywordValueSampleMap.entrySet())
+    for (Map.Entry<String, Map<String, List<String>>> keywordEntry : keywordValueSampleMap.entrySet())
     {
         String keyword = keywordEntry.getKey();
         %>KV['<%=keyword%>']=o(<%
         String and="";
-        for (Map.Entry<String, FlowJoWorkspace.SampleInfo> valueEntry : keywordEntry.getValue().entrySet())
+        for (Map.Entry<String, List<String>> valueEntry : keywordEntry.getValue().entrySet())
         {
             String value = valueEntry.getKey();
-            String sampleId = valueEntry.getValue().getSampleId(); 
-            %><%=and%>'<%=value%>', SS[<%=sampleToSubsetArray.get(sampleId)%>]<%
+            int subsetHash = valueEntry.getValue().hashCode();
+            %><%=and%>'<%=value%>', SS[<%=hashToIndexMap.get(subsetHash)%>]<%
             and = ",";
         }
         %>);<%
         out.println();
     }
 %>
-var keywordValueSubsetListMap = KV;
+var keywordValueSubsetListMap = KV; 
 </script>
 <p><h2>Instructions:</h2>
     For each parameter which requires compensation, specify the keyword name and value
     which are to be used to identify the compensation control in experiment runs.
-    If your FlowJo workspace uses AutoCompensation scripts, you can select the script
-    from the drop down below to quickly populate the form fields.
-</p>
-<p>
-    Filters may be applied to this analysis script.  The set of keyword and
-    value pairs <i>must</i> all match in the FCS header to be included in the analysis.
-</p>
-<p>
-    <b>If you do not see the keyword you are looking for:</b><br>
-    This page only allows you to choose keyword/value pairs that uniquely identify a
-    sample in the workspace.  If you do not see the keyword that you would like to use,
-    this might be because the workspace that you uploaded contained more than one sample
-    with that keyword value.  Use FlowJo to save a workspace that contains only one set of
-    compensation controls, and upload that new workspace.
 </p>
 
 <form method="POST" action="<%=formAction(ScriptController.Action.editCompensationCalculation)%>">
 
+<% if (hasAutoCompScripts) { %>
     <p>
-    <b>AutoCompensation script:</b><br/>
+    <b>AutoCompensation script:</b>
+    <labkey:helpPopup title="AutoCompensation Scripts">
+    Your FlowJo workspace contains AutoCompensation scripts; you can select a script
+    from the drop down below to quickly populate the form fields.
+    </labkey:helpPopup>
+    <br/>
     <select name="selectAutoCompScript" onchange="populateAutoComp(this);">
     <%
         %><option value="" selected></option><%
@@ -128,9 +111,17 @@ var keywordValueSubsetListMap = KV;
     %>
     </select>
     </p>
+<% } %>
 
     <p>
-    <b>Filter FCS files by keyword:</b><br/>
+    <b>Analyze FCS Files Where:</b>
+    <labkey:helpPopup title="Filter Wells:">
+    Filters may be applied to this analysis script.  The set of keyword and
+    value pairs <i>must all</i> match in the FCS header to be included in the analysis.
+    You can change the filter later by changing the script settings from the
+    analysis script start page.
+    </labkey:helpPopup>
+    <br/>
     <table class="normal">
         <tr><th/><th>Keyword</th><th/><th>Value</th></tr>
         <%
@@ -170,7 +161,22 @@ var keywordValueSubsetListMap = KV;
     </p>
 
     <p>
-    <b>Select Compensation:</b><br/>
+    <b>Select Compensation:</b>
+    <labkey:helpPopup title="Select Compensation">
+    <p>For each parameter which requires compensation, specify the keyword name and value
+    which are to be used to identify the compensation control in experiment runs.<p>
+    <p><b>If you do not see the keyword you are looking for:</b><br>
+    This page only allows you to choose keyword/value pairs that uniquely identify a
+    sample in the workspace.  If you do not see the keyword that you would like to use,
+    this might be because the workspace that you uploaded contained more than one sample
+    with that keyword value.
+    </p>
+    <p>
+    Use FlowJo to save a workspace template with AutoCompensation scripts or
+    a workspace containing only one set of compensation controls, and upload that new workspace.
+    </p>
+    </labkey:helpPopup>
+    <br/>
     <table class="normal" border="1">
         <tr><th rowspan="2">Channel</th><th colspan="3">Positive</th><th colspan="3">Negative</th></tr>
         <tr><th>Keyword</th><th>Value</th><th>Subset</th><th>Keyword</th><th>Value</th><th>Subset</th></tr>
