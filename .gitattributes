@@ -600,7 +600,7 @@ ms1/src/org/labkey/ms1/view/RetentionMassChart.java -text
 ms1/src/org/labkey/ms1/view/SimilarSearchView.jsp -text
 ms1/src/org/labkey/ms1/view/SpectrumChart.java -text
 ms1/src/org/labkey/ms1/view/softwareView.jsp -text
-ms1/webapp/WEB-INF/ms1/applicationContext.xml -text
+ms1/webapp/WEB-INF/ms1/ms1Context.xml -text
 ms2/gwtsrc/MS2GWT.iml -text
 ms2/gwtsrc/org/labkey/ms2/MS2VennDiagramView.gwt.xml -text
 ms2/gwtsrc/org/labkey/ms2/client/CompareService.java -text
@@ -1072,7 +1072,7 @@ ms2/src/org/labkey/ms2/testMascot.jsp -text
 ms2/src/org/labkey/ms2/testSequest.jsp -text
 ms2/webapp/MS2/externalData/ProtSprotOrgMap.txt -text
 ms2/webapp/MS2/images/runIcon.gif -text
-ms2/webapp/WEB-INF/ms2/applicationContext.xml -text
+ms2/webapp/WEB-INF/ms2/ms2Context.xml -text
 ms2/webapp/_images/gray.gif -text
 ms2/webapp/_images/red.gif -text
 nab/module.properties -text

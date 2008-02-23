@@ -80,6 +80,12 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
         SystemMaintenance.addTask(new PurgeTask());
     }
 
+    @Override
+    protected ContextType getContextType()
+    {
+        return ContextType.config;
+    }
+
     public void containerCreated(Container c)
     {
     }

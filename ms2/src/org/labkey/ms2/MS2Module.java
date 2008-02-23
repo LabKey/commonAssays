@@ -147,6 +147,11 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         MS2Service.register(new MS2ServiceImpl());
     }
 
+    @Override
+    protected ContextType getContextType()
+    {
+        return ContextType.config;
+    }
 
     @Override
     public void startup(ModuleContext context)
