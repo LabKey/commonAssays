@@ -37,7 +37,7 @@ public class OpenSSOManager
 
         try
         {
-            is = OpenSSOManager.class.getResourceAsStream(filename);
+            is = OpenSSOManager.class.getResourceAsStream(filename);  // TODO: Fix this so it works better with Tomcat reload
             Properties props = new Properties();
             props.load(is);
             return props;

@@ -54,8 +54,10 @@ public abstract class GoLoader
             html.append("No GO annotation loads have been attempted during this server session");
         else
         {
-            html.append("Refresh this page to update status<br><br>\n");
-            html.append(_currentLoader.getStatus());
+            StringBuffer status = _currentLoader.getStatus();
+            if (-1 == status.indexOf("failed"))
+                html.append("Refresh this page to update status<br><br>\n");
+            html.append(status);
         }
 
         return new HtmlView("GO Annotation Load Status", html.toString());
@@ -140,6 +142,9 @@ public abstract class GoLoader
 
             te = _tis.getNextEntry();
         }
+
+        if (true)
+            throw new RuntimeException("This is a test");
 
         Table.execute(schema, schema.getSqlDialect().execute(schema, "create_go_indexes", ""), null);
 
@@ -261,8 +266,12 @@ public abstract class GoLoader
 
     private void logException(Exception e)
     {
+        _status.insert(0, "See below for complete log<br><br>");
+        _status.insert(0, ExceptionUtil.renderException(e));
+        _status.insert(0, "Loading GO annotations failed with the following exception:<br>");
+
         logStatus("Loading GO annotations failed with the following exception:");
-        _status.append(ExceptionUtil.renderException(e));
+        logStatus(ExceptionUtil.renderException(e));
         _log.debug("GoLoader", e);
     }
 
@@ -286,7 +295,7 @@ public abstract class GoLoader
     }
 
 
-    private CharSequence getStatus()
+    private StringBuffer getStatus()
     {
         return _status;
     }
