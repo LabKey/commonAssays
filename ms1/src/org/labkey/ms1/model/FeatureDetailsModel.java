@@ -79,7 +79,7 @@ public class FeatureDetailsModel
         _pepUrl = new ActionURL(MS1Controller.ShowMS2PeptideAction.class,  container);
         _pepUrl.addParameter("featureId", _feature.getFeatureId());
 
-        _findSimilarUrl = MS1Controller.SimilarSearchForm.getDefaultUrl(container);
+        _findSimilarUrl = new ActionURL(MS1Controller.SimilarSearchAction.class, container);
         _findSimilarUrl.addParameter(MS1Controller.SimilarSearchForm.ParamNames.featureId.name(), _feature.getFeatureId());
 
         _pepSearchUrl = new ActionURL(MS1Controller.PepSearchAction.class, container);

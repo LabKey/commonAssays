@@ -32,20 +32,31 @@ import java.text.DecimalFormat;
 public class SimilarSearchModel
 {
     private String _resultsUri;
-    private Feature _feature;
+    private Feature _feature = null;
     private DecimalFormat _numberFormat = new DecimalFormat("0.0000");
-    private double _mzOffset = 0;
+    private Double _mzSource = null;
+    private Double _timeSource = null;
+    private double _mzOffset = 5;
     private MS1Controller.SimilarSearchForm.MzOffsetUnits _mzUnits = MS1Controller.SimilarSearchForm.MzOffsetUnits.ppm;
-    private double _tOffset = 0;
+    private double _tOffset = 30;
     private MS1Controller.SimilarSearchForm.TimeOffsetUnits _tUnits = MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt;
     private boolean _subfolders = false;
 
-    public SimilarSearchModel(Feature feature, Container container,
+    public SimilarSearchModel(Container container, boolean searchSubfolders)
+    {
+        _resultsUri = new ActionURL(MS1Controller.SimilarSearchAction.class, container).getLocalURIString();
+        _subfolders = searchSubfolders;
+    }
+
+    public SimilarSearchModel(Container container, Feature feature,
+                              Double mzSource, Double timeSource,
                               double mzOffset, MS1Controller.SimilarSearchForm.MzOffsetUnits mzUnits,
                               double timeOffset, MS1Controller.SimilarSearchForm.TimeOffsetUnits timeUnits,
                               boolean searchSubfolders)
     {
         _feature = feature;
+        _mzSource = mzSource;
+        _timeSource = timeSource;
         _resultsUri = new ActionURL(MS1Controller.SimilarSearchAction.class, container).getLocalURIString();
         _mzOffset = mzOffset;
         _mzUnits = mzUnits;
@@ -59,9 +70,24 @@ public class SimilarSearchModel
         return _resultsUri;
     }
 
-    public Feature getFeature()
+    public Double getMzSource()
     {
-        return _feature;
+        return _mzSource;
+    }
+
+    public void setMzSource(Double mzSource)
+    {
+        _mzSource = mzSource;
+    }
+
+    public Double getTimeSource()
+    {
+        return _timeSource;
+    }
+
+    public void setTimeSource(Double timeSource)
+    {
+        _timeSource = timeSource;
     }
 
     public MS1Controller.SimilarSearchForm.MzOffsetUnits getMzUnits()
@@ -104,9 +130,35 @@ public class SimilarSearchModel
         _tUnits = tUnits;
     }
 
-    public String formatNumber(Number num)
+    public String getTimeUnitsLabel()
     {
-        return _numberFormat.format(num);
+        return getTimeUnitsLabel(_tUnits);
+    }
+
+    public String getTimeUnitsLabel(MS1Controller.SimilarSearchForm.TimeOffsetUnits units)
+    {
+        return units == MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt ? "Retention Time" : "Scan";
+    }
+
+    public String formatTimeSource()
+    {
+        return formatTimeSource(getTimeSource(), _tUnits);
+    }
+
+    public String formatTimeSource(Double num, MS1Controller.SimilarSearchForm.TimeOffsetUnits units)
+    {
+        if(null == num)
+            return "";
+
+        if(units == MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt)
+            return _numberFormat.format(num.doubleValue());
+        else
+            return String.valueOf(num.intValue());
+    }
+
+    public String formatMzSource()
+    {
+        return getMzSource() == null ? "" : _numberFormat.format(getMzSource().doubleValue());
     }
 
     public boolean searchSubfolders()
@@ -117,5 +169,20 @@ public class SimilarSearchModel
     public void setSearchSubfolders(boolean searchSubfolders)
     {
         _subfolders = searchSubfolders;
+    }
+
+    public Integer getFeatureScan()
+    {
+        return null == _feature ? null : _feature.getScan();
+    }
+
+    public Double getFeatureTime()
+    {
+        return null == _feature ? null : _feature.getTime();
+    }
+
+    public Integer getFeatureId()
+    {
+        return null == _feature ? null : new Integer(_feature.getFeatureId());
     }
 }

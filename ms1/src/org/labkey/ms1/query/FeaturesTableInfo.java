@@ -121,8 +121,8 @@ public class FeaturesTableInfo extends FilteredTable
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                ActionURL url = MS1Controller.SimilarSearchForm.getDefaultUrl(_schema.getContainer());
-                UrlColumn urlCol = new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "&featureId=${FeatureId}", true), "similar");
+                ActionURL url = new ActionURL(MS1Controller.SimilarSearchAction.class, _schema.getContainer());
+                UrlColumn urlCol = new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "featureId=${FeatureId}", true), "similar");
                 urlCol.setName(COLUMN_FIND_SIMILAR_LINK);
                 return urlCol;
             }

@@ -17,6 +17,7 @@ import org.labkey.api.util.SystemMaintenance;
 import org.labkey.api.view.*;
 import org.labkey.ms1.maintenance.PurgeTask;
 import org.labkey.ms1.model.PepSearchModel;
+import org.labkey.ms1.model.SimilarSearchModel;
 import org.labkey.ms1.pipeline.MSInspectFeaturesDataHandler;
 import org.labkey.ms1.pipeline.PeaksFileDataHandler;
 import org.labkey.ms1.query.MS1Schema;
@@ -38,6 +39,7 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
     public static final String CONTROLLER_NAME = "ms1";
     public static final String WEBPART_MS1_RUNS = "MS1 Runs";
     public static final String WEBPART_PEP_SEARCH = "Peptide Search";
+    public static final String WEBPART_FEATURE_SEARCH = "MS1 Feature Search";
     public static final String PROTOCOL_MS1 = "msInspect Feature Finding Analysis";
     public static final ExperimentRunFilter EXP_RUN_FILTER = new MS1ExperimentRunFilter();
 
@@ -65,6 +67,16 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
                         JspView<PepSearchModel> view = new JspView<PepSearchModel>("/org/labkey/ms1/view/PepSearchView.jsp", model);
                         view.setTitle(WEBPART_PEP_SEARCH);
                         return view;
+                    }
+                },
+                new WebPartFactory(WEBPART_FEATURE_SEARCH)
+                {
+                    public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
+                    {
+                        SimilarSearchModel searchModel = new SimilarSearchModel(portalCtx.getContainer(), false);
+                        JspView<SimilarSearchModel> searchView = new JspView<SimilarSearchModel>("/org/labkey/ms1/view/SimilarSearchView.jsp", searchModel);
+                        searchView.setTitle(WEBPART_FEATURE_SEARCH);
+                        return searchView;
                     }
                 }
         );

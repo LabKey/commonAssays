@@ -711,6 +711,8 @@ public class MS1Controller extends SpringActionController
         public enum ParamNames
         {
             featureId,
+            mzSource,
+            timeSource,
             mzOffset,
             mzUnits,
             timeOffset,
@@ -730,8 +732,10 @@ public class MS1Controller extends SpringActionController
             scans
         }
 
-        private int _featureId = -1;
-        private double _mzOffset = 0;
+        private Integer _featureId = null;
+        private Double _mzSource = null;
+        private Double _timeSource = null;
+        private double _mzOffset = 5;
         private MzOffsetUnits _mzUnits = MzOffsetUnits.ppm;
         private double _timeOffset = 30;
         private TimeOffsetUnits _timeUnits = TimeOffsetUnits.rt;
@@ -739,21 +743,54 @@ public class MS1Controller extends SpringActionController
         private String _export;
         private Feature _feature = null;
 
-        public int getFeatureId()
+        public Integer getFeatureId()
         {
             return _featureId;
         }
 
-        public void setFeatureId(int featureId)
+        public void setFeatureId(Integer featureId)
         {
             _featureId = featureId;
         }
 
         public Feature getFeature() throws SQLException
         {
-            if(null == _feature)
-                _feature = MS1Manager.get().getFeature(_featureId);
+            if(null == _feature && null != _featureId)
+                _feature = MS1Manager.get().getFeature(_featureId.intValue());
             return _feature;
+        }
+
+        public Double getMzSource() throws SQLException
+        {
+            if(null == _mzSource)
+            {
+                Feature feature = getFeature();
+                if(null != feature)
+                    _mzSource = feature.getMz();
+            }
+
+            return _mzSource;
+        }
+
+        public void setMzSource(Double mzSource)
+        {
+            _mzSource = mzSource;
+        }
+
+        public Double getTimeSource() throws SQLException
+        {
+            if(null == _timeSource)
+            {
+                Feature feature = getFeature();
+                if(null != feature)
+                    _timeSource = (_timeUnits == TimeOffsetUnits.rt ? feature.getTime() : new Double(feature.getScan().doubleValue()));
+            }
+            return _timeSource;
+        }
+
+        public void setTimeSource(Double timeSource)
+        {
+            _timeSource = timeSource;
         }
 
         public double getMzOffset()
@@ -816,23 +853,11 @@ public class MS1Controller extends SpringActionController
             _export = export;
         }
 
-        /**
-         * Returns a url with default parameter values for mzOffset, mzUnits,
-         * timeOffset, and timeUnits. Callers can then add the featureId
-         * parameter.
-         *
-         * @param container The current container
-         * @return A default ActionURL
-         */
-        public static ActionURL getDefaultUrl(Container container)
+        public boolean canSearch()
         {
-            ActionURL ret = new ActionURL(SimilarSearchAction.class, container);
-            ret.addParameter(ParamNames.mzOffset.name(), 5);
-            ret.addParameter(ParamNames.mzUnits.name(), MzOffsetUnits.ppm.name());
-            ret.addParameter(ParamNames.timeOffset.name(), 30);
-            ret.addParameter(ParamNames.timeUnits.name(), TimeOffsetUnits.rt.name());
-            return ret;
+            return _mzSource != null && _timeSource != null;
         }
+
     } //SimilarSearchForm
 
     /**
@@ -843,15 +868,15 @@ public class MS1Controller extends SpringActionController
     {
         protected FeaturesView getFeaturesView(SimilarSearchForm form) throws Exception
         {
-            Feature feature = form.getFeature();
-
             ArrayList<FeaturesFilter> baseFilters = new ArrayList<FeaturesFilter>();
             baseFilters.add(new ContainerFilter(getViewContext().getContainer(), form.isSubfolders(), getUser()));
-            baseFilters.add(new MzFilter(feature.getMz().doubleValue(), form.getMzOffset(), form.getMzUnits()));
+            baseFilters.add(new MzFilter(form.getMzSource().doubleValue(), form.getMzOffset(), form.getMzUnits()));
             if(SimilarSearchForm.TimeOffsetUnits.rt == form.getTimeUnits())
-                baseFilters.add(new RetentionTimeFilter(feature, form.getTimeOffset()));
+                baseFilters.add(new RetentionTimeFilter(form.getTimeSource().doubleValue() - form.getTimeOffset(),
+                        form.getTimeSource().doubleValue() + form.getTimeOffset()));
             else
-                baseFilters.add(new ScanFilter(feature, (int)(form.getTimeOffset())));
+                baseFilters.add(new ScanFilter((int)form.getTimeSource().doubleValue() - (int)form.getTimeOffset(),
+                        (int)form.getTimeSource().doubleValue() + (int)(form.getTimeOffset())));
 
             FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getViewContext().getContainer(),
                                             !(form.isSubfolders())), baseFilters);
@@ -861,19 +886,17 @@ public class MS1Controller extends SpringActionController
 
         public ModelAndView getView(SimilarSearchForm form, BindException errors) throws Exception
         {
-            //if no feature id was passed, redir to begin
-            if(form.getFeatureId() < 0)
-                return HttpView.redirect(new BeginAction().getUrl());
-
-            //get the source feature
-            Feature feature = MS1Manager.get().getFeature(form.getFeatureId());
-            if(null == feature)
-                throw new NotFoundException("Invalid feature id");
-
-            SimilarSearchModel searchModel = new SimilarSearchModel(feature, getViewContext().getContainer(),
-                    form.getMzOffset(), form.getMzUnits(), form.getTimeOffset(), form.getTimeUnits(),
+            SimilarSearchModel searchModel = new SimilarSearchModel(getViewContext().getContainer(), form.getFeature(),
+                    form.getMzSource(), form.getTimeSource(),
+                    form.getMzOffset(), form.getMzUnits(),
+                    form.getTimeOffset(), form.getTimeUnits(),
                     form.isSubfolders());
             JspView<SimilarSearchModel> searchView = new JspView<SimilarSearchModel>("/org/labkey/ms1/view/SimilarSearchView.jsp", searchModel);
+            searchView.setTitle("Find Features Where");
+
+            //if we don't have enough search info, just return the search view
+            if(!form.canSearch())
+                return searchView;
 
             //create the features view
             FeaturesView featuresView = getFeaturesView(form);

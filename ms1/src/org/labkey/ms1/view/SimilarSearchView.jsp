@@ -7,20 +7,42 @@
     JspView<SimilarSearchModel> me = (JspView<SimilarSearchModel>) HttpView.currentView();
     SimilarSearchModel model = me.getModelBean();
 %>
+<script type="text/javascript">
+    function onTimeUnitsChange(units)
+    {
+        var txtTimeSource = document.getElementById("txtTimeSource");
+        var lblTime = document.getElementById("lblTime");
+        if(null == lblTime || null == txtTimeSource)
+            return;
+
+        if(units == "<%=MS1Controller.SimilarSearchForm.TimeOffsetUnits.scans.name()%>")
+        {
+            lblTime.innerHTML = "<%=model.getTimeUnitsLabel(MS1Controller.SimilarSearchForm.TimeOffsetUnits.scans)%>";
+            txtTimeSource.value = "<%=PageFlowUtil.filter(model.getFeatureScan())%>";
+        }
+        else
+        {
+            lblTime.innerHTML = "<%=model.getTimeUnitsLabel(MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt)%>";
+            txtTimeSource.value = "<%=model.formatTimeSource(model.getFeatureTime(), MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt)%>";
+        }
+    }
+</script>
 <form action="<%=model.getResultsUri()%>" method="get">
+    <% if(model.getFeatureId() != null) { %>
     <input type="hidden" name="<%=MS1Controller.SimilarSearchForm.ParamNames.featureId.name()%>"
-           value="<%=model.getFeature().getFeatureId()%>"/>
+           value="<%=PageFlowUtil.filter(model.getFeatureId())%>"/>
+    <% } %>
     <table border="0" width="100%">
-        <tr class="wpHeader">
-            <td colspan="4" class="wpTitle"><b>Find Features Where</b></td>
-        </tr>
         <tr>
             <td>
                 <table border="0" cellspacing="0" cellpadding="3">
                     <tr>
-                        <td class="ms-searchform">m/z</td>
+                        <td>m/z</td>
                         <td>=</td>
-                        <td><%=model.formatNumber(model.getFeature().getMz())%></td>
+                        <td>
+                            <input type="text" name="<%=MS1Controller.SimilarSearchForm.ParamNames.mzSource.name()%>"
+                                value="<%=model.formatMzSource()%>"/>
+                        </td>
                         <td>&#177;<input name="<%=MS1Controller.SimilarSearchForm.ParamNames.mzOffset.name()%>"
                                          value="<%=PageFlowUtil.filter(model.getMzOffset())%>" size="7"/>
                             <select name="<%=MS1Controller.SimilarSearchForm.ParamNames.mzUnits.name()%>">
@@ -34,18 +56,22 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="ms-searchform" style="text-align:center"><b>and</b></td>
+                        <td style="text-align:center"><b>and</b></td>
                         <td colspan="3">&nbsp;</td>
                     </tr>
                     <tr>
-                        <td class="ms-searchform">Retention Time<br/>(Scan)</td>
-                        <td>=</td>
-                        <td><%=model.formatNumber(model.getFeature().getTime())%><br/>
-                            (<%=model.getFeature().getScan()%>)
+                        <td>
+                            <span id="lblTime"><%=model.getTimeUnitsLabel()%></span>
                         </td>
-                        <td>&#177;<input name="<%=MS1Controller.SimilarSearchForm.ParamNames.timeOffset.name()%>"
+                        <td>=</td>
+                        <td>
+                            <input id="txtTimeSource" type="text" name="<%=MS1Controller.SimilarSearchForm.ParamNames.timeSource.name()%>"
+                                value="<%=model.formatTimeSource()%>"/>
+                        </td>
+                        <td>&#177;<input id="txtTimeOffset" 
+                                         name="<%=MS1Controller.SimilarSearchForm.ParamNames.timeOffset.name()%>"
                                          value="<%=PageFlowUtil.filter(model.getTimeOffset())%>" size="7"/>
-                            <select name="<%=MS1Controller.SimilarSearchForm.ParamNames.timeUnits.name()%>">
+                            <select name="<%=MS1Controller.SimilarSearchForm.ParamNames.timeUnits.name()%>" onchange="onTimeUnitsChange(this.value);">
                                 <option value="<%=MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt.name()%>"
                                         <%=model.getTimeUnits() == MS1Controller.SimilarSearchForm.TimeOffsetUnits.rt ? "selected=\"1\"" : ""%>
                                         >Seconds</option>
@@ -56,13 +82,13 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="ms-searchform">Search Subfolders</td>
+                        <td>Search Subfolders</td>
                         <td>:</td>
                         <td><input id="cbxSubfolders" name="<%=MS1Controller.SimilarSearchForm.ParamNames.subfolders.name()%>"
                                    type="checkbox" style="vertical-align:middle"
                                     <%=model.searchSubfolders() ? "checked=\"1\"" : "" %>/>
                         </td>
-                        <td></td>
+                        <td>&nbsp;</td>
                     </tr>
                     <tr>
                         <td colspan="4" style="text-align:right">
