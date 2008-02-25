@@ -10,7 +10,6 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms1.MS1Service;
-import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
@@ -19,7 +18,6 @@ import org.labkey.api.view.*;
 import org.labkey.ms1.maintenance.PurgeTask;
 import org.labkey.ms1.model.PepSearchModel;
 import org.labkey.ms1.pipeline.MSInspectFeaturesDataHandler;
-import org.labkey.ms1.pipeline.MSInspectPipelineProvider;
 import org.labkey.ms1.pipeline.PeaksFileDataHandler;
 import org.labkey.ms1.query.MS1Schema;
 
@@ -108,7 +106,6 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
         super.startup(moduleContext);
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(this);
-        PipelineService.get().registerPipelineProvider(new MSInspectPipelineProvider());
 
         // Tell the pipeline that we know how to handle msInspect files
         ExperimentService.get().registerExperimentDataHandler(new MSInspectFeaturesDataHandler());

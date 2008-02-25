@@ -9,9 +9,10 @@ import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.security.User;
+import org.labkey.api.util.FileType;
 import org.labkey.api.util.URLHelper;
-import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.common.tools.TabLoader;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.MS1Module;
@@ -39,8 +40,8 @@ import java.util.Map;
  */
 public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 {
-    public static final String FEATURES_FILE_EXTENSION = ".features.tsv";
-    public static final String PEPTIDES_FILE_EXTENSION = ".peptides.tsv";
+    public static final FileType FT_FEATURES = new FileType(".features.tsv");
+    public static final FileType FT_PEPTIDES = new FileType(".peptides.tsv");
 
     /**
      * This class maps a source column in the features tsv file with its
@@ -627,9 +628,9 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      */
     public Priority getPriority(ExpData data)
     {
-        //we handle only *.features.tvt files
+        //we handle only *.features.tsv files
         String fileUrl = data.getDataFileUrl();
-        if(null != fileUrl && (fileUrl.toLowerCase().endsWith(FEATURES_FILE_EXTENSION) || fileUrl.toLowerCase().endsWith(PEPTIDES_FILE_EXTENSION)))
+        if(null != fileUrl && (FT_FEATURES.isType(fileUrl) || FT_PEPTIDES.isType(fileUrl)))
             return Priority.MEDIUM;
         else
             return null;

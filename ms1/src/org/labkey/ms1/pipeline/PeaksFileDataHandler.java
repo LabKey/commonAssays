@@ -1,23 +1,23 @@
 package org.labkey.ms1.pipeline;
 
+import org.apache.log4j.Logger;
+import org.labkey.api.data.Container;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.XarContext;
-import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
+import org.labkey.api.util.FileType;
 import org.labkey.api.util.URLHelper;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms1.MS1Manager;
-import org.labkey.ms1.pipeline.PeaksFileImporter;
-import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -32,7 +32,7 @@ import java.sql.SQLException;
  */
 public class PeaksFileDataHandler extends AbstractExperimentDataHandler
 {
-    public static final String PEAKS_FILE_EXTENSION = ".peaks.xml";
+    public static final FileType FT_PEAKS = new FileType(".peaks.xml");
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
@@ -147,7 +147,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
     {
         //we handle only *.peaks.xml files
         return (null != data && null != data.getDataFileUrl() && 
-                data.getDataFileUrl().endsWith(PEAKS_FILE_EXTENSION)) ? Priority.MEDIUM : null;
+                FT_PEAKS.isType(data.getDataFileUrl())) ? Priority.MEDIUM : null;
     } //Priority()
 
 } //class PeaksFileDataHandler

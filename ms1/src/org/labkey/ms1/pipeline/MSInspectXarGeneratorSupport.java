@@ -18,6 +18,7 @@ package org.labkey.ms1.pipeline;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.pipeline.file.FileAnalysisXarGeneratorSupport;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.NetworkDrive;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,11 +28,35 @@ import java.util.Map;
 /**
  * <code>MSInspectXarGeneratorSupport</code>
  */
-public class MSInspectXarGeneratorSupport implements FileAnalysisXarGeneratorSupport
+abstract public class MSInspectXarGeneratorSupport implements FileAnalysisXarGeneratorSupport
 {
-    public String getXarTemplateResource(AbstractFileAnalysisJob job)
+    public static class Features extends MSInspectXarGeneratorSupport
     {
-        return "org/labkey/ms1/pipeline/templates/msInspectFeatureFinding.xml";
+        public String getXarTemplateResource(AbstractFileAnalysisJob job)
+        {
+            if (hasFileType(job, PeaksFileDataHandler.FT_PEAKS))
+                return "org/labkey/ms1/pipeline/templates/msInspectFeaturesPeaks.xml";
+            else
+                return "org/labkey/ms1/pipeline/templates/msInspectFeatures.xml";
+        }
+    }
+
+    public static class Peptides extends MSInspectXarGeneratorSupport
+    {
+        public String getXarTemplateResource(AbstractFileAnalysisJob job)
+        {
+            if (hasFileType(job, PeaksFileDataHandler.FT_PEAKS))
+                return "org/labkey/ms1/pipeline/templates/msInspectPeptidesPeaks.xml";
+            else
+                return "org/labkey/ms1/pipeline/templates/msInspectPeptides.xml";
+        }
+    }
+
+    public boolean hasFileType(AbstractFileAnalysisJob job, FileType ft)
+    {
+        File file = job.findInputFile(ft.getName(job.getBaseName()));
+        return NetworkDrive.exists(file);
+
     }
 
     public Map<String, String> getXarTemplateReplacements(AbstractFileAnalysisJob job) throws IOException
@@ -46,18 +71,20 @@ public class MSInspectXarGeneratorSupport implements FileAnalysisXarGeneratorSup
         // But since all this will soon be replaced by experiments generated during
         // pipeline execution, this small hack is the least of its problems.
         File fileMzXML = job.findInputFile(new FileType(".mzXML").getName(baseName));
-
-        replaceMap.put("MZXML_STARTING_INPUTS", job.getStartingInputDataSnippet(fileMzXML));
+        replaceMap.put("MZXML_STARTING_INPUT", job.getStartingInputDataSnippet(fileMzXML));
         replaceMap.put("MZXML_PATH", job.getXarPath(fileMzXML));
-        replaceMap.put("MSINSPECT_XML_FILE_PATH", job.getXarPath(job.getParametersFile()));
+        File filePepXML = job.findInputFile(new FileType(".pep.xml").getName(baseName));
+        replaceMap.put("PEPXML_STARTING_INPUT", job.getStartingInputDataSnippet(filePepXML));
+        replaceMap.put("PEPXML_PATH", job.getXarPath(filePepXML));
+        replaceMap.put("INPUT_XML_FILE_PATH", job.getXarPath(job.getParametersFile()));
 
-        File fileFeatures = job.findInputFile(new FileType(".features.tsv").getName(baseName));
-
-        replaceMap.put("FEATURES_FILE_PATH", job.getXarPath(fileFeatures));
-
-        File filePeaks = job.findInputFile(new FileType(".peaks.xml").getName(baseName));
-
+        // Not all pipelines will contain all three files below, but add them just in case.
+        File filePeaks = job.findInputFile(PeaksFileDataHandler.FT_PEAKS.getName(baseName));
         replaceMap.put("PEAKS_FILE_PATH", job.getXarPath(filePeaks));
+        File fileFeatures = job.findInputFile(MSInspectFeaturesDataHandler.FT_FEATURES.getName(baseName));
+        replaceMap.put("FEATURES_FILE_PATH", job.getXarPath(fileFeatures));
+        File filePeptides = job.findInputFile(MSInspectFeaturesDataHandler.FT_PEPTIDES.getName(baseName));
+        replaceMap.put("PEPTIDES_FILE_PATH", job.getXarPath(filePeptides));
 
         replaceMap.put("RUN-UNIQUIFIER", job.getExperimentRunUniquifier());        
         return replaceMap;

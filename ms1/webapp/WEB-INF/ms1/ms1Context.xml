@@ -8,12 +8,13 @@
                     <constructor-arg value="ms1FeaturePipeline"/>
                     <property name="description" value="Find MS1 Features"/>
                     <property name="protocolFactoryName" value="inspect"/>
-                    <!-- bogus XAR file for this pipeline -->
                     <property name="xarGeneratorSupport">
-                        <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport"/>
+                        <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$Features"/>
+<!--                        <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$FeaturesPeaks"/> -->
                     </property>
                     <property name="taskProgressionSpec">
                         <list>
+<!--                            <ref bean="peakabooFactory"/> -->
                             <ref bean="msInspectFactory"/>
                             <ref bean="expGeneratorFeatures"/>
                             <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarImportTaskId</value>
@@ -34,7 +35,8 @@
                         </map>
                     </property>
                     <property name="xarGeneratorSupport">
-                        <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport"/>
+                        <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$Peptides"/>
+<!--                        <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$PeptidesPeaks"/> -->
                     </property>
                     <property name="taskProgressionSpec">
                         <list>

@@ -3,12 +3,12 @@
 <beans>
     <bean id="expGeneratorSearch" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
         <constructor-arg value="expGeneratorSearch"/>
-        <property name="outputExt" value=".search.xar"/>
+        <property name="outputExt" value=".search.xar.xml"/>
     </bean>
 
     <bean id="expImportSearch" class="org.labkey.api.exp.pipeline.XarImportFactorySettings">
         <constructor-arg value="expImportSearch"/>
-        <property name="inputExt" value=".search.xar"/>
+        <property name="inputExt" value=".search.xar.xml"/>
     </bean>
 
     <bean id="ms2PipelineRegistry" class="org.labkey.api.pipeline.TaskPipelineRegistrar">
