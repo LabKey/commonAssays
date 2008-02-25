@@ -143,9 +143,6 @@ public abstract class GoLoader
             te = _tis.getNextEntry();
         }
 
-        if (true)
-            throw new RuntimeException("This is a test");
-
         Table.execute(schema, schema.getSqlDialect().execute(schema, "create_go_indexes", ""), null);
 
         logStatus("Successfully loaded all GO annotation files");
