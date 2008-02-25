@@ -112,7 +112,7 @@ public class CagesController extends ViewController
     {
         requiresPermission(ACL.PERM_INSERT);
 
-        InsertView insertView = new InsertView(_region);
+        InsertView insertView = new InsertView(_region, null);
         insertView.setTitle("Add New Cage");
         _renderInTemplate(insertView, form);
         return null;
@@ -123,7 +123,7 @@ public class CagesController extends ViewController
     {
         requiresPermission(ACL.PERM_UPDATE);
 
-        UpdateView updateView = new UpdateView(_region, form);
+        UpdateView updateView = new UpdateView(_region, form, null);
         updateView.setTitle("Update Cage");
         _renderInTemplate(updateView, form);
         return null;

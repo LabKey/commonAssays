@@ -40,6 +40,7 @@ import org.labkey.mousemodel.MouseModelController;
 import org.labkey.mousemodel.MouseModelController.MouseModelTemplateView;
 import org.labkey.mousemodel.VelocityDataView;
 import org.labkey.mousemodel.sample.SampleController;
+import org.springframework.validation.BindException;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -168,7 +169,7 @@ public class MouseController extends ViewController
     {
         requiresPermission(ACL.PERM_UPDATE);
 
-        UpdateView updateView = new UpdateView(getDefaultRegion(form), form);
+        UpdateView updateView = new UpdateView(getDefaultRegion(form), form, (BindException)null);
         updateView.setTitle("Update Mouse");
         _renderInTemplate(updateView, form);
 

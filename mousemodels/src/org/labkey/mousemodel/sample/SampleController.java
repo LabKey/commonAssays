@@ -330,7 +330,7 @@ public class SampleController extends ViewController
         sampleIdCol.setEditable(false);
         DataColumn organismIdCol = (DataColumn) dr.getDisplayColumn("OrganismId");
         organismIdCol.setEditable(false);
-        UpdateView updateView = new UpdateView(dr, form);
+        UpdateView updateView = new UpdateView(dr, form, null);
         updateView.setTitle("Update Sample");
         _renderInTemplate(updateView, form);
         return null;

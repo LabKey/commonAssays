@@ -320,7 +320,7 @@ public class BoundDataRegion extends DefaultModelAndView<RenderContext>
     public String getMainErrors() throws IOException
     {
         StringWriter out = new StringWriter();
-        _rgn.renderMainErrors(out, _ctx.getForm());
+        _rgn.renderMainErrors(_ctx, out);
         return out.toString();
     }
 

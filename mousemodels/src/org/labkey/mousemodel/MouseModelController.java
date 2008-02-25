@@ -101,7 +101,7 @@ public class MouseModelController extends ViewController
     {
         requiresPermission(ACL.PERM_UPDATE);
 
-        UpdateView v = new UpdateView(getDefaultRegion(), form);
+        UpdateView v = new UpdateView(getDefaultRegion(), form, null);
         _renderInTemplate(v, form.getContainer());
         return null;
     }
@@ -116,7 +116,7 @@ public class MouseModelController extends ViewController
         ButtonBar bb = new ButtonBar();
         bb.add(new ActionButton("insertPair.post", "Submit"));
         drAddPair.setButtonBar(bb, DataRegion.MODE_INSERT);
-        InsertView v = new InsertView(drAddPair, form);
+        InsertView v = new InsertView(drAddPair, form, null);
         _renderInTemplate(v, form.getContainer());
         return null;
     }
@@ -131,7 +131,7 @@ public class MouseModelController extends ViewController
         ButtonBar bb = new ButtonBar();
         bb.add(new ActionButton("updatePair.post", "Submit"));
         drAddPair.setButtonBar(bb, DataRegion.MODE_UPDATE);
-        UpdateView v = new UpdateView(drAddPair, form);
+        UpdateView v = new UpdateView(drAddPair, form, null);
         _renderInTemplate(v, form.getContainer());
         return null;
     }
