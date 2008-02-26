@@ -99,7 +99,8 @@ public class MS1Schema extends UserSchema
         runFilter.setFilters(tinfo);
 
         //filter out features that don't have an associated peptide
-        tinfo.addCondition(new SQLFragment("MS2Scan IS NOT NULL"), "MS2Scan");
+        ColumnInfo colPep = tinfo.getColumn(FeaturesTableInfo.COLUMN_PEPTIDE_INFO);
+        tinfo.addCondition(new SQLFragment(colPep.getValueSql() + " IS NOT NULL"));
 
         ActionURL urlPepSearch = new ActionURL(MS1Controller.PepSearchAction.class, getContainer());
         urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.exact.name(), "on");
