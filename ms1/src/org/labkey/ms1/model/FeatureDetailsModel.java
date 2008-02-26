@@ -4,6 +4,8 @@ import org.labkey.api.data.Container;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.common.util.Pair;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
@@ -35,6 +37,7 @@ public class FeatureDetailsModel
     private ActionURL _pepUrl = null;
     private ActionURL _findSimilarUrl = null;
     private ActionURL _pepSearchUrl = null;
+    private ActionURL _runDetailsUrl = null;
     private int _scan = -1;
     private ActionURL _url;
     private Container _container;
@@ -85,6 +88,8 @@ public class FeatureDetailsModel
         _pepSearchUrl = new ActionURL(MS1Controller.PepSearchAction.class, container);
 
         _prevNextScans = getPrevNextScans();
+
+        _runDetailsUrl = PageFlowUtil.urlProvider(ExperimentUrls.class).getRunGraphURL(container, _feature.getRunId());
     }
 
     public Feature getFeature()
@@ -314,4 +319,8 @@ public class FeatureDetailsModel
         return sb.toString();
     }
 
+    public String getRunDetailsUrl()
+    {
+        return _runDetailsUrl.getLocalURIString();
+    }
 }

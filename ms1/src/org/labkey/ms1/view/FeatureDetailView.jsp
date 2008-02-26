@@ -309,7 +309,11 @@
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Experiment Run</td>
-                    <td><%=PageFlowUtil.filter(feature.getExpRun().getName())%></td>
+                    <td>
+                        <a href="<%=model.getRunDetailsUrl()%>">
+                        <%=feature.getExpRun() == null ? "&nbsp;" : PageFlowUtil.filter(feature.getExpRun().getName())%>
+                        </a>
+                    </td>
                 </tr>
             </table>
         </td>
