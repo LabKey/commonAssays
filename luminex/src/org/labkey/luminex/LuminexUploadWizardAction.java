@@ -96,29 +96,29 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
     }
 
-    protected ModelAndView afterRunCreation(LuminexRunUploadForm form, ExpRun run) throws ServletException, SQLException
+    protected ModelAndView afterRunCreation(LuminexRunUploadForm form, ExpRun run, BindException errors) throws ServletException, SQLException
     {
         PropertyDescriptor[] analyteColumns = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         if (analyteColumns.length == 0)
         {
-            return super.afterRunCreation(form, run);
+            return super.afterRunCreation(form, run, errors);
         }
         else
         {
             List<ExpData> outputs = run.getDataOutputs();
             assert outputs.size() == 1;
-            return getAnalytesView(outputs.get(0).getRowId(), form, false);
+            return getAnalytesView(outputs.get(0).getRowId(), form, false, errors);
         }
     }
 
-    private ModelAndView getAnalytesView(int dataRowId, LuminexRunUploadForm form, boolean reshow)
+    private ModelAndView getAnalytesView(int dataRowId, LuminexRunUploadForm form, boolean reshow, BindException errors)
             throws SQLException
     {
         Map<PropertyDescriptor, String> map = new LinkedHashMap<PropertyDescriptor, String>();
 
         String lsidColumn = "RowId";
         form.setDataId(dataRowId);
-        InsertView view = createInsertView(LuminexSchema.getTableInfoAnalytes(), lsidColumn, map, reshow, form.isResetDefaultValues(), AnalyteStepHandler.NAME, form);
+        InsertView view = createInsertView(LuminexSchema.getTableInfoAnalytes(), lsidColumn, map, reshow, form.isResetDefaultValues(), AnalyteStepHandler.NAME, form, errors);
 
         view.getDataRegion().addHiddenFormField("dataId", Integer.toString(dataRowId));
 
@@ -189,7 +189,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     {
         public static final String NAME = "ANALYTE";
 
-        public ModelAndView handleStep(LuminexRunUploadForm form) throws ServletException, SQLException
+        @Override
+        public ModelAndView handleStep(LuminexRunUploadForm form, BindException errors) throws ServletException, SQLException
         {
             try
             {
@@ -200,7 +201,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     {
                         Map<PropertyDescriptor, String> properties = form.getAnalyteProperties(analyte.getRowId());
 
-                        validatePostedProperties(properties, getViewContext().getRequest());
+                        validatePostedProperties(properties, getViewContext().getRequest(), errors);
                     }
                 }
 
@@ -209,7 +210,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     HttpView.throwRedirect(AssayService.get().getUploadWizardURL(getContainer(), _protocol));
                 }
 
-                if (!form.isResetDefaultValues() && PageFlowUtil.getActionErrors(getViewContext().getRequest(), true).isEmpty())
+                if (!form.isResetDefaultValues() && errors.getErrorCount() == 0)
                 {
                     for (Analyte analyte : getAnalytes(form.getDataId()))
                     {
@@ -230,11 +231,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     LuminexSchema.getSchema().getScope().commitTransaction();
                     getCompletedUploadAttemptIDs().add(form.getUploadAttemptID());
                     form.resetUploadAttemptID();
-                    return runUploadComplete(form);
+                    return runUploadComplete(form, errors);
                 }
                 else
                 {
-                    return getAnalytesView(form.getDataId(), form, true);
+                    return getAnalytesView(form.getDataId(), form, true, errors);
                 }
             }
             finally

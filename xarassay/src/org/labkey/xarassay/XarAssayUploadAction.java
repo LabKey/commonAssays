@@ -62,7 +62,8 @@ public class XarAssayUploadAction extends UploadWizardAction<XarAssayForm>
     {
         public static final String NAME = "DELETEASSAYS";
 
-        public ModelAndView handleStep(XarAssayForm form) throws ServletException, SQLException
+        @Override
+        public ModelAndView handleStep(XarAssayForm form, BindException errors) throws ServletException, SQLException
         {
 
             try

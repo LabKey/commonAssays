@@ -1,5 +1,8 @@
 package org.labkey.elispot;
 
+import org.apache.struts.action.ActionErrors;
+import org.apache.struts.action.ActionMessage;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
@@ -13,20 +16,18 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.Position;
+import org.labkey.api.study.WellGroup;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.*;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
+import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMessage;
 
 import javax.servlet.ServletException;
-import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -45,9 +46,9 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         addStepHandler(new AntigenStepHandler());
     }
 
-    protected InsertView createRunInsertView(ElispotRunUploadForm newRunForm, boolean reshow)
+    protected InsertView createRunInsertView(ElispotRunUploadForm newRunForm, boolean reshow, BindException errors)
     {
-        InsertView parent = super.createRunInsertView(newRunForm, reshow);
+        InsertView parent = super.createRunInsertView(newRunForm, reshow, errors);
 
         ElispotAssayProvider provider = (ElispotAssayProvider) getProvider(newRunForm);
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
@@ -78,24 +79,24 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         }
     }
 
-    protected ModelAndView afterRunCreation(ElispotRunUploadForm form, ExpRun run) throws ServletException, SQLException
+    protected ModelAndView afterRunCreation(ElispotRunUploadForm form, ExpRun run, BindException errors) throws ServletException, SQLException
     {
         PropertyDescriptor[] antigenColumns = AbstractAssayProvider.getPropertiesForDomainPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
         if (antigenColumns.length == 0)
         {
-            return super.afterRunCreation(form, run);
+            return super.afterRunCreation(form, run, errors);
         }
         else
         {
-            return getAntigenView(form, false);
+            return getAntigenView(form, false, errors);
         }
     }
 
-    private ModelAndView getAntigenView(ElispotRunUploadForm form, boolean reshow) throws ServletException
+    private ModelAndView getAntigenView(ElispotRunUploadForm form, boolean reshow, BindException errors) throws ServletException
     {
         Map<PropertyDescriptor, String> map = new LinkedHashMap<PropertyDescriptor, String>();
         InsertView view = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
-                "lsid", map, reshow, form.isResetDefaultValues(), AntigenStepHandler.NAME, form);
+                "lsid", map, reshow, form.isResetDefaultValues(), AntigenStepHandler.NAME, form, errors);
 
         try {
             PlateAntigenPropertyHelper antigenHelper = createAntigenPropertyHelper(form.getContainer(), form.getProtocol(), (ElispotAssayProvider)form.getProvider());
@@ -174,9 +175,10 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
     {
         private Map<PropertyDescriptor, String> _postedSampleProperties = null;
 
-        protected boolean validatePost(ElispotRunUploadForm form)
+        @Override
+        protected boolean validatePost(ElispotRunUploadForm form, BindException errors)
         {
-            boolean runPropsValid = super.validatePost(form);
+            boolean runPropsValid = super.validatePost(form, errors);
             boolean samplePropsValid = true;
 
             if (runPropsValid)
@@ -187,23 +189,22 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(getContainer(), _protocol,
                             getSelectedParticipantVisitResolverType(provider, form));
                     _postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());
-                    samplePropsValid = validatePostedProperties(_postedSampleProperties, getViewContext().getRequest());
+                    samplePropsValid = validatePostedProperties(_postedSampleProperties, getViewContext().getRequest(), errors);
                 }
                 catch (ExperimentException e)
                 {
-                    ActionErrors strutsErrors = PageFlowUtil.getActionErrors(getViewContext().getRequest(), true);
-                    strutsErrors.add("main", new ActionMessage("Error", e.getMessage()));
-
+                    errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
                     return false;
                 }
             }
             return runPropsValid && samplePropsValid;
         }
 
-        protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form) throws SQLException, ServletException
+        @Override
+        protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException
         {
             saveDefaultValues(_postedSampleProperties, form.getRequest(), form.getProvider(), RunStepHandler.NAME);
-            return super.handleSuccessfulPost(form);
+            return super.handleSuccessfulPost(form, errors);
         }
 
         protected ExpRun saveExperimentRun(ElispotRunUploadForm form) throws ExperimentException
@@ -218,17 +219,17 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         public static final String NAME = "ANTIGEN";
         private Map<PropertyDescriptor, String> _postedAntigenProperties = null;
 
-        public ModelAndView handleStep(ElispotRunUploadForm form) throws ServletException, SQLException
+        public ModelAndView handleStep(ElispotRunUploadForm form, BindException errors) throws ServletException, SQLException
         {
-            if (!form.isResetDefaultValues() && validatePost(form))
-                return handleSuccessfulPost(form);
+            if (!form.isResetDefaultValues() && validatePost(form, errors))
+                return handleSuccessfulPost(form, errors);
             else
-                return getAntigenView(form, true);
+                return getAntigenView(form, true, errors);
 
             //return getPlateSummary(form, false);
         }
 
-        protected boolean validatePost(ElispotRunUploadForm form)
+        protected boolean validatePost(ElispotRunUploadForm form, BindException errors)
         {
             PlateAntigenPropertyHelper helper = createAntigenPropertyHelper(form.getContainer(),
                     form.getProtocol(), (ElispotAssayProvider)form.getProvider());
@@ -237,7 +238,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             return true;
         }
 
-        protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form) throws SQLException, ServletException
+        protected ModelAndView handleSuccessfulPost(ElispotRunUploadForm form, BindException errors) throws SQLException, ServletException
         {
             ExpRun run = null;
             try {
@@ -311,15 +312,14 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             }
             catch (ExperimentException e)
             {
-                ActionErrors strutsErrors = PageFlowUtil.getActionErrors(getViewContext().getRequest(), true);
-                strutsErrors.add("main", new ActionMessage("Error", e.getMessage()));
-                return getAntigenView(form, true);
+                errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
+                return getAntigenView(form, true, errors);
             }
             finally
             {
                 ExperimentService.get().getSchema().getScope().closeConnection();
             }
-            return runUploadComplete(form);
+            return runUploadComplete(form, errors);
         }
 
         public String getName()

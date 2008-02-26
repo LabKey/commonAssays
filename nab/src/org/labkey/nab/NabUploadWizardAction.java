@@ -36,18 +36,20 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
         return super.getView(assayRunUploadForm, errors);
     }
 
-    protected InsertView createInsertView(TableInfo baseTable, String lsidCol, Map<PropertyDescriptor, String> propertyDescriptors, boolean reshow, boolean resetDefaultValues, String uploadStepName, NabRunUploadForm form)
+    @Override
+    protected InsertView createInsertView(TableInfo baseTable, String lsidCol, Map<PropertyDescriptor, String> propertyDescriptors, boolean reshow, boolean resetDefaultValues, String uploadStepName, NabRunUploadForm form, BindException errors)
     {
-        InsertView view = super.createInsertView(baseTable, lsidCol, propertyDescriptors, reshow, resetDefaultValues, uploadStepName, form);
+        InsertView view = super.createInsertView(baseTable, lsidCol, propertyDescriptors, reshow, resetDefaultValues, uploadStepName, form, errors);
         if (form.getReplaceRunId() != null)
             view.getDataRegion().addHiddenFormField("replaceRunId", "" + form.getReplaceRunId());
         return view;
     }
 
-    protected InsertView createRunInsertView(NabRunUploadForm newRunForm, boolean reshow)
+    @Override
+    protected InsertView createRunInsertView(NabRunUploadForm newRunForm, boolean reshow, BindException errors)
     {
         NabAssayProvider provider = (NabAssayProvider) getProvider(newRunForm);
-        InsertView parent = super.createRunInsertView(newRunForm, reshow);
+        InsertView parent = super.createRunInsertView(newRunForm, reshow, errors);
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
         PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm.getContainer(), newRunForm.getProtocol(), resolverType);
         helper.addSampleColumns(parent.getDataRegion(), getViewContext().getUser());
@@ -110,29 +112,30 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
     {
         private Map<PropertyDescriptor, String> _postedSampleProperties = null;
 
-        protected boolean validatePost(NabRunUploadForm form)
+        @Override
+        protected boolean validatePost(NabRunUploadForm form, BindException errors)
         {
-            boolean runPropsValid = super.validatePost(form);
+            boolean runPropsValid = super.validatePost(form, errors);
 
             NabAssayProvider provider = (NabAssayProvider) getProvider(form);
             PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(getContainer(), _protocol,
                     getSelectedParticipantVisitResolverType(provider, form));
             _postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());
-            boolean samplePropsValid = validatePostedProperties(_postedSampleProperties, getViewContext().getRequest());
+            boolean samplePropsValid = validatePostedProperties(_postedSampleProperties, getViewContext().getRequest(), errors);
             return runPropsValid && samplePropsValid;
         }
 
-        protected ModelAndView handleSuccessfulPost(NabRunUploadForm form) throws SQLException, ServletException
+        protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException error) throws SQLException, ServletException
         {
             saveDefaultValues(_postedSampleProperties, form.getRequest(), form.getProvider(), RunStepHandler.NAME);
-            return super.handleSuccessfulPost(form);
+            return super.handleSuccessfulPost(form, error);
         }
     }
 
-    protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run) throws ServletException, SQLException
+    protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run, BindException errors) throws ServletException, SQLException
     {
         if (form.isMultiRunUpload())
-            return super.afterRunCreation(form, run);
+            return super.afterRunCreation(form, run, errors);
         else
         {
             HttpView.throwRedirect(new ActionURL("NabAssay", "details",
