@@ -67,7 +67,7 @@ public enum MS2RunType
         }
 
         type = type.toLowerCase();
-        StringBuffer filteredType = new StringBuffer();
+        StringBuffer filteredTypeBuffer = new StringBuffer();
 
         // Eliminate all non-letter characters
         for (int i = 0; i < type.length(); i++)
@@ -75,12 +75,13 @@ public enum MS2RunType
             char c = type.charAt(i);
 
             if (Character.isLowerCase(c) || Character.isDigit(c))
-                filteredType.append(c);
+                filteredTypeBuffer.append(c);
         }
 
+        String filteredType = filteredTypeBuffer.toString();
         for (MS2RunType runType : values())
         {
-            if (runType.name().toLowerCase().equals(type))
+            if (runType.name().toLowerCase().equals(filteredType))
             {
                 return runType;
             }

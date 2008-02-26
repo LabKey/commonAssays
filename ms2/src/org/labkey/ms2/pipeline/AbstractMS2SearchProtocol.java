@@ -20,11 +20,12 @@ import org.labkey.api.util.AppProps;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 
-import java.net.URI;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+import java.net.URI;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <code>AbstractMS2SearchProtocol</code>
@@ -82,21 +83,21 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
             throws SQLException, IOException;
 
     @Override
-    protected void save(File file, Map<String, String> addParams) throws IOException
+    protected void save(File file, Map<String, String> addParams, Map<String, String> instanceParams) throws IOException
     {
-        if (addParams != null)
-        {
-            StringBuffer dbs = new StringBuffer();
-            for (String dbName : _dbNames)
-            {
-                if (dbs.length() > 0)
-                    dbs.append(';');
-                dbs.append(dbName);
-            }
-            addParams.put("pipeline, database", dbs.toString());
-        }
+        if (addParams == null)
+            addParams = new HashMap<String, String>();
 
-        super.save(file, addParams);        
+        StringBuffer dbs = new StringBuffer();
+        for (String dbName : _dbNames)
+        {
+            if (dbs.length() > 0)
+                dbs.append(';');
+            dbs.append(dbName);
+        }
+        addParams.put("pipeline, database", dbs.toString());
+
+        super.save(file, addParams, instanceParams);        
     }
 
     public FileType[] getInputTypes()

@@ -110,7 +110,6 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
                 // Grab the required attributes
                 num = Integer.parseInt(getAttributeValue("num"));
                 retentionTime = getAttributeValue("retentionTime");
-                String compressionType = getAttributeValue("compressionType");
                 String byteOrder = getAttributeValue("byteOrder");
                 int peaksCount = Integer.parseInt(getAttributeValue("peaksCount"));
 
@@ -118,6 +117,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
                     return false;
 
                 int precision = Integer.parseInt(getAttributeValue("precision"));
+                String compressionType = getAttributeValue("compressionType");
                 int nextType;
                 StringBuilder sb = new StringBuilder();
                 while ((nextType = _parser.next()) != XMLStreamConstants.END_ELEMENT || !"peaks".equals(_parser.getLocalName()))

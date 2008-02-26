@@ -69,15 +69,16 @@ public class MascotSearchProtocol extends AbstractMS2SearchProtocol<MascotPipeli
         return MascotSearchProtocolFactory.get();
     }
 
-    protected void save(File file, Map<String, String> addParams) throws IOException
+    @Override
+    protected void save(File file, Map<String, String> addParams, Map<String, String> instanceParams) throws IOException
     {
-        if (addParams != null)
+        if (instanceParams != null)
         {
-            addParams.put("pipeline, mascot server", mascotServer);
-            addParams.put("pipeline, mascot http proxy", mascotHTTPProxy);
+            instanceParams.put("pipeline, mascot server", mascotServer);
+            instanceParams.put("pipeline, mascot http proxy", mascotHTTPProxy);
         }
 
-        super.save(file, addParams);
+        super.save(file, addParams, instanceParams);
     }
 
     public MascotPipelineJob createPipelineJob(ViewBackgroundInfo info,
