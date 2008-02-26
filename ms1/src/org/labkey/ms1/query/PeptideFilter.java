@@ -115,6 +115,9 @@ public class PeptideFilter implements FeaturesFilter
 
     private String genSeqPredicate(String sequence)
     {
+        //force sequence to upper-case for case-sensitive DBs like PostgreSQL
+        sequence = sequence.toUpperCase();
+        
         //always add a condition for pd.TrimmedPeptide using normalized version of sequence
         StringBuilder sql = new StringBuilder("(pd.TrimmedPeptide");
 
