@@ -199,7 +199,7 @@ public class MS1Schema extends UserSchema
         ExpRunTable result = _expSchema.createRunsTable(alias);
 
         // Filter to just the runs with the MS1 protocol
-        result.setProtocolPatterns("urn:lsid:%:Protocol.%:MS1.msInspectFeatureFindingAnalysis%");
+        result.setProtocolPatterns("urn:lsid:%:Protocol.%:MS1.%");
 
         //add a new column info for the features link that uses a display column
         //factory to return a UrlColumn.
