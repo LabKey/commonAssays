@@ -11,7 +11,7 @@
     String contextPath = request.getContextPath();
     Map<FieldKey, String> fieldOptions = form.getFieldOptions();
     Map<String, String> opOptions = form.getOpOptions();
-    int clauseCount = Math.max(form.ff_filter_field.length + 2, 4);
+    int clauseCount = Math.max(form.ff_filter_field.length, 3);
 
     FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
 %>

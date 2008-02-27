@@ -352,41 +352,62 @@ abstract public class FlowJoWorkspace implements Serializable
         return null;
     }
 
-    private SubsetSpec makeSubsetKeyAndAddAnalysis(CompensationCalculation calc, String name, String keyword, String value, String subset, List<String> errors)
+    private Analysis findAnalysisWithKeywordValue(String keyword, String value, List<String> errors)
     {
-        if (subset == null)
-            return null;
-        String rootSubset = cleanPopName(name);
-        SubsetSpec ret = SubsetSpec.fromString(rootSubset + "/" + subset);
-        if (calc.getPopulation(rootSubset) != null)
-        {
-            return ret;
-        }
         SampleInfo sample = findSampleWithKeywordValue(keyword, value);
         if (sample == null)
         {
-            errors.add("Could not find sample with " + keyword + "=" + value);
-            return ret;
+            errors.add("Could not find sample for " + keyword + "=" + value);
+            return null;
         }
+
         Analysis analysis = getSampleAnalysis(sample);
         if (analysis == null)
         {
             errors.add("Could not find sample analysis for " + keyword + "=" + value);
-            return ret;
+            return null;
         }
-        Population pop = new Population();
-        pop.setName(rootSubset);
-        for (Population child : analysis.getPopulations())
+
+        return analysis;
+    }
+
+    private SubsetSpec makeSubsetKeyAndAddAnalysis(CompensationCalculation calc, String name, Analysis analysis, String subset, List<String> errors)
+    {
+        if (subset == null || analysis == null)
+            return null;
+        String rootSubset = cleanPopName(name);
+        SubsetSpec ret = SubsetSpec.fromString(rootSubset + "/" + subset);
+
+        Population pop = calc.getPopulation(rootSubset);
+        if (pop == null)
         {
-            pop.addPopulation(child);
+            pop = new Population();
+            pop.setName(rootSubset);
+            for (Population child : analysis.getPopulations())
+            {
+                pop.addPopulation(child);
+            }
+            calc.addPopulation(pop);
         }
-        calc.addPopulation(pop);
+
+        if (!"Ungated".equals(subset) && findPopulation(pop, SubsetSpec.fromString(subset)) == null)
+        {
+            String analysisName = analysis.getName() == null ? "" : " '" + analysis.getName() + "'";
+            errors.add("Channel '" + name + "' subset '" + subset + "' not found in analysis" + analysisName);
+        }
+
         return ret;
     }
 
-    private CompensationCalculation.ChannelSubset makeChannelSubset(CompensationCalculation calc, String name, String keyword, String value, String subset, List<String> errors)
+    private CompensationCalculation.ChannelSubset makeChannelSubset(
+            CompensationCalculation calc, String name, Analysis analysis, String keyword, String value, String subset, List<String> errors)
     {
-        SubsetSpec subsetSpec = makeSubsetKeyAndAddAnalysis(calc, name, keyword, value, subset, errors);
+        if (analysis == null)
+        {
+            analysis = findAnalysisWithKeywordValue(keyword, value, errors);
+        }
+
+        SubsetSpec subsetSpec = makeSubsetKeyAndAddAnalysis(calc, name, analysis, subset, errors);
         SampleCriteria criteria = new SampleCriteria();
         criteria.setKeyword(keyword);
         criteria.setPattern(value);
@@ -507,7 +528,7 @@ abstract public class FlowJoWorkspace implements Serializable
         }
     }
 
-    private Population findPopulation(CompensationCalculation calc, SubsetSpec spec)
+    private Population findPopulation(PopulationSet calc, SubsetSpec spec)
     {
         PopulationSet cur = calc;
         for (String name : spec.getSubsets())
@@ -578,11 +599,22 @@ abstract public class FlowJoWorkspace implements Serializable
         return ret;
     }
 
-    public CompensationCalculation makeCompensationCalculation(Map<String, CompensationChannelData> channelDataMap, List<String> errors)
+    public CompensationCalculation makeCompensationCalculation(Map<String, CompensationChannelData> channelDataMap, String groupName, List<String> errors)
     {
         CompensationCalculation ret = new CompensationCalculation();
         ret.setSettings(_settings);
         boolean isUniversalNegative = isUniversalNegative(channelDataMap);
+
+        Analysis analysis = null;
+        if (StringUtils.isNotEmpty(groupName))
+        {
+            analysis = getGroupAnalyses().get(groupName);
+            if (analysis == null)
+            {
+                errors.add("Group '" + groupName + "' not found in workspace");
+                return ret;
+            }
+        }
 
         for (Map.Entry<String, CompensationChannelData> entry : channelDataMap.entrySet())
         {
@@ -596,8 +628,10 @@ abstract public class FlowJoWorkspace implements Serializable
             }
             String positiveName = parameter + "+";
             String negativeName = isUniversalNegative ? "-" : parameter + "-";
-            CompensationCalculation.ChannelSubset positiveSubset = makeChannelSubset(ret, positiveName, data.positiveKeywordName, data.positiveKeywordValue, data.positiveSubset, errors);
-            CompensationCalculation.ChannelSubset negativeSubset = makeChannelSubset(ret, negativeName, data.negativeKeywordName, data.negativeKeywordValue, data.negativeSubset, errors);
+            CompensationCalculation.ChannelSubset positiveSubset = makeChannelSubset(ret, positiveName, analysis,
+                    data.positiveKeywordName, data.positiveKeywordValue, data.positiveSubset, errors);
+            CompensationCalculation.ChannelSubset negativeSubset = makeChannelSubset(ret, negativeName, analysis,
+                    data.negativeKeywordName, data.negativeKeywordValue, data.negativeSubset, errors);
             ret.addChannel(parameter, positiveSubset, negativeSubset);
         }
         ret = simplify(ret);

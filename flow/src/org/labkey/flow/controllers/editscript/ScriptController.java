@@ -710,7 +710,7 @@ public class ScriptController extends BaseFlowController
             dataMap.put(parameter, cd);
         }
         List<String> errors = new ArrayList();
-        CompensationCalculation calc = workspace.makeCompensationCalculation(dataMap, errors);
+        CompensationCalculation calc = workspace.makeCompensationCalculation(dataMap, form.selectGroupName, errors);
         if (errors.size() > 0)
         {
             for (String error : errors)

@@ -21,7 +21,7 @@
     addCompare(opOptions, CompareType.NONBLANK);
     addCompare(opOptions, CompareType.STARTS_WITH);
     addCompare(opOptions, CompareType.CONTAINS);
-    int clauseCount = Math.max(form.ff_field.length + 2, 4);
+    int clauseCount = Math.max(form.ff_field.length, 3);
 %>
 <labkey:errors />
 <p>

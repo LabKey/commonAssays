@@ -21,6 +21,8 @@ public class EditCompensationCalculationForm extends EditSettingsForm
     public FormFile workspaceFile;
     public int selectedRunId;
     public FlowJoWorkspace workspace;
+    public String selectGroupName;
+    public String selectAutoCompScript;
     public String[] parameters = new String[0];
     public String[] positiveKeywordName;
     public String[] positiveKeywordValue;
@@ -37,6 +39,26 @@ public class EditCompensationCalculationForm extends EditSettingsForm
     public void setSelectedRunId(int runId)
     {
         this.selectedRunId = runId;
+    }
+
+    public String getSelectGroupName()
+    {
+        return selectGroupName;
+    }
+
+    public void setSelectGroupName(String selectGroupName)
+    {
+        this.selectGroupName = selectGroupName;
+    }
+
+    public String getSelectAutoCompScript()
+    {
+        return selectAutoCompScript;
+    }
+
+    public void setSelectAutoCompScript(String selectAutoCompScript)
+    {
+        this.selectAutoCompScript = selectAutoCompScript;
     }
 
     public String[] getPositiveKeywordName()

@@ -11,7 +11,7 @@
     boolean canEdit = form.canEdit();
     Map<FieldKey, String> fieldOptions = getFieldOptions();
     Map<String, String> opOptions = form.getOpOptions();
-    int clauseCount = Math.max(form.ff_filter_field.length + 2, 4);
+    int clauseCount = Math.max(form.ff_filter_field.length, 3);
 %>
 <script type="text/javascript" src="<%=request.getContextPath()%>/Flow/editCompensationCalculation.js"></script>
 <script type="text/javascript">
@@ -85,43 +85,42 @@ var KV = {}; // KEYWORD->VALUE->SUBSET
 %>
 var keywordValueSubsetListMap = KV; 
 </script>
-<p><h2>Instructions:</h2>
-    For each parameter which requires compensation, specify the keyword name and value
-    which are to be used to identify the compensation control in experiment runs.
-</p>
 
 <form method="POST" action="<%=formAction(ScriptController.Action.editCompensationCalculation)%>">
 
 <% if (hasAutoCompScripts) { %>
-    <p>
-    <b>AutoCompensation script:</b>
-    <labkey:helpPopup title="AutoCompensation Scripts">
-    Your FlowJo workspace contains AutoCompensation scripts; you can select a script
-    from the drop down below to quickly populate the form fields.
-    </labkey:helpPopup>
+    <p/>
+    <table width="100%">
+        <tr class="wpHeader">
+            <th class="wpTitle" align="left">Choose AutoCompensation script:</th>
+        </tr>
+    </table>
+    Your FlowJo workspace contains AutoCompensation scripts; you can optionally
+    select a script from the drop down below to quickly populate the compensation
+    calculation form fields.
     <br/>
     <select name="selectAutoCompScript" onchange="populateAutoComp(this);">
     <%
-        %><option value="" selected></option><%
+        %><option value=""></option><%
         for (AutoCompensationScript autoComp : form.workspace.getAutoCompensationScripts())
         {
             %>
-            <option value="<%=autoComp.getName()%>"><%=autoComp.getName()%></option><%
+            <option value="<%=autoComp.getName()%>"<%=autoComp.getName().equals(form.selectAutoCompScript) ? " selected" : ""%>><%=autoComp.getName()%></option><%
         }
     %>
     </select>
-    </p>
 <% } %>
 
-    <p>
-    <b>Analyze FCS Files Where:</b>
-    <labkey:helpPopup title="Filter Wells:">
-    Filters may be applied to this analysis script.  The set of keyword and
+    <p/>
+    <table width="100%">
+        <tr class="wpHeader">
+            <th class="wpTitle" align="left">Analyze FCS Files Where:</th>
+        </tr>
+    </table>
+    Filters may optionally be applied to this analysis script.  The set of keyword and
     value pairs <i>must all</i> match in the FCS header to be included in the analysis.
-    You can change the filter later by changing the script settings from the
+    You can change the filter later by editing the script settings from the
     analysis script start page.
-    </labkey:helpPopup>
-    <br/>
     <table class="normal">
         <tr><th/><th>Keyword</th><th/><th>Value</th></tr>
         <%
@@ -158,25 +157,22 @@ var keywordValueSubsetListMap = KV;
         }
         %>
     </table>
-    </p>
 
-    <p>
-    <b>Select Compensation:</b>
-    <labkey:helpPopup title="Select Compensation">
-    <p>For each parameter which requires compensation, specify the keyword name and value
-    which are to be used to identify the compensation control in experiment runs.<p>
+    <p/>
+    <table width="100%">
+        <tr class="wpHeader">
+            <th class="wpTitle" align="left">Select Compensation:</th>
+        </tr>
+    </table>
+    For each parameter which requires compensation, specify the keyword name and value
+    which are to be used to identify the compensation control in experiment runs.
     <p><b>If you do not see the keyword you are looking for:</b><br>
     This page only allows you to choose keyword/value pairs that uniquely identify a
     sample in the workspace.  If you do not see the keyword that you would like to use,
     this might be because the workspace that you uploaded contained more than one sample
-    with that keyword value.
-    </p>
-    <p>
-    Use FlowJo to save a workspace template with AutoCompensation scripts or
+    with that keyword value.  Use FlowJo to save a workspace template with AutoCompensation scripts or
     a workspace containing only one set of compensation controls, and upload that new workspace.
     </p>
-    </labkey:helpPopup>
-    <br/>
     <table class="normal" border="1">
         <tr><th rowspan="2">Channel</th><th colspan="3">Positive</th><th colspan="3">Negative</th></tr>
         <tr><th>Keyword</th><th>Value</th><th>Subset</th><th>Keyword</th><th>Value</th><th>Subset</th></tr>
@@ -198,8 +194,36 @@ var keywordValueSubsetListMap = KV;
         </tr>
         <% } %>
     </table>
+
+<%
+String[] analysisNames = this.getGroupAnalysisNames();
+if (analysisNames.length > 0)
+{
+%>
+    <p/>
+    <table width="100%">
+        <tr class="wpHeader">
+            <th class="wpTitle" align="left">Choose Source of Gating:</th>
+        </tr>
+    </table>
+    You can choose to use the gating from either the sample identified
+    by the unique keywork/value pair from the compensation
+    calculation above <i>or</i> from one of the named group's in the workspace.
+    <p>
+    By default, the sample's gating will be used.  However, if this is a
+    <b>workspace template</b>, you will most likely need to select a group name
+    from the drop down that has gating for the given subsets.
+    <br/>
+    <select name="selectGroupName" title="Use gating either from the sample or from a group">
+        <option value="" title="Use gating from the sample identified by the Keyword/Value pair">Sample</option>
+        <% for (String group : analysisNames)
+        { %>
+        <option value="<%=h(group)%>"<%=group.equals(form.selectGroupName) ? " selected" : ""%>>Group <%=h(group)%></option>
+        <% } %>
+    </select>
     </p>
-    
+<% } %>
+
     <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form.workspace)%>">
     <input type="Submit" value="Submit">
 </form>

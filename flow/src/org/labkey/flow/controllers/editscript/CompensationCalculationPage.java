@@ -175,12 +175,16 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
                     valueSampleMap.put(param.getSearchValue(), subsets);
                 }
 
-                // XXX: insert the gate into the proper position
+                // XXX: insert the subset into the proper position
                 if (StringUtils.isNotEmpty(param.getPositiveGate()) && !subsets.contains(param.getPositiveGate()))
+                {
                     subsets.add(param.getPositiveGate());
+                }
 
                 if (StringUtils.isNotEmpty(param.getNegativeGate()) && !subsets.contains(param.getNegativeGate()))
+                {
                     subsets.add(param.getNegativeGate());
+                }
             }
         }
 
@@ -337,6 +341,21 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         }
         ret.append("</select>");
         return ret.toString();
+    }
+
+    public String[] getGroupAnalysisNames()
+    {
+        if (form.workspace == null)
+            return new String[0];
+        List<String> ret = new ArrayList();
+        for (Analysis analysis : form.workspace.getGroupAnalyses().values())
+        {
+            if (analysis.getPopulations().size() > 0)
+            {
+                ret.add(analysis.getName());
+            }
+        }
+        return ret.toArray(new String[0]);
     }
 
     public Map<FieldKey, String> getFieldOptions()
