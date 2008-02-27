@@ -576,7 +576,8 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
         String feRequestURL = requestURL(parameters);
         _instanceLogger.info("Submitting URL '" + feRequestURL + "'.");
         int attemptCount = 1;
-        while (true)
+        Exception lastException = null;
+        while (attemptCount < MAX_RETRIES)
         {
             try
             {
@@ -602,15 +603,17 @@ public class AgilentFeatureExtractionClientImpl implements FeatureExtractionClie
             {
                 if (e.getMessage() != null && e.getMessage().indexOf("502") != -1)
                 {
-                    if (attemptCount > MAX_RETRIES)
-                    {
-                        throw new ExtractionException(e);
-                    }
+                    lastException = e;
                     _instanceLogger.warn("Request failed on attempt " + attemptCount + ", " + e);
                     attemptCount++;
                 }
+                else
+                {
+                    throw new ExtractionException(e);
+                }
             }
         }
+        throw new ExtractionException(lastException);
     }
 
     private InputStream getRequestResultStream(Properties parameters) throws ExtractionException

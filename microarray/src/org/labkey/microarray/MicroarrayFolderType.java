@@ -22,7 +22,10 @@ public class MicroarrayFolderType extends DefaultFolderType
                 Portal.getPortalPart(MicroarrayModule.WEBPART_MICROARRAY_RUNS).createWebPart(),
                 Portal.getPortalPart(MicroarrayModule.WEBPART_PENDING_FILES).createWebPart(),
                 Portal.getPortalPart(MicroarrayModule.WEBPART_MICROARRAY_STATISTICS).createWebPart()
-            ), null,
+            ),
+            Arrays.asList(
+                Portal.getPortalPart("Assay List").createWebPart()
+            ),
             getDefaultModuleSet(module, getModule(MicroarrayModule.NAME), getModule(PipelineService.MODULE_NAME), getModule(ExperimentService.MODULE_NAME)),
             module);
     }
