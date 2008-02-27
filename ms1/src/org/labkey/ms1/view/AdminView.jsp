@@ -22,5 +22,5 @@ but you can manually start a purge now by clicking the button below.
 <% } %>
 
 <% if(ctx.isPurgeRunning()) { %>
-<p>MS1 data is currently being purged...</p>
+<p>MS1 data is currently being purged...<a href="javascript:window.location.reload(true)">refresh</a> this page to view updated status.</p>
 <% } %>
