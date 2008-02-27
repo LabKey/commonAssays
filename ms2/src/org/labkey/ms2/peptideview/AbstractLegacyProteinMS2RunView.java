@@ -77,6 +77,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         }
         rgn.setTable(MS2Manager.getTableInfoPeptides());
         rgn.setName(MS2Manager.getDataRegionNamePeptides());
+        rgn.setShowPagination(false);
 
         rgn.setShowRecordSelectors(false);
         rgn.setFixedWidthColumns(true);

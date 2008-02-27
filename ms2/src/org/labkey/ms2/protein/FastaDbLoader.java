@@ -89,9 +89,14 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
     public void validate() throws IOException
     {
-        if (!NetworkDrive.exists(new File(_parseFName)))
+        if (_parseFName == null)
         {
-            throw new IOException("File " + _parseFName + " does not exist.");
+            throw new FileNotFoundException("No file name specified");
+        }
+        File file = new File(_parseFName);
+        if (!NetworkDrive.exists(file) || !file.isFile())
+        {
+            throw new FileNotFoundException("File " + _parseFName + " does not exist.");
         }
     }
 
@@ -763,6 +768,10 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
     // Same as File.getCanonicalPath() except we use forward slashes and lower case drive letters
     public static String getCanonicalPath(File f) throws IOException
     {
+        if (f == null)
+        {
+            return null;
+        }
         String newFileName = f.getCanonicalPath().replace('\\', '/');
 
         // This returns drive letter in canonical form (lower case) or null

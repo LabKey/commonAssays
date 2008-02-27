@@ -72,6 +72,10 @@ public class RandomAccessMzxmlIterator extends AbstractMzxmlIterator
             while (++_currScan <= _scanCount)
             {
                 ScanHeader header = _parser.rapHeader(_currScan);
+                if (header == null)
+                {
+                    return false;
+                }
                 if (_msLevel == 0 || header.getMsLevel() == _msLevel)
                 {
                     _nextSimpleScan = new MzxmlSimpleScan(_currScan, header);

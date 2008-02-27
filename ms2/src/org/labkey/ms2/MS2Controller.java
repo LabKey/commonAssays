@@ -5,7 +5,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionMessage;
 import org.jfree.chart.imagemap.ImageMapUtilities;
 import org.labkey.api.action.*;
 import org.labkey.api.data.*;
@@ -43,6 +42,7 @@ import org.labkey.ms2.query.*;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -1795,6 +1795,7 @@ public class MS2Controller extends SpringActionController
             HttpView filterView = new CurrentFilterView(query);
 
             GridView compareView = new GridView(rgn);
+            rgn.setShowPagination(false);
             compareView.setResultSet(rgn.getResultSet());
 
             title.append(query.getComparisonDescription());
@@ -4864,7 +4865,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(LoadAnnotForm form, boolean reshow, BindException errors) throws Exception
         {
-            return new JspView<LoadAnnotForm>("/org/labkey/ms2/insertAnnots.jsp", form);
+            return new JspView<LoadAnnotForm>("/org/labkey/ms2/insertAnnots.jsp", form, errors);
         }
 
         public boolean handlePost(LoadAnnotForm form, BindException errors) throws Exception
@@ -4881,7 +4882,7 @@ public class MS2Controller extends SpringActionController
             }
             else if ("fasta".equalsIgnoreCase(form.getFileType()))
             {
-                FastaDbLoader fdbl = new FastaDbLoader(new File(fname));
+                FastaDbLoader fdbl = new FastaDbLoader(fname == null ? null : new File(fname));
                 fdbl.setDefaultOrganism(form.getDefaultOrganism());
                 fdbl.setOrganismIsToGuessed(form.getShouldGuess() != null);
                 loader = fdbl;
@@ -4899,7 +4900,7 @@ public class MS2Controller extends SpringActionController
             }
             catch (IOException e)
             {
-                PageFlowUtil.getActionErrors(getViewContext().getRequest(), true).add("main", new ActionMessage(e.getMessage()));        // TODO: Fix this
+                errors.addError(new ObjectError("main", null, null, e.getMessage()));
                 return false;
             }
 
@@ -4929,6 +4930,7 @@ public class MS2Controller extends SpringActionController
         private String _defaultOrganism = "Unknown unknown";
         private String _shouldGuess = "1";
         private boolean _clearExisting;
+        private BindException _errors;
 
         public void setFileType(String ft)
         {

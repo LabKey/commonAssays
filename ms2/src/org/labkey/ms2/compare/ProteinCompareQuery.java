@@ -127,6 +127,7 @@ public class ProteinCompareQuery extends CompareQuery
     protected void addWhereClauses(SimpleFilter filter)
     {
         SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(_currentUrl, _runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
+        peptideFilter = ProteinManager.reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoPeptides());
         filter.addAllClauses(peptideFilter);
     }
 
@@ -155,8 +156,9 @@ public class ProteinCompareQuery extends CompareQuery
     public List<Pair<String, String>> getSQLSummaries()
     {
         List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
-        String filterString = ProteinManager.getPeptideFilter(_currentUrl, _runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER).getFilterText();
-        result.add(new Pair<String, String>("Peptide Filter", filterString));
+        SimpleFilter peptideFilter = new SimpleFilter();
+        addWhereClauses(peptideFilter);
+        result.add(new Pair<String, String>("Peptide Filter", peptideFilter.getFilterText()));
         result.add(new Pair<String, String>("Protein Filter", new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteins()).getFilterText()));
         return result;
     }

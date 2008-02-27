@@ -21,6 +21,7 @@ import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -83,10 +84,18 @@ public class XMLProteinLoader extends DefaultAnnotationLoader implements Annotat
     private String getFile() throws IOException
     {
         String fName = getParseFName();
+        if (fName == null)
+        {
+            throw new FileNotFoundException("No file name specified");
+        }
         File f = new File(fName);
         if (!NetworkDrive.exists(f))
         {
-            throw new IOException("Can't open file '" + fName + "'");
+            throw new FileNotFoundException("Can't open file '" + fName + "'");
+        }
+        if (!f.isFile())
+        {
+            throw new FileNotFoundException("Can't open file '" + fName + "'");
         }
         return fName;
     }
