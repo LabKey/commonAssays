@@ -587,6 +587,7 @@ ms1/src/org/labkey/ms1/query/RetentionTimeFilter.java -text
 ms1/src/org/labkey/ms1/query/RunFilter.java -text
 ms1/src/org/labkey/ms1/query/ScanFilter.java -text
 ms1/src/org/labkey/ms1/query/ScansTableInfo.java -text
+ms1/src/org/labkey/ms1/query/SimilarLinkDisplayColumn.java -text
 ms1/src/org/labkey/ms1/view/AdminView.jsp -text
 ms1/src/org/labkey/ms1/view/AdminViewContext.java -text
 ms1/src/org/labkey/ms1/view/CompareRunsView.java -text

@@ -28,6 +28,7 @@ import org.labkey.ms1.MS1Manager;
 public class PeaksAvailableColumnInfo extends ExprColumn implements DisplayColumnFactory
 {
     public static final String COLUMN_NAME = "PeaksAvailable";
+    public static final String COLUMN_CAPTION = "Details and Peaks Links";
 
     /**
      * Use this constructor if you don't know if peaks are available for all features or not.
@@ -69,12 +70,12 @@ public class PeaksAvailableColumnInfo extends ExprColumn implements DisplayColum
 
     protected void commonInit()
     {
-        setCaption("Details and Peaks Links");
+        setCaption(COLUMN_CAPTION);
         setDisplayColumnFactory(this);
     }
 
     public DisplayColumn createRenderer(ColumnInfo colInfo)
     {
-        return new PeakLinksDisplayColumn(this);
+        return new PeakLinksDisplayColumn(colInfo);
     }
 }

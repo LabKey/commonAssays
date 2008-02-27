@@ -16,16 +16,17 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.*;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
-import org.labkey.ms1.MS1Controller;
-import org.labkey.ms1.MS1Module;
-import org.labkey.ms1.view.FeaturesView;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
 import org.labkey.common.util.Pair;
+import org.labkey.ms1.MS1Controller;
+import org.labkey.ms1.view.FeaturesView;
 
-import java.io.Writer;
 import java.io.IOException;
-import java.sql.SQLException;
+import java.io.Writer;
+import java.util.Set;
+import java.util.Collections;
 
 /**
  * Created by IntelliJ IDEA.
@@ -38,6 +39,8 @@ public class PeakLinksDisplayColumn extends DataColumn
     private ActionURL _basePeaksUrl = null;
     private ActionURL _baseDetailsUrl = null;
 
+    private ColumnInfo _featureIdCol = null;
+
     public PeakLinksDisplayColumn(ColumnInfo colinfo)
     {
         super(colinfo);
@@ -49,25 +52,32 @@ public class PeakLinksDisplayColumn extends DataColumn
         if(null == _basePeaksUrl || null == _baseDetailsUrl)
             setBaseUrls(ctx.getViewContext().getActionURL());
 
-        Number peaksAvailable = (Number)ctx.get(PeaksAvailableColumnInfo.COLUMN_NAME);
-        Integer featureId = (Integer)ctx.get("FeatureId");
+        //column value should be a number (0 or 1)
+        Number peaksAvailable = (Number)getValue(ctx);
+        if(null == peaksAvailable || peaksAvailable.intValue() == 0)
+            return;
 
-        if(null != peaksAvailable && 0 != peaksAvailable.intValue() && null != featureId)
-        {
-            ActionURL detailsUrl = _baseDetailsUrl.clone();
-            detailsUrl.addParameter("featureId", featureId.intValue());
+        //get the corresponding feature id
+        Number featureId = null;
+        if(null != _featureIdCol)
+            featureId = (Number)_featureIdCol.getValue(ctx);
 
-            out.write("[<a href=\"");
-            out.write(detailsUrl.getLocalURIString());
-            out.write("\">details</a>]");
+        if(null == featureId)
+            return;
 
-            ActionURL peaksUrl = _basePeaksUrl.clone();
-            peaksUrl.addParameter("featureId", featureId.intValue());
+        ActionURL detailsUrl = _baseDetailsUrl.clone();
+        detailsUrl.addParameter("featureId", featureId.intValue());
 
-            out.write("&nbsp;[<a href=\"");
-            out.write(peaksUrl.getLocalURIString());
-            out.write("\">peaks</a>]");
-        }
+        out.write("[<a href=\"");
+        out.write(detailsUrl.getLocalURIString());
+        out.write("\">details</a>]");
+
+        ActionURL peaksUrl = _basePeaksUrl.clone();
+        peaksUrl.addParameter("featureId", featureId.intValue());
+
+        out.write("&nbsp;[<a href=\"");
+        out.write(peaksUrl.getLocalURIString());
+        out.write("\">peaks</a>]");
     }
 
     public void renderTitle(RenderContext ctx, Writer out) throws IOException
@@ -105,5 +115,18 @@ public class PeakLinksDisplayColumn extends DataColumn
     public boolean isSortable()
     {
         return false;
+    }
+
+    public void addQueryColumns(Set<ColumnInfo> columns)
+    {
+        super.addQueryColumns(columns);
+        TableInfo table = getBoundColumn().getParentTable();
+        FieldKey currentKey = FieldKey.fromString(getBoundColumn().getName());
+        FieldKey parentKey = currentKey.getParent();
+
+        FieldKey featureIdKey = new FieldKey(parentKey, "FeatureId");
+
+        _featureIdCol = QueryService.get().getColumns(table, Collections.singleton(featureIdKey)).get(featureIdKey);
+        columns.add(_featureIdCol);
     }
 }

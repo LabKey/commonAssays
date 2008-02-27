@@ -116,15 +116,12 @@ public class FeaturesTableInfo extends FilteredTable
             addColumn(new PeaksAvailableColumnInfo(this));
 
         //add a column for the find similar link
-        ColumnInfo similarLinkCol = addColumn(new ColumnInfo(COLUMN_FIND_SIMILAR_LINK, this));
+        ColumnInfo similarLinkCol = addColumn(wrapColumn(COLUMN_FIND_SIMILAR_LINK, getRealTable().getColumn("FeatureId")));
         similarLinkCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                ActionURL url = new ActionURL(MS1Controller.SimilarSearchAction.class, _schema.getContainer());
-                UrlColumn urlCol = new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "featureId=${FeatureId}", true), "similar");
-                urlCol.setName(COLUMN_FIND_SIMILAR_LINK);
-                return urlCol;
+                return new SimilarLinkDisplayColumn(colInfo);
             }
         });
 

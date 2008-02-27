@@ -22,6 +22,7 @@ import org.labkey.ms1.view.*;
 import org.labkey.common.util.Pair;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.beans.MutablePropertyValues;
 
 import java.util.ArrayList;
@@ -486,8 +487,13 @@ public class MS1Controller extends SpringActionController
             //features they were viewing on the previous screen (the showFeatures action)
             FeaturesView featuresView = getSourceFeaturesView(form.getSrcActionUrl());
 
-            //get the previous and next feature ids (ids will be -1 if there isn't a prev or next)
-            int[] prevNextFeatureIds = featuresView.getPrevNextFeature(form.getFeatureId());
+            //get the previous and next feature ids (ids should be -1 if there isn't a prev or next)
+            int[] prevNextFeatureIds = null;
+            if(null != featuresView)
+                prevNextFeatureIds = featuresView.getPrevNextFeature(form.getFeatureId());
+            else
+                prevNextFeatureIds = new int[]{-1,-1};
+
             FeatureDetailsModel model = new FeatureDetailsModel(feature, prevNextFeatureIds[0],
                     prevNextFeatureIds[1], form.getSrcUrl(), form.getMzWindowLow(), form.getMzWindowHigh(),
                     form.getScanWindowLow(), form.getScanWindowHigh(), form.getScan(), 
@@ -501,17 +507,22 @@ public class MS1Controller extends SpringActionController
 
         private FeaturesView getSourceFeaturesView(ActionURL url) throws Exception
         {
-            BaseFeaturesViewAction action = (BaseFeaturesViewAction)_actionResolver.resolveActionName(MS1Controller.this, url.getAction());
-            if(null == action)
+            if(null == url)
                 return null;
+
+            Controller action = _actionResolver.resolveActionName(MS1Controller.this, url.getAction());
+            if(null == action || !(action instanceof BaseFeaturesViewAction))
+                return null;
+
+            BaseFeaturesViewAction fvaction = (BaseFeaturesViewAction)action;
 
             //reset the current container on the action's view context to match
             //the container of the source url
             ViewContext vctx = new ViewContext();
             vctx.setContainer(ContainerManager.getForPath(url.getExtraPath()));
-            action.setViewContext(vctx);
+            fvaction.setViewContext(vctx);
             
-            return action.getFeaturesView(url);
+            return fvaction.getFeaturesView(url);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -1038,7 +1049,7 @@ public class MS1Controller extends SpringActionController
 
         public ActionURL getSrcActionUrl()
         {
-            return new ActionURL(_srcUrl);
+            return _srcUrl == null ? null : new ActionURL(_srcUrl);
         }
 
         public double getMzWindowLow()
