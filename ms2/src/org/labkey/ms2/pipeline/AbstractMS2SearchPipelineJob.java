@@ -1,13 +1,15 @@
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.TaskId;
-import org.labkey.api.util.*;
+import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
+import org.labkey.api.util.AppProps;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
-import java.io.FilenameFilter;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
@@ -315,11 +317,11 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         // CONSIDER(brendanx): look at extension of passed in spectra files to one day support mzData.
         StringBuilder result = new StringBuilder();
         File dirData = getDataDirectory();
-        File[] allSpectraFiles = dirData.listFiles(new FilenameFilter()
+        File[] allSpectraFiles = dirData.listFiles(new FileFilter()
         {
-            public boolean accept(File dir, String name)
+            public boolean accept(File f)
             {
-                return name.toLowerCase().endsWith(".mzxml");
+                return AbstractMS2SearchProtocol.FT_MZXML.isType(f);
             }
         });
         Set<File> fileSet1 = new HashSet<File>(Arrays.asList(allSpectraFiles));
@@ -327,7 +329,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         if (fileSet1.equals(fileSet2))
         {
             result.append(FileUtil.relativizeUnix(analysisDir, dirData));
-            result.append("*.mzxml");
+            result.append("/*.mzxml");
         }
         else
         {
