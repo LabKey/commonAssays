@@ -186,45 +186,39 @@ public class EditScriptForm extends ViewForm
         Map<String, String> ret = new LinkedHashMap();
         if (run == null)
             return ret;
-        try
+
+        FlowWell[] wells = run.getWells(true);
+        int cWellsCounted = 0;
+        for (int i = 0; i < wells.length && cWellsCounted < MAX_WELLS_TO_POLL; i ++)
         {
-            FlowWell[] wells = run.getWells(true);
-            int cWellsCounted = 0;
-            for (int i = 0; i < wells.length && cWellsCounted < MAX_WELLS_TO_POLL; i ++)
+            try
             {
                 try
                 {
-                    try
+                    Map<String, String> wellParams = FCSAnalyzer.get().getParameterNames(wells[i].getFCSURI(), compChannels);
+                    for (Map.Entry<String, String> entry : wellParams.entrySet())
                     {
-                        Map<String, String> wellParams = FCSAnalyzer.get().getParameterNames(wells[i].getFCSURI(), compChannels);
-                        for (Map.Entry<String, String> entry : wellParams.entrySet())
+                        String previous = ret.get(entry.getKey());
+                        if (previous == null)
                         {
-                            String previous = ret.get(entry.getKey());
-                            if (previous == null)
-                            {
-                                ret.put(entry.getKey(), entry.getValue());
-                            }
-                            else if (previous.length() < entry.getValue().length())
-                            {
-                                ret.put(entry.getKey(), entry.getValue());
-                            }
+                            ret.put(entry.getKey(), entry.getValue());
                         }
-                        cWellsCounted ++;
+                        else if (previous.length() < entry.getValue().length())
+                        {
+                            ret.put(entry.getKey(), entry.getValue());
+                        }
                     }
-                    catch(FileNotFoundException e)
-                    {
-                        _log.warn("Error opening file " + wells[i].getFCSURI(), e);
-                    }
+                    cWellsCounted ++;
                 }
-                catch(Exception e)
+                catch(FileNotFoundException e)
                 {
-                    _log.error("Error", e);
+                    _log.warn("Error opening file " + wells[i].getFCSURI(), e);
                 }
             }
-        }
-        catch (SQLException sqlE)
-        {
-            _log.error("Error", sqlE);
+            catch(Exception e)
+            {
+                _log.error("Error", e);
+            }
         }
         return ret;
     }
