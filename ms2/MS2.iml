@@ -30,7 +30,7 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="file://$MODULE_DIR$/../../../build/modules/ms2/jspTempDir/webapp" />
+          <root url="jar://$MODULE_DIR$/../../../build/labkeyWebapp/explodedWar/WEB-INF/jsp/ms2_jsp.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

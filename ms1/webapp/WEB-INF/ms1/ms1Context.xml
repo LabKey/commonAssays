@@ -10,7 +10,6 @@
                     <property name="protocolFactoryName" value="inspect"/>
                     <property name="xarGeneratorSupport">
                         <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$Features"/>
-<!--                        <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$FeaturesPeaks"/> -->
                     </property>
                     <property name="taskProgressionSpec">
                         <list>
@@ -36,7 +35,6 @@
                     </property>
                     <property name="xarGeneratorSupport">
                         <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$Peptides"/>
-<!--                        <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$PeptidesPeaks"/> -->
                     </property>
                     <property name="taskProgressionSpec">
                         <list>
@@ -200,7 +198,7 @@
                 <bean class="org.labkey.api.pipeline.cmd.BooleanToSwitch">
                     <property name="parameter" value="ms1 findpeptides, walk smoothed"/>
                     <property name="switchName" value="walksmoothed"/>
-                    <property name="help" value="When calculating feature extents, use smoothed rather than wavelet-transformed spectra)"/>
+                    <property name="help" value="When calculating feature extents, use smoothed rather than wavelet-transformed spectra"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.PathWithSwitch">
                     <property name="function" value="output"/>
@@ -238,10 +236,26 @@
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
                     <property name="parameter" value="ms1 peptides, window"/>
                     <property name="switchName" value="w"/>
-                    <property name="help" value="Filters on the specified mz-delta window"/>
+                    <property name="help" value="Filters on the specified mz-delta window (default 1.0)"/>
                     <property name="paramValidator">
                         <bean class="org.labkey.api.pipeline.cmd.ValidateDecimal"/>
                     </property>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+                    <property name="parameter" value="ms1 peptides, min probability"/>
+                    <property name="switchName" value="p"/>
+                    <property name="help" value="Minimum PeptideProphet probability to match"/>
+                    <property name="paramValidator">
+                        <bean class="org.labkey.api.pipeline.cmd.ValidateDecimal">
+                            <property name="max" value="1.0"/>
+                            <property name="min" value="0.0"/>
+                        </bean>
+                    </property>
+                </bean>
+                <bean class="org.labkey.api.pipeline.cmd.BooleanToSwitch">
+                    <property name="parameter" value="ms1 peptides, match charge"/>
+                    <property name="switchName" value="c"/>
+                    <property name="help" value="Discard matches where pepXML assumed charge does not match MS1 data"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.PathWithSwitch">
                     <property name="function" value="output"/>

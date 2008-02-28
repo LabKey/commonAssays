@@ -88,8 +88,11 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
                 if (existingRun.statusId != MS2Importer.STATUS_SUCCESS)
                     restart = true;
 
-                existingRun.setExperimentRunLSID(expRun.getLSID());
-                MS2Manager.updateRun(existingRun, null);
+                if (expRun != null)
+                {
+                    existingRun.setExperimentRunLSID(expRun.getLSID());
+                    MS2Manager.updateRun(existingRun, null);
+                }
             }
             if (existingRun != null && !restart)
             {
