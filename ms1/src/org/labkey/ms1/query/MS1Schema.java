@@ -7,6 +7,7 @@ import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
+import org.labkey.api.security.ACL;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.MS1Controller;
@@ -230,4 +231,31 @@ public class MS1Schema extends UserSchema
 
         return result;
     } //getMS1ExpRunsTableInfo()
+
+    /**
+     * Returns the list of the appropriate container ids suitable for use in an IN filter.
+     * If this schema is limited to a single container, it will contain only that container id,
+     * but if it's not, it will contain the ids of the current container and all children in
+     * which the user has read permissions.
+     *
+     * @return A string suitable for wrapping with an "IN ()" filter.
+     */
+    public String getContainerInList()
+    {
+        Set<Container> containers = isRestrictContainer() ? new HashSet<Container>()
+                : ContainerManager.getAllChildren(getContainer(), getUser(), ACL.PERM_READ);
+        containers.add(getContainer());
+
+        StringBuilder filterList = new StringBuilder();
+        String sep = "";
+        for(Container c : containers)
+        {
+            filterList.append(sep);
+            filterList.append("'");
+            filterList.append(c.getId()); //Container Ids are GUIDS, so no embedded quotes
+            filterList.append("'");
+            sep = ",";
+        }
+        return filterList.toString();
+    }
 } //class MS1Schema

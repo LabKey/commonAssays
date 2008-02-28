@@ -6,7 +6,6 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
@@ -81,9 +80,12 @@ public class FeaturesTableInfo extends FilteredTable
             SQLFragment sqlPepJoin = new SQLFragment("(SELECT MIN(pd.rowid) AS PeptideId" +
                     "\nFROM ms2.PeptidesData AS pd" +
                     "\nINNER JOIN ms2.Fractions AS fr ON (fr.fraction=pd.fraction)" +
+                    "\nINNER JOIN ms2.Runs AS r ON (fr.Run=r.Run)" +
                     "\nINNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl)" +
                     "\nINNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)" +
-                    "\nWHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId)");
+                    "\nWHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId" +
+                    "\nAND r.Container IN (" + _schema.getContainerInList() + ")" +
+                    "\nAND r.Deleted=?)", false);
 
             ColumnInfo ciPepId = addColumn(new ExprColumn(this, COLUMN_PEPTIDE_INFO, sqlPepJoin, java.sql.Types.INTEGER, getColumn("FeatureId")));
 

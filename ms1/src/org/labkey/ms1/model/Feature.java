@@ -255,9 +255,11 @@ public class Feature
                 "INNER JOIN exp.Data AS d ON (r.Container=d.Container)\n" +
                 "INNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl AND fi.ExpDataFileId=d.RowId)\n" +
                 "INNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)\n" +
-                "WHERE fe.FeatureId=? ORDER BY pd.RowId";
+                "WHERE fe.FeatureId=? AND r.Deleted=? ORDER BY pd.RowId";
 
-        return Table.executeQuery(DbSchema.get("ms2"), sql, new Integer[]{_featureId}, Peptide.class);
+        return Table.executeQuery(DbSchema.get("ms2"), sql,
+                new Object[]{Integer.valueOf(_featureId), Boolean.valueOf(false)}, 
+                Peptide.class);
     }
 
     private int _featureId;
