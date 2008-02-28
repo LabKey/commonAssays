@@ -1,10 +1,7 @@
 package org.labkey.flow.data;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.query.QueryService;
@@ -69,15 +66,23 @@ public class FlowRun extends FlowObject<ExpRun>
         return false;
     }
 
-    public FlowWell[] getWells() throws SQLException
+    public FlowWell[] getWells()
     {
         return getWells(false);
     }
 
-    public FlowWell[] getWells(boolean realFiles) throws SQLException
+    public FlowWell[] getWells(boolean realFiles)
     {
-        List<? extends FlowDataObject> all = getDatas(null);
-        List<FlowWell> wells = new ArrayList();
+        List<? extends FlowDataObject> all;
+        try
+        {
+            all = getDatas(null);
+        }
+        catch (SQLException x)
+        {
+            throw new RuntimeSQLException(x);
+        }
+        List<FlowWell> wells = new ArrayList<FlowWell>();
         for (FlowDataObject obj : all)
         {
             if (obj instanceof FlowWell)
@@ -113,7 +118,7 @@ public class FlowRun extends FlowObject<ExpRun>
         return null;
     }
 
-    public FlowCompensationMatrix getCompensationMatrix() throws SQLException
+    public FlowCompensationMatrix getCompensationMatrix()
     {
         ExpData[] outputs = getExperimentRun().getOutputDatas(FlowDataType.CompensationMatrix);
         if (outputs.length > 0)
@@ -436,24 +441,17 @@ public class FlowRun extends FlowObject<ExpRun>
 
     public FlowTableType getDefaultQuery()
     {
-        try
+        FlowWell[] wells = getWells();
+        for (FlowWell well : wells)
         {
-            FlowWell[] wells = getWells();
-            for (FlowWell well : wells)
+            if (well.getDataType() == FlowDataType.FCSAnalysis)
             {
-                if (well.getDataType() == FlowDataType.FCSAnalysis)
-                {
-                    return FlowTableType.FCSAnalyses;
-                }
-                if (well.getDataType() == FlowDataType.CompensationControl)
-                {
-                    return FlowTableType.CompensationControls;
-                }
+                return FlowTableType.FCSAnalyses;
             }
-        }
-        catch (SQLException e)
-        {
-            _log.error("Error", e);
+            if (well.getDataType() == FlowDataType.CompensationControl)
+            {
+                return FlowTableType.CompensationControls;
+            }
         }
         return FlowTableType.FCSFiles;
     }

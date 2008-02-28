@@ -98,13 +98,12 @@ public class RunController extends BaseFlowController<RunController.Action>
     {
         public ViewForm __form;
         private FlowRun _run;
-        private FlowWell[] _wells;
+        private FlowWell[] _wells = null;
         private FlowCompensationMatrix _comp;
 
-        public void setRun(FlowRun run) throws Exception
+        public void setRun(FlowRun run)
         {
             _run = run;
-            _wells = _run.getWells();
             _comp = _run.getCompensationMatrix();
         }
 
@@ -115,6 +114,8 @@ public class RunController extends BaseFlowController<RunController.Action>
 
         public FlowWell[] getWells()
         {
+            if (null == _wells)
+                _wells = _run.getWells();
             return _wells;
         }
 
@@ -140,7 +141,7 @@ public class RunController extends BaseFlowController<RunController.Action>
 
         FlowRun run = getRun();
         String strEventCount = getRequest().getParameter("eventCount");
-        Map<String, File> files = new TreeMap();
+        Map<String, File> files = new TreeMap<String, File>();
         FlowWell[] wells = run.getWells(true);
         if (wells.length == 0)
         {

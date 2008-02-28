@@ -1,33 +1,30 @@
 package org.labkey.flow.query;
 
+import org.apache.commons.lang.StringUtils;
+import org.labkey.api.data.*;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.*;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
-import org.labkey.api.data.*;
-import org.labkey.api.exp.api.*;
-import org.labkey.flow.data.*;
-import org.labkey.flow.data.FlowDataType;
-import org.labkey.flow.view.FlowQueryView;
-import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.persist.FlowManager;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.Portal;
 import org.labkey.api.util.PageFlowUtil;
-import org.apache.commons.lang.StringUtils;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
-import java.sql.Types;
-
-import org.labkey.flow.controllers.well.WellController;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.Portal;
+import org.labkey.api.view.ViewContext;
+import org.labkey.flow.analysis.web.FCSAnalyzer;
+import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.run.RunController;
-import org.labkey.flow.analysis.web.StatisticSpec;
-import org.labkey.flow.analysis.web.FCSAnalyzer;
-import org.labkey.api.exp.api.SamplesSchema;
+import org.labkey.flow.controllers.well.WellController;
+import org.labkey.flow.data.*;
+import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.persist.ObjectType;
+import org.labkey.flow.view.FlowQueryView;
+
+import javax.servlet.ServletException;
+import java.sql.Types;
+import java.util.*;
 
 public class FlowSchema extends UserSchema
 {
@@ -93,7 +90,7 @@ public class FlowSchema extends UserSchema
 
     public Set<String> getVisibleTableNames()
     {
-        Set<String> ret = new HashSet();
+        Set<String> ret = new HashSet<String>();
         for (FlowTableType tt : FlowTableType.values())
         {
             if (!tt.isHidden())
@@ -114,7 +111,7 @@ public class FlowSchema extends UserSchema
 
     public Set<String> getTableNames()
     {
-        Set<String> ret = new LinkedHashSet();
+        Set<String> ret = new LinkedHashSet<String>();
         for (FlowTableType type : FlowTableType.values())
         {
             ret.add(type.toString());
@@ -188,13 +185,13 @@ public class FlowSchema extends UserSchema
         return new FlowQueryView(context, new FlowSchema(context), (FlowQuerySettings) settings);
     }
 
-    private SQLFragment sqlObjectTypeId(SQLFragment sqlDataId)
+/*    private SQLFragment sqlObjectTypeId(SQLFragment sqlDataId)
     {
         SQLFragment ret = new SQLFragment("(SELECT flow.Object.TypeId FROM flow.Object WHERE flow.Object.DataId = (");
         ret.append(sqlDataId);
         ret.append("))");
         return sqlDataId;
-    }
+    } */
 
     public ExpRunTable createRunTable(String alias, FlowDataType type)
     {
@@ -251,7 +248,7 @@ public class FlowSchema extends UserSchema
         return ret;
     }
 
-    private SQLFragment dataIdCondition(String dataidName, ObjectType ... types)
+/*    private SQLFragment dataIdCondition(String dataidName, ObjectType ... types)
     {
         SQLFragment ret = new SQLFragment("(SELECT flow.object.TypeId FROM flow.Object WHERE ");
         ret.append(dataidName + " = flow.object.DataId)");
@@ -270,9 +267,256 @@ public class FlowSchema extends UserSchema
             ret.append(" )");
         }
         return ret;
+    } */
+
+
+    /**
+     *  FlowDataTable is ExpDataTable with an ObjectId column
+     *
+     *  basically rejoins what is effectively a vertically partitioned table (ACKK) 
+     */
+    class FlowDataTable extends AbstractTableInfo implements ExpDataTable
+    {
+        final ExpDataTable _expData;
+        final TableInfo _flowObject;
+        final FlowDataType _type;
+        final String _expDataAlias;
+
+        FlowDataTable(String alias, FlowDataType type)
+        {
+            super(getDbSchema());
+            setAlias(alias);
+            _expDataAlias = "_expdata_";
+            _expData = ExperimentService.get().createDataTable(_expDataAlias);
+            _flowObject = DbSchema.get("flow").getTable("object");
+            _type = type;
+        }
+
+        ColumnInfo addStatisticColumn(String columnAlias)
+        {
+            ColumnInfo colStatistic = addObjectIdColumn(columnAlias);
+            colStatistic.setFk(new StatisticForeignKey(new FlowPropertySet(this)));
+            colStatistic.setIsUnselectable(true);
+            addMethod(columnAlias, new StatisticMethod(colStatistic));
+            return colStatistic;
+        }
+
+        ColumnInfo addObjectIdColumn(String name)
+        {
+            ColumnInfo underlyingColumn = _flowObject.getColumn("rowid");
+            ExprColumn ret = new ExprColumn(this, name, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".objectid"), underlyingColumn.getSqlTypeInt());
+            ret.copyAttributesFrom(underlyingColumn);
+            addColumn(ret);
+            return ret;
+        }
+
+        ColumnInfo addExpColumn(ColumnInfo underlyingColumn)
+        {
+            ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getSqlTypeInt());
+            ret.copyAttributesFrom(underlyingColumn);
+            addColumn(ret);
+            return ret;
+        }
+
+        /* TableInfo */
+        public SQLFragment getFromSQL(String alias)
+        {
+            SQLFragment sqlFlowData = new SQLFragment();
+
+            sqlFlowData.append("(SELECT " + _expDataAlias + ".*,");
+            sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("rowid").getName() + " AS objectid\n");
+            sqlFlowData.append("FROM ");
+            sqlFlowData.append(_expData);
+            sqlFlowData.append(" INNER JOIN " );
+            sqlFlowData.append(_flowObject);
+            sqlFlowData.append(" ON " +
+                    _expDataAlias + "." + _expData.getColumn("rowid").getName() + "=" +
+                    _flowObject.toString() + "." + _flowObject.getColumn("dataid").getName());
+            sqlFlowData.append("\n");
+            sqlFlowData.append("WHERE ");
+            sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("typeid").getName() + "=" + _type.getObjectType().getTypeId());
+            if (null != _flowObject.getColumn("container"))
+                sqlFlowData.append(" AND ").append(_flowObject).append("." + _flowObject.getColumn("container").getName() + "='" + _expData.getContainer().getId() + "'");
+            // UNDONE
+            //     final private SimpleFilter _filter;
+            //UNDONE
+            sqlFlowData.append(") AS " + alias);
+            return sqlFlowData;
+        }
+
+        @Override
+        public boolean hasPermission(User user, int perm)
+        {
+            return _expData.hasPermission(user, perm);
+        }
+
+        /* ExpDataTable */
+        public void populate(ExpSchema schema)
+        {
+            _expData.populate(schema);
+            for (ColumnInfo col : _expData.getColumns())
+            {
+                if (null == getColumn(col.getName()))
+                    addExpColumn(col);
+            }
+        }
+
+        public void setExperiment(ExpExperiment experiment)
+        {
+            _expData.setExperiment(experiment);
+        }
+
+        public ExpExperiment getExperiment()
+        {
+            return _expData.getExperiment();
+        }
+
+        public void setRun(ExpRun run)
+        {
+            _expData.setRun(run);
+        }
+
+        public ExpRun getRun()
+        {
+            return _expData.getRun();
+        }
+
+        public void setDataType(DataType type)
+        {
+            _expData.setDataType(type);
+        }
+
+        public DataType getDataType()
+        {
+            return _expData.getDataType();
+        }
+
+        public ColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, PropertyDescriptor inputRole, ExpSampleSet sampleSet)
+        {
+            ColumnInfo col = _expData.addMaterialInputColumn(alias,schema,inputRole,sampleSet);
+            return addExpColumn(col);
+        }
+
+        public ColumnInfo addDataInputColumn(String alias, PropertyDescriptor role)
+        {
+            ColumnInfo col = _expData.addDataInputColumn(alias,role);
+            return addExpColumn(col);
+        }
+
+        public ColumnInfo addInputRunCountColumn(String alias)
+        {
+            ColumnInfo col = _expData.addInputRunCountColumn(alias);
+            return addExpColumn(col);
+        }
+
+        /* ExpTable */
+
+        public void setContainer(Container container)
+        {
+            _expData.setContainer(container);
+        }
+
+        public Container getContainer()
+        {
+            return _expData.getContainer();
+        }
+
+        public ColumnInfo addColumn(Column column)
+        {
+            ColumnInfo col = _expData.addColumn(column);
+            return addExpColumn(col);
+        }
+
+        public ColumnInfo addColumn(String alias, Column column)
+        {
+            ColumnInfo col = _expData.addColumn(alias, column);
+           return addExpColumn(col);
+        }
+
+        public ColumnInfo getColumn(Column column)
+        {
+            for (ColumnInfo info : getColumns())
+            {
+                if (info instanceof ExprColumn && info.getAlias().equals(column.toString()))
+                {
+                    return info;
+                }
+            }
+            return null;
+        }
+
+        public ColumnInfo createColumn(String alias, Column column)
+        {
+            ColumnInfo col = _expData.createColumn(alias, column);
+            return addExpColumn(col);
+        }
+
+        public ColumnInfo createPropertyColumn(String alias)
+        {
+            ColumnInfo col = _expData.createPropertyColumn(alias);
+            return addExpColumn(col);
+        }
+
+        public void addCondition(SQLFragment condition, String... columnNames)
+        {
+            // NOTE: since this is being pushed down we can't use object id here
+            _expData.addCondition(condition,columnNames);
+        }
+
+        public void addRowIdCondition(SQLFragment rowidCondition)
+        {
+            _expData.addRowIdCondition(rowidCondition);
+        }
+
+        public void addLSIDCondition(SQLFragment lsidCondition)
+        {
+            _expData.addLSIDCondition(lsidCondition);
+        }
+
+        public void setEditHelper(TableEditHelper helper)
+        {
+            _expData.setEditHelper(helper);
+        }
+
+        public ColumnInfo addPropertyColumns(String domainDescription, PropertyDescriptor[] pds, QuerySchema schema)
+        {
+            ColumnInfo col = _expData.addPropertyColumns(domainDescription, pds, schema);
+            return addExpColumn(col);
+        }
     }
 
-    public ExpDataTable createDataTable(String alias, final FlowDataType type)
+
+    public FlowDataTable createDataTable(String alias, final FlowDataType type)
+    {
+        FlowDataTable ret = new FlowDataTable(alias, type);
+        ret.setContainer(getContainer());
+        ret.setDataType(type);
+        ret.addColumn(ExpDataTable.Column.RowId);
+        ret.addColumn(ExpDataTable.Column.LSID).setIsHidden(true);
+        ret.addColumn(ExpDataTable.Column.Name);
+        ret.addColumn(ExpDataTable.Column.Flag);
+        ret.addColumn(ExpDataTable.Column.Created);
+        ret.setTitleColumn("Name");
+        ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
+        protocol.setIsHidden(true);
+
+        ColumnInfo colRun = ret.addColumn(ExpDataTable.Column.Run);
+        colRun.setFk(new LookupForeignKey(PageFlowUtil.urlFor(RunController.Action.showRun, getContainer()), FlowParam.runId, "RowId", "Name")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                return detach().createRunTable("run", type);
+            }
+        });
+        if (_run != null)
+        {
+            ret.setRun(ExperimentService.get().getExpRun(_run.getRunId()));
+        }
+        return ret;
+    }
+    
+
+/*    public ExpDataTable createDataTableOLD(String alias, final FlowDataType type)
     {
         ExpDataTable ret = ExperimentService.get().createDataTable(alias);
         ret.setContainer(getContainer());
@@ -310,7 +554,8 @@ public class FlowSchema extends UserSchema
         ColumnInfo ret = new ExprColumn(table, name, sql, Types.INTEGER);
         table.addColumn(ret);
         return ret;
-    }
+    } */
+
 
     static private class DeferredFCSFileVisibleColumns implements Iterable<FieldKey>
     {
@@ -353,7 +598,7 @@ public class FlowSchema extends UserSchema
 
         public Iterator<FieldKey> iterator()
         {
-            Collection<FieldKey> ret = new LinkedHashSet();
+            Collection<FieldKey> ret = new LinkedHashSet<FieldKey>();
             ret.addAll(QueryService.get().getDefaultVisibleColumns(_table.getColumns()));
             ret.remove(FieldKey.fromParts("AnalysisScript"));
             ret.remove(FieldKey.fromParts("FCSFile"));
@@ -385,11 +630,11 @@ public class FlowSchema extends UserSchema
         }
     }
 
-    public ExpDataTable createFCSFileTable(String alias)
+    public FlowDataTable createFCSFileTable(String alias)
     {
-        final ExpDataTable ret = createDataTable(alias, FlowDataType.FCSFile);
+        final FlowDataTable ret = createDataTable(alias, FlowDataType.FCSFile);
         ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
-        final ColumnInfo colKeyword = addObjectIdColumn(ret, "Keyword");
+        final ColumnInfo colKeyword = ret.addObjectIdColumn("Keyword");
         FlowPropertySet fps = new FlowPropertySet(ret);
         colKeyword.setFk(new KeywordForeignKey(fps));
         colKeyword.setIsUnselectable(true);
@@ -409,18 +654,10 @@ public class FlowSchema extends UserSchema
         return ret;
     }
 
-    public ColumnInfo addStatisticColumn(ExpDataTable table, String columnAlias)
-    {
-        ColumnInfo colStatistic = addObjectIdColumn(table, columnAlias);
-        colStatistic.setFk(new StatisticForeignKey(new FlowPropertySet(table)));
-        colStatistic.setIsUnselectable(true);
-        table.addMethod(columnAlias, new StatisticMethod(colStatistic));
-        return colStatistic;
-    }
 
     public ExpDataTable createFCSAnalysisTable(String alias, FlowDataType type)
     {
-        ExpDataTable ret = createDataTable(alias, type);
+        FlowDataTable ret = createDataTable(alias, type);
         ColumnInfo colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.getPropertyDescriptor(getContainer()));
         colAnalysisScript.setFk(new LookupForeignKey(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()),
                 FlowParam.scriptId.toString(), "RowId", "Name"){
@@ -444,8 +681,8 @@ public class FlowSchema extends UserSchema
         {
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
         }
-        ColumnInfo colStatistic = addStatisticColumn(ret, "Statistic");
-        ColumnInfo colGraph = addObjectIdColumn(ret, "Graph");
+        ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
+        ColumnInfo colGraph = ret.addObjectIdColumn("Graph");
         colGraph.setFk(new GraphForeignKey(fps));
         colGraph.setIsUnselectable(true);
         ColumnInfo colFCSFile = ret.addDataInputColumn("FCSFile", InputRole.FCSFile.getPropertyDescriptor(getContainer()));
@@ -464,22 +701,22 @@ public class FlowSchema extends UserSchema
     public ExpDataTable createCompensationControlTable(String alias)
     {
         ExpDataTable ret = createFCSAnalysisTable(alias, FlowDataType.CompensationControl);
-        List<FieldKey> defColumns = new ArrayList(ret.getDefaultVisibleColumns());
+        List<FieldKey> defColumns = new ArrayList<FieldKey>(ret.getDefaultVisibleColumns());
         defColumns.add(FieldKey.fromParts("Statistic", new StatisticSpec(FCSAnalyzer.compSubset, StatisticSpec.STAT.Count, null).toString()));
         defColumns.add(FieldKey.fromParts("Statistic", new StatisticSpec(FCSAnalyzer.compSubset, StatisticSpec.STAT.Freq_Of_Parent, null).toString()));
         ret.setDefaultVisibleColumns(defColumns);
         return ret;
     }
 
-    public ExpDataTable createCompensationMatrixTable(String alias)
+    public FlowDataTable createCompensationMatrixTable(String alias)
     {
-        ExpDataTable ret = createDataTable(alias, FlowDataType.CompensationMatrix);
+        FlowDataTable ret = createDataTable(alias, FlowDataType.CompensationMatrix);
         if (getExperiment() != null)
         {
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
         }
         ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(CompensationController.Action.showCompensation, getContainer()), Collections.singletonMap(FlowParam.compId.toString(), ExpDataTable.Column.RowId.toString())));
-        addStatisticColumn(ret, "Value");
+        ret.addStatisticColumn("Value");
         return ret;
     }
 
@@ -600,6 +837,5 @@ public class FlowSchema extends UserSchema
             sqlCondition.append(")");
             table.addCondition(sqlCondition);
         }
-
     }
 }

@@ -1,23 +1,28 @@
 package org.labkey.flow.data;
 
-import org.labkey.api.data.*;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.security.User;
-import org.labkey.api.exp.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
-import org.labkey.api.exp.property.SystemProperty;
 import org.labkey.api.exp.api.ExpObject;
+import org.labkey.api.exp.property.SystemProperty;
+import org.labkey.api.security.User;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.GUID;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
 import org.labkey.flow.controllers.FlowParam;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
-import java.sql.SQLException;
 import java.io.Serializable;
+import java.sql.SQLException;
+import java.util.*;
 
 abstract public class FlowObject<T extends ExpObject> implements Comparable<Object>, Serializable
 {
@@ -98,7 +103,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     public void checkContainer(ActionURL url) throws ServletException
     {
         if (!getContainerPath().equals(url.getExtraPath()))
-            throw new ServletException("Wrong container");
+            HttpView.throwNotFound("Wrong container");
     }
 
     static public String getParam(ActionURL url, HttpServletRequest request, FlowParam param)
