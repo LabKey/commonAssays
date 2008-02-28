@@ -7,31 +7,21 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.exp.list.ListDefinition;
-import org.labkey.api.exp.list.ListService;
 import org.labkey.api.exp.list.ListItem;
-import org.labkey.api.exp.PropertyType;
-import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.OntologyObject;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QuerySchema;
-import org.labkey.api.query.QueryViewCustomizer;
+import org.labkey.api.exp.*;
+import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.TimepointType;
-import org.labkey.api.view.HtmlView;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.DataView;
+import org.labkey.api.study.query.RunDataQueryView;
+import org.labkey.api.view.*;
 import org.labkey.elispot.plate.ExcelPlateReader;
 import org.labkey.elispot.plate.TextPlateReader;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
-import org.labkey.elispot.query.ElispotRunDataTable;
 
 import javax.servlet.ServletException;
 import java.util.*;
-import java.io.Writer;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -373,47 +363,33 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
         return getPropertiesForDomainPrefix(protocol, ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
     }
 
-    public QueryViewCustomizer getDataViewCustomizer(final Container container, final ExpProtocol protocol)
+    private static final class ElispotRunDataQueryView extends RunDataQueryView
     {
-        return new QueryViewCustomizer()
+        public ElispotRunDataQueryView(ExpProtocol protocol, ViewContext context, QuerySettings settings)
         {
-            public void customize(DataView view)
-            {
-                view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
-            }
-        };
-    }
-
-    public static class ElispotRunsViewCustomizer implements QueryViewCustomizer
-    {
-        private String _idColumn;
-
-        public ElispotRunsViewCustomizer(String idColumn)
-        {
-            _idColumn = idColumn;
+            super(protocol, context, settings);
         }
 
-        public void customize(DataView view)
+        protected DataView createDataView()
         {
-            DataRegion rgn = view.getDataRegion();
-            rgn.addColumn(0, new SimpleDisplayColumn()
-            {
-                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-                {
-                    Object runId = ctx.getRow().get(_idColumn);
-                    if (runId != null)
-                    {
-                        ActionURL url = new ActionURL(ElispotController.RunDetailsAction.class, ctx.getContainer()).addParameter("rowId", "" + runId);
-                        out.write("[<a href=\"" + url.getLocalURIString() + "\" title=\"View run details\">run&nbsp;details</a>]");
-                    }
-                }
-            });
+            DataView view = super.createDataView();
+            view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
+            return view;
         }
     }
 
-    public QueryViewCustomizer getRunsViewCustomizer(Container container, ExpProtocol protocol)
+    public QueryView createRunDataView(ViewContext context, ExpProtocol protocol)
     {
-        return new ElispotRunsViewCustomizer(ExpRunTable.Column.RowId.toString());
+        String name = getRunDataTableName(protocol);
+        QuerySettings settings = new QuerySettings(context.getActionURL(), name);
+        settings.setSchemaName(AssayService.ASSAY_SCHEMA_NAME);
+        settings.setQueryName(name);
+        return new ElispotRunDataQueryView(protocol, context, settings);
     }
 
+    public QueryView createRunView(ViewContext context, ExpProtocol protocol)
+    {
+        return new RunListDetailsQueryView(protocol, context,
+                ElispotController.RunDetailsAction.class, "rowId", ExpRunTable.Column.RowId.toString());
+    }
 }

@@ -17,16 +17,19 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.ExperimentRunListView;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.query.QueryViewCustomizer;
+import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.DilutionCurve;
 import org.labkey.api.study.WellData;
+import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.PageFlowUtil;
@@ -101,6 +104,56 @@ public class NabAssayController extends SpringActionController
         }
     }
 
+    private static class DuplicateDataFileRunView extends RunListQueryView
+    {
+        private Luc5Assay _assay;
+        private ExpRun _run;
+
+        public DuplicateDataFileRunView(Luc5Assay assay, ExpRun run, ExpProtocol protocol, ViewContext context)
+        {
+            super(protocol, context);
+            setShowExportButtons(false);
+            _assay = assay;
+            _run = run;
+        }
+
+        protected DataView createDataView()
+        {
+            DataView view = super.createDataView();
+            DataRegion rgn = view.getDataRegion();
+            ButtonBar bar = rgn.getButtonBar(DataRegion.MODE_GRID);
+            ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
+            selectButton.setDisplayPermission(ACL.PERM_INSERT);
+            bar.add(selectButton);
+
+            ActionButton clearButton = ActionButton.BUTTON_CLEAR_ALL.clone();
+            clearButton.setDisplayPermission(ACL.PERM_INSERT);
+            bar.add(clearButton);
+
+            ActionButton deleteButton = new ActionButton("deleteRuns.view", "Delete Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
+            deleteButton.setDisplayPermission(ACL.PERM_DELETE);
+            bar.add(deleteButton);
+
+            SimpleFilter filter;
+            if (view.getRenderContext().getBaseFilter() instanceof SimpleFilter)
+            {
+                filter = (SimpleFilter) view.getRenderContext().getBaseFilter();
+            }
+            else
+            {
+                filter = new SimpleFilter(view.getRenderContext().getBaseFilter());
+            }
+            filter.addCondition("Name", _assay.getDataFile().getName());
+            filter.addCondition("RowId", _run.getRowId(), CompareType.NEQ);
+            return view;
+        }
+
+        public void setRun(ExpRun run)
+        {
+            _run = run;
+        }
+    }
+
     public static class RenderAssayBean
     {
         private Luc5Assay _assay;
@@ -163,40 +216,7 @@ public class NabAssayController extends SpringActionController
         {
             if (isDuplicateDataFile())
             {
-                QueryView runsView = ExperimentService.get().createExperimentRunWebPart(context, new AssayRunFilter(_protocol, context.getContainer()), false);
-                runsView.setShowExportButtons(false);
-                runsView.setQueryViewCustomizer(new QueryViewCustomizer()
-                {
-                    public void customize(DataView view)
-                    {
-                        DataRegion rgn = view.getDataRegion();
-                        ButtonBar bar = rgn.getButtonBar(DataRegion.MODE_GRID);
-                        ActionButton selectButton = ActionButton.BUTTON_SELECT_ALL.clone();
-                        selectButton.setDisplayPermission(ACL.PERM_INSERT);
-                        bar.add(selectButton);
-
-                        ActionButton clearButton = ActionButton.BUTTON_CLEAR_ALL.clone();
-                        clearButton.setDisplayPermission(ACL.PERM_INSERT);
-                        bar.add(clearButton);
-
-                        ActionButton deleteButton = new ActionButton("deleteRuns.view", "Delete Selected", DataRegion.MODE_GRID, ActionButton.Action.POST);
-                        deleteButton.setDisplayPermission(ACL.PERM_DELETE);
-                        bar.add(deleteButton);
-
-                        SimpleFilter filter;
-                        if (view.getRenderContext().getBaseFilter() instanceof SimpleFilter)
-                        {
-                            filter = (SimpleFilter) view.getRenderContext().getBaseFilter();
-                        }
-                        else
-                        {
-                            filter = new SimpleFilter(view.getRenderContext().getBaseFilter());
-                        }
-                        filter.addCondition("Name", _assay.getDataFile().getName());
-                        filter.addCondition("RowId", _run.getRowId(), CompareType.NEQ);
-                    }
-                });
-                return runsView;
+                return new DuplicateDataFileRunView(_assay, _run, _protocol, context);
             }
             else
                 return null;
@@ -551,12 +571,12 @@ public class NabAssayController extends SpringActionController
         {
             if (_queryView == null)
             {
-                QueryView dataView = AssayService.get().createRunDataView(_context, _protocol);
-                dataView.setQueryViewCustomizer(new NabAssayProvider.NabQueryViewCustomizer(NabRunDataTable.RUN_ID_COLUMN_NAME)
+                AssayProvider provider = AssayService.get().getProvider(_protocol);
+                QueryView dataView = new NabAssayProvider.NabRunDataQueryView(_protocol, _context, provider)
                 {
-                    public void customize(DataView view)
+                    protected DataView createDataView()
                     {
-                        super.customize(view);
+                        DataView view = super.createDataView();
                         SimpleFilter filter = new SimpleFilter();
                         SimpleFilter existingFilter = (SimpleFilter) view.getRenderContext().getBaseFilter();
                         if (existingFilter != null)
@@ -567,8 +587,9 @@ public class NabAssayController extends SpringActionController
                         filter.addInClause("ObjectId", objectIds);
                         view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
                         view.getRenderContext().setBaseFilter(filter);
+                        return view;
                     }
-                });
+                };
                 _queryView = dataView;
             }
             return _queryView;

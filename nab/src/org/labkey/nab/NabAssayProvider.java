@@ -3,6 +3,7 @@ package org.labkey.nab;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.TimepointType;
+import org.labkey.api.study.query.RunDataQueryView;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.list.ListDefinition;
@@ -12,13 +13,8 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.data.*;
-import org.labkey.api.query.QuerySchema;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QueryViewCustomizer;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.view.HtmlView;
-import org.labkey.api.view.DataView;
+import org.labkey.api.query.*;
+import org.labkey.api.view.*;
 import org.labkey.api.security.User;
 import org.labkey.nab.query.NabSchema;
 import org.labkey.nab.query.NabRunDataTable;
@@ -410,23 +406,40 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         return Arrays.asList(new ParticipantVisitLookupResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());
     }
 
-    public static class NabQueryViewCustomizer implements QueryViewCustomizer
+    public static class NabRunDataQueryView extends RunDataQueryView
     {
-        private String _idColumn;
-
-        public NabQueryViewCustomizer(String idColumn)
+        public NabRunDataQueryView(ExpProtocol protocol, ViewContext context, AssayProvider provider)
         {
-            _idColumn = idColumn;
+            super(protocol, context, getDefaultSettings(protocol, context, provider));
         }
 
-        public void customize(DataView view)
+        private static QuerySettings getDefaultSettings(ExpProtocol protocol, ViewContext context, AssayProvider provider)
         {
+            String name = provider.getRunDataTableName(protocol);
+            QuerySettings settings = new QuerySettings(context.getActionURL(), name);
+            settings.setSchemaName(AssayService.ASSAY_SCHEMA_NAME);
+            settings.setQueryName(name);
+            return settings;
+        }
+        
+        protected DataView createDataView()
+        {
+            DataView view = super.createDataView();
             DataRegion rgn = view.getDataRegion();
+            rgn.setRecordSelectorValueColumns("ObjectId");
+            rgn.addHiddenFormField("protocolId", "" + _protocol.getRowId());
+            ButtonBar bbar = view.getDataRegion().getButtonBar(DataRegion.MODE_GRID);
+            ActionURL graphSelectedURL = new ActionURL("NabAssay", "graphSelected", getContainer());
+            ActionButton graphSelectedButton = new ActionButton("button", "Graph Selected");
+            graphSelectedButton.setScript("return verifySelected(this.form, \"" + graphSelectedURL.getLocalURIString() + "\", \"get\", \"rows\")");
+            graphSelectedButton.setActionType(ActionButton.Action.GET);
+            bbar.add(graphSelectedButton);
+
             rgn.addColumn(0, new SimpleDisplayColumn()
             {
                 public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                 {
-                    Object runId = ctx.getRow().get(_idColumn);
+                    Object runId = ctx.getRow().get(NabRunDataTable.RUN_ID_COLUMN_NAME);
                     if (runId != null)
                     {
                         ActionURL url = new ActionURL("NabAssay", "details", ctx.getContainer()).addParameter("rowId", "" + runId);
@@ -434,31 +447,26 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                     }
                 }
             });
+            return view;
         }
     }
 
-    public QueryViewCustomizer getRunsViewCustomizer(Container container, ExpProtocol protocol)
+    public QueryView createRunDataView(ViewContext context, ExpProtocol protocol)
     {
-        return new NabQueryViewCustomizer(ExpRunTable.Column.RowId.toString());
+        return new NabRunDataQueryView(protocol, context, this);
     }
 
-    public QueryViewCustomizer getDataViewCustomizer(final Container container, final ExpProtocol protocol)
+    public static class NabRunListQueryView extends RunListDetailsQueryView
     {
-        return new NabQueryViewCustomizer(NabRunDataTable.RUN_ID_COLUMN_NAME)
+        public NabRunListQueryView(ExpProtocol protocol, ViewContext context)
         {
-            public void customize(DataView view)
-            {
-                super.customize(view);
-                view.getDataRegion().setRecordSelectorValueColumns("ObjectId");
-                view.getDataRegion().addHiddenFormField("protocolId", "" + protocol.getRowId());
-                ButtonBar bbar = view.getDataRegion().getButtonBar(DataRegion.MODE_GRID);
-                ActionURL graphSelectedURL = new ActionURL("NabAssay", "graphSelected", container);
-                ActionButton graphSelectedButton = new ActionButton("button", "Graph Selected");
-                graphSelectedButton.setScript("return verifySelected(this.form, \"" + graphSelectedURL.getLocalURIString() + "\", \"get\", \"rows\")");
-                graphSelectedButton.setActionType(ActionButton.Action.GET);
-                bbar.add(graphSelectedButton);
-            }
-        };
+            super(protocol, context, NabAssayController.DetailsAction.class, "rowId", ExpRunTable.Column.RowId.toString());
+        }
+    }
+
+    public QueryView createRunView(ViewContext context, ExpProtocol protocol)
+    {
+        return new NabRunListQueryView(protocol, context);
     }
 
     public Pair<ExpProtocol, List<Domain>> getAssayTemplate(User user, Container targetContainer, ExpProtocol toCopy)
