@@ -491,7 +491,7 @@ public class FlowSchema extends UserSchema
         FlowDataTable ret = new FlowDataTable(alias, type);
         ret.setContainer(getContainer());
         ret.setDataType(type);
-        ret.addColumn(ExpDataTable.Column.RowId);
+        ret.addColumn(ExpDataTable.Column.RowId).setIsHidden(true);
         ret.addColumn(ExpDataTable.Column.LSID).setIsHidden(true);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);
