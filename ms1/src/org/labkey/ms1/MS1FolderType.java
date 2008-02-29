@@ -23,7 +23,11 @@ public class MS1FolderType extends DefaultFolderType
             Arrays.asList(
                 Portal.getPortalPart("Data Pipeline").createWebPart(),
                 Portal.getPortalPart("MS1 Runs").createWebPart()
-            ), null,
+            ),
+            Arrays.asList(
+                Portal.getPortalPart("Run Groups").createWebPart(),
+                Portal.getPortalPart("Run Types").createWebPart()
+            ),
             getDefaultModuleSet(module, getModule("MS2"), getModule("Pipeline")),
             module);
     }

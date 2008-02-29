@@ -1,7 +1,6 @@
 <%@ page import="org.labkey.ms2.query.SpectraCountConfiguration" %>
 <%@ page import="java.io.PrintWriter" %>
 <%@ page import="org.labkey.api.query.QueryPicker" %>
-<%@ page import="org.labkey.api.query.QueryView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
@@ -10,28 +9,40 @@
 
 <%
 JspView<MS2Controller.CompareOptionsBean> view = (JspView<MS2Controller.CompareOptionsBean>) HttpView.currentView();
-MS2Controller.CompareOptionsBean bean = view.getModelBean();
-QueryView peptidesView = bean.getPeptideView();
+MS2Controller.CompareOptionsBean<MS2Controller.SpectraCountForm> bean = view.getModelBean();
+MS2Controller.SpectraCountForm form = bean.getForm();
 %>
 <form action="<%= bean.getTargetURL() %>">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
     <p>
         Group by:<br/>
-        <%
-        boolean first = true;
-        for (SpectraCountConfiguration spectraCountConfig : SpectraCountConfiguration.VALID_CONFIGS)
-        {
-            %><input onclick="document.getElementById('spectraCountRadioButton').checked = true;" type="radio" <%= first ? "checked=\"true\"" : "" %><% first = false; %> name="spectraConfig" value="<%= spectraCountConfig.getTableName()%>" /><%= h(spectraCountConfig.getDescription())%><br/><%
-        }
-        %>
+        <div style="padding-left: 2em">
+            <%
+            SpectraCountConfiguration selectedConfig = null;
+            for (SpectraCountConfiguration spectraConfig : SpectraCountConfiguration.VALID_CONFIGS)
+            {
+                if (selectedConfig == null || spectraConfig.getTableName().equals(form.getSpectraConfig()))
+                {
+                    selectedConfig = spectraConfig;
+                }
+            }
+            for (SpectraCountConfiguration spectraConfig : SpectraCountConfiguration.VALID_CONFIGS)
+            {
+                %><input type="radio" <%= spectraConfig == selectedConfig  ? "checked=\"true\"" : "" %> name="spectraConfig" value="<%= spectraConfig.getTableName()%>" /><%= h(spectraConfig.getDescription())%><br/><%
+            }
+            %>
+        </div>
     </p>
-    <p>
-        You may use a customized Peptides view to establish criteria for which peptides to include in the spectra counts.
+    <p>There are three options for filtering the peptide identifications:</p>
+    <p style="padding-left: 2em"><input type="radio" name="peptideFilterType" value="none" <%= form.isNoPeptideFilter() ? "checked=\"true\"" : "" %> /> Use all the peptides</p>
+    <p style="padding-left: 2em"><input type="radio" name="peptideFilterType" value="peptideProphet" <%= form.isPeptideProphetFilter() ? "checked=\"true\"" : "" %>/> All peptides with PeptideProphet probability &ge; <input type="text" size="2" name="peptideProphetProbability" value="<%= form.getPeptideProphetProbability() == null ? "" : form.getPeptideProphetProbability() %>" /></p>
+    <p style="padding-left: 2em"><input type="radio" name="peptideFilterType" value="customView" <%= form.isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>
+        Use a customized Peptides view to establish criteria for which peptides to include in the comparison.
         <%
-        QueryPicker picker = peptidesView.getColumnListPicker(request);
+        QueryPicker picker = bean.getPeptideView().getColumnListPicker(request);
         picker.setAutoRefresh(false);
         PrintWriter writer = new PrintWriter(out);
-        peptidesView.renderCustomizeViewLink(writer);
+        bean.getPeptideView().renderCustomizeViewLink(writer);
         writer.flush();
         %>
         <%= picker.toString()%>

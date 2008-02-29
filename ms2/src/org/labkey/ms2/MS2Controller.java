@@ -1234,7 +1234,12 @@ public class MS2Controller extends SpringActionController
 
         public String getCustomViewName(ViewContext context)
         {
-            return context.getActionURL().getParameter(PEPTIDES_FILTER_VIEW_NAME);
+            String result = context.getActionURL().getParameter(PEPTIDES_FILTER_VIEW_NAME);
+            if ("".equals(result))
+            {
+                return null;
+            }
+            return result;
         }
 
         public boolean isOrCriteriaForEachRun()
@@ -1309,7 +1314,7 @@ public class MS2Controller extends SpringActionController
 //            if (!view.getErrors().isEmpty())
 //                return _renderErrors(view.getErrors());
 
-            HtmlView helpView = new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein-specific columns, or expand <em>Run</em> to see the values associated with individual runs, like probability. To set a filter, select the Filter tab, add column, and filter it based on the desired threshold.</p></div>");
+            HtmlView helpView = new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein columns under the <em>Protein</em> node in the tree, or expand <em>Protein Group</em> to see the values associated with individual runs, like probability. To set a filter, select the Filter tab, add column, and filter it based on the desired threshold.</p></div>");
 
             Map<String, String> props = new HashMap<String, String>();
             props.put("originalURL", getViewContext().getActionURL().toString());
@@ -1567,7 +1572,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public static class SpectraCountForm extends RunListForm
+    public static class SpectraCountForm extends PeptideFilteringComparisonForm
     {
         private String _spectraConfig;
 
@@ -1630,20 +1635,20 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ACL.PERM_READ)
-    public class SpectraCountSetupAction extends AbstractRunListCreationAction<PeptideFilteringComparisonForm>
+    public class SpectraCountSetupAction extends AbstractRunListCreationAction<SpectraCountForm>
     {
         public SpectraCountSetupAction()
         {
-            super(PeptideFilteringComparisonForm.class, false);
+            super(SpectraCountForm.class, false);
         }
 
-        public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
+        public ModelAndView getView(SpectraCountForm form, BindException errors, int runListId)
         {
             QuerySettings spectraCountSettings = new QuerySettings(new ActionURL(), PEPTIDES_FILTER);
             spectraCountSettings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
             QueryView spectraCountView = new QueryView(new MS2Schema(getUser(), getContainer()), spectraCountSettings);
 
-            CompareOptionsBean bean = new CompareOptionsBean(spectraCountView, new ActionURL(SpectraCountAction.class, getContainer()), runListId, form);
+            CompareOptionsBean<SpectraCountForm> bean = new CompareOptionsBean<SpectraCountForm>(spectraCountView, new ActionURL(SpectraCountAction.class, getContainer()), runListId, form);
 
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/spectraCountOptions.jsp", bean);
         }
@@ -1680,6 +1685,9 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_NONE)
     public class SpectraCountAction extends RunListHandlerAction<SpectraCountForm, QueryView>
     {
+        private SpectraCountConfiguration _config;
+        private SpectraCountForm _form;
+
         public SpectraCountAction()
         {
             super(SpectraCountForm.class);
@@ -1687,27 +1695,22 @@ public class MS2Controller extends SpringActionController
 
         protected QueryView createQueryView(SpectraCountForm form, BindException errors, boolean forExport) throws Exception
         {
+            _form = form;
             QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), "SpectraCount");
             settings.setAllowChooseQuery(false);
-            final SpectraCountConfiguration config = SpectraCountConfiguration.findByTableName(form.getSpectraConfig());
-            if (config == null)
+            _config = SpectraCountConfiguration.findByTableName(form.getSpectraConfig());
+            if (_config == null)
             {
                 HttpView.throwNotFound("Could not find spectra count config: " + form.getSpectraConfig());
             }
 
-            String viewName = getViewContext().getActionURL().getParameter(PEPTIDES_FILTER_VIEW_NAME);
-            if ("".equals(viewName))
-            {
-                viewName = null;
-            }
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
 
-            settings.setQueryName(config.getTableName());
+            settings.setQueryName(_config.getTableName());
 
             schema.setRuns(_runs);
-            QueryView view = new SpectraCountQueryView(schema, settings, config, viewName, form.getRunList().intValue());
+            QueryView view = new SpectraCountQueryView(schema, settings, _config, _form);
             view.setShowRReportButton(true);
-            view.setTitle("Spectra Counts");
             // ExcelWebQueries won't be part of the same HTTP session so we won't have access to the run list anymore
             view.setAllowExcelWebQuery(false);
             return view;
@@ -1715,6 +1718,21 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
+            root = appendRootNavTrail(root, null, getPageConfig(), "spectraCount");
+            if (_form != null)
+            {
+                ActionURL setupURL = new ActionURL(SpectraCountSetupAction.class, getContainer());
+                setupURL.addParameter("peptideFilterType", _form.getPeptideFilterType());
+                if (_form.getPeptideProphetProbability() != null)
+                {
+                    setupURL.addParameter("peptideProphetProbability", _form.getPeptideProphetProbability().toString());
+                }
+                setupURL.addParameter("runList", _form.getRunList());
+                setupURL.addParameter("spectraConfig", _form.getSpectraConfig());
+
+                root.addChild("Spectra Count Options", setupURL);
+                root.addChild("Spectra Counts: " + _config.getDescription());
+            }
             return root;
         }
 
@@ -5641,14 +5659,14 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public class CompareOptionsBean
+    public class CompareOptionsBean<Form extends PeptideFilteringComparisonForm>
     {
         private final QueryView _peptideView;
         private final ActionURL _targetURL;
         private final int _runList;
-        private final PeptideFilteringComparisonForm _form;
+        private final Form _form;
 
-        public CompareOptionsBean(QueryView peptideView, ActionURL targetURL, int runList, PeptideFilteringComparisonForm form)
+        public CompareOptionsBean(QueryView peptideView, ActionURL targetURL, int runList, Form form)
         {
             _peptideView = peptideView;
             _targetURL = targetURL;
@@ -5671,7 +5689,7 @@ public class MS2Controller extends SpringActionController
             return _runList;
         }
 
-        public PeptideFilteringComparisonForm getForm()
+        public Form getForm()
         {
             return _form;
         }

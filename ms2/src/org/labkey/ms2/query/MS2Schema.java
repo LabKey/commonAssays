@@ -10,6 +10,7 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.ProteinGroupProteins;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.util.AppProps;
@@ -177,9 +178,9 @@ public class MS2Schema extends UserSchema
         return createSearchTable(alias, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX);
     }
 
-    public SpectraCountTableInfo createSpectraCountTable(SpectraCountConfiguration config, HttpServletRequest request, String peptideViewName)
+    public SpectraCountTableInfo createSpectraCountTable(SpectraCountConfiguration config, ViewContext context, MS2Controller.SpectraCountForm form)
     {
-        return new SpectraCountTableInfo(this, config, request, peptideViewName);
+        return new SpectraCountTableInfo(this, config, context, form);
     }
 
     public ProteinGroupTableInfo createProteinGroupsForSearchTable(String alias)
@@ -210,7 +211,7 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    protected FilteredTable createProteinGroupMembershipTable(final MS2Controller.PeptideFilteringComparisonForm form, final ViewContext context)
+    protected FilteredTable createProteinGroupMembershipTable(final MS2Controller.PeptideFilteringComparisonForm form, final ViewContext context, boolean filterByRuns)
     {
         FilteredTable result = new FilteredTable(MS2Manager.getTableInfoProteinGroupMemberships());
         result.wrapAllColumns(true);
@@ -271,23 +272,32 @@ public class MS2Schema extends UserSchema
             public TableInfo getLookupTableInfo()
             {
                 SequencesTableInfo result = createSequencesTable(null);
+                // This is a horrible hack to try to deal with https://www.labkey.org/issues/home/Developer/issues/details.view?issueId=5237
+                // Performance on a SQLServer installation with a large number of runs and sequences is much better with
+                // this condition because it causes the query plan to flip to something that does a much more efficient
+                // join with the sequences tables. However, adding it significantly degrades performance on my admittedly
+                // small (though not tiny) Postgres dev database
+                if (_runs != null && MS2Manager.getSchema().getSqlDialect() instanceof SqlDialectMicrosoftSQLServer)
+                {
+                    SQLFragment sql = new SQLFragment();
+                    sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
+                    sql.append(MS2Manager.getTableInfoRuns() + " WHERE Run IN ");
+                    appendRunInClause(sql);
+                    sql.append(")))");
+
+                    result.addCondition(sql, "SeqId");
+                }
                 return result;
             }
         });
 
-        if (_runs != null)
+        if (_runs != null && filterByRuns)
         {
             SQLFragment sql = new SQLFragment("ProteinGroupId IN (SELECT pg.RowId FROM ");
             sql.append(MS2Manager.getTableInfoProteinGroups() + " pg, " + MS2Manager.getTableInfoProteinProphetFiles() + " ppf ");
-            sql.append(" WHERE pg.ProteinProphetFileId = ppf.RowId AND ppf.Run IN (");
-            String separator = "";
-            for (MS2Run run : _runs)
-            {
-                sql.append(separator);
-                separator = ", ";
-                sql.append(run.getRun());
-            }
-            sql.append("))");
+            sql.append(" WHERE pg.ProteinProphetFileId = ppf.RowId AND ppf.Run IN ");
+            appendRunInClause(sql);
+            sql.append(")");
             result.addCondition(sql, "ProteinGroupId");
         }
 
@@ -311,6 +321,19 @@ public class MS2Schema extends UserSchema
         }
 
         return result;
+    }
+
+    private void appendRunInClause(SQLFragment sql)
+    {
+        sql.append("(");
+        String separator = "";
+        for (MS2Run run : _runs)
+        {
+            sql.append(separator);
+            separator = ", ";
+            sql.append(run.getRun());
+        }
+        sql.append(")");
     }
 
     protected TableInfo createPeptideMembershipsTable(final MS2Run... runs)
@@ -506,6 +529,33 @@ public class MS2Schema extends UserSchema
         return _runs;
     }
 
+    protected SQLFragment getPeptideSelectSQL(SimpleFilter filter, Collection<FieldKey> fieldKeys)
+    {
+        TableInfo peptidesTable = createPeptidesTable("PeptidesAlias");
+
+        ColumnInfo[] peptideCols = QueryService.get().getColumns(peptidesTable, fieldKeys).values().toArray(new ColumnInfo[0]);
+
+        List<ColumnInfo> reqCols = new ArrayList<ColumnInfo>(Arrays.asList(peptideCols));
+        Set<String> unresolvedColumns = new HashSet<String>();
+        QueryService.get().ensureRequiredColumns(peptidesTable, reqCols, filter, null, unresolvedColumns);
+        ColumnInfo[] cols = new ColumnInfo[reqCols.size()];
+        cols = reqCols.toArray(cols);
+
+        SQLFragment sql = new SQLFragment();
+        sql.append("SELECT * FROM (\n");
+        sql.append(Table.getSelectSQL(peptidesTable, cols, null, null));
+        sql.append("\n) AS InnerPeptides ");
+
+        Map<String, ColumnInfo> map = new HashMap<String, ColumnInfo>(cols.length);
+        for(ColumnInfo col : cols)
+        {
+            map.put(col.getName(), col);
+        }
+
+        sql.append(filter.getSQLFragment(getDbSchema().getSqlDialect(), map));
+        return sql;
+    }
+
     protected SQLFragment getPeptideSelectSQL(HttpServletRequest request, String viewName, Collection<FieldKey> fieldKeys)
     {
         QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, MS2Schema.PEPTIDES_TABLE_NAME);
@@ -517,21 +567,28 @@ public class MS2Schema extends UserSchema
             view.applyFilterAndSortToURL(url, "InternalName");
             filter.addUrlFilters(url, "InternalName");
         }
-
-        TableInfo peptidesTable = createPeptidesTable("PeptidesAlias");
-
-        ColumnInfo[] peptideCols = QueryService.get().getColumns(peptidesTable, fieldKeys).values().toArray(new ColumnInfo[0]);
-
-        return Table.getSelectSQL(peptidesTable, peptideCols, filter, new Sort());
+        return getPeptideSelectSQL(filter, fieldKeys);
     }
 
     public CrosstabTableInfo createProteinProphetCrosstabTable(MS2Controller.PeptideFilteringComparisonForm form, ViewContext context)
     {
-        FilteredTable baseTable = createProteinGroupMembershipTable(form, context);
+        // Don't need to filter by run since we'll add a filter, post-join
+        FilteredTable baseTable = createProteinGroupMembershipTable(form, context, false);
 
         ActionURL urlPepSearch = new ActionURL(MS2Controller.ShowProteinAction.class, getContainer());
 
         CrosstabSettings settings = new CrosstabSettings(baseTable);
+        SimpleFilter filter = new SimpleFilter();
+        List<Integer> runIds = new ArrayList<Integer>();
+        if (_runs != null)
+        {
+            for (MS2Run run : _runs)
+            {
+                runIds.add(run.getRun());
+            }
+        }
+        filter.addClause(new SimpleFilter.InClause("ProteinGroupId/ProteinProphetFileId/Run", runIds, false));
+        settings.setSourceTableFilter(filter);
 
         CrosstabDimension rowDim = settings.getRowAxis().addDimension(FieldKey.fromParts("SeqId"));
         rowDim.setUrl(urlPepSearch.getLocalURIString() + "&seqId=${SeqId}");

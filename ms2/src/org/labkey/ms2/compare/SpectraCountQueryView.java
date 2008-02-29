@@ -20,21 +20,19 @@ public class SpectraCountQueryView extends QueryView
 {
     private final MS2Schema _schema;
     private final SpectraCountConfiguration _config;
-    private final String _peptideViewName;
-    private final int _runListId;
+    private MS2Controller.SpectraCountForm _form;
 
-    public SpectraCountQueryView(MS2Schema schema, QuerySettings settings, SpectraCountConfiguration config, String peptideViewName, int runListId)
+    public SpectraCountQueryView(MS2Schema schema, QuerySettings settings, SpectraCountConfiguration config, MS2Controller.SpectraCountForm form)
     {
         super(schema, settings);
         _schema = schema;
         _config = config;
-        _peptideViewName = peptideViewName;
-        _runListId = runListId;
+        _form = form;
     }
 
     protected TableInfo createTable()
     {
-        return _schema.createSpectraCountTable(_config, getViewContext().getRequest(), _peptideViewName);
+        return _schema.createSpectraCountTable(_config, getViewContext(), _form);
     }
 
     public ActionButton createReportButton()
@@ -49,8 +47,7 @@ public class SpectraCountQueryView extends QueryView
         bean.setRedirectUrl(getViewContext().getActionURL().toString());
 
 	    // your custom params...
-        bean.addParam("runIndex", Integer.toString(_runListId));
-//        bean.addParam("forExport", Boolean.toString(_forExport));
+        bean.addParam("runIndex", _form.getRunList().toString());
 
         ActionURL chartURL = ChartUtil.getRReportDesignerURL(_viewContext, bean);
         ActionURL url = getViewContext().getActionURL();

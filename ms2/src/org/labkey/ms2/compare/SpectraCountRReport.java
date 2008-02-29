@@ -26,6 +26,8 @@ public class SpectraCountRReport extends RReport
 
     private static final String RUN_LIST_NAME = "runList";
     private static final String SPECTRA_CONFIG_NAME = "spectraConfig";
+    private static final String PEPTIDE_PROPHET_PROBABILITY_NAME = "peptideProphetProbability";
+    private static final String PEPTIDE_FILTER_TYPE_NAME = "peptideFilterType";
 
     public enum Prop implements ReportDescriptor.ReportProperty
     {
@@ -64,21 +66,25 @@ public class SpectraCountRReport extends RReport
             throw new IllegalArgumentException("Could not find spectra count config: " + spectraConfig);
         }
 
-        String viewName = context.getActionURL().getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME);
-        if ("".equals(viewName))
-        {
-            viewName = null;
-        }
         MS2Schema schema = new MS2Schema(context.getUser(), context.getContainer());
-
-        int runList = Integer.parseInt(getRunList(context));
+        MS2Controller.SpectraCountForm form = new MS2Controller.SpectraCountForm();
+        form.setRunList(new Integer(getRunList(context)));
+        form.setPeptideFilterType(context.getActionURL().getParameter(PEPTIDE_FILTER_TYPE_NAME));
+        try
+        {
+            if (context.getActionURL().getParameter(PEPTIDE_PROPHET_PROBABILITY_NAME) != null)
+            {
+                form.setPeptideProphetProbability(new Float(context.getActionURL().getParameter(PEPTIDE_PROPHET_PROBABILITY_NAME)));
+            }
+        }
+        catch (NumberFormatException e) {}
 
         settings.setQueryName(config.getTableName());
 
-        List<MS2Run> runs = RunListCache.getCachedRuns(runList, false, context);
+        List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList().intValue(), false, context);
 
         schema.setRuns(runs);
-        return new SpectraCountQueryView(schema, settings, config, viewName, runList);
+        return new SpectraCountQueryView(schema, settings, config, form);
     }
 
     private String getRunList(ViewContext context)
@@ -96,6 +102,8 @@ public class SpectraCountRReport extends RReport
         ActionURL result = super.getRunReportURL(context);
         result.addParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME, context.getActionURL().getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME));
         result.addParameter(SPECTRA_CONFIG_NAME, context.getActionURL().getParameter(SPECTRA_CONFIG_NAME));
+        result.addParameter(PEPTIDE_PROPHET_PROBABILITY_NAME, context.getActionURL().getParameter(PEPTIDE_PROPHET_PROBABILITY_NAME));
+        result.addParameter(PEPTIDE_FILTER_TYPE_NAME, context.getActionURL().getParameter(PEPTIDE_FILTER_TYPE_NAME));
         result.addParameter(RUN_LIST_NAME, getRunList(context));
         return result;
     }

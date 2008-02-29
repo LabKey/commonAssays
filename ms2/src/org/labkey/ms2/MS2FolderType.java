@@ -16,7 +16,7 @@ public class MS2FolderType extends DefaultFolderType
         //TODO: Get rid of these strings.. Should be part of some service
         super("MS2",
                 "Manage tandem mass spectrometry analyses using a variety of popular search engines, " +
-                        "including Mascot, Sequest, and X-Tandem. " +
+                        "including Mascot, Sequest, and X!Tandem. " +
                         "Use existing analytic tools like PeptideProphet and ProteinProphet.",
             Arrays.asList(
                 Portal.getPortalPart("Data Pipeline").createWebPart(),
@@ -25,7 +25,8 @@ public class MS2FolderType extends DefaultFolderType
             Arrays.asList(
                 Portal.getPortalPart(ProteinSearchWebPart.NAME).createWebPart(),
                 Portal.getPortalPart(MS2Module.MS2_SAMPLE_PREPARATION_RUNS_NAME).createWebPart(),
-                Portal.getPortalPart("Experiments").createWebPart(),
+                Portal.getPortalPart("Run Groups").createWebPart(),
+                Portal.getPortalPart("Run Types").createWebPart(),
                 Portal.getPortalPart("Sample Sets").createWebPart(),
                 Portal.getPortalPart("Protocols").createWebPart()
             ),

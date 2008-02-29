@@ -3,12 +3,12 @@ package org.labkey.ms2.query;
 import org.labkey.api.data.*;
 import org.labkey.api.query.*;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
 
-import javax.servlet.http.HttpServletRequest;
 import java.sql.Types;
 import java.util.List;
 import java.util.ArrayList;
@@ -22,10 +22,10 @@ public class SpectraCountTableInfo extends VirtualTable
     private final MS2Schema _ms2Schema;
 
     private final SpectraCountConfiguration _config;
-    private final HttpServletRequest _request;
-    private final String _peptideViewName;
+    private final ViewContext _context;
 
     private List<PeptideAggregate> _aggregates = new ArrayList<PeptideAggregate>();
+    private MS2Controller.SpectraCountForm _form;
 
     private class PeptideAggregate
     {
@@ -92,14 +92,14 @@ public class SpectraCountTableInfo extends VirtualTable
         }
     }
 
-    public SpectraCountTableInfo(MS2Schema ms2Schema, SpectraCountConfiguration config, HttpServletRequest request, String peptideViewName)
+    public SpectraCountTableInfo(MS2Schema ms2Schema, SpectraCountConfiguration config, ViewContext context, MS2Controller.SpectraCountForm form)
     {
         super(MS2Manager.getSchema());
         _ms2Schema = ms2Schema;
         _config = config;
 
-        _request = request;
-        _peptideViewName = peptideViewName;
+        _context = context;
+        _form = form;
 
         _aggregates.add(new PeptideAggregate(FieldKey.fromParts("PeptideProphet"), true, true, true, true, false));
         _aggregates.add(new PeptideAggregate(FieldKey.fromParts("RetentionTime"), true, true, true, true, false));
@@ -128,6 +128,12 @@ public class SpectraCountTableInfo extends VirtualTable
             addColumn(new ExprColumn(this, "TrimmedPeptide", new SQLFragment("TrimmedPeptide"), Types.VARCHAR));
         }
 
+        if (_config.isGroupedByCharge())
+        {
+            addColumn(new ExprColumn(this, "Charge", new SQLFragment("Charge"), Types.INTEGER));
+            defaultCols.add(FieldKey.fromParts("Charge"));
+        }
+
         if (_config.isGroupedByProtein())
         {
             ExprColumn col = new ExprColumn(this, "Protein", new SQLFragment("SequenceId"), Types.INTEGER);
@@ -144,12 +150,7 @@ public class SpectraCountTableInfo extends VirtualTable
             addColumn(new ExprColumn(this, "FastaName", new SQLFragment("FastaName"), Types.VARCHAR));
         }
 
-        if (_config.isGroupedByCharge())
-        {
-            addColumn(new ExprColumn(this, "Charge", new SQLFragment("Charge"), Types.INTEGER));
-            defaultCols.add(FieldKey.fromParts("Charge"));
-        }
-        else
+        if (!_config.isGroupedByCharge())
         {
             addColumn(new ExprColumn(this, "ChargeStatesObsv", new SQLFragment("ChargeStatesObsv"), Types.INTEGER));
             defaultCols.add(FieldKey.fromParts("ChargeStatesObsv"));
@@ -247,7 +248,21 @@ public class SpectraCountTableInfo extends VirtualTable
         peptideFieldKeys.add(FieldKey.fromParts("RowId"));
         peptideFieldKeys.add(FieldKey.fromParts("Charge"));
 
-        SQLFragment peptidesSQL = _ms2Schema.getPeptideSelectSQL(_request, _peptideViewName, peptideFieldKeys);
+        SQLFragment peptidesSQL;
+        if (_form.isCustomViewPeptideFilter())
+        {
+            peptidesSQL = _ms2Schema.getPeptideSelectSQL(_context.getRequest(), _form.getCustomViewName(_context), peptideFieldKeys);
+        }
+        else
+        {
+            SimpleFilter filter = new SimpleFilter();
+            if (_form.isPeptideProphetFilter() && _form.getPeptideProphetProbability() != null)
+            {
+                filter.addClause(new CompareType.CompareClause("PeptideProphet", CompareType.GTE, _form.getPeptideProphetProbability()));
+            }
+            peptidesSQL = _ms2Schema.getPeptideSelectSQL(filter, peptideFieldKeys);
+        }
+        
         sql.append(peptidesSQL);
         sql.append(") pd ON (f.fraction = pd.fraction)\n");
 
