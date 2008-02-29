@@ -85,7 +85,7 @@ public class FeaturesTableInfo extends FilteredTable
                     "\nINNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)" +
                     "\nWHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId" +
                     "\nAND r.Container IN (" + _schema.getContainerInList() + ")" +
-                    "\nAND r.Deleted='false')");
+                    "\nAND r.Deleted=?)", false);
 
             ColumnInfo ciPepId = addColumn(new ExprColumn(this, COLUMN_PEPTIDE_INFO, sqlPepJoin, java.sql.Types.INTEGER, getColumn("FeatureId")));
 
