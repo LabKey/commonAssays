@@ -314,6 +314,7 @@ public class FlowSchema extends UserSchema
         {
             ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getSqlTypeInt());
             ret.copyAttributesFrom(underlyingColumn);
+            ret.setIsHidden(underlyingColumn.isHidden());
             addColumn(ret);
             return ret;
         }
