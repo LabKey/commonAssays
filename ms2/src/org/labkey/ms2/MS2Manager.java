@@ -76,7 +76,7 @@ public class MS2Manager
 
     private static PeptideIndexCache _peptideIndexCache = new PeptideIndexCache();
 
-    private static final String FRACTION_PREFIX = "MS2Run/";
+    private static final String FRACTION_PREFIX = "MS2Fraction/";
     private static final String _ms2RunPrefix = "MS2Run/";
     private static final String _peptideProphetSummaryPrefix = "PeptideProphetSummary/";
     protected static final String _ms2RunPackage = MS2Run.class.getPackage().getName() + ".";
