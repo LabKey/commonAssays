@@ -10,6 +10,7 @@ import org.labkey.api.reports.report.view.ChartUtil;
 import org.labkey.api.reports.report.view.RReportBean;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.SpectraCountConfiguration;
+import org.labkey.ms2.MS2Controller;
 
 /**
  * User: jeckels
@@ -51,8 +52,13 @@ public class SpectraCountQueryView extends QueryView
         bean.addParam("runIndex", Integer.toString(_runListId));
 //        bean.addParam("forExport", Boolean.toString(_forExport));
 
-        ActionURL url = ChartUtil.getRReportDesignerURL(_viewContext, bean);
-        return new CreateChartButton(url.toString(), false, true,
+        ActionURL chartURL = ChartUtil.getRReportDesignerURL(_viewContext, bean);
+        ActionURL url = getViewContext().getActionURL();
+        chartURL.replaceParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME, url.getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME));
+        chartURL.replaceParameter("spectraConfig", url.getParameter("spectraConfig"));
+        chartURL.replaceParameter("runList", url.getParameter("runList"));
+        
+        return new CreateChartButton(chartURL.toString(), false, true,
                 getSchema().getSchemaName(), getSettings().getQueryName(), getSettings().getViewName(), SpectraCountRReport.TYPE);
     }
 }
