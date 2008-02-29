@@ -1,5 +1,8 @@
-<%@ page import="org.labkey.api.pipeline.PipelineUrls"%>
+<%@ page import="org.labkey.api.data.Container"%>
+<%@ page import="org.labkey.api.exp.api.ExpRun" %>
+<%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.ms2.pipeline.FileStatus" %>
 <%@ page import="org.labkey.ms2.pipeline.MS2ExperimentForm" %>
 <%@ page import="org.labkey.ms2.pipeline.MS2PipelineForm" %>
@@ -9,31 +12,87 @@
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <p/>
-
-<form method=post action="<%=urlFor(PipelineController.ShowDescribeMS2RunAction.class)%>">
 <%
-    MS2ExperimentForm form = (MS2ExperimentForm) getForm();
-    PipelineUrls up = urlProvider(PipelineUrls.class);    
+PipelineUrls up = urlProvider(PipelineUrls.class);
+Container c = getContainer();
+MS2ExperimentForm form = (MS2ExperimentForm) getForm();
 
-    int annotFileCount = 0;
-    for (FileStatus status : form.getMzXmlFileStatus().values())
-        if (status == FileStatus.UNKNOWN)
-            annotFileCount++;
+int nMzXML = form.getMzXmlFileStatus().size();
+int nAnnotations = form.getAnnotationFiles().size();
+int nRuns = form.getCreatingRuns().size();
+
+int nUnannotated = 0;
+for (FileStatus status : form.getMzXmlFileStatus().values())
+    if (status == FileStatus.UNKNOWN)
+        nUnannotated++;
+    
+if (nAnnotations != 0)
+{ %>
+    Sample information for <%= nMzXML == 1 ? "this file" : "these files" %> has already been described by the following XAR file<%= nAnnotations == 1 ? "" : "s" %>:
+    <ul>
+<%
+    for (File annotationFile : form.getAnnotationFiles())
+    {
+        %><li><%= annotationFile.getName() %></li><%
+    }
 %>
+    </ul>
+<p><%
+}
+
+if (nRuns != 0)
+{ %>
+    Sample information for <%= nMzXML == 1 ? "this file" : "these files" %> has already been described and loaded with the following experiment run<%= nRuns == 1 ? "" : "s" %>:
+    <ul>
+<%
+    for (ExpRun run : form.getCreatingRuns())
+    {
+        ActionURL runURL = new ActionURL("Experiment", "showRunGraph.view", c);
+        %><li><a href="<%= runURL %>rowId=<%= run.getRowId() %>"><%= run.getName() %></a></li><%
+    }
+%>
+    </ul>
+<%
+}
+
+if (nRuns > 0 || nAnnotations > 0)
+{
+    if (!form.getCreatingRuns().isEmpty() || !form.getAnnotationFiles().isEmpty())
+    {
+%>
+<i>Choosing to redescribe you samples will delete XAR files and experiment runs listed above and allow you to re-enter this information.</i>
+<p/>
+    <table>
+        <tr>
+            <td>
+                <labkey:button text="Redescribe Samples" href="<%=PipelineController.urlRedescribeFiles(c, form.getPath())%>"/>
+            </td>
+<%      if (nUnannotated == 0)
+        { %>
+            <td>
+                <labkey:button text="Cancel" href="<%=up.urlReferer(c)%>"/>
+            </td>
+<%      } %>
+        </tr>
+    </table><%
+    }
+}
+
+if (nUnannotated > 0)    
+{
+%>
+<form method=post action="<%=urlFor(PipelineController.ShowDescribeMS2RunAction.class)%>">
 <input type="hidden" name="stepString" value="pickProtocol">
-<input type="hidden" name="size" value="<%=annotFileCount%>">
+<input type="hidden" name="size" value="<%=nUnannotated%>">
 <input type="hidden" name="<%=MS2PipelineForm.PARAMS.path%>" value="<%=h(form.getPath())%>">
 <input type="hidden" name="<%=MS2PipelineForm.PARAMS.searchEngine%>" value="<%=h(form.getSearchEngine())%>">
 <br>
 
-<p>You may optionally choose the experimental protocol that describes how the LC-MS/MS sample was processed to create the
-mzXML file. This step will allow you to identify the sample used as input to the run, which you can then use for later
+<p>Choose the experimental protocol that describes how the LC-MS/MS sample was processed to create the
+mzXML file. This will allow you to identify the sample used as input to the run, which you can then use for later
 analysis inside of CPAS.</p>
-<p>You may choose to skip this step. If so, you can enter this information later by initiating another search through
-the pipeline.</p>
 
-[<a href="<%=PipelineController.urlShowCreateMS2Protocol(getContainer(), form)%>">create a new protocol</a>]<%= PageFlowUtil.helpPopup("Create a new protocol", "Creating a new protocol lets you describe the steps taken to process a sample, or any special configuration for the mass spectrometer.") %>
-&nbsp;&nbsp;&nbsp;[<a href="<%=PipelineController.urlSearch(getContainer(), form, true)%>">skip this step and continue</a>]
+[<a href="<%=PipelineController.urlShowCreateMS2Protocol(c, form)%>">create a new protocol</a>]<%= PageFlowUtil.helpPopup("Create a new protocol", "Creating a new protocol lets you describe the steps taken to process a sample, or any special configuration for the mass spectrometer.") %>
 <br>
 <br>
 <%
@@ -51,7 +110,7 @@ the pipeline.</p>
 %>
     <table border=0>
 <%
-    if (annotFileCount > 1)
+    if (nUnannotated > 1)
     {
 %>
         <tr>
@@ -150,7 +209,7 @@ for (Map.Entry<File, FileStatus> entry : form.getMzXmlFileStatus().entrySet())
             <labkey:button text="Submit"/>
         </td>
         <td>
-            <labkey:button text="Cancel" href="<%=up.urlReferer(getContainer())%>"/>
+            <labkey:button text="Cancel" href="<%=up.urlReferer(c)%>"/>
         </td>
     </tr>
 </table>
@@ -178,9 +237,12 @@ for (Map.Entry<File, FileStatus> entry : form.getMzXmlFileStatus().entrySet())
     else
     {
 %>
-This step allows you to record additional information about the sample that
+This page allows you to record additional information about the sample that
 was used to generate the mzXML file and the specific steps ("protocol")
-used to prepare the sample. 
+used to prepare the sample.
+<p/>
+<labkey:button text="Cancel" href="<%=up.urlReferer(c)%>"/>
 <%
     }
+}
 %>

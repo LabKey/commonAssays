@@ -30,8 +30,6 @@ abstract public class SearchPage extends FormPage<MS2SearchForm>
     private Map<File, FileStatus> mzXmlFileStatus;
     private Map<String, String[]> sequenceDBs;
     private String[] protocolNames;
-    private Set<File> annotationFiles;
-    private Set<ExpRun> creatingRuns;
 
     public Map<File, FileStatus> getMzXmlFileStatus()
     {
@@ -63,23 +61,4 @@ abstract public class SearchPage extends FormPage<MS2SearchForm>
         this.protocolNames = protocolNames;
     }
 
-    public Set<File> getAnnotationFiles()
-    {
-        return annotationFiles;
-    }
-
-    public void setAnnotationFiles(Set<File> annotationFiles)
-    {
-        this.annotationFiles = annotationFiles;
-    }
-
-    public Set<ExpRun> getCreatingRuns()
-    {
-        return creatingRuns;
-    }
-
-    public void setCreatingRuns(Set<ExpRun> creatingRuns)
-    {
-        this.creatingRuns = creatingRuns;
-    }
 }

@@ -21,6 +21,8 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.ms2.pipeline.MassSpecProtocol;
 import org.labkey.ms2.pipeline.MassSpecProtocolFactory;
 
@@ -29,9 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <code>MS2ExperimentForm</code>
@@ -69,6 +69,8 @@ public class MS2ExperimentForm extends MS2PipelineForm
     private String[] protocolAvailableNames;
     private MassSpecProtocol[] protocols;
     private Map<File, FileStatus> mzXmlFileStatus;
+    private Set<ExpRun> creatingRuns;
+    private Set<File> annotationFiles;
 
     public void reset(ActionMapping am, HttpServletRequest request)
     {
@@ -262,9 +264,17 @@ public class MS2ExperimentForm extends MS2PipelineForm
 
     public Map<File, FileStatus> getMzXmlFileStatus() throws IOException
     {
-        if (mzXmlFileStatus == null)
-            mzXmlFileStatus = MS2PipelineManager.getAnalysisFileStatus(getDirData(), null, getContainer());
         return mzXmlFileStatus;
+    }
+
+    public Set<ExpRun> getCreatingRuns()
+    {
+        return creatingRuns;
+    }
+
+    public Set<File> getAnnotationFiles()
+    {
+        return annotationFiles;
     }
 
     public String[] getProtocolAvailableNames()
@@ -339,5 +349,30 @@ public class MS2ExperimentForm extends MS2PipelineForm
         }
 
         return protocols;
+    }
+
+    public void ensureMzXMLFileStatus() throws IOException
+    {
+        if (mzXmlFileStatus == null)
+            mzXmlFileStatus = MS2PipelineManager.getAnalysisFileStatus(getDirData(), null, getContainer());
+
+        creatingRuns = new HashSet<ExpRun>();
+        annotationFiles = new HashSet<File>();
+        for (File mzXMLFile : mzXmlFileStatus.keySet())
+        {
+            if (mzXmlFileStatus.get(mzXMLFile) == FileStatus.UNKNOWN)
+                continue;
+
+            ExpRun run = ExperimentService.get().getCreatingRun(mzXMLFile, getContainer());
+            if (run != null)
+            {
+                creatingRuns.add(run);
+            }
+            File annotationFile = MS2PipelineManager.findAnnotationFile(mzXMLFile);
+            if (annotationFile != null)
+            {
+                annotationFiles.add(annotationFile);
+            }
+        }
     }
 }

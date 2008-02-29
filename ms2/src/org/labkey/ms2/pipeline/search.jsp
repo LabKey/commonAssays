@@ -20,7 +20,7 @@ boolean hasWork = false;
 
 <labkey:errors />
 
-<span style="font-size:<%=ThemeFont.getThemeFont().getHeader_1Size()%>">An MS2 search protocol is defined by a set of options for the search engine and a set of protein databases to search.</span>
+<span style="font-size:<%=ThemeFont.getThemeFont().getHeader_1Size()%>">An MS2 search protocol is defined by a set of options for the search engine and a protein sequence file to search.</span>
 <br><br>
 <%
     if ("".equals(form.getProtocol()) && getSequenceDBs().size () == 0)
@@ -265,55 +265,3 @@ boolean hasWork = false;
     try {document.getElementByName("protocol").focus();} catch(x){}
 </script><%
 }%>
-<p>
-<%
-if (!getAnnotationFiles().isEmpty())
-{ %>
-    Sample information for <%= getMzXmlFileStatus().size() == 1 ? "this file" : "these files" %> has already been described by the following XAR file<%= getAnnotationFiles().size() == 1 ? "" : "s" %>:
-    <ul>
-<%
-    for (File annotationFile : getAnnotationFiles())
-    {
-        %><li><%= annotationFile.getName() %></li><%
-    }
-%>
-    </ul>
-<p><%
-}
-
-if (!getCreatingRuns().isEmpty())
-{ %>
-    Sample information for <%= getMzXmlFileStatus().size() == 1 ? "this file" : "these files" %> has already been described and loaded with the following experiment run<%= getCreatingRuns().size() == 1 ? "" : "s" %>:
-    <ul>
-<%
-    for (ExpRun run : getCreatingRuns())
-    {
-        ActionURL runURL = new ActionURL("Experiment", "showRunGraph.view", getContainer());
-        %><li><a href="<%= runURL %>rowId=<%= run.getRowId() %>"><%= run.getName() %></a></li><%
-    }
-%>
-    </ul>
-<%
-}
-else
-{
-    %>Currently, no experiment runs that describe the sample information for <%= getMzXmlFileStatus().size() == 1 ? "this mzXML file" : "these mzXML files" %> have been loaded.<%
-}
-
-if (!getCreatingRuns().isEmpty() || !getAnnotationFiles().isEmpty())
-{
-    ActionURL urlRedescribe = urlFor(PipelineController.RedescribeFilesAction.class);
-    urlRedescribe.addParameter("path", form.getPath());
-    urlRedescribe.addParameter("searchEngine", form.getSearchEngine());
-%>
-    <table>
-        <tr>
-            <td>
-                <labkey:button text="Redescribe sample information" href="<%=urlRedescribe%>"/>
-            </td>
-            <td>
-                <i>(This will immediately delete the XAR files and experiment runs listed above and then prompt you to redescribe them)</i>                
-            </td>
-        </tr>
-    </table><%
-} %>

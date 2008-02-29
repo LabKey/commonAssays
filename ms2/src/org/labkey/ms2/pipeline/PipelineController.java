@@ -283,6 +283,7 @@ public class PipelineController extends SpringActionController
         private File _dirAnalysis;
         private AbstractMS2SearchPipelineProvider _provider;
         private AbstractMS2SearchProtocol _protocol;
+        private String[] _protocolNames;
 
         public String getProviderName()
         {
@@ -321,6 +322,20 @@ public class PipelineController extends SpringActionController
             setHelpTopic(getHelpTopic(_provider.getHelpTopic()));
 
             AbstractMS2SearchProtocolFactory protocolFactory = _provider.getProtocolFactory();
+            _protocolNames = protocolFactory.getProtocolNames(_dirRoot.toURI());
+
+            if ("".equals(form.getProtocol()))
+            {
+                // If protocol is empty check for a saved protocol
+                String protocolNameLast = PipelineService.get().getLastProtocolSetting(protocolFactory,
+                        getContainer(), getUser());
+                if (protocolNameLast != null && !"".equals(protocolNameLast))
+                {
+                    // Make sure it is still around.
+                    if (Arrays.asList(_protocolNames).contains(protocolNameLast))
+                        form.setProtocol(protocolNameLast);
+                }
+            }
 
             String protocolName = form.getProtocol();
 
@@ -379,6 +394,8 @@ public class PipelineController extends SpringActionController
                     _protocol.setDirSeqRoot(_dirSeqRoot);
                     _protocol.setDbPath(form.getSequenceDBPath());
                     _protocol.setDbNames(new String[] {form.getSequenceDB()});
+                    PipelineService.get().rememberLastProtocolSetting(_protocol.getFactory(),
+                            getContainer(), getUser(), form.getProtocol());
                 }
                 else
                 {
@@ -395,6 +412,8 @@ public class PipelineController extends SpringActionController
                     if (form.isSaveProtocol())
                     {
                         _protocol.saveDefinition(_dirRoot.toURI());
+                        PipelineService.get().rememberLastProtocolSetting(_protocol.getFactory(),
+                                getContainer(), getUser(), form.getProtocolName());
                     }
                 }
 
@@ -473,40 +492,6 @@ public class PipelineController extends SpringActionController
 
             Map<File, FileStatus> mzXmlFileStatus =
                     MS2PipelineManager.getAnalysisFileStatus(_dirData, _dirAnalysis, getContainer());
-            for (FileStatus status : mzXmlFileStatus.values())
-            {
-                // Look for unannotated data.
-                if (status == FileStatus.UNKNOWN && !form.isSkipDescription())
-                    return HttpView.redirect(urlShowDescribeMS2Run(getContainer(), form));
-            }
-
-            Set<ExpRun> creatingRuns = new HashSet<ExpRun>();
-            Set<File> annotationFiles = new HashSet<File>();
-            try
-            {
-                for (File mzXMLFile : mzXmlFileStatus.keySet())
-                {
-                    if (mzXmlFileStatus.get(mzXMLFile) == FileStatus.UNKNOWN)
-                        continue;
-
-                    ExpRun run = ExperimentService.get().getCreatingRun(mzXMLFile, getContainer());
-                    if (run != null)
-                    {
-                        creatingRuns.add(run);
-                    }
-                    File annotationFile = MS2PipelineManager.findAnnotationFile(mzXMLFile);
-                    if (annotationFile != null)
-                    {
-                        annotationFiles.add(annotationFile);
-                    }
-                }
-            }
-            catch (IOException e)
-            {
-                String errorMessage = "While attempting to initiate the search on the mzXML file there was an " +
-                    "error interacting with the file system. " + ((e.getMessage() != null) ? "<br>\nDetails: " + e.getMessage() : "");
-                return HttpView.throwNotFoundMV(errorMessage);
-            }
 
             if (form.getConfigureXml().length() == 0)
             {
@@ -517,6 +502,7 @@ public class PipelineController extends SpringActionController
             }
 
             Map<String, String[]> sequenceDBs = new HashMap<String, String[]>();
+            
             // If the protocol is being loaded, then the user doesn't need to pick a FASTA file,
             // it will be part of the protocol.
             // CONSIDER: Should we check for the existence of the protocol's FASTA file, since
@@ -535,15 +521,11 @@ public class PipelineController extends SpringActionController
                 }
             }
 
-            String[] protocolNames = _provider.getProtocolFactory().getProtocolNames(_dirRoot.toURI());
-
             SearchPage page = (SearchPage) FormPage.get(PipelineController.class, form, "search.jsp");
 
             page.setMzXmlFileStatus(mzXmlFileStatus);
             page.setSequenceDBs(sequenceDBs);
-            page.setProtocolNames(protocolNames);
-            page.setAnnotationFiles(annotationFiles);
-            page.setCreatingRuns(creatingRuns);
+            page.setProtocolNames(_protocolNames);
 
             return page.createView(errors);
         }
@@ -1035,6 +1017,12 @@ public class PipelineController extends SpringActionController
         }
     }
 
+    public static ActionURL urlRedescribeFiles(Container c, String path)
+    {
+        return new ActionURL(RedescribeFilesAction.class, c)
+                .addParameter(MS2PipelineForm.PARAMS.path, path);
+    }
+
     @RequiresPermission(ACL.PERM_DELETE)
     public class RedescribeFilesAction extends RedirectAction<MS2ExperimentForm>
     {
@@ -1213,7 +1201,7 @@ public class PipelineController extends SpringActionController
 
         public ActionURL getSuccessURL(MS2ExperimentForm form)
         {
-            return urlSearch(getContainer(), form, true);
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlReferer(getContainer());
         }
 
         public ModelAndView getView(MS2ExperimentForm form, boolean reshow, BindException errors) throws Exception
@@ -1222,6 +1210,17 @@ public class PipelineController extends SpringActionController
 
             ExperimentService.get().ensureDefaultSampleSet();
             ExpSampleSet activeMaterialSource = ExperimentService.get().ensureActiveSampleSet(getContainer());
+
+            try
+            {
+                form.ensureMzXMLFileStatus();
+            }
+            catch (IOException e)
+            {
+                String errorMessage = "While attempting retrieve information about an mzXML file there was an " +
+                    "error interacting with the file system. " + ((e.getMessage() != null) ? "<br>\nDetails: " + e.getMessage() : "");
+                return HttpView.throwNotFoundMV(errorMessage);
+            }
 
             URI uriRoot = form.getDirRoot().toURI();
             if (form.getStep() == MS2ExperimentForm.Step.pickProtocol)
