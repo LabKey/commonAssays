@@ -6,9 +6,8 @@ import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.*;
-import org.labkey.api.security.User;
 import org.labkey.api.security.ACL;
-import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
@@ -202,30 +201,42 @@ public class MS1Schema extends UserSchema
         // Filter to just the runs with the MS1 protocol
         result.setProtocolPatterns("urn:lsid:%:Protocol.%:MS1.%");
 
-        //add a new column info for the features link that uses a display column
-        //factory to return a UrlColumn.
-        //this depends on the RowId column, but that will always be selected
-        //because it's a primary key
-        ColumnInfo cinfo = new ColumnInfo("Features Link");
-        cinfo.setDescription("Link to the msInspect features found in each run");
-        cinfo.setDisplayColumnFactory(new DisplayColumnFactory()
+        //add a new column for the features link
+        //that wraps the experiment run row id
+        ColumnInfo rowIdCol = result.getColumn("RowId");
+        if(rowIdCol != null)
         {
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            ColumnInfo featuresLinkCol = result.addColumn(new ExprColumn(result, "Features Link",
+                    new SQLFragment(rowIdCol.getValueSql()), rowIdCol.getSqlTypeInt(), rowIdCol));
+            featuresLinkCol.setDescription("Link to the msInspect features found in each run");
+            featuresLinkCol.setDisplayColumnFactory(new DisplayColumnFactory()
             {
-                ActionURL url = new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer());
-                return new UrlColumn(StringExpressionFactory.create(url.getLocalURIString() + "runId=${RowId}", true), "features");
-            }
-        });
-        result.addColumn(cinfo);
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    return new FeaturesLinkDisplayColumn(colInfo, getContainer());
+                }
+            });
+        }
+
+        //reset the URL on the name column to jump to our feature details view
+        ColumnInfo nameCol = result.getColumn("Name");
+        if(null != nameCol)
+        {
+            ActionURL featuresUrl = new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer());
+            nameCol.setURL(featuresUrl.getLocalURIString() + "runId=${rowId}");
+        }
 
         //set the default visible columns list
         List<FieldKey> columns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
-        //move the Features link to position 1
-        columns.remove(FieldKey.fromParts("Features Link"));
-        columns.add(1, FieldKey.fromParts("Features Link"));
 
-        //add the msInspect def file and mzXml file columns
-        columns.add(FieldKey.fromParts("Input", "msInspectDefFile"));
+        //remove unecessary columns
+        columns.remove(FieldKey.fromParts("CreatedBy"));
+        columns.remove(FieldKey.fromParts("Protocol"));
+
+        //move the Features link
+        columns.remove(FieldKey.fromParts("Features Link"));
+        columns.add(2, FieldKey.fromParts("Features Link"));
+
         columns.add(FieldKey.fromParts("Input", "mzXMLFile"));
         result.setDefaultVisibleColumns(columns);
 

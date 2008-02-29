@@ -428,30 +428,48 @@ public class MS2Schema extends UserSchema
         result.addColumn(ms2DetailsColumn);
 
         ms2DetailsColumn.setIsHidden(false);
-        FieldKey fieldLinks = FieldKey.fromParts("Links");
-        FieldKey fieldMS2Links = FieldKey.fromParts("MS2Details", "Links");
-        boolean ms2LinksAdded = false;
-        List<FieldKey> columns = new ArrayList<FieldKey>();
-        for (FieldKey field : result.getDefaultVisibleColumns())
-        {
-            columns.add(field);
-            if (!ms2LinksAdded && fieldLinks.equals(field))
-            {
-                columns.add(fieldMS2Links);
-                ms2LinksAdded = true;
-            }
-        }
+
+        //adjust the default visible columns
+        List<FieldKey> columns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
         columns.remove(FieldKey.fromParts("Name"));
         columns.remove(FieldKey.fromParts("Protocol"));
         columns.remove(FieldKey.fromParts("CreatedBy"));
-        if (!ms2LinksAdded)
-        {
-            columns.add(fieldMS2Links);
-        }
+
+        columns.add(2, FieldKey.fromParts("MS2Details", "Links"));
         columns.add(FieldKey.fromParts("MS2Details", "Path"));
         columns.add(FieldKey.fromParts("Input", "FASTA"));
+
+        FieldKey ms2DetailsKey = FieldKey.fromParts("MS2Details");
+        columns.remove(ms2DetailsKey);
+        columns.add(3, ms2DetailsKey);
+
         result.setDefaultVisibleColumns(columns);
         return result;
+
+//        FieldKey fieldLinks = FieldKey.fromParts("Links");
+//        FieldKey fieldMS2Links = FieldKey.fromParts("MS2Details", "Links");
+//        boolean ms2LinksAdded = false;
+//        List<FieldKey> columns = new ArrayList<FieldKey>();
+//        for (FieldKey field : result.getDefaultVisibleColumns())
+//        {
+//            columns.add(field);
+//            if (!ms2LinksAdded && fieldLinks.equals(field))
+//            {
+//                columns.add(fieldMS2Links);
+//                ms2LinksAdded = true;
+//            }
+//        }
+//        columns.remove(FieldKey.fromParts("Name"));
+//        columns.remove(FieldKey.fromParts("Protocol"));
+//        columns.remove(FieldKey.fromParts("CreatedBy"));
+//        if (!ms2LinksAdded)
+//        {
+//            columns.add(fieldMS2Links);
+//        }
+//        columns.add(FieldKey.fromParts("MS2Details", "Path"));
+//        columns.add(FieldKey.fromParts("Input", "FASTA"));
+//        result.setDefaultVisibleColumns(columns);
+//        return result;
     }
 
     public void setRuns(MS2Run[] runs)

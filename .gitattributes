@@ -574,6 +574,7 @@ ms1/src/org/labkey/ms1/pipeline/templates/msInspectPeptidesPeaks.xml -text
 ms1/src/org/labkey/ms1/query/ContainerFilter.java -text
 ms1/src/org/labkey/ms1/query/FeaturesFilter.java -text
 ms1/src/org/labkey/ms1/query/FeaturesFilterFactory.java -text
+ms1/src/org/labkey/ms1/query/FeaturesLinkDisplayColumn.java -text
 ms1/src/org/labkey/ms1/query/FeaturesTableInfo.java -text
 ms1/src/org/labkey/ms1/query/FilesTableInfo.java -text
 ms1/src/org/labkey/ms1/query/ListFilterBase.java -text
@@ -604,6 +605,7 @@ ms1/src/org/labkey/ms1/view/SimilarSearchView.jsp -text
 ms1/src/org/labkey/ms1/view/SpectrumChart.java -text
 ms1/src/org/labkey/ms1/view/softwareView.jsp -text
 ms1/webapp/WEB-INF/ms1/ms1Context.xml -text
+ms1/webapp/ms1/images/features.png -text
 ms2/gwtsrc/MS2GWT.iml -text
 ms2/gwtsrc/org/labkey/ms2/MS2VennDiagramView.gwt.xml -text
 ms2/gwtsrc/org/labkey/ms2/client/CompareService.java -text
