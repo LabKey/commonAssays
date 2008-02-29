@@ -18,22 +18,15 @@ package org.labkey.ms2;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.labkey.common.tools.Peptide;
 import org.labkey.common.tools.Hydrophobicity3;
+import org.labkey.common.tools.Peptide;
 import org.labkey.common.util.Pair;
-import org.labkey.api.util.NetworkDrive;
-import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
-import org.labkey.ms2.reader.SimpleScan;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.net.URL;
-import java.net.URISyntaxException;
-import java.net.URI;
 
 public class MS2Peptide
 {
@@ -96,89 +89,19 @@ public class MS2Peptide
 
         fragment();
 
-        byte[] spectrumBytes = MS2Manager.getSpectrum(_fractionId, _scan);
-        if (spectrumBytes == null)
+        try
         {
-            MS2Fraction fraction = MS2Manager.getFraction(_fractionId);
-            if (fraction != null && fraction.getMzXmlURL() != null)
-            {
-                URL url = new URL(fraction.getMzXmlURL());
-                File f = null;
-                try
-                {
-                    URI uri = url.toURI();
-                    if (uri.getAuthority() == null)
-                    {
-                        f = new File(uri);
-                    }
-                    else
-                    {
-                        _spectrumErrorMessage = "Invalid mzXMLURL: " + fraction.getMzXmlURL();
-                    }
-                }
-                catch (URISyntaxException e)
-                {
-                    _spectrumErrorMessage = "Bad mzXML URI: " + fraction.getMzXmlURL();
-                }
-                if (f != null && NetworkDrive.exists(f))
-                {
-                    RandomAccessMzxmlIterator iter = null;
-                    try
-                    {
-                        iter = new RandomAccessMzxmlIterator(f.getAbsolutePath(), 2, getScan());
-                        if (iter.hasNext())
-                        {
-                            SimpleScan scan = iter.next();
-                            float[][] data = scan.getData();
-                            if (data != null)
-                            {
-                                _spectrumMZ = data[0];
-                                _spectrumIntensity = data[1];
-                            }
-                            else
-                            {
-                                _spectrumErrorMessage = "Could not find spectra for scan " + getScan() + " in " + f.getName();
-                            }
-                        }
-                        else
-                        {
-                            _spectrumErrorMessage = "Could not find scan " + getScan() + " in " + f.getName();
-                        }
-                    }
-                    finally
-                    {
-                        if (iter != null)
-                        {
-                            iter.close();
-                        }
-                    }
-                }
-                else if (_spectrumErrorMessage == null)
-                {
-                    if (f != null)
-                    {
-                        _spectrumErrorMessage = "Spectra file not found.\n" + f.getAbsolutePath();
-                    }
-                    else
-                    {
-                        _spectrumErrorMessage = "Unable to find spectra";
-                    }
-                }
-            }
+            Pair<float[], float[]> spectrum = MS2Manager.getSpectrum(_fractionId, _scan);
+            _spectrumMZ = spectrum.first;
+            _spectrumIntensity = spectrum.second;
         }
-        else
-        {
-            Pair<float[], float[]> pData = SpectrumLoader.byteArrayToFloatArrays(spectrumBytes);
-            _spectrumMZ = pData.first;
-            _spectrumIntensity = pData.second;
-        }
-
-        if (_spectrumMZ == null)
+        catch (MS2Manager.SpectrumException e)
         {
             _spectrumMZ = new float[0];
             _spectrumIntensity = new float[0];
+            _spectrumErrorMessage = e.getMessage();
         }
-        
+
         _massMatches = new ArrayList[_spectrumMZ.length];
         _bMatches = computeMatches(_b, "b", tolerance, xStart, xEnd);
         _yMatches = computeMatches(_y, "y", tolerance, xStart, xEnd);

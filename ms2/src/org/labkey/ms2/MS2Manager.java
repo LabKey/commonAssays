@@ -35,23 +35,29 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.Cache;
 import org.labkey.api.util.Formats;
+import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.HttpView;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.RelativeQuantAnalysisSummary;
+import org.labkey.common.util.Pair;
 import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
+import org.labkey.ms2.reader.SimpleScan;
 
-import javax.xml.stream.XMLStreamException;
 import javax.servlet.ServletException;
+import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -70,6 +76,7 @@ public class MS2Manager
 
     private static PeptideIndexCache _peptideIndexCache = new PeptideIndexCache();
 
+    private static final String FRACTION_PREFIX = "MS2Run/";
     private static final String _ms2RunPrefix = "MS2Run/";
     private static final String _peptideProphetSummaryPrefix = "PeptideProphetSummary/";
     protected static final String _ms2RunPackage = MS2Run.class.getPackage().getName() + ".";
@@ -942,18 +949,103 @@ public class MS2Manager
     }
 
 
-    public static byte[] getSpectrum(int fractionId, int scan)
+    public static Pair<float[], float[]> getSpectrum(int fractionId, int scan) throws SpectrumException
     {
         try
         {
-            return Table.executeSingleton(getSchema(), "SELECT Spectrum FROM " + getTableInfoSpectraData() + " WHERE Fraction=? AND Scan=?", new Object[]{new Integer(fractionId), new Integer(scan)}, byte[].class);
+            byte[] spectrumBytes = Table.executeSingleton(getSchema(), "SELECT Spectrum FROM " + getTableInfoSpectraData() + " WHERE Fraction=? AND Scan=?", new Object[]{new Integer(fractionId), new Integer(scan)}, byte[].class);
+
+            if (null != spectrumBytes)
+                return SpectrumLoader.byteArrayToFloatArrays(spectrumBytes);
+            else
+                return getSpectrumFromMzXML(fractionId, scan);
         }
         catch (SQLException e)
         {
-            _log.error("getSpectrum", e);
-            return null;
+            throw new RuntimeSQLException(e);  // Unrecoverable -- always raise these excpetions to user and log to mothership
         }
     }
+
+
+    public static Pair<float[], float[]> getSpectrumFromMzXML(int fractionId, int scan) throws SpectrumException
+    {
+        MS2Fraction fraction = MS2Manager.getFraction(fractionId);
+
+        if (null == fraction || fraction.getMzXmlURL() == null)
+            throw new SpectrumException("Can't locate spectrum file.");
+
+        URL url;
+        File f = null;
+        try
+        {
+            url = new URL(fraction.getMzXmlURL());
+            URI uri = url.toURI();
+            if (uri.getAuthority() == null)
+            {
+                f = new File(uri);
+            }
+        }
+        catch (Exception e)
+        {
+            // Treat exceptions and null file identically below
+        }
+
+        if (null == f)
+            throw new SpectrumException("Invalid mzXML URL: " + fraction.getMzXmlURL());
+
+        if (!NetworkDrive.exists(f))
+            throw new SpectrumException("Spectrum file not found.\n" + f.getAbsolutePath());
+
+        RandomAccessMzxmlIterator iter = null;
+
+        try
+        {
+            iter = new RandomAccessMzxmlIterator(f.getAbsolutePath(), 2, scan);
+            if (iter.hasNext())
+            {
+                SimpleScan sscan = iter.next();
+                float[][] data = sscan.getData();
+                if (data != null)
+                {
+                    return new Pair<float[], float[]>(data[0], data[1]);
+                }
+                else
+                {
+                    throw new SpectrumException("Could not find spectra for scan " + scan + " in " + f.getName());
+                }
+            }
+            else
+            {
+                throw new SpectrumException("Could not find scan " + scan + " in " + f.getName());
+            }
+        }
+        catch (IOException e)
+        {
+            throw new SpectrumException("Error reading mzXML file " + f.getName(), e);
+        }
+        finally
+        {
+            if (iter != null)
+            {
+                iter.close();
+            }
+        }
+    }
+
+
+    public static class SpectrumException extends Exception
+    {
+        private SpectrumException(String message)
+        {
+            super(message);
+        }
+
+        private SpectrumException(String message, Throwable e)
+        {
+            super(message, e);
+        }
+    }
+
 
     private static void _addRunToCache(String runId, MS2Run run)
     {
@@ -1109,7 +1201,49 @@ public class MS2Manager
 
     public static MS2Fraction getFraction(int fractionId)
     {
-        return Table.selectObject(getTableInfoFractions(), fractionId, MS2Fraction.class);
+        MS2Fraction fraction = _getFractionFromCache(fractionId);
+
+        if (null == fraction)
+        {
+            fraction = Table.selectObject(getTableInfoFractions(), fractionId, MS2Fraction.class);
+            _addFractionToCache(fractionId, fraction);
+        }
+
+        return fraction;
+    }
+
+
+    private static void _addFractionToCache(int fractionId, MS2Fraction fraction)
+    {
+        Cache.getShared().put(FRACTION_PREFIX + fractionId, fraction);
+    }
+
+
+    private static MS2Fraction _getFractionFromCache(int fractionId)
+    {
+        return (MS2Fraction) Cache.getShared().get(FRACTION_PREFIX + fractionId);
+    }
+
+
+    private static void _removeFractionFromCache(int fractionId)
+    {
+        Cache.getShared().remove(FRACTION_PREFIX + fractionId);
+    }
+
+
+    public static MS2Fraction writeHydro(MS2Fraction fraction, Map updateMap)
+    {
+        try
+        {
+            Table.update(null, MS2Manager.getTableInfoFractions(), updateMap, new Integer(fraction.getFraction()), null);
+            _removeFractionFromCache(fraction.getFraction());
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+
+        return MS2Manager.getFraction(fraction.getFraction());
     }
 
 

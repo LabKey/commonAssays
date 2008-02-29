@@ -406,7 +406,7 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            appendRunNavTrail(root, _run, null, getPageConfig(), "viewRun");
+            appendRunNavTrail(root, _run, null, getPageConfig(), "viewRuns");
             return root;
         }
     }

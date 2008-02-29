@@ -286,7 +286,7 @@ public class PeptidesTableInfo extends FilteredTable
 
     private void addScoreColumns(TableInfo info)
     {
-        Map<String, List<Pair<MS2RunType,Integer>>> columnMap = new HashMap<String, List<Pair<MS2RunType, Integer>>>();
+        Map<String, List<Pair<MS2RunType, Integer>>> columnMap = new HashMap<String, List<Pair<MS2RunType, Integer>>>();
         List<MS2Run> runs = _schema.getRuns();
 
         Collection<MS2RunType> runTypes;

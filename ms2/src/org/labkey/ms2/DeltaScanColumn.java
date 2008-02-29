@@ -40,8 +40,6 @@ public class DeltaScanColumn extends SimpleDisplayColumn
     private static Logger _log = Logger.getLogger(DeltaScanColumn.class);
     private static Set<ColumnInfo> _queryColumns = new HashSet<ColumnInfo>(Arrays.asList(MS2Manager.getTableInfoPeptides().getColumns("Fraction,Scan,Peptide")));
 
-    private Map<Integer, MS2Fraction> fractionMap = new HashMap<Integer, MS2Fraction>();
-
     private ColumnInfo _fractionColInfo;
     private ColumnInfo _scanColInfo;
     private ColumnInfo _peptideColInfo;
@@ -81,16 +79,10 @@ public class DeltaScanColumn extends SimpleDisplayColumn
         if (null == fractionId)
             return 0;
 
-        MS2Fraction fraction = fractionMap.get(fractionId);
+        MS2Fraction fraction = MS2Manager.getFraction(fractionId.intValue());
 
-        if (null == fraction)
-        {
-            fraction = MS2Manager.getFraction(fractionId.intValue());
-            if (null == fraction.getHydroR2())
-                fraction = writeHydro(fraction.getFraction());
-
-            fractionMap.put(fractionId, fraction);
-        }
+        if (null == fraction.getHydroR2())
+            fraction = MS2Manager.writeHydro(fraction, runRegression(fraction));
 
         if (0 == fraction.getHydroR2().floatValue())
         {
@@ -104,7 +96,7 @@ public class DeltaScanColumn extends SimpleDisplayColumn
             if (null != scan && null != peptide)
             {
                 double h = MS2Peptide.hydrophobicity(peptide);
-                return (scan - (fraction.getHydroB0() + fraction.getHydroB1() * h)) / fraction.getHydroSigma();
+                return (scan.intValue() - (fraction.getHydroB0() + fraction.getHydroB1() * h)) / fraction.getHydroSigma();
             }
 
             return 0;
@@ -118,26 +110,9 @@ public class DeltaScanColumn extends SimpleDisplayColumn
     }
 
 
-    private MS2Fraction writeHydro(int fractionId)
-    {
-        Map updateMap = runRegression(fractionId);
-
-        try
-        {
-            Table.update(null, MS2Manager.getTableInfoFractions(), updateMap, new Integer(fractionId), null);
-        }
-        catch (SQLException e)
-        {
-            _log.error("writeHydro", e);
-        }
-
-        return MS2Manager.getFraction(fractionId);
-    }
-
-
     private final float ppLimit = 0.99f;
 
-    private Map runRegression(int fractionId)
+    private Map runRegression(MS2Fraction fraction)
     {
         Map<String, Float> map = new HashMap<String, Float>();
         ResultSet rs = null;
@@ -145,7 +120,7 @@ public class DeltaScanColumn extends SimpleDisplayColumn
         try
         {
 //                ResultSet rs = Table.executeQuery("ms2", "SELECT DERIVEDTBL.Scan, DERIVEDTBL.Peptide FROM (SELECT MIN(Scan) AS Scan, Peptide FROM MS2Peptides WHERE (Fraction = ?) GROUP BY Peptide) DERIVEDTBL INNER JOIN MS2Peptides ON DERIVEDTBL.Scan = MS2Peptides.Scan AND DERIVEDTBL.Peptide = MS2Peptides.Peptide WHERE (MS2Peptides.PeptideProphet > ?)", new Object[] {fractionId, new Float(ppLimit)});
-            rs = Table.executeQuery(MS2Manager.getSchema(), "SELECT MIN(Scan) AS Scan, Peptide FROM " + MS2Manager.getTableInfoPeptides() + " WHERE (Fraction = ?) AND (PeptideProphet > .6) GROUP BY Peptide HAVING (MAX(PeptideProphet) > ?)", new Object[]{new Integer(fractionId), new Float(ppLimit)});
+            rs = Table.executeQuery(MS2Manager.getSchema(), "SELECT MIN(Scan) AS Scan, Peptide FROM " + MS2Manager.getTableInfoPeptides() + " WHERE (Fraction = ?) AND (PeptideProphet > .6) GROUP BY Peptide HAVING (MAX(PeptideProphet) > ?)", new Object[]{fraction.getFraction(), new Float(ppLimit)});
 
             DoubleArray xArray = new DoubleArray();
             DoubleArray yArray = new DoubleArray();

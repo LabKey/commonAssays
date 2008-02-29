@@ -22,7 +22,6 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.module.FolderType;
-import org.labkey.api.module.Module;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
@@ -43,8 +42,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Set;
-import java.util.Map;
 
 
 public class ProjectController extends SpringActionController
@@ -66,15 +63,14 @@ public class ProjectController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    ActionURL homeUrl()
+    ActionURL homeURL()
     {
-        return new ActionURL("Project", "begin", ContainerManager.HOME_PROJECT_PATH);
+        return new ActionURL(BeginAction.class, ContainerManager.getHomeContainer());
     }
 
-    ActionURL projectUrl(String action)
+    ActionURL beginURL()
     {
-        return new ActionURL("Project", action, getContainer());
-
+        return new ActionURL(BeginAction.class, getContainer());
     }
 
     @RequiresPermission(ACL.PERM_NONE)
@@ -141,7 +137,7 @@ public class ProjectController extends SpringActionController
 
             ActionURL url = getViewContext().getActionURL();
             if (null == url || url.getExtraPath().equals("/"))
-                return HttpView.redirect(homeUrl());
+                return HttpView.redirect(homeURL());
 
             PageConfig page = getPageConfig();
             if (title != null)
@@ -171,7 +167,7 @@ public class ProjectController extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return HttpView.redirect(projectUrl("begin"));
+            return HttpView.redirect(beginURL());
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -247,7 +243,7 @@ public class ProjectController extends SpringActionController
 
         public ActionURL getSuccessURL(MovePortletForm movePortletForm)
         {
-            return projectUrl("begin");
+            return beginURL();
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -288,12 +284,12 @@ public class ProjectController extends SpringActionController
         {
             if (null != _desc && _desc.isEditable() && _desc.showCustomizeOnInsert())
             {
-                return projectUrl("customizeWebPart")
+                return new ActionURL(CustomizeWebPartAction.class, getContainer())
                         .addParameter("pageId", form.getPageId())
                         .addParameter("index", ""+_newPart.getIndex());
             }
             else
-                return projectUrl("begin");
+                return beginURL();
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -330,13 +326,13 @@ public class ProjectController extends SpringActionController
                 if (part.getIndex() != index)
                     newParts.add(part);
 
-            Portal.saveParts(form.getPageId(), newParts.toArray(new Portal.WebPart[0]));
+            Portal.saveParts(form.getPageId(), newParts.toArray(new Portal.WebPart[newParts.size()]));
             return true;
         }
 
         public ActionURL getSuccessURL(CustomizePortletForm customizePortletForm)
         {
-            return projectUrl("begin");
+            return beginURL();
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -471,17 +467,17 @@ public class ProjectController extends SpringActionController
         {
             _webPart = Portal.getPart(form.getPageId(), form.getIndex());
             if (null == _webPart)
-                return HttpView.redirect(projectUrl("begin"));
+                return HttpView.redirect(beginURL());
 
             WebPartFactory desc = Portal.getPortalPart(_webPart.getName());
             assert (null != desc);
             if (null == desc)
-                return HttpView.redirect(projectUrl("begin"));
+                return HttpView.redirect(beginURL());
 
             HttpView v = desc.getEditView(_webPart);
             assert(null != v);
             if (null == v)
-                return HttpView.redirect(projectUrl("begin"));
+                return HttpView.redirect(beginURL());
 
             return v;
         }
@@ -516,7 +512,7 @@ public class ProjectController extends SpringActionController
 
         public ActionURL getSuccessURL(CustomizePortletForm customizePortletForm)
         {
-            return projectUrl("begin");
+            return beginURL();
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -546,7 +542,7 @@ public class ProjectController extends SpringActionController
 
     public static ActionURL getSearchUrl(Container c)
     {
-        return new ActionURL("Project", "search", c);
+        return new ActionURL(SearchAction.class, c);
     }
 
 

@@ -64,7 +64,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
         public float[] getX()
         {
             if (null == _pair)
-                getSpectrum();
+                loadSpectrum();
 
             return _pair.first;
         }
@@ -72,25 +72,36 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
         public float[] getY()
         {
             if (null == _pair)
-                getSpectrum();
+                loadSpectrum();
 
             return _pair.second;
         }
 
-        private void getSpectrum()
+        private void loadSpectrum()
         {
-            byte[] bytes;
-
             try
             {
-                bytes = _rs.getBytes("Spectrum");
+                byte[] bytes = _rs.getBytes("Spectrum");
+
+                if (null != bytes)
+                {
+                    _pair = SpectrumLoader.byteArrayToFloatArrays(bytes);
+                }
+                else
+                {
+                    int fraction = _rs.getInt("Fraction");
+                    int scan = _rs.getInt("Scan");
+                    _pair = MS2Manager.getSpectrumFromMzXML(fraction, scan);
+                }
             }
             catch (SQLException e)
             {
                 throw new RuntimeSQLException(e);
             }
-
-            _pair = SpectrumLoader.byteArrayToFloatArrays(bytes);
+            catch (MS2Manager.SpectrumException e)
+            {
+                _pair = new Pair<float[], float[]>(new float[0], new float[0]);  // Ignore spectrum exceptions -- just return empty spectrum
+            }
         }
 
         public int getCharge()
@@ -143,11 +154,11 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             ProteinManager.replaceRunCondition(_filter, null, _iter.next());
 
             StringBuilder sql = new StringBuilder();
-            sql.append("SELECT Charge, PrecursorMass, MZ, Spectrum FROM (SELECT pep.*, Spectrum FROM ");  // Use sub-SELECT to disambiguate filters/sorts on Scan & Fraction
-            sql.append(MS2Manager.getTableInfoSpectraData());
-            sql.append(" sd INNER JOIN ");
+            sql.append("SELECT Fraction, Scan, Charge, PrecursorMass, MZ, Spectrum FROM (SELECT pep.*, Spectrum FROM ");  // Use sub-SELECT to disambiguate filters/sorts on Scan & Fraction
             sql.append(MS2Manager.getTableInfoPeptides());
-            sql.append(" pep ON sd.Fraction = pep.Fraction AND sd.Scan = pep.Scan) X\n");
+            sql.append(" pep LEFT OUTER JOIN ");         // We want all peptides, even those without spectra in the database
+            sql.append(MS2Manager.getTableInfoSpectraData());
+            sql.append(" sd ON sd.Fraction = pep.Fraction AND sd.Scan = pep.Scan) X\n");
             sql.append(_filter.getWhereSQL(MS2Manager.getSqlDialect()));
             sql.append('\n');
             sql.append(_sort.getOrderByClause(MS2Manager.getSqlDialect()));
