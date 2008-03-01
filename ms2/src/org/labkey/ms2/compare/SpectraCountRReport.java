@@ -51,7 +51,7 @@ public class SpectraCountRReport extends RReport
 
         view.setButtonBarPosition(DataRegion.ButtonBarPosition.NONE);
         view.setShowChangeViewPicker(false);
-        
+
         return view;
     }
 
@@ -99,12 +99,24 @@ public class SpectraCountRReport extends RReport
 
     public ActionURL getRunReportURL(ViewContext context)
     {
-        ActionURL result = super.getRunReportURL(context);
-        result.addParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME, context.getActionURL().getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME));
-        result.addParameter(SPECTRA_CONFIG_NAME, context.getActionURL().getParameter(SPECTRA_CONFIG_NAME));
-        result.addParameter(PEPTIDE_PROPHET_PROBABILITY_NAME, context.getActionURL().getParameter(PEPTIDE_PROPHET_PROBABILITY_NAME));
-        result.addParameter(PEPTIDE_FILTER_TYPE_NAME, context.getActionURL().getParameter(PEPTIDE_FILTER_TYPE_NAME));
-        result.addParameter(RUN_LIST_NAME, getRunList(context));
-        return result;
+        ActionURL url = super.getRunReportURL(context);
+        return addReportParameters(url, context);
+    }
+
+    public ActionURL getDownloadDataURL(ViewContext context)
+    {
+        ActionURL url = super.getDownloadDataURL(context);
+        return addReportParameters(url, context);
+    }
+
+    private ActionURL addReportParameters(ActionURL url, ViewContext context)
+    {
+        url.addParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME, context.getActionURL().getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME));
+        url.addParameter(SPECTRA_CONFIG_NAME, context.getActionURL().getParameter(SPECTRA_CONFIG_NAME));
+        url.addParameter(PEPTIDE_PROPHET_PROBABILITY_NAME, context.getActionURL().getParameter(PEPTIDE_PROPHET_PROBABILITY_NAME));
+        url.addParameter(PEPTIDE_FILTER_TYPE_NAME, context.getActionURL().getParameter(PEPTIDE_FILTER_TYPE_NAME));
+        url.addParameter(RUN_LIST_NAME, getRunList(context));
+
+        return url;
     }
 }
