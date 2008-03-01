@@ -600,6 +600,7 @@ ms1/src/org/labkey/ms1/view/FileDetailsView.jsp -text
 ms1/src/org/labkey/ms1/view/PeakWarnView.jsp -text
 ms1/src/org/labkey/ms1/view/PeaksView.java -text
 ms1/src/org/labkey/ms1/view/PepSearchView.jsp -text
+ms1/src/org/labkey/ms1/view/PeptidesView.java -text
 ms1/src/org/labkey/ms1/view/RetentionMassChart.java -text
 ms1/src/org/labkey/ms1/view/SimilarSearchView.jsp -text
 ms1/src/org/labkey/ms1/view/SpectrumChart.java -text

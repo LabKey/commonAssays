@@ -4,7 +4,9 @@ import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.ms2.SearchClient;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.security.User;
+import org.labkey.api.query.FieldKey;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.sequest.SequestClientImpl;
 import org.labkey.ms2.query.PeptidesTableInfo;
@@ -33,12 +35,17 @@ public class MS2ServiceImpl implements MS2Service.Service
 
     public TableInfo createPeptidesTableInfo(User user, Container container)
     {
-        return createPeptidesTableInfo(user, container, true, true);
+        return createPeptidesTableInfo(user, container, true, true, null, null);
     }
 
-    public TableInfo createPeptidesTableInfo(User user, Container container, boolean includeFeatureFk, boolean restrictContainer)
+    public TableInfo createPeptidesTableInfo(User user, Container container, boolean includeFeatureFk, boolean restrictContainer, SimpleFilter filter, Iterable<FieldKey> defaultColumns)
     {
-        return new PeptidesTableInfo(new MS2Schema(user, container), includeFeatureFk, restrictContainer);
+        PeptidesTableInfo table = new PeptidesTableInfo(new MS2Schema(user, container), includeFeatureFk, restrictContainer);
+        if(null != filter)
+            table.addCondition(filter);
+        if(null != defaultColumns)
+            table.setDefaultVisibleColumns(defaultColumns);
+        return table;
     }
 
 }

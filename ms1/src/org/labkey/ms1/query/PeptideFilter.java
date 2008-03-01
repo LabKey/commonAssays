@@ -15,10 +15,16 @@
  */
 package org.labkey.ms1.query;
 
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlDialect;
 import org.labkey.api.query.FieldKey;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Used to filter for a given set of peptide sequences
@@ -28,7 +34,7 @@ import java.util.ArrayList;
  * Date: Jan 14, 2008
  * Time: 10:17:45 AM
  */
-public class PeptideFilter implements FeaturesFilter
+public class PeptideFilter extends SimpleFilter.FilterClause implements FeaturesFilter
 {
     private String[] _sequences;
     private boolean _exact = false;
@@ -72,6 +78,31 @@ public class PeptideFilter implements FeaturesFilter
         }
         
         return new String(trimmed, 0, len);
+    }
+
+    public List<String> getColumnNames()
+    {
+        if(_exact)
+            return Arrays.asList("TrimmedPeptide", "Peptide");
+        else
+            return Arrays.asList("TrimmedPeptide");
+    }
+
+    public SQLFragment toSQLFragment(Map<String, ? extends ColumnInfo> columnMap, SqlDialect dialect)
+    {
+        if(null == _sequences)
+            return null;
+
+        // OR together the sequence conditions
+        StringBuilder sql = new StringBuilder();
+        for(int idx = 0; idx < _sequences.length; ++idx)
+        {
+            if(idx > 0)
+                sql.append(" OR ");
+
+            sql.append(genSeqPredicate(_sequences[idx]));
+        }
+        return new SQLFragment(sql.toString(), (List<Object>)null);
     }
 
     public void setFilters(FeaturesTableInfo tinfo)
@@ -119,7 +150,7 @@ public class PeptideFilter implements FeaturesFilter
         sequence = sequence.toUpperCase();
         
         //always add a condition for pd.TrimmedPeptide using normalized version of sequence
-        StringBuilder sql = new StringBuilder("(pd.TrimmedPeptide");
+        StringBuilder sql = new StringBuilder("(TrimmedPeptide");
 
         if(_exact)
         {
@@ -137,7 +168,7 @@ public class PeptideFilter implements FeaturesFilter
         //if _exact, AND another contains condition against pd.Peptide
         if(_exact)
         {
-            sql.append(" AND pd.Peptide LIKE '%");
+            sql.append(" AND Peptide LIKE '%");
             sql.append(sequence.trim());
             sql.append("%'");
         }

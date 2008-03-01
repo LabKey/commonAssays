@@ -384,6 +384,9 @@ public class PeptidesTableInfo extends FilteredTable
 
     public List<FieldKey> getDefaultVisibleColumns()
     {
+        if(null != _defaultVisibleColumns)
+            return super.getDefaultVisibleColumns();
+
         List<FieldKey> result = new ArrayList<FieldKey>();
         result.add(FieldKey.fromParts("Scan"));
         result.add(FieldKey.fromParts("Charge"));
@@ -419,4 +422,8 @@ public class PeptidesTableInfo extends FilteredTable
         return result;
     }
 
+    public String getPublicName()
+    {
+        return MS2Schema.PEPTIDES_TABLE_NAME;
+    }
 }

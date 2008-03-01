@@ -15,6 +15,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.CaseInsensitiveHashSet;
+import org.labkey.api.ms2.MS2Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;

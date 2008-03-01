@@ -95,7 +95,7 @@ public class FeaturesTableInfo extends FilteredTable
                 public TableInfo getLookupTableInfo()
                 {
                     return MS2Service.get().createPeptidesTableInfo(_schema.getUser(), _schema.getContainer(), 
-                            false, _schema.isRestrictContainer());
+                            false, _schema.isRestrictContainer(), null, null);
                 }
             });
             

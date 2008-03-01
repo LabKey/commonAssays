@@ -7,15 +7,19 @@ import org.labkey.api.action.QueryViewAction;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegionSelection;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.api.ms1.MS1Urls;
+import org.labkey.api.ms2.MS2Service;
 import org.labkey.ms1.model.*;
 import org.labkey.ms1.query.*;
 import org.labkey.ms1.view.*;
@@ -679,7 +683,7 @@ public class MS1Controller extends SpringActionController
 
             FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getViewContext().getContainer(),
                                             !(form.isSubfolders())), baseFilters);
-            featuresView.setTitle("Search Results");
+            featuresView.setTitle("Matching MS1 Features");
             return featuresView;
         }
 
@@ -700,6 +704,18 @@ public class MS1Controller extends SpringActionController
 
             //create the features view
             FeaturesView featuresView = getFeaturesView(form);
+            featuresView.enableExpandCollapse("features", false);
+
+            //create the peptide search results view
+            //get a peptides table so that we can get the public schema and query name for it
+            TableInfo peptidesTable = MS2Service.get().createPeptidesTableInfo(getViewContext().getUser(), getViewContext().getContainer());
+            PeptidesView pepView = new PeptidesView(peptidesTable.getPublicSchemaName(), peptidesTable.getPublicName(),
+                    getViewContext().getUser(), getViewContext().getContainer());
+            pepView.setSearchSubfolders(form.isSubfolders());
+            if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
+                pepView.setPeptideFilter(new PeptideFilter(form.getPepSeq(), form.isExact()));
+            pepView.setTitle("Matching MS2 Peptides");
+            pepView.enableExpandCollapse("peptides", false);
 
             //if there is an export request, export and return
             if(isExportRequest(form.getExport()))
@@ -708,7 +724,7 @@ public class MS1Controller extends SpringActionController
                 return exportQueryView(featuresView, getPageConfig(), form.getExport());
             }
 
-            return new VBox(searchView, featuresView);
+            return new VBox(searchView, featuresView, pepView);
         }
 
         public NavTree appendNavTrail(NavTree root)
