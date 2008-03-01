@@ -39,6 +39,8 @@ import java.util.ArrayList;
  */
 public class PeptidesView extends QueryView
 {
+    public static final String DATAREGION_NAME = "pv";
+
     private boolean _searchSubfolders = true;
     private PeptideFilter _pepFilter;
 
@@ -46,7 +48,7 @@ public class PeptidesView extends QueryView
     {
         super(QueryService.get().getUserSchema(user, container, schemaName));
 
-        QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), null);
+        QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), DATAREGION_NAME);
         settings.setSchemaName(schemaName);
         settings.setQueryName(queryName);
         settings.setAllowChooseQuery(false);
@@ -54,7 +56,6 @@ public class PeptidesView extends QueryView
 
         setShowCustomizeViewLinkInButtonBar(true);
         setShowRecordSelectors(false);
-        setShowExportButtons(false);
     }
 
     public boolean isSearchSubfolders()

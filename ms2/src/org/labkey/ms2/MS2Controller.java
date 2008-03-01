@@ -1272,7 +1272,7 @@ public class MS2Controller extends SpringActionController
 
         protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
         {
-            CompareProteinsView view = createInitializedQueryView(form, errors, false);
+            CompareProteinsView view = createInitializedQueryView(form, errors, false, null);
             if (!view.getErrors().isEmpty())
                 return _renderErrors(view.getErrors());
 
@@ -1289,7 +1289,7 @@ public class MS2Controller extends SpringActionController
             return new VBox(gwtView, helpView, view);
         }
 
-        protected CompareProteinsView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport) throws Exception
+        protected CompareProteinsView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
         {
             String viewName = form.getCustomViewName(getViewContext());
             return new CompareProteinsView(getViewContext(), form.getRunList(), forExport, viewName);
@@ -1319,7 +1319,7 @@ public class MS2Controller extends SpringActionController
 
         protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
         {
-            ProteinProphetCrosstabView view = createInitializedQueryView(form, errors, false);
+            ProteinProphetCrosstabView view = createInitializedQueryView(form, errors, false, null);
 //            if (!view.getErrors().isEmpty())
 //                return _renderErrors(view.getErrors());
 
@@ -1336,7 +1336,7 @@ public class MS2Controller extends SpringActionController
             return new VBox(gwtView, helpView, view);
         }
 
-        protected ProteinProphetCrosstabView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport) throws Exception
+        protected ProteinProphetCrosstabView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
         {
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList(), false, getViewContext());
@@ -1702,7 +1702,7 @@ public class MS2Controller extends SpringActionController
             super(SpectraCountForm.class);
         }
 
-        protected QueryView createQueryView(SpectraCountForm form, BindException errors, boolean forExport) throws Exception
+        protected QueryView createQueryView(SpectraCountForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
         {
             _form = form;
             QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), "SpectraCount");

@@ -1,10 +1,12 @@
 package org.labkey.ms1.view;
 
-import org.labkey.api.data.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.util.ResultSetUtil;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.query.*;
@@ -26,12 +28,6 @@ import java.util.List;
 public class FeaturesView extends QueryView
 {
     public static final String DATAREGION_NAME = "fv";
-
-    //Localizable strings
-    private static final String CAPTION_EXPORT = "Export";
-    private static final String CAPTION_EXPORT_ALL_EXCEL = "Export All to Excel (.xls)";
-    private static final String CAPTION_EXPORT_ALL_TSV = "Export All to Text (.txt)";
-    private static final String CAPTION_PRINT_ALL = "Print";
 
     private List<FeaturesFilter> _baseFilters = null;
     private MS1Schema _ms1Schema = null;
@@ -70,7 +66,6 @@ public class FeaturesView extends QueryView
 
         setShowCustomizeViewLinkInButtonBar(true);
         setShowRecordSelectors(false);
-        setShowExportButtons(false);
     }
 
     public List<FeaturesFilter> getBaseFilters()
@@ -175,34 +170,8 @@ public class FeaturesView extends QueryView
     {
         DataView view = super.createDataView();
         view.getRenderContext().setBaseSort(getBaseSort());
-        DataRegion region = view.getDataRegion();
-
-        //Since this code calls getDataRegion() on the newly created view, you'd *think* that
-        //this could all be done in the overidden createDataRegion() method, but it can't for some reason.
-        //the button bar returned from DataRegion.getButtonBar() during createDataRegion()
-        //is unmodifiable. It only becomes modifiable after the call to QueryView.createDataView().
-        if(region.getButtonBarPosition() != DataRegion.ButtonBarPosition.NONE)
-        {
-            ButtonBar bar = region.getButtonBar(DataRegion.MODE_GRID);
-            assert null != bar : "Coun't get the button bar during FeaturesView.createDataView()!";
-
-            MenuButton exportButton = new MenuButton(CAPTION_EXPORT);
-            exportButton.addMenuItem(CAPTION_EXPORT_ALL_EXCEL, getExportUrl("excel"));
-            exportButton.addMenuItem(CAPTION_EXPORT_ALL_TSV, getExportUrl("tsv"));
-            bar.add(exportButton);
-
-            bar.add(new ActionButton(getExportUrl("print"), CAPTION_PRINT_ALL, DataRegion.MODE_ALL, ActionButton.Action.LINK));
-        }
-
         return view;
     } //createDataView()
-
-    protected String getExportUrl(String format)
-    {
-        ActionURL url = getViewContext().getActionURL().clone();
-        url.replaceParameter("export", format);
-        return url.getLocalURIString();
-    }
 
     protected Sort getBaseSort()
     {
