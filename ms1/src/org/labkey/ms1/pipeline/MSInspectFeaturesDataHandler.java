@@ -561,7 +561,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      * @return              The URL the user should be redirected to
      * @throws ExperimentException Thrown if there's a problem
      */
-    public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
+    public URLHelper getContentURL(Container container, ExpData data)
     {
         ActionURL url = new ActionURL(MS1Module.CONTROLLER_NAME, "showFeatures.view", container);
         url.addParameter("runId", Integer.toString(data.getRun().getRowId()));

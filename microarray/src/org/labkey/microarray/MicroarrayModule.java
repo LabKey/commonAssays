@@ -72,7 +72,6 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
                 }
         );
         addController(CONTROLLER_NAME, MicroarrayController.class);
-
         MicroarraySchema.register();
     }
 
@@ -106,6 +105,7 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
         ModuleLoader.getInstance().registerFolderType(new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());
+        ExperimentService.get().registerExperimentRunFilter(MicroarrayRunFilter.INSTANCE);
 
         PipelineService.get().registerPipelineProvider(new MicroarrayPipelineProvider());
     }

@@ -136,7 +136,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
         }
     } //runMoved()
 
-    public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
+    public URLHelper getContentURL(Container container, ExpData data)
     {
         ActionURL url = new ActionURL("ms1", "showPeaks.view", container);
         url.addParameter("dataRowId", Integer.toString(data.getRowId()));

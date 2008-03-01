@@ -813,7 +813,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
+    public URLHelper getContentURL(Container container, ExpData data)
     {
         ExpRun run = data.getRun();
         if (run != null)

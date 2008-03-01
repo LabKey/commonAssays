@@ -9,7 +9,7 @@ import org.labkey.microarray.assay.MicroarrayAssayProvider;
  * User: jeckels
 * Date: Feb 7, 2008
 */
-class MicroarrayRunFilter extends ExperimentRunFilter
+public class MicroarrayRunFilter extends ExperimentRunFilter
 {
     public static final MicroarrayRunFilter INSTANCE = new MicroarrayRunFilter();
 

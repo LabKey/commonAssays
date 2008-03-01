@@ -66,7 +66,17 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
 
     public TableInfo createDataTable(QuerySchema schema, String alias, ExpProtocol protocol)
     {
-        return new RunDataTable(schema, alias, protocol);
+        RunDataTable result = new RunDataTable(schema, alias, protocol);
+        Iterator<FieldKey> iterator = result.getDefaultVisibleColumns().iterator();
+        while (iterator.hasNext())
+        {
+            FieldKey key = iterator.next();
+            if ("Run".equals(key.getParts().get(0)))
+            {
+                iterator.remove();
+            }
+        }
+        return result;
     }
 
     protected Domain createRunDomain(Container c, User user)

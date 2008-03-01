@@ -59,6 +59,7 @@ public class SpectraCountRReport extends RReport
     {
         String spectraConfig = context.getActionURL().getParameter(SPECTRA_CONFIG_NAME);
         QuerySettings settings = new QuerySettings(context.getActionURL(), "SpectraCount");
+        settings.setViewName(getDescriptor().getProperty(ReportDescriptor.Prop.viewName));
         settings.setAllowChooseQuery(false);
         final SpectraCountConfiguration config = SpectraCountConfiguration.findByTableName(spectraConfig);
         if (config == null)

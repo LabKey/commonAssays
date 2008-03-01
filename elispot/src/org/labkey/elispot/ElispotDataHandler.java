@@ -158,7 +158,7 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
         return prop;
     }
 
-    public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
+    public URLHelper getContentURL(Container container, ExpData data)
     {
         return null;
     }

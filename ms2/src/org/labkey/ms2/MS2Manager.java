@@ -271,7 +271,7 @@ public class MS2Manager
         return runIds;
     }
 
-    public static ProteinProphetFile getProteinProphetFile(File f, Container c) throws SQLException, IOException
+    public static ProteinProphetFile getProteinProphetFile(File f, Container c) throws SQLException
     {
         String sql = "SELECT " +
                 getTableInfoProteinProphetFiles() + ".* FROM " +
@@ -282,7 +282,17 @@ public class MS2Manager
                 getTableInfoRuns() + ".Container = ? AND " +
                 getTableInfoRuns() + ".Deleted = ?";
 
-        ProteinProphetFile[] files = Table.executeQuery(getSchema(), sql, new Object[] { f.getCanonicalPath(), c.getId(), Boolean.FALSE }, ProteinProphetFile.class);
+        String path;
+        try
+        {
+            path = f.getCanonicalPath();
+        }
+        catch (IOException e)
+        {
+            path = f.getAbsolutePath();
+        }
+
+        ProteinProphetFile[] files = Table.executeQuery(getSchema(), sql, new Object[] { path, c.getId(), Boolean.FALSE }, ProteinProphetFile.class);
         if (files.length == 0)
         {
             return null;

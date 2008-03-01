@@ -22,7 +22,6 @@ public class FeatureExtractionPipelineJob extends PipelineJob
     protected Integer _extractionRowId;
     protected File _dirImages;
     protected String _protocol;
-    private URI _uriData;
     private String _extractionEngine;
 
     public FeatureExtractionPipelineJob(ViewBackgroundInfo info,
@@ -32,9 +31,8 @@ public class FeatureExtractionPipelineJob extends PipelineJob
         super(MicroarrayPipelineProvider.NAME, info);
 
         _protocol = protocol;
-        _uriData = uriData;
         _extractionEngine = extractionEngine;
-        _dirImages = new File(uriData).getParentFile();
+        _dirImages = new File(uriData);
         setLogFile(ArrayPipelineManager.getExtractionLog(_dirImages, null), false);
         header("Feature extraction for folder " + _dirImages.getAbsolutePath());
     }
@@ -91,17 +89,16 @@ public class FeatureExtractionPipelineJob extends PipelineJob
         boolean completeStatus = false;
         try
         {
-            File dirData = new File(_uriData);
-            if (!dirData.exists())
+            if (!_dirImages.exists() || !_dirImages.isDirectory())
             {
-                throw new FileNotFoundException("The specified data directory, " + dirData + ", does not exist.");
+                throw new FileNotFoundException("The specified data directory, " + _dirImages + ", does not exist.");
             }
 
             AppProps appProps = AppProps.getInstance();
             if ("agilent".equalsIgnoreCase(_extractionEngine) && appProps.getMicroarrayFeatureExtractionServer() == null)
                 throw new IllegalArgumentException("Feature extraction server has not been specified in site customization.");
 
-            File[] unprocessedFile = ArrayPipelineManager.getImageFiles(_uriData, _protocol, FileStatus.UNKNOWN, getContainer(), _extractionEngine);
+            File[] unprocessedFile = ArrayPipelineManager.getImageFiles(_dirImages, FileStatus.UNKNOWN, getContainer());
             List<File> imageFileList = new ArrayList<File>();
             imageFileList.addAll(Arrays.asList(unprocessedFile));
             File[] imageFiles = imageFileList.toArray(new File[imageFileList.size()]);
@@ -184,15 +181,16 @@ public class FeatureExtractionPipelineJob extends PipelineJob
                 warn("Delete this file manually to recover disk space.");
             }
 
-            for (File image : imageFiles)
-            {
-                boolean removed = image.delete();
-                if (!removed)
-                {
-                    warn("Unable to delete processed image file '" + image.getAbsolutePath() + "'.");
-                    warn("Delete this image manually to recover disk space.");
-                }
-            }
+//            As requested by Jon on 2/27/08, don't delete the original TIFF
+//            for (File image : imageFiles)
+//            {
+//                boolean removed = image.delete();
+//                if (!removed)
+//                {
+//                    warn("Unable to delete processed image file '" + image.getAbsolutePath() + "'.");
+//                    warn("Delete this image manually to recover disk space.");
+//                }
+//            }
 
             iReturn = extractionClient.saveProcessedRuns(getUser(), getContainer(), new File(_dirImages, extractionClient.getTaskId()));
 

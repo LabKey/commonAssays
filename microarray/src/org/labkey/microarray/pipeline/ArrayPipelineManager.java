@@ -5,12 +5,10 @@ import java.net.URI;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.*;
-import org.labkey.api.view.ViewBackgroundInfo;
 
 
 public class ArrayPipelineManager {
@@ -126,9 +124,9 @@ public class ArrayPipelineManager {
     }
     
     
-    public static File[] getImageFiles(URI uriData, String protocolName, FileStatus status, Container c, String extractionEngine) throws IOException
+    public static File[] getImageFiles(File imageDir, FileStatus status, Container c) throws IOException
     {
-        Map<File, FileStatus> imageFileStatus = getExtractionStatus(uriData, protocolName, c, extractionEngine);
+        Map<File, FileStatus> imageFileStatus = getExtractionStatus(imageDir, c);
         List<File> fileList = new ArrayList<File>();
         for (File imageFile : imageFileStatus.keySet())
         {
@@ -138,9 +136,9 @@ public class ArrayPipelineManager {
         return fileList.toArray(new File[fileList.size()]);
     }
     
-    public static File[] getMageFiles(URI uriData, String protocolName, FileStatus status, Container c) throws IOException
+    public static File[] getMageFiles(URI uriData, FileStatus status, Container c) throws IOException
     {
-        Map<File, FileStatus> mageFileStatus = getExperimentRunStatus(uriData, protocolName, c);
+        Map<File, FileStatus> mageFileStatus = getExperimentRunStatus(uriData, c);
         List<File> fileList = new ArrayList<File>();
         for (File mageFile : mageFileStatus.keySet())
         {
@@ -150,13 +148,12 @@ public class ArrayPipelineManager {
         return fileList.toArray(new File[fileList.size()]);
     }
     
-    public static Map<File, FileStatus> getExtractionStatus(URI uriData, String protocolName, Container c, String extractionEngine) throws IOException
+    public static Map<File, FileStatus> getExtractionStatus(File imageDir, Container c) throws IOException
     {
         Set<File> knownFiles = new HashSet<File>();
         Set<File> checkedDirectories = new HashSet<File>();
         
-        File dirData = new File(uriData).getCanonicalFile();
-        String dirDataURL = dirData.toURI().toURL().toString();
+        File dirData = imageDir.getCanonicalFile();
         File[] imageFiles = dirData.listFiles(getImageFileFilter());
 
         Map<File, FileStatus> imageFileMap = new LinkedHashMap<File, FileStatus>();
@@ -176,40 +173,47 @@ public class ArrayPipelineManager {
             for (File file : imageFiles)
             {
                 FileStatus status = FileStatus.UNKNOWN;
-                if (logExists) {//Check to see if images match what is being or has been processed by the pipeline.
-                    PipelineJob job = PipelineService.get().getPipelineQueue().findJob(c, logFile.getAbsolutePath());
+                if (logExists)
+                {
+                    // Check to see if images match what is being or has been processed by the pipeline.
+                    PipelineJob job = PipelineService.get().getPipelineQueue().findJob(c, logFile.getCanonicalPath());
                     if (null == job || job.isDone())
                         status = FileStatus.COMPLETE;
                     else
                         status = FileStatus.RUNNING;
                     
                     BufferedReader logFileReader = null;
-                    try {
+                    try
+                    {
                         logFileReader = new BufferedReader(new FileReader(logFile));
                         String line;
-                        while (logFileReader.ready())
+                        while ((line = logFileReader.readLine()) != null)
                         {
-                            line = logFileReader.readLine();
                             if (line.endsWith("EXTRACTING"))
                                  break;
                             
-                            if (line.endsWith(file.getName())) {
+                            if (line.endsWith(file.getName()))
+                            {
                                 imageFileMap.put(file, status);
                                 break;
                             }
                         }
-                        logFileReader.close();
+                        if (!imageFileMap.containsKey(file))
+                        {
+                            imageFileMap.put(file, FileStatus.UNKNOWN);
+                        }
                     }
-                    catch (IOException ioe) {
-                        _log.error("Error encountered when attempting to read pipeline log file in method getExtractionStatus...",ioe);
-                    }
-                    finally {
-                        try {
+                    finally
+                    {
+                        try
+                        {
                             logFileReader.close();
                         }
                         catch (Exception e) {}
                     }
-                } else {
+                }
+                else
+                {
                     imageFileMap.put(file, status);
                 }
             }
@@ -217,13 +221,12 @@ public class ArrayPipelineManager {
         return imageFileMap;
     }
     
-    public static Map<File, FileStatus> getExperimentRunStatus(URI uriData, String protocolName, Container c) throws IOException
+    public static Map<File, FileStatus> getExperimentRunStatus(URI uriData, Container c) throws IOException
     {
         Set<File> knownFiles = new HashSet<File>();
         Set<File> checkedDirectories = new HashSet<File>();
         
         File dirData = new File(uriData).getCanonicalFile();
-        String dirDataURL = dirData.toURI().toURL().toString();
         File[] mageFiles = dirData.listFiles(getMageFileFilter());
 
         Map<File, FileStatus> mageFileMap = new LinkedHashMap<File, FileStatus>();
@@ -294,10 +297,7 @@ public class ArrayPipelineManager {
                 File[] files = parent.listFiles();
                 if (files != null)
                 {
-                    for (File f : files)
-                    {
-                        knownFiles.add(f);
-                    }
+                    knownFiles.addAll(Arrays.asList(files));
                 }
                 checkedDirectories.add(parent);
             }

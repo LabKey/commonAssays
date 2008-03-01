@@ -5,6 +5,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.security.User;
@@ -43,7 +44,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         }
     }
 
-    public URLHelper getContentURL(Container container, ExpData data) throws ExperimentException
+    public URLHelper getContentURL(Container container, ExpData data)
     {
         File dataFile = data.getDataFile();
         MS2Run run = null;
@@ -57,12 +58,9 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         }
         catch (SQLException e)
         {
-            throw new ExperimentException(e);
+            throw new RuntimeSQLException(e);
         }
-        catch (IOException e)
-        {
-            throw new ExperimentException(e);
-        }
+        
         if (run == null)
         {
             return null;

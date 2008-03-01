@@ -61,13 +61,13 @@ public class MicroarraySchema extends UserSchema
     public ExpRunTable createRunsTable(String alias)
     {
         ExpRunTable result = _expSchema.createRunsTable(alias);
-        result.getColumn(ExpRunTable.Column.Name).setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                return new AssayDataLinkDisplayColumn(colInfo);
-            }
-        });
+//        result.getColumn(ExpRunTable.Column.Name).setDisplayColumnFactory(new DisplayColumnFactory()
+//        {
+//            public DisplayColumn createRenderer(ColumnInfo colInfo)
+//            {
+//                return new AssayDataLinkDisplayColumn(colInfo);
+//            }
+//        });
         result.setProtocolPatterns("urn:lsid:%:" + MicroarrayAssayProvider.PROTOCOL_PREFIX + ".%");
 
         SQLFragment thumbnailSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +
