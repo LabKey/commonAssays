@@ -735,8 +735,17 @@ public class MS2Controller extends SpringActionController
             int rowIndex = sqlRowIndex - 1;  // Switch 1-based, JDBC row index to 0-based row index for array lookup
 
             MS2Run run = MS2Manager.getRun(runId);
-            long[] peptideIndex = getPeptideIndex(currentUrl, run);
-            rowIndex = MS2Manager.verifyRowIndex(peptideIndex, rowIndex, peptideId);
+            long[] peptideIndex = null;
+            
+            //if no row index was passed, don't try to look it up, as it always results
+            //in an error being written to the log. There are now other instances where
+            //peptide sequences are displayed with hyperlinks to this action, and they
+            //often do not want the prev/next buttons to be enabled.
+            if(rowIndex >= 0)
+            {
+                peptideIndex = getPeptideIndex(currentUrl, run);
+                rowIndex = MS2Manager.verifyRowIndex(peptideIndex, rowIndex, peptideId);
+            }
 
             peptide.init(form.getTolerance(), form.getxStartDouble(), form.getxEnd());
 

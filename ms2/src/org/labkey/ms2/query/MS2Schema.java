@@ -1,25 +1,24 @@
 package org.labkey.ms2.query;
 
+import org.labkey.api.data.*;
+import org.labkey.api.exp.api.ExpRunTable;
+import org.labkey.api.exp.api.ExpSchema;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
-import org.labkey.api.data.*;
-import org.labkey.api.exp.api.ExpSchema;
-import org.labkey.api.exp.api.ExpRunTable;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.ProteinGroupProteins;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MS2Controller;
-import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.util.CaseInsensitiveHashSet;
-import org.labkey.api.ms2.MS2Service;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewContext;
+import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.ProteinGroupProteins;
+import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
 import java.sql.Types;
+import java.util.*;
 
 /**
  * User: jeckels
