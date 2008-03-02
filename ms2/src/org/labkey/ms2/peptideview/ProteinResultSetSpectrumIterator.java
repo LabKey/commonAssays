@@ -49,8 +49,8 @@ public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
             }
             else
             {
-                sql = ProteinManager.getProteinProphetPeptideSql(_currentUrl, _iter.next(), _extraWhere, 0, 0, "Charge, PrecursorMass, MZ, Spectrum");
-                joinSql = sql.toString().replaceFirst("WHERE", ", (SELECT s.Run AS fRun, s.Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + " s) spec WHERE ms2.simplepeptides.Run=fRun AND Scan = fScan AND ");
+                sql = ProteinManager.getProteinProphetPeptideSql(_currentUrl, _iter.next(), _extraWhere, 0, 0, "Scan, Charge, Fraction, PrecursorMass, MZ, Spectrum");
+                joinSql = sql.toString().replaceFirst("WHERE", "LEFT OUTER JOIN (SELECT s.Run AS fRun, s.Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + " s) spec ON " + MS2Manager.getTableInfoSimplePeptides() + ".Run=fRun AND Scan = fScan WHERE ");
             }
 
             return Table.executeQuery(ProteinManager.getSchema(), joinSql, sql.getParams().toArray(), 0, false);

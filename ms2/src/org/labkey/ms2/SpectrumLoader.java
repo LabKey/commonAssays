@@ -159,9 +159,9 @@ public class SpectrumLoader
                 SimpleScan spectrum = _scanIterator.next();
                 int scan = spectrum.getScan();
 
-                // Load spectrum only if we loaded the corresponding scan in the HTML or XML file.
+                // Load spectrum only if we loaded the corresponding scan in the XML file.
                 // Since we want to store spectrum only once per scan, remove it from the set so
-                // we store it once even if this spectrum shows up again (e.g., multiple DTA files
+                // it's not duplicated if this spectrum shows up again (e.g., multiple DTA files
                 // for a single scan but different charge)
                 if (_scans.contains(scan))
                 {
@@ -197,11 +197,7 @@ public class SpectrumLoader
                         conn.commit();
                     }
 
-                    // TODO: Eliminate this check once we eliminate COMET HTML
-                    if (null != _progress)
-                    {
-                        _progress.addSpectrum();
-                    }
+                    _progress.addSpectrum();
                 }
             }
 

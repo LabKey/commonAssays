@@ -937,32 +937,21 @@ public class ProteinManager
 
         sql.append(" FROM ");
         sql.append(MS2Manager.getTableInfoSimplePeptides());
-        sql.append(", ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
-        sql.append(", ");
+        sql.append(" INNER JOIN\n");
         sql.append(MS2Manager.getTableInfoPeptideMemberships());
-        sql.append(", ");
-        sql.append(MS2Manager.getTableInfoProteinProphetFiles());
-        sql.append(" ");
-
-        // Construct Peptide WHERE clause (no need to sort by peptide)
-        SimpleFilter peptideFilter = getPeptideFilter(currentUrl, RUN_FILTER + URL_FILTER + EXTRA_FILTER, MS2Manager.getTableInfoSimplePeptides().toString(), run);
-        peptideFilter = reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoSimplePeptides());
-        if (null != extraWhere)
-            peptideFilter.addWhereClause(extraWhere, new Object[]{});
-        sql.append(peptideFilter.getWhereSQL(getSqlDialect()));
-        sql.addAll(peptideFilter.getWhereParams(MS2Manager.getTableInfoPeptides()));
-        sql.append(" AND ");
+        sql.append(" ON ");
         sql.append(MS2Manager.getTableInfoSimplePeptides());
         sql.append(".RowId = ");
         sql.append(MS2Manager.getTableInfoPeptideMemberships());
-        sql.append(".PeptideId");
-        sql.append(" AND ");
+        sql.append(".PeptideId INNER JOIN\n");
+        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+        sql.append(" ON ");
         sql.append(MS2Manager.getTableInfoPeptideMemberships());
         sql.append(".ProteinGroupId = ");
         sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
-        sql.append(".RowId");
-        sql.append(" AND ");
+        sql.append(".RowId INNER JOIN\n");
+        sql.append(MS2Manager.getTableInfoProteinProphetFiles());
+        sql.append(" ON ");
         sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
         sql.append(".ProteinProphetFileId = ");
         sql.append(MS2Manager.getTableInfoProteinProphetFiles());
@@ -971,7 +960,16 @@ public class ProteinManager
         sql.append(MS2Manager.getTableInfoProteinProphetFiles());
         sql.append(".Run = ");
         sql.append(MS2Manager.getTableInfoSimplePeptides());
-        sql.append(".Run");
+        sql.append(".Run\n");
+
+        // Construct Peptide WHERE clause (no need to sort by peptide)
+        SimpleFilter peptideFilter = getPeptideFilter(currentUrl, RUN_FILTER + URL_FILTER + EXTRA_FILTER, MS2Manager.getTableInfoSimplePeptides().toString(), run);
+        peptideFilter = reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoSimplePeptides());
+        if (null != extraWhere)
+            peptideFilter.addWhereClause(extraWhere, new Object[]{});
+        sql.append(peptideFilter.getWhereSQL(getSqlDialect()));
+        sql.addAll(peptideFilter.getWhereParams(MS2Manager.getTableInfoPeptides()));
+
         sql.append("\n");
 
         SimpleFilter proteinFilter = new SimpleFilter(currentUrl, MS2Manager.getDataRegionNameProteinGroups());
