@@ -13,7 +13,7 @@
    <td align="left">Description:</td><td><%=h(bean.seqDesc)%></td>
 </tr>
 <tr>
-   <td align="left">Gene Name(s):</td><td><%=h(bean.geneName)%></td>
+   <td align="left">Gene Name(s):</td><td><%=bean.geneName%><% // geneName is either an href or empty string, so don't filter %></td>
 </tr>
 <tr>
    <td align="left">Organisms(s):</td>

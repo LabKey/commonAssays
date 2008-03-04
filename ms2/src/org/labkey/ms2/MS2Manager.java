@@ -76,10 +76,9 @@ public class MS2Manager
 
     private static PeptideIndexCache _peptideIndexCache = new PeptideIndexCache();
 
-    private static final String FRACTION_PREFIX = "MS2Fraction/";
-    private static final String _ms2RunPrefix = "MS2Run/";
-    private static final String _peptideProphetSummaryPrefix = "PeptideProphetSummary/";
-    protected static final String _ms2RunPackage = MS2Run.class.getPackage().getName() + ".";
+    private static final String FRACTION_CACHE_PREFIX = "MS2Fraction/";
+    private static final String RUN_CACHE_PREFIX = "MS2Run/";
+    private static final String PEPTIDEPROPHET_SUMMARY_CACHE_PREFIX = "PeptideProphetSummary/";
 
     public static DbSchema getSchema()
     {
@@ -1059,19 +1058,19 @@ public class MS2Manager
 
     private static void _addRunToCache(String runId, MS2Run run)
     {
-        Cache.getShared().put(_ms2RunPrefix + runId, run);
+        Cache.getShared().put(RUN_CACHE_PREFIX + runId, run);
     }
 
 
     private static MS2Run _getRunFromCache(String runId)
     {
-        return (MS2Run) Cache.getShared().get(_ms2RunPrefix + runId);
+        return (MS2Run) Cache.getShared().get(RUN_CACHE_PREFIX + runId);
     }
 
 
     private static void _removeRunFromCache(Integer runId)
     {
-        Cache.getShared().remove(_ms2RunPrefix + runId);
+        Cache.getShared().remove(RUN_CACHE_PREFIX + runId);
     }
 
 
@@ -1084,13 +1083,13 @@ public class MS2Manager
 
     private static void _addPeptideProphetSummaryToCache(PeptideProphetSummary summary)
     {
-        Cache.getShared().put(_peptideProphetSummaryPrefix + summary.getRun(), summary);
+        Cache.getShared().put(PEPTIDEPROPHET_SUMMARY_CACHE_PREFIX + summary.getRun(), summary);
     }
 
 
     private static PeptideProphetSummary _getPeptideProphetSummaryFromCache(int runId)
     {
-        return (PeptideProphetSummary) Cache.getShared().get(_peptideProphetSummaryPrefix + runId);
+        return (PeptideProphetSummary) Cache.getShared().get(PEPTIDEPROPHET_SUMMARY_CACHE_PREFIX + runId);
     }
 
 
@@ -1225,19 +1224,19 @@ public class MS2Manager
 
     private static void _addFractionToCache(int fractionId, MS2Fraction fraction)
     {
-        Cache.getShared().put(FRACTION_PREFIX + fractionId, fraction);
+        Cache.getShared().put(FRACTION_CACHE_PREFIX + fractionId, fraction);
     }
 
 
     private static MS2Fraction _getFractionFromCache(int fractionId)
     {
-        return (MS2Fraction) Cache.getShared().get(FRACTION_PREFIX + fractionId);
+        return (MS2Fraction) Cache.getShared().get(FRACTION_CACHE_PREFIX + fractionId);
     }
 
 
     private static void _removeFractionFromCache(int fractionId)
     {
-        Cache.getShared().remove(FRACTION_PREFIX + fractionId);
+        Cache.getShared().remove(FRACTION_CACHE_PREFIX + fractionId);
     }
 
 

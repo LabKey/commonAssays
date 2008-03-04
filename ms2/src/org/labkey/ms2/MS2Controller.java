@@ -3725,8 +3725,7 @@ public class MS2Controller extends SpringActionController
             /* info from db into view */
             bean.seqName = SeqName;
             bean.seqDesc = SeqDesc;
-            if (GeneNames != null && GeneNames.length > 0)
-                bean.geneName = StringUtils.join(ProteinManager.makeFullAnchorStringArray(GeneNames, "protWindow", "GeneName"), ", ");
+            bean.geneName = StringUtils.join(ProteinManager.makeFullAnchorStringArray(GeneNames, "protWindow", "GeneName"), ", ");
             bean.seqOrgs = ProteinManager.getOrganismsFromId(seqId);
             bean.genBankUrls = allGbURLs;
             bean.swissProtNames = ProteinManager.makeFullAnchorStringArray(SwissProtNames, "protWindow", "SwissProt");
@@ -3757,7 +3756,7 @@ public class MS2Controller extends SpringActionController
     {
         public String seqName;
         public String seqDesc;
-        public String geneName = null;
+        public String geneName;
         public Set<String> seqOrgs;
         public Set<String> genBankUrls;
         public String[] swissProtNames;
