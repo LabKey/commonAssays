@@ -35,6 +35,7 @@
   <note type="input" label="spectrum, minimum fragment mz">140.0</note>
   <note type="input" label="spectrum, minimum peaks">10</note>
   <note type="input" label="spectrum, threads">1</note>
+  <note type="input" label="pipeline, load spectra">no</note>
 
 <note>residue modification parameters</note>
   <note type="input" label="residue, modification mass"></note>

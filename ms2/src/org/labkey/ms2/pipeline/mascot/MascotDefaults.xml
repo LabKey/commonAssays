@@ -57,6 +57,8 @@
   <note type="input" label="spectrum, fragment mass type">Average</note>
         <note>See http://www.matrixscience.com/help/search_field_help.html#MASS</note>
 
+  <note type="input" label="pipeline, load spectra">no</note>
+
   <note type="input" label="mascot, fixed modifications"></note>
         <note>See http://www.matrixscience.com/help/search_field_help.html#MODS</note>
 
