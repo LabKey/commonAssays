@@ -1189,7 +1189,7 @@ public class MS2Controller extends SpringActionController
             peptidesSettings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
             QueryView peptidesView = new QueryView(new MS2Schema(getUser(), getContainer()), peptidesSettings);
 
-            CompareOptionsBean bean = new CompareOptionsBean(peptidesView, new ActionURL(CompareProteinProphetQueryAction.class, getContainer()), runListId, form);
+            CompareOptionsBean bean = new CompareOptionsBean(new ActionURL(CompareProteinProphetQueryAction.class, getContainer()), runListId, form);
 
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp", bean);
         }
@@ -1353,6 +1353,7 @@ public class MS2Controller extends SpringActionController
                 setupURL.addParameter("peptideProphetProbability", _form.getPeptideProphetProbability().toString());
             }
             setupURL.addParameter("runList", _form.getRunList());
+            setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getCustomViewName(getViewContext()));
             root.addChild("MS2 Dashboard");
             root.addChild("Setup Compare ProteinProphet", setupURL);
             return root.addChild("Compare ProteinProphet (Query)");
@@ -1653,11 +1654,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(SpectraCountForm form, BindException errors, int runListId)
         {
-            QuerySettings spectraCountSettings = new QuerySettings(new ActionURL(), PEPTIDES_FILTER);
-            spectraCountSettings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
-            QueryView spectraCountView = new QueryView(new MS2Schema(getUser(), getContainer()), spectraCountSettings);
-
-            CompareOptionsBean<SpectraCountForm> bean = new CompareOptionsBean<SpectraCountForm>(spectraCountView, new ActionURL(SpectraCountAction.class, getContainer()), runListId, form);
+            CompareOptionsBean<SpectraCountForm> bean = new CompareOptionsBean<SpectraCountForm>(new ActionURL(SpectraCountAction.class, getContainer()), runListId, form);
 
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/spectraCountOptions.jsp", bean);
         }
@@ -1736,6 +1733,7 @@ public class MS2Controller extends SpringActionController
                 {
                     setupURL.addParameter("peptideProphetProbability", _form.getPeptideProphetProbability().toString());
                 }
+                setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getCustomViewName(getViewContext()));
                 setupURL.addParameter("runList", _form.getRunList());
                 setupURL.addParameter("spectraConfig", _form.getSpectraConfig());
 
@@ -2013,7 +2011,7 @@ public class MS2Controller extends SpringActionController
             reload.setActionType(ActionButton.Action.GET);
             bb.add(reload);
 
-            MenuButton setBestNameMenu = new MenuButton("Set Protein BestName...");
+            MenuButton setBestNameMenu = new MenuButton("Set Protein Best Name...");
             ActionURL setBestNameURL = new ActionURL(SetBestNameAction.class, getContainer());
 
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.LOOKUP_STRING.toString());
@@ -2021,9 +2019,9 @@ public class MS2Controller extends SpringActionController
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.IPI.toString());
             setBestNameMenu.addMenuItem("to IPI (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.SWISS_PROT.toString());
-            setBestNameMenu.addMenuItem("to SwissProt (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameMenu.addMenuItem("to Swiss-Prot Name (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.SWISS_PROT_ACCN.toString());
-            setBestNameMenu.addMenuItem("to SwissProtAccn (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameMenu.addMenuItem("to Swiss-Prot Accession (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
 
             bb.add(setBestNameMenu);
 
@@ -5675,9 +5673,9 @@ public class MS2Controller extends SpringActionController
         private final int _runList;
         private final Form _form;
 
-        public CompareOptionsBean(QueryView peptideView, ActionURL targetURL, int runList, Form form)
+        public CompareOptionsBean(ActionURL targetURL, int runList, Form form)
         {
-            _peptideView = peptideView;
+            _peptideView = new PeptidesFilterView(getUser(), getContainer(), getViewContext().getActionURL());
             _targetURL = targetURL;
             _runList = runList;
             _form = form;

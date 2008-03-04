@@ -274,6 +274,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
         rgn.setName(MS2Manager.getDataRegionNamePeptides());
         rgn.setDisplayColumnList(getPeptideDisplayColumns(peptideColumnNames));
+        rgn.setShowPagination(false);
         rgn.setMaxRows(maxRows);
         rgn.setOffset(offset);
 

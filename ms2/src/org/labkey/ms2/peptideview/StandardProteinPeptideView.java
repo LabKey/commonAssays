@@ -36,6 +36,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         DataRegion proteinRgn = createProteinDataRegion(expanded, requestedPeptideColumnNames, requestedProteinColumnNames);
         proteinRgn.setTable(MS2Manager.getTableInfoProteins());
         GridView proteinView = new GridView(proteinRgn);
+        proteinRgn.setShowPagination(false);
         proteinView.setResultSet(ProteinManager.getProteinRS(_url, getSingleRun(), null, proteinRgn.getMaxRows(), proteinRgn.getOffset()));
         proteinView.setContainer(getContainer());
         proteinView.setTitle("Proteins");

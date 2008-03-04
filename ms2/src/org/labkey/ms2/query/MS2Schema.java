@@ -35,6 +35,7 @@ public class MS2Schema extends UserSchema
     public static final String GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME = "MS2SearchRuns";
 
     public static final String PEPTIDES_TABLE_NAME = "Peptides";
+    public static final String PEPTIDES_FILTER_TABLE_NAME = "PeptidesFilter";
     public static final String PROTEIN_GROUPS_TABLE_NAME = "ProteinGroups";
     public static final String PROTEIN_GROUPS_FOR_RUN_TABLE_NAME = "ProteinGroupsForRun";
     public static final String PROTEIN_GROUPS_FOR_SEARCH_TABLE_NAME = "ProteinGroupsForSearch";
@@ -115,7 +116,7 @@ public class MS2Schema extends UserSchema
         {
             return createRunsTable(alias);
         }
-        else if (PEPTIDES_TABLE_NAME.equalsIgnoreCase(name))
+        else if (PEPTIDES_TABLE_NAME.equalsIgnoreCase(name) || PEPTIDES_FILTER_TABLE_NAME.equalsIgnoreCase(name))
         {
             return createPeptidesTable(alias);
         }

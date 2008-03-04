@@ -127,6 +127,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
                 rgn.setDisplayColumnList(originalColumns);
                 getSettings().setMaxRows(1000);
             }
+            rgn.setShowPagination(false);
             rgn.setMaxRows(getMaxRows());
             rgn.setOffset(getOffset());
             rgn.setSelectionKey(getSelectionKey());

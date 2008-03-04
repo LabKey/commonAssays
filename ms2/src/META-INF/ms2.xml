@@ -97,11 +97,6 @@
           <ns:nullable>false</ns:nullable>
           <ns:isReadOnly>false</ns:isReadOnly>
           <ns:isUserEditable>true</ns:isUserEditable>
-            <ns:fk>
-                <ns:fkColumnName>Fraction</ns:fkColumnName>
-                <ns:fkTable>Fractions</ns:fkTable>
-                <ns:fkDbSchema>ms2</ns:fkDbSchema>
-            </ns:fk>
       </ns:column>
         <ns:column columnName="Scan">
           <ns:columnTitle>Scan</ns:columnTitle>
@@ -625,11 +620,6 @@
         <ns:nullable>false</ns:nullable>
         <ns:isReadOnly>false</ns:isReadOnly>
         <ns:isUserEditable>true</ns:isUserEditable>
-          <ns:fk>
-              <ns:fkColumnName>Fraction</ns:fkColumnName>
-              <ns:fkTable>Fractions</ns:fkTable>
-              <ns:fkDbSchema>ms2</ns:fkDbSchema>
-          </ns:fk>
       </ns:column>
       <ns:column columnName="FractionName">
         <ns:displayWidth>200</ns:displayWidth>

@@ -67,7 +67,8 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
     public TableInfo createDataTable(QuerySchema schema, String alias, ExpProtocol protocol)
     {
         RunDataTable result = new RunDataTable(schema, alias, protocol);
-        Iterator<FieldKey> iterator = result.getDefaultVisibleColumns().iterator();
+        List<FieldKey> cols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
+        Iterator<FieldKey> iterator = cols.iterator();
         while (iterator.hasNext())
         {
             FieldKey key = iterator.next();
@@ -76,6 +77,7 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
                 iterator.remove();
             }
         }
+        result.setDefaultVisibleColumns(cols);
         return result;
     }
 

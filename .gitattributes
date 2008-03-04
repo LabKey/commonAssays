@@ -1046,6 +1046,7 @@ ms2/src/org/labkey/ms2/query/MS2Schema.java -text
 ms2/src/org/labkey/ms2/query/OrganismTableInfo.java -text
 ms2/src/org/labkey/ms2/query/PeptideAggregrationDisplayColumn.java -text
 ms2/src/org/labkey/ms2/query/PeptideCountCoverageColumn.java -text
+ms2/src/org/labkey/ms2/query/PeptidesFilterView.java -text
 ms2/src/org/labkey/ms2/query/PeptidesTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinGroupTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinProphetCrosstabView.java -text

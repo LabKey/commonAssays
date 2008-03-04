@@ -97,9 +97,17 @@ public class GroupNumberDisplayColumn extends DataColumn
             Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(getColumnInfo().getParentTable(), keys);
 
             _collectionIdColumn = cols.get(idiKey);
+            if (_collectionIdColumn == null)
+            {
+                throw new IllegalStateException("Could not resolve IndistinguishableCollectionId column from " + thisFieldKey);
+            }
             columns.add(_collectionIdColumn);
 
             ColumnInfo groupIdCol = cols.get(groupIdKey);
+            if (groupIdCol == null)
+            {
+                throw new IllegalStateException("Could not resolve RowId column from " + thisFieldKey);
+            }
             columns.add(groupIdCol);
 
             ActionURL url = new ActionURL(MS2Controller.ShowProteinGroupAction.class, _container);

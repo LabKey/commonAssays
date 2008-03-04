@@ -163,6 +163,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         proteinRgn.addColumns(getProteinDisplayColumns(requestedProteinColumnNames, false));
         proteinRgn.setShowRecordSelectors(true);
         proteinRgn.setExpanded(expanded);
+        proteinRgn.setShowPagination(false);
         proteinRgn.setRecordSelectorValueColumns("ProteinGroupId");
         proteinRgn.setMaxRows(_maxPeptideRows);
         proteinRgn.setOffset(_offset);

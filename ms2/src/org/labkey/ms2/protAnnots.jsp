@@ -38,9 +38,9 @@
 </tr>
 </table>
 <br>
-<table cellspacing="20">
+<table cellspacing="10">
 <tr>
-   <th>Genbank IDs</th><th>GIs</th><th>SwissProt IDs</th><th>SwissProtNames</th><th>Ensembl</th><th>IPI numbers</th><th>GO Categories</th>
+   <th>Genbank IDs</th><th>GIs</th><th>Swiss-Prot Accessions</th><th>Swiss-Prot Names</th><th>Ensembl</th><th>IPI numbers</th><th>GO Categories</th>
 </tr>
 <tr valign="top">
    <td><%

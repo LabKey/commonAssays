@@ -17,8 +17,8 @@ public enum CustomAnnotationType
         }
     },
     GENE_NAME("Gene Name", IdentifierType.GeneName),
-    SWISS_PROT("Swiss Prot", IdentifierType.SwissProt),
-    SWISS_PROT_ACCN("Swiss Prot Accession", IdentifierType.SwissProtAccn);
+    SWISS_PROT("Swiss-Prot", IdentifierType.SwissProt),
+    SWISS_PROT_ACCN("Swiss-Prot Accession", IdentifierType.SwissProtAccn);
 
     protected String getIdentifierSelectSQL()
     {

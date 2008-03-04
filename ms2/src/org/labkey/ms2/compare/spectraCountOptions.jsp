@@ -12,7 +12,7 @@ JspView<MS2Controller.CompareOptionsBean> view = (JspView<MS2Controller.CompareO
 MS2Controller.CompareOptionsBean<MS2Controller.SpectraCountForm> bean = view.getModelBean();
 MS2Controller.SpectraCountForm form = bean.getForm();
 %>
-<form action="<%= bean.getTargetURL() %>">
+<form action="<%= bean.getTargetURL() %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
     <p>
         Group by:<br/>
@@ -35,8 +35,8 @@ MS2Controller.SpectraCountForm form = bean.getForm();
     </p>
     <p>There are three options for filtering the peptide identifications:</p>
     <p style="padding-left: 2em"><input type="radio" name="peptideFilterType" value="none" <%= form.isNoPeptideFilter() ? "checked=\"true\"" : "" %> /> Use all the peptides</p>
-    <p style="padding-left: 2em"><input type="radio" name="peptideFilterType" value="peptideProphet" <%= form.isPeptideProphetFilter() ? "checked=\"true\"" : "" %>/> All peptides with PeptideProphet probability &ge; <input type="text" size="2" name="peptideProphetProbability" value="<%= form.getPeptideProphetProbability() == null ? "" : form.getPeptideProphetProbability() %>" /></p>
-    <p style="padding-left: 2em"><input type="radio" name="peptideFilterType" value="customView" <%= form.isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>
+    <p style="padding-left: 2em"><input type="radio" name="peptideFilterType" id="peptideProphetRadioButton" value="peptideProphet" <%= form.isPeptideProphetFilter() ? "checked=\"true\"" : "" %>/> All peptides with PeptideProphet probability &ge; <input onfocus="document.getElementById('peptideProphetRadioButton').checked=true;" type="text" size="2" name="peptideProphetProbability" value="<%= form.getPeptideProphetProbability() == null ? "" : form.getPeptideProphetProbability() %>" /></p>
+    <p style="padding-left: 2em"><input type="radio" name="peptideFilterType" id="customViewRadioButton" value="customView" <%= form.isCustomViewPeptideFilter() ? "checked=\"true\"" : "" %>/>
         Use a customized Peptides view to establish criteria for which peptides to include in the comparison.
         <%
         QueryPicker picker = bean.getPeptideView().getColumnListPicker(request);
