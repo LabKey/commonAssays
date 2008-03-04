@@ -418,14 +418,21 @@ public class PipelineController extends SpringActionController
                 }
 
                 Container c = getContainer();
-                File[] annotatedFiles = MS2PipelineManager.getAnalysisFiles(_dirData, _dirAnalysis, FileStatus.ANNOTATED, c);
-                File[] unprocessedFile = MS2PipelineManager.getAnalysisFiles(_dirData, _dirAnalysis, FileStatus.UNKNOWN, c);
                 List<File> mzXMLFileList = new ArrayList<File>();
+
+
+                File[] annotatedFiles = MS2PipelineManager.getAnalysisFiles(_dirData, _dirAnalysis, FileStatus.ANNOTATED, c);
                 mzXMLFileList.addAll(Arrays.asList(annotatedFiles));
+                File[] unprocessedFile = MS2PipelineManager.getAnalysisFiles(_dirData, _dirAnalysis, FileStatus.UNKNOWN, c);
                 mzXMLFileList.addAll(Arrays.asList(unprocessedFile));
+                    
                 File[] mzXMLFiles = mzXMLFileList.toArray(new File[mzXMLFileList.size()]);
+
                 if (mzXMLFiles.length == 0)
-                    throw new IllegalArgumentException("Analysis for this protocol is already complete.");
+                {
+                    errors.reject(ERROR_MSG, "Analysis for this protocol is already complete.");
+                    return false;
+                }
 
                 _protocol.getFactory().ensureDefaultParameters(_dirRoot);
 
@@ -490,8 +497,15 @@ public class PipelineController extends SpringActionController
             if (!reshow)
                 form.setSaveProtocol(true);
 
-            Map<File, FileStatus> mzXmlFileStatus =
-                    MS2PipelineManager.getAnalysisFileStatus(_dirData, _dirAnalysis, getContainer());
+            Map<File, FileStatus> mzXmlFileStatus = new HashMap<File, FileStatus>();
+            try
+            {
+                mzXmlFileStatus = MS2PipelineManager.getAnalysisFileStatus(_dirData, _dirAnalysis, getContainer());
+            }
+            catch (IOException e)
+            {
+                errors.reject(ERROR_MSG, e.getMessage());
+            }
 
             if (form.getConfigureXml().length() == 0)
             {
