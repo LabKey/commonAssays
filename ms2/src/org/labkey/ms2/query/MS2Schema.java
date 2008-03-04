@@ -451,21 +451,19 @@ public class MS2Schema extends UserSchema
         });
         result.addColumn(ms2DetailsColumn);
 
+        ActionURL runUrl = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
+        result.getColumn("Name").setURL(runUrl.getLocalURIString() + "run=${RowId}");
+
         ms2DetailsColumn.setIsHidden(false);
 
         //adjust the default visible columns
         List<FieldKey> columns = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
-        columns.remove(FieldKey.fromParts("Name"));
+        columns.remove(FieldKey.fromParts("MS2Details"));
         columns.remove(FieldKey.fromParts("Protocol"));
         columns.remove(FieldKey.fromParts("CreatedBy"));
 
         columns.add(2, FieldKey.fromParts("MS2Details", "Links"));
-        columns.add(FieldKey.fromParts("MS2Details", "Path"));
         columns.add(FieldKey.fromParts("Input", "FASTA"));
-
-        FieldKey ms2DetailsKey = FieldKey.fromParts("MS2Details");
-        columns.remove(ms2DetailsKey);
-        columns.add(3, ms2DetailsKey);
 
         result.setDefaultVisibleColumns(columns);
         return result;

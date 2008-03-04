@@ -80,6 +80,10 @@
             <ns:formatString>0.00</ns:formatString>
             <ns:columnTitle>MS2 Prob</ns:columnTitle>
         </ns:column>
+        <ns:column columnName="MS2Charge">
+          <ns:columnTitle>MS2 Z</ns:columnTitle>
+          <ns:formatString>#+</ns:formatString>
+        </ns:column>
       </ns:columns>
     </ns:table>
     <ns:table tableName="Files" tableDbType="TABLE">

@@ -74,15 +74,13 @@ public class FeaturesTableInfo extends FilteredTable
         if(includePepFk)
         {
             //add an expression column that finds the corresponding peptide id based on
-            //the mzXmlUrl and MS2Scan (but not charge since, according to Roland, it may not always be correct)
-            //Since we're not matching on charge, we could get multiple rows back, so use MIN to
-            //select just the first matching one.
+            //the mzXmlUrl, MS2Scan, and MS2Charge
             SQLFragment sqlPepJoin = new SQLFragment("(SELECT MIN(pd.rowid) AS PeptideId" +
                     "\nFROM ms2.PeptidesData AS pd" +
                     "\nINNER JOIN ms2.Fractions AS fr ON (fr.fraction=pd.fraction)" +
                     "\nINNER JOIN ms2.Runs AS r ON (fr.Run=r.Run)" +
                     "\nINNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl)" +
-                    "\nINNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)" +
+                    "\nINNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan AND pd.Charge=fe.MS2Charge)" +
                     "\nWHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId" +
                     "\nAND r.Container IN (" + _schema.getContainerInList() + ")" +
                     "\nAND r.Deleted=?)", false);

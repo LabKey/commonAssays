@@ -65,7 +65,7 @@ abstract public class MSInspectXarGeneratorSupport implements FileAnalysisXarGen
 
         String baseName = job.getBaseName();
 
-        replaceMap.put("SEARCH_NAME", "Run for " + job.getDescription());
+        replaceMap.put("SEARCH_NAME", job.getDescription());
 
         // Ideally the FileTypes objects used below would be defined somewhere else,
         // But since all this will soon be replaced by experiments generated during

@@ -45,7 +45,7 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
 
     public MS1Module()
     {
-        super(NAME, 2.31, "/org/labkey/ms1", true,
+        super(NAME, 2.32, "/org/labkey/ms1", true,
                 new WebPartFactory(WEBPART_MS1_RUNS)
                 {
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
@@ -149,6 +149,7 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
         Set<String> result = new HashSet<String>();
         result.add("Pipeline");
         result.add("Experiment");
+        result.add("MS2");
         return result;
     }
 }

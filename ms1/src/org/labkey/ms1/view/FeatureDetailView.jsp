@@ -215,7 +215,7 @@
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Accurate</td>
-                    <td><%=feature.getAccurateMz()%></td>
+                    <td><%=PageFlowUtil.filter(feature.getAccurateMz())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Mass</td>
@@ -227,11 +227,11 @@
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Charge</td>
-                    <td><%=feature.getCharge()%></td>
+                    <td>+<%=PageFlowUtil.filter(feature.getCharge())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Charge States</td>
-                    <td><%=feature.getChargeStates()%></td>
+                    <td><%=PageFlowUtil.filter(feature.getChargeStates())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">KL</td>
@@ -247,15 +247,15 @@
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Peaks</td>
-                    <td><%=feature.getPeaks()%></td>
+                    <td><%=PageFlowUtil.filter(feature.getPeaks())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">First Scan</td>
-                    <td><%=feature.getScanFirst()%></td>
+                    <td><%=PageFlowUtil.filter(feature.getScanFirst())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Last Scan</td>
-                    <td><%=feature.getScanLast()%></td>
+                    <td><%=PageFlowUtil.filter(feature.getScanLast())%></td>
                 </tr>
                 <tr>
                     <td bgcolor="#EEEEEE">Total Intensity</td>
@@ -277,11 +277,15 @@
                     </td>
                 </tr>
                 <tr>
+                    <td bgcolor="#EEEEEE">MS2 Charge</td>
+                    <td>+<%=PageFlowUtil.filter(feature.getMs2Charge())%></td>
+                </tr>
+                <tr>
                     <td bgcolor="#EEEEEE">MS2 Probability</td>
                     <td><%=model.formatNumber(feature.getMs2ConnectivityProbability())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Matching Peptides</td>
+                    <td bgcolor="#EEEEEE">Matching Peptide</td>
                     <td>
                         <%
                             {

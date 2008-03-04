@@ -154,6 +154,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         //columns added by Ceaders-Sinai to their post-processed features files
         _bindingMap.put(new ColumnBinding("MS2scan", "MS2Scan", java.sql.Types.INTEGER, false));
         _bindingMap.put(new ColumnBinding("probability", "MS2ConnectivityProbability", java.sql.Types.REAL, false));
+        _bindingMap.put(new ColumnBinding("MS2charge", "MS2Charge", java.sql.Types.TINYINT, false));
     } //static init for _bindingMap
 
     /**
@@ -243,6 +244,8 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
                 row = (Map)iter.next();
                 ++numRows;
 
+                validateRow(row, numRows);
+
                 //set parameter values
                 pstmt.clearParameters();
                 pstmt.setInt(1, idFile); //jdbc params are 1-based!
@@ -294,6 +297,26 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         } //finally
 
     } //importFile()
+
+    /**
+     * Validates the row, throwing an exception if it's invalid
+     * @param row The row
+     * @param rowNum The row number (for error messages)
+     * @throws ExperimentException Thrown if the row is invalid
+     */
+    protected void validateRow(Map row, int rowNum) throws ExperimentException
+    {
+        //if MS2Scan value is present, MS2Charge must be there as well
+        //and vice-versa
+        if(row.get("MS2scan") != null && row.get("MS2charge") == null)
+            throw new ExperimentException("Missing MS2charge value for row " + rowNum + "! If MS2scan is specified, MS2charge must be as well." +
+                    " Use the MS1PeptideParser.exe program to re-match the features to the peptides.");
+
+        if(row.get("MS2charge") != null && row.get("MS2scan") == null)
+            throw new ExperimentException("Missing MS2scan value for row " + rowNum + "! If MS2charge is specified, MS2scan must be as well." + 
+                    " Use the MS1PeptideParser.exe program to re-match the features to the peptides.");
+
+    }
 
     protected int insertFeaturesFile(User user, DbSchema schema, ExpData data) throws SQLException, ExperimentException
     {

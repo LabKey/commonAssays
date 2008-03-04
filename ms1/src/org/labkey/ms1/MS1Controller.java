@@ -391,7 +391,7 @@ public class MS1Controller extends SpringActionController
             //add a filter for MS2 scan so that the showPeptide view will know to enable or
             //disable it's <<prev and next>> buttons based on how many peptides were actually
             //matched.
-            return HttpView.redirect(url + "&MS2Peptides.Scan~eq=" + pepFirst.getScan());
+            return HttpView.redirect(url + "&MS2Peptides.Scan~eq=" + feature.getMs2Scan() + "&MS2Peptides.Charge~eq=" + feature.getMs2Charge());
         }
 
         public NavTree appendNavTrail(NavTree root)

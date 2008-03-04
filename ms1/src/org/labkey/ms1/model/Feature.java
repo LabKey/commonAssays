@@ -219,6 +219,16 @@ public class Feature
         _ms2Scan = ms2Scan;
     }
 
+    public Integer getMs2Charge()
+    {
+        return _ms2Charge;
+    }
+
+    public void setMs2Charge(Integer ms2Charge)
+    {
+        _ms2Charge = ms2Charge;
+    }
+
     public Double getMs2ConnectivityProbability()
     {
         return _ms2ConnectivityProbability;
@@ -254,7 +264,7 @@ public class Feature
                 "INNER JOIN ms2.Runs AS r ON (fr.Run=r.Run)\n" +
                 "INNER JOIN exp.Data AS d ON (r.Container=d.Container)\n" +
                 "INNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl AND fi.ExpDataFileId=d.RowId)\n" +
-                "INNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)\n" +
+                "INNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan AND pd.charge=fe.MS2Charge)\n" +
                 "WHERE fe.FeatureId=? AND r.Deleted=? ORDER BY pd.RowId";
 
         return Table.executeQuery(DbSchema.get("ms2"), sql,
@@ -282,6 +292,7 @@ public class Feature
     private Double _totalIntensity;
     private String _description;
     private Integer _ms2Scan;
+    private Integer _ms2Charge;
     private Double _ms2ConnectivityProbability;
     private Integer _runId = null;
     private ExpRun _run = null;
