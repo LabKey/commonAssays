@@ -95,7 +95,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         _fractions = job._fractions;
 
         // Change parameters which are specific to the fraction job.
-        if (getStatusFile() != getLogFile())
+        if (job.getStatusFile() != job.getLogFile())
             setStatusFile(FT_CLUSTER_STATUS.newFile(getAnalysisDirectory(), getBaseName()));
     }
 
