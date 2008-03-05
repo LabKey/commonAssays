@@ -168,7 +168,12 @@
 <script type="text/javascript" src="<%=contextPath%>/slider/rangeslider.js"></script>
 
 <!-- Main View Layout Table -->
-
+<style type="text/css">
+    td.caption
+    {
+        background-color: #EEEEEE;
+    }
+</style>
 <table cellspacing="0" cellpadding="4px">
     <tr>
         <!-- Previous/Next Feature buttons -->
@@ -200,69 +205,69 @@
             <!-- feature data -->
             <table cellspacing="0" cellpadding="2px">
                 <tr>
-                    <td bgcolor="#EEEEEE">Scan</td>
+                    <td class="caption">Scan</td>
                     <td><%=feature.getScan()%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Time</td>
+                    <td class="caption">Time</td>
                     <td><%=model.formatNumber(feature.getTime())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">m/z</td>
+                    <td class="caption">m/z</td>
                     <td><%=model.formatNumber(feature.getMz())%>
                         &nbsp;[<a href="<%=model.getFindSimilarUrl()%>">find&nbsp;similar</a>]
                     </td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Accurate</td>
+                    <td class="caption">Accurate</td>
                     <td><%=PageFlowUtil.filter(feature.getAccurateMz())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Mass</td>
+                    <td class="caption">Mass</td>
                     <td><%=model.formatNumber(feature.getMass())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Intensity</td>
+                    <td class="caption">Intensity</td>
                     <td><%=model.formatNumber(feature.getIntensity())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Charge</td>
+                    <td class="caption">Charge</td>
                     <td>+<%=PageFlowUtil.filter(feature.getCharge())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Charge States</td>
+                    <td class="caption">Charge States</td>
                     <td><%=PageFlowUtil.filter(feature.getChargeStates())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">KL</td>
+                    <td class="caption">KL</td>
                     <td><%=model.formatNumber(feature.getKl())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Background</td>
+                    <td class="caption">Background</td>
                     <td><%=model.formatNumber(feature.getBackground())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Median</td>
+                    <td class="caption">Median</td>
                     <td><%=model.formatNumber(feature.getMedian())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Peaks</td>
+                    <td class="caption">Peaks</td>
                     <td><%=PageFlowUtil.filter(feature.getPeaks())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">First Scan</td>
+                    <td class="caption">First Scan</td>
                     <td><%=PageFlowUtil.filter(feature.getScanFirst())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Last Scan</td>
+                    <td class="caption">Last Scan</td>
                     <td><%=PageFlowUtil.filter(feature.getScanLast())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Total Intensity</td>
+                    <td class="caption">Total Intensity</td>
                     <td><%=model.formatNumber(feature.getTotalIntensity())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">MS2 Scan</td>
+                    <td class="caption">MS2 Scan</td>
                     <td>
                         <%
                             if(feature.getMs2Scan() != null)
@@ -277,15 +282,15 @@
                     </td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">MS2 Charge</td>
+                    <td class="caption">MS2 Charge</td>
                     <td>+<%=PageFlowUtil.filter(feature.getMs2Charge())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">MS2 Probability</td>
+                    <td class="caption">MS2 Probability</td>
                     <td><%=model.formatNumber(feature.getMs2ConnectivityProbability())%></td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Matching Peptide</td>
+                    <td class="caption">Matching Peptide</td>
                     <td>
                         <%
                             {
@@ -312,7 +317,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td bgcolor="#EEEEEE">Experiment Run</td>
+                    <td class="caption">Experiment Run</td>
                     <td>
                         <a href="<%=model.getRunDetailsUrl()%>">
                         <%=feature.getExpRun() == null ? "&nbsp;" : PageFlowUtil.filter(feature.getExpRun().getName())%>
