@@ -29,19 +29,21 @@ public class FlowManager
     static private FlowManager instance = new FlowManager();
     static private final Logger _log = Logger.getLogger(FlowManager.class);
     private static final String SCHEMA_NAME = "flow";
-    private final Map<String, Integer> _attridCacheMap = new LimitedCacheMap(1000, 10000);
-    class AttrNameCacheMap extends LimitedCacheMap<Integer, String>
+
+    // NOTE: don't use a LimitedCacheMap, blowing it out kills performance
+    private final Map<String, Integer> _attridCacheMap = new CacheMap(1000);
+    class AttrNameCacheMap extends CacheMap<Integer, String>
     {
-        public AttrNameCacheMap(int initialSize, int maxSize)
+        public AttrNameCacheMap(int initialSize)
         {
-            super(initialSize, maxSize);
+            super(initialSize);
         }
         public Entry<Integer, String> findEntry(Object key)
         {
             return super.findEntry(key);
         }
     }
-    private final AttrNameCacheMap _attrNameCacheMap = new AttrNameCacheMap(1000, 10000);
+    private final AttrNameCacheMap _attrNameCacheMap = new AttrNameCacheMap(1000);
 
     static public FlowManager get()
     {
@@ -98,6 +100,8 @@ public class FlowManager
     {
         synchronized (_attridCacheMap)
         {
+            quickFillCache();
+            
             Integer ret = _attridCacheMap.get(attr);
             if (ret != null)
                 return ret;
@@ -148,10 +152,13 @@ public class FlowManager
         return lstRet.toArray(new Map.Entry[0]);
     }
 
+
     public Map.Entry<Integer, String> getAttributeName(int id)
     {
         synchronized(_attridCacheMap)
         {
+            quickFillCache();
+
             Map.Entry<Integer, String>ret = _attrNameCacheMap.findEntry(id);
             if (ret == null)
             {
@@ -173,6 +180,34 @@ public class FlowManager
                 }
             }
             return ret;
+        }
+    }
+
+    private void quickFillCache()
+    {
+        if (_attrNameCacheMap.isEmpty())
+        {
+            ResultSet rs = null;
+            try
+            {
+                rs = Table.executeQuery(getSchema(), "SELECT RowId, Name FROM flow.Attribute", null, 0, false);
+                while (rs.next())
+                {
+                    int rowid = rs.getInt(1);
+                    String name = rs.getString(2);
+                    _attrNameCacheMap.put(rowid, name);
+                    _attridCacheMap.put(name, rowid);
+                }
+            }
+            catch (SQLException e)
+            {
+                _log.error("Unexpected error", e);
+                // fall through;
+            }
+            finally
+            {
+                ResultSetUtil.close(rs);
+            }
         }
     }
 
