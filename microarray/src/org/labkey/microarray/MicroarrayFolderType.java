@@ -24,6 +24,7 @@ public class MicroarrayFolderType extends DefaultFolderType
             ),
             Arrays.asList(
                 Portal.getPortalPart(MicroarrayModule.WEBPART_MICROARRAY_RUNS).createWebPart(),
+                Portal.getPortalPart("Assay Details").createWebPart(),
                 Portal.getPortalPart("Assay List").createWebPart()
             ),
             getDefaultModuleSet(module, getModule(MicroarrayModule.NAME), getModule(PipelineService.MODULE_NAME), getModule(ExperimentService.MODULE_NAME)),

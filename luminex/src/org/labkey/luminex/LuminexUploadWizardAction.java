@@ -137,7 +137,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 info.setName(getAnalytePropertyName(analyte, pd));
                 cols.add(info.getRenderer());
             }
-            view.getDataRegion().addGroup(cols, pd.getName(), true);
+            view.getDataRegion().addGroup(new DisplayColumnGroup(cols, pd.getName(), true));
         }
         view.getDataRegion().setHorizontalGroups(false);
         List<String> analyteNames = new ArrayList<String>();

@@ -8,6 +8,7 @@ import org.labkey.api.util.AppProps;
 import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.study.assay.AssayDataLinkDisplayColumn;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
@@ -61,13 +62,9 @@ public class MicroarraySchema extends UserSchema
     public ExpRunTable createRunsTable(String alias)
     {
         ExpRunTable result = _expSchema.createRunsTable(alias);
-//        result.getColumn(ExpRunTable.Column.Name).setDisplayColumnFactory(new DisplayColumnFactory()
-//        {
-//            public DisplayColumn createRenderer(ColumnInfo colInfo)
-//            {
-//                return new AssayDataLinkDisplayColumn(colInfo);
-//            }
-//        });
+        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getRunTextURL(getContainer(), -1);
+        result.getColumn(ExpRunTable.Column.Name).setURL(url.toString().replace("-1", "${RowId}"));
+
         result.setProtocolPatterns("urn:lsid:%:" + MicroarrayAssayProvider.PROTOCOL_PREFIX + ".%");
 
         SQLFragment thumbnailSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +

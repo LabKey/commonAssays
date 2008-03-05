@@ -21,6 +21,8 @@ import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.springframework.validation.BindException;
+import org.springframework.validation.ObjectError;
 
 import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPath;
@@ -34,6 +36,7 @@ import java.util.HashMap;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Writer;
+import java.io.FileNotFoundException;
 
 /**
  * User: jeckels
@@ -43,93 +46,11 @@ import java.io.Writer;
 public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUploadForm>
 {
 
-    protected Map<String, String> getDefaultValues(String suffix, AssayRunUploadForm form) throws ExperimentException
+    private XPathExpression compileXPathExpression(String expression) throws XPathExpressionException
     {
-        Map<String, String> result = super.getDefaultValues(suffix, form);
-
-        AssayDataCollector dataCollector = form.getSelectedDataCollector();
-
-        if (RunStepHandler.NAME.equals(suffix))
-        {
-            // Make a copy so we can modify it
-            result = new HashMap<String, String>(result);
-
-            XPathFactory factory = XPathFactory.newInstance();
-            XPath xPath = factory.newXPath();
-
-            Document input = null;
-
-            try
-            {
-                PropertyDescriptor[] runPDs = getProvider(form).getRunPropertyColumns(form.getProtocol());
-                StringBuilder errors = new StringBuilder();
-                for (PropertyDescriptor runPD : runPDs)
-                {
-                    String expression = runPD.getDescription();
-                    if (expression != null)
-                    {
-                        try
-                        {
-                            XPathExpression xPathExpression = xPath.compile(expression);
-                            if (input == null)
-                            {
-                                DocumentBuilderFactory dbfact = DocumentBuilderFactory.newInstance();
-                                dbfact.setAttribute("http://apache.org/xml/features/nonvalidating/load-external-dtd",false);
-                                DocumentBuilder builder = dbfact.newDocumentBuilder();
-                                input = builder.parse(new InputSource(new FileInputStream(dataCollector.createData(form).values().iterator().next())));
-                            }
-                            String value = xPathExpression.evaluate(input);
-                            result.put(ColumnInfo.propNameFromName(runPD.getName()), value);
-                        }
-                        catch (XPathExpressionException e)
-                        {
-                            errors.append("Error parsing XPath expression '").append(expression).append("'. ");
-                            if (e.getMessage() != null)
-                            {
-                                errors.append(e.getMessage());
-                            }
-                        }
-                    }
-                }
-
-                if (errors.length() > 0)
-                {
-                    throw new ExperimentException(errors.toString());
-                }
-
-//                XPathExpression xPathDescriptionProducer = xPath.compile(
-//                        "/MAGE-ML/Descriptions_assnlist/Description/Annotations_assnlist/OntologyEntry[@category='Producer']/@value");
-//                XPathExpression xPathDescriptionVersion = xPath.compile(
-//                        "/MAGE-ML/Descriptions_assnlist/Description/Annotations_assnlist/OntologyEntry[@category='Version']/@value");
-//                XPathExpression xPathProtocol = xPath.compile(
-//                        "/MAGE-ML/BioAssay_package/BioAssay_assnlist/MeasuredBioAssay/FeatureExtraction_assn/FeatureExtraction/ProtocolApplications_assnlist/ProtocolApplication/SoftwareApplications_assnlist/SoftwareApplication/ParameterValues_assnlist/ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:Protocol_Name']/@value");
-//                XPathExpression xPathGrid = xPath.compile(
-//                        "/MAGE-ML/BioAssay_package/BioAssay_assnlist/MeasuredBioAssay/FeatureExtraction_assn/FeatureExtraction/ProtocolApplications_assnlist/ProtocolApplication/SoftwareApplications_assnlist/SoftwareApplication/ParameterValues_assnlist/ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:Grid_Name']/@value");
-//                XPathExpression xPathBarcode = xPath.compile(
-//                        "/MAGE-ML/BioAssay_package/BioAssay_assnlist/MeasuredBioAssay/FeatureExtraction_assn/FeatureExtraction/ProtocolApplications_assnlist/ProtocolApplication/SoftwareApplications_assnlist/SoftwareApplication/ParameterValues_assnlist/ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:FeatureExtractor_Barcode']/@value");
-
-//                String descriptionProducer = xPathDescriptionProducer.evaluate(input);
-//                String descriptionVersion = xPathDescriptionVersion.evaluate(input);
-//                String description = descriptionProducer + " Version " + descriptionVersion;
-//                String protocol = xPathProtocol.evaluate(input);
-//                String grid = xPathGrid.evaluate(input);
-//                String barcode = xPathBarcode.evaluate(input);
-            }
-            catch (IOException e)
-            {
-                throw new ExperimentException("Error parsing MAGE output", e);
-            }
-            catch (SAXException e)
-            {
-                throw new ExperimentException("Error parsing MAGE output", e);
-            }
-            catch (ParserConfigurationException e)
-            {
-                throw new ExperimentException("Error parsing MAGE output", e);
-            }
-        }
-
-        return result;
+        XPathFactory factory = XPathFactory.newInstance();
+        XPath xPath = factory.newXPath();
+        return xPath.compile(expression);
     }
 
     protected void addSampleInputColumns(ExpProtocol protocol, InsertView insertView)
@@ -187,5 +108,72 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
                 throw (IOException)new IOException().initCause(e);
             }
         }
+    }
+
+    protected InsertView createRunInsertView(AssayRunUploadForm form, boolean reshow, BindException errors)
+    {
+        Map<PropertyDescriptor, String> allProperties = form.getRunProperties();
+        Map<PropertyDescriptor, String> userProperties = new HashMap<PropertyDescriptor, String>();
+
+        Document input = null;
+
+        Map<String, String> hiddenElements = new HashMap<String, String>();
+        AssayDataCollector dataCollector = form.getSelectedDataCollector();
+
+        for (Map.Entry<PropertyDescriptor, String> entry : allProperties.entrySet())
+        {
+            PropertyDescriptor runPD = entry.getKey();
+            String expression = runPD.getDescription();
+            if (expression != null)
+            {
+                try
+                {
+                    XPathExpression xPathExpression = compileXPathExpression(expression);
+                    if (input == null)
+                    {
+                        DocumentBuilderFactory dbfact = DocumentBuilderFactory.newInstance();
+                        dbfact.setAttribute("http://apache.org/xml/features/nonvalidating/load-external-dtd",false);
+                        DocumentBuilder builder = dbfact.newDocumentBuilder();
+                        input = builder.parse(new InputSource(new FileInputStream(dataCollector.createData(form).values().iterator().next())));
+                    }
+                    String value = xPathExpression.evaluate(input);
+
+                    hiddenElements.put(ColumnInfo.propNameFromName(runPD.getName()), value);
+                }
+                catch (XPathExpressionException e)
+                {
+                    userProperties.put(runPD, entry.getValue());
+                }
+                catch (IOException e)
+                {
+                    errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
+                }
+                catch (SAXException e)
+                {
+                    errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
+                }
+                catch (ExperimentException e)
+                {
+                    errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
+                }
+                catch (ParserConfigurationException e)
+                {
+                    errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
+                }
+            }
+            else
+            {
+                userProperties.put(runPD, entry.getValue());
+            }
+        }
+
+        InsertView result = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
+                "lsid", userProperties, reshow, form.isResetDefaultValues(), RunStepHandler.NAME, form, errors);
+
+        for (Map.Entry<String, String> hiddenElement : hiddenElements.entrySet())
+        {
+            result.getDataRegion().addHiddenFormField(hiddenElement.getKey(), hiddenElement.getValue());
+        }
+        return result;
     }
 }
