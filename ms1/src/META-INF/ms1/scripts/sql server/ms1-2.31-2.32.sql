@@ -32,7 +32,7 @@ GO
 
 UPDATE ms1.Features
 SET MS2Charge=
-(SELECT TOP (1) pd1.Charge
+(SELECT TOP 1 pd1.Charge
 FROM ms2.PeptidesData AS pd1
 INNER JOIN ms2.Fractions AS fr1 ON (pd1.Fraction=fr1.Fraction)
 INNER JOIN ms2.Runs AS r1 ON (fr1.Run=r1.Run)
