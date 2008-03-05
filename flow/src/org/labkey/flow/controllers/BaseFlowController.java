@@ -85,7 +85,8 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
         }
         ntc.setExtraChildren(children.toArray(new NavTree[0]));
         ntc.setTitle(title);
-        ntc.setHelpTopic(new HelpTopic(PageFlowUtil.helpTopic(action), HelpTopic.Area.FLOW));
+//        ntc.setHelpTopic(new HelpTopic(PageFlowUtil.helpTopic(action), HelpTopic.Area.FLOW));
+        ntc.setHelpTopic(new HelpTopic("flowDefault", HelpTopic.Area.FLOW));
         return ntc;
 
     }
