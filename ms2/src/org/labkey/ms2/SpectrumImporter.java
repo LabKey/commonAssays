@@ -40,9 +40,9 @@ import java.util.Set;
  * Date: Oct 26, 2005
  * Time: 3:37:30 PM
  */
-public class SpectrumLoader
+public class SpectrumImporter
 {
-    private static Logger _systemLog = Logger.getLogger(SpectrumLoader.class);
+    private static Logger _systemLog = Logger.getLogger(SpectrumImporter.class);
     private static final int SQL_BATCH_SIZE = 100;
 
     private Logger _log = null;
@@ -51,18 +51,18 @@ public class SpectrumLoader
     private int _fractionId;
     private SimpleScanIterator _scanIterator;
     private String _fileName = null;
-    private boolean _shouldLoadRetentionTime;
-    private boolean _shouldLoadSpectra;
+    private boolean _shouldImportRetentionTime;
+    private boolean _shouldImportSpectra;
 
 
-    protected SpectrumLoader(String gzFileName, String dtaFileNamePrefix, String mzXmlFileName, Set scans, MS2Importer.MS2Progress progress, int fractionId, Logger log, boolean shouldLoadSpectra, boolean shouldLoadRetentionTime)
+    protected SpectrumImporter(String gzFileName, String dtaFileNamePrefix, String mzXmlFileName, Set scans, MS2Importer.MS2Progress progress, int fractionId, Logger log, boolean shouldImportSpectra, boolean shouldImportRetentionTime)
     {
         _scans = scans;
         _progress = progress;
         _fractionId = fractionId;
         _log = log;
-        _shouldLoadRetentionTime = shouldLoadRetentionTime;
-        _shouldLoadSpectra = shouldLoadSpectra;
+        _shouldImportRetentionTime = shouldImportRetentionTime;
+        _shouldImportSpectra = shouldImportSpectra;
 
         if (null == scans)
             return;
@@ -80,7 +80,7 @@ public class SpectrumLoader
             else
             {
                 if (null == mzXmlFileName)
-                    _log.warn("Spectra were not loaded: " + gzFileName + " could not be opened and no mzXML file name was specified.");
+                    _log.warn("Spectra were not imported: " + gzFileName + " could not be opened and no mzXML file name was specified.");
                 else
                 {
                     _fileName = mzXmlFileName;
@@ -90,7 +90,7 @@ public class SpectrumLoader
         }
         catch (IOException x)
         {
-            _log.warn("Spectra were not loaded: " + x.toString());  // Note: x.getMessage() has just the file name
+            _log.warn("Spectra were not imported: " + x.toString());  // Note: x.getMessage() has just the file name
         }
         catch (XMLStreamException x)
         {
@@ -103,8 +103,8 @@ public class SpectrumLoader
     {
         try
         {
-            if (shouldLoadSpectra())
-                loadIntoDatabase();
+            if (shouldImportSpectra())
+                importSpectra();
         }
         finally
         {
@@ -113,14 +113,14 @@ public class SpectrumLoader
     }
 
 
-    private boolean shouldLoadSpectra()
+    private boolean shouldImportSpectra()
     {
-        if (!_shouldLoadSpectra)
-            _log.info("Spectra were not loaded: pep.xml file included \"pipeline, load spectra = no\" setting.");
+        if (!_shouldImportSpectra)
+            _log.info("Spectra were not imported: pep.xml file included \"pipeline, import spectra = no\" or \"pipeline, load spectra = no\" setting.");
         else if (null == _scans || _scans.isEmpty())
-            _log.warn("Spectra were not loaded: no scans were loaded from pep.xml file.");
+            _log.warn("Spectra were not imported: no scans were imported from pep.xml file.");
         else if (null == _scanIterator)
-            _log.warn("Spectra were not loaded: could not open spectrum source.");
+            _log.warn("Spectra were not imported: could not open spectrum source.");
         else
             return true;
 
@@ -129,10 +129,10 @@ public class SpectrumLoader
 
 
     // Iterates the spectra and writes them to the ms2.SpectraData table using the same Fraction & Row as the peptide table
-    private void loadIntoDatabase()
+    private void importSpectra()
     {
         long start = System.currentTimeMillis();
-        _log.info("Starting spectra load from " + _fileName);
+        _log.info("Starting to import spectra from " + _fileName);
 
         DbSchema schema = MS2Manager.getSchema();
         Connection conn = null;
@@ -146,7 +146,7 @@ public class SpectrumLoader
             spectraStmt = conn.prepareStatement("INSERT INTO " + MS2Manager.getTableInfoSpectraData() + " (Fraction, Scan, Spectrum) VALUES (?, ?, ?)");
             spectraStmt.setInt(1, _fractionId);
 
-            if (_shouldLoadRetentionTime)
+            if (_shouldImportRetentionTime)
             {
                 retentionStmt = conn.prepareStatement("UPDATE " + MS2Manager.getTableInfoPeptidesData() + " SET RetentionTime = ? WHERE Scan = ? AND Fraction = ?");
                 retentionStmt.setInt(3, _fractionId);
@@ -159,7 +159,7 @@ public class SpectrumLoader
                 SimpleScan spectrum = _scanIterator.next();
                 int scan = spectrum.getScan();
 
-                // Load spectrum only if we loaded the corresponding scan in the XML file.
+                // Import spectrum only if we imported the corresponding scan in the XML file.
                 // Since we want to store spectrum only once per scan, remove it from the set so
                 // it's not duplicated if this spectrum shows up again (e.g., multiple DTA files
                 // for a single scan but different charge)
@@ -174,7 +174,7 @@ public class SpectrumLoader
                     spectraStmt.setBytes(3, copyBytes);
                     spectraStmt.addBatch();
 
-                    if (_shouldLoadRetentionTime)
+                    if (_shouldImportRetentionTime)
                     {
                         Double retentionTime = spectrum.getRetentionTime();
                         if (retentionTime != null)
@@ -191,7 +191,7 @@ public class SpectrumLoader
                     {
                         spectraStmt.executeBatch();
 
-                        if (_shouldLoadRetentionTime)
+                        if (_shouldImportRetentionTime)
                             retentionStmt.executeBatch();
 
                         conn.commit();
@@ -280,7 +280,7 @@ public class SpectrumLoader
             }
         }
 
-        MS2Importer.logElapsedTime(_log, start, "load spectra");
+        MS2Importer.logElapsedTime(_log, start, "import spectra");
     }
 
 

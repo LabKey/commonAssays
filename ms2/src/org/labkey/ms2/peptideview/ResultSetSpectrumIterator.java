@@ -85,7 +85,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
 
                 if (null != bytes)
                 {
-                    _pair = SpectrumLoader.byteArrayToFloatArrays(bytes);
+                    _pair = SpectrumImporter.byteArrayToFloatArrays(bytes);
                 }
                 else
                 {

@@ -3432,6 +3432,7 @@ public class MS2Controller extends SpringActionController
 
             AbstractMS2RunView peptideView = null;
 
+            // runId is not set when linking from compare
             if (runId != 0)
             {
                 _run = MS2Manager.getRun(runId);
@@ -3445,10 +3446,7 @@ public class MS2Controller extends SpringActionController
                 // Set the protein name used in this run's FASTA file; we want to include this in the view.
                 _protein.setLookupString(form.getProtein());
                 getPageConfig().setTemplate(PageConfig.Template.Print);
-            }
-            else
-            {
-                getPageConfig().setTemplate(PageConfig.Template.Home);  // This is used in links from compare
+                getPageConfig().setTitle(getProteinTitle(_protein, true));
             }
 
             return new ProteinsView(currentUrl, _run, form, new Protein[] {_protein}, null, peptideView);
@@ -3486,13 +3484,15 @@ public class MS2Controller extends SpringActionController
 
             MS2Run run = MS2Manager.getRun(form.run);
 
-            setTitle("Proteins Containing " + peptide);       // TODO: Add this text to the view
+            setTitle("Proteins Containing " + peptide);
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
             Protein[] proteins = ProteinManager.getProteinsContainingPeptide(run.getFastaId(), peptide);
             ActionURL currentUrl = getViewContext().cloneActionURL();
             AbstractMS2RunView peptideView = new StandardProteinPeptideView(getViewContext(), run);
-            return new ProteinsView(currentUrl, run, form, proteins, new String[]{peptide.getTrimmedPeptide()}, peptideView);
+            ProteinsView view = new ProteinsView(currentUrl, run, form, proteins, new String[]{peptide.getTrimmedPeptide()}, peptideView);
+            HttpView summary = new HtmlView("<table><tr><td><span class=\"navPageHeader\">All protein sequences in FASTA file " + run.getFastaFileName() + " that contain the peptide " + peptide + "</span></td></tr></table>");
+            return new VBox(summary, view);
         }
 
         public NavTree appendNavTrail(NavTree root)

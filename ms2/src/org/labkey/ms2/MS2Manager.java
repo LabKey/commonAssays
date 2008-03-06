@@ -965,7 +965,7 @@ public class MS2Manager
             byte[] spectrumBytes = Table.executeSingleton(getSchema(), "SELECT Spectrum FROM " + getTableInfoSpectraData() + " WHERE Fraction=? AND Scan=?", new Object[]{new Integer(fractionId), new Integer(scan)}, byte[].class);
 
             if (null != spectrumBytes)
-                return SpectrumLoader.byteArrayToFloatArrays(spectrumBytes);
+                return SpectrumImporter.byteArrayToFloatArrays(spectrumBytes);
             else
                 return getSpectrumFromMzXML(fractionId, scan);
         }

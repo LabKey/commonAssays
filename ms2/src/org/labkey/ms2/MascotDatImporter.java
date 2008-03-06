@@ -26,7 +26,7 @@ public class MascotDatImporter extends MS2Importer
         return "Mascot";
     }
 
-    public void uploadRun() throws IOException, SQLException, XMLStreamException
+    public void importRun() throws IOException, SQLException, XMLStreamException
     {
         throw new UnsupportedOperationException();
     }

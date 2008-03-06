@@ -51,8 +51,8 @@ public abstract class MS2Importer
     public static final int STATUS_SUCCESS = 1;
     public static final int STATUS_FAILED = 2;
 
-    private static final String UPLOAD_STARTED = "Loading... (refresh to check status)";
-    private static final String UPLOAD_SUCCEEDED = "";
+    private static final String IMPORT_STARTED = "Importing... (refresh to check status)";
+    private static final String IMPORT_SUCCEEDED = "";
 
     protected User _user;
     protected Container _container;
@@ -65,7 +65,7 @@ public abstract class MS2Importer
     protected int _runId, _fractionId;
     protected long _startTime;
 
-    // Use passed in logger for upload status, information, and file format problems.  This should
+    // Use passed in logger for import status, information, and file format problems.  This should
     // end up in the pipeline log.
     protected Logger _log = null;
 
@@ -104,13 +104,13 @@ public abstract class MS2Importer
     public static class RunInfo implements Serializable
     {
         private final int _runId;
-        private final boolean _alreadyLoaded;
+        private final boolean _alreadyImported;
 
-        private RunInfo(int runId, boolean alreadyLoaded)
+        private RunInfo(int runId, boolean alreadyImported)
         {
             _runId = runId;
 
-            _alreadyLoaded = alreadyLoaded;
+            _alreadyImported = alreadyImported;
         }
 
         public int getRunId()
@@ -118,9 +118,9 @@ public abstract class MS2Importer
             return _runId;
         }
 
-        public boolean isAlreadyLoaded()
+        public boolean isAlreadyImported()
         {
-            return _alreadyLoaded;
+            return _alreadyImported;
         }
     }
 
@@ -128,32 +128,32 @@ public abstract class MS2Importer
     {
         try
         {
-            boolean alreadyLoaded = false;
+            boolean alreadyImported = false;
             MS2Manager.getSchema().getScope().beginTransaction();
             synchronized (_schemaLock)
             {
-                // Don't upload if we've already loaded this file (undeleted run exists matching this file name)
+                // Don't import if we've already imported this file (undeleted run exists matching this file name)
                 _runId = getRun();
                 if (_runId != -1)
                 {
                     if (!restart)
                     {
-                        alreadyLoaded = true;
+                        alreadyImported = true;
                     }
                     else
                     {
-                        _log.info("Restarting upload from \"" + _fileName + "\"");
+                        _log.info("Restarting import from \"" + _fileName + "\"");
                     }
                 }
                 else
                 {
-                    _log.info("Starting upload from \"" + _fileName + "\"");
+                    _log.info("Starting import from \"" + _fileName + "\"");
                     _runId = createRun();
                 }
             }
 
             MS2Manager.getSchema().getScope().commitTransaction();
-            return new RunInfo(_runId, alreadyLoaded);
+            return new RunInfo(_runId, alreadyImported);
         }
         finally
         {
@@ -168,9 +168,9 @@ public abstract class MS2Importer
         MS2Run run = MS2Manager.getRun(_runId);
 
         // Skip if run was already fully imported
-        if (info.isAlreadyLoaded() && run != null && run.getStatusId() == MS2Importer.STATUS_SUCCESS)
+        if (info.isAlreadyImported() && run != null && run.getStatusId() == MS2Importer.STATUS_SUCCESS)
         {
-            _log.info(_fileName + " has already been loaded so it does not need to be reloaded");
+            _log.info(_fileName + " has already been imported so it does not need to be imported again");
             return info.getRunId();
         }
 
@@ -182,42 +182,42 @@ public abstract class MS2Importer
         try
         {
             _log.info("Clearing out existing MS2 data for " + _fileName);
-            updateRunStatus(UPLOAD_STARTED);
+            updateRunStatus(IMPORT_STARTED);
             MS2Manager.clearRun(_runId);
             _log.info("Finished clearing out existing MS2 data for " + _fileName);
 
-            uploadRun();
+            importRun();
             updatePeptideColumns();
             updateCounts();
         }
         catch (FileNotFoundException fnfe)
         {
-            logError("MS2 data upload failed due to a missing file.", fnfe);
-            updateRunStatus("Upload failed (see pipeline log)", STATUS_FAILED);
+            logError("MS2 import failed due to a missing file.", fnfe);
+            updateRunStatus("Import failed (see pipeline log)", STATUS_FAILED);
             throw fnfe;
         }
         catch (SQLException e)
         {
-            logError("MS2 data upload failed", e);
-            updateRunStatus("Upload failed (see pipeline log)", STATUS_FAILED);
+            logError("MS2 import failed", e);
+            updateRunStatus("Import failed (see pipeline log)", STATUS_FAILED);
             throw e;
         }
         catch (IOException e)
         {
-            logError("MS2 data upload failed", e);
-            updateRunStatus("Upload failed (see pipeline log)", STATUS_FAILED);
+            logError("MS2 import failed", e);
+            updateRunStatus("Import failed (see pipeline log)", STATUS_FAILED);
             throw e;
         }
         catch (XMLStreamException e)
         {
-            logError("MS2 data upload failed", e);
-            updateRunStatus("Upload failed (see pipeline log)", STATUS_FAILED);
+            logError("MS2 import failed", e);
+            updateRunStatus("Import failed (see pipeline log)", STATUS_FAILED);
             throw e;
         }
         catch (RuntimeException e)
         {
-            logError("MS2 data upload failed", e);
-            updateRunStatus("Upload failed (see pipeline log)", STATUS_FAILED);
+            logError("MS2 import failed", e);
+            updateRunStatus("Import failed (see pipeline log)", STATUS_FAILED);
             throw e;
         }
         finally
@@ -225,15 +225,15 @@ public abstract class MS2Importer
             close();
         }
 
-        updateRunStatus(UPLOAD_SUCCEEDED, STATUS_SUCCESS);
+        updateRunStatus(IMPORT_SUCCEEDED, STATUS_SUCCESS);
 
         MS2Manager.computeBasicMS2Stats();       // Update runs/peptides statistics
-        logElapsedTime(_startTime, "upload \"" + _fileName + "\"");
+        logElapsedTime(_startTime, "import \"" + _fileName + "\"");
         return info.getRunId();
     }
 
 
-    abstract public void uploadRun() throws IOException, SQLException, XMLStreamException;
+    abstract public void importRun() throws IOException, SQLException, XMLStreamException;
 
     abstract protected String getType();
 
@@ -317,7 +317,7 @@ public abstract class MS2Importer
         runMap.put("Container", _container.getId());
         runMap.put("Path", _path);
         runMap.put("FileName", _fileName);
-        runMap.put("Status", UPLOAD_STARTED);
+        runMap.put("Status", IMPORT_STARTED);
         runMap.put("Type", getType());    // TODO: Change how we handle type: For pepXML, this is null at this point... okay for Comet
 
         Map returnMap = Table.insert(_user, MS2Manager.getTableInfoRuns(), runMap);
@@ -361,7 +361,7 @@ public abstract class MS2Importer
 
 
     // When we first create a fraction record we don't know what the spectrum file name or type is,
-    // so update it after loading the spectra.
+    // so update it after importing the spectra.
     protected void updateFractionSpectrumFileName(File spectrumFile) throws SQLException
     {
         if (null != spectrumFile)
@@ -589,12 +589,12 @@ public abstract class MS2Importer
 
 
     // Calculates progress of an MS2 import.  PepXML file progress is based on offset within the peptide portion of the file;
-    // progress through each fraction's spectra based on actual number of scans loaded vs. expected.
+    // progress through each fraction's spectra based on actual number of scans imported vs. expected.
     protected class MS2Progress
     {
-        // Default assumption is equal weighting between scans and spectra... change this value if (for example) loading
-        // a spectrum takes significantly longer than loading a peptide.  Value is time to load a peptide as a fraction
-        // of total time for loading both a peptide and a spectrum.  Always a fraction of 1.0.
+        // Default assumption is equal weighting between scans and spectra... change this value if (for example) importing
+        // a spectrum takes significantly longer than importing a peptide.  Value is time to import a peptide as a fraction
+        // of total time for importing both a peptide and a spectrum.  Always a fraction of 1.0.
         private static final float DEFAULT_PEPTIDE_WEIGHTING = 0.5f;
 
         private float _peptideWeighting = DEFAULT_PEPTIDE_WEIGHTING;
@@ -630,13 +630,13 @@ public abstract class MS2Importer
         }
 
 
-        // If we're not loading spectra then use the peptide file progress only (weight the spectrum progress at 0.0).
-        // This should work on multiple fraction runs, even those where some fractions have spectra loaded and some
+        // If we're not importing spectra then use the peptide file progress only (weight the spectrum progress at 0.0).
+        // This should work on multiple fraction runs, even those where some fractions have spectra imported and some
         // don't, since progress in the peptide file is always the master.  Call this method before each fraction is
-        // loaded to reset the weights appropriately.
-        protected void setLoadSpectra(boolean loadSpectra)
+        // imported to reset the weights appropriately.
+        protected void setImportSpectra(boolean importSpectra)
         {
-            _peptideWeighting = loadSpectra ? DEFAULT_PEPTIDE_WEIGHTING : 1.0F;
+            _peptideWeighting = importSpectra ? DEFAULT_PEPTIDE_WEIGHTING : 1.0F;
         }
 
 
@@ -682,8 +682,8 @@ public abstract class MS2Importer
 
             if (null != percent)
             {
-                _log.info("Loading MS/MS results is " + percent + "% complete");
-                updateRunStatus("Loading is " + percent + "% complete");
+                _log.info("Importing MS/MS results is " + percent + "% complete");
+                updateRunStatus("Importing is " + percent + "% complete");
             }
         }
 

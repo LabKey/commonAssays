@@ -63,13 +63,14 @@ public class PepXmlImporter extends MS2Importer
     }
 
 
-    public void uploadRun() throws SQLException, XMLStreamException, IOException
+    public void importRun() throws SQLException, XMLStreamException, IOException
     {
         PepXmlLoader loader = null;
+        int fractionCount = 0;
 
         try
         {
-            boolean runUpdated = false;  // Set to true after we update the run information (after loading the first fraction)
+            boolean runUpdated = false;  // Set to true after we update the run information (after importing the first fraction)
 
             File f = new File(_path + "/" + _fileName);
             NetworkDrive.ensureDrive(f.getPath());
@@ -96,13 +97,14 @@ public class PepXmlImporter extends MS2Importer
                 }
 
                 progress.setPeptideMode();
+                _log.info("Starting to import fraction " + (++fractionCount) + ", peptide search results for file " + fraction.getSpectrumPath());
                 writeFractionInfo(fraction);
 
                 PeptideIterator pi = fraction.getPeptideIterator();
-                boolean shouldLoadSpectra = fraction.shouldLoadSpectra();
-                progress.setLoadSpectra(shouldLoadSpectra);
+                boolean shouldImportSpectra = fraction.shouldLoadSpectra();
+                progress.setImportSpectra(shouldImportSpectra);
                 // Initialize scans to a decent size, but only if we're going to load spectra
-                HashSet<Integer> scans = new HashSet<Integer>(shouldLoadSpectra ? 1000 : 0);
+                HashSet<Integer> scans = new HashSet<Integer>(shouldImportSpectra ? 1000 : 0);
                 _conn.setAutoCommit(false);
 
                 boolean retentionTimesInPepXml = false;
@@ -112,17 +114,17 @@ public class PepXmlImporter extends MS2Importer
                 {
                     PepXmlPeptide peptide = pi.next();
 
-                    // If any peptide in the pep.xml file has retention time then don't load retention times from mzXML
+                    // If any peptide in the pep.xml file has retention time then don't import retention times from mzXML
                     if (null != peptide.getRetentionTime())
                         retentionTimesInPepXml = true;
 
                     // Mascot exported pepXML may contain unassigned spectrum
-                    // we omit them for the uploading
+                    // we omit them for import
                     if (null != peptide.getTrimmedPeptide())
                     {
 	                    write(peptide, summary);
 
-                        if (shouldLoadSpectra)
+                        if (shouldImportSpectra)
                             scans.add(peptide.getScan());
 
                         count++;
@@ -137,7 +139,7 @@ public class PepXmlImporter extends MS2Importer
                 _conn.setAutoCommit(true);
 
                 progress.setSpectrumMode(scans.size());
-                processSpectrumFile(fraction, scans, progress, shouldLoadSpectra, !retentionTimesInPepXml);
+                processSpectrumFile(fraction, scans, progress, shouldImportSpectra, !retentionTimesInPepXml);
             }
         }
         finally
@@ -168,7 +170,7 @@ public class PepXmlImporter extends MS2Importer
 
         // For now, we only support one set of quantitation results per run
         if (quantSummaries.size() > 1)
-            throw new RuntimeException("Cannot currently upload runs that contain more than one set of quantitation results");
+            throw new RuntimeException("Cannot import runs that contain more than one set of quantitation results");
 
         for (RelativeQuantAnalysisSummary summary : quantSummaries)
         {
@@ -196,8 +198,8 @@ public class PepXmlImporter extends MS2Importer
 
         try
         {
-            updateRunStatus("Loading FASTA file");
-            _log.info("Loading FASTA file");
+            updateRunStatus("Importing FASTA file");
+            _log.info("Importing FASTA file");
             int fastaId = FastaDbLoader.loadAnnotations(_path, databaseLocalPath, FastaDbLoader.UNKNOWN_ORGANISM, true, _log, _context);
 
             _scoringAnalysis = Table.executeSingleton(ProteinManager.getSchema(),
@@ -311,7 +313,7 @@ public class PepXmlImporter extends MS2Importer
         {
             gzFileName = gzFile.toString();
         }
-        //sequest spectra are loaded from the tgz but are deleted after they are loaded.
+        //sequest spectra are imported from the tgz but are deleted after they are imported.
         if(_run.getType().equalsIgnoreCase("sequest") && mzXmlFileName != null)   // TODO: Move this check (perhaps all the code) into the appropriate run classes
         {
             if (NetworkDrive.exists(new File(mzXmlFileName)))
@@ -320,7 +322,7 @@ public class PepXmlImporter extends MS2Importer
             }
         }
 
-        SpectrumLoader sl = new SpectrumLoader(gzFileName, "", mzXmlFileName, scans, progress, _fractionId, _log, shouldLoadSpectra, shouldLoadRetentionTimes);
+        SpectrumImporter sl = new SpectrumImporter(gzFileName, "", mzXmlFileName, scans, progress, _fractionId, _log, shouldLoadSpectra, shouldLoadRetentionTimes);
         sl.upload();
         updateFractionSpectrumFileName(sl.getFile());
     }

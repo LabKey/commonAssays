@@ -803,8 +803,8 @@ ms2/src/org/labkey/ms2/RunListCache.java -text
 ms2/src/org/labkey/ms2/RunListException.java -text
 ms2/src/org/labkey/ms2/ShowPeptideContext.java -text
 ms2/src/org/labkey/ms2/Spectrum.java -text
+ms2/src/org/labkey/ms2/SpectrumImporter.java -text
 ms2/src/org/labkey/ms2/SpectrumIterator.java -text
-ms2/src/org/labkey/ms2/SpectrumLoader.java -text
 ms2/src/org/labkey/ms2/SpectrumRenderer.java -text
 ms2/src/org/labkey/ms2/TotalFilteredPeptidesColumn.java -text
 ms2/src/org/labkey/ms2/UniqueFilteredPeptidesColumn.java -text

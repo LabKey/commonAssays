@@ -16,6 +16,7 @@ import org.labkey.api.study.*;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.attachments.AttachmentService;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -131,7 +132,7 @@ public class NabManager
         return null;
     }
 
-    public Luc5Assay saveResults(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, FormFile datafile) throws SQLException, IOException, BiffException, ServletException
+    public Luc5Assay saveResults(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, FormFile datafile) throws SQLException, IOException, BiffException, ServletException, AttachmentService.DuplicateFilenameException
     {
         return createLuc5Assay(container, user, plateTemplate, metadata, sampleInfos, cutoffs, datafile);
     }
@@ -310,7 +311,7 @@ public class NabManager
         return new Luc5Assay(plate, cutoffs, DilutionCurve.FitType.FIVE_PARAMETER);
     }
 
-    protected Luc5Assay createLuc5Assay(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, FormFile datafile) throws SQLException, IOException, ServletException, BiffException
+    protected Luc5Assay createLuc5Assay(Container container, User user, String plateTemplate, RunMetadata metadata, SampleInfo[] sampleInfos, int[] cutoffs, FormFile datafile) throws SQLException, IOException, ServletException, BiffException, AttachmentService.DuplicateFilenameException
     {
         InputStream attachmentStream = null;
         try
