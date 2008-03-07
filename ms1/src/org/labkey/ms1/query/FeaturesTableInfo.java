@@ -73,19 +73,8 @@ public class FeaturesTableInfo extends FilteredTable
 
         if(includePepFk)
         {
-            //add an expression column that finds the corresponding peptide id based on
-            //the mzXmlUrl, MS2Scan, and MS2Charge
-            SQLFragment sqlPepJoin = new SQLFragment("(SELECT MIN(pd.rowid) AS PeptideId" +
-                    "\nFROM ms2.PeptidesData AS pd" +
-                    "\nINNER JOIN ms2.Fractions AS fr ON (fr.fraction=pd.fraction)" +
-                    "\nINNER JOIN ms2.Runs AS r ON (fr.Run=r.Run)" +
-                    "\nINNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl)" +
-                    "\nINNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan AND pd.Charge=fe.MS2Charge)" +
-                    "\nWHERE fe.FeatureId=" + ExprColumn.STR_TABLE_ALIAS + ".FeatureId" +
-                    "\nAND r.Container IN (" + _schema.getContainerInList() + ")" +
-                    "\nAND r.Deleted=?)", false);
-
-            ColumnInfo ciPepId = addColumn(new ExprColumn(this, COLUMN_PEPTIDE_INFO, sqlPepJoin, java.sql.Types.INTEGER, getColumn("FeatureId")));
+            ColumnInfo ciPepId = addColumn(new ExprColumn(this, COLUMN_PEPTIDE_INFO,
+                    new SQLFragment(COLUMN_PEPTIDE_INFO), java.sql.Types.INTEGER));
 
             //tell query that this new column is an FK to the peptides data table
             ciPepId.setFk(new LookupForeignKey("RowId", "Peptide")
@@ -105,9 +94,6 @@ public class FeaturesTableInfo extends FilteredTable
         ColumnInfo ciMS2Scan = getColumn("MS2Scan");
         ciMS2Scan.setURL(urlPep);
         ciMS2Scan.setDisplayColumnFactory(dcfPep);
-
-        //mandate a filter that excludes deleted and not fully-imported features
-        addCondition(new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files WHERE Imported=? AND Deleted=?)", true, false), "FileId");
 
         //add new columns for the peaks and details links
         if(null != peaksAvailable)
@@ -147,4 +133,52 @@ public class FeaturesTableInfo extends FilteredTable
         setDefaultVisibleColumns(visibleColumns);
     } //c-tor
 
+    public SQLFragment getFromSQL(String alias)
+    {
+        SQLFragment sql = new SQLFragment("(SELECT * FROM (SELECT\n");
+        String sep = "";
+
+        //all base-table columns
+        for(ColumnInfo col : getRealTable().getColumns())
+        {
+            sql.append(sep);
+            sql.append("fe."); //because I alias ms1.Features in the FROM clause, I must also use that alias as the table name here
+            sql.append(col.getName());
+            sql.append(" AS ");
+            sql.append(col.getAlias());
+            sep = ",\n";
+        }
+
+        //peptide row id
+        sql.append(sep);
+        sql.append("pd.RowId AS ");
+        sql.append(COLUMN_PEPTIDE_INFO);
+
+        //from clause
+        sql.append("\nFROM ms1.Features AS fe");
+        sql.append("\nINNER JOIN ms1.Files AS fi ON (fe.FileId=fi.FileId)");
+        sql.append("\nINNER JOIN exp.Data AS d ON (fi.ExpDataFileId=d.RowId)");
+        sql.append("\nLEFT OUTER JOIN ms2.Fractions AS fr ON (fi.MzXmlUrl=fr.MzXmlUrl)");
+        sql.append("\nLEFT OUTER JOIN ms2.PeptidesData AS pd ON (pd.Fraction=fr.Fraction AND pd.Scan=fe.MS2Scan AND pd.Charge=fe.MS2Charge)");
+        sql.append("\nINNER JOIN ms2.Runs AS r ON (fr.Run=r.Run)");
+
+        //set a base filter condition to exclude deleted and unimported runs
+        //and only runs from the correct containers
+        sql.append("\nWHERE r.Container IN (");
+        sql.append(_schema.getContainerInList());
+        sql.append(")");
+        sql.append(new SQLFragment("\nAND fi.Imported=? AND fi.Deleted=? AND r.Deleted=?", true, false, false));
+
+        sql.append(") AS fti\n");
+
+        //filters
+        if(null != getFilter() && getFilter().getClauses().size() > 0)
+            sql.append(getFilter().getSQLFragment(getRealTable().getSqlDialect(), _columnMap));
+
+        //alias
+        sql.append(") AS ");
+        sql.append(alias);
+
+        return sql;
+    }
 } //class FeaturesTableInfo
