@@ -21,12 +21,14 @@ public class MascotDatImporter extends MS2Importer
         super(context, user, c, description, fullFileName, log);
     }
 
+    @Override
     protected String getType()
     {
         return "Mascot";
     }
 
-    public void importRun() throws IOException, SQLException, XMLStreamException
+    @Override
+    public void importRun(MS2Progress progress) throws IOException, SQLException, XMLStreamException
     {
         throw new UnsupportedOperationException();
     }

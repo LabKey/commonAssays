@@ -63,7 +63,8 @@ public class PepXmlImporter extends MS2Importer
     }
 
 
-    public void importRun() throws SQLException, XMLStreamException, IOException
+    @Override
+    public void importRun(MS2Progress progress) throws SQLException, XMLStreamException, IOException
     {
         PepXmlLoader loader = null;
         int fractionCount = 0;
@@ -83,7 +84,6 @@ public class PepXmlImporter extends MS2Importer
             writeQuantSummaries(_runId, _quantSummaries);
 
             FractionIterator fi = loader.getFractionIterator();
-            MS2Progress progress = new MS2Progress();
 
             while (fi.hasNext())
             {
@@ -91,13 +91,13 @@ public class PepXmlImporter extends MS2Importer
 
                 if (!runUpdated)  // do this for the first fraction only
                 {
-                    writeRunInfo(fraction);
+                    writeRunInfo(fraction, progress);
                     progress.setMs2FileInfo(loader.getFileLength(), loader.getCurrentOffset());
                     runUpdated = true;
                 }
 
+                progress.getCumulativeTimer().setCurrentTask(Tasks.ImportPeptides, "for fraction " + (++fractionCount) + ", analysis of file " + fraction.getSpectrumPath());
                 progress.setPeptideMode();
-                _log.info("Starting to import fraction " + (++fractionCount) + ", peptide search results for file " + fraction.getSpectrumPath());
                 writeFractionInfo(fraction);
 
                 PeptideIterator pi = fraction.getPeptideIterator();
@@ -179,7 +179,7 @@ public class PepXmlImporter extends MS2Importer
         }
     }
 
-    protected void writeRunInfo(PepXmlFraction fraction) throws SQLException, IOException
+    protected void writeRunInfo(PepXmlFraction fraction, MS2Progress progress) throws SQLException, IOException
     {
         String databaseLocalPath = fraction.getDatabaseLocalPath();
 
@@ -199,7 +199,7 @@ public class PepXmlImporter extends MS2Importer
         try
         {
             updateRunStatus("Importing FASTA file");
-            _log.info("Importing FASTA file");
+            progress.getCumulativeTimer().setCurrentTask(Tasks.ImportFASTA, databaseLocalPath);
             int fastaId = FastaDbLoader.loadAnnotations(_path, databaseLocalPath, FastaDbLoader.UNKNOWN_ORGANISM, true, _log, _context);
 
             _scoringAnalysis = Table.executeSingleton(ProteinManager.getSchema(),

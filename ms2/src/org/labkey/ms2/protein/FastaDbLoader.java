@@ -23,6 +23,7 @@ import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.ResultSetUtil;
 import org.labkey.common.tools.FastaLoader;
 import org.labkey.common.tools.IdPattern;
 import org.labkey.common.tools.Protein;
@@ -128,7 +129,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
     public void parseFile() throws SQLException, IOException
     {
-        long startTime = System.currentTimeMillis();
         if (_fileHash == null)
         {
             _fileHash = HashHelpers.hashFileContents(getParseFName());
@@ -145,8 +145,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
         if (isFileAvailable())
         {
-            _log.info("Starting to load protein annotations");
-
             synchronized (LOCK)
             {
                 try
@@ -161,9 +159,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
                         try { ProteinManager.getSchema().getScope().releaseConnection(conn); } catch (SQLException e) {}
                 }
             }
-            _log.info("Finished loading protein annotations");
-            long seconds = (System.currentTimeMillis() - startTime) / 1000;
-            _log.info("Loading took " + seconds + " seconds"); 
         }
         else
         {
@@ -196,7 +191,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             }
             finally
             {
-                if (rs != null) try { rs.close(); } catch (SQLException e) {}
+                ResultSetUtil.close(rs);
             }
         }
         else
@@ -713,12 +708,12 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             {
                 processMouthful(conn, mouth, seqIds);
                 mouth.clear();
-
-                Integer percentComplete = proteinIterator.getPercentCompleteIfChanged();
-
-                if (null != percentComplete)
-                    _log.info("Loading FASTA file sequences: " + percentComplete + "% complete");
             }
+
+            Integer percentComplete = proteinIterator.getPercentCompleteIfChanged();
+
+            if (null != percentComplete)
+                _log.info("Importing FASTA file sequences: " + percentComplete + "% complete");
         }
 
         if (protCount / 3 < negCount)
@@ -815,9 +810,9 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
                     Table.executeSingleton(ProteinManager.getSchema(), "SELECT FileName FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hashArray, String.class);
 
             if (convertedName.equals(previousFileWithSameChecksum))
-                log.info("FASTA file \"" + convertedName + "\" has already been loaded");
+                log.info("FASTA file \"" + convertedName + "\" has already been imported");
             else
-                log.info("FASTA file \"" + convertedName + "\" not loaded; another file, '" + previousFileWithSameChecksum + "', has the same checksum");
+                log.info("FASTA file \"" + convertedName + "\" not imported, but another file, '" + previousFileWithSameChecksum + "', has the same checksum");
             return loadedFile.getFastaId();
         }
 

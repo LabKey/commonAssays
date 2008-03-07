@@ -131,8 +131,7 @@ public class SpectrumImporter
     // Iterates the spectra and writes them to the ms2.SpectraData table using the same Fraction & Row as the peptide table
     private void importSpectra()
     {
-        long start = System.currentTimeMillis();
-        _log.info("Starting to import spectra from " + _fileName);
+        _progress.getCumulativeTimer().setCurrentTask(MS2Importer.Tasks.ImportSpectra, "from " + _fileName);
 
         DbSchema schema = MS2Manager.getSchema();
         Connection conn = null;
@@ -279,8 +278,6 @@ public class SpectrumImporter
                 _systemLog.error(e);
             }
         }
-
-        MS2Importer.logElapsedTime(_log, start, "import spectra");
     }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2005 Fred Hutchinson Cancer Research Center
+ * Copyright (c) 2003-2008 Fred Hutchinson Cancer Research Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,11 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.CsvSet;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.common.tools.Rounder;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -63,7 +62,6 @@ public abstract class MS2Importer
     protected PreparedStatement _prophetStmt = null;
     protected PreparedStatement _quantStmt = null;
     protected int _runId, _fractionId;
-    protected long _startTime;
 
     // Use passed in logger for import status, information, and file format problems.  This should
     // end up in the pipeline log.
@@ -142,12 +140,12 @@ public abstract class MS2Importer
                     }
                     else
                     {
-                        _log.info("Restarting import from \"" + _fileName + "\"");
+                        _log.info("Restarting import from " + _fileName);
                     }
                 }
                 else
                 {
-                    _log.info("Starting import from \"" + _fileName + "\"");
+                    _log.info("Starting import from " + _fileName);
                     _runId = createRun();
                 }
             }
@@ -174,21 +172,15 @@ public abstract class MS2Importer
             return info.getRunId();
         }
 
-        if (_startTime == 0)
-        {
-            _startTime = System.currentTimeMillis();
-        }
+        MS2Progress progress = new MS2Progress();
 
         try
         {
-            _log.info("Clearing out existing MS2 data for " + _fileName);
             updateRunStatus(IMPORT_STARTED);
-            MS2Manager.clearRun(_runId);
-            _log.info("Finished clearing out existing MS2 data for " + _fileName);
-
-            importRun();
-            updatePeptideColumns();
-            updateCounts();
+            clearRun(progress);
+            importRun(progress);
+            updatePeptideColumns(progress);
+            updateCounts(progress);
         }
         catch (FileNotFoundException fnfe)
         {
@@ -228,12 +220,19 @@ public abstract class MS2Importer
         updateRunStatus(IMPORT_SUCCEEDED, STATUS_SUCCESS);
 
         MS2Manager.computeBasicMS2Stats();       // Update runs/peptides statistics
-        logElapsedTime(_startTime, "import \"" + _fileName + "\"");
+        progress.getCumulativeTimer().logSummary("import \"" + _fileName + "\"" + (progress.getCumulativeTimer().hasTask(Tasks.ImportSpectra) ? " and import spectra" : ""));
         return info.getRunId();
     }
 
 
-    abstract public void importRun() throws IOException, SQLException, XMLStreamException;
+    private void clearRun(MS2Progress progress) throws SQLException
+    {
+        progress.getCumulativeTimer().setCurrentTask(Tasks.ClearRun, "for " + _fileName);
+        MS2Manager.clearRun(_runId);
+    }
+
+
+    abstract public void importRun(MS2Progress progress) throws IOException, SQLException, XMLStreamException;
 
     abstract protected String getType();
 
@@ -434,14 +433,15 @@ public abstract class MS2Importer
     }
 
 
-    protected void updatePeptideColumns() throws SQLException
+    protected void updatePeptideColumns(MS2Progress progress) throws SQLException
     {
         updateRunStatus("Updating peptide columns");
         MS2Run run = MS2Manager.getRun(_runId);
         MS2Fraction[] fractions = run.getFractions();
         int fractionCount = fractions.length;
 
-        long start = System.currentTimeMillis();
+        progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateSeqId);
+
         int i = 0;
 
         for (MS2Fraction fraction : fractions)
@@ -452,9 +452,8 @@ public abstract class MS2Importer
                 _log.info("Updating SeqId column: fraction " + (++i) + " out of " + fractionCount);
         }
 
-        logElapsedTime(start, "update SeqId column");
+        progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateSequencePosition);
 
-        start = System.currentTimeMillis();
         i = 0;
 
         for (MS2Fraction fraction : fractions)
@@ -464,8 +463,6 @@ public abstract class MS2Importer
             if (fractionCount > 1)
                 _log.info("Updating SequencePosition column: fraction " + (++i) + " out of " + fractionCount);
         }
-
-        logElapsedTime(start, "update SequencePosition column");
     }
 
 
@@ -475,8 +472,10 @@ public abstract class MS2Importer
                 " SpectrumCount = (SELECT COUNT(*) AS SpecCount FROM " + MS2Manager.getTableInfoSpectra() + " spec WHERE spec.run = " + MS2Manager.getTableInfoRuns() + ".run)" +
             " WHERE Run = ?";
 
-    private void updateCounts() throws SQLException
+    private void updateCounts(MS2Progress progress) throws SQLException
     {
+        progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateCounts);
+
         String negativeHitLike = MS2Manager.getNegativeHitPrefix(_container) + "%";
 
         Table.execute(MS2Manager.getSchema(), _updateCountsSql, new Object[]{negativeHitLike, _runId});
@@ -573,18 +572,27 @@ public abstract class MS2Importer
     }
 
 
-    protected void logElapsedTime(long startTime, String action)
+    protected enum Tasks implements CumulativeTimer.TimerTask
     {
-        logElapsedTime(_log, startTime, action);
-    }
+        ImportFASTA("import FASTA file"),
+        ImportPeptides("import peptide search results"),
+        ImportSpectra("import spectra"),
+        UpdateSeqId("update SeqId column"),
+        UpdateSequencePosition("update SequencePosition column"),
+        UpdateCounts("update peptide and spectrum counts"),
+        ClearRun("clear out any previously imported data");
 
+        private String _action;
 
-    public static void logElapsedTime(Logger log, long startTime, String action)
-    {
-        double seconds = (double) (System.currentTimeMillis() - startTime) / 1000;
-        double minutes = seconds / 60;
+        Tasks(String action)
+        {
+            _action = action;
+        }
 
-        log.info(Rounder.round(seconds, 2) + " seconds " + ((minutes > 1) ? ("(" + Rounder.round(seconds / 60, 2) + " minutes) ") : "") + "to " + action);
+        public String getAction()
+        {
+            return _action;
+        }
     }
 
 
@@ -598,7 +606,6 @@ public abstract class MS2Importer
         private static final float DEFAULT_PEPTIDE_WEIGHTING = 0.5f;
 
         private float _peptideWeighting = DEFAULT_PEPTIDE_WEIGHTING;
-
         private boolean _peptideMode = true;
 
         private long _peptideFileSize;
@@ -614,12 +621,18 @@ public abstract class MS2Importer
 
         private Integer _previous = null;
 
+        private CumulativeTimer _timer = new CumulativeTimer(_log);
+
+        public CumulativeTimer getCumulativeTimer()
+        {
+            return _timer;
+        }
+
         protected void setMs2FileInfo(long size, long initialOffset)
         {
             _peptideFileSize = size;
             _peptideFileInitialOffset = initialOffset;
             _peptideFileCurrentOffset = initialOffset;
-            updateIfChanged();
         }
 
 

@@ -759,6 +759,7 @@ ms2/src/META-INF/prot.xml -text
 ms2/src/org/labkey/ms2/AACoverageColumn.java -text
 ms2/src/org/labkey/ms2/BeanXMLStreamReader.java -text
 ms2/src/org/labkey/ms2/CompareServiceImpl.java -text
+ms2/src/org/labkey/ms2/CumulativeTimer.java -text
 ms2/src/org/labkey/ms2/DeltaScanColumn.java -text
 ms2/src/org/labkey/ms2/DisplayThreadStatusColumn.java -text
 ms2/src/org/labkey/ms2/DtaSpectrumRenderer.java -text

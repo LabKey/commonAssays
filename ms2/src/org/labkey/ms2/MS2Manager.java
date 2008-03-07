@@ -412,10 +412,10 @@ public class MS2Manager
         MS2Importer importer = createImporter(file, info, file.getName() + context.getJobDescription() != null ? file.getName() + " (" + context.getJobDescription() + ")" : "", log, context);
         MS2Importer.RunInfo runInfo = importer.prepareRun(restart);
 
-        return uploadRun(info, log, file, runInfo, context);
+        return importRun(info, log, file, runInfo, context);
     }
 
-    public static int uploadRun(ViewBackgroundInfo info, Logger log,
+    public static int importRun(ViewBackgroundInfo info, Logger log,
                              File file,
                              MS2Importer.RunInfo runInfo,
                              XarContext context) throws SQLException, IOException, XMLStreamException
@@ -434,7 +434,7 @@ public class MS2Manager
         else if (fileName.toLowerCase().endsWith(".dat"))
             return new MascotDatImporter(info.getUser(), c, description, fileName, log, context);
         else
-            throw new IOException("Unable to load file type '" + file + "'.");
+            throw new IOException("Unable to import file type '" + file + "'.");
     }
 
     public static MS2Run[] getRunsForFastaId(int fastaId)
@@ -464,7 +464,7 @@ public class MS2Manager
         if (runs != null && runs.length == 1)
         {
             run = runs[0];
-            // Cache only successfully loaded files so message updates as run loads
+            // Cache only successfully imported files so message updates as run is imported
             if (run.getStatusId() == MS2Importer.STATUS_SUCCESS)
                 _addRunToCache(runId, run);
         }
@@ -841,7 +841,7 @@ public class MS2Manager
     }
 
 
-    // Clear contents of a single run, but not the run itself.  Used to reload after a failed attempt and to purge runs.
+    // Clear contents of a single run, but not the run itself.  Used to re-import after a failed attempt and to purge runs.
     public static void clearRun(int run) throws SQLException
     {
         Object[] params = new Object[] {run};
@@ -1103,7 +1103,7 @@ public class MS2Manager
         addStats(stats, "failed", "Deleted = ? AND StatusId = 2", new Object[]{Boolean.FALSE});
         addStats(stats, "deleted", "Deleted = ?", new Object[]{Boolean.TRUE});
 
-        // For in-process runs, actually count the current number of peptides & spectra; counts in MS2Runs table aren't filled in until run is done loading
+        // For in-process runs, actually count the current number of peptides & spectra; counts in Runs table aren't filled in until import is complete
         addStatsWithCounting(stats, "inProcess", "Deleted = ? AND StatusId = 0", new Object[]{Boolean.FALSE});
 
         Calendar now = Calendar.getInstance();
@@ -1800,13 +1800,13 @@ public class MS2Manager
 
             if (run.getStatusId() == MS2Importer.STATUS_RUNNING)
             {
-                errors.add(run.getDescription() + " is still loading");
+                errors.add(run.getDescription() + " is still importing");
                 continue;
             }
 
             if (run.getStatusId() == MS2Importer.STATUS_FAILED)
             {
-                errors.add(run.getDescription() + " did not load successfully");
+                errors.add(run.getDescription() + " did not import successfully");
                 continue;
             }
 
