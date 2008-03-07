@@ -451,8 +451,32 @@ public class MS2Schema extends UserSchema
         });
         result.addColumn(ms2DetailsColumn);
 
-        ActionURL runUrl = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
-        result.getColumn("Name").setURL(runUrl.getLocalURIString() + "run=${RowId}");
+        result.getColumn("Name").setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                return new DataColumn(colInfo)
+                {
+                    private ColumnInfo _runCol;
+
+                    public String getURL(RenderContext ctx)
+                    {
+                        ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
+                        setURL(url.toString() + "&run=${" + _runCol.getAlias() + "}");
+                        return super.getURL(ctx);
+                    }
+
+                    public void addQueryColumns(Set<ColumnInfo> columns)
+                    {
+                        super.addQueryColumns(columns);
+                        FieldKey key = new FieldKey(FieldKey.fromString(getBoundColumn().getName()).getParent(),  "MS2Details");
+                        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(getBoundColumn().getParentTable(), Collections.singleton(key));
+                        _runCol = cols.get(key);
+                        columns.add(_runCol);
+                    }
+                };
+            }
+        });
 
         ms2DetailsColumn.setIsHidden(false);
 

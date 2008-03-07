@@ -8,7 +8,6 @@ import org.labkey.ms2.query.MS2Schema;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.query.FieldKey;
 import org.apache.log4j.Logger;
 
 import java.util.List;
@@ -54,9 +53,9 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
 
             MS2Controller.PeptideFilteringComparisonForm form = new MS2Controller.PeptideFilteringComparisonForm();
             form.setRunList(Integer.parseInt(url.getParameter("runList")));
-            String probString = url.getParameter("peptideProphetProbability");
-            form.setPeptideProphetProbability(probString == null || "".equals(probString) ? null : Float.parseFloat(url.getParameter("peptideProphetProbability")));
-            form.setPeptideFilterType(url.getParameter("peptideFilterType"));
+            String probString = url.getParameter(MS2Controller.PeptideFilteringFormElements.peptideProphetProbability);
+            form.setPeptideProphetProbability(probString == null || "".equals(probString) ? null : Float.parseFloat(probString));
+            form.setPeptideFilterType(url.getParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType));
 
             ViewContext queryContext = new ViewContext(_context);
             queryContext.setActionURL(url);

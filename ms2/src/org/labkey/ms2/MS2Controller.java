@@ -1183,12 +1183,27 @@ public class MS2Controller extends SpringActionController
             super(PeptideFilteringComparisonForm.class, false);
         }
 
+        protected PeptideFilteringComparisonForm getCommand(HttpServletRequest request) throws Exception
+        {
+            PeptideFilteringComparisonForm form = super.getCommand(request);
+            Map<String, String> prefs = getPreferences(CompareProteinProphetQuerySetupAction.class);
+            form.setPeptideFilterType(prefs.get(PeptideFilteringFormElements.peptideFilterType.name()) == null ? "none" : prefs.get(PeptideFilteringFormElements.peptideFilterType.name()));
+            form.setOrCriteriaForEachRun(Boolean.parseBoolean(prefs.get(PeptideFilteringFormElements.orCriteriaForEachRun.name())));
+            form.setDefaultCustomView(prefs.get(PEPTIDES_FILTER_VIEW_NAME));
+            if (prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name()) != null)
+            {
+                try
+                {
+                    form.setPeptideProphetProbability(new Float(prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name())));
+                }
+                catch (NumberFormatException e) {}
+            }
+
+            return form;
+        }
+
         public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
         {
-            QuerySettings peptidesSettings = new QuerySettings(new ActionURL(), PEPTIDES_FILTER);
-            peptidesSettings.setQueryName(MS2Schema.PEPTIDES_TABLE_NAME);
-            QueryView peptidesView = new QueryView(new MS2Schema(getUser(), getContainer()), peptidesSettings);
-
             CompareOptionsBean bean = new CompareOptionsBean(new ActionURL(CompareProteinProphetQueryAction.class, getContainer()), runListId, form);
 
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp", bean);
@@ -1200,11 +1215,17 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    public enum PeptideFilteringFormElements
+    {
+        peptideFilterType, peptideProphetProbability, orCriteriaForEachRun, runList, spectraConfig
+    }
+
     public static class PeptideFilteringComparisonForm extends RunListForm
     {
         private String _peptideFilterType = "none";
         private Float _peptideProphetProbability;
         private boolean _orCriteriaForEachRun;
+        private String _defaultCustomView;
 
         public String getPeptideFilterType()
         {
@@ -1241,9 +1262,18 @@ public class MS2Controller extends SpringActionController
             _peptideProphetProbability = peptideProphetProbability;
         }
 
+        public void setDefaultCustomView(String defaultCustomView)
+        {
+            _defaultCustomView = defaultCustomView;
+        }
+
         public String getCustomViewName(ViewContext context)
         {
-            String result = context.getActionURL().getParameter(PEPTIDES_FILTER_VIEW_NAME);
+            String result = context.getRequest().getParameter(PEPTIDES_FILTER_VIEW_NAME);
+            if (result == null)
+            {
+                result = _defaultCustomView;
+            }
             if ("".equals(result))
             {
                 return null;
@@ -1320,8 +1350,17 @@ public class MS2Controller extends SpringActionController
         protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
         {
             ProteinProphetCrosstabView view = createInitializedQueryView(form, errors, false, null);
-//            if (!view.getErrors().isEmpty())
-//                return _renderErrors(view.getErrors());
+
+            if (!getUser().isGuest())
+            {
+                Map<String, String> prefs = getPreferences(CompareProteinProphetQuerySetupAction.class);
+                prefs.put(PeptideFilteringFormElements.peptideFilterType.name(), form.getPeptideFilterType());
+                prefs.put(PeptideFilteringFormElements.orCriteriaForEachRun.name(), Boolean.toString(form.isOrCriteriaForEachRun()));
+                prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getCustomViewName(getViewContext()));
+                prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
+                PropertyManager.saveProperties(prefs);
+            }
+            
 
             HtmlView helpView = new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein columns under the <em>Protein</em> node in the tree, or expand <em>Protein Group</em> to see the values associated with individual runs, like probability. To set a filter, select the Filter tab, add column, and filter it based on the desired threshold.</p></div>");
 
@@ -1347,12 +1386,13 @@ public class MS2Controller extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             ActionURL setupURL = new ActionURL(CompareProteinProphetQuerySetupAction.class, getContainer());
-            setupURL.addParameter("peptideFilterType", _form.getPeptideFilterType());
+            setupURL.addParameter(PeptideFilteringFormElements.peptideFilterType, _form.getPeptideFilterType());
             if (_form.getPeptideProphetProbability() != null)
             {
-                setupURL.addParameter("peptideProphetProbability", _form.getPeptideProphetProbability().toString());
+                setupURL.addParameter(PeptideFilteringFormElements.peptideProphetProbability, _form.getPeptideProphetProbability().toString());
             }
-            setupURL.addParameter("runList", _form.getRunList());
+            setupURL.addParameter(PeptideFilteringFormElements.runList, _form.getRunList());
+            setupURL.addParameter(PeptideFilteringFormElements.orCriteriaForEachRun, _form.isOrCriteriaForEachRun());
             setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getCustomViewName(getViewContext()));
             root.addChild("MS2 Dashboard");
             root.addChild("Setup Compare ProteinProphet", setupURL);
@@ -1633,6 +1673,14 @@ public class MS2Controller extends SpringActionController
             else
             {
                 runListId = form.getRunList().intValue();
+                try
+                {
+                    RunListCache.getCachedRuns(runListId, false, getViewContext());
+                }
+                catch (RunListException e)
+                {
+                    errorMessages.addAll(e.getMessages());
+                }
             }
 
             if (!errorMessages.isEmpty())
@@ -1644,12 +1692,35 @@ public class MS2Controller extends SpringActionController
         protected abstract ModelAndView getView(FormType form, BindException errors, int runListId);
     }
 
+    private Map<String, String> getPreferences(Class<? extends AbstractRunListCreationAction> setupActionClass)
+    {
+        return PropertyManager.getProperties(getUser().getUserId(), getContainer().getId(), setupActionClass.getName(), true);
+    }
+
     @RequiresPermission(ACL.PERM_READ)
     public class SpectraCountSetupAction extends AbstractRunListCreationAction<SpectraCountForm>
     {
         public SpectraCountSetupAction()
         {
             super(SpectraCountForm.class, false);
+        }
+
+        protected SpectraCountForm getCommand(HttpServletRequest request) throws Exception
+        {
+            SpectraCountForm form = super.getCommand(request);
+            Map<String, String> prefs = getPreferences(SpectraCountSetupAction.class);
+            form.setPeptideFilterType(prefs.get(PeptideFilteringFormElements.peptideFilterType.name()) == null ? "none" : prefs.get(PeptideFilteringFormElements.peptideFilterType.name()));
+            form.setSpectraConfig(prefs.get(PeptideFilteringFormElements.spectraConfig.name()));
+            form.setDefaultCustomView(prefs.get(PEPTIDES_FILTER_VIEW_NAME));
+            if (prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name()) != null)
+            {
+                try
+                {
+                    form.setPeptideProphetProbability(new Float(prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name())));
+                }
+                catch (NumberFormatException e) {}
+            }
+            return form;
         }
 
         public ModelAndView getView(SpectraCountForm form, BindException errors, int runListId)
@@ -1710,6 +1781,16 @@ public class MS2Controller extends SpringActionController
                 HttpView.throwNotFound("Could not find spectra count config: " + form.getSpectraConfig());
             }
 
+            if (!getUser().isGuest())
+            {
+                Map<String, String> prefs = getPreferences(SpectraCountSetupAction.class);
+                prefs.put(PeptideFilteringFormElements.peptideFilterType.name(), form.getPeptideFilterType());
+                prefs.put(PeptideFilteringFormElements.spectraConfig.name(), form.getSpectraConfig());
+                prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getCustomViewName(getViewContext()));
+                prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
+                PropertyManager.saveProperties(prefs);
+            }
+
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
 
             settings.setQueryName(_config.getTableName());
@@ -1728,14 +1809,14 @@ public class MS2Controller extends SpringActionController
             if (_form != null)
             {
                 ActionURL setupURL = new ActionURL(SpectraCountSetupAction.class, getContainer());
-                setupURL.addParameter("peptideFilterType", _form.getPeptideFilterType());
+                setupURL.addParameter(PeptideFilteringFormElements.peptideFilterType, _form.getPeptideFilterType());
                 if (_form.getPeptideProphetProbability() != null)
                 {
-                    setupURL.addParameter("peptideProphetProbability", _form.getPeptideProphetProbability().toString());
+                    setupURL.addParameter(PeptideFilteringFormElements.peptideProphetProbability, _form.getPeptideProphetProbability().toString());
                 }
                 setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getCustomViewName(getViewContext()));
-                setupURL.addParameter("runList", _form.getRunList());
-                setupURL.addParameter("spectraConfig", _form.getSpectraConfig());
+                setupURL.addParameter(PeptideFilteringFormElements.runList, _form.getRunList());
+                setupURL.addParameter(PeptideFilteringFormElements.spectraConfig, _form.getSpectraConfig());
 
                 root.addChild("Spectra Count Options", setupURL);
                 root.addChild("Spectra Counts: " + _config.getDescription());
@@ -5674,10 +5755,10 @@ public class MS2Controller extends SpringActionController
 
         public CompareOptionsBean(ActionURL targetURL, int runList, Form form)
         {
-            _peptideView = new PeptidesFilterView(getUser(), getContainer(), getViewContext().getActionURL());
             _targetURL = targetURL;
             _runList = runList;
             _form = form;
+            _peptideView = new PeptidesFilterView(getUser(), getContainer(), getViewContext().getActionURL(), _form);
         }
 
         public QueryView getPeptideView()

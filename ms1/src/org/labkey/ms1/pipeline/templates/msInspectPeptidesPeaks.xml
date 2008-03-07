@@ -143,6 +143,13 @@
                         <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">Peakaboo Peaks File</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@PEAKS_FILE_PATH@@</exp:SimpleVal>
                     </exp:CommonParametersApplied>
+                    <exp:ApplicationInstanceCollection>
+                        <exp:InstanceDetails>
+                            <exp:InstanceInputs>
+                                <exp:DataLSID DataFileUrl="@@MZXML_PATH@@" RoleName="mzXMLFile">${AutoFileLSID}</exp:DataLSID>
+                            </exp:InstanceInputs>
+                        </exp:InstanceDetails>
+                    </exp:ApplicationInstanceCollection>
                 </exp:ExperimentLogEntry>
                 <exp:ExperimentLogEntry ActionSequenceRef="50">
                     <exp:CommonParametersApplied>
@@ -152,6 +159,14 @@
                         <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">msInspect Feature Finding Results</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@FEATURES_FILE_PATH@@</exp:SimpleVal>
                     </exp:CommonParametersApplied>
+                    <exp:ApplicationInstanceCollection>
+                        <exp:InstanceDetails>
+                            <exp:InstanceInputs>
+                                <exp:DataLSID DataFileUrl="@@INPUT_XML_FILE_PATH@@" RoleName="msInspectDefFile">${AutoFileLSID}</exp:DataLSID>
+                                <exp:DataLSID DataFileUrl="@@MZXML_PATH@@" RoleName="mzXMLFile">${AutoFileLSID}</exp:DataLSID>
+                            </exp:InstanceInputs>
+                        </exp:InstanceDetails>
+                    </exp:ApplicationInstanceCollection>
                 </exp:ExperimentLogEntry>
                 <exp:ExperimentLogEntry ActionSequenceRef="60">
                     <exp:CommonParametersApplied>
@@ -161,6 +176,14 @@
                         <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">msInspect Peptide Matching Results</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@PEPTIDES_FILE_PATH@@</exp:SimpleVal>
                     </exp:CommonParametersApplied>
+                    <exp:ApplicationInstanceCollection>
+                        <exp:InstanceDetails>
+                            <exp:InstanceInputs>
+                                <exp:DataLSID>${RunLSIDBase}:msInspectFeaturesFile</exp:DataLSID>
+                                <exp:DataLSID DataFileUrl="@@PEPXML_PATH@@" RoleName="pepXMLFile">${AutoFileLSID}</exp:DataLSID>
+                            </exp:InstanceInputs>
+                        </exp:InstanceDetails>
+                    </exp:ApplicationInstanceCollection>
                 </exp:ExperimentLogEntry>
 
 				<exp:ExperimentLogEntry ActionSequenceRef="1000"/>

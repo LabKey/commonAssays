@@ -49,7 +49,7 @@ public class RunListCache
     {
         Set<String> stringIds = DataRegionSelection.getSelected(ctx, true);
 
-        if (null == stringIds)
+        if (null == stringIds || stringIds.isEmpty())
         {
             throw new RunListException(NO_RUNS_MESSAGE);
         }
@@ -99,7 +99,11 @@ public class RunListCache
 
         MS2Manager.lookupRuns(runIds, requireSameType, ctx.getUser());
 
-        int index = RUN_LIST_ID++;
+        int index;
+        synchronized(RunListCache.class)
+        {
+            index = RUN_LIST_ID++;
+        }
 
         getRunListCache(ctx).put(index, runIds);
         return index;

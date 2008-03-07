@@ -205,7 +205,7 @@ public class PepXmlImporter extends MS2Importer
             _scoringAnalysis = Table.executeSingleton(ProteinManager.getSchema(),
                     "SELECT ScoringAnalysis " +
                     "FROM " + ProteinManager.getTableInfoFastaFiles() + " " +
-                    "WHERE FastaId = ?", new Object[] {fastaId}, Boolean.class);
+                    "WHERE FastaId = ?", new Object[] {fastaId}, Boolean.class).booleanValue();
 
             m.put("FastaId", fastaId);
         }
@@ -234,13 +234,28 @@ public class PepXmlImporter extends MS2Importer
         // Build the name of the tgz file
         if(fraction.getSearchEngine().equalsIgnoreCase("sequest"))
         {
-             int i = baseName.lastIndexOf("/");
-            String newFilename =
-                    (i < 0 ? baseName : baseName.substring(i + 1));
+            String newFilename = new File(baseName).getName();
            _gzFileName =  newFilename + "." + "pep." + dataSuffix;
-            //No spectrumPath in a sequest pepXML file.
-            File sampleDir = new File(_path).getParentFile().getParentFile();
-            fraction.setSpectrumPath(new File(sampleDir, newFilename + ".mzXML").getAbsolutePath());
+
+            // No spectrumPath in a sequest pepXML file.
+            if (fraction.getSpectrumPath() == null)
+            {
+                // First, check two directories up from the MS2 results. This is where searches done through the CPAS
+                // pipeline will be
+                File pepXmlDir = new File(_path);
+                File mzXMLFile = null;
+                if (pepXmlDir.getParentFile() != null && pepXmlDir.getParentFile().getParentFile() != null)
+                {
+                    mzXMLFile = new File(pepXmlDir.getParentFile().getParentFile(), newFilename + ".mzXML");
+                }
+
+                if (mzXMLFile == null || !NetworkDrive.exists(mzXMLFile))
+                {
+                    // If not there, look in the same directory as the MS2 results
+                    mzXMLFile = new File(pepXmlDir, newFilename + ".mzXML");
+                }
+                fraction.setSpectrumPath(mzXMLFile.getAbsolutePath());
+            }
         }
         else
         {
@@ -334,8 +349,23 @@ public class PepXmlImporter extends MS2Importer
 
         if (null != mzXmlFileName)
         {
-            File f = _context.findFile(mzXmlFileName, new File(_path));
+            File dir = new File(_path);
+            File f = _context.findFile(mzXmlFileName, dir);
             if (f != null)
+            {
+                return f.toString();
+            }
+            File mzXMLFile = new File(mzXmlFileName);
+            if (dir.getParentFile() != null && dir.getParentFile().getParentFile() != null)
+            {
+                f = new File(dir.getParentFile().getParentFile(), mzXMLFile.getName());
+                if (NetworkDrive.exists(f) && f.isFile())
+                {
+                    return f.toString();
+                }
+            }
+            f = new File(dir, mzXMLFile.getName());
+            if (NetworkDrive.exists(f) && f.isFile())
             {
                 return f.toString();
             }
@@ -425,7 +455,7 @@ public class PepXmlImporter extends MS2Importer
         if (v == null)
             stmt.setNull(n, java.sql.Types.FLOAT);
         else
-            stmt.setFloat(n, Float.valueOf(v));
+            stmt.setFloat(n, Float.valueOf(v).floatValue());
     }
 
     private long getPeptideId(PreparedStatement stmt) throws SQLException

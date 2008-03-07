@@ -16,10 +16,12 @@ import java.io.PrintWriter;
 public class PeptidesFilterView extends QueryView
 {
     private static final String PEPTIDE_FILTER_LINK_ID = "peptideFilterLink";
+    private MS2Controller.PeptideFilteringComparisonForm _form;
 
-    public PeptidesFilterView(User user, Container container, ActionURL currentURL)
+    public PeptidesFilterView(User user, Container container, ActionURL currentURL, MS2Controller.PeptideFilteringComparisonForm form)
     {
         super(new MS2Schema(user, container), new QuerySettings(currentURL, MS2Controller.PEPTIDES_FILTER, MS2Schema.PEPTIDES_FILTER_TABLE_NAME));
+        _form = form;
     }
 
     public void renderCustomizeViewLink(PrintWriter out)
@@ -32,7 +34,7 @@ public class PeptidesFilterView extends QueryView
     public QueryPicker getColumnListPicker(HttpServletRequest request)
     {
         QueryPicker basePicker = super.getColumnListPicker(request);
-        return new QueryPicker("Peptide filter:", basePicker.getParamName(), basePicker.getCurrentValue(), basePicker.getChoices())
+        return new QueryPicker("Peptide filter:", basePicker.getParamName(), _form.getCustomViewName(getViewContext()), basePicker.getChoices())
         {
             protected void appendOnChangeHandler(StringBuilder ret)
             {
