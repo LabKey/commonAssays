@@ -1,7 +1,10 @@
 package org.labkey.flow.persist;
 
+import org.labkey.api.data.Container;
+
 public class AttrObject
 {
+    Container _container;
     int _rowId;
     int _dataId;
     int _typeId;
@@ -45,5 +48,15 @@ public class AttrObject
     public void setUri(String uri)
     {
         _uri = uri;
+    }
+
+    public void setContainer(Container c)
+    {
+        _container = c;
+    }
+
+    public Container getContainer()
+    {
+        return _container;
     }
 }

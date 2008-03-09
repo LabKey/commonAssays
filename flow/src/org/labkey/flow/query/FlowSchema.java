@@ -326,6 +326,13 @@ public class FlowSchema extends UserSchema
 
             sqlFlowData.append("(SELECT " + _expDataAlias + ".*,");
             sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("rowid").getName() + " AS objectid\n");
+            if (null != _flowObject.getColumn("compid"))
+            {
+                sqlFlowData.append(",");
+                sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("compid").getName() + ",\n");
+                sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("fcsid").getName() + ",\n");
+                sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("scriptid").getName() + "\n");
+            }
             sqlFlowData.append("FROM ");
             sqlFlowData.append(_expData);
             sqlFlowData.append(" INNER JOIN " );
@@ -658,6 +665,9 @@ public class FlowSchema extends UserSchema
 
     public ExpDataTable createFCSAnalysisTable(String alias, FlowDataType type)
     {
+        if (null != DbSchema.get("flow").getTable("object").getColumn("compid"))
+            return createFCSAnalysisTableNEW(alias, type);
+
         FlowDataTable ret = createDataTable(alias, type);
         ColumnInfo colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.getPropertyDescriptor(getContainer()));
         colAnalysisScript.setFk(new LookupForeignKey(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()),
@@ -698,6 +708,51 @@ public class FlowSchema extends UserSchema
         ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph));
         return ret;
     }
+
+
+    public ExpDataTable createFCSAnalysisTableNEW(String alias, FlowDataType type)
+    {
+        FlowDataTable ret = createDataTable(alias, type);
+        ColumnInfo colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.getPropertyDescriptor(getContainer()));
+        colAnalysisScript.setFk(new LookupForeignKey(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()),
+                FlowParam.scriptId.toString(), "RowId", "Name"){
+            public TableInfo getLookupTableInfo()
+            {
+                return detach().createAnalysisScriptTable("Lookup", true);
+            }
+        });
+        ColumnInfo colCompensationMatrix = ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.getPropertyDescriptor(getContainer()));
+        colCompensationMatrix.setFk(new LookupForeignKey(PageFlowUtil.urlFor(CompensationController.Action.showCompensation, getContainer()), FlowParam.compId.toString(),
+                "RowId", "Name"){
+            public TableInfo getLookupTableInfo()
+            {
+                return detach().createCompensationMatrixTable("Lookup");
+            }
+        });
+
+        FlowPropertySet fps = new FlowPropertySet(ret);
+        ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
+        if (getExperiment() != null)
+        {
+            ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
+        }
+        ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
+        ColumnInfo colGraph = ret.addObjectIdColumn("Graph");
+        colGraph.setFk(new GraphForeignKey(fps));
+        colGraph.setIsUnselectable(true);
+        ColumnInfo colFCSFile = ret.addDataInputColumn("FCSFile", InputRole.FCSFile.getPropertyDescriptor(getContainer()));
+        colFCSFile.setFk(new LookupForeignKey(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()),
+                FlowParam.wellId.toString(),
+                "RowId", "Name") {
+                public TableInfo getLookupTableInfo()
+                {
+                    return detach().createFCSFileTable("FCSFile");
+                }
+            });
+        ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph));
+        return ret;
+    }
+
 
     public ExpDataTable createCompensationControlTable(String alias)
     {

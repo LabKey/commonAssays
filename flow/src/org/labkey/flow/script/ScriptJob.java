@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 import org.fhcrc.cpas.exp.xml.*;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
-import org.labkey.api.data.Container;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
@@ -15,8 +15,8 @@ import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.controllers.FlowController;
@@ -599,6 +599,7 @@ abstract public class ScriptJob extends PipelineJob
         }
     }
 
+
     public void importRuns(ExperimentArchiveDocument xardoc, File root, File workingDirectory, FlowProtocolStep step) throws Exception
     {
         if (xardoc.getExperimentArchive().getExperimentRuns().getExperimentRunArray().length > 0)
@@ -608,6 +609,7 @@ abstract public class ScriptJob extends PipelineJob
             {
                 ScriptXarSource source = new ScriptXarSource(xardoc, root, workingDirectory);
                 ExperimentService.get().loadXar(source, this, true);
+                updateFlowObjectCols(getContainer());
             }
             catch (Throwable t)
             {
@@ -621,6 +623,59 @@ abstract public class ScriptJob extends PipelineJob
         addRunsLSIDs(step, _pendingRunLSIDs);
         _pendingRunLSIDs.clear();
     }
+
+
+    static void updateFlowObjectCols(Container c)
+    {
+        DbSchema s = DbSchema.get("flow");
+        TableInfo o = s.getTable("object");
+        boolean beginTrans = !s.getScope().isTransactionActive();
+
+        try
+        {
+            if (beginTrans)
+                s.getScope().beginTransaction();
+
+            if (o.getColumn("container") != null)
+            {
+                Table.execute(s,
+                        "UPDATE flow.object "+
+                        "SET container = ? " +
+                        "WHERE container IS NULL AND dataid IN (select rowid from exp.data WHERE exp.data.container = ?)", new Object[] {c.getId(), c.getId()});
+            }
+            
+            if (o.getColumn("compid") != null)
+            {
+                Table.execute(s,
+                        "UPDATE flow.object SET "+
+                        "compid = COALESCE(compid,"+
+                        "    (SELECT MIN(DI.dataid) "+
+                        "    FROM flow.object INPUT INNER JOIN exp.datainput DI ON INPUT.dataid=DI.dataid INNER JOIN exp.data D ON D.sourceapplicationid=DI.targetapplicationid "+
+                        "    WHERE D.rowid = flow.object.dataid AND INPUT.typeid=4)), " +
+                        "fcsid = COALESCE(fcsid,"+
+                        "    (SELECT MIN(DI.dataid) "+
+                        "    FROM flow.object INPUT INNER JOIN exp.datainput DI ON INPUT.dataid=DI.dataid INNER JOIN exp.data D ON D.sourceapplicationid=DI.targetapplicationid "+
+                        "    WHERE D.rowid = flow.object.dataid AND INPUT.typeid=1)), " +
+                        "scriptid = COALESCE(scriptid,"+
+                        "    (SELECT MIN(DI.dataid) "+
+                        "    FROM flow.object INPUT INNER JOIN exp.datainput DI ON INPUT.dataid=DI.dataid INNER JOIN exp.data D ON D.sourceapplicationid=DI.targetapplicationid "+
+                        "    WHERE D.rowid = flow.object.dataid AND INPUT.typeid IN (5,7))) " +
+                        "WHERE dataid IN (select rowid from exp.data where exp.data.container = ?) AND typeid=3 AND (compid IS NULL OR fcsid IS NULL OR scriptid IS NULL)", new Object[] {c.getId()});
+            }
+            if (beginTrans)
+                s.getScope().commitTransaction();
+        }
+        catch (SQLException sqlx)
+        {
+            throw new RuntimeSQLException(sqlx);
+        }
+        finally
+        {
+            if (beginTrans)
+                s.getScope().closeConnection();
+        }
+    }
+
 
     private void addRunsLSIDs(FlowProtocolStep step, List<String> lsids)
     {

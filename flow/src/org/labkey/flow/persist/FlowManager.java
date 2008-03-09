@@ -271,6 +271,7 @@ public class FlowManager
             throw new IllegalStateException("FlowDataHandler must be associated with data file");
         }
         AttrObject newObject = new AttrObject();
+        newObject.setContainer(data.getContainer());
         newObject.setDataId(data.getRowId());
         newObject.setTypeId(type.getTypeId());
         if (uri != null)
