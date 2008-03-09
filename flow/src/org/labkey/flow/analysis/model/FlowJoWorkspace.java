@@ -9,6 +9,7 @@ import org.labkey.api.security.User;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.data.*;
 import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.w3c.dom.Document;
@@ -894,6 +895,8 @@ abstract public class FlowJoWorkspace implements Serializable
             {
                 experiment.getExperiment().addRun(user, run);
             }
+            
+            FlowManager.updateFlowObjectCols(container);
 
             svc.commitTransaction();
             transaction = false;

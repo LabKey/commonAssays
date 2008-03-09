@@ -603,4 +603,60 @@ public class FlowManager
             return "FCS File";
         }
     }
+
+
+    /**
+     * this is a bit of a hack
+     * script job and FlowJoWorkspace.createExperimentRun() do not update these new fields
+     */
+    public static void updateFlowObjectCols(Container c)
+    {
+        DbSchema s = DbSchema.get("flow");
+        TableInfo o = s.getTable("object");
+        boolean beginTrans = !s.getScope().isTransactionActive();
+
+        try
+        {
+            if (beginTrans)
+                s.getScope().beginTransaction();
+
+            if (o.getColumn("container") != null)
+            {
+                Table.execute(s,
+                        "UPDATE flow.object "+
+                        "SET container = ? " +
+                        "WHERE container IS NULL AND dataid IN (select rowid from exp.data WHERE exp.data.container = ?)", new Object[] {c.getId(), c.getId()});
+            }
+
+            if (o.getColumn("compid") != null)
+            {
+                Table.execute(s,
+                        "UPDATE flow.object SET "+
+                        "compid = COALESCE(compid,"+
+                        "    (SELECT MIN(DI.dataid) "+
+                        "    FROM flow.object INPUT INNER JOIN exp.datainput DI ON INPUT.dataid=DI.dataid INNER JOIN exp.data D ON D.sourceapplicationid=DI.targetapplicationid "+
+                        "    WHERE D.rowid = flow.object.dataid AND INPUT.typeid=4)), " +
+                        "fcsid = COALESCE(fcsid,"+
+                        "    (SELECT MIN(DI.dataid) "+
+                        "    FROM flow.object INPUT INNER JOIN exp.datainput DI ON INPUT.dataid=DI.dataid INNER JOIN exp.data D ON D.sourceapplicationid=DI.targetapplicationid "+
+                        "    WHERE D.rowid = flow.object.dataid AND INPUT.typeid=1)), " +
+                        "scriptid = COALESCE(scriptid,"+
+                        "    (SELECT MIN(DI.dataid) "+
+                        "    FROM flow.object INPUT INNER JOIN exp.datainput DI ON INPUT.dataid=DI.dataid INNER JOIN exp.data D ON D.sourceapplicationid=DI.targetapplicationid "+
+                        "    WHERE D.rowid = flow.object.dataid AND INPUT.typeid IN (5,7))) " +
+                        "WHERE dataid IN (select rowid from exp.data where exp.data.container = ?) AND typeid=3 AND (compid IS NULL OR fcsid IS NULL OR scriptid IS NULL)", new Object[] {c.getId()});
+            }
+            if (beginTrans)
+                s.getScope().commitTransaction();
+        }
+        catch (SQLException sqlx)
+        {
+            throw new RuntimeSQLException(sqlx);
+        }
+        finally
+        {
+            if (beginTrans)
+                s.getScope().closeConnection();
+        }
+    }
 }
