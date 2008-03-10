@@ -133,11 +133,11 @@ abstract public class AttributeCache<T>
 
     public Map<T, Integer> getAttrValues(Container container, ColumnInfo colDataId)
     {
+/*
         TableInfo table = colDataId.getParentTable();
         SQLFragment sql = new SQLFragment("SELECT DISTINCT ");
         sql.append(_attrIdColumn.getValueSql("property"));
         sql.append(" AS attrId\nFROM ");
-/*
         sql.append(table.getFromSQL("Data"));
         sql.append("\nINNER JOIN flow.Object ON flow.Object.DataId = ");
         sql.append(colDataId.getValueSql("Data"));
@@ -146,9 +146,12 @@ abstract public class AttributeCache<T>
         sql.append(" ON flow.Object.RowId = ");
         sql.append(_objectIdColumn.getValueSql("property"));
 */
-        sql.append("flow.Object INNER JOIN ").append(_table.getFromSQL("property"))
+        // this more complicated SQL executes faster on Postgres than
+        // select distinct statisticid from flow.statistic inner join flow.object on flow.statistic.objectid=flow.object.rowid where container=?
+        SQLFragment sql = new SQLFragment();
+        sql.append("SELECT rowid\nFROM flow.attribute\nWHERE rowid IN (SELECT " + _attrIdColumn.getValueSql("property")  + " FROM flow.Object INNER JOIN ").append(_table.getFromSQL("property"))
             .append(" ON flow.Object.RowId = ").append(_objectIdColumn.getValueSql("property"));
-        sql.append("\nWHERE flow.Object.container=?");
+        sql.append("\n WHERE flow.Object.container=?)");
         sql.add(container.getId());
 
         CacheKey key = new CacheKey(container, sql.getSQL(), sql.getParams().toArray());
