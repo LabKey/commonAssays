@@ -338,13 +338,15 @@ public class FlowSchema extends UserSchema
             sqlFlowData.append(" INNER JOIN " );
             sqlFlowData.append(_flowObject);
             sqlFlowData.append(" ON " +
-                    _expDataAlias + "." + _expData.getColumn("rowid").getName() + "=" +
-                    _flowObject.toString() + "." + _flowObject.getColumn("dataid").getName());
+                    _expDataAlias + "." + _expData.getColumn("rowid").getName() + "=" + _flowObject.toString() + "." + _flowObject.getColumn("dataid").getName() +
+                    " AND " +
+                    _expDataAlias + ".container=" + _flowObject.toString() + "." + _flowObject.getColumn("container").getName()
+                    );
             sqlFlowData.append("\n");
             sqlFlowData.append("WHERE ");
             sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("typeid").getName() + "=" + _type.getObjectType().getTypeId());
-            if (null != _flowObject.getColumn("container"))
-                sqlFlowData.append(" AND ").append(_flowObject).append("." + _flowObject.getColumn("container").getName() + "='" + _expData.getContainer().getId() + "'");
+            sqlFlowData.append(" AND ");
+            sqlFlowData.append(_flowObject.toString() + "." + _flowObject.getColumn("container").getName() + "='" + getContainer().getId() + "'");
             // UNDONE
             //     final private SimpleFilter _filter;
             //UNDONE

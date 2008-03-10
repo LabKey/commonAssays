@@ -137,6 +137,7 @@ abstract public class AttributeCache<T>
         SQLFragment sql = new SQLFragment("SELECT DISTINCT ");
         sql.append(_attrIdColumn.getValueSql("property"));
         sql.append(" AS attrId\nFROM ");
+/*
         sql.append(table.getFromSQL("Data"));
         sql.append("\nINNER JOIN flow.Object ON flow.Object.DataId = ");
         sql.append(colDataId.getValueSql("Data"));
@@ -144,6 +145,12 @@ abstract public class AttributeCache<T>
         sql.append(_table.getFromSQL("property"));
         sql.append(" ON flow.Object.RowId = ");
         sql.append(_objectIdColumn.getValueSql("property"));
+*/
+        sql.append("flow.Object INNER JOIN ").append(_table.getFromSQL("property"))
+            .append(" ON flow.Object.RowId = ").append(_objectIdColumn.getValueSql("property"));
+        sql.append("\nWHERE flow.Object.container=?");
+        sql.add(container.getId());
+
         CacheKey key = new CacheKey(container, sql.getSQL(), sql.getParams().toArray());
         Map.Entry<Integer, String>[] entries = getFromCache(key);
         if (entries != null)

@@ -484,9 +484,7 @@ public class FlowManager
     public int getObjectCount(Container container, ObjectType type) throws SQLException
     {
         String sqlFCSFileCount = "SELECT COUNT(flow.object.rowid) FROM flow.object\n" +
-                "INNER JOIN exp.data ON flow.object.dataid = exp.data.rowid\n" +
-                "WHERE exp.data.container = ? AND " +
-                "flow.object.typeid = ?";
+                "WHERE flow.object.container = ? AND flow.object.typeid = ?";
         return Table.executeSingleton(getSchema(), sqlFCSFileCount, new Object[] { container.getId(), type.getTypeId() }, Integer.class);
     }
 
@@ -495,7 +493,7 @@ public class FlowManager
         String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
                 "WHERE exp.ExperimentRun.RowId IN (" +
                 "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
-                "AND exp.data.container = ?\n" +
+                "AND flow.object.container = ?\n" +
                 "AND flow.object.typeid = ?)";
         return Table.executeSingleton(getSchema(), sqlFCSRunCount, new Object[] { container.getId(), type.getTypeId() }, Integer.class);
     }
@@ -505,7 +503,7 @@ public class FlowManager
         String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
                 "WHERE exp.ExperimentRun.RowId IN (" +
                 "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
-                "AND exp.data.container = ?\n" +
+                "AND flow.object.container = ?\n" +
                 "AND flow.object.typeid = ?) AND exp.ExperimentRun.FilePathRoot IS NOT NULL";
         return Table.executeSingleton(getSchema(), sqlFCSRunCount, new Object[] { container.getId(), ObjectType.fcsKeywords.getTypeId() }, Integer.class);
     }
