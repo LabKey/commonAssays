@@ -6,12 +6,8 @@ import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
-import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.GroupNumberDisplayColumn;
-import org.labkey.ms2.ProteinListDisplayColumn;
-import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.*;
 import org.labkey.ms2.protein.ProteinManager;
-import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
 import java.sql.Types;
@@ -157,7 +153,7 @@ public class ProteinGroupTableInfo extends FilteredTable
                         DataColumn result = new DataColumn(colInfo);
                         result.setLinkTarget("prot");
 
-                        ActionURL url = new ActionURL("MS2", "showProtein.view", _schema.getContainer());
+                        ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, _schema.getContainer());
                         if (_runs != null && _runs.size() == 1)
                         {
                             url.addParameter("run", Integer.toString(_runs.get(0).getRun()));
@@ -201,7 +197,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         addColumn(proteinGroup);
     }
 
-    public void addProteinDetailColumns(final MS2Run... runs)
+    public void addProteinDetailColumns()
     {
         ColumnInfo rowIdColumn = _rootTable.getColumn("RowId");
 
@@ -209,7 +205,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
-                _schema.getProteinGroupProteins().setRuns(runs);
+                _schema.getProteinGroupProteins().setRuns(_schema.getRuns());
                 ProteinListDisplayColumn result = new ProteinListDisplayColumn(colInfo.getColumnName(), _schema.getProteinGroupProteins());
                 result.setColumnInfo(colInfo);
                 return result;
@@ -342,17 +338,16 @@ public class ProteinGroupTableInfo extends FilteredTable
         sql.add(Boolean.FALSE);
         if (runs != null)
         {
-            List<Integer> params = new ArrayList<Integer>(runs.size());
+            assert !runs.isEmpty() : "Doesn't make sense to filter to no runs";
+            sql.append(" AND Run IN (");
+            String separator = "";
             for (MS2Run run : runs)
             {
-                params.add(run.getRun());
+                sql.append(separator);
+                sql.append(run.getRun());
+                separator = ", ";
             }
-
-            assert !runs.isEmpty() : "Doesn't make sense to filter to no runs";
-            sql.append(" AND Run IN (?");
-            sql.append(StringUtils.repeat(", ?", params.size() - 1));
             sql.append(")");
-            sql.addAll(params);
         }
         sql.append("))");
         addCondition(sql);

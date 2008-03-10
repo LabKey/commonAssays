@@ -306,7 +306,11 @@ public class MS2Schema extends UserSchema
         {
             SQLFragment sql = new SQLFragment("ProteinGroupID IN (SELECT pm.ProteinGroupID FROM ");
             sql.append(MS2Manager.getTableInfoPeptideMemberships() + " pm ");
-            sql.append(", " + MS2Manager.getTableInfoPeptidesData() + " pd WHERE pd.RowId = pm.PeptideId AND pd.peptideprophet >= ");
+            sql.append(", " + MS2Manager.getTableInfoPeptidesData() + " pd, ");
+            sql.append(MS2Manager.getTableInfoFractions() + " f ");
+            sql.append("WHERE f.Fraction = pd.Fraction AND f.Run IN ");
+            appendRunInClause(sql);
+            sql.append(" AND pd.RowId = pm.PeptideId AND pd.peptideprophet >= ");
             sql.append(form.getPeptideProphetProbability());
             sql.append(")");
             result.addCondition(sql, "ProteinGroupId");
@@ -324,7 +328,7 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    private void appendRunInClause(SQLFragment sql)
+    public void appendRunInClause(SQLFragment sql)
     {
         sql.append("(");
         String separator = "";
@@ -337,7 +341,7 @@ public class MS2Schema extends UserSchema
         sql.append(")");
     }
 
-    protected TableInfo createPeptideMembershipsTable(final MS2Run... runs)
+    protected TableInfo createPeptideMembershipsTable()
     {
         TableInfo info = MS2Manager.getTableInfoPeptideMemberships();
         FilteredTable result = new FilteredTable(info);
@@ -355,7 +359,7 @@ public class MS2Schema extends UserSchema
             {
                 ProteinGroupTableInfo result = new ProteinGroupTableInfo(null, MS2Schema.this);
                 result.getColumn("ProteinProphet").setIsHidden(true);
-                result.addProteinDetailColumns(runs);
+                result.addProteinDetailColumns();
 
                 return result;
             }
@@ -526,6 +530,7 @@ public class MS2Schema extends UserSchema
     public void setRuns(List<MS2Run> runs)
     {
         _runs = runs;
+        _proteinGroupProteins.setRuns(_runs);
         Collections.sort(_runs, new Comparator<MS2Run>()
         {
             public int compare(MS2Run run1, MS2Run run2)

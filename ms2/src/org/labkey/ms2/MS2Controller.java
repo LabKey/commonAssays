@@ -153,12 +153,6 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private NavTree appendMS2AdminNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
-    {
-        return appendAdminNavTrail(root, "MS2 Admin", getShowMS2AdminURL(null), title, page, helpTopic);
-    }
-
-
     private AbstractMS2RunView getPeptideView(String grouping, MS2Run... runs) throws ServletException
     {
         return MS2RunViewType.getViewType(grouping).createView(getViewContext(), runs);
@@ -1290,6 +1284,25 @@ public class MS2Controller extends SpringActionController
         {
             _orCriteriaForEachRun = orCriteriaForEachRun;
         }
+
+        public void appendPeptideFilterDescription(StringBuilder title, ViewContext context)
+        {
+            if (isPeptideProphetFilter() && getPeptideProphetProbability() != null)
+            {
+                title.append("PeptideProphet >= ");
+                title.append(getPeptideProphetProbability());
+            }
+            else if (isCustomViewPeptideFilter())
+            {
+                title.append("\"");
+                title.append(getCustomViewName(context) == null ? "<default>" : getCustomViewName(context));
+                title.append("\" peptide filter");
+            }
+            else
+            {
+                title.append("No peptide filter");
+            }
+        }
     }
 
     @RequiresPermission(ACL.PERM_NONE)
@@ -1385,17 +1398,32 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            ActionURL setupURL = new ActionURL(CompareProteinProphetQuerySetupAction.class, getContainer());
-            setupURL.addParameter(PeptideFilteringFormElements.peptideFilterType, _form.getPeptideFilterType());
-            if (_form.getPeptideProphetProbability() != null)
+            if (_form != null)
             {
-                setupURL.addParameter(PeptideFilteringFormElements.peptideProphetProbability, _form.getPeptideProphetProbability().toString());
+                ActionURL setupURL = new ActionURL(CompareProteinProphetQuerySetupAction.class, getContainer());
+                setupURL.addParameter(PeptideFilteringFormElements.peptideFilterType, _form.getPeptideFilterType());
+                if (_form.getPeptideProphetProbability() != null)
+                {
+                    setupURL.addParameter(PeptideFilteringFormElements.peptideProphetProbability, _form.getPeptideProphetProbability().toString());
+                }
+                setupURL.addParameter(PeptideFilteringFormElements.runList, _form.getRunList() == null ? -1 : _form.getRunList());
+                setupURL.addParameter(PeptideFilteringFormElements.orCriteriaForEachRun, _form.isOrCriteriaForEachRun());
+                setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getCustomViewName(getViewContext()));
+                root.addChild("MS2 Dashboard");
+                root.addChild("Setup Compare ProteinProphet", setupURL);
+                StringBuilder title = new StringBuilder("Compare ProteinProphet (Query): ");
+                _form.appendPeptideFilterDescription(title, getViewContext());
+                title.append(", ");
+                if (_form.isOrCriteriaForEachRun())
+                {
+                    title.append("Show in all runs");
+                }
+                else
+                {
+                    title.append("Show only in runs that meet criteria");
+                }
+                return root.addChild(title.toString());
             }
-            setupURL.addParameter(PeptideFilteringFormElements.runList, _form.getRunList());
-            setupURL.addParameter(PeptideFilteringFormElements.orCriteriaForEachRun, _form.isOrCriteriaForEachRun());
-            setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getCustomViewName(getViewContext()));
-            root.addChild("MS2 Dashboard");
-            root.addChild("Setup Compare ProteinProphet", setupURL);
             return root.addChild("Compare ProteinProphet (Query)");
         }
     }
@@ -1747,6 +1775,10 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(FormType form, BindException errors) throws Exception
         {
+            if (form.getRunList() == null)
+            {
+                return _renderErrors(Arrays.asList("Could not find the list of selected runs for comparison. Please reselect the runs."));
+            }
             try
             {
                 _runs = RunListCache.getCachedRuns(form.getRunList(), false, getViewContext());
@@ -1819,11 +1851,14 @@ public class MS2Controller extends SpringActionController
                 setupURL.addParameter(PeptideFilteringFormElements.spectraConfig, _form.getSpectraConfig());
 
                 root.addChild("Spectra Count Options", setupURL);
-                root.addChild("Spectra Counts: " + _config.getDescription());
+                StringBuilder title = new StringBuilder("Spectra Counts: ");
+                title.append(_config.getDescription());
+                title.append(", ");
+                _form.appendPeptideFilterDescription(title, getViewContext());
+                root.addChild(title.toString());
             }
             return root;
         }
-
     }
 
     private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column) throws ServletException, SQLException

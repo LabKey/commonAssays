@@ -8,6 +8,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
@@ -29,6 +30,7 @@ public class PendingMageMLFilesView extends QueryView
         setShowExportButtons(false);
         setShowRecordSelectors(true);
         setShowDetailsColumn(false);
+        setShowRReportButton(false);
         setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
         setShowCustomizeViewLinkInButtonBar(true);
     }
@@ -44,7 +46,7 @@ public class PendingMageMLFilesView extends QueryView
 
     protected void populateButtonBar(DataView view, ButtonBar bar)
     {
-        super.populateButtonBar(view, bar);
+//        super.populateButtonBar(view, bar);
 
         List<ExpProtocol> protocols = AssayService.get().getAssayProtocols(getContainer());
         List<ExpProtocol> microarrayProtocols = new ArrayList<ExpProtocol>();
@@ -66,44 +68,51 @@ public class PendingMageMLFilesView extends QueryView
             throw new RuntimeSQLException(e);
         }
 
+        ActionButton deleteButton = new ActionButton("placeholder", "Delete");
+        ActionURL deleteURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getDeleteDatasURL(view.getViewContext().getContainer(), view.getViewContext().getActionURL());
+        deleteButton.setScript("if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + deleteURL + "\", \"post\", \"MageML files\")) {document.forms[\"" + view.getDataRegion().getName() + "\"].submit();} return false;");
+        deleteButton.setDisplayPermission(ACL.PERM_DELETE);
+        bar.add(deleteButton);
+
         if (root == null)
         {
-            SimpleTextDisplayElement element = new SimpleTextDisplayElement("Unable to upload, no pipeline root has been configured", true);
+            SimpleTextDisplayElement element = new SimpleTextDisplayElement("Unable to upload because pipeline has not been configured. [<a href=\"" + PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer()) + "\">setup pipeline</a>]", true);
             element.setDisplayPermission(ACL.PERM_INSERT);
             bar.add(element);
-        }
-        else if (microarrayProtocols.size() == 0)
-        {
-            SimpleTextDisplayElement element = new SimpleTextDisplayElement("Unable to upload, no microarray assay definitions found", false);
-            element.setDisplayPermission(ACL.PERM_INSERT);
-            bar.add(element);
-        }
-        else if (microarrayProtocols.size() == 1)
-        {
-            ExpProtocol protocol = protocols.get(0);
-            ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
-            ActionButton button = new ActionButton(url, "Upload selected using " + protocol.getName());
-            button.setDisplayPermission(ACL.PERM_INSERT);
-            button.setScript("if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); } return false;");
-            bar.add(button);
         }
         else
         {
-            MenuButton menu = new MenuButton("Upload selected using...");
-            menu.setDisplayPermission(ACL.PERM_INSERT);
-            bar.add(menu);
-            for (ExpProtocol protocol : microarrayProtocols)
+            if (microarrayProtocols.size() == 0)
             {
-                ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
-                menu.addMenuItem("Upload using " + protocol.getName(), "javascript: if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); }");
+                SimpleTextDisplayElement element = new SimpleTextDisplayElement("Unable to upload, no microarray assay definitions found", false);
+                element.setDisplayPermission(ACL.PERM_INSERT);
+                bar.add(element);
             }
+            else if (microarrayProtocols.size() == 1)
+            {
+                ExpProtocol protocol = protocols.get(0);
+                ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
+                ActionButton button = new ActionButton(url, "Upload selected using " + protocol.getName());
+                button.setDisplayPermission(ACL.PERM_INSERT);
+                button.setScript("if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); } return false;");
+                bar.add(button);
+            }
+            else
+            {
+                MenuButton menu = new MenuButton("Upload selected using...");
+                menu.setDisplayPermission(ACL.PERM_INSERT);
+                bar.add(menu);
+                for (ExpProtocol protocol : microarrayProtocols)
+                {
+                    ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
+                    menu.addMenuItem("Upload using " + protocol.getName(), "javascript: if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); }");
+                }
+            }
+            ActionURL browseURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), getViewContext().getActionURL().toString());
+            ActionButton browseButton = new ActionButton(browseURL, "Browse for MageML Files");
+            browseButton.setDisplayPermission(ACL.PERM_INSERT);
+            bar.add(browseButton);
         }
-
-        ActionButton deleteButton = new ActionButton("placeholder", "Delete selected");
-        ActionURL deleteURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getDeleteDatasURL(view.getViewContext().getContainer(), view.getViewContext().getActionURL());
-        deleteButton.setScript("if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + deleteURL + "\", \"post\", \"MageML files\")) {document.forms[\"" + view.getDataRegion().getName() + "\"].submit();} return false;"); 
-        deleteButton.setDisplayPermission(ACL.PERM_DELETE);
-        bar.add(deleteButton);
     }
 
     protected TableInfo createTable()

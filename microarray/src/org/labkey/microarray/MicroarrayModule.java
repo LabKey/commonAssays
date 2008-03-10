@@ -55,8 +55,8 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
                         QueryView view = new PendingMageMLFilesView(portalCtx);
-                        view.setTitle(WEBPART_PENDING_FILES);
-                        view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
+                        view.setTitle("Pending MageML Files");
+                        view.setTitleHref(MicroarrayController.getPendingMageMLFilesURL(portalCtx.getContainer()));
                         return view;
                     }
                 },

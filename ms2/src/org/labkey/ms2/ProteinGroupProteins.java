@@ -15,9 +15,14 @@ import java.sql.ResultSet;
 public class ProteinGroupProteins
 {
     private Map<Integer, List<ProteinSummary>> _summaries;
-    private MS2Run[] _runs;
+    private List<MS2Run> _runs;
 
-    public ProteinGroupProteins(MS2Run... runs)
+    public ProteinGroupProteins()
+    {
+        this(null);
+    }
+
+    public ProteinGroupProteins(List<MS2Run> runs)
     {
         _runs = runs;
     }
@@ -26,7 +31,7 @@ public class ProteinGroupProteins
     {
         Map<Integer, List<ProteinSummary>> result = new HashMap<Integer, List<ProteinSummary>>();
 
-        if (_runs != null && _runs.length > 0)
+        if (_runs != null && !_runs.isEmpty())
         {
             StringBuilder inClause = new StringBuilder();
             inClause.append("SELECT pg.RowId FROM\n");
@@ -35,11 +40,11 @@ public class ProteinGroupProteins
             inClause.append(MS2Manager.getTableInfoProteinProphetFiles());
             inClause.append(" ppf WHERE ppf.RowId = pg.ProteinProphetFileId AND ppf.Run IN (");
 
-            inClause.append(_runs[0].getRun());
-            for (int i = 1; i < _runs.length; i++)
+            inClause.append(_runs.get(0).getRun());
+            for (int i = 1; i < _runs.size(); i++)
             {
                 inClause.append(", ");
-                inClause.append(_runs[i].getRun());
+                inClause.append(_runs.get(i).getRun());
             }
 
             inClause.append(")");
@@ -138,17 +143,17 @@ public class ProteinGroupProteins
     }
 
 
-    public void setRuns(MS2Run[] runs)
+    public void setRuns(List<MS2Run> runs)
     {
         assert runsMatch(runs);
         _runs = runs;
     }
 
-    private boolean runsMatch(MS2Run[] runs)
+    private boolean runsMatch(List<MS2Run> runs)
     {
-        if (_runs != null && _runs.length != 0)
+        if (_runs != null && _runs.size() != 0)
         {
-            return _runs == runs || new HashSet(Arrays.asList(runs)).equals(new HashSet(Arrays.asList(_runs)));
+            return _runs == runs || new HashSet<MS2Run>(runs).equals(new HashSet<MS2Run>(_runs));
         }
         return true;
     }

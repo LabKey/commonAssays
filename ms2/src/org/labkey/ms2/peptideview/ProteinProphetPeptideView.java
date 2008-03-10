@@ -13,10 +13,7 @@ import org.labkey.common.util.Pair;
 
 import java.sql.SQLException;
 import java.sql.ResultSet;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashMap;
+import java.util.*;
 
 import org.labkey.ms2.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -41,7 +38,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     {
         ProteinColumnNameList originalNames = new ProteinColumnNameList(requestedProteinColumnNames);
         List<DisplayColumn> displayColumns = new ArrayList<DisplayColumn>();
-        ProteinGroupProteins proteins = new ProteinGroupProteins(_runs);
+        ProteinGroupProteins proteins = new ProteinGroupProteins(Arrays.asList(_runs));
         Set<String> sequenceColumnNames = new CaseInsensitiveHashSet(ProteinListDisplayColumn.ALL_SEQUENCE_COLUMNS);
 
         for (String name : originalNames)

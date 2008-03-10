@@ -23,6 +23,7 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.gwt.server.BaseRemoteService;
+import org.labkey.api.query.QueryView;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.springframework.web.servlet.ModelAndView;
@@ -218,12 +219,14 @@ public class MicroarrayController extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return ExperimentService.get().createExperimentRunWebPart(getViewContext(), MicroarrayRunFilter.INSTANCE, true);
+            QueryView result = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MicroarrayRunFilter.INSTANCE, true);
+            result.setFrame(WebPartView.FrameType.NONE);
+            return result;
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return root;
+            return root.addChild("Microarray Runs");
         }
     }
 
@@ -237,7 +240,7 @@ public class MicroarrayController extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return root;
+            return root.addChild("Pending MageML Files");
         }
     }
 

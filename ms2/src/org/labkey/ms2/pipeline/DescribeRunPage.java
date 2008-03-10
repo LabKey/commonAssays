@@ -145,7 +145,7 @@ abstract public class DescribeRunPage extends JspBase
         builder.append(" Sample ID</td><td class=\"normal\">");
         String namePrefix = runPrefix + ".sampleIds";
         String nameSuffix = "[" + index + "]";
-        builder.append("<input type=\"radio\" id=\"" + namePrefix + "NewType" + nameSuffix + "\" name=\"" + namePrefix + "Type" + nameSuffix + "\" checked=\"checked\" value=\"New\"/>");
+        builder.append("<table><tr><td><input type=\"radio\" id=\"" + namePrefix + "NewType" + nameSuffix + "\" name=\"" + namePrefix + "Type" + nameSuffix + "\" checked=\"checked\" value=\"New\"/></td><td>\n");
         builder.append("<input type=\"text\" size=\"50\" name=\"" + namePrefix + "New" + nameSuffix + "\" onKeyUp=\"document.getElementById('" + namePrefix + "NewType" + nameSuffix + "').checked = true;\"" );
         String[] sampleIds = runInfo.getSampleIdsNew();
         String sampleId = sampleIds != null && index < sampleIds.length ? sampleIds[index] : null;
@@ -163,9 +163,8 @@ abstract public class DescribeRunPage extends JspBase
         builder.append("\" ");
 
         Integer[] materialSourceIds = runInfo.getMaterialSourceIds();
-        builder.append(" >");
-        builder.append("<br>\n");
-        builder.append("<input type=\"radio\" id=\"" + namePrefix + "ExistingType" + nameSuffix + "\" name=\"" + namePrefix + "Type" + nameSuffix + "\" value=\"Existing\"/>\n");
+        builder.append(" ></tr><tr><td>\n");
+        builder.append("<input type=\"radio\" id=\"" + namePrefix + "ExistingType" + nameSuffix + "\" name=\"" + namePrefix + "Type" + nameSuffix + "\" value=\"Existing\"/></td><td>\n");
         builder.append("<select name=\"" + namePrefix + "Existing" + nameSuffix + "\" onchange=\"document.getElementById('" + namePrefix + "ExistingType" + nameSuffix + "').checked = true;\">");
         if (getSampleSets().length > 0)
         {
@@ -182,7 +181,7 @@ abstract public class DescribeRunPage extends JspBase
                 }
             }
         }
-        builder.append("</select>");
+        builder.append("</select></td></tr></table>");
         builder.append("</td></tr><tr><td class=\"ms-searchform\">");
         builder.append(roleName);
         builder.append(" Sample Set</td><td class=\"normal\">");

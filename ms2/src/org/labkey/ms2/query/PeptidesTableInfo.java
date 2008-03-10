@@ -23,15 +23,15 @@ public class PeptidesTableInfo extends FilteredTable
 
     public PeptidesTableInfo(MS2Schema schema)
     {
-        this(schema, null, new ActionURL("MS2", "someAction.view", schema.getContainer()), true, true);
+        this(schema, new ActionURL("MS2", "someAction.view", schema.getContainer()), true, true);
     }
 
     public PeptidesTableInfo(MS2Schema schema, boolean includeFeatureFk, boolean restrictContainer)
     {
-        this(schema, null, new ActionURL("MS2", "someAction.view", schema.getContainer()), includeFeatureFk, restrictContainer);
+        this(schema, new ActionURL("MS2", "someAction.view", schema.getContainer()), includeFeatureFk, restrictContainer);
     }
 
-    public PeptidesTableInfo(MS2Schema schema, final MS2Run[] runs, ActionURL url, boolean includeFeatureFk, boolean restrictContainer)
+    public PeptidesTableInfo(MS2Schema schema, ActionURL url, boolean includeFeatureFk, boolean restrictContainer)
     {
         super(MS2Manager.getTableInfoPeptidesData());
         _schema = schema;
@@ -113,7 +113,7 @@ public class PeptidesTableInfo extends FilteredTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return _schema.createPeptideMembershipsTable(runs);
+                return _schema.createPeptideMembershipsTable();
             }
         });
         proteinGroup.setKeyField(false);
@@ -208,19 +208,11 @@ public class PeptidesTableInfo extends FilteredTable
             sql.append(" AND Container = ?"); 
             sql.add(_schema.getContainer().getId());
         }
-        if (runs != null)
+        if (_schema.getRuns() != null)
         {
-            List<Integer> params = new ArrayList<Integer>(runs.length);
-            for (MS2Run run : runs)
-            {
-                params.add(run.getRun());
-            }
-
-            assert runs.length > 0 : "Doesn't make sense to filter to no runs";
-            sql.append(" AND Run IN (?");
-            sql.append(StringUtils.repeat(", ?", params.size() - 1));
-            sql.append(")");
-            sql.addAll(params);
+            assert _schema.getRuns().size()> 0 : "Doesn't make sense to filter to no runs";
+            sql.append(" AND Run IN ");
+            _schema.appendRunInClause(sql);
         }
         sql.append("))");
         addCondition(sql);
