@@ -18,10 +18,12 @@ package org.labkey.ms1.query;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlDialect;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 
 import java.util.Set;
+import java.util.Map;
 
 /**
  * Use with FeaturesView and TableInfo to filter on a given set of containers
@@ -58,11 +60,11 @@ public class ContainerFilter implements FeaturesFilter
             _containers = new Container[]{container};
     }
 
-    public void setFilters(FeaturesTableInfo tinfo)
+    public SQLFragment getWhereClause(Map<String, String> aliasMap, SqlDialect dialect)
     {
-        tinfo.addCondition(new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.Container IN(" + genListSQL() +"))"),
-                "FileId");
-
+        String dataTableAlias = aliasMap.get("exp.Data");
+        assert(null != dataTableAlias);
+        return new SQLFragment(dataTableAlias + ".Container IN (" + genListSQL() + ")");
     }
 
     //can't use ListFilterBase for this because Container.toString() returns more than just the container id!

@@ -19,9 +19,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlDialect;
-import org.labkey.api.query.FieldKey;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -100,57 +98,39 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
             if(idx > 0)
                 sql.append(" OR ");
 
-            sql.append(genSeqPredicate(_sequences[idx]));
+            sql.append(genSeqPredicate(_sequences[idx], null));
         }
         return new SQLFragment(sql.toString(), (List<Object>)null);
     }
 
-    public void setFilters(FeaturesTableInfo tinfo)
+    public SQLFragment getWhereClause(Map<String, String> aliasMap, SqlDialect dialect)
     {
         if(null == _sequences)
-            return;
+            return null;
 
-        //add a condition that selects only features that match the given peptide sequence
-        StringBuilder sql = new StringBuilder("FeatureId IN (SELECT fe.FeatureId" +
-                " FROM ms2.PeptidesData AS pd" +
-                " INNER JOIN ms2.Fractions AS fr ON (fr.fraction=pd.fraction)" +
-                " INNER JOIN ms2.Runs AS r ON (fr.Run=r.Run)" +
-                " INNER JOIN exp.Data AS d ON (r.Container=d.Container)" +
-                " INNER JOIN ms1.Files AS fi ON (fi.MzXmlUrl=fr.MzXmlUrl AND fi.ExpDataFileId=d.RowId)" +
-                " INNER JOIN ms1.Features AS fe ON (fe.FileId=fi.FileId AND pd.scan=fe.MS2Scan)" +
-                " WHERE ");
+        String pepDataAlias = aliasMap.get("ms2.PeptidesData");
+        assert(null != pepDataAlias);
 
         // OR together the sequence conditions
+        StringBuilder sql = new StringBuilder();
         for(int idx = 0; idx < _sequences.length; ++idx)
         {
             if(idx > 0)
                 sql.append(" OR ");
 
-            sql.append(genSeqPredicate(_sequences[idx]));
+            sql.append(genSeqPredicate(_sequences[idx], pepDataAlias));
         }
-
-        sql.append(")"); //end paren for sub-select
-
-        SQLFragment sqlf = new SQLFragment(sql.toString());
-        tinfo.addCondition(sqlf, "FeatureId");
-
-        //change the default visible columnset
-        ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(tinfo.getDefaultVisibleColumns());
-        visibleColumns.add(2, FieldKey.fromParts("FileId","ExpDataFileId","Run","Name"));
-        visibleColumns.remove(FieldKey.fromParts("AccurateMz"));
-        visibleColumns.remove(FieldKey.fromParts("Mass"));
-        visibleColumns.remove(FieldKey.fromParts("Peaks"));
-        visibleColumns.remove(FieldKey.fromParts("TotalIntensity"));
-        tinfo.setDefaultVisibleColumns(visibleColumns);
+        return new SQLFragment(sql.toString(), (List<Object>)null);
     }
 
-    private String genSeqPredicate(String sequence)
+    private String genSeqPredicate(String sequence, String pepDataAlias)
     {
         //force sequence to upper-case for case-sensitive DBs like PostgreSQL
         sequence = sequence.toUpperCase();
         
         //always add a condition for pd.TrimmedPeptide using normalized version of sequence
-        StringBuilder sql = new StringBuilder("(TrimmedPeptide");
+        StringBuilder sql = new StringBuilder(null == pepDataAlias ? "(TrimmedPeptide"
+                : "(" + pepDataAlias + ".TrimmedPeptide");
 
         if(_exact)
         {
@@ -168,7 +148,7 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
         //if _exact, AND another contains condition against pd.Peptide
         if(_exact)
         {
-            sql.append(" AND Peptide LIKE '%");
+            sql.append(null == pepDataAlias ? " AND Peptide LIKE '%" : " AND " + pepDataAlias + ".Peptide LIKE '%");
             sql.append(sequence.trim());
             sql.append("%'");
         }
@@ -177,5 +157,4 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
 
         return sql.toString();
     }
-
 }

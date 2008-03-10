@@ -16,7 +16,11 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlDialect;
+import org.labkey.api.ms1.MS1Service;
 import org.labkey.ms1.model.Feature;
+
+import java.util.Map;
 
 /**
  * Features filter for retention time values
@@ -43,9 +47,10 @@ public class RetentionTimeFilter implements FeaturesFilter
         _rtHigh = rtHigh;
     }
 
-    public void setFilters(FeaturesTableInfo tinfo)
+    public SQLFragment getWhereClause(Map<String, String> aliasMap, SqlDialect dialect)
     {
-        tinfo.addCondition(new SQLFragment("Time BETWEEN " + _rtLow + " AND " + _rtHigh), "Time");
-
+        String featuresAlias = aliasMap.get(MS1Service.Tables.Features.getFullName());
+        assert(featuresAlias != null);
+        return new SQLFragment(featuresAlias + ".Time BETWEEN " + _rtLow + " AND " + _rtHigh);
     }
 }

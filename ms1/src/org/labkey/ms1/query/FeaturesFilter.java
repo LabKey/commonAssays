@@ -15,6 +15,11 @@
  */
 package org.labkey.ms1.query;
 
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlDialect;
+
+import java.util.Map;
+
 /**
  * Interface for objects that wish to establish base filters on a FeaturesTableInfo
  *
@@ -26,14 +31,10 @@ package org.labkey.ms1.query;
 public interface FeaturesFilter
 {
     /**
-     * Called by the view just after the TableInfo is created, but before
-     * it is returned to the base QueryView classes.
-     *
-     * Implementations should use the passed FeaturesTableInfo to set any
-     * initial conditions desired.
-     *
-     * @param tinfo The FeaturesTableInfo to manipulate
+     * Implementations should return a SQLFragment suitable for inclusion in a WHERE clause
+     * @param aliasMap A map of fully-qualified table names to table aliases
+     * @param dialect
+     * @return A SQLFragment for the clause
      */
-    public void setFilters(FeaturesTableInfo tinfo);
-
+    public SQLFragment getWhereClause(Map<String, String> aliasMap, SqlDialect dialect);
 }

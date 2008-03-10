@@ -232,7 +232,7 @@ public class PeptidesTableInfo extends FilteredTable
                 "INNER JOIN exp.Data AS d ON (fi.ExpDataFileId=d.RowId)\n" +
                 "INNER JOIN ms2.Runs AS r ON (r.Container=d.Container)\n" +
                 "INNER JOIN ms2.Fractions AS fr ON (fr.Run=r.Run AND fr.MzXmlUrl=fi.MzXmlUrl)\n" +
-                "INNER JOIN ms2.PeptidesData AS pd ON (pd.Fraction=fr.Fraction AND pd.scan=fe.MS2Scan)\n" +
+                "INNER JOIN ms2.PeptidesData AS pd ON (pd.Fraction=fr.Fraction AND pd.scan=fe.MS2Scan AND pd.Charge=fe.MS2Charge)\n" +
                 "WHERE pd.RowId=" + ExprColumn.STR_TABLE_ALIAS + ".RowId)");
 
         ColumnInfo ciFeatureId = addColumn(new ExprColumn(this, "MS1 Feature", sqlFeatureJoin, java.sql.Types.INTEGER, getColumn("RowId")));

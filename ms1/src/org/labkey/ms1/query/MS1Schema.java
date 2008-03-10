@@ -12,10 +12,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Provides a customized experiment run grid with features specific to MS1 runs.
@@ -25,6 +22,7 @@ public class MS1Schema extends UserSchema
     public static final String SCHEMA_NAME = "ms1";
     public static final String TABLE_FEATURE_RUNS = "MSInspectFeatureRuns";
     public static final String TABLE_FEATURES = "Features";
+    public static final String TABLE_FEATURES_SEARCH = "FeaturesSearch";
     public static final String TABLE_PEAKS = "Peaks";
     public static final String TABLE_FILES = "Files";
     public static final String TABLE_SCANS = "Scans";
@@ -66,6 +64,7 @@ public class MS1Schema extends UserSchema
         HashSet<String> ret = new HashSet<String>();
         ret.add(TABLE_FEATURE_RUNS);
         ret.add(TABLE_FEATURES);
+        ret.add(TABLE_FEATURES_SEARCH);
         ret.add(TABLE_FILES);
         ret.add(TABLE_PEAKS);
         ret.add(TABLE_SCANS);
@@ -79,6 +78,8 @@ public class MS1Schema extends UserSchema
             return getMS1ExpRunsTableInfo(alias);
         else if(TABLE_FEATURES.equalsIgnoreCase(name))
             return getFeaturesTableInfo();
+        else if(TABLE_FEATURES_SEARCH.equalsIgnoreCase(name))
+            return getFeaturesTableInfoSearch();
         else if(TABLE_PEAKS.equalsIgnoreCase(name))
             return getPeaksTableInfo();
         else if(TABLE_FILES.equalsIgnoreCase(name))
@@ -93,10 +94,12 @@ public class MS1Schema extends UserSchema
 
     public CrosstabTableInfo getComparePeptideTableInfo(int[] runIds)
     {
+        FeaturesTableInfo tinfo = getFeaturesTableInfo(true, true);
+        ArrayList<FeaturesFilter> filters = new ArrayList<FeaturesFilter>();
         //OK if runIds is null
         RunFilter runFilter = new RunFilter(runIds);
-        FeaturesTableInfo tinfo = getFeaturesTableInfo(true, true);
-        runFilter.setFilters(tinfo);
+        filters.add(runFilter);
+        tinfo.setBaseFilters(filters);
 
         //filter out features that don't have an associated peptide
         ColumnInfo colPep = tinfo.getColumn(FeaturesTableInfo.COLUMN_PEPTIDE_INFO);
@@ -171,6 +174,22 @@ public class MS1Schema extends UserSchema
     public FeaturesTableInfo getFeaturesTableInfo()
     {
         return getFeaturesTableInfo(true);
+    } //getFeaturesTableInfo()
+
+    public FeaturesTableInfo getFeaturesTableInfoSearch()
+    {
+        FeaturesTableInfo table = getFeaturesTableInfo(true);
+
+        //change the default visible columnset
+        ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(table.getDefaultVisibleColumns());
+        visibleColumns.add(2, FieldKey.fromParts("FileId","ExpDataFileId","Run","Name"));
+        visibleColumns.remove(FieldKey.fromParts("AccurateMz"));
+        visibleColumns.remove(FieldKey.fromParts("Mass"));
+        visibleColumns.remove(FieldKey.fromParts("Peaks"));
+        visibleColumns.remove(FieldKey.fromParts("TotalIntensity"));
+        table.setDefaultVisibleColumns(visibleColumns);
+
+        return table;
     } //getFeaturesTableInfo()
 
     public FeaturesTableInfo getFeaturesTableInfo(boolean includePepFk)

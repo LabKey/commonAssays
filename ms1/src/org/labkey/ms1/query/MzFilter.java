@@ -16,10 +16,11 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.query.FieldKey;
+import org.labkey.api.data.SqlDialect;
+import org.labkey.api.ms1.MS1Service;
 import org.labkey.ms1.MS1Controller;
 
-import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Features filter for mz values
@@ -51,18 +52,10 @@ public class MzFilter implements FeaturesFilter
         _mzHigh = mzHigh;
     }
 
-    public void setFilters(FeaturesTableInfo tinfo)
+    public SQLFragment getWhereClause(Map<String, String> aliasMap, SqlDialect dialect)
     {
-        tinfo.addCondition(new SQLFragment("MZ BETWEEN " + _mzLow + " AND " + _mzHigh), "MZ");
-        
-        //change the default visible columnset
-        ArrayList<FieldKey> visibleColumns = new ArrayList<FieldKey>(tinfo.getDefaultVisibleColumns());
-        visibleColumns.add(2, FieldKey.fromParts("FileId","ExpDataFileId","Run","Name"));
-        visibleColumns.remove(FieldKey.fromParts("AccurateMz"));
-        visibleColumns.remove(FieldKey.fromParts("Mass"));
-        visibleColumns.remove(FieldKey.fromParts("Charge"));
-        visibleColumns.remove(FieldKey.fromParts("Peaks"));
-        visibleColumns.remove(FieldKey.fromParts("TotalIntensity"));
-        tinfo.setDefaultVisibleColumns(visibleColumns);
+        String featuresAlias = aliasMap.get(MS1Service.Tables.Features.getFullName());
+        assert(null != featuresAlias);
+        return new SQLFragment(featuresAlias + ".MZ BETWEEN " + _mzLow + " AND " + _mzHigh);
     }
 }

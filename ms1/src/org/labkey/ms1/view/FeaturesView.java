@@ -33,34 +33,36 @@ public class FeaturesView extends QueryView
     private MS1Schema _ms1Schema = null;
     private boolean _forExport = false;
     private Boolean _peaksAvailable = null;
+    private boolean _forSearch = false;
 
     public FeaturesView(MS1Schema schema)
     {
-        this(schema, new ArrayList<FeaturesFilter>());
+        this(schema, new ArrayList<FeaturesFilter>(), false);
     }
 
     public FeaturesView(MS1Schema schema, Container container)
     {
-        this(schema, new ArrayList<FeaturesFilter>());
+        this(schema, new ArrayList<FeaturesFilter>(), false);
         _baseFilters.add(new ContainerFilter(container));
     }
 
     public FeaturesView(MS1Schema schema, int runId) throws SQLException
     {
-        this(schema, new ArrayList<FeaturesFilter>());
+        this(schema, new ArrayList<FeaturesFilter>(), false);
         _baseFilters.add(new RunFilter(runId));
         _peaksAvailable = Boolean.valueOf(MS1Manager.get().isPeakDataAvailable(runId) == MS1Manager.PeakAvailability.Available);
     }
 
-    public FeaturesView(MS1Schema schema, List<FeaturesFilter> baseFilters)
+    public FeaturesView(MS1Schema schema, List<FeaturesFilter> baseFilters, boolean forSearch)
     {
         super(schema);
         _ms1Schema = schema;
         _baseFilters = baseFilters;
+        _forSearch = forSearch;
 
         QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), DATAREGION_NAME);
         settings.setSchemaName(schema.getSchemaName());
-        settings.setQueryName(MS1Schema.TABLE_FEATURES);
+        settings.setQueryName(_forSearch ? MS1Schema.TABLE_FEATURES_SEARCH : MS1Schema.TABLE_FEATURES);
         settings.setAllowChooseQuery(false);
         setSettings(settings);
 
@@ -130,17 +132,8 @@ public class FeaturesView extends QueryView
     {
         assert null != _ms1Schema : "MS1 Schema was not set in FeaturesView class!";
 
-        FeaturesTableInfo tinfo = _ms1Schema.getFeaturesTableInfo(true, _peaksAvailable);
-
-        //apply base filters
-        if(null != _baseFilters)
-        {
-            for(FeaturesFilter filter : _baseFilters)
-            {
-                filter.setFilters(tinfo);
-            }
-        }
-
+        FeaturesTableInfo tinfo = _forSearch ? _ms1Schema.getFeaturesTableInfoSearch() : _ms1Schema.getFeaturesTableInfo(true, _peaksAvailable);
+        tinfo.setBaseFilters(_baseFilters);
         return tinfo;
     }
 

@@ -16,7 +16,11 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlDialect;
+import org.labkey.api.ms1.MS1Service;
 import org.labkey.ms1.model.Feature;
+
+import java.util.Map;
 
 /**
  * Features filter for scan numbers
@@ -43,8 +47,10 @@ public class ScanFilter implements FeaturesFilter
         _scanHigh = scanHigh;
     }
 
-    public void setFilters(FeaturesTableInfo tinfo)
+    public SQLFragment getWhereClause(Map<String, String> aliasMap, SqlDialect dialect)
     {
-        tinfo.addCondition(new SQLFragment("Scan BETWEEN " + _scanLow + " AND " + _scanHigh), "Scan");
+        String featuresAlias = aliasMap.get(MS1Service.Tables.Features.getFullName());
+        assert(null != featuresAlias);
+        return new SQLFragment(featuresAlias + ".Scan BETWEEN " + _scanLow + " AND " + _scanHigh);
     }
 }

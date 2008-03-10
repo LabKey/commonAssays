@@ -636,7 +636,7 @@ public class MS1Controller extends SpringActionController
                 baseFilters.add(new RunFilter(form.getRunIds()));
 
             FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getViewContext().getContainer(),
-                                            !(form.isSubfolders())), baseFilters);
+                                            !(form.isSubfolders())), baseFilters, true);
             featuresView.setTitle("Matching MS1 Features");
             featuresView.setForExport(forExport);
             return featuresView;
@@ -855,7 +855,7 @@ public class MS1Controller extends SpringActionController
                         (int)form.getTimeSource().doubleValue() + (int)(form.getTimeOffset())));
 
             FeaturesView featuresView = new FeaturesView(new MS1Schema(getUser(), getViewContext().getContainer(),
-                                            !(form.isSubfolders())), baseFilters);
+                                            !(form.isSubfolders())), baseFilters, true);
             featuresView.setTitle("Search Results");
             featuresView.setForExport(forExport);
             return featuresView;

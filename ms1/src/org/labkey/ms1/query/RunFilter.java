@@ -16,13 +16,10 @@
 package org.labkey.ms1.query;
 
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlDialect;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.ms1.MS1Controller;
 
-import java.util.List;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * Use with the FeaturesView and TableInfo to filter on one or more runs
@@ -60,11 +57,10 @@ public class RunFilter extends ListFilterBase implements FeaturesFilter
             return genListSQL(_runIds);
     }
 
-    public void setFilters(FeaturesTableInfo tinfo)
+    public SQLFragment getWhereClause(Map<String, String> aliasMap, SqlDialect dialect)
     {
-        if(null != _runIds)
-            tinfo.addCondition(new SQLFragment("FileId IN (SELECT FileId FROM ms1.Files AS f INNER JOIN Exp.Data AS d ON (f.ExpDataFileId=d.RowId) WHERE d.RunId IN(" + genListSQL(_runIds) +"))"),
-                                "FileId");
+        String expDataAlias = aliasMap.get("exp.Data");
+        assert(null != expDataAlias);
+        return new SQLFragment(expDataAlias + ".RunId IN (" + genListSQL(_runIds) + ")");
     }
-
 }

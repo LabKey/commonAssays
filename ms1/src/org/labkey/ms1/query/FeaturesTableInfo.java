@@ -7,10 +7,14 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.ms1.MS1Service;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Provides a filtered table implementation for the Features table, allowing clients
@@ -28,6 +32,8 @@ public class FeaturesTableInfo extends FilteredTable
 
     //Data Members
     private MS1Schema _schema;
+    private boolean _includePepFk = true;
+    private List<FeaturesFilter> _filters = null;
 
     public FeaturesTableInfo(MS1Schema schema)
     {
@@ -44,6 +50,7 @@ public class FeaturesTableInfo extends FilteredTable
         super(MS1Manager.get().getTable(MS1Manager.TABLE_FEATURES));
 
         _schema = schema;
+        _includePepFk = includePepFk;
 
         //wrap all the columns
         wrapAllColumns(true);
@@ -133,6 +140,16 @@ public class FeaturesTableInfo extends FilteredTable
         setDefaultVisibleColumns(visibleColumns);
     } //c-tor
 
+    public List<FeaturesFilter> getBaseFilters()
+    {
+        return _filters;
+    }
+
+    public void setBaseFilters(List<FeaturesFilter> filters)
+    {
+        _filters = filters;
+    }
+
     public SQLFragment getFromSQL(String alias)
     {
         SQLFragment sql = new SQLFragment("(SELECT * FROM (SELECT\n");
@@ -142,7 +159,7 @@ public class FeaturesTableInfo extends FilteredTable
         for(ColumnInfo col : getRealTable().getColumns())
         {
             sql.append(sep);
-            sql.append("fe."); //because I alias ms1.Features in the FROM clause, I must also use that alias as the table name here
+            sql.append("fe.");
             sql.append(col.getName());
             sql.append(" AS ");
             sql.append(col.getAlias());
@@ -150,26 +167,51 @@ public class FeaturesTableInfo extends FilteredTable
         }
 
         //peptide row id
-        sql.append(sep);
-        sql.append("pd.RowId AS ");
-        sql.append(COLUMN_PEPTIDE_INFO);
+        if(_includePepFk)
+        {
+            sql.append(sep);
+            sql.append("pd.RowId AS ");
+            sql.append(COLUMN_PEPTIDE_INFO);
+        }
 
         //from clause
-        sql.append("\nFROM ms1.Features AS fe");
-        sql.append("\nINNER JOIN ms1.Files AS fi ON (fe.FileId=fi.FileId)");
-        sql.append("\nINNER JOIN exp.Data AS d ON (fi.ExpDataFileId=d.RowId)");
-        sql.append("\nLEFT OUTER JOIN ms2.Fractions AS fr ON (fi.MzXmlUrl=fr.MzXmlUrl)");
-        sql.append("\nLEFT OUTER JOIN ms2.PeptidesData AS pd ON (pd.Fraction=fr.Fraction AND pd.Scan=fe.MS2Scan AND pd.Charge=fe.MS2Charge)");
-        sql.append("\nINNER JOIN ms2.Runs AS r ON (fr.Run=r.Run)");
+        sql.append("\nFROM ");
+        sql.append(MS1Service.Tables.Features.getFullName());
+        sql.append(" AS fe");
+        sql.append("\nINNER JOIN ");
+        sql.append(MS1Service.Tables.Files.getFullName());
+        sql.append(" AS fi ON (fe.FileId=fi.FileId)");
+        if(_includePepFk || null != _filters)
+        {
+            sql.append("\nINNER JOIN exp.Data AS d ON (fi.ExpDataFileId=d.RowId)");
+            sql.append("\nLEFT OUTER JOIN ms2.Fractions AS fr ON (fi.MzXmlUrl=fr.MzXmlUrl)");
+            sql.append("\nLEFT OUTER JOIN ms2.PeptidesData AS pd ON (pd.Fraction=fr.Fraction AND pd.Scan=fe.MS2Scan AND pd.Charge=fe.MS2Charge)");
+            sql.append("\nLEFT OUTER JOIN ms2.Runs AS r ON (fr.Run=r.Run)");
 
-        //set a base filter condition to exclude deleted and unimported runs
-        //and only runs from the correct containers
-        sql.append("\nWHERE r.Container IN (");
-        sql.append(_schema.getContainerInList());
-        sql.append(")");
-        sql.append(new SQLFragment("\nAND fi.Imported=? AND fi.Deleted=? AND r.Deleted=?", true, false, false));
+            //set a base filter condition to exclude deleted and unimported runs
+            //and only runs from the correct containers
+            sql.append("\nWHERE r.Container IN (");
+            sql.append(_schema.getContainerInList());
+            sql.append(")");
+            sql.append(new SQLFragment("\nAND fi.Imported=? AND fi.Deleted=? AND r.Deleted=?", true, false, false));
 
-        sql.append(") AS fti\n");
+            if(null != _filters)
+            {
+                Map<String,String> aliasMap = getAliasMap();
+                for(FeaturesFilter filter : _filters)
+                {
+                    sql.append("\nAND (");
+                    sql.append(filter.getWhereClause(aliasMap, getSqlDialect()));
+                    sql.append(")");
+                }
+            }
+        }
+        else
+        {
+            sql.append(new SQLFragment("\nWHERE fi.Imported=? AND fi.Deleted=?", true, false));
+        }
+
+        sql.append("\n) AS fti\n");
 
         //filters
         if(null != getFilter() && getFilter().getClauses().size() > 0)
@@ -180,5 +222,17 @@ public class FeaturesTableInfo extends FilteredTable
         sql.append(alias);
 
         return sql;
+    }
+
+    public Map<String,String> getAliasMap()
+    {
+        HashMap<String,String> aliasMap = new HashMap<String,String>();
+        aliasMap.put(MS1Service.Tables.Features.getFullName(), "fe");
+        aliasMap.put(MS1Service.Tables.Files.getFullName(), "fi");
+        aliasMap.put("exp.Data", "d");
+        aliasMap.put("ms2.Fractions", "fr");
+        aliasMap.put("ms2.PeptidesData", "pd");
+        aliasMap.put("ms2.Runs", "r");
+        return aliasMap;
     }
 } //class FeaturesTableInfo
