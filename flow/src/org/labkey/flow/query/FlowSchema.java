@@ -325,15 +325,15 @@ public class FlowSchema extends UserSchema
             SQLFragment sqlFlowData = new SQLFragment();
 
             sqlFlowData.append("(SELECT " + _expDataAlias + ".*,");
-            sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("rowid").getName() + " AS objectid\n");
+            sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("rowid").getName() + " AS objectid");
             if (null != _flowObject.getColumn("compid"))
             {
                 sqlFlowData.append(",");
-                sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("compid").getName() + ",\n");
-                sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("fcsid").getName() + ",\n");
-                sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("scriptid").getName() + "\n");
+                sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("compid").getName() + ",");
+                sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("fcsid").getName() + ",");
+                sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("scriptid").getName() + "");
             }
-            sqlFlowData.append("FROM ");
+            sqlFlowData.append("\nFROM ");
             sqlFlowData.append(_expData);
             sqlFlowData.append(" INNER JOIN " );
             sqlFlowData.append(_flowObject);
@@ -713,7 +713,9 @@ public class FlowSchema extends UserSchema
     public ExpDataTable createFCSAnalysisTableNEW(String alias, FlowDataType type)
     {
         FlowDataTable ret = createDataTable(alias, type);
-        ColumnInfo colAnalysisScript = ret.addDataInputColumn("AnalysisScript", InputRole.AnalysisScript.getPropertyDescriptor(getContainer()));
+
+        ColumnInfo colAnalysisScript = new ExprColumn(ret, "AnalysisScript", new SQLFragment(alias + ".scriptid"), Types.INTEGER);
+        ret.addColumn(colAnalysisScript);
         colAnalysisScript.setFk(new LookupForeignKey(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()),
                 FlowParam.scriptId.toString(), "RowId", "Name"){
             public TableInfo getLookupTableInfo()
@@ -721,7 +723,8 @@ public class FlowSchema extends UserSchema
                 return detach().createAnalysisScriptTable("Lookup", true);
             }
         });
-        ColumnInfo colCompensationMatrix = ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.getPropertyDescriptor(getContainer()));
+        ColumnInfo colCompensationMatrix = new ExprColumn(ret, "CompensationMatrix", new SQLFragment(alias + ".compid"), Types.INTEGER);
+        ret.addColumn(colCompensationMatrix);
         colCompensationMatrix.setFk(new LookupForeignKey(PageFlowUtil.urlFor(CompensationController.Action.showCompensation, getContainer()), FlowParam.compId.toString(),
                 "RowId", "Name"){
             public TableInfo getLookupTableInfo()
@@ -740,7 +743,8 @@ public class FlowSchema extends UserSchema
         ColumnInfo colGraph = ret.addObjectIdColumn("Graph");
         colGraph.setFk(new GraphForeignKey(fps));
         colGraph.setIsUnselectable(true);
-        ColumnInfo colFCSFile = ret.addDataInputColumn("FCSFile", InputRole.FCSFile.getPropertyDescriptor(getContainer()));
+        ColumnInfo colFCSFile = new ExprColumn(ret, "FCSFile", new SQLFragment(alias + ".fcsid"), Types.INTEGER);
+        ret.addColumn(colFCSFile);
         colFCSFile.setFk(new LookupForeignKey(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()),
                 FlowParam.wellId.toString(),
                 "RowId", "Name") {
