@@ -344,6 +344,8 @@ public class FlowSchema extends UserSchema
             ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getSqlTypeInt());
             ret.copyAttributesFrom(underlyingColumn);
             ret.setIsHidden(underlyingColumn.isHidden());
+            if (underlyingColumn.getFk() instanceof RowIdForeignKey)
+                ret.setFk(new RowIdForeignKey(ret));
             addColumn(ret);
             return ret;
         }
@@ -469,7 +471,7 @@ public class FlowSchema extends UserSchema
         public ColumnInfo addColumn(String alias, Column column)
         {
             ColumnInfo col = _expData.addColumn(alias, column);
-           return addExpColumn(col);
+            return addExpColumn(col);
         }
 
         public ColumnInfo getColumn(Column column)
@@ -530,9 +532,9 @@ public class FlowSchema extends UserSchema
         FlowDataTable ret = new FlowDataTable(alias, type);
         ret.setContainer(getContainer());
         ret.setDataType(type);
+        ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.RowId).setIsHidden(true);
         ret.addColumn(ExpDataTable.Column.LSID).setIsHidden(true);
-        ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);
         ret.addColumn(ExpDataTable.Column.Created);
         ret.setTitleColumn("Name");
