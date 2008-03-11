@@ -71,19 +71,24 @@ public class FlowRun extends FlowObject<ExpRun>
         return getWells(false);
     }
 
+    List<? extends FlowDataObject> _allDatas = null;
+
     public FlowWell[] getWells(boolean realFiles)
     {
-        List<? extends FlowDataObject> all;
-        try
+        if (null == _allDatas)
         {
-            all = getDatas(null);
+            try
+            {
+                _allDatas = getDatas(null);
+            }
+            catch (SQLException x)
+            {
+                throw new RuntimeSQLException(x);
+            }
         }
-        catch (SQLException x)
-        {
-            throw new RuntimeSQLException(x);
-        }
+        
         List<FlowWell> wells = new ArrayList<FlowWell>();
-        for (FlowDataObject obj : all)
+        for (FlowDataObject obj : _allDatas)
         {
             if (obj instanceof FlowWell)
             {
@@ -96,6 +101,27 @@ public class FlowRun extends FlowObject<ExpRun>
         Arrays.sort(ret);
         return ret;
     }
+
+
+    public FlowWell getFirstWell()
+    {
+        if (_allDatas != null)
+        {
+            for (FlowDataObject obj : _allDatas)
+                if (obj instanceof FlowWell)
+                    return (FlowWell)obj;
+        }
+
+        ExpData[] datas = getExperimentRun().getOutputDatas(null);
+        for (ExpData data : datas)
+        {
+            FlowDataObject obj = FlowDataObject.fromData(data);
+            if (obj instanceof FlowWell)
+                return (FlowWell)obj;
+        }
+        return null;
+    }
+
 
     public FlowFCSFile[] getFCSFiles() throws SQLException
     {
@@ -189,15 +215,18 @@ public class FlowRun extends FlowObject<ExpRun>
     {
         return fromURL(url, null);
     }
+
     static public FlowRun fromURL(ActionURL url, HttpServletRequest request) throws ServletException
     {
-        FlowRun ret = fromRunId(getIntParam(url, request, FlowParam.runId));
+        int runid = getIntParam(url, request, FlowParam.runId);
+        if (0 == runid)
+            return null;
+        FlowRun ret = fromRunId(runid);
         if (ret != null)
         {
             ret.checkContainer(url);
         }
         return ret;
-
     }
 
     public String getAnalysisScript() throws SQLException
@@ -424,7 +453,7 @@ public class FlowRun extends FlowObject<ExpRun>
         finally
         {
             if (transaction)
-            {
+            { 
                 ExperimentService.get().rollbackTransaction();
             }
         }

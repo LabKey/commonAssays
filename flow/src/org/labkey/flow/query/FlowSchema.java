@@ -23,6 +23,7 @@ import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.view.FlowQueryView;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Types;
 import java.util.*;
 
@@ -31,12 +32,11 @@ public class FlowSchema extends UserSchema
     static public final String SCHEMANAME = "flow";
     private FlowExperiment _experiment;
     private FlowRun _run;
-    private FlowProtocol _protocol;
+    private FlowProtocol _protocol = null;
 
     public FlowSchema(User user, Container container)
     {
-        super(SCHEMANAME, user, container, ExperimentService.get().getSchema());
-        _protocol = FlowProtocol.getForContainer(_container);
+        this(user, container, FlowProtocol.getForContainer(container));
     }
 
     public FlowSchema(ViewContext context) throws ServletException
@@ -46,11 +46,40 @@ public class FlowSchema extends UserSchema
         setRun(FlowRun.fromURL(context.getActionURL()));
     }
 
+    // FlowSchema.createView()
+    private FlowSchema(ViewContext context, FlowSchema from) throws ServletException
+    {
+        this(context.getUser(), context.getContainer(), from._protocol);
+
+        if (from._experiment != null)
+        {
+            _experiment = from._experiment;
+            assert _experiment.getExperimentId() == getIntParam(context.getRequest(), FlowParam.experimentId);
+        }
+
+        if (from._run != null)
+        {
+            _run = from._run;
+            assert _run.getRunId() == getIntParam(context.getRequest(), FlowParam.runId);
+        }
+
+        if (null == _experiment)
+            setExperiment(FlowExperiment.fromURL(context.getActionURL(), context.getRequest()));
+        if (null == _run)
+            setRun(FlowRun.fromURL(context.getActionURL()));
+    }
+
+    private FlowSchema(User user, Container container, FlowProtocol protocol)
+    {
+        super(SCHEMANAME, user, container, ExperimentService.get().getSchema());
+        _protocol = protocol;
+    }
+
     public FlowSchema detach()
     {
         if (_experiment == null && _run == null)
             return this;
-        return new FlowSchema(_user, _container);
+        return new FlowSchema(_user, _container, _protocol);
     }
 
     public TableInfo getTable(String name, String alias)
@@ -182,7 +211,7 @@ public class FlowSchema extends UserSchema
 
     public QueryView createView(ViewContext context, QuerySettings settings) throws ServletException
     {
-        return new FlowQueryView(context, new FlowSchema(context), (FlowQuerySettings) settings);
+        return new FlowQueryView(context, new FlowSchema(context, this), (FlowQuerySettings) settings);
     }
 
 /*    private SQLFragment sqlObjectTypeId(SQLFragment sqlDataId)
@@ -203,7 +232,7 @@ public class FlowSchema extends UserSchema
         }
         if (_experiment != null)
         {
-            ret.setExperiment(ExperimentService.get().getExpExperiment(_experiment.getExperimentId()));
+            ret.setExperiment(_experiment.getExpObject());
         }
         ret.addColumn(ExpRunTable.Column.RowId);
         ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(RunController.Action.showRun, _container), Collections.singletonMap(FlowParam.runId.toString(), ExpRunTable.Column.RowId.toString())));
@@ -520,7 +549,7 @@ public class FlowSchema extends UserSchema
         });
         if (_run != null)
         {
-            ret.setRun(ExperimentService.get().getExpRun(_run.getRunId()));
+            ret.setRun(_run.getExpObject());
         }
         return ret;
     }
@@ -899,5 +928,15 @@ public class FlowSchema extends UserSchema
             sqlCondition.append(")");
             table.addCondition(sqlCondition);
         }
+    }
+
+
+
+    static public int getIntParam(HttpServletRequest request, FlowParam param)
+    {
+        String str = request.getParameter(param.toString());
+        if (str == null || str.length() == 0)
+            return 0;
+        return Integer.valueOf(str);
     }
 }

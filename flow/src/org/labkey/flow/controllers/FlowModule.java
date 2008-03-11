@@ -20,12 +20,16 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.module.*;
+import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleContext;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Search;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.editscript.ScriptController;
@@ -50,6 +54,7 @@ import org.labkey.flow.webparts.AnalysisScriptsWebPart;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.Set;
@@ -69,7 +74,19 @@ public class FlowModule extends DefaultModule
         {
             public QuerySchema getSchema(DefaultSchema schema)
             {
-                return new FlowSchema(schema.getUser(), schema.getContainer());
+                // don't create twice for same request
+                FlowSchema fs;
+                ViewContext c = HttpView.getRootContext();
+                if (null != c)
+                {
+                    fs = (FlowSchema)c.get("org.labkey.flow.controllers.FlowModule$FlowSchema");
+                    if (null != fs)
+                        return fs;
+                }
+                fs = new FlowSchema(schema.getUser(), schema.getContainer());
+                if (null != c)
+                    c.put("org.labkey.flow.controllers.FlowModule$FlowSchema", fs);
+                return fs;
             }
         });
         addController("flow", FlowController.class);

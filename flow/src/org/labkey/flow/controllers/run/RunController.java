@@ -51,13 +51,12 @@ public class RunController extends BaseFlowController<RunController.Action>
         return new ViewForward(urlFor(FlowController.Action.begin));
     }
 
-    protected Page getPage(String name) throws Exception
+    protected Page getPage(String name, RunForm form) throws Exception
     {
-        FlowRun run = FlowRun.fromURL(getActionURL());
-        if (null == run)
+        if (null == form.getRun())
             HttpView.throwNotFound();
         Page ret = (Page) getFlowPage(name);
-        ret.setRun(run);
+        ret.setRun(form.getRun());
         return ret;
     }
 
@@ -66,12 +65,11 @@ public class RunController extends BaseFlowController<RunController.Action>
     {
         requiresPermission(ACL.PERM_READ);
 
-
-        Page page = getPage("showRun.jsp");
+        Page page = getPage("showRun.jsp", form);
         page.__form = form;
         JspView view = new JspView(page);
 
-        return includeView(new HomeTemplate(getViewContext(), view, getNavTrailConfig(form._run, null, Action.showRun)));
+        return includeView(new HomeTemplate(getViewContext(), view, getNavTrailConfig(form.getRun(), null, Action.showRun)));
     }
 
     @Jpf.Action
@@ -104,7 +102,6 @@ public class RunController extends BaseFlowController<RunController.Action>
         public void setRun(FlowRun run)
         {
             _run = run;
-            _comp = _run.getCompensationMatrix();
         }
 
         public FlowRun getRun()
@@ -121,9 +118,12 @@ public class RunController extends BaseFlowController<RunController.Action>
 
         public FlowCompensationMatrix getCompensationMatrix()
         {
+            if (null == _comp)
+                _comp = _run.getCompensationMatrix();
             return _comp;
         }
     }
+
 
     @Jpf.Action
     protected Forward details() throws Exception
