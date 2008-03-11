@@ -76,7 +76,7 @@ public class PendingMageMLFilesView extends QueryView
 
         if (root == null)
         {
-            SimpleTextDisplayElement element = new SimpleTextDisplayElement("Unable to upload because pipeline has not been configured. [<a href=\"" + PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer()) + "\">setup pipeline</a>]", true);
+            SimpleTextDisplayElement element = new SimpleTextDisplayElement("Unable to import because pipeline has not been configured. [<a href=\"" + PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer()) + "\">setup pipeline</a>]", true);
             element.setDisplayPermission(ACL.PERM_INSERT);
             bar.add(element);
         }
@@ -84,7 +84,7 @@ public class PendingMageMLFilesView extends QueryView
         {
             if (microarrayProtocols.size() == 0)
             {
-                SimpleTextDisplayElement element = new SimpleTextDisplayElement("Unable to upload, no microarray assay definitions found", false);
+                SimpleTextDisplayElement element = new SimpleTextDisplayElement("Unable to import, no microarray assay definitions found", false);
                 element.setDisplayPermission(ACL.PERM_INSERT);
                 bar.add(element);
             }
@@ -92,20 +92,20 @@ public class PendingMageMLFilesView extends QueryView
             {
                 ExpProtocol protocol = protocols.get(0);
                 ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
-                ActionButton button = new ActionButton(url, "Upload selected using " + protocol.getName());
+                ActionButton button = new ActionButton(url, "Import selected using " + protocol.getName());
                 button.setDisplayPermission(ACL.PERM_INSERT);
                 button.setScript("if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); } return false;");
                 bar.add(button);
             }
             else
             {
-                MenuButton menu = new MenuButton("Upload selected using...");
+                MenuButton menu = new MenuButton("Import selected using...");
                 menu.setDisplayPermission(ACL.PERM_INSERT);
                 bar.add(menu);
                 for (ExpProtocol protocol : microarrayProtocols)
                 {
                     ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
-                    menu.addMenuItem("Upload using " + protocol.getName(), "javascript: if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); }");
+                    menu.addMenuItem("Import using " + protocol.getName(), "javascript: if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); }");
                 }
             }
             ActionURL browseURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), getViewContext().getActionURL().toString());

@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.DomainNotFoundException;
 import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.ms2.*;
 
@@ -349,6 +350,10 @@ public class ProteinManager
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
+        }
+        catch (DomainNotFoundException e)
+        {
+            throw new RuntimeException(e);
         }
 
         try
