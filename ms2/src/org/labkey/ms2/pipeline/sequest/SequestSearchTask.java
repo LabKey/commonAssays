@@ -143,6 +143,12 @@ public class SequestSearchTask extends PipelineJob.Task
             ArrayList<String> command = new ArrayList<String>();
             command.add("MzXML2Search");
             command.add("-dta");
+            String paramMinParent = params.get("spectrum, minimum parent m+h");
+            if (paramMinParent != null)
+                command.add("-B" + paramMinParent);
+            String paramMaxParent = params.get("spectrum, maximum parent m+h");
+            if (paramMaxParent != null)
+                command.add("-T" + paramMaxParent);
             command.add("-O" + dirOutputDta.getName());
             Collection<String> inputXmlParams = convertParams(new Mzxml2SearchParams().getParams(), params);
             command.addAll(inputXmlParams);

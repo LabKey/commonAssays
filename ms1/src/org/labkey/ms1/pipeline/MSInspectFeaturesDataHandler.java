@@ -40,8 +40,20 @@ import java.util.Map;
  */
 public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 {
+    /**
+     * Old feature finding extension
+     */
     public static final FileType FT_FEATURES = new FileType(".features.tsv");
+
+    /**
+     * Current feature finding extension
+     */
     public static final FileType FT_PEPTIDES = new FileType(".peptides.tsv");
+
+    /**
+     * Features with matching peptides
+     */
+    public static final FileType FT_PEPMATCH = new FileType(".pepmatch.tsv");
 
     /**
      * This class maps a source column in the features tsv file with its
@@ -653,7 +665,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
     {
         //we handle only *.features.tsv files
         String fileUrl = data.getDataFileUrl();
-        if(null != fileUrl && (FT_FEATURES.isType(fileUrl) || FT_PEPTIDES.isType(fileUrl)))
+        if(null != fileUrl && (FT_FEATURES.isType(fileUrl) || FT_PEPTIDES.isType(fileUrl) || FT_PEPMATCH.isType(fileUrl)))
             return Priority.MEDIUM;
         else
             return null;

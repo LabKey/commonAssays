@@ -6,7 +6,7 @@
             <list>
                 <bean class="org.labkey.api.pipeline.file.FileAnalysisTaskPipelineSettings">
                     <constructor-arg value="ms1FeaturePipeline"/>
-                    <property name="description" value="Find MS1 Features"/>
+                    <property name="description" value="msInspect Find Features"/>
                     <property name="protocolFactoryName" value="inspect"/>
                     <property name="xarGeneratorSupport">
                         <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$Features"/>
@@ -23,8 +23,8 @@
                 
                 <bean class="org.labkey.api.pipeline.file.FileAnalysisTaskPipelineSettings">
                     <constructor-arg value="ms1FeaturePeptidePipeline"/>
-                    <property name="description" value="Match MS1 Features to Peptides"/>
-                    <property name="protocolFactoryName" value="ms1peptides"/>
+                    <property name="description" value="msInspect Find Features and Match Peptides"/>
+                    <property name="protocolFactoryName" value="pepmatch"/>
                     <property name="initialInputExt" value=".pep.xml"/>
                     <property name="inputExtHeirarchy">
                         <map>
@@ -40,7 +40,7 @@
                         <list>
 <!--                            <ref bean="peakabooFactory"/> -->
                             <ref bean="msInspectFactory"/>
-                            <ref bean="ms1PeptideParserFactory"/>
+                            <ref bean="pepMatchFactory"/>
                             <ref bean="expGeneratorPeptides"/>
                             <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarImportTaskId</value>
                         </list>
@@ -52,12 +52,12 @@
 
     <bean id="expGeneratorFeatures" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
         <constructor-arg value="expGeneratorFeatures"/>
-        <property name="inputExt" value=".features.tsv"/>
+        <property name="inputExt" value=".peptides.tsv"/>
     </bean>
 
     <bean id="expGeneratorPeptides" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
         <constructor-arg value="expGeneratorPeptides"/>
-        <property name="inputExt" value=".peptides.tsv"/>
+        <property name="inputExt" value=".pepmatch.tsv"/>
     </bean>
 
     <bean id="unixCompactSwitch" class="org.labkey.api.pipeline.cmd.UnixCompactSwitchFormat"/>
@@ -81,40 +81,40 @@
                     <property name="value" value="peakaboo"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="ms1 peaks, start scan"/>
+                    <property name="parameter" value="peakaboo, start scan"/>
                     <property name="switchName" value="scanBegin"/>
                     <property name="help" value="Minimum scan number (default 1)"/>
                     <property name="paramValidator" ref="gtOne"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="ms1 peaks, end scan"/>
+                    <property name="parameter" value="peakaboo, end scan"/>
                     <property name="switchName" value="scanEnd"/>
                     <property name="help" value="Maximum scan number (default last)"/>
                     <property name="paramValidator">
                         <bean class="org.labkey.api.pipeline.cmd.ValidateNumber">
-                            <property name="minParamName" value="ms1 peaks, start scan"/>
+                            <property name="minParamName" value="peakaboo, start scan"/>
                         </bean>
                     </property>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="ms1 peaks, minimum m/z"/>
+                    <property name="parameter" value="peakaboo, minimum m/z"/>
                     <property name="switchName" value="mzLow"/>
                     <property name="help" value="Minimum M/Z Value (default: the minimum m/z value in the file)"/>
                     <property name="paramValidator">
                         <!-- todo: minimum and maximum values? -->
                         <bean class="org.labkey.api.pipeline.cmd.ValidateDecimal">
-                            <property name="maxParamName" value="ms1 peaks, maximum m/z"/>
+                            <property name="maxParamName" value="peakaboo, maximum m/z"/>
                         </bean>
                     </property>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="ms1 peaks, maximum m/z"/>
+                    <property name="parameter" value="peakaboo, maximum m/z"/>
                     <property name="switchName" value="mzHigh"/>
                     <property name="help" value="Maximum M/Z Value (default: the maximum m/z value in the file)"/>
                     <property name="paramValidator">
                         <!-- todo: minimum and maximum values? -->
                         <bean class="org.labkey.api.pipeline.cmd.ValidateDecimal">
-                            <property name="minParamName" value="ms1 peaks, minimum m/z"/>
+                            <property name="minParamName" value="peakaboo, minimum m/z"/>
                         </bean>
                     </property>
                 </bean>
@@ -130,7 +130,7 @@
     <bean id="msInspectFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
         <constructor-arg value="msInspectFactory"/>
         <property name="inputExtension" value=".mzXML"/>
-        <property name="outputExtension" value=".features.tsv"/>
+        <property name="outputExtension" value=".peptides.tsv"/>
         <property name="switchFormat" ref="unixNewSwitch"/>
         <property name="converters">
             <list>
@@ -152,12 +152,14 @@
                     <property name="help" value="Number of scans to search, if not all"/>
                     <property name="paramValidator" ref="gtOne"/>
                 </bean>
-                <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
+<!--           No longer used
+               <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
                     <property name="parameter" value="ms1 findpeptides, dump window"/>
                     <property name="switchName" value="dumpwindow"/>
                     <property name="help" value="Number of scans around each feature to dump to the file"/>
                     <property name="paramValidator" ref="gtOne"/>
                 </bean>
+-->
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
                     <property name="parameter" value="ms1 findpeptides, minimum m/z"/>
                     <property name="switchName" value="minmz"/>
@@ -165,38 +167,38 @@
                     <property name="paramValidator">
                         <!-- todo: minimum and maximum values? -->
                         <bean class="org.labkey.api.pipeline.cmd.ValidateDecimal">
-                            <property name="maxParamName" value="ms1 findpeptides, maximum m/z"/>
+                            <property name="maxParamName" value="msinspect findpeptides, maximum m/z"/>
                         </bean>
                     </property>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="ms1 findpeptides, maximum m/z"/>
+                    <property name="parameter" value="msinspect findpeptides, maximum m/z"/>
                     <property name="switchName" value="maxmz"/>
                     <property name="help" value="Maximum M/Z Value (default: the maximum m/z value in the file)"/>
                     <property name="paramValidator">
                         <!-- todo: minimum and maximum values? -->
                         <bean class="org.labkey.api.pipeline.cmd.ValidateDecimal">
-                            <property name="minParamName" value="ms1 findpeptides, minimum m/z"/>
+                            <property name="minParamName" value="msinspect findpeptides, minimum m/z"/>
                         </bean>
                     </property>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="ms1 findpeptides, strategy"/>
+                    <property name="parameter" value="msinspect findpeptides, strategy"/>
                     <property name="switchName" value="strategy"/>
                     <property name="help" value="Class name of a feature-finding strategy implementation"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="ms1 findpeptides, accurate mass scans"/>
+                    <property name="parameter" value="msinspect findpeptides, accurate mass scans"/>
                     <property name="switchName" value="accuratemassscans"/>
                     <property name="help" value="When attempting to improve mass-accuracy, consider a neighborhood of n scans"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.BooleanToSwitch">
-                    <property name="parameter" value="ms1 findpeptides, no accurate mass"/>
+                    <property name="parameter" value="msinspect findpeptides, no accurate mass"/>
                     <property name="switchName" value="noaccuratemass"/>
                     <property name="help" value="Do not attempt mass-accuracy adjustment after default peak finding strategy"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.BooleanToSwitch">
-                    <property name="parameter" value="ms1 findpeptides, walk smoothed"/>
+                    <property name="parameter" value="msinspect findpeptides, walk smoothed"/>
                     <property name="switchName" value="walksmoothed"/>
                     <property name="help" value="When calculating feature extents, use smoothed rather than wavelet-transformed spectra"/>
                 </bean>
@@ -209,10 +211,10 @@
         </property>
     </bean>
 
-    <bean id="ms1PeptideParserFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
-        <constructor-arg value="ms1PeptideParserFactory"/>
+    <bean id="pepMatchFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
+        <constructor-arg value="pepMatchFactory"/>
         <property name="removeInput" value="true"/>
-        <property name="inputExtension" value=".features.tsv"/>
+        <property name="inputExtension" value=".peptides.tsv"/>
         <property name="inputPaths">
             <map>
                 <entry key="input-peptides">
@@ -222,27 +224,27 @@
                 </entry>
             </map>
         </property>
-        <property name="outputExtension" value=".peptides.tsv"/>
+        <property name="outputExtension" value=".pepmatch.tsv"/>
         <property name="switchFormat" ref="unixCompactSwitch"/>
         <property name="converters">
             <list>
                 <bean class="org.labkey.api.pipeline.cmd.RequiredInLine">
-                    <property name="value" value="MS1PeptideParser"/>
+                    <property name="value" value="pepmatch"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.PathInLine">
                     <property name="key" value="input-peptides"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.PathInLine"/>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="ms1 peptides, window"/>
+                    <property name="parameter" value="ms1 pepmatch, m/z window"/>
                     <property name="switchName" value="w"/>
-                    <property name="help" value="Filters on the specified mz-delta window (default 1.0)"/>
+                    <property name="help" value="Filters on the specified m/z-delta window (default 1.0)"/>
                     <property name="paramValidator">
                         <bean class="org.labkey.api.pipeline.cmd.ValidateDecimal"/>
                     </property>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="ms1 peptides, min probability"/>
+                    <property name="parameter" value="ms1 pepmatch, min probability"/>
                     <property name="switchName" value="p"/>
                     <property name="help" value="Minimum PeptideProphet probability to match"/>
                     <property name="paramValidator">
@@ -253,7 +255,7 @@
                     </property>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.BooleanToSwitch">
-                    <property name="parameter" value="ms1 peptides, match charge"/>
+                    <property name="parameter" value="ms1 pepmatch, require charge match"/>
                     <property name="switchName" value="c"/>
                     <property name="help" value="Discard matches where pepXML assumed charge does not match MS1 data"/>
                 </bean>

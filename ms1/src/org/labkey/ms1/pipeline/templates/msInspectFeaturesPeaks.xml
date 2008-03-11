@@ -8,8 +8,8 @@
     </exp:Experiment>
 	<exp:ProtocolDefinitions>
         <exp:Protocol rdf:about="${FolderLSIDBase}:MS1.msInspectFeatureFindingPeaksAnalysis:1">
-            <exp:Name>msInspect Feature Finding Analysis with Peakaboo peaks analysis</exp:Name>
-            <exp:ProtocolDescription>Use msInspect to search for features in one mzXml file</exp:ProtocolDescription>
+            <exp:Name>msInspect Feature Finding Analysis with Peakaboo Peak Extraction</exp:Name>
+            <exp:ProtocolDescription>Use msInspect to search for features and peakaboo to extract peaks in one mzXml file</exp:ProtocolDescription>
             <exp:ApplicationType>ExperimentRun</exp:ApplicationType>
             <exp:MaxInputMaterialPerInstance xsi:nil="true"/>
             <exp:MaxInputDataPerInstance xsi:nil="true"/>
@@ -17,7 +17,7 @@
             <exp:OutputDataPerInstance xsi:nil="true"/>
             <exp:ParameterDeclarations>
                 <exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:MS1.msInspectFeatureFindingPeaksAnalysis</exp:SimpleVal>
-                <exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">msInspect feature finding and peaks analysis run</exp:SimpleVal>
+                <exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">msInspect feature finding and peak extraction run</exp:SimpleVal>
             </exp:ParameterDeclarations>
             <exp:Properties>
                 <exp:SimpleVal Name="Category" OntologyEntryURI="terms.fhcrc.org#RunProtocolTypes.Category"
@@ -41,7 +41,7 @@
 			<exp:Properties/>
 		</exp:Protocol>
         <exp:Protocol rdf:about="${FolderLSIDBase}:MS1.PeakabooCreatePeaksFile:1">
-            <exp:Name>Create the Peaks XML file</exp:Name>
+            <exp:Name>Create a peakaboo peaks XML file</exp:Name>
             <exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
             <exp:MaxInputMaterialPerInstance>0</exp:MaxInputMaterialPerInstance>
             <exp:MaxInputDataPerInstance xsi:nil="true"/>
@@ -117,9 +117,9 @@
                 <exp:ExperimentLogEntry ActionSequenceRef="40">
                     <exp:CommonParametersApplied>
                         <exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:MS1.PeakabooCreatePeaksFile</exp:SimpleVal>
-                        <exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Create the Peaks XML file</exp:SimpleVal>
+                        <exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Peakaboo Peak Extraction</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${RunLSIDBase}:PeakabooPeaksFile</exp:SimpleVal>
-                        <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">Peakaboo Peaks File</exp:SimpleVal>
+                        <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">Peakaboo Peak Extraction Results</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@PEAKS_FILE_PATH@@</exp:SimpleVal>
                     </exp:CommonParametersApplied>
                 </exp:ExperimentLogEntry>

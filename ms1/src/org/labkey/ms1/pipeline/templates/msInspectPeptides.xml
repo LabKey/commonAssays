@@ -9,7 +9,7 @@
 	<exp:ProtocolDefinitions>
         <exp:Protocol rdf:about="${FolderLSIDBase}:MS1.msInspectFeaturePeptideMatchingAnalysis:1">
             <exp:Name>msInspect Feature Peptide Matching Analysis</exp:Name>
-            <exp:ProtocolDescription>Use msInspect to search for features in one mzXml file, and match them with peptides from a search on the same mzXML file</exp:ProtocolDescription>
+            <exp:ProtocolDescription>Use msInspect to search for features and match them with peptides from a search of one mzXml file</exp:ProtocolDescription>
             <exp:ApplicationType>ExperimentRun</exp:ApplicationType>
             <exp:MaxInputMaterialPerInstance xsi:nil="true"/>
             <exp:MaxInputDataPerInstance xsi:nil="true"/>
@@ -17,7 +17,7 @@
             <exp:OutputDataPerInstance xsi:nil="true"/>
             <exp:ParameterDeclarations>
                 <exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:MS1.msInspectFeaturePeptideMatchingAnalysis</exp:SimpleVal>
-                <exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">msInspect feature peptide matching analysis run</exp:SimpleVal>
+                <exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">msInspect feature finding and peptide matching analysis run</exp:SimpleVal>
             </exp:ParameterDeclarations>
             <exp:Properties>
                 <exp:SimpleVal Name="Category" OntologyEntryURI="terms.fhcrc.org#RunProtocolTypes.Category"
@@ -41,7 +41,7 @@
 			<exp:Properties/>
 		</exp:Protocol>
         <exp:Protocol rdf:about="${FolderLSIDBase}:MS1.msInspectPeptideMatching:1">
-            <exp:Name>Connect an msInspect features TSV file to peptide search results</exp:Name>
+            <exp:Name>Match msInspect features to peptide search results</exp:Name>
             <exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
             <exp:MaxInputMaterialPerInstance>0</exp:MaxInputMaterialPerInstance>
             <exp:MaxInputDataPerInstance xsi:nil="true"/>
@@ -135,9 +135,9 @@
                 <exp:ExperimentLogEntry ActionSequenceRef="60">
                     <exp:CommonParametersApplied>
                         <exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:MS1.msInspectPeptideMatching</exp:SimpleVal>
-                        <exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">msInspect Peptide Matching</exp:SimpleVal>
+                        <exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Peptide Matching</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${RunLSIDBase}:msInspectPeptidesFile</exp:SimpleVal>
-                        <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">msInspect Peptide Matching Results</exp:SimpleVal>
+                        <exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">Peptide Matching Results</exp:SimpleVal>
                         <exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@PEPTIDES_FILE_PATH@@</exp:SimpleVal>
                     </exp:CommonParametersApplied>
                     <exp:ApplicationInstanceCollection>

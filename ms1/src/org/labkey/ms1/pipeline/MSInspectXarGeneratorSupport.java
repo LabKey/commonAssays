@@ -81,9 +81,9 @@ abstract public class MSInspectXarGeneratorSupport implements FileAnalysisXarGen
         // Not all pipelines will contain all three files below, but add them just in case.
         File filePeaks = job.findInputFile(PeaksFileDataHandler.FT_PEAKS.getName(baseName));
         replaceMap.put("PEAKS_FILE_PATH", job.getXarPath(filePeaks));
-        File fileFeatures = job.findInputFile(MSInspectFeaturesDataHandler.FT_FEATURES.getName(baseName));
+        File fileFeatures = job.findInputFile(MSInspectFeaturesDataHandler.FT_PEPTIDES.getName(baseName));
         replaceMap.put("FEATURES_FILE_PATH", job.getXarPath(fileFeatures));
-        File filePeptides = job.findInputFile(MSInspectFeaturesDataHandler.FT_PEPTIDES.getName(baseName));
+        File filePeptides = job.findInputFile(MSInspectFeaturesDataHandler.FT_PEPMATCH.getName(baseName));
         replaceMap.put("PEPTIDES_FILE_PATH", job.getXarPath(filePeptides));
 
         replaceMap.put("RUN-UNIQUIFIER", job.getExperimentRunUniquifier());        

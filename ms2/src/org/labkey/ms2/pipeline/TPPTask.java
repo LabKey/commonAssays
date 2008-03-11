@@ -22,6 +22,7 @@ import org.labkey.api.util.NetworkDrive;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -256,7 +257,7 @@ public class TPPTask extends PipelineJob.Task
         }
     }
 
-    public String getQuantitationCmd(Map<String, String> params, String pathMzXml)
+    public String getQuantitationCmd(Map<String, String> params, String pathMzXml) throws FileNotFoundException
     {
         String paramAlgorithm = params.get("pipeline quantitation, algorithm");
         if (paramAlgorithm == null)
@@ -323,8 +324,8 @@ public class TPPTask extends PipelineJob.Task
         if ("yes".equalsIgnoreCase(paramCompatQ3))
             quantOpts.add("--compat");
 
-        return ("-C1java -client -Xmx256M -jar "
-                + "\"" /* + path to bin */ + "msInspect/viewerApp.jar" + "\""
+        return ("-C1\"" + PipelineJobService.get().getJavaPath() + "\" -client -Xmx256M -jar "
+                + "\"" + PipelineJobService.get().getJarPath("viewerApp.jar") + "\""
                 + " --q3 " + StringUtils.join(quantOpts.iterator(), ' ')
                 + " -C2Q3ProteinRatioParser");
     }

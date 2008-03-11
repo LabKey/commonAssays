@@ -16,13 +16,17 @@
 package org.labkey.ms2.pipeline.mascot;
 
 import org.apache.commons.io.FileUtils;
-import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.WorkDirFactory;
+import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.*;
 
 import java.io.*;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -172,8 +176,18 @@ public class MascotSearchTask extends PipelineJob.Task
             0. pre-Mascot search: c) translate the mzXML file to mgf for Mascot (msxml2other)
             */
             FileUtils.copyFile(getJobSupport().getSearchSpectraFile(), fileWorkSpectra);
-            getJob().runSubProcess(new ProcessBuilder("MzXML2Search",
-                    "-mgf", fileWorkSpectra.getName()),
+            ArrayList<String> argsM2S = new ArrayList<String>();
+            argsM2S.add("MzXML2Search");
+            argsM2S.add("-mgf");
+            String paramMinParent = params.get("spectrum, minimum parent m+h");
+            if (paramMinParent != null)
+                argsM2S.add("-B" + paramMinParent);
+            String paramMaxParent = params.get("spectrum, maximum parent m+h");
+            if (paramMaxParent != null)
+                argsM2S.add("-T" + paramMaxParent);
+            argsM2S.add(fileWorkSpectra.getName());
+
+            getJob().runSubProcess(new ProcessBuilder(argsM2S.toArray(new String[argsM2S.size()])),
                     wd.getDir());
 
             /*
