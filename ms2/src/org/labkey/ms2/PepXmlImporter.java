@@ -102,6 +102,7 @@ public class PepXmlImporter extends MS2Importer
 
                 PeptideIterator pi = fraction.getPeptideIterator();
                 boolean shouldImportSpectra = fraction.shouldLoadSpectra();
+                float importSpectraMinProbability = (null == fraction.getImportSpectraMinProbability() ? -Float.MAX_VALUE : fraction.getImportSpectraMinProbability().floatValue());
                 progress.setImportSpectra(shouldImportSpectra);
                 // Initialize scans to a decent size, but only if we're going to load spectra
                 HashSet<Integer> scans = new HashSet<Integer>(shouldImportSpectra ? 1000 : 0);
@@ -125,7 +126,11 @@ public class PepXmlImporter extends MS2Importer
 	                    write(peptide, summary);
 
                         if (shouldImportSpectra)
-                            scans.add(peptide.getScan());
+                        {
+                            PeptideProphetHandler.PeptideProphetResult pp = peptide.getPeptideProphetResult();
+                            if (null == pp || pp.getProbability() >= importSpectraMinProbability)
+                                scans.add(peptide.getScan());
+                        }
 
                         count++;
                         if (count % BATCH_SIZE == 0)
