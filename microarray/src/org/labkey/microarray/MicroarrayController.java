@@ -160,22 +160,7 @@ public class MicroarrayController extends SpringActionController
     {
         public ModelAndView getView(UploadRedirectForm form, BindException errors) throws Exception
         {
-            int[] dataIds = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
             List<Map<String, File>> files = new ArrayList<Map<String, File>>();
-            for (int dataId : dataIds)
-            {
-                ExpData data = ExperimentService.get().getExpData(dataId);
-                if (data == null || !data.getContainer().equals(getContainer()))
-                {
-                    HttpView.throwNotFound("Could not find all selected datas");
-                }
-
-                File f = data.getFile();
-                if (f != null && f.isFile())
-                {
-                    files.add(Collections.singletonMap("File", f));
-                }
-            }
             if (form.getPath() != null)
             {
                 PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
@@ -198,6 +183,26 @@ public class MicroarrayController extends SpringActionController
                     }
                 }
             }
+            else
+            {
+                int[] dataIds = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
+
+                for (int dataId : dataIds)
+                {
+                    ExpData data = ExperimentService.get().getExpData(dataId);
+                    if (data == null || !data.getContainer().equals(getContainer()))
+                    {
+                        HttpView.throwNotFound("Could not find all selected datas");
+                    }
+
+                    File f = data.getFile();
+                    if (f != null && f.isFile())
+                    {
+                        files.add(Collections.singletonMap("File", f));
+                    }
+                }
+            }
+
             if (files.isEmpty())
             {
                 HttpView.throwNotFound("Could not find any matching files");
