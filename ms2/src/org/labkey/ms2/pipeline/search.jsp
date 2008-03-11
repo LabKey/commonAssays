@@ -56,7 +56,7 @@ boolean hasWork = false;
     <tr><td class='ms-searchform'>Analysis Protocol:</td>
         <td class='ms-vb'><select name="protocol"
                             onchange="changeProtocol(this)">
-            <option value="">&lt;New Protocol&gt;</option>
+            <option>&lt;New Protocol&gt;</option>
 <%
     for (String protocol : getProtocolNames())
     {
@@ -226,8 +226,7 @@ boolean hasWork = false;
         }
         var opt = sel.options[sel.selectedIndex];
         searchNew = "searchEngine=<%=h(form.getSearchEngine())%>&" + searchNew;
-        if (opt.text.indexOf("<") != 0)
-            searchNew += "&protocol=" + opt.text;
+        searchNew += "&protocol=" + opt.text;
         document.location.search = searchNew;
     }
     <% if (form.getProtocol() == "" && getSequenceDBs().size() > 1)

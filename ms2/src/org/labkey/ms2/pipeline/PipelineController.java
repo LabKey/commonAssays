@@ -336,6 +336,11 @@ public class PipelineController extends SpringActionController
                         form.setProtocol(protocolNameLast);
                 }
             }
+            // New protocol chosen from form
+            else if ("<New Protocol>".equals(form.getProtocol()))
+            {
+                form.setProtocol("");
+            }
 
             String protocolName = form.getProtocol();
 

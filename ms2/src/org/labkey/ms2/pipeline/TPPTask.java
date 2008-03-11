@@ -324,8 +324,9 @@ public class TPPTask extends PipelineJob.Task
         if ("yes".equalsIgnoreCase(paramCompatQ3))
             quantOpts.add("--compat");
 
-        return ("-C1\"" + PipelineJobService.get().getJavaPath() + "\" -client -Xmx256M -jar "
-                + "\"" + PipelineJobService.get().getJarPath("viewerApp.jar") + "\""
+        // TODO: Doesn't work when JAVA_HOME has a space in the path
+        return ("-C1" + PipelineJobService.get().getJavaPath() + " -client -Xmx256M -jar "
+                + "" + PipelineJobService.get().getJarPath("viewerApp.jar") + ""
                 + " --q3 " + StringUtils.join(quantOpts.iterator(), ' ')
                 + " -C2Q3ProteinRatioParser");
     }
