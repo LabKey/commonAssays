@@ -147,7 +147,7 @@ public class ProteinController extends ViewController
     protected Forward deleteCustomAnnotationSets() throws Exception
     {
         HttpServletRequest request = getRequest();
-        String[] setIds = request.getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
+        Set<String> setIds = DataRegionSelection.getSelected(getViewContext(), true);
         for (String setId : setIds)
         {
             int id = Integer.parseInt(setId);
@@ -227,6 +227,14 @@ public class ProteinController extends ViewController
                     break;
                 }
                 row.put(lookupStringColumnName, lookupString);
+                for (Object o : row.values())
+                {
+                    if (o != null && o.toString().length() >= 4000)
+                    {
+                        addError("The input contains a value that is more than 4000 characters long, which is the limit for a single value");
+                        break;
+                    }
+                }
             }
         }
 

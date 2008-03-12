@@ -856,7 +856,7 @@ public class ProteinManager
         combinedSort.insertSort(peptideSort);
         combinedSort.insertSortColumn(orderByColumnName, false);
         combinedSort.insertSort(proteinSort);
-        combinedSort = reduceToValidColumns(combinedSort, MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoProteinGroupsWithQuantitation());
+        combinedSort = reduceToValidColumns(combinedSort, MS2Manager.getTableInfoSimplePeptides(), MS2Manager.getTableInfoProteinGroupsWithQuantitation());
         return combinedSort.getOrderByClause(ProteinManager.getSqlDialect());
     }
 
@@ -1023,8 +1023,8 @@ public class ProteinManager
     public static String[] getIdentifiersFromId(String identType, int id) throws SQLException
     {
         return Table.executeArray(getSchema(),
-                "SELECT identifier FROM " + getTableInfoIdentifiers() + " WHERE identtypeid = (SELECT IdentTypeId FROM " + getTableInfoIdentTypes() + " WHERE name = ?) AND seqId = ?",
-                new Object[]{identType, id}, String.class);
+                "SELECT identifier FROM " + getTableInfoIdentifiers() + " WHERE identtypeid IN (SELECT IdentTypeId FROM " + getTableInfoIdentTypes() + " WHERE LOWER(name) = ?) AND seqId = ?",
+                new Object[]{identType.toLowerCase(), id}, String.class);
     }
 
     public static Set<String> getOrganismsFromId(int id) throws SQLException

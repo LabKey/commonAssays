@@ -998,6 +998,7 @@ ms2/src/org/labkey/ms2/protein/ProteinController.java -text
 ms2/src/org/labkey/ms2/protein/ProteinException.java -text
 ms2/src/org/labkey/ms2/protein/ProteinManager.java -text
 ms2/src/org/labkey/ms2/protein/ProteinPlus.java -text
+ms2/src/org/labkey/ms2/protein/SetBestNameRunnable.java -text
 ms2/src/org/labkey/ms2/protein/XMLProteinHandler.java -text
 ms2/src/org/labkey/ms2/protein/XMLProteinLoader.java -text
 ms2/src/org/labkey/ms2/protein/fasta/FastaDbHelper.java -text

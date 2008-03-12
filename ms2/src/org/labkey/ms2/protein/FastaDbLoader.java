@@ -591,6 +591,10 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
 
     protected void finalizeAnnotLoad(Connection c, int insertId) throws SQLException
     {
+        handleThreadStateChangeRequests("Setting BestGeneName");
+        fdbu._updateBestGeneNameStmt.setInt(1, currentInsertId);
+        fdbu._updateBestGeneNameStmt.executeUpdate();
+
         handleThreadStateChangeRequests("Finalizing bookkeeping record");
         fdbu._finalizeInsertionStmt.setTimestamp(1, new java.sql.Timestamp(new java.util.Date().getTime()));
         fdbu._finalizeInsertionStmt.setInt(2, currentInsertId);
@@ -992,10 +996,39 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("REFSEQ","NP_001073825;XP_593190"));
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("ENSEMBL","ENSBTAP00000028878"));
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"Q2KIJ2"));
-            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GB","MGC137286;LOC515210"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GN","MGC137286;LOC515210"));
             idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00685094.1"));
             parseAndCompare("IPI:IPI00685094.1|SWISS-PROT:Q2KIJ2|ENSEMBL:ENSBTAP00000028878|REFSEQ:NP_001073825;XP_593190", idMapE,
                     "IPI:IPI00685094.1|SWISS-PROT:Q2KIJ2|ENSEMBL:ENSBTAP00000028878|REFSEQ:NP_001073825;XP_593190 Tax_Id=9913 Gene_Symbol=MGC137286;LOC515210 Uncharacterized protein C1orf156 homolog");
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("REFSEQ","NP_001020605"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("ENSEMBL","ENSP00000368334"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"Q3B792"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GN","NQO1"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00619898.2"));
+            parseAndCompare("IPI:IPI00619898.2|TREMBL:Q3B792|ENSEMBL:ENSP00000368334|REFSEQ:NP_001020605", idMapE, "IPI:IPI00619898.2|TREMBL:Q3B792|ENSEMBL:ENSP00000368334|REFSEQ:NP_001020605 Tax_Id=9606 Gene_Symbol=NQO1 NQO1 protein (Fragment)");
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("REFSEQ","NP_000894"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("ENSEMBL","ENSP00000319788"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"Q53G81;P15559"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GN","NQO1"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00012069.1"));
+            parseAndCompare("IPI:IPI00012069.1|SWISS-PROT:P15559|TREMBL:Q53G81|ENSEMBL:ENSP00000319788|REFSEQ:NP_000894|H-INV:HIT000191221|VEGA:OTTHUMP00000081321;OTTHUMP00000174897", idMapE, "IPI:IPI00012069.1|SWISS-PROT:P15559|TREMBL:Q53G81|ENSEMBL:ENSP00000319788|REFSEQ:NP_000894|H-INV:HIT000191221|VEGA:OTTHUMP00000081321;OTTHUMP00000174897 Tax_Id=9606 Gene_Symbol=NQO1 NAD");
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"P15559"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProt.toString(),"NQO1_HUMAN"));
+            parseAndCompare("P15559|NQO1_HUMAN", idMapE);
+
+            idMapE=null;
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("ENSEMBL","ENSP00000307953"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap(IdentifierType.SwissProtAccn.toString(),"Q7KYQ5;Q7KYY4;Q8IZZ8;Q8IZZ9;Q8J000;Q8J001;Q8TCE1;Q9UBW9"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("GN","SERPINC1"));
+            idMapE = IdPattern.addIdMap(idMapE, IdPattern.createIdMap("IPI","IPI00844156.2"));
+            parseAndCompare("IPI:IPI00844156.2|TREMBL:Q7KYQ5;Q7KYY4;Q8IZZ8;Q8IZZ9;Q8J000;Q8J001;Q8TCE1;Q9UBW9|ENSEMBL:ENSP00000307953", idMapE, "IPI:IPI00844156.2|TREMBL:Q7KYQ5;Q7KYY4;Q8IZZ8;Q8IZZ9;Q8J000;Q8J001;Q8TCE1;Q9UBW9|ENSEMBL:ENSP00000307953 Tax_Id=9606 Gene_Symbol=SERPINC1 SERPINC1 protein");
+
 
             // return empty map
             idMapE=new HashMap<String,Set<String>>();

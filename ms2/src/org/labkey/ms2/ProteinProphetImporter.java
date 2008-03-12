@@ -46,6 +46,11 @@ public class ProteinProphetImporter
         long startTime = System.currentTimeMillis();
         log.info("Starting to load ProteinProphet file " + _file.getPath());
 
+        if (!NetworkDrive.exists(_file))
+        {
+            throw new FileNotFoundException(_file.toString());
+        }
+
         if (!shouldImportFile(log, info.getContainer()))
         {
             return;
@@ -55,13 +60,13 @@ public class ProteinProphetImporter
 
         if (run == null)
         {
-            log.error("Failed to import MS2 run " + getPepXMLFileName());
-            return;
+            throw new ExperimentException("Failed to import MS2 run " + getPepXMLFileName());
         }
 
-        if (!NetworkDrive.exists(_file))
+        ProteinProphetFile proteinProphetFile = run.getProteinProphetFile();
+        if (proteinProphetFile != null)
         {
-            throw new FileNotFoundException(_file.toString());
+            throw new ExperimentException("MS2 run already has ProteinProphet data loaded from file " + proteinProphetFile.getFilePath());
         }
 
         SqlDialect dialect = MS2Manager.getSchema().getSqlDialect();

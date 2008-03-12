@@ -44,6 +44,11 @@ public class FastaDbHelper
                     " MRMOrganismsAdded=?,MRMSize=?,RecordsProcessed=?,ChangeDate=? " +
                     " WHERE  InsertId=?";
 
+    private static final String UPDATE_BEST_GENE_NAME_COMMAND = "UPDATE " + ProteinManager.getTableInfoSequences() + " SET BestGeneName = (" +
+            "SELECT MIN(identifier) FROM " + ProteinManager.getTableInfoIdentifiers() + " i, " + ProteinManager.getTableInfoIdentTypes() + " it WHERE i.identtypeid = it.identtypeid AND " +
+            "i.seqid = " + ProteinManager.getTableInfoSequences() + ".seqid AND it.name='GeneName') WHERE BestGeneName IS NULL AND seqid IN (SELECT seqid FROM " +
+            ProteinManager.getTableInfoFastaSequences() + " WHERE fastaid = ?)";
+
     private static final String FINALIZE_INSERTION_COMMAND =
             "UPDATE " + ProteinManager.getTableInfoAnnotInsertions() + " SET " +
                     " CompletionDate=? WHERE InsertId=?";
@@ -58,6 +63,7 @@ public class FastaDbHelper
     public final PreparedStatement _initialInsertionStmt;
     public final PreparedStatement _updateInsertionStmt;
     public final PreparedStatement _finalizeInsertionStmt;
+    public final PreparedStatement _updateBestGeneNameStmt;
     public final PreparedStatement _getCurrentInsertStatsStmt;
     public final PreparedStatement _addIdentStmt;
     public final PreparedStatement _addSeqStmt;
@@ -94,6 +100,7 @@ public class FastaDbHelper
         _getCurrentInsertStatsStmt = c.prepareStatement(GET_CURRENT_INSERT_STATS_COMMAND);
         _updateInsertionStmt = c.prepareStatement(UPDATE_INSERTION_COMMAND);
         _finalizeInsertionStmt = c.prepareStatement(FINALIZE_INSERTION_COMMAND);
+        _updateBestGeneNameStmt = c.prepareStatement(UPDATE_BEST_GENE_NAME_COMMAND);
 
         c.createStatement().execute("CREATE " +  _dialect.getTempTableKeyword() + " TABLE " + _seqTableName + " ( " +
                 "srowid " + _dialect.getUniqueIdentType() + " PRIMARY KEY NOT NULL, " +

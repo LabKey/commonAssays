@@ -2154,7 +2154,7 @@ public class MS2Controller extends SpringActionController
 
     public static class SetBestNameForm
     {
-        private enum NameType
+        public enum NameType
         { LOOKUP_STRING, IPI, SWISS_PROT, SWISS_PROT_ACCN };
 
         private String _nameType;
@@ -2185,47 +2185,8 @@ public class MS2Controller extends SpringActionController
         public boolean handlePost(SetBestNameForm form, BindException errors) throws Exception
         {
             int[] fastaIds = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
-
-            for (int fastaId : fastaIds)
-            {
-                SQLFragment identifierSQL;
-                switch (form.lookupNameType())
-                {
-                    case IPI:
-                        identifierSQL = new SQLFragment();
-                        identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinManager.getTableInfoIdentifiers() + " i, ");
-                        identifierSQL.append(ProteinManager.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
-                        identifierSQL.append(IdentifierType.IPI + "' AND " + ProteinManager.getTableInfoSequences() + ".SeqId = i.SeqId");
-                        break;
-                    case SWISS_PROT:
-                        identifierSQL = new SQLFragment();
-                        identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinManager.getTableInfoIdentifiers() + " i, ");
-                        identifierSQL.append(ProteinManager.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
-                        identifierSQL.append(IdentifierType.SwissProt + "' AND " + ProteinManager.getTableInfoSequences() + ".SeqId = i.SeqId");
-                        break;
-                    case SWISS_PROT_ACCN:
-                        identifierSQL = new SQLFragment();
-                        identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinManager.getTableInfoIdentifiers() + " i, ");
-                        identifierSQL.append(ProteinManager.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
-                        identifierSQL.append(IdentifierType.SwissProtAccn + "' AND " + ProteinManager.getTableInfoSequences() + ".SeqId = i.SeqId");
-                        break;
-                    case LOOKUP_STRING:
-                        identifierSQL = new SQLFragment();
-                        identifierSQL.append("SELECT MAX(fs.LookupString) FROM " + ProteinManager.getTableInfoFastaSequences() + " fs ");
-                        identifierSQL.append(" WHERE fs.SeqId = " + ProteinManager.getTableInfoSequences() + ".SeqId");
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unexpected NameType: " + form.lookupNameType());
-                }
-
-                SQLFragment sql = new SQLFragment("UPDATE " + ProteinManager.getTableInfoSequences() + " SET BestName = (");
-                sql.append(identifierSQL);
-                sql.append(") WHERE " + ProteinManager.getTableInfoSequences() + ".SeqId IN (SELECT fs.SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " fs WHERE FastaId = " + fastaId + ") AND ");
-                sql.append("(");
-                sql.append(identifierSQL);
-                sql.append(") IS NOT NULL");
-                Table.execute(ProteinManager.getSchema(), sql);
-            }
+            SetBestNameRunnable runnable = new SetBestNameRunnable(fastaIds, form.lookupNameType());
+            JobRunner.getDefault().execute(runnable);
             return true;
         }
 
@@ -3095,7 +3056,7 @@ public class MS2Controller extends SpringActionController
 
             // We don't want ActionURL to encode ${ContainerPath}, so set a dummy value and use string substitution
             String urlString = containerURL.setExtraPath("ContainerPath").getLocalURIString().replaceFirst("/ContainerPath/", "\\$\\{ContainerPath}/");
-            cdc.setURL(urlString);
+            cdc.setURLExpression(StringExpressionFactory.create(urlString, false));
             rgn.addColumn(cdc);
 
             DataColumn descriptionColumn = new DataColumn(MS2Manager.getTableInfoRuns().getColumn("Description")) {
@@ -3109,7 +3070,7 @@ public class MS2Controller extends SpringActionController
             };
             ActionURL showRunUrl = new ActionURL("MS2", "showRun", "ContainerPath");
             String showUrlString = showRunUrl.getLocalURIString().replaceFirst("/ContainerPath/", "\\$\\{ContainerPath}/") + "run=${Run}";
-            descriptionColumn.setURL(showUrlString);
+            descriptionColumn.setURLExpression(StringExpressionFactory.create(showUrlString, false));
             rgn.addColumn(descriptionColumn);
 
             rgn.addColumns(MS2Manager.getTableInfoRuns().getColumns("Path, Created, Deleted, StatusId, Status, PeptideCount, SpectrumCount, FastaId"));
