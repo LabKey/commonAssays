@@ -44,15 +44,14 @@ public class SequestSearchTask extends PipelineJob.Task
     private static final String SEQUEST_PARAMS = "sequest.params";
     private static final String REMOTE_PARAMS = "remote.params";
 
-    private static final FileType FT_RAW_XML = new FileType(".xml");
-    private static final FileType FT_SUMMARY = new FileType(".html");
+    private static final FileType FT_RAW_XML = new FileType("_raw.pep.xml");
     private static final FileType FT_SPECTRA_ARCHIVE = new FileType(".pep.tgz");
 
-    public static File getNativeOutputFile(File dirData, String baseName)
-    {
-        return FT_SUMMARY.newFile(dirData, baseName);
-    }
 
+    public static File getNativeOutputFile(File dirAnalysis, String baseName)
+    {
+        return FT_RAW_XML.newFile(dirAnalysis, baseName);
+    }
     /**
      * Interface for support required from the PipelineJob to run this task,
      * beyond the base PipelineJob methods.
@@ -130,7 +129,6 @@ public class SequestSearchTask extends PipelineJob.Task
 
             File dirOutputDta = new File(wd.getDir(), getJobSupport().getBaseName());
             File fileTgz = wd.newFile(FT_SPECTRA_ARCHIVE);
-            File fileSequestSummary =  wd.newFile(FT_SUMMARY);
             File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(wd.getDir(),
                     getJobSupport().getBaseName());
 
@@ -165,19 +163,11 @@ public class SequestSearchTask extends PipelineJob.Task
             int iReturn = sequestClient.search(sequenceRoot,
                     fileWorkParamsRemote.getAbsolutePath(),
                     getJobSupport().getSearchSpectraFile().getAbsolutePath(),
-                    fileSequestSummary.getAbsolutePath(),
+                    fileWorkPepXMLRaw.getAbsolutePath(),
                     inputXmlParams);
 
-            if (iReturn != 0 || !fileSequestSummary.exists())
+            if (iReturn != 0 || !fileWorkPepXMLRaw.exists())
                 throw new IOException("Failed running Sequest.");
-
-            // TODO: Make Sequest server return pepXML using Out2XML
-            FileUtils.copyFileToDirectory(fileParamsLocal, wd.getDir());
-            getJob().runSubProcess(new ProcessBuilder("Sequest2Xml", fileSequestSummary.getName()), wd.getDir());
-
-            File fileOutputPepXML = wd.newFile(FT_RAW_XML);
-            if (!fileOutputPepXML.renameTo(fileWorkPepXMLRaw))
-                throw new IOException("Failed to rename " + fileOutputPepXML + " to " + fileWorkPepXMLRaw);
 
             getJob().runSubProcess(new ProcessBuilder("bsdtar.exe", "czf", fileTgz.getAbsolutePath(), "*"), dirOutputDta);
 
@@ -190,7 +180,6 @@ public class SequestSearchTask extends PipelineJob.Task
 
             wd.discardFile(fileWorkParamsLocal);
             wd.discardFile(fileWorkParamsRemote);
-            wd.discardFile(fileSequestSummary);
             wd.remove();
         }
         catch (PipelineJob.RunProcessException e)

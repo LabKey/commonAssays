@@ -9,7 +9,7 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.log4j.Logger;
 import org.labkey.api.ms2.SearchClient;
-
+import org.labkey.api.util.NetworkDrive;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -496,6 +496,11 @@ public class SequestClientImpl implements SearchClient
 
         boolean ioError = true;
         File outFile = new File(resultFile);
+        if (!NetworkDrive.exists(outFile.getParentFile()))
+        {
+            ioError = true;
+            _instanceLogger.error("Can't find " + resultFile);
+        }
         BufferedWriter writer = null;
         try
         {
@@ -508,18 +513,18 @@ public class SequestClientImpl implements SearchClient
             {
                 if(isFirstLine)isFirstLine = false;
                 else writer.newLine();
-                if(line.startsWith("</BODY></HTML>"))
+                writer.write(line);
+                lastLine = line;
+                if(line.startsWith("</msms_pipeline_analysis>"))
                 {
                     ioError = false;
                     break;
                 }
-                writer.write(line);
-                lastLine = line;
             }
             if(ioError)
             {
                 _instanceLogger.error("getResultFile(result="+resultFile+",taskid="+taskId+")." +
-                        " Incomplete download.Expected: </BODY></HTML> Actual: " + lastLine );
+                       " Incomplete download. Expected: </msms_pipeline_analysis> Actual: " + lastLine );
             }
         }
         catch (FileNotFoundException e)
