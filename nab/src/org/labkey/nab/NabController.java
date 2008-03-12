@@ -1029,7 +1029,11 @@ public class NabController extends ViewController
             for (int index = 0; index < _sampleIds.length; index++)
             {
                 if (_sampleIds[index].equals(sampleId))
-                    return new PublishSampleInfo(_participantIds[index], sampleId, _sequenceNums[index], _dates[index]);
+                {
+                    String sequenceNum =  _sequenceNums != null ?  _sequenceNums[index] : null;
+                    String date =  _dates != null ?  _dates[index] : null;
+                    return new PublishSampleInfo(_participantIds[index], sampleId, sequenceNum, date);
+                }
             }
             return null;
         }
