@@ -119,6 +119,7 @@ public class MassSpecProtocol extends PipelineProtocol
 
         //TODO: (marki) Don't use tokens here. Just edit as with other inputs
         tokenMap.put("RUN_FILENAME", "../" + runInfo.getRunFileName());
+        tokenMap.put("DATA_NAME", runInfo.getRunFileName());
         tokenMap.put("RUN_NAME", runInfo.getRunName());
         String instanceText = getInstanceText(uriRoot);
         instanceText = tokenReplace(instanceText, tokenMap);

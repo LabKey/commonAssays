@@ -31,7 +31,7 @@
 				<exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">raw file (N/A)</exp:SimpleVal>
 			</exp:ParameterDeclarations>
 		</exp:Protocol>
-		<exp:Protocol rdf:about="${FolderLSIDBase}:MS2.ConvertToMzXML.@@PROTOCOL_NAME@@">
+		<exp:Protocol rdf:about="${FolderLSIDBase}:MS2.ConvertToMzXML.@@PROTOCOL_NAME@@:2">
 			<exp:Name>Convert to mzXML</exp:Name>
 			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
 			<exp:MaxInputMaterialPerInstance>0</exp:MaxInputMaterialPerInstance>
@@ -44,7 +44,7 @@
 				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:${InputLSID.objectid}.ConvertToMzXML</exp:SimpleVal>
 				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Convert To MzXML</exp:SimpleVal>
 				<exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${AutoFileLSID}</exp:SimpleVal>
-				<exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">MzXML file</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String"/>
 			</exp:ParameterDeclarations>
 		</exp:Protocol>
 		<exp:Protocol rdf:about="${FolderLSIDBase}:MarkRunOutput:2">
@@ -60,7 +60,7 @@
 				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Run Output</exp:SimpleVal>
 			</exp:ParameterDeclarations>
 		</exp:Protocol>
-		<exp:Protocol rdf:about="${FolderLSIDBase}:MS2.PreSearch.@@PROTOCOL_NAME@@">
+		<exp:Protocol rdf:about="${FolderLSIDBase}:MS2.PreSearch.@@PROTOCOL_NAME@@:2">
 			<exp:Name>@@PROTOCOL_NAME@@ (LCMS2)</exp:Name>
 			<exp:ProtocolDescription>Prepare and run LCMS, producing one mzXml file per input sample.</exp:ProtocolDescription>
 			<exp:ApplicationType>ExperimentRun</exp:ApplicationType>
@@ -79,8 +79,8 @@
 		</exp:Protocol>
 	</exp:ProtocolDefinitions>
 	<exp:ProtocolActionDefinitions>
-		<exp:ProtocolActionSet ParentProtocolLSID="${FolderLSIDBase}:MS2.PreSearch.@@PROTOCOL_NAME@@">
-			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS2.PreSearch.@@PROTOCOL_NAME@@" ActionSequence="1">
+		<exp:ProtocolActionSet ParentProtocolLSID="${FolderLSIDBase}:MS2.PreSearch.@@PROTOCOL_NAME@@:2">
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS2.PreSearch.@@PROTOCOL_NAME@@:2" ActionSequence="1">
 				<exp:PredecessorAction ActionSequenceRef="1"/>
 			</exp:ProtocolAction>
 			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:SamplePreparation.@@PROTOCOL_NAME@@" ActionSequence="10">
@@ -89,7 +89,7 @@
 			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS2.LCMS2.@@PROTOCOL_NAME@@" ActionSequence="30">
 				<exp:PredecessorAction ActionSequenceRef="10"/>
 			</exp:ProtocolAction>
-			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS2.ConvertToMzXML.@@PROTOCOL_NAME@@" ActionSequence="40">
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS2.ConvertToMzXML.@@PROTOCOL_NAME@@:2" ActionSequence="40">
 				<exp:PredecessorAction ActionSequenceRef="30"/>
 			</exp:ProtocolAction>
 			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MarkRunOutput:2" ActionSequence="1000">
@@ -108,7 +108,7 @@
 	<exp:ExperimentRuns>
 		<exp:ExperimentRun rdf:about="${FolderLSIDBase}:MS2PreSearch.@@RUN_NAME@@">
 			<exp:Name>@@RUN_NAME@@</exp:Name>
-			<exp:ProtocolLSID>${FolderLSIDBase}:MS2.PreSearch.@@PROTOCOL_NAME@@</exp:ProtocolLSID>
+			<exp:ProtocolLSID>${FolderLSIDBase}:MS2.PreSearch.@@PROTOCOL_NAME@@:2</exp:ProtocolLSID>
 			<exp:Comments/>
 			<exp:Properties/>
 			<exp:ExperimentLog>
@@ -126,6 +126,7 @@
 				<exp:ExperimentLogEntry ActionSequenceRef="40">
 					<exp:CommonParametersApplied>
 						<exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@RUN_FILENAME@@</exp:SimpleVal>
+						<exp:SimpleVal Name="OutputDataFileName" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@DATA_NAME@@</exp:SimpleVal>
 					</exp:CommonParametersApplied>
 				</exp:ExperimentLogEntry>
 				<exp:ExperimentLogEntry ActionSequenceRef="1000"/>
