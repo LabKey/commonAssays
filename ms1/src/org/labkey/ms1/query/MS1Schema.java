@@ -99,16 +99,9 @@ public class MS1Schema extends UserSchema
         //OK if runIds is null
         RunFilter runFilter = new RunFilter(runIds);
         filters.add(runFilter);
-        tinfo.setBaseFilters(filters);
-
         //filter out features that don't have an associated peptide
-        ColumnInfo colPep = tinfo.getColumn(FeaturesTableInfo.COLUMN_PEPTIDE_INFO);
-        if(null != colPep)
-        {
-            SQLFragment filter = new SQLFragment(colPep.getValueSql());
-            filter.append(" IS NOT NULL");
-            tinfo.addCondition(filter);
-        }
+        filters.add(new PeptideNotNullFilter());
+        tinfo.setBaseFilters(filters);
 
         ActionURL urlPepSearch = new ActionURL(MS1Controller.PepSearchAction.class, getContainer());
         urlPepSearch.addParameter(MS1Controller.PepSearchForm.ParamNames.exact.name(), "on");
@@ -129,7 +122,11 @@ public class MS1Schema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                return getFeaturesTableInfo(false, true);
+                FeaturesTableInfo table = getFeaturesTableInfo(false, Boolean.TRUE);
+                //set include deleted true so that we don't include the files table in the join
+                //without it, we get a too many tables exception from SQL Server
+                table.setIncludeDeleted(true);
+                return table;
             }
         });
 

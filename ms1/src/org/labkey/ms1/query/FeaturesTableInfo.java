@@ -34,6 +34,7 @@ public class FeaturesTableInfo extends FilteredTable
     private MS1Schema _schema;
     private boolean _includePepFk = true;
     private List<FeaturesFilter> _filters = null;
+    private boolean _includeDeleted = false;
 
     public FeaturesTableInfo(MS1Schema schema)
     {
@@ -150,9 +151,19 @@ public class FeaturesTableInfo extends FilteredTable
         _filters = filters;
     }
 
+    public boolean includeDeleted()
+    {
+        return _includeDeleted;
+    }
+
+    public void setIncludeDeleted(boolean includeDeleted)
+    {
+        _includeDeleted = includeDeleted;
+    }
+
     public SQLFragment getFromSQL(String alias)
     {
-        SQLFragment sql = new SQLFragment("(SELECT * FROM (SELECT\n");
+        SQLFragment sql = new SQLFragment("(SELECT\n");
         String sep = "";
 
         //all base-table columns
@@ -178,9 +189,14 @@ public class FeaturesTableInfo extends FilteredTable
         sql.append("\nFROM ");
         sql.append(MS1Service.Tables.Features.getFullName());
         sql.append(" AS fe");
-        sql.append("\nINNER JOIN ");
-        sql.append(MS1Service.Tables.Files.getFullName());
-        sql.append(" AS fi ON (fe.FileId=fi.FileId)");
+
+        if(!includeDeleted())
+        {
+            sql.append("\nINNER JOIN ");
+            sql.append(MS1Service.Tables.Files.getFullName());
+            sql.append(" AS fi ON (fe.FileId=fi.FileId)");
+        }
+
         if(_includePepFk || null != _filters)
         {
             sql.append("\nINNER JOIN exp.Data AS d ON (fi.ExpDataFileId=d.RowId)");
@@ -193,7 +209,9 @@ public class FeaturesTableInfo extends FilteredTable
             sql.append("\nWHERE r.Container IN (");
             sql.append(_schema.getContainerInList());
             sql.append(")");
-            sql.append(new SQLFragment("\nAND fi.Imported=? AND fi.Deleted=? AND r.Deleted=?", true, false, false));
+            sql.append(new SQLFragment("\nAND r.Deleted=?", false)); //filter out deleted MS2 runs
+            if(!includeDeleted())
+                sql.append(new SQLFragment("\nAND fi.Imported=? AND fi.Deleted=?", true, false));
 
             if(null != _filters)
             {
@@ -208,14 +226,9 @@ public class FeaturesTableInfo extends FilteredTable
         }
         else
         {
-            sql.append(new SQLFragment("\nWHERE fi.Imported=? AND fi.Deleted=?", true, false));
+            if(!includeDeleted())
+                sql.append(new SQLFragment("\nWHERE fi.Imported=? AND fi.Deleted=?", true, false));
         }
-
-        sql.append("\n) AS fti\n");
-
-        //filters
-        if(null != getFilter() && getFilter().getClauses().size() > 0)
-            sql.append(getFilter().getSQLFragment(getRealTable().getSqlDialect(), _columnMap));
 
         //alias
         sql.append(") AS ");

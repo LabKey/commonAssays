@@ -588,6 +588,7 @@ ms1/src/org/labkey/ms1/query/PeakLinksDisplayColumn.java -text
 ms1/src/org/labkey/ms1/query/PeaksAvailableColumnInfo.java -text
 ms1/src/org/labkey/ms1/query/PeaksTableInfo.java -text
 ms1/src/org/labkey/ms1/query/PeptideFilter.java -text
+ms1/src/org/labkey/ms1/query/PeptideNotNullFilter.java -text
 ms1/src/org/labkey/ms1/query/RetentionTimeFilter.java -text
 ms1/src/org/labkey/ms1/query/RunFilter.java -text
 ms1/src/org/labkey/ms1/query/ScanFilter.java -text
