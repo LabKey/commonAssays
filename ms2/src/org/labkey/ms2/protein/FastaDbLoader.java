@@ -592,7 +592,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
     protected void finalizeAnnotLoad(Connection c, int insertId) throws SQLException
     {
         handleThreadStateChangeRequests("Setting BestGeneName");
-        fdbu._updateBestGeneNameStmt.setInt(1, currentInsertId);
+        fdbu._updateBestGeneNameStmt.setInt(1, associatedFastaId);
         fdbu._updateBestGeneNameStmt.executeUpdate();
 
         handleThreadStateChangeRequests("Finalizing bookkeeping record");
