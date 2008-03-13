@@ -2,10 +2,6 @@
 <exp:ExperimentArchive xmlns:exp="http://cpas.fhcrc.org/exp/xml" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                        xsi:schemaLocation="http://cpas.fhcrc.org/exp/xml http://www.labkey.org/download/XarSchema/V2.2/expTypes.xsd">
-    <exp:Experiment rdf:about="${FolderLSIDBase}:DefaultExperiment">
-        <exp:Name>Default Experiment</exp:Name>
-        <exp:Hypothesis/>
-    </exp:Experiment>
 	<exp:ProtocolDefinitions>
         <exp:Protocol rdf:about="${FolderLSIDBase}:MS1.msInspectFeatureFindingPeaksAnalysis:1">
             <exp:Name>msInspect Feature Finding Analysis with Peakaboo Peak Extraction</exp:Name>
