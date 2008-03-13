@@ -33,7 +33,7 @@ public class MS2WebPart extends WebPartView
         GridView gridView = new GridView(rgn);
         gridView.setCustomizeLinks(getCustomizeLinks());
         gridView.setTitle("MS2 Runs");
-        gridView.setTitleHref(MS2Controller.getShowListUrl(c));
+        gridView.setTitleHref(MS2Controller.getShowListURL(c));
         gridView.setFilter(new SimpleFilter("Deleted", Boolean.FALSE));
         gridView.setSort(MS2Manager.getRunsBaseSort());
 

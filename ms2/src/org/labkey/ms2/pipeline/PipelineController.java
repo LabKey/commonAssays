@@ -108,7 +108,7 @@ public class PipelineController extends SpringActionController
     {
         public ActionURL getRedirectURL(Object o)
         {
-            return MS2Controller.getBeginUrl(getContainer());
+            return MS2Controller.getBeginURL(getContainer());
         }
     }
 
@@ -117,7 +117,7 @@ public class PipelineController extends SpringActionController
     {
         public ActionURL getSuccessURL(PipelinePathForm form)
         {
-            return MS2Controller.getShowListUrl(getContainer());
+            return MS2Controller.getShowListURL(getContainer());
         }
 
         public void validateCommand(PipelinePathForm form, Errors errors)

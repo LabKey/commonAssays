@@ -31,7 +31,7 @@ if (null != bean.quantAlgorithm)
 
 if (bean.writePermissions)
 { %>
-    <a href="<%=h(MS2Controller.getRenameRunUrl(c, run.getRun()))%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Rename")%>"></a><%
+    <a href="<%=h(MS2Controller.getRenameRunURL(c, run, me.getViewContext().getActionURL()))%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Rename")%>"></a><%
 } %>
     <%=bean.modHref%><%
 

@@ -120,17 +120,33 @@ public class MS2Controller extends SpringActionController
     private NavTree appendRootNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
     {
         page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic, HelpTopic.Area.CPAS));
-        root.addChild("MS2 Runs", getShowListUrl(getContainer()));
+        root.addChild("MS2 Runs", getShowListURL(getContainer()));
         if (null != title)
             root.addChild(title);
         return root;
     }
 
 
+    @Deprecated
     private NavTree appendRunNavTrail(NavTree root, MS2Run run, String title, PageConfig page, String helpTopic)
     {
         appendRootNavTrail(root, null, page, helpTopic);
-        root.addChild(run.getDescription(), getShowRunUrl(getContainer(), run.getRun()));
+        root.addChild(run.getDescription(), getShowRunURL(getContainer(), run.getRun()));
+        if (null != title)
+            root.addChild(title);
+        return root;
+    }
+
+
+    private NavTree appendRunNavTrail(NavTree root, MS2Run run, ActionURL runURL, String title, PageConfig page, String helpTopic)
+    {
+        appendRootNavTrail(root, null, page, helpTopic);
+
+        if (null != runURL)
+            root.addChild(run.getDescription(), runURL);
+        else
+            root.addChild(run.getDescription());
+
         if (null != title)
             root.addChild(title);
         return root;
@@ -159,13 +175,13 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static ActionURL getBeginUrl(Container c)
+    public static ActionURL getBeginURL(Container c)
     {
         return new ActionURL(BeginAction.class, c);
     }
 
 
-    public static ActionURL getPeptideChartUrl(Container c, ProteinDictionaryHelpers.GoTypes chartType)
+    public static ActionURL getPeptideChartURL(Container c, ProteinDictionaryHelpers.GoTypes chartType)
     {
         ActionURL url = new ActionURL(PeptideChartsAction.class, c);
         url.addParameter("chartType", chartType.toString());
@@ -178,12 +194,12 @@ public class MS2Controller extends SpringActionController
     {
         public ActionURL getRedirectURL(Object o)
         {
-            return getShowListUrl(getContainer());
+            return getShowListURL(getContainer());
         }
     }
 
 
-    public static ActionURL getShowListUrl(Container c)
+    public static ActionURL getShowListURL(Container c)
     {
         return new ActionURL(ShowListAction.class, c);
     }
@@ -194,7 +210,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            ActionURL currentUrl = getViewContext().cloneActionURL();
+            ActionURL currentURL = getViewContext().cloneActionURL();
             DataRegion rgn = new DataRegion();
             rgn.setName(MS2Manager.getDataRegionNameExperimentRuns());
             rgn.setColumns(MS2Manager.getTableInfoExperimentRuns().getColumns("Description, Path, Created, Status, ExperimentRunLSID, ExperimentRunRowId, ProtocolName, PeptideCount, NegativeHitCount"));
@@ -202,9 +218,9 @@ public class MS2Controller extends SpringActionController
                 rgn.getDisplayColumn(i).setVisible(false);
 
 
-            currentUrl.setAction("showRun");
-            currentUrl.deleteParameters();
-            rgn.getDisplayColumn(0).setURL(currentUrl.getLocalURIString() + "&run=${Run}");
+            currentURL.setAction("showRun");
+            currentURL.deleteParameters();
+            rgn.getDisplayColumn(0).setURL(currentURL.getLocalURIString() + "&run=${Run}");
             // TODO: What does this do?
             rgn.setFixedWidthColumns(false);
             rgn.setShowRecordSelectors(true);
@@ -318,7 +334,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static ActionURL getShowRunUrl(Container c, int runId)
+    public static ActionURL getShowRunURL(Container c, int runId)
     {
         ActionURL url = new ActionURL(ShowRunAction.class, c);
         url.addParameter(RunForm.PARAMS.run, String.valueOf(runId));
@@ -339,7 +355,7 @@ public class MS2Controller extends SpringActionController
             if (!isAuthorized(form.run))
                 return null;
 
-            ActionURL currentUrl = getViewContext().getActionURL();
+            ActionURL currentURL = getViewContext().getActionURL();
             MS2Run run = MS2Manager.getRun(form.run);
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
@@ -370,10 +386,10 @@ public class MS2Controller extends SpringActionController
             bean.quantAlgorithm = MS2Manager.getQuantAnalysisAlgorithm(form.run);
             vBox.addView(runSummary);
 
-            vBox.addView(new FilterHeaderView(currentUrl, form, run));
+            vBox.addView(new FilterHeaderView(currentURL, form, run));
 
             List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
-            SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run);
+            SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentURL, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run);
             peptideView.addSQLSummaries(peptideFilter, sqlSummaries);
 
             vBox.addView(new CurrentFilterView(null, sqlSummaries));
@@ -400,7 +416,7 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            appendRunNavTrail(root, _run, null, getPageConfig(), "viewRuns");
+            appendRunNavTrail(root, _run, null, null, getPageConfig(), "viewRuns");
             return root;
         }
     }
@@ -417,50 +433,50 @@ public class MS2Controller extends SpringActionController
 
     private class FilterHeaderView extends JspView<FilterHeaderBean>
     {
-        private FilterHeaderView(ActionURL currentUrl, RunForm form, MS2Run run) throws ServletException, SQLException
+        private FilterHeaderView(ActionURL currentURL, RunForm form, MS2Run run) throws ServletException, SQLException
         {
             super("/org/labkey/ms2/filterHeader.jsp", new FilterHeaderBean());
 
             FilterHeaderBean bean = getModelBean();
 
             bean.run = run;
-            bean.applyViewUrl = clearFilter(currentUrl).setAction("applyRunView");
+            bean.applyViewURL = clearFilter(currentURL).setAction("applyRunView");
             bean.applyView = renderViewSelect(0, true, ACL.PERM_READ, true);
-            bean.saveViewUrl = currentUrl.clone().setAction("saveView");
-            bean.manageViewsUrl = currentUrl.clone().setAction("manageViews");
-            bean.pickPeptideColumnsUrl = currentUrl.clone().setAction("pickPeptideColumns");
-            bean.pickProteinColumnsUrl = currentUrl.clone().setAction("pickProteinColumns");
+            bean.saveViewURL = currentURL.clone().setAction("saveView");
+            bean.manageViewsURL = getManageViewsURL(run, currentURL);
+            bean.pickPeptideColumnsURL = getPickPeptideColumnsURL(run, form.getColumns(), currentURL);
+            bean.pickProteinColumnsURL = getPickProteinColumnsURL(run, form.getProteinColumns(), currentURL);
             bean.viewTypes = MS2RunViewType.getTypesForRun(run);
             bean.currentViewType = MS2RunViewType.getViewType(form.getGrouping());
             bean.expanded = form.getExpanded();
 
             String chargeFilterParamName = run.getChargeFilterParamName();
-            ActionURL extraFilterUrl = currentUrl.clone().setAction("addExtraFilter.post");
-            extraFilterUrl.deleteParameter(chargeFilterParamName + "1");
-            extraFilterUrl.deleteParameter(chargeFilterParamName + "2");
-            extraFilterUrl.deleteParameter(chargeFilterParamName + "3");
-            extraFilterUrl.deleteParameter("tryptic");
-            extraFilterUrl.deleteParameter("grouping");
-            extraFilterUrl.deleteParameter("expanded");
-            bean.extraFilterUrl = extraFilterUrl;
+            ActionURL extraFilterURL = currentURL.clone().setAction("addExtraFilter.post");
+            extraFilterURL.deleteParameter(chargeFilterParamName + "1");
+            extraFilterURL.deleteParameter(chargeFilterParamName + "2");
+            extraFilterURL.deleteParameter(chargeFilterParamName + "3");
+            extraFilterURL.deleteParameter("tryptic");
+            extraFilterURL.deleteParameter("grouping");
+            extraFilterURL.deleteParameter("expanded");
+            bean.extraFilterURL = extraFilterURL;
 
-            bean.charge1 = defaultIfNull(currentUrl.getParameter(chargeFilterParamName + "1"), "0");
-            bean.charge2 = defaultIfNull(currentUrl.getParameter(chargeFilterParamName + "2"), "0");
-            bean.charge3 = defaultIfNull(currentUrl.getParameter(chargeFilterParamName + "3"), "0");
+            bean.charge1 = defaultIfNull(currentURL.getParameter(chargeFilterParamName + "1"), "0");
+            bean.charge2 = defaultIfNull(currentURL.getParameter(chargeFilterParamName + "2"), "0");
+            bean.charge3 = defaultIfNull(currentURL.getParameter(chargeFilterParamName + "3"), "0");
             bean.tryptic = form.tryptic;
 
             setTitle("View");
         }
 
 
-        private ActionURL clearFilter(ActionURL currentUrl)
+        private ActionURL clearFilter(ActionURL currentURL)
         {
-            ActionURL newUrl = currentUrl.clone();
-            String run = newUrl.getParameter("run");
-            newUrl.deleteParameters();
+            ActionURL newURL = currentURL.clone();
+            String run = newURL.getParameter("run");
+            newURL.deleteParameters();
             if (null != run)
-                newUrl.addParameter("run", run);
-            return newUrl;
+                newURL.addParameter("run", run);
+            return newURL;
         }
     }
 
@@ -468,13 +484,13 @@ public class MS2Controller extends SpringActionController
     public static class FilterHeaderBean
     {
         public MS2Run run;
-        public ActionURL applyViewUrl;
+        public ActionURL applyViewURL;
         public StringBuilder applyView;
-        public ActionURL saveViewUrl;
-        public ActionURL manageViewsUrl;
-        public ActionURL pickPeptideColumnsUrl;
-        public ActionURL pickProteinColumnsUrl;
-        public ActionURL extraFilterUrl;
+        public ActionURL saveViewURL;
+        public ActionURL manageViewsURL;
+        public ActionURL pickPeptideColumnsURL;
+        public ActionURL pickProteinColumnsURL;
+        public ActionURL extraFilterURL;
         public List<MS2RunViewType> viewTypes;
         public MS2RunViewType currentViewType;
         public boolean expanded;
@@ -623,7 +639,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static class RenameForm
+    public static class RenameForm extends ReturnUrlForm
     {
         private int run;
         private String description;
@@ -650,10 +666,12 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static ActionURL getRenameRunUrl(Container c, int runId)
+    public static ActionURL getRenameRunURL(Container c, MS2Run run, ActionURL returnURL)
     {
         ActionURL url = new ActionURL(RenameRunAction.class, c);
-        return url.addParameter("run", String.valueOf(runId));
+        url.addParameter("run", run.getRun());
+        url.addParameter(ReturnUrlForm.Params.returnUrl, returnURL.getLocalURIString());
+        return url;
     }
 
 
@@ -661,6 +679,7 @@ public class MS2Controller extends SpringActionController
     public class RenameRunAction extends FormViewAction<RenameForm>
     {
         private MS2Run _run;
+        private ActionURL _returnURL;
 
         public void validateCommand(RenameForm target, Errors errors)
         {
@@ -669,6 +688,8 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(RenameForm form, boolean reshow, BindException errors) throws Exception
         {
             _run = MS2Manager.getRun(form.getRun());
+            _returnURL = form.getReturnActionURL();
+
             String description = form.getDescription();
             if (description == null || description.length() == 0)
                 description = _run.getDescription();
@@ -676,8 +697,9 @@ public class MS2Controller extends SpringActionController
             RenameBean bean = new RenameBean();
             bean.run = _run;
             bean.description = description;
+            bean.returnURL = form.getReturnActionURL();
 
-            // TODO: Set focus
+            getPageConfig().setFocusId("description");
 
             return new JspView<RenameBean>("/org/labkey/ms2/renameRun.jsp", bean);
         }
@@ -690,12 +712,12 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getSuccessURL(RenameForm form)
         {
-            return getShowRunUrl(getContainer(), form.getRun());
+            return form.getReturnActionURL();
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendRunNavTrail(root, _run, "Rename Run", getPageConfig(), null);
+            return appendRunNavTrail(root, _run, _returnURL, "Rename Run", getPageConfig(), null);
         }
     }
 
@@ -704,6 +726,7 @@ public class MS2Controller extends SpringActionController
     {
         public MS2Run run;
         public String description;
+        public ActionURL returnURL;
     }
 
 
@@ -723,7 +746,7 @@ public class MS2Controller extends SpringActionController
             if (!isAuthorized(runId))
                 return HttpView.throwUnauthorizedMV();
 
-            ActionURL currentUrl = getViewContext().getActionURL();
+            ActionURL currentURL = getViewContext().getActionURL();
 
             int sqlRowIndex = form.getRowIndex();
             int rowIndex = sqlRowIndex - 1;  // Switch 1-based, JDBC row index to 0-based row index for array lookup
@@ -737,47 +760,47 @@ public class MS2Controller extends SpringActionController
             //often do not want the prev/next buttons to be enabled.
             if(rowIndex >= 0)
             {
-                peptideIndex = getPeptideIndex(currentUrl, run);
+                peptideIndex = getPeptideIndex(currentURL, run);
                 rowIndex = MS2Manager.verifyRowIndex(peptideIndex, rowIndex, peptideId);
             }
 
             peptide.init(form.getTolerance(), form.getxStartDouble(), form.getxEnd());
 
-            ActionURL previousUrl = null;
-            ActionURL nextUrl = null;
-            ActionURL showGzUrl = null;
+            ActionURL previousURL = null;
+            ActionURL nextURL = null;
+            ActionURL showGzURL = null;
 
             // Display next and previous only if we have a cached index and a valid pointer
             if (null != peptideIndex && -1 != rowIndex)
             {
                 if (0 == rowIndex)
-                    previousUrl = null;
+                    previousURL = null;
                 else
                 {
-                    previousUrl = getViewContext().cloneActionURL();
-                    previousUrl.replaceParameter("peptideId", String.valueOf(peptideIndex[rowIndex - 1]));
-                    previousUrl.replaceParameter("rowIndex", String.valueOf(sqlRowIndex - 1));
+                    previousURL = getViewContext().cloneActionURL();
+                    previousURL.replaceParameter("peptideId", String.valueOf(peptideIndex[rowIndex - 1]));
+                    previousURL.replaceParameter("rowIndex", String.valueOf(sqlRowIndex - 1));
                 }
 
                 if (rowIndex == (peptideIndex.length - 1))
-                    nextUrl = null;
+                    nextURL = null;
                 else
                 {
-                    nextUrl = getViewContext().cloneActionURL();
-                    nextUrl.replaceParameter("peptideId", String.valueOf(peptideIndex[rowIndex + 1]));
-                    nextUrl.replaceParameter("rowIndex", String.valueOf(sqlRowIndex + 1));
+                    nextURL = getViewContext().cloneActionURL();
+                    nextURL.replaceParameter("peptideId", String.valueOf(peptideIndex[rowIndex + 1]));
+                    nextURL.replaceParameter("rowIndex", String.valueOf(sqlRowIndex + 1));
                 }
 
-                showGzUrl = getViewContext().cloneActionURL();
-                showGzUrl.deleteParameter("seqId");
-                showGzUrl.deleteParameter("rowIndex");
-                showGzUrl.setAction("showGZFile");
+                showGzURL = getViewContext().cloneActionURL();
+                showGzURL.deleteParameter("seqId");
+                showGzURL.deleteParameter("rowIndex");
+                showGzURL.setAction("showGZFile");
             }
 
             setTitle(peptide.toString());
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
-            ShowPeptideContext ctx = new ShowPeptideContext(form, run, peptide, currentUrl, previousUrl, nextUrl, showGzUrl, modificationHref(run), getContainer(), getUser());
+            ShowPeptideContext ctx = new ShowPeptideContext(form, run, peptide, currentURL, previousURL, nextURL, showGzURL, modificationHref(run), getContainer(), getUser());
             return new JspView<ShowPeptideContext>("/org/labkey/ms2/showPeptide.jsp", ctx);
         }
 
@@ -788,10 +811,10 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private long[] getPeptideIndex(ActionURL currentUrl, MS2Run run) throws SQLException, ServletException
+    private long[] getPeptideIndex(ActionURL currentURL, MS2Run run) throws SQLException, ServletException
     {
-        AbstractMS2RunView view = getPeptideView(currentUrl.getParameter("grouping"), run);
-        return view.getPeptideIndex(currentUrl);
+        AbstractMS2RunView view = getPeptideView(currentURL.getParameter("grouping"), run);
+        return view.getPeptideIndex(currentURL);
     }
 
 
@@ -971,10 +994,10 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(ChartForm form, BindException errors) throws Exception
         {
             ViewContext ctx = getViewContext();
-            ActionURL queryUrl = ctx.cloneActionURL();
+            ActionURL queryURL = ctx.cloneActionURL();
             String queryString = (String) ctx.get("queryString");
-            queryUrl.setRawQuery(queryString);
-            int runId = Integer.parseInt(queryUrl.getParameter("run"));
+            queryURL.setRawQuery(queryString);
+            int runId = Integer.parseInt(queryURL.getParameter("run"));
 
             if (!isAuthorized(runId))
                 return null;
@@ -985,7 +1008,7 @@ public class MS2Controller extends SpringActionController
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
-            Map<String, SimpleFilter> filters = peptideView.getFilter(queryUrl, run);
+            Map<String, SimpleFilter> filters = peptideView.getFilter(queryURL, run);
             String peptideFilterInfo = "";
             String proteinFilterInfo = "";
             String proteinGroupFilterInfo = "";
@@ -1000,7 +1023,7 @@ public class MS2Controller extends SpringActionController
             }
 
             String chartTitle = "GO " + _goChartType + " Classifications";
-            SQLFragment fragment = peptideView.getProteins(queryUrl, run, form);
+            SQLFragment fragment = peptideView.getProteins(queryURL, run, form);
             PieJChartHelper pjch = PieJChartHelper.prepareGOPie(chartTitle, fragment, _goChartType);
             pjch.renderAsPNG(new NullOutputStream());
 
@@ -1015,7 +1038,7 @@ public class MS2Controller extends SpringActionController
             bean.queryString = queryString;
             bean.grouping = form.getGrouping();
             bean.pieHelperObjName = "piechart-" + (new Random().nextInt(1000000000));
-            bean.chartUrl = new ActionURL(DoOnePeptideChartAction.class, getContainer()).addParameter("ctype", _goChartType.toString()).addParameter("helpername", bean.pieHelperObjName);
+            bean.chartURL = new ActionURL(DoOnePeptideChartAction.class, getContainer()).addParameter("ctype", _goChartType.toString()).addParameter("helpername", bean.pieHelperObjName);
 
             Cache.getShared().put(bean.pieHelperObjName, pjch, Cache.HOUR * 2);
 
@@ -1038,7 +1061,7 @@ public class MS2Controller extends SpringActionController
         public String proteinFilterInfo = "";
         public String proteinGroupFilterInfo = "";
         public String pieHelperObjName;
-        public ActionURL chartUrl;
+        public ActionURL chartURL;
         public String imageMap;
         public String queryString;
         public String grouping;
@@ -1064,50 +1087,98 @@ public class MS2Controller extends SpringActionController
     }
 
 
+    private ActionURL getManageViewsURL(MS2Run run, ActionURL runURL)
+    {
+        ActionURL url = new ActionURL(ManageViewsAction.class, getContainer());
+        url.addParameter("run", run.getRun());
+        url.addParameter(ReturnUrlForm.Params.returnUrl, runURL.getLocalURIString());
+        return url;
+    }
+
+
     @RequiresPermission(ACL.PERM_READ)
-    public class ManageViewsAction extends SimpleViewAction
+    public class ManageViewsAction extends FormViewAction<RunForm>
     {
         private MS2Run _run;
+        private ActionURL _returnURL;
 
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public void validateCommand(RunForm form, Errors errors)
         {
-            ActionURL runUrl = getViewContext().cloneActionURL().setAction("showRun");
+        }
 
-            _run = MS2Manager.getRun(runUrl.getParameter("run"));
+        public ModelAndView getView(RunForm form, boolean reshow, BindException errors) throws Exception
+        {
+            _run = MS2Manager.getRun(form.getRun());
             if (null == _run)
             {
-                return HttpView.throwNotFoundMV("Could not find run " + runUrl.getParameter("run"));
+                return HttpView.throwNotFoundMV("Could not find run " + form.getRun());
             }
 
-            ActionURL postUrl = getViewContext().cloneActionURL();
-            postUrl.setAction("deleteViews");
-            postUrl.deleteParameter("x");
-            postUrl.deleteParameter("y");
+            _returnURL = form.getReturnActionURL();
 
             ManageViewsBean bean = new ManageViewsBean();
-            bean.postUrl = postUrl;
-            bean.select = renderViewSelect(10, false, ACL.PERM_DELETE, false);
+            bean.selectHTML = renderViewSelect(10, false, ACL.PERM_DELETE, false);
+            bean.returnURL = _returnURL;
 
             return new JspView<ManageViewsBean>("/org/labkey/ms2/manageViews.jsp", bean);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendRunNavTrail(root, _run, "Manage Views", getPageConfig(), "viewRun");
+            return appendRunNavTrail(root, _run, _returnURL, "Manage Views", getPageConfig(), "viewRun");
+        }
+
+        public boolean handlePost(RunForm runForm, BindException errors) throws Exception
+        {
+            List<String> viewNames = getViewContext().getList("viewParams");
+
+            if (null != viewNames)
+            {
+                PropertyManager.PropertyMap m = PropertyManager.getWritableProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_VIEWS_CATEGORY, true);
+
+                for (String viewName : viewNames)
+                    m.remove(viewName);
+
+                PropertyManager.saveProperties(m);
+
+                // NOTE: If names collide between shared and user-specific view names (unlikely since we append "(Shared)" to
+                // project views) only the shared names will be seen and deleted. Local names ending in "(Shared)" are shadowed
+                if (getContainer().hasPermission(getUser(), ACL.PERM_DELETE))
+                {
+                    m = PropertyManager.getWritableProperties(0, getContainer().getId(), MS2_VIEWS_CATEGORY, true);
+
+                    for (String name : viewNames)
+                    {
+                        if (name.endsWith(SHARED_VIEW_SUFFIX))
+                            name = name.substring(0, name.length() - SHARED_VIEW_SUFFIX.length());
+
+                        m.remove(name);
+                    }
+
+                    PropertyManager.saveProperties(m);
+                }
+            }
+
+            return false;  // Always reshow -- "Done" button returns user to run
+        }
+
+        public ActionURL getSuccessURL(RunForm runForm)
+        {
+            return null;
         }
     }
 
 
     public static class ManageViewsBean
     {
-        public ActionURL postUrl;
-        public StringBuilder select;
+        public ActionURL returnURL;
+        public StringBuilder selectHTML;
     }
 
 
     public static class PickViewBean
     {
-        public ActionURL nextUrl;
+        public ActionURL nextURL;
         public StringBuilder select;
         public HttpView extraOptionsView;
         public String viewInstructions;
@@ -1130,8 +1201,8 @@ public class MS2Controller extends SpringActionController
         {
             JspView<CompareOptionsBean> extraCompareOptions = new JspView<CompareOptionsBean>(_optionsJSP);
 
-            ActionURL nextUrl = getViewContext().cloneActionURL().setAction("applyCompareView");
-            return pickView(nextUrl, "Select a view to apply a filter to all the runs.", extraCompareOptions, runListId);
+            ActionURL nextURL = getViewContext().cloneActionURL().setAction("applyCompareView");
+            return pickView(nextURL, "Select a view to apply a filter to all the runs.", extraCompareOptions, runListId);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -1430,17 +1501,17 @@ public class MS2Controller extends SpringActionController
 
 
     // extraFormHtml gets inserted between the view dropdown and the button.
-    private HttpView pickView(ActionURL nextUrl, String viewInstructions, HttpView embeddedView, int runListId)
+    private HttpView pickView(ActionURL nextURL, String viewInstructions, HttpView embeddedView, int runListId)
     {
         JspView<PickViewBean> pickView = new JspView<PickViewBean>("/org/labkey/ms2/pickView.jsp", new PickViewBean());
 
         PickViewBean bean = pickView.getModelBean();
 
-        nextUrl.deleteFilterParameters("button");
-        nextUrl.deleteFilterParameters("button.x");
-        nextUrl.deleteFilterParameters("button.y");
+        nextURL.deleteFilterParameters("button");
+        nextURL.deleteFilterParameters("button.x");
+        nextURL.deleteFilterParameters("button.y");
 
-        bean.nextUrl = nextUrl;
+        bean.nextURL = nextURL;
         bean.select = renderViewSelect(0, true, ACL.PERM_READ, false);
         bean.extraOptionsView = embeddedView;
         bean.viewInstructions = viewInstructions;
@@ -1476,8 +1547,8 @@ public class MS2Controller extends SpringActionController
     {
         public ActionURL getRedirectURL(Object o) throws Exception
         {
-            ActionURL currentUrl = getViewContext().cloneActionURL();
-            String moveRuns = currentUrl.getParameter("moveRuns");
+            ActionURL currentURL = getViewContext().cloneActionURL();
+            String moveRuns = currentURL.getParameter("moveRuns");
             String[] idStrings = moveRuns.split(",");
             List<Integer> ids = new ArrayList<Integer>();
             for (String idString : idStrings)
@@ -1519,10 +1590,10 @@ public class MS2Controller extends SpringActionController
                 }
             }
 
-            currentUrl.setAction("showList");
-            currentUrl.deleteParameter("moveRuns");
+            currentURL.setAction("showList");
+            currentURL.deleteParameter("moveRuns");
 
-            return currentUrl;
+            return currentURL;
         }
     }
 
@@ -1545,8 +1616,8 @@ public class MS2Controller extends SpringActionController
 
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), runs.toArray(new MS2Run[runs.size()]));
-            ActionURL currentUrl = getViewContext().cloneActionURL();
-            SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentUrl, runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
+            ActionURL currentURL = getViewContext().cloneActionURL();
+            SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentURL, runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER);
 
             if (form.getExportFormat() != null && form.getExportFormat().startsWith("Excel"))
             {
@@ -1563,9 +1634,9 @@ public class MS2Controller extends SpringActionController
             if ("DTA".equals(form.getExportFormat()) || "PKL".equals(form.getExportFormat()))
             {
                 if (peptideView instanceof FlatPeptideView)
-                    exportSpectra(runs, currentUrl, peptideFilter, form.getExportFormat().toLowerCase());
+                    exportSpectra(runs, currentURL, peptideFilter, form.getExportFormat().toLowerCase());
                 else
-                    exportProteinsAsSpectra(runs, currentUrl, form.getExportFormat().toLowerCase(), peptideView, null);
+                    exportProteinsAsSpectra(runs, currentURL, form.getExportFormat().toLowerCase(), peptideView, null);
                 return;
             }
 
@@ -1580,10 +1651,10 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private void exportSpectra(List<MS2Run> runs, ActionURL currentUrl, SimpleFilter filter, String extension) throws IOException
+    private void exportSpectra(List<MS2Run> runs, ActionURL currentURL, SimpleFilter filter, String extension) throws IOException
     {
         Sort sort = ProteinManager.getPeptideBaseSort();
-        sort.applyURLSort(currentUrl, MS2Manager.getDataRegionNamePeptides());
+        sort.applyURLSort(currentURL, MS2Manager.getDataRegionNamePeptides());
         SpectrumIterator iter = new ResultSetSpectrumIterator(runs, filter, sort);
 
         SpectrumRenderer sr;
@@ -1863,7 +1934,7 @@ public class MS2Controller extends SpringActionController
 
     private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column) throws ServletException, SQLException
     {
-        ActionURL currentUrl = getViewContext().getActionURL();
+        ActionURL currentURL = getViewContext().getActionURL();
 
         List<MS2Run> runs;
         try
@@ -1884,7 +1955,7 @@ public class MS2Controller extends SpringActionController
             }
         }
 
-        CompareQuery query = CompareQuery.getCompareQuery(column, currentUrl, runs);
+        CompareQuery query = CompareQuery.getCompareQuery(column, currentURL, runs);
         if (query == null)
             return _renderError("You must specify a comparison type");
 
@@ -2073,11 +2144,11 @@ public class MS2Controller extends SpringActionController
             rgn.getDisplayColumn("fileType").setWidth("20");
             rgn.getDisplayColumn("insertId").setCaption("ID");
             rgn.getDisplayColumn("insertId").setWidth("5");
-            ActionURL showUrl = getViewContext().cloneActionURL();
-            showUrl.setAction("showAnnotInsertDetails");
-            showUrl.deleteParameters();
-            String detailUrl = showUrl.getLocalURIString() + "insertId=${InsertId}";
-            rgn.getDisplayColumn("insertId").setURL(detailUrl);
+            ActionURL showURL = getViewContext().cloneActionURL();
+            showURL.setAction("showAnnotInsertDetails");
+            showURL.deleteParameters();
+            String detailURL = showURL.getLocalURIString() + "insertId=${InsertId}";
+            rgn.getDisplayColumn("insertId").setURL(detailURL);
             rgn.addColumn(threadControl1);
             rgn.setMaxRows(MAX_INSERTIONS_DISPLAY_ROWS);
             rgn.setShowRecordSelectors(true);
@@ -2107,8 +2178,8 @@ public class MS2Controller extends SpringActionController
         {
             DataRegion rgn = new DataRegion();
             rgn.setColumns(ProteinManager.getTableInfoFastaAdmin().getColumns("FileName, Loaded, FastaId, Runs"));
-            String runsUrl = ActionURL.toPathString("MS2", "showAllRuns", (String)null) + "?" + MS2Manager.getDataRegionNameRuns() + ".FastaId~eq=${FastaId}";
-            rgn.getDisplayColumn("Runs").setURL(runsUrl);
+            String runsURL = ActionURL.toPathString("MS2", "showAllRuns", (String)null) + "?" + MS2Manager.getDataRegionNameRuns() + ".FastaId~eq=${FastaId}";
+            rgn.getDisplayColumn("Runs").setURL(runsURL);
             rgn.setFixedWidthColumns(false);
             rgn.setShowRecordSelectors(true);
 
@@ -2265,9 +2336,9 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private void exportProteinsAsSpectra(List<MS2Run> runs, ActionURL currentUrl, String extension, AbstractMS2RunView peptideView, String where) throws IOException
+    private void exportProteinsAsSpectra(List<MS2Run> runs, ActionURL currentURL, String extension, AbstractMS2RunView peptideView, String where) throws IOException
     {
-        SpectrumIterator iter = new ProteinResultSetSpectrumIterator(runs, currentUrl, peptideView, where);
+        SpectrumIterator iter = new ProteinResultSetSpectrumIterator(runs, currentURL, peptideView, where);
 
         SpectrumRenderer sr;
 
@@ -2334,7 +2405,7 @@ public class MS2Controller extends SpringActionController
                 for (int i = 0; i < Math.min(proteins.size(), ExcelWriter.MAX_ROWS); i++)
                 {
                     // Escape all single quotes in the protein names
-                    // TODO: Use (?, ?, ...) and JDBC parameters instead -- use IN FilterClause
+                    // TODO: Use IN FilterClause
                     String protein = proteins.get(i).replaceAll("'", "\\\\'");
 
                     if (i > 0)
@@ -2648,12 +2719,12 @@ public class MS2Controller extends SpringActionController
 
         MS2Run run = MS2Manager.getRun(form.run);
 
-        ActionURL currentUrl = getViewContext().getActionURL();
+        ActionURL currentURL = getViewContext().getActionURL();
         AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
 
         // Need to create a filter for 1) extra filter and 2) selected peptides
         // URL filter is applied automatically (except for DTA/PKL)
-        SimpleFilter baseFilter = ProteinManager.getPeptideFilter(currentUrl, ProteinManager.EXTRA_FILTER, run);
+        SimpleFilter baseFilter = ProteinManager.getPeptideFilter(currentURL, ProteinManager.EXTRA_FILTER, run);
 
         List<String> exportRows = null;
         if (selected)
@@ -2695,10 +2766,10 @@ public class MS2Controller extends SpringActionController
         }
 
         // Add URL filter manually
-        baseFilter.addAllClauses(ProteinManager.getPeptideFilter(currentUrl, ProteinManager.URL_FILTER, run));
+        baseFilter.addAllClauses(ProteinManager.getPeptideFilter(currentURL, ProteinManager.URL_FILTER, run));
 
         if ("DTA".equals(form.getExportFormat()) || "PKL".equals(form.getExportFormat()))
-            exportSpectra(Arrays.asList(run), currentUrl, baseFilter, form.getExportFormat().toLowerCase());
+            exportSpectra(Arrays.asList(run), currentURL, baseFilter, form.getExportFormat().toLowerCase());
     }
 
 
@@ -2859,23 +2930,25 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowPeptideProphetDetailsAction extends SimpleViewAction<RunForm>
     {
-        private MS2Run _run;
-
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return null;
 
-            _run = MS2Manager.getRun(form.run);
+            MS2Run run = MS2Manager.getRun(form.run);
+
+            String title = "Peptide Prophet Details";
+            setTitle(title);
+            getPageConfig().setTemplate(PageConfig.Template.Print);
 
             PeptideProphetSummary summary = MS2Manager.getPeptideProphetSummary(form.run);
 
-            return new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showPeptideProphetDetails.jsp", new PeptideProphetDetailsBean(_run, summary, "showPeptideProphetSensitivityPlot.view"));
+            return new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showPeptideProphetDetails.jsp", new PeptideProphetDetailsBean(run, summary, "showPeptideProphetSensitivityPlot.view", title));
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendRunNavTrail(root, _run, "Peptide Prophet Details", getPageConfig(), null);
+            return null;
         }
     }
 
@@ -2885,12 +2958,14 @@ public class MS2Controller extends SpringActionController
         public MS2Run run;
         public SensitivitySummary summary;
         public String action;
+        public String title;
 
-        public PeptideProphetDetailsBean(MS2Run run, SensitivitySummary summary, String action)
+        public PeptideProphetDetailsBean(MS2Run run, SensitivitySummary summary, String action, String title)
         {
             this.run = run;
             this.summary = summary;
             this.action = action;
+            this.title = title + " " + run.getDescription();
         }
     }
 
@@ -2913,21 +2988,23 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowProteinProphetDetailsAction extends SimpleViewAction<RunForm>
     {
-        private MS2Run _run;
-
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return null;
 
-            _run = MS2Manager.getRun(form.run);
+            MS2Run run = MS2Manager.getRun(form.run);
+            String title = "Protein Prophet Details";
+            setTitle(title);
+            getPageConfig().setTemplate(PageConfig.Template.Print);
+
             ProteinProphetFile summary = MS2Manager.getProteinProphetFileByRun(form.run);
-            return new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showSensitivityDetails.jsp", new PeptideProphetDetailsBean(_run, summary, "showProteinProphetSensitivityPlot.view"));
+            return new JspView<PeptideProphetDetailsBean>("/org/labkey/ms2/showSensitivityDetails.jsp", new PeptideProphetDetailsBean(run, summary, "showProteinProphetSensitivityPlot.view", title));
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendRunNavTrail(root, _run, "Protein Prophet Details", getPageConfig(), null);
+            return null;
         }
     }
 
@@ -2978,10 +3055,10 @@ public class MS2Controller extends SpringActionController
             bean.days = getDays();
             bean.stats = MS2Manager.getStats(bean.days);
             bean.purgeStatus = MS2Manager.getPurgeStatus();
-            bean.successfulUrl = showRunsUrl(false, 1);
-            bean.inProcessUrl = showRunsUrl(false, 0);
-            bean.failedUrl = showRunsUrl(false, 2);
-            bean.deletedUrl = showRunsUrl(true, null);
+            bean.successfulURL = showRunsURL(false, 1);
+            bean.inProcessURL = showRunsURL(false, 0);
+            bean.failedURL = showRunsURL(false, 2);
+            bean.deletedURL = showRunsURL(true, null);
 
             return new JspView<MS2AdminBean>("/org/labkey/ms2/ms2Admin.jsp", bean);
         }
@@ -2994,7 +3071,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private ActionURL showRunsUrl(Boolean deleted, Integer statusId)
+    private ActionURL showRunsURL(Boolean deleted, Integer statusId)
     {
         ActionURL url = new ActionURL("MS2", "showAllRuns", (String)null);
 
@@ -3010,10 +3087,10 @@ public class MS2Controller extends SpringActionController
 
     public static class MS2AdminBean
     {
-        public ActionURL successfulUrl;
-        public ActionURL inProcessUrl;
-        public ActionURL failedUrl;
-        public ActionURL deletedUrl;
+        public ActionURL successfulURL;
+        public ActionURL inProcessURL;
+        public ActionURL failedURL;
+        public ActionURL deletedURL;
         public Map<String, String> stats;
         public int days;
         public String purgeStatus;
@@ -3068,9 +3145,9 @@ public class MS2Controller extends SpringActionController
                         out.write(getFormattedValue(ctx));
                 }
             };
-            ActionURL showRunUrl = new ActionURL("MS2", "showRun", "ContainerPath");
-            String showUrlString = showRunUrl.getLocalURIString().replaceFirst("/ContainerPath/", "\\$\\{ContainerPath}/") + "run=${Run}";
-            descriptionColumn.setURLExpression(StringExpressionFactory.create(showUrlString, false));
+            ActionURL showRunURL = new ActionURL("MS2", "showRun", "ContainerPath");
+            String showURLString = showRunURL.getLocalURIString().replaceFirst("/ContainerPath/", "\\$\\{ContainerPath}/") + "run=${Run}";
+            descriptionColumn.setURLExpression(StringExpressionFactory.create(showURLString, false));
             rgn.addColumn(descriptionColumn);
 
             rgn.addColumns(MS2Manager.getTableInfoRuns().getColumns("Path, Created, Deleted, StatusId, Status, PeptideCount, SpectrumCount, FastaId"));
@@ -3100,21 +3177,89 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_READ)
-    public class SavePeptideColumnsAction extends RedirectAction<ColumnForm>
+    public static class ColumnForm extends RunForm
     {
-        ActionURL _returnURL;
+        private boolean saveDefault = false;
+        private String columns;
 
-        public ActionURL getSuccessURL(ColumnForm columnForm)
+        public boolean getSaveDefault()
         {
-            return _returnURL;
+            return saveDefault;
         }
 
-        public boolean doAction(ColumnForm form, BindException errors) throws Exception
+        public void setSaveDefault(boolean saveDefault)
         {
-            _returnURL = getViewContext().cloneActionURL();
-            _returnURL.setAction("showRun");
-            _returnURL.setRawQuery(form.getQueryString());
+            this.saveDefault = saveDefault;
+        }
+    }
+
+
+    private ActionURL getPickPeptideColumnsURL(MS2Run run, String currentColumns, ActionURL returnURL)
+    {
+        ActionURL url = new ActionURL(PickPeptideColumnsAction.class, getContainer());
+        url.addParameter("run", run.getRun());
+        if (null != currentColumns)
+            url.addParameter("columns", currentColumns);
+        url.addParameter(ReturnUrlForm.Params.returnUrl, returnURL.getLocalURIString());
+        return url;
+    }
+
+
+    public static ActionURL getPickPeptideColumnsPostURL(Container c, ActionURL returnURL, boolean saveDefault)
+    {
+        ActionURL url = new ActionURL(PickPeptideColumnsAction.class, c);
+        url.addParameter(ReturnUrlForm.Params.returnUrl, returnURL.getLocalURIString());
+        if (saveDefault)
+            url.addParameter("saveDefault", "1");
+        return url;
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class PickPeptideColumnsAction extends FormViewAction<ColumnForm>
+    {
+        private MS2Run _run;
+        private ActionURL _returnURL;
+
+        public ModelAndView getView(ColumnForm form, boolean reshow, BindException errors) throws Exception
+        {
+            _run = MS2Manager.getRun(form.run);
+            if (_run == null)
+            {
+                return HttpView.throwNotFoundMV("Could not find run");
+            }
+            _returnURL = form.getReturnActionURL();
+
+            AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), _run);
+
+            JspView<PickColumnsBean> pickColumns = new JspView<PickColumnsBean>("/org/labkey/ms2/pickPeptideColumns.jsp", new PickColumnsBean());
+            PickColumnsBean bean = pickColumns.getModelBean();
+            bean.commonColumns = _run.getCommonPeptideColumnNames();
+            bean.proteinProphetColumns = _run.getProteinProphetPeptideColumnNames();
+            bean.quantitationColumns = _run.getQuantitationPeptideColumnNames();
+
+            // Put a space between each name
+            bean.defaultColumns = peptideView.getPeptideColumnNames(null).replaceAll(" ", "").replaceAll(",", ", ");
+            bean.currentColumns = peptideView.getPeptideColumnNames(form.getColumns()).replaceAll(" ", "").replaceAll(",", ", ");
+            bean.returnURL = _returnURL;
+
+            getPageConfig().setFocusId("columns");
+            return pickColumns;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            appendRunNavTrail(root, _run, _returnURL, "Pick Peptide Columns", getPageConfig(), "pickPeptideColumns");
+            return root;
+        }
+
+        public void validateCommand(ColumnForm target, Errors errors)
+        {
+        }
+
+        public boolean handlePost(ColumnForm form, BindException errors) throws Exception
+        {
+            _returnURL = form.getReturnActionURL();
             String columnNames = form.getColumns();
             if (columnNames == null)
             {
@@ -3131,6 +3276,7 @@ public class MS2Controller extends SpringActionController
                 }
                 AbstractMS2RunView view = getPeptideView(_returnURL.getParameter("grouping"), run);
                 view.savePeptideColumnNames(run.getType(), columnNames);
+                _returnURL.deleteParameter("columns");
             }
             else
                 _returnURL.replaceParameter("columns", columnNames);
@@ -3138,130 +3284,9 @@ public class MS2Controller extends SpringActionController
             return true;
         }
 
-        public void validateCommand(ColumnForm target, Errors errors)
+        public ActionURL getSuccessURL(ColumnForm form)
         {
-        }
-    }
-
-
-    @RequiresPermission(ACL.PERM_READ)
-    public class SaveProteinColumnsAction extends RedirectAction<ColumnForm>
-    {
-        private ActionURL _returnUrl;
-
-        public ActionURL getSuccessURL(ColumnForm columnForm)
-        {
-            return _returnUrl;
-        }
-
-        public boolean doAction(ColumnForm form, BindException errors) throws Exception
-        {
-            _returnUrl = getViewContext().cloneActionURL();
-            _returnUrl.setAction("showRun");
-            _returnUrl.setRawQuery(form.getQueryString());
-            String columnNames = form.getColumns();
-            if (columnNames == null)
-            {
-                columnNames = "";
-            }
-            columnNames = columnNames.replaceAll(" ", "");
-
-            if (form.getSaveDefault())
-            {
-                MS2Run run = MS2Manager.getRun(_returnUrl.getParameter("run"));
-                AbstractMS2RunView view = getPeptideView(_returnUrl.getParameter("grouping"), run);
-                view.saveProteinColumnNames(run.getType(), columnNames);
-            }
-            else
-                _returnUrl.replaceParameter("proteinColumns", columnNames);
-
-            return true;
-        }
-
-        public void validateCommand(ColumnForm target, Errors errors)
-        {
-        }
-    }
-
-
-    public static class ColumnForm
-    {
-        private boolean saveDefault = false;
-        private String queryString;
-        private String columns;
-
-        public boolean getSaveDefault()
-        {
-            return saveDefault;
-        }
-
-        public void setSaveDefault(boolean saveDefault)
-        {
-            this.saveDefault = saveDefault;
-        }
-
-        public String getQueryString()
-        {
-            return queryString;
-        }
-
-        public void setQueryString(String queryString)
-        {
-            this.queryString = queryString;
-        }
-
-        public String getColumns()
-        {
-            return columns;
-        }
-
-        public void setColumns(String columns)
-        {
-            this.columns = columns;
-        }
-    }
-
-
-    @RequiresPermission(ACL.PERM_READ)
-    public class PickPeptideColumnsAction extends SimpleViewAction<RunForm>
-    {
-        private MS2Run _run;
-
-        public ModelAndView getView(RunForm form, BindException errors) throws Exception
-        {
-            ActionURL url = getViewContext().cloneActionURL();
-            _run = MS2Manager.getRun(form.run);
-            if (_run == null)
-            {
-                return HttpView.throwNotFoundMV("Could not find run");
-            }
-
-            AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), _run);
-
-            JspView<PickColumnsBean> pickColumns = new JspView<PickColumnsBean>("/org/labkey/ms2/pickPeptideColumns.jsp", new PickColumnsBean());
-            PickColumnsBean bean = pickColumns.getModelBean();
-            bean.commonColumns = _run.getCommonPeptideColumnNames();
-            bean.proteinProphetColumns = _run.getProteinProphetPeptideColumnNames();
-            bean.quantitationColumns = _run.getQuantitationPeptideColumnNames();
-
-            // Put a space between each name
-            bean.defaultColumns = peptideView.getPeptideColumnNames(null).replaceAll(" ", "").replaceAll(",", ", ");
-            bean.currentColumns = peptideView.getPeptideColumnNames(form.getColumns()).replaceAll(" ", "").replaceAll(",", ", ");
-
-            url.deleteParameter("columns");
-
-            bean.queryString = url.getRawQuery();
-            url.deleteParameters().setAction("savePeptideColumns");
-            bean.saveUrl = url;
-            bean.saveDefaultUrl = url.clone().addParameter("saveDefault", "1");
-
-            return pickColumns;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            appendRunNavTrail(root, _run, "Pick Peptide Columns", getPageConfig(), "pickPeptideColumns");
-            return root;
+            return _returnURL;
         }
     }
 
@@ -3273,27 +3298,46 @@ public class MS2Controller extends SpringActionController
         public String quantitationColumns;
         public String defaultColumns;
         public String currentColumns;
-        public String queryString;
-        public ActionURL saveUrl;
-        public ActionURL saveDefaultUrl;
+        public ActionURL returnURL;
+    }
+
+
+    private ActionURL getPickProteinColumnsURL(MS2Run run, String currentColumns, ActionURL returnURL)
+    {
+        ActionURL url = new ActionURL(PickProteinColumnsAction.class, getContainer());
+        url.addParameter("run", run.getRun());
+        if (null != currentColumns)
+            url.addParameter("proteinColumns", currentColumns);
+        url.addParameter(ReturnUrlForm.Params.returnUrl, returnURL.getLocalURIString());
+        return url;
+    }
+
+
+    public static ActionURL getPickProteinColumnsPostURL(Container c, ActionURL returnURL, boolean saveDefault)
+    {
+        ActionURL url = new ActionURL(PickProteinColumnsAction.class, c);
+        url.addParameter(ReturnUrlForm.Params.returnUrl, returnURL.getLocalURIString());
+        if (saveDefault)
+            url.addParameter("saveDefault", "1");
+        return url;
     }
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class PickProteinColumnsAction extends SimpleViewAction<RunForm>
+    public class PickProteinColumnsAction extends FormViewAction<ColumnForm>
     {
         private MS2Run _run;
+        private ActionURL _returnURL;
 
-        public ModelAndView getView(RunForm form, BindException errors) throws Exception
+        public ModelAndView getView(ColumnForm form, boolean reshow, BindException errors) throws Exception
         {
-            // TODO: NavTrail URL: cloneActionURL().setAction("showRun")
-            ActionURL url = getViewContext().cloneActionURL();
             _run = MS2Manager.getRun(form.run);
             if (_run == null)
             {
                 return HttpView.throwNotFoundMV("Could not find run " + form.run);
             }
 
+            _returnURL = form.getReturnActionURL();
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), _run);
 
             JspView<PickColumnsBean> pickColumns = new JspView<PickColumnsBean>("/org/labkey/ms2/pickProteinColumns.jsp", new PickColumnsBean());
@@ -3306,23 +3350,89 @@ public class MS2Controller extends SpringActionController
             // Put a space between each name
             bean.defaultColumns = peptideView.getProteinColumnNames(null).replaceAll(" ", "").replaceAll(",", ", ");
             bean.currentColumns = peptideView.getProteinColumnNames(form.getProteinColumns()).replaceAll(" ", "").replaceAll(",", ", ");
+            bean.returnURL = _returnURL;
 
-            url.deleteParameter("proteinColumns");
-
-            bean.queryString = url.getRawQuery();
-            url.deleteParameters().setAction("saveProteinColumns");
-            bean.saveUrl = url;
-            bean.saveDefaultUrl = url.clone().addParameter("saveDefault", "1");
-
+            getPageConfig().setFocusId("columns");
             return pickColumns;
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendRunNavTrail(root, _run, "Pick Protein Columns", getPageConfig(), "pickProteinColumns");
+            return appendRunNavTrail(root, _run, _returnURL, "Pick Protein Columns", getPageConfig(), "pickProteinColumns");
+        }
+
+        public void validateCommand(ColumnForm target, Errors errors)
+        {
+        }
+
+        public boolean handlePost(ColumnForm form, BindException errors) throws Exception
+        {
+            _returnURL = form.getReturnActionURL();
+            String columnNames = form.getColumns();
+            if (columnNames == null)
+            {
+                columnNames = "";
+            }
+            columnNames = columnNames.replaceAll(" ", "");
+
+            if (form.getSaveDefault())
+            {
+                MS2Run run = MS2Manager.getRun(_returnURL.getParameter("run"));
+                AbstractMS2RunView view = getPeptideView(_returnURL.getParameter("grouping"), run);
+                view.saveProteinColumnNames(run.getType(), columnNames);
+                _returnURL.deleteParameter("proteinColumns");
+            }
+            else
+                _returnURL.replaceParameter("proteinColumns", columnNames);
+
+            return true;
+        }
+
+        public ActionURL getSuccessURL(ColumnForm columnForm)
+        {
+            return _returnURL;
         }
     }
 
+
+/*    @RequiresPermission(ACL.PERM_READ)
+    public class SaveProteinColumnsAction extends RedirectAction<ColumnForm>
+    {
+        private ActionURL _returnURL;
+
+        public ActionURL getSuccessURL(ColumnForm columnForm)
+        {
+            return _returnURL;
+        }
+
+        public boolean doAction(ColumnForm form, BindException errors) throws Exception
+        {
+            _returnURL = form.getReturnActionURL();
+            String columnNames = form.getColumns();
+            if (columnNames == null)
+            {
+                columnNames = "";
+            }
+            columnNames = columnNames.replaceAll(" ", "");
+
+            if (form.getSaveDefault())
+            {
+                MS2Run run = MS2Manager.getRun(_returnURL.getParameter("run"));
+                AbstractMS2RunView view = getPeptideView(_returnURL.getParameter("grouping"), run);
+                view.saveProteinColumnNames(run.getType(), columnNames);
+                _returnURL.deleteParameter("proteinColumns");
+            }
+            else
+                _returnURL.replaceParameter("proteinColumns", columnNames);
+
+            return true;
+        }
+
+        public void validateCommand(ColumnForm target, Errors errors)
+        {
+        }
+    }
+*/
 
     public static class ChartForm extends RunForm
     {
@@ -3344,6 +3454,7 @@ public class MS2Controller extends SpringActionController
     public class SaveViewAction extends FormViewAction<MS2ViewForm>
     {
         private MS2Run _run;
+        private ActionURL _returnURL;
 
         public void validateCommand(MS2ViewForm target, Errors errors)
         {
@@ -3356,15 +3467,17 @@ public class MS2Controller extends SpringActionController
                 return null;
             }
 
+            _returnURL = getViewContext().cloneActionURL().setAction(ShowRunAction.class);
             JspView<SaveViewBean> saveView = new JspView<SaveViewBean>("/org/labkey/ms2/saveView.jsp", new SaveViewBean());
             SaveViewBean bean = saveView.getModelBean();
-            bean.returnUrl = getViewContext().cloneActionURL().setAction("showRun");
+            bean.returnURL = _returnURL;
             bean.canShare = getContainer().hasPermission(getUser(), ACL.PERM_INSERT);
 
-            ActionURL newUrl = bean.returnUrl.clone().deleteParameter("run");
-            bean.viewParams = newUrl.getRawQuery();
+            ActionURL newURL = bean.returnURL.clone().deleteParameter("run");
+            bean.viewParams = newURL.getRawQuery();
 
             _run = MS2Manager.getRun(form.getRun());
+            getPageConfig().setFocusId("name");
 
             return saveView;
         }
@@ -3388,28 +3501,27 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getSuccessURL(MS2ViewForm form)
         {
-            return new ActionURL(form.getReturnUrl());
+            return form.getReturnActionURL();
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendRunNavTrail(root, _run, "Save View", getPageConfig(), "viewRun");
+            return appendRunNavTrail(root, _run, _returnURL, "Save View", getPageConfig(), "viewRun");
         }
     }
 
 
     public static class SaveViewBean
     {
-        public ActionURL returnUrl;
+        public ActionURL returnURL;
         public boolean canShare;
         public String viewParams;
     }
 
 
-    public static class MS2ViewForm
+    public static class MS2ViewForm extends ReturnUrlForm
     {
         private String viewParams;
-        private String returnUrl;
         private String name;
         private int run;
         private boolean shared;
@@ -3422,16 +3534,6 @@ public class MS2Controller extends SpringActionController
         public String getName()
         {
             return this.name;
-        }
-
-        public void setReturnUrl(String returnUrl)
-        {
-            this.returnUrl = returnUrl;
-        }
-
-        public String getReturnUrl()
-        {
-            return this.returnUrl;
         }
 
         public void setViewParams(String viewParams)
@@ -3500,7 +3602,7 @@ public class MS2Controller extends SpringActionController
                 runId = 0;
             }
 
-            ActionURL currentUrl = getViewContext().getActionURL();
+            ActionURL currentURL = getViewContext().getActionURL();
 
             if (0 == seqId)
                 return HttpView.throwNotFoundMV("Protein sequence not found");
@@ -3526,7 +3628,7 @@ public class MS2Controller extends SpringActionController
                 getPageConfig().setTitle(getProteinTitle(_protein, true));
             }
 
-            return new ProteinsView(currentUrl, _run, form, new Protein[] {_protein}, null, peptideView);
+            return new ProteinsView(currentURL, _run, form, new Protein[] {_protein}, null, peptideView);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -3565,9 +3667,9 @@ public class MS2Controller extends SpringActionController
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
             Protein[] proteins = ProteinManager.getProteinsContainingPeptide(run.getFastaId(), peptide);
-            ActionURL currentUrl = getViewContext().cloneActionURL();
+            ActionURL currentURL = getViewContext().cloneActionURL();
             AbstractMS2RunView peptideView = new StandardProteinPeptideView(getViewContext(), run);
-            ProteinsView view = new ProteinsView(currentUrl, run, form, proteins, new String[]{peptide.getTrimmedPeptide()}, peptideView);
+            ProteinsView view = new ProteinsView(currentURL, run, form, proteins, new String[]{peptide.getTrimmedPeptide()}, peptideView);
             HttpView summary = new HtmlView("<table><tr><td><span class=\"navPageHeader\">All protein sequences in FASTA file " + run.getFastaFileName() + " that contain the peptide " + peptide + "</span></td></tr></table>");
             return new VBox(summary, view);
         }
@@ -3582,8 +3684,6 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowProteinGroupAction extends SimpleViewAction<DetailsForm>
     {
-        private MS2Run _run;
-
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             // May have a runId, a group number, and an indistinguishableGroupId, or might just have a
@@ -3618,9 +3718,9 @@ public class MS2Controller extends SpringActionController
             if (!isAuthorized(form.run))
                 return null;
 
-            _run = MS2Manager.getRun(form.run);
+            MS2Run run1 = MS2Manager.getRun(form.run);
 
-            ProteinProphetFile proteinProphet = _run.getProteinProphetFile();
+            ProteinProphetFile proteinProphet = run1.getProteinProphetFile();
             if (proteinProphet == null)
             {
                 return HttpView.throwNotFoundMV();
@@ -3632,17 +3732,21 @@ public class MS2Controller extends SpringActionController
             }
             Protein[] proteins = group.lookupProteins();
 
-            AbstractMS2RunView peptideView = new ProteinProphetPeptideView(getViewContext(), _run);
-            VBox view = new ProteinsView(getViewContext().getActionURL(), _run, form, proteins, null, peptideView);         // TODO: clone?
+            String title = "Protein Group Details";
+            setTitle(title);
+            getPageConfig().setTemplate(PageConfig.Template.Print);
+
+            ModelAndView titleView = new HtmlView("<table><tr><td><span class=\"navPageHeader\">" + title + " from " + run1.getDescription() + "</span></td></tr></table>\n");
+            AbstractMS2RunView peptideView = new ProteinProphetPeptideView(getViewContext(), run1);
+            VBox view = new ProteinsView(getViewContext().getActionURL(), run1, form, proteins, null, peptideView);         // TODO: clone?
             JspView summaryView = new JspView<ProteinGroupWithQuantitation>("/org/labkey/ms2/showProteinGroup.jsp", group);
 
-            return new VBox(summaryView, view);
+            return new VBox(titleView, summaryView, view);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            appendRunNavTrail(root, _run, "Protein Group Details", getPageConfig(), "showProteinGroup");
-            return root;
+            return null;
         }
     }
 
@@ -3656,7 +3760,7 @@ public class MS2Controller extends SpringActionController
 
     private static class ProteinsView extends VBox
     {
-        private ProteinsView(ActionURL currentUrl, MS2Run run, DetailsForm form, Protein[] proteins, String[] peptides, AbstractMS2RunView peptideView) throws Exception
+        private ProteinsView(ActionURL currentURL, MS2Run run, DetailsForm form, Protein[] proteins, String[] peptides, AbstractMS2RunView peptideView) throws Exception
         {
             // Limit to 100 proteins
             int proteinCount = Math.min(100, proteins.length);
@@ -3688,9 +3792,9 @@ public class MS2Controller extends SpringActionController
             if (showPeptides)
             {
                 List<Pair<String, String>> sqlSummaries = new ArrayList<Pair<String, String>>();
-                String peptideFilterString = ProteinManager.getPeptideFilter(currentUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run).getFilterText();
+                String peptideFilterString = ProteinManager.getPeptideFilter(currentURL, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, run).getFilterText();
                 sqlSummaries.add(new Pair<String, String>("Peptide Filter", peptideFilterString));
-                sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(currentUrl, MS2Manager.getDataRegionNamePeptides()).getSortText()));
+                sqlSummaries.add(new Pair<String, String>("Peptide Sort", new Sort(currentURL, MS2Manager.getDataRegionNamePeptides()).getSortText()));
                 CurrentFilterView peptideFilter = new CurrentFilterView(null, sqlSummaries);
                 peptideFilter.setTitle("Peptides");
                 addView(peptideFilter);
@@ -3846,60 +3950,12 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class DeleteViewsAction extends RedirectAction
-    {
-        public ActionURL getSuccessURL(Object o)
-        {
-            return getViewContext().cloneActionURL().setAction("manageViews");
-        }
-
-        public boolean doAction(Object o, BindException errors) throws Exception
-        {
-            List<String> viewNames = getViewContext().getList("viewParams");
-
-            if (null != viewNames)
-            {
-                PropertyManager.PropertyMap m = PropertyManager.getWritableProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_VIEWS_CATEGORY, true);
-
-                for (String viewName : viewNames)
-                    m.remove(viewName);
-
-                PropertyManager.saveProperties(m);
-
-                // NOTE: If names collide between shared and user-specific view names (unlikely since we append "(Shared)" to
-                // project views only the shared names will be seen and deleted. Local names ending in "(Shared)" are shadowed
-                if (getContainer().hasPermission(getUser(), ACL.PERM_DELETE))
-                {
-                    m = PropertyManager.getWritableProperties(0, getContainer().getId(), MS2_VIEWS_CATEGORY, true);
-
-                    for (String name : viewNames)
-                    {
-                        if (name.endsWith(SHARED_VIEW_SUFFIX))
-                            name = name.substring(0, name.length() - SHARED_VIEW_SUFFIX.length());
-
-                        m.remove(name);
-                    }
-
-                    PropertyManager.saveProperties(m);
-                }
-            }
-
-            return true;
-        }
-
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
-    }
-
-
-    @RequiresPermission(ACL.PERM_READ)
     public class ShowHierarchyAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            ActionURL currentUrl = getViewContext().cloneActionURL();
-            MS2RunHierarchyTree ht = new MS2RunHierarchyTree(currentUrl.getExtraPath(), getUser(), ACL.PERM_READ, currentUrl);
+            ActionURL currentURL = getViewContext().cloneActionURL();
+            MS2RunHierarchyTree ht = new MS2RunHierarchyTree(currentURL.getExtraPath(), getUser(), ACL.PERM_READ, currentURL);
 
             StringBuilder html = new StringBuilder();
             html.append("<script type=\"text/javascript\">\n");
@@ -4062,7 +4118,7 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getSuccessURL(Object o)
         {
-            return getShowListUrl(getContainer());
+            return getShowListURL(getContainer());
         }
     }
 
@@ -4301,7 +4357,7 @@ public class MS2Controller extends SpringActionController
         public ActionURL getRedirectURL(MS2ViewForm form) throws Exception
         {
             // Redirect to have Spring fill in the form and ensure that the DataRegion JavaScript sees the showRun action
-            return getApplyViewForwardUrl(form, "showRun");
+            return getApplyViewForwardURL(form, "showRun");
         }
     }
 
@@ -4312,7 +4368,7 @@ public class MS2Controller extends SpringActionController
         public ActionURL getForwardURL(MS2ViewForm form) throws Exception
         {
             // Forward without redirect: this lets Spring fill in the form but preserves the post data
-            return getApplyViewForwardUrl(form, "exportRuns");
+            return getApplyViewForwardURL(form, "exportRuns");
         }
     }
 
@@ -4322,7 +4378,7 @@ public class MS2Controller extends SpringActionController
     {
         public ActionURL getRedirectURL(MS2ViewForm form) throws Exception
         {
-            ActionURL redirectURL = getApplyViewForwardUrl(form, "showCompare");
+            ActionURL redirectURL = getApplyViewForwardURL(form, "showCompare");
 
             redirectURL.deleteParameter("submit.x");
             redirectURL.deleteParameter("submit.y");
@@ -4333,12 +4389,12 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private ActionURL getApplyViewForwardUrl(MS2ViewForm form, String action)
+    private ActionURL getApplyViewForwardURL(MS2ViewForm form, String action)
     {
         // Add the "view params" (which were posted as a single param) to the URL params.
-        ActionURL forwardUrl = getViewContext().cloneActionURL();
-        forwardUrl.setRawQuery(forwardUrl.getRawQuery() + (null == form.viewParams ? "" : "&" + form.viewParams));
-        return forwardUrl.setAction(action);
+        ActionURL forwardURL = getViewContext().cloneActionURL();
+        forwardURL.setRawQuery(forwardURL.getRawQuery() + (null == form.viewParams ? "" : "&" + form.viewParams));
+        return forwardURL.setAction(action);
     }
 
 
@@ -4478,7 +4534,7 @@ public class MS2Controller extends SpringActionController
                 if (c == null)
                     HttpView.throwNotFound();
                 else
-                    return getShowListUrl(c);
+                    return getShowListURL(c);
             }
 
             if (null != form.getFileName())
@@ -4514,7 +4570,7 @@ public class MS2Controller extends SpringActionController
                     if (run == -1)
                         HttpView.throwNotFound();
 
-                    url = getShowListUrl(c);
+                    url = getShowListURL(c);
                     url.addParameter(MS2Manager.getDataRegionNameExperimentRuns() + ".Run~eq", Integer.toString(run));
                 }
                 else if (!AppProps.getInstance().hasPipelineCluster())
@@ -4845,6 +4901,7 @@ public class MS2Controller extends SpringActionController
         String columns;
         String proteinColumns;
         String proteinGroupingId;
+        String returnUrl;
 
         ArrayList<String> errors;
 
@@ -4953,6 +5010,21 @@ public class MS2Controller extends SpringActionController
         public void setProteinGroupingId(String proteinGroupingId)
         {
             this.proteinGroupingId = proteinGroupingId;
+        }
+
+        public ActionURL getReturnActionURL()
+        {
+            return new ActionURL(returnUrl);
+        }
+
+        public String getReturnUrl()
+        {
+            return returnUrl;
+        }
+
+        public void setReturnUrl(String returnUrl)
+        {
+            this.returnUrl = returnUrl;
         }
     }
 

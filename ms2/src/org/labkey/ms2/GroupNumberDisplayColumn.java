@@ -35,6 +35,7 @@ public class GroupNumberDisplayColumn extends DataColumn
         ActionURL actionURL = url.clone();
         actionURL.setAction("showProteinGroup.view");
         setURL(actionURL.toString() + "&groupNumber=${" + _groupNumber + "}&indistinguishableCollectionId=${" + _collectionId + "}");
+        setLinkTarget("prot");
         setWidth("50");
     }
 
@@ -112,6 +113,7 @@ public class GroupNumberDisplayColumn extends DataColumn
 
             ActionURL url = new ActionURL(MS2Controller.ShowProteinGroupAction.class, _container);
             setURL(url.toString() + "&grouping=proteinprophet&proteinGroupId=${" + groupIdCol.getAlias() + "}");
+            setLinkTarget("prot");
         }
     }
 }

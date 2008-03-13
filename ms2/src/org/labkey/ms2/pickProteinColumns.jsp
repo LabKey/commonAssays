@@ -1,3 +1,4 @@
+<%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -5,9 +6,10 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.PickColumnsBean bean = ((JspView<MS2Controller.PickColumnsBean>) HttpView.currentView()).getModelBean();
+    Container c = getViewContext().getContainer();
 %>
 <table class="dataRegion"><tr>
-  <td><form method="post" action="<%=h(bean.saveUrl)%>"><table class="dataRegion" border="0">
+  <td><form method="post" action=""><table class="dataRegion" border="0">
     <tr>
         <td><strong>Common:</strong></td>
         <td><%=h(bean.commonColumns)%></td>
@@ -46,15 +48,12 @@
       </tr>
     <tr>
         <td><strong>Current:</strong></td>
-        <td><textarea style="font-family: verdana; width:100%;" name="columns" id="columns" rows="3" cols="100"><%=h(bean.currentColumns)%></textArea></td>
+        <td><textarea style="font-family:sans-serif; font-size:small; width:100%;" name="columns" id="columns" rows="3" cols="100"><%=h(bean.currentColumns)%></textArea></td>
     </tr>
-    <tr><td colspan=2><input type=hidden value="<%=h(bean.queryString)%>" name="queryString"></td></tr>
-    <tr><td colspan=2 align=center><input type="image" src="<%=PageFlowUtil.buttonSrc("Pick Columns")%>"> <input type="image" src="<%=PageFlowUtil.buttonSrc("Save As Default")%>" onclick="this.form.action='<%=h(bean.saveDefaultUrl)%>';"></td></tr>
+    <tr><td colspan=2 align=center><input type="image" src="<%=PageFlowUtil.buttonSrc("Pick Columns")%>" onclick="this.form.action='<%=h(MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, false))%>';"> <input type="image" src="<%=PageFlowUtil.buttonSrc("Save As Default")%>" onclick="this.form.action='<%=h(MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, true))%>';"></td></tr>
   </table></form></td>
 </tr></table>
-<script type="text/javascript" for=window event=onload>
-try {document.getElementById("columns").focus();} catch (x) {}
-</script>
+
 <script type="text/javascript">
 function setCurrent(newString)
 {

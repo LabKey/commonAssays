@@ -7,26 +7,26 @@
 <%
     MS2Controller.FilterHeaderBean bean = ((JspView<MS2Controller.FilterHeaderBean>)HttpView.currentView()).getModelBean();
 %>
-<form method="post" action="<%=h(bean.applyViewUrl)%>">
+<form method="post" action="<%=h(bean.applyViewURL)%>">
     <table class="dataRegion" border="0">
         <tr>
             <td valign=bottom><%=bean.applyView%></td>
             <td valign=bottom><input type="image" value="Go" src="<%=PageFlowUtil.buttonSrc("Go")%>"></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td valign=bottom><a href="<%=h(bean.saveViewUrl)%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Save View")%>"></a></td>
-            <td valign=bottom><a href="<%=h(bean.manageViewsUrl)%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Manage Views")%>"></a></td><%
+            <td valign=bottom><a href="<%=h(bean.saveViewURL)%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Save View")%>"></a></td>
+            <td valign=bottom><a href="<%=h(bean.manageViewsURL)%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Manage Views")%>"></a></td><%
             if (bean.currentViewType.supportsPeptideColumnPicker())
             { %>
-            <td valign=bottom><a href="<%=h(bean.pickPeptideColumnsUrl)%>" id="pickPeptideColumns"><img border=0 src="<%=PageFlowUtil.buttonSrc("Pick Peptide Columns")%>"></a></td><%
+            <td valign=bottom><a href="<%=h(bean.pickPeptideColumnsURL)%>" id="pickPeptideColumns"><img border=0 src="<%=PageFlowUtil.buttonSrc("Pick Peptide Columns")%>"></a></td><%
             }
             if (bean.currentViewType.supportsProteinColumnPicker())
             { %>
-            <td valign=bottom><a href="<%=h(bean.pickProteinColumnsUrl)%>" id="pickProteinColumns"><img border=0 src="<%=PageFlowUtil.buttonSrc("Pick Protein Columns")%>"></a></td><%
+            <td valign=bottom><a href="<%=h(bean.pickProteinColumnsURL)%>" id="pickProteinColumns"><img border=0 src="<%=PageFlowUtil.buttonSrc("Pick Protein Columns")%>"></a></td><%
             } %>
         </tr>
     </table>
 </form>
-<form method="post" id="extraFilter" action="<%=h(bean.extraFilterUrl)%>">
+<form method="post" id="extraFilter" action="<%=h(bean.extraFilterURL)%>">
     <table cellspacing="0" cellpadding="0" border="0">
         <tr>
             <td style="height: 100%; padding-right: 1em">

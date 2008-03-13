@@ -8,7 +8,7 @@
 %>
 <p><%=h(bean.viewInstructions)%></p>
 <p>To define a view: display a run, filter the run, click "Save View", and pick a name.  The filter you've set up will be saved with the view and the name will then appear in the list below.</p>
-<form method="get" action="<%=h(bean.nextUrl)%>">
+<form method="get" action="<%=h(bean.nextURL)%>">
     <input type="hidden" name="runList" value="<%=bean.runList%>">
     <%=bean.select%><br/>
     <br/><br/>

@@ -32,7 +32,7 @@ Run: <%=h(bean.run.toString())%><br>
     </td>
 </tr>
 <tr><td>
-<img src="<%=h(bean.chartUrl)%>" width="800" height="800" alt="GO Chart" usemap="#pie1">
+<img src="<%=h(bean.chartURL)%>" width="800" height="800" alt="GO Chart" usemap="#pie1">
 <input type="hidden" name="run" value="<%=bean.run.getRun()%>">
 <input type="hidden" name="queryString" value="<%=h(bean.queryString)%>">
 <input type="hidden" name="grouping" value="<%=h(bean.grouping)%>">

@@ -6,13 +6,24 @@
 <%
     MS2Controller.SaveViewBean bean = ((JspView<MS2Controller.SaveViewBean>) HttpView.currentView()).getModelBean();
 %>
-<form method="post" action="saveView.view" class="dataRegion"><table>
-  <tr><td>Name:</td><td class="normal"><input name="name" id="name" style="width:200px;">
-  <input type=hidden value="<%=h(bean.viewParams)%>" name="viewParams"><input type=hidden value="<%=h(bean.returnUrl)%>" name="returnUrl">
-  </td></tr><%
+<form method="post" action="saveView.view" class="dataRegion">
+    <table>
+        <tr>
+            <td>Name:</td>
+            <td class="normal">
+                <input name="name" id="name" style="width:200px;">
+                <input type=hidden value="<%=h(bean.viewParams)%>" name="viewParams">
+                <input type=hidden value="<%=h(bean.returnURL)%>" name="returnUrl">
+            </td>
+        </tr><%
 if (bean.canShare)
 { %>
-  <tr><td colspan=2><input name=shared type=checkbox> Share view with all users of this folder</td></tr><%
+        <tr>
+            <td colspan=2><input name=shared type=checkbox> Share view with all users of this folder</td>
+        </tr><%
 } %>
-  <tr><td colspan=2><input type="image" src="<%=PageFlowUtil.buttonSrc("Save View")%>"></td></tr>
-</table></form><script for=window event=onload>try {document.getElementById("name").focus();} catch(x){}</script>
+        <tr>
+            <td colspan=2><input type="image" src="<%=PageFlowUtil.buttonSrc("Save View")%>"> <%=PageFlowUtil.buttonLink("Cancel", bean.returnURL)%></td>
+        </tr>
+    </table>
+</form>

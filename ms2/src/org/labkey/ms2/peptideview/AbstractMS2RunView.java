@@ -124,7 +124,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
             types.add(ProteinDictionaryHelpers.GoTypes.PROCESS);
             for (ProteinDictionaryHelpers.GoTypes goType : types)
             {
-                ActionURL url = MS2Controller.getPeptideChartUrl(getContainer(), goType);
+                ActionURL url = MS2Controller.getPeptideChartURL(getContainer(), goType);
                 goButton.addMenuItem(goType.toString(), "javascript: document.forms[\"" + dataRegion.getName() + "\"].action=\"" + url.getLocalURIString() + "\"; document.forms[\"" + dataRegion.getName() + "\"].submit();");
             }
             result.add(goButton);

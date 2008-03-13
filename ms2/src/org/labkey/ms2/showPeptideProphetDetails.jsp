@@ -1,6 +1,3 @@
-<%@ page import="org.labkey.api.view.ActionURL"%>
-<%@ page import="org.labkey.ms2.MS2Run"%>
-
 <%@ include file="showSensitivityDetails.jsp" %>
 
 <table>

@@ -8,11 +8,11 @@
 %>
 <table class="dataRegion">
 <tr><td>&nbsp;</td><td><b>MS2 Runs</b></td><td><b>MS2 Peptides</b></td><td><b>MS2 Spectra</b></td></tr>
-<tr><td>Successful:</td><td><a href="<%=h(bean.successfulUrl)%>"><%=bean.stats.get("successfulRuns")%></a></td><td><%=bean.stats.get("successfulPeptides")%></td><td><%=bean.stats.get("successfulSpectra")%></td></tr>
-<tr><td>In-Process:</td><td><a href="<%=h(bean.inProcessUrl)%>"><%=bean.stats.get("inProcessRuns")%></a></td><td><%=bean.stats.get("inProcessPeptides")%></td><td><%=bean.stats.get("inProcessSpectra")%></td></tr>
-<tr><td>Failed:</td><td><a href="<%=h(bean.failedUrl)%>"><%=bean.stats.get("failedRuns")%></a></td><td><%=bean.stats.get("failedPeptides")%></td><td><%=bean.stats.get("failedSpectra")%></td></tr>
+<tr><td>Successful:</td><td><a href="<%=h(bean.successfulURL)%>"><%=bean.stats.get("successfulRuns")%></a></td><td><%=bean.stats.get("successfulPeptides")%></td><td><%=bean.stats.get("successfulSpectra")%></td></tr>
+<tr><td>In-Process:</td><td><a href="<%=h(bean.inProcessURL)%>"><%=bean.stats.get("inProcessRuns")%></a></td><td><%=bean.stats.get("inProcessPeptides")%></td><td><%=bean.stats.get("inProcessSpectra")%></td></tr>
+<tr><td>Failed:</td><td><a href="<%=h(bean.failedURL)%>"><%=bean.stats.get("failedRuns")%></a></td><td><%=bean.stats.get("failedPeptides")%></td><td><%=bean.stats.get("failedSpectra")%></td></tr>
 <tr><td>&nbsp;</td></tr>
-<tr><td>Deleted:</td><td><a href="<%=h(bean.deletedUrl)%>"><%=bean.stats.get("deletedRuns")%></a></td><td><%=bean.stats.get("deletedPeptides")%></td><td><%=bean.stats.get("deletedSpectra")%></td></tr>
+<tr><td>Deleted:</td><td><a href="<%=h(bean.deletedURL)%>"><%=bean.stats.get("deletedRuns")%></a></td><td><%=bean.stats.get("deletedPeptides")%></td><td><%=bean.stats.get("deletedSpectra")%></td></tr>
 <tr><td>To Be Purged:</td><td><%=bean.stats.get("purgedRuns")%></td><td><%=bean.stats.get("purgedPeptides")%></td><td><%=bean.stats.get("purgedSpectra")%></td></tr>
 </table><br>
 
