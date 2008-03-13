@@ -206,10 +206,10 @@ public class FeaturesTableInfo extends FilteredTable
 
             //set a base filter condition to exclude deleted and unimported runs
             //and only runs from the correct containers
-            sql.append("\nWHERE r.Container IN (");
+            sql.append("\nWHERE (r.Container IS NULL OR r.Container IN (");
             sql.append(_schema.getContainerInList());
-            sql.append(")");
-            sql.append(new SQLFragment("\nAND r.Deleted=?", false)); //filter out deleted MS2 runs
+            sql.append("))");
+            sql.append(new SQLFragment("\nAND (r.Deleted IS NULL OR r.Deleted=?)", false)); //filter out deleted MS2 runs
             if(!includeDeleted())
                 sql.append(new SQLFragment("\nAND fi.Imported=? AND fi.Deleted=?", true, false));
 
