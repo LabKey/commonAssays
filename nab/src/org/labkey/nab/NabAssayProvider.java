@@ -371,7 +371,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                 addProperty(study, "Run Comments", run.getComments(), dataMap, typeSet);
                 addProperty(study, "Run CreatedOn", run.getCreated(), dataMap, typeSet);
                 User createdBy = run.getCreatedBy();
-                addProperty(study, "Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(), dataMap, typeSet);
+                addProperty(study, "Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(HttpView.currentContext()), dataMap, typeSet);
                 dataMaps[rowIndex++] = dataMap;
             }
             return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol,

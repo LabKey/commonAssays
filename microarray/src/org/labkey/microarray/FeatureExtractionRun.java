@@ -5,6 +5,7 @@ import org.labkey.api.data.Entity;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.util.MemTracker;
+import org.labkey.api.view.ViewContext;
 
 import javax.ejb.*;
 import java.io.Serializable;
@@ -55,9 +56,9 @@ public class FeatureExtractionRun extends Entity implements Serializable, Clonea
     }
 
     @Transient
-    public String getCreatedByName()
+    public String getCreatedByName(ViewContext context)
     {
-        return UserManager.getDisplayName(getCreatedBy());
+        return UserManager.getDisplayName(getCreatedBy(), context);
     }
 
     public String getBarcode() {

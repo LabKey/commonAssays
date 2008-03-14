@@ -327,7 +327,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 addProperty(study, "Run Comments", run.getComment(), dataMap, types);
                 addProperty(study, "Run CreatedOn", run.getCreated(), dataMap, types);
                 User createdBy = run.getCreatedBy();
-                addProperty(study, "Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(), dataMap, types);
+                addProperty(study, "Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(HttpView.currentContext()), dataMap, types);
 
                 Map<String, ObjectProperty> props = runProperties.get(run);
                 if (props == null)
