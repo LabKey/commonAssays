@@ -78,7 +78,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
             else
             {
                 rgn = new DataRegion();
-                rgn.setDisplayColumnList(originalColumns);
+                rgn.setDisplayColumns(originalColumns);
             }
             rgn.setShowPagination(false);
             rgn.setMaxRows(getMaxRows());

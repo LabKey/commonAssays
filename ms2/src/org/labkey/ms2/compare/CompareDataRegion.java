@@ -53,7 +53,8 @@ public class CompareDataRegion extends DataRegion
         _offset = offset;
     }
 
-    protected void renderGridHeaders(RenderContext ctx, Writer out, DisplayColumn[] renderers) throws SQLException, IOException
+    @Override
+    protected void renderGridHeaders(RenderContext ctx, Writer out, List<DisplayColumn> renderers) throws SQLException, IOException
     {
         // Add an extra row and render the multi-column captions
         out.write("<tr>");
@@ -67,7 +68,7 @@ public class CompareDataRegion extends DataRegion
         {
             if (shade)
             {
-                renderers[columnIndex].setBackgroundColor("#EEEEEE");
+                renderers.get(columnIndex).setBackgroundColor("#EEEEEE");
             }
             shade = !shade;
             columnIndex++;
@@ -91,7 +92,7 @@ public class CompareDataRegion extends DataRegion
                 out.write(" bgcolor=\"#EEEEEE\"");
                 for (int i = 0; i < _colSpan; i++)
                 {
-                    renderers[columnIndex++].setBackgroundColor("#EEEEEE");
+                    renderers.get(columnIndex++).setBackgroundColor("#EEEEEE");
                 }
             }
             else
@@ -102,10 +103,10 @@ public class CompareDataRegion extends DataRegion
             out.write(">" + caption + "</td>");
             shade = !shade;
         }
-        if (_colSpan * _multiColumnCaptions.size() + _offset < renderers.length)
+        if (_colSpan * _multiColumnCaptions.size() + _offset < renderers.size())
         {
             out.write("<td colspan=\"");
-            out.write(Integer.toString(renderers.length - _colSpan * _multiColumnCaptions.size() + _offset));
+            out.write(Integer.toString(renderers.size() - _colSpan * _multiColumnCaptions.size() + _offset));
             out.write("\" style=\"border-right: 1px solid rgb(170, 170, 170); border-bottom: 1px solid rgb(170, 170, 170)\">&nbsp;</td>");
         }
         out.write("</tr>\n");

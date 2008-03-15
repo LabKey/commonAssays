@@ -264,7 +264,7 @@ public abstract class AbstractRunCompareView extends QueryView
         rgn.setSelectionKey(getSelectionKey());
         rgn.setShowRecordSelectors(showRecordSelectors());
         rgn.setName(getDataRegionName());
-        rgn.setDisplayColumnList(displayColumns);
+        rgn.setDisplayColumns(displayColumns);
         return rgn;
     }
 

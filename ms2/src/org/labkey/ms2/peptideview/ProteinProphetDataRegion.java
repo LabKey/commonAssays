@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
 
 /**
  * User: jeckels
@@ -25,7 +26,8 @@ public class ProteinProphetDataRegion extends AbstractProteinDataRegion
         setShadeAlternatingRows(true);
     }
 
-    protected void renderTableRow(RenderContext ctx, Writer out, DisplayColumn[] renderers, int rowIndex) throws SQLException, IOException
+    @Override
+    protected void renderTableRow(RenderContext ctx, Writer out, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
     {
         _groupedRS.previous();
         ResultSet nestedRS = _groupedRS.getNextResultSet();

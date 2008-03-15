@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
+import java.util.List;
 
 public class ChooseRunsRegion extends DataRegion
 {
@@ -40,7 +41,8 @@ public class ChooseRunsRegion extends DataRegion
 
     // Allows subclasses to do pre-row and post-row processing
     // CONSIDER: Separate as renderTableRow and renderTableRowContents?
-    protected void renderTableRow(RenderContext ctx, Writer out, DisplayColumn[] renderers, int rowIndex) throws SQLException, IOException
+    @Override
+    protected void renderTableRow(RenderContext ctx, Writer out, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
     {
         out.write("<tr");
         String disabledReason = getDisabledReason(ctx);

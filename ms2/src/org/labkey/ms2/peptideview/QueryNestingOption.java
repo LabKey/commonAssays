@@ -104,13 +104,13 @@ public abstract class QueryNestingOption
         DataRegion nestedRgn = new DataRegion();
         nestedRgn.setName(dataRegionName);
         nestedRgn.setButtonBarPosition(DataRegion.ButtonBarPosition.NONE);
-        nestedRgn.setDisplayColumnList(innerColumns);
+        nestedRgn.setDisplayColumns(innerColumns);
         dataRegion.setNestedRegion(nestedRgn);
         for (DisplayColumn column : outerColumns)
         {
             column.setCaption(column.getColumnInfo().getCaption());
         }
-        dataRegion.setDisplayColumnList(outerColumns);
+        dataRegion.setDisplayColumns(outerColumns);
 
         return dataRegion;
     }

@@ -204,6 +204,7 @@ flow/src/org/labkey/flow/analysis/model/FJ8Workspace.java -text
 flow/src/org/labkey/flow/analysis/model/FixedCalibrationTable.java -text
 flow/src/org/labkey/flow/analysis/model/FlowException.java -text
 flow/src/org/labkey/flow/analysis/model/FlowJoWorkspace.java -text
+flow/src/org/labkey/flow/analysis/model/FlowJoWorkspaceWriter.java -text
 flow/src/org/labkey/flow/analysis/model/Gate.java -text
 flow/src/org/labkey/flow/analysis/model/GateList.java -text
 flow/src/org/labkey/flow/analysis/model/IdentityCalibrationTable.java -text

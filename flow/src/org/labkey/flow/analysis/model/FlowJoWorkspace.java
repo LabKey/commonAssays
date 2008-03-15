@@ -32,20 +32,20 @@ import java.util.*;
 
 abstract public class FlowJoWorkspace implements Serializable
 {
-    protected Map<String, Analysis> _groupAnalyses = new HashMap();
-    protected Map<String, Analysis> _sampleAnalyses = new HashMap();
-    protected Map<String, AttributeSet> _sampleAnalysisResults = new HashMap();
-    protected Map<String, SampleInfo> _sampleInfos = new HashMap();
-    protected Map<String, ParameterInfo> _parameters = new LinkedHashMap();
-    protected List<CalibrationTable> _calibrationTables = new ArrayList();
+    protected Map<String, Analysis> _groupAnalyses = new HashMap<String, Analysis>();
+    protected Map<String, Analysis> _sampleAnalyses = new HashMap<String, Analysis>();
+    protected Map<String, AttributeSet> _sampleAnalysisResults = new HashMap<String, AttributeSet>();
+    protected Map<String, SampleInfo> _sampleInfos = new HashMap<String, SampleInfo>();
+    protected Map<String, ParameterInfo> _parameters = new LinkedHashMap<String, ParameterInfo>();
+    protected List<CalibrationTable> _calibrationTables = new ArrayList<CalibrationTable>();
     protected ScriptSettings _settings = new ScriptSettings();
     protected List<String> _warnings;
-    protected List<CompensationMatrix> _compensationMatrices = new ArrayList();
-    protected List<AutoCompensationScript> _autoCompensationScripts = new ArrayList();
+    protected List<CompensationMatrix> _compensationMatrices = new ArrayList<CompensationMatrix>();
+    protected List<AutoCompensationScript> _autoCompensationScripts = new ArrayList<AutoCompensationScript>();
 
     public class SampleInfo implements Serializable
     {
-        Map<String, String> _keywords = new HashMap();
+        Map<String, String> _keywords = new HashMap<String, String>();
         Map<String, ParameterInfo> _parameters;
         String _sampleId;
         String _compensationId;
@@ -190,7 +190,7 @@ abstract public class FlowJoWorkspace implements Serializable
 
     public Set<CompensationMatrix> getUsedCompensationMatrices()
     {
-        Set<CompensationMatrix> ret = new LinkedHashSet();
+        Set<CompensationMatrix> ret = new LinkedHashSet<CompensationMatrix>();
         for (SampleInfo sample : getSamples())
         {
             CompensationMatrix comp = sample.getCompensationMatrix();
@@ -208,7 +208,7 @@ abstract public class FlowJoWorkspace implements Serializable
 
     static List<Element> getElementsByTagName(Element parent, String tagName)
     {
-        List<Element> ret = new ArrayList();
+        List<Element> ret = new ArrayList<Element>();
         NodeList nl = parent.getChildNodes();
         for (int i = 0; i < nl.getLength(); i ++)
         {
@@ -269,7 +269,7 @@ abstract public class FlowJoWorkspace implements Serializable
         {
             return 4096;
         }
-        return Double.valueOf(elParameter.getAttribute("highValue")) * findMultiplier(elParameter);
+        return Double.valueOf(elParameter.getAttribute("highValue")).doubleValue() * findMultiplier(elParameter);
     }
 
     static public String cleanName(String name)
@@ -313,7 +313,7 @@ abstract public class FlowJoWorkspace implements Serializable
 
     public List<SampleInfo> getSamples()
     {
-        return new ArrayList(_sampleInfos.values());
+        return new ArrayList<SampleInfo>(_sampleInfos.values());
     }
 
     public SampleInfo getSample(String sampleId)
@@ -330,7 +330,7 @@ abstract public class FlowJoWorkspace implements Serializable
     }
     public String[] getParameters()
     {
-        return _parameters.keySet().toArray(new String[0]);
+        return _parameters.keySet().toArray(new String[_parameters.keySet().size()]);
     }
 
     static public class CompensationChannelData
@@ -441,7 +441,7 @@ abstract public class FlowJoWorkspace implements Serializable
         return true;
     }
 
-    private void addPopulationMap(HashMap<SubsetSpec, Population> map, SubsetSpec parent, Population pop)
+    private void addPopulationMap(Map<SubsetSpec, Population> map, SubsetSpec parent, Population pop)
     {
         SubsetSpec subset = new SubsetSpec(parent, pop.getName());
         map.put(subset, pop);
@@ -459,9 +459,9 @@ abstract public class FlowJoWorkspace implements Serializable
     private boolean isUniversal(SubsetSpec subset, List<Map<SubsetSpec,Population>> lstMap)
     {
         Population popCompare = null;
-        for (int i = 0; i < lstMap.size(); i ++)
+        for (Map<SubsetSpec, Population> aLstMap : lstMap)
         {
-            Population pop = lstMap.get(i).get(subset);
+            Population pop = aLstMap.get(subset);
             if (pop == null)
                 continue;
             if (popCompare == null)
@@ -504,7 +504,7 @@ abstract public class FlowJoWorkspace implements Serializable
      * If it is, then the "FITC+/L" gate is changed to "L".
      * If it is not, then the "FITC+/L" gate is changed to "FITC+L"
      */
-    private void simplifySubsetNames(LinkedHashMap<SubsetSpec, SubsetSpec> subsetMap, List<Map<SubsetSpec,Population>> lstPopulationMap, SubsetSpec oldParent, Population population)
+    private void simplifySubsetNames(Map<SubsetSpec, SubsetSpec> subsetMap, List<Map<SubsetSpec,Population>> lstPopulationMap, SubsetSpec oldParent, Population population)
     {
         SubsetSpec newParent = subsetMap.get(oldParent);
         SubsetSpec oldSubset = new SubsetSpec(oldParent, population.getName());
@@ -543,11 +543,11 @@ abstract public class FlowJoWorkspace implements Serializable
 
     private CompensationCalculation simplify(CompensationCalculation calc)
     {
-        LinkedHashMap<SubsetSpec, SubsetSpec> subsetMap = new LinkedHashMap();
-        List<Map<SubsetSpec,Population>> lstPopulationMap = new ArrayList();
+        Map<SubsetSpec, SubsetSpec> subsetMap = new LinkedHashMap<SubsetSpec, SubsetSpec>();
+        List<Map<SubsetSpec,Population>> lstPopulationMap = new ArrayList<Map<SubsetSpec,Population>>();
         for (Population pop : calc.getPopulations())
         {
-            HashMap<SubsetSpec,Population> map = new HashMap();
+            Map<SubsetSpec,Population> map = new HashMap<SubsetSpec,Population>();
             for (Population child : pop.getPopulations())
             {
                 addPopulationMap(map, null, child);
@@ -644,14 +644,14 @@ abstract public class FlowJoWorkspace implements Serializable
         double[] ret = new double[lst.size()];
         for (int i = 0; i < lst.size(); i ++)
         {
-            ret[i] = lst.get(i);
+            ret[i] = lst.get(i).doubleValue();
         }
         return ret;
     }
 
     protected double parseParamValue(String param, Element el, String attribute)
     {
-        return Double.valueOf(el.getAttribute(attribute));
+        return Double.valueOf(el.getAttribute(attribute)).doubleValue();
     }
 
     protected void warning(String str)
@@ -672,9 +672,9 @@ abstract public class FlowJoWorkspace implements Serializable
             return;
         }
         assert multiplier == 64;
-        for (int i = 0; i < values.size(); i++)
+        for (Double value : values)
         {
-            if (values.get(i) > 4096 * 1.05) // small fudge factor for gates nudged above scale
+            if (value.doubleValue() > 4096 * 1.05) // small fudge factor for gates nudged above scale
                 return;
         }
         for (int i = 0; i < values.size(); i ++)

@@ -214,7 +214,7 @@ public class MS2Controller extends SpringActionController
             DataRegion rgn = new DataRegion();
             rgn.setName(MS2Manager.getDataRegionNameExperimentRuns());
             rgn.setColumns(MS2Manager.getTableInfoExperimentRuns().getColumns("Description, Path, Created, Status, ExperimentRunLSID, ExperimentRunRowId, ProtocolName, PeptideCount, NegativeHitCount"));
-            for (int i = 4; i < rgn.getDisplayColumnList().size(); i++)
+            for (int i = 4; i < rgn.getDisplayColumns().size(); i++)
                 rgn.getDisplayColumn(i).setVisible(false);
 
 
@@ -370,7 +370,7 @@ public class MS2Controller extends SpringActionController
             }
             else
             {
-                displayColumns = ((GridView)grid).getDataRegion().getDisplayColumnList();
+                displayColumns = ((GridView)grid).getDataRegion().getDisplayColumns();
                 dataRegionName = ((GridView)grid).getDataRegion().getName();
             }
 
@@ -1977,7 +1977,7 @@ public class MS2Controller extends SpringActionController
         if (exportToExcel)
         {
             ResultSet rs = rgn.getResultSet();
-            CompareExcelWriter ew = new CompareExcelWriter(rs, rgn.getDisplayColumnList());
+            CompareExcelWriter ew = new CompareExcelWriter(rs, rgn.getDisplayColumns());
             ew.setAutoSize(true);
             ew.setSheetName(query.getComparisonDescription());
             ew.setFooter(query.getComparisonDescription());

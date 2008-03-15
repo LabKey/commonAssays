@@ -36,7 +36,7 @@ public abstract class AbstractProteinDataRegion extends DataRegion
     {
         if (_expanded)
         {
-            List<DisplayColumn> displayColumnList = getDisplayColumnList();
+            List<DisplayColumn> displayColumnList = getDisplayColumns();
             for (Iterator<DisplayColumn> i = displayColumnList.iterator(); i.hasNext(); )
             {
                 DisplayColumn col = i.next();
@@ -153,7 +153,7 @@ public abstract class AbstractProteinDataRegion extends DataRegion
         out.write(value);
         out.write("\"><td></td><td colspan=\"");
         int colspan = 0;
-        for (DisplayColumn dc : getDisplayColumnList())
+        for (DisplayColumn dc : getDisplayColumns())
         {
             if (dc.getVisible(ctx))
             {

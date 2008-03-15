@@ -14,7 +14,7 @@ import java.util.*;
 
 public class MacWorkspace extends FlowJoWorkspace
 {
-    static Map<String, StatisticSpec.STAT> statMap = new HashMap();
+    static Map<String, StatisticSpec.STAT> statMap = new HashMap<String, StatisticSpec.STAT>();
     static
     {
         statMap.put("Count", StatisticSpec.STAT.Count);
@@ -115,12 +115,12 @@ public class MacWorkspace extends FlowJoWorkspace
                     String strTot = sampleInfo.getKeywords().get("$TOT");
                     if (strTot != null)
                     {
-                        results.setStatistic(count, Double.valueOf(strTot));
+                        results.setStatistic(count, Double.valueOf(strTot).doubleValue());
                     }
                 }
             }
             // Fill in the Freq Of Parents that can be determined from the existing stats
-            for (Map.Entry<StatisticSpec, Double> entry : results.getStatistics().entrySet().toArray(new Map.Entry[0]))
+            for (Map.Entry<StatisticSpec, Double> entry : results.getStatistics().entrySet())
             {
                 if (entry.getKey().getStatistic() != StatisticSpec.STAT.Count)
                 {
@@ -146,7 +146,7 @@ public class MacWorkspace extends FlowJoWorkspace
                 }
                 else if (!denominator.equals(0.0))
                 {
-                    results.setStatistic(freqStat, entry.getValue() / denominator * 100);
+                    results.setStatistic(freqStat, entry.getValue().doubleValue() / denominator.doubleValue() * 100);
                 }
             }
             _sampleAnalysisResults.put(sampleId, results);
@@ -160,7 +160,7 @@ public class MacWorkspace extends FlowJoWorkspace
         if (booleanGates.size() != 1)
             return null;
         Element elBooleanGate = booleanGates.get(0);
-        List<String> gatePaths = new ArrayList();
+        List<String> gatePaths = new ArrayList<String>();
         String specification = elBooleanGate.getAttribute("specification");
         Element elGatePaths = getElementsByTagName(elBooleanGate, "GatePaths").get(0);
         Element elStringArray = getElementsByTagName(elGatePaths, "StringArray").get(0);
@@ -170,8 +170,8 @@ public class MacWorkspace extends FlowJoWorkspace
             gatePaths.add(string);
         }
         StringTokenizer st = new StringTokenizer(specification, "&|", true);
-        List<String> gateCodes = new ArrayList();
-        List<String> operators = new ArrayList();
+        List<String> gateCodes = new ArrayList<String>();
+        List<String> operators = new ArrayList<String>();
         while(st.hasMoreTokens())
         {
             gateCodes.add(StringUtils.trim(st.nextToken()));
@@ -216,7 +216,7 @@ public class MacWorkspace extends FlowJoWorkspace
         if (!StringUtils.isEmpty(strCount))
         {
             StatisticSpec statCount = new StatisticSpec(subset, StatisticSpec.STAT.Count, null);
-            results.setStatistic(statCount, Double.valueOf(strCount));
+            results.setStatistic(statCount, Double.valueOf(strCount).doubleValue());
         }
         for (Element elStat : getElementsByTagName(elPopulation, "Statistic"))
         {
@@ -238,7 +238,7 @@ public class MacWorkspace extends FlowJoWorkspace
             double value;
             try
             {
-                value = Double.valueOf(strValue);
+                value = Double.valueOf(strValue).doubleValue();
             }
             catch (NumberFormatException nfe)
             {
@@ -263,8 +263,8 @@ public class MacWorkspace extends FlowJoWorkspace
         String xAxis = cleanName(el.getAttribute("xAxisName"));
         String yAxis = cleanName(el.getAttribute("yAxisName"));
 
-        List<Double> lstX = new ArrayList();
-        List<Double> lstY = new ArrayList();
+        List<Double> lstX = new ArrayList<Double>();
+        List<Double> lstY = new ArrayList<Double>();
         for (Element elPolygon : getElementsByTagName(el, "Polygon"))
         {
             for (Element elVertex : getElementsByTagName(elPolygon, "Vertex"))
@@ -296,7 +296,7 @@ public class MacWorkspace extends FlowJoWorkspace
         Population ret = new Population();
         ret.setName(cleanName(elPopulation.getAttribute("name")));
         SubsetSpec subset = new SubsetSpec(parentSubset, ret.getName());
-        Set<String> gatedParams = new LinkedHashSet();
+        Set<String> gatedParams = new LinkedHashSet<String>();
 
         for (Element elPolygonGate : getElementsByTagName(elPopulation, "PolygonGate"))
         {
@@ -317,7 +317,7 @@ public class MacWorkspace extends FlowJoWorkspace
                 {
                     String axis = cleanName(el.getAttribute("xAxisName"));
                     gatedParams.add(axis);
-                    List<Double> lstValues = new ArrayList();
+                    List<Double> lstValues = new ArrayList<Double>();
                     for (Element elPolygon : getElementsByTagName(el, "Polygon"))
                     {
                         for (Element elVertex : getElementsByTagName(elPolygon, "Vertex"))
@@ -326,7 +326,7 @@ public class MacWorkspace extends FlowJoWorkspace
                         }
                     }
                     scaleValues(axis, lstValues);
-                    IntervalGate gate = new IntervalGate(axis, lstValues.get(0), lstValues.get(1));
+                    IntervalGate gate = new IntervalGate(axis, lstValues.get(0).doubleValue(), lstValues.get(1).doubleValue());
                     ret.addGate(gate);
                     analysis.addGraph(new GraphSpec(parentSubset, gate.getXAxis()));
                 }
@@ -421,7 +421,7 @@ public class MacWorkspace extends FlowJoWorkspace
                 String calibrationIndex = elParameter.getAttribute("calibrationIndex");
                 if (!StringUtils.isEmpty(calibrationIndex))
                 {
-                    int index = Integer.valueOf(calibrationIndex);
+                    int index = Integer.valueOf(calibrationIndex).intValue();
                     if (index > 0 && index <= _calibrationTables.size())
                     {
                         pi.calibrationTable = _calibrationTables.get(index - 1);
@@ -437,7 +437,7 @@ public class MacWorkspace extends FlowJoWorkspace
             String lowValue = elParameter.getAttribute("lowValue");
             if (lowValue != null)
             {
-                _settings.getParameterInfo(name, true).setMinValue(Double.valueOf(lowValue));
+                _settings.getParameterInfo(name, true).setMinValue(Double.valueOf(lowValue).doubleValue());
             }
         }
     }
@@ -458,5 +458,4 @@ public class MacWorkspace extends FlowJoWorkspace
         _sampleInfos.put(ret._sampleId, ret);
         return ret;
     }
-
 }

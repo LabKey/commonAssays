@@ -78,7 +78,7 @@ public class GraphView extends GridView
             List<DisplayColumn> dataColumns = new ArrayList();
             List<GraphColumn> graphColumns = new ArrayList();
 
-            for (DisplayColumn dc : region.getDisplayColumnList())
+            for (DisplayColumn dc : region.getDisplayColumns())
             {
                 if (dc instanceof GraphColumn)
                 {

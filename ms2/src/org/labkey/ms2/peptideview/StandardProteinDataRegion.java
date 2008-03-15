@@ -26,7 +26,8 @@ public class StandardProteinDataRegion extends AbstractProteinDataRegion
         setShadeAlternatingRows(true);
     }
 
-    protected void renderTableRow(RenderContext ctx, Writer out, DisplayColumn[] renderers, int rowIndex) throws SQLException, IOException
+    @Override
+    protected void renderTableRow(RenderContext ctx, Writer out, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
     {
         Protein protein = new Protein();
 

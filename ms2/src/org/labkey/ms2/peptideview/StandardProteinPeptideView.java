@@ -129,7 +129,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
 
         ewProtein.setResultSet(proteinRS);
         ewProtein.setGroupedResultSet(peptideRS);
-        ExcelWriter ewPeptide = new ExcelWriter(peptideRS, peptideRgn.getDisplayColumnList());
+        ExcelWriter ewPeptide = new ExcelWriter(peptideRS, peptideRgn.getDisplayColumns());
         if (expanded)
         {
             ExcelColumn ec = ewPeptide.getExcelColumn("Protein");

@@ -51,7 +51,7 @@ public class ChooseRunsView extends FlowQueryView
         rgn.setSelectionKey(getSelectionKey());
         rgn.setShowRecordSelectors(showRecordSelectors());
         rgn.setName(getDataRegionName());
-        rgn.setDisplayColumnList(displayColumns);
+        rgn.setDisplayColumns(displayColumns);
         return rgn;
     }
 

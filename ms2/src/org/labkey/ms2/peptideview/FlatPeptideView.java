@@ -163,7 +163,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         ctx.setBaseFilter(filter);
         ctx.setBaseSort(ProteinManager.getPeptideBaseSort());
         ew.setResultSet(rgn.getResultSet(ctx));
-        ew.setColumns(rgn.getDisplayColumnList());
+        ew.setColumns(rgn.getDisplayColumns());
         ew.setAutoSize(true);
     }
 

@@ -1,9 +1,9 @@
 package org.labkey.flow.persist;
 
-import org.apache.commons.collections.MultiMap;
-import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections15.MultiMap;
+import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.Handler;
@@ -515,7 +515,7 @@ public class FlowManager
     }
 
 
-    public MultiMap searchFCSFiles(Collection<String> containerIds, Search.SearchTermParser parser)
+    public MultiMap<String, String> searchFCSFiles(Collection<String> containerIds, Search.SearchTermParser parser)
     {
         FCSFileSearch search = new FCSFileSearch(containerIds, parser);
         return search.search();
@@ -533,7 +533,7 @@ public class FlowManager
             this.parser = parser;
         }
 
-        public MultiMap search(Collection<String> containerIds, Search.SearchTermParser parser)
+        public MultiMap<String, String> search(Collection<String> containerIds, Search.SearchTermParser parser)
         {
             this.containerIds = containerIds;
             this.parser = parser;
@@ -541,13 +541,13 @@ public class FlowManager
         }
 
 
-        protected MultiMap search()
+        protected MultiMap<String, String> search()
         {
             DbSchema s = DbSchema.get("flow");
             String fromClause = "flow.attribute A inner join flow.keyword K on A.rowid=K.keywordid inner join flow.object O on K.objectid = O.rowid inner join exp.data D on O.dataid = D.rowid";
             SQLFragment fragment = Search.getSQLFragment("container, uri, dataid", "D.container, O.uri, O.dataid, A.name, K.value", fromClause, "D.Container", null, containerIds, parser, s.getSqlDialect(),  "A.name", "K.value");
 
-            MultiMap map = new MultiValueMap();
+            MultiMap<String, String> map = new MultiHashMap<String, String>();
             ResultSet rs = null;
 
             ActionURL url = new ActionURL("flow-well", "showWell", "");

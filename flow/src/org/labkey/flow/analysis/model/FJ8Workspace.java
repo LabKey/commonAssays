@@ -2,8 +2,6 @@ package org.labkey.flow.analysis.model;
 
 import org.w3c.dom.Element;
 
-import java.util.Set;
-
 public class FJ8Workspace extends MacWorkspace
 {
     public FJ8Workspace(Element elDoc) throws Exception
@@ -21,8 +19,6 @@ public class FJ8Workspace extends MacWorkspace
             }
         }
     }
-
-
 
     protected SampleInfo readSample(Element elSample)
     {

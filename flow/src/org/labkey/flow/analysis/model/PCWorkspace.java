@@ -2,9 +2,8 @@ package org.labkey.flow.analysis.model;
 
 import org.w3c.dom.Element;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.List;
 
 public class PCWorkspace extends FlowJoWorkspace
 {
@@ -45,7 +44,7 @@ public class PCWorkspace extends FlowJoWorkspace
             String paramRange = sampleInfo._keywords.get("$P" + i + "R");
             if ("LIN".equals(paramDisplay))
             {
-                double range = Double.valueOf(paramRange);
+                double range = Double.valueOf(paramRange).doubleValue();
                 if (range > 4096)
                 {
                     paramInfo.multiplier = range/4096;
@@ -69,8 +68,8 @@ public class PCWorkspace extends FlowJoWorkspace
     {
         String xAxis = null;
         String yAxis = null;
-        List<Double> lstX = new ArrayList();
-        List<Double> lstY = new ArrayList();
+        List<Double> lstX = new ArrayList<Double>();
+        List<Double> lstY = new ArrayList<Double>();
         for (Element elAxis : getElementsByTagName(elPolygonGate, "Axis"))
         {
             String axis = elAxis.getAttribute("dimension");
@@ -120,9 +119,9 @@ public class PCWorkspace extends FlowJoWorkspace
 
     protected PolygonGate readRectangleGate(Element elRectangleGate)
     {
-        List<String> axes = new ArrayList();
-        List<Double> lstMin = new ArrayList();
-        List<Double> lstMax = new ArrayList();
+        List<String> axes = new ArrayList<String>();
+        List<Double> lstMin = new ArrayList<Double>();
+        List<Double> lstMax = new ArrayList<Double>();
         for (Element elRangeGate : getElementsByTagName(elRectangleGate, "RangeGate"))
         {
             Element elAxis = getElementByTagName(elRangeGate, "Axis");
@@ -131,8 +130,8 @@ public class PCWorkspace extends FlowJoWorkspace
             lstMin.add(parseParamValue(axisName, elRangeGate, "min"));
             lstMax.add(parseParamValue(axisName, elRangeGate, "max"));
         }
-        double[] X = new double[] { lstMin.get(0), lstMin.get(0), lstMax.get(0), lstMax.get(0) };
-        double[] Y = new double[] { lstMin.get(1), lstMax.get(1), lstMax.get(1), lstMin.get(1) };
+        double[] X = new double[] { lstMin.get(0).doubleValue(), lstMin.get(0).doubleValue(), lstMax.get(0).doubleValue(), lstMax.get(0).doubleValue() };
+        double[] Y = new double[] { lstMin.get(1).doubleValue(), lstMax.get(1).doubleValue(), lstMax.get(1).doubleValue(), lstMin.get(1).doubleValue() };
         return new PolygonGate(axes.get(0), axes.get(1), new Polygon(X, Y));
     }
 

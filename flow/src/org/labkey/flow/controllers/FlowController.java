@@ -18,33 +18,37 @@ package org.labkey.flow.controllers;
 
 import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.beehive.netui.pageflow.annotations.Jpf;
-import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionError;
-import org.labkey.flow.script.*;
-import org.labkey.flow.view.JobStatusView;
-import org.labkey.flow.FlowSettings;
-import org.labkey.flow.FlowPreference;
-import org.labkey.flow.webparts.FlowFolderType;
-import org.labkey.flow.webparts.OverviewWebPart;
-import org.labkey.flow.data.FlowProtocol;
-import org.labkey.flow.data.FlowScript;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.jsp.FormPage;
+import org.labkey.api.module.Module;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.security.ACL;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.HomeTemplate;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineStatusFile;
-import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.module.Module;
-import org.labkey.api.jsp.FormPage;
+import org.labkey.flow.FlowPreference;
+import org.labkey.flow.FlowSettings;
+import org.labkey.flow.analysis.model.FlowJoWorkspaceWriter;
+import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.script.ScriptJob;
+import org.labkey.flow.view.JobStatusView;
+import org.labkey.flow.webparts.FlowFolderType;
+import org.labkey.flow.webparts.OverviewWebPart;
 
-import java.util.*;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.OutputStream;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class FlowController extends BaseFlowController<FlowController.Action>
@@ -129,7 +133,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
 
     protected Forward renderError(String error) throws Exception
     {
-        return renderErrors(Arrays.asList(new String[]{error}));
+        return renderErrors(Arrays.asList(error));
     }
 
     private Forward renderErrors(List errors) throws Exception
@@ -317,5 +321,22 @@ public class FlowController extends BaseFlowController<FlowController.Action>
     {
         FlowPreference.update(getRequest());
         return new Forward(new URI(getRequest().getContextPath() + "/_.gif"));
+    }
+
+    @Jpf.Action
+    protected Forward export() throws Exception
+    {
+        HttpServletResponse response = getResponse();
+        response.setContentType("text/plain");
+        response.setHeader("Content-disposition", "attachment; filename=\"" + "someDumbFile.xml" +"\"");
+        OutputStream os = response.getOutputStream();
+
+        FlowJoWorkspaceWriter writer = new FlowJoWorkspaceWriter();
+        writer.write(os);
+
+        os.close();
+        response.flushBuffer();
+
+        return null;
     }
 }

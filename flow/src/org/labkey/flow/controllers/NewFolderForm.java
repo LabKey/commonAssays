@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class NewFolderForm extends ViewForm
 {
     public String ff_folderName;
-    public Set<String> ff_copyAnalysisScript = Collections.EMPTY_SET;
+    public Set<String> ff_copyAnalysisScript = Collections.emptySet();
     public boolean ff_copyProtocol;
 
     public void setFf_folderName(String name)
@@ -20,7 +20,7 @@ public class NewFolderForm extends ViewForm
 
     public void setFf_copyAnalysisScript(String[] analysisScript)
     {
-        ff_copyAnalysisScript = new HashSet(Arrays.asList(analysisScript));
+        ff_copyAnalysisScript = new HashSet<String>(Arrays.asList(analysisScript));
     }
 
     public void setFf_copyProtocol(boolean b)
