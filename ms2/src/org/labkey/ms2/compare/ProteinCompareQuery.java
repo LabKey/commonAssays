@@ -148,6 +148,11 @@ public class ProteinCompareQuery extends CompareQuery
         return "protein=${Protein}&seqId=${SeqId}";
     }
 
+    protected String getComparisonColumnLinkTarget()
+    {
+        return "prot";
+    }
+
     protected ColumnInfo getComparisonCommonColumn(TableInfo ti)
     {
         return ti.getColumn("Protein");

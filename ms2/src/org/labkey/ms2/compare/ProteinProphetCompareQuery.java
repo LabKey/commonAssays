@@ -152,6 +152,11 @@ public class ProteinProphetCompareQuery extends CompareQuery
 
     }
 
+    protected String getComparisonColumnLinkTarget()
+    {
+        return "prot";
+    }
+
     protected ColumnInfo getComparisonCommonColumn(TableInfo ti)
     {
         ColumnInfo result = ti.getColumn("Protein");

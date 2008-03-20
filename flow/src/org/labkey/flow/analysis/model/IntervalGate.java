@@ -90,11 +90,11 @@ public class IntervalGate extends RegionGate
     {
         double[] X = null;
         double[] Y = null;
-        if (xAxis.equals(_axis))
+        if (null!=xAxis && xAxis.equals(_axis))
         {
             X = new double[]{_min, _min, _max, _max};
         }
-        if (yAxis.equals(_axis))
+        if (null!=yAxis && yAxis.equals(_axis))
         {
             Y = new double[]{_min, _max, _max, _min};
         }

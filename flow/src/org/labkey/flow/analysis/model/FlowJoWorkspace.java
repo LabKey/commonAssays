@@ -801,6 +801,8 @@ abstract public class FlowJoWorkspace implements Serializable
             compMatrixMap.put(compMatrix, attrs);
         }
 
+        FlowManager.vacuum();
+
         boolean transaction = false;
         try
         {
@@ -900,6 +902,7 @@ abstract public class FlowJoWorkspace implements Serializable
 
             svc.commitTransaction();
             transaction = false;
+
             return new FlowRun(run);
         }
         finally
@@ -908,9 +911,7 @@ abstract public class FlowJoWorkspace implements Serializable
             {
                 svc.rollbackTransaction();
             }
+            FlowManager.analyze();
         }
-
-
-
     }
 }

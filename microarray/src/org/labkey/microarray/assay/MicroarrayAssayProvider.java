@@ -51,7 +51,7 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
 
     protected Domain createUploadSetDomain(Container c, User user)
     {
-        return PropertyService.get().createDomain(c, getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_UPLOAD_SET), "Upload Set Properties");
+        return PropertyService.get().createDomain(c, getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_UPLOAD_SET), "Upload Set Fields");
     }
 
     public String getName()

@@ -119,4 +119,8 @@ public class PeptideCompareQuery extends CompareQuery
         return result;
     }
 
+    protected String getComparisonColumnLinkTarget()
+    {
+        return null;
+    }
 }

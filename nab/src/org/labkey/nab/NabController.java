@@ -1144,7 +1144,7 @@ public class NabController extends ViewController
         public String getParticipantCompletionBase()
         {
             return SpecimenService.get().getCompletionURLBase(_targetContainer,
-                    SpecimenService.CompletionType.ParticpantId);
+                    SpecimenService.CompletionType.ParticipantId);
         }
 
         public List<String> getUploadErrors()

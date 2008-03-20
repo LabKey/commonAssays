@@ -179,11 +179,14 @@ public class XTandemSearchTask extends PipelineJob.Task
         params.remove("list path, default parameters");
 
         // CONSIDER: If we remove these, they will not end up in the pepXML file.
-        for (String key : params.keySet().toArray(new String[params.size()]))
+        //  ... which is a bad thing, since we currently rely on "pipline, import spectra"
+        //  to keep from loading all spectra into the database.
+/*        for (String key : params.keySet().toArray(new String[params.size()]))
         {
             if (key.startsWith("pipeline"))
                 params.remove(key);
         }
+*/
 
         try
         {

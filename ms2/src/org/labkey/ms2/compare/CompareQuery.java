@@ -299,7 +299,9 @@ public abstract class CompareQuery extends SQLFragment
     {
         CompareDataRegion rgn = new CompareDataRegion(createResultSet());
         TableInfo ti = MS2Manager.getTableInfoCompare();
-        rgn.addColumn(getComparisonCommonColumn(ti));
+        ColumnInfo comparisonColumn = getComparisonCommonColumn(ti);
+        rgn.addColumn(comparisonColumn);
+        rgn.getDisplayColumn(comparisonColumn.getName()).setLinkTarget(getComparisonColumnLinkTarget());
 
         ActionURL originalLinkURL = this._currentUrl.clone();
         originalLinkURL.deleteFilterParameters(DataRegion.SELECT_CHECKBOX_NAME);
@@ -370,6 +372,8 @@ public abstract class CompareQuery extends SQLFragment
         dc.setURL(linkURL.getLocalURIString() + "&" + columnFilter);
         return dc;
     }
+
+    protected abstract String getComparisonColumnLinkTarget();
 
     protected abstract ColumnInfo getComparisonCommonColumn(TableInfo ti);
 

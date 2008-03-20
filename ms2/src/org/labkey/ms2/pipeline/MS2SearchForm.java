@@ -33,8 +33,8 @@ public class MS2SearchForm extends MS2PipelineForm
     private String sequenceDBPath = "";
     private String sequenceDB = "";
     private String configureXml = "";
-    private boolean skipDescription;
-    private boolean saveProtocol = false;
+    private boolean saveProtocol;
+    private boolean runSearch;
 
     public String getSequenceDB()
     {
@@ -96,16 +96,6 @@ public class MS2SearchForm extends MS2PipelineForm
         this.sequenceDBPath = sequenceDBPath;
     }
 
-    public boolean isSkipDescription()
-    {
-        return skipDescription;
-    }
-
-    public void setSkipDescription(boolean skipDescription)
-    {
-        this.skipDescription = skipDescription;
-    }
-
     public boolean isSaveProtocol()
     {
         return saveProtocol;
@@ -114,5 +104,15 @@ public class MS2SearchForm extends MS2PipelineForm
     public void setSaveProtocol(boolean saveProtocol)
     {
         this.saveProtocol = saveProtocol;
+    }
+
+    public boolean isRunSearch()
+    {
+        return runSearch;
+    }
+
+    public void setRunSearch(boolean runSearch)
+    {
+        this.runSearch = runSearch;
     }
 }

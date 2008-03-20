@@ -787,7 +787,9 @@ public class ScriptController extends BaseFlowController
             ret.script = service.makeGWTScript(analysisScript);
             ret.compensation = editingMode.isCompensation();
             ret.editingMode = editingMode;
-            ret.compensationMatrix = service.makeCompensationMatrix(getCompensationMatrix(), false);
+            FlowCompensationMatrix m = getCompensationMatrix();
+            if (null != m)
+                ret.compensationMatrix = service.makeCompensationMatrix(m, false);
             ret.well = service.makeWell(getWell());
             ret.width = width;
             ret.height = height;

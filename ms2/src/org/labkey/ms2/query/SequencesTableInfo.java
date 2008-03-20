@@ -1,20 +1,20 @@
 package org.labkey.ms2.query;
 
-import org.labkey.api.query.*;
 import org.labkey.api.data.*;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.security.User;
+import org.labkey.api.query.*;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
 import org.labkey.api.util.StringExpressionFactory;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.api.view.ActionURL;
+import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.CustomAnnotationType;
+import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.query.CustomAnnotationSetsTable;
 import org.labkey.ms2.protein.query.CustomAnnotationTable;
-import org.labkey.ms2.MS2Manager;
 
-import java.util.*;
 import java.sql.Types;
+import java.util.*;
 
 /**
  * User: jeckels
@@ -48,9 +48,17 @@ public class SequencesTableInfo extends FilteredTable
         addColumn(wrapColumn("Source", getRealTable().getColumn("SourceId")));
         getColumn("SourceId").setIsHidden(true);
 
-
         ActionURL url = new ActionURL("MS2", "showProtein.view", _container);
-        getColumn("BestName").setURL(url + "seqId=${SeqId}");
+        ColumnInfo bnColumn = getColumn("BestName");
+        bnColumn.setURL(url + "seqId=${SeqId}");
+        bnColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                DataColumn dc = new DataColumn(colInfo);
+                dc.setLinkTarget("prot");
+                return dc;
+            }
+        });
 
         ColumnInfo annotationColumn = wrapColumn("CustomAnnotations", _rootTable.getColumn("SeqId"));
         annotationColumn.setIsUnselectable(true);

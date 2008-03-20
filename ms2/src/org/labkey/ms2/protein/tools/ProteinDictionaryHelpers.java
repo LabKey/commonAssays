@@ -38,7 +38,7 @@ public class ProteinDictionaryHelpers
 {
     private static Logger _log = Logger.getLogger(ProteinDictionaryHelpers.class);
 
-    public static final String WEBAPP_ROOT = "MS2/externalData/";
+    public static final String WEBAPP_ROOT = "/MS2/externalData/";
     private static final String PROTSPROTORGMAP_FILE = ProteinDictionaryHelpers.WEBAPP_ROOT + "ProtSprotOrgMap.txt";
     private static final int SPOM_BATCH_SIZE = 1000;
 

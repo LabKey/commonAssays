@@ -1105,11 +1105,17 @@ public class MascotClientImpl implements SearchClient
         {
             // handle response.
             // check for "Finished uploading search details..."
-            final String endOfUploadMarker = "Finished uploading search details...";
+            //for Mascot version earlier than 2.2.03
+            //final String endOfUploadMarker = "Finished uploading search details...";
+            //for Mascot version 2.2.03
+            //final String endOfUploadMarker = "Finished uploading search details and file...";
+            final String endOfUploadMarker = "Finished uploading search details";
             BufferedReader in = new BufferedReader(new InputStreamReader(post.getResponseBodyAsStream()));
             String str;
             StringBuffer reply = new StringBuffer();
-            while ((str = in.readLine()) != null) {
+            while ((str = in.readLine()) != null)
+            {
+                //getLogger().info("Mascot Server: "+str);
                 if (str.contains(endOfUploadMarker))
                 {
                     uploadFinished = true;

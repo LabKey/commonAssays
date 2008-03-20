@@ -89,11 +89,11 @@ public class FeaturesTableInfo extends FilteredTable
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return MS2Service.get().createPeptidesTableInfo(_schema.getUser(), _schema.getContainer(), 
+                    return MS2Service.get().createPeptidesTableInfo(_schema.getUser(), _schema.getContainer(),
                             false, _schema.isRestrictContainer(), null, null);
                 }
             });
-            
+
             ciPepId.setURL(urlPep);
             ciPepId.setDisplayColumnFactory(dcfPep);
         } //if(includePepFk)
@@ -181,7 +181,7 @@ public class FeaturesTableInfo extends FilteredTable
         if(_includePepFk)
         {
             sql.append(sep);
-            sql.append("pd.RowId AS ");
+            sql.append("pep.RowId AS ");
             sql.append(COLUMN_PEPTIDE_INFO);
         }
 
@@ -200,27 +200,35 @@ public class FeaturesTableInfo extends FilteredTable
         if(_includePepFk || null != _filters)
         {
             sql.append("\nINNER JOIN exp.Data AS d ON (fi.ExpDataFileId=d.RowId)");
-            sql.append("\nLEFT OUTER JOIN ms2.Fractions AS fr ON (fi.MzXmlUrl=fr.MzXmlUrl)");
-            sql.append("\nLEFT OUTER JOIN ms2.PeptidesData AS pd ON (pd.Fraction=fr.Fraction AND pd.Scan=fe.MS2Scan AND pd.Charge=fe.MS2Charge)");
-            sql.append("\nLEFT OUTER JOIN ms2.Runs AS r ON (fr.Run=r.Run)");
-
-            //set a base filter condition to exclude deleted and unimported runs
-            //and only runs from the correct containers
-            sql.append("\nWHERE (r.Container IS NULL OR r.Container IN (");
+            sql.append("\nLEFT OUTER JOIN (SELECT pd.*, fr.MzXmlUrl");
+            sql.append("\nFROM ms2.Fractions AS fr");
+            sql.append("\nINNER JOIN ms2.PeptidesData AS pd ON (pd.Fraction=fr.Fraction)");
+            sql.append("\nINNER JOIN ms2.Runs AS r ON (fr.Run=r.Run");
+            sql.append("\nAND r.Container IN (");
             sql.append(_schema.getContainerInList());
-            sql.append("))");
-            sql.append(new SQLFragment("\nAND (r.Deleted IS NULL OR r.Deleted=?)", false)); //filter out deleted MS2 runs
-            if(!includeDeleted())
-                sql.append(new SQLFragment("\nAND fi.Imported=? AND fi.Deleted=?", true, false));
+            sql.append(new SQLFragment(")\nAND r.Deleted=?)", false));
+            sql.append(") AS pep ON (fi.MzXmlUrl=pep.MzXmlUrl AND fe.MS2Scan=pep.Scan AND fe.MS2Charge=pep.Charge)");
 
-            if(null != _filters)
+            if(null != _filters || !includeDeleted())
             {
+                String whereSep = "\nWHERE ";
+
+                //set a base filter condition to exclude deleted and unimported runs
+                if(!includeDeleted())
+                {
+                    sql.append(whereSep);
+                    sql.append(new SQLFragment("fi.Imported=? AND fi.Deleted=?", true, false));
+                    whereSep = "\nAND ";
+                }
+
                 Map<String,String> aliasMap = getAliasMap();
                 for(FeaturesFilter filter : _filters)
                 {
-                    sql.append("\nAND (");
+                    sql.append(whereSep);
+                    sql.append("(");
                     sql.append(filter.getWhereClause(aliasMap, getSqlDialect()));
                     sql.append(")");
+                    whereSep = "\nAND ";
                 }
             }
         }
@@ -243,9 +251,9 @@ public class FeaturesTableInfo extends FilteredTable
         aliasMap.put(MS1Service.Tables.Features.getFullName(), "fe");
         aliasMap.put(MS1Service.Tables.Files.getFullName(), "fi");
         aliasMap.put("exp.Data", "d");
-        aliasMap.put("ms2.Fractions", "fr");
-        aliasMap.put("ms2.PeptidesData", "pd");
-        aliasMap.put("ms2.Runs", "r");
+        aliasMap.put("ms2.Fractions", "pep");
+        aliasMap.put("ms2.PeptidesData", "pep");
+        aliasMap.put("ms2.Runs", "pep");
         return aliasMap;
     }
 } //class FeaturesTableInfo

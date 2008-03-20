@@ -3139,7 +3139,7 @@ public class MS2Controller extends SpringActionController
             DataColumn descriptionColumn = new DataColumn(MS2Manager.getTableInfoRuns().getColumn("Description")) {
                 public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                 {
-                    if (null != ctx.get("ContainerPath"))
+                    if (null != ctx.get("ContainerPath") && !((Boolean)ctx.get("deleted")).booleanValue())
                         super.renderGridCellContents(ctx, out);
                     else
                         out.write(getFormattedValue(ctx));
@@ -3622,23 +3622,19 @@ public class MS2Controller extends SpringActionController
 
                 peptideView = new StandardProteinPeptideView(getViewContext(), _run);
 
-                // Set the protein name used in this run's FASTA file; we want to include this in the view.
+                // Set the protein name used in this run's FASTA file; we want to include it in the view.
                 _protein.setLookupString(form.getProtein());
-                getPageConfig().setTemplate(PageConfig.Template.Print);
-                getPageConfig().setTitle(getProteinTitle(_protein, true));
             }
+
+            getPageConfig().setTemplate(PageConfig.Template.Print);
+            getPageConfig().setTitle(getProteinTitle(_protein, true));
 
             return new ProteinsView(currentURL, _run, form, new Protein[] {_protein}, null, peptideView);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            if (null != _run)
-                appendRunNavTrail(root, _run, getProteinTitle(_protein, true), getPageConfig(), "showProtein");
-            else
-                appendRootNavTrail(root, getProteinTitle(_protein, true), getPageConfig(), "showProtein");
-
-            return root;
+            return null;
         }
     }
 
@@ -5365,7 +5361,7 @@ public class MS2Controller extends SpringActionController
         {
             List<String> moveRuns = getViewContext().getList(DataRegion.SELECT_CHECKBOX_NAME);
 
-            ActionURL url = new ActionURL(SelectMoveLocationAction.class, getContainer()).addParameter("moveRuns", StringUtils.join(moveRuns, ','));
+            ActionURL url = new ActionURL(PickMoveLocationAction.class, getContainer()).addParameter("moveRuns", StringUtils.join(moveRuns, ','));
 
             if ("true".equals(getViewContext().getRequest().getParameter("ExperimentRunIds")))
                 url.addParameter("ExperimentRunIds", "true");
@@ -5381,6 +5377,7 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             ActionURL moveURL = new ActionURL(MoveRunsAction.class);
+            moveURL.addParameters(getViewContext().getActionURL().getParameters());
             final Container originalContainer = getContainer();
             ContainerTree ct = new ContainerTree("/", getUser(), ACL.PERM_INSERT, moveURL)
             {

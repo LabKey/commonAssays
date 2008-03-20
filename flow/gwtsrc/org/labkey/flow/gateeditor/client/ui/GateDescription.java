@@ -126,7 +126,12 @@ public class GateDescription extends GateComponent
         int row = -1;
         widget.setText(++row, 0, caption);
         widget.getFlexCellFormatter().setColSpan(row, 0, 2);
-        if (gate instanceof GWTIntervalGate)
+        if (null == gate)
+        {
+            widget.setText(++row, 0, "No gate defined.");
+            widget.getFlexCellFormatter().setColSpan(row, 0, 2);
+        }
+        else if (gate instanceof GWTIntervalGate)
         {
             GWTIntervalGate interval = (GWTIntervalGate) gate;
             widget.setText(++row, 0, "Axis:");

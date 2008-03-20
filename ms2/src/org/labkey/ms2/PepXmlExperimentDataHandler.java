@@ -109,9 +109,11 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
                 throw new ExperimentException("Failed to load MS2 data");
             }
 
-            run.setExperimentRunLSID(expRun.getLSID());
-            MS2Manager.updateRun(run, info.getUser());
-        }
+            if (expRun != null)
+            {
+                run.setExperimentRunLSID(expRun.getLSID());
+                MS2Manager.updateRun(run, info.getUser());
+            }        }
         catch (SQLException e)
         {
             throw new ExperimentException(e);

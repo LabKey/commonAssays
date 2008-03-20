@@ -45,7 +45,7 @@ public class ScriptXarSource extends XarSource
 
     public String canonicalizeDataFileURL(String dataFileURL) throws XarFormatException
     {
-        return dataFileURL;
+        return new File(dataFileURL).toURI().toString();
     }
 
     public File getRoot()

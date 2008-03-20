@@ -418,7 +418,8 @@ public class MS2Schema extends UserSchema
 
         SQLFragment sql = new SQLFragment("(SELECT MIN(ms2Runs.run)\n" +
                 "\nFROM " + MS2Manager.getTableInfoRuns() + " ms2Runs " +
-                "\nWHERE ms2Runs.ExperimentRunLSID = " + ExprColumn.STR_TABLE_ALIAS + ".LSID)");
+                "\nWHERE ms2Runs.ExperimentRunLSID = " + ExprColumn.STR_TABLE_ALIAS + ".LSID AND ms2Runs.Deleted = ?)");
+        sql.add(Boolean.FALSE);
         ColumnInfo ms2DetailsColumn = new ExprColumn(result, alias, sql, Types.INTEGER);
         ms2DetailsColumn.setName("MS2Details");
         ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
@@ -586,7 +587,7 @@ public class MS2Schema extends UserSchema
 
     protected SQLFragment getPeptideSelectSQL(HttpServletRequest request, String viewName, Collection<FieldKey> fieldKeys)
     {
-        QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, MS2Schema.PEPTIDES_TABLE_NAME);
+        QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, MS2Schema.PEPTIDES_FILTER_TABLE_NAME);
         SimpleFilter filter = new SimpleFilter();
         CustomView view = queryDef.getCustomView(getUser(), request, viewName);
         if (view != null)
@@ -603,8 +604,6 @@ public class MS2Schema extends UserSchema
         // Don't need to filter by run since we'll add a filter, post-join
         FilteredTable baseTable = createProteinGroupMembershipTable(form, context, false);
 
-        ActionURL urlPepSearch = new ActionURL(MS2Controller.ShowProteinAction.class, getContainer());
-
         CrosstabSettings settings = new CrosstabSettings(baseTable);
         SimpleFilter filter = new SimpleFilter();
         List<Integer> runIds = new ArrayList<Integer>();
@@ -619,7 +618,16 @@ public class MS2Schema extends UserSchema
         settings.setSourceTableFilter(filter);
 
         CrosstabDimension rowDim = settings.getRowAxis().addDimension(FieldKey.fromParts("SeqId"));
-        rowDim.setUrl(urlPepSearch.getLocalURIString() + "&seqId=${SeqId}");
+        ActionURL showProteinURL = new ActionURL(MS2Controller.ShowProteinAction.class, getContainer());
+        rowDim.setUrl(showProteinURL.getLocalURIString() + "&seqId=${SeqId}");
+        rowDim.getSourceColumn().setDisplayColumnFactory(new DisplayColumnFactory(){
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                DisplayColumn dc = new DataColumn(colInfo);
+                dc.setLinkTarget("prot");
+                return dc;
+            }
+        });
 
         CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
         colDim.setUrl(new ActionURL(MS2Controller.ShowRunAction.class, getContainer()).getLocalURIString() + "run=" + CrosstabMember.VALUE_TOKEN);

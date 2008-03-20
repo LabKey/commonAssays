@@ -657,4 +657,50 @@ public class FlowManager
                 s.getScope().closeConnection();
         }
     }
+
+
+    // postgres 8.2 workaround
+    static String version82 = "?";
+
+    static public void vacuum()
+    {
+        DbSchema db = DbSchema.get("flow");
+
+        if (!(db.getSqlDialect() instanceof SqlDialectPostgreSQL))
+            return;
+
+        try
+        {
+            if (version82 != null && version82.equals("?"))
+                version82 = Table.executeSingleton(db, "SELECT version() WHERE version() like '% 8.2%'", null, String.class);
+            
+            if (null != version82)
+                Table.execute(db, "VACUUM exp.data; VACUUM flow.object; VACUUM flow.keyword; VACUUM flow.statistic;", null);
+        }
+        catch (SQLException x)
+        {
+            _log.error("unexpected error", x);
+        }
+    }
+
+    static public void analyze()
+    {
+        DbSchema db = DbSchema.get("flow");
+
+        if (!(db.getSqlDialect() instanceof SqlDialectPostgreSQL))
+            return;
+
+        try
+        {
+            if (version82 != null && version82.equals("?"))
+                version82 = Table.executeSingleton(db, "SELECT version() WHERE version() like '% 8.2%'", null, String.class);
+
+            if (null != version82)
+                Table.execute(db, "ANALYZE exp.data; ANALYZE flow.object; ANALYZE flow.keyword; ANALYZE flow.statistic;", null);
+        }
+        catch (SQLException x)
+        {
+            _log.error("unexpected error", x);
+        }
+    }
 }

@@ -40,6 +40,7 @@ public class MS2ExperimentForm extends MS2PipelineForm
 {
     public enum Step
     {
+        choosePath,
         pickProtocol,
         describeSamples
     }
@@ -51,7 +52,7 @@ public class MS2ExperimentForm extends MS2PipelineForm
         none
     }
 
-    private Step step = Step.pickProtocol;
+    private Step step = Step.choosePath;
     private ProtocolSharing protocolSharing = ProtocolSharing.share;
     private String sharedProtocol;
     private String fractionProtocol;

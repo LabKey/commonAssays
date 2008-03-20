@@ -116,7 +116,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
     protected Domain createAntigenWellGroupDomain(Container c, User user)
     {
         String domainLsid = getPresubstitutionLsid(ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
-        Domain antigenWellGroupDomain = PropertyService.get().createDomain(c, domainLsid, "Antigen Properties");
+        Domain antigenWellGroupDomain = PropertyService.get().createDomain(c, domainLsid, "Antigen Fields");
 
         antigenWellGroupDomain.setDescription("The user will be prompted to enter these properties for each of the antigen well groups in their chosen plate template.");
         addProperty(antigenWellGroupDomain, ANTIGENID_PROPERTY_NAME, ANTIGENID_PROPERTY_CAPTION, PropertyType.INTEGER);

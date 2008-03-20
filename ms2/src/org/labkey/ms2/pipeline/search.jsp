@@ -48,10 +48,11 @@ boolean hasWork = false;
 %>
     <br>
 
-<form method="post" action="<%=urlFor(PipelineController.SearchAction.class)%>">
+<form id="search_form" method="post" action="<%=urlFor(PipelineController.SearchAction.class)%>">
+    <input type="hidden" name="runSearch" value="true">
     <input type="hidden" name="path" value="<%=h(form.getPath())%>">
     <input type="hidden" name="searchEngine" value="<%=h(form.getSearchEngine())%>">
-    <input type="hidden" name="skipDescription" value="<%=h(form.isSkipDescription())%>">
+
 <table border="0">
     <tr><td class='ms-searchform'>Analysis Protocol:</td>
         <td class='ms-vb'><select name="protocol"
@@ -209,25 +210,8 @@ boolean hasWork = false;
 <script>
     function changeProtocol(sel)
     {
-        var search = document.location.search;
-        if (search.charAt(0) == '?')
-            search = search.substring(1);
-        var params = search.split('&');
-        var searchNew = "";
-        for (var i = 0; i < params.length; i++)
-        {
-            if (params[i].indexOf("protocol=") != 0 &&
-                    params[i].indexOf("searchEngine=") != 0)
-            {
-                if (searchNew != "")
-                    searchNew += "&";
-                searchNew += params[i];
-            }
-        }
-        var opt = sel.options[sel.selectedIndex];
-        searchNew = "searchEngine=<%=h(form.getSearchEngine())%>&" + searchNew;
-        searchNew += "&protocol=" + opt.text;
-        document.location.search = searchNew;
+        document.getElementsByName("runSearch")[0].value = false;
+        document.getElementById("search_form").submit();
     }
     <% if (form.getProtocol() == "" && getSequenceDBs().size() > 1)
     {

@@ -368,7 +368,7 @@ public class PipelineController extends SpringActionController
                     String[] seqDbNames = _protocol.getDbNames();
                     form.setConfigureXml(_protocol.getXml());
                     if (seqDbNames == null || seqDbNames.length == 0)
-                        errors.reject(ERROR_MSG, "Protocol must have specify a FASTA file.");
+                        errors.reject(ERROR_MSG, "Protocol must specify a FASTA file.");
                     else if (seqDbNames.length > 1)
                         errors.reject(ERROR_MSG, "Protocol specifies multiple FASTA files.");
                     else
@@ -389,6 +389,9 @@ public class PipelineController extends SpringActionController
 
         public boolean handlePost(MS2SearchForm form, BindException errors) throws Exception
         {
+            if (!form.isRunSearch())
+                return false;
+            
             try
             {
                 _provider.ensureEnabled();   // throws exception if not enabled
@@ -499,7 +502,7 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView getView(MS2SearchForm form, boolean reshow, BindException errors) throws Exception
         {
-            if (!reshow)
+            if (!reshow || "".equals(form.getProtocol()))
                 form.setSaveProtocol(true);
 
             Map<File, FileStatus> mzXmlFileStatus = new HashMap<File, FileStatus>();
@@ -1118,6 +1121,9 @@ public class PipelineController extends SpringActionController
 
         public boolean handlePost(MS2ExperimentForm form, BindException errors) throws Exception
         {
+            if (MS2ExperimentForm.Step.choosePath.equals(form.getStep()))
+                return false;
+            
             if (form.isProtocolIndividual())
             {
                 for (String formProtocolName : form.getProtocolNames())
@@ -1242,7 +1248,7 @@ public class PipelineController extends SpringActionController
             }
 
             URI uriRoot = form.getDirRoot().toURI();
-            if (form.getStep() == MS2ExperimentForm.Step.pickProtocol)
+            if (form.getStep() != MS2ExperimentForm.Step.describeSamples)
             {
                 return FormPage.getView(PipelineController.class, form, errors, "pickProtocol.jsp");
             }

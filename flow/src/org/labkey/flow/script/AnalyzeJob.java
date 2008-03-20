@@ -1,11 +1,12 @@
 package org.labkey.flow.script;
 
+import org.apache.log4j.Logger;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.data.FlowProtocol;
-import org.apache.log4j.Logger;
+import org.labkey.flow.persist.FlowManager;
 
 import java.io.File;
 
@@ -47,6 +48,8 @@ public class AnalyzeJob extends ScriptJob
 
     public void doRun() throws Exception
     {
+        FlowManager.vacuum();
+
         for (int i = 0; i < _runIds.length; i ++)
         {
             FlowRun srcRun = FlowRun.fromRunId(_runIds[i]);
@@ -62,5 +65,7 @@ public class AnalyzeJob extends ScriptJob
                 addError(null, null, "Exception: " + t);
             }
         }
+
+        FlowManager.analyze();
     }
 }
