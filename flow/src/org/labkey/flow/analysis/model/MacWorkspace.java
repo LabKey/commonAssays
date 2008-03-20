@@ -120,7 +120,7 @@ public class MacWorkspace extends FlowJoWorkspace
                 }
             }
             // Fill in the Freq Of Parents that can be determined from the existing stats
-            for (Map.Entry<StatisticSpec, Double> entry : results.getStatistics().entrySet())
+            for (Map.Entry<StatisticSpec, Double> entry : new HashMap<StatisticSpec, Double>(results.getStatistics()).entrySet())
             {
                 if (entry.getKey().getStatistic() != StatisticSpec.STAT.Count)
                 {
