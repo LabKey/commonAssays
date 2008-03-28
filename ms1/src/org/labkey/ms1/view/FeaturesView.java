@@ -1,9 +1,6 @@
 package org.labkey.ms1.view;
 
-import org.labkey.api.data.Container;
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.Sort;
-import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.*;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.util.ResultSetUtil;
@@ -99,7 +96,7 @@ public class FeaturesView extends QueryView
         try
         {
             //make sure we get all rows and not just the current page
-            getSettings().setShowAllRows(true);
+            getSettings().setShowRows(ShowRows.ALL);
             rs = getResultset();
             while(rs.next())
             {

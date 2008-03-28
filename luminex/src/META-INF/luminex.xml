@@ -82,6 +82,7 @@
             <ns:column columnName="DataRowGroup"/>
             <ns:column columnName="Ratio"/>
             <ns:column columnName="SamplingErrors"/>
+            <ns:column columnName="ExtraSpecimenInfo"/>
         </ns:columns>
     </ns:table>
 

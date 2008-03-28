@@ -133,6 +133,7 @@ public class LuminexSchema extends UserSchema
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Well")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Outlier")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("Description")));
+        result.addColumn(result.wrapColumn(result.getRealTable().getColumn("ExtraSpecimenInfo")));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FIString"))).setCaption("FI String");
         OORDisplayColumnFactory.addOORColumns(result, result.getRealTable().getColumn("FI"), result.getRealTable().getColumn("FIOORIndicator"));
         result.addColumn(result.wrapColumn(result.getRealTable().getColumn("FIBackgroundString"))).setCaption("FI-Bkgd String");

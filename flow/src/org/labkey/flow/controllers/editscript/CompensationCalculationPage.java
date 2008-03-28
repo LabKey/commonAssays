@@ -310,7 +310,8 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
     public String selectSubsets(Sign sign, int index)
     {
         StringBuilder ret = new StringBuilder();
-        Map<String, List<String>> valueSubsetMap = this.keywordValueSampleMap.get(getKeywordName(sign, index));
+        String keywordName = getKeywordName(sign, index);
+        Map<String, List<String>> valueSubsetMap = keywordName == null ? null : keywordValueSampleMap.get(keywordName);
         List<String> subsets = Collections.emptyList();
         if (valueSubsetMap == null)
         {

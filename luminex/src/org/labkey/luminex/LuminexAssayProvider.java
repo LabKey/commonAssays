@@ -299,6 +299,8 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 addProperty(study, "Ratio", luminexDataRow.getRatio(), dataMap, types);
                 addProperty(study, "SamplingErrors", luminexDataRow.getSamplingErrors(), dataMap, types);
                 addProperty(study, "Outlier", luminexDataRow.isOutlier(), dataMap, types);
+                addProperty(study, "Description", luminexDataRow.getDescription(), dataMap, types);
+                addProperty(study, "ExtraSpecimenInfo", luminexDataRow.getExtraSpecimenInfo(), dataMap, types);
                 addProperty(study, "SourceLSID", new Lsid("LuminexDataRow", Integer.toString(luminexDataRow.getRowId())).toString(), dataMap, types);
 
                 Analyte analyte = analytes.get(luminexDataRow.getAnalyteId());

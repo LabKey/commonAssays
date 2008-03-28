@@ -40,6 +40,7 @@ public class LuminexDataRow
     private String _dataRowGroup;
     private String _ratio;
     private String _samplingErrors;
+    private String _extraSpecimenInfo;
 
     public LuminexDataRow()
     {
@@ -353,5 +354,15 @@ public class LuminexDataRow
     public void setDate(Date date)
     {
         _date = date;
+    }
+
+    public void setExtraSpecimenInfo(String extraSpecimenInfo)
+    {
+        _extraSpecimenInfo = extraSpecimenInfo;
+    }
+
+    public String getExtraSpecimenInfo()
+    {
+        return _extraSpecimenInfo;
     }
 }

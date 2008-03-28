@@ -10,6 +10,7 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.data.AggregateColumnInfo;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewContext;
 import org.labkey.api.gwt.client.model.GWTComparisonResult;
 import org.labkey.api.gwt.client.model.GWTComparisonMember;
 import org.labkey.api.gwt.client.model.GWTComparisonGroup;
@@ -59,6 +60,7 @@ public class ProteinProphetCrosstabView extends ComparisonCrosstabView
     protected DataView createDataView()
     {
         DataView view = super.createDataView();
+        view.getRenderContext().setViewContext(getViewContext());
         String sortString = CrosstabTableInfo.getDefaultSortString() + ",SeqId/BestName";
         view.getRenderContext().setBaseSort(new Sort(sortString));
         return view;

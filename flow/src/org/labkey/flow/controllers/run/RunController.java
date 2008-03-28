@@ -1,33 +1,33 @@
 package org.labkey.flow.controllers.run;
 
-import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.beehive.netui.pageflow.Forward;
+import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.log4j.Logger;
-import org.labkey.flow.data.*;
-import org.labkey.flow.view.FlowQueryView;
+import org.labkey.api.jsp.FormPage;
+import org.labkey.api.security.ACL;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.HomeTemplate;
-import org.labkey.api.security.ACL;
-import org.labkey.api.jsp.FormPage;
-import org.labkey.api.util.PageFlowUtil;
+import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.editscript.ScriptController;
+import org.labkey.flow.data.*;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.script.MoveRunFromWorkspaceJob;
-import org.labkey.flow.analysis.model.FCS;
+import org.labkey.flow.view.FlowQueryView;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.zip.ZipOutputStream;
-import java.util.zip.ZipEntry;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.Map;
 import java.util.TreeMap;
-import java.io.File;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.ByteArrayInputStream;
-import java.net.URI;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
 public class RunController extends BaseFlowController<RunController.Action>
@@ -140,6 +140,11 @@ public class RunController extends BaseFlowController<RunController.Action>
         HttpServletResponse response = getResponse();
 
         FlowRun run = getRun();
+        if (run == null)
+        {
+            response.getWriter().write("Error: no run found");
+            return null;
+        }
         String strEventCount = getRequest().getParameter("eventCount");
         Map<String, File> files = new TreeMap<String, File>();
         FlowWell[] wells = run.getWells(true);

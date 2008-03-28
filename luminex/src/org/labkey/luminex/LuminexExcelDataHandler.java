@@ -5,6 +5,8 @@ import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.read.biff.BiffException;
 import org.apache.log4j.Logger;
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.beanutils.ConversionException;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.*;
@@ -669,9 +671,58 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                 if (resolver != null)
                 {
                     ParticipantVisit match = resolver.resolve(value, null, null, null);
-                    dataRow.setPtid(match.getParticipantID());
-                    dataRow.setVisitID(match.getVisitID());
-                    dataRow.setDate(match.getDate());
+                    String participantId;
+                    Double visitId;
+                    Date date;
+                    String extraSpecimenInfo = null;
+                    String[] parts = value == null ? new String[0] : value.split(",");
+                    if (match.getParticipantID() == null && match.getVisitID() == null && match.getDate() == null && parts.length >= 3)
+                    {
+                        // First part is participant id
+                        participantId = parts[0].trim();
+                        try
+                        {
+                            // Second part is visit id, possibly prefixed with "visit"
+                            String visitString = parts[1].trim();
+                            if (visitString.toLowerCase().startsWith("visit"))
+                            {
+                                visitString = visitString.substring("visit".length()).trim();
+                            }
+                            visitId = new Double(visitString);
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            visitId = null;
+                        }
+                        try
+                        {
+                            date = (Date)ConvertUtils.convert(parts[2].trim(), Date.class);
+                        }
+                        catch (ConversionException e)
+                        {
+                            date = null;
+                        }
+                        if (parts.length > 3)
+                        {
+                            StringBuilder sb = new StringBuilder(parts[3]);
+                            for (int i = 4; i < parts.length; i++)
+                            {
+                                sb.append(", ");
+                                sb.append(parts[i].trim());
+                            }
+                            extraSpecimenInfo = sb.toString();
+                        }
+                    }
+                    else
+                    {
+                        participantId = match.getParticipantID();
+                        visitId = match.getVisitID();
+                        date = match.getDate();
+                    }
+                    dataRow.setPtid(participantId);
+                    dataRow.setVisitID(visitId);
+                    dataRow.setDate(date);
+                    dataRow.setExtraSpecimenInfo(extraSpecimenInfo);
                 }
             }
             else if ("Std Dev".equalsIgnoreCase(columnName))

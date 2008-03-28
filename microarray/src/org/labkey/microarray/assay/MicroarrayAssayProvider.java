@@ -16,10 +16,13 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.MicroarraySchema;
 import org.labkey.microarray.MicroarrayUploadWizardAction;
+import org.labkey.microarray.MicroarrayController;
 import org.labkey.microarray.sampleset.client.SampleInfo;
 import org.labkey.microarray.sampleset.client.SampleChooser;
 
@@ -258,5 +261,26 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
             }
             inputMaterials.put(material, "Sample " + (i + 1));
         }
+    }
+
+    public boolean allowUpload(User user, Container container, ExpProtocol protocol)
+    {
+        // Microarray module expects MageML files to already be on the server's file system
+        return false;
+    }
+
+    public HttpView getDisallowedUploadMessageView(User user, Container container, ExpProtocol protocol)
+    {
+        HttpView result = super.getDisallowedUploadMessageView(user, container, protocol);
+        if (result == null)
+        {
+            String message = "To upload Microarray runs, browse to the MageML files using the <a href=\"" +
+                    PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(container, null) +
+                    "\">data pipeline</a> or use the <a href=\"" +
+                    MicroarrayController.getPendingMageMLFilesURL(container)
+                    + "\">pending MageML files list</a>.";
+            result = new HtmlView(message);
+        }
+        return result;
     }
 }

@@ -30,6 +30,7 @@ public class FlowQueryView extends QueryView
 {
     List<DisplayColumn> _displayColumns;
     boolean __hasGraphs;
+
     public FlowQueryView(FlowQueryForm form)
     {
         this(form.getContext(), (FlowSchema) form.getSchema(), (FlowQuerySettings) form.getQuerySettings());
@@ -40,6 +41,8 @@ public class FlowQueryView extends QueryView
         super(schema, settings);
         setShowChartButton(true);
         setShowRReportButton(true);
+        setShadeAlternatingRows(true);
+        setShowColumnSeparators(true);
     }
 
     protected boolean showRecordSelectors()

@@ -6,6 +6,7 @@ import org.labkey.api.view.*;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.GWTServiceAction;
+import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.ContainerManager;
@@ -28,12 +29,12 @@ import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
+import org.springframework.validation.ObjectError;
 import org.apache.beehive.netui.pageflow.FormData;
 
 import java.net.URI;
 import java.io.FileNotFoundException;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public class MicroarrayController extends SpringActionController
@@ -158,6 +159,8 @@ public class MicroarrayController extends SpringActionController
     @RequiresPermission(ACL.PERM_INSERT)
     public class UploadRedirectAction extends SimpleViewAction<UploadRedirectForm>
     {
+        private static final String FILE_DESCRIPTION = "File";
+
         public ModelAndView getView(UploadRedirectForm form, BindException errors) throws Exception
         {
             List<Map<String, File>> files = new ArrayList<Map<String, File>>();
@@ -166,12 +169,12 @@ public class MicroarrayController extends SpringActionController
                 PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
                 if (root == null)
                 {
-                    throw new IllegalStateException("No pipeline root is available");
+                    HttpView.throwNotFound("No pipeline root is available");
                 }
                 File f = root.resolvePath(form.getPath());
                 if (!NetworkDrive.exists(f))
                 {
-                    throw new IOException("Unable to find file: " + form.getPath());
+                    HttpView.throwNotFound("Unable to find file: " + form.getPath());
                 }
 
                 File[] selectedFiles = f.listFiles(ArrayPipelineManager.getMageFileFilter());
@@ -179,7 +182,7 @@ public class MicroarrayController extends SpringActionController
                 {
                     for (File selectedFile : selectedFiles)
                     {
-                        files.add(Collections.singletonMap("File", selectedFile));
+                        files.add(Collections.singletonMap(FILE_DESCRIPTION, selectedFile));
                     }
                 }
             }
@@ -198,7 +201,7 @@ public class MicroarrayController extends SpringActionController
                     File f = data.getFile();
                     if (f != null && f.isFile())
                     {
-                        files.add(Collections.singletonMap("File", f));
+                        files.add(Collections.singletonMap(FILE_DESCRIPTION, f));
                     }
                 }
             }
@@ -207,6 +210,19 @@ public class MicroarrayController extends SpringActionController
             {
                 HttpView.throwNotFound("Could not find any matching files");
             }
+            for (Map<String, File> fileMap : files)
+            {
+                File f = fileMap.get(FILE_DESCRIPTION);
+                ExpData data = ExperimentService.get().getDataByURL(f, getContainer());
+                if (data != null && data.getRun() != null)
+                {
+                    errors.addError(new ObjectError("main", null, null, "The file " + f.getAbsolutePath() + " has already been uploaded"));
+                }
+            }
+            if (errors.getErrorCount() > 0)
+            {
+                return new SimpleErrorView(errors);
+            }
             PipelineDataCollector.setFileCollection(getViewContext().getRequest().getSession(true), getContainer(), form.getProtocol(), files);
             HttpView.throwRedirect(AssayService.get().getUploadWizardURL(getContainer(), form.getProtocol()));
             return null;
@@ -214,7 +230,7 @@ public class MicroarrayController extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            throw new UnsupportedOperationException();
+            return root.addChild("Microarray Upload Attempt");
         }
     }
 

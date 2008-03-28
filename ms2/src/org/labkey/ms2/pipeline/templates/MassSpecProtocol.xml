@@ -126,7 +126,7 @@
 				<exp:ExperimentLogEntry ActionSequenceRef="40">
 					<exp:CommonParametersApplied>
 						<exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@RUN_FILENAME@@</exp:SimpleVal>
-						<exp:SimpleVal Name="OutputDataFileName" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">@@DATA_NAME@@</exp:SimpleVal>
+						<exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">@@DATA_NAME@@</exp:SimpleVal>
 					</exp:CommonParametersApplied>
 				</exp:ExperimentLogEntry>
 				<exp:ExperimentLogEntry ActionSequenceRef="1000"/>

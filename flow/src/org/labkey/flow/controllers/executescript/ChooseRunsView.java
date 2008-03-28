@@ -1,15 +1,15 @@
 package org.labkey.flow.controllers.executescript;
 
-import org.labkey.api.view.DataView;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.*;
-import org.labkey.flow.view.FlowQueryView;
-import org.labkey.api.query.QueryPicker;
 import org.labkey.api.query.QueryAction;
+import org.labkey.api.query.QueryPicker;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
+import org.labkey.flow.view.FlowQueryView;
 
-import java.util.List;
-import java.util.Collections;
 import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.List;
 
 public class ChooseRunsView extends FlowQueryView
 {
@@ -50,6 +50,7 @@ public class ChooseRunsView extends FlowQueryView
         rgn.setOffset(getOffset());
         rgn.setSelectionKey(getSelectionKey());
         rgn.setShowRecordSelectors(showRecordSelectors());
+        rgn.setShowRows(getShowRows());
         rgn.setName(getDataRegionName());
         rgn.setDisplayColumns(displayColumns);
         return rgn;

@@ -25,4 +25,17 @@ public class RunListException extends Exception
     {
         return _messages;
     }
+
+    public String getMessage()
+    {
+        StringBuffer sb = new StringBuffer();
+        String concat = "";
+        for (String msg : _messages)
+        {
+            sb.append(msg);
+            sb.append(concat);
+            concat = "\n";
+        }
+        return sb.toString();
+    }
 }

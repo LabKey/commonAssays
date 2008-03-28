@@ -1068,7 +1068,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_NONE)
+    @RequiresPermission(ACL.PERM_READ)
     public class GetProteinGroupingPeptides extends SimpleViewAction<RunForm>
     {
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
@@ -1376,46 +1376,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_NONE)
-    public class OldCompareProteinProphetQueryAction extends RunListHandlerAction<PeptideFilteringComparisonForm, CompareProteinsView>
-    {
-        public OldCompareProteinProphetQueryAction()
-        {
-            super(PeptideFilteringComparisonForm.class);
-        }
-
-        protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
-        {
-            CompareProteinsView view = createInitializedQueryView(form, errors, false, null);
-            if (!view.getErrors().isEmpty())
-                return _renderErrors(view.getErrors());
-
-            HtmlView helpView = new HtmlView("Comparison Details", "<div style=\"width: 800px;\"><p>To change the columns shown and set filters, use the Customize View link below. Add protein-specific columns, or expand <em>Run</em> to see the values associated with individual runs, like probability. To set a filter, select the Filter tab, add column, and filter it based on the desired threshold.</p></div>");
-
-            Map<String, String> props = new HashMap<String, String>();
-            props.put("originalURL", getViewContext().getActionURL().toString());
-            props.put("comparisonName", view.getComparisonName());
-            GWTView gwtView = new GWTView("org.labkey.ms2.MS2VennDiagramView", props);
-            gwtView.setTitle("Comparison Overview");
-            gwtView.setFrame(WebPartView.FrameType.PORTAL);
-            gwtView.enableExpandCollapse("ProteinProphetQueryCompare", true);
-
-            return new VBox(gwtView, helpView, view);
-        }
-
-        protected CompareProteinsView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
-        {
-            String viewName = form.getCustomViewName(getViewContext());
-            return new CompareProteinsView(getViewContext(), form.getRunList(), forExport, viewName);
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root.addChild("Compare ProteinProphet (OldQuery)");
-        }
-    }
-
-    @RequiresPermission(ACL.PERM_NONE)
+    @RequiresPermission(ACL.PERM_NONE)    // QueryViewAction handles permission check; it requires PERM_NONE
     public class CompareProteinProphetQueryAction extends RunListHandlerAction<PeptideFilteringComparisonForm, ProteinProphetCrosstabView>
     {
         private PeptideFilteringComparisonForm _form;
@@ -1862,7 +1823,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_NONE)
+    @RequiresPermission(ACL.PERM_NONE)       // QueryViewAction handles permission check; it requires PERM_NONE
     public class SpectraCountAction extends RunListHandlerAction<SpectraCountForm, QueryView>
     {
         private SpectraCountConfiguration _config;
@@ -2638,7 +2599,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_NONE)      // TODO: Check this
+    @RequiresPermission(ACL.PERM_READ)
     public class ExportProteinSearchToExcel extends ExportAction<ProteinSearchForm>
     {
         public void export(ProteinSearchForm form, HttpServletResponse response) throws Exception
@@ -2651,7 +2612,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_NONE)      // TODO: Check this
+    @RequiresPermission(ACL.PERM_READ)
     public class ExportProteinSearchToTSVAction extends ExportAction<ProteinSearchForm>
     {
         public void export(ProteinSearchForm form, HttpServletResponse response) throws Exception
@@ -2665,7 +2626,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_NONE)      // TODO: Check this
+    @RequiresPermission(ACL.PERM_READ)
     public class ExportProteinGroupSearchToExcelAction extends ExportAction<ProteinSearchForm>
     {
         public void export(ProteinSearchForm form, HttpServletResponse response) throws Exception
@@ -2678,7 +2639,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_NONE)      // TODO: Check this
+    @RequiresPermission(ACL.PERM_READ)
     public class ExportProteinGroupSearchToTSVAction extends ExportAction<ProteinSearchForm>
     {
         public void export(ProteinSearchForm form, HttpServletResponse response) throws Exception
@@ -3119,7 +3080,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @RequiresPermission(ACL.PERM_NONE)
+    @RequiresPermission(ACL.PERM_READ)
     public class ShowAllRunsAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception

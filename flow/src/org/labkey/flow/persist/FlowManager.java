@@ -11,8 +11,8 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.*;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.query.AttributeCache;
@@ -545,7 +545,7 @@ public class FlowManager
         {
             DbSchema s = DbSchema.get("flow");
             String fromClause = "flow.attribute A inner join flow.keyword K on A.rowid=K.keywordid inner join flow.object O on K.objectid = O.rowid inner join exp.data D on O.dataid = D.rowid";
-            SQLFragment fragment = Search.getSQLFragment("container, uri, dataid", "D.container, O.uri, O.dataid, A.name, K.value", fromClause, "D.Container", null, containerIds, parser, s.getSqlDialect(),  "A.name", "K.value");
+            SQLFragment fragment = Search.getSQLFragment("container, FCSName, uri, dataid", "D.container, D.name AS FCSName, O.uri, O.dataid, A.name, K.value", fromClause, "D.Container", null, containerIds, parser, s.getSqlDialect(),  "A.name", "K.value");
 
             MultiMap<String, String> map = new MultiHashMap<String, String>();
             ResultSet rs = null;
@@ -560,17 +560,20 @@ public class FlowManager
                 while(rs.next())
                 {
                     String containerId = rs.getString(1);
-                    String uri = rs.getString(2);
-                    String wellId = String.valueOf(rs.getInt(3));
+                    String name = rs.getString(2);
+                    String uri = rs.getString(3);
+                    String wellId = String.valueOf(rs.getInt(4));
                     
-                    String path;
-                    try
+                    String path = null;
+                    if (uri != null)
                     {
-                        path = new File(new URI(uri)).getPath();
-                    }
-                    catch (URISyntaxException x)
-                    {
-                        continue;
+                        try
+                        {
+                            path = new File(new URI(uri)).getPath();
+                        }
+                        catch (URISyntaxException x)
+                        {
+                        }
                     }
                     Container c = ContainerManager.getForId(containerId);
                     url.setExtraPath(c.getPath());
@@ -578,7 +581,10 @@ public class FlowManager
                     link.append("<a href=\"");
                     link.append(url.getEncodedLocalURIString());
                     link.append("\">");
-                    link.append(PageFlowUtil.filter(path));
+                    if (path != null)
+                        link.append(PageFlowUtil.filter(path));
+                    else
+                        link.append(name);
                     link.append("</a>");
                     map.put(containerId, link.toString());
                     link.setLength(0);

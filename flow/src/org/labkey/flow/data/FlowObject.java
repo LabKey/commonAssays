@@ -125,7 +125,14 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         String str = getParam(url, request, param);
         if (str == null || str.length() == 0)
             return 0;
-        return Integer.valueOf(str);
+        try
+        {
+            return Integer.valueOf(str);
+        }
+        catch (NumberFormatException nfe)
+        {
+            return 0;
+        }
     }
 
     public void addHiddenFields(DataRegion region)

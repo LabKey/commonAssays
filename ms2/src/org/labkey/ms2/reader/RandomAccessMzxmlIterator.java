@@ -38,7 +38,7 @@ import java.io.FileNotFoundException;
 public class RandomAccessMzxmlIterator extends AbstractMzxmlIterator
 {
     MSXMLParser _parser = null;
-    int _scanCount = 0;
+    int _maxScan = 0;
     int _currScan = 0;
     MzxmlSimpleScan _nextSimpleScan = null;
     
@@ -49,7 +49,7 @@ public class RandomAccessMzxmlIterator extends AbstractMzxmlIterator
         if (!NetworkDrive.exists(new File(fileName)))
             throw new FileNotFoundException(fileName);
         _parser = new MSXMLParser(fileName);
-        _scanCount = _parser.getScanCount();
+        _maxScan = _parser.getMaxScanNumber();
     }
 
     public RandomAccessMzxmlIterator(String fileName, int msLevel, int startingScan)
@@ -67,22 +67,18 @@ public class RandomAccessMzxmlIterator extends AbstractMzxmlIterator
         if (null == _parser)
             return false;
 
-        if (null == _nextSimpleScan && _currScan < _scanCount)
+        if (null == _nextSimpleScan && _currScan < _maxScan)
         {
-            while (++_currScan <= _scanCount)
+            while (++_currScan <= _maxScan)
             {
                 ScanHeader header = _parser.rapHeader(_currScan);
-                if (header == null)
-                {
-                    return false;
-                }
-                if (_msLevel == 0 || header.getMsLevel() == _msLevel)
+                if (header != null && (_msLevel == 0 || header.getMsLevel() == _msLevel))
                 {
                     _nextSimpleScan = new MzxmlSimpleScan(_currScan, header);
                     break;
                 }
             }
-            assert (_currScan <= _scanCount) == (_nextSimpleScan != null);
+            assert (_currScan <= _maxScan) == (_nextSimpleScan != null);
         }
         return _nextSimpleScan != null;
     }

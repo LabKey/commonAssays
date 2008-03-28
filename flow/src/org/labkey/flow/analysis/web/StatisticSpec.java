@@ -1,15 +1,12 @@
 package org.labkey.flow.analysis.web;
 
-import org.labkey.flow.analysis.model.Subset;
+import org.labkey.api.view.Stats;
 import org.labkey.flow.analysis.model.FlowException;
-import org.labkey.flow.analysis.model.FCS;
-import org.labkey.flow.analysis.model.ScriptSettings;
+import org.labkey.flow.analysis.model.Subset;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.HashMap;
-
-import org.labkey.api.view.Stats;
+import java.util.Map;
 
 public class StatisticSpec implements Serializable, Comparable
 {
@@ -57,8 +54,9 @@ public class StatisticSpec implements Serializable, Comparable
         _parameter = parameter;
     }
 
-    public StatisticSpec(String str)
+    public StatisticSpec(String stat)
     {
+        String str = stat;
         if (str.endsWith(")"))
         {
             int ichLParen = str.lastIndexOf("(");
@@ -86,11 +84,11 @@ public class StatisticSpec implements Serializable, Comparable
         }
         try
         {
-            _statistic = STAT.valueOf(str.substring(0));
+            _statistic = STAT.valueOf(str);
         }
         catch (Exception e)
         {
-            throw new FlowException("'" + str + "' is not a valid statistic.", e);
+            throw new FlowException("'" + stat + "' is not a valid statistic.", e);
         }
     }
 
