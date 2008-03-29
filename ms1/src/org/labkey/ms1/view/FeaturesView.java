@@ -146,7 +146,7 @@ public class FeaturesView extends QueryView
         //if this is for export, remove the details and peaks links
         if(_forExport)
         {
-            region.removeColumnsFromDisplayColumnList(PeaksAvailableColumnInfo.COLUMN_NAME,
+            region.removeColumns(PeaksAvailableColumnInfo.COLUMN_NAME,
                     FeaturesTableInfo.COLUMN_FIND_SIMILAR_LINK);
         }
         return region;

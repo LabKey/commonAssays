@@ -187,7 +187,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
             throws SQLException
     {
         DataRegion peptideGrid = getNestedPeptideGrid(getSingleRun(), requestedPeptideColumnNames, false);
-        peptideGrid.removeColumnsFromDisplayColumnList("Protein", "Description", "GeneName", "SeqId");
+        peptideGrid.removeColumns("Protein", "Description", "GeneName", "SeqId");
         return peptideGrid;
     }
 

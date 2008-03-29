@@ -24,6 +24,7 @@ import org.apache.struts.action.ActionError;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.XMLWriterTest;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipelineJob;
@@ -35,7 +36,6 @@ import org.labkey.api.view.*;
 import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
-import org.labkey.flow.analysis.model.FlowJoWorkspaceWriter;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.script.ScriptJob;
@@ -46,6 +46,7 @@ import org.labkey.flow.webparts.OverviewWebPart;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
@@ -323,7 +324,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
         return new Forward(new URI(getRequest().getContextPath() + "/_.gif"));
     }
 
-    @Jpf.Action
+    @Jpf.Action     // Just a simple test of XMLWriter TODO: Replace with actual export
     protected Forward export() throws Exception
     {
         HttpServletResponse response = getResponse();
@@ -331,9 +332,8 @@ public class FlowController extends BaseFlowController<FlowController.Action>
         response.setHeader("Content-disposition", "attachment; filename=\"" + "someDumbFile.xml" +"\"");
         OutputStream os = response.getOutputStream();
 
-        FlowJoWorkspaceWriter writer = new FlowJoWorkspaceWriter();
-        writer.write(os);
-
+        XMLWriterTest writer = new XMLWriterTest();
+        writer.write(new PrintWriter(os));
         os.close();
         response.flushBuffer();
 

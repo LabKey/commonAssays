@@ -3757,7 +3757,7 @@ public class MS2Controller extends SpringActionController
                 addView(peptideFilter);
 
                 GridView peptidesGridView = peptideView.createPeptideViewForGrouping(form);
-                peptidesGridView.getDataRegion().removeColumnsFromDisplayColumnList("Description,Protein,GeneName,SeqId");
+                peptidesGridView.getDataRegion().removeColumns("Description,Protein,GeneName,SeqId");
                 addView(peptidesGridView);
             }
         }
