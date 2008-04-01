@@ -18,9 +18,8 @@ package org.labkey.ms1.view;
 import org.labkey.api.data.CrosstabTableInfo;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.query.CrosstabView;
-import org.labkey.api.query.QuerySettings;
-import org.labkey.api.query.QueryView;
+import org.labkey.api.data.AggregateColumnInfo;
+import org.labkey.api.query.*;
 import org.labkey.api.view.DataView;
 import org.labkey.ms1.query.FeaturesTableInfo;
 import org.labkey.ms1.query.MS1Schema;
@@ -31,7 +30,7 @@ import org.labkey.ms1.query.MS1Schema;
  * Date: Jan 22, 2008
  * Time: 3:56:33 PM
  */
-public class CompareRunsView extends CrosstabView
+public class CompareRunsView extends ComparisonCrosstabView
 {
     private MS1Schema _schema = null;
     private int[] _runIds = null;
@@ -64,5 +63,10 @@ public class CompareRunsView extends CrosstabView
         String sortString = CrosstabTableInfo.getDefaultSortString() + "," + FeaturesTableInfo.COLUMN_PEPTIDE_INFO + "_Peptide";
         view.getRenderContext().setBaseSort(new Sort(sortString));
         return view;
+    }
+
+    protected FieldKey getComparisonColumn()
+    {
+        return FieldKey.fromParts(AggregateColumnInfo.NAME_PREFIX + "MIN_FeatureId");
     }
 }

@@ -100,7 +100,6 @@ public class ProteinProphetCrosstabView extends ComparisonCrosstabView
                     {
                         group = new GWTComparisonGroup();
                         group.setURL(PageFlowUtil.urlProvider(ExperimentUrls.class).getExperimentDetailsURL(experiment.getContainer(), experiment).toString());
-                        group.setRowId(experiment.getRowId());
                         group.setName(experiment.getName());
                         groups.put(experiment.getRowId(), group);
                     }

@@ -9,11 +9,9 @@
 <%
     JspView<ProteinController.UploadAnnotationsForm> me = (JspView<ProteinController.UploadAnnotationsForm>) HttpView.currentView();
     ProteinController.UploadAnnotationsForm bean = me.getModelBean();
-
-    String errors = PageFlowUtil.getStrutsError(request, "main");
 %>
 
-<span class="labkey-error"><%=errors%></span>
+<labkey:errors/>
 
 <form action="uploadCustomProteinAnnotations.post" method="POST">
     <table>

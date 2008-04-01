@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.QueryViewAction;
+import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegionSelection;
@@ -18,9 +19,11 @@ import org.labkey.api.view.*;
 import org.labkey.api.ms1.MS1Urls;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.ms2.MS2Urls;
+import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.ms1.model.*;
 import org.labkey.ms1.query.*;
 import org.labkey.ms1.view.*;
+import org.labkey.ms1.client.MS1VennDiagramView;
 import org.labkey.common.util.Pair;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -29,6 +32,8 @@ import org.springframework.beans.MutablePropertyValues;
 
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import java.sql.SQLException;
 
 /**
@@ -958,6 +963,23 @@ public class MS1Controller extends SpringActionController
             return new CompareRunsView(new MS1Schema(getUser(), getViewContext().getContainer()), form.getRunIdArray());
         }
 
+        protected ModelAndView getHtmlView(CompareRunsForm form, BindException errors) throws Exception
+        {
+            Map<String, String> props = new HashMap<String, String>();
+            props.put("originalURL", getViewContext().getActionURL().toString());
+            props.put("comparisonName", MS1VennDiagramView.FEATURES_BY_PEPTIDE);
+            GWTView gwtView = new GWTView(org.labkey.ms1.client.MS1VennDiagramView.class, props);
+            gwtView.setTitle("Comparison Overview");
+            gwtView.setFrame(WebPartView.FrameType.PORTAL);
+            gwtView.enableExpandCollapse(MS1VennDiagramView.FEATURES_BY_PEPTIDE + "Overview", true);
+
+            CompareRunsView queryView = (CompareRunsView)super.getHtmlView(form, errors);
+            queryView.setTitle("Comparison Details");
+            queryView.setFrame(WebPartView.FrameType.PORTAL);
+            queryView.enableExpandCollapse(MS1VennDiagramView.FEATURES_BY_PEPTIDE + "Details", false);
+            return new VBox(gwtView, queryView);
+        }
+
         public NavTree appendNavTrail(NavTree root)
         {
             return root.addChild("Compare Runs");
@@ -1277,4 +1299,12 @@ public class MS1Controller extends SpringActionController
         return "javascript: if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"post\", \"runs\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); }";
     }
 
+    @RequiresPermission(ACL.PERM_READ)
+    public class CompareServiceAction extends GWTServiceAction
+    {
+        protected BaseRemoteService createService()
+        {
+            return new CompareServiceImpl(getViewContext());
+        }
+    }
 } //class MS1Controller

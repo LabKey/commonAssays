@@ -18,6 +18,7 @@ public class GWTWorkspace implements IsSerializable, Serializable
     /**
      * For compensation calculation, selecting a specific subset (e.g. "L/FITC+") should result in the UI automatically
      * selecting the FITC+ FCS file.
+     * @gwt.typeArgs <java.lang.String, org.labkey.flow.gateeditor.client.model.GWTWell>
      */
     Map subsetReleventWellMap = new HashMap();
 

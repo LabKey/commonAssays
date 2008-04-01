@@ -161,7 +161,6 @@ public abstract class AbstractRunCompareView extends QueryView
                         {
                             comparisonGroup = new GWTComparisonGroup();
                             comparisonGroup.setURL(PageFlowUtil.urlProvider(ExperimentUrls.class).getExperimentDetailsURL(experiment.getContainer(), experiment).toString());
-                            comparisonGroup.setRowId(experiment.getRowId());
                             comparisonGroup.setName(experiment.getName());
                             runGroups.put(experiment.getRowId(), comparisonGroup);
                         }

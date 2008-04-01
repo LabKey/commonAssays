@@ -15,6 +15,19 @@ public enum CustomAnnotationType
         {
             return ProteinManager.getSchema().getSqlDialect().getSubstringFunction("Identifier", "0", "12");
         }
+
+        public String validateUserLookupString(String lookupString)
+        {
+            if (!lookupString.startsWith("IPI"))
+            {
+                return "All IPI identifiers must start with 'IPI'.";
+            }
+            if (lookupString.indexOf(".") != -1)
+            {
+                return "IPI identifiers must not include a version number.";
+            }
+            return null;
+        }
     },
     GENE_NAME("Gene Name", IdentifierType.GeneName),
     SWISS_PROT("Swiss-Prot", IdentifierType.SwissProt),
@@ -23,6 +36,11 @@ public enum CustomAnnotationType
     protected String getIdentifierSelectSQL()
     {
         return "Identifier";
+    }
+
+    public String validateUserLookupString(String lookupString)
+    {
+        return null;
     }
 
     public String getFirstSelectForSeqId()

@@ -1,0 +1,8 @@
+<module>
+
+    <inherits name='org.labkey.api.gwt.Internal'/>
+
+    <entry-point class='org.labkey.ms1.client.MS1VennDiagramView'/>
+
+    <servlet path="/org.labkey.ms1.MS1VennDiagramView/CompareService" class="org.labkey.ms1.CompareServiceImpl"/>
+</module>

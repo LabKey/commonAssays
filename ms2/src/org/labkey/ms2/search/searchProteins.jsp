@@ -47,7 +47,7 @@
             <td><labkey:button text="Search" /></td>
         <%= separator %>
             <td></td>
-            <td>[<a href="<%= annotationsURL.getLocalURIString() %>">manage annotations</a>]</td>
+            <td>[<a href="<%= annotationsURL.getLocalURIString() %>">manage custom protein lists</a>]</td>
         </tr>
     </table>
 </form>
