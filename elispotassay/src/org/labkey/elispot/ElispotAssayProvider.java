@@ -322,7 +322,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
                 addProperty(study, "Run Comments", run.getComments(), dataMap, typeSet);
                 addProperty(study, "Run CreatedOn", run.getCreated(), dataMap, typeSet);
                 User createdBy = run.getCreatedBy();
-                addProperty(study, "Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(HttpView.currentContext()), dataMap, typeSet);
+                addProperty(study, "Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(HttpView.currentView().getViewContext()), dataMap, typeSet);
 
                 dataMaps[rowIndex++] = dataMap;
             }

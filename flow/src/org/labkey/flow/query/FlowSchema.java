@@ -747,7 +747,7 @@ public class FlowSchema extends UserSchema
     {
         FlowDataTable ret = createDataTable(alias, type);
 
-        ColumnInfo colAnalysisScript = new ExprColumn(ret, "AnalysisScript", new SQLFragment(alias + ".scriptid"), Types.INTEGER);
+        ColumnInfo colAnalysisScript = new ExprColumn(ret, "AnalysisScript", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".scriptid"), Types.INTEGER);
         ret.addColumn(colAnalysisScript);
         colAnalysisScript.setFk(new LookupForeignKey(PageFlowUtil.urlFor(AnalysisScriptController.Action.begin, getContainer()),
                 FlowParam.scriptId.toString(), "RowId", "Name"){
@@ -756,7 +756,8 @@ public class FlowSchema extends UserSchema
                 return detach().createAnalysisScriptTable("Lookup", true);
             }
         });
-        ColumnInfo colCompensationMatrix = new ExprColumn(ret, "CompensationMatrix", new SQLFragment(alias + ".compid"), Types.INTEGER);
+
+        ColumnInfo colCompensationMatrix = new ExprColumn(ret, "CompensationMatrix", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".compid"), Types.INTEGER);
         ret.addColumn(colCompensationMatrix);
         colCompensationMatrix.setFk(new LookupForeignKey(PageFlowUtil.urlFor(CompensationController.Action.showCompensation, getContainer()), FlowParam.compId.toString(),
                 "RowId", "Name"){
@@ -772,11 +773,14 @@ public class FlowSchema extends UserSchema
         {
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
         }
+
         ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
+
         ColumnInfo colGraph = ret.addObjectIdColumn("Graph");
         colGraph.setFk(new GraphForeignKey(fps));
         colGraph.setIsUnselectable(true);
-        ColumnInfo colFCSFile = new ExprColumn(ret, "FCSFile", new SQLFragment(alias + ".fcsid"), Types.INTEGER);
+
+        ColumnInfo colFCSFile = new ExprColumn(ret, "FCSFile", new SQLFragment(ExprColumn.STR_TABLE_ALIAS  + ".fcsid"), Types.INTEGER);
         ret.addColumn(colFCSFile);
         colFCSFile.setFk(new LookupForeignKey(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()),
                 FlowParam.wellId.toString(),
@@ -786,6 +790,7 @@ public class FlowSchema extends UserSchema
                     return detach().createFCSFileTable("FCSFile");
                 }
             });
+
         ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph));
         return ret;
     }

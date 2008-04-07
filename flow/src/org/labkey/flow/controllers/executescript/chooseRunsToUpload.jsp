@@ -1,18 +1,16 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<%@ page import="org.apache.commons.io.filefilter.SuffixFileFilter" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.flow.controllers.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToUploadForm" %>
-<%@ page import="java.io.File" %>
-<%@ page import="java.io.FilenameFilter" %>
 <%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%
     ChooseRunsToUploadForm form = (ChooseRunsToUploadForm) __form;
     Map<String, String> paths = form.getNewPaths();
     PipeRoot root = form.getPipeRoot();
-    
+
     %><labkey:errors/><%
 
     if (paths.size() != 0)
@@ -23,7 +21,7 @@
           class="normal">
         <input type="hidden" name="path" value="<%=h(form.path)%>">
         <p>
-            Choose which directories in '<%=h(form.path)%>' contain the FCS files for your experiment runs.
+            Choose which directories in '<%=h(PageFlowUtil.decode(form.path))%>' contain the FCS files for your experiment runs.
             <%=FlowModule.getLongProductName()%> will read the keywords from these FCS files into the database.  The FCS files
             themselves will not be modified, and will remain in the file system.
         </p>

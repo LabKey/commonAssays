@@ -27,6 +27,7 @@ public class PeptidesFilterView extends QueryView
     public void renderCustomizeViewLink(PrintWriter out)
     {
         ActionURL url = urlFor(QueryAction.chooseColumns);
+        url.addParameter(QueryParam.viewName, _form.getCustomViewName(getViewContext()));
         url.addParameter(QueryParam.defaultTab, "filter");
         out.write(textLink("edit peptide filter", url, PEPTIDE_FILTER_LINK_ID));
     }

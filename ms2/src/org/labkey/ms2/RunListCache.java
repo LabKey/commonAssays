@@ -47,6 +47,12 @@ public class RunListCache
     // just caching the list, we do all error & security checks upfront to alert the user early.
     public static int cacheSelectedRuns(boolean requireSameType, MS2Controller.RunListForm form, ViewContext ctx) throws ServletException, RunListException
     {
+        String selectionKey = ctx.getRequest().getParameter(DataRegionSelection.DATA_REGION_SELECTION_KEY);
+        if (selectionKey == null)
+        {
+            throw new RunListException(NO_RUNS_MESSAGE);
+        }
+        
         Set<String> stringIds = DataRegionSelection.getSelected(ctx, true);
 
         if (null == stringIds || stringIds.isEmpty())

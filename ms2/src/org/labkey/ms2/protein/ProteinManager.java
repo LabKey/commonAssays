@@ -420,10 +420,10 @@ public class ProteinManager
     {
         SQLFragment mappingSQL = new SQLFragment("SELECT fs1.seqid AS OldSeqId, fs2.seqid AS NewSeqId\n");
         mappingSQL.append("FROM \n");
-        mappingSQL.append("\t(SELECT ff.SeqId, s.Hash FROM " + getTableInfoFastaSequences() + " ff, " + getTableInfoSequences() + " s WHERE ff.SeqId = s.SeqId AND ff.FastaId = " + oldFastaId + ") fs1 \n");
+        mappingSQL.append("\t(SELECT ff.SeqId, s.Hash, ff.LookupString FROM " + getTableInfoFastaSequences() + " ff, " + getTableInfoSequences() + " s WHERE ff.SeqId = s.SeqId AND ff.FastaId = " + oldFastaId + ") fs1 \n");
         mappingSQL.append("\tLEFT OUTER JOIN \n");
-        mappingSQL.append("\t(SELECT ff.SeqId, s.Hash FROM " + getTableInfoFastaSequences() + " ff, " + getTableInfoSequences() + " s WHERE ff.SeqId = s.SeqId AND ff.FastaId = " + newFastaId + ") fs2 \n");
-        mappingSQL.append("\tON (fs1.Hash = fs2.Hash)");
+        mappingSQL.append("\t(SELECT ff.SeqId, s.Hash, ff.LookupString FROM " + getTableInfoFastaSequences() + " ff, " + getTableInfoSequences() + " s WHERE ff.SeqId = s.SeqId AND ff.FastaId = " + newFastaId + ") fs2 \n");
+        mappingSQL.append("\tON (fs1.Hash = fs2.Hash AND fs1.LookupString = fs2.LookupString)");
 
         SQLFragment missingCountSQL = new SQLFragment("SELECT COUNT(*) FROM (");
         missingCountSQL.append(mappingSQL);
@@ -439,37 +439,47 @@ public class ProteinManager
             throw new SQLException("There are " + missingCount + " protein sequences in the original FASTA file that are not in the new file");
         }
 
-        SQLFragment updatePeptidesSQL = new SQLFragment();
-        updatePeptidesSQL.append("UPDATE " + MS2Manager.getTableInfoPeptidesData() + " SET SeqId = map.NewSeqId");
-        updatePeptidesSQL.append("\tFROM " + MS2Manager.getTableInfoFractions() + " f \n");
-        updatePeptidesSQL.append("\t, " + MS2Manager.getTableInfoRuns() + " r\n");
-        updatePeptidesSQL.append("\t, (");
-        updatePeptidesSQL.append(mappingSQL);
-        updatePeptidesSQL.append(") map \n");
-        updatePeptidesSQL.append("WHERE f.Fraction = " + MS2Manager.getTableInfoPeptidesData() + ".Fraction\n");
-        updatePeptidesSQL.append("\tAND r.Run = f.Run\n");
-        updatePeptidesSQL.append("\tAND " + MS2Manager.getTableInfoPeptidesData() + ".SeqId = map.OldSeqId \n");
-        updatePeptidesSQL.append("\tAND r.FastaId = " + oldFastaId);
+        try
+        {
+            MS2Manager.getSchema().getScope().beginTransaction();
 
-        int peptideUpdateCount = Table.execute(MS2Manager.getSchema(), updatePeptidesSQL);
+            SQLFragment updatePeptidesSQL = new SQLFragment();
+            updatePeptidesSQL.append("UPDATE " + MS2Manager.getTableInfoPeptidesData() + " SET SeqId = map.NewSeqId");
+            updatePeptidesSQL.append("\tFROM " + MS2Manager.getTableInfoFractions() + " f \n");
+            updatePeptidesSQL.append("\t, " + MS2Manager.getTableInfoRuns() + " r\n");
+            updatePeptidesSQL.append("\t, (");
+            updatePeptidesSQL.append(mappingSQL);
+            updatePeptidesSQL.append(") map \n");
+            updatePeptidesSQL.append("WHERE f.Fraction = " + MS2Manager.getTableInfoPeptidesData() + ".Fraction\n");
+            updatePeptidesSQL.append("\tAND r.Run = f.Run\n");
+            updatePeptidesSQL.append("\tAND " + MS2Manager.getTableInfoPeptidesData() + ".SeqId = map.OldSeqId \n");
+            updatePeptidesSQL.append("\tAND r.FastaId = " + oldFastaId);
 
-        SQLFragment updateProteinsSQL = new SQLFragment();
-        updateProteinsSQL.append("UPDATE " + MS2Manager.getTableInfoProteinGroupMemberships() + " SET SeqId= map.NewSeqId\n");
-        updateProteinsSQL.append("FROM " + MS2Manager.getTableInfoProteinGroups() + " pg\n");
-        updateProteinsSQL.append("\t, " + MS2Manager.getTableInfoProteinProphetFiles() + " ppf\n");
-        updateProteinsSQL.append("\t, " + MS2Manager.getTableInfoRuns() + " r\n");
-        updateProteinsSQL.append("\t, (");
-        updateProteinsSQL.append(mappingSQL);
-        updateProteinsSQL.append(") map \n");
-        updateProteinsSQL.append("WHERE " + MS2Manager.getTableInfoProteinGroupMemberships() + ".ProteinGroupId = pg.RowId\n");
-        updateProteinsSQL.append("\tAND pg.ProteinProphetFileId = ppf.RowId\n");
-        updateProteinsSQL.append("\tAND r.Run = ppf.Run\n");
-        updateProteinsSQL.append("\tAND " + MS2Manager.getTableInfoProteinGroupMemberships() + ".SeqId = map.OldSeqId\n");
-        updateProteinsSQL.append("\tAND r.FastaId = " + oldFastaId);
+            int peptideUpdateCount = Table.execute(MS2Manager.getSchema(), updatePeptidesSQL);
 
-        int proteinUpdateCount = Table.execute(MS2Manager.getSchema(), updateProteinsSQL);
+            SQLFragment updateProteinsSQL = new SQLFragment();
+            updateProteinsSQL.append("UPDATE " + MS2Manager.getTableInfoProteinGroupMemberships() + " SET SeqId= map.NewSeqId\n");
+            updateProteinsSQL.append("FROM " + MS2Manager.getTableInfoProteinGroups() + " pg\n");
+            updateProteinsSQL.append("\t, " + MS2Manager.getTableInfoProteinProphetFiles() + " ppf\n");
+            updateProteinsSQL.append("\t, " + MS2Manager.getTableInfoRuns() + " r\n");
+            updateProteinsSQL.append("\t, (");
+            updateProteinsSQL.append(mappingSQL);
+            updateProteinsSQL.append(") map \n");
+            updateProteinsSQL.append("WHERE " + MS2Manager.getTableInfoProteinGroupMemberships() + ".ProteinGroupId = pg.RowId\n");
+            updateProteinsSQL.append("\tAND pg.ProteinProphetFileId = ppf.RowId\n");
+            updateProteinsSQL.append("\tAND r.Run = ppf.Run\n");
+            updateProteinsSQL.append("\tAND " + MS2Manager.getTableInfoProteinGroupMemberships() + ".SeqId = map.OldSeqId\n");
+            updateProteinsSQL.append("\tAND r.FastaId = " + oldFastaId);
 
-        Table.execute(MS2Manager.getSchema(), "UPDATE " + MS2Manager.getTableInfoRuns() + " SET FastaID = ? WHERE FastaID = ?", new Object[] { newFastaId, oldFastaId } );
+            int proteinUpdateCount = Table.execute(MS2Manager.getSchema(), updateProteinsSQL);
+
+            Table.execute(MS2Manager.getSchema(), "UPDATE " + MS2Manager.getTableInfoRuns() + " SET FastaID = ? WHERE FastaID = ?", new Object[] { newFastaId, oldFastaId } );
+            MS2Manager.getSchema().getScope().commitTransaction();
+        }
+        finally
+        {
+            MS2Manager.getSchema().getScope().closeConnection();
+        }
     }
 
 

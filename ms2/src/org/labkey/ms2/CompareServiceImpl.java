@@ -65,8 +65,7 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             schema.setRuns(runs);
 
-            ProteinProphetCrosstabView view = new ProteinProphetCrosstabView(schema, form);
-            view.getViewContext().setActionURL(url);
+            ProteinProphetCrosstabView view = new ProteinProphetCrosstabView(schema, form, url);
 
             return view.createComparisonResult();
         }

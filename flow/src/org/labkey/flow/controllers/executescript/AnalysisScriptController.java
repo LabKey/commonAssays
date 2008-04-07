@@ -14,6 +14,7 @@ import org.labkey.api.pipeline.browse.DefaultBrowseView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.flow.FlowSettings;
@@ -28,6 +29,7 @@ import org.labkey.flow.script.AnalyzeJob;
 import org.labkey.flow.script.FlowPipelineProvider;
 
 import java.io.File;
+import java.net.URI;
 import java.util.*;
 
 @Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
@@ -142,9 +144,16 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         }
         else
         {
-            displayPath = "'" + form.path + "'";
+            displayPath = "'" + PageFlowUtil.decode(form.path) + "'";
         }
-        File directory = StringUtils.isEmpty(form.path) ? root.getRootPath() : new File(root.getRootPath(), form.path);
+
+        URI uri = URIUtil.resolve(root.getUri(), form.path);
+        if (null == uri)
+        {
+            addError("The path " + displayPath + " is invalid.");
+            return Collections.EMPTY_MAP;
+        }
+        File directory = new File(uri);
         if (!root.isUnderRoot(directory))
         {
             addError("The path " + displayPath + " is invalid.");
@@ -178,7 +187,6 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                 anyFCSDirectories = true;
                 if (!usedPaths.contains(file.toString()))
                 {
-                    String relativePath = root.relativePath(file);
                     String displayName;
                     if (file.equals(directory))
                     {
@@ -188,7 +196,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                     {
                         displayName = file.getName() + " (" + fcsFiles.length + " fcs files)";
                     }
-                    ret.put(relativePath, displayName);
+                    ret.put(URIUtil.relativize(root.getUri(), file.toURI()).toString(), displayName);
                 }
             }
         }
@@ -246,7 +254,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
             }
             else
             {
-                file = root.resolvePath(path);
+                file = new File(URIUtil.resolve(root.getUri(), path));
             }
             if (file == null)
             {

@@ -7,13 +7,14 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.ViewContext;
+import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewContext;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
-import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -22,10 +23,11 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.FileFilter;
+import java.net.URI;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
 
 public class FlowPipelineProvider extends PipelineProvider
 {
@@ -129,7 +131,7 @@ public class FlowPipelineProvider extends PipelineProvider
                 File[] fcsFiles = dir.listFiles((FileFilter)FCS.FCSFILTER);
                 if (null == fcsFiles || 0 == fcsFiles.length)
                     continue;
-                url.replaceParameter("path", root.relativePath(dir));
+                url.replaceParameter("path", URIUtil.relativize(root.getUri(), dir.toURI()).toString());
                 FileAction action = new UploadRunAction("Upload Flow Run", url, dir);
                 action.setDescription("" + fcsFiles.length + "&nbsp;fcs&nbsp;file" + ((fcsFiles.length>1)?"s":""));
                 entry.addAction(action);
@@ -142,7 +144,7 @@ public class FlowPipelineProvider extends PipelineProvider
             FileEntry entryRoot = entries.get(0);
             File file = new File(entryRoot.getURI());
 
-            url.replaceParameter("path", root.relativePath(file));
+            url.replaceParameter("path", URIUtil.relativize(root.getUri(),file.toURI()).toString());
             FileAction action = new FileAction("Upload Multiple Runs", url, null);
             action.setDescription("<p><b>Flow Instructions:</b><br>Navigate to the directories containing FCS files.  Click the button to upload FCS files in the directories shown.</p>");
             entryRoot.addAction(action);

@@ -35,13 +35,15 @@ public class ProteinProphetCrosstabView extends ComparisonCrosstabView
     private MS2Schema _schema = null;
     private final MS2Controller.PeptideFilteringComparisonForm _form;
 
-    public ProteinProphetCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form)
+    public ProteinProphetCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ActionURL url)
     {
         super(schema);
         _schema = schema;
         _form = form;
 
-        QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), QueryView.DATAREGIONNAME_DEFAULT);
+        getViewContext().setActionURL(url);
+
+        QuerySettings settings = new QuerySettings(url, QueryView.DATAREGIONNAME_DEFAULT);
         settings.setSchemaName(schema.getSchemaName());
         settings.setQueryName(MS2Schema.PROTEIN_PROPHET_CROSSTAB_TABLE_NAME);
         settings.setAllowChooseQuery(false);

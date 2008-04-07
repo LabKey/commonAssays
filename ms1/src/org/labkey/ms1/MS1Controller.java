@@ -1296,7 +1296,7 @@ public class MS1Controller extends SpringActionController
     public static String createVerifySelectedScript(DataView view, ActionURL url)
     {
         //copied from MS2Controller--perhaps we should move this to API?
-        return "javascript: if (verifySelected(document.forms[\"" + view.getDataRegion().getName() + "\"], \"" + url.getLocalURIString() + "\", \"post\", \"runs\")) { document.forms[\"" + view.getDataRegion().getName() + "\"].submit(); }";
+        return "javascript: if (verifySelected(" + view.getDataRegion().getJavascriptFormReference() + ", \"" + url.getLocalURIString() + "\", \"post\", \"runs\")) { " + view.getDataRegion().getJavascriptFormReference() + ".submit(); }";
     }
 
     @RequiresPermission(ACL.PERM_READ)

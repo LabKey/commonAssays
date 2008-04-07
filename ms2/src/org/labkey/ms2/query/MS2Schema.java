@@ -562,24 +562,35 @@ public class MS2Schema extends UserSchema
     {
         TableInfo peptidesTable = createPeptidesTable("PeptidesAlias");
 
-        ColumnInfo[] peptideCols = QueryService.get().getColumns(peptidesTable, fieldKeys).values().toArray(new ColumnInfo[0]);
+        Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(peptidesTable, fieldKeys);
+        ColumnInfo[] peptideCols = columnMap.values().toArray(new ColumnInfo[columnMap.size()]);
 
         List<ColumnInfo> reqCols = new ArrayList<ColumnInfo>(Arrays.asList(peptideCols));
         Set<String> unresolvedColumns = new HashSet<String>();
         QueryService.get().ensureRequiredColumns(peptidesTable, reqCols, filter, null, unresolvedColumns);
         ColumnInfo[] cols = new ColumnInfo[reqCols.size()];
         cols = reqCols.toArray(cols);
-
-        SQLFragment sql = new SQLFragment();
-        sql.append("SELECT * FROM (\n");
-        sql.append(Table.getSelectSQL(peptidesTable, cols, null, null));
-        sql.append("\n) AS InnerPeptides ");
+        
+        SQLFragment innerSelect = Table.getSelectSQL(peptidesTable, cols, null, null);
 
         Map<String, ColumnInfo> map = new HashMap<String, ColumnInfo>(cols.length);
         for(ColumnInfo col : cols)
         {
             map.put(col.getName(), col);
         }
+
+        SQLFragment sql = new SQLFragment();
+        sql.append("SELECT ");
+        String separator = "";
+        for (FieldKey fieldKey : fieldKeys)
+        {
+            sql.append(separator);
+            separator = ", ";
+            sql.append(columnMap.get(fieldKey).getAlias());
+        }
+        sql.append(" FROM (\n");
+        sql.append(innerSelect);
+        sql.append("\n) AS InnerPeptides ");
 
         sql.append(filter.getSQLFragment(getDbSchema().getSqlDialect(), map));
         return sql;

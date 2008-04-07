@@ -1425,7 +1425,7 @@ public class MS2Controller extends SpringActionController
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList(), false, getViewContext());
             schema.setRuns(runs);
-            return new ProteinProphetCrosstabView(schema, form);
+            return new ProteinProphetCrosstabView(schema, form, getViewContext().getActionURL());
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -4971,7 +4971,25 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getReturnActionURL()
         {
-            return new ActionURL(returnUrl);
+            if (null != returnUrl)
+            {
+                try
+                {
+                    return new ActionURL(returnUrl);
+                }
+                catch (Exception e)
+                {
+                    // Bad URL -- fall through
+                }
+            }
+
+            // Bad or missing returnUrl -- go to showRun or showList
+            Container c = HttpView.currentContext().getContainer();
+
+            if (0 != run)
+                return getShowRunURL(c, run);
+            else
+                return getShowListURL(c);
         }
 
         public String getReturnUrl()
