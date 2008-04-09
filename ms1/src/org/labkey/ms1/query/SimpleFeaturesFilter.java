@@ -75,7 +75,7 @@ public class SimpleFeaturesFilter implements FeaturesFilter
 
     public SQLFragment getWhereClause(Map<String, String> aliasMap, SqlDialect dialect)
     {
-        String featuresAlias = aliasMap.get(MS1Service.Tables.Features.name());
+        String featuresAlias = aliasMap.get(MS1Service.Tables.Features.getFullName());
         assert(null != featuresAlias);
         return new SQLFragment(featuresAlias + "." + _columnName + _operator.getSqlOperator() + "?", _value);
     }

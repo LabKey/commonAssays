@@ -68,7 +68,6 @@ public class MS1Schema extends UserSchema
         ret.add(TABLE_FILES);
         ret.add(TABLE_PEAKS);
         ret.add(TABLE_SCANS);
-        ret.add(TABLE_COMPARE_PEP);
         return ret;
     }
 

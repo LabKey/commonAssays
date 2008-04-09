@@ -201,16 +201,14 @@ public class FeaturesTableInfo extends VirtualTable
         sql.append(MS1Service.Tables.Features.getFullName());
         sql.append(" AS fe");
 
-        if(!includeDeleted())
-        {
-            sql.append("\nINNER JOIN ");
-            sql.append(MS1Service.Tables.Files.getFullName());
-            sql.append(" AS fi ON (fe.FileId=fi.FileId)");
-        }
+        //always join to files and exp.Data so that we can filter for features within the schema's container list
+        sql.append("\nINNER JOIN ");
+        sql.append(MS1Service.Tables.Files.getFullName());
+        sql.append(" AS fi ON (fe.FileId=fi.FileId)");
+        sql.append("\nINNER JOIN exp.Data AS d ON (fi.ExpDataFileId=d.RowId)");
 
         if(includePepFk() || null != getBaseFilters())
         {
-            sql.append("\nINNER JOIN exp.Data AS d ON (fi.ExpDataFileId=d.RowId)");
             sql.append("\nLEFT OUTER JOIN (SELECT pd.*, fr.MzXmlUrl");
             sql.append("\nFROM ms2.Fractions AS fr");
             sql.append("\nINNER JOIN ms2.PeptidesData AS pd ON (pd.Fraction=fr.Fraction)");
@@ -221,15 +219,17 @@ public class FeaturesTableInfo extends VirtualTable
             sql.append(") AS pep ON (fi.MzXmlUrl=pep.MzXmlUrl AND fe.MS2Scan=pep.Scan AND fe.MS2Charge=pep.Charge)");
         }
 
-        String whereSep = "\nWHERE ";
+        //add a base filter that includes only features in the schema's container list
+        sql.append("\nWHERE d.Container IN (");
+        sql.append(_schema.getContainerInList());
+        sql.append(")");
 
         //set a base filter condition to exclude deleted and unimported runs
         //unless the includeDeleted() flag is on
         if(!includeDeleted())
         {
-            sql.append(whereSep);
+            sql.append("\nAND ");
             sql.append(new SQLFragment("fi.Imported=? AND fi.Deleted=?", true, false));
-            whereSep = "\nAND ";
         }
 
         //if there are other filters, apply them as well
@@ -238,11 +238,10 @@ public class FeaturesTableInfo extends VirtualTable
             Map<String,String> aliasMap = getAliasMap();
             for(FeaturesFilter filter : getBaseFilters())
             {
-                sql.append(whereSep);
+                sql.append("\nAND ");
                 sql.append("(");
                 sql.append(filter.getWhereClause(aliasMap, getSqlDialect()));
                 sql.append(")");
-                whereSep = "\nAND ";
             }
         }
 
