@@ -2,10 +2,7 @@ package org.labkey.ms1.query;
 
 import org.labkey.api.data.*;
 import org.labkey.api.ms2.MS2Service;
-import org.labkey.api.query.ExprColumn;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.FilteredTable;
-import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.ms1.MS1Service;
 import org.labkey.ms1.MS1Controller;
@@ -25,13 +22,14 @@ import java.util.Map;
  * Date: Oct 3, 2007
  * Time: 11:00:43 AM
  */
-public class FeaturesTableInfo extends FilteredTable
+public class FeaturesTableInfo extends VirtualTable
 {
     public static final String COLUMN_PEPTIDE_INFO = "RelatedPeptide";
     public static final String COLUMN_FIND_SIMILAR_LINK = "FindSimilarLink";
 
     //Data Members
     private MS1Schema _schema;
+    private TableInfo _sourceTable;
     private boolean _includePepFk = true;
     private List<FeaturesFilter> _filters = null;
     private boolean _includeDeleted = false;
@@ -48,9 +46,10 @@ public class FeaturesTableInfo extends FilteredTable
 
     public FeaturesTableInfo(MS1Schema schema, boolean includePepFk, Boolean peaksAvailable)
     {
-        super(MS1Manager.get().getTable(MS1Manager.TABLE_FEATURES));
+        super(schema.getDbSchema());
 
         _schema = schema;
+        _sourceTable = MS1Manager.get().getTable(MS1Service.Tables.Features.name());
         _includePepFk = includePepFk;
 
         //wrap all the columns
@@ -110,7 +109,7 @@ public class FeaturesTableInfo extends FilteredTable
             addColumn(new PeaksAvailableColumnInfo(this));
 
         //add a column for the find similar link
-        ColumnInfo similarLinkCol = addColumn(wrapColumn(COLUMN_FIND_SIMILAR_LINK, getRealTable().getColumn("FeatureId")));
+        ColumnInfo similarLinkCol = addColumn(wrapColumn(COLUMN_FIND_SIMILAR_LINK, getSourceTable().getColumn("FeatureId")));
         similarLinkCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
@@ -161,13 +160,25 @@ public class FeaturesTableInfo extends FilteredTable
         _includeDeleted = includeDeleted;
     }
 
+    public boolean includePepFk()
+    {
+        return _includePepFk;
+    }
+
+    public void setIncludePepFk(boolean includePepFk)
+    {
+        _includePepFk = includePepFk;
+    }
+
     public SQLFragment getFromSQL(String alias)
     {
+        assert null != getSourceTable();
+
         SQLFragment sql = new SQLFragment("(SELECT\n");
         String sep = "";
 
         //all base-table columns
-        for(ColumnInfo col : getRealTable().getColumns())
+        for(ColumnInfo col : getSourceTable().getColumns())
         {
             sql.append(sep);
             sql.append("fe.");
@@ -178,7 +189,7 @@ public class FeaturesTableInfo extends FilteredTable
         }
 
         //peptide row id
-        if(_includePepFk)
+        if(includePepFk())
         {
             sql.append(sep);
             sql.append("pep.RowId AS ");
@@ -197,7 +208,7 @@ public class FeaturesTableInfo extends FilteredTable
             sql.append(" AS fi ON (fe.FileId=fi.FileId)");
         }
 
-        if(_includePepFk || null != _filters)
+        if(includePepFk() || null != getBaseFilters())
         {
             sql.append("\nINNER JOIN exp.Data AS d ON (fi.ExpDataFileId=d.RowId)");
             sql.append("\nLEFT OUTER JOIN (SELECT pd.*, fr.MzXmlUrl");
@@ -208,34 +219,31 @@ public class FeaturesTableInfo extends FilteredTable
             sql.append(_schema.getContainerInList());
             sql.append(new SQLFragment(")\nAND r.Deleted=?)", false));
             sql.append(") AS pep ON (fi.MzXmlUrl=pep.MzXmlUrl AND fe.MS2Scan=pep.Scan AND fe.MS2Charge=pep.Charge)");
-
-            if(null != _filters || !includeDeleted())
-            {
-                String whereSep = "\nWHERE ";
-
-                //set a base filter condition to exclude deleted and unimported runs
-                if(!includeDeleted())
-                {
-                    sql.append(whereSep);
-                    sql.append(new SQLFragment("fi.Imported=? AND fi.Deleted=?", true, false));
-                    whereSep = "\nAND ";
-                }
-
-                Map<String,String> aliasMap = getAliasMap();
-                for(FeaturesFilter filter : _filters)
-                {
-                    sql.append(whereSep);
-                    sql.append("(");
-                    sql.append(filter.getWhereClause(aliasMap, getSqlDialect()));
-                    sql.append(")");
-                    whereSep = "\nAND ";
-                }
-            }
         }
-        else
+
+        String whereSep = "\nWHERE ";
+
+        //set a base filter condition to exclude deleted and unimported runs
+        //unless the includeDeleted() flag is on
+        if(!includeDeleted())
         {
-            if(!includeDeleted())
-                sql.append(new SQLFragment("\nWHERE fi.Imported=? AND fi.Deleted=?", true, false));
+            sql.append(whereSep);
+            sql.append(new SQLFragment("fi.Imported=? AND fi.Deleted=?", true, false));
+            whereSep = "\nAND ";
+        }
+
+        //if there are other filters, apply them as well
+        if(null != getBaseFilters())
+        {
+            Map<String,String> aliasMap = getAliasMap();
+            for(FeaturesFilter filter : getBaseFilters())
+            {
+                sql.append(whereSep);
+                sql.append("(");
+                sql.append(filter.getWhereClause(aliasMap, getSqlDialect()));
+                sql.append(")");
+                whereSep = "\nAND ";
+            }
         }
 
         //alias
@@ -256,4 +264,31 @@ public class FeaturesTableInfo extends FilteredTable
         aliasMap.put("ms2.Runs", "pep");
         return aliasMap;
     }
+
+    protected void wrapAllColumns(boolean preserveHidden)
+    {
+        for (ColumnInfo col : getSourceTable().getColumns())
+        {
+            ColumnInfo newCol = new AliasedColumn(this, col.getAlias(), col);
+            addColumn(newCol);
+            if (preserveHidden && col.isHidden())
+                newCol.setIsHidden(col.isHidden());
+        }
+    }
+
+    public ColumnInfo wrapColumn(String alias, ColumnInfo underlyingColumn)
+    {
+        assert underlyingColumn.getParentTable() == getSourceTable();
+        ExprColumn ret = new ExprColumn(this, alias, underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getSqlTypeInt());
+        ret.copyAttributesFrom(underlyingColumn);
+        ret.setCaption(ColumnInfo.captionFromName(alias));
+        return ret;
+    }
+
+    protected TableInfo getSourceTable()
+    {
+        return _sourceTable;
+    }
+
+
 } //class FeaturesTableInfo

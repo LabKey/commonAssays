@@ -33,7 +33,7 @@ public interface FeaturesFilter
     /**
      * Implementations should return a SQLFragment suitable for inclusion in a WHERE clause
      * @param aliasMap A map of fully-qualified table names to table aliases
-     * @param dialect
+     * @param dialect The SqlDialect for the current database
      * @return A SQLFragment for the clause
      */
     public SQLFragment getWhereClause(Map<String, String> aliasMap, SqlDialect dialect);
