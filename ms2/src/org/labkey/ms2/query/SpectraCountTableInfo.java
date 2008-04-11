@@ -137,7 +137,7 @@ public class SpectraCountTableInfo extends VirtualTable
         if (_config.isGroupedByProtein())
         {
             ExprColumn col = new ExprColumn(this, "Protein", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".SequenceId"), Types.INTEGER);
-            col.setFk(new LookupForeignKey(new ActionURL(MS2Controller.ShowProteinAction.class), "seqId", "SeqId", "BestName")
+            col.setFk(new LookupForeignKey(new ActionURL(MS2Controller.ShowProteinAction.class, ContainerManager.getRoot()), "seqId", "SeqId", "BestName")
             {
                 public TableInfo getLookupTableInfo()
                 {

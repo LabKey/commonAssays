@@ -868,7 +868,7 @@ public class MS2Controller extends SpringActionController
 
     public static ActionURL getLoadGoURL()
     {
-        return new ActionURL(LoadGoAction.class);
+        return new ActionURL(LoadGoAction.class, ContainerManager.getRoot());
     }
 
 
@@ -946,7 +946,7 @@ public class MS2Controller extends SpringActionController
 
     private ActionURL getGoStatusURL(String message)
     {
-        ActionURL url = new ActionURL(GoStatusAction.class);
+        ActionURL url = new ActionURL(GoStatusAction.class, ContainerManager.getRoot());
         if (null != message)
             url.addParameter("message", message);
         return url;
@@ -2997,7 +2997,7 @@ public class MS2Controller extends SpringActionController
 
     public static ActionURL getShowMS2AdminURL(Integer days)
     {
-        ActionURL url = new ActionURL(ShowMS2AdminAction.class);
+        ActionURL url = new ActionURL(ShowMS2AdminAction.class, ContainerManager.getRoot());
 
         if (null != days)
             url.addParameter("days", days.intValue());
@@ -5355,7 +5355,7 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            ActionURL moveURL = new ActionURL(MoveRunsAction.class);
+            ActionURL moveURL = new ActionURL(MoveRunsAction.class, ContainerManager.getRoot());
             moveURL.addParameters(getViewContext().getActionURL().getParameters());
             final Container originalContainer = getContainer();
             ContainerTree ct = new ContainerTree("/", getUser(), ACL.PERM_INSERT, moveURL)
@@ -5778,7 +5778,7 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getShowProteinAdminUrl()
         {
-            return new ActionURL(ShowProteinAdminAction.class);
+            return new ActionURL(ShowProteinAdminAction.class, ContainerManager.getRoot());
         }
 
 
