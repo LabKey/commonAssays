@@ -2412,8 +2412,10 @@ public class MS2Controller extends SpringActionController
                 HttpView.throwRedirect(url + "&" + filter.toQueryString("ProteinSearchResults"));
             }
 
-            QueryView proteinsView = createProteinSearchView(form);
-            QueryView groupsView = createProteinGroupSearchView(form);
+            Integer[] seqIds = getSeqIds(form);
+
+            QueryView proteinsView = createProteinSearchView(form, seqIds);
+            QueryView groupsView = createProteinGroupSearchView(form, seqIds);
 
             ProteinSearchWebPart searchView = new ProteinSearchWebPart(true);
             searchView.getModelBean().setIdentifier(form.getIdentifier());
@@ -2447,7 +2449,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private QueryView createProteinGroupSearchView(final ProteinSearchForm form) throws ServletException
+    private QueryView createProteinGroupSearchView(final ProteinSearchForm form, final Integer[] seqIds) throws ServletException
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
         QuerySettings groupsSettings = new QuerySettings(getViewContext().getActionURL(), "ProteinSearchResults");
@@ -2459,7 +2461,14 @@ public class MS2Controller extends SpringActionController
             protected TableInfo createTable()
             {
                 ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable(null);
-                table.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
+                if (seqIds.length <= 500)
+                {
+                    table.addSeqIdFilter(seqIds);
+                }
+                else
+                {
+                    table.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
+                }
                 table.addContainerCondition(getContainer(), getUser(), form.isIncludeSubfolders());
 
                 return table;
@@ -2488,8 +2497,25 @@ public class MS2Controller extends SpringActionController
         return groupsView;
     }
 
+    private Integer[] getSeqIds(ProteinSearchForm form)
+    {
+        SequencesTableInfo tableInfo = new SequencesTableInfo(null, new MS2Schema(getUser(), getContainer()));
+        tableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
+        if (form.isRestrictProteins())
+        {
+            tableInfo.addContainerCondition(getContainer(), getUser(), true);
+        }
+        try
+        {
+            return Table.executeArray(tableInfo, tableInfo.getColumn("SeqId"), null, null, Integer.class);
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+    }
 
-    private QueryView createProteinSearchView(ProteinSearchForm form)
+    private QueryView createProteinSearchView(ProteinSearchForm form, Integer[] seqIds)
         throws ServletException
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
@@ -2518,10 +2544,17 @@ public class MS2Controller extends SpringActionController
         proteinsView.setShowExportButtons(false);
         proteinsView.setShowCustomizeViewLinkInButtonBar(true);
         SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
-        sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
-        if (form.isRestrictProteins())
+        if (seqIds.length <= 500)
         {
-            sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
+            sequencesTableInfo.addSeqIdFilter(seqIds);
+        }
+        else
+        {
+            sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
+            if (form.isRestrictProteins())
+            {
+                sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
+            }
         }
         proteinsView.setTitle("Matching Proteins");
         return proteinsView;
@@ -2604,7 +2637,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ProteinSearchForm form, HttpServletResponse response) throws Exception
         {
-            QueryView view = createProteinSearchView(form);
+            QueryView view = createProteinSearchView(form, getSeqIds(form));
             ExcelWriter excelWriter = view.getExcelWriter();
             excelWriter.setFilenamePrefix("ProteinSearchResults");
             excelWriter.write(response);
@@ -2617,7 +2650,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ProteinSearchForm form, HttpServletResponse response) throws Exception
         {
-            QueryView view = createProteinSearchView(form);
+            QueryView view = createProteinSearchView(form, getSeqIds(form));
             TSVGridWriter tsvWriter = view.getTsvWriter();
             tsvWriter.setFilenamePrefix("ProteinSearchResults");
             tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
@@ -2631,7 +2664,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ProteinSearchForm form, HttpServletResponse response) throws Exception
         {
-            QueryView view = createProteinGroupSearchView(form);
+            QueryView view = createProteinGroupSearchView(form, getSeqIds(form));
             ExcelWriter excelWriter = view.getExcelWriter();
             excelWriter.setFilenamePrefix("ProteinGroupSearchResults");
             excelWriter.write(response);
@@ -2644,7 +2677,7 @@ public class MS2Controller extends SpringActionController
     {
         public void export(ProteinSearchForm form, HttpServletResponse response) throws Exception
         {
-            QueryView view = createProteinGroupSearchView(form);
+            QueryView view = createProteinGroupSearchView(form, getSeqIds(form));
             TSVGridWriter tsvWriter = view.getTsvWriter();
             tsvWriter.setFilenamePrefix("ProteinGroupSearchResults");
             tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);

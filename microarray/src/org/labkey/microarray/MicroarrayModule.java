@@ -39,7 +39,7 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
 
     public MicroarrayModule()
     {
-        super(NAME, 0.01, null, true,
+        super(NAME, 8.10, null, true,
                 new WebPartFactory(WEBPART_MICROARRAY_RUNS)
                 {
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)

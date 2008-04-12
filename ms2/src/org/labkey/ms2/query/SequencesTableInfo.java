@@ -262,4 +262,25 @@ public class SequencesTableInfo extends FilteredTable
         sql.append(")");
         addCondition(sql);
     }
+
+    public void addSeqIdFilter(Integer[] seqIds)
+    {
+        SQLFragment sql = new SQLFragment("SeqId IN (");
+        if (seqIds.length == 0)
+        {
+            sql.append("NULL");
+        }
+        else
+        {
+            String separator = "";
+            for (long seqId : seqIds)
+            {
+                sql.append(separator);
+                separator = ", ";
+                sql.append(Long.toString(seqId));
+            }
+        }
+        sql.append(")");
+        addCondition(sql, "SeqId");
+    }
 }

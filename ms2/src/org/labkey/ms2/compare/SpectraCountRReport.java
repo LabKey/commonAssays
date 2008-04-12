@@ -84,7 +84,7 @@ public class SpectraCountRReport extends RReport
         return new SpectraCountQueryView(schema, settings, config, form);
     }
 
-    private String getRunList(ViewContext context)
+    private static String getRunList(ViewContext context)
     {
         return context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.runList);
     }
@@ -96,8 +96,28 @@ public class SpectraCountRReport extends RReport
 
     public ActionURL getRunReportURL(ViewContext context)
     {
-        ActionURL url = super.getRunReportURL(context);
-        return addReportParameters(url, context);
+        if (hasValidParameters(context))
+        {
+            ActionURL url = super.getRunReportURL(context);
+            return addReportParameters(url, context);
+        }
+        return null;
+    }
+
+    private boolean hasValidParameters(ViewContext context)
+    {
+        if (getRunList(context) != null &&
+                context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.spectraConfig) != null)
+        {
+            return context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType) != null;
+        }
+        return false;
+    }
+
+    public ActionURL getEditReportURL(ViewContext context)
+    {
+        // no editing from the manage page
+        return null;
     }
 
     public ActionURL getDownloadDataURL(ViewContext context)
@@ -106,13 +126,13 @@ public class SpectraCountRReport extends RReport
         return addReportParameters(url, context);
     }
 
-    private ActionURL addReportParameters(ActionURL url, ViewContext context)
+    public static ActionURL addReportParameters(ActionURL url, ViewContext context)
     {
-        url.addParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME, context.getActionURL().getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME));
-        url.addParameter(MS2Controller.PeptideFilteringFormElements.spectraConfig, context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.spectraConfig));
-        url.addParameter(MS2Controller.PeptideFilteringFormElements.peptideProphetProbability, context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideProphetProbability));
-        url.addParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType, context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType));
-        url.addParameter(MS2Controller.PeptideFilteringFormElements.runList, getRunList(context));
+        url.replaceParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME, context.getActionURL().getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME));
+        url.replaceParameter(MS2Controller.PeptideFilteringFormElements.spectraConfig, context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.spectraConfig));
+        url.replaceParameter(MS2Controller.PeptideFilteringFormElements.peptideProphetProbability, context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideProphetProbability));
+        url.replaceParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType, context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType));
+        url.replaceParameter(MS2Controller.PeptideFilteringFormElements.runList, getRunList(context));
 
         return url;
     }

@@ -46,15 +46,9 @@ public class SpectraCountQueryView extends QueryView
 	// the redirect after a save
         bean.setRedirectUrl(getViewContext().getActionURL().toString());
 
-	    // your custom params...
-        bean.addParam("runIndex", _form.getRunList().toString());
-
         ActionURL chartURL = ChartUtil.getRReportDesignerURL(_viewContext, bean);
-        ActionURL url = getViewContext().getActionURL();
-        chartURL.replaceParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME, url.getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME));
-        chartURL.replaceParameter("spectraConfig", url.getParameter("spectraConfig"));
-        chartURL.replaceParameter("runList", url.getParameter("runList"));
-        
+        chartURL = SpectraCountRReport.addReportParameters(chartURL, getViewContext());
+
         return new CreateChartButton(chartURL.toString(), false, true,
                 getSchema().getSchemaName(), getSettings().getQueryName(), getSettings().getViewName(), SpectraCountRReport.TYPE);
     }

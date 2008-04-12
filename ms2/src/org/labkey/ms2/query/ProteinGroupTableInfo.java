@@ -280,6 +280,32 @@ public class ProteinGroupTableInfo extends FilteredTable
         addCondition(sql);
     }
 
+    public void addSeqIdFilter(Integer[] seqIds)
+    {
+        SQLFragment sql = new SQLFragment();
+        sql.append("RowId IN (\n");
+        sql.append("SELECT ProteinGroupId FROM ");
+        sql.append(MS2Manager.getTableInfoProteinGroupMemberships());
+        sql.append(" pgm WHERE pgm.SeqId IN (\n");
+        if (seqIds.length == 0)
+        {
+            sql.append("NULL");
+        }
+        else
+        {
+            String separator = "";
+            for (long seqId : seqIds)
+            {
+                sql.append(separator);
+                separator = ", ";
+                sql.append(seqId);
+            }
+        }
+        sql.append("))");
+
+        addCondition(sql);
+    }
+    
     public void addProteinNameFilter(String identifier, boolean exactMatch)
     {
         List<String> params = SequencesTableInfo.getIdentifierParameters(identifier);
