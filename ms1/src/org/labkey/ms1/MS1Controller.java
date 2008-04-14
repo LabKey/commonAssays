@@ -163,7 +163,7 @@ public class MS1Controller extends SpringActionController
     /**
      * Action to show the features for a given experiment run
      */
-    @RequiresPermission(ACL.PERM_NONE) //required by QueryViewAction
+    @RequiresPermission(ACL.PERM_READ)
     public class ShowFeaturesAction extends BasicFeaturesViewAction<ShowFeaturesForm>
     {
         public static final String PARAM_RUNID = "runId";
@@ -272,7 +272,7 @@ public class MS1Controller extends SpringActionController
     /**
      * Action to show the peaks for a given experiment run and scan number
      */
-    @RequiresPermission(ACL.PERM_NONE) //required by QueryViewAction
+    @RequiresPermission(ACL.PERM_READ)
     public class ShowPeaksAction extends QueryViewAction<PeaksViewForm, PeaksView>
     {
         private int _runId = -1;
@@ -615,7 +615,7 @@ public class MS1Controller extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_NONE) //required by QueryViewAction
+    @RequiresPermission(ACL.PERM_READ)
     public class PepSearchAction extends BaseFeaturesViewAction<PepSearchForm, QueryView>
     {
         public PepSearchAction()
@@ -839,7 +839,7 @@ public class MS1Controller extends SpringActionController
     /**
      * Action for finding features similar to a specified feature id
      */
-    @RequiresPermission(ACL.PERM_NONE) //required by QueryViewAction
+    @RequiresPermission(ACL.PERM_READ)
     public class SimilarSearchAction extends BasicFeaturesViewAction<SimilarSearchForm>
     {
         public SimilarSearchAction()
@@ -950,7 +950,7 @@ public class MS1Controller extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_NONE)
+    @RequiresPermission(ACL.PERM_READ)
     public class CompareRunsAction extends QueryViewAction<CompareRunsForm,CompareRunsView>
     {
         public CompareRunsAction()

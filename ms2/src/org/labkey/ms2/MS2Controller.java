@@ -1376,7 +1376,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_NONE)    // QueryViewAction handles permission check; it requires PERM_NONE
+    @RequiresPermission(ACL.PERM_READ)
     public class CompareProteinProphetQueryAction extends RunListHandlerAction<PeptideFilteringComparisonForm, ProteinProphetCrosstabView>
     {
         private PeptideFilteringComparisonForm _form;
@@ -1823,7 +1823,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    @RequiresPermission(ACL.PERM_NONE)       // QueryViewAction handles permission check; it requires PERM_NONE
+    @RequiresPermission(ACL.PERM_READ)
     public class SpectraCountAction extends RunListHandlerAction<SpectraCountForm, QueryView>
     {
         private SpectraCountConfiguration _config;
