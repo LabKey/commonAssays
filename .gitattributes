@@ -1,5 +1,4 @@
 * text=auto !eol
-biotrue/biotrue.iml -text
 biotrue/module.properties -text
 biotrue/src/META-INF/biotrue.xml -text
 biotrue/src/META-INF/biotrue/scripts/postgresql/biotrue-0.00-2.10.sql -text
@@ -49,7 +48,6 @@ biotrue/src/org/labkey/biotrue/task/DownloadTask.java -text
 biotrue/src/org/labkey/biotrue/task/Operation.java -text
 biotrue/src/org/labkey/biotrue/task/ScheduledTask.java -text
 cabig/build.xml -text
-cabig/caBIG.iml -text
 cabig/module.properties -text
 cabig/src/META-INF/cabig.xml -text
 cabig/src/META-INF/cabig/scripts/postgresql/cabig-0.00-2.10.sql -text
@@ -80,7 +78,6 @@ cabig/src/org/labkey/cabig/caBIGManager.java -text
 cabig/src/org/labkey/cabig/caBIGModule.java -text
 cabig/src/org/labkey/cabig/caBIGSchema.java -text
 cabig/src/org/labkey/cabig/view/publish.jsp -text
-elispotassay/Elispot.iml -text
 elispotassay/build.xml -text
 elispotassay/module.properties -text
 elispotassay/src/org/labkey/elispot/ElispotAssayProvider.java -text
@@ -98,7 +95,6 @@ elispotassay/src/org/labkey/elispot/plate/ExcelPlateReader.java -text
 elispotassay/src/org/labkey/elispot/plate/TextPlateReader.java -text
 elispotassay/src/org/labkey/elispot/query/ElispotRunDataTable.java -text
 elispotassay/src/org/labkey/elispot/view/plateSummary.jsp -text
-flow/FlowGWT.iml -text
 flow/gwtsrc/org/labkey/flow/gateeditor/GateEditor.gwt.xml -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/EditorState.java -text
 flow/gwtsrc/org/labkey/flow/gateeditor/client/FlowStyle.java -text
@@ -431,7 +427,6 @@ flow/webapp/Flow/unflagFCSAnalysis.gif -text
 flow/webapp/Flow/unflagFCSFile.gif -text
 flow/webapp/Flow/unflagSample.gif -text
 flow/webapp/Flow/util.js -text
-luminex/Luminex.iml -text
 luminex/module.properties -text
 luminex/src/META-INF/luminex.xml -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-0.00-2.20.sql -text
@@ -471,7 +466,6 @@ luminex/src/org/labkey/luminex/LuminexRunUploadForm.java -text
 luminex/src/org/labkey/luminex/LuminexSchema.java -text
 luminex/src/org/labkey/luminex/LuminexUploadWizardAction.java -text
 luminex/src/org/labkey/luminex/LuminexWell.java -text
-microarray/Microarray.iml -text
 microarray/build.xml -text
 microarray/gwtsrc/org/labkey/microarray/designer/MicroarrayAssayDesigner.gwt.xml -text
 microarray/gwtsrc/org/labkey/microarray/designer/client/MicroarrayAssayDesigner.java -text
@@ -541,8 +535,6 @@ mousemodels/src/org/labkey/mousemodel/mouse/bulkUpdate.vm -text
 mousemodels/src/org/labkey/mousemodel/mouse/showPhoto.jsp -text
 mousemodels/src/org/labkey/mousemodel/sample/EnterSampleLocations.vm -text
 mousemodels/src/org/labkey/mousemodel/sample/slides.jsp -text
-ms1/MS1.iml -text
-ms1/gwtsrc/MS1GWT.iml -text
 ms1/gwtsrc/org/labkey/ms1/MS1VennDiagramView.gwt.xml -text
 ms1/gwtsrc/org/labkey/ms1/client/CompareService.java -text
 ms1/gwtsrc/org/labkey/ms1/client/CompareServiceAsync.java -text
@@ -635,7 +627,6 @@ ms1/src/org/labkey/ms1/view/SpectrumChart.java -text
 ms1/src/org/labkey/ms1/view/softwareView.jsp -text
 ms1/webapp/WEB-INF/ms1/ms1Context.xml -text
 ms1/webapp/ms1/images/features.png -text
-ms2/gwtsrc/MS2GWT.iml -text
 ms2/gwtsrc/org/labkey/ms2/MS2VennDiagramView.gwt.xml -text
 ms2/gwtsrc/org/labkey/ms2/client/CompareService.java -text
 ms2/gwtsrc/org/labkey/ms2/client/CompareServiceAsync.java -text
@@ -1144,7 +1135,6 @@ nab/src/org/labkey/nab/query/NabSchema.java -text
 nab/src/org/labkey/nab/runDetails.jsp -text
 nab/src/org/labkey/nab/runProperties.jsp -text
 nab/src/org/labkey/nab/runResults.jsp -text
-opensso/OpenSSO.iml -text
 opensso/lib/amclientsdk.jar -text
 opensso/lib/opensso-src.zip -text
 opensso/module.properties -text
@@ -1162,7 +1152,6 @@ portal/src/org/labkey/portal/PortalModule.java -text
 portal/src/org/labkey/portal/customizeSearchWebPart.gm -text
 portal/src/org/labkey/portal/customizeWebPart.gm -text
 portal/src/org/labkey/portal/search.jsp -text
-xarassay/XarAssay.iml -text
 xarassay/build.xml -text
 xarassay/module.properties -text
 xarassay/readme.htm -text
