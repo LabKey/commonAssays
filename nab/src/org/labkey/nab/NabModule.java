@@ -75,6 +75,8 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
         PlateService.get().registerPlateTypeHandler(new NabPlateTypeHandler());
         AssayService.get().registerAssayProvider(new NabAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new NabDataHandler());
+
+        super.startup(moduleContext);
     }
 
 
