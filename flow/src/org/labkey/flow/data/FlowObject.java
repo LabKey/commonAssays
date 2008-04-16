@@ -62,7 +62,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
 
     protected ActionURL pfURL(Enum action)
     {
-        return PageFlowUtil.urlFor(action, getContainerPath());
+        return PageFlowUtil.urlFor(action, getContainer());
     }
 
     public ActionURL urlFor(Enum action)

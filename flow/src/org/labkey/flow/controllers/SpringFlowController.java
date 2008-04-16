@@ -106,7 +106,7 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
         }
         else
         {
-            ActionURL url = PageFlowUtil.urlFor(FlowController.Action.begin, context.getContainer().getPath());
+            ActionURL url = PageFlowUtil.urlFor(FlowController.Action.begin, context.getContainer());
             project = new NavTree(FlowModule.getShortProductName(), url.clone());
         }
         return project;

@@ -1,16 +1,10 @@
 package org.labkey.flow.controllers;
 
-import org.labkey.api.view.ViewController;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ViewController;
 
 abstract public class BaseController<A extends Enum, P extends Enum> extends ViewController
 {
-    public ActionURL urlFor(Enum action)
-    {
-        return PageFlowUtil.urlFor(action, getContainerPath());
-    }
-
     protected int getIntParam(P param)
     {
         String value = getParam(param);

@@ -73,7 +73,7 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
         }
         else
         {
-            ActionURL url = PageFlowUtil.urlFor(FlowController.Action.begin, context.getContainer().getPath());
+            ActionURL url = PageFlowUtil.urlFor(FlowController.Action.begin, context.getContainer());
             children.add(0, new NavTree(FlowModule.getShortProductName(), url.clone()));
         }
 

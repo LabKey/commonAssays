@@ -48,7 +48,7 @@ public class GraphView extends GridView
         try
         {
             int wellId = (Integer) ctx.getRow().get("RowId");
-            ActionURL src = PageFlowUtil.urlFor(WellController.Action.showGraph, ctx.getContainer().getPath());
+            ActionURL src = PageFlowUtil.urlFor(WellController.Action.showGraph, ctx.getContainer());
             src.addParameter("wellId", Integer.toString(wellId));
             src.addParameter("graph", description);
             out.write("<img src=\"" + src + "\">");
