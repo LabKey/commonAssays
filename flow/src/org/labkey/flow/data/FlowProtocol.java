@@ -1,29 +1,29 @@
 package org.labkey.flow.data;
 
-import org.labkey.api.security.User;
-import org.labkey.api.security.ACL;
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.labkey.api.data.*;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.ExperimentProperty;
-import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.data.*;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
-import org.labkey.flow.query.FlowSchema;
-import org.labkey.flow.persist.AttributeSet;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.log4j.Logger;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.protocol.ProtocolController;
+import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.query.FlowSchema;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.ServletException;
-import java.util.*;
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 public class FlowProtocol extends FlowObject<ExpProtocol>
 {
@@ -54,7 +54,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return getForContainer(container, DEFAULT_PROTOCOL_NAME);
     }
 
-    static public FlowProtocol fromURL(User user, ActionURL url, HttpServletRequest request) throws ServletException
+    static public FlowProtocol fromURL(User user, ActionURL url, HttpServletRequest request) throws UnauthorizedException
     {
         FlowProtocol ret = fromProtocolId(getIntParam(url, request, FlowParam.experimentId));
         if (ret == null)

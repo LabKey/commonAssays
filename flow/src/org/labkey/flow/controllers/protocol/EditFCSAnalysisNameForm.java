@@ -1,15 +1,13 @@
 package org.labkey.flow.controllers.protocol;
 
+import org.apache.commons.lang.StringUtils;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.data.FieldSubstitution;
 import org.labkey.flow.data.FlowProtocol;
-import org.labkey.api.query.FieldKey;
-import org.apache.commons.lang.StringUtils;
-import org.apache.struts.action.ActionMapping;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class EditFCSAnalysisNameForm extends ProtocolForm
 {
@@ -17,24 +15,16 @@ public class EditFCSAnalysisNameForm extends ProtocolForm
     public String ff_rawString;
     public FieldKey[] ff_keyword;
 
-    public void reset(ActionMapping actionMapping, HttpServletRequest request)
+    public void init() throws UnauthorizedException
     {
-        super.reset(actionMapping, request);
-        try
+        FieldSubstitution fs = getProtocol().getFCSAnalysisNameExpr();
+        if (fs != null)
         {
-            FieldSubstitution fs = getProtocol().getFCSAnalysisNameExpr();
-            if (fs != null)
-            {
-                setFieldSubstitution(fs);
-            }
-            else
-            {
-                setFieldSubstitution(FlowProtocol.getDefaultFCSAnalysisNameExpr());
-            }
+            setFieldSubstitution(fs);
         }
-        catch (ServletException e)
+        else
         {
-            ff_rawString = "#Error#";
+            setFieldSubstitution(FlowProtocol.getDefaultFCSAnalysisNameExpr());
         }
     }
 

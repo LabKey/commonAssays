@@ -1,12 +1,11 @@
 package org.labkey.flow.controllers.protocol;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.struts.action.ActionMapping;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.UnauthorizedException;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +16,8 @@ public class EditFCSAnalysisFilterForm extends ProtocolForm
     public String[] ff_op;
     public String[] ff_value;
 
-    public void reset(ActionMapping actionMapping, HttpServletRequest request)
+    public void init() throws UnauthorizedException
     {
-        super.reset(actionMapping, request);
         List<FieldKey> fields = new ArrayList();
         List<String> ops = new ArrayList();
         List<String> values = new ArrayList();

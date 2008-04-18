@@ -1,19 +1,27 @@
 package org.labkey.flow.controllers.protocol;
 
-import org.labkey.flow.controllers.BaseFlowController;
-import org.apache.beehive.netui.pageflow.annotations.Jpf;
-import org.apache.beehive.netui.pageflow.Forward;
-import org.labkey.api.security.ACL;
+import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.view.ViewForward;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.UnauthorizedException;
+import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.data.FlowProtocol;
+import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
+import org.springframework.web.servlet.ModelAndView;
 
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
-@Jpf.Controller
-public class ProtocolController extends BaseFlowController<ProtocolController.Action>
+public class ProtocolController extends SpringFlowController<ProtocolController.Action, FlowParam>
 {
     public enum Action
     {
@@ -25,29 +33,82 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
         editFCSAnalysisFilter,
     }
 
-    @Jpf.Action
-    protected Forward begin(ProtocolForm form) throws Exception
+    static SpringActionController.DefaultActionResolver _actionResolver = new SpringActionController.DefaultActionResolver(ProtocolController.class);
+
+    public ProtocolController() throws Exception
     {
-        FlowProtocol protocol = form.getProtocol();
-        if (protocol != null)
+        super();
+        setActionResolver(_actionResolver);
+    }
+
+    public abstract class ProtocolViewAction<FORM extends ProtocolForm> extends FormViewAction<FORM>
+    {
+        private FlowProtocol protocol;
+
+        public ModelAndView handleRequest(FORM form, BindException errors) throws Exception
         {
-            return new ViewForward(protocol.urlShow());
+            try
+            {
+                protocol = form.getProtocol();
+            }
+            catch (UnauthorizedException e)
+            {
+                errors.reject(ERROR_MSG, "You don't have permission to view the protocol.");
+            }
+            return super.handleRequest(form, errors);
         }
-        return null;
+
+        protected FlowProtocol getProtocol()
+        {
+            return protocol;
+        }
     }
 
-    @Jpf.Action
-    protected Forward showProtocol(ProtocolForm form) throws Exception
+    @RequiresPermission(ACL.PERM_NONE)
+    public class BeginAction extends SimpleViewAction<ProtocolForm>
     {
-        requiresPermission(ACL.PERM_READ);
-        return renderInTemplate(FormPage.getView(ProtocolController.class, form, "showProtocol.jsp"), form.getProtocol(), "Protocol", Action.showProtocol);
+        public ModelAndView getView(ProtocolForm form, BindException errors) throws Exception
+        {
+            return HttpView.redirect(urlFor(ProtocolController.Action.showProtocol));
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
     }
 
-    @Jpf.Action
-    protected Forward joinSampleSet(JoinSampleSetForm form) throws Exception
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowProtocolAction extends SimpleViewAction<ProtocolForm>
     {
-        requiresPermission(ACL.PERM_UPDATE);
-        if (isPost())
+        FlowProtocol protocol = null;
+
+        public ModelAndView getView(ProtocolForm form, BindException errors) throws Exception
+        {
+            protocol = form.getProtocol();
+            return FormPage.getView(ProtocolController.class, form, errors, "showProtocol.jsp");
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(root, protocol, "Protocol", Action.showProtocol);
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class JoinSampleSetAction extends ProtocolViewAction<JoinSampleSetForm>
+    {
+        public void validateCommand(JoinSampleSetForm form, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(JoinSampleSetForm form, boolean reshow, BindException errors) throws Exception
+        {
+            form.init();
+            return FormPage.getView(ProtocolController.class, form, "joinSampleSet.jsp");
+        }
+
+        public boolean handlePost(JoinSampleSetForm form, BindException errors) throws Exception
         {
             Map<String, FieldKey> fields = new LinkedHashMap();
             for (int i = 0; i < form.ff_samplePropertyURI.length; i ++)
@@ -58,42 +119,98 @@ public class ProtocolController extends BaseFlowController<ProtocolController.Ac
                     continue;
                 fields.put(samplePropertyURI, fcsKey);
             }
-            form.getProtocol().setSampleSetJoinFields(getUser(), fields);
-            return new ViewForward(form.getProtocol().urlFor(Action.updateSamples));
+            getProtocol().setSampleSetJoinFields(getUser(), fields);
+            return true;
         }
-        return renderInTemplate(FormPage.getView(ProtocolController.class, form, "joinSampleSet.jsp"), form.getProtocol(), "Join Samples", Action.joinSampleSet);
-    }
 
-    @Jpf.Action
-    protected Forward updateSamples(UpdateSamplesForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        form.fileCount = form.getProtocol().updateSampleIds(getUser());
-        return renderInTemplate(FormPage.getView(ProtocolController.class, form, "updateSamples.jsp"), form.getProtocol(), "Update Samples", Action.updateSamples);
-    }
-
-    @Jpf.Action
-    protected Forward editFCSAnalysisName(EditFCSAnalysisNameForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        if (isPost())
+        public ActionURL getSuccessURL(JoinSampleSetForm form)
         {
-            form.getProtocol().setFCSAnalysisNameExpr(getUser(), form.getFieldSubstitution());
-            form.getProtocol().updateFCSAnalysisName(getUser());
-            return new ViewForward(form.getProtocol().urlShow());
+            return getProtocol().urlFor(Action.updateSamples);
         }
-        return renderInTemplate(FormPage.getView(ProtocolController.class, form, "editFCSAnalysisName.jsp"), form.getProtocol(), "Edit FCS Analysis Name", Action.editFCSAnalysisName);
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(root, getProtocol(), "Join Samples", Action.joinSampleSet);
+        }
     }
 
-    @Jpf.Action
-    protected Forward editFCSAnalysisFilter(EditFCSAnalysisFilterForm form) throws Exception
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class UpdateSamplesAction extends SimpleViewAction<UpdateSamplesForm>
     {
-        requiresPermission(ACL.PERM_UPDATE);
-        if (isPost())
+        FlowProtocol protocol;
+
+        public ModelAndView getView(UpdateSamplesForm form, BindException errors) throws Exception
         {
-            form.getProtocol().setFCSAnalysisFilter(getUser(), form.getFilterValue());
-            return new ViewForward(form.getProtocol().urlShow());
+            protocol = form.getProtocol();
+            form.fileCount = protocol.updateSampleIds(getUser());
+            return FormPage.getView(ProtocolController.class, form, "updateSamples.jsp");
         }
-        return renderInTemplate(FormPage.getView(ProtocolController.class, form, "editFCSAnalysisFilter.jsp"), form.getProtocol(), "Edit FCS Analysis Filter", Action.editFCSAnalysisFilter);
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(root, protocol, "Update Samples", Action.updateSamples);
+        }
     }
+
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class EditFCSAnalysisNameAction extends ProtocolViewAction<EditFCSAnalysisNameForm>
+    {
+        public void validateCommand(EditFCSAnalysisNameForm form, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(EditFCSAnalysisNameForm form, boolean reshow, BindException errors) throws Exception
+        {
+            form.init();
+            return FormPage.getView(ProtocolController.class, form, "editFCSAnalysisName.jsp");
+        }
+
+        public boolean handlePost(EditFCSAnalysisNameForm form, BindException errors) throws Exception
+        {
+            getProtocol().setFCSAnalysisNameExpr(getUser(), form.getFieldSubstitution());
+            getProtocol().updateFCSAnalysisName(getUser());
+            return true;
+        }
+
+        public ActionURL getSuccessURL(EditFCSAnalysisNameForm form)
+        {
+            return getProtocol().urlShow();
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(root, getProtocol(), "Edit FCS Analysis Name", Action.editFCSAnalysisName);
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class EditFCSAnalysisFilterAction extends ProtocolViewAction<EditFCSAnalysisFilterForm>
+    {
+        public void validateCommand(EditFCSAnalysisFilterForm target, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(EditFCSAnalysisFilterForm form, boolean reshow, BindException errors) throws Exception
+        {
+            form.init();
+            return FormPage.getView(ProtocolController.class, form, "editFCSAnalysisFilter.jsp");
+        }
+
+        public boolean handlePost(EditFCSAnalysisFilterForm form, BindException errors) throws Exception
+        {
+            getProtocol().setFCSAnalysisFilter(getUser(), form.getFilterValue());
+            return true;
+        }
+
+        public ActionURL getSuccessURL(EditFCSAnalysisFilterForm form)
+        {
+            return getProtocol().urlShow();
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(root, getProtocol(), "Edit FCS Analysis Filter", Action.editFCSAnalysisFilter);
+        }
+    }
+
 }

@@ -1,19 +1,17 @@
 package org.labkey.flow.controllers.protocol;
 
-import org.labkey.api.query.FieldKey;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.util.UnexpectedException;
-import org.apache.struts.action.ActionMapping;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class JoinSampleSetForm extends ProtocolForm
 {
@@ -22,25 +20,17 @@ public class JoinSampleSetForm extends ProtocolForm
     public FieldKey[] ff_dataField = new FieldKey[KEY_FIELDS_MAX];
     public String[] ff_samplePropertyURI = new String[KEY_FIELDS_MAX];
 
-    public void reset(ActionMapping actionMapping, HttpServletRequest request)
+    public void init() throws UnauthorizedException
     {
-        super.reset(actionMapping, request);
-        try
+        FlowProtocol protocol = getProtocol();
+        Map.Entry<String, FieldKey>[] entries = protocol.getSampleSetJoinFields().entrySet().toArray(new Map.Entry[KEY_FIELDS_MAX]);
+        for (int i = 0; i < KEY_FIELDS_MAX; i ++)
         {
-            FlowProtocol protocol = getProtocol();
-            Map.Entry<String, FieldKey>[] entries = protocol.getSampleSetJoinFields().entrySet().toArray(new Map.Entry[KEY_FIELDS_MAX]);
-            for (int i = 0; i < KEY_FIELDS_MAX; i ++)
-            {
-                Map.Entry<String, FieldKey> entry = entries[i];
-                if (entry == null)
-                    break;
-                ff_samplePropertyURI[i] = entry.getKey();
-                ff_dataField[i] = entry.getValue();
-            }
-        }
-        catch (ServletException e)
-        {
-            throw UnexpectedException.wrap(e);
+            Map.Entry<String, FieldKey> entry = entries[i];
+            if (entry == null)
+                break;
+            ff_samplePropertyURI[i] = entry.getKey();
+            ff_dataField[i] = entry.getValue();
         }
     }
 
