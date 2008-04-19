@@ -82,6 +82,7 @@ public class RunController extends SpringFlowController<RunController.Action>
 
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
+            run = form.getRun();
             Page page = getPage("showRun.jsp", form);
             return new JspView(page);
         }
