@@ -7,12 +7,14 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.jsp.FormPage;
+import org.labkey.api.query.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.view.*;
-import org.labkey.api.query.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.ViewForm;
 import org.labkey.flow.analysis.model.CompensationMatrix;
-import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.data.FlowCompensationMatrix;
 import org.labkey.flow.data.FlowDataType;
@@ -29,7 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
-public class CompensationController extends SpringFlowController<CompensationController.Action, FlowParam>//BaseFlowController<CompensationController.Action>
+public class CompensationController extends SpringFlowController<CompensationController.Action>
 {
     public enum Action
     {

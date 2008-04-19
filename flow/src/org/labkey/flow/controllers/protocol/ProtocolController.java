@@ -11,7 +11,6 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.UnauthorizedException;
-import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.data.FlowProtocol;
 import org.springframework.validation.BindException;
@@ -21,7 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ProtocolController extends SpringFlowController<ProtocolController.Action, FlowParam>
+public class ProtocolController extends SpringFlowController<ProtocolController.Action>
 {
     public enum Action
     {

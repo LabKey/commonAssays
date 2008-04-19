@@ -1,14 +1,14 @@
 <%@ page buffer="none" %>
-<%@ page import="org.labkey.flow.data.FlowLog" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.flow.controllers.run.RunForm"%>
-<%@ page import="org.labkey.flow.view.FlowQueryView"%>
-<%@ page import="org.labkey.flow.data.FlowCompensationMatrix"%>
-<%@ page import="org.labkey.flow.controllers.compensation.CompensationController"%>
-<%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page import="org.labkey.api.security.ACL" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.flow.controllers.compensation.CompensationController"%>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
+<%@ page import="org.labkey.flow.controllers.run.RunController"%>
+<%@ page import="org.labkey.flow.controllers.run.RunForm"%>
+<%@ page import="org.labkey.flow.data.FlowCompensationMatrix" %>
+<%@ page import="org.labkey.flow.data.FlowLog" %>
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
+<%@ page import="org.labkey.flow.view.FlowQueryView" %>
 <%@ page extends="org.labkey.flow.controllers.run.RunController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -40,7 +40,7 @@
         <% } else { %>
             <p>
                 You can modify the gates on individual FCS files in this run.<br>
-                <labkey:link href="<%=getRun().urlFor(RunController.Action.moveToWorkspace)%>" text="Move this run to the workspace." /><br>
+                <labkey:link href="<%=getRun().urlFor(RunController.Action.moveToWorkspace)%>" text="Move this run to the workspace" /><br>
             </p>
 
     <% } } %>

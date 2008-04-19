@@ -1,6 +1,5 @@
 package org.labkey.flow.controllers;
 
-import org.apache.beehive.netui.pageflow.Forward;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.jsp.JspBase;
@@ -8,10 +7,9 @@ import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ViewForward;
-import org.labkey.api.view.ActionURL;
 import org.labkey.flow.data.FlowObject;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
@@ -25,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 
 
-public class SpringFlowController<A extends Enum, P extends Enum> extends SpringActionController
+public class SpringFlowController<A extends Enum> extends SpringActionController
 {
     protected SpringFlowController.FlowPage getFlowPage(String name) throws Exception
     {
@@ -51,7 +49,7 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
         return ret;
     }
 
-    protected Forward executeScript(ScriptJob job, FlowScript script) throws Exception
+    protected ActionURL executeScript(ScriptJob job, FlowScript script) throws Exception
     {
         FlowProtocol.ensureForContainer(getUser(), job.getContainer());
         PipelineService service = PipelineService.get();
@@ -60,8 +58,9 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
         ActionURL forward = job.getStatusHref().clone();
         putParam(forward, FlowParam.redirect, 1);
         forward.setFragment("end");
-        return new ViewForward(forward);
+        return forward;
     }
+
 
 
     // override to append root nav to all paths
@@ -150,7 +149,7 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
     }
 
 
-    protected int getIntParam(P param)
+    protected int getIntParam(FlowParam param)
     {
         String value = getParam(param);
         if (value == null)
@@ -158,7 +157,7 @@ public class SpringFlowController<A extends Enum, P extends Enum> extends Spring
         return Integer.valueOf(value).intValue();
     }
 
-    protected String getParam(P param)
+    protected String getParam(FlowParam param)
     {
         return getRequest().getParameter(param.toString());
     }
