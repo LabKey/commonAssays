@@ -1092,8 +1092,8 @@ ms2/src/org/labkey/ms2/renameRun.jsp -text
 ms2/src/org/labkey/ms2/runSummary.jsp -text
 ms2/src/org/labkey/ms2/saveView.jsp -text
 ms2/src/org/labkey/ms2/scoring/ScoringController.java -text
-ms2/src/org/labkey/ms2/scoring/compare.gm -text
-ms2/src/org/labkey/ms2/scoring/discriminate.gm -text
+ms2/src/org/labkey/ms2/scoring/compare.jsp -text
+ms2/src/org/labkey/ms2/scoring/discriminate.jsp -text
 ms2/src/org/labkey/ms2/search/ProteinSearchBean.java -text
 ms2/src/org/labkey/ms2/search/ProteinSearchWebPart.java -text
 ms2/src/org/labkey/ms2/search/searchProteins.jsp -text

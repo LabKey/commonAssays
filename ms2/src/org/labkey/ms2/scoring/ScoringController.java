@@ -15,138 +15,240 @@
  */
 package org.labkey.ms2.scoring;
 
-import org.labkey.api.view.*;
-import org.labkey.api.view.template.HomeTemplate;
-import org.labkey.api.security.ACL;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.util.HelpTopic;
-import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.MS2Run;
 import org.apache.log4j.Logger;
-import org.apache.beehive.netui.pageflow.annotations.Jpf;
-import org.apache.beehive.netui.pageflow.Forward;
-import org.apache.struts.action.ActionMapping;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.ChartRenderingInfo;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.entity.StandardEntityCollection;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.XYSeries;
+import org.labkey.api.action.ExportAction;
+import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.SpringActionController;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.util.HelpTopic;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.NavTree;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
+import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
+import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import java.net.URISyntaxException;
-import java.io.IOException;
-import java.util.Enumeration;
+import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
+import java.util.Enumeration;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
-/**
- */
-@Jpf.Controller
-public class ScoringController extends ViewController
+public class ScoringController extends SpringActionController
 {
     private static Logger _log = Logger.getLogger(ScoringController.class);
+    private static DefaultActionResolver _resolver = new DefaultActionResolver(ScoringController.class);
 
-    private Forward _renderInTemplate(HttpView view, String title, String helpTopic) throws Exception
+    private static HelpTopic getHelpTopic(String topic)
     {
-        if (helpTopic == null)
-            helpTopic = "ms2";
-
-        NavTrailConfig trailConfig = new NavTrailConfig(getViewContext());
-        if (title != null)
-            trailConfig.setTitle(title);
-        trailConfig.setHelpTopic(new HelpTopic(helpTopic, HelpTopic.Area.CPAS));
-        
-        return includeView(new HomeTemplate(getViewContext(), view, trailConfig));
+        return new HelpTopic(topic, HelpTopic.Area.CPAS);
     }
 
-    @Jpf.Action
-    protected Forward begin()
+    public ScoringController()
     {
-        return null;
+        super();
+        setActionResolver(_resolver);
     }
 
-    @Jpf.Action
-    protected Forward compare(ChartForm form) throws ServletException, URISyntaxException, Exception
+    @RequiresPermission(ACL.PERM_READ)
+    public class CompareAction extends SimpleViewAction<ChartForm>
     {
-        requiresPermission(ACL.PERM_READ);
-
-        Container c = getContainer();
-        ActionURL currentUrl = cloneActionURL();
-
-        String[] compareRunIds = null;
-
-        int[] runIds = form.getRunIds();
-        if (runIds == null || runIds.length == 0)
-            compareRunIds = currentUrl.getParameters(DataRegion.SELECT_CHECKBOX_NAME);
-        else
+        public ModelAndView getView(ChartForm form, BindException errors) throws Exception
         {
-            compareRunIds = new String[runIds.length];
-            for (int i = 0; i < runIds.length; i++)
-                compareRunIds[i] = Integer.toString(runIds[i]);
+            setHelpTopic(getHelpTopic("MS2-Scoring/compare"));
+
+            form.initArrays(getViewContext().getRequest());
+
+            if (form.getRuns().length == 0)
+                errors.reject(ERROR_MSG, "No runs specified.");
+
+            return new JspView<ChartForm>("/org/labkey/ms2/scoring/compare.jsp", form);
         }
-        MS2Run[] compareRuns = null;
-        String[] runErrors = null;
 
-        String error = "";
-        if (null == compareRunIds || compareRunIds.length == 0)
+        public NavTree appendNavTrail(NavTree root)
         {
-            error = "No runs specified.";
+            return root.addChild("Compare MS2 Peptide Scoring");
         }
-        else
-        {
-            compareRuns = new MS2Run[compareRunIds.length];
-            runErrors = new String[compareRunIds.length];
+    }
 
-            for (int i = 0; i < compareRuns.length; i++)
+    @RequiresPermission(ACL.PERM_READ)
+    abstract public class ChartCompareBaseAction extends ExportAction<ChartForm>
+    {
+        abstract public XYSeriesCollection getSeriesCollection(ChartForm form);
+
+        public void export(ChartForm form, HttpServletResponse response) throws Exception
+        {
+            form.initArrays(getViewContext().getRequest());
+
+            XYSeriesCollection collection = getSeriesCollection(form);
+
+            JFreeChart chart = ChartFactory.createXYLineChart(form.getTitle(),
+                    "False Positives",
+                    "Correct IDs",
+                    collection,
+                    PlotOrientation.VERTICAL,
+                    true,
+                    true,
+                    false);
+            chart.getTitle().setFont(chart.getTitle().getFont().deriveFont(16.0f));
+            chart.setBackgroundPaint(Color.white);
+
+            XYPlot plot = chart.getXYPlot();
+            for (int i = 0; i < collection.getSeriesCount(); i++)
             {
-                final MS2Run run = MS2Manager.getRun(compareRunIds[i]);
-                if (run == null)
-                    continue;
-                compareRuns[i] = run;
-                if (run.getNegativeHitCount() < run.getPeptideCount() / 3)
+                final Paint paint = plot.getRenderer().getSeriesPaint(i);
+                MS2Manager.XYSeriesROC series = (MS2Manager.XYSeriesROC) collection.getSeries(i);
+                series.plotAnnotations(plot, paint);
+            }
+
+            response.setContentType("image/png");
+            ChartUtilities.writeChartAsPNG(response.getOutputStream(),
+                    chart,
+                    form.getWidth(),
+                    form.getHeight(),
+                    new ChartRenderingInfo(new StandardEntityCollection()));
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ChartCompareAction extends ChartCompareBaseAction
+    {
+        public XYSeriesCollection getSeriesCollection(ChartForm form)
+        {
+            /* @todo: error handling. */
+
+            XYSeriesCollection collection =
+                    MS2Manager.getROCData(form.getRunIds(),
+                            form.getDiscriminates(),
+                            form.getIncrement(),
+                            form.getPercentAACorrect(),
+                            form.getLimit(),
+                            form.getMarkNums(),
+                            form.isMarkFdr(),
+                            getContainer());
+
+            if (form.isSaveTsvs())
+            {
+                File tempDir = new File(System.getenv("TEMP"));
+                for (int i = 0; i < collection.getSeriesCount(); i++)
                 {
-                    runErrors[i] = "Insufficient negative hit data to perform analysis.";
+                    XYSeries series = collection.getSeries(i);
+                    File tempFile = new File(tempDir, series.getKey() + ".tsv");
+                    FileWriter writer = null;
+                    try
+                    {
+                        writer = new FileWriter(tempFile);
+                        for (int point = 0; point < series.getItemCount(); point++)
+                        {
+                            writer.write(series.getX(point).toString());
+                            writer.write("\t");
+                            writer.write(series.getY(point).toString());
+                            writer.write("\n");
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        _log.error("Failed to save scoring TSV " + tempFile, e);
+                    }
+                    finally
+                    {
+                        if (writer != null)
+                        {
+                            try { writer.close(); }
+                            catch(Exception e) {}
+                        }
+                    }
                 }
             }
+
+            return collection;
         }
-
-        HttpView v = new GroovyView("/org/labkey/ms2/scoring/compare.gm");
-        v.addObject("error", error);
-        v.addObject("runs", compareRuns);
-        v.addObject("runErrors", runErrors);
-        v.addObject("form", form);
-
-        return _renderInTemplate(v, "Compare MS2 Peptide Scoring", "MS2-Scoring/compare");
     }
 
-    public static class ChartForm extends ViewForm
+    @RequiresPermission(ACL.PERM_READ)
+    public class ChartCompareProtAction extends ChartCompareBaseAction
+    {
+        public XYSeriesCollection getSeriesCollection(ChartForm form)
+        {
+            /* @todo: error handling. */
+
+            return MS2Manager.getROCDataProt(form.getRunIds(),
+                            form.getIncrement(),
+                            form.getDiscriminates(),
+                            form.getPercentAACorrect(),
+                            form.getLimit(),
+                            form.getMarkNums(),
+                            form.isMarkFdr(),
+                            getContainer());
+        }
+    }
+
+    public static class ChartForm
     {
         private String title = "Scoring Comparison";
+        private double percentAACorrect = 0.1;
         private double increment = 0.2;
         private int limit = 200;
         private int width = 500;
         private int height = 500;
         private String marks = "0,50";
-        private int runIds[];
+        private boolean markFdr;
+        private boolean saveTsvs;
         private boolean discriminates[][];
+        private MS2Run[] runs;
 
-        public void reset(ActionMapping am, HttpServletRequest request)
+        public void initArrays(HttpServletRequest request)
         {
             int size = 0;
-            try
+            String sizeValue = request.getParameter("size");
+            if (sizeValue != null)
             {
-                size = Integer.parseInt(request.getParameter("size"));
-            }
-            catch (Exception e)
-            {
+                try
+                {
+                    size = Integer.parseInt(sizeValue);
+                }
+                catch (Exception e)
+                {
+                    _log.warn("Invalid size parameter comparing scores.", e);
+                }
             }
 
-            runIds = new int[size];
-            discriminates = new boolean[size][];
+            String[] runIdValues;
+            if (size == 0)
+            {
+                runIdValues = request.getParameterValues(DataRegion.SELECT_CHECKBOX_NAME);
+                size = runIdValues.length;
+            }
+            else
+            {
+                runIdValues = new String[size];
+                for (int i = 0; i < size; i++)
+                    runIdValues[i] = request.getParameter("runIds_" + i);
+            }
+
+            MS2Run[] runs = new MS2Run[size];
+            for (int i = 0; i < size; i++)
+                runs[i] = MS2Manager.getRun(runIdValues[i]);
+            setRuns(runs);
+
+            boolean[][] discriminates = new boolean[size][];
 
             for (int i = 0; i < size; i++)
                 discriminates[i] = new boolean[64]; // Safe maximum.
@@ -164,6 +266,8 @@ public class ScoringController extends ViewController
                 if ("on".equals(value))
                     discriminates[Integer.parseInt(nameParts[1])][Integer.parseInt(nameParts[2])] = true;
             }
+
+            setDiscriminates(discriminates);
         }
 
         public boolean[][] getDiscriminates()
@@ -174,16 +278,6 @@ public class ScoringController extends ViewController
         public void setDiscriminates(boolean[][] discriminates)
         {
             this.discriminates = discriminates;
-        }
-
-        public int[] getRunIds()
-        {
-            return runIds;
-        }
-
-        public void setRunIds(int[] runIds)
-        {
-            this.runIds = runIds;
         }
 
         public int getWidth()
@@ -226,6 +320,16 @@ public class ScoringController extends ViewController
             this.increment = increment;
         }
 
+        public double getPercentAACorrect()
+        {
+            return percentAACorrect;
+        }
+
+        public void setPercentAACorrect(double percentAACorrect)
+        {
+            this.percentAACorrect = percentAACorrect;
+        }
+
         public String getMarks()
         {
             return marks;
@@ -234,6 +338,26 @@ public class ScoringController extends ViewController
         public void setMarks(String marks)
         {
             this.marks = marks;
+        }
+
+        public boolean isMarkFdr()
+        {
+            return markFdr;
+        }
+
+        public void setMarkFdr(boolean markFdr)
+        {
+            this.markFdr = markFdr;
+        }
+
+        public boolean isSaveTsvs()
+        {
+            return saveTsvs;
+        }
+
+        public void setSaveTsvs(boolean saveTsvs)
+        {
+            this.saveTsvs = saveTsvs;
         }
 
         public String getTitle()
@@ -245,128 +369,193 @@ public class ScoringController extends ViewController
         {
             this.title = title;
         }
-    }
 
-    @Jpf.Action
-    protected Forward chartCompare(ChartForm form) throws ServletException, URISyntaxException, IOException
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        Container c = getContainer();
-        ActionURL currentUrl = cloneActionURL();
-
-        /* @todo: error handling. */
-
-        String[] markStrs = new String[0];
-
-        String markParam = form.getMarks();
-        if (markParam != null && markParam.length() > 0)
-            markStrs = markParam.split(",");
-
-        int[] marks = new int[markStrs.length];
-        for (int i = 0; i < marks.length; i++)
-            marks[i] = Integer.parseInt(markStrs[i]);
-
-        XYSeriesCollection collection =
-                MS2Manager.getROCData(form.getRunIds(),
-                        form.getDiscriminates(),
-                        form.getIncrement(),
-                        form.getLimit(),
-                        marks,
-                        c);
-
-        JFreeChart chart = ChartFactory.createXYLineChart(form.getTitle(),
-                "False Positives",
-                "Correct IDs",
-                collection,
-                PlotOrientation.VERTICAL,
-                true,
-                true,
-                false);
-        chart.getTitle().setFont(chart.getTitle().getFont().deriveFont(16.0f));
-        chart.setBackgroundPaint(Color.white);
-
-        XYPlot plot = chart.getXYPlot();
-        for (int i = 0; i < collection.getSeriesCount(); i++)
+        public MS2Run[] getRuns()
         {
-            final Paint paint = plot.getRenderer().getSeriesPaint(i);
-            MS2Manager.XYSeriesROC series = (MS2Manager.XYSeriesROC) collection.getSeries(i);
-            series.plotAnnotations(plot, paint);
+            return runs;
         }
 
-        getResponse().setContentType("image/png");
-        ChartUtilities.writeChartAsPNG(getResponse().getOutputStream(),
-                chart,
-                form.getWidth(),
-                form.getHeight(),
-                new ChartRenderingInfo(new StandardEntityCollection()));
-
-        return null;
-    }
-
-
-    @Jpf.Action
-    protected Forward chartCompareProt(ChartForm form) throws ServletException, URISyntaxException, IOException
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        Container c = getContainer();
-        ActionURL currentUrl = cloneActionURL();
-
-        /* @todo: error handling. */
-
-        String[] markStrs = new String[0];
-
-        String markParam = form.getMarks();
-        if (markParam != null && markParam.length() > 0)
-            markStrs = markParam.split(",");
-
-        int[] marks = new int[markStrs.length];
-        for (int i = 0; i < marks.length; i++)
-            marks[i] = Integer.parseInt(markStrs[i]);
-
-        XYSeriesCollection collection =
-                MS2Manager.getROCDataProt(form.getRunIds(),
-                        form.getIncrement(),
-                        form.getDiscriminates(),
-                        form.getLimit(),
-                        marks,
-                        c);
-
-        JFreeChart chart = ChartFactory.createXYLineChart(form.getTitle(),
-                "False Positives",
-                "Correct IDs",
-                collection,
-                PlotOrientation.VERTICAL,
-                true,
-                true,
-                false);
-        chart.getTitle().setFont(chart.getTitle().getFont().deriveFont(16.0f));
-        chart.setBackgroundPaint(Color.white);
-
-        XYPlot plot = chart.getXYPlot();
-        for (int i = 0; i < collection.getSeriesCount(); i++)
+        public void setRuns(MS2Run[] runs)
         {
-            final Paint paint = plot.getRenderer().getSeriesPaint(i);
-            MS2Manager.XYSeriesROC series = (MS2Manager.XYSeriesROC) collection.getSeries(i);
-            series.plotAnnotations(plot, paint);
+            this.runs = runs;
         }
 
-        getResponse().setContentType("image/png");
-        ChartUtilities.writeChartAsPNG(getResponse().getOutputStream(),
-                chart,
-                form.getWidth(),
-                form.getHeight(),
-                new ChartRenderingInfo(new StandardEntityCollection()));
+        public double[] getMarkNums()
+        {
+            String[] markStrs = new String[0];
 
-        return null;
+            if (marks.length() > 0)
+                markStrs = marks.split(",");
+
+            double[] markNums = new double[markStrs.length];
+            for (int i = 0; i < markNums.length; i++)
+                markNums[i] = Double.parseDouble(markStrs[i]);
+            return markNums;
+        }
+
+        public int[] getRunIds()
+        {
+            int[] runIds = new int[runs.length];
+            for (int i = 0; i < runs.length; i++)
+                runIds[i] = runs[i].getRun();
+            return runIds;
+        }
     }
 
-
-    public static class ChartDiscForm extends ViewForm
+    @RequiresPermission(ACL.PERM_READ)
+    public class DiscriminateAction extends SimpleViewAction<ChartDiscForm>
     {
-        private String title;
+        public ModelAndView getView(ChartDiscForm form, BindException errors) throws Exception
+        {
+            setHelpTopic(getHelpTopic("MS2-Scoring/discriminate"));
+
+            form.initArrays(getViewContext().getRequest());
+
+            final MS2Run run = MS2Manager.getRun(form.getRunId());
+            if (run == null)
+                errors.reject(ERROR_MSG, "No run specified.");
+            else if (run.getNegativeHitCount() < run.getPeptideCount() / 3)
+                errors.reject(ERROR_MSG, "Insufficient negative hit data to perform analysis.");
+
+            form.setRun(run);
+
+            return new JspView<ChartDiscForm>("/org/labkey/ms2/scoring/discriminate.jsp", form);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("MS2 Peptide Scoring Discriminate Charts");
+        }
+    }
+
+    public static ActionURL urlChartDiscriminate(Container c, int charge, ChartDiscForm form)
+    {
+        int i = charge - 1;
+        return new ActionURL(ChartDiscriminateAction.class, c)
+                .addParameter(ChartDiscForm.PARAMS.runId, form.getRunId())
+                .addParameter(ChartDiscForm.PARAMS.width, form.getWidth())
+                .addParameter(ChartDiscForm.PARAMS.height, form.getHeight())
+                .addParameter(ChartDiscForm.PARAMS.percentAACorrect, Double.toString(form.getPercentAACorrect()))
+                .addParameter(ChartDiscForm.PARAMS.charge, charge)
+                .addParameter(ChartDiscForm.PARAMS.buckets + "_" + i, Double.toString(form.getBuckets()[i]))
+                .addParameter(ChartDiscForm.PARAMS.expressions + "_" + i, form.getExpressions()[i])
+                .addParameter(ChartDiscForm.PARAMS.scaleFactors + "_" + i, form.getScaleFactors()[i])
+                .addParameter(ChartDiscForm.PARAMS.title, form.getTitle() + " (charge " + charge + ")");
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ChartDiscriminateAction extends ExportAction<ChartDiscForm>
+    {
+        public void export(ChartDiscForm form, HttpServletResponse response) throws Exception
+        {
+            Container c = getContainer();
+
+            form.initArrays(getViewContext().getRequest());
+
+            /* @todo: error handling. */
+
+            int charge = form.getCharge();
+            XYSeriesCollection collection =
+                    MS2Manager.getDiscriminateData(form.getRunId(),
+                            charge,
+                            form.getPercentAACorrect(),
+                            form.getExpressions()[charge-1],
+                            form.getBuckets()[charge-1],
+                            form.getScaleFactors()[charge-1],
+                            c);
+
+            JFreeChart chart = ChartFactory.createXYLineChart(form.getTitle(),
+                    form.getExpressions()[charge-1],
+                    "Number of Spectra",
+                    collection,
+                    PlotOrientation.VERTICAL,
+                    true,
+                    true,
+                    false);
+
+            response.setContentType("image/png");
+            ChartUtilities.writeChartAsPNG(response.getOutputStream(),
+                    chart,
+                    form.getWidth(),
+                    form.getHeight(),
+                    new ChartRenderingInfo(new StandardEntityCollection()));
+        }
+    }
+
+    public static ActionURL urlChartDiscriminateROC(Container c, ChartDiscForm form)
+    {
+        return new ActionURL(ChartDiscriminateROCAction.class, c)
+                .addParameter(ChartDiscForm.PARAMS.runId, form.getRunId())
+                .addParameter(ChartDiscForm.PARAMS.width, form.getWidth())
+                .addParameter(ChartDiscForm.PARAMS.height, form.getHeight())
+                .addParameter(ChartDiscForm.PARAMS.expressions + "_" + 0, form.getExpressions()[0])
+                .addParameter(ChartDiscForm.PARAMS.expressions + "_" + 1, form.getExpressions()[1])
+                .addParameter(ChartDiscForm.PARAMS.expressions + "_" + 2, form.getExpressions()[2]);
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ChartDiscriminateROCAction extends ExportAction<ChartDiscForm>
+    {
+        public void export(ChartDiscForm form, HttpServletResponse response) throws Exception
+        {
+            Container c = getContainer();
+
+            form.initArrays(getViewContext().getRequest());
+
+            /* @todo: error handling. */
+
+            XYSeriesCollection collection =
+                    MS2Manager.getDiscriminateROCData(form.getRunId(),
+                            form.getExpressions(),
+                            0.2,
+                            150,
+                            new int[] {0, 50},
+                            c);
+
+            JFreeChart chart = ChartFactory.createXYLineChart(form.getTitle(),
+                    "False Positives",
+                    "Correct IDs",
+                    collection,
+                    PlotOrientation.VERTICAL,
+                    true,
+                    true,
+                    false);
+
+            XYPlot plot = chart.getXYPlot();
+            for (int i = 0; i < collection.getSeriesCount(); i++)
+            {
+                final Paint paint = plot.getRenderer().getSeriesPaint(i);
+                MS2Manager.XYSeriesROC series = (MS2Manager.XYSeriesROC) collection.getSeries(i);
+                series.plotAnnotations(plot, paint);
+            }
+
+            response.setContentType("image/png");
+            ChartUtilities.writeChartAsPNG(response.getOutputStream(),
+                    chart,
+                    form.getWidth(),
+                    form.getHeight(),
+                    new ChartRenderingInfo(new StandardEntityCollection()));
+        }
+    }
+
+    public static class ChartDiscForm
+    {
+        enum PARAMS
+        {
+            title,
+            runId,
+            charge,
+            width,
+            height,
+            percentAACorrect,
+            buckets,
+            expressions,
+            scaleFactors
+        }
+
+        private String title = "Discriminate";
         private int runId;
+        private MS2Run run;
         private int charge = 2;
         private double percentAACorrect = 0.1;
         private int width = 500;
@@ -375,6 +564,44 @@ public class ScoringController extends ViewController
         private String[] expressions = new String[]
                 { "-log(expect)", "-log(expect)", "-log(expect)" };
         private int[] scaleFactors = new int[] { 1, 2, 4 };
+
+        public void initArrays(HttpServletRequest request)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                String param = request.getParameter(PARAMS.buckets.toString() + "_" + i);
+                if (param != null)
+                {
+                    try
+                    {
+                        buckets[i] = Double.parseDouble(param);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                    }
+                }
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                String param = request.getParameter(PARAMS.expressions.toString() + "_" + i);
+                if (param != null)
+                    expressions[i] = param;
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                String param = request.getParameter(PARAMS.scaleFactors.toString() + "_" + i);
+                if (param != null)
+                {
+                    try
+                    {
+                        scaleFactors[i] = Integer.parseInt(param);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                    }
+                }
+            }
+        }
 
         public String getTitle()
         {
@@ -394,6 +621,16 @@ public class ScoringController extends ViewController
         public void setRunId(int runId)
         {
             this.runId = runId;
+        }
+
+        public MS2Run getRun()
+        {
+            return run;
+        }
+
+        public void setRun(MS2Run run)
+        {
+            this.run = run;
         }
 
         public int getCharge()
@@ -465,159 +702,5 @@ public class ScoringController extends ViewController
         {
             this.percentAACorrect = percentAACorrect;
         }
-    }
-
-    @Jpf.Action
-    protected Forward discriminate(ChartDiscForm form) throws ServletException, URISyntaxException, Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        Container c = getContainer();
-        ActionURL currentUrl = cloneActionURL();
-
-        String error = "";
-
-        int runId = form.getRunId();
-
-        final MS2Run run = MS2Manager.getRun(runId);
-        if (run == null)
-            error = "No run specified.";
-        if (run.getNegativeHitCount() < run.getPeptideCount() / 3)
-            error = "Insufficient negative hit data to perform analysis.";
-
-        ActionURL runUrl = new ActionURL("MS2-Scoring", "chartDiscriminate", getContainer());
-        runUrl.deleteParameters();
-        runUrl.addParameter("runId", Integer.toString(form.getRunId()));
-        runUrl.addParameter("width", Integer.toString(form.getWidth()));
-        runUrl.addParameter("height", Integer.toString(form.getHeight()));
-        runUrl.addParameter("percentAACorrect", Double.toString(form.getPercentAACorrect()));
-
-        ActionURL urlC1 = runUrl.clone();
-        urlC1.addParameter("charge", "1");
-        urlC1.addParameter("buckets[0]", Double.toString(form.getBuckets()[0]));
-        urlC1.addParameter("scaleFactors[0]", Integer.toString(form.getScaleFactors()[0]));
-        ActionURL urlC2 = runUrl.clone();
-        urlC2.addParameter("charge", "2");
-        urlC2.addParameter("expressions[1]", form.getExpressions()[1]);
-        urlC2.addParameter("buckets[1]", Double.toString(form.getBuckets()[1]));
-        urlC2.addParameter("scaleFactors[1]", Integer.toString(form.getScaleFactors()[1]));
-        ActionURL urlC3 = runUrl.clone();
-        urlC3.addParameter("charge", "3");
-        urlC3.addParameter("expressions[2]", form.getExpressions()[2]);
-        urlC3.addParameter("buckets[2]", Double.toString(form.getBuckets()[2]));
-        urlC3.addParameter("scaleFactors[2]", Integer.toString(form.getScaleFactors()[2]));
-
-        if (form.title != null && form.title.length() > 0)
-        {
-            urlC1.addParameter("title", form.title + " (charge 1)");
-            urlC2.addParameter("title", form.title + " (charge 2)");
-            urlC3.addParameter("title", form.title + " (charge 3)");
-        }
-
-        ActionURL urlROC = new ActionURL("MS2-Scoring", "chartDiscriminateROC", getContainer());
-        urlROC.addParameter("runId", Integer.toString(form.getRunId()));
-        urlROC.addParameter("width", Integer.toString(form.getWidth()));
-        urlROC.addParameter("height", Integer.toString(form.getHeight()));
-        urlROC.addParameter("expressions[0]", form.expressions[0]);
-        urlROC.addParameter("expressions[1]", form.expressions[1]);
-        urlROC.addParameter("expressions[2]", form.expressions[2]);
-
-
-        HttpView v = new GroovyView("/org/labkey/ms2/scoring/discriminate.gm");
-        v.addObject("error", error);
-        v.addObject("run", run);
-        v.addObject("form", form);
-        v.addObject("container", c);
-        v.addObject("runUrl", runUrl);
-        v.addObject("urlC1", urlC1);
-        v.addObject("urlC2", urlC2);
-        v.addObject("urlC3", urlC3);
-        v.addObject("urlROC", urlROC);
-
-        return _renderInTemplate(v, "MS2 Peptide Scoring Discriminate Charts", "MS2-Compare/discriminate");
-    }
-
-    @Jpf.Action
-    protected Forward chartDiscriminate(ChartDiscForm form) throws ServletException, URISyntaxException, IOException
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        Container c = getContainer();
-        ActionURL currentUrl = cloneActionURL();
-
-        /* @todo: error handling. */
-
-        int charge = form.getCharge();
-        XYSeriesCollection collection =
-                MS2Manager.getDiscriminateData(form.getRunId(),
-                        charge,
-                        form.getPercentAACorrect(),
-                        form.getExpressions()[charge-1],
-                        form.getBuckets()[charge-1],
-                        form.getScaleFactors()[charge-1],
-                        c);
-
-        JFreeChart chart = ChartFactory.createXYLineChart(form.getTitle(),
-                form.getExpressions()[charge-1],
-                "Number of Spectra",
-                collection,
-                PlotOrientation.VERTICAL,
-                true,
-                true,
-                false);
-
-        getResponse().setContentType("image/png");
-        ChartUtilities.writeChartAsPNG(getResponse().getOutputStream(),
-                chart,
-                form.getWidth(),
-                form.getHeight(),
-                new ChartRenderingInfo(new StandardEntityCollection()));
-
-        return null;
-    }
-
-    @Jpf.Action
-    protected Forward chartDiscriminateROC(ChartDiscForm form) throws ServletException, URISyntaxException, IOException
-    {
-        requiresPermission(ACL.PERM_READ);
-
-        Container c = getContainer();
-        ActionURL currentUrl = cloneActionURL();
-
-        /* @todo: error handling. */
-
-        XYSeriesCollection collection =
-                MS2Manager.getDiscriminateROCData(form.getRunId(),
-                        form.getExpressions(),
-                        0.2,
-                        150,
-                        new int[] {0, 50},
-                        c);
-
-        JFreeChart chart = ChartFactory.createXYLineChart(form.getTitle(),
-                "False Positives",
-                "Correct IDs",
-                collection,
-                PlotOrientation.VERTICAL,
-                true,
-                true,
-                false);
-
-        XYPlot plot = chart.getXYPlot();
-        for (int i = 0; i < collection.getSeriesCount(); i++)
-        {
-            final Paint paint = plot.getRenderer().getSeriesPaint(i);
-            MS2Manager.XYSeriesROC series = (MS2Manager.XYSeriesROC) collection.getSeries(i);
-            series.plotAnnotations(plot, paint);
-        }
-
-        getResponse().setContentType("image/png");
-        ChartUtilities.writeChartAsPNG(getResponse().getOutputStream(),
-                chart,
-                form.getWidth(),
-                form.getHeight(),
-                new ChartRenderingInfo(new StandardEntityCollection()));
-
-        return null;
     }
 }

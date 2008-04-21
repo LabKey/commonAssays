@@ -1364,8 +1364,8 @@ public class MS2Manager
     }
 
     public static XYSeriesCollection getROCData(int[] runIds, boolean[][] discriminateFlags,
-                                                double increment, int limitFalsePs, int[] marks,
-                                                Container c)
+                                                double increment, double percentAACorrect, int limitFalsePs,
+                                                double[] marks, boolean markFdr, Container c)
     {
         String negHitPrefix = getNegativeHitPrefix(c);
 
@@ -1425,12 +1425,19 @@ public class MS2Manager
                                 {
                                     // If this is the first false positive, create a point
                                     // with an annotation for it.
-                                    if (iMark < marks.length && falsePositives == marks[iMark])
+                                    if (iMark < marks.length &&
+                                        ((!markFdr && falsePositives == marks[iMark]) ||
+                                         (markFdr && falsePositives > (marks[iMark] / 100.0) * ((100.0 - percentAACorrect) / 100.00) * rows)))
                                     {
                                         series.addFirstFalseAnnotation(rs.getString("Expression"),
                                                 falsePositives, rows - falsePositives);
 
                                         iMark++;
+                                    }
+                                    // If FDR dips below mark, back-up and mark again.
+                                    else if (iMark > 0 && (markFdr && falsePositives <= (marks[iMark-1] / 100.0) * ((100.0 - percentAACorrect) / 100.00) * rows))
+                                    {
+                                        iMark--;
                                     }
                                     falsePositives++;
                                 }
@@ -1463,7 +1470,8 @@ public class MS2Manager
 
     public static XYSeriesCollection getROCDataProt(int[] runIds, double increment,
                                                     boolean[][] discriminateFlags,
-                                                    int limitFalsePs, int[] marks, Container c)
+                                                    double percentAACorrect, int limitFalsePs,
+                                                    double[] marks, boolean markFdr, Container c)
     {
         String negHitPrefix = getNegativeHitPrefix(c);
 
@@ -1540,7 +1548,9 @@ public class MS2Manager
                             {
                                 // If this is the first false positive, create a point
                                 // with an annotation for it.
-                                if (iMark < marks.length && falsePositives == marks[iMark])
+                                if (iMark < marks.length &&
+                                    ((!markFdr && falsePositives == marks[iMark]) ||
+                                     (markFdr && falsePositives > (marks[iMark] / 100.0) * ((100.0 - percentAACorrect) / 100.00) * rows)))
                                 {
                                     series.addFirstFalseAnnotation(rs.getString("Expression"),
                                             falsePositives, rows - falsePositives);

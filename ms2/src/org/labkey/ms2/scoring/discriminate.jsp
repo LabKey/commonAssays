@@ -1,0 +1,80 @@
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.ActionURL"%>
+<%@ page import="org.labkey.api.view.ThemeFont"%>
+<%@ page import="org.labkey.ms2.scoring.ScoringController" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.data.Container" %>
+<%@ page extends="org.labkey.api.jsp.JspBase"%>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
+<%
+    JspView<ScoringController.ChartDiscForm> me = (JspView<ScoringController.ChartDiscForm>) HttpView.currentView();
+    ScoringController.ChartDiscForm form = me.getModelBean();
+
+    StringBuffer params = new StringBuffer();
+
+    Container c = getViewContext().getContainer();
+%>
+<labkey:errors/>
+<%
+    if (form.getRun() != null)
+    {
+%>
+<form method=get action="discriminate.post">
+<input type="hidden" name="runId" value="<%=form.getRunId()%>">
+<table>
+    <tr><td colspan=2 style="font-size:<%=ThemeFont.getThemeFont().getHeader_1Size()%>">
+    Enter expressions to use for verious charges.<br>
+    </td></tr>
+    <tr><td valign="top">
+<table border="0">
+<tr><td colspan="2" class="heading-1"><%=h(form.getRun().getDescription())%></td>
+<tr><td colspan="2">
+            <table border="0">
+                <tr><td class="ms-searchform">Title</td>
+                    <td class="normal"><input type="text" size="15" name="title" value="<%=h(form.getTitle())%>"></td></tr>
+                <tr><td class="ms-searchform">Chart width</td>
+                    <td class="normal"><input type="text" size="4" name="width" value="<%=h(form.getWidth())%>"></td></tr>
+                <tr><td class="ms-searchform">Chart height</td>
+                    <td class="normal"><input type="text" size="4" name="height" value="<%=h(form.getHeight())%>"></td></tr>
+                <tr><td class="ms-searchform">Correct Amino Acids</td>
+                    <td class="normal"><input type="text" size="4" name="percentAACorrect" value="<%=h(form.getPercentAACorrect())%>"> %</td></tr>
+                <tr><td class="ms-searchform">Charge 1 expression</td>
+                    <td class="normal"><input type="text" size="15" name="expressions[0]" value="<%=h(form.getExpressions()[0])%>"></td></tr>
+                <tr><td class="ms-searchform">Charge 1 bucket</td>
+                    <td class="normal"><input type="text" size="15" name="buckets[0]" value="<%=h(form.getBuckets()[0])%>"></td></tr>
+                <tr><td class="ms-searchform">Charge 1 scale</td>
+                    <td class="normal"><input type="text" size="15" name="scaleFactors[0]" value="<%=h(form.getScaleFactors()[0])%>"></td></tr>
+                <tr><td class="ms-searchform">Charge 2 expression</td>
+                    <td class="normal"><input type="text" size="15" name="expressions[1]" value="<%=h(form.getExpressions()[1])%>"></td></tr>
+                <tr><td class="ms-searchform">Charge 2 bucket</td>
+                    <td class="normal"><input type="text" size="15" name="buckets[1]" value="<%=h(form.getBuckets()[1])%>"></td></tr>
+                <tr><td class="ms-searchform">Charge 2 scale</td>
+                    <td class="normal"><input type="text" size="15" name="scaleFactors[1]" value="<%=h(form.getScaleFactors()[1])%>"></td></tr>
+                <tr><td class="ms-searchform">Charge 3 expression</td>
+                    <td class="normal"><input type="text" size="15" name="expressions[2]" value="<%=h(form.getExpressions()[2])%>"></td></tr>
+                <tr><td class="ms-searchform">Charge 3 bucket</td>
+                    <td class="normal"><input type="text" size="15" name="buckets[2]" value="<%=h(form.getBuckets()[2])%>"></td></tr>
+                <tr><td class="ms-searchform">Charge 3 scale</td>
+                    <td class="normal"><input type="text" size="15" name="scaleFactors[2]" value="<%=h(form.getScaleFactors()[2])%>"></td></tr>
+            </table>
+</td></tr>
+<tr>
+    <td colspan="2"><input type=image src="<%=PageFlowUtil.submitSrc()%>"></td>
+</tr>
+</table>
+</td>
+
+    <td valign="top">
+        <img src="<%=ScoringController.urlChartDiscriminateROC(c, form)%>"><br><br>
+        <img src="<%=ScoringController.urlChartDiscriminate(c, 1, form)%>"><br><br>
+        <img src="<%=ScoringController.urlChartDiscriminate(c, 2, form)%>"><br><br>
+        <img src="<%=ScoringController.urlChartDiscriminate(c, 3, form)%>"><br><br>
+    </td>
+
+</tr>
+</table>
+</form>
+<%
+    }
+%>
