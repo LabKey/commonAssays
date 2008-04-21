@@ -221,7 +221,41 @@ public class SequestClientImpl implements SearchClient
         return results.getProperty("HTTPContent", "");
     }
 
-    public Map<String, String[]> getSequenceDBNamesMap(String directory,Map<String, String[]> result)
+    public List<String> addSequenceDbPaths(String directory,List<String> result)
+    {
+        errorCode = 0;
+        errorString = "";
+        Properties results;
+
+        findWorkableSettings();
+        if (0 == errorCode )
+            results = getDbNamesResults(directory);
+        else
+            results = new Properties();
+
+
+        String dbsString = results.getProperty("HTTPContent");
+        if(dbsString == null) return null;
+        String[] contentLines = dbsString.split("\n");
+        ArrayList listSubDirs = new ArrayList();
+        for (String contentLine : contentLines)
+        {
+            if (contentLine.endsWith("/"))
+            {
+                listSubDirs.add(contentLine);
+                result.add(contentLine);
+            }
+        }
+        if(listSubDirs.size() == 0) return result;
+
+        for(Object subDir:listSubDirs)
+        {
+            addSequenceDbPaths((String)subDir, result);
+        }
+        return result;
+    }
+
+    public List<String> getSequenceDbDirList(String directory)
     {
         errorCode = 0;
         errorString = "";
@@ -234,8 +268,8 @@ public class SequestClientImpl implements SearchClient
         else
             results = new Properties();
 
-
-        String dbsString = results.getProperty("HTTPContent", "");
+        String dbsString = results.getProperty("HTTPContent");
+        if(dbsString == null) return null;
         String[] contentLines = dbsString.split("\n");
         for (String contentLine : contentLines)
         {
@@ -244,23 +278,7 @@ public class SequestClientImpl implements SearchClient
                 dbFilesList.add(contentLine);
             }
         }
-        if(dbFilesList.size() == 0) return result;
-
-        TreeList listNames = new TreeList();
-        TreeList listSubDirs = new TreeList();
-        for(String db:dbFilesList)
-        {
-            if(db.endsWith("/")) listSubDirs.add(db);
-            else listNames.add(db);  
-        }
-
-        if(listNames.size() > 0)
-            result.put(directory,(String[])listNames.toArray(new String[listNames.size()]));
-        for(Object subDir:listSubDirs)
-        {
-            getSequenceDBNamesMap((String)subDir, result);
-        }
-        return result;
+        return dbFilesList;
     }
 
     public int search(String databaseDir,

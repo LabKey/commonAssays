@@ -1,0 +1,10 @@
+<module>
+
+    <inherits name='org.labkey.api.gwt.Internal'/>
+    <inherits name="com.google.gwt.xml.XML"/>
+
+    <entry-point class='org.labkey.ms2.pipeline.client.Search'/>
+
+    <servlet path="/org.labkey.ms2.pipeline.Search/SearchService"
+		 class="org.labkey.ms2.pipeline.SearchServiceImpl"/>
+</module>

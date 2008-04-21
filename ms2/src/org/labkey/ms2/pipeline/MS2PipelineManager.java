@@ -149,50 +149,54 @@ public class MS2PipelineManager
         return new AnalyzeFileFilter();
     }
 
-    public static Map<String, String[]> addSequenceDBNames(File dir, String path, Map<String, String[]> m)
+    public static List<String> getSequenceDirList(File dir, String path)
     {
-        File[] dbFiles = dir.listFiles(new FileFilter()
-            {
-                public boolean accept(File f)
-                {
-                    final String name = f.getName();
-                    //added filters for Sequest indexed databases
-                    return !(name.startsWith(".") ||
-                            name.endsWith(".check") ||
-                            name.endsWith(".out") ||
-                            name.endsWith(".idx") ||
-                            name.endsWith(".dgt") ||
-                            name.endsWith(".log"));
-                }
-            });
+        File[] dbFiles = dir.listFiles(new SequenceDbFileFilter());
 
         if (dbFiles == null)
-            return m;
-        Arrays.sort(dbFiles, new Comparator<File>()
-        {
-            public int compare(File f1, File f2)
-            {
-                return f1.getName().compareToIgnoreCase(f2.getName());
-            }
-        });
-        ArrayList<String> listNames = new ArrayList<String>();
-        ArrayList<File> listSubdirs = new ArrayList<File>();
+            return null;
+
+        ArrayList<String> dirList = new ArrayList<String>();
+
         for (File dbFile : dbFiles)
         {
             if (dbFile.isDirectory())
-                listSubdirs.add(dbFile);
+                dirList.add(path + dbFile.getName() + "/");
             else
-                listNames.add(dbFile.getName());
+                dirList.add(dbFile.getName());
         }
 
-        if (listNames.size() > 0)
-            m.put(path, listNames.toArray(new String[listNames.size()]));
+        return dirList;
+    }
 
+    public static List<String> addSequenceDbPaths(File dir, String path, List<String> m)
+    {
+        File[] dbFiles = dir.listFiles(new SequenceDbFileFilter());
+
+        if (dbFiles == null)
+            return null;
+        ArrayList<File> listSubdirs = new ArrayList<File>();
+        int fileCount  = 0;
+        for (File dbFile : dbFiles)
+        {
+            if (dbFile.isDirectory())
+            {
+                listSubdirs.add(dbFile);
+                m.add(path + dbFile.getName() + "/");
+            }
+            else
+            {
+              fileCount++;
+            }
+        }
+        if(fileCount == 0)
+        {
+            m.remove(path);
+        }
         for (File subdir : listSubdirs)
         {
-             addSequenceDBNames(subdir, path + subdir.getName() + "/", m);
+             addSequenceDbPaths(subdir, path + subdir.getName() + "/", m);
         }
-
         return m;
     }
 
@@ -477,5 +481,21 @@ public class MS2PipelineManager
                 fileList.add(fileMzXML);
         }
         return fileList.toArray(new File[fileList.size()]);
+    }
+
+    private static class SequenceDbFileFilter implements FileFilter
+    {
+        public boolean accept(File f)
+        {
+            final String name = f.getName();
+            //added filters for Sequest indexed databases
+            return !(name.startsWith(".") ||
+                    name.endsWith(".check") ||
+                    name.endsWith(".out") ||
+                    name.endsWith(".idx") ||
+                    name.endsWith(".dgt") ||
+                    name.endsWith(".log") ||
+                    name.endsWith(".hash"));
+        }
     }
 }

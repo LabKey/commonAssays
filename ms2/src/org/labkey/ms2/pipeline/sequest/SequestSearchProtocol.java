@@ -42,17 +42,8 @@ public class SequestSearchProtocol extends AbstractMS2SearchProtocol<SequestPipe
     public void validate(URI uriRoot) throws PipelineValidationException
     {
         String[] dbNames = getDbNames();
-        String dbPath = getDbPath();
         if(dbNames == null || dbNames.length == 0)
             throw new IllegalArgumentException("A sequence database must be selected.");
-
-        if (dbPath != null && dbPath.length() > 0)
-        {
-            String[] seqFullDBs = new String[dbNames.length];
-            for (int i = 0; i < dbNames.length; i++)
-                seqFullDBs[i] = dbPath + dbNames[i];
-            setDbNames(seqFullDBs);
-        }
 
         File fileSequenceDB = new File(getDirSeqRoot(), dbNames[0]);
         if (!fileSequenceDB.exists())

@@ -87,6 +87,21 @@ public class CometCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return super.handleStatusAction(ctx, name, sf);
     }
 
+    public boolean supportsDirectories()
+    {
+        return true;
+    }
+
+    public boolean remembersDirectories()
+    {
+        return true;
+    }
+
+    public boolean hasRemoteDirectories()
+    {
+        return false;
+    }
+
     public AbstractMS2SearchProtocolFactory getProtocolFactory()
     {
         // Never actually create a protocol based job.
@@ -99,14 +114,18 @@ public class CometCPipelineProvider extends AbstractMS2SearchPipelineProvider
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }
 
-    public Map<String, String[]> getSequenceFiles(URI sequenceRoot) throws IOException
+    public String getHelpTopic()
     {
         // No user interface for this search type.
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }
 
-    public String getHelpTopic()
-    {
+    public List<String> getSequenceDbPaths(URI sequenceRoot) throws IOException {
+        // No user interface for this search type.
+        throw new UnsupportedOperationException("Comet does not support search job creation.");
+    }
+
+    public List<String> getSequenceDbDirList(URI sequenceRoot) throws IOException {
         // No user interface for this search type.
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }

@@ -26,15 +26,11 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * XTandemCPipelineProvider class
@@ -153,14 +149,34 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
         }
     }
 
+    public boolean supportsDirectories()
+    {
+        return true;
+    }
+
+    public boolean remembersDirectories()
+    {
+        return true;
+    }
+
+    public boolean hasRemoteDirectories()
+    {
+        return false;
+    }
+
     public AbstractMS2SearchProtocolFactory getProtocolFactory()
     {
         return XTandemSearchProtocolFactory.get();
     }
 
-    public Map<String, String[]> getSequenceFiles(URI sequenceRoot) throws IOException
+    public List<String> getSequenceDbPaths(URI sequenceRoot) throws IOException
     {
-        return MS2PipelineManager.addSequenceDBNames(new File(sequenceRoot), "", new LinkedHashMap<String, String[]>());
+        return MS2PipelineManager.addSequenceDbPaths(new File(sequenceRoot), "", new ArrayList<String>());
+    }
+
+    public List<String> getSequenceDbDirList(URI sequenceRoot) throws IOException
+    {
+        return MS2PipelineManager.getSequenceDirList(new File(sequenceRoot), "");
     }
 
     public String getHelpTopic()

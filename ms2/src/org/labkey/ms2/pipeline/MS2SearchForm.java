@@ -34,7 +34,8 @@ public class MS2SearchForm extends MS2PipelineForm
     private String sequenceDB = "";
     private String configureXml = "";
     private boolean saveProtocol;
-    private boolean runSearch;
+
+    private boolean runSearch = false;
 
     public String getSequenceDB()
     {

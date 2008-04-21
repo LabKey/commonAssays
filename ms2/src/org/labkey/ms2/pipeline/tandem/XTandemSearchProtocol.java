@@ -58,16 +58,6 @@ public class XTandemSearchProtocol extends AbstractMS2SearchProtocol<XTandemPipe
 
     public void validate(URI uriRoot) throws PipelineValidationException
     {
-        String dbPath = getDbPath();
-        if (dbPath != null && dbPath.length() > 0)
-        {
-            String[] dbNames = getDbNames();
-            String[] dbPaths = new String[dbNames.length];
-            for (int i = 0; i < dbNames.length; i++)
-                dbPaths[i] = dbPath + dbNames[i];
-            setDbNames(dbPaths);
-        }
-
         super.validate(uriRoot);
     }
 }

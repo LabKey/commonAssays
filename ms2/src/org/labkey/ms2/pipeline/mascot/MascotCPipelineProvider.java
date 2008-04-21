@@ -28,13 +28,11 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 
 /**
  * MascotCPipelineProvider class
@@ -151,15 +149,19 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return MascotSearchProtocolFactory.get();
     }
 
-    public Map<String, String[]> getSequenceFiles(URI sequenceRoot) throws IOException
+    public List<String> getSequenceDbPaths(URI sequenceRoot) throws IOException
     {
+        return null;//No directories for Mascot databases.
+    }
+
+    public List<String> getSequenceDbDirList(URI sequenceRoot) throws IOException {
         AppProps appProps = AppProps.getInstance();
         if (!appProps.hasMascotServer())
             throw new IOException("Mascot server has not been specified in site customization.");
 
         MascotClientImpl mascotClient = new MascotClientImpl(appProps.getMascotServer(), null);
         mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
-        Map<String, String[]> sequenceDBs = mascotClient.getSequenceDBNames();
+        List<String> sequenceDBs = mascotClient.getSequenceDbList();
 
         if (0 == sequenceDBs.size())
         {
@@ -168,13 +170,32 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
             if (!"".equals(connectivityResult))
                 throw new IOException(connectivityResult);
         }
-
         return sequenceDBs;
     }
 
     public String getHelpTopic()
     {
         return "pipelineMascot";
+    }
+
+    public boolean dbExists(String dirSequenceRoot, String db)
+    {
+        return true;
+    }
+
+    public boolean supportsDirectories()
+    {
+        return false;
+    }
+
+    public boolean remembersDirectories()
+    {
+        return false;
+    }
+
+    public boolean hasRemoteDirectories()
+    {
+        return false;
     }
 
     public void ensureEnabled() throws PipelineProtocol.PipelineValidationException

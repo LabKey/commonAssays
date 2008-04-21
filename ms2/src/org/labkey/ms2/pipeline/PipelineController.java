@@ -18,16 +18,9 @@ package org.labkey.ms2.pipeline;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts.upload.FormFile;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
-import org.labkey.api.action.FormViewAction;
-import org.labkey.api.action.RedirectAction;
-import org.labkey.api.action.SimpleRedirectAction;
-import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.ExperimentPipelineJob;
-import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExpSampleSet;
-import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.*;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.*;
@@ -50,7 +43,9 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.ModelAndView;
-
+import org.springframework.web.servlet.mvc.Controller;
+import org.labkey.api.action.*;
+import org.labkey.api.gwt.server.BaseRemoteService;
 import java.io.*;
 import java.net.URI;
 import java.sql.SQLException;
@@ -61,7 +56,6 @@ import java.util.*;
  */
 public class PipelineController extends SpringActionController
 {
-//    private static Logger _log = Logger.getLogger(PipelineController.class);
     private static DefaultActionResolver _resolver = new DefaultActionResolver(PipelineController.class);
 
     private static HelpTopic getHelpTopic(String topic)
@@ -227,7 +221,7 @@ public class PipelineController extends SpringActionController
     {
         public String getProviderName()
         {
-            return XTandemCPipelineProvider.name;
+           return XTandemCPipelineProvider.name;
         }
     }
 
@@ -259,20 +253,16 @@ public class PipelineController extends SpringActionController
         }
     }
 
-    public static ActionURL urlSearch(Container container, MS2PipelineForm form, boolean skipDescription)
+    @RequiresPermission(ACL.PERM_READ)
+    public class SearchServiceAction extends GWTServiceAction
     {
-        return urlSearch(container, form.getPath(), form.getSearchEngine(), skipDescription);
+        protected BaseRemoteService createService()
+        {
+            return new SearchServiceImpl(getViewContext());
+        }
     }
 
-    public static ActionURL urlSearch(Container container, String path, String searchEngine, boolean skipDescription)
-    {
-        ActionURL url = new ActionURL(SearchAction.class, container);
-        url.addParameter(MS2PipelineForm.PARAMS.searchEngine, searchEngine);
-        url.addParameter(MS2PipelineForm.PARAMS.path, path);
-        if (skipDescription)
-            url.addParameter(MS2SearchForm.PARAMS.skipDescription, Boolean.toString(skipDescription));
-        return url;
-    }
+
 
     @RequiresPermission(ACL.PERM_INSERT)
     public class SearchAction extends FormViewAction<MS2SearchForm>
@@ -283,17 +273,22 @@ public class PipelineController extends SpringActionController
         private File _dirAnalysis;
         private AbstractMS2SearchPipelineProvider _provider;
         private AbstractMS2SearchProtocol _protocol;
-        private String[] _protocolNames;
 
         public String getProviderName()
         {
             return null;
         }
-        
+
+        public Class<? extends Controller>  getAction()
+        {
+            return this.getClass();
+        }
+
         public ActionURL getSuccessURL(MS2SearchForm form)
         {
             return urlProjectStart(getContainer());
         }
+
 
         public ModelAndView handleRequest(MS2SearchForm form, BindException errors) throws Exception
         {
@@ -302,12 +297,12 @@ public class PipelineController extends SpringActionController
                 return HttpView.throwNotFoundMV();
 
             URI uriRoot = pr.getUri();
+            _dirRoot = new File(uriRoot);
+            _dirSeqRoot= new File(MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer()));
+
             URI uriData = URIUtil.resolve(uriRoot, form.getPath());
             if (uriData == null)
                 return HttpView.throwNotFoundMV();
-
-            _dirRoot = new File(uriRoot);
-            _dirSeqRoot = new File(MS2PipelineManager.getSequenceDatabaseRoot(pr.getContainer()));
             _dirData = new File(uriData);
             if (!NetworkDrive.exists(_dirData))
                 return HttpView.throwNotFoundMV();
@@ -315,14 +310,11 @@ public class PipelineController extends SpringActionController
             if (getProviderName() != null)
                 form.setSearchEngine(getProviderName());
 
-            _provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(form.getSearchEngine());
+            _provider =
+                (AbstractMS2SearchPipelineProvider)PipelineService.get().getPipelineProvider(form.getSearchEngine());
             if (_provider == null)
                 return HttpView.throwNotFoundMV();
-
-            setHelpTopic(getHelpTopic(_provider.getHelpTopic()));
-
             AbstractMS2SearchProtocolFactory protocolFactory = _provider.getProtocolFactory();
-            _protocolNames = protocolFactory.getProtocolNames(_dirRoot.toURI());
 
             if ("".equals(form.getProtocol()))
             {
@@ -331,8 +323,9 @@ public class PipelineController extends SpringActionController
                         getContainer(), getUser());
                 if (protocolNameLast != null && !"".equals(protocolNameLast))
                 {
+                    String[] protocolNames = protocolFactory.getProtocolNames(_dirRoot.toURI());
                     // Make sure it is still around.
-                    if (Arrays.asList(_protocolNames).contains(protocolNameLast))
+                    if (Arrays.asList(protocolNames).contains(protocolNameLast))
                         form.setProtocol(protocolNameLast);
                 }
             }
@@ -343,10 +336,8 @@ public class PipelineController extends SpringActionController
             }
 
             String protocolName = form.getProtocol();
-
-            _dirAnalysis = protocolFactory.getAnalysisDir(_dirData, protocolName);
-
-            if (protocolName.length() != 0)
+            _dirAnalysis = protocolFactory.getAnalysisDir(_dirData,protocolName);
+            if ( !protocolName.equals("new") && !protocolName.equals("") )
             {
                 try
                 {
@@ -379,8 +370,40 @@ public class PipelineController extends SpringActionController
                     errors.reject(ERROR_MSG, "Failed to load requested protocol.");
                 }
             }
+            boolean success = errors == null || !errors.hasErrors();
+            try
+            {
+                if ("POST".equals(getViewContext().getRequest().getMethod()) && form.isRunSearch())
+                {
+                    getPageConfig().setTemplate(PageConfig.Template.None);
 
-            return super.handleRequest(form, errors);
+                    if (success && null != form)
+                        validate(form, errors);
+                    success = errors == null || !errors.hasErrors();
+
+                    if (success)
+                        success = handlePost(form, errors);
+
+                    if (success)
+                    {
+                        ActionURL url = getSuccessURL(form);
+                        if (null != url)
+                        {
+                            getViewContext().getResponse().getOutputStream().print("SUCCESS=" + url.getLocalURIString());
+                            return null;
+                        }
+                    }
+                    getViewContext().getResponse().getOutputStream().print("ERROR=" + getErrors(errors));
+                    return null;
+                }
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace(new PrintStream(getViewContext().getResponse().getOutputStream()));
+                return null;
+            }
+
+            return getView(form, getReshow(), errors);
         }
 
         public void validateCommand(MS2SearchForm form, Errors errors)
@@ -389,21 +412,25 @@ public class PipelineController extends SpringActionController
 
         public boolean handlePost(MS2SearchForm form, BindException errors) throws Exception
         {
-            if (!form.isRunSearch())
+
+            if(!form.isRunSearch())
+            {
                 return false;
-            
+            }
             try
             {
                 _provider.ensureEnabled();   // throws exception if not enabled
 
                 // If not a saved protocol, create one from the information in the form.
-                if (!"".equals(form.getProtocol()))
+                if (!"new".equals(form.getProtocol()))
                 {
                     _protocol.setDirSeqRoot(_dirSeqRoot);
                     _protocol.setDbPath(form.getSequenceDBPath());
                     _protocol.setDbNames(new String[] {form.getSequenceDB()});
                     PipelineService.get().rememberLastProtocolSetting(_protocol.getFactory(),
                             getContainer(), getUser(), form.getProtocol());
+                    PipelineService.get().rememberLastSequenceDbSetting(_protocol.getFactory(), getContainer(),
+                            getUser(), form.getSequenceDBPath(), form.getSequenceDB());
                 }
                 else
                 {
@@ -421,8 +448,10 @@ public class PipelineController extends SpringActionController
                     {
                         _protocol.saveDefinition(_dirRoot.toURI());
                         PipelineService.get().rememberLastProtocolSetting(_protocol.getFactory(),
-                                getContainer(), getUser(), form.getProtocolName());
+                                getContainer(), getUser(), form.getProtocolName());   
                     }
+                    PipelineService.get().rememberLastSequenceDbSetting(_protocol.getFactory(),getContainer(),
+                                getUser(),form.getSequenceDBPath(), form.getSequenceDB());
                 }
 
                 Container c = getContainer();
@@ -497,7 +526,7 @@ public class PipelineController extends SpringActionController
                 return false;
             }
 
-            return true;
+            return true;      
         }
 
         public ModelAndView getView(MS2SearchForm form, boolean reshow, BindException errors) throws Exception
@@ -505,51 +534,39 @@ public class PipelineController extends SpringActionController
             if (!reshow || "".equals(form.getProtocol()))
                 form.setSaveProtocol(true);
 
-            Map<File, FileStatus> mzXmlFileStatus = new HashMap<File, FileStatus>();
-            try
+             //get help topic
+            String helpTopic = getHelpTopic(_provider.getHelpTopic()).getHelpTopicLink();
+            ActionURL returnURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlReferer(getContainer());
+            ActionURL protocolURL = form.getViewContext().getActionURL().clone();
+            protocolURL.deleteParameter("searchEngine");
+            protocolURL.deleteParameter("protocol");
+            protocolURL.addParameter("searchEngine", form.getSearchEngine());
+           
+            //properties to send to GWT page
+            Map<String, String> props = new HashMap<String, String>();
+            props.put("errors", getErrors(errors));
+            props.put("saveProtocol", Boolean.toString(form.isSaveProtocol()));
+            props.put("returnURL", returnURL.getLocalURIString() );
+            props.put("helpTopic",helpTopic);
+            props.put("dirRoot",_dirRoot.toURI().toString());
+            props.put("dirSequenceRoot",_dirSeqRoot.toURI().toString());
+            props.put("searchEngine", form.getSearchEngine());
+            props.put("action", SpringActionController.getActionName(getAction()) + ".view");
+            props.put("path",form.getPath());
+            return new GWTView("org.labkey.ms2.pipeline.Search",props);
+        }
+
+        private String getErrors(BindException errors)
+        {
+            if(errors == null) return "";
+            List errorMessages = errors.getAllErrors();
+            StringBuilder errorString = new StringBuilder();
+            for (ObjectError errorMessage : (Iterable<ObjectError>) errorMessages)
             {
-                mzXmlFileStatus = MS2PipelineManager.getAnalysisFileStatus(_dirData, _dirAnalysis, getContainer());
+                errorString.append(errorMessage.getDefaultMessage());
+                errorString.append("\n");
             }
-            catch (IOException e)
-            {
-                errors.reject(ERROR_MSG, e.getMessage());
-            }
-
-            if (form.getConfigureXml().length() == 0)
-            {
-                form.setConfigureXml("<?xml version=\"1.0\"?>\n" +
-                        "<bioml>\n" +
-                        "<!-- Override default parameters here. -->\n" +
-                        "</bioml>");
-            }
-
-            Map<String, String[]> sequenceDBs = new HashMap<String, String[]>();
-            
-            // If the protocol is being loaded, then the user doesn't need to pick a FASTA file,
-            // it will be part of the protocol.
-            // CONSIDER: Should we check for the existence of the protocol's FASTA file, since
-            //           it may have been deleted?
-            if ("".equals(form.getProtocol()))
-            {
-                try
-                {
-                    sequenceDBs = _provider.getSequenceFiles(_dirSeqRoot.toURI());
-                    if (0 == sequenceDBs.size())
-                        errors.reject(ERROR_MSG, "No databases available for searching.");
-                }
-                catch (IOException e)
-                {
-                    errors.reject(ERROR_MSG, e.getMessage());
-                }
-            }
-
-            SearchPage page = (SearchPage) FormPage.get(PipelineController.class, form, "search.jsp");
-
-            page.setMzXmlFileStatus(mzXmlFileStatus);
-            page.setSequenceDBs(sequenceDBs);
-            page.setProtocolNames(_protocolNames);
-
-            return page.createView(errors);
+            return errorString.toString();
         }
 
         public NavTree appendNavTrail(NavTree root)

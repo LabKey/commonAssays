@@ -666,7 +666,7 @@ public class MascotClientImpl implements SearchClient
         return statusString;
     }
 
-    public Map<String, String[]> getSequenceDBNames()
+    public List<String> getSequenceDbList()
     {
         errorCode = 0;
         errorString = "";
@@ -694,15 +694,7 @@ public class MascotClientImpl implements SearchClient
                         dbNames.add(contentLine);
             }
         }
-
-        Map<String, String[]> result = new LinkedHashMap<String, String[]>();
-        if (dbNames.size() > 0)
-        {
-            String[] dbsList;
-            dbsList = dbNames.toArray(new String[dbNames.size()]);
-            result.put("", dbsList);
-        }
-        return result;
+        return dbNames;
     }
 
     public int search (String paramFile, String queryFile, String resultFile)
@@ -1245,6 +1237,15 @@ public class MascotClientImpl implements SearchClient
         // retrieve the list of databases from MascotServer
         Properties results = getParametersResults();
         return results.getProperty("HTTPContent", "");
+    }
+
+    private Properties getEnzymeResults()
+    {
+        // retrieve the list of databases from MascotServer
+        Properties parameters = new Properties();
+        parameters.setProperty("cgi", "labkeydbmgmt.pl");
+        parameters.setProperty("cmd", "downloadenz");
+        return request (parameters, false);
     }
 
     private Properties getParametersResults()

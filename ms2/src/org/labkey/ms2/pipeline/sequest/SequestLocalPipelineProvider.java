@@ -1,7 +1,6 @@
 package org.labkey.ms2.pipeline.sequest;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.view.*;
@@ -10,15 +9,10 @@ import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
-
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.File;
 import java.net.URI;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: billnelson@uky.edu
@@ -92,11 +86,22 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
         return SequestSearchProtocolFactory.get();
     }
 
-    public Map<String, String[]> getSequenceFiles(URI sequenceRoot) throws IOException
+    public List<String> getSequenceDbPaths(URI sequenceRoot) throws IOException
     {
         AppProps appProps = AppProps.getInstance();
         SequestClientImpl sequestClient = new SequestClientImpl(appProps.getSequestServer(), _log);
-        return sequestClient.getSequenceDBNamesMap("", new LinkedHashMap<String, String[]>());
+        List dbList = sequestClient.addSequenceDbPaths("", new ArrayList<String>());
+        if(dbList == null) throw new IOException("Trouble connecting to the Sequest server.");
+        return dbList;
+    }
+
+    public List<String> getSequenceDbDirList(URI sequenceRoot) throws IOException
+    {
+        AppProps appProps = AppProps.getInstance();
+        SequestClientImpl sequestClient = new SequestClientImpl(appProps.getSequestServer(), _log);
+        List dbList = sequestClient.getSequenceDbDirList(sequenceRoot.getPath());
+        if(dbList == null) throw new IOException("Trouble connecting to the Sequest server.");
+        return dbList;
     }
 
     public String getHelpTopic()
@@ -110,4 +115,20 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
         if (!appProps.hasSequest())
             throw new PipelineProtocol.PipelineValidationException("Sequest server has not been specified in site customization.");
     }
+
+    public boolean supportsDirectories()
+    {
+        return true;
+    }
+
+    public boolean remembersDirectories()
+    {
+        return false;
+    }
+
+    public boolean hasRemoteDirectories()
+    {
+        return true;
+    }
+
 }

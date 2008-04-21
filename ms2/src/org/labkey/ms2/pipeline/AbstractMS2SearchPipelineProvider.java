@@ -18,11 +18,12 @@ package org.labkey.ms2.pipeline;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProvider;
 import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.TaskPipeline;
-
+import org.fhcrc.cpas.util.NetworkDrive;
 import java.io.IOException;
 import java.io.File;
 import java.net.URI;
-import java.util.Map;
+import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * <code>AbstractMS2SearchPipelineProvider</code>
@@ -56,11 +57,37 @@ abstract public class AbstractMS2SearchPipelineProvider
         return null; 
     }
 
+    public boolean dbExists(String dirSequenceRoot, String db)
+    {
+        try
+        {
+            URI dbURI = new URI(dirSequenceRoot + db);
+            File dbFile = new File(dbURI);
+            if(!NetworkDrive.exists(dbFile))
+            {
+                return false;
+            }
+        }
+        catch(URISyntaxException e)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    abstract public boolean supportsDirectories();
+
+    abstract public boolean remembersDirectories();
+
+    abstract public boolean hasRemoteDirectories();
+
     abstract public AbstractMS2SearchProtocolFactory getProtocolFactory();
 
     abstract public void ensureEnabled() throws PipelineProtocol.PipelineValidationException;
 
-    abstract public Map<String, String[]> getSequenceFiles(URI sequenceRoot) throws IOException;
+    abstract public List<String> getSequenceDbPaths(URI sequenceRoot) throws IOException;
+
+    abstract public List<String> getSequenceDbDirList(URI sequenceRoot) throws IOException;
 
     abstract public String getHelpTopic();
 }
