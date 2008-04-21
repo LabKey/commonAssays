@@ -89,7 +89,8 @@ public class RunController extends SpringFlowController<RunController.Action>
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, run, "Run '" + run.getName() + "'", Action.showRun);
+            String label = run != null ? "Run '" + run.getLabel() + "'" : "Run not found";
+            return appendFlowNavTrail(root, run, label, Action.showRun);
         }
     }
 
@@ -229,7 +230,8 @@ public class RunController extends SpringFlowController<RunController.Action>
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, run, "Move '" + run.getName() + "' to the workspace", Action.moveToWorkspace);
+            String label = run != null ? "Move '" + run.getLabel() + "' to the workspace" : "Run not found";
+            return appendFlowNavTrail(root, run, label, Action.moveToWorkspace);
         }
     }
 
@@ -276,8 +278,8 @@ public class RunController extends SpringFlowController<RunController.Action>
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(root, run,
-                    "Move '" + run.getName() + "' to an analysis", Action.moveToWorkspace);
+            String label = run != null ? "Move '" + run.getLabel() + "' to an analysis" : "Run not found";
+            return appendFlowNavTrail(root, run, label, Action.moveToWorkspace);
         }
     }
 

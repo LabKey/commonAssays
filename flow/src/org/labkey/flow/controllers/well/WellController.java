@@ -1,33 +1,37 @@
 package org.labkey.flow.controllers.well;
 
-import org.apache.beehive.netui.pageflow.annotations.Jpf;
-import org.apache.beehive.netui.pageflow.Forward;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.struts.action.ActionError;
 import org.apache.log4j.Logger;
-import org.labkey.flow.data.*;
-import org.labkey.flow.script.FlowAnalyzer;
+import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.jsp.FormPage;
-import org.labkey.api.view.*;
-import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
-import org.labkey.flow.controllers.BaseFlowController;
-import org.labkey.flow.controllers.FlowController;
-import org.labkey.flow.controllers.FlowParam;
-
-import java.util.*;
-import java.io.FileNotFoundException;
-
-import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.api.view.*;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.FCSViewer;
+import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.controllers.FlowController;
+import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.SpringFlowController;
+import org.labkey.flow.data.*;
+import org.labkey.flow.script.FlowAnalyzer;
+import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
+import org.springframework.web.servlet.ModelAndView;
 
-@Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
-public class WellController extends BaseFlowController
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+public class WellController extends SpringFlowController<WellController.Action>
 {
     static private final Logger _log = Logger.getLogger(WellController.class);
     public enum Action
@@ -41,10 +45,26 @@ public class WellController extends BaseFlowController
         showFCS,
     }
 
-    @Jpf.Action
-    protected Forward begin() throws Exception
+    static DefaultActionResolver _actionResolver = new DefaultActionResolver(WellController.class);
+
+    public WellController() throws Exception
     {
-        return new ViewForward(urlFor(FlowController.Action.begin));
+        super();
+        setActionResolver(_actionResolver);
+    }
+
+    @RequiresPermission(ACL.PERM_NONE)
+    public class BeginAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            return HttpView.redirect(urlFor(FlowController.Action.begin));
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
     }
 
     public FlowWell getWell() throws Exception
@@ -59,177 +79,239 @@ public class WellController extends BaseFlowController
         return ret;
     }
 
-    @Jpf.Action
-    protected Forward showWell() throws Exception
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowWellAction extends SimpleViewAction
     {
-        requiresPermission(ACL.PERM_READ);
+        FlowWell well;
 
-
-        Page page = getPage("showWell.jsp");
-        NavTrailConfig ntc = getNavTrailConfig(page.getWell(), null, Action.showWell);
-
-        return includeView(new HomeTemplate(getViewContext(), new JspView(page), ntc));
-    }
-
-    @Jpf.Action
-    protected Forward editWell(EditWellForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-
-        form.setWell(getWell());
-        if (isPost())
+        public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            Forward forward = updateWell(form);
-            if (forward != null)
-                return forward;
+            Page page = getPage("showWell.jsp");
+            well = page.getWell();
+            return new JspView(page);
         }
 
-        NavTrailConfig ntc = getNavTrailConfig(form.getWell(), "Edit " + form.getWell().getLabel(), Action.editWell);
-        return includeView(new HomeTemplate(getViewContext(), FormPage.getView(WellController.class, form, "editWell.jsp"), ntc));
-    }
-
-    protected boolean addError(String error)
-    {
-        PageFlowUtil.getActionErrors(getRequest(), true).add("main", new ActionError("Error", error));
-        return true;
-    }
-
-    protected Forward updateWell(EditWellForm form) throws Exception
-    {
-        FlowWell well = form.getWell();
-        boolean anyErrors = false;
-        if (StringUtils.isEmpty(form.ff_name))
+        public NavTree appendNavTrail(NavTree root)
         {
-            anyErrors = addError("Name cannot be blank");
+            String label = well != null ? "Edit " + well.getLabel() : "Well not found";
+            return appendFlowNavTrail(root, well, label, Action.showWell);
         }
-        if (form.ff_keywordName != null)
+    }
+
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class EditWellAction extends FormViewAction<EditWellForm>
+    {
+        FlowWell well;
+        public void validateCommand(EditWellForm target, Errors errors)
         {
-            Set<String> keywords = new HashSet();
-            for (int i = 0; i < form.ff_keywordName.length; i ++)
+            try
             {
-                String name = form.ff_keywordName[i];
-                String value = form.ff_keywordValue[i];
-                if (StringUtils.isEmpty(name))
+                well = getWell();
+                target.setWell(well);
+            }
+            catch (Exception e)
+            {
+                errors.reject(ERROR_MSG, e.getMessage());
+            }
+        }
+
+        public ModelAndView getView(EditWellForm form, boolean reshow, BindException errors) throws Exception
+        {
+            well = getWell();
+            form.setWell(well);
+            return FormPage.getView(WellController.class, form, errors, "editWell.jsp");
+        }
+
+        public boolean handlePost(EditWellForm form, BindException errors) throws Exception
+        {
+            FlowWell well = form.getWell();
+            if (StringUtils.isEmpty(form.ff_name))
+            {
+                errors.reject(ERROR_MSG, "Name cannot be blank");
+            }
+            if (form.ff_keywordName != null)
+            {
+                Set<String> keywords = new HashSet<String>();
+                for (int i = 0; i < form.ff_keywordName.length; i ++)
                 {
-                    if (!StringUtils.isEmpty(value))
+                    String name = form.ff_keywordName[i];
+                    String value = form.ff_keywordValue[i];
+                    if (StringUtils.isEmpty(name))
                     {
-                        anyErrors = addError("Missing name for value '" + value + "'");
+                        if (!StringUtils.isEmpty(value))
+                        {
+                            errors.reject(ERROR_MSG, "Missing name for value '" + value + "'");
+                        }
+                    }
+                    else if (!keywords.add(name))
+                    {
+                        errors.reject(ERROR_MSG, "There is already a keyword '" + name + "'");
+                        break;
                     }
                 }
-                else if (!keywords.add(name))
+            }
+            if (errors.hasErrors())
+                return false;
+            well.setName(getUser(), form.ff_name);
+            well.getExpObject().setComment(getUser(), form.ff_comment);
+            if (form.ff_keywordName != null)
+            {
+                for (int i = 0; i < form.ff_keywordName.length; i ++)
                 {
-                    anyErrors = addError("There is already a keyword '" + name + "'");
-                    break;
+                    String name = form.ff_keywordName[i];
+                    if (StringUtils.isEmpty(name))
+                        continue;
+                    well.setKeyword(getUser(), name, form.ff_keywordValue[i]);
                 }
             }
+            return true;
         }
-        if (anyErrors)
+
+        public ActionURL getSuccessURL(EditWellForm form)
+        {
+            return form.getWell().urlFor(Action.showWell);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            String label = well != null ? "Edit " + well.getLabel() : "Well not found";
+            return appendFlowNavTrail(root, well, label, Action.editWell);
+        }
+    }
+
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ChooseGraphAction extends SimpleViewAction<ChooseGraphForm>
+    {
+        FlowWell well;
+
+        public ModelAndView getView(ChooseGraphForm form, BindException errors) throws Exception
+        {
+            well = form.getWell();
+            FormPage page = FormPage.get(WellController.class, form, "chooseGraph.jsp");
+            return new JspView(page);
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(root, well, "Choose Graph", Action.chooseGraph);
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowGraphAction extends SimpleViewAction
+    {
+        FlowWell well;
+
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            well = getWell();
+            if (well == null)
+            {
+                int objectId = getIntParam(FlowParam.objectId);
+                if (objectId == 0)
+                    return null;
+                FlowObject obj = FlowDataObject.fromAttrObjectId(objectId);
+                if (!(obj instanceof FlowWell))
+                    return null;
+                well = (FlowWell) obj;
+                well.checkContainer(getActionURL());
+            }
+            String graph = getParam(FlowParam.graph);
+            byte[] bytes = well.getGraphBytes(new GraphSpec(graph));
+            if (bytes != null)
+            {
+                streamBytes(getViewContext().getResponse(),
+                        bytes, "image/png", System.currentTimeMillis() + DateUtils.MILLIS_PER_HOUR);
+            }
             return null;
-        well.setName(getUser(), form.ff_name);
-        well.getExpObject().setComment(getUser(), form.ff_comment);
-        if (form.ff_keywordName != null)
+        }
+
+        public NavTree appendNavTrail(NavTree root)
         {
-            for (int i = 0; i < form.ff_keywordName.length; i ++)
+            return null;
+        }
+    }
+
+    static void streamBytes(HttpServletResponse response, byte[] bytes, String contentType, long expires) throws IOException
+    {
+        response.setDateHeader("Expires", expires);
+        response.setContentType(contentType);
+        response.getOutputStream().write(bytes);
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class GenerateGraphAction extends SimpleViewAction<ChooseGraphForm>
+    {
+        public ModelAndView getView(ChooseGraphForm form, BindException errors) throws Exception
+        {
+            GraphSpec graph = new GraphSpec(getRequest().getParameter("graph"));
+            FCSAnalyzer.GraphResult res = FlowAnalyzer.generateGraph(form.getWell(), form.getScript(), FlowProtocolStep.fromActionSequence(form.getActionSequence()), form.getCompensationMatrix(), graph);
+            if (res.exception != null)
             {
-                String name = form.ff_keywordName[i];
-                if (StringUtils.isEmpty(name))
-                    continue;
-                well.setKeyword(getUser(), name, form.ff_keywordValue[i]);
+                _log.error("Error generating graph", res.exception);
             }
+            streamBytes(getViewContext().getResponse(), res.bytes, "image/png", 0);
+            return null;
         }
-        return new ViewForward(well.urlFor(Action.showWell));
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
     }
 
-    @Jpf.Action
-    protected Forward chooseGraph(ChooseGraphForm form) throws Exception
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowFCSAction extends SimpleViewAction
     {
-        requiresPermission(ACL.PERM_READ);
-        FormPage page = FormPage.get(WellController.class, form, "chooseGraph.jsp");
-        NavTrailConfig ntc = getNavTrailConfig(form.getWell(), "Choose Graph", Action.chooseGraph);
-        return includeView(new HomeTemplate(getViewContext(), new JspView(page), ntc));
-    }
-
-    @Jpf.Action
-    protected Forward showGraph() throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-        FlowWell well = getWell();
-        if (well == null)
+        public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            int objectId = getIntParam(FlowParam.objectId);
-            if (objectId == 0)
-                return null;
-            FlowObject obj = FlowDataObject.fromAttrObjectId(objectId);
-            if (!(obj instanceof FlowWell))
-                return null;
-            well = (FlowWell) obj;
-            well.checkContainer(getActionURL());
-        }
-        String graph = getParam(FlowParam.graph);
-        byte[] bytes = well.getGraphBytes(new GraphSpec(graph));
-        if (bytes != null)
-        {
-            streamBytes(bytes, "image/png", System.currentTimeMillis() + DateUtils.MILLIS_PER_HOUR);
-        }
-        return null;
-    }
+            String mode = getActionURL().getParameter("mode");
+            FlowWell well = getWell();
 
-    @Jpf.Action
-    protected Forward generateGraph(ChooseGraphForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-        GraphSpec graph = new GraphSpec(getRequest().getParameter("graph"));
-        FCSAnalyzer.GraphResult res = FlowAnalyzer.generateGraph(form.getWell(), form.getScript(), FlowProtocolStep.fromActionSequence(form.getActionSequence()), form.getCompensationMatrix(), graph);
-        if (res.exception != null)
-        {
-            _log.error("Error generating graph", res.exception);
-        }
-        return streamBytes(res.bytes, "image/png", 0);
-    }
-
-    @Jpf.Action
-    protected Forward showFCS() throws Exception
-    {
-        requiresPermission(ACL.PERM_READ);
-        String mode = getActionURL().getParameter("mode");
-        FlowWell well = getWell();
-
-        try
-        {
-            if (mode.equals("raw"))
+            try
             {
-                String strEventCount = getActionURL().getParameter("eventCount");
-                int maxEventCount = Integer.MAX_VALUE;
-                if (strEventCount != null)
+                if (mode.equals("raw"))
                 {
-                    maxEventCount = Integer.valueOf(strEventCount);
+                    String strEventCount = getActionURL().getParameter("eventCount");
+                    int maxEventCount = Integer.MAX_VALUE;
+                    if (strEventCount != null)
+                    {
+                        maxEventCount = Integer.valueOf(strEventCount);
+                    }
+                    byte[] bytes = FCSAnalyzer.get().getFCSBytes(well.getFCSURI(), maxEventCount);
+                    PageFlowUtil.streamFileBytes(getViewContext().getResponse(), URIUtil.getFilename(well.getFCSURI()), bytes, true);
+                    return null;
                 }
-                byte[] bytes = FCSAnalyzer.get().getFCSBytes(well.getFCSURI(), maxEventCount);
-                PageFlowUtil.streamFileBytes(getResponse(), URIUtil.getFilename(well.getFCSURI()), bytes, true);
-                return null;
-            }
 
-            getResponse().setContentType("text/plain");
-            FCSViewer viewer = new FCSViewer(FlowAnalyzer.getFCSUri(well));
-            if ("compensated".equals(mode))
-            {
-                FlowCompensationMatrix comp = well.getRun().getCompensationMatrix();
-                // viewer.applyCompensationMatrix(URIUtil.resolve(base, compFiles[0].getPath()));
+                getViewContext().getResponse().setContentType("text/plain");
+                FCSViewer viewer = new FCSViewer(FlowAnalyzer.getFCSUri(well));
+                if ("compensated".equals(mode))
+                {
+                    FlowCompensationMatrix comp = well.getRun().getCompensationMatrix();
+                    // viewer.applyCompensationMatrix(URIUtil.resolve(base, compFiles[0].getPath()));
+                }
+                if ("keywords".equals(mode))
+                {
+                    viewer.writeKeywords(getViewContext().getResponse().getWriter());
+                }
+                else
+                {
+                    viewer.writeValues(getViewContext().getResponse().getWriter());
+                }
             }
-            if ("keywords".equals(mode))
+            catch (FileNotFoundException fnfe)
             {
-                viewer.writeKeywords(getResponse().getWriter());
+                errors.reject(ERROR_MSG, "The specified FCS file could not be found.");
+                return new ActionErrorsView<Object>();
             }
-            else
-            {
-                viewer.writeValues(getResponse().getWriter());
-            }
+            return null;
         }
-        catch (FileNotFoundException fnfe)
+
+        public NavTree appendNavTrail(NavTree root)
         {
-            return renderInTemplate(new HtmlView("The specified FCS file could not be found."), well, "File Not Found", Action.showFCS);
+            return null;
         }
-        return null;
     }
 
     static abstract public class Page extends FlowPage
