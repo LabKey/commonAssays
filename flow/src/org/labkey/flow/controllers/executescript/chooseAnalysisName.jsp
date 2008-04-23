@@ -1,22 +1,29 @@
 <%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="org.labkey.api.data.DataRegion"%>
-<%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ page import="org.labkey.api.data.DataRegionSelection" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController.Action" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToAnalyzeForm" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
 <%@ page import="java.util.HashSet" %>
 <%@ page import="java.util.Set" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<% ChooseRunsToAnalyzeForm form = (ChooseRunsToAnalyzeForm) __form; %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%
+    JspView<ChooseRunsToAnalyzeForm> me = (JspView<ChooseRunsToAnalyzeForm>) HttpView.currentView();
+    ViewContext context = HttpView.getRootContext();
+    ChooseRunsToAnalyzeForm form = me.getModelBean();
+%>
+<labkey:errors/>
 <form method="POST" action="analyzeSelectedRuns.post">
-    <%=errors()%>
     <p>What do you want to call the new analysis folder?<br>
         <% String name = form.ff_analysisName;
             if (StringUtils.isEmpty(name))
             {
                 Set<String> namesInUse = new HashSet<String>();
-                for (FlowExperiment experiment : FlowExperiment.getExperiments(getContainer()))
+                for (FlowExperiment experiment : FlowExperiment.getExperiments(context.getContainer()))
                 {
                     namesInUse.add(experiment.getName().toLowerCase());
                 }

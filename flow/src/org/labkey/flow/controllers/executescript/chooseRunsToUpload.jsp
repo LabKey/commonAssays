@@ -1,13 +1,19 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToUploadForm" %>
 <%@ page import="java.util.Map" %>
-<%@ page extends="org.labkey.api.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    ChooseRunsToUploadForm form = (ChooseRunsToUploadForm) __form;
+    JspView<ChooseRunsToUploadForm> me = (JspView<ChooseRunsToUploadForm>) HttpView.currentView();
+    ChooseRunsToUploadForm form = me.getModelBean();
+    ViewContext context = HttpView.getRootContext();
+
     Map<String, String> paths = form.getNewPaths();
     PipeRoot root = form.getPipeRoot();
 
@@ -17,7 +23,7 @@
     {
         assert root != null;
 
-        %><form method="POST" action="<%=org.labkey.api.util.PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, getContainer())%>"
+        %><form method="POST" action="<%=org.labkey.api.util.PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer())%>"
           class="normal">
         <input type="hidden" name="path" value="<%=h(form.path)%>">
         <p>

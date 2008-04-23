@@ -1,21 +1,27 @@
-<%@ page import="org.labkey.flow.controllers.executescript.UploadWorkspaceResultsForm" %>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
+<%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.FlowModule" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
+<%@ page import="org.labkey.flow.controllers.executescript.UploadWorkspaceResultsForm" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
-<%@ page import="java.util.Map" %>
 <%@ page import="java.util.LinkedHashMap" %>
-<%@ page extends="org.labkey.api.jsp.FormPage"%>
+<%@ page import="java.util.Map" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<% UploadWorkspaceResultsForm form = (UploadWorkspaceResultsForm) __form;
-    Map<Integer, String> analyses = new LinkedHashMap();
-    for (FlowExperiment analysis : FlowExperiment.getAnalyses(getContainer()))
+<%
+    ViewContext context = getViewContext();
+    Container container = context.getContainer();
+
+    UploadWorkspaceResultsForm form = (UploadWorkspaceResultsForm)getModelBean();
+    Map<Integer, String> analyses = new LinkedHashMap<Integer, String>();
+    for (FlowExperiment analysis : FlowExperiment.getAnalyses(container))
     {
         analyses.put(analysis.getExperimentId(), analysis.getName());
     }
 
 %>
 <labkey:errors />
-<form action="<%=h(getContainer().urlFor(AnalysisScriptController.Action.uploadWorkspaceChooseAnalysis))%>" method="POST" enctype="multipart/form-data">
+<form action="<%=h(container.urlFor(AnalysisScriptController.Action.uploadWorkspaceChooseAnalysis))%>" method="POST" enctype="multipart/form-data">
     <% for (Map.Entry<String, String> entry : form.getWorkspace().getHiddenFields().entrySet())
     {%>
     <input type="hidden" name="workspace.<%=entry.getKey()%>" value="<%=h(entry.getValue())%>">

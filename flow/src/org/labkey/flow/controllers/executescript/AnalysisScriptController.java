@@ -1,39 +1,43 @@
 package org.labkey.flow.controllers.executescript;
 
-import org.apache.beehive.netui.pageflow.Forward;
-import org.apache.beehive.netui.pageflow.annotations.Jpf;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang.StringUtils;
-import org.apache.struts.action.ActionError;
+import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.DataRegionSelection;
-import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.DefaultBrowseView;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.view.template.HomeTemplate;
+import org.labkey.common.util.Pair;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
-import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
+import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.*;
 import org.labkey.flow.script.AddRunsJob;
 import org.labkey.flow.script.AnalyzeJob;
 import org.labkey.flow.script.FlowPipelineProvider;
+import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
 import java.net.URI;
 import java.util.*;
 
-@Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
-public class AnalysisScriptController extends BaseFlowController<AnalysisScriptController.Action>
+public class AnalysisScriptController extends SpringFlowController<AnalysisScriptController.Action>
 {
     public enum Action
     {
@@ -54,17 +58,34 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         browseForWorkspace,
     }
 
-    @Jpf.Action
-    protected Forward begin() throws Exception
+    static SpringActionController.DefaultActionResolver _actionResolver = new SpringActionController.DefaultActionResolver(AnalysisScriptController.class);
+
+    public AnalysisScriptController() throws Exception
     {
-        requiresPermission(ACL.PERM_READ);
-        FlowScript script = FlowScript.fromURL(getActionURL(), getRequest());
-        if (script == null)
+        super();
+        setActionResolver(_actionResolver);
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class BeginAction extends SimpleViewAction
+    {
+        FlowScript script;
+
+        public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return new ViewForward(getContainer().urlFor(FlowController.Action.begin));
+            script = FlowScript.fromURL(getActionURL(), getRequest());
+            if (script == null)
+            {
+                return HttpView.redirect(getContainer().urlFor(FlowController.Action.begin));
+            }
+            ScriptOverview overview = new ScriptOverview(getUser(), getContainer(), script);
+            return new HtmlView(overview.toString());
         }
-        ScriptOverview overview = new ScriptOverview(getUser(), getContainer(), script);
-        return includeView(new HomeTemplate(getViewContext(), new HtmlView(overview.toString()), getNavTrailConfig(script, null, Action.begin)));
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(root, script, null, Action.begin);
+        }
     }
 
     protected Page getPage(String name) throws Exception
@@ -74,66 +95,92 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         return ret;
     }
 
-    @Jpf.Action
-    protected Forward chooseRunsToAnalyze(ChooseRunsToAnalyzeForm form) throws Exception
+    public abstract class BaseAnalyzeRunsAction extends SimpleViewAction<ChooseRunsToAnalyzeForm>
     {
-        requiresPermission(ACL.PERM_INSERT);
-        HttpView view = FormPage.getView(AnalysisScriptController.class, form, "chooseRunsToAnalyze.jsp");
-        NavTrailConfig ntc = getNavTrailConfig(form.getProtocol(), "Choose runs", Action.chooseRunsToAnalyze);
-        return includeView(new HomeTemplate(getViewContext(), view, ntc));
+        FlowScript script;
+        Pair<String, Action> nav;
+
+        protected ModelAndView chooseRunsToAnalyze(ChooseRunsToAnalyzeForm form, BindException errors)
+        {
+            nav = new Pair<String, Action>("Choose runs", Action.chooseRunsToAnalyze);
+            return new JspView<ChooseRunsToAnalyzeForm>(AnalysisScriptController.class, "chooseRunsToAnalyze.jsp", form, errors);
+        }
+
+        protected ModelAndView chooseAnalysisName(ChooseRunsToAnalyzeForm form, BindException errors)
+        {
+            nav = new Pair<String, Action>("Choose new analysis name", Action.chooseAnalysisName);
+            return new JspView<ChooseRunsToAnalyzeForm>(AnalysisScriptController.class, "chooseAnalysisName.jsp", form, errors);
+        }
+
+        protected ModelAndView analyzeRuns(ChooseRunsToAnalyzeForm form, BindException errors,
+                                         int[] runIds, String experimentLSID)
+                throws Exception
+        {
+            nav = new Pair<String, Action>(null, Action.analyzeSelectedRuns);
+            DataRegionSelection.clearAll(getViewContext());
+
+            FlowExperiment experiment = FlowExperiment.fromLSID(experimentLSID);
+            String experimentName = form.ff_analysisName;
+            if (experiment != null)
+            {
+                experimentName = experiment.getName();
+            }
+            FlowScript analysis = form.getProtocol();
+            AnalyzeJob job = new AnalyzeJob(getViewBackgroundInfo(), experimentName, experimentLSID, FlowProtocol.ensureForContainer(getUser(), getContainer()), analysis, form.getProtocolStep(), runIds);
+            if (form.getCompensationMatrixId() != 0)
+            {
+                job.setCompensationMatrix(FlowCompensationMatrix.fromCompId(form.getCompensationMatrixId()));
+            }
+            job.setCompensationExperimentLSID(form.getCompensationExperimentLSID());
+            return HttpView.redirect(executeScript(job, analysis));
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(root, script, nav.first, nav.second);
+        }
     }
 
-    @Jpf.Action
-    protected Forward analyzeSelectedRuns(ChooseRunsToAnalyzeForm form) throws Exception
+    @RequiresPermission(ACL.PERM_INSERT)
+    public class ChooseRunsToAnalyzeAction extends BaseAnalyzeRunsAction
     {
-        requiresPermission(ACL.PERM_INSERT);
-        int[] runIds = form.getSelectedRunIds();
-        if (runIds.length == 0)
-        {
-            addError("Please select at least one run to analyze.");
-            return chooseRunsToAnalyze(form);
-        }
-        String experimentLSID = form.getAnalysisLSID();
-        if (experimentLSID == null)
-        {
-            return chooseAnalysisName(form);
-        }
+        FlowScript script;
 
-        DataRegionSelection.clearAll(getViewContext());
-
-        FlowExperiment experiment = FlowExperiment.fromLSID(experimentLSID);
-        String experimentName = form.ff_analysisName;
-        if (experiment != null)
+        public ModelAndView getView(ChooseRunsToAnalyzeForm form, BindException errors) throws Exception
         {
-            experimentName = experiment.getName();
+            script = form.getProtocol();
+            return chooseRunsToAnalyze(form, errors);
         }
-        FlowScript analysis = form.getProtocol();
-        AnalyzeJob job = new AnalyzeJob(getViewBackgroundInfo(), experimentName, experimentLSID, FlowProtocol.ensureForContainer(getUser(), getContainer()), analysis, form.getProtocolStep(), runIds);
-        if (form.getCompensationMatrixId() != 0)
-        {
-            job.setCompensationMatrix(FlowCompensationMatrix.fromCompId(form.getCompensationMatrixId()));
-        }
-        job.setCompensationExperimentLSID(form.getCompensationExperimentLSID());
-        return executeScript(job, analysis);
     }
 
-    protected Forward chooseAnalysisName(ChooseRunsToAnalyzeForm form) throws Exception
+    @RequiresPermission(ACL.PERM_INSERT)
+    public class AnalyzeSelectedRunsAction extends BaseAnalyzeRunsAction
     {
-        HttpView view = FormPage.getView(AnalysisScriptController.class, form, "chooseAnalysisName.jsp");
-        NavTrailConfig ntc = getNavTrailConfig(form.getProtocol(), "Choose new analysis name", Action.chooseRunsToAnalyze);
-        HomeTemplate template = new HomeTemplate(getViewContext(), view, ntc);
-        template.getModelBean().setFocus("forms[0].ff_analysisName");
-        return includeView(template);
+        public ModelAndView getView(ChooseRunsToAnalyzeForm form, BindException errors) throws Exception
+        {
+            script = form.getProtocol();
+            int[] runIds = form.getSelectedRunIds();
+            if (runIds.length == 0)
+            {
+                errors.reject(ERROR_MSG, "Please select at least one run to analyze.");
+                return chooseRunsToAnalyze(form, errors);
+            }
+            String experimentLSID = form.getAnalysisLSID();
+            if (experimentLSID == null)
+            {
+                return chooseAnalysisName(form, errors);
+            }
+            return analyzeRuns(form, errors, runIds, experimentLSID);
+        }
     }
 
-
-    protected Map<String, String> getNewPaths(ChooseRunsToUploadForm form) throws Exception
+    protected Map<String, String> getNewPaths(ChooseRunsToUploadForm form, Errors errors) throws Exception
     {
         PipelineService service = PipelineService.get();
         PipeRoot root = service.findPipelineRoot(getContainer());
         if (root == null)
         {
-            addError("The pipeline root is not set.");
+            errors.reject(ERROR_MSG, "The pipeline root is not set.");
             return Collections.EMPTY_MAP;
         }
 
@@ -150,19 +197,19 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         URI uri = URIUtil.resolve(root.getUri(), form.path);
         if (null == uri)
         {
-            addError("The path " + displayPath + " is invalid.");
+            errors.reject(ERROR_MSG, "The path " + displayPath + " is invalid.");
             return Collections.EMPTY_MAP;
         }
         File directory = new File(uri);
         if (!root.isUnderRoot(directory))
         {
-            addError("The path " + displayPath + " is invalid.");
+            errors.reject(ERROR_MSG, "The path " + displayPath + " is invalid.");
             return Collections.EMPTY_MAP;
         }
 
         if (!directory.isDirectory())
         {
-            addError(displayPath + " is not a directory.");
+            errors.reject(ERROR_MSG, displayPath + " is not a directory.");
             return Collections.EMPTY_MAP;
         }
         List<File> files = new ArrayList<File>();
@@ -204,83 +251,115 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         {
             if (anyFCSDirectories)
             {
-                addError("All of the directories in " + displayPath + " have already been uploaded.");
+                errors.reject(ERROR_MSG, "All of the directories in " + displayPath + " have already been uploaded.");
             }
             else
             {
-                addError("No FCS files were found in " + displayPath + " or its children.");
+                errors.reject(ERROR_MSG, "No FCS files were found in " + displayPath + " or its children.");
             }
         }
         return ret;
     }
 
-
-    @Jpf.Action
-    protected Forward chooseRunsToUpload(ChooseRunsToUploadForm form) throws Exception
+    public abstract class BaseUploadRunsAction extends SimpleViewAction<ChooseRunsToUploadForm>
     {
-        requiresPermission(ACL.PERM_INSERT);
-        PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-        root.requiresPermission(getContainer(), getUser(), ACL.PERM_INSERT);
+        Pair<String, Action> nav;
 
-        HttpView view = FormPage.getView(AnalysisScriptController.class, form, "chooseRunsToUpload.jsp");
+        protected ModelAndView chooseRunsToUpload(ChooseRunsToUploadForm form, BindException errors) throws Exception
+        {
+            nav = new Pair<String, Action>("Choose Runs to Upload", Action.chooseRunsToUpload);
+            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+            root.requiresPermission(getContainer(), getUser(), ACL.PERM_INSERT);
 
-        NavTrailConfig ntc = getNavTrailConfig(null, "Choose Runs To Upload", Action.chooseRunsToUpload);
-        form.setNewPaths(getNewPaths(form));
-        form.setPipeRoot(root);
+            JspView<ChooseRunsToUploadForm> view = new JspView<ChooseRunsToUploadForm>(AnalysisScriptController.class, "chooseRunsToUpload.jsp", form, errors);
+            form.setNewPaths(getNewPaths(form, errors));
+            form.setPipeRoot(root);
+            return view;
+        }
 
-        return includeView(new HomeTemplate(getViewContext(), view, ntc));
+        protected ModelAndView uploadRuns(ChooseRunsToUploadForm form, BindException errors) throws Exception
+        {
+            nav = new Pair<String, Action>(null, Action.uploadRuns);
+            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+            root.requiresPermission(getContainer(), getUser(), ACL.PERM_INSERT);
+            if (form.ff_path == null || form.ff_path.length == 0)
+            {
+                errors.reject(ERROR_MSG, "You did not select any runs.");
+                return chooseRunsToUpload(form, errors);
+            }
+            List<File> paths = new ArrayList<File>();
+            List<String> skippedPaths = new ArrayList<String>();
+            for (String path : form.ff_path)
+            {
+                File file;
+                if (path == null)
+                {
+                    file = root.getRootPath();
+                }
+                else
+                {
+                    file = new File(URIUtil.resolve(root.getUri(), path));
+                }
+                if (file == null)
+                {
+                    skippedPaths.add(path);
+                    continue;
+                }
+
+                paths.add(file);
+            }
+
+            ViewBackgroundInfo vbi = getViewBackgroundInfo();
+            AddRunsJob job = new AddRunsJob(vbi, FlowProtocol.ensureForContainer(getUser(), vbi.getContainer()), paths);
+            for (String path : skippedPaths)
+            {
+                job.addStatus("Skipping path '" + path + "' because it is invalid.");
+            }
+            return HttpView.redirect(executeScript(job, null));
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(root, null, nav.first, nav.second);
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_INSERT)
+    public class ChooseRunsToUploadAction extends BaseUploadRunsAction
+    {
+        public ModelAndView getView(ChooseRunsToUploadForm form, BindException errors) throws Exception
+        {
+            return chooseRunsToUpload(form, errors);
+        }
     }
 
 
-    @Jpf.Action
-    protected Forward uploadRuns(ChooseRunsToUploadForm form) throws Exception
+    @RequiresPermission(ACL.PERM_INSERT)
+    public class UploadRunsAction extends BaseUploadRunsAction
     {
-        requiresPermission(ACL.PERM_INSERT);
-        PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-        root.requiresPermission(getContainer(), getUser(), ACL.PERM_INSERT);
-        if (form.ff_path == null || form.ff_path.length == 0)
+        public ModelAndView getView(ChooseRunsToUploadForm form, BindException errors) throws Exception
         {
-            addError("You did not select any runs.");
-            return chooseRunsToUpload(form);
+            return uploadRuns(form, errors);
         }
-        List<File> paths = new ArrayList();
-        List<String> skippedPaths = new ArrayList();
-        for (String path : form.ff_path)
-        {
-            File file;
-            if (path == null)
-            {
-                file = root.getRootPath();
-            }
-            else
-            {
-                file = new File(URIUtil.resolve(root.getUri(), path));
-            }
-            if (file == null)
-            {
-                skippedPaths.add(path);
-                continue;
-            }
-
-            paths.add(file);
-        }
-
-        ViewBackgroundInfo vbi = getViewBackgroundInfo();
-        AddRunsJob job = new AddRunsJob(vbi, FlowProtocol.ensureForContainer(getUser(), vbi.getContainer()), paths);
-        for (String path : skippedPaths)
-        {
-            job.addStatus("Skipping path '" + path + "' because it is invalid.");
-        }
-        return executeScript(job, null);
     }
 
-    @Jpf.Action
-    protected Forward showUploadRuns() throws Exception
+    @RequiresPermission(ACL.PERM_INSERT)
+    public class ShowUploadRunsAction extends RedirectAction
     {
-        requiresPermission(ACL.PERM_INSERT);
-        ActionURL forward = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(),
+        public ActionURL getSuccessURL(Object o)
+        {
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(),
                 FlowPipelineProvider.NAME);
-        return new ViewForward(forward);
+        }
+
+        public boolean doAction(Object o, BindException errors) throws Exception
+        {
+            return true;
+        }
+
+        public void validateCommand(Object target, Errors errors)
+        {
+        }
     }
 
     abstract static public class Page extends FlowPage
@@ -300,41 +379,83 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         return Action.class;
     }
 
-    protected boolean addError(String error)
+    public abstract class BaseUploadWorkspaceAction extends FormViewAction<UploadWorkspaceResultsForm>
     {
-        PageFlowUtil.getActionErrors(getRequest(), true).add("main", new ActionError("Error", error));
-        return true;
-    }
+        Pair<String, Action> nav;
+        ActionURL successURL;
 
-    @Jpf.Action
-    protected Forward uploadWorkspaceChooseAnalysis(UploadWorkspaceResultsForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        if (isPost() && form.ff_confirm)
+        public void validateCommand(UploadWorkspaceResultsForm form, Errors errors)
+        {
+            WorkspaceData workspace = form.getWorkspace();
+            Map<String, MultipartFile> files = getFileMap();
+            MultipartFile file = files.get("workspace.file");
+            if (file != null)
+                form.getWorkspace().setFile(file);
+            workspace.validate(getContainer(), errors, getRequest());
+        }
+
+        public ActionURL getSuccessURL(UploadWorkspaceResultsForm form)
+        {
+            return successURL;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(root, null, nav.first, nav.second);
+        }
+
+        protected boolean uploadWorkspaceChooseAnalysis(UploadWorkspaceResultsForm form, BindException errors)
         {
             try
             {
-                Forward forward = doUploadWorkspace(form);
-                if (forward != null)
-                    return forward;
+                successURL = doUploadWorkspace(form, errors);
+                if (successURL != null)
+                    return true;
             }
             catch (Throwable t)
             {
                 ExceptionUtil.logExceptionToMothership(getRequest(), t);
-                addError(t);
+                errors.reject(ERROR_MSG, t.getMessage());
             }
+            return false;
         }
-        return renderInTemplate(FormPage.getView(AnalysisScriptController.class, form, "uploadWorkspaceChooseAnalysis.jsp"), getContainer(), getNavTrailConfig(null, "Upload FlowJo Workspace Analysis Results", Action.uploadWorkspaceChooseAnalysis));
     }
 
-    protected Forward doUploadWorkspace(UploadWorkspaceResultsForm form) throws Exception
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class UploadWorkspaceChooseAnalysisAction extends BaseUploadWorkspaceAction
     {
-        if (!form.validate())
+        public ModelAndView getView(UploadWorkspaceResultsForm form, boolean reshow, BindException errors) throws Exception
         {
-            return null;
+            nav = new Pair<String, Action>("Upload FlowJo Workspace Analysis Results", Action.uploadWorkspaceChooseAnalysis);
+            return new JspView<UploadWorkspaceResultsForm>(AnalysisScriptController.class, "uploadWorkspaceChooseAnalysis.jsp", form, errors);
         }
-        WorkspaceData workspaceData = form.getWorkspace();
 
+        public boolean handlePost(UploadWorkspaceResultsForm form, BindException errors) throws Exception
+        {
+            if (form.ff_confirm)
+                return uploadWorkspaceChooseAnalysis(form, errors);
+            return false;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class ShowUploadWorkspaceAction extends BaseUploadWorkspaceAction
+    {
+        public ModelAndView getView(UploadWorkspaceResultsForm form, boolean reshow, BindException errors) throws Exception
+        {
+            nav = new Pair<String, Action>("Upload FlowJo Results", Action.showUploadWorkspace);
+            return new JspView<UploadWorkspaceResultsForm>(AnalysisScriptController.class, "showUploadWorkspace.jsp", form, errors);
+        }
+
+        public boolean handlePost(UploadWorkspaceResultsForm form, BindException errors) throws Exception
+        {
+            return uploadWorkspaceChooseAnalysis(form, errors);
+        }
+    }
+
+    protected ActionURL doUploadWorkspace(UploadWorkspaceResultsForm form, BindException errors) throws Exception
+    {
+        WorkspaceData workspaceData = form.getWorkspace();
 
         String path = workspaceData.getPath();
         File workspaceFile = null;
@@ -376,7 +497,7 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
                 FlowRun[] existing = experiment.findRun(runFilePathRoot, null);
                 if (existing.length != 0)
                 {
-                    addError("This analysis folder already contains this path.");
+                    errors.reject(ERROR_MSG, "This analysis folder already contains this path.");
                     return null;
                 }
             }
@@ -387,51 +508,45 @@ public class AnalysisScriptController extends BaseFlowController<AnalysisScriptC
         }
 
         FlowRun run = workspace.createExperimentRun(getUser(), getContainer(), experiment, workspaceFile, runFilePathRoot);
-        return new ViewForward(run.urlShow());
+        return run.urlShow();
     }
 
-    @Jpf.Action
-    protected Forward browseForWorkspace(BrowsePipelineForm form) throws Exception
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class BrowseForWorkspaceAction extends SimpleViewAction<BrowsePipelineForm>
     {
-        requiresPermission(ACL.PERM_UPDATE);
-        DefaultBrowseView view = new DefaultBrowseView(form);
-        return renderInTemplate(view, getContainer(), "Browse for Workspace");
-    }
-
-    @Jpf.Action
-    protected Forward uploadWorkspaceBrowse(BrowsePipelineForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        String[] files = form.getFile();
-        if (files.length == 0)
+        public ModelAndView getView(BrowsePipelineForm form, BindException errors) throws Exception
         {
-            addError("You must select at least one file.");
-            return browseForWorkspace(form);
+            return new DefaultBrowseView<BrowsePipelineForm>(form);
         }
-        WorkspaceData wsData = new WorkspaceData();
-        wsData.setPath(files[0]);
-        wsData.validate(form);
-        if (form.getActionErrors() != null && form.getActionErrors().size() > 0)
+
+        public NavTree appendNavTrail(NavTree root)
         {
-            PageFlowUtil.getActionErrors(getRequest(), true).add(form.getActionErrors());
-            return browseForWorkspace(form);
+            return root.addChild("Browse for Workspace");
         }
-        ActionURL url = getContainer().urlFor(Action.uploadWorkspaceChooseAnalysis);
-        url.addParameter("workspace.path", files[0]);
-        return new ViewForward(url);
     }
 
-    @Jpf.Action
-    protected Forward showUploadWorkspace(UploadWorkspaceResultsForm form) throws Exception
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class UploadWorkspaceBrowseAction extends BrowseForWorkspaceAction
     {
-        requiresPermission(ACL.PERM_UPDATE);
-        if (isPost())
+        public ModelAndView getView(BrowsePipelineForm form, BindException errors) throws Exception
         {
-            if (form.validate())
+            String[] files = form.getFile();
+            if (files.length == 0)
             {
-                return uploadWorkspaceChooseAnalysis(form);
+                errors.reject(ERROR_MSG, "You must select at least one file.");
+                return super.getView(form, errors);
             }
+            WorkspaceData wsData = new WorkspaceData();
+            wsData.setPath(files[0]);
+            wsData.validate(getContainer(), errors, getRequest());
+            if (errors.hasErrors())
+            {
+                return super.getView(form, errors);
+            }
+            ActionURL url = getContainer().urlFor(Action.uploadWorkspaceChooseAnalysis);
+            url.addParameter("workspace.path", files[0]);
+            return HttpView.redirect(url);
         }
-        return renderInTemplate(FormPage.getView(AnalysisScriptController.class, form, "showUploadWorkspace.jsp"), getContainer(), "Upload FlowJo Results");
     }
+
 }

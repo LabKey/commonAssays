@@ -1,30 +1,31 @@
 package org.labkey.flow.controllers;
 
-import org.apache.struts.upload.FormFile;
 import org.apache.log4j.Logger;
-import org.labkey.flow.analysis.model.FlowJoWorkspace;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.ExceptionUtil;
-import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.view.ViewForm;
+import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.data.Container;
+import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.UnexpectedException;
+import org.labkey.flow.analysis.model.FlowJoWorkspace;
+import org.springframework.validation.Errors;
+import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXParseException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class WorkspaceData
 {
     static final private Logger _log = Logger.getLogger(WorkspaceData.class);
     String path;
-    FormFile file;
+    MultipartFile file;
     FlowJoWorkspace object;
     String name;
 
@@ -34,10 +35,10 @@ public class WorkspaceData
         this.name = new File(path).getName();
     }
 
-    public void setFile(FormFile file)
+    public void setFile(MultipartFile file)
     {
         this.file = file;
-        this.name = new File(file.getFileName()).getName();
+        this.name = file.getOriginalFilename();
     }
 
     public void setName(String name)
@@ -55,7 +56,7 @@ public class WorkspaceData
         this.object = (FlowJoWorkspace) PageFlowUtil.decodeObject(object);
     }
 
-    public FormFile getFile()
+    public MultipartFile getFile()
     {
         return file;
     }
@@ -70,9 +71,8 @@ public class WorkspaceData
         return path;
     }
 
-    public void validate(ViewForm form)
+    public void validate(Container container, Errors errors, HttpServletRequest request)
     {
-        Container container = form.getContainer();
         if (object == null)
         {
             if (path != null)
@@ -83,30 +83,30 @@ public class WorkspaceData
                     pipeRoot = PipelineService.get().findPipelineRoot(container);
                     if (pipeRoot == null)
                     {
-                        form.addActionError("There is no pipeline root in this folder.");
+                        errors.reject(null, "There is no pipeline root in this folder.");
                     }
                 }
                 catch (Exception e)
                 {
-                    ExceptionUtil.logExceptionToMothership(form.getRequest(), e);
-                    form.addActionError("An error occurred trying to retrieve the pipeline root: " + e);
+                    ExceptionUtil.logExceptionToMothership(request, e);
+                    errors.reject(null, "An error occurred trying to retrieve the pipeline root: " + e);
                 }
                 if (pipeRoot != null)
                 {
                     File file = pipeRoot.resolvePath(path);
                     if (file == null)
                     {
-                        form.addActionError("The path '" + path + "' is invalid.");
+                        errors.reject(null, "The path '" + path + "' is invalid.");
                     }
                     else
                     {
                         if (!file.exists())
                         {
-                            form.addActionError("The file '" + path + "' does not exist.");
+                            errors.reject(null, "The file '" + path + "' does not exist.");
                         }
                         else if (file.isDirectory())
                         {
-                            form.addActionError("The file '" + path + "' is a directory.");
+                            errors.reject(null, "The file '" + path + "' is a directory.");
                         }
                         else
                         {
@@ -119,19 +119,19 @@ public class WorkspaceData
                                 }
                                 catch (SAXParseException spe)
                                 {
-                                    form.addActionError("Error parsing the workspace.  This might be because it is not an " +
+                                    errors.reject(null, "Error parsing the workspace.  This might be because it is not an " +
                                             "XML document: " + spe);
                                 }
                                 catch (Exception e)
                                 {
-                                    ExceptionUtil.logExceptionToMothership(form.getRequest(), e);
-                                    form.addActionError("Error parsing workspace: " + e);
+                                    ExceptionUtil.logExceptionToMothership(request, e);
+                                    errors.reject(null, "Error parsing workspace: " + e);
                                 }
                             }
                             catch (FileNotFoundException fnfe)
                             {
                                 _log.error("Error", fnfe);
-                                form.addActionError("Unable to access the file '" + path + "'.");
+                                errors.reject(null, "Unable to access the file '" + path + "'.");
                             }
                         }
                     }
@@ -140,7 +140,7 @@ public class WorkspaceData
             }
             else
             {
-                if (file != null)
+                if (file != null && !file.isEmpty())
                 {
                     try
                     {
@@ -148,18 +148,18 @@ public class WorkspaceData
                     }
                     catch (SAXParseException spe)
                     {
-                        form.addActionError("Error parsing the workspace.  This might be because it is not an " +
+                        errors.reject(null, "Error parsing the workspace.  This might be because it is not an " +
                                 "XML document: " + spe);
                     }
                     catch (Exception e)
                     {
                         _log.error("Error parsing workspace: " + e);
-                        form.addActionError("Error parsing workspace: " + e);
+                        errors.reject(null, "Error parsing workspace: " + e);
                     }
                 }
                 else
                 {
-                    form.addActionError("No workspace file was specified.");
+                    errors.reject(null, "No workspace file was specified.");
                 }
             }
         }

@@ -102,29 +102,20 @@ public class WellController extends SpringFlowController<WellController.Action>
     public class EditWellAction extends FormViewAction<EditWellForm>
     {
         FlowWell well;
-        public void validateCommand(EditWellForm target, Errors errors)
+
+        public void validateCommand(EditWellForm form, Errors errors)
         {
             try
             {
                 well = getWell();
-                target.setWell(well);
+                form.setWell(well);
             }
             catch (Exception e)
             {
                 errors.reject(ERROR_MSG, e.getMessage());
+                return;
             }
-        }
 
-        public ModelAndView getView(EditWellForm form, boolean reshow, BindException errors) throws Exception
-        {
-            well = getWell();
-            form.setWell(well);
-            return FormPage.getView(WellController.class, form, errors, "editWell.jsp");
-        }
-
-        public boolean handlePost(EditWellForm form, BindException errors) throws Exception
-        {
-            FlowWell well = form.getWell();
             if (StringUtils.isEmpty(form.ff_name))
             {
                 errors.reject(ERROR_MSG, "Name cannot be blank");
@@ -150,8 +141,20 @@ public class WellController extends SpringFlowController<WellController.Action>
                     }
                 }
             }
-            if (errors.hasErrors())
-                return false;
+        }
+
+        public ModelAndView getView(EditWellForm form, boolean reshow, BindException errors) throws Exception
+        {
+            if (well == null)
+            {
+                well = getWell();
+                form.setWell(well);
+            }
+            return FormPage.getView(WellController.class, form, errors, "editWell.jsp");
+        }
+
+        public boolean handlePost(EditWellForm form, BindException errors) throws Exception
+        {
             well.setName(getUser(), form.ff_name);
             well.getExpObject().setComment(getUser(), form.ff_comment);
             if (form.ff_keywordName != null)

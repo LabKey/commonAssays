@@ -1,8 +1,14 @@
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
+<%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.FlowModule" %>
-<%@ page extends="org.labkey.api.jsp.FormPage" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
+<%
+    ViewContext context = getViewContext();
+    Container container = context.getContainer();
+%>
 <labkey:errors />
 <p>You can upload a FlowJo workspace that contains statistics that FlowJo has calculated.  To do this, use FlowJo to save
 the workspace as XML.</p>
@@ -12,7 +18,7 @@ the workspace as XML.</p>
     </p>
     <labkey:button text="Upload" />
 </form>
-<% if (PipelineService.get().findPipelineRoot(getContainer()) != null) { %>
+<% if (PipelineService.get().findPipelineRoot(container) != null) { %>
 <hr>
 <p>Alternatively, if your workspace has been saved as XML on the file server, you can browse the pipeline directories and
 find your workspace.  If there are FCS files are in the same directory as the workspace, then the FlowJo results will be

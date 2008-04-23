@@ -1,13 +1,18 @@
 
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.ViewContext"%>
+<%@ page import="org.labkey.flow.analysis.model.PopulationSet"%>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController"%>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToAnalyzeForm" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsView" %>
-<%@ page import="java.util.*" %>
-<%@ page import="org.labkey.flow.data.*"%>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController"%>
-<%@ page import="org.labkey.flow.analysis.model.PopulationSet"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.flow.data.FlowExperiment" %>
+<%@ page import="org.labkey.flow.data.FlowObject" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Collection" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<%@ page extends="org.labkey.api.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <style type="text/css">
     .disabledRow td, .disabledRow td a, .disabledRow td a:link
     {
@@ -20,7 +25,11 @@
         return PageFlowUtil.strSelect(name, FlowObject.idLabelsFor(objs, nullLabel), curVal);
     }
 %>
-<% ChooseRunsToAnalyzeForm form = (ChooseRunsToAnalyzeForm) __form;
+<%
+    JspView<ChooseRunsToAnalyzeForm> me = (JspView<ChooseRunsToAnalyzeForm>) HttpView.currentView();
+    ViewContext context = HttpView.getRootContext();
+
+    ChooseRunsToAnalyzeForm form = me.getModelBean();
     form.populate();
     ChooseRunsView view = new ChooseRunsView(form);
     Collection<FlowExperiment> targetExperiments = new ArrayList(form.getAvailableAnalyses());
@@ -28,7 +37,7 @@
     PopulationSet analysis = form.getProtocol().getCompensationCalcOrAnalysis(form.getProtocolStep());
 %>
 <labkey:errors/>
-<form class="normal" method="POST" action="<%=org.labkey.api.util.PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, getContainer())%>">
+<form class="normal" method="POST" action="<%=org.labkey.api.util.PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToAnalyze, context.getContainer())%>">
     <table>
         <tr><td>Analysis script to use:</td>
             <td><select name="scriptId" onchange="this.form.submit()">

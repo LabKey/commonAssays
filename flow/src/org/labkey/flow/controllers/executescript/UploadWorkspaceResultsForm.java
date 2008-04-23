@@ -1,52 +1,36 @@
 package org.labkey.flow.controllers.executescript;
 
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.Globals;
-import org.labkey.api.view.ViewForm;
-import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.data.Container;
+import org.labkey.api.view.HttpView;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.FlowExperiment;
 
-import javax.servlet.http.HttpServletRequest;
-
-public class UploadWorkspaceResultsForm extends ViewForm
+public class UploadWorkspaceResultsForm
 {
     private FlowExperiment[] availableAnalyses;
     private WorkspaceData workspace = new WorkspaceData();
-
-    public boolean validate()
-    {
-        workspace.validate(this);
-        if (getActionErrors() != null && !getActionErrors().isEmpty())
-        {
-            PageFlowUtil.getActionErrors(getRequest(), true).add(getActionErrors());
-            return false;
-        }
-        return true;
-    }
-
-    public WorkspaceData getWorkspace()
-    {
-        return workspace;
-    }
 
     public String ff_newAnalysisName;
     public int ff_existingAnalysisId;
     public boolean ff_confirm;
 
-
-    public void reset(ActionMapping actionMapping, HttpServletRequest request)
+    public UploadWorkspaceResultsForm()
     {
-        super.reset(actionMapping, request);
-        availableAnalyses = FlowExperiment.getAnalyses(getContainer());
+        Container container = HttpView.currentContext().getContainer();
+        availableAnalyses = FlowExperiment.getAnalyses(container);
         if (availableAnalyses.length == 0)
         {
             ff_newAnalysisName = FlowExperiment.DEFAULT_ANALYSIS_NAME;
         }
         else
         {
-            ff_existingAnalysisId = FlowExperiment.getMostRecentAnalysis(getContainer()).getExperimentId();
+            ff_existingAnalysisId = FlowExperiment.getMostRecentAnalysis(container).getExperimentId();
         }
+    }
+
+    public WorkspaceData getWorkspace()
+    {
+        return workspace;
     }
 
     public void setFf_confirm(boolean b)
