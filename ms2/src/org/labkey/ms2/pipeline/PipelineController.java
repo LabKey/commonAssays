@@ -537,10 +537,6 @@ public class PipelineController extends SpringActionController
              //get help topic
             String helpTopic = getHelpTopic(_provider.getHelpTopic()).getHelpTopicLink();
             ActionURL returnURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlReferer(getContainer());
-            ActionURL protocolURL = form.getViewContext().getActionURL().clone();
-            protocolURL.deleteParameter("searchEngine");
-            protocolURL.deleteParameter("protocol");
-            protocolURL.addParameter("searchEngine", form.getSearchEngine());
            
             //properties to send to GWT page
             Map<String, String> props = new HashMap<String, String>();
