@@ -1,28 +1,28 @@
 package org.labkey.flow.webparts;
 
-import org.labkey.api.security.User;
-import org.labkey.api.security.ACL;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.CompareType;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineJobData;
+import org.labkey.api.data.Container;
+import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJobData;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.query.QueryAction;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.User;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.Overview;
-import org.labkey.api.query.QueryAction;
-import org.labkey.api.exp.api.ExpSampleSet;
-import org.labkey.api.util.PageFlowUtil;
+import org.labkey.flow.controllers.FlowController;
+import org.labkey.flow.controllers.FlowModule;
+import org.labkey.flow.controllers.compensation.CompensationController;
+import org.labkey.flow.controllers.editscript.ScriptController;
+import org.labkey.flow.controllers.executescript.AnalysisScriptController;
+import org.labkey.flow.controllers.protocol.ProtocolController;
+import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
-import org.labkey.flow.controllers.FlowModule;
-import org.labkey.flow.controllers.FlowController;
-import org.labkey.flow.controllers.protocol.ProtocolController;
-import org.labkey.flow.controllers.compensation.CompensationController;
-import org.labkey.flow.controllers.executescript.AnalysisScriptController;
-import org.labkey.flow.controllers.editscript.ScriptController;
-import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.data.FlowProtocolStep;
-import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.query.FlowTableType;
 
 public class FlowOverview extends Overview
@@ -368,25 +368,26 @@ public class FlowOverview extends Overview
         Step ret = new Step("Assign additional meanings to keywords", status);
         if (protocol != null)
         {
-            StringBuilder descriptionHTML = new StringBuilder();
             ExpSampleSet ss = protocol.getSampleSet();
             if (ss != null)
             {
-                descriptionHTML.append("There are <a href=\"" + h(ss.detailsURL()) + "\">" + ss.getSamples().length + " sample descriptions</a> in this folder.");
+                ret.setStatusHTML("There are <a href=\"" + h(ss.detailsURL()) + "\">" + ss.getSamples().length + " sample descriptions</a> in this folder.");
+
                 if (_canUpdate)
                 {
+                    Action uploadAction = new Action("Upload More Samples", protocol.urlUploadSamples());
+                    ret.addAction(uploadAction);
+                    
                     if (protocol.getSampleSetJoinFields().size() != 0)
                     {
                         Action action = new Action("Modify sample description join fields", protocol.urlFor(ProtocolController.Action.joinSampleSet));
-                        descriptionHTML.append("<br><i>The sample descriptions are linked to the FCS files using some keywords.  When new samples are added or FCS files are loaded, new links will be created.</i>");
-                        action.setDescriptionHTML(descriptionHTML.toString());
+                        action.setDescriptionHTML("<i>The sample descriptions are linked to the FCS files using some keywords.  When new samples are added or FCS files are loaded, new links will be created.</i>");
                         ret.addAction(action);
                     }
                     else
                     {
                         Action action = new Action("Define sample description join fields", protocol.urlFor(ProtocolController.Action.joinSampleSet));
-                        descriptionHTML.append("<br>You can specify how these sample descriptions should be linked to FCS files.");
-                        action.setDescriptionHTML(descriptionHTML.toString());
+                        action.setDescriptionHTML("You can specify how these sample descriptions should be linked to FCS files.");
                         ret.addAction(action);
                     }
                 }

@@ -6,6 +6,7 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.security.User;
+import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.data.*;
 import org.labkey.flow.persist.AttributeSet;
@@ -775,30 +776,62 @@ abstract public class FlowJoWorkspace implements Serializable
         Map<SampleInfo, AttributeSet> keywordsMap = new LinkedHashMap();
         Map<CompensationMatrix, AttributeSet> compMatrixMap = new LinkedHashMap();
         Map<SampleInfo, AttributeSet> analysisMap = new LinkedHashMap();
+        Map<Analysis, ScriptDocument> scriptDocs = new HashMap();
         Map<Analysis, FlowScript> scripts = new HashMap();
+        Set<CompensationMatrix> compMatrices = getUsedCompensationMatrices();
+
         for (FlowJoWorkspace.SampleInfo sample : getSamples())
         {
             AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, null);
+            URI uri = null;
             if (runFilePathRoot != null)
             {
-                attrs.setURI(new File(runFilePathRoot, sample.getLabel()).toURI());
+                uri = new File(runFilePathRoot, sample.getLabel()).toURI();
+                attrs.setURI(uri);
             }
             attrs.setKeywords(sample.getKeywords());
             attrs.prepareForSave();
             keywordsMap.put(sample, attrs);
+
+            CompensationMatrix comp = sample.getCompensationMatrix();
+
             AttributeSet results = getSampleAnalysisResults(sample);
             if (results != null)
             {
+                Analysis analysis = getSampleAnalysis(sample);
+                if (analysis != null)
+                {
+                    ScriptDocument scriptDoc = ScriptDocument.Factory.newInstance();
+                    ScriptDef scriptDef = scriptDoc.addNewScript();
+                    FlowAnalyzer.makeAnalysisDef(scriptDef, analysis, EnumSet.of(StatisticSet.workspace, StatisticSet.count, StatisticSet.frequencyOfParent));
+                    scriptDocs.put(analysis, scriptDoc);
+
+                    // XXX: check fcs file exists
+                    if (uri != null)
+                    {
+                        List<FCSAnalyzer.GraphResult> graphResults = FCSAnalyzer.get().generateGraphs(
+                                uri, comp, analysis, analysis.getGraphs());
+                        for (FCSAnalyzer.GraphResult graphResult : graphResults)
+                        {
+                            if (graphResult.exception == null)
+                            {
+                                results.setGraph(graphResult.spec, graphResult.bytes);
+                            }
+                        }
+                    }
+                }
+
                 results.prepareForSave();
                 analysisMap.put(sample, results);
             }
-        }
-        Set<CompensationMatrix> compMatrices = getUsedCompensationMatrices();
-        for (CompensationMatrix compMatrix : compMatrices)
-        {
-            AttributeSet attrs = new AttributeSet(compMatrix);
-            attrs.prepareForSave();
-            compMatrixMap.put(compMatrix, attrs);
+
+            if (comp != null)
+            {
+                AttributeSet compAttrs = new AttributeSet(comp);
+                compAttrs.prepareForSave();
+                compMatrices.add(comp);
+                compMatrixMap.put(comp, compAttrs);
+            }
         }
 
         FlowManager.vacuum();
@@ -870,13 +903,11 @@ abstract public class FlowJoWorkspace implements Serializable
                     Analysis analysis = getSampleAnalysis(entry.getKey());
                     if (analysis != null)
                     {
-                        ScriptDocument scriptDoc = ScriptDocument.Factory.newInstance();
-                        ScriptDef scriptDef = scriptDoc.addNewScript();
                         FlowScript script = scripts.get(analysis);
                         FlowWell well = new FlowFCSAnalysis(fcsAnalysis);
                         if (script == null)
                         {
-                            FlowAnalyzer.makeAnalysisDef(scriptDef, analysis, EnumSet.of(StatisticSet.workspace, StatisticSet.count, StatisticSet.frequencyOfParent));
+                            ScriptDocument scriptDoc = scriptDocs.get(analysis);
                             well = FlowScript.createScriptForWell(user, well, "workspaceScript" + (scripts.size() + 1), scriptDoc, workspaceData, InputRole.Workspace);
                             scripts.put(analysis, well.getScript());
                         }
