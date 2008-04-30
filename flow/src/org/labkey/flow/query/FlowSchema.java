@@ -236,7 +236,7 @@ public class FlowSchema extends UserSchema
         }
         ret.addColumn(ExpRunTable.Column.RowId);
         ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(RunController.Action.showRun, _container), Collections.singletonMap(FlowParam.runId.toString(), ExpRunTable.Column.RowId.toString())));
-        if (type == null || type == FlowDataType.FCSFile)
+        if (type == null || type == FlowDataType.FCSFile || type == FlowDataType.FCSAnalysis)
         {
             ret.addColumn(ExpRunTable.Column.Flag);
         }
