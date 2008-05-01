@@ -79,11 +79,9 @@ public class XTandemSearchTask extends PipelineJob.Task
                 return false;
 
             // Either raw converted pepXML from Tandem2XML, or completely analyzed pepXML
-            if (!NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) &&
-                    !NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName)))
-                return false;
+            return NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) ||
+                   NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName));
 
-            return true;
         }
     }
 
@@ -122,7 +120,7 @@ public class XTandemSearchTask extends PipelineJob.Task
 
             writeRunParameters(pathSpectra, fileWorkParameters, fileWorkTaxonomy, fileWorkOutputXML);
 
-            getJob().runSubProcess(new ProcessBuilder("tandem.exe",
+            getJob().runSubProcess(new ProcessBuilder(getExecutablePath("tandem.exe"),
                     INPUT_XML),
                     wd.getDir());
 
@@ -130,7 +128,7 @@ public class XTandemSearchTask extends PipelineJob.Task
             wd.discardFile(fileWorkParameters);
             wd.discardFile(fileWorkTaxonomy);
 
-            getJob().runSubProcess(new ProcessBuilder("Tandem2XML",
+            getJob().runSubProcess(new ProcessBuilder(getExecutablePath("Tandem2XML"),
                     fileWorkOutputXML.getName(),
                     fileWorkPepXMLRaw.getName()),
                     wd.getDir());

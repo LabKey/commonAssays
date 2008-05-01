@@ -184,7 +184,7 @@ public class TPPTask extends PipelineJob.Task
                 fileWorkProtXML = wd.newFile(FT_INTERMEDIATE_PROT_XML);
 
             List<String> interactCmd = new ArrayList<String>();
-            interactCmd.add("xinteract");
+            interactCmd.add(getExecutablePath("xinteract"));
 
             if (!getJobSupport().isProphetEnabled())
             {
