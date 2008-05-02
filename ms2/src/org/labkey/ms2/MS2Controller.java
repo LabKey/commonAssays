@@ -670,7 +670,7 @@ public class MS2Controller extends SpringActionController
     {
         ActionURL url = new ActionURL(RenameRunAction.class, c);
         url.addParameter("run", run.getRun());
-        url.addParameter(ReturnUrlForm.Params.returnUrl, returnURL.getLocalURIString());
+        url.addReturnURL(returnURL);
         return url;
     }
 
@@ -1091,7 +1091,7 @@ public class MS2Controller extends SpringActionController
     {
         ActionURL url = new ActionURL(ManageViewsAction.class, getContainer());
         url.addParameter("run", run.getRun());
-        url.addParameter(ReturnUrlForm.Params.returnUrl, runURL.getLocalURIString());
+        url.addReturnURL(runURL);
         return url;
     }
 
@@ -3194,7 +3194,7 @@ public class MS2Controller extends SpringActionController
         url.addParameter("run", run.getRun());
         if (null != currentColumns)
             url.addParameter("columns", currentColumns);
-        url.addParameter(ReturnUrlForm.Params.returnUrl, returnURL.getLocalURIString());
+        url.addReturnURL(returnURL);
         return url;
     }
 
@@ -3202,7 +3202,7 @@ public class MS2Controller extends SpringActionController
     public static ActionURL getPickPeptideColumnsPostURL(Container c, ActionURL returnURL, boolean saveDefault)
     {
         ActionURL url = new ActionURL(PickPeptideColumnsAction.class, c);
-        url.addParameter(ReturnUrlForm.Params.returnUrl, returnURL.getLocalURIString());
+        url.addReturnURL(returnURL);
         if (saveDefault)
             url.addParameter("saveDefault", "1");
         return url;
@@ -3302,7 +3302,7 @@ public class MS2Controller extends SpringActionController
         url.addParameter("run", run.getRun());
         if (null != currentColumns)
             url.addParameter("proteinColumns", currentColumns);
-        url.addParameter(ReturnUrlForm.Params.returnUrl, returnURL.getLocalURIString());
+        url.addReturnURL(returnURL);
         return url;
     }
 
@@ -3310,7 +3310,7 @@ public class MS2Controller extends SpringActionController
     public static ActionURL getPickProteinColumnsPostURL(Container c, ActionURL returnURL, boolean saveDefault)
     {
         ActionURL url = new ActionURL(PickProteinColumnsAction.class, c);
-        url.addParameter(ReturnUrlForm.Params.returnUrl, returnURL.getLocalURIString());
+        url.addReturnURL(returnURL);
         if (saveDefault)
             url.addParameter("saveDefault", "1");
         return url;
