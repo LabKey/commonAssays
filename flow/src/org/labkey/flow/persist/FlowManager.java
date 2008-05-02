@@ -524,6 +524,10 @@ public class FlowManager
 
     public static class FCSFileSearch implements Search.Searchable
     {
+        public static final String SEARCH_DOMAIN = "fcsfile";
+        public static final String SEARCH_RESULT_TYPE = "labkey/fcsfile";
+        public static final String SEARCH_RESULT_TYPE_DESCR = "FCS File";
+
         Collection<String> containerIds;
         Search.SearchTermParser parser;
         
@@ -533,13 +537,66 @@ public class FlowManager
             this.parser = parser;
         }
 
-        public MultiMap<String, String> search(Collection<String> containerIds, Search.SearchTermParser parser)
+        public int search(Search.SearchTermParser parser, Set<Container> containers, List<SearchHit> hits)
         {
-            this.containerIds = containerIds;
-            this.parser = parser;
-            return search();
-        }
+            int startCount = hits.size();
 
+            List<String> ids = new ArrayList<String>(containers.size());
+            for(Container c : containers)
+                ids.add(c.getId());
+            this.containerIds = ids;
+            this.parser = parser;
+
+            DbSchema s = DbSchema.get("flow");
+            String fromClause = "flow.attribute A inner join flow.keyword K on A.rowid=K.keywordid inner join flow.object O on K.objectid = O.rowid inner join exp.data D on O.dataid = D.rowid";
+            SQLFragment fragment = Search.getSQLFragment("container, FCSName, uri, dataid", "D.container, D.name AS FCSName, O.uri, O.dataid, A.name, K.value", fromClause, "D.Container", null, containerIds, parser, s.getSqlDialect(),  "A.name", "K.value");
+
+            ResultSet rs = null;
+
+            ActionURL url = new ActionURL("flow-well", "showWell", "");
+
+            try
+            {
+                rs = Table.executeQuery(s, fragment);
+
+                while(rs.next())
+                {
+                    String containerId = rs.getString(1);
+                    String name = rs.getString(2);
+                    String uri = rs.getString(3);
+                    String wellId = String.valueOf(rs.getInt(4));
+
+                    String path = null;
+                    if (uri != null)
+                    {
+                        try
+                        {
+                            path = new File(new URI(uri)).getPath();
+                        }
+                        catch (URISyntaxException x)
+                        {
+                        }
+                    }
+                    Container c = ContainerManager.getForId(containerId);
+                    url.setExtraPath(c.getPath());
+                    url.replaceParameter("wellId", wellId);
+
+                    SimpleSearchHit hit = new SimpleSearchHit(SEARCH_DOMAIN, c.getPath(), path != null ? path : name,
+                            url.getLocalURIString(), SEARCH_RESULT_TYPE, SEARCH_RESULT_TYPE_DESCR);
+                    hits.add(hit);
+                }
+            }
+            catch(SQLException e)
+            {
+                ExceptionUtil.logExceptionToMothership(HttpView.currentRequest(), e);
+            }
+            finally
+            {
+                ResultSetUtil.close(rs);
+            }
+
+            return hits.size() - startCount;
+        }
 
         protected MultiMap<String, String> search()
         {
@@ -604,7 +661,12 @@ public class FlowManager
 
         public String getSearchResultName()
         {
-            return "FCS File";
+            return SEARCH_RESULT_TYPE_DESCR;
+        }
+
+        public String getDomainName()
+        {
+            return SEARCH_DOMAIN;
         }
     }
 
