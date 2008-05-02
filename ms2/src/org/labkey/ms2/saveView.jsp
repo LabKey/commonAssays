@@ -2,6 +2,7 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.api.action.ReturnUrlForm" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.SaveViewBean bean = ((JspView<MS2Controller.SaveViewBean>) HttpView.currentView()).getModelBean();
@@ -13,7 +14,7 @@
             <td class="normal">
                 <input name="name" id="name" style="width:200px;">
                 <input type=hidden value="<%=h(bean.viewParams)%>" name="viewParams">
-                <input type=hidden value="<%=h(bean.returnURL)%>" name="returnUrl">
+                <input type=hidden value="<%=h(bean.returnURL)%>" name="<%=ReturnUrlForm.Params.returnUrl%>">
             </td>
         </tr><%
 if (bean.canShare)
