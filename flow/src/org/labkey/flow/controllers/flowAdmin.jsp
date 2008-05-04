@@ -1,8 +1,7 @@
-<%@ page import="org.labkey.flow.controllers.FlowController"%>
 <%@ page import="org.labkey.api.data.ContainerManager"%>
-<%@ page import="org.labkey.flow.controllers.FlowAdminForm"%>
 <%@ page import="org.labkey.api.view.ActionURL"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.flow.controllers.FlowAdminForm"%>
+<%@ page import="org.labkey.flow.controllers.FlowController"%>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
@@ -14,5 +13,5 @@
         <input type="text" name="ff_workingDirectory" value="<%=h(form.ff_workingDirectory)%>">
     </p>
     <labkey:button text="update" />
-    <labkey:button text="cancel" href="<%=new ActionURL("admin", "begin", "")%>" />
+    <labkey:button text="cancel" href="<%=new ActionURL("admin", "showAdmin", "")%>" />
 </form>

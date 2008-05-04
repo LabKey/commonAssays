@@ -314,7 +314,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
         {
             return null;
         }
-        return new ViewForward(new ActionURL("admin", "begin", ""));
+        return new ViewForward(new ActionURL("admin", "showAdmin", ""));
     }
 
     @Jpf.Action
