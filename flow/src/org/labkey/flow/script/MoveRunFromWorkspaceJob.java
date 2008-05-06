@@ -1,11 +1,11 @@
 package org.labkey.flow.script;
 
-import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.data.FlowExperiment;
-import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
 
 public class MoveRunFromWorkspaceJob extends ScriptJob
 {
@@ -21,7 +21,7 @@ public class MoveRunFromWorkspaceJob extends ScriptJob
     protected void doRun() throws Throwable
     {
         executeHandler(_run, getAnalysisHandler());
-        if (!_errors)
+        if (!hasErrors())
         {
             ExperimentService.get().deleteExperimentRunsByRowIds(getContainer(), getUser(), _run.getRunId());
         }

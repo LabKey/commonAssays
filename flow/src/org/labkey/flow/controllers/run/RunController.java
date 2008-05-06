@@ -267,7 +267,7 @@ public class RunController extends SpringFlowController<RunController.Action>
                 return false;
             }
             MoveRunFromWorkspaceJob job = new MoveRunFromWorkspaceJob(getViewBackgroundInfo(), experiment, run);
-            successURL = executeScript(job, run.getScript());
+            successURL = executeScript(job);
             return true;
         }
 
