@@ -28,6 +28,7 @@ import org.labkey.flow.data.*;
 import org.labkey.flow.script.AddRunsJob;
 import org.labkey.flow.script.AnalyzeJob;
 import org.labkey.flow.script.FlowPipelineProvider;
+import org.labkey.flow.script.WorkspaceJob;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
@@ -132,7 +133,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
                 job.setCompensationMatrix(FlowCompensationMatrix.fromCompId(form.getCompensationMatrixId()));
             }
             job.setCompensationExperimentLSID(form.getCompensationExperimentLSID());
-            return HttpView.redirect(executeScript(job, analysis));
+            return HttpView.redirect(executeScript(job));
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -315,7 +316,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             {
                 job.addStatus("Skipping path '" + path + "' because it is invalid.");
             }
-            return HttpView.redirect(executeScript(job, null));
+            return HttpView.redirect(executeScript(job));
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -507,8 +508,8 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             workspaceFile = new File(FlowSettings.getWorkingDirectory(), form.getWorkspace().getName());
         }
 
-        FlowRun run = workspace.createExperimentRun(getUser(), getContainer(), experiment, workspaceFile, runFilePathRoot);
-        return run.urlShow();
+        WorkspaceJob job = new WorkspaceJob(getViewBackgroundInfo(), workspaceData, experiment, workspaceFile, runFilePathRoot);
+        return executeScript(job);
     }
 
     @RequiresPermission(ACL.PERM_UPDATE)

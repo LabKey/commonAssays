@@ -1,16 +1,17 @@
 package org.labkey.flow.view;
 
 import org.apache.log4j.Logger;
-import org.labkey.flow.data.FlowRun;
-import org.labkey.flow.data.FlowProtocolStep;
-import org.labkey.flow.script.ScriptJob;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.script.FlowJob;
+import org.labkey.flow.script.ScriptJob;
 
-import java.io.PrintWriter;
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.Map;
 
 public class JobStatusView extends HttpView
@@ -18,10 +19,10 @@ public class JobStatusView extends HttpView
     private static Logger _log = Logger.getLogger(JobStatusView.class);
 
     PipelineStatusFile _psf;
-    ScriptJob _job;
+    FlowJob _job;
     String _status;
 
-    public JobStatusView(PipelineStatusFile psf, ScriptJob job)
+    public JobStatusView(PipelineStatusFile psf, FlowJob job)
     {
         _psf = psf;
         _job = job;
@@ -72,9 +73,10 @@ public class JobStatusView extends HttpView
         }
         out.write("<a name=\"end\">&nbsp;</a>");
         out.write("</code></div></td>");
-        if (_job != null)
+        if (_job != null && _job instanceof ScriptJob)
         {
-            Map<FlowProtocolStep, String[]> processedRuns = _job.getProcessedRunLSIDs();
+            ScriptJob scriptJob = (ScriptJob)_job;
+            Map<FlowProtocolStep, String[]> processedRuns = scriptJob.getProcessedRunLSIDs();
             if (!processedRuns.isEmpty())
             {
                 out.write("<td valign=\"top\">");

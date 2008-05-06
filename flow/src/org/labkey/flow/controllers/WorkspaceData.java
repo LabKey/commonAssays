@@ -73,6 +73,23 @@ public class WorkspaceData
 
     public void validate(Container container, Errors errors, HttpServletRequest request)
     {
+        try
+        {
+            validate(container);
+        }
+        catch (WorkspaceValidationException wve)
+        {
+            errors.reject(null, wve.getMessage());
+        }
+        catch (RuntimeException ex)
+        {
+            errors.reject(null, ex.getMessage());
+            ExceptionUtil.logExceptionToMothership(request, ex);
+        }
+    }
+
+    public void validate(Container container) throws WorkspaceValidationException
+    {
         if (object == null)
         {
             if (path != null)
@@ -83,30 +100,29 @@ public class WorkspaceData
                     pipeRoot = PipelineService.get().findPipelineRoot(container);
                     if (pipeRoot == null)
                     {
-                        errors.reject(null, "There is no pipeline root in this folder.");
+                        throw new WorkspaceValidationException("There is no pipeline root in this folder.");
                     }
                 }
                 catch (Exception e)
                 {
-                    ExceptionUtil.logExceptionToMothership(request, e);
-                    errors.reject(null, "An error occurred trying to retrieve the pipeline root: " + e);
+                    throw new RuntimeException("An error occurred trying to retrieve the pipeline root: " + e, e);
                 }
                 if (pipeRoot != null)
                 {
                     File file = pipeRoot.resolvePath(path);
                     if (file == null)
                     {
-                        errors.reject(null, "The path '" + path + "' is invalid.");
+                        throw new WorkspaceValidationException("The path '" + path + "' is invalid.");
                     }
                     else
                     {
                         if (!file.exists())
                         {
-                            errors.reject(null, "The file '" + path + "' does not exist.");
+                            throw new WorkspaceValidationException("The file '" + path + "' does not exist.");
                         }
                         else if (file.isDirectory())
                         {
-                            errors.reject(null, "The file '" + path + "' is a directory.");
+                            throw new WorkspaceValidationException("The file '" + path + "' is a directory.");
                         }
                         else
                         {
@@ -119,19 +135,18 @@ public class WorkspaceData
                                 }
                                 catch (SAXParseException spe)
                                 {
-                                    errors.reject(null, "Error parsing the workspace.  This might be because it is not an " +
+                                    throw new WorkspaceValidationException("Error parsing the workspace.  This might be because it is not an " +
                                             "XML document: " + spe);
                                 }
                                 catch (Exception e)
                                 {
-                                    ExceptionUtil.logExceptionToMothership(request, e);
-                                    errors.reject(null, "Error parsing workspace: " + e);
+                                    throw new RuntimeException("Error parsing workspace: " + e, e);
                                 }
                             }
                             catch (FileNotFoundException fnfe)
                             {
                                 _log.error("Error", fnfe);
-                                errors.reject(null, "Unable to access the file '" + path + "'.");
+                                throw new WorkspaceValidationException("Unable to access the file '" + path + "'.");
                             }
                         }
                     }
@@ -148,18 +163,18 @@ public class WorkspaceData
                     }
                     catch (SAXParseException spe)
                     {
-                        errors.reject(null, "Error parsing the workspace.  This might be because it is not an " +
+                        throw new WorkspaceValidationException("Error parsing the workspace.  This might be because it is not an " +
                                 "XML document: " + spe);
                     }
                     catch (Exception e)
                     {
                         _log.error("Error parsing workspace: " + e);
-                        errors.reject(null, "Error parsing workspace: " + e);
+                        throw new WorkspaceValidationException("Error parsing workspace: " + e);
                     }
                 }
                 else
                 {
-                    errors.reject(null, "No workspace file was specified.");
+                    throw new WorkspaceValidationException("No workspace file was specified.");
                 }
             }
         }
@@ -188,6 +203,29 @@ public class WorkspaceData
 
             }
             return ret;
+        }
+    }
+
+    public static class WorkspaceValidationException extends Exception
+    {
+        public WorkspaceValidationException()
+        {
+            super();
+        }
+
+        public WorkspaceValidationException(String message)
+        {
+            super(message);
+        }
+
+        public WorkspaceValidationException(String message, Throwable cause)
+        {
+            super(message, cause);
+        }
+
+        public WorkspaceValidationException(Throwable cause)
+        {
+            super(cause);
         }
     }
 }

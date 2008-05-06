@@ -38,7 +38,7 @@ import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.script.ScriptJob;
+import org.labkey.flow.script.FlowJob;
 import org.labkey.flow.view.JobStatusView;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
@@ -95,7 +95,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
             return renderError("Status file not specified.");
         }
         PipelineStatusFile psf = PipelineService.get().getStatusFile(statusFile);
-        ScriptJob job = findJob(statusFile);
+        FlowJob job = findJob(statusFile);
 
         if (PipelineJob.COMPLETE_STATUS.equals(psf.getStatus()))
         {
@@ -108,7 +108,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
                 }
             }
         }
-        if (job != null && !job.isComplete())
+        if (job != null && !job.isDone())
         {
             // Take 1 second longer each time to refresh.
             int refresh = getIntParam(FlowParam.refresh);
@@ -160,12 +160,12 @@ public class FlowController extends BaseFlowController<FlowController.Action>
         return renderInTemplate(FormPage.getView(FlowController.class, form, "runningJobs.jsp"), getContainer(), "Running Flow Jobs");
     }
 
-    ScriptJob findJob(String statusFile) throws Exception
+    FlowJob findJob(String statusFile) throws Exception
     {
         PipelineService service = PipelineService.get();
         PipelineJob job = service.getPipelineQueue().findJob(getContainer(), statusFile);
-        if (job instanceof ScriptJob)
-            return (ScriptJob) job;
+        if (job instanceof FlowJob)
+            return (FlowJob) job;
         return null;
     }
 
@@ -175,7 +175,7 @@ public class FlowController extends BaseFlowController<FlowController.Action>
         requiresPermission(ACL.PERM_UPDATE);
 
         String statusFile = getParam(FlowParam.statusFile);
-        ScriptJob job = findJob(statusFile);
+        FlowJob job = findJob(statusFile);
         if (job == null)
         {
             return renderError("Job " + statusFile + " not found.");

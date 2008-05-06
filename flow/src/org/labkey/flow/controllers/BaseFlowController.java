@@ -6,14 +6,14 @@ import org.labkey.api.jsp.FormPage;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
-import org.labkey.api.view.*;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.*;
 import org.labkey.flow.data.FlowObject;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.script.ScriptJob;
+import org.labkey.flow.script.FlowJob;
 import org.labkey.flow.webparts.FlowFolderType;
 
 import javax.servlet.ServletException;
@@ -45,7 +45,7 @@ public class BaseFlowController<A extends Enum<A>> extends BaseController<A, Flo
         return ret;
     }
 
-    protected Forward executeScript(ScriptJob job, FlowScript script) throws Exception
+    protected Forward executeScript(FlowJob job, FlowScript script) throws Exception
     {
         FlowProtocol.ensureForContainer(getUser(), job.getContainer());
         PipelineService service = PipelineService.get();

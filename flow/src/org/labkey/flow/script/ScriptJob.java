@@ -9,9 +9,6 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
@@ -19,17 +16,14 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.FlowException;
-import org.labkey.flow.controllers.FlowController;
-import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.*;
 import org.labkey.flow.persist.FlowManager;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
 
-abstract public class ScriptJob extends PipelineJob
+abstract public class ScriptJob extends FlowJob
 {
     private static Logger _log = getJobLogger(ScriptJob.class);
 
@@ -47,9 +41,6 @@ abstract public class ScriptJob extends PipelineJob
     String _experimentLSID;
     String _compensationExperimentLSID;
     String _experimentName;
-    volatile Date _start;
-    volatile Date _end;
-    volatile boolean _errors;
 
     RunData _runData;
     List<String> _pendingRunLSIDs = new ArrayList();
@@ -57,7 +48,6 @@ abstract public class ScriptJob extends PipelineJob
     FlowProtocol _protocol;
 
     private transient ScriptHandlerGroup _handlers;
-    private transient ActionURL _statusHref;
 
     class RunData
     {
@@ -177,7 +167,7 @@ abstract public class ScriptJob extends PipelineJob
 
     public ScriptJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript script, FlowProtocolStep step) throws Exception
     {
-        super("flow", info);
+        super(FlowPipelineProvider.NAME, info);
         _runAnalysisScript = script;
         _step = step;
         _experimentName = experimentName;
@@ -230,32 +220,12 @@ abstract public class ScriptJob extends PipelineJob
         return FlowExperiment.fromLSID(_experimentLSID);
     }
 
-    public ActionURL urlRedirect()
-    {
-        if (!isComplete())
-            return null;
-        if (hasErrors())
-            return null;
-        return urlData();
-    }
-
     public ActionURL urlData()
     {
         FlowExperiment experiment = getExperiment();
         if (experiment == null)
             return null;
         return experiment.urlShow();
-    }
-
-    public ActionURL urlStatus()
-    {
-        if (_statusHref == null)
-        {
-            File statusFile = getLogFile();
-            _statusHref = PageFlowUtil.urlFor(FlowController.Action.showStatusJob, getContainer());
-            _statusHref.addParameter(FlowParam.statusFile.toString(), PipelineJobService.statusPathOf(statusFile.toString()));
-        }
-        return _statusHref;
     }
 
     public FlowRun[] findRuns(File path, FlowProtocolStep step) throws SQLException
@@ -310,21 +280,6 @@ abstract public class ScriptJob extends PipelineJob
         return compRun.getCompensationMatrix();
     }
 
-    public ActionURL getStatusHref()
-    {
-        ActionURL ret = urlRedirect();
-        if (ret != null)
-        {
-            return ret;
-        }
-        return urlStatus().clone();
-    }
-
-    public ActionURL getStatusHref(HttpServletRequest request)
-        {
-        return getStatusHref();
-        }
-
     public String getDescription()
     {
         if (_runAnalysisScript != null)
@@ -359,28 +314,9 @@ abstract public class ScriptJob extends PipelineJob
         return ret;
     }
 
-    public int getElapsedTime()
-    {
-        Date start = _start;
-        if (start == null)
-            return 0;
-        Date end = _end;
-        if (end == null)
-        {
-            end = new Date();
-        }
-        return (int) (end.getTime() - start.getTime());
-    }
-
-    synchronized public void addStatus(String status)
-    {
-        info(status);
-    }
-
     public void addError(String lsid, String propertyURI, String message)
     {
-        _errors = true;
-        addStatus(message);
+        super.addError(lsid, propertyURI, message);
         if (_runData != null)
         {
             _runData.logError(lsid, propertyURI, message);
@@ -397,62 +333,6 @@ abstract public class ScriptJob extends PipelineJob
         }
         addStatus("Processing " + path.toString());
         return true;
-    }
-
-    abstract protected void doRun() throws Throwable;
-
-    public void run()
-    {
-        _start = new Date();
-        setStatus("Running");
-        addStatus("Job started at " + DateUtil.formatDateTime(_start));
-        try
-        {
-            doRun();
-        }
-        catch (Throwable e)
-        {
-            _log.error("Exception", e);
-            addStatus("Error " + e.toString());
-            setStatus(ERROR_STATUS, e.toString());
-            return;
-        }
-        finally
-        {
-            _end = new Date();
-            addStatus("Job completed at " + DateUtil.formatDateTime(_end));
-            long duration = Math.max(0, _end.getTime() - _start.getTime());
-            addStatus("Elapsed time " + DateUtil.formatDuration(duration));
-        }
-        if (checkInterrupted())
-        {
-            setStatus(INTERRUPTED_STATUS);
-        }
-        else
-        {
-            setStatus(COMPLETE_STATUS);
-        }
-    }
-
-    public boolean isStarted()
-    {
-        return _start != null;
-    }
-
-    public boolean isComplete()
-    {
-        return _end != null;
-    }
-
-    protected boolean canInterrupt()
-    {
-        return true;
-    }
-
-    public synchronized boolean interrupt()
-    {
-        addStatus("Job Interrupted");
-        return super.interrupt();
     }
 
     public ExperimentArchiveDocument createExperimentArchive()
@@ -656,11 +536,6 @@ abstract public class ScriptJob extends PipelineJob
         return true;
     }
 
-    public boolean hasErrors()
-    {
-        return _errors;
-    }
-
     private File getWorkingFolder(Container container) throws Exception
     {
         File dirRoot = FlowAnalyzer.getAnalysisDirectory();
@@ -759,40 +634,4 @@ abstract public class ScriptJob extends PipelineJob
         return _sampleMap;
     }
 
-    public String getStatusText()
-    {
-        if (_start == null)
-            return "Pending";
-        if (_end != null)
-        {
-            if (_errors)
-            {
-                return "Errors";
-            }
-            return "Complete";
-        }
-        if (_errors)
-        {
-            return "Running (errors)";
-        }
-        return "Running";
-    }
-
-    public String getStatusFilePath()
-    {
-        return PipelineJobService.statusPathOf(getStatusFile().getAbsolutePath());
-    }
-
-    public ActionURL urlCancel()
-    {
-        ActionURL ret = PageFlowUtil.urlFor(FlowController.Action.cancelJob, getContainer());
-        ret.addParameter(FlowParam.statusFile.toString(), getStatusFilePath());
-        return ret;
-    }
-
-    public void handleException(Throwable e)
-    {
-        _log.error("Error", e);
-        addError(null, null, e.toString());
-    }
 }

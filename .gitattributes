@@ -384,6 +384,7 @@ flow/src/org/labkey/flow/script/AnalyzeJob.java -text
 flow/src/org/labkey/flow/script/BaseHandler.java -text
 flow/src/org/labkey/flow/script/CompensationCalculationHandler.java -text
 flow/src/org/labkey/flow/script/FlowAnalyzer.java -text
+flow/src/org/labkey/flow/script/FlowJob.java -text
 flow/src/org/labkey/flow/script/FlowPipelineProvider.java -text
 flow/src/org/labkey/flow/script/FlowTaskSet.java -text
 flow/src/org/labkey/flow/script/FlowThreadPool.java -text
@@ -391,6 +392,7 @@ flow/src/org/labkey/flow/script/KeywordsHandler.java -text
 flow/src/org/labkey/flow/script/MoveRunFromWorkspaceJob.java -text
 flow/src/org/labkey/flow/script/ScriptJob.java -text
 flow/src/org/labkey/flow/script/ScriptXarSource.java -text
+flow/src/org/labkey/flow/script/WorkspaceJob.java -text
 flow/src/org/labkey/flow/view/FlowQueryView.java -text
 flow/src/org/labkey/flow/view/GraphColumn.java -text
 flow/src/org/labkey/flow/view/GraphView.java -text

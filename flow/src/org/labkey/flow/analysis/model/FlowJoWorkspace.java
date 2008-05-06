@@ -13,6 +13,7 @@ import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.script.FlowAnalyzer;
+import org.labkey.flow.script.FlowJob;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -769,7 +770,7 @@ abstract public class FlowJoWorkspace implements Serializable
         return new PolygonGate(polygonGate.getXAxis(), polygonGate.getYAxis(), polygon);
     }
 
-    public FlowRun createExperimentRun(User user, Container container, FlowExperiment experiment, File workspaceFile, File runFilePathRoot) throws Exception
+    public FlowRun createExperimentRun(FlowJob job, User user, Container container, FlowExperiment experiment, File workspaceFile, File runFilePathRoot) throws Exception
     {
         URI dataFileURI = new File(workspaceFile.getParent(), "attributes.flowdata.xml").toURI();
         ExperimentService.Interface svc = ExperimentService.get();
@@ -778,10 +779,15 @@ abstract public class FlowJoWorkspace implements Serializable
         Map<SampleInfo, AttributeSet> analysisMap = new LinkedHashMap();
         Map<Analysis, ScriptDocument> scriptDocs = new HashMap();
         Map<Analysis, FlowScript> scripts = new HashMap();
-        Set<CompensationMatrix> compMatrices = getUsedCompensationMatrices();
 
-        for (FlowJoWorkspace.SampleInfo sample : getSamples())
+        List<SampleInfo> samples = getSamples();
+        int iSample = 0;
+        for (FlowJoWorkspace.SampleInfo sample : samples)
         {
+            iSample++;
+            String description = "sample " + iSample + "/" + samples.size() + ":" + sample.getLabel();
+            job.addStatus("Preparing " + description);
+
             AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, null);
             URI uri = null;
             if (runFilePathRoot != null)
@@ -809,6 +815,7 @@ abstract public class FlowJoWorkspace implements Serializable
                     // XXX: check fcs file exists
                     if (uri != null)
                     {
+                        job.addStatus("Generating graphs for " + description);
                         List<FCSAnalyzer.GraphResult> graphResults = FCSAnalyzer.get().generateGraphs(
                                 uri, comp, analysis, analysis.getGraphs());
                         for (FCSAnalyzer.GraphResult graphResult : graphResults)
@@ -829,7 +836,6 @@ abstract public class FlowJoWorkspace implements Serializable
             {
                 AttributeSet compAttrs = new AttributeSet(comp);
                 compAttrs.prepareForSave();
-                compMatrices.add(comp);
                 compMatrixMap.put(comp, compAttrs);
             }
         }
@@ -839,6 +845,8 @@ abstract public class FlowJoWorkspace implements Serializable
         boolean transaction = false;
         try
         {
+            job.addStatus("Begin transaction for workspace " + workspaceFile.getName());
+
             svc.beginTransaction();
             transaction = true;
             ExpRun run = svc.createExperimentRun(container, workspaceFile.getName());
@@ -859,8 +867,10 @@ abstract public class FlowJoWorkspace implements Serializable
             ExpProtocolApplication startingInputs = run.addProtocolApplication(user, null, ExpProtocol.ApplicationType.ExperimentRun);
             startingInputs.addDataInput(user, workspaceData, InputRole.Workspace.toString(), null);
             Map<FlowJoWorkspace.SampleInfo, FlowFCSFile> fcsFiles = new HashMap();
-            for (FlowJoWorkspace.SampleInfo sample : getSamples())
+            iSample = 0;
+            for (FlowJoWorkspace.SampleInfo sample : samples)
             {
+                iSample++;
                 ExpProtocolApplication paSample = run.addProtocolApplication(user, FlowProtocolStep.keywords.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
                 paSample.addDataInput(user, workspaceData, InputRole.Workspace.toString(), InputRole.Workspace.getPropertyDescriptor(container));
                 ExpData fcsFile = svc.createData(container, FlowDataType.FCSFile);
@@ -868,27 +878,37 @@ abstract public class FlowJoWorkspace implements Serializable
                 fcsFile.setDataFileURI(dataFileURI);
 
                 fcsFile.setSourceApplication(paSample);
+                job.addStatus("Saving FCSFile " + iSample + "/" + samples.size() + ":" + sample.getLabel());
                 fcsFile.save(user);
                 fcsFiles.put(sample, new FlowFCSFile(fcsFile));
                 AttributeSet attrs = keywordsMap.get(sample);
                 attrs.doSave(user, fcsFile);
             }
+
+            int iComp = 0;
             Map<CompensationMatrix, FlowCompensationMatrix> flowCompMatrices = new HashMap();
-            for (CompensationMatrix compMatrix : compMatrices)
+            for (Map.Entry<CompensationMatrix, AttributeSet> entry : compMatrixMap.entrySet())
             {
-                FlowCompensationMatrix flowComp = FlowCompensationMatrix.create(user, container, null, compMatrixMap.get(compMatrix));
+                iComp++;
+                CompensationMatrix compMatrix = entry.getKey();
+                AttributeSet compAttrs = entry.getValue();
+                FlowCompensationMatrix flowComp = FlowCompensationMatrix.create(user, container, null, compAttrs);
                 ExpProtocolApplication paComp = run.addProtocolApplication(user, FlowProtocolStep.calculateCompensation.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
                 paComp.addDataInput(user, workspaceData, InputRole.Workspace.toString(), null);
                 flowComp.getData().setSourceApplication(paComp);
                 flowComp.getData().setName(compMatrix.getName() + " " + workspaceFile.getName());
+                job.addStatus("Saving CompMatrix " + iComp + "/" + compMatrixMap.size() + ":" + flowComp.getName());
                 flowComp.getData().save(user);
                 flowCompMatrices.put(compMatrix, flowComp);
             }
+
+            int iAnalysis = 0;
             for (Map.Entry<FlowJoWorkspace.SampleInfo, FlowFCSFile> entry : fcsFiles.entrySet())
             {
                 AttributeSet results = analysisMap.get(entry.getKey());
                 if (results != null)
                 {
+                    iAnalysis++;
                     ExpProtocolApplication paAnalysis = run.addProtocolApplication(user,
                             FlowProtocolStep.analysis.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
                     FlowFCSFile fcsFile = entry.getValue();
@@ -898,6 +918,7 @@ abstract public class FlowJoWorkspace implements Serializable
                     fcsAnalysis.setName(flowProtocol.getFCSAnalysisName(fcsFile));
                     fcsAnalysis.setSourceApplication(paAnalysis);
                     fcsAnalysis.setDataFileURI(dataFileURI);
+                    job.addStatus("Saving FCSAnalysis " + iAnalysis + "/" + analysisMap.size() + ":" + fcsAnalysis.getName());
                     fcsAnalysis.save(user);
                     results.doSave(user, fcsAnalysis);
                     Analysis analysis = getSampleAnalysis(entry.getKey());
@@ -933,6 +954,7 @@ abstract public class FlowJoWorkspace implements Serializable
 
             svc.commitTransaction();
             transaction = false;
+            job.addStatus("Transaction completed successfully for workspace " + workspaceFile.getName());
 
             return new FlowRun(run);
         }
@@ -941,6 +963,7 @@ abstract public class FlowJoWorkspace implements Serializable
             if (transaction)
             {
                 svc.rollbackTransaction();
+                job.addStatus("Transaction failed to complete for workspace " + workspaceFile.getName());
             }
             FlowManager.analyze();
         }

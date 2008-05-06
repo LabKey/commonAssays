@@ -4,6 +4,7 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.jsp.JspLoader;
+import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
@@ -14,7 +15,6 @@ import org.labkey.flow.data.FlowObject;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.script.ScriptJob;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -49,7 +49,7 @@ public class SpringFlowController<A extends Enum> extends SpringActionController
         return ret;
     }
 
-    protected ActionURL executeScript(ScriptJob job, FlowScript script) throws Exception
+    protected ActionURL executeScript(PipelineJob job) throws Exception
     {
         FlowProtocol.ensureForContainer(getUser(), job.getContainer());
         PipelineService service = PipelineService.get();

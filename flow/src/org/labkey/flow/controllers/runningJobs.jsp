@@ -1,24 +1,24 @@
-<%@ page import="org.labkey.api.pipeline.PipelineService"%>
 <%@ page import="org.labkey.api.pipeline.PipelineJob"%>
-<%@ page import="org.labkey.flow.script.ScriptJob"%>
-<%@ page import="java.util.List"%>
-<%@ page import="java.util.ArrayList"%>
+<%@ page import="org.labkey.api.pipeline.PipelineJobData"%>
+<%@ page import="org.labkey.api.pipeline.PipelineService"%>
 <%@ page import="org.labkey.api.view.ActionURL"%>
-<%@ page import="org.labkey.api.pipeline.PipelineJobData" %>
+<%@ page import="org.labkey.flow.script.FlowJob"%>
+<%@ page import="java.util.ArrayList"%>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     PipelineJobData data = PipelineService.get().getPipelineQueue().getJobData(null);
-    List<ScriptJob> jobs = new ArrayList();
+    List<FlowJob> jobs = new ArrayList();
     for (PipelineJob job : data.getPendingJobs())
     {
-        if (job instanceof ScriptJob)
-            jobs.add((ScriptJob) job);
+        if (job instanceof FlowJob)
+            jobs.add((FlowJob) job);
     }
     for (PipelineJob job : data.getRunningJobs())
     {
-        if (job instanceof ScriptJob)
-            jobs.add((ScriptJob) job);
+        if (job instanceof FlowJob)
+            jobs.add((FlowJob) job);
     }
 %>
 <% if (jobs.size() == 0) { %>
@@ -27,7 +27,7 @@
 %>
 <table>
     <tr><th>Status</th><th>Description</th><th>Folder</th><th>Owner</th></tr>
-<% for (ScriptJob job : jobs) {
+<% for (FlowJob job : jobs) {
 %>
     <tr><td><a href="<%=h(job.urlStatus())%>"><%=h(job.getStatusText())%></a></td>
         <td><%=h(job.getDescription())%></td>
