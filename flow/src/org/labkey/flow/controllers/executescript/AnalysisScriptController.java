@@ -508,7 +508,16 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             workspaceFile = new File(FlowSettings.getWorkingDirectory(), form.getWorkspace().getName());
         }
 
-        WorkspaceJob job = new WorkspaceJob(getViewBackgroundInfo(), workspaceData, experiment, workspaceFile, runFilePathRoot);
+        ViewBackgroundInfo info = getViewBackgroundInfo();
+        PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
+        if (pr == null)
+        {
+            // root-less pipeline job for workapce uploaded via the browser
+            assert path == null : "Shouldn't be able to upload workspace from pipeline without a pipeline root";
+            info.setUrlHelper(null);
+        }
+
+        WorkspaceJob job = new WorkspaceJob(info, workspaceData, experiment, workspaceFile, runFilePathRoot);
         return executeScript(job);
     }
 
