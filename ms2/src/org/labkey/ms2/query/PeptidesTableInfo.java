@@ -339,14 +339,14 @@ public class PeptidesTableInfo extends FilteredTable
 
     private void addMassColumns(SqlDialect dialect)
     {
-        SQLFragment precursorMassSQL = new SQLFragment(getAliasName() + ".mass + " + getAliasName() + ".deltamass");
+        SQLFragment precursorMassSQL = new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".mass + " + ExprColumn.STR_TABLE_ALIAS + ".deltamass");
         ColumnInfo precursorMass = new ExprColumn(this, "PrecursorMass", precursorMassSQL, Types.REAL);
         precursorMass.setFormatString("0.0000");
         precursorMass.setWidth("65");
         precursorMass.setCaption("ObsMH+");
         addColumn(precursorMass);
 
-        SQLFragment fractionalDeltaMassSQL = new SQLFragment("ABS(" + getAliasName() + ".deltamass - " + dialect.getRoundFunction(getAliasName() + ".deltamass") + ")");
+        SQLFragment fractionalDeltaMassSQL = new SQLFragment("ABS(" + ExprColumn.STR_TABLE_ALIAS + ".deltamass - " + dialect.getRoundFunction(ExprColumn.STR_TABLE_ALIAS + ".deltamass") + ")");
         ColumnInfo fractionalDeltaMass = new ExprColumn(this, "FractionalDeltaMass", fractionalDeltaMassSQL, Types.REAL);
         fractionalDeltaMass.setFormatString("0.0000");
         fractionalDeltaMass.setWidth("55");
