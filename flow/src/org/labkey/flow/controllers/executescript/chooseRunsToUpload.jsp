@@ -41,7 +41,7 @@
         %></table>
         <labkey:selectAll/>
         <labkey:clearAll/>
-        <labkey:button text="Upload Selected Runs" action="<%=AnalysisScriptController.Action.uploadRuns%>"/>
+        <labkey:button text="Import Selected Runs" action="<%=AnalysisScriptController.Action.uploadRuns%>"/>
         </form><%
     }
     else

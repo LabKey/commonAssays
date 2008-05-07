@@ -118,6 +118,7 @@ public class FlowPipelineProvider extends PipelineProvider
         ActionURL url = PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer());
         String srcURL = context.getActionURL().toString();
         url.replaceParameter("srcURL", srcURL);
+        URI rootURI = root.getUri();
 
         boolean hasFlowDir = false;
         
@@ -131,8 +132,8 @@ public class FlowPipelineProvider extends PipelineProvider
                 File[] fcsFiles = dir.listFiles((FileFilter)FCS.FCSFILTER);
                 if (null == fcsFiles || 0 == fcsFiles.length)
                     continue;
-                url.replaceParameter("path", URIUtil.relativize(root.getUri(), dir.toURI()).toString());
-                FileAction action = new UploadRunAction("Upload Flow Run", url, dir);
+                url.replaceParameter("path", URIUtil.relativize(rootURI, dir.toURI()).toString());
+                FileAction action = new UploadRunAction("Import Flow Run", url, dir);
                 action.setDescription("" + fcsFiles.length + "&nbsp;fcs&nbsp;file" + ((fcsFiles.length>1)?"s":""));
                 entry.addAction(action);
                 hasFlowDir = true;
@@ -144,8 +145,8 @@ public class FlowPipelineProvider extends PipelineProvider
             FileEntry entryRoot = entries.get(0);
             File file = new File(entryRoot.getURI());
 
-            url.replaceParameter("path", URIUtil.relativize(root.getUri(),file.toURI()).toString());
-            FileAction action = new FileAction("Upload Multiple Runs", url, null);
+            url.replaceParameter("path", URIUtil.relativize(rootURI, file.toURI()).toString());
+            FileAction action = new FileAction("Import Multiple Runs", url, null);
             action.setDescription("<p><b>Flow Instructions:</b><br>Navigate to the directories containing FCS files.  Click the button to upload FCS files in the directories shown.</p>");
             entryRoot.addAction(action);
         }
