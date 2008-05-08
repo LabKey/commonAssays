@@ -537,10 +537,8 @@ public class FlowManager
             this.parser = parser;
         }
 
-        public int search(Search.SearchTermParser parser, Set<Container> containers, List<SearchHit> hits)
+        public void search(Search.SearchTermParser parser, Set<Container> containers, List<SearchHit> hits)
         {
-            int startCount = hits.size();
-
             List<String> ids = new ArrayList<String>(containers.size());
             for(Container c : containers)
                 ids.add(c.getId());
@@ -594,8 +592,6 @@ public class FlowManager
             {
                 ResultSetUtil.close(rs);
             }
-
-            return hits.size() - startCount;
         }
 
         protected MultiMap<String, String> search()
