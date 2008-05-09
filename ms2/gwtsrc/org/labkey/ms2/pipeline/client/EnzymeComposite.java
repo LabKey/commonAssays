@@ -1,0 +1,197 @@
+package org.labkey.ms2.pipeline.client;
+
+import com.google.gwt.user.client.ui.*;
+import java.util.*;
+
+/**
+ * User: billnelson@uky.edu
+ * Date: Apr 24, 2008
+ */
+
+/**
+ * <code>EnzymeComposite</code>
+ */
+public class EnzymeComposite extends SearchFormComposite implements SourcesChangeEvents
+{
+    protected VerticalPanel instance = new VerticalPanel();
+    protected ListBox enzymeListBox = new ListBox();
+    protected Label enzymeReadOnly = new Label();
+
+    public EnzymeComposite()
+    {
+        super();
+        init();
+    }
+
+    public void init()
+    {
+        enzymeListBox.setVisibleItemCount(1);
+        enzymeReadOnly.setStylePrimaryName("ms-readonly");
+        instance.add(enzymeListBox);
+        initWidget(instance);
+        labelWidget = new Label();
+    }
+
+    public void update(Map enzymeMap)
+    {
+        if(enzymeMap == null) return;
+        Set keySet =  enzymeMap.keySet();
+        ArrayList sorted = new ArrayList(keySet);
+        Collections.sort(sorted);
+        enzymeListBox.clear();
+
+        for(Iterator it = sorted.iterator(); it.hasNext();)
+        {
+            String name = (String)it.next();
+            String value = (String)enzymeMap.get(name);
+            enzymeListBox.addItem(name, value);
+        }
+        setSelectedEnzymeByName("Trypsin");
+    }
+
+
+    public void setWidth(String width)
+    {
+        instance.setWidth(width);
+        enzymeListBox.setWidth(width);
+        enzymeReadOnly.setWidth(width);
+    }
+
+    public Widget getLabel(String style)
+    {
+        ((Label)labelWidget).setText("Enzyme:");
+        labelWidget.setStylePrimaryName(style);
+        return labelWidget;
+    }
+
+    public String validate()
+    {
+        return "";
+    }
+
+    public void setName(String s)
+    {
+        enzymeListBox.setName(s);
+    }
+
+    public String getName()
+    {
+        return enzymeListBox.getName();
+    }
+
+    public String getSelectedEnzyme()
+    {
+        int index = enzymeListBox.getSelectedIndex();
+        if(index == -1) return "";
+        return enzymeListBox.getValue(index);
+    }
+
+    public String setSelectedEnzymeByName(String enzyme)
+    {
+
+        int enzCount = enzymeListBox.getItemCount();
+        boolean foundEnz = false;
+        for(int i = 0; i < enzCount; i++)
+        {
+            if(enzyme.equals(enzymeListBox.getItemText(i)))
+            {
+                enzymeListBox.setSelectedIndex(i);
+                foundEnz = true;
+            }
+        }
+        if(!foundEnz)
+            return "The enzyme '" + enzyme + "' was not found.";
+        return "";
+    }
+
+    public String setSelectedEnzyme(String enzymeSignature)
+    {
+        Enzyme enzyme;
+        try
+        {
+            enzyme = new Enzyme(enzymeSignature);
+        }
+        catch(EnzymeParseException e)
+        {
+            return e.getMessage();
+        }
+        StringBuffer error = new StringBuffer();
+        CutSite[] cutSites = enzyme.getCutSite();
+        if(cutSites == null)
+        {
+            return "Cut sites equal to null for: " + enzymeSignature;
+        }
+        for(int i = 0; i < cutSites.length; i++)
+        {
+            error.append(findEnzyme(cutSites[i]));
+        }
+        return error.toString();
+    }
+
+    private String findEnzyme(CutSite cutSite)
+    {
+        if(cutSite == null) return "Cut site is equal to null.";
+        int enzCount = enzymeListBox.getItemCount();
+        boolean foundEnz = false;
+
+        for(int i = 0; i < enzCount; i++)
+        {
+            Enzyme listCutSite;
+            Enzyme origCutSite;
+            try
+            {
+                String listBoxValue = enzymeListBox.getValue(i);
+                listCutSite = new Enzyme(listBoxValue);
+                origCutSite = new Enzyme(cutSite.getSignature());
+            }
+            catch(EnzymeParseException e)
+            {
+                return e.getMessage();
+            }
+            if(origCutSite.equals(listCutSite))
+            {
+                enzymeListBox.setSelectedIndex(i);
+                foundEnz = true;
+            }
+        }
+        if(!foundEnz)
+            return "The enzyme '" + cutSite.getSignature() + "' was not found.";
+        return "";
+    }
+
+    public void setReadOnly(boolean readOnly)
+    {
+        super.setReadOnly(readOnly);
+
+        if(readOnly)
+        {
+            int index = enzymeListBox.getSelectedIndex();
+            if(index != -1)
+            {
+                String enzymeName = enzymeListBox.getItemText(index);
+                enzymeReadOnly.setText(enzymeName);
+            }
+            else
+            {
+                enzymeReadOnly.setText(" ");   
+            }
+            instance.remove(enzymeListBox);
+            instance.insert(enzymeReadOnly, 0);
+        }
+        else
+        {
+            instance.remove(enzymeReadOnly);
+            instance.add(enzymeListBox);
+        }
+    }
+
+    public void addChangeListener(ChangeListener changeListener)
+    {
+        enzymeListBox.addChangeListener(changeListener);
+    }
+
+    public void removeChangeListener(ChangeListener changeListener)
+    {
+        enzymeListBox.removeChangeListener(changeListener);
+    }
+}

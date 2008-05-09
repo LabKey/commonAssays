@@ -20,7 +20,7 @@ public class SequestParamsV1 extends SequestParams
             130,                                                       //sortOrder
             "1",                                                      //The value of the property
             "enzyme_number",                                           // the sequest.params property name
-            "[KR]|{P}",                                                       // the input.xml label
+            "",                                                       // the input.xml label
             ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
             null,
             false                                                                //pass threw- no Xtandem counterpart
@@ -38,7 +38,7 @@ public class SequestParamsV1 extends SequestParams
 
         _params.add(new SequestParam(
             590,                                                       //sortOrder
-            "No_Enzyme\t\t\t\t0\t0\t-\t\t-",                                            //The value of the property
+            "nonspecific\t\t\t\t0\t0\t-\t\t-",                                            //The value of the property
             "enzyme0",                                // the sequest.params property name
             "0.\t",       // the sequest.params comment
             ConverterFactory.getSequestEnzymeConverter(),                      //converts the instance to a sequest.params line
@@ -48,7 +48,7 @@ public class SequestParamsV1 extends SequestParams
 
         _params.add(new SequestParam(
             600,                                                       //sortOrder
-            "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP",                                            //The value of the property
+            "trypsin\t\t\t\t1\tKR\t\tP",                                            //The value of the property
             "enzyme1",                                // the sequest.params property name
             "1.\t",       // the sequest.params comment
             ConverterFactory.getSequestEnzymeConverter(),                      //converts the instance to a sequest.params line

@@ -1346,7 +1346,7 @@ public abstract class SequestParamsBuilder
             //Testing no enzyme
             String expected1 = "0";
             //String expected2 = "No_Enzyme\t\t\t\t0\t0\t-\t\t-";
-            String expected2 = "No_Enzyme 0 0 - -";
+            String expected2 = "nonspecific 0 0 - -";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[X]|[X]</note>" +
@@ -1368,7 +1368,7 @@ public abstract class SequestParamsBuilder
 
             expected1 = "1";
             //expected2 = "Trypsin_K\t\t\t\t1\tK\t\tP";
-            expected2 = "Trypsin_K 1 1 K P";
+            expected2 = "trypsin_k 1 1 K P";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">[K]|{P}</note>" +
@@ -1390,10 +1390,10 @@ public abstract class SequestParamsBuilder
 
             expected1 = "1";
             //expected2 = "Trypsin(KRLNH)\t\t\t\t1\tKRLNH\t\t-";
-            expected2 = "Trypsin(KRLNH) 1 1 KRLNH -";
+            expected2 = "pepsina 1 1 FL -";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
-                "<note type=\"input\" label=\"protein, cleavage site\">[KRLNH]|[X]</note>" +
+                "<note type=\"input\" label=\"protein, cleavage site\">[LF]|[X]</note>" +
                 "</bioml>");
 
             parserError = spb.initEnzymeInfo();
@@ -1456,7 +1456,6 @@ public abstract class SequestParamsBuilder
             assertEquals("enzyme_description", expected2, actual);
 
             expected1 = "1";
-            //TODO: I don't know if this syntax is right(1 or 0)?
             expected2 = "Unknown([X]|[W]) 1 0 W -";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1483,7 +1482,7 @@ public abstract class SequestParamsBuilder
         {
             String expected1 = "1";
 //            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
-            String expected2 = "Trypsin(KR/P) 1 1 KR P";
+            String expected2 = "trypsin 1 1 KR P";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "</bioml>");
@@ -1507,7 +1506,7 @@ public abstract class SequestParamsBuilder
         {
             String expected1 = "1";
 //            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
-            String expected2 = "Trypsin(KR/P) 1 1 KR P";
+            String expected2 = "trypsin 1 1 KR P";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\"></note>" +
@@ -1535,7 +1534,7 @@ public abstract class SequestParamsBuilder
         {
             String expected1 = "1";
 //            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
-            String expected2 = "Trypsin(KR/P) 1 1 KR P";
+            String expected2 = "trypsin 1 1 KR P";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
                 "<note type=\"input\" label=\"protein, cleavage site\">foo</note>" +

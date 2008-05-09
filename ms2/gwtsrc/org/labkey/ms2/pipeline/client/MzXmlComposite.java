@@ -39,6 +39,7 @@ public class MzXmlComposite extends SearchFormComposite
     public void init()
     {
         initWidget(instance);
+        labelWidget = new Label();
     }
 
     public void update(Map mzXmlMap)
@@ -48,6 +49,10 @@ public class MzXmlComposite extends SearchFormComposite
         instance.clear();
         int count = 1;
         int num = keySet.size();
+        if(num > 1)
+        {
+            ((Label)labelWidget).setText("Analyze files:");
+        }
         if(num > 0)
         {
             for(Iterator it = keySet.iterator(); it.hasNext();)
@@ -69,7 +74,9 @@ public class MzXmlComposite extends SearchFormComposite
                         count++;
                     }    
                 }
-                instance.add(new HTML(name.toString()));
+                HTML html = new HTML(name.toString());
+                html.setStylePrimaryName("ms-readonly");
+                instance.add(html);
             }
         }
         else
@@ -95,7 +102,7 @@ public class MzXmlComposite extends SearchFormComposite
 
     public Widget getLabel(String style)
     {
-        labelWidget = new Label("Analyze file:");
+        ((Label)labelWidget).setText("Analyze file:");
         labelWidget.setStylePrimaryName(style);
         return labelWidget;
     }

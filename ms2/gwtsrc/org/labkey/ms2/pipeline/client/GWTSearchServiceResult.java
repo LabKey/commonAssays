@@ -27,7 +27,6 @@ import java.util.Map;
 
 public class GWTSearchServiceResult implements IsSerializable
 {
-
     /**
      * @gwt.typeArgs <java.lang.String>
      */
@@ -36,6 +35,25 @@ public class GWTSearchServiceResult implements IsSerializable
      * @gwt.typeArgs <java.lang.String>
      */
     private List sequenceDbPaths;
+    /**
+     * @gwt.typeArgs <java.lang.String>
+     */
+    private List mascotTaxonomyList;
+
+    /**
+     * @gwt.typeArgs <java.lang.String, java.lang.String>
+     */
+    private Map enzymeMap;
+
+    /**
+     * @gwt.typeArgs <java.lang.String, java.lang.String>
+     */
+    private Map mod0Map;
+
+    /**
+     * @gwt.typeArgs <java.lang.String, java.lang.String>
+     */
+    private Map mod1Map;
 
     private String defaultSequenceDb;
 
@@ -82,7 +100,7 @@ public class GWTSearchServiceResult implements IsSerializable
     }
     /**
      * @gwt.typeArgs <java.lang.String>
-     */    
+     */
     public List getSequenceDbPaths()
     {
         return sequenceDbPaths;
@@ -116,6 +134,7 @@ public class GWTSearchServiceResult implements IsSerializable
 
     public void appendError(String error)
     {
+        if(error.trim().length() == 0) return;
         if(errors.length() > 0)
             errors += "\n";
         errors += error;
@@ -161,7 +180,6 @@ public class GWTSearchServiceResult implements IsSerializable
         return mzXmlMap;
     }
 
-
     /**
      * @gwt.typeArgs  mzXmlMap <java.lang.String, java.lang.String>
      */
@@ -169,4 +187,70 @@ public class GWTSearchServiceResult implements IsSerializable
     {
         this.mzXmlMap = mzXmlMap;
     }
+
+    /**
+     * @gwt.typeArgs <java.lang.String, java.lang.String>
+     */
+    public Map getEnzymeMap()
+    {
+        return enzymeMap;
+    }
+
+    /**
+     * @gwt.typeArgs  enzymeMap <java.lang.String, java.lang.String>
+     */
+    public void setEnzymeMap(Map enzymeMap)
+    {
+        this.enzymeMap = enzymeMap;
+    }
+
+    /**
+     * @gwt.typeArgs <java.lang.String, java.lang.String>
+     */
+    public Map getMod0Map()
+    {
+        return mod0Map;
+    }
+
+    /**
+     * @gwt.typeArgs  modMap <java.lang.String, java.lang.String>
+     */
+    public void setMod0Map(Map mod0Map)
+    {
+        this.mod0Map = mod0Map;
+    }
+
+    /**
+     * @gwt.typeArgs <java.lang.String, java.lang.String>
+     */
+    public Map getMod1Map()
+    {
+        return mod1Map;
+    }
+
+    /**
+     * @gwt.typeArgs  modMap <java.lang.String, java.lang.String>
+     */
+    public void setMod1Map(Map mod1Map)
+    {
+        this.mod1Map = mod1Map;
+    }
+
+
+    /**
+     * @gwt.typeArgs <java.lang.String>
+     */
+    public List getMascotTaxonomyList()
+    {
+           return mascotTaxonomyList;
+    }
+    
+    /**
+     * @gwt.typeArgs mascotTaxonomyList <java.lang.String>
+     */
+    public void setMascotTaxonomyList(List mascotTaxonomyList)
+    {
+       this.mascotTaxonomyList = mascotTaxonomyList;
+    }
+
 }

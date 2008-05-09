@@ -22,10 +22,8 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
-import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
-import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
-import org.labkey.ms2.pipeline.PipelineController;
+import org.labkey.ms2.pipeline.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -179,6 +177,26 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return MS2PipelineManager.getSequenceDirList(new File(sequenceRoot), "");
     }
 
+    public List<String> getTaxonomyList() throws IOException
+    {
+        //"X! Tandem does not support Mascot style taxonomy.
+        return null;
+    }
+
+    public Map<String, String> getEnzymes() throws IOException
+    {
+        return SearchFormUtil.getDefaultEnzymeMap();
+    }
+
+    public Map<String, String> getResidue0Mods() throws IOException
+    {
+        return SearchFormUtil.getDefaultStaticMods();
+    }
+
+    public Map<String, String> getResidue1Mods() throws IOException
+    {
+        return SearchFormUtil.getDefaultDynamicMods();
+    }
     public String getHelpTopic()
     {
         return "pipelineXTandem";

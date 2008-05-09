@@ -1,6 +1,8 @@
 package org.labkey.ms2.pipeline.client;
 
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.core.client.GWT;
+
 import java.util.*;
 import org.labkey.api.gwt.client.ui.ImageButton;
 
@@ -9,11 +11,11 @@ import org.labkey.api.gwt.client.ui.ImageButton;
  * Date: Mar 13, 2008
  */
 
-public class SequenceDbComposite extends SearchFormComposite implements SourcesChangeEvents
+public abstract class SequenceDbComposite extends SearchFormComposite implements SourcesChangeEvents, SourcesClickEvents
 {
     protected VerticalPanel instance = new VerticalPanel();
     protected ListBox sequenceDbPathListBox = new ListBox();
-    protected ListBox sequenceDbListBox = new ListBox(true);
+    protected ListBox sequenceDbListBox = new ListBox(false);
     protected Hidden sequenceDbHidden = new Hidden();
     protected Hidden sequenceDbPathHidden = new Hidden();
     protected Label sequenceDbLabel = new Label();
@@ -24,31 +26,20 @@ public class SequenceDbComposite extends SearchFormComposite implements SourcesC
     protected boolean foundDefaultDb;
     public static final String DB_DIR_ROOT = "<root>";
 
-    public SequenceDbComposite()
-    {
-        super();
-        init();
-    }
 
-//    public SequenceDbComposite(ArrayList directories, ArrayList files, String defaultDb, String searchEngine)
-//    {
-//        super();
-//        update(directories, files, defaultDb);
-//    }
     public void init()
     {
         sequenceDbPathListBox.setVisibleItemCount(1);
+        sequenceDbLabel.setStylePrimaryName("ms-readonly");
         dirPanel.add(sequenceDbPathListBox);
         instance.add(sequenceDbListBox);
         initWidget(instance);
     }
 
-    public void update(List files, List directories, String defaultDb)
+    public void update(List files, List directories, String defaultDb, List taxonomy)
     {
         setSequenceDbPathListBoxContents(directories,defaultDb);
         setSequenceDbsListBoxContents(files,defaultDb);
-
-
     }
 
     public void setSequenceDbPathListBoxContents(List paths, String defaultDb)
@@ -134,7 +125,7 @@ public class SequenceDbComposite extends SearchFormComposite implements SourcesC
         }
         setDefault(defaultDb);
     }
-    // returns false if it fired the dbPath changeListener
+    
     public boolean setDefault(String defaultDb)
     {
         String path = "/";
@@ -245,9 +236,26 @@ public class SequenceDbComposite extends SearchFormComposite implements SourcesC
     {
         sequenceDbListBox.setVisibleItemCount(itemCount);
     }
-    //For X! Tandem's refresh button.
+
+    public void addRefreshClickListener(ClickListener listener)
+    {
+            refreshButton.addClickListener(listener);
+    }
+
+    public void removeRefreshClickListener(ClickListener listener)
+    {
+            refreshButton.removeClickListener(listener);
+    }
+
     public void addClickListener(ClickListener listener)
-    {}
+    {
+            sequenceDbListBox.addClickListener(listener);
+    }
+
+    public void removeClickListener(ClickListener listener)
+    {
+            sequenceDbListBox.removeClickListener(listener);
+    }
 
     public void setReadOnly(boolean readOnly)
     {
@@ -255,7 +263,6 @@ public class SequenceDbComposite extends SearchFormComposite implements SourcesC
         String path = "/";
         String sequenceDbName = "";
         String dbWidgetName = "";
-
 
         if(readOnly)
         {
@@ -296,7 +303,6 @@ public class SequenceDbComposite extends SearchFormComposite implements SourcesC
                 instance.add(sequenceDbListBox);
             }
         }
-        
     }
 
     public Widget getLabel(String style)
@@ -310,10 +316,16 @@ public class SequenceDbComposite extends SearchFormComposite implements SourcesC
     {
         if(getSelectedDb().equals("") || getSelectedDb().equals("None found.") )
         {
-            return "Error: A sequence database must be selected.";
+            return "A sequence database must be selected.";
         }
         return "";
     }
+
+    abstract public void setTaxonomyListBoxContents(List taxonomyList);
+    abstract public String getSelectedTaxonomy();
+    abstract public String setDefaultTaxonomy(String name);
+    abstract public void addTaxonomyChangeListener(ChangeListener listener);
+    abstract public void removeTaxonomyChangeListener(ChangeListener listener);
 
     protected class RefreshButton extends ImageButton
     {

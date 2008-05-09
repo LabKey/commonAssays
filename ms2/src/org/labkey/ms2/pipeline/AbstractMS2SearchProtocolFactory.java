@@ -27,8 +27,8 @@ abstract public class AbstractMS2SearchProtocolFactory extends AbstractFileAnaly
 {
     protected AbstractMS2SearchProtocol createProtocolInstance(ParamParser parser)
     {
-        // Remove the pipeline specific parameters.
-        String databases = parser.removeInputParameter("pipeline, database");
+        // Get the pipeline specific parameters.
+        String databases = parser.getInputParameter("pipeline, database");
 
         // Remove the parameters set in the pipeline job.
         parser.removeInputParameter("list path, default parameters");

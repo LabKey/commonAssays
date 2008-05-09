@@ -549,7 +549,9 @@ public class PipelineController extends SpringActionController
             props.put("searchEngine", form.getSearchEngine());
             props.put("action", SpringActionController.getActionName(getAction()) + ".view");
             props.put("path",form.getPath());
-            return new GWTView("org.labkey.ms2.pipeline.Search",props);
+            GWTView result = new GWTView(org.labkey.ms2.pipeline.client.Search.class, props);
+            result.setImmediateLoad(true);
+            return result;
         }
 
         private String getErrors(BindException errors)

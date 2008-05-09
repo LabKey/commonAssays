@@ -5,10 +5,8 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.view.*;
 import org.labkey.api.pipeline.PipelineProtocol;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
-import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
-import org.labkey.ms2.pipeline.PipelineController;
-import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.pipeline.*;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
@@ -102,6 +100,27 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
         List dbList = sequestClient.getSequenceDbDirList(sequenceRoot.getPath());
         if(dbList == null) throw new IOException("Trouble connecting to the Sequest server.");
         return dbList;
+    }
+
+    public List<String> getTaxonomyList() throws IOException 
+    {
+        //"Sequest does not support Mascot style taxonomy.
+        return null;
+    }
+
+    public Map<String, String> getEnzymes() throws IOException
+    {
+        return SearchFormUtil.getDefaultEnzymeMap();
+    }
+
+    public Map<String, String> getResidue0Mods() throws IOException
+    {
+        return SearchFormUtil.getDefaultStaticMods();
+    }
+
+    public Map<String, String> getResidue1Mods() throws IOException
+    {
+        return SearchFormUtil.getDefaultDynamicMods();
     }
 
     public String getHelpTopic()

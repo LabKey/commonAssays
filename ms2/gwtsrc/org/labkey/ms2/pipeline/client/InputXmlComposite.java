@@ -5,16 +5,22 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.DOM;
 import org.labkey.api.gwt.client.util.StringUtils;
 
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Iterator;
+
 /**
  * User: billnelson@uky.edu
  * Date: Apr 8, 2008
  */
-public abstract class InputXmlComposite extends SearchFormComposite
+public abstract class InputXmlComposite extends SearchFormComposite  implements SourcesChangeEvents
 {
-    private TextAreaWrapable inputXmlTextArea = new TextAreaWrapable();
-    private Hidden inputXmlHidden = new Hidden();
-    private HTML inputXmlHtml = new HTML();
-    private HorizontalPanel instance = new HorizontalPanel();
+    protected TextAreaWrapable inputXmlTextArea = new TextAreaWrapable();
+    protected Hidden inputXmlHidden = new Hidden();
+    protected HTML inputXmlHtml = new HTML();
+    protected HorizontalPanel instance = new HorizontalPanel();
+    protected ParamParser params;
     public static final String DEFAULT_XML = "<?xml version=\"1.0\"?>\n" +
                 "<bioml>\n" +
                 "<!-- Override default parameters here. -->\n" +
@@ -28,14 +34,15 @@ public abstract class InputXmlComposite extends SearchFormComposite
 
     public void setDefault()
     {
-        inputXmlTextArea.setText(DEFAULT_XML);
+        update(DEFAULT_XML);
     }
 
-    public void update(String text)
+    public String update(String text)
     {
         if(text.equals(""))
             text = DEFAULT_XML;
         inputXmlTextArea.setText(text);
+        return validate();
     }
 
     public void setReadOnly(boolean readOnly) {
@@ -63,6 +70,7 @@ public abstract class InputXmlComposite extends SearchFormComposite
     {
         inputXmlTextArea.setVisibleLines(10);
         inputXmlTextArea.setWrap("OFF");
+        inputXmlHtml.setStylePrimaryName("ms-readonly");
         instance.add(inputXmlTextArea);
         initWidget(instance);
     }
@@ -86,7 +94,107 @@ public abstract class InputXmlComposite extends SearchFormComposite
 
     public String validate()
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return params.validate();
+    }
+
+    public void addChangeListener(ChangeListener changeListener)
+    {
+        inputXmlTextArea.addChangeListener(changeListener);
+    }
+
+    public void removeChangeListener(ChangeListener changeListener)
+    {
+        inputXmlTextArea.removeChangeListener(changeListener);
+    }
+
+    public void setSequenceDb(String name) throws SearchFormException
+    {
+        params.setSequenceDb(name);
+    }
+
+    public String getSequenceDb()
+    {
+        return params.getSequenceDb();
+    }
+
+    public void setTaxonomy(String name) throws SearchFormException
+    {/*only implemented for Mascot*/}
+
+    public String getTaxonomy()
+    {
+        return params.getTaxonomy();
+    }
+
+    public void setEnzyme(String name) throws SearchFormException
+    {
+        params.setEnzyme(name);
+    }
+
+    public String getEnzyme()
+    {
+        return params.getEnzyme();
+    }
+
+    public Map getStaticMods(Map knownMods)
+    {
+        return mods2Map(params.getStaticMods(), knownMods);
+    }
+
+    public void setStaticMods(Map mods) throws SearchFormException
+    {
+        params.setStaticMods(mods);
+    }
+
+    public Map getDynamicMods(Map knownMods)
+    {
+        return mods2Map(params.getDynamicMods(), knownMods);
+    }
+
+    public void setDynamicMods(Map mods) throws SearchFormException
+    {
+        params.setDynamicMods(mods);
+    }
+
+    public void removeSequenceDb()
+    {
+        params.removeSequenceDb();
+    }
+
+    public void removeTaxonomy()
+    {
+        params.removeTaxonomy();
+    }
+
+    public void removeEnzyme()
+    {
+        params.removeEnzyme();
+    }
+
+    private Map mods2Map(List mods, Map knownMods)
+    {
+        if(knownMods == null || mods == null) return null;
+        Map returnMap = new HashMap();
+        for(Iterator modsIt = mods.iterator(); modsIt.hasNext();)
+        {
+            String mod = (String)modsIt.next();
+            boolean found = false;
+            for(Iterator knownIt = knownMods.entrySet().iterator();knownIt.hasNext();)
+            {
+                Map.Entry knownEntry = (Map.Entry)knownIt.next();
+                String known = (String)knownEntry.getValue();
+                if(mod.equals(known))
+                {
+                    returnMap.put(knownEntry.getKey(),knownEntry.getValue());
+                    found = true;
+                    continue;
+                }
+            }
+            if(!found)
+            {
+                returnMap.put(mod, mod);
+            }
+        }
+        return returnMap;
     }
 
     private class TextAreaWrapable extends TextArea

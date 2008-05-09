@@ -1,7 +1,11 @@
 package org.labkey.ms2.pipeline.client.tandem;
 
 import com.google.gwt.user.client.ui.ClickListener;
+import com.google.gwt.user.client.ui.ChangeListener;
+import com.google.gwt.core.client.GWT;
 import org.labkey.ms2.pipeline.client.SequenceDbComposite;
+
+import java.util.List;
 
 /**
  * User: billnelson@uky.edu
@@ -17,6 +21,7 @@ public class XtandemSequenceDbComposite extends SequenceDbComposite
     public XtandemSequenceDbComposite()
     {
         super();
+        init();
     }
 
     public void init()
@@ -62,6 +67,42 @@ public class XtandemSequenceDbComposite extends SequenceDbComposite
 
     public void addClickListener(ClickListener listener)
     {
-        refreshButton.addClickListener(listener);
+        if(GWT.getTypeName(listener).equals("org.labkey.ms2.pipeline.client.Search$RefreshSequenceDbPathsClickListener"))
+            refreshButton.addClickListener(listener);
+        else
+            super.addClickListener(listener);
+    }
+
+    public void removeClickListener(ClickListener listener)
+    {
+        if(GWT.getTypeName(listener).equals("org.labkey.ms2.pipeline.client.Search$RefreshSequenceDbPathsClickListener"))
+            refreshButton.removeClickListener(listener);
+        else
+            super.removeClickListener(listener);
+    }
+
+    public void setTaxonomyListBoxContents(List taxonomyList)
+    {
+        //No Mascot style taxonomy in X! Tandem
+    }
+
+    public String getSelectedTaxonomy()
+    {
+        //No Mascot style taxonomy in X! Tandem
+        return null;
+    }
+
+    public String setDefaultTaxonomy(String name)
+    {
+        //No Mascot style taxonomy in X! Tandem
+        return null;
+    }
+
+    public void addTaxonomyChangeListener(ChangeListener listener) {
+        ///No Mascot style taxonomy in X! Tandem
+    }
+
+    public void removeTaxonomyChangeListener(ChangeListener listener) {
+        //No Mascot style taxonomy in X! Tandemm
     }
 }

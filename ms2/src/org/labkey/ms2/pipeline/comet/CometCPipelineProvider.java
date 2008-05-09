@@ -129,4 +129,24 @@ public class CometCPipelineProvider extends AbstractMS2SearchPipelineProvider
         // No user interface for this search type.
         throw new UnsupportedOperationException("Comet does not support search job creation.");
     }
+
+    public List<String> getTaxonomyList() throws IOException {
+        // No user interface for this search type.
+        throw new UnsupportedOperationException("Comet does not support Mascot style taxonomy.");
+    }
+
+    public Map<String, String> getEnzymes() throws IOException {
+        // No user interface for this search type.
+        throw new UnsupportedOperationException("Comet does not support search job creation.");
+    }
+
+    public Map<String, String> getResidue0Mods() throws IOException {
+        // No user interface for this search type.
+        throw new UnsupportedOperationException("Comet does not support search job creation.");
+    }
+
+    public Map<String, String> getResidue1Mods() throws IOException {
+        // No user interface for this search type.
+        throw new UnsupportedOperationException("Comet does not support search job creation.");
+    }
 }

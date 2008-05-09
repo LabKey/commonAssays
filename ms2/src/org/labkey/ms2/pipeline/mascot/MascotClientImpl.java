@@ -29,7 +29,9 @@ import org.labkey.api.ms2.SearchClient;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.HelpTopic;
-
+import org.labkey.ms2.pipeline.client.Enzyme;
+import org.labkey.ms2.pipeline.client.CutSite;
+import org.labkey.ms2.pipeline.SearchFormUtil;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -666,6 +668,37 @@ public class MascotClientImpl implements SearchClient
         return statusString;
     }
 
+    public List<String> getTaxonomyList()
+    {
+        errorCode = 0;
+        errorString = "";
+
+        findWorkableSettings (false);
+
+        Properties results;
+        if (0 == errorCode || -3 == errorCode)
+            results = getParametersResults();
+        else
+            results = new Properties();
+
+        List<String> taxonomies = new ArrayList<String>();
+        String dbsString = results.getProperty("HTTPContent", "");
+        String[] contentLines = dbsString.split("\n");
+        boolean sectionTAXONOMY = false;
+        for (String contentLine : contentLines)
+        {
+            if (contentLine.startsWith("[") && contentLine.endsWith("]"))
+                sectionTAXONOMY = "[TAXONOMY]".equals(contentLine);
+            else
+            {
+                if (sectionTAXONOMY)
+                    if (!"".equals(contentLine))
+                        taxonomies.add(contentLine);
+            }
+        }
+        return taxonomies;
+    }
+
     public List<String> getSequenceDbList()
     {
         errorCode = 0;
@@ -695,6 +728,108 @@ public class MascotClientImpl implements SearchClient
             }
         }
         return dbNames;
+    }
+
+    public Map<String, String> getResidueModsMap()
+    {
+        errorCode = 0;
+        errorString = "";
+
+        findWorkableSettings (false);
+
+        Properties results;
+        if (0 == errorCode || -3 == errorCode)
+            results = getParametersResults();
+        else
+            results = new Properties();
+
+        Map<String, String> mods = new HashMap<String, String>();
+        String dbsString = results.getProperty("HTTPContent", "");
+        String[] contentLines = dbsString.split("\n");
+        boolean sectionMODS = false;
+        for (String contentLine : contentLines)
+        {
+            if (contentLine.startsWith("[") && contentLine.endsWith("]"))
+                sectionMODS = "[MODS]".equals(contentLine);
+            else
+            {
+                if (sectionMODS)
+                    if (!"".equals(contentLine))
+                        mods.put(contentLine, contentLine);
+            }
+        }
+        return mods;
+    }
+
+    public Map<String, String> getEnzymeMap()
+    {
+        errorCode = 0;
+        errorString = "";
+
+        findWorkableSettings (false);
+
+        Properties results;
+        Properties parameters = new Properties();
+        parameters.setProperty("cgi", "labkeydbmgmt.pl");
+        parameters.setProperty("cmd", "getenzymes");
+
+        results = request(parameters, false);
+
+        List<Enzyme> enzymes = new ArrayList();
+        String dbsString = results.getProperty("HTTPContent", "");
+        String[] contentLines = dbsString.split("\n");
+        String mascotName = "";
+        char[] cuts = null;
+        char[] noCuts = new char[0];
+        boolean nTerm = false;
+
+        for (String contentLine : contentLines)
+        {
+            contentLine = contentLine.trim();
+
+            if(contentLine.startsWith("Title"))
+            {
+                mascotName = contentLine.substring(contentLine.indexOf(":") +1);
+            }
+            else if(contentLine.startsWith("Cleavage"))
+            {
+                String cutString = contentLine.substring(contentLine.indexOf(":")+1);
+                int numCuts = cutString.length();
+                cuts = new char[numCuts];
+                for(int i = 0; i < numCuts; i++)
+                {
+                    cuts[i] = cutString.charAt(i);
+                }
+            }
+            else if(contentLine.startsWith("Restrict"))
+            {
+                String noCutString = contentLine.substring(contentLine.indexOf(":")+1);
+                int numNoCuts = noCutString.length();
+                noCuts = new char[numNoCuts];
+                for(int i = 0; i < numNoCuts; i++)
+                {
+                    noCuts[i] = noCutString.charAt(i);
+                }
+            }
+            else if(contentLine.equals("Cterm"))
+            {
+                nTerm = false;
+            }
+            else if(contentLine.equals("Nterm"))
+            {
+                nTerm = true;
+            }
+            else if(contentLine.equals("*"))
+            {
+                CutSite[] cutSites = new CutSite[1];
+                cutSites[0] = new CutSite(cuts,noCuts,mascotName,nTerm);
+                Enzyme enzyme = new Enzyme(mascotName,null, cutSites);
+                enzymes.add(enzyme);
+                noCuts = new char[0];
+            }
+        }
+        return SearchFormUtil.mascot2Tpp(enzymes);
+
     }
 
     public int search (String paramFile, String queryFile, String resultFile)
@@ -1239,14 +1374,14 @@ public class MascotClientImpl implements SearchClient
         return results.getProperty("HTTPContent", "");
     }
 
-    private Properties getEnzymeResults()
-    {
-        // retrieve the list of databases from MascotServer
-        Properties parameters = new Properties();
-        parameters.setProperty("cgi", "labkeydbmgmt.pl");
-        parameters.setProperty("cmd", "downloadenz");
-        return request (parameters, false);
-    }
+//    private Properties getEnzymeResults()
+//    {
+//        // retrieve the list of databases from MascotServer
+//        Properties parameters = new Properties();
+//        parameters.setProperty("cgi", "labkeydbmgmt.pl");
+//        parameters.setProperty("cmd", "downloadenz");
+//        return request (parameters, false);
+//    }
 
     private Properties getParametersResults()
     {
@@ -1364,7 +1499,7 @@ public class MascotClientImpl implements SearchClient
             else
                 getLogger().error(msg);
             errorCode = 2;
-            errorString = "Fail to interact with Mascot Server";
+            errorString = "Failed to interact with Mascot Server";
             results.setProperty("error", "2");
             results.setProperty("errorstring", errorString);
             results.setProperty("exceptionmessage", x.getMessage());

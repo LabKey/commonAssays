@@ -31,8 +31,7 @@ import org.labkey.ms2.pipeline.PipelineController;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 /**
  * MascotCPipelineProvider class
@@ -171,6 +170,135 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
                 throw new IOException(connectivityResult);
         }
         return sequenceDBs;
+    }
+
+    public List<String> getTaxonomyList() throws IOException
+    {
+        AppProps appProps = AppProps.getInstance();
+        if (!appProps.hasMascotServer())
+            throw new IOException("Mascot server has not been specified in site customization.");
+
+        MascotClientImpl mascotClient = new MascotClientImpl(appProps.getMascotServer(), null);
+        mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
+        List<String> taxonomy = mascotClient.getTaxonomyList();
+
+        if (0 == taxonomy.size())
+        {
+            // TODO: Would be nice if the Mascot client just threw its own connectivity exception.
+            String connectivityResult = mascotClient.testConnectivity(false);
+            if (!"".equals(connectivityResult))
+                throw new IOException(connectivityResult);
+        }
+        return taxonomy;
+//        ArrayList mock = new ArrayList();
+//        mock.add("All entries");
+//        mock.add(". . Archaea (Archaeobacteria)");
+//        mock.add(". . Eukaryota (eucaryotes)");
+//        mock.add(". . . . Alveolata (alveolates)");
+//        mock.add(". . . . . . Plasmodium falciparum (malaria parasite)");
+//        mock.add(". . . . . . Other Alveolata");
+//        mock.add(". . . . Metazoa (Animals)");
+//        mock.add(". . . . . . Caenorhabditis elegans");
+//        mock.add(". . . . . . Drosophila (fruit flies)");
+//        mock.add(". . . . . . Chordata (vertebrates and relatives)");
+//        mock.add(". . . . . . . . bony vertebrates");
+//        mock.add(". . . . . . . . . . lobe-finned fish and tetrapod clade");
+//        mock.add(". . . . . . . . . . . . Mammalia (mammals)");
+//        mock.add(". . . . . . . . . . . . . . Primates");
+//        mock.add(". . . . . . . . . . . . . . . . Homo sapiens (human)");
+//        mock.add(". . . . . . . . . . . . . . . . Other primates");
+//        mock.add(". . . . . . . . . . . . . . Rodentia (Rodents)");
+//        mock.add(". . . . . . . . . . . . . . . . Mus.");
+//        mock.add(". . . . . . . . . . . . . . . . . . Mus musculus (house mouse)");
+//        mock.add(". . . . . . . . . . . . . . . . Rattus");
+//        mock.add(". . . . . . . . . . . . . . . . Other rodentia");
+//        mock.add(". . . . . . . . . . . . . . Other mammalia");
+//        mock.add(". . . . . . . . . . . . Xenopus laevis (African clawed frog)");
+//        mock.add(". . . . . . . . . . . . Other lobe-finned fish and tetrapod clade");
+//        mock.add(". . . . . . . . . . Actinopterygii (ray-finned fishes)");
+//        mock.add(". . . . . . . . . . . . Fugu rubripes (Japanese Pufferfish)");
+//        mock.add(". . . . . . . . . . . . Danio rerio (zebra fish)");
+//        mock.add(". . . . . . . . . . . . Other Actinopterygii");
+//        mock.add(". . . . . . . . . . Other bony vertebrates");
+//        mock.add(". . . . . . . . Other Chordata");
+//        mock.add(". . . . . . Other Metazoa");
+//        mock.add(". . . . Dictyostelium discoideum");
+//        mock.add(". . . . Fungi");
+//        mock.add(". . . . . . Saccharomyces Cerevisiae (baker's yeast)");
+//        mock.add(". . . . . . Schizosaccharomyces pombe (fission yeast)");
+//        mock.add(". . . . . . Pneumocystis carinii");
+//        mock.add(". . . . . . Other Fungi");
+//        mock.add(". . . . Viridiplantae (Green Plants)");
+//        mock.add(". . . . . . Arabidopsis thaliana (thale cress)");
+//        mock.add(". . . . . . Oryza sativa (rice)");
+//        mock.add(". . . . . . Other green plants");
+//        mock.add(". . . . Other Eukaryota");
+//        mock.add(". . Bacteria (Eubacteria)");
+//        mock.add(". . . . Proteobacteria (purple bacteria)");
+//        mock.add(". . . . . . Escherichia coli");
+//        mock.add(". . . . . . Campylobacter jejuni");
+//        mock.add(". . . . . . Other Proteobacteria");
+//        mock.add(". . . . Firmicutes (gram-positive bacteria)");
+//        mock.add(". . . . . . Mycoplasma");
+//        mock.add(". . . . . . Bacillus subtilis");
+//        mock.add(". . . . . . Streptococcus Pneumoniae");
+//        mock.add(". . . . . . Streptomyces coelicolor");
+//        mock.add(". . . . . . Other Firmicutes");
+//        mock.add(". . . . Other Bacteria");
+//        mock.add(". . Viruses");
+//        mock.add(". . . . Hepatitis C virus");
+//        mock.add(". . . . Other viruses");
+//        mock.add(". . Other (includes plasmids and artificial sequences)");
+//        mock.add(". . unclassified");
+//        mock.add(". . Species information unavailable");
+//        return mock;
+    }
+
+    public Map<String, String> getEnzymes() throws IOException 
+    {
+        AppProps appProps = AppProps.getInstance();
+        if (!appProps.hasMascotServer())
+            throw new IOException("Mascot server has not been specified in site customization.");
+
+        MascotClientImpl mascotClient = new MascotClientImpl(appProps.getMascotServer(), null);
+        mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
+        Map<String,String> enzymes = mascotClient.getEnzymeMap();
+
+        if (0 == enzymes.size())
+        {
+            String connectivityResult = mascotClient.testConnectivity(false);
+            if (!"".equals(connectivityResult))
+                throw new IOException(connectivityResult);
+        }
+        return enzymes;
+//        Map<String, String> mock = new HashMap< String, String >();
+//        mock.put("trypsin", "Typsin");
+//        mock.put("aspn","AspN");
+//        return mock;
+    }
+
+    public Map<String, String> getResidue0Mods() throws IOException
+    {
+        AppProps appProps = AppProps.getInstance();
+        if (!appProps.hasMascotServer())
+            throw new IOException("Mascot server has not been specified in site customization.");
+
+        MascotClientImpl mascotClient = new MascotClientImpl(appProps.getMascotServer(), null);
+        mascotClient.setProxyURL(appProps.getMascotHTTPProxy());
+        Map<String,String> mods = mascotClient.getResidueModsMap();
+
+        if (0 == mods.size())
+        {
+            String connectivityResult = mascotClient.testConnectivity(false);
+            if (!"".equals(connectivityResult))
+                throw new IOException(connectivityResult);
+        }
+        return mods;
+    }
+
+    public Map<String, String> getResidue1Mods() throws IOException
+    {
+        return null;  //no difference between static and dynamic mods in mascot 
     }
 
     public String getHelpTopic()

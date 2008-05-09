@@ -19,31 +19,29 @@ public class SequestParamsV2Builder extends SequestParamsBuilder
 
         this._params = new SequestParamsV2();
 
-        supportedEnzymes.put("[X]|[X]", "No_Enzyme 0 0 - -");
-        supportedEnzymes.put("[KR]|{P}", "Trypsin(KR/P) 1 1 KR P");
-        supportedEnzymes.put("[K]|{P}", "Trypsin_K 1 1 K P");
-        supportedEnzymes.put("[R]|{P}", "Trypsin_R 1 1 R P");
-        supportedEnzymes.put("[KR]|[X]", "Trypsin(KR) 1 1 KR -");
-        supportedEnzymes.put("[KRLNH]|[X]", "Trypsin(KRLNH) 1 1 KRLNH -");
-        supportedEnzymes.put("[KRLNH]|{P}", "Trypsin(KRLNH/P) 1 1 KRLNH P");
-        supportedEnzymes.put("[KMR]|{P}", "Trypsin/CnBr 1 1 KMR P");
-        supportedEnzymes.put("[FMWY]|{P}", "Chymotrypsin(FMWY/P) 1 1 FMWY P");
-        supportedEnzymes.put("[FWYL]|[X]", "Chymotrypsin 1 1 FWYL -");
-        supportedEnzymes.put("[FWY]|{P}", "Chymotrypsin(FWY) 1 1 FWY P");
-        supportedEnzymes.put("[R]|[X]", "Clostripain 1 1 R -");
-        supportedEnzymes.put("[M]|[X]", "Cyanogen_Bromide 1 1 M -");
-        supportedEnzymes.put("[M]|{P}", "Cyanogen_Bromide(M/P) 1 1 M P");
-        supportedEnzymes.put("[W]|[X]", "IodosoBenzoate 1 1 W -");
-        supportedEnzymes.put("[P]|[X]", "Proline_Endopept 1 1 P -");
-        supportedEnzymes.put("[E]|[X]", "Staph_Protease 1 1 E -");
-        supportedEnzymes.put("[ED]|[X]", "GluC 1 1 ED -");
-        supportedEnzymes.put("[ED]|{P}", "GluC(ED/P) 1 1 ED P");
-        supportedEnzymes.put("[K]|[X]", "LysC 1 1 K -");
-        supportedEnzymes.put("[X]|[D]", "AspN 1 0 D -");
-        supportedEnzymes.put("[ALIV]|{P}", "Elastase 1 1 ALIV P");
-        supportedEnzymes.put("[AGILV]|{P}", "Elastase(AGILV/P) 1 1 AGILV P");
-        supportedEnzymes.put("[E]|{P}", "GluC_Bicarb 1 1 E P");
-        supportedEnzymes.put("[ALIVKRWFY]|{P}", "Elastase/Tryp/Chymo 1 1 ALIVKRWFY P");
+        supportedEnzymes.put("[KR]|{P}", "trypsin 1 1 KR P");
+        supportedEnzymes.put("[KR]|[X]", "stricttrypsin 1 1 KR -");
+        supportedEnzymes.put("[R]|{P}", "argc 1 1 R P");
+        supportedEnzymes.put("[X]|[D]", "aspn 1 0 D -");
+        supportedEnzymes.put("[FMWY]|{P}", "chymotrypsin 1 1 FMWY P");
+        supportedEnzymes.put("[R]|[X]", "clostripain 1 1 R -");
+        supportedEnzymes.put("[M]|{P}", "cnbr 1 1 M P");
+        supportedEnzymes.put("[AGILV]|{P}", "elastase 1 1 AGILV P");
+        supportedEnzymes.put("[D]|{P}", "formicacid 1 1 D P");
+        supportedEnzymes.put("[K]|{P}", "trypsin_k 1 1 K P");
+        supportedEnzymes.put("[ED]|{P}", "gluc 1 1 ED P");
+        supportedEnzymes.put("[E]|{P}", "gluc_bicarb 1 1 E P");
+        supportedEnzymes.put("[W]|[X]", "iodosobenzoate 1 1 W -");
+        supportedEnzymes.put("[K]|[X]", "lysc 1 1 K P");
+        supportedEnzymes.put("[K]|[X]", "lysc-p 1 1 K -");
+        supportedEnzymes.put("[X]|[D]", "lysn 1 0 K -");
+        supportedEnzymes.put("[X]|[KASR]", "lysn_promisc 1 0 KASR -");
+        supportedEnzymes.put("[X]|[X]", "nonspecific 0 0 - -");
+        supportedEnzymes.put("[FL]|[X]", "pepsina 1 1 FL -");
+        supportedEnzymes.put("[P]|[X]", "protein_endopeptidase 1 1 P -");
+        supportedEnzymes.put("[E]|[X]", "staph_protease 1 1 E -");
+        supportedEnzymes.put("[KMR]|{P}", "trypsin/cnbr 1 1 KMR P");
+        supportedEnzymes.put("[DEKR]|{P}", "trypsin_gluc 1 1 DEKR P");
     }
 
     public String initXmlValues()

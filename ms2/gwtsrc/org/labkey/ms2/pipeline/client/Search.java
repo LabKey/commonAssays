@@ -28,6 +28,8 @@ public class Search implements EntryPoint
     private                 ProtocolComposite       protocolComposite;
     private                 SequenceDbComposite     sequenceDbComposite;
     private                 MzXmlComposite          mzXmlComposite = new MzXmlComposite();
+    private                 EnzymeComposite         enzymeComposite;
+    private                 ResidueModComposite     residueModComposite;
     private                 Label                   searchEngineLabel = new Label();
     private                 Label                   actualSearchEngineLabel = new Label();
     private                 InputXmlComposite       inputXmlComposite;
@@ -62,6 +64,8 @@ public class Search implements EntryPoint
         SearchFormCompositeFactory compositeFactory = new SearchFormCompositeFactory(searchEngine);
         sequenceDbComposite = compositeFactory.getSequenceDbComposite();
         inputXmlComposite = compositeFactory.getInputXmlComposite();
+        enzymeComposite = compositeFactory.getEnzymeComposite();
+        residueModComposite = compositeFactory.getResidueModComposite(this);
         protocolComposite = new ProtocolComposite();
         dirSequenceRoot = PropertyUtil.getServerProperty("dirSequenceRoot");
         String dirRoot = PropertyUtil.getServerProperty("dirRoot");
@@ -91,11 +95,16 @@ public class Search implements EntryPoint
 
         searchEngineLabel.setText("Search engine:");
         searchEngineLabel.setStylePrimaryName("ms-searchform-nowrap");
+        actualSearchEngineLabel.setStylePrimaryName("ms-readonly");
         actualSearchEngineLabel.setText(searchEngine);
 
         sequenceDbComposite.setName("sequenceDB");
         sequenceDbComposite.setWidth(INPUT_WIDTH);
         sequenceDbComposite.setVisibleItemCount(4);
+
+        enzymeComposite.setWidth(INPUT_WIDTH);
+
+        residueModComposite.setWidth(INPUT_WIDTH);
 
         inputXmlComposite.setName("configureXml");
         inputXmlComposite.setWidth("100%");
@@ -117,7 +126,12 @@ public class Search implements EntryPoint
         protocolComposite.addChangeListener(new ProtocolChangeListener(dirRoot));
 
         sequenceDbComposite.addChangeListener(new SequenceDbChangeListener(dirSequenceRoot));
-        sequenceDbComposite.addClickListener(new RefreshSequenceDbPathsClickListener(dirSequenceRoot));
+        sequenceDbComposite.addRefreshClickListener(new RefreshSequenceDbPathsClickListener(dirSequenceRoot));
+        sequenceDbComposite.addClickListener(new SequenceDbClickListener());
+        sequenceDbComposite.addTaxonomyChangeListener(new TaxonomyChangeListener());
+        enzymeComposite.addChangeListener(new EnzymeChangeListener());
+
+       inputXmlComposite.addChangeListener(new InputXmlChangeListener());
 
 
         RootPanel panel = RootPanel.get("org.labkey.ms2.pipeline.Search-Root");
@@ -126,7 +140,7 @@ public class Search implements EntryPoint
         setReadOnly(true);
     }
 
-    private void setReadOnly(boolean readOnly)
+    public void setReadOnly(boolean readOnly)
     {
         setReadOnly(readOnly, false);
     }
@@ -135,13 +149,15 @@ public class Search implements EntryPoint
     {
         protocolComposite.setReadOnly(readOnly);
         sequenceDbComposite.setReadOnly(readOnly);
+        enzymeComposite.setReadOnly(readOnly);
+        residueModComposite.setReadOnly(readOnly);
         inputXmlComposite.setReadOnly(readOnly);
         saveProtocolCheckBox.setEnabled(!readOnly);
         if(protocolComposite.getSelectedProtocolValue().equals("new"))
             buttonPanel.remove(copyButton);
         else
             buttonPanel.insert(copyButton, 1);
-        if(getErrors().length() > 0 || !mzXmlComposite.hasWork())
+        if(hasErrors() || !mzXmlComposite.hasWork())
         {
             if(force) searchButton.setEnabled(true);
             else searchButton.setEnabled(false);
@@ -168,13 +184,25 @@ public class Search implements EntryPoint
 
     private void changeProtocol()
     {
+        residueModComposite.clear();
         mzXmlComposite.clearStatus();
-        clearDisplay();
         getSearchService().getSequenceDbs(sequenceDbComposite.getSelectedDb(), dirSequenceRoot,searchEngine,
                 new SequenceDbServiceCallback());
-        setReadOnly(false);
         buttonPanel.remove(copyButton);
         protocolComposite.setFocus(true);
+        String error = syncXml2Form();
+        if(error.length() > 0)
+        {
+            clearDisplay();
+            appendError(error);
+            setReadOnly(false);
+            setSearchButtonEnabled(false);
+        }
+        else
+        {
+            clearDisplay();
+            setReadOnly(false);
+        }
     }
 
     private void cancelForm()
@@ -199,7 +227,7 @@ public class Search implements EntryPoint
 
     private void loadSubPanel()
     {
-        int rows = 6;
+        int rows = 8;
         int cols = 2;
         String labelStyle = "ms-searchform-nowrap";
 
@@ -220,10 +248,14 @@ public class Search implements EntryPoint
         formGrid.setWidget(2, 1, mzXmlComposite);
         formGrid.setWidget(3, 0, sequenceDbComposite.getLabel(labelStyle));
         formGrid.setWidget(3, 1, sequenceDbComposite);
-        formGrid.setWidget(4, 0, inputXmlComposite.getLabel(labelStyle));
-        formGrid.setWidget(4, 1, inputXmlComposite);
-        formGrid.setWidget(5, 0, saveProtocolCheckBoxLabel);
-        formGrid.setWidget(5, 1, saveProtocolCheckBox);
+        formGrid.setWidget(4, 0, enzymeComposite.getLabel(labelStyle));
+        formGrid.setWidget(4, 1, enzymeComposite);
+        formGrid.setWidget(5, 0, residueModComposite.getLabel(labelStyle));
+        formGrid.setWidget(5, 1, residueModComposite);
+        formGrid.setWidget(6, 0, inputXmlComposite.getLabel(labelStyle));
+        formGrid.setWidget(6, 1, inputXmlComposite);
+        formGrid.setWidget(7, 0, saveProtocolCheckBoxLabel);
+        formGrid.setWidget(7, 1, saveProtocolCheckBox);
         formGrid.getColumnFormatter().setWidth(1,"100%");
 
         for(int i = 0; i < rows; i++)
@@ -236,9 +268,10 @@ public class Search implements EntryPoint
         subPanel.add(helpHTML);
     }
 
-    private void appendError(String error)
+    public void appendError(String error)
     {
-        appendDisplay(error);
+        if(error.trim().length() ==  0)   return;
+        appendDisplay("ERROR:" + error);
         displayLabel.setStylePrimaryName("cpas-error");
     }
 
@@ -257,7 +290,7 @@ public class Search implements EntryPoint
         displayLabel.setText(startingError.toString());
     }
 
-    private void clearDisplay()
+    public void clearDisplay()
     {
         displayLabel.setText("");
     }
@@ -280,9 +313,9 @@ public class Search implements EntryPoint
         else displayLabel.setText(text);
     }
 
-    private String getErrors()
+    private boolean hasErrors()
     {
-        return displayLabel.getText();
+        return(displayLabel.getText().length() > 0);
     }
 
     private void loading()
@@ -290,8 +323,151 @@ public class Search implements EntryPoint
         setMessage("LOADING...");
     }
 
-    private class SearchButton extends ImageButton
+    public String syncForm2Xml()
     {
+        String sequenceDb = sequenceDbComposite.getSelectedDb();
+        String taxonomy = sequenceDbComposite.getSelectedTaxonomy();
+        String enzyme = enzymeComposite.getSelectedEnzyme();
+        Map staticMods = residueModComposite.getStaticMods();
+        Map dynamicMods = residueModComposite.getDynamicMods();
+        try
+        {
+            inputXmlComposite.setSequenceDb(sequenceDb);
+            inputXmlComposite.setTaxonomy(taxonomy);
+            inputXmlComposite.setEnzyme(enzyme);
+            inputXmlComposite.setStaticMods(staticMods);
+            inputXmlComposite.setDynamicMods(dynamicMods);
+        }
+        catch(SearchFormException e)
+        {
+          return "Trouble adding selected parameter to input XML.\n" + e.getMessage();
+        }
+        return residueModComposite.validate();
+    }
+
+    public String syncXml2Form()
+    {
+        StringBuffer error = new StringBuffer();
+        error.append(syncTaxonomyXML2Form());
+        error.append(syncSequenceDbXML2Form());
+        error.append(syncEnzymeXML2Form());
+        error.append(syncResidueMod2Form());
+        return error.toString();
+    }
+
+    private String syncResidueMod2Form()
+    {
+        Map modMap = residueModComposite.getModMap(residueModComposite.STATIC);
+        Map staticMods = inputXmlComposite.getStaticMods(modMap);
+        residueModComposite.setSelectedStaticMods(staticMods);
+
+        modMap = residueModComposite.getModMap(residueModComposite.DYNAMIC);
+        Map dynamicMods = inputXmlComposite.getDynamicMods(modMap);
+        residueModComposite.setSelectedDynamicMods(dynamicMods);
+        
+        return residueModComposite.validate();
+    }
+
+    private String syncEnzymeXML2Form()
+    {
+        String enzyme = inputXmlComposite.getEnzyme();
+        if(enzyme == null || enzyme.equals(""))
+        {
+            enzyme = enzymeComposite.getSelectedEnzyme();
+            if(enzyme == null || enzyme.equals(""))
+            {
+                return "";
+            }
+            else
+            {
+                try
+                {
+                    inputXmlComposite.setEnzyme(enzyme);
+                }
+                catch(SearchFormException e)
+                {
+                    return "Cannot set the enzyme in XML: " + e.getMessage();
+                }
+            }
+        }
+        else if(!enzyme.equals(enzymeComposite.getSelectedEnzyme()))
+        {
+            return enzymeComposite.setSelectedEnzyme(enzyme);
+        }
+        return "";
+    }
+
+    private String syncSequenceDbXML2Form()
+    {
+        String sequenceDb = inputXmlComposite.getSequenceDb();
+        if(sequenceDb == null || sequenceDb.equals(""))
+        {
+            sequenceDb = sequenceDbComposite.getSelectedDb();
+            if(sequenceDb == null || sequenceDb.equals(""))
+            {
+                return "";
+            }
+            else
+            {
+                try
+                {
+                    inputXmlComposite.setSequenceDb(sequenceDb);
+                }
+                catch(SearchFormException e)
+                {
+                    return "Cannot set pipeline, database in XML: " + e.getMessage();
+                }
+            }
+        }
+        else if(sequenceDb.equals(sequenceDbComposite.getSelectedDb()))
+        {
+            return "";
+        }
+        else
+        {
+            getSearchService().getSequenceDbs(sequenceDb, dirSequenceRoot, searchEngine, new SequenceDbServiceCallback());
+        }
+        return "";
+    }
+
+    private String syncTaxonomyXML2Form()
+    {
+        String error = "";
+        String taxonomy = inputXmlComposite.getTaxonomy();
+        if(taxonomy == null || taxonomy.equals(""))
+        {
+            taxonomy = sequenceDbComposite.getSelectedTaxonomy();
+            if(taxonomy != null && !taxonomy.equals(""))
+            {
+                try
+                {
+                    inputXmlComposite.setTaxonomy(taxonomy);
+                }
+                catch(SearchFormException e)
+                {
+                    return "Cannot set protein, taxon in XML: " + e.getMessage();
+                }
+            }
+        }
+        else if(!taxonomy.equals(sequenceDbComposite.getSelectedTaxonomy()))
+        {
+            error = sequenceDbComposite.setDefaultTaxonomy(taxonomy);
+            if(error.length() > 0)
+            {
+                return error;
+            }
+        }
+        return error;
+    }
+
+    public void setSearchButtonEnabled(boolean enabled)
+    {
+        searchButton.setEnabled(enabled);
+    }
+
+       private class SearchButton extends ImageButton
+    {
+        boolean enabled = true;
         SearchButton()
         {
             super("Search");
@@ -300,6 +476,17 @@ public class Search implements EntryPoint
         public void onClick(Widget sender)
         {
             searchFormPanel.submit();
+        }
+
+        public void setEnabled(boolean enabled)
+        {
+            super.setEnabled(enabled);
+            this.enabled = enabled;
+        }
+
+        public boolean isEnabled()
+        {
+            return enabled;
         }
     }
 
@@ -336,7 +523,7 @@ public class Search implements EntryPoint
             clearDisplay();
             appendError(protocolComposite.validate());
             appendError(sequenceDbComposite.validate());
-            event.setCancelled(getErrors().length() > 0);
+            event.setCancelled(hasErrors());
         }
 
         public void onSubmitComplete(FormSubmitCompleteEvent event)
@@ -348,7 +535,7 @@ public class Search implements EntryPoint
                 destination  = destination.trim();
                 if(destination.length() == 0)
                 {
-                    appendError("Error: The submit did not return a destination.");
+                    appendError("The submit did not return a destination.");
                     setReadOnly(false, true);
                 }
                 navigate(destination);
@@ -359,12 +546,12 @@ public class Search implements EntryPoint
             {
                 String errorString = results.substring(results.indexOf("ERROR=") + 6);
                 errorString  = errorString.trim();
-                appendError("Error: " + errorString);
+                appendError(errorString);
                 setReadOnly(false, true);
             }
             else
             {
-                appendError("Error: Unexpected response from server: " + results);
+                appendError("Unexpected response from server: " + results);
                 setReadOnly(false);
             }
         }
@@ -383,11 +570,26 @@ public class Search implements EntryPoint
             GWTSearchServiceResult gwtResult = (GWTSearchServiceResult)result;
             List sequenceDbs = gwtResult.getSequenceDBs();
             List sequenceDbPaths = gwtResult.getSequenceDbPaths();
-            sequenceDbComposite.setSequenceDbPathListBoxContents(sequenceDbPaths,((GWTSearchServiceResult)result).getDefaultSequenceDb());
-            sequenceDbComposite.setSequenceDbsListBoxContents(sequenceDbs,gwtResult.getDefaultSequenceDb());
+            sequenceDbComposite.setSequenceDbPathListBoxContents(sequenceDbPaths,
+                    ((GWTSearchServiceResult)result).getDefaultSequenceDb());
+            if(sequenceDbs != null)
+            {
+                sequenceDbComposite.setSequenceDbsListBoxContents(sequenceDbs,gwtResult.getDefaultSequenceDb());
+            }
             appendError(gwtResult.getErrors());
             sequenceDbComposite.selectDefaultDb(gwtResult.getDefaultSequenceDb());
-
+            if(sequenceDbComposite.getSelectedDb().length() == 0 && inputXmlComposite.getSequenceDb().length() > 0)
+            {
+                appendError(syncXml2Form());
+            }
+            if(inputXmlComposite.getSequenceDb().length() > 0 &&
+                !inputXmlComposite.getSequenceDb().equals(sequenceDbComposite.getSelectedDb()))
+            {
+                appendError("The database entered for the input XML label \"pipeline, database\" cannot be found"
+                + " at this fasta root.");
+                return;
+            }
+            appendError(syncForm2Xml());
         }
     }
 
@@ -408,7 +610,8 @@ public class Search implements EntryPoint
             String protocolDescription = gwtResult.getProtocolDescription();
             protocolComposite.update(protocols, defaultProtocol, protocolDescription);
             mzXmlComposite.update(gwtResult.getMzXmlMap());
-            inputXmlComposite.update(gwtResult.getProtocolXml());
+            appendError(inputXmlComposite.update(gwtResult.getProtocolXml()));
+            appendError(syncXml2Form());
             String defaultDb = gwtResult.getDefaultSequenceDb();
             sequenceDbComposite.setSequenceDbsListBoxContents(null, defaultDb);
             if(defaultProtocol == null || defaultDb.equals(""))
@@ -432,13 +635,17 @@ public class Search implements EntryPoint
             List sequenceDbs = gwtResult.getSequenceDBs();
             List sequenceDbPaths = gwtResult.getSequenceDbPaths();
             String defaultDb = gwtResult.getDefaultSequenceDb();
-            sequenceDbComposite.update(sequenceDbs,sequenceDbPaths, defaultDb );
+            List taxonomy = gwtResult.getMascotTaxonomyList();
+            sequenceDbComposite.update(sequenceDbs,sequenceDbPaths, defaultDb, taxonomy );
             List protocols = gwtResult.getProtocols();
             String defaultProtocol = gwtResult.getSelectedProtocol();
             String protocolDescription = gwtResult.getProtocolDescription();
             protocolComposite.update(protocols, defaultProtocol, protocolDescription);
             mzXmlComposite.update(gwtResult.getMzXmlMap());
-            inputXmlComposite.update(gwtResult.getProtocolXml());
+            enzymeComposite.update(gwtResult.getEnzymeMap());
+            residueModComposite.update(gwtResult.getMod0Map(), gwtResult.getMod1Map());
+            appendError(inputXmlComposite.update(gwtResult.getProtocolXml()));
+            appendError(syncXml2Form());
             appendError(gwtResult.getErrors());
             if(defaultProtocol == null || defaultProtocol.equals(""))
                 setReadOnly(false);
@@ -462,6 +669,7 @@ public class Search implements EntryPoint
             ListBox listBox = (ListBox)widget;
             String dbDirectory = listBox.getValue(listBox.getSelectedIndex());
             loading();
+            inputXmlComposite.removeSequenceDb();
             service.getSequenceDbs(dbDirectory, dirSequenceRoot, searchEngine,new SequenceDbServiceCallback());
         }
     }
@@ -486,7 +694,68 @@ public class Search implements EntryPoint
                 return;
             }
             loading();
-            service.getProtocol(searchEngine, protocolName, dirRoot, dirSequenceRoot, PropertyUtil.getServerProperty("path"),new ProtocolServiceAsyncCallback());
+            service.getProtocol(searchEngine, protocolName, dirRoot, dirSequenceRoot,
+                    PropertyUtil.getServerProperty("path"),new ProtocolServiceAsyncCallback());
+        }
+    }
+
+    private class SequenceDbClickListener implements ClickListener
+    {
+
+        public void onClick(Widget widget)
+        {
+            String db = sequenceDbComposite.getSelectedDb();
+            if(db.length() > 0)
+            {
+                inputXmlComposite.removeSequenceDb();
+                appendError(syncForm2Xml());
+            }
+        }
+    }
+
+    private class TaxonomyChangeListener implements ChangeListener
+    {
+        public void onChange(Widget widget)
+        {
+            String tax = sequenceDbComposite.getSelectedTaxonomy();
+            if(tax.length() > 0)
+            {
+                inputXmlComposite.removeTaxonomy();
+                clearDisplay();
+                String error = syncForm2Xml();
+                if(error.length() > 0 )
+                {
+                    appendError(syncForm2Xml());
+                    searchButton.setEnabled(false);
+                }
+                else
+                {
+                    setReadOnly(false);
+                }
+            }
+        }
+    }
+
+    private class EnzymeChangeListener implements ChangeListener
+    {
+        public void onChange(Widget widget)
+        {
+            String enz = enzymeComposite.getSelectedEnzyme();
+            if(enz.length() > 0)
+            {
+                inputXmlComposite.removeEnzyme();
+                clearDisplay();
+                String error = syncForm2Xml();
+                if(error.length() > 0 )
+                {
+                    appendError(syncForm2Xml());
+                    searchButton.setEnabled(false);
+                }
+                else
+                {
+                    setReadOnly(false);
+                }
+            }
         }
     }
 
@@ -505,4 +774,30 @@ public class Search implements EntryPoint
         }
     }
 
+    private class InputXmlChangeListener implements ChangeListener
+    {
+
+        public void onChange(Widget widget)
+        {
+            String error = inputXmlComposite.validate();
+            if(error.length() > 0)
+            {
+                clearDisplay();
+                appendError(error);
+                setReadOnly(true);
+                inputXmlComposite.setReadOnly(false);
+                return;
+            }
+            error = syncXml2Form();
+            if(error.length() > 0)
+            {
+                clearDisplay();
+                appendError(error);
+                searchButton.setEnabled(false);
+                return;
+            }
+            clearDisplay();
+            setReadOnly(false);
+        }
+    }
 }

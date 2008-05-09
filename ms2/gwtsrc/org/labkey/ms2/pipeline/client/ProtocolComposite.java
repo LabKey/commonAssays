@@ -35,6 +35,7 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
     {
         protocolListBox.setVisibleItemCount(1);
         protocolDescHtml.setWordWrap(true);
+        protocolDescHtml.setStylePrimaryName("ms-readonly");
         instance.add(protocolListBox);
         instance.add(protocolNameTextBox);
         instance.add(protocolDescTextArea);
@@ -45,6 +46,7 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
     private void initLabel()
     {
         listBoxLabel = new Label("Analysis protocols:");
+        listBoxLabel.addStyleName("ms-strong");
         textBoxLabel = new Label("Protocol name:");
         descriptionLabel = new Label("Protocol description:");
         labelWidget = new VerticalPanel();
@@ -227,13 +229,13 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
     public String validate()
     {
         if(protocolNameTextBox.getText().equalsIgnoreCase("default"))
-            return "Error: Sorry, default is a reserved protocol name. Please choose another.";
+            return "Sorry, default is a reserved protocol name. Please choose another.";
         String selectedProtocol = getSelectedProtocolValue();
         if(selectedProtocol.equals("new"))
         {
             if(protocolNameTextBox.getText().equals(""))
             {
-                return "Error: Missing protocol name.";
+                return "Missing protocol name.";
             }
             else
             {
@@ -242,11 +244,11 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
                     char ch = protocolNameTextBox.getText().charAt(i);
                     if (!Character.isLetterOrDigit(ch) && ch != '_')
                     {
-                        return "Error: The name '" + protocolNameTextBox.getText() + "' is not a valid protocol name.";
+                        return "The name '" + protocolNameTextBox.getText() + "' is not a valid protocol name.";
                     }
                     if (ch == ' ')
                     {
-                        return "Error: The cluster pipeline does not currently support spaces in search protocol names.";
+                        return "The cluster pipeline does not currently support spaces in search protocol names.";
                     }
                 }
             }

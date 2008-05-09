@@ -18,7 +18,7 @@ public class SequestParamsV2 extends SequestParams
 
         _params.add(new SequestParam(
                   130,                                                       //sortOrder
-                  "Trypsin(KR/P) 1 1 KR P",                                                      //The value of the property
+                  "trypsin 1 1 KR P",                                                      //The value of the property
                   "enzyme_info",                                           // the sequest.params property name
                   "",                                                       // the input.xml label
                    ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line

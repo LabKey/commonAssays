@@ -17,4 +17,8 @@ public interface SearchServiceAsync
 
     void getProtocol(String searchEngine, String protocolName, String dirRoot,String dirSequenceRoot,
                      String path, AsyncCallback async);
+
+    void getMascotTaxonomy(String searchEngine, AsyncCallback async);
+
+    void getEnzymes(String searchEngine, AsyncCallback async);
 }

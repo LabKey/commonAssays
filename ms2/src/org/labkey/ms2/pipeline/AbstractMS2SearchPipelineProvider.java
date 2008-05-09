@@ -24,6 +24,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <code>AbstractMS2SearchPipelineProvider</code>
@@ -88,6 +89,14 @@ abstract public class AbstractMS2SearchPipelineProvider
     abstract public List<String> getSequenceDbPaths(URI sequenceRoot) throws IOException;
 
     abstract public List<String> getSequenceDbDirList(URI sequenceRoot) throws IOException;
+
+    abstract public List<String> getTaxonomyList() throws IOException;
+
+    abstract public Map<String, String> getEnzymes() throws IOException;
+
+    abstract public Map<String, String> getResidue0Mods() throws IOException;
+
+    abstract public Map<String, String> getResidue1Mods() throws IOException;
 
     abstract public String getHelpTopic();
 }
