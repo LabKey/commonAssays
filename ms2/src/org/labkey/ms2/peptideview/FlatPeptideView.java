@@ -99,7 +99,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         }
 
         // Always include column captions at the top
-        ew.setColumns(getPeptideDisplayColumns(getPeptideColumnNames(form.getColumns())));
+        ew.setDisplayColumns(getPeptideDisplayColumns(getPeptideColumnNames(form.getColumns())));
         ew.renderNewSheet(workbook);
         ew.setCaptionRowVisible(false);
 
@@ -163,7 +163,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         ctx.setBaseFilter(filter);
         ctx.setBaseSort(ProteinManager.getPeptideBaseSort());
         ew.setResultSet(rgn.getResultSet(ctx));
-        ew.setColumns(rgn.getDisplayColumns());
+        ew.setDisplayColumns(rgn.getDisplayColumns());
         ew.setAutoSize(true);
     }
 

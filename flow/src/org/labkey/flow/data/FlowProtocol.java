@@ -197,14 +197,14 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     {
         ExpSampleSet ss = getSampleSet();
         if (ss == null)
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         Set<String> propertyNames = getSampleSetJoinFields().keySet();
         if (propertyNames.size() == 0)
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         SamplesSchema schema = new SamplesSchema(null, getContainer());
 
         ExpMaterialTable sampleTable = schema.getSampleTable("samples", ss);
-        List<ColumnInfo> selectedColumns = new ArrayList();
+        List<ColumnInfo> selectedColumns = new ArrayList<ColumnInfo>();
         ColumnInfo colProperty = sampleTable.getColumn(ExpMaterialTable.Column.Property.toString());
         ColumnInfo colRowId = sampleTable.getColumn(ExpMaterialTable.Column.RowId.toString());
         selectedColumns.add(colRowId);
@@ -212,8 +212,8 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         {
             selectedColumns.add(colProperty.getFk().createLookupColumn(colProperty, propertyName));
         }
-        Map<SampleKey, ExpMaterial> ret = new HashMap();
-        ResultSet rsSamples = Table.select(sampleTable, selectedColumns.toArray(new ColumnInfo[0]), null, null);
+        Map<SampleKey, ExpMaterial> ret = new HashMap<SampleKey, ExpMaterial>();
+        ResultSet rsSamples = Table.select(sampleTable, selectedColumns, null, null);
         try
         {
             while (rsSamples.next())
@@ -257,7 +257,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         ColumnInfo colRowId = columns.get(fieldRowId);
         ColumnInfo colSampleId = columns.get(fieldSampleRowId);
         int ret = 0;
-        ResultSet rs = Table.select(fcsFilesTable, columns.values().toArray(new ColumnInfo[0]), null, null);
+        ResultSet rs = Table.select(fcsFilesTable, new ArrayList<ColumnInfo>(columns.values()), null, null);
         try
         {
             boolean fTransaction = false;
@@ -422,12 +422,12 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         fs.insertParent(FieldKey.fromParts("FCSFile"));
         FlowSchema schema = new FlowSchema(user, getContainer());
         ExpDataTable table = schema.createFCSAnalysisTable("FCSAnalysis", FlowDataType.FCSAnalysis);
-        Map<FieldKey, ColumnInfo> columns = new HashMap();
+        Map<FieldKey, ColumnInfo> columns = new HashMap<FieldKey, ColumnInfo>();
         ColumnInfo colRowId = table.getColumn(ExpDataTable.Column.RowId);
         columns.put(new FieldKey(null, "RowId"), colRowId);
         columns.putAll(QueryService.get().getColumns(table, Arrays.asList(fs.getFieldKeys())));
         boolean fTrans = false;
-        ResultSet rs = Table.select(table, columns.values().toArray(new ColumnInfo[0]), null, null);
+        ResultSet rs = Table.select(table, new ArrayList<ColumnInfo>(columns.values()), null, null);
         try
         {
             if (!expService.isTransactionActive())
@@ -477,7 +477,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         if (fs == null)
             return well.getName();
         Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(table, Arrays.asList(fs.getFieldKeys()));
-        ResultSet rs = Table.select(table, columns.values().toArray(new ColumnInfo[0]), filter, null);
+        ResultSet rs = Table.select(table, new ArrayList<ColumnInfo>(columns.values()), filter, null);
         try
         {
             if (rs.next())
@@ -517,7 +517,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public String getProtocolSettingsDescription()
     {
-        List<String> parts = new ArrayList();
+        List<String> parts = new ArrayList<String>();
         if (getSampleSetJoinFields().size() != 0)
         {
             parts.add("Sample set join fields");

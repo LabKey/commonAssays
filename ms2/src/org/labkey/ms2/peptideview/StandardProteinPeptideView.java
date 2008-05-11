@@ -59,7 +59,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     {
         StandardProteinDataRegion proteinRgn = new StandardProteinDataRegion(_url);
         proteinRgn.setName(MS2Manager.getDataRegionNameProteins());
-        proteinRgn.addColumns(getProteinDisplayColumns(requestedProteinColumnNames, false));
+        proteinRgn.addDisplayColumns(getProteinDisplayColumns(requestedProteinColumnNames, false));
         proteinRgn.setShowRecordSelectors(true);
         proteinRgn.setExpanded(expanded);
         proteinRgn.setMaxRows(_maxGroupingRows);
@@ -102,7 +102,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
     public StandardProteinExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException
     {
         StandardProteinExcelWriter ew = new StandardProteinExcelWriter();
-        ew.setColumns(getProteinDisplayColumns(requestedProteinColumnNames, true));
+        ew.setDisplayColumns(getProteinDisplayColumns(requestedProteinColumnNames, true));
         return ew;
     }
 

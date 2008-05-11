@@ -6,6 +6,7 @@ import org.labkey.api.view.GridView;
 import org.labkey.api.data.*;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * User: jeckels
@@ -46,7 +47,7 @@ public class MS2WebPart extends WebPartView
         DataRegion rgn = new DataRegion();
         rgn.setName(MS2Manager.getDataRegionNameExperimentRuns());
         TableInfo ti = MS2Manager.getTableInfoExperimentRuns();
-        ColumnInfo[] cols = ti.getColumns("Description", "Path", "Created", "Run", "ExperimentRunLSID", "ProtocolName", "ExperimentRunRowId");
+        List<ColumnInfo> cols = ti.getColumns("Description", "Path", "Created", "Run", "ExperimentRunLSID", "ProtocolName", "ExperimentRunRowId");
         rgn.setColumns(cols);
         rgn.getDisplayColumn(3).setVisible(false);
         rgn.getDisplayColumn(4).setVisible(false);

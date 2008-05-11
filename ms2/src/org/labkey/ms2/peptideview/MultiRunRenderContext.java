@@ -24,7 +24,8 @@ public class MultiRunRenderContext extends RenderContext
         _runs = runs;
     }
 
-    protected ResultSet selectForDisplay(TableInfo table, ColumnInfo[] columns, SimpleFilter filter, Sort sort, int maxRows, long offset, boolean async) throws SQLException
+    @Override
+    protected ResultSet selectForDisplay(TableInfo table, List<ColumnInfo> columns, SimpleFilter filter, Sort sort, int maxRows, long offset, boolean async) throws SQLException
     {
         // XXX: we're ignoring offset for now
         return new MultiRunResultSet(_runs, table, columns, filter, sort, maxRows, getCache());
@@ -34,11 +35,11 @@ public class MultiRunRenderContext extends RenderContext
     public static class MultiRunResultSet extends MS2ResultSet
     {
         private TableInfo _table;
-        private ColumnInfo[] _columns;
+        private List<ColumnInfo> _columns;
         private int _maxRows;
         private boolean _cache;
 
-        MultiRunResultSet(List<MS2Run> runs, TableInfo table, ColumnInfo[] columns, SimpleFilter filter, Sort sort, int maxRows, boolean cache)
+        MultiRunResultSet(List<MS2Run> runs, TableInfo table, List<ColumnInfo> columns, SimpleFilter filter, Sort sort, int maxRows, boolean cache)
         {
             super(runs, filter, sort);
             _table = table;

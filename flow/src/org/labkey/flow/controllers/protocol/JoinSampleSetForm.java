@@ -62,7 +62,7 @@ public class JoinSampleSetForm extends ProtocolForm
 
     public Map<FieldKey, String> getAvailableDataKeyFields()
     {
-        LinkedHashMap<FieldKey, String> ret = new LinkedHashMap();
+        LinkedHashMap<FieldKey, String> ret = new LinkedHashMap<FieldKey, String>();
         FlowSchema schema = new FlowSchema(getUser(), getContainer());
         TableInfo tableFCSFiles = schema.getTable(FlowTableType.FCSFiles.toString(), "Foo");
 
@@ -72,7 +72,7 @@ public class JoinSampleSetForm extends ProtocolForm
         FieldKey keyword = new FieldKey(null, "Keyword");
         ColumnInfo colKeyword = tableFCSFiles.getColumn("Keyword");
         TableInfo tableKeywords = colKeyword.getFk().getLookupTableInfo();
-        for (ColumnInfo column : tableKeywords.getColumns())
+        for (ColumnInfo column : tableKeywords.getColumnsList())
         {
             ret.put(new FieldKey(keyword, column.getName()), column.getCaption());
         }

@@ -217,7 +217,6 @@ public class MS2Controller extends SpringActionController
             for (int i = 4; i < rgn.getDisplayColumns().size(); i++)
                 rgn.getDisplayColumn(i).setVisible(false);
 
-
             currentURL.setAction("showRun");
             currentURL.deleteParameters();
             rgn.getDisplayColumn(0).setURL(currentURL.getLocalURIString() + "&run=${Run}");
@@ -231,7 +230,7 @@ public class MS2Controller extends SpringActionController
             gridView.setSort(MS2Manager.getRunsBaseSort());
 
             ButtonBar bb = getListButtonBar(getContainer(), gridView);
-            rgn.addColumn(new HideShowScoringColumn(bb));
+            rgn.addDisplayColumn(new HideShowScoringColumn(bb));
             rgn.setButtonBar(bb, DataRegion.MODE_GRID);
 
             ProteinSearchWebPart searchView = new ProteinSearchWebPart(true);
@@ -1997,7 +1996,7 @@ public class MS2Controller extends SpringActionController
         {
             TableInfo tinfo = MS2Manager.getTableInfoHistory();
             ExcelWriter ew = new ExcelWriter(MS2Manager.getSchema(), "SELECT * FROM " + MS2Manager.getTableInfoHistory() + " ORDER BY Date");
-            ew.setColumns(tinfo.getColumns());
+            ew.setColumns(tinfo.getColumnsList());
             ew.setSheetName("MS2 History");
             ew.write(response);
         }
@@ -2110,7 +2109,7 @@ public class MS2Controller extends SpringActionController
             showURL.deleteParameters();
             String detailURL = showURL.getLocalURIString() + "insertId=${InsertId}";
             rgn.getDisplayColumn("insertId").setURL(detailURL);
-            rgn.addColumn(threadControl1);
+            rgn.addDisplayColumn(threadControl1);
             rgn.setMaxRows(MAX_INSERTIONS_DISPLAY_ROWS);
             rgn.setShowRecordSelectors(true);
 
@@ -3128,7 +3127,7 @@ public class MS2Controller extends SpringActionController
             // We don't want ActionURL to encode ${ContainerPath}, so set a dummy value and use string substitution
             String urlString = containerURL.setExtraPath("ContainerPath").getLocalURIString().replaceFirst("/ContainerPath/", "\\$\\{ContainerPath}/");
             cdc.setURLExpression(StringExpressionFactory.create(urlString, false));
-            rgn.addColumn(cdc);
+            rgn.addDisplayColumn(cdc);
 
             DataColumn descriptionColumn = new DataColumn(MS2Manager.getTableInfoRuns().getColumn("Description")) {
                 public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
@@ -3142,7 +3141,7 @@ public class MS2Controller extends SpringActionController
             ActionURL showRunURL = new ActionURL("MS2", "showRun", "ContainerPath");
             String showURLString = showRunURL.getLocalURIString().replaceFirst("/ContainerPath/", "\\$\\{ContainerPath}/") + "run=${Run}";
             descriptionColumn.setURLExpression(StringExpressionFactory.create(showURLString, false));
-            rgn.addColumn(descriptionColumn);
+            rgn.addDisplayColumn(descriptionColumn);
 
             rgn.addColumns(MS2Manager.getTableInfoRuns().getColumns("Path, Created, Deleted, StatusId, Status, PeptideCount, SpectrumCount, FastaId"));
 

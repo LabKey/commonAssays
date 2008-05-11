@@ -435,7 +435,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
             graphSelectedButton.setActionType(ActionButton.Action.GET);
             bbar.add(graphSelectedButton);
 
-            rgn.addColumn(0, new SimpleDisplayColumn()
+            rgn.addDisplayColumn(0, new SimpleDisplayColumn()
             {
                 public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                 {

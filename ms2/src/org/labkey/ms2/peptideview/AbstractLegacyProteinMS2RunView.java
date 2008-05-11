@@ -73,7 +73,7 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         {
             DisplayColumn seqId = MS2Manager.getTableInfoPeptides().getColumn("SeqId").getRenderer();
             seqId.setVisible(false);
-            rgn.addColumn(seqId);
+            rgn.addDisplayColumn(seqId);
         }
         rgn.setTable(MS2Manager.getTableInfoPeptides());
         rgn.setName(MS2Manager.getDataRegionNamePeptides());

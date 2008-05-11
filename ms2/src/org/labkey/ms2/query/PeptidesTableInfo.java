@@ -1,17 +1,19 @@
 package org.labkey.ms2.query;
 
-import org.labkey.api.query.*;
 import org.labkey.api.data.*;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.ms1.MS1Service;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.util.CaseInsensitiveHashSet;
+import org.labkey.api.view.ActionURL;
+import org.labkey.common.util.Pair;
 import org.labkey.ms2.*;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
-import org.labkey.common.util.Pair;
-import org.apache.commons.lang.StringUtils;
 
-import java.util.*;
 import java.sql.Types;
+import java.util.*;
 
 /**
  * User: jeckels
@@ -39,8 +41,7 @@ public class PeptidesTableInfo extends FilteredTable
         // Stick EndScan column just after Scan column
         ColumnInfo scanColumn = getRealTable().getColumn("Scan");
         ColumnInfo endScanColumn = getRealTable().getColumn("EndScan");
-        ColumnInfo[] tableColumns = getRealTable().getColumns();
-        List<ColumnInfo> columns = new ArrayList<ColumnInfo>(Arrays.asList(tableColumns));
+        List<ColumnInfo> columns = new ArrayList<ColumnInfo>(getRealTable().getColumnsList());
         columns.remove(endScanColumn);
         int i = columns.indexOf(scanColumn);
         columns.add(i + 1, endScanColumn);

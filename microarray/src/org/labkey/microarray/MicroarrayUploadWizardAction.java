@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Writer;
-import java.io.FileNotFoundException;
 
 /**
  * User: jeckels
@@ -55,7 +54,7 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
 
     protected void addSampleInputColumns(ExpProtocol protocol, InsertView insertView)
     {
-        insertView.getDataRegion().addColumn(new SampleChooserDisplayColumn(MicroarrayAssayProvider.MIN_SAMPLE_COUNT, MicroarrayAssayProvider.MAX_SAMPLE_COUNT));
+        insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(MicroarrayAssayProvider.MIN_SAMPLE_COUNT, MicroarrayAssayProvider.MAX_SAMPLE_COUNT));
     }
 
     private class SampleChooserDisplayColumn extends SimpleDisplayColumn

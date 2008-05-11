@@ -1033,11 +1033,11 @@ public class PipelineController extends SpringActionController
             nameCol.setCaption("Protocol Name");
             DataRegion dr = new DataRegion();
             dr.setName("protocolRegion");
-            dr.addColumn(nameCol);
+            dr.addDisplayColumn(nameCol);
             dr.addHiddenFormField(MS2ProtocolForm.PARAMS.templateName, template.getName());
             dr.addHiddenFormField(MS2PipelineForm.PARAMS.searchEngine, form.getSearchEngine());
             dr.addHiddenFormField(MS2PipelineForm.PARAMS.path, form.getPath());
-            dr.addColumns(template.getSubstitutionFields());
+            dr.addDisplayColumns(template.getSubstitutionFields());
 
             ButtonBar bb = new ButtonBar();
             ActionButton ab = new ActionButton(new ActionURL(ShowCreateMS2ProtocolAction.class, getViewContext().getContainer()), "Submit");

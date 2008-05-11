@@ -345,7 +345,7 @@ public class MS2Schema extends UserSchema
     {
         TableInfo info = MS2Manager.getTableInfoPeptideMemberships();
         FilteredTable result = new FilteredTable(info);
-        for (ColumnInfo col : info.getColumns())
+        for (ColumnInfo col : info.getColumnsList())
         {
             ColumnInfo newColumn = result.addWrapColumn(col);
             if (HIDDEN_PEPTIDE_MEMBERSHIPS_COLUMN_NAMES.contains(newColumn.getName()))
@@ -563,18 +563,15 @@ public class MS2Schema extends UserSchema
         TableInfo peptidesTable = createPeptidesTable("PeptidesAlias");
 
         Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(peptidesTable, fieldKeys);
-        ColumnInfo[] peptideCols = columnMap.values().toArray(new ColumnInfo[columnMap.size()]);
 
-        List<ColumnInfo> reqCols = new ArrayList<ColumnInfo>(Arrays.asList(peptideCols));
+        List<ColumnInfo> reqCols = new ArrayList<ColumnInfo>(columnMap.values());
         Set<String> unresolvedColumns = new HashSet<String>();
         QueryService.get().ensureRequiredColumns(peptidesTable, reqCols, filter, null, unresolvedColumns);
-        ColumnInfo[] cols = new ColumnInfo[reqCols.size()];
-        cols = reqCols.toArray(cols);
-        
-        SQLFragment innerSelect = Table.getSelectSQL(peptidesTable, cols, null, null);
 
-        Map<String, ColumnInfo> map = new HashMap<String, ColumnInfo>(cols.length);
-        for(ColumnInfo col : cols)
+        SQLFragment innerSelect = Table.getSelectSQL(peptidesTable, reqCols, null, null);
+
+        Map<String, ColumnInfo> map = new HashMap<String, ColumnInfo>(reqCols.size());
+        for(ColumnInfo col : reqCols)
         {
             map.put(col.getName(), col);
         }

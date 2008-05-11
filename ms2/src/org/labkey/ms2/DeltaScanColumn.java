@@ -38,7 +38,7 @@ import java.util.*;
 public class DeltaScanColumn extends SimpleDisplayColumn
 {
     private static Logger _log = Logger.getLogger(DeltaScanColumn.class);
-    private static Set<ColumnInfo> _queryColumns = new HashSet<ColumnInfo>(Arrays.asList(MS2Manager.getTableInfoPeptides().getColumns("Fraction,Scan,Peptide")));
+    private static Set<ColumnInfo> _queryColumns = new HashSet<ColumnInfo>(MS2Manager.getTableInfoPeptides().getColumns("Fraction,Scan,Peptide"));
 
     private ColumnInfo _fractionColInfo;
     private ColumnInfo _scanColInfo;

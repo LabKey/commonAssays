@@ -190,7 +190,7 @@ public abstract class GoLoader
                 }
             }
 
-            ColumnInfo[] columns = ti.getColumns();
+            List<ColumnInfo> columns = ti.getColumnsList();
 
             conn.setAutoCommit(false);
             ps = conn.prepareStatement(SQLCommand + QMarkPart);
@@ -198,7 +198,7 @@ public abstract class GoLoader
             {
                 Map curRec = (Map)it.next();
                 for (int i = 0; i < cols.length; i++)
-                    ps.setNull(i + 1, columns[i].getSqlTypeInt());
+                    ps.setNull(i + 1, columns.get(i).getSqlTypeInt());
 
                 for (Object key : curRec.keySet())
                 {
@@ -210,7 +210,7 @@ public abstract class GoLoader
                         if (s.equals("\\N"))
                             continue;
 
-                        ColumnInfo column = columns[kindex];
+                        ColumnInfo column = columns.get(kindex);
 
                         if (column.getSqlTypeInt() == Types.VARCHAR)
                         {

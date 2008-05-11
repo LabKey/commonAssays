@@ -157,7 +157,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         ProteinProphetDataRegion proteinRgn = new ProteinProphetDataRegion(_url);
         proteinRgn.setTable(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
         proteinRgn.setName(MS2Manager.getDataRegionNameProteinGroups());
-        proteinRgn.addColumns(getProteinDisplayColumns(requestedProteinColumnNames, false));
+        proteinRgn.addDisplayColumns(getProteinDisplayColumns(requestedProteinColumnNames, false));
         proteinRgn.setShowRecordSelectors(true);
         proteinRgn.setExpanded(expanded);
         proteinRgn.setShowPagination(false);
@@ -319,7 +319,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     public ProteinProphetExcelWriter getExcelProteinGridWriter(String requestedProteinColumnNames) throws SQLException
     {
         ProteinProphetExcelWriter ew = new ProteinProphetExcelWriter();
-        ew.setColumns(getProteinDisplayColumns(requestedProteinColumnNames, true));
+        ew.setDisplayColumns(getProteinDisplayColumns(requestedProteinColumnNames, true));
         return ew;
     }
 

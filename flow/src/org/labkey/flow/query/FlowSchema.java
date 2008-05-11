@@ -395,7 +395,7 @@ public class FlowSchema extends UserSchema
         public void populate(ExpSchema schema)
         {
             _expData.populate(schema);
-            for (ColumnInfo col : _expData.getColumns())
+            for (ColumnInfo col : _expData.getColumnsList())
             {
                 if (null == getColumn(col.getName()))
                     addExpColumn(col);
@@ -476,7 +476,7 @@ public class FlowSchema extends UserSchema
 
         public ColumnInfo getColumn(Column column)
         {
-            for (ColumnInfo info : getColumns())
+            for (ColumnInfo info : getColumnsList())
             {
                 if (info instanceof ExprColumn && info.getAlias().equals(column.toString()))
                 {
@@ -610,7 +610,7 @@ public class FlowSchema extends UserSchema
 
         public Iterator<FieldKey> iterator()
         {
-            List<FieldKey> ret = QueryService.get().getDefaultVisibleColumns(_table.getColumns());
+            List<FieldKey> ret = QueryService.get().getDefaultVisibleColumns(_table.getColumnsList());
             TableInfo lookup = _colKeyword.getFk().getLookupTableInfo();
             FieldKey keyKeyword = new FieldKey(null, _colKeyword.getName());
             if (lookup != null)
@@ -640,7 +640,7 @@ public class FlowSchema extends UserSchema
         public Iterator<FieldKey> iterator()
         {
             Collection<FieldKey> ret = new LinkedHashSet<FieldKey>();
-            ret.addAll(QueryService.get().getDefaultVisibleColumns(_table.getColumns()));
+            ret.addAll(QueryService.get().getDefaultVisibleColumns(_table.getColumnsList()));
             ret.remove(FieldKey.fromParts("AnalysisScript"));
             ret.remove(FieldKey.fromParts("FCSFile"));
             TableInfo lookup = _colStatistic.getFk().getLookupTableInfo();

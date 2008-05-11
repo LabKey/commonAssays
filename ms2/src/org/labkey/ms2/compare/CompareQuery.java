@@ -337,7 +337,7 @@ public abstract class CompareQuery extends SQLFragment
                 if (displayColumn != null)
                 {
                     _columnsPerRun++;
-                    rgn.addColumn(displayColumn);
+                    rgn.addDisplayColumn(displayColumn);
                 }
             }
         }
