@@ -16,15 +16,16 @@
 
 package org.labkey.ms1;
 
-import org.labkey.api.gwt.server.BaseRemoteService;
+import org.apache.log4j.Logger;
 import org.labkey.api.gwt.client.model.GWTComparisonResult;
+import org.labkey.api.gwt.server.BaseRemoteService;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.ms1.client.CompareService;
-import org.labkey.ms1.view.CompareRunsView;
 import org.labkey.ms1.query.MS1Schema;
-import org.apache.log4j.Logger;
+import org.labkey.ms1.view.CompareRunsView;
 
 /**
  * User: jeckels
@@ -39,7 +40,7 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         super(context);
     }
     
-    public GWTComparisonResult getFeaturesByPeptideComparison(String originalURL) throws Exception
+    public GWTComparisonResult getFeaturesByPeptideComparison(String originalURL)
     {
         try
         {
@@ -52,7 +53,7 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         catch (Exception e)
         {
             _log.error("Problem generating comparison", e);
-            throw e;
+            throw UnexpectedException.wrap(e);
         }
     }
     

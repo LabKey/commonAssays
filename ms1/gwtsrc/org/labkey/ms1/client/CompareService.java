@@ -47,6 +47,6 @@ public interface CompareService extends RemoteService
 
     }
 
-    public GWTComparisonResult getFeaturesByPeptideComparison(String originalURL) throws Exception;
+    public GWTComparisonResult getFeaturesByPeptideComparison(String originalURL);
 
 }

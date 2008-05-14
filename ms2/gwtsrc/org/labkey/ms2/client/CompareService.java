@@ -47,10 +47,10 @@ public interface CompareService extends RemoteService
 
     }
 
-    public GWTComparisonResult getProteinProphetComparison(String originalURL) throws Exception;
+    public GWTComparisonResult getProteinProphetComparison(String originalURL);
 
-    public GWTComparisonResult getPeptideComparison(String originalURL) throws Exception;
+    public GWTComparisonResult getPeptideComparison(String originalURL);
 
-    public GWTComparisonResult getProteinProphetCrosstabComparison(String originalURL) throws Exception;
+    public GWTComparisonResult getProteinProphetCrosstabComparison(String originalURL);
 
 }

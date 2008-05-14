@@ -16,15 +16,16 @@
 
 package org.labkey.ms2;
 
-import org.labkey.ms2.client.CompareService;
-import org.labkey.api.gwt.client.model.GWTComparisonResult;
-import org.labkey.ms2.query.CompareProteinsView;
-import org.labkey.ms2.query.ProteinProphetCrosstabView;
-import org.labkey.ms2.query.MS2Schema;
-import org.labkey.api.gwt.server.BaseRemoteService;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ActionURL;
 import org.apache.log4j.Logger;
+import org.labkey.api.gwt.client.model.GWTComparisonResult;
+import org.labkey.api.gwt.server.BaseRemoteService;
+import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewContext;
+import org.labkey.ms2.client.CompareService;
+import org.labkey.ms2.query.CompareProteinsView;
+import org.labkey.ms2.query.MS2Schema;
+import org.labkey.ms2.query.ProteinProphetCrosstabView;
 
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         super(context);
     }
 
-    public GWTComparisonResult getProteinProphetComparison(String originalURL) throws Exception
+    public GWTComparisonResult getProteinProphetComparison(String originalURL)
     {
         try
         {
@@ -57,11 +58,11 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         catch (Exception e)
         {
             _log.error("Problem generating comparison", e);
-            throw e;
+            throw UnexpectedException.wrap(e);
         }
     }
 
-    public GWTComparisonResult getProteinProphetCrosstabComparison(String originalURL) throws Exception
+    public GWTComparisonResult getProteinProphetCrosstabComparison(String originalURL)
     {
         try
         {
@@ -88,11 +89,11 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         catch (Exception e)
         {
             _log.error("Problem generating comparison", e);
-            throw e;
+            throw UnexpectedException.wrap(e);
         }
     }
 
-    public GWTComparisonResult getPeptideComparison(String originalURL) throws Exception
+    public GWTComparisonResult getPeptideComparison(String originalURL)
     {
 /*        ActionURL url = new ActionURL(originalURL);
         int runList = Integer.parseInt(url.getParameter("runList"));
