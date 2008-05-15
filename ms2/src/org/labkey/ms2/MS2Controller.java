@@ -1577,19 +1577,9 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ExportRunsAction extends ExportAction<ExportForm>
     {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
+        public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            List<MS2Run> runs;
-            try
-            {
-                runs = RunListCache.getCachedRuns(form.getRunList(), true, getViewContext());
-            }
-            catch (RunListException e)
-            {
-                _renderErrors(e.getMessages());  // TODO: throw
-                return;
-            }
-
+            List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList(), true, getViewContext());
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), runs.toArray(new MS2Run[runs.size()]));
             ActionURL currentURL = getViewContext().cloneActionURL();
@@ -1652,7 +1642,7 @@ public class MS2Controller extends SpringActionController
 
         public ModelAndView getView(ExportForm form, BindException errors) throws Exception
         {
-            return compareRuns(form.getRunList(), false, _title, form.getColumn());
+            return compareRuns(form.getRunList(), false, _title, form.getColumn(), errors);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -1665,9 +1655,9 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ExportCompareToExcel extends ExportAction<ExportForm>
     {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
+        public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            compareRuns(form.getRunList(), true, null, form.getColumn());
+            compareRuns(form.getRunList(), true, null, form.getColumn(), errors);
         }
     }
 
@@ -1728,40 +1718,30 @@ public class MS2Controller extends SpringActionController
 
         public final ModelAndView getView(FormType form, BindException errors) throws ServletException
         {
-            List<String> errorMessages = new ArrayList<String>();
             ActionURL currentURL = getViewContext().getActionURL();
             int runListId;
-            if (form.getRunList() == null)
+            try
             {
-                try
+                if (form.getRunList() == null)
                 {
                     runListId = RunListCache.cacheSelectedRuns(_requiresSameType, form, getViewContext());
                     ActionURL redirectURL = currentURL.clone();
                     redirectURL.addParameter("runList", Integer.toString(runListId));
                     HttpView.throwRedirect(redirectURL);
                 }
-                catch (RunListException e)
+                else
                 {
-                    return _renderErrors(e.getMessages());
-                }
-            }
-            else
-            {
-                runListId = form.getRunList().intValue();
-                try
-                {
+                    runListId = form.getRunList().intValue();
                     RunListCache.getCachedRuns(runListId, false, getViewContext());
                 }
-                catch (RunListException e)
-                {
-                    errorMessages.addAll(e.getMessages());
-                }
+
+                return getView(form, errors, runListId);
             }
-
-            if (!errorMessages.isEmpty())
-                return _renderErrors(errorMessages);
-
-            return getView(form, errors, runListId);
+            catch (RunListException e)
+            {
+                e.addErrors(errors);
+                return new SimpleErrorView(errors);
+            }
         }
 
         protected abstract ModelAndView getView(FormType form, BindException errors, int runListId);
@@ -1824,7 +1804,8 @@ public class MS2Controller extends SpringActionController
         {
             if (form.getRunList() == null)
             {
-                return _renderErrors(Arrays.asList("Could not find the list of selected runs for comparison. Please reselect the runs."));
+                errors.addError(new LabkeyError("Could not find the list of selected runs for comparison. Please reselect the runs."));
+                return new SimpleErrorView(errors);
             }
             try
             {
@@ -1832,7 +1813,8 @@ public class MS2Controller extends SpringActionController
             }
             catch (RunListException e)
             {
-                return _renderErrors(e.getMessages());
+                e.addErrors(errors);
+                return new SimpleErrorView(errors);
             }
             return super.getView(form, errors);
         }
@@ -1908,7 +1890,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column) throws ServletException, SQLException
+    private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column, BindException errors) throws ServletException, SQLException
     {
         ActionURL currentURL = getViewContext().getActionURL();
 
@@ -1919,7 +1901,8 @@ public class MS2Controller extends SpringActionController
         }
         catch (RunListException e)
         {
-            return _renderErrors(e.getMessages());
+            e.addErrors(errors);
+            return new SimpleErrorView(errors);
         }
 
         for (MS2Run run : runs)
@@ -1933,13 +1916,17 @@ public class MS2Controller extends SpringActionController
 
         CompareQuery query = CompareQuery.getCompareQuery(column, currentURL, runs);
         if (query == null)
-            return _renderError("You must specify a comparison type");
+        {
+            errors.addError(new LabkeyError("You must specify a comparison type"));
+            return new SimpleErrorView(errors);
+        }
 
-        List<String> errors = new ArrayList<String>();
         query.checkForErrors(errors);
 
-        if (errors.size() > 0)
-            return _renderErrors(errors);
+        if (errors.getErrorCount() > 0)
+        {
+            return new SimpleErrorView(errors);
+        }
 
         List<RunColumn> gridColumns = query.getGridColumns();
         CompareDataRegion rgn = query.getCompareGrid();
@@ -2008,7 +1995,7 @@ public class MS2Controller extends SpringActionController
     @RequiresLogin
     public class ExportHistoryAction extends ExportAction
     {
-        public void export(Object o, HttpServletResponse response) throws Exception
+        public void export(Object o, HttpServletResponse response, BindException errors) throws Exception
         {
             TableInfo tinfo = MS2Manager.getTableInfoHistory();
             ExcelWriter ew = new ExcelWriter(MS2Manager.getSchema(), "SELECT * FROM " + MS2Manager.getTableInfoHistory() + " ORDER BY Date");
@@ -2022,7 +2009,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowGraphAction extends ExportAction<DetailsForm>
     {
-        public void export(DetailsForm form, HttpServletResponse response) throws Exception
+        public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideIdLong());
 
@@ -2202,7 +2189,7 @@ public class MS2Controller extends SpringActionController
     public static class SetBestNameForm
     {
         public enum NameType
-        { LOOKUP_STRING, IPI, SWISS_PROT, SWISS_PROT_ACCN };
+        { LOOKUP_STRING, IPI, SWISS_PROT, SWISS_PROT_ACCN }
 
         private String _nameType;
 
@@ -2247,7 +2234,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ExportSelectedProteinGroupsAction extends ExportAction<ExportForm>
     {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
+        public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return;
@@ -2263,7 +2250,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ExportProteinGroupsAction extends ExportAction<ExportForm>
     {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
+        public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             if (isAuthorized(form.run))
                 exportProteinGroups(response, form, null);
@@ -2355,7 +2342,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ExportAllProteinsAction extends ExportAction<ExportForm>
     {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
+        public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             if (isAuthorized(form.run))
                 exportProteins(form, response, null, null);
@@ -2366,7 +2353,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ExportSelectedProteinsAction extends ExportAction<ExportForm>
     {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
+        public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return;
@@ -2650,7 +2637,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ExportProteinSearchToExcel extends ExportAction<ProteinSearchForm>
     {
-        public void export(ProteinSearchForm form, HttpServletResponse response) throws Exception
+        public void export(ProteinSearchForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             QueryView view = createProteinSearchView(form, getSeqIds(form));
             ExcelWriter excelWriter = view.getExcelWriter();
@@ -2663,7 +2650,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ExportProteinSearchToTSVAction extends ExportAction<ProteinSearchForm>
     {
-        public void export(ProteinSearchForm form, HttpServletResponse response) throws Exception
+        public void export(ProteinSearchForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             QueryView view = createProteinSearchView(form, getSeqIds(form));
             TSVGridWriter tsvWriter = view.getTsvWriter();
@@ -2677,7 +2664,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ExportProteinGroupSearchToExcelAction extends ExportAction<ProteinSearchForm>
     {
-        public void export(ProteinSearchForm form, HttpServletResponse response) throws Exception
+        public void export(ProteinSearchForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             QueryView view = createProteinGroupSearchView(form, getSeqIds(form));
             ExcelWriter excelWriter = view.getExcelWriter();
@@ -2690,7 +2677,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ExportProteinGroupSearchToTSVAction extends ExportAction<ProteinSearchForm>
     {
-        public void export(ProteinSearchForm form, HttpServletResponse response) throws Exception
+        public void export(ProteinSearchForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             QueryView view = createProteinGroupSearchView(form, getSeqIds(form));
             TSVGridWriter tsvWriter = view.getTsvWriter();
@@ -2704,7 +2691,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ExportAllPeptidesAction extends ExportAction<ExportForm>
     {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
+        public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             exportPeptides(form, response, false);
         }
@@ -2714,7 +2701,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ExportSelectedPeptidesAction extends ExportAction<ExportForm>
     {
-        public void export(ExportForm form, HttpServletResponse response) throws Exception
+        public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             exportPeptides(form, response, true);
         }
@@ -2781,32 +2768,6 @@ public class MS2Controller extends SpringActionController
             exportSpectra(Arrays.asList(run), currentURL, baseFilter, form.getExportFormat().toLowerCase());
     }
 
-
-    @Deprecated
-    private HttpView _renderErrors(List<String> messages) throws ServletException
-    {
-        getViewContext().requiresPermission(ACL.PERM_READ);
-        StringBuilder sb = new StringBuilder("<table class=\"DataRegion\">");
-
-        for (String message : messages)
-        {
-            sb.append("<tr><td>");
-            sb.append(message);
-            sb.append("</td></tr>");
-        }
-        sb.append("</table>");
-        HtmlView view = new HtmlView(sb.toString());
-        return view;
-    }
-
-
-    @Deprecated
-    private HttpView _renderError(String message) throws ServletException
-    {
-        return _renderErrors(Arrays.asList(message));
-    }
-
-
     public static class ExportForm extends RunForm
     {
         private String _column;
@@ -2848,7 +2809,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowPeptideProphetDistributionPlotAction extends ExportAction<PeptideProphetForm>
     {
-        public void export(PeptideProphetForm form, HttpServletResponse response) throws Exception
+        public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return;
@@ -2863,7 +2824,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowPeptideProphetObservedVsModelPlotAction extends ExportAction<PeptideProphetForm>
     {
-        public void export(PeptideProphetForm form, HttpServletResponse response) throws Exception
+        public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return;
@@ -2878,7 +2839,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowPeptideProphetObservedVsPPScorePlotAction extends ExportAction<PeptideProphetForm>
     {
-        public void export(PeptideProphetForm form, HttpServletResponse response) throws Exception
+        public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return;
@@ -2891,7 +2852,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowPeptideProphetSensitivityPlotAction extends ExportAction<PeptideProphetForm>
     {
-        public void export(PeptideProphetForm form, HttpServletResponse response) throws Exception
+        public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return;
@@ -2982,7 +2943,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowProteinProphetSensitivityPlotAction extends ExportAction<RunForm>
     {
-        public void export(RunForm form, HttpServletResponse response) throws Exception
+        public void export(RunForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return;
@@ -4077,7 +4038,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowLightElutionGraphAction extends ExportAction<DetailsForm>
     {
-        public void export(DetailsForm form, HttpServletResponse response) throws Exception
+        public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             showElutionGraph(response, form, true, false);
         }
@@ -4087,7 +4048,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowHeavyElutionGraphAction extends ExportAction<DetailsForm>
     {
-        public void export(DetailsForm form, HttpServletResponse response) throws Exception
+        public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             showElutionGraph(response, form, false, true);
         }
@@ -4097,7 +4058,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowCombinedElutionGraphAction extends ExportAction<DetailsForm>
     {
-        public void export(DetailsForm form, HttpServletResponse response) throws Exception
+        public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             showElutionGraph(response, form, true, true);
         }
@@ -4418,7 +4379,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class DoOnePeptideChartAction extends ExportAction
     {
-        public void export(Object o, HttpServletResponse response) throws Exception
+        public void export(Object o, HttpServletResponse response, BindException errors) throws Exception
         {
             HttpServletRequest req = getViewContext().getRequest();
             response.setContentType("image/png");
@@ -5249,7 +5210,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_NONE)
     public class AddFileRunStatusAction extends ExportAction
     {
-        public void export(Object o, HttpServletResponse response) throws Exception
+        public void export(Object o, HttpServletResponse response, BindException errors) throws Exception
         {
             ActionURL url = getViewContext().getActionURL();
             String status = null;
@@ -5504,7 +5465,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowParamsFileAction extends ExportAction<DetailsForm>
     {
-        public void export(DetailsForm form, HttpServletResponse response) throws Exception
+        public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             MS2Run run = MS2Manager.getRun(form.getRun());
 
@@ -5553,7 +5514,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ShowGZFileAction extends ExportAction<DetailsForm>
     {
-        public void export(DetailsForm form, HttpServletResponse response) throws Exception
+        public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             if (!isAuthorized(form.run))
                 return;

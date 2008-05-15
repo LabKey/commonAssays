@@ -334,11 +334,8 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
                 }
                 dataMap.put("SourceLSID", run.getLSID());
                 dataMap.put(getDataRowIdFieldKey().toString(), publishKey.getDataId());
-                addProperty(study, "Run Name", run.getName(), dataMap, typeSet);
-                addProperty(study, "Run Comments", run.getComments(), dataMap, typeSet);
-                addProperty(study, "Run CreatedOn", run.getCreated(), dataMap, typeSet);
-                User createdBy = run.getCreatedBy();
-                addProperty(study, "Run CreatedBy", createdBy == null ? null : createdBy.getDisplayName(HttpView.currentView().getViewContext()), dataMap, typeSet);
+
+                addStandardRunPublishProperties(study, typeSet, dataMap, run);
 
                 dataMaps[rowIndex++] = dataMap;
             }

@@ -494,16 +494,16 @@ public class Search implements EntryPoint
             searchFormPanel.submit();
         }
 
-        public void setEnabled(boolean enabled)
-        {
-            super.setEnabled(enabled);
-            this.enabled = enabled;
-        }
-
-        public boolean isEnabled()
-        {
-            return enabled;
-        }
+//        public void setEnabled(boolean enabled)
+//        {
+//            super.setEnabled(enabled);
+//            this.enabled = enabled;
+//        }
+//
+//        public boolean isEnabled()
+//        {
+//            return enabled;
+//        }
     }
 
     private class CopyButton extends ImageButton

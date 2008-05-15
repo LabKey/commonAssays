@@ -24,6 +24,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.TableInfo;
 import org.labkey.ms2.protein.ProteinManager;
+import org.springframework.validation.BindException;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -92,7 +93,7 @@ public class ProteinCompareQuery extends CompareQuery
         return "BestName";
     }
 
-    protected void selectColumns(List<String> errors)
+    protected void selectColumns(BindException errors)
     {
         // Use subselect to make it easier to join seqid to prot.sequences for bestname
         append("SELECT ");
@@ -113,7 +114,7 @@ public class ProteinCompareQuery extends CompareQuery
             "p.SeqId = s.SeqSeqId ";
     }
 
-    protected void selectRows(List<String> errors)
+    protected void selectRows(BindException errors)
     {
         super.selectRows(errors);
 
@@ -147,7 +148,7 @@ public class ProteinCompareQuery extends CompareQuery
         filter.addAllClauses(peptideFilter);
     }
 
-    protected void groupByCompareColumn(List<String> errors)
+    protected void groupByCompareColumn(BindException errors)
     {
         super.groupByCompareColumn(errors);
 

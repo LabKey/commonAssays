@@ -13,12 +13,10 @@
 
 <labkey:errors/>
 
-<form action="uploadCustomProteinAnnotations.post" method="POST">
+<form action="uploadCustomProteinAnnotations.post" name="proteinListForm" method="POST">
     <table>
         <tr>
-            <td>
-            </td>
-            <td>
+            <td colspan="2">
                 <p>
                     Upload your protein annotation set as tab-separated values (TSV). You can include additional values
                     associated with each protein, or just upload a list of proteins.
@@ -64,8 +62,8 @@
             <td valign="top">
                 Annotations:
             </td>
-            <td>
-                <textarea rows="10" cols="50" name="annotationsText"><%= h(bean.getAnnotationsText()) %></textarea>
+            <td width="100%">
+                <textarea style="width: 100%" rows="15" cols="50" name="annotationsText"><%= h(bean.getAnnotationsText()) %></textarea>
             </td>
         </tr>
         <tr>
@@ -74,3 +72,7 @@
         </tr>
     </table>
 </form>
+
+<script type="text/javascript">
+    document.forms.proteinListForm.name.focus();
+</script>

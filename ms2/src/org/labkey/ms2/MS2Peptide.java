@@ -95,7 +95,7 @@ public class MS2Peptide
             _spectrumMZ = spectrum.first;
             _spectrumIntensity = spectrum.second;
         }
-        catch (MS2Manager.SpectrumException e)
+        catch (SpectrumException e)
         {
             _spectrumMZ = new float[0];
             _spectrumIntensity = new float[0];

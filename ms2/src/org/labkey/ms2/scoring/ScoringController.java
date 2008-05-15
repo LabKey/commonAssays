@@ -26,7 +26,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.data.xy.XYSeries;
 import org.labkey.api.action.ExportAction;
-import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.data.Container;
@@ -40,7 +39,6 @@ import org.labkey.api.view.NavTree;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.springframework.validation.BindException;
-import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -93,7 +91,7 @@ public class ScoringController extends SpringActionController
     {
         abstract public XYSeriesCollection getSeriesCollection(ChartForm form);
 
-        public void export(ChartForm form, HttpServletResponse response) throws Exception
+        public void export(ChartForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             form.initArrays(getViewContext().getRequest());
 
@@ -446,7 +444,7 @@ public class ScoringController extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ChartDiscriminateAction extends ExportAction<ChartDiscForm>
     {
-        public void export(ChartDiscForm form, HttpServletResponse response) throws Exception
+        public void export(ChartDiscForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             Container c = getContainer();
 
@@ -496,7 +494,7 @@ public class ScoringController extends SpringActionController
     @RequiresPermission(ACL.PERM_READ)
     public class ChartDiscriminateROCAction extends ExportAction<ChartDiscForm>
     {
-        public void export(ChartDiscForm form, HttpServletResponse response) throws Exception
+        public void export(ChartDiscForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             Container c = getContainer();
 

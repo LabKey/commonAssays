@@ -256,7 +256,7 @@ public class MicroarrayController extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            QueryView result = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MicroarrayRunFilter.INSTANCE, true);
+            QueryView result = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MicroarrayRunFilter.INSTANCE, true, false);
             result.setFrame(WebPartView.FrameType.NONE);
             return result;
         }

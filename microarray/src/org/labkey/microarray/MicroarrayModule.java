@@ -60,7 +60,7 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
                 {
                     public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart webPart)
                     {
-                        QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MicroarrayRunFilter.INSTANCE, true);
+                        QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MicroarrayRunFilter.INSTANCE, true, false);
                         view.setTitle(WEBPART_MICROARRAY_RUNS);
                         view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
                         return view;

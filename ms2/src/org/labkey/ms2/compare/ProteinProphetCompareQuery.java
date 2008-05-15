@@ -23,6 +23,8 @@ import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.common.util.Pair;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.action.LabkeyError;
+import org.springframework.validation.BindException;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -108,7 +110,7 @@ public class ProteinProphetCompareQuery extends CompareQuery
         return "BestName";
     }
 
-    protected void selectColumns(List<String> errors)
+    protected void selectColumns(BindException errors)
     {
         // Use subselect to make it easier to join seqid to prot.sequences for bestname
         append("SELECT ");
@@ -122,7 +124,7 @@ public class ProteinProphetCompareQuery extends CompareQuery
         super.selectColumns(errors);
     }
 
-    protected void groupByCompareColumn(List<String> errors)
+    protected void groupByCompareColumn(BindException errors)
     {
         super.groupByCompareColumn(errors);
 
@@ -209,15 +211,14 @@ public class ProteinProphetCompareQuery extends CompareQuery
         filter.addWhereClause("pg.rowId = pgm.proteingroupid", new Object[0]);
     }
 
-
-    public void checkForErrors(List<String> errors) throws SQLException
+    public void checkForErrors(BindException errors) throws SQLException
     {
         super.checkForErrors(errors);
         for (MS2Run run : _runs)
         {
             if (run.getProteinProphetFile() == null)
             {
-                errors.add("Run " + run.getDescription() + " does not have ProteinProphet results.");
+                errors.addError(new LabkeyError("Run " + run.getDescription() + " does not have ProteinProphet results."));
             }
         }
     }

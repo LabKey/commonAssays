@@ -67,7 +67,7 @@ public class SetBestNameRunnable implements Runnable
                         break;
                     case LOOKUP_STRING:
                         identifierSQL = new SQLFragment();
-                        String nameSubstring = ProteinManager.getSqlDialect().getSubstringFunction("MAX(fs.LookupString)", "0", "49");
+                        String nameSubstring = ProteinManager.getSqlDialect().getSubstringFunction("MAX(fs.LookupString)", "0", "50");
                         identifierSQL.append("SELECT " + nameSubstring + " FROM " + ProteinManager.getTableInfoFastaSequences() + " fs ");
                         identifierSQL.append(" WHERE fs.SeqId = " + ProteinManager.getTableInfoSequences() + ".SeqId");
                         break;

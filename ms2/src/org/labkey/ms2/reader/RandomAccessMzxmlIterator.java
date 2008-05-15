@@ -148,7 +148,12 @@ public class RandomAccessMzxmlIterator extends AbstractMzxmlIterator
         {
             if (null == _scan)
                 _scan = _parser.rap(_scanIndex);
-            return _scan.getMassIntensityList(); // casts mass/intens pairs to floats if they were read as doubles
+            float[][] result = _scan.getMassIntensityList();  // casts mass/intens pairs to floats if they were read as doubles
+            if (result == null)
+            {
+                throw new IOException("No spectra available for scan " + _scan.getNum() + ", most likely there was an exception parsing. Check the server logs");
+            }
+            return result;
         }
     }
 

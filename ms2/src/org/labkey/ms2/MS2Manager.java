@@ -1042,20 +1042,6 @@ public class MS2Manager
     }
 
 
-    public static class SpectrumException extends Exception
-    {
-        private SpectrumException(String message)
-        {
-            super(message);
-        }
-
-        private SpectrumException(String message, Throwable e)
-        {
-            super(message, e);
-        }
-    }
-
-
     private static void _addRunToCache(String runId, MS2Run run)
     {
         Cache.getShared().put(RUN_CACHE_PREFIX + runId, run);

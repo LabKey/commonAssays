@@ -20,10 +20,12 @@ import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.*;
 import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.action.LabkeyError;
 import org.labkey.common.util.Pair;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
+import org.springframework.validation.BindException;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -91,7 +93,7 @@ public abstract class CompareQuery extends SQLFragment
         return _compareColumn;
     }
 
-    protected void generateSql(List<String> errors)
+    protected void generateSql(BindException errors)
     {
         selectColumns(errors);
         selectRows(errors);
@@ -99,7 +101,7 @@ public abstract class CompareQuery extends SQLFragment
         sort(errors);
     }
 
-    protected void selectColumns(List<String> errors)
+    protected void selectColumns(BindException errors)
     {
         // SELECT SeqId, Max(Run0Total) AS Run0Total, MAX(Run0Unique) AS Run0Unique..., COUNT(Run) As RunCount,
         append("SELECT ");
@@ -145,7 +147,7 @@ public abstract class CompareQuery extends SQLFragment
         append(" AS Pattern");
     }
 
-    protected void selectRows(List<String> errors)
+    protected void selectRows(BindException errors)
     {
         // FROM (SELECT Run, SeqId, CASE WHEN Run=1 THEN COUNT(DISTINCT Peptide) ELSE NULL END AS Run0, ... FROM MS2Peptides WHERE (peptideFilter)
         //       AND Run IN (?, ?, ...) GROUP BY Run, SeqId
@@ -215,7 +217,7 @@ public abstract class CompareQuery extends SQLFragment
             }
             if (!illegalColumns.isEmpty())
             {
-                errors.add("If you are comparing runs of different types, you cannot filter on search-engine specific scores: " + illegalColumns);
+                errors.addError(new LabkeyError("If you are comparing runs of different types, you cannot filter on search-engine specific scores: " + illegalColumns));
             }
         }
 
@@ -234,7 +236,7 @@ public abstract class CompareQuery extends SQLFragment
 
     protected abstract void addWhereClauses(SimpleFilter filter);
 
-    protected void groupByCompareColumn(List<String> errors)
+    protected void groupByCompareColumn(BindException errors)
     {
         outdent();
         appendNewLine();
@@ -246,7 +248,7 @@ public abstract class CompareQuery extends SQLFragment
         append(_compareColumn);
     }
 
-    protected void sort(List<String> errors)
+    protected void sort(BindException errors)
     {
         appendNewLine();
         // ORDER BY RunCount DESC, Pattern DESC, Protein ASC (plus apply any URL sort)
@@ -395,10 +397,13 @@ public abstract class CompareQuery extends SQLFragment
 
     public abstract List<Pair<String, String>> getSQLSummaries();
 
-    public void checkForErrors(List<String> errors) throws SQLException
+    public void checkForErrors(BindException errors) throws SQLException
     {
-        generateSql(errors);
         if (getGridColumns().size() == 0)
-            errors.add("You must choose at least one column to display in the grid.");
+        {
+            errors.addError(new LabkeyError("You must choose at least one comparison column to display in the grid."));
+            return;
+        }
+        generateSql(errors);
     }
 }

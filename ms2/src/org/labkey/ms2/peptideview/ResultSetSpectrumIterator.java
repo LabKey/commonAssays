@@ -114,7 +114,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             {
                 throw new RuntimeSQLException(e);
             }
-            catch (MS2Manager.SpectrumException e)
+            catch (SpectrumException e)
             {
                 _pair = new Pair<float[], float[]>(new float[0], new float[0]);  // Ignore spectrum exceptions -- just return empty spectrum
             }
