@@ -1,4 +1,16 @@
 * text=auto !eol
+authentication/lib/amclientsdk.jar -text
+authentication/lib/opensso-src.zip -text
+authentication/module.properties -text
+authentication/src/org/labkey/opensso/AMClient.properties -text
+authentication/src/org/labkey/opensso/OpenSSOController.java -text
+authentication/src/org/labkey/opensso/OpenSSOManager.java -text
+authentication/src/org/labkey/opensso/OpenSSOModule.java -text
+authentication/src/org/labkey/opensso/OpenSSOProvider.java -text
+authentication/src/org/labkey/opensso/clientDefault.properties -text
+authentication/src/org/labkey/opensso/view/configure.jsp -text
+authentication/src/org/labkey/opensso/view/currentSettings.jsp -text
+authentication/src/org/labkey/opensso/view/referrerPrefix.jsp -text
 biotrue/module.properties -text
 biotrue/src/META-INF/biotrue.xml -text
 biotrue/src/META-INF/biotrue/scripts/postgresql/biotrue-0.00-2.10.sql -text
