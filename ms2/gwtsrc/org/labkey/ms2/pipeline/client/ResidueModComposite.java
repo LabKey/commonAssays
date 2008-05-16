@@ -33,19 +33,21 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
 {
     protected Search searchForm;
     protected SimplePanel instance = new SimplePanel();
-    protected FlexTable modFlexTable = new FlexTable();
-    protected DeckPanel modsDeckPanel = new DeckPanel();
-    protected ListBox mod0ListBox = new ListBox(false);
-    protected ListBox mod1ListBox = new ListBox(false);
     protected TabPanel modTabPanel = new TabPanel();
+    protected FlexTable staticFlexTable = new FlexTable();
+    protected FlexTable dynamicFlexTable = new FlexTable();
+    protected ListBox modStaticListBox = new ListBox(false);
+    protected ListBox modDynamicListBox = new ListBox(false);
     protected ListBox staticListBox = new ListBox();
     protected ListBox dynamicListBox = new ListBox();
     protected HorizontalPanel staticPanel = new HorizontalPanel();
     protected HorizontalPanel dynamicPanel = new HorizontalPanel();
-    protected AddButton addButton = new AddButton();
+    protected AddButton addStaticButton = new AddButton(STATIC);
+    protected AddButton addDynamicButton = new AddButton(DYNAMIC);
     protected DeleteButton deleteDynamicButton = new DeleteButton(DYNAMIC);
     protected DeleteButton deleteStaticButton = new DeleteButton(STATIC);
-    protected NewButton newButton = new NewButton();
+    protected NewButton newStaticButton = new NewButton(STATIC);
+    protected NewButton newDynamicButton = new NewButton(DYNAMIC);
     protected VerticalPanel readOnlyPanel = new VerticalPanel();
     protected Label staticReadOnlyLabel = new Label();
     protected Label dynamicReadOnlyLabel = new Label();
@@ -62,18 +64,16 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
 
     public void init()
     {
-        mod0ListBox.setVisibleItemCount(4);
-        mod1ListBox.setVisibleItemCount(4);
-        modsDeckPanel.setHeight("100%");
+        modStaticListBox.setVisibleItemCount(3);
+        modDynamicListBox.setVisibleItemCount(3);
         staticListBox.setVisibleItemCount(3);
         dynamicListBox.setVisibleItemCount(3);
         staticPanel.add(staticListBox);
         staticPanel.add(deleteStaticButton);
         dynamicPanel.add(dynamicListBox);
         dynamicPanel.add(deleteDynamicButton);
-        modTabPanel.add(staticPanel, "Fixed");
-        modTabPanel.add(dynamicPanel, "Variable");
-        modTabPanel.addTabListener(new ModsTabListener());
+        modTabPanel.add(staticFlexTable, "Fixed");
+        modTabPanel.add(dynamicFlexTable, "Variable");
         modTabPanel.selectTab(0);
         readOnlyPanel.add(staticReadOnlyLabel);
         readOnlyPanel.add(dynamicReadOnlyLabel);
@@ -109,17 +109,19 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
             centerWidth.append(Integer.toString(intWidth/9));
             centerWidth.append(type);
             listWidth.append(Integer.toString(((intWidth/9) * 4)-60));
-            modFlexTable.getColumnFormatter().setWidth(0, endWidth.toString());
-            modFlexTable.getColumnFormatter().setWidth(1, centerWidth.toString());
-            modFlexTable.getColumnFormatter().setWidth(2, endWidth.toString());
-            modsDeckPanel.setWidth(endWidth.toString());
-            mod0ListBox.setWidth(endWidth.toString());
-            mod1ListBox.setWidth(endWidth.toString());
             modTabPanel.setWidth(endWidth.toString());
-            dynamicListBox.setWidth(listWidth.toString());
+            staticFlexTable.getColumnFormatter().setWidth(0, endWidth.toString());
+            staticFlexTable.getColumnFormatter().setWidth(1, centerWidth.toString());
+            staticFlexTable.getColumnFormatter().setWidth(2, endWidth.toString());
+            dynamicFlexTable.getColumnFormatter().setWidth(0, endWidth.toString());
+            dynamicFlexTable.getColumnFormatter().setWidth(1, centerWidth.toString());
+            dynamicFlexTable.getColumnFormatter().setWidth(2, endWidth.toString());
+            modStaticListBox.setWidth(endWidth.toString());
+            modDynamicListBox.setWidth(endWidth.toString());
             dynamicPanel.setWidth(endWidth.toString());
             staticPanel.setWidth(endWidth.toString());
             staticListBox.setWidth(listWidth.toString());
+            dynamicListBox.setWidth(listWidth.toString());
         }
         catch(NumberFormatException e)
         {}
@@ -241,17 +243,18 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
 
     private class AddButton extends ImageButton
     {
-        AddButton()
+        private int tabIndex;
+
+        AddButton(int tabIndex)
         {
             super("Add>");
+            this.tabIndex = tabIndex;
         }
 
         public void onClick(Widget sender)
         {
-            int tabIndex = getTabIndex();
             ListBox tabBox = getTabListBox(tabIndex);
-            int defaultIndex = modsDeckPanel.getVisibleWidget();
-            ListBox defaultModListBox = getDeckListBox(defaultIndex);
+            ListBox defaultModListBox = getDefaultsListBox(tabIndex);
             int modIndex = defaultModListBox.getSelectedIndex();
             if(modIndex != -1)
             {
@@ -274,14 +277,16 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
 
     public class NewButton extends ImageButton
     {
-        NewButton()
+        private int tabIndex;
+        NewButton(int tabIndex)
         {
             super("New");
+            this.tabIndex = tabIndex;
         }
 
         public void onClick(Widget sender)
         {
-            new NewModDialogBox();
+            new NewModDialogBox(tabIndex);
         }
     }
 
@@ -320,12 +325,14 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
 
     private class NewModDialogBox
     {
-        TextBox molWt = new TextBox();
-        ListBox residues = new ListBox();
-        DialogBox dialog = new DialogBox();
+        private TextBox molWt = new TextBox();
+        private ListBox residues = new ListBox();
+        private DialogBox dialog = new DialogBox();
+        private final int tabIndex;
 
-        public NewModDialogBox()
+        public NewModDialogBox(int index)
         {
+            this.tabIndex = index;
             loadResidues(residues);
             dialog.setText("Create new residue modification");
             FlexTable table = new FlexTable();
@@ -336,7 +343,7 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
             table.setWidget(2, 0, new ImageButton("Enter"){
                 public void onClick(Widget sender)
                 {
-                    add2List();
+                    add2List(tabIndex);
                     searchForm.syncForm2Xml();
                     dialog.hide();
                     dialog = null;
@@ -361,9 +368,8 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
             molWt.setFocus(true);
         }
 
-        private void add2List()
+        private void add2List(int tabIndex)
         {
-            int tabIndex = getTabIndex();
             add2List(getTabListBox(tabIndex));
         }
 
@@ -418,11 +424,11 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
         }
     }
 
-    private int getTabIndex()
-    {
-        DeckPanel deck = modTabPanel.getDeckPanel();
-        return deck.getVisibleWidget();
-    }
+//    private int getTabIndex()
+//    {
+//        DeckPanel deck = modTabPanel.getDeckPanel();
+//        return deck.getVisibleWidget();
+//    }
 
     private ListBox getTabListBox(int tabIndex)
     {
@@ -432,12 +438,12 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
             return dynamicListBox;
     }
 
-        private ListBox getDeckListBox(int tabIndex)
+    private ListBox getDefaultsListBox(int tabIndex)
     {
         if(tabIndex == STATIC)
-            return mod0ListBox;
+            return modStaticListBox;
         else
-            return mod1ListBox;
+            return modDynamicListBox;
     }
 
     protected int find(String text, ListBox box)
@@ -482,14 +488,14 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
 
             }
             dynamicReadOnlyLabel.setText(sb.toString());
-            instance.remove(modFlexTable);
+            instance.remove(modTabPanel);
             instance.setWidget(readOnlyPanel);
         }
         else
         {
             boolean removed = instance.remove(readOnlyPanel);
             if(removed)
-                instance.add(modFlexTable);
+                instance.add(modTabPanel);
         }
     }
 
@@ -497,21 +503,4 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
 
     abstract public Map getModMap(int modType);
 
-    private class ModsTabListener implements TabListener
-    {
-        public boolean onBeforeTabSelected(SourcesTabEvents sourcesTabEvents, int i)
-        {
-            return true;
-        }
-
-        public void onTabSelected(SourcesTabEvents sourcesTabEvents, int i)
-        {
-            int modTypeCount = modsDeckPanel.getWidgetCount();
-            if(modTypeCount < 2)
-            {
-                return;
-            }
-            modsDeckPanel.showWidget(i);
-        }
-    }
 }

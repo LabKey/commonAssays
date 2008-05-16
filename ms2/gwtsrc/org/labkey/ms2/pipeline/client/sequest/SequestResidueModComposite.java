@@ -47,35 +47,35 @@ public class SequestResidueModComposite extends ResidueModComposite
     public void init()
     {
         super.init();
-        SimplePanel mod0WrapperPanel = new SimplePanel();
-        SimplePanel mod1WrapperPanel = new SimplePanel();
-        mod0WrapperPanel.add(mod0ListBox);
-        mod1WrapperPanel.add(mod1ListBox);
-        FlexTable.FlexCellFormatter formatter = modFlexTable.getFlexCellFormatter();
-        formatter.setRowSpan(0, 0, 2);
-        formatter.setRowSpan(0, 2, 2);
-        modsDeckPanel.add(mod0WrapperPanel);
-        modsDeckPanel.add(mod1WrapperPanel);
-        modsDeckPanel.showWidget(0);
-        modFlexTable.setWidget(0, 0, modsDeckPanel);
-        modFlexTable.setWidget(0, 2, modTabPanel);
-        modFlexTable.setWidget(0, 1, addButton);
-        modFlexTable.setWidget(1, 0, newButton);
-        instance.setWidget(modFlexTable);
+        FlexTable.FlexCellFormatter staticFormatter = staticFlexTable.getFlexCellFormatter();
+        staticFormatter.setRowSpan(0, 0, 2);
+        staticFormatter.setRowSpan(0, 2, 2);
+        FlexTable.FlexCellFormatter dynamicFormatter = dynamicFlexTable.getFlexCellFormatter();
+        dynamicFormatter.setRowSpan(0, 0, 2);
+        dynamicFormatter.setRowSpan(0, 2, 2);
+        staticFlexTable.setWidget(0, 0, modStaticListBox);
+        staticFlexTable.setWidget(0, 2, staticPanel);
+        staticFlexTable.setWidget(0, 1, addStaticButton);
+        staticFlexTable.setWidget(1, 0, newStaticButton);
+        dynamicFlexTable.setWidget(0, 0, modDynamicListBox);
+        dynamicFlexTable.setWidget(0, 2, dynamicPanel);
+        dynamicFlexTable.setWidget(0, 1, addDynamicButton);
+        dynamicFlexTable.setWidget(1, 0, newDynamicButton);
+        instance.setWidget(modTabPanel);
     }
 
         public void update(Map mod0Map, Map mod1Map)
     {
-        setListBoxMods(mod0Map, mod0ListBox);
-        setListBoxMods(mod1Map, mod1ListBox);
+        setListBoxMods(mod0Map, modStaticListBox);
+        setListBoxMods(mod1Map, modDynamicListBox);
     }
 
     public Map getModMap(int modType)
     {
         if(modType == STATIC)
-            return getListBoxMap(mod0ListBox);
+            return getListBoxMap(modStaticListBox);
         else if(modType == DYNAMIC)
-            return getListBoxMap(mod1ListBox);
+            return getListBoxMap(modDynamicListBox);
         return null;
     }
     
@@ -83,8 +83,8 @@ public class SequestResidueModComposite extends ResidueModComposite
         {
             Map modMap = getListBoxMap(box);
             ListBox defaultModListBox;
-            if(modType == STATIC) defaultModListBox = mod0ListBox;
-            else defaultModListBox = mod1ListBox;
+            if(modType == STATIC) defaultModListBox = modStaticListBox;
+            else defaultModListBox = modDynamicListBox;
             Set keys = modMap.keySet();
 
             for(Iterator it = keys.iterator(); it.hasNext();)

@@ -20,10 +20,7 @@ import com.google.gwt.xml.client.*;
 import com.google.gwt.xml.client.impl.DOMParseException;
 import com.google.gwt.user.client.ui.HasText;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: billnelson@uky.edu
@@ -167,7 +164,7 @@ public class ParamParser
                 return "Note type '" + type + "' is not supported";
             }
             String label = elNote.getAttribute(ATTR_LABEL);
-            if(foundList.contains(label) && !(label.equals(STATIC_MOD) || label.equals(DYNAMIC_MOD)))
+            if(foundList.contains(label))
             {
                 return "The \"" + label + "\" label appears more than once in the input XML.";
             }
@@ -187,15 +184,15 @@ public class ParamParser
             if(isInputParameterElement(name, elNote))
                 removeNode(elNote);
         }
-        try
-        {
-            xmlWrapper.setText(toXml());
-        }
-        catch(SearchFormException e)
-        {
-            //sholdn't happen so throw runtime
-            throw new DOMParseException(e.getMessage());
-        }
+//        try
+//        {
+//            xmlWrapper.setText(toXml());
+//        }
+//        catch(SearchFormException e)
+//        {
+//            //sholdn't happen so throw runtime
+//            throw new DOMParseException(e.getMessage());
+//        }
     }
 
     private void removeNode(Node node)
@@ -230,12 +227,38 @@ public class ParamParser
 
     public void setStaticMods(Map mods) throws SearchFormException
     {
-        setInputParameters(STATIC_MOD, mods);
+        if(mods.size() == 0)
+        {
+            removeStaticMods();
+            return;
+        }
+        Collection values = mods.values();
+        StringBuffer valuesString = new StringBuffer();
+        for(Iterator it = values.iterator(); it.hasNext();)
+        {
+            if(valuesString.length() > 0)
+                valuesString.append(",");
+            valuesString.append((String)it.next());
+        }
+        setInputParameter(STATIC_MOD, valuesString.toString());
     }
 
     public void setDynamicMods(Map mods) throws SearchFormException
     {
-        setInputParameters(DYNAMIC_MOD, mods);
+        if(mods.size() == 0)
+        {
+            removeDynamicMods();
+            return;
+        }
+        Collection values = mods.values();
+        StringBuffer valuesString = new StringBuffer();
+        for(Iterator it = values.iterator(); it.hasNext();)
+        {
+            if(valuesString.length() > 0)
+                valuesString.append(",");
+            valuesString.append((String)it.next());
+        }
+        setInputParameter(DYNAMIC_MOD, valuesString.toString());
     }
 
     public String getSequenceDb()
@@ -253,14 +276,14 @@ public class ParamParser
         return getInputParameter(ENZYME);
     }
 
-    public List getStaticMods()
+    public String getStaticMods()
     {
-        return getInputParameters(STATIC_MOD);
+        return getInputParameter(STATIC_MOD);
     }
 
-    public List getDynamicMods()
+    public String getDynamicMods()
     {
-        return getInputParameters(DYNAMIC_MOD);
+        return getInputParameter(DYNAMIC_MOD);
     }
 
     public void removeSequenceDb()
@@ -288,28 +311,6 @@ public class ParamParser
         removeInputParameter(DYNAMIC_MOD);
     }
 
-    public void setInputParameters(String name, Map values) throws SearchFormException
-    {
-        if(name == null) throw new SearchFormException("Parameter name is null.");
-
-        removeInputParameter(name);
-        if(values == null || values.size() == 0) return;
-
-        for(Iterator it = values.values().iterator(); it.hasNext();)
-        {
-            String value = (String)it.next();
-            Element ip = getDocument().createElement(TAG_NOTE);
-            ip.setAttribute(ATTR_TYPE, VAL_INPUT);
-            ip.setAttribute(ATTR_LABEL,name);
-            ip.appendChild(getDocument().createTextNode(value));
-            Element de = getDocumentElement();
-            if(de == null) return;
-            Node before = de.getFirstChild();
-            de.insertBefore(ip,before);
-            xmlWrapper.setText(toXml());
-        }
-    }
-
     public void setInputParameter(String name, String value) throws SearchFormException
     {
         if(name == null) throw new SearchFormException("Parameter name is null.");
@@ -323,7 +324,6 @@ public class ParamParser
         if(de == null) return;
         Node before = de.getFirstChild();
         de.insertBefore(ip,before);
-        xmlWrapper.setText(toXml());
     }
 
     public String getInputParameter(String name)
@@ -342,25 +342,6 @@ public class ParamParser
             }
         }
         return "";
-    }
-
-    public List getInputParameters(String name)
-    {
-        List inputParams = new ArrayList();
-        if(name == null) return inputParams;
-        NodeList notes = getNoteElements();
-        if(notes == null) return null;
-        for(int i = 0; i < notes.getLength(); i++)
-        {
-            Element elNote = (Element)notes.item(i);
-            if(isInputParameterElement(name, elNote))
-            {
-                Node n = elNote.getFirstChild();
-                if(n != null)
-                    inputParams.add(n.getNodeValue());
-            }
-        }
-        return inputParams;
     }
 
     private boolean isInputParameterElement(String name, Element elNote)
@@ -410,6 +391,11 @@ public class ParamParser
         {
             throw new SearchFormException(e);
         }
+    }
+
+    public void writeXml() throws SearchFormException
+    {
+        xmlWrapper.setText(toXml());
     }
 
     private Document getDocument() throws SearchFormException

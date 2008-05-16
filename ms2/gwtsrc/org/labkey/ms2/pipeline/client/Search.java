@@ -342,10 +342,11 @@ public class Search implements EntryPoint
     public String syncForm2Xml()
     {
         String sequenceDb = sequenceDbComposite.getSelectedDb();
-        String taxonomy = sequenceDbComposite.getSelectedTaxonomy();
-        String enzyme = enzymeComposite.getSelectedEnzyme();
-        Map staticMods = residueModComposite.getStaticMods();
-        Map dynamicMods = residueModComposite.getDynamicMods();
+        String taxonomy   = sequenceDbComposite.getSelectedTaxonomy();
+        String enzyme     = enzymeComposite.getSelectedEnzyme();
+        Map staticMods    = residueModComposite.getStaticMods();
+        Map dynamicMods   = residueModComposite.getDynamicMods();
+
         try
         {
             inputXmlComposite.setSequenceDb(sequenceDb);
@@ -353,6 +354,7 @@ public class Search implements EntryPoint
             inputXmlComposite.setEnzyme(enzyme);
             inputXmlComposite.setStaticMods(staticMods);
             inputXmlComposite.setDynamicMods(dynamicMods);
+            inputXmlComposite.writeXml();
         }
         catch(SearchFormException e)
         {
@@ -368,6 +370,15 @@ public class Search implements EntryPoint
         error.append(syncSequenceDbXML2Form());
         error.append(syncEnzymeXML2Form());
         error.append(syncResidueMod2Form());
+        try
+        {
+            inputXmlComposite.writeXml();
+        }
+        catch(SearchFormException e)
+        {
+            error.append("Trouble writing XML: " + e.getMessage());   
+        }
+
         return error.toString();
     }
 
@@ -380,6 +391,15 @@ public class Search implements EntryPoint
         modMap = residueModComposite.getModMap(residueModComposite.DYNAMIC);
         Map dynamicMods = inputXmlComposite.getDynamicMods(modMap);
         residueModComposite.setSelectedDynamicMods(dynamicMods);
+        try
+        {
+           inputXmlComposite.setStaticMods(staticMods);
+           inputXmlComposite.setDynamicMods(dynamicMods);
+        }
+        catch(SearchFormException e)
+        {
+          return "Trouble adding residue modification params to input XML.\n" + e.getMessage();
+        }
         
         return residueModComposite.validate();
     }
@@ -577,7 +597,9 @@ public class Search implements EntryPoint
     {
         public void onFailure(Throwable caught)
         {
-            Window.alert(caught.getMessage());
+            if(!(GWT.getTypeName(caught).equals("com.google.gwt.user.client.rpc.InvocationException")
+                    && caught.getMessage().length() == 0))
+                Window.alert(caught.getMessage() + GWT.getTypeName(caught));
         }
 
         public void onSuccess(Object result)
@@ -594,10 +616,10 @@ public class Search implements EntryPoint
             }
             appendError(gwtResult.getErrors());
             sequenceDbComposite.selectDefaultDb(gwtResult.getDefaultSequenceDb());
-            if(sequenceDbComposite.getSelectedDb().length() == 0 && inputXmlComposite.getSequenceDb().length() > 0)
-            {
-                appendError(syncXml2Form());
-            }
+//            if(sequenceDbComposite.getSelectedDb().length() == 0 && inputXmlComposite.getSequenceDb().length() > 0)
+//            {
+//                appendError(syncXml2Form());
+//            }
             if(inputXmlComposite.getSequenceDb().length() > 0 &&
                 !inputXmlComposite.getSequenceDb().equals(sequenceDbComposite.getSelectedDb()))
             {

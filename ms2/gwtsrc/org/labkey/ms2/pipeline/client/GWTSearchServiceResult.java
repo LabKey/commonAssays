@@ -213,7 +213,7 @@ public class GWTSearchServiceResult implements IsSerializable
     }
 
     /**
-     * @gwt.typeArgs  modMap <java.lang.String, java.lang.String>
+     * @gwt.typeArgs  mod0Map <java.lang.String, java.lang.String>
      */
     public void setMod0Map(Map mod0Map)
     {
@@ -229,7 +229,7 @@ public class GWTSearchServiceResult implements IsSerializable
     }
 
     /**
-     * @gwt.typeArgs  modMap <java.lang.String, java.lang.String>
+     * @gwt.typeArgs  mod1Map <java.lang.String, java.lang.String>
      */
     public void setMod1Map(Map mod1Map)
     {

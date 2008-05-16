@@ -45,17 +45,19 @@ public class MascotResidueModComposite extends ResidueModComposite
     public void init()
     {
         super.init();
-        SimplePanel mod0WrapperPanel = new SimplePanel();
-        mod0WrapperPanel.add(mod0ListBox);
-        modsDeckPanel.add(mod0WrapperPanel);
-        FlexTable.FlexCellFormatter formatter = modFlexTable.getFlexCellFormatter();
-        formatter.setRowSpan(0, 0, 2);
-        formatter.setRowSpan(0, 2, 2);
-        modFlexTable.setWidget(0, 0, modsDeckPanel);
-        modFlexTable.setWidget(0, 2, modTabPanel);
-        modFlexTable.setWidget(0, 1, addButton);
-        modsDeckPanel.showWidget(0);
-        instance.setWidget(modFlexTable);
+        FlexTable.FlexCellFormatter staticFormatter = staticFlexTable.getFlexCellFormatter();
+        staticFormatter.setRowSpan(0, 0, 2);
+        staticFormatter.setRowSpan(0, 2, 2);
+        FlexTable.FlexCellFormatter dynamicFormatter = dynamicFlexTable.getFlexCellFormatter();
+        dynamicFormatter.setRowSpan(0, 0, 2);
+        dynamicFormatter.setRowSpan(0, 2, 2);
+        staticFlexTable.setWidget(0, 0, modStaticListBox);
+        staticFlexTable.setWidget(0, 2, staticPanel);
+        staticFlexTable.setWidget(0, 1, addStaticButton);
+        dynamicFlexTable.setWidget(0, 0, modDynamicListBox);
+        dynamicFlexTable.setWidget(0, 2, dynamicPanel);
+        dynamicFlexTable.setWidget(0, 1, addDynamicButton);
+        instance.setWidget(modTabPanel);
     }
 
         public String validate()
@@ -74,19 +76,21 @@ public class MascotResidueModComposite extends ResidueModComposite
         for(Iterator it = keys.iterator(); it.hasNext();)
         {
             String modName = (String)it.next();
-            if(find(modName, mod0ListBox) == -1) return "modification mass contained an invalid value(" + modName + ").";
+            if(find(modName, modStaticListBox) == -1) return "modification mass contained an invalid value(" + modName + ").";
         }
         return "";
     }
 
     public Map getModMap(int modType)
     {
-        return getListBoxMap(mod0ListBox);
+        return getListBoxMap(modStaticListBox);
     }
 
     public void update(Map mod0Map, Map mod1Map)
     {
-        setListBoxMods(mod0Map, mod0ListBox);
+        setListBoxMods(mod0Map, modStaticListBox);
+        //there the same in mascot
+        setListBoxMods(mod0Map, modDynamicListBox);
     }
 
     protected String validate(ListBox box, int modType)
@@ -98,7 +102,7 @@ public class MascotResidueModComposite extends ResidueModComposite
         for(Iterator it = keys.iterator(); it.hasNext();)
         {
             String modName = (String)it.next();
-            if(find(modName, mod0ListBox) != -1) continue;
+            if(find(modName, modStaticListBox) != -1) continue;
             if (modName.charAt(modName.length() - 2) != '@' && modName.length() > 3)
             {
                 return "modification mass contained an invalid value(" + modName + ").";

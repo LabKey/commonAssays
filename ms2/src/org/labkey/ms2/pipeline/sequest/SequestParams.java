@@ -219,7 +219,7 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             ConverterFactory.getSequestBasicConverter(),                              //converts the instance to a sequest.params line
             null,
             false
-         ).setInputXmlLabels("refine, potential N-terminus modifications", "refine, potential C-terminus modifications"));
+         ).setInputXmlLabels("residue, potential modification mass"));
         //No xtandem element created for this property.
         _params.add(new SequestParam(
             170,                                                       //sortOrder
@@ -379,9 +379,9 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             "add_Cterm_peptide",                                // the sequest.params property name
             "added to each peptide C-terminus",       // the sequest.params comment
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
-            ParamsValidatorFactory.getRealNumberParamsValidator(),
-            true
-        ).setInputXmlLabels().setInputXmlLabels("protein, cleavage C-terminal mass change"));
+            null,
+            false
+        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
 
         _params.add(new SequestParam(
             320,                                                       //sortOrder
@@ -399,9 +399,9 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             "add_Nterm_peptide",                                // the sequest.params property name
             "added to each peptide N-terminus",       // the sequest.params comment
             ConverterFactory.getSequestBasicConverter(),                      //converts the instance to a sequest.params line
-            ParamsValidatorFactory.getRealNumberParamsValidator(),
-            true
-        ).setInputXmlLabels().setInputXmlLabels("protein, cleavage N-terminal mass change"));
+            null,
+            false
+        ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
 
         _params.add(new SequestParam(
             340,                                                       //sortOrder

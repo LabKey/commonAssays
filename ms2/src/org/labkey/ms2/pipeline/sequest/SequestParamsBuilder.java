@@ -37,10 +37,9 @@ import java.util.*;
  */
 public abstract class SequestParamsBuilder
 {
-
     Map<String, String> sequestInputParams;
     URI uriSequenceRoot;
-    char[] _validResidues = {'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'O'};
+    char[] _validResidues = {'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'O','[',']'};
     HashMap<String, String> supportedEnzymes = new HashMap<String, String>();
     SequestParams _params;
 
@@ -272,7 +271,16 @@ public abstract class SequestParamsBuilder
 
         for (int i = 0; i < masses.size(); i++)
         {
-            defaultMods.put(residues.get(i), masses.get(i));
+            char res = residues.get(i);
+            if(res == '['||res == ']')
+            {
+                parserError =initDynamicTermMods(res, masses.get(i));
+                if (parserError != null && !parserError.equals("")) return parserError;
+            }
+            else
+            {
+                defaultMods.put(res, masses.get(i));
+            }
         }
 
         StringBuilder sb = new StringBuilder();
@@ -304,8 +312,21 @@ public abstract class SequestParamsBuilder
         Param modProp;
         for (int i = 0; i < masses.size(); i++)
         {
-            modProp = _params.startsWith("add_" + residues.get(i) + "_");
-            modProp.setValue(masses.get(i));
+            if(residues.get(i) == '[')
+            {
+                modProp = _params.startsWith("add_Nterm_peptide");
+                modProp.setValue(masses.get(i));
+            }
+            else if(residues.get(i) == ']')
+            {
+                modProp = _params.startsWith("add_Cterm_peptide");
+                modProp.setValue(masses.get(i));
+            }
+            else
+            {
+                modProp = _params.startsWith("add_" + residues.get(i) + "_");
+                modProp.setValue(masses.get(i));
+            }
         }
         return parserError;
     }
@@ -351,40 +372,22 @@ public abstract class SequestParamsBuilder
     }
 
 
-    String initTermDynamicMods()
+    String initDynamicTermMods(char term, String mass)
     {
         String parserError = "";
-        String nMod = sequestInputParams.get("potential N-terminus modifications");
-        String cMod = sequestInputParams.get("potential C-terminus modifications");
         Param termProp = _params.getParam("term_diff_search_options");
         String defaultTermMod = termProp.getValue();
         StringTokenizer st = new StringTokenizer(defaultTermMod);
         String defaultCTerm = st.nextToken();
         String defaultNTerm = st.nextToken();
 
-        if (nMod == null && cMod == null)
+        if (mass == null|| mass.length() == 0)
         {
-            return parserError;
+            return "The mass value for term_diff_search_options is empty.";
         }
-        StringBuilder cValue = new StringBuilder(defaultCTerm);
-        StringBuilder nValue = new StringBuilder(defaultNTerm);
-
-        if (cMod != null)
-            parserError = parseTermMods(cMod, cValue, "C");
-
-        if (!parserError.equals(""))
-            return parserError;
-
-
-        if (nMod != null)
-            parserError = parseTermMods(nMod, nValue, "N");
-
-        if (!parserError.equals(""))
-            return parserError;
-
-        defaultCTerm = cValue.toString();
-        defaultNTerm = nValue.toString();
-        termProp.setValue(defaultNTerm + " " + defaultCTerm);
+        if(term == '[') defaultNTerm = mass;
+        else if(term == ']') defaultCTerm = mass;
+        termProp.setValue(defaultCTerm + " " + defaultNTerm);
         return parserError;
     }
 
@@ -705,47 +708,6 @@ public abstract class SequestParamsBuilder
         }
         return clean.toString();
     }
-
-    private String parseTermMods(String mod, StringBuilder value, String term)
-    {
-
-        String parserError = "";
-        String key = "@[";
-        mod = removeWhiteSpace(mod);
-        if (term.equals("C")) key = "@]";
-        int modCount = new StringTokenizer(mod, ",").countTokens();
-        if (modCount > 1)
-        {
-            parserError = "potential " + term + "-terminus modifications has more than one value(" + mod + ").\n";
-            return parserError;
-        }
-        try
-        {
-            if (mod.equals(""))
-            {
-                return parserError;
-            }
-            else if (mod.endsWith(key))
-            {
-                double d = Double.parseDouble(mod.substring(0, mod.indexOf(key)));
-                String temp = Double.toString(d);
-                value.replace(0, value.length(), temp);
-            }
-            else
-            {
-                parserError = "potential " + term + "-terminus modifications has an invalid format(" + mod + ").\n";
-                return parserError;
-            }
-        }
-        catch (NumberFormatException e)
-        {
-            parserError = "potential " + term + "-terminus modifications has an invalid format(" + mod + ").\n";
-            return parserError;
-        }
-        return parserError;
-    }
-
-
     //JUnit TestCase
     public static class TestCase extends junit.framework.TestCase
     {
@@ -790,7 +752,6 @@ public abstract class SequestParamsBuilder
             suite.addTest(new TestCase("testInitTermDynamicModsNormal"));
             suite.addTest(new TestCase("testInitTermDynamicModsMissingValue"));
             suite.addTest(new TestCase("testInitTermDynamicModsDefault"));
-            suite.addTest(new TestCase("testInitTermDynamicModsGarbage"));
             suite.addTest(new TestCase("testInitStaticModsNormal"));
             suite.addTest(new TestCase("testInitStaticModsMissingValue"));
             suite.addTest(new TestCase("testInitStaticModsDefault"));
@@ -848,17 +809,6 @@ public abstract class SequestParamsBuilder
                 "<bioml>" +
                 "<note type=\"input\" label=\"pipeline, database\">" + value + ", " + value2 + "</note>" +
                 "</bioml>");
-
-
-
-//            Commenting out as Bovine_mini.fasta.hdr is not checked into source control 
-
-//            parserError = spb.initDatabases();
-//            if (!parserError.equals("")) fail(parserError);
-//            sp = spb.getProperties().getParam("first_database_name");
-//            assertEquals(dbPath + File.separator + value, sp.getValue());
-//            sp = spb.getProperties().getParam("second_database_name");
-//            assertEquals(dbPath + File.separator + value2, sp.getValue());
         }
 
         public void testInitDatabasesMissingValue()
@@ -1361,7 +1311,6 @@ public abstract class SequestParamsBuilder
         {
             //Testing no enzyme
             String expected1 = "0";
-            //String expected2 = "No_Enzyme\t\t\t\t0\t0\t-\t\t-";
             String expected2 = "nonspecific 0 0 - -";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1370,20 +1319,12 @@ public abstract class SequestParamsBuilder
 
             String parserError = spb.initEnzymeInfo();
             if (!parserError.equals("")) fail(parserError);
-//            Param sp = spb.getProperties().getParam("enzyme_number");
-//            String actual = sp.getValue();
-//            assertEquals("enzyme_number", expected1, actual);
-
-//            sp = spb.getProperties().getParam("enzyme0");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_description", expected2, actual);
 
             Param sp = spb.getProperties().getParam("enzyme_info");
             String actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
 
             expected1 = "1";
-            //expected2 = "Trypsin_K\t\t\t\t1\tK\t\tP";
             expected2 = "trypsin_k 1 1 K P";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1392,20 +1333,12 @@ public abstract class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (!parserError.equals("")) fail(parserError);
-//            sp = spb.getProperties().getParam("enzyme_number");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_number", expected1, actual);
-//
-//            sp = spb.getProperties().getParam("enzyme1");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_description", expected2, actual);
 
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
 
             expected1 = "1";
-            //expected2 = "Trypsin(KRLNH)\t\t\t\t1\tKRLNH\t\t-";
             expected2 = "pepsina 1 1 FL -";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1414,13 +1347,6 @@ public abstract class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (!parserError.equals("")) fail(parserError);
-//            sp = spb.getProperties().getParam("enzyme_number");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_number", expected1, actual);
-//
-//            sp = spb.getProperties().getParam("enzyme1");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_description", expected2, actual);
 
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
@@ -1549,7 +1475,6 @@ public abstract class SequestParamsBuilder
         public void testInitEnzymeInfoGarbage()
         {
             String expected1 = "1";
-//            String expected2 = "Trypsin(KR/P)\t\t\t\t1\tKR\t\tP";
             String expected2 = "trypsin 1 1 KR P";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -1558,14 +1483,7 @@ public abstract class SequestParamsBuilder
 
             String parserError = spb.initEnzymeInfo();
             if (parserError.equals("")) fail("Expected error message");
-//            Param sp = spb.getProperties().getParam("enzyme_number");
-//            String actual = sp.getValue();
-//            assertEquals("enzyme_number", expected1, actual);
-//
-//            sp = spb.getProperties().getParam("enzyme1");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_description", expected2, actual);
-//            assertEquals("enzyme_description", "protein, cleavage site contained invalid format(foo).\n", parserError);
+
 
             Param sp = spb.getProperties().getParam("enzyme_info");
             String actual = sp.getValue();
@@ -1579,14 +1497,6 @@ public abstract class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (parserError.equals("")) fail("Expected error message");
-//            sp = spb.getProperties().getParam("enzyme_number");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_number", expected1, actual);
-//
-//            sp = spb.getProperties().getParam("enzyme1");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_description", expected2, actual);
-//            assertEquals("protein, cleavage site contained more than one cleavage site([CV]|{P},[KR]|{P}).\n", parserError);
 
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
@@ -1600,14 +1510,6 @@ public abstract class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (parserError.equals("")) fail("Expected error message");
-//            sp = spb.getProperties().getParam("enzyme_number");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_number", expected1, actual);
-//
-//            sp = spb.getProperties().getParam("enzyme1");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_description", expected2, actual);
-//            assertEquals("protein, cleavage site does not support n-terminal blocking AAs({P}|[KR]).\n", parserError);
 
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
@@ -1621,14 +1523,6 @@ public abstract class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (parserError.equals("")) fail("Expected error message");
-//            sp = spb.getProperties().getParam("enzyme_number");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_number", expected1, actual);
-//
-//            sp = spb.getProperties().getParam("enzyme1");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_description", expected2, actual);
-//            assertEquals("protein, cleavage site contained invalid residue(a).\n", parserError);
 
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
@@ -1642,14 +1536,6 @@ public abstract class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (parserError.equals("")) fail("Expected error message");
-//            sp = spb.getProperties().getParam("enzyme_number");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_number", expected1, actual);
-//
-//            sp = spb.getProperties().getParam("enzyme1");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_description", expected2, actual);
-//            assertEquals("protein, cleavage site contained invalid residue(a).\n", parserError);
 
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
@@ -1663,14 +1549,6 @@ public abstract class SequestParamsBuilder
 
             parserError = spb.initEnzymeInfo();
             if (parserError.equals("")) fail("Expected error message");
-//            sp = spb.getProperties().getParam("enzyme_number");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_number", expected1, actual);
-//
-//            sp = spb.getProperties().getParam("enzyme1");
-//            actual = sp.getValue();
-//            assertEquals("enzyme_description", expected2, actual);
-//            assertEquals("protein, cleavage site contained invalid format([X]|P).\n", parserError);
 
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
@@ -1794,40 +1672,39 @@ public abstract class SequestParamsBuilder
         {
             Param sp = spb.getProperties().getParam("term_diff_search_options");
             String defaultValue = sp.getValue();
-            String expected1 = "42.0 0.0";
+            String expected1 = "0.0 42.0";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
-                "<note type=\"input\" label=\"potential N-terminus modifications\">+42.0@[</note>" +
+                "<note type=\"input\" label=\"residue, potential modification mass\">+42.0@[</note>" +
                 "</bioml>");
 
-            String parserError = spb.initTermDynamicMods();
+            String parserError = spb.initDynamicMods();
             if (!parserError.equals("")) fail(parserError);
             sp = spb.getProperties().getParam("term_diff_search_options");
             String actual = sp.getValue();
             assertEquals("term_diff_search_options", expected1, actual);
 
             sp.setValue(defaultValue);
-            expected1 = "42.0 -88.0";
+            expected1 = "-88.0 42.0";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
-                "<note type=\"input\" label=\"potential C-terminus modifications\">-88 @ ]</note>" +
-                "<note type=\"input\" label=\"potential N-terminus modifications\">+ 42.0 @[</note>" +
+                "<note type=\"input\" label=\"residue, potential modification mass\">+ 42.0 @[,-88 @ ]</note>" +
                 "</bioml>");
 
-            parserError = spb.initTermDynamicMods();
+            parserError = spb.initDynamicMods();
             if (!parserError.equals("")) fail(parserError);
             sp = spb.getProperties().getParam("term_diff_search_options");
             actual = sp.getValue();
             assertEquals("term_diff_search_options", expected1, actual);
 
             sp.setValue(defaultValue);
-            expected1 = "0.0 -88.0";
+            expected1 = "-88.0 0.0";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
-                "<note type=\"input\" label=\"potential C-terminus modifications\">-88@]</note>" +
+                "<note type=\"input\" label=\"residue, potential modification mass\">-88@]</note>" +
                 "</bioml>");
 
-            parserError = spb.initTermDynamicMods();
+            parserError = spb.initDynamicMods();
             if (!parserError.equals("")) fail(parserError);
             sp = spb.getProperties().getParam("term_diff_search_options");
             actual = sp.getValue();
@@ -1842,25 +1719,23 @@ public abstract class SequestParamsBuilder
             String expected1 = "0.0 0.0";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
-                "<note type=\"input\" label=\"potential N-terminus modifications\">+0.0@[</note>" +
-                "<note type=\"input\" label=\"potential C-terminus modifications\"></note>" +
+                "<note type=\"input\" label=\"residue, potential modification mass\">+0.0@[</note>" +
                 "</bioml>");
 
-            String parserError = spb.initTermDynamicMods();
+            String parserError = spb.initDynamicMods();
             if (!parserError.equals("")) fail(parserError);
             sp = spb.getProperties().getParam("term_diff_search_options");
             String actual = sp.getValue();
             assertEquals("term_diff_search_options", expected1, actual);
 
             sp.setValue(defaultValue);
-            expected1 = "42.0 0.0";
+            expected1 = "0.0 42.0";
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
-                "<note type=\"input\" label=\"potential C-terminus modifications\"></note>" +
-                "<note type=\"input\" label=\"potential N-terminus modifications\">+ 42.0 @[</note>" +
+                "<note type=\"input\" label=\"residue, potential modification mass\">+ 42.0 @[</note>" +
                 "</bioml>");
 
-            parserError = spb.initTermDynamicMods();
+            parserError = spb.initDynamicMods();
             if (!parserError.equals("")) fail(parserError);
             sp = spb.getProperties().getParam("term_diff_search_options");
             actual = sp.getValue();
@@ -1874,45 +1749,11 @@ public abstract class SequestParamsBuilder
                 "<bioml>" +
                 "</bioml>");
 
-            String parserError = spb.initTermDynamicMods();
+            String parserError = spb.initDynamicMods();
             if (!parserError.equals("")) fail(parserError);
             Param sp = spb.getProperties().getParam("term_diff_search_options");
             String actual = sp.getValue();
             assertEquals("term_diff_search_options", expected1, actual);
-        }
-
-        public void testInitTermDynamicModsGarbage()
-        {
-            Param sp = spb.getProperties().getParam("term_diff_search_options");
-            String defaultValue = sp.getValue();
-            String expected1 = "0.0 0.0";
-            parseParams("<?xml version=\"1.0\"?>" +
-                "<bioml>" +
-                "<note type=\"input\" label=\"potential C-terminus modifications\">foo</note>" +
-                "<note type=\"input\" label=\"potential N-terminus modifications\"></note>" +
-                "</bioml>");
-
-            String parserError = spb.initTermDynamicMods();
-            if (parserError.equals("")) fail("Expected error.");
-            sp = spb.getProperties().getParam("term_diff_search_options");
-            String actual = sp.getValue();
-            assertEquals("term_diff_search_options", expected1, actual);
-            assertEquals("term_diff_search_options", "potential C-terminus modifications has an invalid format(foo).\n", parserError);
-
-            sp.setValue(defaultValue);
-            expected1 = "0.0 0.0";
-            parseParams("<?xml version=\"1.0\"?>" +
-                "<bioml>" +
-                "<note type=\"input\" label=\"potential C-terminus modifications\"></note>" +
-                "<note type=\"input\" label=\"potential N-terminus modifications\">bar</note>" +
-                "</bioml>");
-
-            parserError = spb.initTermDynamicMods();
-            if (parserError.equals("")) fail("Expected error.");
-            sp = spb.getProperties().getParam("term_diff_search_options");
-            actual = sp.getValue();
-            assertEquals("term_diff_search_options", expected1, actual);
-            assertEquals("term_diff_search_options", "potential N-terminus modifications has an invalid format(bar).\n", parserError);
         }
 
         public void testInitStaticModsNormal()
@@ -1929,7 +1770,19 @@ public abstract class SequestParamsBuilder
 
                 String parserError = spb.initStaticMods();
                 if (!parserError.equals("")) fail(parserError);
-                Param sp = spb.getProperties().startsWith("add_" + residue + "_");
+                Param sp;
+                if(residue == '[')
+                {
+                    sp = spb.getProperties().startsWith("add_Nterm_peptide");
+                }
+                else if(residue == ']')
+                {
+                    sp = spb.getProperties().startsWith("add_Cterm_peptide");
+                }
+                else
+                {
+                    sp = spb.getProperties().startsWith("add_" + residue + "_");   
+                }
                 String actual = sp.getValue();
                 assertEquals("residue, modification mass", expected1, actual);
             }
@@ -1945,7 +1798,19 @@ public abstract class SequestParamsBuilder
 
                 String parserError = spb.initStaticMods();
                 if (!parserError.equals("")) fail(parserError);
-                Param sp = spb.getProperties().startsWith("add_" + residue + "_");
+                Param sp;
+                if(residue == '[')
+                {
+                    sp = spb.getProperties().startsWith("add_Nterm_peptide");
+                }
+                else if(residue == ']')
+                {
+                    sp = spb.getProperties().startsWith("add_Cterm_peptide");
+                }
+                else
+                {
+                    sp = spb.getProperties().startsWith("add_" + residue + "_");
+                }
                 String actual = sp.getValue();
                 assertEquals("residue, modification mass", expected1, actual);
             }
@@ -1985,7 +1850,19 @@ public abstract class SequestParamsBuilder
 
                 String parserError = spb.initStaticMods();
                 if (!parserError.equals("")) fail(parserError);
-                Param sp = spb.getProperties().startsWith("add_" + residue + "_");
+                Param sp;
+                if(residue == '[')
+                {
+                    sp = spb.getProperties().startsWith("add_Nterm_peptide");
+                }
+                else if(residue == ']')
+                {
+                    sp = spb.getProperties().startsWith("add_Cterm_peptide");
+                }
+                else
+                {
+                    sp = spb.getProperties().startsWith("add_" + residue + "_");
+                }
                 String actual = sp.getValue();
                 assertEquals("residue, modification mass", expected1, actual);
             }
@@ -2004,7 +1881,19 @@ public abstract class SequestParamsBuilder
 
                 String parserError = spb.initStaticMods();
                 if (!parserError.equals("")) fail(parserError);
-                Param sp = spb.getProperties().startsWith("add_" + residue + "_");
+                Param sp;
+                if(residue == '[')
+                {
+                    sp = spb.getProperties().startsWith("add_Nterm_peptide");
+                }
+                else if(residue == ']')
+                {
+                    sp = spb.getProperties().startsWith("add_Cterm_peptide");
+                }
+                else
+                {
+                    sp = spb.getProperties().startsWith("add_" + residue + "_");
+                }
                 String actual = sp.getValue();
                 assertEquals("residue, modification mass", expected1, actual);
             }

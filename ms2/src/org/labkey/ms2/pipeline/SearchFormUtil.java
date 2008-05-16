@@ -180,7 +180,8 @@ public class SearchFormUtil
             mod0Map.put("Carboxymethyl (C)", "58.005479@C");
             mod0Map.put("ICAT-D (C)","442.224991@C");
             mod0Map.put("ICAT-C (C)", "227.126991@C");
-            mod0Map.put("iTRAQ (N-term,K)", "144.102063@[,144.102063@K");
+            mod0Map.put("iTRAQ (N-term)", "144.102063@[");
+            mod0Map.put("iTRAQ (K)", "144.102063@K");
             mod0Map.put("Propionamide (C)", "71.037114@C");
             mod0Map.put("Pyridylethyl (C)", "105.057849@C");
         }

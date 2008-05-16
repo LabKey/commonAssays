@@ -21,10 +21,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.DOM;
 import org.labkey.api.gwt.client.util.StringUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * User: billnelson@uky.edu
@@ -186,11 +183,25 @@ public abstract class InputXmlComposite extends SearchFormComposite  implements 
         params.removeEnzyme();
     }
 
-    private Map mods2Map(List mods, Map knownMods)
+    public void writeXml() throws SearchFormException
+    {
+        params.writeXml();
+    }
+
+    private Map mods2Map(String mods, Map knownMods)
     {
         if(knownMods == null || mods == null) return null;
         Map returnMap = new HashMap();
-        for(Iterator modsIt = mods.iterator(); modsIt.hasNext();)
+        if(mods.length() == 0) return returnMap;
+        String[] modsArray = mods.split(",");
+        List modsList = new ArrayList();
+        for(int i = 0; i < modsArray.length; i++)
+        {
+            String checkMod = modsArray[i].trim();
+            if(checkMod.length() > 0)
+                modsList.add(checkMod);   
+        }
+        for(Iterator modsIt = modsList.iterator(); modsIt.hasNext();)
         {
             String mod = (String)modsIt.next();
             boolean found = false;

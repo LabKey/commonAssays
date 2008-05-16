@@ -69,9 +69,7 @@ public class SequestParamsV2Builder extends SequestParamsBuilder
         parserError.append(initIonScoring());
         parserError.append(initEnzymeInfo());
         parserError.append(initDynamicMods());
-        parserError.append(initTermDynamicMods());
         parserError.append(initMassType());
-    //        parserError.append(initMassRange());
         parserError.append(initStaticMods());
         parserError.append(initPassThroughs());
 
