@@ -294,7 +294,7 @@ public class MS2Schema extends UserSchema
                 // this condition because it causes the query plan to flip to something that does a much more efficient
                 // join with the sequences tables. However, adding it significantly degrades performance on my admittedly
                 // small (though not tiny) Postgres dev database
-                if (_runs != null && MS2Manager.getSchema().getSqlDialect() instanceof SqlDialectMicrosoftSQLServer)
+                if (_runs != null && "Sql Server".equals(MS2Manager.getSchema().getSqlDialect().getProductName()))
                 {
                     SQLFragment sql = new SQLFragment();
                     sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
