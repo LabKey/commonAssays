@@ -86,7 +86,7 @@ public class PendingMageMLFilesView extends QueryView
 
         ActionButton deleteButton = new ActionButton("placeholder", "Delete");
         ActionURL deleteURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getDeleteDatasURL(view.getViewContext().getContainer(), view.getViewContext().getActionURL());
-        deleteButton.setScript("if (verifySelected(" + view.getDataRegion().getJavascriptFormReference() + ", \"" + deleteURL + "\", \"post\", \"MageML files\")) {" + view.getDataRegion().getJavascriptFormReference() + ".submit();} return false;");
+        deleteButton.setScript("if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(true) + ", \"" + deleteURL + "\", \"post\", \"MageML files\")) {" + view.getDataRegion().getJavascriptFormReference(true) + ".submit();} return false;");
         deleteButton.setDisplayPermission(ACL.PERM_DELETE);
         bar.add(deleteButton);
 
@@ -110,7 +110,7 @@ public class PendingMageMLFilesView extends QueryView
                 ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
                 ActionButton button = new ActionButton(url, "Import selected using " + protocol.getName());
                 button.setDisplayPermission(ACL.PERM_INSERT);
-                button.setScript("if (verifySelected(" + view.getDataRegion().getJavascriptFormReference() + ", \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { " + view.getDataRegion().getJavascriptFormReference() + ".submit(); } return false;");
+                button.setScript("if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(true) + ", \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { " + view.getDataRegion().getJavascriptFormReference(true) + ".submit(); } return false;");
                 bar.add(button);
             }
             else
@@ -121,7 +121,7 @@ public class PendingMageMLFilesView extends QueryView
                 for (ExpProtocol protocol : microarrayProtocols)
                 {
                     ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
-                    menu.addMenuItem("Import using " + protocol.getName(), "javascript: if (verifySelected(" + view.getDataRegion().getJavascriptFormReference() + ", \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { " + view.getDataRegion().getJavascriptFormReference() + ".submit(); }");
+                    menu.addMenuItem("Import using " + protocol.getName(), "javascript: if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(false) + ", \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { " + view.getDataRegion().getJavascriptFormReference(false) + ".submit(); }");
                 }
             }
             ActionURL browseURL = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), getViewContext().getActionURL().toString());

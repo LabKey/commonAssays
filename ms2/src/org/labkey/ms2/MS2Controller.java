@@ -277,35 +277,35 @@ public class MS2Controller extends SpringActionController
         {
             proteinProphetURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("ProteinProphet", view.createVerifySelectedScript(proteinProphetURL, "runs"));
+        compareMenu.addMenuItem("ProteinProphet", view.createVerifySelectedScript(proteinProphetURL, "runs", false));
 
         ActionURL searchEngineURL = new ActionURL(MS2Controller.CompareSearchEngineProteinSetupAction.class, container);
         if (experimentRunIds)
         {
             searchEngineURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("Search Engine Protein", view.createVerifySelectedScript(searchEngineURL, "runs"));
+        compareMenu.addMenuItem("Search Engine Protein", view.createVerifySelectedScript(searchEngineURL, "runs", false));
 
         ActionURL peptidesURL = new ActionURL(MS2Controller.ComparePeptidesSetupAction.class, container);
         if (experimentRunIds)
         {
             peptidesURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("Peptide", view.createVerifySelectedScript(peptidesURL, "runs"));
+        compareMenu.addMenuItem("Peptide", view.createVerifySelectedScript(peptidesURL, "runs", false));
 
         ActionURL proteinProphetQueryURL = new ActionURL(MS2Controller.CompareProteinProphetQuerySetupAction.class, container);
         if (experimentRunIds)
         {
             proteinProphetQueryURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("ProteinProphet (Query)", view.createVerifySelectedScript(proteinProphetQueryURL, "runs"));
+        compareMenu.addMenuItem("ProteinProphet (Query)", view.createVerifySelectedScript(proteinProphetQueryURL, "runs", false));
 
         ActionURL spectraURL = new ActionURL(MS2Controller.SpectraCountSetupAction.class, container);
         if (experimentRunIds)
         {
             spectraURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("Spectra Count", view.createVerifySelectedScript(spectraURL, "runs"));
+        compareMenu.addMenuItem("Spectra Count", view.createVerifySelectedScript(spectraURL, "runs", false));
         return compareMenu;
     }
 
@@ -2152,12 +2152,12 @@ public class MS2Controller extends SpringActionController
             ButtonBar bb = new ButtonBar();
 
             ActionButton delete = new ActionButton("", "Delete");
-            delete.setScript(result.createVerifySelectedScript(new ActionURL(DeleteDataBasesAction.class, getContainer()), "FASTA files"));
+            delete.setScript(result.createVerifySelectedScript(new ActionURL(DeleteDataBasesAction.class, getContainer()), "FASTA files", true));
             delete.setActionType(ActionButton.Action.GET);
             bb.add(delete);
 
             ActionButton reload = new ActionButton("button", "Reload FASTA");
-            reload.setScript(result.createVerifySelectedScript(new ActionURL(ReloadFastaAction.class, getContainer()), "FASTA files"));
+            reload.setScript(result.createVerifySelectedScript(new ActionURL(ReloadFastaAction.class, getContainer()), "FASTA files", true));
             reload.setActionType(ActionButton.Action.GET);
             bb.add(reload);
 
@@ -2165,13 +2165,13 @@ public class MS2Controller extends SpringActionController
             ActionURL setBestNameURL = new ActionURL(SetBestNameAction.class, getContainer());
 
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.LOOKUP_STRING.toString());
-            setBestNameMenu.addMenuItem("to name from FASTA", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameMenu.addMenuItem("to name from FASTA", result.createVerifySelectedScript(setBestNameURL, "FASTA files", false));
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.IPI.toString());
-            setBestNameMenu.addMenuItem("to IPI (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameMenu.addMenuItem("to IPI (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files", false));
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.SWISS_PROT.toString());
-            setBestNameMenu.addMenuItem("to Swiss-Prot Name (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameMenu.addMenuItem("to Swiss-Prot Name (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files", false));
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.SWISS_PROT_ACCN.toString());
-            setBestNameMenu.addMenuItem("to Swiss-Prot Accession (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameMenu.addMenuItem("to Swiss-Prot Accession (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files", false));
 
             bb.add(setBestNameMenu);
 

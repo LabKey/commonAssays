@@ -117,7 +117,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         for (String exportFormat : exportFormats)
         {
             exportUrl.replaceParameter("exportFormat", exportFormat);
-            exportAll.addMenuItem(exportFormat, "javascript: " + dataRegion.getJavascriptFormReference() + ".action=\"" + exportUrl.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference() + ".submit();");
+            exportAll.addMenuItem(exportFormat, "javascript: " + dataRegion.getJavascriptFormReference(false) + ".action=\"" + exportUrl.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference(false) + ".submit();");
         }
         result.add(exportAll);
 
@@ -126,7 +126,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         for (String exportFormat : exportFormats)
         {
             exportUrl.replaceParameter("exportFormat", exportFormat);
-            exportSelected.addMenuItem(exportFormat, "javascript: if (verifySelected(" + dataRegion.getJavascriptFormReference() + ", \"" + exportUrl.getEncodedLocalURIString() + "\", \"post\", \"" + whatWeAreSelecting + "\")) { " + dataRegion.getJavascriptFormReference() + ".submit(); }");
+            exportSelected.addMenuItem(exportFormat, "javascript: if (verifySelected(" + dataRegion.getJavascriptFormReference(false) + ", \"" + exportUrl.getEncodedLocalURIString() + "\", \"post\", \"" + whatWeAreSelecting + "\")) { " + dataRegion.getJavascriptFormReference(false) + ".submit(); }");
         }
         result.add(exportSelected);
 
@@ -141,7 +141,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
             for (ProteinDictionaryHelpers.GoTypes goType : types)
             {
                 ActionURL url = MS2Controller.getPeptideChartURL(getContainer(), goType);
-                goButton.addMenuItem(goType.toString(), "javascript: " + dataRegion.getJavascriptFormReference() + ".action=\"" + url.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference() + ".submit();");
+                goButton.addMenuItem(goType.toString(), "javascript: " + dataRegion.getJavascriptFormReference(false) + ".action=\"" + url.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference(false) + ".submit();");
             }
             result.add(goButton);
         }
