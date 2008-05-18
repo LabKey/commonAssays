@@ -117,7 +117,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         for (String exportFormat : exportFormats)
         {
             exportUrl.replaceParameter("exportFormat", exportFormat);
-            exportAll.addMenuItem(exportFormat, "javascript: " + dataRegion.getJavascriptFormReference(false) + ".action=\"" + exportUrl.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference(false) + ".submit();");
+            exportAll.addMenuItem(exportFormat, null, dataRegion.getJavascriptFormReference(false) + ".action=\"" + exportUrl.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference(false) + ".submit();");
         }
         result.add(exportAll);
 
@@ -126,7 +126,7 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         for (String exportFormat : exportFormats)
         {
             exportUrl.replaceParameter("exportFormat", exportFormat);
-            exportSelected.addMenuItem(exportFormat, "javascript: if (verifySelected(" + dataRegion.getJavascriptFormReference(false) + ", \"" + exportUrl.getEncodedLocalURIString() + "\", \"post\", \"" + whatWeAreSelecting + "\")) { " + dataRegion.getJavascriptFormReference(false) + ".submit(); }");
+            exportSelected.addMenuItem(exportFormat, null, "if (verifySelected(" + dataRegion.getJavascriptFormReference(false) + ", \"" + exportUrl.getLocalURIString() + "\", \"post\", \"" + whatWeAreSelecting + "\")) { " + dataRegion.getJavascriptFormReference(false) + ".submit(); }");
         }
         result.add(exportSelected);
 
