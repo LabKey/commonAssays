@@ -206,7 +206,7 @@ public abstract class GoLoader
                 }
             }
 
-            List<ColumnInfo> columns = ti.getColumnsList();
+            List<ColumnInfo> columns = ti.getColumns();
 
             conn.setAutoCommit(false);
             ps = conn.prepareStatement(SQLCommand + QMarkPart);

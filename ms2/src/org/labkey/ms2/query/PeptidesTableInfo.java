@@ -57,7 +57,7 @@ public class PeptidesTableInfo extends FilteredTable
         // Stick EndScan column just after Scan column
         ColumnInfo scanColumn = getRealTable().getColumn("Scan");
         ColumnInfo endScanColumn = getRealTable().getColumn("EndScan");
-        List<ColumnInfo> columns = new ArrayList<ColumnInfo>(getRealTable().getColumnsList());
+        List<ColumnInfo> columns = new ArrayList<ColumnInfo>(getRealTable().getColumns());
         columns.remove(endScanColumn);
         int i = columns.indexOf(scanColumn);
         columns.add(i + 1, endScanColumn);
@@ -428,7 +428,7 @@ public class PeptidesTableInfo extends FilteredTable
         result.add(FieldKey.fromParts("Peptide"));
         result.add(FieldKey.fromParts("ProteinHits"));
         result.add(FieldKey.fromParts("Protein"));
-        return result;
+        return Collections.unmodifiableList(result);
     }
 
     public String getPublicName()

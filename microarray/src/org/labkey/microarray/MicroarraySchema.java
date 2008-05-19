@@ -17,23 +17,23 @@
 package org.labkey.microarray;
 
 import org.labkey.api.data.*;
-import org.labkey.api.query.*;
-import org.labkey.api.security.User;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.AppProps;
 import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
+import org.labkey.api.query.*;
+import org.labkey.api.security.User;
+import org.labkey.api.util.AppProps;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.study.assay.AssayDataLinkDisplayColumn;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 
-import java.util.Set;
-import java.util.List;
-import java.sql.Types;
-import java.io.Writer;
 import java.io.IOException;
+import java.io.Writer;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class MicroarraySchema extends UserSchema
 {
@@ -112,7 +112,7 @@ public class MicroarraySchema extends UserSchema
         });
         result.addColumn(qcReportColumn);
 
-        List<FieldKey> defaultCols = result.getDefaultVisibleColumns();
+        List<FieldKey> defaultCols = new ArrayList<FieldKey>(result.getDefaultVisibleColumns());
         defaultCols.remove(FieldKey.fromParts(qcReportColumn.getName()));
         defaultCols.remove(FieldKey.fromParts(thumbnailColumn.getName()));
         defaultCols.add(2, FieldKey.fromParts(qcReportColumn.getName()));

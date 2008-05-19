@@ -355,14 +355,14 @@ public class FlowRun extends FlowObject<ExpRun>
         schema.setRun(this);
         TableInfo table = schema.createFCSFileTable("FCSFiles");
         ColumnInfo colRowId = table.getColumn("RowId");
-        List<FlowFCSFile> ret = new ArrayList();
+        List<FlowFCSFile> ret = new ArrayList<FlowFCSFile>();
 
         SimpleFilter filter = new SimpleFilter();
         if (protocol != null)
             filter.addAllClauses(protocol.getFCSAnalysisFilter());
         if (settings != null)
             filter.addAllClauses(settings.getFilter());
-        ResultSet rs = QueryService.get().select(table, new ColumnInfo[] { colRowId }, filter, null);
+        ResultSet rs = QueryService.get().select(table, new ArrayList<ColumnInfo>(Arrays.asList(colRowId)), filter, null);
         while (rs.next())
         {
             FlowWell well = FlowWell.fromWellId(colRowId.getIntValue(rs));

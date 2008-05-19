@@ -174,7 +174,7 @@ public class MS1Schema extends UserSchema
         else
             cti = new CrosstabTableInfo(settings);
 
-        List<FieldKey> defaultCols = cti.getDefaultVisibleColumns();
+        List<FieldKey> defaultCols = new ArrayList<FieldKey>(cti.getDefaultVisibleColumns());   // Make a copy so we can modify
         defaultCols.remove(FieldKey.fromParts(firstFeature.getName()));
         defaultCols.add(FieldKey.fromParts(firstFeature.getName(), "Time"));
         defaultCols.add(FieldKey.fromParts(firstFeature.getName(), "MZ"));

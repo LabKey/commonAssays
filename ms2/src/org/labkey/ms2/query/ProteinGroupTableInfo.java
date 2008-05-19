@@ -80,7 +80,7 @@ public class ProteinGroupTableInfo extends FilteredTable
         quantitation.setKeyField(false);
         addColumn(quantitation);
 
-        for (ColumnInfo col : getColumnsList())
+        for (ColumnInfo col : getColumns())
         {
             if (HIDDEN_PROTEIN_GROUP_COLUMN_NAMES.contains(col.getName()))
             {
@@ -152,7 +152,7 @@ public class ProteinGroupTableInfo extends FilteredTable
             {
                 TableInfo info = MS2Manager.getTableInfoProteinGroupMemberships();
                 FilteredTable result = new FilteredTable(info);
-                for (ColumnInfo col : info.getColumnsList())
+                for (ColumnInfo col : info.getColumns())
                 {
                     ColumnInfo newColumn = result.addWrapColumn(col);
                     if (HIDDEN_PROTEIN_GROUP_MEMBERSHIPS_COLUMN_NAMES.contains(newColumn.getName()))

@@ -1999,7 +1999,7 @@ public class MS2Controller extends SpringActionController
         {
             TableInfo tinfo = MS2Manager.getTableInfoHistory();
             ExcelWriter ew = new ExcelWriter(MS2Manager.getSchema(), "SELECT * FROM " + MS2Manager.getTableInfoHistory() + " ORDER BY Date");
-            ew.setColumns(tinfo.getColumnsList());
+            ew.setColumns(tinfo.getColumns());
             ew.setSheetName("MS2 History");
             ew.write(response);
         }

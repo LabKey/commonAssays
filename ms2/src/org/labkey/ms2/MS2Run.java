@@ -203,7 +203,7 @@ public abstract class MS2Run implements Serializable
 
         for (TableInfo tableInfo : tableInfos)
         {
-            for (ColumnInfo column : tableInfo.getColumnsList())
+            for (ColumnInfo column : tableInfo.getColumns())
             {
                 String columnName = column.getName();
                 if (columnNameList.contains(columnName) || pkList.contains(columnName) && !sqlColumns.contains(columnName))

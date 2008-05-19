@@ -194,7 +194,7 @@ public class FeaturesTableInfo extends VirtualTable
         String sep = "";
 
         //all base-table columns
-        for(ColumnInfo col : getSourceTable().getColumnsList())
+        for(ColumnInfo col : getSourceTable().getColumns())
         {
             sql.append(sep);
             sql.append("fe.");
@@ -282,7 +282,7 @@ public class FeaturesTableInfo extends VirtualTable
 
     protected void wrapAllColumns(boolean preserveHidden)
     {
-        for (ColumnInfo col : getSourceTable().getColumnsList())
+        for (ColumnInfo col : getSourceTable().getColumns())
         {
             ColumnInfo newCol = new AliasedColumn(this, col.getAlias(), col);
             addColumn(newCol);

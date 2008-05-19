@@ -88,7 +88,7 @@ public class JoinSampleSetForm extends ProtocolForm
         FieldKey keyword = new FieldKey(null, "Keyword");
         ColumnInfo colKeyword = tableFCSFiles.getColumn("Keyword");
         TableInfo tableKeywords = colKeyword.getFk().getLookupTableInfo();
-        for (ColumnInfo column : tableKeywords.getColumnsList())
+        for (ColumnInfo column : tableKeywords.getColumns())
         {
             ret.put(new FieldKey(keyword, column.getName()), column.getCaption());
         }
