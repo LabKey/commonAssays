@@ -976,7 +976,7 @@ public class MS1Controller extends SpringActionController
 
         protected CompareRunsView createQueryView(CompareRunsForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
         {
-            return new CompareRunsView(new MS1Schema(getUser(), getViewContext().getContainer()), form.getRunIdArray());
+            return new CompareRunsView(new MS1Schema(getUser(), getViewContext().getContainer()), form.getRunIdArray(), getViewContext().getActionURL());
         }
 
         protected ModelAndView getHtmlView(CompareRunsForm form, BindException errors) throws Exception

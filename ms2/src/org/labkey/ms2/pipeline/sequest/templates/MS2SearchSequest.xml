@@ -51,7 +51,7 @@
             </exp:ParameterDeclarations>
             <exp:Properties/>
         </exp:Protocol>
-		<exp:Protocol rdf:about="${FolderLSIDBase}:MS2.SequestAnalysis:3">
+		<exp:Protocol rdf:about="${FolderLSIDBase}:MS2.SequestAnalysis:4">
 			<exp:Name>Sequest Analysis</exp:Name>
 			<exp:ProtocolDescription>Use Sequest to search for peptides in one mzXml file</exp:ProtocolDescription>
 			<exp:ApplicationType>ExperimentRun</exp:ApplicationType>
@@ -85,8 +85,8 @@
         </exp:Protocol>
 	</exp:ProtocolDefinitions>
 	<exp:ProtocolActionDefinitions>
-		<exp:ProtocolActionSet ParentProtocolLSID="${FolderLSIDBase}:MS2.SequestAnalysis:3">
-			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS2.SequestAnalysis:3" ActionSequence="1">
+		<exp:ProtocolActionSet ParentProtocolLSID="${FolderLSIDBase}:MS2.SequestAnalysis:4">
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS2.SequestAnalysis:4" ActionSequence="1">
 				<exp:PredecessorAction ActionSequenceRef="1"/>
 			</exp:ProtocolAction>
 			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS2.SequestSearch:2" ActionSequence="50">
@@ -115,7 +115,7 @@
 	<exp:ExperimentRuns>
 		<exp:ExperimentRun rdf:about="${FolderLSIDBase}:MS2-@@RUN-UNIQUIFIER@@">
 			<exp:Name>@@SEARCH_NAME@@</exp:Name>
-			<exp:ProtocolLSID>${FolderLSIDBase}:MS2.SequestAnalysis:3</exp:ProtocolLSID>
+			<exp:ProtocolLSID>${FolderLSIDBase}:MS2.SequestAnalysis:4</exp:ProtocolLSID>
 			<exp:Comments/>
 			<exp:Properties/>
 			<exp:ExperimentLog>

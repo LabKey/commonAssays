@@ -67,7 +67,7 @@
             </exp:ParameterDeclarations>
             <exp:Properties/>
         </exp:Protocol>
-        <exp:Protocol rdf:about="${FolderLSIDBase}:MS2.SequestXpressAnalysis.Fractions:1">
+        <exp:Protocol rdf:about="${FolderLSIDBase}:MS2.SequestXpressAnalysis.Fractions:2">
 			<exp:Name>Sequest Analysis (with Fractions, Peptide Prophet, Xpress quantitation, and Protein Prophet)</exp:Name>
 			<exp:ProtocolDescription>Use Sequest to search for peptides in multiple mzXml files, then run Peptide Prophet, Xpress quantitation, and Protein Prophet</exp:ProtocolDescription>
 			<exp:ApplicationType>ExperimentRun</exp:ApplicationType>
@@ -117,8 +117,8 @@
         </exp:Protocol>
 	</exp:ProtocolDefinitions>
 	<exp:ProtocolActionDefinitions>
-		<exp:ProtocolActionSet ParentProtocolLSID="${FolderLSIDBase}:MS2.SequestXpressAnalysis.Fractions:1">
-			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS2.SequestXpressAnalysis.Fractions:1" ActionSequence="1">
+		<exp:ProtocolActionSet ParentProtocolLSID="${FolderLSIDBase}:MS2.SequestXpressAnalysis.Fractions:2">
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS2.SequestXpressAnalysis.Fractions:2" ActionSequence="1">
 				<exp:PredecessorAction ActionSequenceRef="1"/>
 			</exp:ProtocolAction>
 			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS2.SequestSearch:2" ActionSequence="50">
@@ -153,7 +153,7 @@
 	<exp:ExperimentRuns>
 		<exp:ExperimentRun rdf:about="${FolderLSIDBase}:MS2-@@RUN-UNIQUIFIER@@">
 			<exp:Name>@@SEARCH_NAME@@</exp:Name>
-			<exp:ProtocolLSID>${FolderLSIDBase}:MS2.SequestXpressAnalysis.Fractions:1</exp:ProtocolLSID>
+			<exp:ProtocolLSID>${FolderLSIDBase}:MS2.SequestXpressAnalysis.Fractions:2</exp:ProtocolLSID>
 			<exp:Comments/>
 			<exp:Properties/>
 			<exp:ExperimentLog>

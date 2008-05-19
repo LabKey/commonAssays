@@ -21,6 +21,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.AggregateColumnInfo;
 import org.labkey.api.query.*;
 import org.labkey.api.view.DataView;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms1.query.FeaturesTableInfo;
 import org.labkey.ms1.query.MS1Schema;
 
@@ -35,13 +36,15 @@ public class CompareRunsView extends ComparisonCrosstabView
     private MS1Schema _schema = null;
     private int[] _runIds = null;
 
-    public CompareRunsView(MS1Schema schema, int[] runIds)
+    public CompareRunsView(MS1Schema schema, int[] runIds, ActionURL url)
     {
         super(schema);
         _schema = schema;
         _runIds = runIds;
 
-        QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), QueryView.DATAREGIONNAME_DEFAULT);
+        getViewContext().setActionURL(url);
+        
+        QuerySettings settings = new QuerySettings(url, QueryView.DATAREGIONNAME_DEFAULT);
         settings.setSchemaName(schema.getSchemaName());
         settings.setQueryName(MS1Schema.TABLE_COMPARE_PEP);
         settings.setAllowChooseQuery(false);
@@ -60,6 +63,7 @@ public class CompareRunsView extends ComparisonCrosstabView
     protected DataView createDataView()
     {
         DataView view = super.createDataView();
+        view.getRenderContext().setViewContext(getViewContext());
         String sortString = CrosstabTableInfo.getDefaultSortString() + "," + FeaturesTableInfo.COLUMN_PEPTIDE_INFO + "_Peptide";
         view.getRenderContext().setBaseSort(new Sort(sortString));
         return view;

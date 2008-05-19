@@ -47,8 +47,10 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
             ActionURL url = new ActionURL(originalURL);
 
             int[] runIds = PageFlowUtil.toInts(url.getParameter("runIds").split(","));
+            ViewContext queryContext = new ViewContext(_context);
+            queryContext.setActionURL(url);
 
-            return new CompareRunsView(new MS1Schema(getUser(), _context.getContainer()), runIds).createComparisonResult();
+            return new CompareRunsView(new MS1Schema(getUser(), _context.getContainer()), runIds, url).createComparisonResult();
         }
         catch (Exception e)
         {
