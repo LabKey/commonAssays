@@ -15,20 +15,22 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.admin.AdminUrls"%>
 <%@ page import="org.labkey.api.data.ContainerManager"%>
-<%@ page import="org.labkey.api.view.ActionURL"%>
-<%@ page import="org.labkey.flow.controllers.FlowAdminForm"%>
-<%@ page import="org.labkey.flow.controllers.FlowController"%>
-<%@ page extends="org.labkey.api.jsp.FormPage" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil"%>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.flow.controllers.FlowAdminForm" %>
+<%@ page import="org.labkey.flow.controllers.FlowController" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
-<% FlowAdminForm form = (FlowAdminForm) __form; %>
+<% FlowAdminForm form = (FlowAdminForm) getModelBean(); %>
 <labkey:errors />
-<form method="POST" action="<%=h(org.labkey.api.util.PageFlowUtil.urlFor(FlowController.Action.flowAdmin, ContainerManager.getRoot()))%>">
+<form method="POST" action="<%=h(new ActionURL(FlowController.FlowAdminAction.class, ContainerManager.getRoot()))%>">
     <p>
         Which directory should the flow module use to do work in?  By default, it will use the system temporary directory.<br>
-        <input type="text" name="ff_workingDirectory" value="<%=h(form.ff_workingDirectory)%>">
+        <input type="text" id="workingDirectory" name="workingDirectory" value="<%=h(form.getWorkingDirectory())%>">
     </p>
     <labkey:button text="update" />
-    <labkey:button text="cancel" href="<%=new ActionURL("admin", "showAdmin", "")%>" />
+    <labkey:button text="cancel" href="<%=PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL()%>" />
 </form>

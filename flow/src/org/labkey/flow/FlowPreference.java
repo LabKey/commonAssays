@@ -16,14 +16,12 @@
 
 package org.labkey.flow;
 
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.view.ActionURL;
+import org.labkey.flow.controllers.FlowController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
-import org.labkey.flow.controllers.FlowController;
 
 public enum FlowPreference
 {
@@ -73,7 +71,7 @@ public enum FlowPreference
 
     public String urlUpdate()
     {
-        ActionURL url = PageFlowUtil.urlFor(FlowController.Action.savePreferences, ContainerManager.getRoot());
+        ActionURL url = new ActionURL(FlowController.SavePerferencesAction.class, ContainerManager.getRoot());
         url.addParameter(name(), "");
         return url.toString();
     }

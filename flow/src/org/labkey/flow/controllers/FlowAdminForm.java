@@ -16,24 +16,24 @@
 
 package org.labkey.flow.controllers;
 
-import org.labkey.api.view.ViewForm;
 import org.labkey.flow.FlowSettings;
-import org.apache.struts.action.ActionMapping;
 
-import javax.servlet.http.HttpServletRequest;
-
-public class FlowAdminForm extends ViewForm
+public class FlowAdminForm
 {
-    public String ff_workingDirectory;
+    private String _workingDirectory;
 
-    public void reset(ActionMapping actionMapping, HttpServletRequest request)
+    public FlowAdminForm()
     {
-        super.reset(actionMapping, request);
-        ff_workingDirectory = FlowSettings.getWorkingDirectoryPath();
+        _workingDirectory = FlowSettings.getWorkingDirectoryPath();
     }
 
-    public void setFf_workingDirectory(String path)
+    public void setWorkingDirectory(String path)
     {
-        ff_workingDirectory = path;
+        _workingDirectory = path;
+    }
+
+    public String getWorkingDirectory()
+    {
+        return _workingDirectory;
     }
 }

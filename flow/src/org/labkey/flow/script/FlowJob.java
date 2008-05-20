@@ -20,7 +20,6 @@ import org.apache.log4j.Logger;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.DateUtil;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.controllers.FlowController;
@@ -186,7 +185,7 @@ public abstract class FlowJob extends PipelineJob
         if (_statusHref == null)
         {
             File statusFile = getLogFile();
-            _statusHref = PageFlowUtil.urlFor(FlowController.Action.showStatusJob, getContainer());
+            _statusHref = new ActionURL(FlowController.ShowStatusJobAction.class, getContainer());
             _statusHref.addParameter(FlowParam.statusFile.toString(), PipelineJobService.statusPathOf(statusFile.toString()));
         }
         return _statusHref;
@@ -199,7 +198,7 @@ public abstract class FlowJob extends PipelineJob
 
     public ActionURL urlCancel()
     {
-        ActionURL ret = PageFlowUtil.urlFor(FlowController.Action.cancelJob, getContainer());
+        ActionURL ret = new ActionURL(FlowController.CancelJobAction.class, getContainer());
         ret.addParameter(FlowParam.statusFile.toString(), getStatusFilePath());
         return ret;
     }

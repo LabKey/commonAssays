@@ -21,6 +21,7 @@ import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
+import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.script.FlowJob;
@@ -51,6 +52,10 @@ public class JobStatusView extends HttpView
             if (!_job.isStarted())
             {
                 _status = "This job has not started yet.";
+            }
+            else if (_job.checkInterrupted())
+            {
+                _status = "This job was interrupted after running for " + (_job.getElapsedTime() / 1000) + " seconds.";
             }
             else
             {
@@ -120,9 +125,9 @@ public class JobStatusView extends HttpView
             }
         }
         out.write("</tr></table>");
-        if (_job != null)
+        if (_job != null && !_job.checkInterrupted())
         {
-            ActionURL cancelURL = new ActionURL("Flow", "cancelJob", getViewContext().getContainer());
+            ActionURL cancelURL = new ActionURL(FlowController.CancelJobAction.class, getViewContext().getContainer());
             cancelURL.addParameter("statusFile", _psf.getFilePath());
             out.write("<br>" + PageFlowUtil.buttonLink("Cancel Job", cancelURL));
         }

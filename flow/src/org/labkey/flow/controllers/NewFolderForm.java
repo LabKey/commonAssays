@@ -16,31 +16,45 @@
 
 package org.labkey.flow.controllers;
 
-import org.labkey.api.view.ViewForm;
-
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Collections;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-public class NewFolderForm extends ViewForm
+public class NewFolderForm
 {
-    public String ff_folderName;
-    public Set<String> ff_copyAnalysisScript = Collections.emptySet();
-    public boolean ff_copyProtocol;
+    private String _folderName;
+    private Set<String> _copyAnalysisScript = Collections.emptySet();
+    private boolean _copyProtocol;
 
-    public void setFf_folderName(String name)
+    public void setFolderName(String name)
     {
-        ff_folderName = name;
+        _folderName = name;
     }
 
-    public void setFf_copyAnalysisScript(String[] analysisScript)
+    public String getFolderName()
     {
-        ff_copyAnalysisScript = new HashSet<String>(Arrays.asList(analysisScript));
+        return _folderName;
     }
 
-    public void setFf_copyProtocol(boolean b)
+    public void setCopyAnalysisScript(String[] analysisScript)
     {
-        ff_copyProtocol = b;
+        _copyAnalysisScript = new HashSet<String>(Arrays.asList(analysisScript));
     }
+
+    public Set<String> getCopyAnalysisScript()
+    {
+        return _copyAnalysisScript;
+    }
+
+    public void setCopyProtocol(boolean b)
+    {
+        _copyProtocol = b;
+    }
+
+    public boolean isCopyProtocol()
+    {
+        return _copyProtocol;
+    }
+
 }

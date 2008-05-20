@@ -15,25 +15,31 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.FlowController" %>
 <%@ page import="org.labkey.flow.controllers.NewFolderForm" %>
-<%@ page import="org.labkey.flow.data.FlowScript" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.flow.data.FlowScript" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<%@ page extends="org.labkey.api.jsp.FormPage" %>
-<% NewFolderForm form = (NewFolderForm) __form; %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%
+    ViewContext context = getViewContext();
+    Container c = context.getContainer();
+    NewFolderForm form = (NewFolderForm) getModelBean();
+%>
 <labkey:errors/>
-<form method="POST" action="<%=org.labkey.api.util.PageFlowUtil.urlFor(FlowController.Action.newFolder, getContainer())%>">
+<form method="POST" action="<%=new ActionURL(FlowController.NewFolderAction.class, c)%>">
     <p>A new folder will be created that is a sibling of this one.
         What do you want to call the new folder?<br>
-        <input type="text" name="ff_folderName" value="<%=h(form.ff_folderName)%>">
+        <input type="text" id="folderName" name="folderName" value="<%=h(form.getFolderName())%>">
     </p>
 
     <p>
         You can choose to copy some items from this folder into the new one.
     </p>
-    <% FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+    <% FlowProtocol protocol = FlowProtocol.getForContainer(c);
         if (protocol != null)
         {
             String description = protocol.getProtocolSettingsDescription();
@@ -41,8 +47,8 @@
             {
     %>
     <p>
-        <input type="checkbox" name="ff_copyProtocol"
-               value="true"<%= form.ff_copyProtocol ? " checked" : ""%>> <%=h(description)%>
+        <input type="checkbox" name="copyProtocol"
+               value="true"<%= form.isCopyProtocol() ? " checked" : ""%>> <%=h(description)%>
     </p>
 
     <% }
@@ -51,11 +57,11 @@
     <p>
         Analysis Scripts:<br>
 
-        <% FlowScript[] scripts = FlowScript.getScripts(getContainer());
+        <% FlowScript[] scripts = FlowScript.getScripts(c);
             if (scripts.length != 0) for (FlowScript script : scripts)
             { %>
-        <input type="checkbox" name="ff_copyAnalysisScript"
-               value="<%=h(script.getName())%>"<%=form.ff_copyAnalysisScript.contains(script.getName()) ? " checked" : ""%>> <%=h(script.getName())%>
+        <input type="checkbox" name="copyAnalysisScript"
+               value="<%=h(script.getName())%>"<%=form.getCopyAnalysisScript().contains(script.getName()) ? " checked" : ""%>> <%=h(script.getName())%>
         <br>
         <%
             }

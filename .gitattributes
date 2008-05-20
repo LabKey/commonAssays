@@ -415,6 +415,7 @@ flow/src/org/labkey/flow/view/FlowQueryView.java -text
 flow/src/org/labkey/flow/view/GraphColumn.java -text
 flow/src/org/labkey/flow/view/GraphView.java -text
 flow/src/org/labkey/flow/view/JobStatusView.java -text
+flow/src/org/labkey/flow/view/errors.jsp -text
 flow/src/org/labkey/flow/view/graphStyle.jsp -text
 flow/src/org/labkey/flow/view/setGraphSize.jsp -text
 flow/src/org/labkey/flow/webparts/AnalysesWebPart.java -text

@@ -16,24 +16,24 @@
 
 package org.labkey.flow.controllers;
 
-import org.apache.beehive.netui.pageflow.Forward;
-import org.apache.beehive.netui.pageflow.annotations.Jpf;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.struts.action.ActionError;
+import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.SimpleRedirectAction;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.XMLWriterTest;
-import org.labkey.api.jsp.FormPage;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.data.FlowProtocol;
@@ -42,17 +42,14 @@ import org.labkey.flow.script.FlowJob;
 import org.labkey.flow.view.JobStatusView;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
+import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
+import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
 
-@Jpf.Controller(messageBundles = {@Jpf.MessageBundle(bundlePath = "messages.Validation")})
-public class FlowController extends BaseFlowController<FlowController.Action>
+public class FlowController extends SpringFlowController<FlowController.Action>
 {
     private static Logger _log = Logger.getLogger(FlowController.class);
 
@@ -71,93 +68,151 @@ public class FlowController extends BaseFlowController<FlowController.Action>
         savePreferences
     }
 
-    @Jpf.Action
-    protected Forward begin() throws Exception
+    static DefaultActionResolver _actionResolver = new DefaultActionResolver(FlowController.class);
+
+    public FlowController() throws Exception
     {
-        if (getContainer().getFolderType() instanceof FlowFolderType)
-        {
-            ActionURL forward = new ActionURL("Project", "begin", getContainer());
-            forward.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
-            return new ViewForward(forward);
-        }
-        requiresPermission(ACL.PERM_READ);
-        return includeView(new HomeTemplate(getViewContext(), new OverviewWebPart(getViewContext()), getNavTrailConfig(null, FlowModule.getLongProductName(), Action.begin)));
+        super();
+        setActionResolver(_actionResolver);
     }
 
-    @Jpf.Action
-    protected Forward showStatusJob() throws Exception
+    @RequiresPermission(ACL.PERM_READ)
+    public class BeginAction extends SimpleViewAction
     {
-        requiresPermission(ACL.PERM_READ);
-
-        String statusFile = getParam(FlowParam.statusFile);
-        if (statusFile == null)
+        public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            return renderError("Status file not specified.");
-        }
-        PipelineStatusFile psf = PipelineService.get().getStatusFile(statusFile);
-        FlowJob job = findJob(statusFile);
-
-        if (PipelineJob.COMPLETE_STATUS.equals(psf.getStatus()))
-        {
-            if (getParam(FlowParam.redirect) != null)
+            if (getContainer().getFolderType() instanceof FlowFolderType)
             {
-                String redirect = psf.getDataUrl();
-                if (redirect != null)
-                {
-                    return new ViewForward(new ActionURL(psf.getDataUrl()));
-                }
+                ActionURL startUrl = PageFlowUtil.urlProvider(ProjectUrls.class).urlStart(getContainer());
+                startUrl.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
+                HttpView.throwRedirect(startUrl);
+            }
+            return new OverviewWebPart(getViewContext());
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return getFlowNavStart(getViewContext());
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowStatusJobAction extends SimpleViewAction<StatusJobForm>
+    {
+        public void validate(StatusJobForm form, BindException errors)
+        {
+            String statusFile = form.getStatusFile();
+            if (statusFile == null)
+            {
+                errors.rejectValue("statusFile", ERROR_MSG, "Status file not specified.");
             }
         }
-        if (job != null && !job.isDone())
+
+        public ModelAndView getView(StatusJobForm form, BindException errors) throws Exception
         {
-            // Take 1 second longer each time to refresh.
-            int refresh = getIntParam(FlowParam.refresh);
-            if (refresh == 0)
+            if (errors.hasErrors())
             {
-                if (getParam(FlowParam.redirect) == null)
-                    refresh = 30;
-                else
-                    refresh = 1;
+                return new JspView<StatusJobForm>("/org/labkey/flow/view/errors.jsp", form, errors);
             }
             else
             {
-                refresh ++;
+                PipelineStatusFile psf = PipelineService.get().getStatusFile(form.getStatusFile());
+                FlowJob job = findJob(form.getStatusFile());
+
+                if (PipelineJob.COMPLETE_STATUS.equals(psf.getStatus()))
+                {
+                    if (form.getRedirect() != null)
+                    {
+                        String redirect = psf.getDataUrl();
+                        if (redirect != null)
+                        {
+                            HttpView.throwRedirect(new ActionURL(psf.getDataUrl()));
+                        }
+                    }
+                }
+
+                if (job != null && !job.isDone())
+                {
+                    // Take 1 second longer each time to refresh.
+                    int refresh = form.getRefresh();
+                    if (refresh == 0)
+                    {
+                        if (form.getRedirect() == null)
+                            refresh = 30;
+                        else
+                            refresh = 1;
+                    }
+                    else
+                    {
+                        refresh++;
+                    }
+                    ActionURL helper = getViewContext().cloneActionURL();
+                    helper.replaceParameter("refresh", Integer.toString(refresh));
+                    helper.setFragment("end");
+                    getViewContext().getResponse().setHeader("Refresh", refresh + ";URL=" + helper.toString());
+                }
+                return new JobStatusView(psf, job);
             }
-            ActionURL helper = cloneActionURL();
-            helper.replaceParameter("refresh", Integer.toString(refresh));
-            helper.setFragment("end");
-            getResponse().setHeader("Refresh", refresh + ";URL=" + helper.toString());
         }
-        HttpView view = new JobStatusView(psf, job);
-        return includeView(new HomeTemplate(getViewContext(), view, getNavTrailConfig(null, "Status File", Action.showStatusFile)));
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("Status File", new ActionURL(ShowStatusJobAction.class, getContainer()));
+            return root;
+        }
+
     }
 
-    protected Forward renderError(String error) throws Exception
+    public static class StatusJobForm
     {
-        return renderErrors(Arrays.asList(error));
+        private String _statusFile;
+        private String _redirect;
+        private int _refresh;
+
+        public String getStatusFile()
+        {
+            return _statusFile;
+        }
+
+        public void setStatusFile(String statusFile)
+        {
+            _statusFile = statusFile;
+        }
+
+        public String getRedirect()
+        {
+            return _redirect;
+        }
+
+        public void setRedirect(String redirect)
+        {
+            _redirect = redirect;
+        }
+
+        public int getRefresh()
+        {
+            return _refresh;
+        }
+
+        public void setRefresh(int refresh)
+        {
+            _refresh = refresh;
+        }
     }
 
-    private Forward renderErrors(List errors) throws Exception
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class ShowJobsAction extends SimpleViewAction<Object>
     {
-        StringBuffer html = new StringBuffer();
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
+            return new JspView<Object>(FlowController.class, "runningJobs.jsp", null, errors);
+        }
 
-        html.append(StringUtils.join(errors.iterator(), "<br>"));
-
-        HttpView view = new HtmlView(html.toString());
-        return includeView(new HomeTemplate(getViewContext(), view, getNavTrailConfig(null, "error", Action.errors)));
-    }
-
-
-    public ViewContext getViewContext()
-    {
-        return super.getViewContext();
-    }
-
-    @Jpf.Action
-    protected Forward showJobs(ViewForm form) throws Exception
-    {
-        requiresPermission(ACL.PERM_UPDATE);
-        return renderInTemplate(FormPage.getView(FlowController.class, form, "runningJobs.jsp"), getContainer(), "Running Flow Jobs");
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("Running Flow Jobs", new ActionURL(ShowJobsAction.class, getContainer()));
+            return root;
+        }
     }
 
     FlowJob findJob(String statusFile) throws Exception
@@ -169,174 +224,211 @@ public class FlowController extends BaseFlowController<FlowController.Action>
         return null;
     }
 
-    @Jpf.Action
-    protected Forward cancelJob() throws Exception
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class CancelJobAction extends SimpleViewAction<CancelJobForm>
     {
-        requiresPermission(ACL.PERM_UPDATE);
-
-        String statusFile = getParam(FlowParam.statusFile);
-        FlowJob job = findJob(statusFile);
-        if (job == null)
+        public ModelAndView getView(CancelJobForm form, BindException errors) throws Exception
         {
-            return renderError("Job " + statusFile + " not found.");
-        }
-        PipelineService service = PipelineService.get();
-        service.getPipelineQueue().cancelJob(getContainer(), job.getJobId());
-        return new ViewForward(job.getStatusHref());
-    }
-
-    @Jpf.Action
-    protected Forward newFolder(NewFolderForm form) throws Exception
-    {
-        requiresAdmin();
-        if (getContainer().getParent() == null || getContainer().getParent().isRoot())
-            HttpView.throwUnauthorized();
-        if (!getContainer().getParent().hasPermission(getUser(), ACL.PERM_ADMIN))
-        {
-            HttpView.throwUnauthorized();
-        }
-        if (isPost())
-        {
-            Forward forward = doNewFolder(form);
-            if (forward != null)
+            if (form.getStatusFile() == null)
             {
-                return forward;
+                errors.rejectValue("statusFile", ERROR_MSG, "Job " + form.getStatusFile() + " not found.");
             }
-        }
-        HomeTemplate template = new HomeTemplate(getViewContext(), getContainer(), FormPage.getView(FlowController.class, form, "newFolder.jsp"), getNavTrailConfig(null, "New Folder", Action.newFolder));
-        template.getModelBean().setFocus("forms[0].ff_folderName");
-        return includeView(template);
-    }
-
-    protected Forward doNewFolder(NewFolderForm form) throws Exception
-    {
-        Container parent = getContainer().getParent();
-
-        if (parent.hasChild(form.ff_folderName))
-        {
-            addError("There is already a folder with the name '" + form.ff_folderName + "'");
-            return null;
-        }
-        StringBuffer error = new StringBuffer();
-        if (!Container.isLegalName(form.ff_folderName, error))
-        {
-            addError(error.toString());
-            return null;
-        }
-        FlowModule flowModule = null;
-        for (Module module : getContainer().getActiveModules())
-        {
-            if (module instanceof FlowModule)
+            else
             {
-                flowModule = (FlowModule) module;
-            }
-        }
-        if (flowModule == null)
-        {
-            addError("A new folder cannot be created because the flow module is not active.");
-            return null;
-        }
-
-        Container destContainer = ContainerManager.createContainer(parent, form.ff_folderName);
-        destContainer.setActiveModules(getContainer().getActiveModules());
-        destContainer.setFolderType(getContainer().getFolderType());
-        destContainer.setDefaultModule(flowModule);
-        FlowProtocol srcProtocol = FlowProtocol.getForContainer(getContainer());
-        if (srcProtocol != null)
-        {
-            if (form.ff_copyProtocol)
-            {
-                FlowProtocol destProtocol = FlowProtocol.ensureForContainer(getUser(), destContainer);
-                destProtocol.setFCSAnalysisNameExpr(getUser(), srcProtocol.getFCSAnalysisNameExpr());
-                destProtocol.setSampleSetJoinFields(getUser(), srcProtocol.getSampleSetJoinFields());
-                destProtocol.setFCSAnalysisFilter(getUser(), srcProtocol.getFCSAnalysisFilterString());
-            }
-            for (String analysisScriptName : form.ff_copyAnalysisScript)
-            {
-                FlowScript srcScript = FlowScript.fromName(getContainer(), analysisScriptName);
-                if (srcScript != null)
+                FlowJob job = findJob(form.getStatusFile());
+                if (job == null)
                 {
-                    FlowScript.create(getUser(), destContainer, srcScript.getName(), srcScript.getAnalysisScript());
+                    errors.rejectValue("statusFile", ERROR_MSG, "Job " + form.getStatusFile() + " not found.");
+                }
+                else
+                {
+                    PipelineService service = PipelineService.get();
+                    service.getPipelineQueue().cancelJob(getContainer(), job.getJobId());
+                    return HttpView.redirect(job.getStatusHref());
                 }
             }
+            return new JspView<CancelJobForm>("/org/labkey/flow/view/errors.jsp", form, errors);
         }
-        ActionURL forward = PageFlowUtil.urlFor(Action.begin, destContainer);
-        return new ViewForward(forward);
-    }
 
-
-    protected boolean addError(String error)
-    {
-        PageFlowUtil.getActionErrors(getRequest(), true).add("main", new ActionError("Error", error));
-        return true;
-    }
-
-    @Jpf.Action
-    protected Forward flowAdmin(FlowAdminForm form) throws Exception
-    {
-        requiresAdmin(ContainerManager.getRoot().getId());
-        if (isPost())
+        public NavTree appendNavTrail(NavTree root)
         {
-            Forward forward = updateFlowSettings(form);
-            if (forward != null)
-                return forward;
+            root.addChild("Error Cancelling Job", new ActionURL(ShowJobsAction.class, getContainer()));
+            return root;
         }
-        return renderInTemplate(FormPage.getView(FlowController.class, form, "flowAdmin.jsp"), ContainerManager.getRoot(), "Flow Module Settings");
     }
 
-    protected Forward updateFlowSettings(FlowAdminForm form)
+    public static class CancelJobForm
     {
-        boolean errors = false;
-        if (form.ff_workingDirectory != null)
+        private String _statusFile;
+
+        public String getStatusFile()
         {
-            File dir = new File(form.ff_workingDirectory);
-            if (!dir.exists())
+            return _statusFile;
+        }
+
+        public void setStatusFile(String statusFile)
+        {
+            _statusFile = statusFile;
+        }
+    }
+
+    @RequiresPermission(ACL.PERM_ADMIN)
+    public class NewFolderAction extends FormViewAction<NewFolderForm>
+    {
+        Container destContainer;
+
+        public void validateCommand(NewFolderForm form, Errors errors)
+        {
+        }
+
+        private void checkPerms() throws UnauthorizedException
+        {
+            if (getContainer().getParent() == null || getContainer().getParent().isRoot())
+                HttpView.throwUnauthorized();
+            if (!getContainer().getParent().hasPermission(getUser(), ACL.PERM_ADMIN))
             {
-                errors = addError("Path does not exist.");
-                return null;
+                HttpView.throwUnauthorized();
             }
-            if (!dir.isDirectory())
+        }
+
+        public ModelAndView getView(NewFolderForm form, boolean reshow, BindException errors) throws Exception
+        {
+            checkPerms();
+            getPageConfig().setFocusId("folderName");
+            return new JspView<NewFolderForm>(FlowController.class, "newFolder.jsp", form, errors);
+        }
+
+        public boolean handlePost(NewFolderForm form, BindException errors) throws Exception
+        {
+            checkPerms();
+            Container parent = getContainer().getParent();
+
+            if (parent.hasChild(form.getFolderName()))
             {
-                errors = addError("Path is not a directory.");
-                return null;
+                errors.rejectValue("folderName", ERROR_MSG, "There is already a folder with the name '" + form.getFolderName() + "'");
+                return false;
             }
+            StringBuffer error = new StringBuffer();
+            if (!Container.isLegalName(form.getFolderName(), error))
+            {
+                errors.rejectValue("folderName", ERROR_MSG, error.toString());
+                return false;
+            }
+            FlowModule flowModule = null;
+            for (Module module : getContainer().getActiveModules())
+            {
+                if (module instanceof FlowModule)
+                {
+                    flowModule = (FlowModule) module;
+                }
+            }
+            if (flowModule == null)
+            {
+                errors.reject(ERROR_MSG, "A new folder cannot be created because the flow module is not active.");
+                return false;
+            }
+
+            destContainer = ContainerManager.createContainer(parent, form.getFolderName());
+            destContainer.setActiveModules(getContainer().getActiveModules());
+            destContainer.setFolderType(getContainer().getFolderType());
+            destContainer.setDefaultModule(flowModule);
+            FlowProtocol srcProtocol = FlowProtocol.getForContainer(getContainer());
+            if (srcProtocol != null)
+            {
+                if (form.isCopyProtocol())
+                {
+                    FlowProtocol destProtocol = FlowProtocol.ensureForContainer(getUser(), destContainer);
+                    destProtocol.setFCSAnalysisNameExpr(getUser(), srcProtocol.getFCSAnalysisNameExpr());
+                    destProtocol.setSampleSetJoinFields(getUser(), srcProtocol.getSampleSetJoinFields());
+                    destProtocol.setFCSAnalysisFilter(getUser(), srcProtocol.getFCSAnalysisFilterString());
+                }
+                for (String analysisScriptName : form.getCopyAnalysisScript())
+                {
+                    FlowScript srcScript = FlowScript.fromName(getContainer(), analysisScriptName);
+                    if (srcScript != null)
+                    {
+                        FlowScript.create(getUser(), destContainer, srcScript.getName(), srcScript.getAnalysisScript());
+                    }
+                }
+            }
+            return true;
         }
-        try
+
+        public ActionURL getSuccessURL(NewFolderForm newFolderForm)
         {
-            FlowSettings.setWorkingDirectoryPath(form.ff_workingDirectory);
+            return PageFlowUtil.urlProvider(ProjectUrls.class).urlStart(destContainer);
         }
-        catch (Exception e)
+
+        public NavTree appendNavTrail(NavTree root)
         {
-            errors = addError("An exception occurred:" + e);
-            _log.error("Error", e);
+            root.addChild("New Folder", new ActionURL(NewFolderAction.class, getContainer()));
+            return root;
         }
-        if (errors)
-        {
-            return null;
-        }
-        return new ViewForward(new ActionURL("admin", "showAdmin", ""));
     }
 
-    @Jpf.Action
-    protected Forward savePreferences() throws Exception
+    @RequiresSiteAdmin
+    public class FlowAdminAction extends FormViewAction<FlowAdminForm>
     {
-        FlowPreference.update(getRequest());
-        return new Forward(new URI(getRequest().getContextPath() + "/_.gif"));
+        public void validateCommand(FlowAdminForm target, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(FlowAdminForm form, boolean reshow, BindException errors) throws Exception
+        {
+            getPageConfig().setFocusId("workingDirectory");
+            return new JspView<FlowAdminForm>(FlowController.class, "flowAdmin.jsp", form, errors);
+        }
+
+        public boolean handlePost(FlowAdminForm form, BindException errors) throws Exception
+        {
+            if (form.getWorkingDirectory() != null)
+            {
+                File dir = new File(form.getWorkingDirectory());
+                if (!dir.exists())
+                {
+                    errors.rejectValue("workingDirectory", ERROR_MSG, "Path does not exist: " + form.getWorkingDirectory());
+                    return false;
+                }
+                if (!dir.isDirectory())
+                {
+                    errors.rejectValue("workingDirectory", ERROR_MSG, "Path is not a directory: " + form.getWorkingDirectory());
+                    return false;
+                }
+            }
+            try
+            {
+                FlowSettings.setWorkingDirectoryPath(form.getWorkingDirectory());
+            }
+            catch (Exception e)
+            {
+                errors.reject(ERROR_MSG, "An exception occurred:" + e);
+                _log.error("Error", e);
+                return false;
+            }
+            return true;
+        }
+
+        public ActionURL getSuccessURL(FlowAdminForm flowAdminForm)
+        {
+            return PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL();
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            root.addChild("Flow Module Settings");
+            return root;
+        }
     }
 
-    @Jpf.Action     // Just a simple test of XMLWriter TODO: Replace with actual export
-    protected Forward export() throws Exception
+    @RequiresPermission(ACL.PERM_READ)
+    public class SavePerferencesAction extends SimpleRedirectAction
     {
-        HttpServletResponse response = getResponse();
-        response.setContentType("text/plain");
-        response.setHeader("Content-disposition", "attachment; filename=\"" + "someDumbFile.xml" +"\"");
-        OutputStream os = response.getOutputStream();
-
-        XMLWriterTest writer = new XMLWriterTest();
-        writer.write(new PrintWriter(os));
-        os.close();
-        response.flushBuffer();
-
-        return null;
+        public ActionURL getRedirectURL(Object o) throws Exception
+        {
+            FlowPreference.update(getRequest());
+            URI uri = new URI(getRequest().getContextPath() + "/_.gif");
+            return new ActionURL(uri.toString());
+        }
     }
+
 }

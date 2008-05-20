@@ -800,6 +800,9 @@ abstract public class FlowJoWorkspace implements Serializable
         int iSample = 0;
         for (FlowJoWorkspace.SampleInfo sample : samples)
         {
+            if (job.checkInterrupted())
+                return null;
+
             iSample++;
             String description = "sample " + iSample + "/" + samples.size() + ":" + sample.getLabel();
             job.addStatus("Preparing " + description);
@@ -856,6 +859,9 @@ abstract public class FlowJoWorkspace implements Serializable
             }
         }
 
+        if (job.checkInterrupted())
+            return null;
+
         FlowManager.vacuum();
 
         boolean transaction = false;
@@ -886,6 +892,9 @@ abstract public class FlowJoWorkspace implements Serializable
             iSample = 0;
             for (FlowJoWorkspace.SampleInfo sample : samples)
             {
+                if (job.checkInterrupted())
+                    return null;
+
                 iSample++;
                 ExpProtocolApplication paSample = run.addProtocolApplication(user, FlowProtocolStep.keywords.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
                 paSample.addDataInput(user, workspaceData, InputRole.Workspace.toString(), InputRole.Workspace.getPropertyDescriptor(container));
@@ -905,6 +914,9 @@ abstract public class FlowJoWorkspace implements Serializable
             Map<CompensationMatrix, FlowCompensationMatrix> flowCompMatrices = new HashMap();
             for (Map.Entry<CompensationMatrix, AttributeSet> entry : compMatrixMap.entrySet())
             {
+                if (job.checkInterrupted())
+                    return null;
+
                 iComp++;
                 CompensationMatrix compMatrix = entry.getKey();
                 AttributeSet compAttrs = entry.getValue();
@@ -921,6 +933,9 @@ abstract public class FlowJoWorkspace implements Serializable
             int iAnalysis = 0;
             for (Map.Entry<FlowJoWorkspace.SampleInfo, FlowFCSFile> entry : fcsFiles.entrySet())
             {
+                if (job.checkInterrupted())
+                    return null;
+
                 AttributeSet results = analysisMap.get(entry.getKey());
                 if (results != null)
                 {
@@ -961,6 +976,10 @@ abstract public class FlowJoWorkspace implements Serializable
                     }
                 }
             }
+
+            if (job.checkInterrupted())
+                return null;
+
             if (experiment != null)
             {
                 experiment.getExperiment().addRun(user, run);
