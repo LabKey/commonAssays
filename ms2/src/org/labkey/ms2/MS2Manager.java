@@ -17,6 +17,7 @@
 package org.labkey.ms2;
 
 import org.apache.log4j.Logger;
+import org.apache.commons.lang.StringUtils;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.plot.XYPlot;
@@ -40,6 +41,7 @@ import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.ViewContext;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.RelativeQuantAnalysisSummary;
@@ -943,9 +945,9 @@ public class MS2Manager
     public static int verifyRowIndex(long[] index, int rowIndex, long peptideId)
     {
         if (rowIndex < 0 || rowIndex >= index.length)
-            _log.error("RowIndex out of bounds " + rowIndex);
+            logRowIndexError("RowIndex out of bounds " + rowIndex);
         else if (index[rowIndex] != peptideId)
-            _log.error("Wrong peptideId found at rowIndex " + rowIndex + " in cached peptide index");
+            logRowIndexError("Wrong peptideId found at rowIndex " + rowIndex + " in cached peptide index");
         else
             return rowIndex;
 
@@ -953,8 +955,18 @@ public class MS2Manager
             if (index[i] == peptideId)
                 return i;
 
-        _log.error("Can't find peptideId " + peptideId + " in peptide index");
+        logRowIndexError("Can't find peptideId " + peptideId + " in peptide index");
         return -1;
+    }
+
+
+    private static void logRowIndexError(String error)
+    {
+        ViewContext ctx = HttpView.currentContext();
+        String url = ctx.getActionURL().getLocalURIString();
+        String referrer = StringUtils.trimToEmpty(ctx.getRequest().getHeader("referer"));
+        String userAgent = StringUtils.trimToEmpty(ctx.getRequest().getHeader("User-Agent"));
+        _log.warn(error + "(url=" + url + ", referrer=" + referrer + ", browser=" + userAgent + ")");
     }
 
 

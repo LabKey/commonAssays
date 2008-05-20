@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.labkey.ms2;
 
 import org.apache.beehive.netui.pageflow.FormData;
@@ -773,10 +772,11 @@ public class MS2Controller extends SpringActionController
             //in an error being written to the log. There are now other instances where
             //peptide sequences are displayed with hyperlinks to this action, and they
             //often do not want the prev/next buttons to be enabled.
-            if(rowIndex >= 0)
+            if (rowIndex >= 0)
             {
                 peptideIndex = getPeptideIndex(currentURL, run);
                 rowIndex = MS2Manager.verifyRowIndex(peptideIndex, rowIndex, peptideId);
+                sqlRowIndex = rowIndex + 1;  // Different rowIndex may be returned -- make sure sqlRowIndex matches
             }
 
             peptide.init(form.getTolerance(), form.getxStartDouble(), form.getxEnd());
