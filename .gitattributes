@@ -65,7 +65,6 @@ biotrue/src/org/labkey/biotrue/task/BtThreadPool.java -text
 biotrue/src/org/labkey/biotrue/task/DownloadTask.java -text
 biotrue/src/org/labkey/biotrue/task/Operation.java -text
 biotrue/src/org/labkey/biotrue/task/ScheduledTask.java -text
-cabig/build.xml -text
 cabig/module.properties -text
 cabig/src/META-INF/cabig.xml -text
 cabig/src/META-INF/cabig/scripts/postgresql/cabig-0.00-2.10.sql -text
@@ -96,7 +95,6 @@ cabig/src/org/labkey/cabig/caBIGManager.java -text
 cabig/src/org/labkey/cabig/caBIGModule.java -text
 cabig/src/org/labkey/cabig/caBIGSchema.java -text
 cabig/src/org/labkey/cabig/view/publish.jsp -text
-elispotassay/build.xml -text
 elispotassay/module.properties -text
 elispotassay/src/org/labkey/elispot/ElispotAssayProvider.java -text
 elispotassay/src/org/labkey/elispot/ElispotController.java -text
