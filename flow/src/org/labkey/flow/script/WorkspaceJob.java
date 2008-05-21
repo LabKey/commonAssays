@@ -37,7 +37,7 @@ public class WorkspaceJob extends FlowJob
 {
     private static Logger _log = getJobLogger(WorkspaceJob.class);
 
-    private final WorkspaceData _workspaceData;
+    private WorkspaceData _workspaceData;
     private final FlowExperiment _experiment;
     private final File _workspaceFile;
     private final File _runFilePathRoot;

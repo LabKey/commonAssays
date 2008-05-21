@@ -432,7 +432,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             catch (Throwable t)
             {
                 ExceptionUtil.logExceptionToMothership(getRequest(), t);
-                errors.reject(ERROR_MSG, t.getMessage());
+                errors.reject(ERROR_MSG, t.toString());
             }
             return false;
         }
