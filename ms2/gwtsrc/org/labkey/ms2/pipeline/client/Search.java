@@ -60,6 +60,7 @@ public class Search implements EntryPoint
     private                 CopyButton              copyButton = new CopyButton();
     private                 String                  dirSequenceRoot;
 
+    private Map databaseCache = new HashMap();
 
     private SearchServiceAsync service = null;
     private SearchServiceAsync getSearchService()
@@ -141,8 +142,8 @@ public class Search implements EntryPoint
 
         protocolComposite.addChangeListener(new ProtocolChangeListener(dirRoot));
 
-        sequenceDbComposite.addChangeListener(new SequenceDbChangeListener(dirSequenceRoot));
-        sequenceDbComposite.addRefreshClickListener(new RefreshSequenceDbPathsClickListener(dirSequenceRoot));
+        sequenceDbComposite.addChangeListener(new SequenceDbChangeListener());
+        sequenceDbComposite.addRefreshClickListener(new RefreshSequenceDbPathsClickListener());
         sequenceDbComposite.addClickListener(new SequenceDbClickListener());
         sequenceDbComposite.addTaxonomyChangeListener(new TaxonomyChangeListener());
         enzymeComposite.addChangeListener(new EnzymeChangeListener());
@@ -202,8 +203,9 @@ public class Search implements EntryPoint
     {
         residueModComposite.clear();
         mzXmlComposite.clearStatus();
+        DatabaseRequestKey key = new DatabaseRequestKey("/", dirSequenceRoot, searchEngine);
         getSearchService().getSequenceDbs(sequenceDbComposite.getSelectedDb(), dirSequenceRoot,searchEngine,
-                new SequenceDbServiceCallback());
+                new SequenceDbServiceCallback(key));
         buttonPanel.remove(copyButton);
         protocolComposite.setFocus(true);
         String error = syncXml2Form();
@@ -461,7 +463,7 @@ public class Search implements EntryPoint
         }
         else
         {
-            getSearchService().getSequenceDbs(sequenceDb, dirSequenceRoot, searchEngine, new SequenceDbServiceCallback());
+            getSearchService().getSequenceDbs(sequenceDb, dirSequenceRoot, searchEngine, new SequenceDbServiceCallback(new DatabaseRequestKey(sequenceDb, dirSequenceRoot, searchEngine)));
         }
         return "";
     }
@@ -595,40 +597,51 @@ public class Search implements EntryPoint
 
     private class SequenceDbServiceCallback implements AsyncCallback
     {
+        private final DatabaseRequestKey _key;
+
+        public SequenceDbServiceCallback(DatabaseRequestKey key)
+        {
+            _key = key;
+        }
+
         public void onFailure(Throwable caught)
         {
             if(!(GWT.getTypeName(caught).equals("com.google.gwt.user.client.rpc.InvocationException")
                     && caught.getMessage().length() == 0))
                 Window.alert(caught.getMessage() + GWT.getTypeName(caught));
+            databaseCache.remove(_key);
         }
 
         public void onSuccess(Object result)
         {
-            clearDisplay();
             GWTSearchServiceResult gwtResult = (GWTSearchServiceResult)result;
-            List sequenceDbs = gwtResult.getSequenceDBs();
-            List sequenceDbPaths = gwtResult.getSequenceDbPaths();
-            sequenceDbComposite.setSequenceDbPathListBoxContents(sequenceDbPaths,
-                    ((GWTSearchServiceResult)result).getDefaultSequenceDb());
-            if(sequenceDbs != null)
-            {
-                sequenceDbComposite.setSequenceDbsListBoxContents(sequenceDbs,gwtResult.getDefaultSequenceDb());
-            }
-            appendError(gwtResult.getErrors());
-            sequenceDbComposite.selectDefaultDb(gwtResult.getDefaultSequenceDb());
-//            if(sequenceDbComposite.getSelectedDb().length() == 0 && inputXmlComposite.getSequenceDb().length() > 0)
-//            {
-//                appendError(syncXml2Form());
-//            }
-            if(inputXmlComposite.getSequenceDb().length() > 0 &&
-                !inputXmlComposite.getSequenceDb().equals(sequenceDbComposite.getSelectedDb()))
-            {
-                appendError("The database entered for the input XML label \"pipeline, database\" cannot be found"
-                + " at this fasta root.");
-                return;
-            }
-            appendError(syncForm2Xml());
+            databaseCache.put(_key, gwtResult);
+            updateDatabases(gwtResult);
         }
+    }
+    
+    private void updateDatabases(GWTSearchServiceResult gwtResult)
+    {
+        clearDisplay();
+        List sequenceDbs = gwtResult.getSequenceDBs();
+        List sequenceDbPaths = gwtResult.getSequenceDbPaths();
+        sequenceDbComposite.setSequenceDbPathListBoxContents(sequenceDbPaths,
+                gwtResult.getDefaultSequenceDb());
+        if(sequenceDbs != null)
+        {
+            sequenceDbComposite.setSequenceDbsListBoxContents(sequenceDbs,gwtResult.getDefaultSequenceDb());
+        }
+        appendError(gwtResult.getErrors());
+        sequenceDbComposite.selectDefaultDb(gwtResult.getDefaultSequenceDb());
+
+        if(inputXmlComposite.getSequenceDb().length() > 0 &&
+            !inputXmlComposite.getSequenceDb().equals(sequenceDbComposite.getSelectedDb()))
+        {
+            appendError("The database entered for the input XML label \"pipeline, database\" cannot be found"
+            + " at this fasta root.");
+            return;
+        }
+        appendError(syncForm2Xml());
     }
 
     private class ProtocolServiceAsyncCallback implements AsyncCallback
@@ -694,21 +707,26 @@ public class Search implements EntryPoint
 
     private class SequenceDbChangeListener implements ChangeListener
     {
-
-        private String  dirSequenceRoot;
-
-        public SequenceDbChangeListener(String dirSequenceRoot)
-        {
-            this.dirSequenceRoot = dirSequenceRoot;
-        }
-
         public void onChange(Widget widget)
         {
             ListBox listBox = (ListBox)widget;
             String dbDirectory = listBox.getValue(listBox.getSelectedIndex());
             loading();
             inputXmlComposite.removeSequenceDb();
-            service.getSequenceDbs(dbDirectory, dirSequenceRoot, searchEngine,new SequenceDbServiceCallback());
+
+            DatabaseRequestKey key = new DatabaseRequestKey(dbDirectory, dirSequenceRoot, searchEngine);
+            if (databaseCache.containsKey(key))
+            {
+                final GWTSearchServiceResult gwtResult = (GWTSearchServiceResult) databaseCache.get(key);
+                if (gwtResult != null)
+                {
+                    updateDatabases(gwtResult);
+                }
+            }
+            else
+            {
+                service.getSequenceDbs(dbDirectory, dirSequenceRoot, searchEngine, new SequenceDbServiceCallback(key));
+            }
         }
     }
 
@@ -799,16 +817,11 @@ public class Search implements EntryPoint
 
     private class RefreshSequenceDbPathsClickListener implements ClickListener
     {
-        private String dirSequenceRoot;
-
-        public RefreshSequenceDbPathsClickListener(String dirSequenceRoot)
-        {
-            this.dirSequenceRoot = dirSequenceRoot;
-        }
         public void onClick(Widget widget)
         {
             loading();
-            service.refreshSequenceDbPaths(dirSequenceRoot,new SequenceDbServiceCallback());
+            databaseCache.clear();
+            service.refreshSequenceDbPaths(dirSequenceRoot,new SequenceDbServiceCallback(new DatabaseRequestKey(dirSequenceRoot, dirSequenceRoot, searchEngine)));
         }
     }
 
@@ -836,6 +849,46 @@ public class Search implements EntryPoint
             }
             clearDisplay();
             setReadOnly(false);
+        }
+    }
+
+    private static class DatabaseRequestKey
+    {
+        private final String _dbDirectory;
+        private final String _dirSequenceRoot;
+        private final String _searchEngine;
+
+        public DatabaseRequestKey(String dbDirectory, String dirSequenceRoot, String searchEngine)
+        {
+            _dbDirectory = dbDirectory;
+            _dirSequenceRoot = dirSequenceRoot;
+            _searchEngine = searchEngine;
+        }
+
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (!(o instanceof DatabaseRequestKey)) return false;
+
+            DatabaseRequestKey that = (DatabaseRequestKey) o;
+
+            if (_dbDirectory != null ? !_dbDirectory.equals(that._dbDirectory) : that._dbDirectory != null)
+                return false;
+            if (_dirSequenceRoot != null ? !_dirSequenceRoot.equals(that._dirSequenceRoot) : that._dirSequenceRoot != null)
+                return false;
+            if (_searchEngine != null ? !_searchEngine.equals(that._searchEngine) : that._searchEngine != null)
+                return false;
+
+            return true;
+        }
+
+        public int hashCode()
+        {
+            int result;
+            result = (_dbDirectory != null ? _dbDirectory.hashCode() : 0);
+            result = 31 * result + (_dirSequenceRoot != null ? _dirSequenceRoot.hashCode() : 0);
+            result = 31 * result + (_searchEngine != null ? _searchEngine.hashCode() : 0);
+            return result;
         }
     }
 }

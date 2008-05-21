@@ -139,7 +139,7 @@ public class SequestSearchTask extends PipelineJob.Task
                 throw new IOException("Failed to create output directory for DTA files '" + dirOutputDta + "'.");
 
             ArrayList<String> command = new ArrayList<String>();
-            command.add("MzXML2Search");
+            command.add(getExecutablePath("MzXML2Search"));
             command.add("-dta");
             String paramMinParent = params.get("spectrum, minimum parent m+h");
             if (paramMinParent != null)
@@ -169,7 +169,7 @@ public class SequestSearchTask extends PipelineJob.Task
             if (iReturn != 0 || !fileWorkPepXMLRaw.exists())
                 throw new IOException("Failed running Sequest.");
 
-            getJob().runSubProcess(new ProcessBuilder("bsdtar.exe", "czf", fileTgz.getAbsolutePath(), "*"), dirOutputDta);
+            getJob().runSubProcess(new ProcessBuilder(getExecutablePath("bsdtar.exe"), "czf", fileTgz.getAbsolutePath(), "*"), dirOutputDta);
 
             if (!FileUtil.deleteDir(dirOutputDta))
                 throw new IOException("Failed to delete DTA directory " + dirOutputDta.getAbsolutePath());
