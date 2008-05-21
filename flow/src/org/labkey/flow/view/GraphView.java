@@ -90,8 +90,11 @@ public class GraphView extends GridView
                 }
             }
 
+            out.write("<table class=\"dataregion_header\">\n");
             region.getButtonBar(DataRegion.MODE_GRID).render(ctx, out);
-            out.write("<table class=\"dataRegion\">");
+            out.write("</table>\n");
+
+            out.write("<table class=\"dataRegion\">\n");
             ResultSet rs = ctx.getResultSet();
             Map rowMap = null;
             while (rs.next())
@@ -117,8 +120,11 @@ public class GraphView extends GridView
                 }
                 out.write("</td></tr>");
             }
-            out.write("</table>");
+            out.write("</table>\n");
+
+            out.write("<table class=\"dataregion_footer\">\n");
             region.getButtonBar(DataRegion.MODE_DETAILS).render(ctx, out);
+            out.write("</table>\n");
         }
         finally
         {

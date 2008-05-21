@@ -64,6 +64,6 @@ public class GraphColumn extends DataColumn
         urlGraph.addParameter(FlowParam.graph.toString(), displayValue.toString());
         out.write("<img class=\"flow-graph\" src=\"");
         out.write(PageFlowUtil.filter(urlGraph));
-        out.write("\">");
+        out.write("\"><wbr>");
     }
 }
