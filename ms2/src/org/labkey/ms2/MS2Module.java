@@ -42,6 +42,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.compare.SpectraCountRReport;
+import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.pipeline.MS2PipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineProvider;
@@ -179,6 +180,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         ModuleLoader.getInstance().registerFolderType(new MS2FolderType(this));
 
         ReportService.get().registerReport(new SpectraCountRReport());
+        ReportService.get().addUIProvider(new MS2ReportUIProvider());
 
         super.startup(context);
     }

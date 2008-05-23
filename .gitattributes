@@ -884,6 +884,7 @@ ms2/src/org/labkey/ms2/annotLoadDetails.jsp -text
 ms2/src/org/labkey/ms2/compare/CompareDataRegion.java -text
 ms2/src/org/labkey/ms2/compare/CompareExcelWriter.java -text
 ms2/src/org/labkey/ms2/compare/CompareQuery.java -text
+ms2/src/org/labkey/ms2/compare/MS2ReportUIProvider.java -text
 ms2/src/org/labkey/ms2/compare/PeptideCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/ProteinCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/ProteinProphetCompareQuery.java -text

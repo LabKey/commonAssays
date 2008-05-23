@@ -24,6 +24,7 @@ import org.labkey.api.data.ActionButton;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.reports.report.view.ChartUtil;
 import org.labkey.api.reports.report.view.RReportBean;
+import org.labkey.api.reports.ReportService;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.SpectraCountConfiguration;
 import org.labkey.ms2.MS2Controller;
@@ -44,28 +45,18 @@ public class SpectraCountQueryView extends QueryView
         _schema = schema;
         _config = config;
         _form = form;
+
+        setViewItemFilter(new ReportService.ItemFilter() {
+            public boolean accept(String type, String label)
+            {
+                if (SpectraCountRReport.TYPE.equals(type)) return true;
+                return false;
+            }
+        });
     }
 
     protected TableInfo createTable()
     {
         return _schema.createSpectraCountTable(_config, getViewContext(), _form);
-    }
-
-    public ActionButton createReportButton()
-    {
-        RReportBean bean = new RReportBean();
-        bean.setReportType(SpectraCountRReport.TYPE);
-        bean.setSchemaName(getSchema().getSchemaName());
-        bean.setQueryName(getSettings().getQueryName());
-        bean.setViewName(getSettings().getViewName());
-        bean.setDataRegionName(getDataRegionName());
-	// the redirect after a save
-        bean.setRedirectUrl(getViewContext().getActionURL().toString());
-
-        ActionURL chartURL = ChartUtil.getRReportDesignerURL(_viewContext, bean);
-        chartURL = SpectraCountRReport.addReportParameters(chartURL, getViewContext());
-
-        return new CreateChartButton(chartURL.toString(), false, true,
-                getSchema().getSchemaName(), getSettings().getQueryName(), getSettings().getViewName(), SpectraCountRReport.TYPE);
     }
 }

@@ -27,6 +27,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.reports.ReportService;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class PendingMageMLFilesView extends QueryView
         setShowExportButtons(false);
         setShowRecordSelectors(true);
         setShowDetailsColumn(false);
-        setShowRReportButton(false);
+        setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
         setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
         setShowCustomizeViewLinkInButtonBar(true);
     }

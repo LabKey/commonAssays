@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TSVGridWriter;
+import org.labkey.api.data.MenuButton;
 import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.query.QueryPicker;
@@ -29,6 +30,9 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.reports.ReportService;
+import org.labkey.api.reports.report.RReport;
+import org.labkey.api.reports.report.ChartQueryReport;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.controllers.FlowParam;
@@ -55,10 +59,16 @@ public class FlowQueryView extends QueryView
     public FlowQueryView(ViewContext context, FlowSchema schema, FlowQuerySettings settings)
     {
         super(schema, settings);
-        setShowChartButton(true);
-        setShowRReportButton(true);
         setShadeAlternatingRows(true);
         setShowColumnSeparators(true);
+        setViewItemFilter(new ReportService.ItemFilter() {
+            public boolean accept(String type, String label)
+            {
+                if (RReport.TYPE.equals(type)) return true;
+                if (ChartQueryReport.TYPE.equals(type)) return true;
+                return false;
+            }
+        });
     }
 
     protected boolean showRecordSelectors()
