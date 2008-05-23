@@ -47,6 +47,7 @@ public class CompareDataRegion extends DataRegion
         setName(MS2Manager.getDataRegionNameCompare());
         setShadeAlternatingRows(true);
         setShowColumnSeparators(true);
+        setShowPagination(false);
     }
     
     public ResultSet getResultSet()
@@ -70,7 +71,7 @@ public class CompareDataRegion extends DataRegion
     }
 
     @Override
-    protected void renderGridHeaders(RenderContext ctx, Writer out, List<DisplayColumn> renderers) throws SQLException, IOException
+    protected void renderGridHeaderColumns(RenderContext ctx, Writer out, List<DisplayColumn> renderers) throws SQLException, IOException
     {
         // Add an extra row and render the multi-column captions
         out.write("<tr>");
@@ -127,6 +128,6 @@ public class CompareDataRegion extends DataRegion
         }
         out.write("</tr>\n");
 
-        super.renderGridHeaders(ctx, out, renderers);
+        super.renderGridHeaderColumns(ctx, out, renderers);
     }
 }

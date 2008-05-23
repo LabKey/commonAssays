@@ -1929,7 +1929,7 @@ public class MS2Controller extends SpringActionController
         }
 
         List<RunColumn> gridColumns = query.getGridColumns();
-        CompareDataRegion rgn = query.getCompareGrid();
+        CompareDataRegion rgn = query.getCompareGrid(exportToExcel);
 
         List<String> runCaptions = new ArrayList<String>(runs.size());
         for (MS2Run run : runs)
@@ -1972,6 +1972,7 @@ public class MS2Controller extends SpringActionController
             GridView compareView = new GridView(rgn);
             rgn.setShowPagination(false);
             compareView.setResultSet(rgn.getResultSet());
+            compareView.getDataRegion().setButtonBarPosition(DataRegion.ButtonBarPosition.BOTH);
 
             title.append(query.getComparisonDescription());
 

@@ -83,9 +83,9 @@ public abstract class CompareQuery extends SQLFragment
         _gridColumns.add(new RunColumn(label, name, aggregate, formatString));
     }
 
-    public ResultSet createResultSet() throws SQLException
+    public ResultSet createResultSet(boolean export, int maxRows) throws SQLException
     {
-        return Table.executeQuery(MS2Manager.getSchema(), getSQL(), getParams().toArray());
+        return Table.executeQuery(MS2Manager.getSchema(), getSQL(), getParamsArray(), maxRows, !export);
     }
 
     protected String getLabelColumn()
@@ -313,9 +313,11 @@ public abstract class CompareQuery extends SQLFragment
     }
 
     // CONSIDER: Split into getCompareGrid (for Excel export) and getCompareGridForDisplay?
-    public CompareDataRegion getCompareGrid() throws SQLException
+    public CompareDataRegion getCompareGrid(boolean export) throws SQLException
     {
-        CompareDataRegion rgn = new CompareDataRegion(createResultSet());
+        int maxRows = export ? Table.ALL_ROWS : 1000;
+        CompareDataRegion rgn = new CompareDataRegion(createResultSet(export, maxRows));
+        rgn.setMaxRows(maxRows);
         TableInfo ti = MS2Manager.getTableInfoCompare();
         ColumnInfo comparisonColumn = getComparisonCommonColumn(ti);
         rgn.addColumn(comparisonColumn);
