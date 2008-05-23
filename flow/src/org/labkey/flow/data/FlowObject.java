@@ -26,7 +26,6 @@ import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.exp.property.SystemProperty;
 import org.labkey.api.security.User;
-import org.labkey.api.util.AppProps;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
@@ -243,8 +242,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
 
     static public String generateLSID(Container container, String type, String name)
     {
-        String str = "urn:lsid:" + AppProps.getInstance().getDefaultLsidAuthority() + ":" + type + ".Folder-" + container.getRowId() + ":" + name;
-        return new Lsid(str).toString();
+        return new Lsid(type, "Folder-" + container.getRowId(), name).toString();
     }
 
     static public String generateLSID(Container container, DataType type, String name)
@@ -254,8 +252,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
 
     static public String generateUniqueLSID(String type)
     {
-        String str = "urn:lsid:" + AppProps.getInstance().getDefaultLsidAuthority() + ":" + type + ":" + GUID.makeGUID();
-        return new Lsid(str).toString();
+        return new Lsid(type, GUID.makeGUID()).toString();
     }
 
     public Container getContainerObject()
