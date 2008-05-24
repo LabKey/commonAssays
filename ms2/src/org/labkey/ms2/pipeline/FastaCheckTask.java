@@ -19,6 +19,7 @@ import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.FileType;
 import org.labkey.common.tools.FastaValidator;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,8 +86,9 @@ public class FastaCheckTask extends PipelineJob.Task
                 getJob().info("Checking sequence file validity of " + sequenceFile);
                 
                 FastaValidator validator = new FastaValidator(sequenceFile);
-                for (String error : validator.validate())
-                    getJob().error(error);
+                String errors = StringUtils.join(validator.validate(), "\n");
+                if (errors.length() > 0)
+                    getJob().error(errors);
             }
 
             getJob().info("");  // blank line

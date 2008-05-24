@@ -19,6 +19,7 @@ package org.labkey.ms2.protein;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.log4j.Logger;
+import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.util.HashHelpers;
@@ -630,11 +631,11 @@ public class FastaDbLoader extends DefaultAnnotationLoader implements Annotation
         if (!errors.isEmpty())
         {
             _log.error("This FASTA file has " + errors.size() + " duplicate protein name" + (1 == errors.size() ? "" : "s") + ", listed below.  " +
-                    "Search engines and the Trans-Proteomic Pipeline use these names to link to specific protein sequeces so they must be unique.  " +
+                    "Search engines and the Trans-Proteomic Pipeline use these names to link to specific protein sequeces so the names must be unique.  " +
                     "You should remove or otherwise disambiguate the duplicate entries from this FASTA file and re-run your search.");
 
-            for (String error : errors)
-                _log.error(error);
+            String errorString = StringUtils.join(errors, "\n");
+            _log.error(errorString);
 
             throw new RuntimeException("Invalid FASTA file");
         }
