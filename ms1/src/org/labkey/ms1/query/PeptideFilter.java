@@ -100,12 +100,12 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
 
             sql.append(genSeqPredicate(_sequences[idx], null));
         }
-        return new SQLFragment(sql.toString(), (List<Object>)null);
+        return new SQLFragment(sql.toString());
     }
 
     public SQLFragment getWhereClause(Map<String, String> aliasMap, SqlDialect dialect)
     {
-        if(null == _sequences)
+        if (null == _sequences)
             return null;
 
         String pepDataAlias = aliasMap.get("ms2.PeptidesData");
@@ -113,14 +113,14 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
 
         // OR together the sequence conditions
         StringBuilder sql = new StringBuilder();
-        for(int idx = 0; idx < _sequences.length; ++idx)
+        for (int idx = 0; idx < _sequences.length; ++idx)
         {
-            if(idx > 0)
+            if (idx > 0)
                 sql.append(" OR ");
 
             sql.append(genSeqPredicate(_sequences[idx], pepDataAlias));
         }
-        return new SQLFragment(sql.toString(), (List<Object>)null);
+        return new SQLFragment(sql.toString());
     }
 
     private String genSeqPredicate(String sequence, String pepDataAlias)
@@ -132,7 +132,7 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
         StringBuilder sql = new StringBuilder(null == pepDataAlias ? "(TrimmedPeptide"
                 : "(" + pepDataAlias + ".TrimmedPeptide");
 
-        if(_exact)
+        if (_exact)
         {
             sql.append("='");
             sql.append(normalizeSequence(sequence));
