@@ -220,6 +220,17 @@ public class MascotClientImpl implements SearchClient
             // user provided a http://host/path, we shall test this first
             if (!"".equals(url.getPath()))
                 possibleURLs.add(_url);
+            if (!(_url.endsWith("cgi")) || _url.endsWith("cgi/"))
+            {
+            	if (_url.endsWith("/"))
+            	{
+            		possibleURLs.add(_url + "cgi/");
+            	}
+            	else
+            	{
+            		possibleURLs.add(_url + "/cgi");
+            	}
+            }
 
             StringBuffer alternativeLink;
             alternativeLink = new StringBuffer("http://");
@@ -1030,12 +1041,18 @@ public class MascotClientImpl implements SearchClient
         //sessionID is optional
         if (/*"".equals(sessionID) ||*/ "".equals(taskID) ||
             "".equals(actionString) || "".equals(paramFile) || "".equals(analysisFile))
+        {
+        	getLogger().error("At least one of the required arguments is empty.");
             return false;
+        }
 
         File queryParamFile = new File(paramFile);
         ParamParser parser = getInputParameters(queryParamFile);
         if (null == parser)
+        {
+        	getLogger().error("I'm sorry, I could not parse the parameter file '" + paramFile + "'.");
             return false;
+        }
 
         String [][] submitFields = {
                 {"charge", "mascot, peptide_charge", "search, charge"},
@@ -1224,6 +1241,9 @@ public class MascotClientImpl implements SearchClient
         // Check that we didn't run out of retries.
         if (statusCode == -1) {
             post.releaseConnection();
+            getLogger().error("Failed to submit Mascot query '" + mascotRequestURL + "' for " +
+                queryFile.getPath() + " with parameters " + queryParamFile.getPath() + "." +
+                " Tried " + maxAttempt + " times.");
             return false;
         }
 
@@ -1252,6 +1272,12 @@ public class MascotClientImpl implements SearchClient
                 }
             }
             in.close();
+            if (!uploadFinished)
+            {
+            	getLogger().error("Failed to get response from Mascot query '" + mascotRequestURL + "' for " +
+            			queryFile.getPath() + " with parameters " + queryParamFile.getPath () + " on attempt#" +
+            			Integer.toString(attempt+1) + ".\n" + "Mascot output: " + post.getResponseBodyAsString());
+            }
         }
         catch (IOException err)
         {

@@ -17,7 +17,6 @@
 package org.labkey.ms2.pipeline.client;
 
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.core.client.GWT;
 
 import java.util.*;
 import org.labkey.api.gwt.client.ui.ImageButton;
@@ -36,6 +35,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
     protected Hidden sequenceDbPathHidden = new Hidden();
     protected Label sequenceDbLabel = new Label();
     protected HorizontalPanel dirPanel = new HorizontalPanel();
+    protected Label statusLabel = new Label();
     protected RefreshButton refreshButton = new RefreshButton();
     protected HorizontalPanel refreshPanel = new HorizontalPanel();
     protected boolean hasDirectories;
@@ -48,6 +48,12 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
         sequenceDbPathListBox.setVisibleItemCount(1);
         sequenceDbLabel.setStylePrimaryName("ms-readonly");
         dirPanel.add(sequenceDbPathListBox);
+        dirPanel.add(statusLabel);
+        dirPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        statusLabel.setWidth("100px");
+        statusLabel.setStylePrimaryName("cpas-message-strong");
+        dirPanel.setSpacing(3);
+        instance.add(dirPanel);
         instance.add(sequenceDbListBox);
         initWidget(instance);
     }
@@ -67,27 +73,20 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
         }
         else
         {
-                defaultPath = defaultDb.substring(0, defaultDb.lastIndexOf('/') + 1);
+            defaultPath = defaultDb.substring(0, defaultDb.lastIndexOf('/') + 1);
         }
         sequenceDbPathListBox.clear();
-        if(paths == null || paths.size() == 0)
+        if (paths == null)
         {
-            instance.remove(dirPanel);
-            hasDirectories = false;
-            return; 
+            paths = new ArrayList();
         }
-        else
-        {
-            if(instance.getWidgetIndex(dirPanel) == -1)
-                instance.insert(dirPanel,0);
-            hasDirectories = true;
-        }
-        Collections.sort(paths);
+        hasDirectories = !paths.isEmpty();
+
         sequenceDbPathListBox.addItem(DB_DIR_ROOT, "/");
-        String dirName;
+        Collections.sort(paths);
         for(Iterator it = paths.iterator() ; it.hasNext(); )
         {
-            dirName = (String)it.next();
+            String dirName = (String)it.next();
             if(dirName == null||dirName.equals(""))
                 continue;
             sequenceDbPathListBox.addItem(dirName,dirName);
@@ -314,8 +313,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
                 instance.remove(sequenceDbLabel);
                 instance.remove(sequenceDbHidden);
                 instance.remove(sequenceDbPathHidden);
-                if(sequenceDbPathListBox.getItemCount() > 0)
-                    instance.insert(dirPanel, 0);
+                instance.insert(dirPanel, 0);
                 instance.add(sequenceDbListBox);
             }
         }
@@ -342,6 +340,26 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
     abstract public String setDefaultTaxonomy(String name);
     abstract public void addTaxonomyChangeListener(ChangeListener listener);
     abstract public void removeTaxonomyChangeListener(ChangeListener listener);
+
+    public void setLoading(boolean loading)
+    {
+        statusLabel.setText(loading ? "LOADING..." : "");
+    }
+
+    public void setEnabled(boolean paths, boolean files)
+    {
+        if (!paths)
+        {
+            sequenceDbPathListBox.clear();
+        }
+        sequenceDbPathListBox.setEnabled(paths);
+        if (!files)
+        {
+            sequenceDbListBox.clear();
+        }
+        sequenceDbListBox.setEnabled(files);
+        refreshButton.setEnabled(paths);
+    }
 
     protected class RefreshButton extends ImageButton
     {

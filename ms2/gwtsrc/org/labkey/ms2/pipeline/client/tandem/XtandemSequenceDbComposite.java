@@ -43,9 +43,8 @@ public class XtandemSequenceDbComposite extends SequenceDbComposite
     public void init()
     {
         super.init();
-        dirPanel.add(refreshPanel);
+        dirPanel.insert(refreshPanel, 1);
         refreshPanel.add(refreshButton);
-        dirPanel.setSpacing(3);
     }
 
     public void setWidth(String width)

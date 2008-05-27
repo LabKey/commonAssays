@@ -204,6 +204,8 @@ public class Search implements EntryPoint
         residueModComposite.clear();
         mzXmlComposite.clearStatus();
         DatabaseRequestKey key = new DatabaseRequestKey("/", dirSequenceRoot, searchEngine);
+        sequenceDbComposite.setLoading(true);
+        sequenceDbComposite.setEnabled(false, false);
         getSearchService().getSequenceDbs(sequenceDbComposite.getSelectedDb(), dirSequenceRoot,searchEngine,
                 new SequenceDbServiceCallback(key));
         buttonPanel.remove(copyButton);
@@ -622,7 +624,7 @@ public class Search implements EntryPoint
     
     private void updateDatabases(GWTSearchServiceResult gwtResult)
     {
-        clearDisplay();
+        sequenceDbComposite.setLoading(false);
         List sequenceDbs = gwtResult.getSequenceDBs();
         List sequenceDbPaths = gwtResult.getSequenceDbPaths();
         sequenceDbComposite.setSequenceDbPathListBoxContents(sequenceDbPaths,
@@ -642,6 +644,7 @@ public class Search implements EntryPoint
             return;
         }
         appendError(syncForm2Xml());
+        sequenceDbComposite.setEnabled(true, true);
     }
 
     private class ProtocolServiceAsyncCallback implements AsyncCallback
@@ -711,7 +714,8 @@ public class Search implements EntryPoint
         {
             ListBox listBox = (ListBox)widget;
             String dbDirectory = listBox.getValue(listBox.getSelectedIndex());
-            loading();
+            sequenceDbComposite.setLoading(true);
+            sequenceDbComposite.setEnabled(true, false);
             inputXmlComposite.removeSequenceDb();
 
             DatabaseRequestKey key = new DatabaseRequestKey(dbDirectory, dirSequenceRoot, searchEngine);
@@ -819,9 +823,10 @@ public class Search implements EntryPoint
     {
         public void onClick(Widget widget)
         {
-            loading();
             databaseCache.clear();
             service.refreshSequenceDbPaths(dirSequenceRoot,new SequenceDbServiceCallback(new DatabaseRequestKey(dirSequenceRoot, dirSequenceRoot, searchEngine)));
+            sequenceDbComposite.setLoading(true);
+            sequenceDbComposite.setEnabled(false, false);
         }
     }
 

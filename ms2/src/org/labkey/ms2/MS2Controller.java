@@ -55,6 +55,7 @@ import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 import org.labkey.ms2.query.*;
 import org.labkey.ms2.search.ProteinSearchWebPart;
+import org.labkey.ms2.scoring.ScoringController;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
@@ -142,17 +143,6 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @Deprecated
-    private NavTree appendRunNavTrail(NavTree root, MS2Run run, String title, PageConfig page, String helpTopic)
-    {
-        appendRootNavTrail(root, null, page, helpTopic);
-        root.addChild(run.getDescription(), getShowRunURL(getContainer(), run.getRun()));
-        if (null != title)
-            root.addChild(title);
-        return root;
-    }
-
-
     private NavTree appendRunNavTrail(NavTree root, MS2Run run, ActionURL runURL, String title, PageConfig page, String helpTopic)
     {
         appendRootNavTrail(root, null, page, helpTopic);
@@ -225,16 +215,14 @@ public class MS2Controller extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            ActionURL currentURL = getViewContext().cloneActionURL();
             DataRegion rgn = new DataRegion();
             rgn.setName(MS2Manager.getDataRegionNameExperimentRuns());
             rgn.setColumns(MS2Manager.getTableInfoExperimentRuns().getColumns("Description, Path, Created, Status, ExperimentRunLSID, ExperimentRunRowId, ProtocolName, PeptideCount, NegativeHitCount"));
             for (int i = 4; i < rgn.getDisplayColumns().size(); i++)
                 rgn.getDisplayColumn(i).setVisible(false);
 
-            currentURL.setAction("showRun");
-            currentURL.deleteParameters();
-            rgn.getDisplayColumn(0).setURL(currentURL.getLocalURIString() + "&run=${Run}");
+            ActionURL url = new ActionURL(ShowRunAction.class, getContainer());
+            rgn.getDisplayColumn(0).setURL(url.getLocalURIString() + "&run=${Run}");
             // TODO: What does this do?
             rgn.setFixedWidthColumns(false);
             rgn.setShowRecordSelectors(true);
@@ -249,11 +237,6 @@ public class MS2Controller extends SpringActionController
             rgn.setButtonBar(bb, DataRegion.MODE_GRID);
 
             ProteinSearchWebPart searchView = new ProteinSearchWebPart(true);
-
-            ActionURL url = getViewContext().cloneActionURL();
-            url.deleteParameters();
-            url.setPageFlow("protein");
-            url.setAction("begin.view");
 
             return new VBox(searchView, gridView);
         }
@@ -315,7 +298,7 @@ public class MS2Controller extends SpringActionController
         bb.add(createCompareMenu(c, view, false));
 
         ActionButton compareScoring = new ActionButton("", CAPTION_SCORING_BUTTON);
-        compareScoring.setScript("return verifySelected(this.form, \"" + ActionURL.toPathString("MS2-Scoring", "compare", c.getPath())+ "\", \"get\", \"runs\")");
+        compareScoring.setScript("return verifySelected(this.form, \"" + new ActionURL(ScoringController.CompareAction.class, c) + "\", \"get\", \"runs\")");
         compareScoring.setActionType(ActionButton.Action.GET);
         compareScoring.setDisplayPermission(ACL.PERM_READ);
         compareScoring.setVisible(false);   // Hidden unless turned on during grid rendering.
@@ -2059,7 +2042,6 @@ public class MS2Controller extends SpringActionController
 
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
-            HttpServletRequest request = getViewContext().getRequest();
             Set<String> fastaIds = DataRegionSelection.getSelected(getViewContext(), true);
             String idList = StringUtils.join(fastaIds, ',');
             Integer[] validIds = Table.executeArray(ProteinManager.getSchema(), "SELECT FastaId FROM " + ProteinManager.getTableInfoFastaAdmin() + " WHERE (FastaId <> 0) AND (Runs IS NULL) AND (FastaId IN (" + idList + "))", new Object[]{}, Integer.class);
@@ -2107,9 +2089,7 @@ public class MS2Controller extends SpringActionController
             rgn.getDisplayColumn("fileType").setWidth("20");
             rgn.getDisplayColumn("insertId").setCaption("ID");
             rgn.getDisplayColumn("insertId").setWidth("5");
-            ActionURL showURL = getViewContext().cloneActionURL();
-            showURL.setAction("showAnnotInsertDetails");
-            showURL.deleteParameters();
+            ActionURL showURL = new ActionURL(ShowAnnotInsertDetailsAction.class, getContainer());
             String detailURL = showURL.getLocalURIString() + "insertId=${InsertId}";
             rgn.getDisplayColumn("insertId").setURL(detailURL);
             rgn.addDisplayColumn(threadControl1);
@@ -2388,9 +2368,112 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class DoProteinSearchAction extends SimpleViewAction<ProteinSearchForm>
+    public class DoProteinSearchAction extends QueryViewAction<ProteinSearchForm, QueryView>
     {
-        public ModelAndView getView(ProteinSearchForm form, BindException errors) throws Exception
+        private static final String PROTEIN_DATA_REGION = "ProteinSearchResults";
+        private static final String POTENTIAL_PROTEIN_DATA_REGION = "PotentialProteins";
+
+        public DoProteinSearchAction()
+        {
+            super(ProteinSearchForm.class);
+        }
+
+        protected QueryView createQueryView(ProteinSearchForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
+        {
+            if (PROTEIN_DATA_REGION.equalsIgnoreCase(dataRegion))
+            {
+                return createProteinGroupSearchView(form);
+            }
+            else if (POTENTIAL_PROTEIN_DATA_REGION.equalsIgnoreCase(dataRegion))
+            {
+                return createProteinSearchView(form);
+            }
+
+            throw new IllegalArgumentException("Unsupported dataRegion name" + dataRegion);
+        }
+
+        private QueryView createProteinSearchView(ProteinSearchForm form)
+            throws ServletException
+        {
+            UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
+            QuerySettings proteinsSettings = schema.getSettings(getViewContext().getActionURL(), POTENTIAL_PROTEIN_DATA_REGION);
+            proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);
+            proteinsSettings.setAllowChooseQuery(false);
+            QueryView proteinsView = new QueryView(schema, proteinsSettings);
+
+            proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
+            proteinsView.setShowCustomizeViewLinkInButtonBar(true);
+            SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
+            Integer[] seqIds = getSeqIds(form);
+            if (seqIds.length <= 500)
+            {
+                sequencesTableInfo.addSeqIdFilter(seqIds);
+            }
+            else
+            {
+                sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
+                if (form.isRestrictProteins())
+                {
+                    sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
+                }
+            }
+            proteinsView.setTitle("Matching Proteins");
+            return proteinsView;
+        }
+
+        private QueryView createProteinGroupSearchView(final ProteinSearchForm form) throws ServletException
+        {
+            UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
+            QuerySettings groupsSettings = new QuerySettings(getViewContext().getActionURL(), PROTEIN_DATA_REGION);
+            groupsSettings.setSchemaName(schema.getSchemaName());
+            groupsSettings.setQueryName(MS2Schema.PROTEIN_GROUPS_FOR_SEARCH_TABLE_NAME);
+            groupsSettings.setAllowChooseQuery(false);
+            QueryView groupsView = new QueryView(schema, groupsSettings)
+            {
+                protected TableInfo createTable()
+                {
+                    ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable(null);
+                    Integer[] seqIds = getSeqIds(form);
+                    if (seqIds.length <= 500)
+                    {
+                        table.addSeqIdFilter(seqIds);
+                    }
+                    else
+                    {
+                        table.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
+                    }
+                    table.addContainerCondition(getContainer(), getUser(), form.isIncludeSubfolders());
+
+                    return table;
+                }
+
+            };
+            groupsView.setShowCustomizeViewLinkInButtonBar(true);
+            groupsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
+
+            groupsView.setTitle("Protein Group Results");
+            return groupsView;
+        }
+
+        private Integer[] getSeqIds(ProteinSearchForm form)
+        {
+            SequencesTableInfo tableInfo = new SequencesTableInfo(null, new MS2Schema(getUser(), getContainer()));
+            tableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
+            if (form.isRestrictProteins())
+            {
+                tableInfo.addContainerCondition(getContainer(), getUser(), true);
+            }
+            try
+            {
+                return Table.executeArray(tableInfo, tableInfo.getColumn("SeqId"), null, null, Integer.class);
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeSQLException(e);
+            }
+        }
+
+        protected ModelAndView getHtmlView(ProteinSearchForm form, BindException errors) throws Exception
         {
             HttpServletRequest request = getViewContext().getRequest();
             SimpleFilter filter = new SimpleFilter();
@@ -2414,10 +2497,8 @@ public class MS2Controller extends SpringActionController
                 HttpView.throwRedirect(url + "&" + filter.toQueryString("ProteinSearchResults"));
             }
 
-            Integer[] seqIds = getSeqIds(form);
-
-            QueryView proteinsView = createProteinSearchView(form, seqIds);
-            QueryView groupsView = createProteinGroupSearchView(form, seqIds);
+            QueryView proteinsView = createInitializedQueryView(form, errors, false, POTENTIAL_PROTEIN_DATA_REGION);
+            QueryView groupsView = createInitializedQueryView(form, errors, false, PROTEIN_DATA_REGION);
 
             ProteinSearchWebPart searchView = new ProteinSearchWebPart(true);
             searchView.getModelBean().setIdentifier(form.getIdentifier());
@@ -2450,120 +2531,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
-    private QueryView createProteinGroupSearchView(final ProteinSearchForm form, final Integer[] seqIds) throws ServletException
-    {
-        UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
-        QuerySettings groupsSettings = new QuerySettings(getViewContext().getActionURL(), "ProteinSearchResults");
-        groupsSettings.setSchemaName(schema.getSchemaName());
-        groupsSettings.setQueryName(MS2Schema.PROTEIN_GROUPS_FOR_SEARCH_TABLE_NAME);
-        groupsSettings.setAllowChooseQuery(false);
-        QueryView groupsView = new QueryView(schema, groupsSettings)
-        {
-            protected TableInfo createTable()
-            {
-                ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable(null);
-                if (seqIds.length <= 500)
-                {
-                    table.addSeqIdFilter(seqIds);
-                }
-                else
-                {
-                    table.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
-                }
-                table.addContainerCondition(getContainer(), getUser(), form.isIncludeSubfolders());
-
-                return table;
-            }
-
-            protected void populateButtonBar(DataView view, ButtonBar bar)
-            {
-                super.populateButtonBar(view, bar);
-
-                ActionURL excelURL = getViewContext().cloneActionURL();
-                excelURL.setAction("exportProteinGroupSearchToExcel.view");
-                ActionButton excelButton = new ActionButton("Export to Excel", excelURL);
-                bar.add(excelButton);
-
-                ActionURL tsvURL = getViewContext().cloneActionURL();
-                tsvURL.setAction("exportProteinGroupSearchToTSV.view");
-                ActionButton tsvButton = new ActionButton("Export to TSV", tsvURL);
-                bar.add(tsvButton);
-            }
-        };
-        groupsView.setShowExportButtons(false);
-        groupsView.setShowCustomizeViewLinkInButtonBar(true);
-        groupsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
-
-        groupsView.setTitle("Protein Group Results");
-        return groupsView;
-    }
-
-    private Integer[] getSeqIds(ProteinSearchForm form)
-    {
-        SequencesTableInfo tableInfo = new SequencesTableInfo(null, new MS2Schema(getUser(), getContainer()));
-        tableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
-        if (form.isRestrictProteins())
-        {
-            tableInfo.addContainerCondition(getContainer(), getUser(), true);
-        }
-        try
-        {
-            return Table.executeArray(tableInfo, tableInfo.getColumn("SeqId"), null, null, Integer.class);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
-    }
-
-    private QueryView createProteinSearchView(ProteinSearchForm form, Integer[] seqIds)
-        throws ServletException
-    {
-        UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
-        QuerySettings proteinsSettings = schema.getSettings(getViewContext().getActionURL(), "PotentialProteins");
-        proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);
-        proteinsSettings.setAllowChooseQuery(false);
-        QueryView proteinsView = new QueryView(schema, proteinsSettings)
-        {
-            protected void populateButtonBar(DataView view, ButtonBar bar)
-            {
-                super.populateButtonBar(view, bar);
-
-                ActionURL excelURL = getViewContext().cloneActionURL();
-                excelURL.setAction("exportProteinSearchToExcel.view");
-                ActionButton excelButton = new ActionButton("Export to Excel", excelURL);
-                bar.add(excelButton);
-
-                ActionURL tsvURL = getViewContext().cloneActionURL();
-                tsvURL.setAction("exportProteinSearchToTSV.view");
-                ActionButton tsvButton = new ActionButton("Export to TSV", tsvURL);
-                bar.add(tsvButton);
-            }
-        };
-
-        proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
-        proteinsView.setShowExportButtons(false);
-        proteinsView.setShowCustomizeViewLinkInButtonBar(true);
-        SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
-        if (seqIds.length <= 500)
-        {
-            sequencesTableInfo.addSeqIdFilter(seqIds);
-        }
-        else
-        {
-            sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch());
-            if (form.isRestrictProteins())
-            {
-                sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
-            }
-        }
-        proteinsView.setTitle("Matching Proteins");
-        return proteinsView;
-    }
-
-
-    public static class ProteinSearchForm
+    public static class ProteinSearchForm extends QueryViewAction.QueryExportForm
     {
         private String _identifier;
         private Float _minimumProbability;
@@ -2630,60 +2598,6 @@ public class MS2Controller extends SpringActionController
         public void setRestrictProteins(boolean restrictProteins)
         {
             _restrictProteins = restrictProteins;
-        }
-    }
-
-
-    @RequiresPermission(ACL.PERM_READ)
-    public class ExportProteinSearchToExcel extends ExportAction<ProteinSearchForm>
-    {
-        public void export(ProteinSearchForm form, HttpServletResponse response, BindException errors) throws Exception
-        {
-            QueryView view = createProteinSearchView(form, getSeqIds(form));
-            ExcelWriter excelWriter = view.getExcelWriter();
-            excelWriter.setFilenamePrefix("ProteinSearchResults");
-            excelWriter.write(response);
-        }
-    }
-
-
-    @RequiresPermission(ACL.PERM_READ)
-    public class ExportProteinSearchToTSVAction extends ExportAction<ProteinSearchForm>
-    {
-        public void export(ProteinSearchForm form, HttpServletResponse response, BindException errors) throws Exception
-        {
-            QueryView view = createProteinSearchView(form, getSeqIds(form));
-            TSVGridWriter tsvWriter = view.getTsvWriter();
-            tsvWriter.setFilenamePrefix("ProteinSearchResults");
-            tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
-            tsvWriter.write(response);
-        }
-    }
-
-
-    @RequiresPermission(ACL.PERM_READ)
-    public class ExportProteinGroupSearchToExcelAction extends ExportAction<ProteinSearchForm>
-    {
-        public void export(ProteinSearchForm form, HttpServletResponse response, BindException errors) throws Exception
-        {
-            QueryView view = createProteinGroupSearchView(form, getSeqIds(form));
-            ExcelWriter excelWriter = view.getExcelWriter();
-            excelWriter.setFilenamePrefix("ProteinGroupSearchResults");
-            excelWriter.write(response);
-        }
-    }
-
-
-    @RequiresPermission(ACL.PERM_READ)
-    public class ExportProteinGroupSearchToTSVAction extends ExportAction<ProteinSearchForm>
-    {
-        public void export(ProteinSearchForm form, HttpServletResponse response, BindException errors) throws Exception
-        {
-            QueryView view = createProteinGroupSearchView(form, getSeqIds(form));
-            TSVGridWriter tsvWriter = view.getTsvWriter();
-            tsvWriter.setFilenamePrefix("ProteinGroupSearchResults");
-            tsvWriter.setColumnHeaderType(TSVGridWriter.ColumnHeaderType.caption);
-            tsvWriter.write(response);
         }
     }
 

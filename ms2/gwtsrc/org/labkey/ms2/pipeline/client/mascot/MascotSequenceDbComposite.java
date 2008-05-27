@@ -167,8 +167,7 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
                 instance.remove(sequenceDbLabel);
                 instance.remove(sequenceDbHidden);
                 instance.remove(sequenceDbPathHidden);
-                if(sequenceDbPathListBox.getItemCount() > 0)
-                    instance.insert(dirPanel, 0);
+                instance.insert(dirPanel, 0);
                 instance.add(sequenceDbListBox);
             }
             labelIndex = instance.getWidgetIndex(taxonomyReadOnly);
