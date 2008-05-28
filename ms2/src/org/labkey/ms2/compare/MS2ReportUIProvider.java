@@ -41,4 +41,12 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
 
         designers.put(SpectraCountRReport.TYPE, chartURL.getLocalURIString());
     }
+
+    public String getReportIcon(ViewContext context, String reportType)
+    {
+        if (SpectraCountRReport.TYPE.equals(reportType))
+            return context.getContextPath() + "/reports/r.gif";
+        return super.getReportIcon(context, reportType);
+    }
+
 }
