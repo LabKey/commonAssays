@@ -125,7 +125,10 @@ public class FCSHeader
                     break;
                 int ichEnd = fullText.indexOf(chDelimiter, ichMid + 1);
                 if (ichEnd < 0)
+                {
                     assert false;
+                    ichEnd = fullText.length();
+                }
                 String strKey = fullText.substring(ichStart + 1, ichMid);
                 String strValue = fullText.substring(ichMid + 1, ichEnd);
                 keywords.put(strKey, strValue.trim());
