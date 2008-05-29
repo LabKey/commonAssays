@@ -20,9 +20,11 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.peptideview.MS2RunViewType" %>
+<%@ page import="org.labkey.api.security.User" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.FilterHeaderBean bean = ((JspView<MS2Controller.FilterHeaderBean>)HttpView.currentView()).getModelBean();
+    User user = HttpView.currentContext().getUser();
 %>
 <form method="post" action="<%=h(bean.applyViewURL)%>">
     <table class="dataRegion" border="0">
@@ -30,8 +32,8 @@
             <td valign=bottom><%=bean.applyView%></td>
             <td valign=bottom><input type="image" value="Go" src="<%=PageFlowUtil.buttonSrc("Go")%>"></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td valign=bottom><a href="<%=h(bean.saveViewURL)%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Save View")%>"></a></td>
-            <td valign=bottom><a href="<%=h(bean.manageViewsURL)%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Manage Views")%>"></a></td><%
+            <td valign=bottom><% if (!user.isGuest()) { %><a href="<%=h(bean.saveViewURL)%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Save View")%>"></a><% } %></td>
+            <td valign=bottom><% if (!user.isGuest()) { %><a href="<%=h(bean.manageViewsURL)%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Manage Views")%>"></a><% } %></td><%
             if (bean.currentViewType.supportsPeptideColumnPicker())
             { %>
             <td valign=bottom><a href="<%=h(bean.pickPeptideColumnsURL)%>" id="pickPeptideColumns"><img border=0 src="<%=PageFlowUtil.buttonSrc("Pick Peptide Columns")%>"></a></td><%

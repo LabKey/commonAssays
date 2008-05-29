@@ -83,6 +83,9 @@ public class MS2Controller extends SpringActionController
     private static DefaultActionResolver _actionResolver = new DefaultActionResolver(MS2Controller.class);
     private static Logger _log = Logger.getLogger(MS2Controller.class);
     private static final String MS2_VIEWS_CATEGORY = "MS2Views";
+    private static final String MS2_DEFAULT_VIEW_CATEGORY = "MS2DefaultView";
+    private static final String DEFAULT_VIEW_NAME = "DefaultViewName";
+    private static final String LAST_VIEW = "LastView";
     private static final int MAX_INSERTIONS_DISPLAY_ROWS = 1000; // Limit annotation table insertions to 1000 rows
     private static final String SHARED_VIEW_SUFFIX = " (Shared)";
     static final String CAPTION_SCORING_BUTTON = "Compare Scoring";
@@ -353,6 +356,37 @@ public class MS2Controller extends SpringActionController
                 return null;
 
             ActionURL currentURL = getViewContext().getActionURL();
+
+            // If the user hasn't customized the view at all, show them their default view
+            if (currentURL.getParameters().length == 1)
+            {
+                Map<String, String> props = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY, true);
+                String params;
+                // Check if they've explicitly requested a view by name as their default
+                if (props.get(MS2Controller.DEFAULT_VIEW_NAME) != null)
+                {
+                    Map<String, String> savedViews = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_VIEWS_CATEGORY, true);
+                    params = savedViews.get(props.get(MS2Controller.DEFAULT_VIEW_NAME));
+                }
+                else
+                {
+                    // Grab the last URL that they used
+                    params = props.get(MS2Controller.LAST_VIEW);
+                }
+
+                if (params != null && params.trim().length() > 0)
+                {
+                    HttpView.throwRedirect(currentURL + "&" + params);
+                }
+            }
+            else if (!getUser().isGuest())
+            {
+                PropertyManager.PropertyMap props = PropertyManager.getWritableProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY, true);
+                ActionURL newURL = currentURL.clone().deleteParameter("run");
+                props.put(MS2Controller.LAST_VIEW, newURL.getRawQuery());
+                PropertyManager.saveProperties(props);
+            }
+
             MS2Run run = MS2Manager.getRun(form.run);
 
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
@@ -437,9 +471,9 @@ public class MS2Controller extends SpringActionController
             FilterHeaderBean bean = getModelBean();
 
             bean.run = run;
-            bean.applyViewURL = clearFilter(currentURL).setAction("applyRunView");
-            bean.applyView = renderViewSelect(0, true, ACL.PERM_READ, true);
-            bean.saveViewURL = currentURL.clone().setAction("saveView");
+            bean.applyViewURL = clearFilter(currentURL).setAction(ApplyRunViewAction.class);
+            bean.applyView = renderViewSelect(ACL.PERM_READ, true);
+            bean.saveViewURL = currentURL.clone().setAction(SaveViewAction.class);
             bean.manageViewsURL = getManageViewsURL(run, currentURL);
             bean.pickPeptideColumnsURL = getPickPeptideColumnsURL(run, form.getColumns(), currentURL);
             bean.pickProteinColumnsURL = getPickProteinColumnsURL(run, form.getProteinColumns(), currentURL);
@@ -503,10 +537,12 @@ public class MS2Controller extends SpringActionController
         return (null != s ? s : def);
     }
 
-
-    private Map<String, Object> getViewMap(boolean includeUser, boolean includeShared, boolean mapValue)
+    /**
+     * @return map from view name to view URL parameters
+     */
+    private Map<String, String> getViewMap(boolean includeUser, boolean includeShared)
     {
-        Map<String, Object> m = new HashMap<String, Object>();
+        Map<String, String> m = new HashMap<String, String>();
 
         if (includeUser)
         {
@@ -514,10 +550,7 @@ public class MS2Controller extends SpringActionController
 
             for (Map.Entry<String, String> entry : properties.entrySet())
             {
-                if (mapValue)
-                    m.put(entry.getKey(), entry.getValue());
-                else
-                    m.put(entry.getKey(), entry.getKey());
+                m.put(entry.getKey(), entry.getValue());
             }
         }
 
@@ -531,10 +564,7 @@ public class MS2Controller extends SpringActionController
                 if (includeUser)
                     name += SHARED_VIEW_SUFFIX;
 
-                if (mapValue)
-                    m.put(name, entry.getValue());
-                else
-                    m.put(name, entry.getKey());
+                m.put(name, entry.getValue());
             }
         }
 
@@ -568,27 +598,19 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    // Render current user's MS2Views in a list box with a submit button beside.  Size == 0 is a dropdown, Size > 0 is a
-    // multi-select normal list box.  postValue determines whether to post the value or the name of selected view(s)
-    //
-    // Caller is responsible for wrapping this in a <form> and (if desired) a <table>
-    private StringBuilder renderViewSelect(int height, boolean postValue, int sharedPerm, boolean selectCurrent)
+    /**
+     * Render current user's MS2Views in a drop down box with a submit button beside.
+     * Caller is responsible for wrapping this in a <form> and (if desired) a <table>
+     */
+    private StringBuilder renderViewSelect(int sharedPerm, boolean selectCurrent)
     {
-        Map<String, Object> m = getViewMap(true, getContainer().hasPermission(getUser(), sharedPerm), postValue);
+        Map<String, String> m = getViewMap(true, getContainer().hasPermission(getUser(), sharedPerm));
 
-        StringBuilder viewSelect = new StringBuilder("<select id=\"views\" name=\"viewParams\" style=\"width:");
-
-        if (height > 0)
-        {
-            viewSelect.append("400\" size=\"");
-            viewSelect.append(height);
-            viewSelect.append("\" multiple>\n");
-        }
-        else
-        {
-            viewSelect.append("200\">");
-            viewSelect.append("\n<option value=\"\">Choose A View</option>\n");
-        }
+        StringBuilder viewSelect = new StringBuilder("<select id=\"views\" name=\"viewParams\" style=\"width:200\">");
+        // The defaultView parameter isn't used directly - it's just something on the URL so that it's clear
+        // that the user has explicitly requested the standard view and therefore prevent us from
+        // bouncing to the user's defined default
+        viewSelect.append("\n<option value=\"doNotApplyDefaultView=yes\">Choose A View</option>\n");
 
         String currentViewParams = getViewContext().cloneActionURL().deleteParameter("run").getRawQuery();
 
@@ -597,7 +619,7 @@ public class MS2Controller extends SpringActionController
 
         for (String name : names)
         {
-            String viewParams = (String) m.get(name);
+            String viewParams = m.get(name);
 
             viewSelect.append("<option value=\"");
             viewSelect.append(PageFlowUtil.filter(viewParams));
@@ -1093,18 +1115,55 @@ public class MS2Controller extends SpringActionController
         return url;
     }
 
+    public static class ManageViewsForm extends RunForm
+    {
+        private String _defaultViewName;
+        private String[] _viewsToDelete;
+        private String _defaultViewType;
 
+        public String getDefaultViewType()
+        {
+            return _defaultViewType;
+        }
+
+        public void setDefaultViewType(String defaultViewType)
+        {
+            _defaultViewType = defaultViewType;
+        }
+
+        public String getDefaultViewName()
+        {
+            return _defaultViewName;
+        }
+
+        public void setDefaultViewName(String defaultViewName)
+        {
+            _defaultViewName = defaultViewName;
+        }
+
+        public String[] getViewsToDelete()
+        {
+            return _viewsToDelete;
+        }
+
+        public void setViewsToDelete(String[] viewsToDelete)
+        {
+            _viewsToDelete = viewsToDelete;
+        }
+    }
+
+    @RequiresLogin
     @RequiresPermission(ACL.PERM_READ)
-    public class ManageViewsAction extends FormViewAction<RunForm>
+    public class ManageViewsAction extends FormViewAction<ManageViewsForm>
     {
         private MS2Run _run;
         private ActionURL _returnURL;
 
-        public void validateCommand(RunForm form, Errors errors)
+        public void validateCommand(ManageViewsForm form, Errors errors)
         {
         }
 
-        public ModelAndView getView(RunForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(ManageViewsForm form, boolean reshow, BindException errors) throws Exception
         {
             _run = MS2Manager.getRun(form.getRun());
             if (null == _run)
@@ -1114,10 +1173,21 @@ public class MS2Controller extends SpringActionController
 
             _returnURL = form.getReturnActionURL();
 
-            ManageViewsBean bean = new ManageViewsBean();
-            bean.selectHTML = renderViewSelect(10, false, ACL.PERM_DELETE, false);
-            bean.returnURL = _returnURL;
+            DefaultViewType defaultViewType;
+            String viewName;
+            Map<String, String> props = PropertyManager.getProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY, true);
+            if (props.get(MS2Controller.DEFAULT_VIEW_NAME) == null)
+            {
+                defaultViewType = DefaultViewType.LastViewed;
+                viewName = null;
+            }
+            else
+            {
+                defaultViewType = DefaultViewType.Manual;
+                viewName = props.get(MS2Controller.DEFAULT_VIEW_NAME);
+            }
 
+            ManageViewsBean bean = new ManageViewsBean(_returnURL, defaultViewType, getViewMap(true, getContainer().hasPermission(getUser(), ACL.PERM_DELETE)), viewName);
             return new JspView<ManageViewsBean>("/org/labkey/ms2/manageViews.jsp", bean);
         }
 
@@ -1126,9 +1196,9 @@ public class MS2Controller extends SpringActionController
             return appendRunNavTrail(root, _run, _returnURL, "Manage Views", getPageConfig(), "viewRun");
         }
 
-        public boolean handlePost(RunForm runForm, BindException errors) throws Exception
+        public boolean handlePost(ManageViewsForm form, BindException errors) throws Exception
         {
-            List<String> viewNames = getViewContext().getList("viewParams");
+            String[] viewNames = form.getViewsToDelete();
 
             if (null != viewNames)
             {
@@ -1157,22 +1227,74 @@ public class MS2Controller extends SpringActionController
                 }
             }
 
-            return false;  // Always reshow -- "Done" button returns user to run
+            DefaultViewType viewType = DefaultViewType.valueOf(form.getDefaultViewType());
+
+            PropertyManager.PropertyMap m = PropertyManager.getWritableProperties(getUser().getUserId(), ContainerManager.getRoot().getId(), MS2_DEFAULT_VIEW_CATEGORY, true);
+            m.put(DEFAULT_VIEW_NAME, viewType == DefaultViewType.Manual ? form.getDefaultViewName() : null);
+            PropertyManager.saveProperties(m);
+
+            return true;
         }
 
-        public ActionURL getSuccessURL(RunForm runForm)
+        public ActionURL getSuccessURL(ManageViewsForm runForm)
         {
-            return null;
+            return runForm.getReturnActionURL();
         }
     }
 
+    public enum DefaultViewType
+    {
+        LastViewed("Remember the last MS2 run view that I looked at and use it the next time I look at a different MS2 run"),
+        Manual("Use the selected default below when I look at a MS2 run");
+
+        private final String _description;
+
+        private DefaultViewType(String description)
+        {
+            _description = description;
+        }
+
+        public String getDescription()
+        {
+            return _description;
+        }
+    }
 
     public static class ManageViewsBean
     {
-        public ActionURL returnURL;
-        public StringBuilder selectHTML;
-    }
+        private ActionURL _returnURL;
+        private DefaultViewType _defaultViewType;
+        private Map<String, String> _views;
+        private final String _viewName;
 
+        public ManageViewsBean(ActionURL returnURL, DefaultViewType defaultViewType, Map<String, String> views, String viewName)
+        {
+            _returnURL = returnURL;
+            _defaultViewType = defaultViewType;
+            _views = views;
+            _viewName = viewName;
+        }
+
+        public ActionURL getReturnURL()
+        {
+            return _returnURL;
+        }
+
+        public DefaultViewType getDefaultViewType()
+        {
+            return _defaultViewType;
+        }
+
+        public Map<String, String> getViews()
+        {
+            return _views;
+        }
+
+        public String getViewName()
+        {
+            return _viewName;
+        }
+    }
 
     public static class PickViewBean
     {
@@ -1471,7 +1593,7 @@ public class MS2Controller extends SpringActionController
         nextURL.deleteFilterParameters("button.y");
 
         bean.nextURL = nextURL;
-        bean.select = renderViewSelect(0, true, ACL.PERM_READ, false);
+        bean.select = renderViewSelect(ACL.PERM_READ, false);
         bean.extraOptionsView = embeddedView;
         bean.viewInstructions = viewInstructions;
         bean.runList = runListId;
@@ -3333,7 +3455,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
+    @RequiresLogin
     @RequiresPermission(ACL.PERM_READ)
     public class SaveViewAction extends FormViewAction<MS2ViewForm>
     {

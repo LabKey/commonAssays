@@ -19,6 +19,7 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="java.util.TreeSet" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     HttpView<MS2Controller.ManageViewsBean> me = (HttpView<MS2Controller.ManageViewsBean>) HttpView.currentView();
@@ -26,20 +27,54 @@
 %>
 <table class="dataRegion">
     <tr>
-        <td>Select one or more views and press Delete</td>
-    </tr>
-    <tr>
         <td>
-            <form method="post" action="">
+            <form method="post" name="manageViewsForm" action="">
+                <p>
+                    <input type=hidden value="<%=h(bean.getReturnURL())%>">
+                    <% for (MS2Controller.DefaultViewType defaultViewType : MS2Controller.DefaultViewType.values())
+                    { %>
+                        <input onchange="updateForm();" type="radio" <% if (bean.getDefaultViewType() == defaultViewType) { %>checked<% } %> name="defaultViewType" value="<%= PageFlowUtil.filter(defaultViewType.toString()) %>" id="defaultViewType<%= PageFlowUtil.filter(defaultViewType.toString()) %>"/> <%= PageFlowUtil.filter(defaultViewType.getDescription()) %><br/>
+                    <% } %>
+                </p>
                 <table class="dataRegion" border="0">
                     <tr>
-                        <td><input type=hidden value="<%=h(bean.returnURL)%>"><%=bean.selectHTML%></td>
+                        <td><strong>Default</strong></td><td><strong>Delete</strong></td><td><strong>View Name</strong></td>
                     </tr>
+                    <%
+                    // Use TreeSet to sort by name
+                    TreeSet<String> names = new TreeSet<String>(bean.getViews().keySet());
+                    for (String name : names)
+                    { %>
+                        <tr>
+                            <td>
+                                <input <% if (name.equals(bean.getViewName())) { %>checked <% } %> type="radio" name="defaultViewName" value="<%= PageFlowUtil.filter(name) %>" />
+                            </td>
+                            <td>
+                                <input type="checkbox" name="viewsToDelete" value="<%= PageFlowUtil.filter(name) %>" />
+                            </td>
+                            <td>
+                                <%= PageFlowUtil.filter(name) %>
+                            </td>
+                        </tr>
+                    <% } %>
                     <tr>
-                        <td align=center><%=buttonImg("Delete")%> <%=PageFlowUtil.buttonLink("Done", bean.returnURL)%></td>
+                        <td colspan="3"><%=buttonImg("OK")%> <%=PageFlowUtil.buttonLink("Cancel", bean.getReturnURL())%></td>
                     </tr>
                 </table>
             </form>
         </td>
     </tr>
 </table>
+
+<script type="text/javascript">
+    function updateForm()
+    {
+        var radioElements = document.getElementsByName("defaultViewName");
+        for (var i = 0; i < radioElements.length; i++)
+        {
+            radioElements[i].disabled = !document.getElementById('defaultViewType<%= MS2Controller.DefaultViewType.Manual %>').checked;
+        }
+    }
+
+    updateForm();
+</script>
