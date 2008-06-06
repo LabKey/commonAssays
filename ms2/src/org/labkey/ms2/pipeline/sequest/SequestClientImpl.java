@@ -301,7 +301,7 @@ public class SequestClientImpl implements SearchClient
                       String sequestParamFile,
                       String mzXmlFile,
                       String resultFile,
-                      Collection<String> mzXmlCommand)
+                      Collection<String> xmlCommand)
     {
         errorCode = 0;
         errorString = "";
@@ -323,7 +323,7 @@ public class SequestClientImpl implements SearchClient
 
         // submit job to sequest server
         _instanceLogger.info("Submitting search to Sequest server (taskId=" + taskId + ").");
-        if (!submitFile(databaseDir, taskId, sequestParamFile, mzXmlFile, mzXmlCommand))
+        if (!submitFile(databaseDir, taskId, sequestParamFile, mzXmlFile, xmlCommand))
         {
             _instanceLogger.info("Failed to submit search to Sequest server.");
             _instanceLogger.info("Retreiving remote log file.");
@@ -394,7 +394,8 @@ public class SequestClientImpl implements SearchClient
         return returnCode;
     }
 
-    protected boolean submitFile(String databaseDir, String taskId, String seqParamPath, String mzXmlPath,Collection<String> mzXmlCommand)
+    protected boolean submitFile(String databaseDir, String taskId, String seqParamPath, String mzXmlPath,
+                                 Collection<String> xmlCommand)
     {
         errorCode = 0;
         errorString = "";
@@ -404,8 +405,8 @@ public class SequestClientImpl implements SearchClient
              "".equals(seqParamPath) ||
              "".equals(mzXmlPath))
             return false;
-
-        int partCount = 4 + mzXmlCommand.size();
+        xmlCommand.remove("");
+        int partCount = 4 + xmlCommand.size();
         int count = 0;
         Part[] parts = new Part[partCount];
 
@@ -434,9 +435,28 @@ public class SequestClientImpl implements SearchClient
             return false;
         }
 
-        for(String command :mzXmlCommand)
+        for(String command :xmlCommand)
         {
-            parts[count++] = new StringPart(command.substring(1,2),command.substring(2));
+            if(command.equals("-pI"))
+            {
+                parts[count++] = new StringPart("pI","1");
+            }
+            else if(command.equals("-all"))
+            {
+                parts[count++] = new StringPart("all","1");
+            }
+            else if(command.equals("-M"))
+            {
+                parts[count++] = new StringPart("M","1");
+            }
+            else if(command.equals("-h"))
+            {
+                parts[count++] = new StringPart("h","1");
+            }
+            else
+            {
+                parts[count++] = new StringPart(command.substring(1,2),command.substring(2));
+            }
         }
 
         StringBuffer urlSB = new StringBuffer(_url);

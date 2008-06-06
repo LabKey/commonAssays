@@ -140,7 +140,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
         }
         setDefault(defaultDb);
     }
-    
+
     public boolean setDefault(String defaultDb)
     {
         String path = "/";
@@ -187,12 +187,14 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
 
     public void selectDefaultDb(String name)
     {
+        setFoundDefaultDb(false);
+        if(name == null|| name.length() == 0) return;
         int dbItemsCount = sequenceDbListBox.getItemCount();
         if(name.indexOf("/") == 0)
         {
             name = name.substring(1);
         }
-        
+
         for(int i = 0; i < dbItemsCount; i++)
         {
             if(sequenceDbListBox.getValue(i).equals(name))
@@ -218,7 +220,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
     {
         int index = sequenceDbListBox.getSelectedIndex();
         if(index == -1) return "";
-        return sequenceDbListBox.getValue(index);    
+        return sequenceDbListBox.getValue(index);
     }
 
     public void addChangeListener(ChangeListener listener)

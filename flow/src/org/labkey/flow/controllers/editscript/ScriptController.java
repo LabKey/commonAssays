@@ -31,6 +31,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.ACL;
+import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.UnexpectedException;
@@ -343,6 +344,7 @@ public class ScriptController extends BaseFlowController
         catch (FlowException e)
         {
             addError(e.getMessage());
+            ExceptionUtil.logExceptionToMothership(form.getRequest(), e);
             return null;
         }
     }
@@ -549,6 +551,7 @@ public class ScriptController extends BaseFlowController
             catch (Exception e)
             {
                 addError("Exception reading run:" + e);
+                ExceptionUtil.logExceptionToMothership(form.getRequest(), e);
             }
         }
         return handleWorkspaceUpload(form.workspaceFile);

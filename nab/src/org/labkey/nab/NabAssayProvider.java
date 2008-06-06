@@ -22,9 +22,6 @@ import org.labkey.api.study.TimepointType;
 import org.labkey.api.study.query.RunDataQueryView;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
-import org.labkey.api.exp.list.ListDefinition;
-import org.labkey.api.exp.list.ListService;
-import org.labkey.api.exp.list.ListItem;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
@@ -92,39 +89,6 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         });
     }
 
-    private ListDefinition createSimpleList(Container lookupContainer, User user, String listName, String displayColumn,
-                                            String displayColumnDescription, String... values)
-    {
-        Map<String, ListDefinition> lists = ListService.get().getLists(lookupContainer);
-        ListDefinition sampleMethodList = lists.get(listName);
-        if (sampleMethodList == null)
-        {
-            sampleMethodList = ListService.get().createList(lookupContainer, listName);
-            DomainProperty nameProperty = addProperty(sampleMethodList.getDomain(), displayColumn, PropertyType.STRING);
-            nameProperty.setPropertyURI(sampleMethodList.getDomain().getTypeURI() + "#" + displayColumn);
-            sampleMethodList.setKeyName(nameProperty.getName());
-            sampleMethodList.setKeyType(ListDefinition.KeyType.Varchar);
-            sampleMethodList.setDescription(displayColumnDescription);
-            sampleMethodList.setTitleColumn(displayColumn);
-            try
-            {
-                sampleMethodList.save(user);
-                for (String value : values)
-                {
-                    ListItem concentration = sampleMethodList.createListItem();
-                    concentration.setKey(value);
-                    concentration.setProperty(nameProperty, value);
-                    concentration.save(user);
-                }
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
-        return sampleMethodList;
-    }
-
     protected Domain createRunDomain(Container c, User user)
     {
         Domain runDomain = super.createRunDomain(c, user);
@@ -154,10 +118,8 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         addProperty(runDomain, LOCK_AXES_PROPERTY_NAME, LOCK_AXES_PROPERTY_CAPTION, PropertyType.BOOLEAN);
 
         Container lookupContainer = c.getProject();
-        ListDefinition curveFitMethodList = createSimpleList(lookupContainer, user, "NabCurveFitMethod", "FitMethod",
-                "Method of curve fitting that will be applied to the neutralization data for each sample.", "Four Parameter", "Five Parameter");
         DomainProperty method = addProperty(runDomain, CURVE_FIT_METHOD_PROPERTY_NAME, CURVE_FIT_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
-        method.setLookup(new Lookup(lookupContainer, "lists", curveFitMethodList.getName()));
+        method.setLookup(new Lookup(lookupContainer, NabSchema.SCHEMA_NAME, NabSchema.CURVE_FIT_METHOD_TABLE_NAME));
         method.setRequired(true);
         return runDomain;
     }
@@ -171,8 +133,6 @@ public class NabAssayProvider extends PlateBasedAssayProvider
     {
         Domain sampleWellGroupDomain = super.createSampleWellGroupDomain(c, user);
         Container lookupContainer = c.getProject();
-        ListDefinition sampleMethodList = createSimpleList(lookupContainer, user, "NabSamplePreparationMethods", "Method",
-                "Method of preparation for a sample in a NAb well group.", SampleInfo.Method.Dilution.toString(), SampleInfo.Method.Concentration.toString());
         addProperty(sampleWellGroupDomain, SPECIMENID_PROPERTY_NAME, SPECIMENID_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(sampleWellGroupDomain, PARTICIPANTID_PROPERTY_NAME, PARTICIPANTID_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(sampleWellGroupDomain, VISITID_PROPERTY_NAME, VISITID_PROPERTY_CAPTION, PropertyType.DOUBLE);
@@ -181,7 +141,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         addProperty(sampleWellGroupDomain, SAMPLE_INITIAL_DILUTION_PROPERTY_NAME, SAMPLE_INITIAL_DILUTION_PROPERTY_CAPTION, PropertyType.DOUBLE).setRequired(true);
         addProperty(sampleWellGroupDomain, SAMPLE_DILUTION_FACTOR_PROPERTY_NAME, SAMPLE_DILUTION_FACTOR_PROPERTY_CAPTION, PropertyType.DOUBLE).setRequired(true);
         DomainProperty method = addProperty(sampleWellGroupDomain, SAMPLE_METHOD_PROPERTY_NAME, SAMPLE_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
-        method.setLookup(new Lookup(lookupContainer, "lists", sampleMethodList.getName()));
+        method.setLookup(new Lookup(lookupContainer, NabSchema.SCHEMA_NAME, NabSchema.SAMPLE_PREPARATION_METHOD_TABLE_NAME));
         method.setRequired(true);
         return sampleWellGroupDomain;
     }

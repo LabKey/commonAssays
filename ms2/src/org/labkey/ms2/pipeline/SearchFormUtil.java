@@ -80,6 +80,7 @@ public class SearchFormUtil
                 new CutSite[]{new CutSite( new char[]{'P'}, new char[]{'-'},"[P]|[X]", false)}));
         tppEnzymeList.add(new Enzyme("Staph protease", new String[]{"staph_protease"},
                 new CutSite[]{new CutSite(new char[]{'E'}, new char[]{'-'},"[E]|[X]", false)}));
+        //Sequest cannot handle mixed sence
 //        tppEnzymeList.add(new Enzyme("TCA", new String[]{"tca"},
 //                new CutSite[]{new CutSite( new char[]{'K','R'}, new char[]{'P'},"[KR]|{P}", false),
 //                              new CutSite( new char[]{'Y','W','F','M'}, new char[]{'P'},"[YWFM]|{P}", false),
@@ -93,6 +94,7 @@ public class SearchFormUtil
                 new CutSite[]{new CutSite(new char[]{'K'}, new char[]{'P'},"[K]|{P}", false)}));
         tppEnzymeList.add(new Enzyme("TrypsinR", new String[]{"trypsin_r"},
                 new CutSite[]{new CutSite(new char[]{'R'}, new char[]{'P'},"[R]|{P}", false)}));
+        // Not currently defined correctly in TPP; no cut is at n-term DE not c-term P
 //        tppEnzymeList.add(new Enzyme("Thermolysin", new String[]{"thermolysin"},
 //                new CutSite[]{new CutSite(new char[]{'A','L','I','V','F','M'}, new char[]{'P'},"[ALIVFM]|{P}", true)}));
         return tppEnzymeList;
@@ -161,12 +163,13 @@ public class SearchFormUtil
             mod1Map.put("Carbamidomethyl (K)", "57.021464@K");
             mod1Map.put("ICAT-D:2H(8) (C)", "8.0502@C");
             mod1Map.put("ICAT-C:13C(9) (C)", "9.0302@C");
-            mod1Map.put("iTRAQ (N-term)", "144.102063@[");
-            mod1Map.put("iTRAQ (K)", "144.102063@K");
+            mod1Map.put("iTRAQ (N-term,K)", "144.102063@[,144.102063@K");
             mod1Map.put("Label:13C(6) (L)", "6.020129@L");
             mod1Map.put("Label:13C(6)15N(2) (K)", "8.014199@K");
             mod1Map.put("Label:13C(6) (R)", "6.020129@R");
             mod1Map.put("Label:2H(4) (K)", "4.025107@K");
+            mod1Map.put("Nic-h4", "-4.026655@[,-4.026655@K");
+            mod1Map.put("Nic-d4", "4.026655@[,4.026655@K");
         }
         return mod1Map;
     }
@@ -180,10 +183,11 @@ public class SearchFormUtil
             mod0Map.put("Carboxymethyl (C)", "58.005479@C");
             mod0Map.put("ICAT-D (C)","442.224991@C");
             mod0Map.put("ICAT-C (C)", "227.126991@C");
-            mod0Map.put("iTRAQ (N-term)", "144.102063@[");
-            mod0Map.put("iTRAQ (K)", "144.102063@K");
+            mod0Map.put("iTRAQ (N-term,K)", "144.102063@[,144.102063@K");
             mod0Map.put("Propionamide (C)", "71.037114@C");
             mod0Map.put("Pyridylethyl (C)", "105.057849@C");
+            mod0Map.put("Nic-h4", "105.021464@[,105.021464@K");
+            mod0Map.put("Nic-d4", "109.048119@[,109.048119@K");
         }
         return mod0Map;
     }

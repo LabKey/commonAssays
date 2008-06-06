@@ -41,9 +41,13 @@
           limits the peaks used by this parameter, and the dynamic range parameter.</note>
   <note type="input" label="spectrum, use noise suppression">no</note>
     <note>Only for high resolution mass spectrometers.</note>
-  <note type="input" label="spectrum, minimum parent m+h">500.0</note>
+  <note type="input" label="spectrum, minimum parent m+h"></note>
+    <note>Default = 600</note>
+    <note type="input" label="spectrum, maximum parent m+h"></note>
+    <note>Default = 4200</note>
   <note type="input" label="spectrum, minimum fragment mz">140.0</note>
-  <note type="input" label="spectrum, minimum peaks">10</note>
+  <note type="input" label="spectrum, minimum peaks"></note>
+    <note>Default = 5</note>
   <note type="input" label="spectrum, threads">1</note>
   <note type="input" label="pipeline, load spectra">no</note>
 
@@ -233,15 +237,32 @@
 	<note type="input" label="sequest, maximum parent m+h">3500.0</note>
 		<note> Used to create digest_mass_range</note>
 
-	<note>MzXML2Search args</note>
+	<note>MzXML2Search args(-B is set with spectrum, minimum parent m+h, -T is set with spectrum, maximum parent m+h, -P is set with spectrum, minimum peaks</note>
   	
    
-	<note type="input" label="MzXML2Search, first scan"></note>
+	<note type="input" label="mzxml2search, first scan"></note>
 		<note> Will ignore all scans # below the entered value</note>
-	<note type="input" label="MzXML2Search, last scan"></note>
+	<note type="input" label="mzxml2search, last scan"></note>
 		<note> Will ignore all scans # above the entered value</note>
-	<note type="input" label="MzXML2Search, charge">1,3</note>
-        <note>Specifies which charge of the precursor ions is to be included (e.g. 1,3 includes charge states 1 thru 3).</note>
+	<note type="input" label="mzxml2search, charge"></note>
+        <note><!---C<n1>[-<n2>]where n1 is an int specifying the precursor charge state to analyze and n2 specifies an optional range of charges to analyze.(e.g. 1,3 = -C1-3)--> </note>
+    <note type="input" label="mzxml2search, charge defaults"></note>
+        <note><!---c<n1>[-<n2>]same as C, only charges act as defaults instead of overriding precursor charge values specified in the input file.(e.g. 1,3 = -c1-3)--></note>
+    <note type="input" label="mzxml2search, hydrogen mass">0</note>
+        <note>1 = -h (1 = true, 0 = false)use hydrogen mass for charge ion (default is proton mass)</note>
 
+    <note>Out2XML args (-E enzyme, -m and -a  are added by CPAS)</note>
+
+    <note type="input" label="out2xml, top hits">1</note>
+		<note> # of top hits to report [1,10]</note>
+    <note type="input" label="out2xml, maldi mode">0</note>
+		<note>true = -M </note>
+    <note type="input" label="out2xml, all">0</note>
+		<note>1 = -all(1=true,0=false): output all peptides don't filter out X containing peptides.</note>
+    <note type="input" label="out2xml, pI">0</note>
+		<note>1 = -pI(1=true,0=false): compute and report peptide pI's.</note>
+    <note type="input" label="out2xml, all">0</note>
+		<note>1 = -all(1=true,0=false): output all peptides, don't filter out X containing peptides</note>
+    out2xml, all
 
 </bioml>

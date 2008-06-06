@@ -495,6 +495,7 @@ public class MS2PipelineManager
                     name.endsWith(".idx") ||
                     name.endsWith(".dgt") ||
                     name.endsWith(".log") ||
+                    name.endsWith(".hdr") ||
                     name.endsWith(".hash"));
         }
     }

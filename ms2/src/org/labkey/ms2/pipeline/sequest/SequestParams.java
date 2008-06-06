@@ -653,23 +653,6 @@ but bioWorks browser default setting is 1.0. so the xtandem value will be passed
             false
         ).setInputXmlLabels().setInputXmlLabels("residue, modification mass"));
 
-
-
-//        _params.add(new SequestParam(
-//                        580,                                                       //sortOrder
-//                        "0.0000",                                            //The value of the property
-//                        "add_J_user_amino_acid",                                // the sequest.params property name
-//                        "added to J",       // the sequest.params comment
-//                        ConverterFactory.getSequestBasicConverter()                      //converts the instance to a sequest.params line
-//                ).setInputXmlLabels( ).setInputXmlLabels("residue, modification mass"));
-//
-//        _params.add(new SequestParam(
-//                        590,                                                       //sortOrder
-//                        "0.0000",                                            //The value of the property
-//                        "add_U_user_amino_acid",                                // the sequest.params property name
-//                        "added to U",       // the sequest.params comment
-//                        ConverterFactory.getSequestBasicConverter()                      //converts the instance to a sequest.params line
-//                ).setInputXmlLabels( ).setInputXmlLabels("residue, modification mass"));
     }
 
     public Collection<SequestParam> getPassThroughs()

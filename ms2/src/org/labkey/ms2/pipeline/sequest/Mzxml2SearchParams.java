@@ -43,7 +43,7 @@ public class Mzxml2SearchParams extends Params
             "-F",
             ConverterFactory.getMzxml2SearchConverter(),
             ParamsValidatorFactory.getNaturalNumberParamsValidator()
-        ).setInputXmlLabels("MzXML2Search, first scan"));
+        ).setInputXmlLabels("mzxml2search, first scan"));
 
         _params.add(new Mzxml2SearchParam(
             20,
@@ -51,22 +51,54 @@ public class Mzxml2SearchParams extends Params
             "-L",
             ConverterFactory.getMzxml2SearchConverter(),
             ParamsValidatorFactory.getNaturalNumberParamsValidator()
-        ).setInputXmlLabels("MzXML2Search, last scan"));
+        ).setInputXmlLabels("mzxml2search, last scan"));
 
         _params.add(new Mzxml2SearchParam(
             30,
-            "1,2,3",
+            "",
             "-C",
             ConverterFactory.getMzxml2SearchConverter(),
             ParamsValidatorFactory.getNaturalNumberParamsValidator()
-        ).setInputXmlLabels("MzXML2Search, charge"));
+        ).setInputXmlLabels("mzxml2search, charge"));
 
         _params.add(new Mzxml2SearchParam(
             40,
-            "10",
+            "",
+            "-c",
+            ConverterFactory.getMzxml2SearchConverter(),
+            ParamsValidatorFactory.getNaturalNumberParamsValidator()
+        ).setInputXmlLabels("mzxml2search, charge defaults"));
+
+        _params.add(new Mzxml2SearchParam(
+            50,
+            "",
             "-P",
             ConverterFactory.getMzxml2SearchConverter(),
             ParamsValidatorFactory.getNaturalNumberParamsValidator()
         ).setInputXmlLabels("spectrum, minimum peaks"));
+
+         _params.add(new Mzxml2SearchParam(
+            60,
+            "",
+            "-B",
+            ConverterFactory.getMzxml2SearchConverter(),
+            ParamsValidatorFactory.getPositiveDoubleParamsValidator()
+        ).setInputXmlLabels("spectrum, minimum parent m+h"));
+
+        _params.add(new Mzxml2SearchParam(
+            70,
+            "",
+            "-T",
+            ConverterFactory.getMzxml2SearchConverter(),
+            ParamsValidatorFactory.getPositiveDoubleParamsValidator()
+        ).setInputXmlLabels("spectrum, maximum parent m+h"));
+
+                _params.add(new Mzxml2SearchParam(
+            80,
+            "",
+            "-h",
+            ConverterFactory.getMzxml2SearchConverter(),
+            ParamsValidatorFactory.getBooleanParamsValidator()
+        ).setInputXmlLabels("mzxml2search, hydrogen mass"));
     }
 }

@@ -84,16 +84,6 @@ public class Enzyme
     public boolean equals(Object o)
     {
         if (this == o) return true;
-//        try
-//        {
-//        String typeThis = GWT.getTypeName(this);
-//        String typeObject = GWT.getTypeName(o);
-//        if (o == null || !typeThis.equals(typeObject)) return false;
-//        }
-//        catch(Exception e)
-//        {
-//            //if (o == null || getClass() != o.getClass()) return false;
-//        }
 
         Enzyme enzyme = (Enzyme) o;
 
@@ -146,5 +136,16 @@ public class Enzyme
             }
         }
         return true;
+    }
+
+    public String toString()
+    {
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < cutSite.length; i++)
+        {
+            if(i < 0) sb.append(", ");
+            sb.append(cutSite[i].getSignature());
+        }
+        return sb.toString();
     }
 }

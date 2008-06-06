@@ -148,7 +148,7 @@ public class Search implements EntryPoint
         sequenceDbComposite.addTaxonomyChangeListener(new TaxonomyChangeListener());
         enzymeComposite.addChangeListener(new EnzymeChangeListener());
 
-       inputXmlComposite.addChangeListener(new InputXmlChangeListener());
+        inputXmlComposite.addChangeListener(new InputXmlChangeListener());
 
 
         RootPanel panel = RootPanel.get("org.labkey.ms2.pipeline.Search-Root");
@@ -206,7 +206,7 @@ public class Search implements EntryPoint
         DatabaseRequestKey key = new DatabaseRequestKey("/", dirSequenceRoot, searchEngine);
         sequenceDbComposite.setLoading(true);
         sequenceDbComposite.setEnabled(false, false);
-        getSearchService().getSequenceDbs(sequenceDbComposite.getSelectedDb(), dirSequenceRoot,searchEngine,
+        getSearchService().getSequenceDbs(sequenceDbComposite.getSelectedDb(), dirSequenceRoot, searchEngine, false,
                 new SequenceDbServiceCallback(key));
         buttonPanel.remove(copyButton);
         protocolComposite.setFocus(true);
@@ -258,7 +258,7 @@ public class Search implements EntryPoint
         subPanel.add(new Label("An MS2 search protocol is defined by a set of  options for the search engine and a set of protein databases to search."));
         subPanel.add(new Label("Choose an existing protocol or define a new one."));
         subPanel.setWidth("100%");
-        
+
         formGrid.resize(rows , cols);
         formGrid.setWidget(0, 0, protocolComposite.getLabel(labelStyle));
         formGrid.setWidget(0, 1, protocolComposite);
@@ -380,7 +380,7 @@ public class Search implements EntryPoint
         }
         catch(SearchFormException e)
         {
-            error.append("Trouble writing XML: " + e.getMessage());   
+            error.append("Trouble writing XML: " + e.getMessage());
         }
 
         return error.toString();
@@ -404,7 +404,7 @@ public class Search implements EntryPoint
         {
           return "Trouble adding residue modification params to input XML.\n" + e.getMessage();
         }
-        
+
         return residueModComposite.validate();
     }
 
@@ -465,7 +465,7 @@ public class Search implements EntryPoint
         }
         else
         {
-            getSearchService().getSequenceDbs(sequenceDb, dirSequenceRoot, searchEngine, new SequenceDbServiceCallback(new DatabaseRequestKey(sequenceDb, dirSequenceRoot, searchEngine)));
+            getSearchService().getSequenceDbs(sequenceDb, dirSequenceRoot, searchEngine, false, new SequenceDbServiceCallback(new DatabaseRequestKey(sequenceDb, dirSequenceRoot, searchEngine)));
         }
         return "";
     }
@@ -569,7 +569,11 @@ public class Search implements EntryPoint
         public void onSubmitComplete(FormSubmitCompleteEvent event)
         {
             String results = event.getResults();
-            if(results.indexOf("SUCCESS=") != -1)
+            if(results == null)
+            {
+                appendError("The LabKey server is not responding.");
+            }
+            else if(results.indexOf("SUCCESS=") != -1)
             {
                 String destination = results.substring(results.indexOf("SUCCESS=") + 8);
                 destination  = destination.trim();
@@ -588,6 +592,10 @@ public class Search implements EntryPoint
                 errorString  = errorString.trim();
                 appendError(errorString);
                 setReadOnly(false, true);
+            }
+            else if(results.indexOf("User does not have permission") != -1)
+            {
+                cancelForm();
             }
             else
             {
@@ -608,10 +616,15 @@ public class Search implements EntryPoint
 
         public void onFailure(Throwable caught)
         {
-            if(!(GWT.getTypeName(caught).equals("com.google.gwt.user.client.rpc.InvocationException")
+            if(caught.getMessage().indexOf("User does not have permission") != -1)
+            {
+                cancelForm();
+            }
+            else if(!(GWT.getTypeName(caught).equals("com.google.gwt.user.client.rpc.InvocationException")
                     && caught.getMessage().length() == 0))
+            {
                 Window.alert(caught.getMessage() + GWT.getTypeName(caught));
-            databaseCache.remove(_key);
+            }
         }
 
         public void onSuccess(Object result)
@@ -621,7 +634,7 @@ public class Search implements EntryPoint
             updateDatabases(gwtResult);
         }
     }
-    
+
     private void updateDatabases(GWTSearchServiceResult gwtResult)
     {
         sequenceDbComposite.setLoading(false);
@@ -729,7 +742,7 @@ public class Search implements EntryPoint
             }
             else
             {
-                service.getSequenceDbs(dbDirectory, dirSequenceRoot, searchEngine, new SequenceDbServiceCallback(key));
+                service.getSequenceDbs(dbDirectory, dirSequenceRoot, searchEngine, false, new SequenceDbServiceCallback(key));
             }
         }
     }
@@ -765,10 +778,20 @@ public class Search implements EntryPoint
         public void onClick(Widget widget)
         {
             String db = sequenceDbComposite.getSelectedDb();
-            if(db.length() > 0)
+            if(db.length() > 0 && !db.equals("None found."))
             {
+                clearDisplay();
                 inputXmlComposite.removeSequenceDb();
-                appendError(syncForm2Xml());
+                String error = syncForm2Xml();
+                if(error.length() > 0 )
+                {
+                    appendError(error);
+                    searchButton.setEnabled(false);
+                }
+                else
+                {
+                    setReadOnly(false);
+                }
             }
         }
     }
@@ -785,7 +808,7 @@ public class Search implements EntryPoint
                 String error = syncForm2Xml();
                 if(error.length() > 0 )
                 {
-                    appendError(syncForm2Xml());
+                    appendError(error);
                     searchButton.setEnabled(false);
                 }
                 else
@@ -824,7 +847,8 @@ public class Search implements EntryPoint
         public void onClick(Widget widget)
         {
             databaseCache.clear();
-            service.refreshSequenceDbPaths(dirSequenceRoot,new SequenceDbServiceCallback(new DatabaseRequestKey(dirSequenceRoot, dirSequenceRoot, searchEngine)));
+            String defaultSequenceDb = inputXmlComposite.getSequenceDb();
+            service.getSequenceDbs(defaultSequenceDb, dirSequenceRoot, searchEngine, true, new SequenceDbServiceCallback(new DatabaseRequestKey(dirSequenceRoot, dirSequenceRoot, searchEngine)));
             sequenceDbComposite.setLoading(true);
             sequenceDbComposite.setEnabled(false, false);
         }

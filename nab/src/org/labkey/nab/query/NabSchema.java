@@ -26,8 +26,10 @@ import org.labkey.api.security.User;
 import org.labkey.api.data.*;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.DilutionCurve;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabDataHandler;
+import org.labkey.nab.SampleInfo;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -39,11 +41,25 @@ import java.sql.SQLException;
  */
 public class NabSchema extends UserSchema
 {
+    public static final String SCHEMA_NAME = "Nab";
+
+    public static final String SAMPLE_PREPARATION_METHOD_TABLE_NAME = "SamplePreparationMethod";
+    public static final String CURVE_FIT_METHOD_TABLE_NAME = "CurveFitMethod";
     private static final String DATA_ROW_TABLE_NAME = "Data";
+
+    static public void register()
+    {
+        DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider() {
+            public QuerySchema getSchema(DefaultSchema schema)
+            {
+                return new NabSchema(schema.getUser(), schema.getContainer());
+            }
+        });
+    }
 
     public NabSchema(User user, Container container)
     {
-        super("Nab", user, container, ExperimentService.get().getSchema());
+        super(SCHEMA_NAME, user, container, ExperimentService.get().getSchema());
     }
 
     public Set<String> getTableNames()
@@ -62,6 +78,8 @@ public class NabSchema extends UserSchema
             if (provider != null && provider instanceof NabAssayProvider)
                 names.add(getTableName(protocol));
         }
+        names.add(SAMPLE_PREPARATION_METHOD_TABLE_NAME);
+        names.add(CURVE_FIT_METHOD_TABLE_NAME);
         return names;
     }
 
@@ -72,6 +90,21 @@ public class NabSchema extends UserSchema
 
     public TableInfo getTable(String name, String alias)
     {
+        if (SAMPLE_PREPARATION_METHOD_TABLE_NAME.equalsIgnoreCase(name))
+        {
+            return new EnumTableInfo<SampleInfo.Method>(SampleInfo.Method.class, getDbSchema());
+        }
+        if (CURVE_FIT_METHOD_TABLE_NAME.equalsIgnoreCase(name))
+        {
+            return new EnumTableInfo<DilutionCurve.FitType>(DilutionCurve.FitType.class, getDbSchema(), new EnumTableInfo.EnumValueGetter<DilutionCurve.FitType>()
+            {
+                public String getValue(DilutionCurve.FitType e)
+                {
+                    return e.getLabel();
+                }
+            });
+        }
+
         for (ExpProtocol protocol : AssayService.get().getAssayProtocols(getContainer()))
         {
             AssayProvider provider = AssayService.get().getProvider(protocol);

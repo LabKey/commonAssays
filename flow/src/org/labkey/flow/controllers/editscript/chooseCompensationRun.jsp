@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="org.labkey.flow.controllers.FlowModule" %>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <form action="<%=form.analysisScript.urlFor(ScriptController.Action.chooseCompensationRun)%>" method="POST">
@@ -26,6 +25,7 @@
     values identify which compensation well.  Choose an experiment run which has compensation controls in it.  On the next page
     you will then have the opportunity to choose which keywords in that experiment run identify the compensation controls.
 </p>
+<p><b>Note:</b> Experiment runs created by uploading FlowJo workspaces from the browser can't be used to define the compensation calculation.</p>
 <p>
     Which experiment run do you want to use?<br>
     <select name="selectedRunId">

@@ -542,7 +542,7 @@ public class FlowManager
     {
         public static final String SEARCH_DOMAIN = "fcsfile";
         public static final String SEARCH_RESULT_TYPE = "labkey/fcsfile";
-        public static final String SEARCH_RESULT_TYPE_DESCR = "FCS File";
+        public static final String SEARCH_RESULT_TYPE_DESCR = "FCS Files";
 
         Collection<String> containerIds;
         Search.SearchTermParser parser;
@@ -671,7 +671,7 @@ public class FlowManager
             return map;
         }
 
-        public String getSearchResultName()
+        public String getSearchResultNamePlural()
         {
             return SEARCH_RESULT_TYPE_DESCR;
         }

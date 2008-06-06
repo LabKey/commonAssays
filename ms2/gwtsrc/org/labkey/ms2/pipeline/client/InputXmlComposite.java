@@ -201,25 +201,38 @@ public abstract class InputXmlComposite extends SearchFormComposite  implements 
             if(checkMod.length() > 0)
                 modsList.add(checkMod);   
         }
+
+        for(Iterator knownIt = knownMods.entrySet().iterator();knownIt.hasNext();)
+        {
+            Map.Entry  knownModEntry =  (Map.Entry)knownIt.next();
+            String[] sites = ((String)knownModEntry.getValue()).split(",");
+            boolean found;
+            for(int i = 0; i < sites.length; i++)
+            {
+                found = false;
+                for(Iterator modsIt = modsList.iterator(); modsIt.hasNext();)
+                {
+                    if(((String)modsIt.next()).equals(sites[i]))
+                    {
+                        found = true;
+                        if(i == (sites.length -1))
+                        {
+                            returnMap.put(knownModEntry.getKey(),knownModEntry.getValue());
+                            for(int y = 0; y < sites.length; y++)
+                            {
+                                modsList.remove(sites[y]);
+                            }
+                        }
+                        break;
+                    }
+                }
+                if(!found)break;
+            }
+        }
         for(Iterator modsIt = modsList.iterator(); modsIt.hasNext();)
         {
             String mod = (String)modsIt.next();
-            boolean found = false;
-            for(Iterator knownIt = knownMods.entrySet().iterator();knownIt.hasNext();)
-            {
-                Map.Entry knownEntry = (Map.Entry)knownIt.next();
-                String known = (String)knownEntry.getValue();
-                if(mod.equals(known))
-                {
-                    returnMap.put(knownEntry.getKey(),knownEntry.getValue());
-                    found = true;
-                    continue;
-                }
-            }
-            if(!found)
-            {
-                returnMap.put(mod, mod);
-            }
+            returnMap.put(mod, mod);
         }
         return returnMap;
     }

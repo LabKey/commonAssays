@@ -72,6 +72,7 @@ public class CutSite
             {
                 if(cuts[0] == 'X' && cuts.length == 1)
                 {
+                    nTerm = true;
                     loadCuts(split[1]);
                     noCuts = new char[]{};
                 }
@@ -90,7 +91,6 @@ public class CutSite
             }
         }
         else throw new EnzymeParseException("Invalid cut site definition: '" + cutSite + "'.");
-        nTerm= cuts[0] == 'X';
         signature = cutSite;
     }
 

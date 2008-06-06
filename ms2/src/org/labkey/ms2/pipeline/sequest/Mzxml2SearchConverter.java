@@ -31,6 +31,11 @@ public class Mzxml2SearchConverter implements IInputXMLConverter
         String value = mzxml2SearchParam.getValue();
         StringBuilder sb = new StringBuilder("");
         if (value.equals("")) return "";
+        if (mzxml2SearchParam.getValidator().getClass().getName().equals("org.labkey.ms2.pipeline.sequest.BooleanParamsValidator"))
+        {
+            if(value.equals("1"))return mzxml2SearchParam.getName();
+            return "";
+        }
         StringTokenizer st = new StringTokenizer(value, ",");
         while (st.hasMoreTokens())
         {

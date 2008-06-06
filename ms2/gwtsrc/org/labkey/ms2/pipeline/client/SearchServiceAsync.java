@@ -27,9 +27,7 @@ public interface SearchServiceAsync
 {
     void getSearchServiceResult(String searchEngine,String dirSequenceRoot, String dirRoot, String path,
                                 AsyncCallback async);
-    void getSequenceDbs(String defaultDb, String dirSequenceRoot, String searchEngine, AsyncCallback async);
-
-    void refreshSequenceDbPaths(String dirSequenceRoot, AsyncCallback async);
+    void getSequenceDbs(String defaultDb, String dirSequenceRoot, String searchEngine, boolean refresh, AsyncCallback async);
 
     void getProtocol(String searchEngine, String protocolName, String dirRoot,String dirSequenceRoot,
                      String path, AsyncCallback async);

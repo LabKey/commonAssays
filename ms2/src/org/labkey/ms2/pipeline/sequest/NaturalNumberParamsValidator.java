@@ -26,6 +26,9 @@ import java.util.StringTokenizer;
  * Date: Oct 23, 2006
  * Time: 4:55:01 PM
  */
+
+
+// Counting numbers 1,2,3,....
 public class NaturalNumberParamsValidator implements IParamsValidator
 {
     public String validate(Param spp)

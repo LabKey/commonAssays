@@ -27,6 +27,7 @@ public class ConverterFactory
     private static SequestEnzymeConverter _sequestEnzyme;
     private static SequestHeaderConverter _sequestHeader;
     private static Mzxml2SearchConverter _mzxml2Search;
+    private static Out2XmlConverter _out2Xml;
 
     public static IInputXMLConverter getSequestBasicConverter()
     {
@@ -62,5 +63,14 @@ public class ConverterFactory
             _mzxml2Search = new Mzxml2SearchConverter();
         }
         return _mzxml2Search;
+    }
+
+    public static IInputXMLConverter getOut2XmlConverter()
+    {
+        if (_out2Xml == null)
+        {
+            _out2Xml = new Out2XmlConverter();
+        }
+        return _out2Xml;
     }
 }

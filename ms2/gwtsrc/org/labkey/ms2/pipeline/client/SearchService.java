@@ -30,10 +30,8 @@ public interface SearchService extends RemoteService
     public GWTSearchServiceResult getSearchServiceResult(String searchEngine,String dirSequenceRoot, String dirRoot,
                                                   String path) throws SerializableException;
 
-    public GWTSearchServiceResult getSequenceDbs(String defaultDb, String dirSequenceRoot,String searchEngine)
+    public GWTSearchServiceResult getSequenceDbs(String defaultDb, String dirSequenceRoot,String searchEngine, boolean refresh)
             throws SerializableException;
-
-    public GWTSearchServiceResult refreshSequenceDbPaths(String dirSequenceRoot) throws SerializableException;
 
     public GWTSearchServiceResult getProtocol(String searchEngine, String protocolName, String dirRoot,
                                               String dirSequenceRoot,String path)

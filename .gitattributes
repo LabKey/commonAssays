@@ -997,6 +997,9 @@ ms2/src/org/labkey/ms2/pipeline/sequest/Mzxml2SearchConverter.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/Mzxml2SearchParam.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/Mzxml2SearchParams.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/NaturalNumberParamsValidator.java -text
+ms2/src/org/labkey/ms2/pipeline/sequest/Out2XmlConverter.java -text
+ms2/src/org/labkey/ms2/pipeline/sequest/Out2XmlParam.java -text
+ms2/src/org/labkey/ms2/pipeline/sequest/Out2XmlParams.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/Param.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/Params.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/ParamsValidatorFactory.java -text

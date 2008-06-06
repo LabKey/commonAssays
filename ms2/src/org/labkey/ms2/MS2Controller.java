@@ -1017,7 +1017,21 @@ public class MS2Controller extends SpringActionController
             ActionURL queryURL = ctx.cloneActionURL();
             String queryString = (String) ctx.get("queryString");
             queryURL.setRawQuery(queryString);
-            int runId = Integer.parseInt(queryURL.getParameter("run"));
+            String runString = queryURL.getParameter("run");
+            if (runString == null)
+            {
+                return HttpView.throwNotFoundMV("No run specified");
+            }
+            
+            int runId;
+            try
+            {
+                runId = Integer.parseInt(runString);
+            }
+            catch (NumberFormatException e)
+            {
+                return HttpView.throwNotFoundMV("Invalid run specified: " +runString);
+            }
 
             if (!isAuthorized(runId))
                 return null;

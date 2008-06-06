@@ -19,6 +19,7 @@ package org.labkey.ms2.pipeline.sequest;
 import java.net.URI;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.Set;
 
 /**
  * User: billnelson@uky.edu
@@ -56,8 +57,6 @@ public class SequestParamsV1Builder extends SequestParamsBuilder
         supportedEnzymes.put("[E]|[X]", "staph_protease\t\t\t\t1\tE\t\t-");
         supportedEnzymes.put("[KMR]|{P}", "trypsin/cnbr\t\t\t\t1\tKMR\t\tP");
         supportedEnzymes.put("[DEKR]|{P}", "trypsin_gluc\t\t\t\t1\tDEKR\t\tP");
-
-
     }
 
     public String initXmlValues()
@@ -72,124 +71,33 @@ public class SequestParamsV1Builder extends SequestParamsBuilder
         parserError.append(initMassType());
         parserError.append(initStaticMods());
         parserError.append(initPassThroughs());
-
         return parserError.toString();
     }
 
-    String initEnzymeInfo()
+    public String getSupportedEnzyme(String enzyme) throws SequestParamsException
     {
-        String parserError = "";
-        String cleavageSites;
-        String cleavageBlockers = "-";
-        String offset;
-        String enzyme = sequestInputParams.get("protein, cleavage site");
-        if (enzyme == null) return parserError;
-        if (enzyme.equals(""))
+        Set<String> enzymeSigs = supportedEnzymes.keySet();
+        enzyme = removeWhiteSpace(enzyme);
+        enzyme = combineEnzymes(enzyme.split(","));
+        for(String supportedEnzyme:enzymeSigs)
         {
-            parserError = "protein, cleavage site did not contain a value.\n";
-            return parserError;
-        }
-        enzyme = enzyme.trim();
-        if (enzyme.startsWith("{"))
-        {
-            parserError = "protein, cleavage site does not support n-terminal blocking AAs(" + enzyme + ").\n";
-            return parserError;
-        }
-        String supportedEnzyme = lookUpEnzyme(enzyme);
-        if (supportedEnzyme != null)
-        {
-            if (supportedEnzyme.equals("No_Enzyme\t\t\t\t0\t-\t\t-"))
+            if(sameEnzyme(enzyme,supportedEnzyme))
             {
-                _params.getParam("enzyme_number").setValue("0");
-                return parserError;
-            }
-            else
-            {
-                _params.getParam("enzyme_number").setValue("1");
-                _params.getParam("enzyme1").setValue(supportedEnzyme);
-                return parserError;
-            }
-        }
-
-        if (enzyme.indexOf(',') != -1)
-        {
-            parserError = "protein, cleavage site contained more than one cleavage site(" + enzyme + ").\n";
-            return parserError;
-        }
-        StringTokenizer sites = new StringTokenizer(enzyme, "|");
-        if (sites.countTokens() != 2)
-        {
-            parserError = "protein, cleavage site contained invalid format(" + enzyme + ").\n";
-            return parserError;
-        }
-        String cTermInfo = sites.nextToken().trim();
-        String nTermInfo = sites.nextToken().trim();
-
-        if (cTermInfo.startsWith("[") & cTermInfo.endsWith("]"))
-        {
-            cTermInfo = cTermInfo.substring(1, (cTermInfo.length() - 1)).trim();
-            if (cTermInfo.equals("X"))
-            {
-                // [X]|[X]   is looked up in the hashtable above.
-                if (nTermInfo.startsWith("[") & nTermInfo.endsWith("]"))
+                if (supportedEnzymes.get(supportedEnzyme).equals("nonspecific\t\t\t\t0\t-\t\t-"))
                 {
-                    nTermInfo = nTermInfo.substring(1, (nTermInfo.length() - 1)).trim();
-                    if (isValidResidue(nTermInfo))
-                    {
-                        cleavageSites = nTermInfo;
-                        offset = "0";
-                    }
-                    else
-                    {
-                        parserError = "protein, cleavage site contained invalid residue(" + nTermInfo + ").\n";
-                        return parserError;
-                    }
-
+                    _params.getParam("enzyme_number").setValue("0");
+                    return "nonspecific";
                 }
                 else
                 {
-                    parserError = "protein, cleavage site contained invalid format(" + enzyme + ").\n";
-                    return parserError;
+                    _params.getParam("enzyme_number").setValue("1");
+                    String paramsString = supportedEnzymes.get(supportedEnzyme);
+                    _params.getParam("enzyme1").setValue(paramsString);
+                    StringTokenizer st = new StringTokenizer(paramsString);
+                    return st.nextToken();
                 }
             }
-            else
-            {
-                if (isValidResidue(cTermInfo))
-                {
-                    cleavageSites = cTermInfo;
-                    offset = "1";
-                    if (nTermInfo.startsWith("{") & nTermInfo.endsWith("}"))
-                    {
-                        nTermInfo = nTermInfo.substring(1, (nTermInfo.length() - 1)).trim();
-                        if (isValidResidue(nTermInfo))
-                        {
-                            cleavageBlockers = nTermInfo;
-                        }
-                        else
-                        {
-                            parserError = "protein, cleavage site contained invalid format(" + enzyme + ").\n";
-                            return parserError;
-                        }
-                    }
-                    else if (nTermInfo.equals("[X]"))
-                    {
-                        cleavageBlockers = "-";
-                    }
-                }
-                else
-                {
-                    parserError = "protein, cleavage site contained invalid residue(" + cTermInfo + ").\n";
-                    return parserError;
-                }
-            }
-
         }
-        else
-        {
-            parserError = "protein, cleavage site contained invalid format(" + enzyme + ").\n";
-            return parserError;
-        }
-        _params.getParam("enzyme1").setValue("Unknown(" + enzyme + ")\t\t\t\t" + offset + "\t" + cleavageSites + "\t\t" + cleavageBlockers);
-        return parserError;
+        return "";
     }
 }

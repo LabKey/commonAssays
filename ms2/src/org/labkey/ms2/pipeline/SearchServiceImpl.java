@@ -33,11 +33,9 @@ import java.sql.SQLException;
 
 
 /**
- * Created by IntelliJ IDEA.
  * User: Bill
  * Date: Jan 29, 2008
  * Time: 4:04:45 PM
- * To change this template use File | Settings | File Templates.
  */
 public class SearchServiceImpl extends BaseRemoteService implements SearchService
 {
@@ -59,7 +57,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
         getProtocols(dirRoot, "",dirSequenceRoot, searchEngine, path);
         if(results.getSelectedProtocol() == null || results.getSelectedProtocol().equals("") )
-            getSequenceDbs(results.getDefaultSequenceDb(), dirSequenceRoot, searchEngine);
+            getSequenceDbs(results.getDefaultSequenceDb(), dirSequenceRoot, searchEngine, false);
         getMascotTaxonomy(searchEngine);
         getEnzymes(searchEngine);
         getResidueMods(searchEngine);
@@ -115,12 +113,11 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             results.appendError("Problem loading protocol\n" + e.getMessage());
         }
         results.setSelectedProtocol(protocol.getName());
-        File dbFile = null;
         try
         {
             results.setDefaultSequenceDb(protocol.getDbNames()[0]);
             if(!provider.dbExists(dirSequenceRoot,protocol.getDbNames()[0]))
-                results.appendError("The database " + dbFile.getPath() + " cannot be found.");
+                results.appendError("The database " + protocol.getDbNames()[0] + " cannot be found.");
         }
         catch(ArrayIndexOutOfBoundsException e)
         {
@@ -284,7 +281,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         results.setSequenceDbPaths(sequenceDbPaths);
     }
 
-    public GWTSearchServiceResult getSequenceDbs(String defaultDb, String dirSequenceRoot, String searchEngine)
+    public GWTSearchServiceResult getSequenceDbs(String defaultDb, String dirSequenceRoot, String searchEngine, boolean refresh)
     {
         if(defaultDb == null) defaultDb = "";
         String relativePath;
@@ -316,7 +313,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             }
             if(relativePath.equals(savedRelativePath) && (savedDefaultDb != null && savedDefaultDb.length() != 0))
             {
-                    defaultDb = relativePath;
+                    defaultDb = savedDefaultDb.substring(savedDefaultDb.lastIndexOf('/') + 1);
             }
             else
             {
@@ -327,18 +324,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         {
             relativePath = defaultDb.substring(0, defaultDb.lastIndexOf('/') + 1);
         }
-        return getSequenceDbs(relativePath,defaultDb, dirSequenceRoot, searchEngine);
-    }
-
-    public GWTSearchServiceResult refreshSequenceDbPaths(String dirSequenceRoot)
-    {
-        return getSequenceDbs("","", dirSequenceRoot, "X! Tandem", true);
-    }
-
-    private GWTSearchServiceResult getSequenceDbs(String relativePath, String defaultDb, String dirSequenceRoot,
-                                                  String searchEngine)
-    {
-        return getSequenceDbs(relativePath, defaultDb, dirSequenceRoot, searchEngine, false);
+        return getSequenceDbs(relativePath,defaultDb, dirSequenceRoot, searchEngine, refresh);
     }
 
     private GWTSearchServiceResult getSequenceDbs(String relativePath, String defaultDb, String dirSequenceRoot,
@@ -388,8 +374,16 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                 defaultDbPathURI = new URI(defaultDbPath);
             }
             sequenceDbs =  provider.getSequenceDbDirList(defaultDbPathURI);
-            if(sequenceDbs == null) throw new IOException("Fasta files not found.");
-            results.setDefaultSequenceDb(defaultDb);
+            if(sequenceDbs == null)
+            {
+                results.appendError("Could not find the default sequence database path : " + defaultDbPath);
+                defaultDbPathURI = new URI(dirSequenceRoot);
+                sequenceDbs = provider.getSequenceDbDirList(defaultDbPathURI);
+            }
+            else
+            {
+                results.setDefaultSequenceDb(defaultDb);
+            }
         }
         catch(URISyntaxException e)
         {
@@ -421,7 +415,8 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                 returnList.add(db);
             }
         }
-         if(returnList.size() == 0  )
+
+        if(returnList.size() == 0  )
         {
             returnList = new ArrayList();
             returnList.add("None found.");
@@ -455,7 +450,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             results.appendError("Can't find the root directory");
 
         File dirData = new File(uriData);
-        File dirAnalysis = provider.getProtocolFactory().getAnalysisDir(dirData,protocolName);;
+        File dirAnalysis = provider.getProtocolFactory().getAnalysisDir(dirData,protocolName);
         if(dirData == null)
         {
             _log.error("Problem loading protocol: no analysis directory in protocol");

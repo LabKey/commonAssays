@@ -36,7 +36,6 @@ import org.labkey.flow.query.FlowSchema;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
-import java.sql.SQLException;
 import java.util.*;
 
 public class EditScriptForm extends ViewForm
@@ -278,11 +277,18 @@ public class EditScriptForm extends ViewForm
 
     public Map<Integer, String> getExperimentRuns() throws Exception
     {
+        return getExperimentRuns(false);
+    }
+
+    public Map<Integer, String> getExperimentRuns(boolean realFiles) throws Exception
+    {
         LinkedHashMap<Integer, String> ret = new LinkedHashMap();
         for (FlowRun run : FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords))
         {
-            ret.put(run.getRunId(), run.getName());
+            if (!realFiles || run.hasRealWells())
+                ret.put(run.getRunId(), run.getName());
         }
         return ret;
     }
+    
 }

@@ -28,6 +28,7 @@ import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
+import org.labkey.nab.query.NabSchema;
 
 import java.beans.PropertyChangeEvent;
 import java.sql.SQLException;
@@ -48,6 +49,8 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
         super(NAME, 8.10, null, false);
         addController("nab", NabController.class);
         addController("nabassay", NabAssayController.class);
+
+        NabSchema.register();
     }
 
     //void wantsToDelete(Container c, List<String> messages);

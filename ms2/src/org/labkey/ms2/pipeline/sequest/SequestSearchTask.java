@@ -141,18 +141,20 @@ public class SequestSearchTask extends PipelineJob.Task
             ArrayList<String> command = new ArrayList<String>();
             command.add(getExecutablePath("MzXML2Search"));
             command.add("-dta");
-            String paramMinParent = params.get("spectrum, minimum parent m+h");
-            if (paramMinParent != null)
-                command.add("-B" + paramMinParent);
-            String paramMaxParent = params.get("spectrum, maximum parent m+h");
-            if (paramMaxParent != null)
-                command.add("-T" + paramMaxParent);
             command.add("-O" + dirOutputDta.getName());
-            Collection<String> inputXmlParams = convertParams(new Mzxml2SearchParams().getParams(), params);
+            Mzxml2SearchParams mzXml2SearchParams = new Mzxml2SearchParams();
+            Collection<String> inputXmlParams = convertParams(mzXml2SearchParams.getParams(), params);
             command.addAll(inputXmlParams);
             command.add(getJobSupport().getSearchSpectraFile().getAbsolutePath());
 
             getJob().runSubProcess(new ProcessBuilder(command), wd.getDir());
+
+            String enzyme =
+                SequestParamsBuilderFactory.createVersion1Builder(params, null).getSupportedEnzyme(params.get("protein, cleavage site"));
+            Out2XmlParams out2XmlParams = new Out2XmlParams();
+            out2XmlParams.getParam("-E").setValue(enzyme);
+            inputXmlParams.addAll(convertParams(out2XmlParams.getParams(), params));
+
 
             /*
             1. perform Sequest search
@@ -207,14 +209,20 @@ public class SequestSearchTask extends PipelineJob.Task
         {
             String value = paramsXml.get(conv.getInputXmlLabels().get(0));
             if (value == null || value.equals(""))
-                continue;
-            conv.setValue(value);
+            {
+                if(conv.getValue() == null || conv.getValue().equals(""))
+                    continue;
+            }
+            else
+            {
+                conv.setValue(value);
+            }
 
             String parserError = conv.validate();
             if (!"".equals(parserError))
                 throw new SequestParamsException(parserError);
-
-            paramsCmd.add(conv.convert());
+            if(!conv.convert().equals(""))
+                paramsCmd.add(conv.convert());
         }
 
         return paramsCmd;

@@ -131,34 +131,22 @@ public class EnzymeComposite extends SearchFormComposite implements SourcesChang
         {
             return e.getMessage();
         }
-        StringBuffer error = new StringBuffer();
-        CutSite[] cutSites = enzyme.getCutSite();
-        if(cutSites == null)
-        {
-            return "Cut sites equal to null for: " + enzymeSignature;
-        }
-        for(int i = 0; i < cutSites.length; i++)
-        {
-            error.append(findEnzyme(cutSites[i]));
-        }
-        return error.toString();
+        return findEnzyme(enzyme);
     }
 
-    private String findEnzyme(CutSite cutSite)
+    private String findEnzyme(Enzyme origCutSite)
     {
-        if(cutSite == null) return "Cut site is equal to null.";
+        if(origCutSite == null) return "Cut site is equal to null.";
         int enzCount = enzymeListBox.getItemCount();
         boolean foundEnz = false;
 
         for(int i = 0; i < enzCount; i++)
         {
             Enzyme listCutSite;
-            Enzyme origCutSite;
             try
             {
                 String listBoxValue = enzymeListBox.getValue(i);
                 listCutSite = new Enzyme(listBoxValue);
-                origCutSite = new Enzyme(cutSite.getSignature());
             }
             catch(EnzymeParseException e)
             {
@@ -171,7 +159,7 @@ public class EnzymeComposite extends SearchFormComposite implements SourcesChang
             }
         }
         if(!foundEnz)
-            return "The enzyme '" + cutSite.getSignature() + "' was not found.";
+            return "The enzyme '" + origCutSite.toString() + "' was not found.";
         return "";
     }
 
