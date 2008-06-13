@@ -105,7 +105,7 @@ public class RunController extends SpringFlowController<RunController.Action>
 
         public NavTree appendNavTrail(NavTree root)
         {
-            String label = run != null ? "Run '" + run.getLabel() + "'" : "Run not found";
+            String label = run != null ? null : "Run not found";
             return appendFlowNavTrail(root, run, label, Action.showRun);
         }
     }

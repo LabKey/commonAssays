@@ -506,7 +506,7 @@ abstract public class ScriptJob extends FlowJob
             {
                 ScriptXarSource source = new ScriptXarSource(xardoc, root, workingDirectory);
                 ExperimentService.get().loadXar(source, this, true);
-                FlowManager.updateFlowObjectCols(getContainer());
+                FlowManager.get().updateFlowObjectCols(getContainer());
             }
             catch (Throwable t)
             {

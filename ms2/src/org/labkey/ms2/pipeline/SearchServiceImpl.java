@@ -89,17 +89,8 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             getMzXml("",path, searchEngine);
             return results;
         }
-        URI uriRoot = null;
-        try
-        {
-            uriRoot = new URI(dirRoot);   
-        }
-        catch(URISyntaxException e)
-        {
-            results.setSelectedProtocol("Loading Error");
-            _log.error("Problem loading protocols", e);
-            results.appendError("Problem loading protocol\n" + e.getMessage());
-        }
+        URI  uriRoot = new File(dirRoot).toURI();
+
         AbstractMS2SearchProtocolFactory protocolFactory = provider.getProtocolFactory();
         try
         {
@@ -215,18 +206,8 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         getProtocol(searchEngine,defaultProtocol,dirRoot, dirSequenceRoot, path);
 
         String[] protocols;
-        URI dirRootURI;
-        try
-        {
-            dirRootURI = new URI(dirRoot);
-        }
-        catch(URISyntaxException e)
-        {
-            protocolList.add("Loading Error.");
-            results.appendError("Problem loading protocols\n" + e.getMessage());
-            results.setProtocols(protocolList);
-            return;
-        }
+        URI  dirRootURI = new File(dirRoot).toURI();
+
         protocols = provider.getProtocolFactory().getProtocolNames(dirRootURI);
         for(String protName:protocols)
         {
@@ -257,7 +238,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             URI dirSequenceRootURI;
             try
             {
-                dirSequenceRootURI = new URI(dirSequenceRoot);
+                dirSequenceRootURI = new File(dirSequenceRoot).toURI();
                 sequenceDbPaths =  provider.getSequenceDbPaths(dirSequenceRootURI);
                 if(sequenceDbPaths == null) throw new IOException("Fasta directory not found.");
                 if(provider.remembersDirectories())
@@ -265,12 +246,6 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                     PipelineService.get().rememberLastSequenceDbPathsSetting(provider.getProtocolFactory(),
                             getContainer(),getUser(), sequenceDbPaths);
                 }
-            }
-            catch(URISyntaxException e)
-            {
-                results.appendError("There was a problem retrieving the database list from the server:\n"
-                        + e.getMessage());
-                return;
             }
             catch(IOException e)
             {
@@ -313,7 +288,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             }
             if(relativePath.equals(savedRelativePath) && (savedDefaultDb != null && savedDefaultDb.length() != 0))
             {
-                    defaultDb = savedDefaultDb.substring(savedDefaultDb.lastIndexOf('/') + 1);
+                defaultDb = savedDefaultDb;
             }
             else
             {
@@ -364,20 +339,21 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         URI defaultDbPathURI;
         try
         {
-
             if(provider.hasRemoteDirectories())
             {
-                defaultDbPathURI = new URI(relativePath);
+                relativePath = relativePath.replaceAll(" ","%20");
+                URI uriPath = new URI(relativePath);
+                sequenceDbs =  provider.getSequenceDbDirList(uriPath);
             }
             else
             {
-                defaultDbPathURI = new URI(defaultDbPath);
-            }
-            sequenceDbs =  provider.getSequenceDbDirList(defaultDbPathURI);
+                defaultDbPathURI = new File(defaultDbPath).toURI();
+                sequenceDbs =  provider.getSequenceDbDirList(defaultDbPathURI);
+            }          
             if(sequenceDbs == null)
             {
                 results.appendError("Could not find the default sequence database path : " + defaultDbPath);
-                defaultDbPathURI = new URI(dirSequenceRoot);
+                defaultDbPathURI = new File(dirSequenceRoot).toURI();
                 sequenceDbs = provider.getSequenceDbDirList(defaultDbPathURI);
             }
             else
@@ -387,16 +363,16 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         }
         catch(URISyntaxException e)
         {
-            results.appendError("There was a problem retrieving the database list from the server:\n"
+            results.appendError("There was a problem parsing the database database path:\n"
                     + e.getMessage());
-            results.setSequenceDbs(sequenceDbs);
+            results.setSequenceDbs(sequenceDbs, relativePath);
             return results;
         }
         catch(IOException e)
         {
             results.appendError("There was a problem retrieving the database list from the server:\n"
                     + e.getMessage());
-            results.setSequenceDbs(sequenceDbs);
+            results.setSequenceDbs(sequenceDbs, relativePath);
             return results;
         }
 
@@ -404,7 +380,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         {
             sequenceDbs = new ArrayList();
             sequenceDbs.add("None found.");
-            results.setSequenceDbs(sequenceDbs);
+            results.setSequenceDbs(sequenceDbs, relativePath);
             return results;
         }
 
@@ -421,7 +397,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             returnList = new ArrayList();
             returnList.add("None found.");
         }
-        results.setSequenceDbs(returnList);
+        results.setSequenceDbs(returnList, relativePath);
         return results;
     }
 

@@ -24,6 +24,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.persist.FlowManager;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -74,6 +75,7 @@ public abstract class FlowJob extends PipelineJob
         }
         finally
         {
+            FlowManager.get().flowObjectModified();
             _end = new Date();
             addStatus("Job completed at " + DateUtil.formatDateTime(_end));
             long duration = Math.max(0, _end.getTime() - _start.getTime());

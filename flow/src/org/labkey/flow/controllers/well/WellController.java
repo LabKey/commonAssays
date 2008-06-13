@@ -35,6 +35,7 @@ import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.data.*;
+import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -109,7 +110,7 @@ public class WellController extends SpringFlowController<WellController.Action>
 
         public NavTree appendNavTrail(NavTree root)
         {
-            String label = well != null ? "Edit " + well.getLabel() : "Well not found";
+            String label = well != null ? null : "Well not found";
             return appendFlowNavTrail(root, well, label, Action.showWell);
         }
     }
@@ -183,6 +184,7 @@ public class WellController extends SpringFlowController<WellController.Action>
                     well.setKeyword(getUser(), name, form.ff_keywordValue[i]);
                 }
             }
+            FlowManager.get().flowObjectModified();
             return true;
         }
 

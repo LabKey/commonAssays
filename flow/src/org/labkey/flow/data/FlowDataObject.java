@@ -26,18 +26,25 @@ import org.apache.commons.lang.ObjectUtils;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.TreeSet;
+import java.util.HashMap;
 
 abstract public class FlowDataObject extends FlowObject<ExpData>
 {
     static public List<FlowDataObject> fromDatas(ExpData[] datas)
     {
-        List<FlowDataObject> ret = new ArrayList();
+        HashMap<Integer,ExpData> flowDatas = new HashMap<Integer,ExpData>(2*datas.length);
         for (ExpData data : datas)
         {
-            FlowDataObject flowObject = fromData(data);
-            if (flowObject == null)
-                continue;
-            ret.add(flowObject);
+            if (data.getDataType() instanceof FlowDataType)
+                flowDatas.put(data.getRowId(), data);
+        }
+        List<AttrObject> attrs = FlowManager.get().getAttrObjects(flowDatas.values());
+        List<FlowDataObject> ret = new ArrayList<FlowDataObject>(attrs.size());
+        for (AttrObject a : attrs)
+        {
+            ExpData data = flowDatas.get(a.getDataId());
+            ret.add(((FlowDataType) data.getDataType()).newInstance(data));
         }
         return ret;
     }

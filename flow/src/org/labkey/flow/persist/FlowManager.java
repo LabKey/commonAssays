@@ -16,10 +16,10 @@
 
 package org.labkey.flow.persist;
 
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.collections15.multimap.MultiHashMap;
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.Handler;
@@ -39,6 +39,7 @@ import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class FlowManager
 {
@@ -247,6 +248,29 @@ public class FlowManager
         }
     }
 
+    public List<AttrObject> getAttrObjects(Collection<ExpData> datas)
+    {
+        try
+        {
+            if (datas.isEmpty())
+                return Collections.emptyList();
+            SQLFragment sql = new SQLFragment ("SELECT * FROM " + getTinfoObject().toString() + " WHERE DataId IN (");
+            String comma = "";
+            for (ExpData data : datas)
+            {
+                sql.append(comma).append(data.getRowId());
+                comma = ",";
+            }
+            sql.append(")");
+            AttrObject[] array = Table.executeQuery(getSchema(), sql.getSQL(), sql.getParamsArray(), AttrObject.class);
+            return Arrays.asList(array);
+        }
+        catch (SQLException e)
+        {
+            throw UnexpectedException.wrap(e);
+        }
+    }
+
     public AttrObject getAttrObject(ExpData data)
     {
         try
@@ -278,6 +302,16 @@ public class FlowManager
         }
     }
 
+
+    public AtomicLong flowObjectModificationCount = new AtomicLong();
+
+
+    public void flowObjectModified()
+    {
+        flowObjectModificationCount.incrementAndGet();
+    }
+
+    
     public AttrObject createAttrObject(ExpData data, ObjectType type, URI uri) throws SQLException
     {
         if (FlowDataHandler.instance.getPriority(ExperimentService.get().getExpData(data.getRowId())) != Handler.Priority.HIGH)
@@ -294,8 +328,10 @@ public class FlowManager
         {
             newObject.setUri(uri.toString());
         }
+        flowObjectModified();
         return Table.insert(null, getTinfoObject(), newObject);
     }
+
 
     private void deleteAttributes(SQLFragment sqlObjectIds) throws SQLException
     {
@@ -335,6 +371,7 @@ public class FlowManager
         deleteAttributes(new SQLFragment("(" + obj.getRowId() + ")"));
     }
 
+
     private void deleteObjectIds(SQLFragment sqlOIDs, Set<Container> containers) throws SQLException
     {
         DbScope scope = getSchema().getScope();
@@ -364,8 +401,8 @@ public class FlowManager
             {
                 AttributeCache.invalidateCache(container);
             }
+            flowObjectModified();
         }
-
     }
 
     public void deleteData(List<ExpData> datas) throws SQLException
@@ -687,10 +724,10 @@ public class FlowManager
      * this is a bit of a hack
      * script job and FlowJoWorkspace.createExperimentRun() do not update these new fields
      */
-    public static void updateFlowObjectCols(Container c)
+    public void updateFlowObjectCols(Container c)
     {
-        DbSchema s = FlowManager.get().getSchema();;
-        TableInfo o = s.getTable("object");
+        DbSchema s = getSchema();
+        TableInfo o = getTinfoObject();
         boolean beginTrans = !s.getScope().isTransactionActive();
 
         try
@@ -733,6 +770,7 @@ public class FlowManager
         }
         finally
         {
+            flowObjectModified();
             if (beginTrans)
                 s.getScope().closeConnection();
         }

@@ -301,7 +301,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
                             for (PropertyDescriptor pd : antigenProps)
                             {
-                                String key = group.getName().replaceAll(" ", "") + "_" + pd.getName();
+                                String key = PlateAntigenPropertyHelper.getSpecimenPropertyInputName(group.getName(), pd);
                                 if (postedPropMap.containsKey(key))
                                 {
                                     ObjectProperty op = ElispotDataHandler.getResultObjectProperty(form.getContainer(),

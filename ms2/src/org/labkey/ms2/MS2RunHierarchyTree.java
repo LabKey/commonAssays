@@ -16,15 +16,14 @@
 
 package org.labkey.ms2;
 
-import org.labkey.api.util.ContainerTree;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.security.User;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.RuntimeSQLException;
-import org.apache.log4j.Logger;
+import org.labkey.api.data.Table;
+import org.labkey.api.security.User;
+import org.labkey.api.util.ContainerTree;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,7 +34,10 @@ import java.sql.SQLException;
 */
 public class MS2RunHierarchyTree extends ContainerTree
 {
-    private static Logger _log = Logger.getLogger(MS2RunHierarchyTree.class);
+    String getSelectionKey()
+    {
+        return "hierarchyRuns";
+    }
 
     public MS2RunHierarchyTree(String rootPath, User user, int perm, ActionURL url)
     {
@@ -92,7 +94,8 @@ public class MS2RunHierarchyTree extends ContainerTree
                         html.append(DataRegion.SELECT_CHECKBOX_NAME);
                         html.append("' value='");
                         html.append(run);
-                        html.append("'></td><td><a href=\"");
+                        html.append("' onclick=\"sendCheckbox(this, ").append(PageFlowUtil.filterQuote(getSelectionKey())).append(", [this.value], this.checked);\"");
+                        html.append("></td><td><a href=\"");
                         html.append(runUrl.getEncodedLocalURIString());
                         html.append("\">");
                         html.append(PageFlowUtil.filter(rs.getString(2)));

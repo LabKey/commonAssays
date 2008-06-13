@@ -90,6 +90,7 @@ public class FlowQueryView extends QueryView
         {
             ret = new GraphView(ret);
         }
+        ret.getDataRegion().setShowPaginationCount(false);
         return ret;
     }
 

@@ -985,7 +985,7 @@ abstract public class FlowJoWorkspace implements Serializable
                 experiment.getExperiment().addRun(user, run);
             }
             
-            FlowManager.updateFlowObjectCols(container);
+            FlowManager.get().updateFlowObjectCols(container);
 
             svc.commitTransaction();
             transaction = false;

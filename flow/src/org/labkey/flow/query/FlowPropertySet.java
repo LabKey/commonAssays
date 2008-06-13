@@ -19,6 +19,7 @@ package org.labkey.flow.query;
 import org.labkey.api.exp.api.ExpDataTable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.flow.analysis.web.SubsetSpec;
@@ -41,6 +42,12 @@ public class FlowPropertySet
     {
         _colDataId = table.getColumn("RowId");
         _container = table.getContainer();
+    }
+
+    public FlowPropertySet(Container c)
+    {
+        _colDataId = DbSchema.get("exp").getTable("data").getColumn("rowid");
+        _container = c;
     }
 
     static protected Map<String, SubsetSpec> getSubsetNameAncestorMap(Collection<SubsetSpec> subsets)

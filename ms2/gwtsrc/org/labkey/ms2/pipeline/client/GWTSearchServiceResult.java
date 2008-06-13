@@ -31,6 +31,7 @@ public class GWTSearchServiceResult implements IsSerializable
      * @gwt.typeArgs <java.lang.String>
      */
     private List sequenceDBs;
+    private String currentPath;
     /**
      * @gwt.typeArgs <java.lang.String>
      */
@@ -94,10 +95,17 @@ public class GWTSearchServiceResult implements IsSerializable
     /**
      * @gwt.typeArgs sequenceDbs <java.lang.String>
      */
-    public void setSequenceDbs(List sequenceDbs)
+    public void setSequenceDbs(List sequenceDbs, String currentPath)
     {
         this.sequenceDBs = sequenceDbs;
+        this.currentPath = currentPath;
     }
+
+    public String getCurrentPath()
+    {
+        return currentPath;
+    }
+
     /**
      * @gwt.typeArgs <java.lang.String>
      */

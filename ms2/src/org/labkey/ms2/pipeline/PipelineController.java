@@ -544,8 +544,8 @@ public class PipelineController extends SpringActionController
             props.put("saveProtocol", Boolean.toString(form.isSaveProtocol()));
             props.put("returnURL", returnURL.getLocalURIString() );
             props.put("helpTopic",helpTopic);
-            props.put("dirRoot",_dirRoot.toURI().toString());
-            props.put("dirSequenceRoot",_dirSeqRoot.toURI().toString());
+            props.put("dirRoot",_dirRoot.toURI().getPath());
+            props.put("dirSequenceRoot",_dirSeqRoot.toURI().getPath());
             props.put("searchEngine", form.getSearchEngine());
             props.put("action", SpringActionController.getActionName(getAction()) + ".view");
             props.put("path",form.getPath());

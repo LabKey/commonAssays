@@ -3972,18 +3972,20 @@ public class MS2Controller extends SpringActionController
         {
             ActionURL currentURL = getViewContext().cloneActionURL();
             MS2RunHierarchyTree ht = new MS2RunHierarchyTree(currentURL.getExtraPath(), getUser(), ACL.PERM_READ, currentURL);
+            String formName = "hierarchy";
 
             StringBuilder html = new StringBuilder();
             html.append("<script type=\"text/javascript\">\n");
             html.append("LABKEY.requiresScript('filter.js');\n");
             html.append("</script>");
-            html.append("<form method=post action=''>");
+            html.append("<form method=post name=\"").append(formName).append("\" action=''>");
 
             html.append("<table class=\"dataRegion\" cellspacing=\"0\" cellpadding=\"1\">");
             ht.render(html);
             html.append("</table>");
+            html.append("<input type='hidden' name='").append(DataRegionSelection.DATA_REGION_SELECTION_KEY).append("' value='").append(PageFlowUtil.filter(ht.getSelectionKey())).append("'>");
 
-            renderHierarchyButtonBar(html);
+            renderHierarchyButtonBar(html, ht.getSelectionKey(), formName);
             html.append("</form>");
 
             return new HtmlView(html.toString());
@@ -3996,18 +3998,20 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private void renderHierarchyButtonBar(StringBuilder html) throws IOException
+    private void renderHierarchyButtonBar(StringBuilder html, String selectionKey, String formName) throws IOException
     {
         ButtonBar bb = new ButtonBar();
 
         bb.add(ActionButton.BUTTON_SELECT_ALL);
         bb.add(ActionButton.BUTTON_CLEAR_ALL);
 
-        ActionButton compareRuns = new ActionButton("button", "Compare");
-        compareRuns.setScript("return verifySelected(this.form, \"compare.view\", \"post\", \"runs\")");
-        compareRuns.setActionType(ActionButton.Action.GET);
-        compareRuns.setDisplayPermission(ACL.PERM_READ);
-        bb.add(compareRuns);
+        // Hack up a DataRegion/DataView so we can create the compare menu
+        DataRegion rgn = new DataRegion();
+        rgn.setName(formName);
+        rgn.setSelectionKey(selectionKey);
+        GridView view = new GridView(rgn);
+
+        bb.add(createCompareMenu(getContainer(), view, false));
 
         ActionButton exportRuns = new ActionButton("button", "MS2 Export");
         exportRuns.setScript("return verifySelected(this.form, \"pickExportRunsView.view\", \"post\", \"runs\")");

@@ -60,7 +60,9 @@ public class Search implements EntryPoint
     private                 CopyButton              copyButton = new CopyButton();
     private                 String                  dirSequenceRoot;
 
+    /** Map from subdirectory path to FASTA files */
     private Map databaseCache = new HashMap();
+    private boolean sequencePathsLoaded = false;
 
     private SearchServiceAsync service = null;
     private SearchServiceAsync getSearchService()
@@ -203,11 +205,10 @@ public class Search implements EntryPoint
     {
         residueModComposite.clear();
         mzXmlComposite.clearStatus();
-        DatabaseRequestKey key = new DatabaseRequestKey("/", dirSequenceRoot, searchEngine);
         sequenceDbComposite.setLoading(true);
         sequenceDbComposite.setEnabled(false, false);
         getSearchService().getSequenceDbs(sequenceDbComposite.getSelectedDb(), dirSequenceRoot, searchEngine, false,
-                new SequenceDbServiceCallback(key));
+                new SequenceDbServiceCallback());
         buttonPanel.remove(copyButton);
         protocolComposite.setFocus(true);
         String error = syncXml2Form();
@@ -291,7 +292,7 @@ public class Search implements EntryPoint
     public void appendError(String error)
     {
         if(error.trim().length() ==  0)   return;
-        appendDisplay("ERROR:" + error);
+        appendDisplay("ERROR: " + error);
         displayLabel.setStylePrimaryName("cpas-error");
     }
 
@@ -465,7 +466,7 @@ public class Search implements EntryPoint
         }
         else
         {
-            getSearchService().getSequenceDbs(sequenceDb, dirSequenceRoot, searchEngine, false, new SequenceDbServiceCallback(new DatabaseRequestKey(sequenceDb, dirSequenceRoot, searchEngine)));
+            getSearchService().getSequenceDbs(sequenceDb, dirSequenceRoot, searchEngine, false, new SequenceDbServiceCallback());
         }
         return "";
     }
@@ -607,13 +608,6 @@ public class Search implements EntryPoint
 
     private class SequenceDbServiceCallback implements AsyncCallback
     {
-        private final DatabaseRequestKey _key;
-
-        public SequenceDbServiceCallback(DatabaseRequestKey key)
-        {
-            _key = key;
-        }
-
         public void onFailure(Throwable caught)
         {
             if(caught.getMessage().indexOf("User does not have permission") != -1)
@@ -630,21 +624,38 @@ public class Search implements EntryPoint
         public void onSuccess(Object result)
         {
             GWTSearchServiceResult gwtResult = (GWTSearchServiceResult)result;
-            databaseCache.put(_key, gwtResult);
+            databaseCache.put(gwtResult.getCurrentPath(), gwtResult);
             updateDatabases(gwtResult);
         }
     }
 
     private void updateDatabases(GWTSearchServiceResult gwtResult)
     {
+        if (sequencePathsLoaded && sequenceDbComposite.getSelectedDbPath() != null && !gwtResult.getCurrentPath().equals(sequenceDbComposite.getSelectedDbPath()))
+        {
+            // This is a listing for a directory that we're not trying to render anymore. The user has probably
+            // changed the selected path again before the response from the first request finished. 
+            return;
+        }
+
+        if (sequenceDbComposite.isReadOnly())
+        {
+            // The user probably messed up the XML and we're not showing the database selection UI, so don't try to do anything 
+            return;
+        }
+
         sequenceDbComposite.setLoading(false);
         List sequenceDbs = gwtResult.getSequenceDBs();
         List sequenceDbPaths = gwtResult.getSequenceDbPaths();
+
         sequenceDbComposite.setSequenceDbPathListBoxContents(sequenceDbPaths,
-                gwtResult.getDefaultSequenceDb());
+                gwtResult.getCurrentPath());
+
+        sequencePathsLoaded = true;
+
         if(sequenceDbs != null)
         {
-            sequenceDbComposite.setSequenceDbsListBoxContents(sequenceDbs,gwtResult.getDefaultSequenceDb());
+            sequenceDbComposite.setSequenceDbsListBoxContents(sequenceDbs, gwtResult.getDefaultSequenceDb());
         }
         appendError(gwtResult.getErrors());
         sequenceDbComposite.selectDefaultDb(gwtResult.getDefaultSequenceDb());
@@ -731,10 +742,9 @@ public class Search implements EntryPoint
             sequenceDbComposite.setEnabled(true, false);
             inputXmlComposite.removeSequenceDb();
 
-            DatabaseRequestKey key = new DatabaseRequestKey(dbDirectory, dirSequenceRoot, searchEngine);
-            if (databaseCache.containsKey(key))
+            if (databaseCache.containsKey(dbDirectory))
             {
-                final GWTSearchServiceResult gwtResult = (GWTSearchServiceResult) databaseCache.get(key);
+                final GWTSearchServiceResult gwtResult = (GWTSearchServiceResult) databaseCache.get(dbDirectory);
                 if (gwtResult != null)
                 {
                     updateDatabases(gwtResult);
@@ -742,7 +752,10 @@ public class Search implements EntryPoint
             }
             else
             {
-                service.getSequenceDbs(dbDirectory, dirSequenceRoot, searchEngine, false, new SequenceDbServiceCallback(key));
+                service.getSequenceDbs(dbDirectory, dirSequenceRoot, searchEngine, false, new SequenceDbServiceCallback());
+
+                // Stick in a null so that we don't request it again
+                databaseCache.put(dbDirectory, null);
             }
         }
     }
@@ -847,8 +860,9 @@ public class Search implements EntryPoint
         public void onClick(Widget widget)
         {
             databaseCache.clear();
+            sequencePathsLoaded = false;
             String defaultSequenceDb = inputXmlComposite.getSequenceDb();
-            service.getSequenceDbs(defaultSequenceDb, dirSequenceRoot, searchEngine, true, new SequenceDbServiceCallback(new DatabaseRequestKey(dirSequenceRoot, dirSequenceRoot, searchEngine)));
+            service.getSequenceDbs(defaultSequenceDb, dirSequenceRoot, searchEngine, true, new SequenceDbServiceCallback());
             sequenceDbComposite.setLoading(true);
             sequenceDbComposite.setEnabled(false, false);
         }
@@ -878,46 +892,6 @@ public class Search implements EntryPoint
             }
             clearDisplay();
             setReadOnly(false);
-        }
-    }
-
-    private static class DatabaseRequestKey
-    {
-        private final String _dbDirectory;
-        private final String _dirSequenceRoot;
-        private final String _searchEngine;
-
-        public DatabaseRequestKey(String dbDirectory, String dirSequenceRoot, String searchEngine)
-        {
-            _dbDirectory = dbDirectory;
-            _dirSequenceRoot = dirSequenceRoot;
-            _searchEngine = searchEngine;
-        }
-
-        public boolean equals(Object o)
-        {
-            if (this == o) return true;
-            if (!(o instanceof DatabaseRequestKey)) return false;
-
-            DatabaseRequestKey that = (DatabaseRequestKey) o;
-
-            if (_dbDirectory != null ? !_dbDirectory.equals(that._dbDirectory) : that._dbDirectory != null)
-                return false;
-            if (_dirSequenceRoot != null ? !_dirSequenceRoot.equals(that._dirSequenceRoot) : that._dirSequenceRoot != null)
-                return false;
-            if (_searchEngine != null ? !_searchEngine.equals(that._searchEngine) : that._searchEngine != null)
-                return false;
-
-            return true;
-        }
-
-        public int hashCode()
-        {
-            int result;
-            result = (_dbDirectory != null ? _dbDirectory.hashCode() : 0);
-            result = 31 * result + (_dirSequenceRoot != null ? _dirSequenceRoot.hashCode() : 0);
-            result = 31 * result + (_searchEngine != null ? _searchEngine.hashCode() : 0);
-            return result;
         }
     }
 }

@@ -98,7 +98,8 @@ public class SpringFlowController<A extends Enum> extends SpringActionController
         }
 
         root.addChildren(children);
-        root.addChild(title);
+        if (title != null)
+            root.addChild(title);
 
 // UNDONE
 //        ntc.setHelpTopic(new HelpTopic(PFUtil.helpTopic(action), HelpTopic.Area.FLOW));

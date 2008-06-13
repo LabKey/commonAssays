@@ -458,6 +458,7 @@ luminex/src/META-INF/luminex/scripts/postgresql/luminex-2.21-2.22.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-2.30-2.31.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-2.30-8.10.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-2.31-2.32.sql -text
+luminex/src/META-INF/luminex/scripts/postgresql/luminex-8.10-8.11.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/obsolete/luminex-0.01-0.02.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/obsolete/luminex-0.02-0.03.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/obsolete/luminex-0.03-0.04.sql -text
@@ -470,6 +471,7 @@ luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-2.21-2.22.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-2.30-2.31.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-2.30-8.10.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-2.31-2.32.sql -text
+luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-8.10-8.11.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/obsolete/luminex-0.01-0.02.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/obsolete/luminex-0.02-0.03.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/obsolete/luminex-0.03-0.04.sql -text

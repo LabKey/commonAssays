@@ -71,36 +71,36 @@ INSERT #idents (CommonName, Genus, Species, Identifier)
 	VALUES ('yeast', 'Saccharomyces', 'cerevisiae', '4932')
 INSERT #idents (CommonName, Genus, Species, Identifier)
 	VALUES ('zebrafish', 'Danio', 'rerio', '7955')
-go
+
 UPDATE #idents
 	SET  IdentTypeId = (SELECT identtypeid FROM prot.ProtIdentTypes WHERE name='NCBI Taxonomy')
-go
+
 INSERT prot.ProtOrganisms (CommonName, Genus, Species)
 SELECT   CommonName, Genus, Species FROM #idents
 	WHERE NOT EXISTS
 		(SELECT * FROM prot.ProtOrganisms PO INNER JOIN #idents i ON (PO.Genus = i.Genus AND PO.Species = i.Species))
-go
+
 INSERT prot.ProtIdentifiers (Identifier, IdentTypeId)
 	SELECT   Identifier, IdentTypeId FROM #idents
 	WHERE NOT EXISTS
 		(SELECT * FROM prot.ProtIdentifiers PI INNER JOIN #idents i ON (PI.Identifier = i.Identifier AND PI.IdentTypeId = i.IdentTypeId))
-go
+
 UPDATE #idents
 	SET OrgId = PO.OrgId
 	FROM prot.ProtOrganisms PO
 	WHERE #idents.Genus = PO.Genus AND #idents.Species = PO.Species
-go
+
 
 UPDATE #idents
 	SET IdentId = PI.IdentId
 	FROM prot.ProtIdentifiers PI
 	WHERE #idents.Identifier = PI.Identifier and #idents.IdentTypeId = PI.IdentTypeId
-go
+
 UPDATE prot.ProtOrganisms
 	SET IdentId = i.IdentID
 	FROM #idents i
 	WHERE i.OrgId = prot.ProtOrganisms.OrgId
-go
+
 --SELECT i.*, PO.orgid, PO.IdentID, PI.IdentId
 -- FROM #idents i
 --inner join prot.ProtOrganisms PO ON (i.genus = PO.genus and i.species = PO.species)

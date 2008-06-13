@@ -30,6 +30,7 @@ import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowAnalyzer;
+import org.labkey.flow.persist.FlowManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -472,6 +473,7 @@ public class FlowRun extends FlowObject<ExpRun>
             { 
                 ExperimentService.get().rollbackTransaction();
             }
+            FlowManager.get().flowObjectModified();
         }
     }
 

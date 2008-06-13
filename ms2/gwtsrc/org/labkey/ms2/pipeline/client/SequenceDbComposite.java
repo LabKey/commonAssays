@@ -216,6 +216,13 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
         this.foundDefaultDb = found;
     }
 
+    public String getSelectedDbPath()
+    {
+        int index = sequenceDbPathListBox.getSelectedIndex();
+        if(index == -1) return "";
+        return sequenceDbPathListBox.getValue(index);
+    }
+
     public String getSelectedDb()
     {
         int index = sequenceDbListBox.getSelectedIndex();

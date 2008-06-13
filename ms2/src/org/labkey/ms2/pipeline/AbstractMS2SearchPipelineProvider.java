@@ -60,16 +60,8 @@ abstract public class AbstractMS2SearchPipelineProvider
 
     public boolean dbExists(String dirSequenceRoot, String db)
     {
-        try
-        {
-            URI dbURI = new URI(dirSequenceRoot + db);
-            File dbFile = new File(dbURI);
-            if(!NetworkDrive.exists(dbFile))
-            {
-                return false;
-            }
-        }
-        catch(URISyntaxException e)
+        File dbFile = new File(dirSequenceRoot, db);
+        if(!NetworkDrive.exists(dbFile))
         {
             return false;
         }

@@ -25,8 +25,8 @@ public class Analyte
     private int _dataId;
     private String _lsid;
     private String _name;
-    private double _fitProb;
-    private double _resVar;
+    private Double _fitProb;
+    private Double _resVar;
     private String _regressionType;
     private String _stdCurve;
     private int _rowId;
@@ -63,12 +63,12 @@ public class Analyte
         _name = name;
     }
 
-    public void setFitProb(double fitProb)
+    public void setFitProb(Double fitProb)
     {
         _fitProb = fitProb;
     }
 
-    public void setResVar(double resVar)
+    public void setResVar(Double resVar)
     {
         _resVar = resVar;
     }
@@ -88,12 +88,12 @@ public class Analyte
         return _rowId;
     }
 
-    public double getFitProb()
+    public Double getFitProb()
     {
         return _fitProb;
     }
 
-    public double getResVar()
+    public Double getResVar()
     {
         return _resVar;
     }

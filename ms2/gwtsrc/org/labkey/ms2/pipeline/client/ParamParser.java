@@ -389,7 +389,7 @@ public class ParamParser
         }
         catch(DOMParseException e)
         {
-            throw new SearchFormException(e);
+            throw new SearchFormException("Invalid XML. Please check your input.");
         }
     }
 

@@ -34,6 +34,7 @@ import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
 
 import javax.servlet.http.HttpServletRequest;
@@ -474,6 +475,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         }
         finally
         {
+            FlowManager.get().flowObjectModified();
             if (fTrans)
             {
                 expService.rollbackTransaction();

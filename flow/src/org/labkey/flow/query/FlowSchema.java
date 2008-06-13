@@ -23,9 +23,13 @@ import org.labkey.api.exp.api.*;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.GUID;
+import org.labkey.api.util.TTLCacheMap;
+import org.labkey.api.util.Cache;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.HttpView;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.controllers.FlowParam;
@@ -41,6 +45,7 @@ import org.labkey.flow.view.FlowQueryView;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Types;
+import java.sql.SQLException;
 import java.util.*;
 
 public class FlowSchema extends UserSchema
@@ -320,14 +325,15 @@ public class FlowSchema extends UserSchema
      *
      *  basically rejoins what is effectively a vertically partitioned table (ACKK) 
      */
-    class FlowDataTable extends AbstractTableInfo implements ExpDataTable
+    class JoinFlowDataTable extends AbstractTableInfo implements ExpDataTable
     {
         final ExpDataTable _expData;
         final TableInfo _flowObject;
         final FlowDataType _type;
         final String _expDataAlias;
+        FlowPropertySet _fps;
 
-        FlowDataTable(String alias, FlowDataType type)
+        JoinFlowDataTable(String alias, FlowDataType type)
         {
             super(getDbSchema());
             setAlias(alias);
@@ -335,15 +341,33 @@ public class FlowSchema extends UserSchema
             _expData = ExperimentService.get().createDataTable(_expDataAlias);
             _flowObject = DbSchema.get("flow").getTable("object");
             _type = type;
+            _fps = new FlowPropertySet(_expData);
         }
 
         ColumnInfo addStatisticColumn(String columnAlias)
         {
             ColumnInfo colStatistic = addObjectIdColumn(columnAlias);
-            colStatistic.setFk(new StatisticForeignKey(new FlowPropertySet(this)));
+            colStatistic.setFk(new StatisticForeignKey(_fps));
             colStatistic.setIsUnselectable(true);
             addMethod(columnAlias, new StatisticMethod(colStatistic));
             return colStatistic;
+        }
+
+        ColumnInfo addKeywordColumn(String columnAlias)
+        {
+            ColumnInfo colKeyword = addObjectIdColumn(columnAlias);
+            colKeyword.setFk(new KeywordForeignKey(_fps));
+            colKeyword.setIsUnselectable(true);
+            addMethod("Keyword", new KeywordMethod(colKeyword));
+            return colKeyword;
+        }
+
+        ColumnInfo addGraphColumn(String columnAlias)
+        {
+            ColumnInfo colGraph = addObjectIdColumn(columnAlias);
+            colGraph.setFk(new GraphForeignKey(_fps));
+            colGraph.setIsUnselectable(true);
+            return colGraph;
         }
 
         ColumnInfo addObjectIdColumn(String name)
@@ -361,7 +385,7 @@ public class FlowSchema extends UserSchema
             ret.copyAttributesFrom(underlyingColumn);
             ret.setIsHidden(underlyingColumn.isHidden());
             if (underlyingColumn.getFk() instanceof RowIdForeignKey)
-                ret.setFk(new RowIdForeignKey(ret));            
+                ret.setFk(new RowIdForeignKey(ret));
             addColumn(ret);
             return ret;
         }
@@ -394,9 +418,6 @@ public class FlowSchema extends UserSchema
             sqlFlowData.append(_flowObject).append("." + _flowObject.getColumn("typeid").getName() + "=" + _type.getObjectType().getTypeId());
             sqlFlowData.append(" AND ");
             sqlFlowData.append(_flowObject.toString() + "." + _flowObject.getColumn("container").getName() + "='" + getContainer().getId() + "'");
-            // UNDONE
-            //     final private SimpleFilter _filter;
-            //UNDONE
             sqlFlowData.append(") AS " + alias);
             return sqlFlowData;
         }
@@ -543,11 +564,304 @@ public class FlowSchema extends UserSchema
     }
 
 
+    class FastFlowDataTable extends AbstractTableInfo implements ExpDataTable
+    {
+        //final ExpDataTable _expData;
+        final ExpDataTable _expData;
+        final TableInfo _flowObject;
+        final FlowDataType _type;
+        final String _expDataAlias;
+        FlowPropertySet _fps;
+
+        // ExpDataTable support
+        TableEditHelper _editHelper = null;
+        final SimpleFilter _filter = new SimpleFilter();
+        ExpExperiment _experiment = null;
+        ExpRun _run = null;
+        boolean _runSpecified = false;
+        Container _c = null;
+
+        FastFlowDataTable(String alias, FlowDataType type)
+        {
+            super(getDbSchema());
+            setAlias(alias);
+            _expDataAlias = "_expdata_";
+            _expData = ExperimentService.get().createDataTable(_expDataAlias);
+            _expData.setDataType(type);
+            _flowObject = DbSchema.get("flow").getTable("object");
+            _type = type;
+
+            _fps = new FlowPropertySet(FlowSchema.this.getContainer());
+        }
+
+        ColumnInfo addStatisticColumn(String columnAlias)
+        {
+            ColumnInfo colStatistic = addObjectIdColumn(columnAlias);
+            colStatistic.setFk(new StatisticForeignKey(_fps));
+            colStatistic.setIsUnselectable(true);
+            addMethod(columnAlias, new StatisticMethod(colStatistic));
+            return colStatistic;
+        }
+
+        ColumnInfo addKeywordColumn(String columnAlias)
+        {
+            ColumnInfo colKeyword = addObjectIdColumn(columnAlias);
+            colKeyword.setFk(new KeywordForeignKey(_fps));
+            colKeyword.setIsUnselectable(true);
+            addMethod("Keyword", new KeywordMethod(colKeyword));
+            return colKeyword;
+        }
+
+        ColumnInfo addGraphColumn(String columnAlias)
+        {
+            ColumnInfo colGraph = addObjectIdColumn(columnAlias);
+            colGraph.setFk(new GraphForeignKey(_fps));
+            colGraph.setIsUnselectable(true);
+            return colGraph;
+        }
+
+        ColumnInfo addObjectIdColumn(String name)
+        {
+            ColumnInfo underlyingColumn = _flowObject.getColumn("rowid");
+            ExprColumn ret = new ExprColumn(this, name, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".objectid"), underlyingColumn.getSqlTypeInt());
+            ret.copyAttributesFrom(underlyingColumn);
+            addColumn(ret);
+            return ret;
+        }
+
+        ColumnInfo addExpColumn(ColumnInfo underlyingColumn)
+        {
+            ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getSqlTypeInt());
+            ret.copyAttributesFrom(underlyingColumn);
+            ret.setIsHidden(underlyingColumn.isHidden());
+            if (underlyingColumn.getFk() instanceof RowIdForeignKey)
+                ret.setFk(new RowIdForeignKey(ret));            
+            addColumn(ret);
+            return ret;
+        }
+
+        /* TableInfo */
+        public SQLFragment getFromSQL(String alias)
+        {
+            assert _container != null;
+            assert _container.getId().equals(getContainer().getId());
+            String name = getFastFlowObjectTableName(_container, _type.getObjectType().getTypeId());
+
+            SQLFragment where = new SQLFragment();
+            SQLFragment filter = _filter.getSQLFragment(getSqlDialect());
+            String and = " WHERE ";
+            if (filter.getFilterText().length() > 0)
+            {
+                where.append(" ").append(filter);
+                and = " AND ";
+            }
+//            if (null != _type)
+//            {
+//                sqlFlowData.append(and).append("TypeId = ").append(_type.getObjectType().getTypeId());
+//                and = " AND ";
+//            }
+            if (null != _experiment)
+            {
+                where.append(and).append("ExperimentId = ").append(_experiment.getRowId());
+                and = " AND ";
+            }
+            if (_runSpecified)
+            {
+                if (_run == null)
+                {
+                    where.append(and).append("RunId IS NULL");
+                }
+                else
+                {
+                    where.append(and).append("RunId = ").append(_run.getRowId());
+                }
+                //and = " AND ";
+            }
+
+            SQLFragment sqlFlowData = new SQLFragment();
+            if (where.getSQL().length() == 0)
+            {
+                sqlFlowData.append(name + " AS " + alias);
+            }
+            else
+            {
+                sqlFlowData = new SQLFragment("(SELECT * FROM " + name );
+                sqlFlowData.append(where);
+                sqlFlowData.append(") AS " + alias);
+            }
+
+            return sqlFlowData;
+        }
+
+
+        /* ExpDataTable */
+        public void populate(ExpSchema schema)
+        {
+            _expData.populate(schema);
+            throw new UnsupportedOperationException();
+        }
+
+        public void setExperiment(ExpExperiment experiment)
+        {
+            _experiment = experiment;
+        }
+
+        public ExpExperiment getExperiment()
+        {
+            return _experiment;
+        }
+
+        public void setRun(ExpRun run)
+        {
+            _runSpecified = true;
+            _run = run;
+        }
+
+        public ExpRun getRun()
+        {
+           return _run;
+        }
+
+        public void setDataType(DataType type)
+        {
+            assert type == _type;
+        }
+
+        public DataType getDataType()
+        {
+            return _type;
+        }
+
+        public ColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, PropertyDescriptor inputRole, ExpSampleSet sampleSet)
+        {
+            ColumnInfo col = _expData.addMaterialInputColumn(alias,schema,inputRole,sampleSet);
+            col.setParentTable(this);
+            return addColumn(col);
+        }
+
+        public ColumnInfo addDataInputColumn(String alias, PropertyDescriptor role)
+        {
+//UNDONE
+            assert false;
+            ColumnInfo col = _expData.addDataInputColumn(alias,role);
+            return addExpColumn(col);
+        }
+
+        public ColumnInfo addInputRunCountColumn(String alias)
+        {
+            ColumnInfo col = _expData.addInputRunCountColumn(alias);
+            col.setParentTable(this);
+            return addColumn(col);
+        }
+
+        /* ExpTable */
+
+        public void setContainer(Container container)
+        {
+            _container = container;
+        }
+
+        public Container getContainer()
+        {
+            return _container;
+        }
+
+        public ColumnInfo addColumn(Column column)
+        {
+            return addColumn(column.toString(), column);
+        }
+
+        public ColumnInfo addColumn(String alias, Column column)
+        {
+            ColumnInfo col =  createColumn(alias, column);
+            addColumn(col);
+            return col;
+        }
+
+        public ColumnInfo getColumn(Column column)
+        {
+            for (ColumnInfo info : getColumns())
+            {
+                if (info instanceof ExprColumn && info.getAlias().equals(column.toString()))
+                {
+                    return info;
+                }
+            }
+            return null;
+        }
+
+        public ColumnInfo createColumn(String alias, Column column)
+        {
+            ColumnInfo col = _expData.createColumn(alias,column);
+            col.setParentTable(this);
+            return col;
+        }
+        
+        public ColumnInfo createPropertyColumn(String alias)
+        {
+            ColumnInfo col = _expData.createPropertyColumn(alias);
+            throw new UnsupportedOperationException();
+        }
+
+        public void addCondition(SQLFragment condition, String... columnNames)
+        {
+            _filter.addWhereClause(condition.getSQL(), condition.getParams().toArray(), columnNames);
+        }
+
+        public void addRowIdCondition(SQLFragment rowidCondition)
+        {
+            _expData.addRowIdCondition(rowidCondition);
+            throw new UnsupportedOperationException();
+        }
+
+        public void addLSIDCondition(SQLFragment lsidCondition)
+        {
+            _expData.addLSIDCondition(lsidCondition);
+            throw new UnsupportedOperationException();
+        }
+
+        public void setEditHelper(TableEditHelper helper)
+        {
+            _editHelper = helper;
+        }
+
+        public boolean hasPermission(User user, int perm)
+        {
+            if (_editHelper != null)
+                return _editHelper.hasPermission(user, perm);
+            return false;
+        }
+
+        public ActionURL delete(User user, ActionURL srcURL, QueryUpdateForm form) throws Exception
+        {
+            if (_editHelper != null)
+            {
+                return _editHelper.delete(user, srcURL, form);
+            }
+            throw new UnsupportedOperationException();
+        }
+
+        public ColumnInfo addPropertyColumns(String domainDescription, PropertyDescriptor[] pds, QuerySchema schema)
+        {
+            ColumnInfo col = _expData.addPropertyColumns(domainDescription, pds, schema);
+            throw new UnsupportedOperationException();
+        }
+    }
+
+
+    public class FlowDataTable extends FastFlowDataTable
+    {
+        FlowDataTable(String alias, FlowDataType type)
+        {
+            super(alias, type);
+        }
+    }
+    
+
     public FlowDataTable createDataTable(String alias, final FlowDataType type)
     {
         FlowDataTable ret = new FlowDataTable(alias, type);
         ret.setContainer(getContainer());
-        ret.setDataType(type);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.RowId).setIsHidden(true);
         ret.addColumn(ExpDataTable.Column.LSID).setIsHidden(true);
@@ -638,7 +952,7 @@ public class FlowSchema extends UserSchema
             }
             return ret.iterator();
         }
-    }
+    }   
 
     static private class DeferredFCSAnalysisVisibleColumns implements Iterable<FieldKey>
     {
@@ -691,11 +1005,7 @@ public class FlowSchema extends UserSchema
     {
         final FlowDataTable ret = createDataTable(alias, FlowDataType.FCSFile);
         ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
-        final ColumnInfo colKeyword = ret.addObjectIdColumn("Keyword");
-        FlowPropertySet fps = new FlowPropertySet(ret);
-        colKeyword.setFk(new KeywordForeignKey(fps));
-        colKeyword.setIsUnselectable(true);
-        ret.addMethod("Keyword", new KeywordMethod(colKeyword));
+        final ColumnInfo colKeyword = ret.addKeywordColumn("Keyword");
         ExpSampleSet ss = null;
         if (_protocol != null)
         {
@@ -735,16 +1045,13 @@ public class FlowSchema extends UserSchema
             }
         });
 
-        FlowPropertySet fps = new FlowPropertySet(ret);
         ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         if (getExperiment() != null)
         {
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
         }
         ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
-        ColumnInfo colGraph = ret.addObjectIdColumn("Graph");
-        colGraph.setFk(new GraphForeignKey(fps));
-        colGraph.setIsUnselectable(true);
+        ColumnInfo colGraph = ret.addGraphColumn("Graph");
         ColumnInfo colFCSFile = ret.addDataInputColumn("FCSFile", InputRole.FCSFile.getPropertyDescriptor(getContainer()));
         colFCSFile.setFk(new LookupForeignKey(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()),
                 FlowParam.wellId.toString(),
@@ -783,7 +1090,6 @@ public class FlowSchema extends UserSchema
             }
         });
 
-        FlowPropertySet fps = new FlowPropertySet(ret);
         ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         if (getExperiment() != null)
         {
@@ -792,9 +1098,7 @@ public class FlowSchema extends UserSchema
 
         ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
 
-        ColumnInfo colGraph = ret.addObjectIdColumn("Graph");
-        colGraph.setFk(new GraphForeignKey(fps));
-        colGraph.setIsUnselectable(true);
+        ColumnInfo colGraph = ret.addGraphColumn("Graph");
 
         ColumnInfo colFCSFile = new ExprColumn(ret, "FCSFile", new SQLFragment(ExprColumn.STR_TABLE_ALIAS  + ".fcsid"), Types.INTEGER);
         ret.addColumn(colFCSFile);
@@ -834,9 +1138,9 @@ public class FlowSchema extends UserSchema
         return ret;
     }
 
-    public ExpDataTable createAnalysisScriptTable(String alias, boolean includePrivate)
+    public FlowDataTable createAnalysisScriptTable(String alias, boolean includePrivate)
     {
-        ExpDataTable ret = createDataTable(alias, FlowDataType.Script);
+        FlowDataTable ret = createDataTable(alias, FlowDataType.Script);
         if (!includePrivate)
         {
             SQLFragment runIdCondition = new SQLFragment("RunId IS NULL");
@@ -922,7 +1226,8 @@ public class FlowSchema extends UserSchema
         ret.setAlias(alias);
         ret.addWrapColumn(ret.getRealTable().getColumn("Name"));
         ExpDataTable fcsAnalysisTable = createFCSAnalysisTable("fcsAnalysis", FlowDataType.FCSAnalysis);
-        FlowPropertySet fps = new FlowPropertySet(fcsAnalysisTable);
+//        FlowPropertySet fps = new FlowPropertySet(fcsAnalysisTable);
+        FlowPropertySet fps = new FlowPropertySet(getContainer());
         filterTable(ret, fps.getStatistics());
         return ret;
     }
@@ -933,7 +1238,8 @@ public class FlowSchema extends UserSchema
         ret.setAlias(alias);
         ret.addWrapColumn(ret.getRealTable().getColumn("Name"));
         ExpDataTable fcsFilesTable = createFCSFileTable("fcsFiles");
-        FlowPropertySet fps = new FlowPropertySet(fcsFilesTable);
+//        FlowPropertySet fps = new FlowPropertySet(fcsFilesTable);
+        FlowPropertySet fps = new FlowPropertySet(getContainer());
         filterTable(ret, fps.getKeywordProperties());
         return ret;
     }
@@ -961,5 +1267,108 @@ public class FlowSchema extends UserSchema
         if (str == null || str.length() == 0)
             return 0;
         return Integer.valueOf(str);
+    }
+
+
+
+    // need an an object to track the temptable (don't want to use String, too confusing)
+    static class TempTableToken
+    {
+        TempTableToken(String name)
+        {
+            this.name = name;
+        }
+        String name;
+    }
+
+
+    /*
+     * Caching needs to be improved
+     * need better notification of changes per container
+     */
+
+    Map<String,TempTableToken> instanceCache = new HashMap<String,TempTableToken>();
+    static Cache staticCache = Cache.getShared();
+
+    String getFastFlowObjectTableName(Container c, int typeid)
+    {
+        TempTableToken tok = null;
+        boolean tx = FlowManager.get().getSchema().getScope().isTransactionActive();
+        HttpServletRequest r = HttpView.currentRequest();
+        String tkey = "" + FlowManager.get().flowObjectModificationCount.get();
+        String attr = FlowSchema.class.getName() + "." + typeid + "." + tkey + ".flow.object$" + c.getId();
+
+        tok = instanceCache.get(attr);
+        if (tok != null)
+            return tok.name;
+        tok = r == null ? null : (TempTableToken)r.getAttribute(attr);
+        if (tok != null)
+        {
+            instanceCache.put(attr, tok);
+            return tok.name;
+        }
+        if (!tx)
+            tok = (TempTableToken)staticCache.get(attr);
+        if (tok == null)
+        {
+            String name = createFastFlowObjectTableName(c, typeid);
+            tok = new TempTableToken(name);
+            TempTableTracker.track(FlowManager.get().getSchema(), name, tok);
+            if (!tx)
+                staticCache.put(attr, tok, 10 * Cache.SECOND);
+        }
+        instanceCache.put(attr, tok);
+        if (null != r)
+            r.setAttribute(attr, tok);
+        return tok.name;
+    }
+
+
+    /** CONSIDER JOIN ObjectId from exp.Objects */ 
+    String createFastFlowObjectTableName(Container c, int typeid)
+    {
+        try
+        {
+            long begin = System.currentTimeMillis();
+            DbSchema flow = FlowManager.get().getSchema();
+            String shortName = "flowObject" + GUID.makeHash(); 
+            String name = flow.getSqlDialect().getGlobalTempTablePrefix() + shortName;
+            Table.execute(flow,
+                "SELECT \n" +
+                "    exp.data.RowId,\n" +
+                "    exp.data.LSID,\n" +
+                "    exp.data.Name,\n" +
+                "    exp.data.CpasType,\n" +
+                "    exp.data.SourceApplicationId,\n" +
+                "    exp.data.SourceProtocolLSID,\n" +
+                "    exp.data.DataFileUrl,\n" +
+                "    exp.data.RunId,\n" +
+                "    exp.data.Created,\n" +
+                "    exp.data.Container,\n" +
+                "    flow.object.RowId AS objectid,\n" +
+                "    flow.object.TypeId,\n" +
+                "    flow.object.compid,\n" +
+                "    flow.object.fcsid,\n" +
+                "    flow.object.scriptid,\n" +
+                "    exp.RunList.ExperimentId\n" +
+                "INTO " +  name + "\n" +
+                "FROM exp.data\n" +
+                "    INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId\n" +
+                "    LEFT OUTER JOIN exp.RunList ON exp.RunList.ExperimentRunid = exp.Data.RunId\n" +
+                "WHERE flow.Object.container = ? and TypeId = ?",
+               new Object[] {c.getId(), typeid}
+            );
+            String create =
+//                    "CREATE INDEX ix_" + shortName + " ON " + name + " (TypeId,ExperimentId);\n" +
+                    "CREATE UNIQUE INDEX ix_" + shortName + "_rowid ON " + name + " (RowId);\n" +
+                    "CREATE UNIQUE INDEX ix_" + shortName + "_objectid ON " + name + " (ObjectId);\n";
+            Table.execute(flow, create, null);
+            long end = System.currentTimeMillis();
+            return name;
+        }
+        catch (SQLException x)
+        {
+            throw new RuntimeSQLException(x);
+        }
     }
 }
