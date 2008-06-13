@@ -561,7 +561,7 @@ public class FlowManager
             this.containerIds = ids;
             this.parser = parser;
 
-            DbSchema s = DbSchema.get("flow");
+            DbSchema s = FlowManager.get().getSchema();
             String fromClause = "flow.attribute A inner join flow.keyword K on A.rowid=K.keywordid inner join flow.object O on K.objectid = O.rowid inner join exp.data D on O.dataid = D.rowid";
             SQLFragment fragment = Search.getSQLFragment("container, FCSName, uri, dataid", "D.container, D.name AS FCSName, O.uri, O.dataid, A.name, K.value", fromClause, "D.Container", null, containerIds, parser, s.getSqlDialect(),  "A.name", "K.value");
 
@@ -612,7 +612,7 @@ public class FlowManager
 
         protected MultiMap<String, String> search()
         {
-            DbSchema s = DbSchema.get("flow");
+            DbSchema s = FlowManager.get().getSchema();
             String fromClause = "flow.attribute A inner join flow.keyword K on A.rowid=K.keywordid inner join flow.object O on K.objectid = O.rowid inner join exp.data D on O.dataid = D.rowid";
             SQLFragment fragment = Search.getSQLFragment("container, FCSName, uri, dataid", "D.container, D.name AS FCSName, O.uri, O.dataid, A.name, K.value", fromClause, "D.Container", null, containerIds, parser, s.getSqlDialect(),  "A.name", "K.value");
 
@@ -689,7 +689,7 @@ public class FlowManager
      */
     public static void updateFlowObjectCols(Container c)
     {
-        DbSchema s = DbSchema.get("flow");
+        DbSchema s = FlowManager.get().getSchema();;
         TableInfo o = s.getTable("object");
         boolean beginTrans = !s.getScope().isTransactionActive();
 
@@ -740,47 +740,59 @@ public class FlowManager
 
 
     // postgres 8.2 workaround
-    static String version82 = "?";
+    private static Boolean _postgreSQL82 = null;
+
+    private static boolean isPostgresSQL82()
+    {
+        if (null == _postgreSQL82)
+        {
+            _postgreSQL82 = false;
+            DbSchema db = FlowManager.get().getSchema();
+
+            if (db.getSqlDialect().isPostgreSQL())
+            {
+                try
+                {
+                    if (null != Table.executeSingleton(db, "SELECT version() WHERE version() like '% 8.2%'", null, String.class))
+                        _postgreSQL82 = true;
+                }
+                catch (SQLException x)
+                {
+                    _log.error("unexpected error", x);
+                }
+            }
+        }
+
+        return _postgreSQL82.booleanValue();
+    }
 
     static public void vacuum()
     {
-        DbSchema db = DbSchema.get("flow");
-
-        if (!(db.getSqlDialect() instanceof SqlDialectPostgreSQL))
-            return;
-
-        try
+        if (isPostgresSQL82())
         {
-            if (version82 != null && version82.equals("?"))
-                version82 = Table.executeSingleton(db, "SELECT version() WHERE version() like '% 8.2%'", null, String.class);
-            
-            if (null != version82)
-                Table.execute(db, "VACUUM exp.data; VACUUM flow.object; VACUUM flow.keyword; VACUUM flow.statistic;", null);
-        }
-        catch (SQLException x)
-        {
-            _log.error("unexpected error", x);
+            try
+            {
+                Table.execute(FlowManager.get().getSchema(), "VACUUM exp.data; VACUUM flow.object; VACUUM flow.keyword; VACUUM flow.statistic;", null);
+            }
+            catch (SQLException x)
+            {
+                _log.error("unexpected error", x);
+            }
         }
     }
 
     static public void analyze()
     {
-        DbSchema db = DbSchema.get("flow");
-
-        if (!(db.getSqlDialect() instanceof SqlDialectPostgreSQL))
-            return;
-
-        try
+        if (isPostgresSQL82())
         {
-            if (version82 != null && version82.equals("?"))
-                version82 = Table.executeSingleton(db, "SELECT version() WHERE version() like '% 8.2%'", null, String.class);
-
-            if (null != version82)
-                Table.execute(db, "ANALYZE exp.data; ANALYZE flow.object; ANALYZE flow.keyword; ANALYZE flow.statistic;", null);
-        }
-        catch (SQLException x)
-        {
-            _log.error("unexpected error", x);
+            try
+            {
+                Table.execute(FlowManager.get().getSchema(), "ANALYZE exp.data; ANALYZE flow.object; ANALYZE flow.keyword; ANALYZE flow.statistic;", null);
+            }
+            catch (SQLException x)
+            {
+                _log.error("unexpected error", x);
+            }
         }
     }
 }

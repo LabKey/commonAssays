@@ -50,7 +50,6 @@ public class AnalyzeJob extends ScriptJob
             if (!checkProcessPath(new File(run.getPath()), FlowProtocolStep.calculateCompensation))
                 return;
             executeHandler(run, getCompensationCalculationHandler());
-            return;
         }
         else
         {
@@ -58,7 +57,6 @@ public class AnalyzeJob extends ScriptJob
                 return;
             ensureCompensationMatrix(run);
             executeHandler(run, getAnalysisHandler());
-            return;
         }
     }
 
@@ -66,9 +64,9 @@ public class AnalyzeJob extends ScriptJob
     {
         FlowManager.vacuum();
 
-        for (int i = 0; i < _runIds.length; i ++)
+        for (int runId : _runIds)
         {
-            FlowRun srcRun = FlowRun.fromRunId(_runIds[i]);
+            FlowRun srcRun = FlowRun.fromRunId(runId);
             if (checkInterrupted())
                 return;
             try
