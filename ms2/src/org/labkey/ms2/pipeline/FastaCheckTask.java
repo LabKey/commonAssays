@@ -35,6 +35,8 @@ public class FastaCheckTask extends PipelineJob.Task
         public Factory()
         {
             super(FastaCheckTask.class);
+
+            setJoin(true);  // Do this once per file-set.
         }
 
         public PipelineJob.Task createTask(PipelineJob job)

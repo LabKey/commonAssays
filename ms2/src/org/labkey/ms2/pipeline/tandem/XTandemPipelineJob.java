@@ -34,17 +34,8 @@ import java.sql.SQLException;
  */
 public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements XTandemSearchTask.JobSupport
 {
-    enum Pipelines
-    {
-        sample, fraction, fractionGroup;
-
-        public TaskId getTaskId()
-        {
-            return new TaskId(getClass().getEnclosingClass(), toString());
-        }
-    }
-
     private static Logger _log = getJobLogger(XTandemPipelineJob.class);
+    private static TaskId _tid = new TaskId(XTandemPipelineJob.class);
 
     public Logger getClassLogger()
     {
@@ -85,12 +76,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
         if (tid != null)
             return tid;
 
-        if (getInputFiles().length > 1)
-            return Pipelines.fractionGroup.getTaskId();
-        if (!isSamples())
-            return Pipelines.fraction.getTaskId();
-
-        return Pipelines.sample.getTaskId();
+        return _tid;
     }
 
     public AbstractFileAnalysisJob createSingleFileJob(File file)

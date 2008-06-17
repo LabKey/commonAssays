@@ -35,15 +35,7 @@ import java.sql.SQLException;
  */
 public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements MascotSearchTask.JobSupport
 {
-    enum Pipelines
-    {
-        sample, fraction, fractionGroup;
-
-        public TaskId getTaskId()
-        {
-            return new TaskId(getClass().getEnclosingClass(), toString());
-        }
-    }
+    private static TaskId _tid = new TaskId(MascotPipelineJob.class);
 
     private String _mascotServer;
     private String _mascotHTTPProxy;
@@ -129,12 +121,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
         if (tid != null)
             return tid;
 
-        if (getInputFiles().length > 1)
-            return Pipelines.fractionGroup.getTaskId();
-        if (!isSamples())
-            return Pipelines.fraction.getTaskId();
-
-        return Pipelines.sample.getTaskId();
+        return _tid;
     }
 
     public AbstractFileAnalysisJob createSingleFileJob(File file)

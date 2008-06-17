@@ -1,14 +1,39 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
+    <bean id="tppTask" class="org.labkey.api.pipeline.TaskId">
+        <constructor-arg><value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value></constructor-arg>
+    </bean>
+    
+    <bean id="tppTaskJoin" class="org.labkey.api.pipeline.TaskId">
+        <constructor-arg><value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value></constructor-arg>
+        <constructor-arg value="join"/>
+    </bean>
+    
     <bean id="expGeneratorSearch" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
         <constructor-arg value="expGeneratorSearch"/>
         <property name="outputExt" value=".search.xar.xml"/>
+        <property name="dependencyId" ref="tppTask"/>
+    </bean>
+
+    <bean id="expGeneratorSearchJoin" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
+        <constructor-arg value="expGeneratorSearchJoin"/>
+        <property name="outputExt" value=".search.xar.xml"/>
+        <property name="join" value="true"/>
+        <property name="dependencyId" ref="tppTaskJoin"/>
     </bean>
 
     <bean id="expImportSearch" class="org.labkey.api.exp.pipeline.XarImportFactorySettings">
         <constructor-arg value="expImportSearch"/>
         <property name="inputExt" value=".search.xar.xml"/>
+        <property name="dependencyId" ref="tppTask"/>
+    </bean>
+
+    <bean id="expImportSearchJoin" class="org.labkey.api.exp.pipeline.XarImportFactorySettings">
+        <constructor-arg value="expImportSearchJoin"/>
+        <property name="inputExt" value=".search.xar.xml"/>
+        <property name="join" value="true"/>
+        <property name="dependencyId" ref="tppTaskJoin"/>
     </bean>
 
     <bean id="ms2PipelineRegistry" class="org.labkey.api.pipeline.TaskPipelineRegistrar">
@@ -19,42 +44,24 @@
                 <bean class="org.labkey.ms2.pipeline.mascot.MascotSearchTask$Factory"/>
                 <bean class="org.labkey.ms2.pipeline.sequest.SequestSearchTask$Factory"/>
                 <bean class="org.labkey.ms2.pipeline.TPPTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.TPPTask$FactoryJoin"/>
             </list>
         </property>
         <property name="pipelines">
             <list>
-                <!-- X! Tandem search pipelines -->
+                <!-- X! Tandem search pipeline -->
                 <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.tandem.XTandemPipelineJob"/>
-                    <constructor-arg value="sample"/>
                     <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemSearchTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
+                            <ref bean="tppTask"/>
                             <ref bean="expGeneratorSearch"/>
                             <ref bean="expImportSearch"/>
-                        </list>
-                    </property>
-                </bean>
-                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.tandem.XTandemPipelineJob"/>
-                    <constructor-arg value="fraction"/>
-                    <property name="taskProgressionSpec">
-                        <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemSearchTask</value>
-                        </list>
-                    </property>
-                </bean>
-                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.tandem.XTandemPipelineJob"/>
-                    <constructor-arg value="fractionGroup"/>
-                    <property name="taskProgressionSpec">
-                        <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
-                            <ref bean="expGeneratorSearch"/>
-                            <ref bean="expImportSearch"/>
+                            <ref bean="tppTaskJoin"/>                            
+                            <ref bean="expGeneratorSearchJoin"/>
+                            <ref bean="expImportSearchJoin"/>
                         </list>
                     </property>
                 </bean>
@@ -62,35 +69,16 @@
                 <!-- Mascot search pipelines -->
                 <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.mascot.MascotPipelineJob"/>
-                    <constructor-arg value="sample"/>
                     <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.mascot.MascotSearchTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
+                            <ref bean="tppTask"/>
                             <ref bean="expGeneratorSearch"/>
                             <ref bean="expImportSearch"/>
-                        </list>
-                    </property>
-                </bean>
-                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.mascot.MascotPipelineJob"/>
-                    <constructor-arg value="fraction"/>
-                    <property name="taskProgressionSpec">
-                        <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.mascot.MascotSearchTask</value>
-                        </list>
-                    </property>
-                </bean>
-                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.mascot.MascotPipelineJob"/>
-                    <constructor-arg value="fractionGroup"/>
-                    <property name="taskProgressionSpec">
-                        <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
-                            <ref bean="expGeneratorSearch"/>
-                            <ref bean="expImportSearch"/>
+                            <ref bean="tppTaskJoin"/>
+                            <ref bean="expGeneratorSearchJoin"/>
+                            <ref bean="expImportSearchJoin"/>
                         </list>
                     </property>
                 </bean>
@@ -98,35 +86,16 @@
                 <!-- Sequest search pipelines -->
                 <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.sequest.SequestPipelineJob"/>
-                    <constructor-arg value="sample"/>
                     <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.sequest.SequestSearchTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
+                            <ref bean="tppTask"/>
                             <ref bean="expGeneratorSearch"/>
                             <ref bean="expImportSearch"/>
-                        </list>
-                    </property>
-                </bean>
-                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.sequest.SequestPipelineJob"/>
-                    <constructor-arg value="fraction"/>
-                    <property name="taskProgressionSpec">
-                        <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.sequest.SequestSearchTask</value>
-                        </list>
-                    </property>
-                </bean>
-                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.sequest.SequestPipelineJob"/>
-                    <constructor-arg value="fractionGroup"/>
-                    <property name="taskProgressionSpec">
-                        <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value>
-                            <ref bean="expGeneratorSearch"/>
-                            <ref bean="expImportSearch"/>
+                            <ref bean="tppTaskJoin"/>
+                            <ref bean="expGeneratorSearchJoin"/>
+                            <ref bean="expImportSearchJoin"/>
                         </list>
                     </property>
                 </bean>

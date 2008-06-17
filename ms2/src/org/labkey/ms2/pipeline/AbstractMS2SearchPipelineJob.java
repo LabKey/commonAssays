@@ -151,22 +151,6 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         return false;
     }
 
-    public void run()
-    {
-        // TODO: Get rid of this, and use branch and join instead.
-        if (!_fromCluster && getInputFiles().length > 1)
-        {
-            for (PipelineJob job : getSingleFileJobs())
-            {
-                job.run();
-                setErrors(getErrors() + job.getErrors());
-            }
-        }
-
-        if (getErrors() == 0)
-            super.run();
-    }
-
     /**
      * Override to turn off PeptideProphet and ProteinProphet analysis.
      * @return true if Prophets should run.

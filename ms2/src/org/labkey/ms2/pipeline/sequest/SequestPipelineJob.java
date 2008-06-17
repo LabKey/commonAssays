@@ -34,15 +34,7 @@ import java.sql.SQLException;
  */
 public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements SequestSearchTask.JobSupport
 {
-    enum Pipelines
-    {
-        sample, fraction, fractionGroup;
-
-        public TaskId getTaskId()
-        {
-            return new TaskId(getClass().getEnclosingClass(), toString());
-        }
-    }
+    private static TaskId _tid = new TaskId(SequestPipelineJob.class);
 
     private String _sequestServer;
 
@@ -90,12 +82,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob implements 
         if (tid != null)
             return tid;
 
-        if (getInputFiles().length > 1)
-            return Pipelines.fractionGroup.getTaskId();
-        if (!isSamples())
-            return Pipelines.fraction.getTaskId();
-
-        return Pipelines.sample.getTaskId();
+        return _tid;
     }
 
     public boolean isRefreshRequired()

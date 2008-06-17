@@ -484,30 +484,29 @@ public class PipelineController extends SpringActionController
                 AbstractMS2SearchPipelineJob job =
                         _protocol.createPipelineJob(getViewBackgroundInfo(), mzXMLFiles, fileParameters, false);
 
+                // This boolean tells us whether the job is going to be processed by a
+                // Perl-driven cluster.
                 boolean hasStatusFile = (job.getStatusFile() != job.getLogFile());
 
-                // If there are multiple files, and this is not a fractions job, or a Perl driven cluster
-                // will do the work, then create the single-file child jobs.
-                if (mzXMLFiles.length > 1)
+                // If not a Perl-driven cluster, just let the PipelineJobQueue deal with it.
+                if (!hasStatusFile)
+                    PipelineService.get().queueJob(job);
+                else
                 {
-                    for (AbstractFileAnalysisJob jobSingle : job.getSingleFileJobs())
+                    // For backward compatibility, we need to create placeholder jobs for
+                    // a Perl-driven cluster.
+                    
+                    // If this is a single file job, or a factions job, then it requires its own processing.
+                    if (mzXMLFiles.length == 1 || job.isFractions())
                     {
-                        // If fractions or for a Perl cluster, just create a placeholder for the status.
-                        if (job.isFractions() || hasStatusFile)
-                            jobSingle.setStatus(PipelineJob.WAITING_STATUS);
-                        else
-                            PipelineService.get().queueJob(jobSingle);
-                    }
-                }
-
-                // If this is a single file job, or a factions job, then it requires its own processing.
-                if (mzXMLFiles.length == 1 || job.isFractions())
-                {
-                    // If a Perl driven cluster will do the work, then just create a placeholder for the status.
-                    if (hasStatusFile)
                         job.setStatus(PipelineJob.WAITING_STATUS);
-                    else
-                        PipelineService.get().queueJob(job);
+                    }
+
+                    if (mzXMLFiles.length > 1)
+                    {
+                        for (PipelineJob jobSingle : job.createSplitJobs())
+                            jobSingle.setStatus(PipelineJob.WAITING_STATUS);
+                    }
                 }
             }
             catch (IllegalArgumentException e)

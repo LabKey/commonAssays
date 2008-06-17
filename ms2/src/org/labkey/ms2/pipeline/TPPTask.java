@@ -119,6 +119,11 @@ public class TPPTask extends PipelineJob.Task
             super(TPPTask.class);
         }
 
+        public Factory(String name)
+        {
+            super(TPPTask.class, name);    
+        }
+
         public PipelineJob.Task createTask(PipelineJob job)
         {
             return new TPPTask(job);
@@ -134,9 +139,14 @@ public class TPPTask extends PipelineJob.Task
             return "ANALYSIS";
         }
 
+        public boolean isParticipant(PipelineJob job) throws IOException, SQLException
+        {
+            return job.getJobSupport(JobSupport.class).isSamples();
+        }
+
         public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
         {
-            JobSupport support = (JobSupport) job;
+            JobSupport support = job.getJobSupport(JobSupport.class);
             String baseName = support.getBaseName();
             File dirAnalysis = support.getAnalysisDirectory();
 
@@ -148,6 +158,21 @@ public class TPPTask extends PipelineJob.Task
                 return false;
 
             return true;
+        }
+    }
+
+    public static class FactoryJoin extends Factory
+    {
+        public FactoryJoin()
+        {
+            super("join");
+            
+            setJoin(true);
+        }
+
+        public boolean isParticipant(PipelineJob job) throws IOException, SQLException
+        {
+            return job.getJobSupport(JobSupport.class).isFractions();
         }
     }
 

@@ -72,6 +72,7 @@
     
     <bean id="peakabooFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
         <constructor-arg value="peakabooFactory"/>
+        <property name="statusName" value="PEAK EXTRACTION"/>
         <property name="inputExtension" value=".mzXML"/>
         <property name="outputExtension" value=".peaks.xml"/>
         <property name="switchFormat" ref="unixMixedSwitch"/>
@@ -129,6 +130,7 @@
 
     <bean id="msInspectFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
         <constructor-arg value="msInspectFactory"/>
+        <property name="statusName" value="FIND PEPTIDES"/>
         <property name="inputExtension" value=".mzXML"/>
         <property name="outputExtension" value=".peptides.tsv"/>
         <property name="switchFormat" ref="unixNewSwitch"/>
@@ -141,27 +143,27 @@
                     <property name="switchName" value="findpeptides"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="ms1 findpeptides, start scan"/>
+                    <property name="parameter" value="msinspect findpeptides, start scan"/>
                     <property name="switchName" value="start"/>
                     <property name="help" value="Minimum scan number (default 1)"/>
                     <property name="paramValidator" ref="gtOne"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="ms1 findpeptides, scan count"/>
+                    <property name="parameter" value="msinspect findpeptides, scan count"/>
                     <property name="switchName" value="count"/>
                     <property name="help" value="Number of scans to search, if not all"/>
                     <property name="paramValidator" ref="gtOne"/>
                 </bean>
 <!--           No longer used
                <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="ms1 findpeptides, dump window"/>
+                    <property name="parameter" value="msinspect findpeptides, dump window"/>
                     <property name="switchName" value="dumpwindow"/>
                     <property name="help" value="Number of scans around each feature to dump to the file"/>
                     <property name="paramValidator" ref="gtOne"/>
                 </bean>
 -->
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
-                    <property name="parameter" value="ms1 findpeptides, minimum m/z"/>
+                    <property name="parameter" value="msinstpect findpeptides, minimum m/z"/>
                     <property name="switchName" value="minmz"/>
                     <property name="help" value="Minimum M/Z Value (default: the minimum m/z value in the file)"/>
                     <property name="paramValidator">
@@ -213,6 +215,7 @@
 
     <bean id="pepMatchFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
         <constructor-arg value="pepMatchFactory"/>
+        <property name="statusName" value="MATCH PEPTIDES"/>
         <property name="removeInput" value="true"/>
         <property name="inputExtension" value=".peptides.tsv"/>
         <property name="inputPaths">
