@@ -17,6 +17,8 @@
 package org.labkey.flow.analysis.web;
 
 import org.labkey.api.view.Stats;
+import org.labkey.flow.analysis.model.DataFrame;
+import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.model.Subset;
 
@@ -42,6 +44,9 @@ public class StatisticSpec implements Serializable, Comparable
         Median("Median", "Median"),
         Mean("Mean", "Mean"),
         Std_Dev("Standard_Deviation", "StdDev"),
+        CV("Coefficient of Variation", "CV"),
+        Median_Abs_Dev("Median Absolute Deviation", "MAD"),
+        //Robust_CV("Robust Coefficient of Variation", "rCV"),
         Percentile("Percentile", "%ile"),
         // Run statistics
         Spill("Spill", "Spill"); // Used for compensation calculations
@@ -211,6 +216,26 @@ public class StatisticSpec implements Serializable, Comparable
                 return doubleStats.getMedian();
             case Std_Dev:
                 return doubleStats.getStdDev();
+            case CV:
+                double median = doubleStats.getMedian();
+                if (median == 0)
+                    return 0;
+                return 100.0 * doubleStats.getStdDev() / median;
+            case Median_Abs_Dev:
+                return doubleStats.getMedianAbsoluteDeviation();
+//            case Robust_CV:
+//                // BD's definition
+//                return 100.0 * doubleStats.getMedianAbsoluteDeviation() / doubleStats.getMedian();
+
+//                // interquartile range, 50% from the middle
+//                double q1 = doubleStats.getFirstQuartile();
+//                double q3 = doubleStats.getThirdQuartile();
+//                return 100.0 * 0.7515 * (q3 - q1) / doubleStats.getMedian();
+
+//                // 63% from the middle, roughly 1 stddev
+//                double q1 = doubleStats.getPercentile(.315);
+//                double q3 = doubleStats.getPercentile(.815);
+//                return 100.0 * 0.8413 * (q3 - q1) / doubleStats.getMedian();
             case Percentile:
                 return doubleStats.getPercentile(percentile / 100);
             default:
@@ -243,5 +268,55 @@ public class StatisticSpec implements Serializable, Comparable
         if (ret != 0)
             return ret;
         return this.toString().compareTo(spec.toString());
+    }
+
+    public static void main(String[] args)
+    {
+        String fcsFile = args[0];
+        FCS fcs = null;
+        try
+        {
+            fcs = new FCS(new java.io.File(fcsFile));
+        }
+        catch (java.io.IOException ioe)
+        {
+            ioe.printStackTrace(System.err);
+        }
+        if (fcs == null)
+            return;
+
+
+        System.out.println("Name\tMin\t1st Qu.\tMean\tMedian\t3rd Qu.\tMax\tCount\tStd_Dev\tMedian_Abs_Dev\tCV");
+
+        DataFrame frame = fcs.getScaledData(null);
+        for (int p = 0; p < frame.getColCount(); p++)
+        {
+            DataFrame.Field field = frame.getField(p);
+            System.out.print(field.getName());
+
+            java.util.Map<String, Stats.DoubleStats> map = new java.util.HashMap<String, Stats.DoubleStats>();
+            Subset subset = new Subset(null, null, fcs, frame);
+            StatisticSpec[] stats = new StatisticSpec[] {
+                new StatisticSpec(null, STAT.Min, field.getName()),
+                new StatisticSpec(null, STAT.Percentile, field.getName() + ":25"),
+                new StatisticSpec(null, STAT.Mean, field.getName()),
+                new StatisticSpec(null, STAT.Median, field.getName()),
+                new StatisticSpec(null, STAT.Percentile, field.getName() + ":75"),
+                new StatisticSpec(null, STAT.Max, field.getName()),
+                new StatisticSpec(null, STAT.Count, field.getName()),
+                new StatisticSpec(null, STAT.Std_Dev, field.getName()),
+                new StatisticSpec(null, STAT.Median_Abs_Dev, field.getName()),
+                new StatisticSpec(null, STAT.CV, field.getName()),
+            };
+
+            for (StatisticSpec stat : stats)
+            {
+                double d = calculate(subset, stat, map);
+                System.out.printf("\t%.2f", d);
+            }
+
+            System.out.println();
+        }
+
     }
 }
