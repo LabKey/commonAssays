@@ -17,14 +17,13 @@
 package org.labkey.flow.view;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.TSVGridWriter;
-import org.labkey.api.data.MenuButton;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.query.QueryPicker;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.query.QueryParam;
+import org.labkey.api.query.QueryAction;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
@@ -101,10 +100,9 @@ public class FlowQueryView extends QueryView
         return getViewContext().getUser();
     }
 
-    public void renderCustomizeLinks(PrintWriter out) throws Exception
+    protected void renderView(Object model, PrintWriter out) throws Exception
     {
-        super.renderCustomizeLinks(out);
-        if (hasGraphs())
+        if (!isPrintView() && hasGraphs())
         {
             if (showGraphs())
             {
@@ -123,6 +121,7 @@ public class FlowQueryView extends QueryView
                 out.write("&nbsp;");
             }
         }
+        super.renderView(model, out);
     }
 
     public FlowQuerySettings getSettings()
@@ -147,28 +146,36 @@ public class FlowQueryView extends QueryView
         return (FlowSchema) super.getSchema();
     }
 
-    protected List<QueryPicker> getChangeViewPickers()
+    protected void populateButtonBar(DataView view, ButtonBar bar,  boolean exportAsWebPage)
     {
-        List<QueryPicker> ret = super.getChangeViewPickers();
         if (getSchema().getRun() == null)
         {
             FlowExperiment[] experiments = FlowExperiment.getAnalysesAndWorkspace(getContainer());
-            Map<Object, String> availableExperiments = new LinkedHashMap();
-            availableExperiments.put(0, "<All Analysis Folders>");
+            ActionURL target = urlChangeView();
+            MenuButton button = new MenuButton("Analysis Folder");
+
+            Map<Integer, String> availableExperiments = new LinkedHashMap();
+            availableExperiments.put(0, "All Analysis Folders");
+
             for (FlowExperiment experiment : experiments)
-            {
                 availableExperiments.put(experiment.getExperimentId(), experiment.getName());
-            }
+
             FlowExperiment current = getSchema().getExperiment();
             int currentId = current == null ? 0 : current.getExperimentId();
 
             if (!availableExperiments.containsKey(currentId))
-            {
                 availableExperiments.put(current.getExperimentId(), current.getName());
+
+            for (Map.Entry<Integer, String> entry : availableExperiments.entrySet())
+            {
+                button.addMenuItem(entry.getValue(),
+                        target.clone().replaceParameter(FlowParam.experimentId, String.valueOf(entry.getKey())).toString(),
+                        null,
+                        currentId == entry.getKey());
             }
-            ret.add(new QueryPicker("Analysis Folder:", FlowParam.experimentId.toString(), currentId, availableExperiments));
+            bar.add(button);
         }
-        return ret;
+        super.populateButtonBar(view, bar, exportAsWebPage);
     }
 
     public List<DisplayColumn> getDisplayColumns()

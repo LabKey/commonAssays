@@ -139,19 +139,13 @@ public class ProteinController extends SpringActionController
                     return result;
                 }
 
-                protected List<QueryPicker> getQueryPickers()
+                public MenuButton createQueryPickerButton(String label)
                 {
-                    List<QueryPicker> result = super.getQueryPickers();
-                    for (QueryPicker picker : result)
-                    {
-                        picker.setLabel("Custom Protein List: ");
-                    }
-                    return result;
+                    return super.createQueryPickerButton("Custom Protein List");
                 }
             };
 
             queryView.setShowExportButtons(true);
-            queryView.setShowCustomizeViewLinkInButtonBar(true);
             queryView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
 
             ActionURL url;

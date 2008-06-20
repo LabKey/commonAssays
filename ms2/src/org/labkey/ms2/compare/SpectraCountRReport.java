@@ -59,10 +59,8 @@ public class SpectraCountRReport extends RReport
         // need to set the view name (if any) from the report, else you will just re-render
         // this report.
         settings.setViewName(getDescriptor().getProperty(ReportDescriptor.Prop.viewName));
-        settings.setAllowChooseView(false);
 
         view.setButtonBarPosition(DataRegion.ButtonBarPosition.NONE);
-        view.setShowChangeViewPicker(false);
 
         return view;
     }

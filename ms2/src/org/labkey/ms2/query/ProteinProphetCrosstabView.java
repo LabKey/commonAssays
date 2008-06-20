@@ -66,7 +66,6 @@ public class ProteinProphetCrosstabView extends ComparisonCrosstabView
         settings.setAllowChooseView(true);
         setSettings(settings);
 
-        setShowCustomizeViewLinkInButtonBar(true);
         setShowRecordSelectors(false);
     }
 

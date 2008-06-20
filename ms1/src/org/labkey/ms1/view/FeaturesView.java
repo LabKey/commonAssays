@@ -79,7 +79,6 @@ public class FeaturesView extends QueryView
         settings.setAllowChooseQuery(false);
         setSettings(settings);
 
-        setShowCustomizeViewLinkInButtonBar(true);
         setShowRecordSelectors(false);
     }
 

@@ -51,7 +51,6 @@ public class CompareRunsView extends ComparisonCrosstabView
         settings.setAllowChooseView(true);
         setSettings(settings);
 
-        setShowCustomizeViewLinkInButtonBar(true);
         setShowRecordSelectors(false);
     }
 

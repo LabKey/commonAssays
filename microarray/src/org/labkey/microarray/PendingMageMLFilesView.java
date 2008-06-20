@@ -49,7 +49,6 @@ public class PendingMageMLFilesView extends QueryView
         setShowDetailsColumn(false);
         setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
         setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
-        setShowCustomizeViewLinkInButtonBar(true);
     }
 
     private QuerySettings createSettings(ViewContext context)

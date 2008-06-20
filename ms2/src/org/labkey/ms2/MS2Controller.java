@@ -2538,7 +2538,6 @@ public class MS2Controller extends SpringActionController
             QueryView proteinsView = new QueryView(schema, proteinsSettings);
 
             proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
-            proteinsView.setShowCustomizeViewLinkInButtonBar(true);
             SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
             Integer[] seqIds = getSeqIds(form);
             if (seqIds.length <= 500)
@@ -2584,7 +2583,6 @@ public class MS2Controller extends SpringActionController
                 }
 
             };
-            groupsView.setShowCustomizeViewLinkInButtonBar(true);
             groupsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
 
             groupsView.setTitle("Protein Group Results");

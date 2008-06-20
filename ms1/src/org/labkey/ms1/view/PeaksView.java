@@ -70,7 +70,6 @@ public class PeaksView extends QueryView
             setTitle("Peaks from Scans " + _scanFirst + " through " + _scanLast);
         
 
-        setShowCustomizeViewLinkInButtonBar(true);
         setShowRecordSelectors(false);
     }
 

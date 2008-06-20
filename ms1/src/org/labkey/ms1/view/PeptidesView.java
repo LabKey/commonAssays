@@ -54,7 +54,6 @@ public class PeptidesView extends QueryView
         settings.setAllowChooseQuery(false);
         setSettings(settings);
 
-        setShowCustomizeViewLinkInButtonBar(true);
         setShowRecordSelectors(false);
     }
 

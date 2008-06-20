@@ -34,24 +34,10 @@ public class ChooseRunsView extends FlowQueryView
     public ChooseRunsView(ChooseRunsToAnalyzeForm form) throws Exception
     {
         super(form);
+        getSettings().setAllowChooseQuery(false);
+        getSettings().setAllowChooseView(false);
         _form = form;
     }
-
-    protected List<QueryPicker> getChangeViewPickers()
-    {
-        return Collections.EMPTY_LIST;
-    }
-
-    protected List<QueryPicker> getQueryPickers()
-    {
-        return Collections.EMPTY_LIST;
-    }
-
-    public void renderCustomizeLinks(PrintWriter out) throws Exception
-    {
-        return;
-    }
-
 
     protected boolean canDelete()
     {
