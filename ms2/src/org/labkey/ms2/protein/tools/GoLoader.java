@@ -213,20 +213,25 @@ public abstract class GoLoader
             for (it = t.iterator(); it.hasNext();)
             {
                 Map curRec = (Map)it.next();
+                boolean addRow = true;
                 for (int i = 0; i < cols.length; i++)
                     ps.setNull(i + 1, columns.get(i).getSqlTypeInt());
 
                 for (Object key : curRec.keySet())
                 {
                     int kindex = Integer.parseInt(((String) key).substring(6));
+
+                    // bug #6085 -- ignore any columns that we don't know about, e.g., term_synonym.synonym_category_id that was added recently
+                    if (kindex >= columns.size())
+                        continue;
+
+                    ColumnInfo column = columns.get(kindex);
                     Object val = curRec.get(key);
                     if (val instanceof String)
                     {
                         String s = (String)val;
                         if (s.equals("\\N"))
                             continue;
-
-                        ColumnInfo column = columns.get(kindex);
 
                         if (column.getSqlTypeInt() == Types.VARCHAR)
                         {
@@ -243,8 +248,14 @@ public abstract class GoLoader
                     {
                         ps.setObject(kindex + 1, val);
                     }
+                    else if (!column.isNullable())
+                    {
+                        addRow = false;   // Skip any record with null in a non-nullable column (e.g., row 21 of 200806 term.txt)
+                        break;
+                    }
                 }
-                ps.addBatch();
+                if (addRow)
+                    ps.addBatch();
                 orgLineCount++;
                 if (orgLineCount % GO_BATCH_SIZE == 0)
                 {
@@ -285,7 +296,7 @@ public abstract class GoLoader
 
         logStatus("Loading GO annotations failed with the following exception:");
         logStatus(ExceptionUtil.renderException(e));
-        _log.debug("GoLoader", e);
+        ExceptionUtil.logExceptionToMothership(null, e);
     }
 
 

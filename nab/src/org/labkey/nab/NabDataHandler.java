@@ -24,7 +24,9 @@ import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.*;
+import org.labkey.common.util.Pair;
 import org.apache.log4j.Logger;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,6 +53,8 @@ public class NabDataHandler extends AbstractExperimentDataHandler
     public static final String WELLGROUP_NAME_PROPERTY = "WellgroupName";
     private static final int START_ROW = 6; //0 based, row 7 inthe workshet
     private static final int START_COL = 0;
+    private static final int PLATE_WIDTH = 12;
+    private static final int PLATE_HEIGHT = 8;
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
@@ -317,14 +321,38 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         }
         double[][] cellValues = new double[nabTemplate.getRows()][nabTemplate.getColumns()];
 
-        if (workbook.getSheets().length < 2)
-            throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: did not find expected sheet 2.");
-        Sheet plateSheet = workbook.getSheet(1);
+        Sheet plateSheet = null;
+        Pair<Integer, Integer> dataLocation = null;
 
-        if (nabTemplate.getRows() + START_ROW > plateSheet.getRows() || nabTemplate.getColumns() + START_COL > plateSheet.getColumns())
+        // search the workbook for a region that contains 96 cells of data labeled with A-H rows and 1-12 cols:
+        for (int sheet = 0; sheet < workbook.getNumberOfSheets() && dataLocation == null; sheet++)
+        {
+            plateSheet = workbook.getSheet(sheet);
+            dataLocation = getPlateDataLocation(plateSheet);
+        }
+
+        int startRow;
+        int startColumn;
+        if (dataLocation == null)
+        {
+            // if we couldn't find a labeled grid of plate data, we'll assume the default location at START_ROW/START_COL
+            // within the second worksheet:
+            startRow = START_ROW;
+            startColumn = START_COL;
+            if (workbook.getSheets().length < 2)
+                throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: no plate data was found.");
+            plateSheet = workbook.getSheet(1);
+        }
+        else
+        {
+            startRow = dataLocation.getKey().intValue();
+            startColumn = dataLocation.getValue().intValue();
+        }
+
+        if (nabTemplate.getRows() + startRow > plateSheet.getRows() || nabTemplate.getColumns() + startColumn > plateSheet.getColumns())
         {
             throw new ExperimentException(dataFile.getName() + " does not appear to be a valid data file: expected " +
-                    (nabTemplate.getRows() + START_ROW) + " rows and " + (nabTemplate.getColumns() + START_COL) + " colums, but found "+
+                    (nabTemplate.getRows() + startRow) + " rows and " + (nabTemplate.getColumns() + startColumn) + " colums, but found "+
                     plateSheet.getRows() + " rows and " + plateSheet.getColumns() + " colums.");
         }
 
@@ -332,7 +360,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         {
             for (int col = 0; col < nabTemplate.getColumns(); col++)
             {
-                Cell cell = plateSheet.getCell(col + START_COL, row + START_ROW);
+                Cell cell = plateSheet.getCell(col + startColumn, row + startRow);
                 String cellContents = cell.getContents();
                 try
                 {
@@ -433,5 +461,54 @@ public class NabDataHandler extends AbstractExperimentDataHandler
             return Priority.HIGH;
         }
         return null;
+    }
+
+    private static Pair<Integer, Integer> getPlateDataLocation(Sheet plateSheet)
+    {
+        for (int row = 0; row < plateSheet.getRows() - PLATE_HEIGHT; row++)
+        {
+            for (int col = 0; col < plateSheet.getColumns() - PLATE_WIDTH; col++)
+            {
+                if (isPlateMatrix(plateSheet, row, col))
+                {
+                    // add one to row and col, since (row,col) is the index of the data grid
+                    // where the first row is column labels and the first column is row labels.
+                    return new Pair<Integer, Integer>(row + 1, col + 1);
+                }
+            }
+        }
+        return null;
+    }
+
+    private static boolean isPlateMatrix(Sheet plateSheet, int startRow, int startCol)
+    {
+        Cell[] row = plateSheet.getRow(startRow);
+        // make sure that there are plate_width + 1 cells to the right of startCol:
+        if (startCol + PLATE_WIDTH + 1 > row.length)
+            return false;
+
+        Cell[] column = plateSheet.getColumn(startCol);
+        // make sure that there are plate_width + 1 cells to the right of startCol:
+        if (startRow + PLATE_HEIGHT + 1 > column.length)
+            return false;
+
+        // check for 1-12 in the row:
+        for (int colIndex = startCol + 1; colIndex < startCol + PLATE_WIDTH + 1; colIndex++)
+        {
+            Cell current = row[colIndex];
+            String indexString = String.valueOf(colIndex - startCol);
+            if (!StringUtils.equals(current.getContents(), indexString))
+                return false;
+        }
+
+        char start = 'A';
+        for (int rowIndex = startRow + 1; rowIndex < startRow + PLATE_HEIGHT + 1; rowIndex++)
+        {
+            Cell current = column[rowIndex];
+            String indexString = String.valueOf(start++);
+            if (!StringUtils.equals(current.getContents(), indexString))
+                return false;
+        }
+        return true;
     }
 }
