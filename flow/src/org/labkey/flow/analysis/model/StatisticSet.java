@@ -20,8 +20,8 @@ import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.StatisticSpec.STAT;
 import org.labkey.flow.analysis.web.SubsetSpec;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /*
@@ -49,7 +49,8 @@ public enum StatisticSet
     frequencyOfGrandparent("FrequencyOfGrandparent", new StatisticSpec(new SubsetSpec(null, "*"), STAT.Freq_Of_Grandparent, null)),
     medianAll("Median values of all parameters", new StatisticSpec(new SubsetSpec(null, "*"), STAT.Median, "*")),
     meanAll("Mean values of all parameters", new StatisticSpec(new SubsetSpec(null, "*"), STAT.Mean, "*")),
-    stdDevAll("Standard deviation of all parameters", new StatisticSpec(new SubsetSpec(null, "*"), STAT.Std_Dev, "*"))
+    stdDevAll("Standard deviation of all parameters", new StatisticSpec(new SubsetSpec(null, "*"), STAT.Std_Dev, "*")),
+    cvAll("Coefficient of variation of all parameters", new StatisticSpec(new SubsetSpec(null, "*"), STAT.CV, "*"))
     ;
 
     final StatisticSpec _spec;
@@ -104,6 +105,8 @@ public enum StatisticSet
                 return statSets.contains(StatisticSet.meanAll);
             case Std_Dev:
                 return statSets.contains(StatisticSet.stdDevAll);
+            case CV:
+                return statSets.contains(StatisticSet.cvAll);
         }
         return false;
     }

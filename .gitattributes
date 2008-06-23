@@ -427,7 +427,6 @@ flow/src/org/labkey/flow/webparts/OverviewWebPart.java -text
 flow/webapp/Flow/blankGraphWindow.html -text
 flow/webapp/Flow/editCompensationCalculation.js -text
 flow/webapp/Flow/editGates.js -text
-flow/webapp/Flow/editScript.js -text
 flow/webapp/Flow/flagAnalysisScript.gif -text
 flow/webapp/Flow/flagCompensationControl.gif -text
 flow/webapp/Flow/flagCompensationMatrix.gif -text

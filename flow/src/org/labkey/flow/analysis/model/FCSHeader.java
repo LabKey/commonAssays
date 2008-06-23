@@ -16,12 +16,13 @@
 
 package org.labkey.flow.analysis.model;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Collections;
-import java.nio.channels.FileChannel;
-import java.nio.ByteBuffer;
-import java.io.*;
 
 /**
  */
@@ -115,7 +116,7 @@ public class FCSHeader
             cbRead += read;
             String fullText = new String(textBuf);
             textBuf = null;
-            assert fullText.charAt(0) == fullText.charAt(fullText.length() - 1);
+//            assert fullText.charAt(0) == fullText.charAt(fullText.length() - 1);
             chDelimiter = fullText.charAt(0);
             int ichStart = 0;
             while (true)
@@ -126,7 +127,7 @@ public class FCSHeader
                 int ichEnd = fullText.indexOf(chDelimiter, ichMid + 1);
                 if (ichEnd < 0)
                 {
-                    assert false;
+//                    assert false;
                     ichEnd = fullText.length();
                 }
                 String strKey = fullText.substring(ichStart + 1, ichMid);

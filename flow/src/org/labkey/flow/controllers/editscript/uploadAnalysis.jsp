@@ -16,9 +16,9 @@
  */
 %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.flow.analysis.model.StatisticSet" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.flow.analysis.model.StatisticSet" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.UploadAnalysisPage" %>
 <%!
@@ -99,6 +99,7 @@
         <%=statOption(StatisticSet.medianAll)%> Median value of all parameters<br>
         <%=statOption(StatisticSet.meanAll)%> Mean value of all parameters<br>
         <%=statOption(StatisticSet.stdDevAll)%> Standard deviation of all parameters<br>
+        <%=statOption(StatisticSet.cvAll)%> Coefficient of variation of all parameters<br>
     </p>
     <% }
     else

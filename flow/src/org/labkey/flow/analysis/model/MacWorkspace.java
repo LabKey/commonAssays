@@ -40,6 +40,8 @@ public class MacWorkspace extends FlowJoWorkspace
         statMap.put("FrequencyOfGrandParent", StatisticSpec.STAT.Freq_Of_Grandparent);
         statMap.put("FrequencyOfParent", StatisticSpec.STAT.Freq_Of_Parent);
         statMap.put("FrequencyOfTotal", StatisticSpec.STAT.Frequency);
+        statMap.put("CV", StatisticSpec.STAT.CV);
+        //statMap.put("RobustCV", StatisticSpec.STAT.Robust_CV);
     }
 
 
@@ -246,20 +248,6 @@ public class MacWorkspace extends FlowJoWorkspace
                 parameter = cleanName(parameter);
             }
             String percentile = StringUtils.trimToNull(elStat.getAttribute("statisticVariable"));
-            String strValue = elStat.getAttribute("value");
-            if (strValue == null)
-            {
-                continue;
-            }
-            double value;
-            try
-            {
-                value = Double.valueOf(strValue).doubleValue();
-            }
-            catch (NumberFormatException nfe)
-            {
-                continue;
-            }
             StatisticSpec spec;
             if (percentile == null)
             {
@@ -269,7 +257,20 @@ public class MacWorkspace extends FlowJoWorkspace
             {
                 spec = new StatisticSpec(subset, stat, parameter + ":" + percentile);
             }
-            results.setStatistic(spec, value);
+            String strValue = StringUtils.trimToNull(elStat.getAttribute("value"));
+            if (strValue != null)
+            {
+                double value;
+                try
+                {
+                    value = Double.valueOf(strValue).doubleValue();
+                }
+                catch (NumberFormatException nfe)
+                {
+                    continue;
+                }
+                results.setStatistic(spec, value);
+            }
             analysis.addStatistic(spec);
         }
     }

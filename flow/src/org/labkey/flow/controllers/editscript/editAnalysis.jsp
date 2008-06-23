@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
-<%@ page import="java.util.Map"%>
-<%@ page import="java.util.Collection" %>
 <%@ page import="org.labkey.flow.analysis.web.SubsetSpec" %>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
+<%@ page import="java.util.Collection" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%=pageHeader(ScriptController.Action.editAnalysis)%>
@@ -26,7 +26,6 @@
 <%Map<String, String> params = form.getParameters();
     Collection<SubsetSpec> subsets = form.analysisScript.getSubsets();
 %>
-<script src="<%=request.getContextPath()%>/Flow/editScript.js"></script>
 <script>
     function addStat()
     {
@@ -34,9 +33,9 @@
         var stat = getValue(document.getElementById("stat_stat"));
         var parameter = getValue(document.getElementById("stat_parameter"));
 
-        var statistic;
+        var statistic = "";
 
-        if (stat == "Median" || stat == "Mean" || stat == "Std_Dev" || stat == "Percentile")
+        if (stat == "Median" || stat == "Mean" || stat == "Std_Dev" || stat == "Percentile" || stat == "CV")
         {
             if (!parameter)
             {
@@ -75,12 +74,12 @@
                     alert("You cannot calculate the " + stat + " statistic on the ungated population.");
                     return;
                 }
-                statistic = "";
             }
             statistic += stat;
         }
         appendLine(document.getElementsByName("statistics")[0], statistic);
     }
+
     function addGraph()
     {
         var subset = getValue(document.getElementById("graph_subset"));
@@ -100,6 +99,24 @@
             graph += "(" + x + ")";
         }
         appendLine(document.getElementsByName("graphs")[0], graph);
+    }
+    
+    function getValue(el)
+    {
+        if (el.options)
+            return el.options[el.selectedIndex].value;
+        return el.value;
+    }
+
+    function appendLine(el, text)
+    {
+        value = el.value;
+        if (value && value.charAt(value.length - 1) != '\n')
+        {
+            value = value + '\n';
+        }
+        value += text;
+        el.value = value;
     }
 </script>
 
@@ -128,6 +145,7 @@
                         <option value="Median">Median</option>
                         <option value="Mean">Mean</option>
                         <option value="Std_Dev">Standard Deviation</option>
+                        <option value="CV">Coefficient of Variance (CV)</option>
                         <option value="Percentile">Percentile</option>
                     </select>
                 </td>
