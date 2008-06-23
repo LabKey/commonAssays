@@ -16,13 +16,14 @@
 
 package org.labkey.flow.analysis.chart;
 
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ColorBar;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYDotRenderer;
-import org.jfree.data.xy.XYDataset;
 import org.jfree.data.Range;
+import org.jfree.data.xy.XYDataset;
+import org.labkey.api.view.Stats;
 import org.labkey.flow.analysis.model.*;
 
 import java.awt.*;
@@ -47,15 +48,14 @@ public class PlotFactory
 
     /**
      * Return a set of buckets usable for binning a dataset.
-     * @param field The field in question
+     * @param minValue min value
+     * @param maxValue max value
      * @param fLogarithmic whether the buckets should be logarithmically spaced
      * @param bucketCount The maximum number of buckets
      * @return
      */
-    static public double[] getPossibleValues(DataFrame.Field field, boolean fLogarithmic, int bucketCount)
+    static public double[] getPossibleValues(double minValue, double maxValue, boolean fLogarithmic, int bucketCount)
     {
-        double maxValue = field.getMaxValue();
-        double minValue = field.getMinValue();
         int cBuckets = (int) Math.min(maxValue - minValue, bucketCount);
         double[] ret = new double[cBuckets];
 
@@ -78,7 +78,15 @@ public class PlotFactory
 
     static double[] getPossibleValues(Subset subset, DataFrame.Field field, int maxCount)
     {
-        return getPossibleValues(field, displayLogarithmic(subset, field), maxCount);
+        double max = field.getMaxValue();
+        double min = field.getMinValue();
+        if ("Time".equals(field.getName()))
+        {
+            Stats.DoubleStats stats = new Stats.DoubleStats(subset.getDataFrame().getDoubleArray(field.getName()));
+            max = stats.getMax();
+            min = stats.getMin();
+        }
+        return getPossibleValues(min, max, displayLogarithmic(subset, field), maxCount);
     }
 
     static protected boolean displayLogarithmic(Subset subset, DataFrame.Field field)
