@@ -35,7 +35,7 @@ import java.sql.SQLException;
 public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements XTandemSearchTask.JobSupport
 {
     private static Logger _log = getJobLogger(XTandemPipelineJob.class);
-    private static TaskId _tid = new TaskId(XTandemPipelineJob.class);
+    protected static TaskId _tid = new TaskId(XTandemPipelineJob.class);
 
     public Logger getClassLogger()
     {

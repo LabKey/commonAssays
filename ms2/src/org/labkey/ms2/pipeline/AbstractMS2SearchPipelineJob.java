@@ -39,7 +39,8 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
 {
     enum Pipelines
     {
-        finishPerlCluster;
+        finishPerlCluster,
+        finishPerlClusterJoined;
 
         public TaskId getTaskId()
         {
@@ -118,15 +119,23 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     public TaskId getTaskPipelineId()
     {
         if (_fromCluster)
-            return Pipelines.finishPerlCluster.getTaskId();
+        {
+            if (getInputFiles().length > 1)
+                return Pipelines.finishPerlClusterJoined.getTaskId();
+            else
+                return Pipelines.finishPerlCluster.getTaskId();
+        }
 
         return null;
     }
 
     public File findInputFile(String name)
     {
-        if (getInputType().isType(name))
-            return new File(getDataDirectory(), name);
+        for (File fileInput : getInputFiles())
+        {
+            if (name.equals(fileInput.getName()))
+                return fileInput;
+        }
         
         return new File(getAnalysisDirectory(), name);
     }
@@ -183,7 +192,8 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     public File getSearchSpectraFile()
     {
         assert getInputFiles().length == 1;
-        return getInputFiles()[0];
+        
+        return AbstractMS2SearchProtocol.FT_MZXML.newFile(getDataDirectory(), getBaseName());
     }
 
     public File getSearchNativeSpectraFile()

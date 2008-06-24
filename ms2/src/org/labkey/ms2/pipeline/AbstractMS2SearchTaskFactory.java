@@ -28,9 +28,9 @@ abstract public class AbstractMS2SearchTaskFactory extends AbstractTaskFactory
         super(namespaceClass);
     }
 
-    public FileType getInputType()
+    public FileType[] getInputTypes()
     {
-        return AbstractMS2SearchProtocol.FT_MZXML;
+        return new FileType[] { AbstractMS2SearchProtocol.FT_MZXML };
     }
 
     public String getStatusName()

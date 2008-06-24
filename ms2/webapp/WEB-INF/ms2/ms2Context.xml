@@ -1,15 +1,114 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
+    <bean id="ms2PipelineRegistry" class="org.labkey.api.pipeline.TaskPipelineRegistrar">
+        <property name="pipelines">
+            <list>
+                <!-- X! Tandem search pipeline -->
+                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.tandem.XTandemPipelineJob"/>
+                    <property name="taskProgressionSpec">
+                        <list>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
+                            <ref bean="mzxmlConverter"/>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemSearchTask</value>
+                            <ref bean="tppTask"/>
+                            <ref bean="expGeneratorSearch"/>
+                            <ref bean="expImportSearch"/>
+                            <ref bean="tppTaskJoin"/>                            
+                            <ref bean="expGeneratorSearchJoin"/>
+                            <ref bean="expImportSearchJoin"/>
+                        </list>
+                    </property>
+                </bean>
+
+                <!-- Mascot search pipelines -->
+                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.mascot.MascotPipelineJob"/>
+                    <property name="taskProgressionSpec">
+                        <list>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
+                            <ref bean="mzxmlConverter"/>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.mascot.MascotSearchTask</value>
+                            <ref bean="tppTask"/>
+                            <ref bean="expGeneratorSearch"/>
+                            <ref bean="expImportSearch"/>
+                            <ref bean="tppTaskJoin"/>
+                            <ref bean="expGeneratorSearchJoin"/>
+                            <ref bean="expImportSearchJoin"/>
+                        </list>
+                    </property>
+                </bean>
+
+                <!-- Sequest search pipelines -->
+                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.sequest.SequestPipelineJob"/>
+                    <property name="taskProgressionSpec">
+                        <list>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
+                            <ref bean="mzxmlConverter"/>
+                            <value type="java.lang.Class">org.labkey.ms2.pipeline.sequest.SequestSearchTask</value>
+                            <ref bean="tppTask"/>
+                            <ref bean="expGeneratorSearch"/>
+                            <ref bean="expImportSearch"/>
+                            <ref bean="tppTaskJoin"/>
+                            <ref bean="expGeneratorSearchJoin"/>
+                            <ref bean="expImportSearchJoin"/>
+                        </list>
+                    </property>
+                </bean>
+
+                <!-- MS2 pipeline for finishing a search on the Perl Cluster Pipeline -->
+                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob"/>
+                    <constructor-arg value="finishPerlCluster"/>
+                    <property name="taskProgressionSpec">
+                        <list>
+                            <ref bean="expGeneratorSearch"/>
+                            <ref bean="expImportSearch"/>
+                        </list>
+                    </property>
+                </bean>
+
+                <!-- MS2 pipeline for finishing a fractions search on the Perl Cluster Pipeline -->
+                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
+                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob"/>
+                    <constructor-arg value="finishPerlClusterJoined"/>
+                    <property name="taskProgressionSpec">
+                        <list>
+                            <ref bean="expGeneratorSearchJoin"/>
+                            <ref bean="expImportSearchJoin"/>
+                        </list>
+                    </property>
+                </bean>
+            </list>
+        </property>
+        <property name="factoryImpls">
+            <list>
+                <bean class="org.labkey.ms2.pipeline.FastaCheckTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.tandem.XTandemSearchTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.mascot.MascotSearchTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.sequest.SequestSearchTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.TPPTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.TPPTask$FactoryJoin"/>
+            </list>
+        </property>
+        <property name="factories">
+            <list>
+                <ref bean="readwMzxmlConverter"/>
+            </list>
+        </property>
+    </bean>
+
     <bean id="tppTask" class="org.labkey.api.pipeline.TaskId">
         <constructor-arg><value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value></constructor-arg>
     </bean>
-    
+
     <bean id="tppTaskJoin" class="org.labkey.api.pipeline.TaskId">
         <constructor-arg><value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value></constructor-arg>
         <constructor-arg value="join"/>
     </bean>
-    
+
     <bean id="expGeneratorSearch" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
         <constructor-arg value="expGeneratorSearch"/>
         <property name="outputExt" value=".search.xar.xml"/>
@@ -36,82 +135,35 @@
         <property name="dependencyId" ref="tppTaskJoin"/>
     </bean>
 
-    <bean id="ms2PipelineRegistry" class="org.labkey.api.pipeline.TaskPipelineRegistrar">
-        <property name="factoryImpls">
+    <bean id="mzxmlConverter" class="org.labkey.api.pipeline.cmd.ConvertTaskFactorySettings">
+        <constructor-arg value="mzxmlConverter"/>
+        <property name="statusName" value="MZXML CONVERSION"/>
+        <property name="outputExt" value=".mzXML"/>
+        <!-- Add converters in ms2Config.xml to enable -->
+    </bean>
+
+    <bean id="unixNewSwitch" class="org.labkey.api.pipeline.cmd.UnixNewSwitchFormat"/>
+
+    <bean id="readwMzxmlConverter" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
+        <constructor-arg value="readwMzxmlConverter"/>
+        <property name="statusName" value="MZXML CONVERSION"/>
+        <property name="inputExtension" value=".RAW"/>
+        <property name="outputExtension" value=".mzXML"/>
+        <property name="switchFormat" ref="unixNewSwitch"/>
+        <property name="converters">
             <list>
-                <bean class="org.labkey.ms2.pipeline.FastaCheckTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.tandem.XTandemSearchTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.mascot.MascotSearchTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.sequest.SequestSearchTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.TPPTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.TPPTask$FactoryJoin"/>
-            </list>
-        </property>
-        <property name="pipelines">
-            <list>
-                <!-- X! Tandem search pipeline -->
-                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.tandem.XTandemPipelineJob"/>
-                    <property name="taskProgressionSpec">
-                        <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemSearchTask</value>
-                            <ref bean="tppTask"/>
-                            <ref bean="expGeneratorSearch"/>
-                            <ref bean="expImportSearch"/>
-                            <ref bean="tppTaskJoin"/>                            
-                            <ref bean="expGeneratorSearchJoin"/>
-                            <ref bean="expImportSearchJoin"/>
-                        </list>
-                    </property>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredInLine">
+                    <property name="value" value="ReAdW"/>
                 </bean>
-
-                <!-- Mascot search pipelines -->
-                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.mascot.MascotPipelineJob"/>
-                    <property name="taskProgressionSpec">
-                        <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.mascot.MascotSearchTask</value>
-                            <ref bean="tppTask"/>
-                            <ref bean="expGeneratorSearch"/>
-                            <ref bean="expImportSearch"/>
-                            <ref bean="tppTaskJoin"/>
-                            <ref bean="expGeneratorSearchJoin"/>
-                            <ref bean="expImportSearchJoin"/>
-                        </list>
-                    </property>
+                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                    <property name="switchName" value="mzxml"/>
                 </bean>
-
-                <!-- Sequest search pipelines -->
-                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.sequest.SequestPipelineJob"/>
-                    <property name="taskProgressionSpec">
-                        <list>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
-                            <value type="java.lang.Class">org.labkey.ms2.pipeline.sequest.SequestSearchTask</value>
-                            <ref bean="tppTask"/>
-                            <ref bean="expGeneratorSearch"/>
-                            <ref bean="expImportSearch"/>
-                            <ref bean="tppTaskJoin"/>
-                            <ref bean="expGeneratorSearchJoin"/>
-                            <ref bean="expImportSearchJoin"/>
-                        </list>
-                    </property>
-                </bean>
-
-                <!-- MS2 pipeline for finishing a search on the Perl Cluster Pipeline -->
-                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob"/>
-                    <constructor-arg value="finishPerlCluster"/>
-                    <property name="taskProgressionSpec">
-                        <list>
-                            <ref bean="expGeneratorSearch"/>
-                            <ref bean="expImportSearch"/>
-                        </list>
-                    </property>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine"/>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                    <property name="function" value="output"/>
                 </bean>
             </list>
         </property>
     </bean>
+
 </beans>

@@ -8,11 +8,19 @@
                     <constructor-arg value="ms1FeaturePipeline"/>
                     <property name="description" value="msInspect Find Features"/>
                     <property name="protocolFactoryName" value="inspect"/>
+                    <property name="sharedOutputExts">
+                        <list>
+                            <value>.mzXML</value>
+                            <value>.mzXML.inspect</value>
+                            <value>.mzXML.ms2.tsv</value>
+                        </list>
+                    </property>
                     <property name="xarGeneratorSupport">
                         <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$Features"/>
                     </property>
                     <property name="taskProgressionSpec">
                         <list>
+                            <ref bean="mzxmlConverter"/>
 <!--                            <ref bean="peakabooFactory"/> -->
                             <ref bean="msInspectFactory"/>
                             <ref bean="expGeneratorFeatures"/>
@@ -33,6 +41,12 @@
                             </entry>
                         </map>
                     </property>
+                    <property name="sharedOutputExts">
+                        <list>
+                            <value>.mzXML.inspect</value>
+                            <value>.mzXML.ms2.tsv</value>
+                        </list>
+                    </property>
                     <property name="xarGeneratorSupport">
                         <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$Peptides"/>
                     </property>
@@ -48,6 +62,11 @@
                 </bean>
             </list>
         </property>
+    </bean>
+
+    <bean id="mzxmlConverter" class="org.labkey.api.pipeline.TaskId">
+        <constructor-arg><value type="java.lang.Class">org.labkey.api.pipeline.cmd.ConvertTaskId</value></constructor-arg>
+        <constructor-arg value="mzxmlConverter"/>
     </bean>
 
     <bean id="expGeneratorFeatures" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">

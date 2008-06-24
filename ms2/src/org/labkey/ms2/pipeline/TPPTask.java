@@ -129,9 +129,9 @@ public class TPPTask extends PipelineJob.Task
             return new TPPTask(job);
         }
 
-        public FileType getInputType()
+        public FileType[] getInputTypes()
         {
-            return FT_PEP_XML;
+            return new FileType[] { FT_PEP_XML };
         }
 
         public String getStatusName()

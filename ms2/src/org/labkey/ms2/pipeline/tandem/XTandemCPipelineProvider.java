@@ -27,6 +27,7 @@ import org.labkey.ms2.pipeline.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.FileFilter;
 import java.net.URI;
 import java.util.*;
 

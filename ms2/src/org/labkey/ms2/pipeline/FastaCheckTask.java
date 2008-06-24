@@ -44,11 +44,11 @@ public class FastaCheckTask extends PipelineJob.Task
             return new FastaCheckTask(job);
         }
 
-        public FileType getInputType()
+        public FileType[] getInputTypes()
         {
             // CONSIDER: Not really the input type, but the input type for the search.
             //           Should it be null or FASTA?
-            return AbstractMS2SearchProtocol.FT_MZXML;
+            return new FileType[] { AbstractMS2SearchProtocol.FT_MZXML };
         }
 
         public String getStatusName()

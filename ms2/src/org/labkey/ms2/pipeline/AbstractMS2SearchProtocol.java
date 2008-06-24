@@ -33,8 +33,8 @@ import java.util.Map;
 abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPipelineJob> extends AbstractFileAnalysisProtocol<JOB>
 {
     public static final FileType FT_MZXML = new FileType(".mzXML");
-    public static final FileType FT_THERMO_RAW = new FileType(".RAW");
-    public static final FileType FT_WATERS_RAW = new FileType(".raw");  // Directory
+    public static final FileType FT_THERMO_RAW = new FileType(".RAW", false);
+    public static final FileType FT_WATERS_RAW = new FileType(".raw", true);  // Directory
     public static final FileType FT_SEARCH_XAR = new FileType(".search.xar.xml");
 
     private File _dirSeqRoot;

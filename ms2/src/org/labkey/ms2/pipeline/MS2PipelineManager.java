@@ -21,11 +21,13 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.cmd.ConvertTaskId;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.AppProps;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
 
 import java.io.*;
@@ -69,12 +71,12 @@ public class MS2PipelineManager
 
     public static boolean isThermoRawFile(File file)
     {
-        return AbstractMS2SearchProtocol.FT_THERMO_RAW.isType(file) && file.isFile();
+        return AbstractMS2SearchProtocol.FT_THERMO_RAW.isType(file);
     }
 
     public static boolean isWatersRawDir(File file)
     {
-        return AbstractMS2SearchProtocol.FT_WATERS_RAW.isType(file) && file.isDirectory();
+        return AbstractMS2SearchProtocol.FT_WATERS_RAW.isType(file);
     }
 
     public static File getAnnotationFile(File dirData)
@@ -146,7 +148,26 @@ public class MS2PipelineManager
 
     public static PipelineProvider.FileEntryFilter getAnalyzeFilter()
     {
-        return new AnalyzeFileFilter();
+        return getAnalyzeFilter(true);
+    }
+
+    public static PipelineProvider.FileEntryFilter getAnalyzeFilter(boolean supportCluster)
+    {
+        if (supportCluster && AppProps.getInstance().hasPipelineCluster())
+            return new AnalyzeFileFilter();
+
+        TaskId tidConvert = new TaskId(ConvertTaskId.class, "mzxmlConverter");
+        TaskFactory factory = PipelineJobService.get().getTaskFactory(tidConvert);
+        if (factory != null)
+            return new PipelineProvider.FileTypesEntryFilter(factory.getInputTypes());
+
+        return new PipelineProvider.FileEntryFilter()
+            {
+                public boolean accept(File f)
+                {
+                    return isMzXMLFile(f);
+                }
+            };
     }
 
     public static List<String> getSequenceDirList(File dir, String path)
