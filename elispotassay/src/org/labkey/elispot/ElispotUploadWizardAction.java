@@ -69,7 +69,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         ElispotAssayProvider provider = (ElispotAssayProvider) getProvider(newRunForm);
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
 
-        PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm.getContainer(), newRunForm.getProtocol(), resolverType);
+        PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm, newRunForm.getProtocol(), resolverType);
         helper.addSampleColumns(parent.getDataRegion(), getViewContext().getUser());
 
         return parent;
@@ -123,7 +123,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             addHiddenRunProperties(form, view);
 
             ElispotAssayProvider provider = (ElispotAssayProvider) getProvider(form);
-            PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(getContainer(), _protocol,
+            PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(form, _protocol,
                     getSelectedParticipantVisitResolverType(provider, form));
             addHiddenProperties(helper.getPostedPropertyValues(form.getRequest()), view);
 
@@ -202,7 +202,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 try {
                     form.getUploadedData();
                     ElispotAssayProvider provider = (ElispotAssayProvider) getProvider(form);
-                    PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(getContainer(), _protocol,
+                    PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(form, _protocol,
                             getSelectedParticipantVisitResolverType(provider, form));
                     _postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());
                     samplePropsValid = validatePostedProperties(_postedSampleProperties, getViewContext().getRequest(), errors);

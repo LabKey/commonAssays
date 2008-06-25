@@ -54,6 +54,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
                 return true;
 
             _rs.close();
+            _rs = null;
             return false;
         }
         catch (SQLException e)
@@ -72,6 +73,20 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
         throw new UnsupportedOperationException();
     }
 
+    public void close()
+    {
+        if (_rs != null)
+        {
+            try
+            {
+                _rs.close();
+                _rs = null;
+            }
+            catch (SQLException e)
+            {
+            }
+        }
+    }
 
     protected class ResultSetSpectrum implements Spectrum
     {

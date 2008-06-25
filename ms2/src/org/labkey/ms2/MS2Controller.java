@@ -2417,17 +2417,28 @@ public class MS2Controller extends SpringActionController
 
     private void exportProteinsAsSpectra(List<MS2Run> runs, ActionURL currentURL, String extension, AbstractMS2RunView peptideView, String where) throws IOException
     {
-        SpectrumIterator iter = new ProteinResultSetSpectrumIterator(runs, currentURL, peptideView, where);
+        SpectrumIterator iter = null;
+        try
+        {
+            iter = new ProteinResultSetSpectrumIterator(runs, currentURL, peptideView, where);
+            SpectrumRenderer sr;
 
-        SpectrumRenderer sr;
+            if ("pkl".equals(extension))
+                sr = new PklSpectrumRenderer(getViewContext().getResponse(), "spectra", extension);
+            else
+                sr = new DtaSpectrumRenderer(getViewContext().getResponse(), "spectra", extension);
 
-        if ("pkl".equals(extension))
-            sr = new PklSpectrumRenderer(getViewContext().getResponse(), "spectra", extension);
-        else
-            sr = new DtaSpectrumRenderer(getViewContext().getResponse(), "spectra", extension);
+            sr.render(iter);
+            sr.close();
+        }
+        finally
+        {
+            if (iter != null)
+            {
+                iter.close();
+            }
+        }
 
-        sr.render(iter);
-        sr.close();
     }
 
 

@@ -131,7 +131,7 @@ public class SpectraCountTableInfo extends VirtualTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return _ms2Schema.createRunsTable(null);
+                return _ms2Schema.createRunsTable(null, false);
             }
         });
         addColumn(runColumn);
@@ -309,8 +309,6 @@ public class SpectraCountTableInfo extends VirtualTable
             }
             sql.append(")\n");
         }
-        sql.append("AND r.Container = ?\n");
-        sql.add(_ms2Schema.getContainer().getId());
         sql.append("GROUP BY f.Run");
         if (_config.isGroupedByPeptide())
         {

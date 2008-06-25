@@ -25,4 +25,5 @@ import java.util.Iterator;
  */
 public interface SpectrumIterator extends Iterator<Spectrum>
 {
+    void close();
 }

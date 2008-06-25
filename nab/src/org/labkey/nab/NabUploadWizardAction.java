@@ -67,7 +67,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
         NabAssayProvider provider = (NabAssayProvider) getProvider(newRunForm);
         InsertView parent = super.createRunInsertView(newRunForm, reshow, errors);
         ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(provider, newRunForm);
-        PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm.getContainer(), newRunForm.getProtocol(), resolverType);
+        PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(newRunForm, newRunForm.getProtocol(), resolverType);
         helper.addSampleColumns(parent.getDataRegion(), getViewContext().getUser());
         return parent;
     }
@@ -134,7 +134,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm>
             boolean runPropsValid = super.validatePost(form, errors);
 
             NabAssayProvider provider = (NabAssayProvider) getProvider(form);
-            PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(getContainer(), _protocol,
+            PlateSamplePropertyHelper helper = provider.createSamplePropertyHelper(form, _protocol,
                     getSelectedParticipantVisitResolverType(provider, form));
             _postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());
             boolean samplePropsValid = validatePostedProperties(_postedSampleProperties, getViewContext().getRequest(), errors);

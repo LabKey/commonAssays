@@ -118,23 +118,23 @@ public class MS2Schema extends UserSchema
         }
         else if (XTANDEM_SEARCH_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createSearchTable(alias, XTANDEM_PROTOCOL_OBJECT_PREFIX);
+            return createSearchTable(alias, true, XTANDEM_PROTOCOL_OBJECT_PREFIX);
         }
         else if (MASCOT_SEARCH_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createSearchTable(alias, MASCOT_PROTOCOL_OBJECT_PREFIX);
+            return createSearchTable(alias, true, MASCOT_PROTOCOL_OBJECT_PREFIX);
         }
         else if (SEQUEST_SEARCH_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createSearchTable(alias, SEQUEST_PROTOCOL_OBJECT_PREFIX);
+            return createSearchTable(alias, true, SEQUEST_PROTOCOL_OBJECT_PREFIX);
         }
         else if (GENERAL_SEARCH_EXPERIMENT_RUNS_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createRunsTable(alias);
+            return createRunsTable(alias, true);
         }
         else if (PEPTIDES_TABLE_NAME.equalsIgnoreCase(name) || PEPTIDES_FILTER_TABLE_NAME.equalsIgnoreCase(name))
         {
-            return createPeptidesTable(alias);
+            return createPeptidesTable(alias, true);
         }
         else if (PROTEIN_GROUPS_TABLE_NAME.equalsIgnoreCase(name))
         {
@@ -190,9 +190,9 @@ public class MS2Schema extends UserSchema
         return new CompareProteinProphetTableInfo(alias, this, _runs, false, request, peptideViewName);
     }
 
-    public TableInfo createRunsTable(String alias)
+    public TableInfo createRunsTable(String alias, boolean restrictContainer)
     {
-        return createSearchTable(alias, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX);
+        return createSearchTable(alias, restrictContainer, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX);
     }
 
     public SpectraCountTableInfo createSpectraCountTable(SpectraCountConfiguration config, ViewContext context, MS2Controller.SpectraCountForm form)
@@ -415,16 +415,19 @@ public class MS2Schema extends UserSchema
         return new SequencesTableInfo(aliasName, this);
     }
 
-    public TableInfo createPeptidesTable(final String alias)
+    public TableInfo createPeptidesTable(final String alias, boolean restrictContainer)
     {
-        PeptidesTableInfo result = new PeptidesTableInfo(this);
+        PeptidesTableInfo result = new PeptidesTableInfo(this, true, restrictContainer);
         result.setAlias(alias);
         return result;
     }
 
-    private TableInfo createSearchTable(String alias, String... protocolObjectPrefix)
+    private TableInfo createSearchTable(String alias, boolean restrictContainer, String... protocolObjectPrefix)
     {
+        boolean originalRestrictContainer = _expSchema.isRestrictContainer();
+        _expSchema.setRestrictContainer(restrictContainer);
         final ExpRunTable result = _expSchema.createRunsTable(alias);
+        _expSchema.setRestrictContainer(originalRestrictContainer);
         String[] protocolPatterns = new String[protocolObjectPrefix.length];
         for (int i = 0; i < protocolObjectPrefix.length; i++)
         {
@@ -576,7 +579,7 @@ public class MS2Schema extends UserSchema
 
     protected SQLFragment getPeptideSelectSQL(SimpleFilter filter, Collection<FieldKey> fieldKeys)
     {
-        TableInfo peptidesTable = createPeptidesTable("PeptidesAlias");
+        TableInfo peptidesTable = createPeptidesTable("PeptidesAlias", false);
 
         Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(peptidesTable, fieldKeys);
 
