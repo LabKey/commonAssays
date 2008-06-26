@@ -43,6 +43,7 @@ CREATE TABLE ms2.PeptideProphetData
 GO
 
 DROP VIEW ms2.MS2Peptides
+GO
 DROP VIEW ms2.MS2SimplePeptides
 GO
 

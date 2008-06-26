@@ -60,6 +60,7 @@ CREATE INDEX MS2Runs_Container ON ms2.Runs(Container)
 GO
 
 DROP VIEW ms2.Peptides
+GO
 DROP VIEW ms2.SimplePeptides
 GO
 

@@ -95,6 +95,7 @@ GO
 
 -- Rebuild peptide views to join to new table name and use new column name
 DROP VIEW ms2.MS2Peptides
+GO
 DROP VIEW ms2.MS2SimplePeptides
 GO
 

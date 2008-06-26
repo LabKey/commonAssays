@@ -37,7 +37,9 @@ ALTER TABLE ms2.PeptidesData
 GO
 
 DROP VIEW ms2.SimplePeptides
+GO
 DROP VIEW ms2.Peptides
+GO
 DROP VIEW ms2.ProteinGroupsWithQuantitation
 GO
 

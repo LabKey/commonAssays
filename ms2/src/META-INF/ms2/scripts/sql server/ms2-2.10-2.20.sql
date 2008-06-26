@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 DROP VIEW ms2.SimplePeptides
+GO
 DROP VIEW ms2.Peptides
 GO
 

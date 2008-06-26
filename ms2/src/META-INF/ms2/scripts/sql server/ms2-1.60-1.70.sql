@@ -44,10 +44,15 @@ GO
 
 -- Rebuild all views to point to the right table names
 DROP VIEW ms2.MS2Spectra
+GO
 DROP VIEW ms2.MS2ExperimentRuns
+GO
 DROP VIEW ms2.MS2Peptides
+GO
 DROP VIEW ms2.MS2SimplePeptides
+GO
 DROP VIEW prot.FastaAdmin
+GO
 DROP VIEW ms2.ProteinGroupsWithQuantitation
 GO
 
