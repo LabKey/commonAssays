@@ -105,7 +105,7 @@ public class XTandemSearchTask extends PipelineJob.Task
             // CONSIDER: If the file stays in its original location, the absolute path
             //           is used, to ensure the loader can find it.  Better way?
             File fileDataSpectra = getJobSupport().getSearchSpectraFile();
-            File fileInputSpectra = wd.inputFile(fileDataSpectra);
+            File fileInputSpectra = wd.inputFile(fileDataSpectra, false);
             String pathSpectra;
             if (fileInputSpectra.equals(fileDataSpectra))
                 pathSpectra = fileInputSpectra.getAbsolutePath();

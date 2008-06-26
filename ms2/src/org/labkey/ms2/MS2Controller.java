@@ -5845,7 +5845,7 @@ public class MS2Controller extends SpringActionController
 
         public ActionURL getShowRunUrl(MS2Run run)
         {
-            return new ActionURL(MS2Controller.ShowPeptideAction.class, ContainerManager.getForId(run.getContainer())).addParameter("run", run.getRun());
+            return new ActionURL(ShowRunAction.class, ContainerManager.getForId(run.getContainer())).addParameter("run", run.getRun());
         }
 
         public ActionURL getShowProteinAdminUrl()

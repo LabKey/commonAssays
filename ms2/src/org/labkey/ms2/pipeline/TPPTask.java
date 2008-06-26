@@ -199,7 +199,7 @@ public class TPPTask extends PipelineJob.Task
             //          may be too great to copy to a temporary directory.
             File[] inputFiles = getJobSupport().getInteractInputFiles();
             for (int i = 0; i < inputFiles.length; i++)
-                inputFiles[i] = wd.inputFile(inputFiles[i]);
+                inputFiles[i] = wd.inputFile(inputFiles[i], false);
 
             File dirMzXml = getJobSupport().getDataDirectory();
 
