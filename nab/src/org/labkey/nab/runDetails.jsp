@@ -112,30 +112,14 @@
                 %>
                     <tr>
                     <%
-                        for (int col = 0; col < 3; col++)
+                        for (int col = 0; col < 2; col++)
                         {
                             Map.Entry<PropertyDescriptor, Object> property = propertyIt.hasNext() ? propertyIt.next() : null;
                             Object value = null;
                             if (property != null)
-                            {
-                                value = property.getValue();
-                                if (property.getKey().getPropertyType() == PropertyType.DATE_TIME && value instanceof Date)
-                                {
-                                    Date date = (Date) value;
-                                    if (date.getHours() == 0 &&
-                                            date.getMinutes() == 0 &&
-                                            date.getSeconds() == 0)
-                                    {
-                                        value = formatDate(date);
-                                    }
-                                    else
-                                    {
-                                        value = formatDateTime(date);
-                                    }
-                                }
-                            }
+                                value = formatValue(property.getKey(), property.getValue());
                     %>
-                        <td style="<%= labelStyle %>"><%= property != null ? h(property.getKey().getLabel()) : "&nbsp;"  %></td>
+                        <td style="<%= labelStyle %>"><%= property != null ? h(property.getKey().getNonBlankLabel()) : "&nbsp;"  %></td>
                         <td ><%= property != null ? h(value) : "&nbsp;"  %></td>
                     <%
                         }
@@ -151,174 +135,79 @@
     <tr>
         <td>
             <table>
-                <tr>
-                    <td rowspan="2" valign="top">
-                        <table>
+                    <tr>
+                        <td valign="top" rowspan="2">
+                            <img src="graph.view?rowId=<%= bean.getRunId() %>">
+                        </td>
+            <%
+                for (int pass = 0; pass < 2; pass++)
+                {
+                    boolean curveBased = (pass == 0);
+            %>
+                        <td valign="top">
+                        <table cellspacing="0" cellpadding="3" bgcolor="#FFFFA0">
                             <tr>
-                    <%
-                        for (int pass = 0; pass < 2; pass++)
-                        {
-                            boolean curveBased = (pass == 0);
-                    %>
-                                <td>
-                                <table cellspacing="0" cellpadding="3" bgcolor="#FFFFA0">
-                                    <tr>
-                                        <th align="center" colspan=<%= assay.getCutoffs().length + 1%>>Cutoff Dilutions<br>(<%= curveBased ? "Curve Based" : "Point Based" %>)</th>
-                                    </tr>
-                                    <tr>
-                                        <td>&nbsp;</td>
-                                        <%
-                                            for (int cutoff : assay.getCutoffs())
-                                            {
-                                        %>
-                                        <td style="<%= labelStyle %>" align="center"><%= cutoff %>%</td>
-                                        <%
-                                            }
-                                        %>
-                                    </tr>
-                                    <%
-                                        for (NabAssayController.SampleResult results : bean.getSampleResults())
-                                        {
-                                            DilutionSummary summary = results.getDilutionSummary();
-                                    %>
-                                    <tr>
-                                        <td class="normal">
-                                            <%=h(results.getKey())%>
-                                        </td>
-                                        <%
-                                            for (int cutoff : assay.getCutoffs())
-                                            {
-                                        %>
-                                        <td class="normal" align="right">
-                                            <%
-                                                double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0) :
-                                                        summary.getInterpolatedCutoffDilution(cutoff / 100.0);
-                                                if (val == Double.NEGATIVE_INFINITY)
-                                                    out.write("&lt; " + Luc5Assay.intString(summary.getMinDilution()));
-                                                else if (val == Double.POSITIVE_INFINITY)
-                                                    out.write("&gt; " + Luc5Assay.intString(summary.getMaxDilution()));
-                                                else
-                                                {
-                                                    DecimalFormat shortDecFormat;
-                                                    if (summary.getMethod() == SampleInfo.Method.Concentration)
-                                                        shortDecFormat = new DecimalFormat("0.###");
-                                                    else
-                                                        shortDecFormat = new DecimalFormat("0");
-
-                                                    out.write(shortDecFormat.format(val));
-                                                }
-                                            %>
-                                        </td>
-                                        <%
-                                            }
-                                        %>
-                                    </tr>
-                                    <%
-                                        }
-                                    %>
-                                </table>
-                            </td>
-                            <%
-                                }
-                            %>
+                                <th align="center" colspan=<%= assay.getCutoffs().length + 1%>>Cutoff Dilutions<br>(<%= curveBased ? "Curve Based" : "Point Based" %>)</th>
                             </tr>
-                        </table><br>
-                        <table cellspacing="0" cellpadding="3">
                             <tr>
-                                <td style="<%= labelStyle %>"><%= h(AbstractAssayProvider.SPECIMENID_PROPERTY_CAPTION) %></td>
-                            <%
-                                PropertyDescriptor sampleDescPD = null;
-                                for (PropertyDescriptor pd : samplePropertyDescriptors)
-                                {
-                                    if (pd.getName().equals(NabAssayProvider.SAMPLE_DESCRIPTION_PROPERTY_NAME))
+                                <td>&nbsp;</td>
+                                <%
+                                    for (int cutoff : assay.getCutoffs())
                                     {
-                                        sampleDescPD = pd;
-                                        continue;
+                                %>
+                                <td style="<%= labelStyle %>" align="center"><%= cutoff %>%</td>
+                                <%
                                     }
-                                    if (pd.getName().equals(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME) ||
-                                            pd.getName().equals(AbstractAssayProvider.VISITID_PROPERTY_NAME) ||
-                                            pd.getName().equals(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME))
-                                        continue;
-                            %>
-                                <td style="<%= labelStyle %>"><%= h(pd.getLabel()) %></td>
-                            <%
-                                }
-                            %>
-                            </tr>
-                            <%
-
-                                for (NabAssayController.SampleResult results : bean.getSampleResults())
-                                {
-                            %>
-                                <tr>
-                                    <td><%= h(results.getKey()) %></td>
-                            <%
-                                for (Map.Entry<PropertyDescriptor, Object> entry : results.getProperties().entrySet())
-                                {
-                                    PropertyDescriptor pd = entry.getKey();
-
-                                    if (pd.equals(sampleDescPD) ||
-                                            pd.getName().equals(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME) ||
-                                            pd.getName().equals(AbstractAssayProvider.VISITID_PROPERTY_NAME) ||
-                                            pd.getName().equals(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME))
-                                        continue;
-
-                                    Object value = entry.getValue();
-                                    if (pd.getFormat() != null)
-                                    {
-                                        if (pd.getPropertyType() == PropertyType.DOUBLE)
-                                        {
-                                            DecimalFormat format = new DecimalFormat(pd.getFormat());
-                                            value = format.format((Double) value);
-                                        }
-                                        if (pd.getPropertyType() == PropertyType.DATE_TIME)
-                                        {
-                                            DateFormat format = new SimpleDateFormat(pd.getFormat());
-                                            value = format.format((Date) value);
-                                        }
-                                    }
-                            %>
-                                    <td><%= h(value) %></td>
-                            <%
-                                    }
-                            %>
-                                </tr>
-                            <%
-                                }
-                            %>
-                        </table><br>
-                        <%
-                            if (sampleDescPD != null)
-                            {
-                        %>
-                        <table cellspacing="0" cellpadding="3" width="100%">
-                            <tr>
-                                <td style="<%= labelStyle %>"><%= h(AbstractAssayProvider.SPECIMENID_PROPERTY_CAPTION) %></td>
-                                <td style="<%= labelStyle %>"><%= h(NabAssayProvider.SAMPLE_DESCRIPTION_PROPERTY_CAPTION) %></td>
+                                %>
                             </tr>
                             <%
                                 for (NabAssayController.SampleResult results : bean.getSampleResults())
                                 {
-                                    String desc = (String) results.getProperties().get(sampleDescPD);
+                                    DilutionSummary summary = results.getDilutionSummary();
                             %>
                             <tr>
-                                <td><%= h(results.getKey()) %></td>
-                                <td><%= h(desc) %></td>
+                                <td class="normal">
+                                    <%=h(results.getKey())%>
+                                </td>
+                                <%
+                                    for (int cutoff : assay.getCutoffs())
+                                    {
+                                %>
+                                <td class="normal" align="right">
+                                    <%
+                                        double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0) :
+                                                summary.getInterpolatedCutoffDilution(cutoff / 100.0);
+                                        if (val == Double.NEGATIVE_INFINITY)
+                                            out.write("&lt; " + Luc5Assay.intString(summary.getMinDilution()));
+                                        else if (val == Double.POSITIVE_INFINITY)
+                                            out.write("&gt; " + Luc5Assay.intString(summary.getMaxDilution()));
+                                        else
+                                        {
+                                            DecimalFormat shortDecFormat;
+                                            if (summary.getMethod() == SampleInfo.Method.Concentration)
+                                                shortDecFormat = new DecimalFormat("0.###");
+                                            else
+                                                shortDecFormat = new DecimalFormat("0");
+
+                                            out.write(shortDecFormat.format(val));
+                                        }
+                                    %>
+                                </td>
+                                <%
+                                    }
+                                %>
                             </tr>
                             <%
                                 }
                             %>
                         </table>
-                        <%
-                            }
-                        %>
                     </td>
-                    <td>
-                        <img src="graph.view?rowId=<%= bean.getRunId() %>">
-                    </td>
-                </tr>
+                    <%
+                        }
+                    %>
+                    </tr>
                 <tr>
-                    <td>
+                    <td colspan="2" valign="top">
                         <table width="100%">
                             <tr>
                                 <td style="<%= labelStyle %>">Range</td>
@@ -336,7 +225,56 @@
                         </table>
                     </td>
                 </tr>
-            </table>
+                </table>
+                <table cellspacing="0" cellpadding="3" class="grid">
+                    <tr>
+                    <%
+                        Set<String> pdsWithData = new HashSet<String>();
+                        for (NabAssayController.SampleResult results : bean.getSampleResults())
+                        {
+                            for (Map.Entry<PropertyDescriptor, Object> entry : results.getProperties().entrySet())
+                            {
+                                if (entry.getValue() != null)
+                                    pdsWithData.add(entry.getKey().getName());
+                            }
+                        }
+
+                        for (PropertyDescriptor pd : samplePropertyDescriptors)
+                        {
+                            if (!pdsWithData.contains(pd.getName()))
+                                continue;
+
+                    %>
+                        <td style="<%= labelStyle %>"><%= h(pd.getLabel()) %></td>
+                    <%
+                        }
+                    %>
+                    </tr>
+                    <%
+                        int rowNumber = 0;
+                        for (NabAssayController.SampleResult results : bean.getSampleResults())
+                        {
+                            rowNumber++;
+                    %>
+                        <tr <%= rowNumber % 2 == 0 ? "bgcolor=\"#eeeeee\"" : ""%>>
+                    <%
+                        for (Map.Entry<PropertyDescriptor, Object> entry : results.getProperties().entrySet())
+                        {
+                            PropertyDescriptor pd = entry.getKey();
+                            if (!pdsWithData.contains(pd.getName()))
+                                continue;
+
+                            Object value = formatValue(pd, entry.getValue());
+                    %>
+                            <td><%= h(value) %></td>
+                    <%
+                            }
+                    %>
+                        </tr>
+                    <%
+                        }
+                    %>
+                </table>
         </td>
     </tr>
     <tr>
@@ -454,3 +392,36 @@
     }
 %>
 </table>
+<%!
+    Object formatValue(PropertyDescriptor pd, Object value)
+    {
+        if (pd.getFormat() != null)
+        {
+            if (pd.getPropertyType() == PropertyType.DOUBLE)
+            {
+                DecimalFormat format = new DecimalFormat(pd.getFormat());
+                value = format.format(value);
+            }
+            if (pd.getPropertyType() == PropertyType.DATE_TIME)
+            {
+                DateFormat format = new SimpleDateFormat(pd.getFormat());
+                value = format.format((Date) value);
+            }
+        }
+        else if (pd.getPropertyType() == PropertyType.DATE_TIME && value instanceof Date)
+        {
+            Date date = (Date) value;
+            if (date.getHours() == 0 &&
+                    date.getMinutes() == 0 &&
+                    date.getSeconds() == 0)
+            {
+                value = formatDate(date);
+            }
+            else
+            {
+                value = formatDateTime(date);
+            }
+        }
+        return value;
+    }
+%>

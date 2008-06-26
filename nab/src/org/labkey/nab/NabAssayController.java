@@ -49,6 +49,7 @@ import org.labkey.api.study.query.RunListQueryView;
 import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.assay.*;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.DateUtil;
 import org.labkey.api.view.*;
 import org.labkey.common.util.Pair;
 import org.labkey.nab.query.NabRunDataTable;
@@ -365,7 +366,7 @@ public class NabAssayController extends SpringActionController
         {
             _dilutionSummary = dilutionSummary;
             _materialKey = materialKey;
-            _properties = properties;
+            _properties = sortProperties(properties);
         }
 
         public DilutionSummary getDilutionSummary()
@@ -382,6 +383,44 @@ public class NabAssayController extends SpringActionController
         {
             return _properties;
         }
+
+        private Map<PropertyDescriptor, Object> sortProperties(Map<PropertyDescriptor, Object> properties)
+        {
+            Map<PropertyDescriptor, Object> sortedProperties = new LinkedHashMap<PropertyDescriptor, Object>();
+            Map.Entry<PropertyDescriptor, Object> sampleIdEntry =
+                    findPropertyDescriptor(properties, AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
+            Map.Entry<PropertyDescriptor, Object> ptidEntry =
+                    findPropertyDescriptor(properties, AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
+            Map.Entry<PropertyDescriptor, Object> visitEntry =
+                    findPropertyDescriptor(properties, AbstractAssayProvider.VISITID_PROPERTY_NAME);
+            if (sampleIdEntry != null)
+                sortedProperties.put(sampleIdEntry.getKey(), sampleIdEntry.getValue());
+            if (ptidEntry != null)
+                sortedProperties.put(ptidEntry.getKey(), ptidEntry.getValue());
+            if (visitEntry != null)
+                sortedProperties.put(visitEntry.getKey(), visitEntry.getValue());
+            for (Map.Entry<PropertyDescriptor, Object> entry : properties.entrySet())
+            {
+                if (sampleIdEntry != null && entry.getKey() == sampleIdEntry.getKey() ||
+                    ptidEntry != null && entry.getKey() == ptidEntry.getKey() ||
+                    visitEntry != null && entry.getKey() == visitEntry.getKey())
+                {
+                    continue;
+                }
+                sortedProperties.put(entry.getKey(), entry.getValue());
+            }
+            return sortedProperties;
+        }
+
+        private Map.Entry<PropertyDescriptor, Object> findPropertyDescriptor(Map<PropertyDescriptor, Object> properties, String propertyName)
+        {
+            for (Map.Entry<PropertyDescriptor, Object> entry : properties.entrySet())
+            {
+                if (entry.getKey().getName().equals(propertyName))
+                    return entry;
+            }
+            return null;
+        }
     }
 
     protected static String getMaterialKey(String specimenId, String participantId, Double visitId, Date date)
@@ -389,9 +428,14 @@ public class NabAssayController extends SpringActionController
         if (specimenId != null)
             return specimenId;
         else if (visitId == null && date != null)
-            return "Ptid " + participantId + ", Date " + date;
+        {
+            if (date.getHours() == 0 && date.getMinutes() == 0 && date.getSeconds() == 0)
+                return participantId + ", " + DateUtil.formatDate(date);
+            else
+                return participantId + ", " + DateUtil.formatDateTime(date);
+        }
         else
-            return "Ptid " + participantId + ", Vst " + visitId;
+            return participantId + ", Vst " + visitId;
     }
 
     public static class HeaderBean
