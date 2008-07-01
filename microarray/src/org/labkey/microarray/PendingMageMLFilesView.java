@@ -87,6 +87,7 @@ public class PendingMageMLFilesView extends QueryView
         ActionButton deleteButton = new ActionButton("placeholder", "Delete");
         ActionURL deleteURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getDeleteDatasURL(view.getViewContext().getContainer(), view.getViewContext().getActionURL());
         deleteButton.setScript("if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(true) + ", \"" + deleteURL + "\", \"post\", \"MageML files\")) {" + view.getDataRegion().getJavascriptFormReference(true) + ".submit();} return false;");
+        deleteButton.setActionType(ActionButton.Action.POST);
         deleteButton.setDisplayPermission(ACL.PERM_DELETE);
         bar.add(deleteButton);
 
@@ -109,8 +110,9 @@ public class PendingMageMLFilesView extends QueryView
                 ExpProtocol protocol = protocols.get(0);
                 ActionURL url = MicroarrayController.getUploadRedirectAction(getContainer(), protocol);
                 ActionButton button = new ActionButton(url, "Import selected using " + protocol.getName());
-                button.setDisplayPermission(ACL.PERM_INSERT);
                 button.setScript("if (verifySelected(" + view.getDataRegion().getJavascriptFormReference(true) + ", \"" + url.getLocalURIString() + "\", \"POST\", \"files\")) { " + view.getDataRegion().getJavascriptFormReference(true) + ".submit(); } return false;");
+                button.setActionType(ActionButton.Action.POST);
+                button.setDisplayPermission(ACL.PERM_INSERT);
                 bar.add(button);
             }
             else
