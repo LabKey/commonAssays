@@ -39,7 +39,6 @@ public class ElispotPlateTypeHandler implements PlateTypeHandler
     public List<String> getTemplateTypes()
     {
         List<String> names = new ArrayList<String>();
-        names.add("Default");
         return names;
     }
 
@@ -56,32 +55,28 @@ public class ElispotPlateTypeHandler implements PlateTypeHandler
                     PlateService.get().createPosition(container, row+1, template.getColumns() - 1));
         }
 
-        if (templateTypeName != null && templateTypeName.equalsIgnoreCase("Default"))
+        // populate the antigen groups
+        for (int antigen = 0; antigen < 4; antigen++)
         {
-            // populate the antigen groups
-            for (int antigen = 0; antigen < 4; antigen++)
+            List<Position> position1 = new ArrayList<Position>();
+            List<Position> position2 = new ArrayList<Position>();
+
+            for (int sample = 0; sample < 4; sample++)
             {
-                List<Position> position1 = new ArrayList<Position>();
-                List<Position> position2 = new ArrayList<Position>();
+                int row = sample * 2;
+                int col = antigen * 3;
 
-                for (int sample = 0; sample < 4; sample++)
-                {
-                    int row = sample * 2;
-                    int col = antigen * 3;
+                position1.add(template.getPosition(row, col));
+                position1.add(template.getPosition(row, col + 1));
+                position1.add(template.getPosition(row, col + 2));
 
-                    position1.add(template.getPosition(row, col));
-                    position1.add(template.getPosition(row, col + 1));
-                    position1.add(template.getPosition(row, col + 2));
-
-                    position2.add(template.getPosition(row + 1, col));
-                    position2.add(template.getPosition(row + 1, col + 1));
-                    position2.add(template.getPosition(row + 1, col + 2));
-                }
-                template.addWellGroup("Antigen " + (antigen*2 + 1), WellGroup.Type.ANTIGEN, position1);
-                template.addWellGroup("Antigen " + (antigen*2 + 2), WellGroup.Type.ANTIGEN, position2);
+                position2.add(template.getPosition(row + 1, col));
+                position2.add(template.getPosition(row + 1, col + 1));
+                position2.add(template.getPosition(row + 1, col + 2));
             }
+            template.addWellGroup("Antigen " + (antigen*2 + 1), WellGroup.Type.ANTIGEN, position1);
+            template.addWellGroup("Antigen " + (antigen*2 + 2), WellGroup.Type.ANTIGEN, position2);
         }
-
         return template;
     }
 
