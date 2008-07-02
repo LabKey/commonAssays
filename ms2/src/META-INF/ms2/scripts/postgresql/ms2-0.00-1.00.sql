@@ -504,7 +504,7 @@ LEFT OUTER JOIN exp.Protocol ON exp.Protocol.LSID=exp.ExperimentRun.ProtocolLSID
 SET search_path TO prot, public;
 
 -- ProteinDataBases with number of runs
-CREATE VIEW ProteinDBs AS
+CREATE VIEW prot.ProteinDBs AS
     SELECT ProteinDataBases.ProteinDataBase, ProteinDataBases.DataBaseId, ProteinDataBases.Loaded, X.Runs
     FROM ProteinDataBases LEFT OUTER JOIN
         (SELECT DataBaseId, COUNT(Run) AS Runs
