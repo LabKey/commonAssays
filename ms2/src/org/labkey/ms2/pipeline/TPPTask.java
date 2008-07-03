@@ -208,8 +208,9 @@ public class TPPTask extends PipelineJob.Task
             if (getJobSupport().isProphetEnabled())
                 fileWorkProtXML = wd.newFile(FT_INTERMEDIATE_PROT_XML);
 
+            String ver = getJob().getParameters().get("pipeline, tpp version");
             List<String> interactCmd = new ArrayList<String>();
-            interactCmd.add(getExecutablePath("xinteract"));
+            interactCmd.add(PipelineJobService.get().getExecutablePath("xinteract", "tpp", ver));
 
             if (!getJobSupport().isProphetEnabled())
             {
@@ -217,11 +218,30 @@ public class TPPTask extends PipelineJob.Task
             }
             else
             {
+                StringBuffer prophetOpts = new StringBuffer("-Opt");
                 if ("yes".equalsIgnoreCase(params.get("pipeline prophet, accurate mass")))
-                    interactCmd.add("-OptA");
-                else
-                    interactCmd.add("-Opt");
-                interactCmd.add("-x20");    // 20 iterations extra for good measure.
+                    prophetOpts.append("A");
+                if ("yes".equalsIgnoreCase(params.get("pipeline prophet, allow multiple instruments")))
+                    prophetOpts.append("w");
+
+                if (!"2.9.9".equals(ver))
+                {
+                    interactCmd.add("-x20");    // 20 iterations extra for good measure.
+                    
+                    if (!"3.0.2".equals(ver))
+                    {
+                        prophetOpts.append("F");
+                        if ("yes".equalsIgnoreCase(params.get("pipeline prophet, use hydrophobicity")))
+                            prophetOpts.append("R");
+                        if ("yes".equalsIgnoreCase(params.get("pipeline prophet, use pI")))
+                            prophetOpts.append("I");
+                        String decoyTag = params.get("pipeline prophet, decoy tag");
+                        if (decoyTag != null && !"".equals(decoyTag))
+                            interactCmd.add("-d" + decoyTag);
+                    }
+                }
+
+                interactCmd.add(prophetOpts.toString());
 
                 if (!getJobSupport().isRefreshRequired())
                     interactCmd.add("-nR");
@@ -349,9 +369,11 @@ public class TPPTask extends PipelineJob.Task
         if ("yes".equalsIgnoreCase(paramCompatQ3))
             quantOpts.add("--compat");
 
+        String ver = params.get("pipeline, msinspect ver");
+        
         // TODO: Doesn't work when JAVA_HOME has a space in the path
         return ("-C1" + PipelineJobService.get().getJavaPath() + " -client -Xmx256M -jar "
-                + "" + PipelineJobService.get().getJarPath("viewerApp.jar") + ""
+                + "" + PipelineJobService.get().getJarPath("viewerApp.jar", "msinspect", ver) + ""
                 + " --q3 " + StringUtils.join(quantOpts.iterator(), ' ')
                 + " -C2Q3ProteinRatioParser");
     }

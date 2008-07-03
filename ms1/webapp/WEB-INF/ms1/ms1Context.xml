@@ -157,6 +157,14 @@
             <list>
                 <bean class="org.labkey.api.pipeline.cmd.JarToCommandArgs">
                     <property name="jarPath" value="viewerApp.jar"/>
+                    <property name="converters">
+                        <list>
+                            <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                <property name="switchName" value="Xmx"/>
+                                <property name="value" value="1024M"/>
+                            </bean>
+                        </list>
+                    </property>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
                     <property name="switchName" value="findpeptides"/>

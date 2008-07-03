@@ -139,7 +139,8 @@ public class SequestSearchTask extends PipelineJob.Task
                 throw new IOException("Failed to create output directory for DTA files '" + dirOutputDta + "'.");
 
             ArrayList<String> command = new ArrayList<String>();
-            command.add(getExecutablePath("MzXML2Search"));
+            String ver = getJob().getParameters().get("pipeline, tpp version");
+            command.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", ver));
             command.add("-dta");
             command.add("-O" + dirOutputDta.getName());
             Mzxml2SearchParams mzXml2SearchParams = new Mzxml2SearchParams();
@@ -171,7 +172,10 @@ public class SequestSearchTask extends PipelineJob.Task
             if (iReturn != 0 || !fileWorkPepXMLRaw.exists())
                 throw new IOException("Failed running Sequest.");
 
-            getJob().runSubProcess(new ProcessBuilder(getExecutablePath("bsdtar.exe"), "czf", fileTgz.getAbsolutePath(), "*"), dirOutputDta);
+            // TODO: This limits SequestSearchTask to running only on LabKey Server
+            String exePath = PipelineJobService.get().getExecutablePath("bsdtar.exe", null, null);
+            getJob().runSubProcess(new ProcessBuilder(exePath,
+                    "czf", fileTgz.getAbsolutePath(), "*"), dirOutputDta);
 
             if (!FileUtil.deleteDir(dirOutputDta))
                 throw new IOException("Failed to delete DTA directory " + dirOutputDta.getAbsolutePath());

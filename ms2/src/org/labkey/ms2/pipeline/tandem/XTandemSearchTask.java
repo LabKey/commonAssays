@@ -120,7 +120,9 @@ public class XTandemSearchTask extends PipelineJob.Task
 
             writeRunParameters(pathSpectra, fileWorkParameters, fileWorkTaxonomy, fileWorkOutputXML);
 
-            getJob().runSubProcess(new ProcessBuilder(getExecutablePath("tandem.exe"),
+            String ver = getJob().getParameters().get("pipeline, xtandem version");
+            String exePath = PipelineJobService.get().getExecutablePath("tandem.exe", "xtandem", ver);
+            getJob().runSubProcess(new ProcessBuilder(exePath,
                     INPUT_XML),
                     wd.getDir());
 
@@ -128,7 +130,9 @@ public class XTandemSearchTask extends PipelineJob.Task
             wd.discardFile(fileWorkParameters);
             wd.discardFile(fileWorkTaxonomy);
 
-            getJob().runSubProcess(new ProcessBuilder(getExecutablePath("Tandem2XML"),
+            ver = getJob().getParameters().get("pipeline, tpp version");
+            exePath = PipelineJobService.get().getExecutablePath("Tandem2XML", "tpp", ver);
+            getJob().runSubProcess(new ProcessBuilder(exePath,
                     fileWorkOutputXML.getName(),
                     fileWorkPepXMLRaw.getName()),
                     wd.getDir());

@@ -177,7 +177,8 @@ public class MascotSearchTask extends PipelineJob.Task
             */
             FileUtils.copyFile(getJobSupport().getSearchSpectraFile(), fileWorkSpectra);
             ArrayList<String> argsM2S = new ArrayList<String>();
-            argsM2S.add(getExecutablePath("MzXML2Search"));
+            String ver = getJob().getParameters().get("pipeline, tpp version");
+            argsM2S.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", ver));
             argsM2S.add("-mgf");
             String paramMinParent = params.get("spectrum, minimum parent m+h");
             if (paramMinParent != null)
@@ -314,7 +315,8 @@ public class MascotSearchTask extends PipelineJob.Task
             //File fileSequenceDatabase = new File(_uriSequenceRoot.getPath(), sequenceDB);
             File fileSequenceDatabase = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
 
-            getJob().runSubProcess(new ProcessBuilder(getExecutablePath("Mascot2XML"),
+            String exePath = PipelineJobService.get().getExecutablePath("Mascot2XML", "tpp", ver);
+            getJob().runSubProcess(new ProcessBuilder(exePath,
                     fileWorkDAT.getName(),
                     "-D" + fileSequenceDatabase.getAbsolutePath(),
                     "-xml",
