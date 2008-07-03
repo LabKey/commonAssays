@@ -81,7 +81,8 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         {
             protocolName = PipelineService.get().getLastProtocolSetting(provider.getProtocolFactory(), getContainer(),
                     getUser());
-        if(protocolName == null || protocolName.length() == 0) protocolName = "new";
+            if(protocolName == null || protocolName.length() == 0)
+                protocolName = "new";
         }
         if(protocolName.equals("new"))
         {

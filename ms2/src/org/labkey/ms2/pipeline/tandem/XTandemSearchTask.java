@@ -100,7 +100,7 @@ public class XTandemSearchTask extends PipelineJob.Task
         try
         {
             WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
-            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport());
+            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
 
             // CONSIDER: If the file stays in its original location, the absolute path
             //           is used, to ensure the loader can find it.  Better way?

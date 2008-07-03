@@ -15,7 +15,6 @@
  */
 package org.labkey.ms2.pipeline.sequest;
 
-import org.apache.commons.io.FileUtils;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.WorkDirFactory;
@@ -111,7 +110,7 @@ public class SequestSearchTask extends PipelineJob.Task
             params.put("search, username", "CPAS User");
 
             WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
-            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport());
+            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
 
             File fileParamsLocal = new File(getJobSupport().getAnalysisDirectory(), SEQUEST_PARAMS);
             File fileWorkParamsLocal = wd.newFile(SEQUEST_PARAMS);

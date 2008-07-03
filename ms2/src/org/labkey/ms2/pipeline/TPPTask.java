@@ -193,7 +193,7 @@ public class TPPTask extends PipelineJob.Task
             Map<String, String> params = getJob().getParameters();
 
             WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
-            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport());
+            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
 
             // TODO: mzXML files may also be required, and input disk space requirements
             //          may be too great to copy to a temporary directory.
