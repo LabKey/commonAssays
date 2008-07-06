@@ -281,7 +281,7 @@ public class TPPTask extends PipelineJob.Task
             // the raw pepXML file(s).
             if (!getJobSupport().isFractions() || inputFiles.length > 1)
             {
-                for (File fileInput : inputFiles)
+                for (File fileInput : getJobSupport().getInteractInputFiles())
                 {
                     if (!fileInput.delete())
                         getJob().warn("Failed to delete intermediat file " + fileInput);

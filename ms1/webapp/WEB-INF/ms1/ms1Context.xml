@@ -97,8 +97,8 @@
         <property name="switchFormat" ref="unixMixedSwitch"/>
         <property name="converters">
             <list>
-                <bean class="org.labkey.api.pipeline.cmd.RequiredInLine">
-                    <property name="value" value="peakaboo"/>
+                <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
+                    <property name="exePath" value="peakaboo"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
                     <property name="parameter" value="peakaboo, start scan"/>
@@ -152,11 +152,26 @@
         <property name="statusName" value="FIND PEPTIDES"/>
         <property name="inputExtension" value=".mzXML"/>
         <property name="outputExtension" value=".peptides.tsv"/>
+        <property name="outputPaths">
+            <map>
+                <entry key="output-cache">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg value=".mzXML.inspect"/>
+                    </bean>
+                </entry>
+                <entry key="output-ms2">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg value=".mzXML.ms2.tsv"/>
+                    </bean>
+                </entry>
+            </map>
+        </property>
         <property name="switchFormat" ref="unixNewSwitch"/>
         <property name="converters">
             <list>
                 <bean class="org.labkey.api.pipeline.cmd.JarToCommandArgs">
-                    <property name="jarPath" value="viewerApp.jar"/>
+                    <property name="softwarePackage" value="msinspect"/>
+                    <property name="jarPath" value="viewerApp${version}.jar"/>
                     <property name="converters">
                         <list>
                             <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
@@ -258,8 +273,9 @@
         <property name="switchFormat" ref="unixCompactSwitch"/>
         <property name="converters">
             <list>
-                <bean class="org.labkey.api.pipeline.cmd.RequiredInLine">
-                    <property name="value" value="pepmatch"/>
+                <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
+                    <property name="softwarePackage" value="tpp"/>
+                    <property name="exePath" value="pepmatch"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.PathInLine">
                     <property name="key" value="input-peptides"/>
