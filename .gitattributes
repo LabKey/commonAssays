@@ -458,6 +458,7 @@ luminex/src/META-INF/luminex/scripts/postgresql/luminex-2.30-2.31.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-2.30-8.10.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-2.31-2.32.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/luminex-8.10-8.11.sql -text
+luminex/src/META-INF/luminex/scripts/postgresql/luminex-8.10-8.20.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/obsolete/luminex-0.01-0.02.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/obsolete/luminex-0.02-0.03.sql -text
 luminex/src/META-INF/luminex/scripts/postgresql/obsolete/luminex-0.03-0.04.sql -text
@@ -471,6 +472,7 @@ luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-2.30-2.31.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-2.30-8.10.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-2.31-2.32.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-8.10-8.11.sql -text
+luminex/src/META-INF/luminex/scripts/sql[!!-~]server/luminex-8.10-8.20.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/obsolete/luminex-0.01-0.02.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/obsolete/luminex-0.02-0.03.sql -text
 luminex/src/META-INF/luminex/scripts/sql[!!-~]server/obsolete/luminex-0.03-0.04.sql -text
@@ -707,6 +709,7 @@ ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.32-2.33.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.33-2.34.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-2.34-2.35.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/ms2-8.10-8.11.sql -text
+ms2/src/META-INF/ms2/scripts/postgresql/ms2-8.10-8.20.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-1.00-1.01.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-1.01-1.02.sql -text
 ms2/src/META-INF/ms2/scripts/postgresql/obsolete/ms2-1.10-1.11.sql -text
@@ -772,6 +775,7 @@ ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.32-2.33.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.33-2.34.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.34-2.35.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-8.10-8.11.sql -text
+ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-8.10-8.20.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.62.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.63.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-0.57-0.58.sql -text
