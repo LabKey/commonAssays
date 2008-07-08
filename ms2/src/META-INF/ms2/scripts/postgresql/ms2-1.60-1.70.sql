@@ -16,10 +16,13 @@
 UPDATE ms2.ms2proteingroups SET pctspectrumids = pctspectrumids / 100, percentcoverage = percentcoverage / 100;
 
 -- Previous to CPAS 1.5, some runs ended up with PeptideCount = 0 & SpectrumCount = 0; this corrects those runs.
+
+/* 7/7/08: COMMENT OUT THIS UPDATE AS PART OF VIEW REFACTORING
 UPDATE ms2.MS2Runs SET
     PeptideCount = (SELECT COUNT(*) AS PepCount FROM ms2.MS2Peptides pep WHERE pep.run = ms2.MS2Runs.run),
     SpectrumCount = (SELECT COUNT(*) AS SpecCount FROM ms2.MS2Spectra spec WHERE spec.run = ms2.MS2Runs.run)
 WHERE (PeptideCount = 0);
+*/
 
 -- Index to speed up deletes from MS2PeptidesData
 CREATE INDEX IX_MS2PeptideMemberships_PeptideId ON ms2.MS2PeptideMemberships(PeptideId);

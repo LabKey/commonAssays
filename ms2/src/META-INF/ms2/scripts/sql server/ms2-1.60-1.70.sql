@@ -18,11 +18,13 @@ GO
 
 -- Previous to CPAS 1.5, some runs ended up with PeptideCount = 0 & SpectrumCount = 0; this corrects those runs.
 -- Use old names here to allow running this easily on 1.6 installations.
+
+/* 7/7/08: COMMENT OUT THIS UPDATE AS PART OF VIEW REFACTORING
 UPDATE ms2.MS2Runs SET
     PeptideCount = (SELECT COUNT(*) AS PepCount FROM ms2.MS2Peptides pep WHERE pep.run = ms2.MS2Runs.run),
     SpectrumCount = (SELECT COUNT(*) AS SpecCount FROM ms2.MS2Spectra spec WHERE spec.run = ms2.MS2Runs.run)
 WHERE (PeptideCount = 0)
-GO
+*/
 
 -- Index to speed up deletes from MS2PeptidesData.  Use old names here to allow running this on 1.6 installations.
 IF NOT EXISTS (SELECT * FROM dbo.sysindexes WHERE name = 'IX_MS2PeptideMemberships_PeptideId' AND id = object_id('ms2.MS2PeptideMemberships'))
