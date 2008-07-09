@@ -85,6 +85,8 @@ cabig/src/META-INF/cabig/scripts/sql[!!-~]server/cabig-2.20-2.30.sql -text
 cabig/src/META-INF/cabig/scripts/sql[!!-~]server/cabig-2.21-2.22.sql -text
 cabig/src/META-INF/cabig/scripts/sql[!!-~]server/cabig-2.30-2.31.sql -text
 cabig/src/META-INF/cabig/scripts/sql[!!-~]server/cabig-2.30-8.10.sql -text
+cabig/src/META-INF/cabig/scripts/sql[!!-~]server/cabig-create.sql -text
+cabig/src/META-INF/cabig/scripts/sql[!!-~]server/cabig-drop.sql -text
 cabig/src/META-INF/cabig/scripts/sql[!!-~]server/obsolete/cabig-0.00-0.01.sql -text
 cabig/src/META-INF/cabig/scripts/sql[!!-~]server/obsolete/cabig-0.01-0.02.sql -text
 cabig/src/META-INF/cabig/scripts/sql[!!-~]server/obsolete/cabig-0.02-0.03.sql -text
@@ -776,6 +778,8 @@ ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.33-2.34.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-2.34-2.35.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-8.10-8.11.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-8.10-8.20.sql -text
+ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-create.sql -text
+ms2/src/META-INF/ms2/scripts/sql[!!-~]server/ms2-drop.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.62.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-0.00-0.63.sql -text
 ms2/src/META-INF/ms2/scripts/sql[!!-~]server/obsolete/ms2-0.57-0.58.sql -text
