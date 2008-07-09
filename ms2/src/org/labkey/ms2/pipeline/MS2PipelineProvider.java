@@ -16,14 +16,15 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.ACL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.WebPartView;
+import org.labkey.api.data.Container;
 
 import java.io.PrintWriter;
-import java.io.File;
 import java.util.List;
 
 /**
@@ -37,12 +38,12 @@ public class MS2PipelineProvider extends PipelineProvider
         super(name);
     }
 
-    public HttpView getSetupWebPart()
+    public HttpView getSetupWebPart(Container container)
     {
         return new SetupWebPart();
     }
 
-    public void updateFileProperties(ViewContext context, List<FileEntry> entries)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
     {
         for (FileEntry entry : entries)
         {
@@ -53,7 +54,7 @@ public class MS2PipelineProvider extends PipelineProvider
                     entry, entry.listFiles(MS2PipelineManager.getUploadFilter()));
 
             addAction("ms2-pipeline", "showDescribeMS2Run", "Describe Samples",
-                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter()));
+                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter(pr.isPerlPipeline())));
         }
     }
 

@@ -110,9 +110,10 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     {
         super.validate(uriRoot);
 
-        if (AppProps.getInstance().hasPipelineCluster())
+        // todo: spaces are currently restricted any time the perl pipeline is enabled
+        //       would be better to only do this for containers running the perl pipeline
+        if (AppProps.getInstance().isPerlPipelineEnabled())
         {
-            // TODO(brendanx): Fix this limitations (post 1.4)
             if (getName().indexOf(' ') != -1)
             {
                 throw new PipelineValidationException("The cluster pipeline does not currently support spaces in"

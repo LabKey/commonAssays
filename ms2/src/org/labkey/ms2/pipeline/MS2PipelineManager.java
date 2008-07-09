@@ -153,7 +153,7 @@ public class MS2PipelineManager
 
     public static PipelineProvider.FileEntryFilter getAnalyzeFilter(boolean supportCluster)
     {
-        if (supportCluster && AppProps.getInstance().hasPipelineCluster())
+        if (supportCluster && AppProps.getInstance().isPerlPipelineEnabled())
             return new AnalyzeFileFilter();
 
         TaskId tidConvert = new TaskId(ConvertTaskId.class, "mzxmlConverter");
@@ -314,7 +314,7 @@ public class MS2PipelineManager
         if (rootSeq != null && root != null && rootSeq.equals(getSequenceDatabaseRoot(root)))
              rootSeq = null;
 
-        service.setPipelineRoot(user, container, rootSeq, SEQUENCE_DB_ROOT_TYPE, null);
+        service.setPipelineRoot(user, container, rootSeq, SEQUENCE_DB_ROOT_TYPE, null, false);
         if (root != null)
             service.setPipelineProperty(container, ALLOW_SEQUENCE_DB_UPLOAD_KEY, allowUpload ? "true" : "false");
         else
@@ -367,7 +367,16 @@ public class MS2PipelineManager
         Set<File> checkedDirectories = new HashSet<File>();
         
         String dirDataURL = dirData.toURI().toURL().toString();
-        File[] mzXMLFiles = dirData.listFiles(getAnalyzeFilter());
+
+        File[] mzXMLFiles = null;
+        try
+        {
+            mzXMLFiles = dirData.listFiles(getAnalyzeFilter(PipelineService.get().usePerlPipeline(c)));
+        }
+        catch (SQLException e)
+        {
+            throw new IOException("Failed retrieving directory properties.");
+        }
 
         Map<File, FileStatus> analysisMap = new LinkedHashMap<File, FileStatus>();
         if (mzXMLFiles != null && mzXMLFiles.length > 0)

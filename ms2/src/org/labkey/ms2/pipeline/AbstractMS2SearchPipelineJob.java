@@ -16,10 +16,9 @@
 
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.TaskId;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
-import org.labkey.api.util.AppProps;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -99,7 +98,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
             }
         }
 
-        if (isPerlClusterAware() && AppProps.getInstance().hasPipelineCluster())
+        if (isPerlClusterAware() && PipelineService.get().usePerlPipeline(info.getContainer()))
             setStatusFile(FT_CLUSTER_STATUS.newFile(getAnalysisDirectory(), getBaseName()));
     }
 

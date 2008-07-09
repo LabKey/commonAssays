@@ -20,6 +20,7 @@ import org.labkey.api.pipeline.PipelineProtocol;
 import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.data.Container;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 
@@ -60,21 +61,21 @@ public class CometCPipelineProvider extends AbstractMS2SearchPipelineProvider
         _clusterSupport.preCompleteStatusFile(sf);
     }
 
-    public boolean isStatusViewableFile(String name, String basename)
+    public boolean isStatusViewableFile(Container container, String name, String basename)
     {
         if ("comet.def".equals(name))
             return true;
 
-        if (_clusterSupport.isStatusViewableFile(name, basename))
+        if (_clusterSupport.isStatusViewableFile(null, name, basename))
             return true;
 
-        return super.isStatusViewableFile(name, basename);
+        return super.isStatusViewableFile(container, name, basename);
     }
 
-    public List<StatusAction> addStatusActions()
+    public List<StatusAction> addStatusActions(Container container)
     {
-        List<StatusAction> actions = super.addStatusActions();
-        _clusterSupport.addStatusActions(actions);
+        List<StatusAction> actions = super.addStatusActions(container);
+        _clusterSupport.addStatusActions(container, actions);
         return actions;
     }
 

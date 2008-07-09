@@ -15,15 +15,14 @@
  */
 package org.labkey.ms2.pipeline.mascot;
 
-import org.labkey.api.pipeline.PipelineProtocol;
-import org.labkey.api.pipeline.PipelinePerlClusterSupport;
-import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
+import org.labkey.api.data.Container;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
@@ -32,6 +31,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.*;
+import java.sql.SQLException;
 
 /**
  * MascotCPipelineProvider class
@@ -65,18 +65,18 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         _clusterSupport.preCompleteStatusFile(sf);
     }
 
-    public boolean isStatusViewableFile(String name, String basename)
+    public boolean isStatusViewableFile(Container container, String name, String basename)
     {
         if ("mascot.xml".equals(name))
             return true;
 
-        if (_clusterSupport.isStatusViewableFile(name, basename))
+        if (_clusterSupport.isStatusViewableFile(null, name, basename))
             return true;
 
-        return super.isStatusViewableFile(name, basename);
+        return super.isStatusViewableFile(container, name, basename);
     }
 
-    public void updateFileProperties(ViewContext context, List<FileEntry> entries)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
     {
         if (!AppProps.getInstance().hasMascotServer())
             return;
@@ -90,14 +90,14 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
             }
 
             addAction("ms2-pipeline", "searchMascot", "Mascot Peptide Search",
-                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter()));
+                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter(pr.isPerlPipeline())));
         }
     }
 
-    public List<StatusAction> addStatusActions()
+    public List<StatusAction> addStatusActions(Container container)
     {
-        List<StatusAction> actions = super.addStatusActions();
-        _clusterSupport.addStatusActions(actions);
+        List<StatusAction> actions = super.addStatusActions(container);
+        _clusterSupport.addStatusActions(container, actions);
         return actions;
     }
 
@@ -110,13 +110,17 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return super.handleStatusAction(ctx, name, sf);
     }
 
-    public HttpView getSetupWebPart()
+    public HttpView getSetupWebPart(Container container)
     {
         if (!AppProps.getInstance().hasMascotServer())
             return null;
-        if (AppProps.getInstance().hasPipelineCluster())
+        try
         {
-            // No extra setup for cluster.
+            if (PipelineService.get().usePerlPipeline(container))
+                return null;
+        }
+        catch (SQLException e)
+        {
             return null;
         }
         return new SetupWebPart();
@@ -131,14 +135,11 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
             if (!context.hasPermission(ACL.PERM_INSERT))
                 return;
             StringBuilder html = new StringBuilder();
-            if (!AppProps.getInstance().hasPipelineCluster())
-            {
-                html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">Mascot specific settings:</td></tr>");
-                ActionURL setDefaultsURL = new ActionURL(PipelineController.SetMascotDefaultsAction.class, context.getContainer());
-                html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
-                        .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
-                        .append(" - Specify the default XML parameters file for Mascot.</td></tr></table>");
-            }
+            html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">Mascot specific settings:</td></tr>");
+            ActionURL setDefaultsURL = new ActionURL(PipelineController.SetMascotDefaultsAction.class, context.getContainer());
+            html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
+                    .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
+                    .append(" - Specify the default XML parameters file for Mascot.</td></tr></table>");
             out.write(html.toString());
         }
     }

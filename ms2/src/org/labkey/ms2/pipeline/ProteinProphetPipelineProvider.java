@@ -17,6 +17,7 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.util.FileType;
 
@@ -36,7 +37,7 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
         super(NAME);
     }
 
-    public void updateFileProperties(ViewContext context, List<FileEntry> entries)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
     {
         for (FileEntry entry : entries)
         {

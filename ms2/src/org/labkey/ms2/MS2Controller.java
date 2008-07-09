@@ -4602,7 +4602,7 @@ public class MS2Controller extends SpringActionController
                     url = getShowListURL(c);
                     url.addParameter(MS2Manager.getDataRegionNameExperimentRuns() + ".Run~eq", Integer.toString(run));
                 }
-                else if (!AppProps.getInstance().hasPipelineCluster())
+                else if (!PipelineService.get().usePerlPipeline(c))
                 {
                     url = new ActionURL("MS2", "addFileRunStatus", "");
                     url.addParameter("error", "Automated upload disabled.");

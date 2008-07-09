@@ -1083,7 +1083,7 @@ public class PipelineController extends SpringActionController
                 return false;
             }
 
-            File[] mzXMLFiles = new File(uriData).listFiles(MS2PipelineManager.getAnalyzeFilter());
+            File[] mzXMLFiles = new File(uriData).listFiles(MS2PipelineManager.getAnalyzeFilter(pr.isPerlPipeline()));
             for (File mzXMLFile : mzXMLFiles)
             {
                 ExpRun run = ExperimentService.get().getCreatingRun(mzXMLFile, c);

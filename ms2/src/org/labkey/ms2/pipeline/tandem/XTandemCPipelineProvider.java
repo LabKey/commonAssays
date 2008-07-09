@@ -17,19 +17,19 @@ package org.labkey.ms2.pipeline.tandem;
 
 import org.labkey.api.pipeline.*;
 import org.labkey.api.security.ACL;
-import org.labkey.api.util.AppProps;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
+import org.labkey.api.data.Container;
 import org.labkey.ms2.pipeline.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.FileFilter;
 import java.net.URI;
 import java.util.*;
+import java.sql.SQLException;
 
 /**
  * XTandemCPipelineProvider class
@@ -63,22 +63,22 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
         _clusterSupport.preCompleteStatusFile(sf);
     }
 
-    public boolean isStatusViewableFile(String name, String basename)
+    public boolean isStatusViewableFile(Container container, String name, String basename)
     {
         String nameParameters = XTandemSearchProtocolFactory.get().getParametersFileName();
         if (nameParameters.equals(name) || (nameParameters + ".err").equals(name))
             return true;
 
-        if (_clusterSupport.isStatusViewableFile(name, basename))
+        if (_clusterSupport.isStatusViewableFile(null, name, basename))
             return true;
 
-        return super.isStatusViewableFile(name, basename);
+        return super.isStatusViewableFile(container, name, basename);
     }
 
-    public List<StatusAction> addStatusActions()
+    public List<StatusAction> addStatusActions(Container container)
     {
-        List<StatusAction> actions = super.addStatusActions();
-        return _clusterSupport.addStatusActions(actions);
+        List<StatusAction> actions = super.addStatusActions(container);
+        return _clusterSupport.addStatusActions(container, actions);
     }
 
     public ActionURL handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf)
@@ -102,7 +102,7 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return super.handleStatusAction(ctx, name, sf);
     }
 
-    public void updateFileProperties(ViewContext context, List<FileEntry> entries)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
     {
         for (ListIterator<FileEntry> it = entries.listIterator(); it.hasNext();)
         {
@@ -113,15 +113,20 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
             }
 
             addAction("ms2-pipeline", "searchXTandem", "X!Tandem Peptide Search",
-                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter()));
+                    entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter(pr.isPerlPipeline())));
         }
     }
 
-    public HttpView getSetupWebPart()
+    public HttpView getSetupWebPart(Container container)
     {
-        if (AppProps.getInstance().hasPipelineCluster())
+        // No extra setup for cluster.
+        try
         {
-            // No extra setup for cluster.
+            if (PipelineService.get().usePerlPipeline(container))
+                return null;
+        }
+        catch (SQLException e)
+        {
             return null;
         }
         return new SetupWebPart();
@@ -136,14 +141,11 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
             if (!context.hasPermission(ACL.PERM_INSERT))
                 return;
             StringBuilder html = new StringBuilder();
-            if (!AppProps.getInstance().hasPipelineCluster())
-            {
-                html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">X! Tandem specific settings:</td></tr>");
-                ActionURL setDefaultsURL = new ActionURL(PipelineController.SetTandemDefaultsAction.class, context.getContainer());  // TODO: Should be method in PipelineController
-                html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
-                        .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
-                        .append(" - Specify the default XML parameters file for X! Tandem.</td></tr></table>");
-            }
+            html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">X! Tandem specific settings:</td></tr>");
+            ActionURL setDefaultsURL = new ActionURL(PipelineController.SetTandemDefaultsAction.class, context.getContainer());  // TODO: Should be method in PipelineController
+            html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
+                    .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
+                    .append(" - Specify the default XML parameters file for X! Tandem.</td></tr></table>");
             out.write(html.toString());
         }
     }

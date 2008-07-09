@@ -108,7 +108,7 @@ public class FlowPipelineProvider extends PipelineProvider
     }
 
 
-    public void updateFileProperties(ViewContext context, List<FileEntry> entries)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
     {
         if (!context.hasPermission(ACL.PERM_INSERT))
             return;

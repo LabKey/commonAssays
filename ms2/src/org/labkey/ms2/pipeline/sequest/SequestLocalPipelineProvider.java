@@ -21,6 +21,8 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.util.AppProps;
 import org.labkey.api.view.*;
 import org.labkey.api.pipeline.PipelineProtocol;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.data.Container;
 import org.labkey.ms2.pipeline.*;
 
 import java.io.IOException;
@@ -44,12 +46,12 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
         super(name);
     }
 
-    public boolean isStatusViewableFile(String name, String basename)
+    public boolean isStatusViewableFile(Container container, String name, String basename)
     {
-        return "sequest.xml".equals(name) || super.isStatusViewableFile(name, basename);
+        return "sequest.xml".equals(name) || super.isStatusViewableFile(container, name, basename);
     }
 
-    public void updateFileProperties(ViewContext context, List<FileEntry> entries)
+    public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)
     {
         if (!AppProps.getInstance().hasSequest())
             return;
@@ -67,7 +69,7 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
         }
     }
 
-    public HttpView getSetupWebPart()
+    public HttpView getSetupWebPart(Container container)
     {
         if (!AppProps.getInstance().hasSequest())
             return null;
@@ -83,14 +85,11 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
             if (!context.hasPermission(ACL.PERM_INSERT))
                 return;
             StringBuilder html = new StringBuilder();
-            if (!AppProps.getInstance().hasPipelineCluster())
-            {
-                html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">Sequest specific settings:</td></tr>");
-                ActionURL setDefaultsURL = new ActionURL(PipelineController.SetSequestDefaultsAction.class, context.getContainer());
-                html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
-                    .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
-                    .append(" - Specify the default XML parameters file for Sequest.</td></tr></table>");
-            }
+            html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">Sequest specific settings:</td></tr>");
+            ActionURL setDefaultsURL = new ActionURL(PipelineController.SetSequestDefaultsAction.class, context.getContainer());
+            html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
+                .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
+                .append(" - Specify the default XML parameters file for Sequest.</td></tr></table>");
             out.write(html.toString());
         }
     }
