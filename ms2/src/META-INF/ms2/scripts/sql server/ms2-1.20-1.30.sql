@@ -110,9 +110,6 @@ UPDATE prot.ProtOrganisms
 drop table #idents
 go
 
-DROP VIEW ms2.MS2Peptides
-GO
-
 -- Create new version of MS2PeptidesData table and copy existing data.  This is faster than modifying the existing table since it adds
 -- the RowId column and updates the SeqId column in a single pass
 EXEC sp_rename 'ms2.MS2PeptidesData', 'MS2PeptidesDataOld'
@@ -259,29 +256,6 @@ CREATE TABLE ms2.Quantitation
 )
 GO
 
-CREATE VIEW ms2.MS2SimplePeptides AS SELECT
-    frac.Run, run.Description AS RunDescription, pep.Fraction, Scan, Charge, Score1 As RawScore, Score2 As DiffScore, Score3 As ZScore, Score1 As SpScore,
-    Score2 As DeltaCn, Score3 As XCorr, Score4 As SpRank, Score1 As Hyper, Score2 As Next, Score3 As B, Score4 As Y,
-    Score5 As Expect, Score1 As Ion, Score2 As "Identity", Score3 AS Homology, IonPercent, pep.Mass, DeltaMass,
-    (pep.Mass + DeltaMass) AS PrecursorMass, ABS(DeltaMass - ROUND(DeltaMass, 0)) AS FractionalDeltaMass,
-    CASE WHEN pep.Mass = 0 THEN 0 ELSE ABS(1000000 * ABS(DeltaMass - ROUND(DeltaMass, 0)) / (pep.Mass + (Charge - 1) * 1.007276)) END AS FractionalDeltaMassPPM,
-	CASE WHEN pep.Mass = 0 THEN 0 ELSE ABS(1000000 * DeltaMass / (pep.Mass + (Charge - 1) * 1.007276)) END AS DeltaMassPPM,
-    CASE WHEN Charge = 0 THEN 0 ELSE (pep.Mass + DeltaMass + (Charge - 1) * 1.007276) / Charge END AS MZ, PeptideProphet, Peptide,
-	ProteinHits, Protein, PrevAA, TrimmedPeptide, NextAA, LTRIM(RTRIM(PrevAA + TrimmedPeptide + NextAA)) AS StrippedPeptide,
-	SequencePosition, pep.SeqId, pep.RowId, quant.* FROM ms2.MS2PeptidesData pep
-        INNER JOIN
-            ms2.MS2Fractions frac ON pep.Fraction = frac.Fraction
-        INNER JOIN
-            ms2.MS2Runs run ON frac.Run = run.Run
-   LEFT JOIN ms2.quantitation quant ON pep.rowid=quant.peptideid
-GO
-
-CREATE VIEW ms2.ms2peptides AS
- SELECT pep.*, seq.description, seq.bestgenename AS genename
-   FROM ms2.ms2SimplePeptides pep
-   LEFT JOIN prot.protsequences seq ON seq.seqid = pep.seqid
-GO
-
 CREATE TABLE ms2.ProteinQuantitation
 (
   ProteinGroupId INT NOT NULL,
@@ -293,12 +267,6 @@ CREATE TABLE ms2.ProteinQuantitation
   CONSTRAINT PK_ProteinQuantitation PRIMARY KEY (ProteinGroupId),
   CONSTRAINT FK_ProteinQuantitation_ProteinGroup FOREIGN KEY (ProteinGroupId) REFERENCES ms2.MS2ProteinGroups (RowId)
 )
-GO
-
-CREATE VIEW ms2.ProteinGroupsWithQuantitation AS
-  SELECT *
-    FROM ms2.ms2proteingroups
-    LEFT JOIN ms2.proteinquantitation ON ProteinGroupId = RowId
 GO
 
 ALTER TABLE ms2.MS2Runs
@@ -327,16 +295,6 @@ CREATE TABLE ms2.PeptideProphetSummaries
 GO
 
 -- No changes to this view, but we need to rebuild it since we added a column to MS2Runs
-DROP VIEW ms2.MS2ExperimentRuns
-GO
-
-CREATE VIEW ms2.MS2ExperimentRuns AS
-SELECT ms2.MS2Runs.*, exp.ExperimentRun.RowId AS ExperimentRunRowId, exp.Protocol.Name AS ProtocolName
-FROM ms2.MS2Runs
-LEFT OUTER JOIN exp.ExperimentRun ON exp.ExperimentRun.LSID=ms2.MS2Runs.ExperimentRunLSID
-LEFT OUTER JOIN exp.Protocol ON exp.Protocol.LSID=exp.ExperimentRun.ProtocolLSID
-GO
-
 -- Update GeneCards URL
 UPDATE prot.ProtInfoSources SET Url = 'http://www.genecards.org/cgi-bin/carddisp?{}&alias=yes'
     WHERE Name = 'GeneCards'
