@@ -15,7 +15,7 @@
  */
 
 /*
- * This only creates a schema, it doesn't create any tables or views
+ * This only creates a schema, it doesn't create any tables
  */
 EXEC sp_addapprole 'ms1', 'password'
 GO

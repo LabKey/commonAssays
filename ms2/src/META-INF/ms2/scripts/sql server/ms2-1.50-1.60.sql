@@ -58,18 +58,13 @@ IF (col_name(@objid, indexkey_property(@objid, @idxid, 3, 'ColumnId')) IS NOT NU
 	END
 GO
 
-
 ALTER TABLE prot.FastaSequences DROP
     COLUMN SequenceId,
     COLUMN SequenceMass,
     COLUMN Sequence
 GO
 
--- Rename and rebuild Fasta admin view
--- Rebuild MS2ExperimentRuns view to pick up FastaId column name change
 -- Add column for retention time
 ALTER TABLE ms2.MS2PeptidesData
     ADD RetentionTime REAL NULL
 GO
-
--- Rebuild peptide views to join to new table name and use new column name

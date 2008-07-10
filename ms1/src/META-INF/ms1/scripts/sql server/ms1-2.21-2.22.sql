@@ -17,22 +17,22 @@
 /* SQL Server Version */
 
 /* drop existing tables */
-drop table ms1.PeaksToFamilies
-go
-drop table ms1.Peaks
-go
-drop table ms1.PeakFamilies
-go
-drop table ms1.CalibrationParams
-go
-drop table ms1.Scans
-go
-drop table ms1.PeaksFiles
-go
-drop table ms1.Features
-go
-drop table ms1.FeaturesFiles
-go
+DROP TABLE ms1.PeaksToFamilies
+GO
+DROP TABLE ms1.Peaks
+GO
+DROP TABLE ms1.PeakFamilies
+GO
+DROP TABLE ms1.CalibrationParams
+GO
+DROP TABLE ms1.Scans
+GO
+DROP TABLE ms1.PeaksFiles
+GO
+DROP TABLE ms1.Features
+GO
+DROP TABLE ms1.FeaturesFiles
+GO
 
 
 /* recreate with changes */

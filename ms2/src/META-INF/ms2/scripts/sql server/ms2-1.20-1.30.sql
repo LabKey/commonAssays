@@ -19,16 +19,16 @@
   UPDATE prot.ProtSequences
       SET OrgId = (SELECT OrgId FROM prot.ProtOrganisms WHERE genus='Unknown' and species='unknown')
       WHERE OrgId NOT IN (SELECT OrgId FROM prot.ProtOrganisms)
-  go
+  GO
   -- drop the incorrect FK
   ALTER TABLE prot.ProtOrganisms
   	DROP CONSTRAINT FK_ProtSequences_ProtOrganisms
-  go
+  GO
 
   -- add the FK back on the correct table
   ALTER TABLE prot.ProtSequences
       WITH NOCHECK ADD	CONSTRAINT FK_ProtSequences_ProtOrganisms FOREIGN KEY (OrgId) REFERENCES prot.ProtOrganisms (OrgId)
-  go
+  GO
 
 -- add most common ncbi Taxonomy id's
 
@@ -107,8 +107,8 @@ UPDATE prot.ProtOrganisms
 --inner join prot.ProtIdentifiers PI ON (i.Identifier = PI.Identifier AND i.IdentTypeID = PI.IdentTypeId)
 
 
-drop table #idents
-go
+DROP TABLE #idents
+GO
 
 -- Create new version of MS2PeptidesData table and copy existing data.  This is faster than modifying the existing table since it adds
 -- the RowId column and updates the SeqId column in a single pass
@@ -294,7 +294,6 @@ CREATE TABLE ms2.PeptideProphetSummaries
 )
 GO
 
--- No changes to this view, but we need to rebuild it since we added a column to MS2Runs
 -- Update GeneCards URL
 UPDATE prot.ProtInfoSources SET Url = 'http://www.genecards.org/cgi-bin/carddisp?{}&alias=yes'
     WHERE Name = 'GeneCards'

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
--- All tables and views used for GO data
+-- All tables used for GO data
 -- Data will change frequently, with updates from the GO consortium
 -- See  
 --      http://www.geneontology.org/GO.downloads.shtml
@@ -93,41 +93,9 @@ CREATE INDEX IX_GoTermSynonym_TermId ON GoTermSynonym(termId);
 CREATE INDEX IX_GoTermSynonym_termSynonym ON GoTermSynonym(termSynonym);
 CREATE UNIQUE INDEX UQ_GoTermSynonym_termId_termSynonym ON GoTermSynonym(termId,termSynonym);
 
-DROP VIEW ms2.MS2ExperimentRuns;
-
 ALTER TABLE ms2.MS2Runs RENAME COLUMN ApplicationLSID TO ExperimentRunLSID;
 
-CREATE OR REPLACE VIEW ms2.MS2ExperimentRuns AS
-SELECT ms2.MS2Runs.*, exp.ExperimentRun.RowId as ExperimentRunRowId, exp.Protocol.Name As ProtocolName
-FROM ms2.MS2Runs
-LEFT OUTER JOIN exp.ExperimentRun ON exp.ExperimentRun.LSID=ms2.MS2Runs.ExperimentRunLSID
-LEFT OUTER JOIN exp.Protocol ON exp.Protocol.LSID=exp.ExperimentRun.ProtocolLSID;
-
-DROP VIEW ms2.MS2Peptides;
-
-CREATE VIEW ms2.MS2Peptides AS
-    SELECT
-        MS2Fractions.Run, ms2.MS2PeptidesData.Fraction, Scan, Charge, Score1 As RawScore, Score2 As DiffScore, Score3 As ZScore,
-        Score1 As SpScore, Score2 As DeltaCn, Score3 As XCorr, Score4 As SpRank, Score1 As Hyper, Score2 As Next,
-        Score3 As B, Score4 As Y, Score5 As Expect, Score1 As Ion, Score2 As Identity, Score3 AS Homology, IonPercent,
-        MS2PeptidesData.Mass, DeltaMass, (MS2PeptidesData.Mass + DeltaMass) AS PrecursorMass,
-        CASE WHEN MS2PeptidesData.Mass = 0 THEN 0 ELSE ABS(1000000 * DeltaMass / (MS2PeptidesData.Mass + (Charge - 1) * 1.00794)) END AS DeltaMassPPM,
-        CASE WHEN Charge = 0 THEN 0 ELSE (MS2PeptidesData.Mass + DeltaMass + (Charge - 1) * 1.00794) / Charge END AS MZ,
-        PeptideProphet, Peptide, ProteinHits, Protein, PrevAA, TrimmedPeptide, NextAA, LTRIM(RTRIM(PrevAA ||
-        TrimmedPeptide || NextAA)) AS StrippedPeptide, SequencePosition, ProtSequences.Description AS Description,
-        ProtSequences.BestGeneName AS GeneName, prot.ProtSequences.SeqId AS SeqId
-    FROM MS2PeptidesData
-        INNER JOIN
-            MS2Fractions ON MS2PeptidesData.Fraction = MS2Fractions.Fraction
-        INNER JOIN
-            MS2Runs ON MS2Fractions.Run = MS2Runs.Run
-        LEFT OUTER JOIN
-            prot.ProteinSequences ON
-                ProteinSequences.LookupString = MS2PeptidesData.Protein AND ProteinSequences.DataBaseId = MS2Runs.DataBaseId
-        LEFT OUTER JOIN
-            prot.ProtSequences ON ProtSequences.SeqId = ProteinSequences.SeqId;
-            
-            SET search_path TO prot,ms2,public;
+SET search_path TO prot,ms2,public;
 
 CREATE INDEX ix_protorganisms_genus ON prot.protorganisms(genus);
 CREATE INDEX ix_protorganisms_species ON prot.protorganisms(species);

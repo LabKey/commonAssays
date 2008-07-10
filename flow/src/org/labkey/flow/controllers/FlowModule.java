@@ -54,7 +54,6 @@ import org.labkey.flow.webparts.AnalysisScriptsWebPart;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
 
-import javax.servlet.http.HttpServletRequest;
 import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.Set;

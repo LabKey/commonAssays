@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
--- Tables and views used for Proteins and MS2 data
+-- Tables used for Proteins and MS2 data
 
 EXEC sp_addapprole 'prot', 'password'
 GO

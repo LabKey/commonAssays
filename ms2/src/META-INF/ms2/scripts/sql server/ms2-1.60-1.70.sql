@@ -44,7 +44,6 @@ EXEC sp_rename 'ms2.MS2Runs', 'Runs'
 EXEC sp_rename 'ms2.MS2SpectraData', 'SpectraData'
 GO
 
--- Rebuild all views to point to the right table names
 -- More accurate column name
 EXEC sp_rename
     @objname = 'ms2.Runs.SampleEnzyme',
@@ -52,10 +51,9 @@ EXEC sp_rename
     @objtype = 'COLUMN'
 GO
 
--- Rebuild view
 -- Bug 2195 restructure prot.FastaSequences
 set nocount on
-go
+GO
 declare @errsave int
 select @errsave=0
 exec sp_rename 'prot.FastaSequences', 'FastaSequences_old'
@@ -85,10 +83,10 @@ select @errsave = CASE WHEN @@ERROR >0 THEN @@ERROR ELSE @errsave END
 
 if (@errsave =0)
     DROP TABLE prot.FastaSequences_old
-go
+GO
 
 set nocount off
-go
+GO
 
 --Bug 2193
 CREATE  INDEX IX_SequencesSource ON prot.Sequences(SourceId)

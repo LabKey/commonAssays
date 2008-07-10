@@ -17,14 +17,14 @@
 /* PostgreSQL Version */
 
 /* drop existing tables */
-drop table ms1.PeaksToFamilies;
-drop table ms1.Peaks;
-drop table ms1.PeakFamilies;
-drop table ms1.CalibrationParams;
-drop table ms1.Scans;
-drop table ms1.PeaksFiles;
-drop table ms1.Features;
-drop table ms1.FeaturesFiles;
+DROP TABLE ms1.PeaksToFamilies;
+DROP TABLE ms1.Peaks;
+DROP TABLE ms1.PeakFamilies;
+DROP TABLE ms1.CalibrationParams;
+DROP TABLE ms1.Scans;
+DROP TABLE ms1.PeaksFiles;
+DROP TABLE ms1.Features;
+DROP TABLE ms1.FeaturesFiles;
 
 
 /* recreate with changes */

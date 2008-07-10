@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
--- Tables and views used for Microarray module
+-- Tables used for Microarray module
 EXEC sp_addapprole 'microarray', 'password'
 GO

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
--- All tables and views used for MS2 data
+-- All tables used for MS2 data
 
 CREATE SCHEMA prot;
 SET search_path TO prot, public;
@@ -444,29 +444,6 @@ CREATE INDEX IX_MS2PeptidesData_Protein ON MS2PeptidesData (Protein);
 
 
 -- Union of all MS2Peptides columns; alias Score1 to RawScore and SpScore, Score2 to DiffScore and DeltaCn, etc.
-CREATE VIEW MS2Peptides AS
-    SELECT
-        MS2Fractions.Run, MS2PeptidesData.Fraction, Scan, Charge, Score1 As RawScore, Score2 As DiffScore, Score3 As ZScore,
-        Score1 As SpScore, Score2 As DeltaCn, Score3 As XCorr, Score4 As SpRank, Score1 As Hyper, Score2 As Next,
-        Score3 As B, Score4 As Y, Score5 As Expect, Score1 As Ion, Score2 As Identity, Score3 AS Homology, IonPercent,
-        MS2PeptidesData.Mass, DeltaMass, (MS2PeptidesData.Mass + DeltaMass) AS PrecursorMass,
-        CASE WHEN MS2PeptidesData.Mass = 0 THEN 0 ELSE ABS(1000000 * DeltaMass / (MS2PeptidesData.Mass + (Charge - 1) * 1.00794)) END AS DeltaMassPPM,
-        CASE WHEN Charge = 0 THEN 0 ELSE (MS2PeptidesData.Mass + DeltaMass + (Charge - 1) * 1.00794) / Charge END AS MZ,
-        PeptideProphet, Peptide, ProteinHits, Protein, PrevAA, TrimmedPeptide, NextAA, LTRIM(RTRIM(PrevAA ||
-        TrimmedPeptide || NextAA)) AS StrippedPeptide, SequencePosition, ProtSequences.Description AS Description,
-        ProtSequences.BestGeneName AS GeneName
-    FROM MS2PeptidesData
-        INNER JOIN
-            MS2Fractions ON MS2PeptidesData.Fraction = MS2Fractions.Fraction
-        INNER JOIN
-            MS2Runs ON MS2Fractions.Run = MS2Runs.Run
-        LEFT OUTER JOIN
-            prot.ProteinSequences ON
-                ProteinSequences.LookupString = MS2PeptidesData.Protein AND ProteinSequences.DataBaseId = MS2Runs.DataBaseId
-        LEFT OUTER JOIN
-            prot.ProtSequences ON ProtSequences.SeqId = ProteinSequences.SeqId;
-
-
 -- Store MS2 Spectrum data in separate table to improve performance of upload and MS2Peptides queries
 CREATE TABLE MS2SpectraData
 	(
@@ -476,12 +453,6 @@ CREATE TABLE MS2SpectraData
 
 	CONSTRAINT PK_MS2SpectraData PRIMARY KEY (Fraction, Scan)
 	);
-
-
-CREATE VIEW MS2Spectra AS
-    SELECT MS2Fractions.Run AS Run, MS2SpectraData.*
-    FROM MS2SpectraData INNER JOIN
-    MS2Fractions ON MS2SpectraData.Fraction = MS2Fractions.Fraction;
 
 
 CREATE TABLE MS2History
@@ -494,19 +465,6 @@ CREATE TABLE MS2History
     );
 
 
-CREATE VIEW ms2.MS2ExperimentRuns AS
-SELECT ms2.MS2Runs.*, exp.ExperimentRun.RowId as ExperimentRunRowId, exp.Protocol.Name As ProtocolName
-FROM ms2.MS2Runs
-LEFT OUTER JOIN exp.ExperimentRun ON exp.ExperimentRun.LSID=ms2.MS2Runs.ApplicationLSID
-LEFT OUTER JOIN exp.Protocol ON exp.Protocol.LSID=exp.ExperimentRun.ProtocolLSID;
-
-
 SET search_path TO prot, public;
 
 -- ProteinDataBases with number of runs
-CREATE VIEW prot.ProteinDBs AS
-    SELECT ProteinDataBases.ProteinDataBase, ProteinDataBases.DataBaseId, ProteinDataBases.Loaded, X.Runs
-    FROM ProteinDataBases LEFT OUTER JOIN
-        (SELECT DataBaseId, COUNT(Run) AS Runs
-        FROM ms2.MS2Runs
-        GROUP BY DataBaseId) X ON X.DataBaseId = ProteinDataBases.DataBaseId;

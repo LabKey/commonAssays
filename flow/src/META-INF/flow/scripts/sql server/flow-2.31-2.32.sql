@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 drop index flow.object.flow_object_typeid
-go
+GO
 create index flow_object_typeid on flow.object (container, typeid, dataid)
-go
+GO

@@ -16,6 +16,6 @@
 
 /* microarray-0.00-0.01.sql */
 
--- Tables and views used for Microarray module
+-- Tables used for Microarray module
 EXEC sp_addapprole 'microarray', 'password'
 GO

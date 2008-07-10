@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 ALTER TABLE flow.object ADD container entityid
-go
+GO
 UPDATE flow.object SET container = (select container from exp.data where exp.data.rowid = flow.object.dataid)
-go
+GO
 ALTER TABLE flow.object ALTER COLUMN container entityid NOT NULL
-go
+GO
 -- UNDONE: PK_Object is clustered even though it would make more sense to cluster this index
 CREATE INDEX flow_object_typeid ON flow.object (container, typeid, dataid)
-go
+GO
 
 ALTER TABLE flow.object ADD compid int;
 ALTER TABLE flow.object ADD scriptid int;
 ALTER TABLE flow.object ADD fcsid int;
-go
+GO
 
 UPDATE flow.object
 SET
@@ -46,4 +46,4 @@ scriptid =(
  WHERE D.rowid = flow.object.dataid AND INPUT.typeid in (5,7)
  )
 WHERE flow.object.typeid=3;
-go
+GO

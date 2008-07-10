@@ -29,7 +29,6 @@ UPDATE ms2.MS2Runs SET SpectrumCount = SpecCount FROM
 WHERE ms2.MS2Runs.Run = x.Run
 GO
 
--- No changes to this view, but we need to rebuild it since we added two columns to MS2Runs
 -- Relax contraints on quantitation result columns; q3 does not generate string representations of ratios.
 ALTER TABLE ms2.Quantitation ALTER COLUMN Ratio VARCHAR(20) NULL
 ALTER TABLE ms2.Quantitation ALTER COLUMN Heavy2lightRatio VARCHAR(20) NULL

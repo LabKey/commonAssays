@@ -18,7 +18,6 @@ ALTER TABLE ms2.MS2Runs ADD
     NegativeHitCount INT NOT NULL DEFAULT 0
 GO
 
--- No changes to this view, but we need to rebuild it since we added a column to MS2Runs
 CREATE TABLE ms2.PeptideProphetData
 (
 	PeptideId BIGINT NOT NULL,

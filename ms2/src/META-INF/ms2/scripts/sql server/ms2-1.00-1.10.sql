@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
--- All tables and views used for GO data
+-- All tables used for GO data
 -- Data will change frequently, with updates from the GO consortium
 -- See  
 --      http://www.geneontology.org/GO.downloads.shtml
