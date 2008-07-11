@@ -68,7 +68,7 @@ public class SpectraCountRReport extends RReport
     private SpectraCountQueryView getQueryView(ViewContext context) throws Exception
     {
         String spectraConfig = context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.spectraConfig);
-        QuerySettings settings = new QuerySettings(context.getActionURL(), "SpectraCount");
+        QuerySettings settings = new QuerySettings(context, "SpectraCount");
         settings.setViewName(getDescriptor().getProperty(ReportDescriptor.Prop.viewName));
         settings.setAllowChooseQuery(false);
         final SpectraCountConfiguration config = SpectraCountConfiguration.findByTableName(spectraConfig);

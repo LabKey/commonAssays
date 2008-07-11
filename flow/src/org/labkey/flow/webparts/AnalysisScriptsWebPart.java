@@ -45,13 +45,13 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         public WebPartView getWebPartView(ViewContext portalCtx, Portal.WebPart wp) throws Exception
         {
             FlowSchema schema = new FlowSchema(portalCtx.getUser(), portalCtx.getContainer());
-            FlowQuerySettings settings = schema.getSettings(wp, portalCtx);
+            FlowQuerySettings settings = (FlowQuerySettings)schema.getSettings(wp, portalCtx);
             settings.setAllowChooseQuery(false);
             settings.setAllowChooseView(false);
             settings.setQueryName(FlowTableType.AnalysisScripts.toString());
             return new AnalysisScriptsWebPart(new ViewContext(portalCtx), schema, settings);
         }
-    };
+    }
 
     public AnalysisScriptsWebPart(ViewContext context, FlowSchema schema, FlowQuerySettings settings)
     {
@@ -62,7 +62,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
 
     public List<DisplayColumn> getDisplayColumns()
     {
-        List<DisplayColumn> ret = new ArrayList();
+        List<DisplayColumn> ret = new ArrayList<DisplayColumn>();
         TableInfo table = getTable();
         ret.addAll(getQueryDef().getDisplayColumns(null, table));
         ColumnInfo colScriptType = new AliasedColumn("Type", table.getColumn("RowId"));
@@ -76,7 +76,6 @@ public class AnalysisScriptsWebPart extends FlowQueryView
             return;
         ActionButton btnNewScript = new ActionButton("Create New Analysis Script", PageFlowUtil.urlFor(ScriptController.Action.newProtocol, getContainer()));
         bar.add(btnNewScript);
-        return;
     }
 
     protected DataRegion createDataRegion()

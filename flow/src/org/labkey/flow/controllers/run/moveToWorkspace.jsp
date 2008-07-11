@@ -18,9 +18,11 @@
 <%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page import="org.labkey.flow.controllers.run.RunForm" %>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
-<%@ page extends="org.labkey.api.jsp.FormPage" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<% RunForm form = (RunForm) __form;
+<% 
+    RunForm form = (RunForm) HttpView.currentModel();
     FlowRun run = form.getRun();
 %>
 <labkey:errors />

@@ -21,9 +21,11 @@
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page extends="org.labkey.api.jsp.FormPage"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib"%>
-<% MoveToAnalysisForm form = (MoveToAnalysisForm) __form;
+<%
+    MoveToAnalysisForm form = (MoveToAnalysisForm) HttpView.currentModel();
     FlowRun run = form.getRun();
     Map<Integer, String> analyses = new LinkedHashMap();
     for (FlowExperiment experiment : FlowExperiment.getAnalyses(getContainer()))

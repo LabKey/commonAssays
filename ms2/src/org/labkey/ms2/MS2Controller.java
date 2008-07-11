@@ -1953,7 +1953,7 @@ public class MS2Controller extends SpringActionController
         protected QueryView createQueryView(SpectraCountForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
         {
             _form = form;
-            QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), "SpectraCount");
+            QuerySettings settings = new QuerySettings(getViewContext(), "SpectraCount");
             settings.setAllowChooseQuery(false);
             _config = SpectraCountConfiguration.findByTableName(form.getSpectraConfig());
             if (_config == null)
@@ -2543,7 +2543,7 @@ public class MS2Controller extends SpringActionController
             throws ServletException
         {
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
-            QuerySettings proteinsSettings = schema.getSettings(getViewContext().getActionURL(), POTENTIAL_PROTEIN_DATA_REGION);
+            QuerySettings proteinsSettings = schema.getSettings(getViewContext(), POTENTIAL_PROTEIN_DATA_REGION);
             proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);
             proteinsSettings.setAllowChooseQuery(false);
             QueryView proteinsView = new QueryView(schema, proteinsSettings);
@@ -2570,7 +2570,7 @@ public class MS2Controller extends SpringActionController
         private QueryView createProteinGroupSearchView(final ProteinSearchForm form) throws ServletException
         {
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
-            QuerySettings groupsSettings = new QuerySettings(getViewContext().getActionURL(), PROTEIN_DATA_REGION);
+            QuerySettings groupsSettings = new QuerySettings(getViewContext(), PROTEIN_DATA_REGION);
             groupsSettings.setSchemaName(schema.getSchemaName());
             groupsSettings.setQueryName(MS2Schema.PROTEIN_GROUPS_FOR_SEARCH_TABLE_NAME);
             groupsSettings.setAllowChooseQuery(false);
@@ -5874,7 +5874,7 @@ public class MS2Controller extends SpringActionController
             _targetURL = targetURL;
             _runList = runList;
             _form = form;
-            _peptideView = new PeptidesFilterView(getUser(), getContainer(), getViewContext().getActionURL(), _form);
+            _peptideView = new PeptidesFilterView(getViewContext(), _form);
         }
 
         public QueryView getPeptideView()

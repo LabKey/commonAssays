@@ -36,7 +36,7 @@ public class RunForm extends FlowQueryForm
 
     protected FlowSchema createSchema()
     {
-        FlowSchema ret = super.createSchema();
+        FlowSchema ret = (FlowSchema)super.createSchema();
         ret.setRun(getRun());
         return ret;
     }

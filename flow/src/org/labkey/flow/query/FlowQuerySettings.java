@@ -17,30 +17,27 @@
 package org.labkey.flow.query;
 
 import org.labkey.api.query.QuerySettings;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.Portal;
-import org.labkey.api.view.ActionURL;
-
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.PropertyValues;
 
 public class FlowQuerySettings extends QuerySettings
 {
     private boolean _showGraphs;
 
-    public FlowQuerySettings(ActionURL url, String dataRegionName)
+    public FlowQuerySettings(String dataRegionName)
     {
-        super(url, dataRegionName);
+        super(dataRegionName);
     }
 
-    public FlowQuerySettings(Portal.WebPart webPart, ViewContext context)
+    public FlowQuerySettings(PropertyValues pvs, String dataRegionName)
     {
-        super(webPart, context);
+        super(pvs, dataRegionName);
     }
 
-    protected void init(ActionURL url)
+    @Override
+    public void init(PropertyValues params)
     {
-        super.init(url);
-        _showGraphs = url.getParameter(param("showGraphs")) != null;
+        super.init(params);
+        _showGraphs = _getParameter(param("showGraphs")) != null;
     }
 
     public boolean getShowGraphs()

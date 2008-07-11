@@ -20,6 +20,7 @@ import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.data.Container;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,9 +35,9 @@ public class PeptidesFilterView extends QueryView
     private static final String PEPTIDE_FILTER_LINK_ID = "peptideFilterLink";
     private MS2Controller.PeptideFilteringComparisonForm _form;
 
-    public PeptidesFilterView(User user, Container container, ActionURL currentURL, MS2Controller.PeptideFilteringComparisonForm form)
+    public PeptidesFilterView(ViewContext context, MS2Controller.PeptideFilteringComparisonForm form)
     {
-        super(new MS2Schema(user, container), new QuerySettings(currentURL, MS2Controller.PEPTIDES_FILTER, MS2Schema.PEPTIDES_FILTER_TABLE_NAME));
+        super(new MS2Schema(context.getUser(), context.getContainer()), new QuerySettings(context, MS2Controller.PEPTIDES_FILTER, MS2Schema.PEPTIDES_FILTER_TABLE_NAME));
         _form = form;
     }
 

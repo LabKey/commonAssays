@@ -120,6 +120,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
         protected ModelAndView chooseRunsToAnalyze(ChooseRunsToAnalyzeForm form, BindException errors)
         {
             nav = new Pair<String, Action>("Choose runs", Action.chooseRunsToAnalyze);
+            form.populate(errors);
             return new JspView<ChooseRunsToAnalyzeForm>(AnalysisScriptController.class, "chooseRunsToAnalyze.jsp", form, errors);
         }
 

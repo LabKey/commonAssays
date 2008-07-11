@@ -27,10 +27,12 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.flow.data.*;
 import org.labkey.flow.query.FlowQueryForm;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
+import org.springframework.validation.BindException;
 
 import java.util.*;
 
@@ -48,17 +50,11 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
     private boolean _targetExperimentSet;
     private String _dataRegionSelectionKey;
 
-    protected FlowSchema createSchema()
+    public ChooseRunsToAnalyzeForm()
     {
-        return new FlowSchema(getUser(), getContainer());
+        super(FlowTableType.Runs.toString());
     }
-
-    protected QuerySettings createQuerySettings(UserSchema schema)
-    {
-        QuerySettings ret = super.createQuerySettings(schema);
-        ret.setQueryName(FlowTableType.Runs.toString());
-        return ret;
-    }
+    
 
     public void setFf_analysisName(String name)
     {
@@ -90,7 +86,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
         _step = step;
     }
 
-    public Map<Integer, String> getAvailableSteps(FlowScript analysisScript) throws Exception
+    public Map<Integer, String> getAvailableSteps(FlowScript analysisScript)
     {
         Map<Integer, String> ret = new LinkedHashMap();
         if (analysisScript.hasStep(FlowProtocolStep.calculateCompensation))
@@ -117,11 +113,6 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
     {
         ff_targetExperimentId = experimentId;
         _targetExperimentSet = true;
-    }
-
-    public void addActionError(String error)
-    {
-        PageFlowUtil.getActionErrors(getRequest(), true).add(null, new ActionError("error", error));
     }
 
     public FlowScript getProtocol()
@@ -165,7 +156,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
         return Arrays.asList(FlowExperiment.getAnalyses(getContainer()));
     }
 
-    public void populate() throws Exception
+    public void populate(BindException errors)
     {
         if (!_targetExperimentSet)
         {
@@ -178,7 +169,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
         Collection<FlowScript> availableProtocols = Arrays.asList(FlowScript.getScripts(getContainer()));
         if (availableProtocols.size() == 0)
         {
-            addActionError("There are no analysis or compensation protocols in this folder.");
+            errors.reject(SpringActionController.ERROR_MSG, "There are no analysis or compensation protocols in this folder.");
         }
         else
         {

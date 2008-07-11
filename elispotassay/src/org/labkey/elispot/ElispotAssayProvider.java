@@ -394,7 +394,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
     public QueryView createRunDataView(ViewContext context, ExpProtocol protocol)
     {
         String name = getRunDataTableName(protocol);
-        QuerySettings settings = new QuerySettings(context.getActionURL(), name);
+        QuerySettings settings = new QuerySettings(context, name);
         settings.setSchemaName(AssayService.ASSAY_SCHEMA_NAME);
         settings.setQueryName(name);
         return new ElispotRunDataQueryView(protocol, context, settings);

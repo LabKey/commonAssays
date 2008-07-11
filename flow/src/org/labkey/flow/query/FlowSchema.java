@@ -24,10 +24,8 @@ import org.labkey.api.query.*;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.GUID;
-import org.labkey.api.util.TTLCacheMap;
 import org.labkey.api.util.Cache;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.HttpView;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
@@ -41,6 +39,7 @@ import org.labkey.flow.data.*;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.view.FlowQueryView;
+import org.springframework.beans.PropertyValues;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -1181,18 +1180,10 @@ public class FlowSchema extends UserSchema
         return ret;
     }
 
-    public FlowQuerySettings getSettings(ActionURL url, String dataRegionName)
-    {
-        FlowQuerySettings settings = new FlowQuerySettings(url, dataRegionName);
-        settings.setSchemaName(getSchemaName());
-        return settings;
-    }
 
-    public FlowQuerySettings getSettings(Portal.WebPart webPart, ViewContext context)
+    protected QuerySettings createQuerySettings(String dataRegionName)
     {
-        FlowQuerySettings settings = new FlowQuerySettings(webPart, context);
-        settings.setSchemaName(getSchemaName());
-        return settings;
+        return new FlowQuerySettings(dataRegionName);    //To change body of overridden methods use File | Settings | File Templates.
     }
 
     public QueryDefinition getQueryDefForTable(String name)

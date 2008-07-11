@@ -47,7 +47,6 @@
     ViewContext context = HttpView.getRootContext();
 
     ChooseRunsToAnalyzeForm form = me.getModelBean();
-    form.populate();
     ChooseRunsView view = new ChooseRunsView(form);
     Collection<FlowExperiment> targetExperiments = new ArrayList(form.getAvailableAnalyses());
     targetExperiments.add(null);

@@ -73,7 +73,7 @@ public class FeaturesView extends QueryView
         _baseFilters = baseFilters;
         _forSearch = forSearch;
 
-        QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), DATAREGION_NAME);
+        QuerySettings settings = new QuerySettings(getViewContext(), DATAREGION_NAME);
         settings.setSchemaName(schema.getSchemaName());
         settings.setQueryName(_forSearch ? MS1Schema.TABLE_FEATURES_SEARCH : MS1Schema.TABLE_FEATURES);
         settings.setAllowChooseQuery(false);

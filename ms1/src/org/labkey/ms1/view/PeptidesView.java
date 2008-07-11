@@ -48,7 +48,7 @@ public class PeptidesView extends QueryView
     {
         super(QueryService.get().getUserSchema(user, container, schemaName));
 
-        QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), DATAREGION_NAME);
+        QuerySettings settings = new QuerySettings(getViewContext(), DATAREGION_NAME);
         settings.setSchemaName(schemaName);
         settings.setQueryName(queryName);
         settings.setAllowChooseQuery(false);

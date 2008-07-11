@@ -52,7 +52,7 @@ public class FlowQueryView extends QueryView
 
     public FlowQueryView(FlowQueryForm form)
     {
-        this(form.getContext(), (FlowSchema) form.getSchema(), (FlowQuerySettings) form.getQuerySettings());
+        this(form.getViewContext(), (FlowSchema) form.getSchema(), (FlowQuerySettings) form.getQuerySettings());
     }
 
     public FlowQueryView(ViewContext context, FlowSchema schema, FlowQuerySettings settings)
@@ -111,7 +111,7 @@ public class FlowQueryView extends QueryView
                 out.write(textLink("Hide Graphs", urlHide));
                 JspView view = new JspView(JspLoader.createPage(getViewContext().getRequest(), FlowQueryView.class, "setGraphSize.jsp"));
                 view.setFrame(FrameType.NONE);
-                ((HttpView) HttpView.currentView()).include(view, out);
+                HttpView.currentView().include(view, out);
             }
             else
             {

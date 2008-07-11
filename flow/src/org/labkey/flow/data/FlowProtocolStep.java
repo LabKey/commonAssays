@@ -109,7 +109,7 @@ public class FlowProtocolStep implements Serializable
         return fromActionSequence(Integer.valueOf(strActionSequence));
     }
 
-    public FlowProtocol ensureForContainer(User user, Container container) throws Exception
+    public FlowProtocol ensureForContainer(User user, Container container)
     {
         FlowProtocol ret = getForContainer(container);
         if (ret != null)

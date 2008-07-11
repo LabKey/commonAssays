@@ -103,7 +103,7 @@ public abstract class AbstractRunCompareView extends QueryView
 
     private static QuerySettings createSettings(ViewContext context, String tableName)
     {
-        QuerySettings settings = new QuerySettings(context.cloneActionURL(), "Compare");
+        QuerySettings settings = new QuerySettings(context, "Compare");
         settings.setSchemaName(MS2Schema.SCHEMA_NAME);
         settings.setQueryName(tableName);
         settings.setAllowChooseQuery(false);

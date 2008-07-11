@@ -123,7 +123,7 @@ public class ProteinController extends SpringActionController
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             UserSchema schema = new CustomAnnotationSchema(getUser(), getContainer(), _showSequences);
-            QuerySettings settings = new QuerySettings(getViewContext().getActionURL(), "CustomAnnotation");
+            QuerySettings settings = new QuerySettings(getViewContext(), "CustomAnnotation");
             settings.setSchemaName(schema.getSchemaName());
             settings.getQueryDef(schema);
             settings.setAllowChooseQuery(true);

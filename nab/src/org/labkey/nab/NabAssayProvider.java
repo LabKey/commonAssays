@@ -388,7 +388,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         private static QuerySettings getDefaultSettings(ExpProtocol protocol, ViewContext context, AssayProvider provider)
         {
             String name = provider.getRunDataTableName(protocol);
-            QuerySettings settings = new QuerySettings(context.getActionURL(), name);
+            QuerySettings settings = new QuerySettings(context, name);
             settings.setSchemaName(AssayService.ASSAY_SCHEMA_NAME);
             settings.setQueryName(name);
             return settings;

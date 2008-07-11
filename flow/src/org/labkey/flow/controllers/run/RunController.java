@@ -67,15 +67,6 @@ public class RunController extends SpringFlowController<RunController.Action>
         setActionResolver(_actionResolver);
     }
 
-    protected Page getPage(String name, RunForm form) throws Exception
-    {
-        if (null == form.getRun())
-            HttpView.throwNotFound();
-        Page ret = (Page) getFlowPage(name);
-        ret.setRun(form.getRun());
-        ret.__form = form;
-        return ret;
-    }
 
     @RequiresPermission(ACL.PERM_NONE)
     public class BeginAction extends SimpleViewAction<RunForm>
@@ -99,8 +90,7 @@ public class RunController extends SpringFlowController<RunController.Action>
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
             run = form.getRun();
-            Page page = getPage("showRun.jsp", form);
-            return new JspView(page);
+            return new JspView<RunForm>(RunController.class, "showRun.jsp", form, errors);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -110,38 +100,7 @@ public class RunController extends SpringFlowController<RunController.Action>
         }
     }
 
-    abstract static public class Page extends FlowPage<RunController>
-    {
-        public ViewForm __form;
-        private FlowRun _run;
-        private FlowWell[] _wells = null;
-        private FlowCompensationMatrix _comp;
-
-        public void setRun(FlowRun run)
-        {
-            _run = run;
-        }
-
-        public FlowRun getRun()
-        {
-            return _run;
-        }
-
-        public FlowWell[] getWells()
-        {
-            if (null == _wells)
-                _wells = _run.getWells();
-            return _wells;
-        }
-
-        public FlowCompensationMatrix getCompensationMatrix()
-        {
-            if (null == _comp)
-                _comp = _run.getCompensationMatrix();
-            return _comp;
-        }
-    }
-
+    
     @RequiresPermission(ACL.PERM_READ)
     public class DownloadAction extends SimpleViewAction<DownloadRunForm>
     {
@@ -217,7 +176,7 @@ public class RunController extends SpringFlowController<RunController.Action>
         public ModelAndView getView(RunForm form, boolean reshow, BindException errors) throws Exception
         {
             run = form.getRun();
-            return FormPage.getView(RunController.class, form, "moveToWorkspace.jsp");
+            return new JspView<RunForm>(RunController.class, "moveToWorkspace.jsp", form, errors);
         }
 
         public boolean handlePost(RunForm form, BindException errors) throws Exception
@@ -264,7 +223,7 @@ public class RunController extends SpringFlowController<RunController.Action>
         public ModelAndView getView(MoveToAnalysisForm form, boolean reshow, BindException errors) throws Exception
         {
             run = form.getRun();
-            return FormPage.getView(RunController.class, form, "moveToAnalysis.jsp");
+            return new JspView<MoveToAnalysisForm>(RunController.class, "moveToAnalysis.jsp", form, errors);
         }
 
         public boolean handlePost(MoveToAnalysisForm form, BindException errors) throws Exception

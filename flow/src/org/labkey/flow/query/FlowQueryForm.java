@@ -23,20 +23,13 @@ import org.labkey.api.util.UnexpectedException;
 
 public class FlowQueryForm extends QueryForm
 {
-    public String getSchemaName()
+    public FlowQueryForm()
     {
-        return FlowSchema.SCHEMANAME;
+        super(FlowSchema.SCHEMANAME, null);
     }
 
-    protected FlowSchema createSchema()
+    public FlowQueryForm(String queryName)
     {
-        try
-        {
-            return new FlowSchema(getViewContext());
-        }
-        catch (Exception e)
-        {
-            throw UnexpectedException.wrap(e);
-        }
+        super(FlowSchema.SCHEMANAME, queryName);
     }
 }

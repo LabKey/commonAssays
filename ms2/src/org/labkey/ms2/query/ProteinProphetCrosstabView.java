@@ -59,7 +59,7 @@ public class ProteinProphetCrosstabView extends ComparisonCrosstabView
 
         getViewContext().setActionURL(url);
 
-        QuerySettings settings = new QuerySettings(url, QueryView.DATAREGIONNAME_DEFAULT);
+        QuerySettings settings = new QuerySettings(url.getPropertyValues(), QueryView.DATAREGIONNAME_DEFAULT);
         settings.setSchemaName(schema.getSchemaName());
         settings.setQueryName(MS2Schema.PROTEIN_PROPHET_CROSSTAB_TABLE_NAME);
         settings.setAllowChooseQuery(false);
