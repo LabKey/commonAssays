@@ -83,8 +83,12 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     public ActionURL handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf)
             throws HandlerException
-    {
-        if ("Retry".equals(name) &&
+    {        
+        ActionURL url = super.handleStatusAction(ctx, name, sf);
+        if (url != null)
+            return url;
+
+        if (PipelineProvider.CAPTION_RETRY_BUTTON.equals(name) &&
                 "ERROR".equals(sf.getStatus()) &&
                 "type=database".equals(sf.getInfo()))
         {
@@ -95,11 +99,7 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
             tandemErr.renameTo(tandemXml);
         }
 
-        ActionURL url = _clusterSupport.handleStatusAction(ctx, name, sf);
-        if (url != null)
-            return url;
-
-        return super.handleStatusAction(ctx, name, sf);
+        return _clusterSupport.handleStatusAction(ctx, name, sf);
     }
 
     public void updateFileProperties(ViewContext context, PipeRoot pr, List<FileEntry> entries)

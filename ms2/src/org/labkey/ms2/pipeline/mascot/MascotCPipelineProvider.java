@@ -103,11 +103,11 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     public ActionURL handleStatusAction(ViewContext ctx, String name, PipelineStatusFile sf) throws HandlerException
     {
-        ActionURL url = _clusterSupport.handleStatusAction(ctx, name, sf);
+        ActionURL url = super.handleStatusAction(ctx, name, sf);
         if (url != null)
             return url;
 
-        return super.handleStatusAction(ctx, name, sf);
+        return _clusterSupport.handleStatusAction(ctx, name, sf); 
     }
 
     public HttpView getSetupWebPart(Container container)

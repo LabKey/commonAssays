@@ -16,6 +16,7 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.struts.upload.FormFile;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.labkey.api.data.*;
@@ -457,7 +458,6 @@ public class PipelineController extends SpringActionController
                 Container c = getContainer();
                 List<File> mzXMLFileList = new ArrayList<File>();
 
-
                 File[] annotatedFiles = MS2PipelineManager.getAnalysisFiles(_dirData, _dirAnalysis, FileStatus.ANNOTATED, c);
                 mzXMLFileList.addAll(Arrays.asList(annotatedFiles));
                 File[] unprocessedFile = MS2PipelineManager.getAnalysisFiles(_dirData, _dirAnalysis, FileStatus.UNKNOWN, c);
@@ -474,7 +474,7 @@ public class PipelineController extends SpringActionController
                 _protocol.getFactory().ensureDefaultParameters(_dirRoot);
 
                 File fileParameters = _protocol.getParametersFile(_dirData);
-                // Make sure configure.xml file exists for the job when it runs.
+                // Make sure parameters XML file exists for the job when it runs.
                 if (!fileParameters.exists())
                 {
                     _protocol.setEmail(getUser().getEmail());
@@ -490,7 +490,17 @@ public class PipelineController extends SpringActionController
 
                 // If not a Perl-driven cluster, just let the PipelineJobQueue deal with it.
                 if (!hasStatusFile)
+                {
+                    // If the Perl pipeline is enabled, but is not to be run on this job,
+                    // write a blank 'pipe.log' file to keep the Perl pipeline from ever
+                    // processing this directory.
+                    if (AppProps.getInstance().isPerlPipelineEnabled())
+                    {
+                        FileUtils.writeLines(new File(job.getAnalysisDirectory(), "pipe.log"),
+                                Arrays.asList("Prevent Perl pipeline processing."));
+                    }
                     PipelineService.get().queueJob(job);
+                }
                 else
                 {
                     // For backward compatibility, we need to create placeholder jobs for
