@@ -202,11 +202,15 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         setProperty(user, ExperimentProperty.SampleSetLSID.getPropertyDescriptor(), getSampleSetLSID());
     }
 
-    public ActionURL urlUploadSamples()
+    public ActionURL urlUploadSamples(boolean importMoreSamples)
     {
         ActionURL ret = new ActionURL("Experiment", "showUploadMaterials", getContainerPath());
         ret.addParameter("name", SAMPLESET_NAME);
         ret.addParameter("nameReadOnly", "true");
+        if (importMoreSamples)
+        {
+            ret.addParameter("importMoreSamples", "true");
+        }
         return ret;
     }
 

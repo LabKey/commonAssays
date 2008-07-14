@@ -31,10 +31,10 @@
     The Flow Protocol describes how to match samples from a Sample Set with FCSFiles.<br>
     <% if (protocol.getSampleSet() == null) { %>
         No samples have been uploaded in this folder.<br>
-        <labkey:link href="<%=protocol.urlUploadSamples()%>" text="Upload samples from a spreadsheet" /><br>
+        <labkey:link href="<%=protocol.urlUploadSamples(false)%>" text="Upload samples from a spreadsheet" /><br>
     <% } else { %>
         <labkey:link href="<%=protocol.getSampleSet().detailsURL()%>" text="Show samples" /><br>
-        <labkey:link href="<%=protocol.urlUploadSamples()%>" text="Upload more samples from a spreadsheet" /><br>
+        <labkey:link href="<%=protocol.urlUploadSamples(true)%>" text="Upload more samples from a spreadsheet" /><br>
         <labkey:link href="<%=protocol.urlFor(Action.joinSampleSet)%>" text="Join samples to FCS File Data" /><br>
     <% } %>
 </p>
