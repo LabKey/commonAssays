@@ -333,9 +333,19 @@ public class MascotSearchTask extends PipelineJob.Task
             if (!fileOutputPepXML.renameTo(fileWorkPepXMLRaw))
                 throw new IOException("Failed to rename " + fileOutputPepXML + " to " + fileWorkPepXMLRaw);
 
-            wd.outputFile(fileWorkPepXMLRaw);
-            wd.outputFile(fileWorkDAT);
-            wd.outputFile(fileWorkMGF);
+            WorkDirectory.CopyingResource lock = null;
+            try
+            {
+                lock = wd.ensureCopyingLock();
+                wd.outputFile(fileWorkPepXMLRaw);
+                wd.outputFile(fileWorkDAT);
+                wd.outputFile(fileWorkMGF);
+            }
+            finally
+            {
+                if (lock != null) { lock.release(); }
+            }
+
 
             wd.discardFile(fileWorkSpectra);
             wd.discardFile(fileWorkInputXML);

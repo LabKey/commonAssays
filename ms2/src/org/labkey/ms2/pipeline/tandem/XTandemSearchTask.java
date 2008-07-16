@@ -138,8 +138,18 @@ public class XTandemSearchTask extends PipelineJob.Task
                     wd.getDir());
 
             // Move final outputs to analysis directory.
-            wd.outputFile(fileWorkOutputXML);
-            wd.outputFile(fileWorkPepXMLRaw);
+            WorkDirectory.CopyingResource lock = null;
+            try
+            {
+                lock = wd.ensureCopyingLock();
+                wd.outputFile(fileWorkOutputXML);
+                wd.outputFile(fileWorkPepXMLRaw);
+            }
+            finally
+            {
+                if (lock != null) { lock.release(); }
+            }
+            
             wd.remove();
         }
         catch (PipelineJob.RunProcessException e)

@@ -180,8 +180,17 @@ public class SequestSearchTask extends PipelineJob.Task
                 throw new IOException("Failed to delete DTA directory " + dirOutputDta.getAbsolutePath());
 
             // TODO: TGZ file is only required to get spectra loaded into CPAS.  Fix to use mzXML instead.
-            wd.outputFile(fileTgz);
-            wd.outputFile(fileWorkPepXMLRaw);
+            WorkDirectory.CopyingResource lock = null;
+            try
+            {
+                lock = wd.ensureCopyingLock();
+                wd.outputFile(fileTgz);
+                wd.outputFile(fileWorkPepXMLRaw);
+            }
+            finally
+            {
+                if (lock != null) { lock.release(); }
+            }
 
             wd.discardFile(fileWorkParamsLocal);
             wd.discardFile(fileWorkParamsRemote);

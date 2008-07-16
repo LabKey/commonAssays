@@ -198,8 +198,20 @@ public class TPPTask extends PipelineJob.Task
             // TODO: mzXML files may also be required, and input disk space requirements
             //          may be too great to copy to a temporary directory.
             File[] inputFiles = getJobSupport().getInteractInputFiles();
-            for (int i = 0; i < inputFiles.length; i++)
-                inputFiles[i] = wd.inputFile(inputFiles[i], false);
+            if (inputFiles.length > 0)
+            {
+                WorkDirectory.CopyingResource lock = null;
+                try
+                {
+                    lock = wd.ensureCopyingLock();
+                    for (int i = 0; i < inputFiles.length; i++)
+                        inputFiles[i] = wd.inputFile(inputFiles[i], false);
+                }
+                finally
+                {
+                    if (lock != null) { lock.release(); }
+                }
+            }
 
             File dirMzXml = getJobSupport().getDataDirectory();
 
@@ -263,11 +275,20 @@ public class TPPTask extends PipelineJob.Task
             getJob().runSubProcess(new ProcessBuilder(interactCmd),
                     wd.getDir());
 
-            wd.outputFile(fileWorkPepXML);
-            if (fileWorkProtXML != null)
+            WorkDirectory.CopyingResource lock = null;
+            try
             {
-                wd.outputFile(fileWorkProtXML,
-                        FT_PROT_XML.getName(getJobSupport().getBaseName()));
+                lock = wd.ensureCopyingLock();
+                wd.outputFile(fileWorkPepXML);
+                if (fileWorkProtXML != null)
+                {
+                    wd.outputFile(fileWorkProtXML,
+                            FT_PROT_XML.getName(getJobSupport().getBaseName()));
+                }
+            }
+            finally
+            {
+                if (lock != null) { lock.release(); }
             }
 
             // Deal with possible TPP outputs, if TPP was not XML_ONLY
@@ -284,7 +305,7 @@ public class TPPTask extends PipelineJob.Task
                 for (File fileInput : getJobSupport().getInteractInputFiles())
                 {
                     if (!fileInput.delete())
-                        getJob().warn("Failed to delete intermediat file " + fileInput);
+                        getJob().warn("Failed to delete intermediate file " + fileInput);
                 }
             }
         }
