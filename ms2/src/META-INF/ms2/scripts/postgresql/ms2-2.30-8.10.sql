@@ -38,7 +38,7 @@ DELETE FROM prot.identifiers WHERE (identifier = '' OR identifier IS NULL) AND i
 
 /* ms2-2.32-2.33.sql */
 
-DELETE FROM prot.FastaFiles where FastaId = 0;
+DELETE FROM prot.FastaFiles WHERE FastaId = 0;
 
 /* ms2-2.33-2.34.sql */
 

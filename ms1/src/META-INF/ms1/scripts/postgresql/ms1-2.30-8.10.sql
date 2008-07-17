@@ -40,7 +40,7 @@ INNER JOIN ms1.Features AS fe1 ON (fe1.FileId=fi1.FileId AND fe1.MS2Scan=pd1.Sca
 WHERE r1.Deleted=false AND ms1.Features.FeatureId=fe1.FeatureId
 AND r1.Container=
 (SELECT d2.Container FROM exp.Data AS d2 INNER JOIN ms1.Files AS fi2 ON (fi2.ExpDataFileId=d2.RowId)
-INNER JOIN ms1.Features as fe2 ON (fi2.FileId=fe2.FileId) WHERE fe2.FeatureId=ms1.Features.FeatureId)
+INNER JOIN ms1.Features AS fe2 ON (fi2.FileId=fe2.FileId) WHERE fe2.FeatureId=ms1.Features.FeatureId)
 ORDER BY pd1.PeptideProphet DESC LIMIT 1)
 WHERE MS2Scan IS NOT NULL AND MS2Charge IS NULL;
 

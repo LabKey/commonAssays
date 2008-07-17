@@ -126,8 +126,8 @@ EXEC sp_rename
     @objtype = 'COLUMN'
 GO
 
-CREATE INDEX IX_ProtOrganisms_Genus on prot.ProtOrganisms(Genus)
+CREATE INDEX IX_ProtOrganisms_Genus ON prot.ProtOrganisms(Genus)
 GO
 
-CREATE INDEX IX_ProtOrganisms_Species on prot.ProtOrganisms(Species)
+CREATE INDEX IX_ProtOrganisms_Species ON prot.ProtOrganisms(Species)
 GO

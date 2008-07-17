@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 -- DROP obsolete views.  Do not remove; these are needed when upgrading from older versions.
 EXEC core.fn_dropifexists 'ProteinDBs', 'prot', 'VIEW', NULL
 EXEC core.fn_dropifexists 'MS2Spectra', 'ms2', 'VIEW', NULL

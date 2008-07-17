@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-drop index flow.object.flow_object_typeid
+DROP INDEX flow.object.flow_object_typeid
 GO
-create index flow_object_typeid on flow.object (container, typeid, dataid)
+CREATE INDEX flow_object_typeid ON flow.object (container, typeid, dataid)
 GO

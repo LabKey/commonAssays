@@ -49,7 +49,7 @@ GO
 
 /* ms2-2.32-2.33.sql */
 
-DELETE FROM prot.FastaFiles where FastaId = 0
+DELETE FROM prot.FastaFiles WHERE FastaId = 0
 GO
 
 /* ms2-2.33-2.34.sql */

@@ -40,8 +40,8 @@ GO
 
 CREATE VIEW ms2.SimplePeptides AS SELECT
     frac.Run, run.Description AS RunDescription, pep.Fraction, LEFT(frac.FileName, CHARINDEX('.', frac.FileName) - 1) AS FractionName, Scan, EndScan,
-    RetentionTime, Charge, Score1 As RawScore, Score2 As DiffScore, Score3 As ZScore, Score1 As SpScore, Score2 As DeltaCn, Score3 As XCorr, Score4 As SpRank, Score1 AS OrigScore,
-    Score1 As Hyper, Score2 As Next, Score3 As B, Score4 As Y, Score5 As Expect, Score1 As Ion, Score2 As "Identity", Score3 AS Homology,
+    RetentionTime, Charge, Score1 AS RawScore, Score2 AS DiffScore, Score3 AS ZScore, Score1 AS SpScore, Score2 AS DeltaCn, Score3 AS XCorr, Score4 AS SpRank, Score1 AS OrigScore,
+    Score1 AS Hyper, Score2 AS Next, Score3 AS B, Score4 AS Y, Score5 AS Expect, Score1 AS Ion, Score2 AS "Identity", Score3 AS Homology,
     IonPercent, pep.Mass, DeltaMass, (pep.Mass + DeltaMass) AS PrecursorMass, ABS(DeltaMass - ROUND(DeltaMass, 0)) AS FractionalDeltaMass,
     CASE WHEN pep.Mass = 0 THEN 0 ELSE ABS(1000000 * ABS(DeltaMass - ROUND(DeltaMass, 0)) / (pep.Mass + (Charge - 1) * 1.007276)) END AS FractionalDeltaMassPPM,
 	CASE WHEN pep.Mass = 0 THEN 0 ELSE ABS(1000000 * DeltaMass / (pep.Mass + (Charge - 1) * 1.007276)) END AS DeltaMassPPM,

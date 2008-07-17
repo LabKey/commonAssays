@@ -16,13 +16,13 @@
 -- add most common ncbi Taxonomy id's
 
 CREATE TEMPORARY TABLE idents
-(	Identifier varchar(50) not null,
-	CommonName varchar(20) null,
-	Genus varchar(100) not null,
-	Species varchar(100) not null,
-	OrgId int null,
-	IdentId int null,
-	IdentTypeId int null
+(	Identifier varchar(50) NOT NULL,
+	CommonName varchar(20) NULL,
+	Genus varchar(100) NOT NULL,
+	Species varchar(100) NOT NULL,
+	OrgId int NULL,
+	IdentId int NULL,
+	IdentTypeId int NULL
 )
 ;
 INSERT INTO idents (CommonName, Genus, Species, Identifier)
@@ -76,7 +76,7 @@ UPDATE idents
 UPDATE idents
 	SET IdentId = PI.IdentId
 	FROM prot.ProtIdentifiers PI
-	WHERE idents.Identifier = PI.Identifier and idents.IdentTypeId = PI.IdentTypeId
+	WHERE idents.Identifier = PI.Identifier AND idents.IdentTypeId = PI.IdentTypeId
 ;
 UPDATE prot.ProtOrganisms
 	SET IdentId = i.IdentID
@@ -85,8 +85,8 @@ UPDATE prot.ProtOrganisms
 ;
 --SELECT i.*, PO.orgid, PO.IdentID, PI.IdentId
 -- FROM idents i
---inner join prot.ProtOrganisms PO ON (i.genus = PO.genus and i.species = PO.species)
---inner join prot.ProtIdentifiers PI ON (i.Identifier = PI.Identifier AND i.IdentTypeID = PI.IdentTypeId)
+--INNER JOIN prot.ProtOrganisms PO ON (i.genus = PO.genus AND i.species = PO.species)
+--INNER JOIN prot.ProtIdentifiers PI ON (i.Identifier = PI.Identifier AND i.IdentTypeID = PI.IdentTypeId)
 
 
 DROP TABLE idents;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-exec sp_addAppRole 'flow', 'password';
+EXEC sp_addAppRole 'flow', 'password';
 
 CREATE TABLE flow.Attribute(
     RowId int IDENTITY(1,1) NOT NULL,

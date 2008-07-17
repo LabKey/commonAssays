@@ -16,5 +16,5 @@
 
 /* SQLServer Version */
 
-DELETE FROM prot.FastaFiles where FastaId = 0
+DELETE FROM prot.FastaFiles WHERE FastaId = 0
 GO

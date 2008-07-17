@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 ALTER TABLE flow.object ADD COLUMN container entityid;
-UPDATE flow.object SET container = (select container from exp.data where exp.data.rowid = flow.object.dataid);
+UPDATE flow.object SET container = (SELECT container FROM exp.data WHERE exp.data.rowid = flow.object.dataid);
 ALTER TABLE flow.object ALTER COLUMN container SET NOT NULL;
 CREATE INDEX flow_object_typeid ON flow.object (container, typeid, dataid);
 
@@ -37,7 +37,7 @@ fcsid =(
 scriptid =(
  SELECT DI.dataid
  FROM flow.object INPUT INNER JOIN exp.datainput DI ON INPUT.dataid=DI.dataid INNER JOIN exp.data D ON D.sourceapplicationid=DI.targetapplicationid
- WHERE D.rowid = flow.object.dataid AND INPUT.typeid in (5,7)
+ WHERE D.rowid = flow.object.dataid AND INPUT.typeid IN (5,7)
  )
 WHERE flow.object.typeid=3;
 
