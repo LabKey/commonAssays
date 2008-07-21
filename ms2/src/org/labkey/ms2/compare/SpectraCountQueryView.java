@@ -16,18 +16,13 @@
 
 package org.labkey.ms2.compare;
 
-import org.labkey.api.query.QueryView;
-import org.labkey.api.query.QuerySettings;
-import org.labkey.api.query.CreateChartButton;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.ActionButton;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.reports.report.view.ChartUtil;
-import org.labkey.api.reports.report.view.RReportBean;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.SpectraCountConfiguration;
-import org.labkey.ms2.MS2Controller;
 
 /**
  * User: jeckels
