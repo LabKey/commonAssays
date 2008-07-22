@@ -17,7 +17,6 @@
 package org.labkey.ms2.pipeline.client.mascot;
 
 import org.labkey.ms2.pipeline.client.SequenceDbComposite;
-import org.labkey.api.gwt.client.util.StringUtils;
 
 import java.util.List;
 
