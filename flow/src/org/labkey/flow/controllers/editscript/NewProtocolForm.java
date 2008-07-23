@@ -18,6 +18,7 @@ package org.labkey.flow.controllers.editscript;
 
 import org.labkey.api.view.ViewForm;
 import org.labkey.api.util.URIUtil;
+import org.labkey.api.module.ModuleLoader;
 import org.apache.struts.action.ActionMapping;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,8 +43,8 @@ public class NewProtocolForm extends ViewForm
 
     public List<String> getTemplateNames(String suffix) throws Exception
     {
-        Set<String> uris = getRequest().getSession().getServletContext().getResourcePaths("/Flow/templates/");
-        List<String> ret = new ArrayList();
+        Set<String> uris = ModuleLoader.getServletContext().getResourcePaths("/Flow/templates/");
+        List<String> ret = new ArrayList<String>();
         for (String uri : uris)
         {
             String name = URIUtil.getFilename(new URI(uri));

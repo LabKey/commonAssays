@@ -37,6 +37,7 @@ import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.HomeTemplate;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.flow.ScriptParser;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.model.Polygon;
@@ -208,7 +209,7 @@ public class ScriptController extends BaseFlowController
     {
         URI base = new URI("Flow/templates/");
         URI uri = URIUtil.resolve(base, name);
-        InputStream stream = getRequest().getSession().getServletContext().getResourceAsStream(uri.toString());
+        InputStream stream = ModuleLoader.getServletContext().getResourceAsStream(uri.toString());
 
         return PageFlowUtil.getStreamContentsAsString(stream);
     }
