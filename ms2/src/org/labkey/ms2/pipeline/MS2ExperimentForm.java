@@ -281,7 +281,7 @@ public class MS2ExperimentForm extends MS2PipelineForm
     public String[] getProtocolAvailableNames()
     {
         if (protocolAvailableNames == null)
-            protocolAvailableNames = MassSpecProtocolFactory.get().getProtocolNames(getDirRoot().toURI());
+            protocolAvailableNames = MassSpecProtocolFactory.get().getProtocolNames(getDirRoot().toURI(), getDirData());
         return protocolAvailableNames;
     }
 

@@ -1,6 +1,8 @@
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
-<beans>
     <bean id="ms1PipelineRegistry" class="org.labkey.api.pipeline.TaskPipelineRegistrar">
         <property name="pipelines">
             <list>
@@ -20,7 +22,7 @@
                     </property>
                     <property name="taskProgressionSpec">
                         <list>
-                            <ref bean="mzxmlConverter"/>
+                            <ref bean="mzxmlConverterId"/>
 <!--                            <ref bean="peakabooFactory"/> -->
                             <ref bean="msInspectFactory"/>
                             <ref bean="expGeneratorFeatures"/>
@@ -34,9 +36,15 @@
                     <property name="description" value="msInspect Find Features and Match Peptides"/>
                     <property name="protocolFactoryName" value="pepmatch"/>
                     <property name="initialInputExt" value=".pep.xml"/>
-                    <property name="inputExtHeirarchy">
+                    <property name="fileExtHeirarchy">
                         <map>
                             <entry key=".mzXML">
+                                <list><value>.pep.xml</value></list>
+                            </entry>
+                            <entry key=".mzXML.inspect">
+                                <list><value>.pep.xml</value></list>
+                            </entry>
+                            <entry key=".mzXML.ms2.tsv">
                                 <list><value>.pep.xml</value></list>
                             </entry>
                         </map>
@@ -64,7 +72,7 @@
         </property>
     </bean>
 
-    <bean id="mzxmlConverter" class="org.labkey.api.pipeline.TaskId">
+    <bean id="mzxmlConverterId" class="org.labkey.api.pipeline.TaskId">
         <constructor-arg><value type="java.lang.Class">org.labkey.api.pipeline.cmd.ConvertTaskId</value></constructor-arg>
         <constructor-arg value="mzxmlConverter"/>
     </bean>

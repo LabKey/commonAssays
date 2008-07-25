@@ -23,6 +23,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.util.URIUtil;
+import org.labkey.api.util.NetworkDrive;
 import org.apache.log4j.Logger;
 import java.util.*;
 import java.io.IOException;
@@ -73,7 +74,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             if (provider == null)
             {
                 results.setSelectedProtocol("Loading Error");
-                _log.error("Problem loading protocols: provider equals null");
+                _log.debug("Problem loading protocols: provider equals null");
                 results.appendError("Problem loading protocol: provider equals null\n");
             }
         }
@@ -96,32 +97,48 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         try
         {
             if(protocol == null)
-                protocol = protocolFactory.load(uriRoot, protocolName);
+            {
+                File protocolFile = protocolFactory.getParametersFile(new File(URIUtil.resolve(uriRoot, path)), protocolName);
+                if (NetworkDrive.exists(protocolFile))
+                {
+                    protocol = protocolFactory.loadInstance(protocolFile);
+
+                    // Don't allow the instance file to override the protocol name.
+                    protocol.setName(protocolName);
+                }
+                else
+                {
+                    protocol = protocolFactory.load(uriRoot, protocolName);
+                }
+            }
         }
         catch(IOException e)
         {
             results.setSelectedProtocol("Loading Error");
-            _log.error("Problem loading protocols: provider equals null");
-            results.appendError("Problem loading protocol\n" + e.getMessage());
+            _log.debug("Problem loading protocol.\n" + e.getMessage());
+            results.appendError("Problem loading protocol.\n" + e.getMessage());
         }
-        results.setSelectedProtocol(protocol.getName());
-        try
+        if (protocol != null)
         {
-            results.setDefaultSequenceDb(protocol.getDbNames()[0]);
-            if(!provider.dbExists(dirSequenceRoot,protocol.getDbNames()[0]))
-                results.appendError("The database " + protocol.getDbNames()[0] + " cannot be found.");
-        }
-        catch(ArrayIndexOutOfBoundsException e)
-        {
-            _log.error("Problem loading protocol: no database in protocol");
-            results.appendError("Problem loading protocol: No database in protocol");
-        }
+            results.setSelectedProtocol(protocolName);
+            try
+            {
+                results.setDefaultSequenceDb(protocol.getDbNames()[0]);
+                if(!provider.dbExists(dirSequenceRoot,protocol.getDbNames()[0]))
+                    results.appendError("The database " + protocol.getDbNames()[0] + " cannot be found.");
+            }
+            catch(ArrayIndexOutOfBoundsException e)
+            {
+                _log.debug("Problem loading protocol: no database in protocol");
+                results.appendError("Problem loading protocol: No database in protocol");
+            }
 
-        PipelineService.get().rememberLastSequenceDbSetting(provider.getProtocolFactory(), getContainer(),
-                    getUser(),"",results.getDefaultSequenceDb());
-        results.setProtocolDescription(protocol.getDescription());
-        results.setProtocolXml(protocol.getXml());
-        getMzXml(results.getSelectedProtocol(),path, searchEngine);
+            PipelineService.get().rememberLastSequenceDbSetting(provider.getProtocolFactory(), getContainer(),
+                        getUser(),"",results.getDefaultSequenceDb());
+            results.setProtocolDescription(protocol.getDescription());
+            results.setProtocolXml(protocol.getXml());
+        }
+        getMzXml(results.getSelectedProtocol(), path, searchEngine);
         return results;
     }
 
@@ -193,7 +210,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
     private void getProtocols(String dirRoot, String defaultProtocol, String dirSequenceRoot, String searchEngine,
                               String path)
     {
-        ArrayList protocolList = new ArrayList();
+        ArrayList<String> protocolList = new ArrayList<String>();
         if(defaultProtocol == null || defaultProtocol.length() == 0 )
         {
             if(provider == null)
@@ -209,7 +226,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         String[] protocols;
         URI  dirRootURI = new File(dirRoot).toURI();
 
-        protocols = provider.getProtocolFactory().getProtocolNames(dirRootURI);
+        protocols = provider.getProtocolFactory().getProtocolNames(dirRootURI, new File(URIUtil.resolve(dirRootURI, path)));
         for(String protName:protocols)
         {
             if(!protName.equals("default"))
@@ -309,7 +326,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
         List<String> sequenceDbs = null;
         String defaultDbPath;
-        ArrayList returnList = new ArrayList();
+        ArrayList<String> returnList = new ArrayList<String>();
         if(defaultDb != null && defaultDb.endsWith("/"))
         {
             String savedDb =
@@ -379,7 +396,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
         if(sequenceDbs == null || sequenceDbs.size() == 0  )
         {
-            sequenceDbs = new ArrayList();
+            sequenceDbs = new ArrayList<String>();
             sequenceDbs.add("None found.");
             results.setSequenceDbs(sequenceDbs, relativePath);
             return results;
@@ -395,7 +412,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
         if(returnList.size() == 0  )
         {
-            returnList = new ArrayList();
+            returnList = new ArrayList<String>();
             returnList.add("None found.");
         }
         results.setSequenceDbs(returnList, relativePath);
@@ -430,7 +447,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         File dirAnalysis = provider.getProtocolFactory().getAnalysisDir(dirData,protocolName);
         if(dirData == null)
         {
-            _log.error("Problem loading protocol: no analysis directory in protocol");
+            _log.debug("Problem loading protocol: no analysis directory in protocol");
             results.appendError("Problem loading protocol: no analysis directory in protocol\n");
         }
         Map<File,FileStatus> mzXmlFileStatus = null;
