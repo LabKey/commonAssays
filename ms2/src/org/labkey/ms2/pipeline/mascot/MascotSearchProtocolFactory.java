@@ -16,11 +16,9 @@
 package org.labkey.ms2.pipeline.mascot;
 
 import org.labkey.api.pipeline.ParamParser;
-import org.labkey.api.util.AppProps;
+import org.labkey.api.settings.AppProps;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
-
-import java.io.File;
 
 /**
  * MascotSearchProtocolFactory class

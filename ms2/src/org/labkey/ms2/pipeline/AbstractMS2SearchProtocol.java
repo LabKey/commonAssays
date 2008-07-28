@@ -16,7 +16,7 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
-import org.labkey.api.util.AppProps;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 

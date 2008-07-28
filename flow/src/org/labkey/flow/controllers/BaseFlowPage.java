@@ -17,7 +17,7 @@
 package org.labkey.flow.controllers;
 
 import org.labkey.api.jsp.JspBase;
-import org.labkey.api.util.AppProps;
+import org.labkey.api.settings.AppProps;
 
 import java.util.List;
 import java.util.ArrayList;

@@ -19,7 +19,7 @@ package org.labkey.flow.view;
 import org.labkey.api.data.*;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.AppProps;
+import org.labkey.api.settings.AppProps;
 import org.apache.log4j.Logger;
 
 import org.labkey.flow.controllers.well.WellController;

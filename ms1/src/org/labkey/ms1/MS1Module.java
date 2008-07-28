@@ -143,6 +143,7 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
 
         //register the MS1 folder type
         ModuleLoader.getInstance().registerFolderType(new MS1FolderType(this));
+        MS1Controller.registerAdminConsoleLinks();
     }
 
 

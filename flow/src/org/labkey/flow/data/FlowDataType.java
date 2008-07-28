@@ -19,12 +19,8 @@ package org.labkey.flow.data;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.util.AppProps;
-import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.settings.AppProps;
 import org.labkey.flow.persist.ObjectType;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 abstract public class FlowDataType extends DataType
 {

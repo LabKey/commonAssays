@@ -36,6 +36,8 @@ import org.labkey.api.ms1.MS1Urls;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.gwt.server.BaseRemoteService;
+import org.labkey.api.settings.AdminConsole;
+import org.labkey.api.settings.AdminConsole.*;
 import org.labkey.ms1.model.*;
 import org.labkey.ms1.query.*;
 import org.labkey.ms1.view.*;
@@ -67,6 +69,11 @@ public class MS1Controller extends SpringActionController
     {
         super();
         setActionResolver(_actionResolver);
+    }
+
+    public static void registerAdminConsoleLinks()
+    {
+        AdminConsole.addLink(SettingsLinkType.Management, "ms1", new ActionURL(ShowAdminAction.class, ContainerManager.getRoot()));
     }
 
     /**

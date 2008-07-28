@@ -22,7 +22,7 @@ import org.labkey.api.exp.api.ExpSchema;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.*;
 import org.labkey.api.security.User;
-import org.labkey.api.util.AppProps;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.CaseInsensitiveHashSet;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;

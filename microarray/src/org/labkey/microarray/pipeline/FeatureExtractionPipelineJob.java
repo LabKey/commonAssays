@@ -26,7 +26,7 @@ import java.util.zip.GZIPInputStream;
 
 import org.labkey.api.microarray.FeatureExtractionClient;
 import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.util.AppProps;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ActionURL;
 import com.ice.tar.TarInputStream;

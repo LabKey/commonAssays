@@ -47,6 +47,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 import org.labkey.api.action.*;
 import org.labkey.api.gwt.server.BaseRemoteService;
+import org.labkey.api.settings.AppProps;
+
 import java.io.*;
 import java.net.URI;
 import java.sql.SQLException;

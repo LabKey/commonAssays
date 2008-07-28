@@ -17,7 +17,7 @@ package org.labkey.ms2.pipeline.mascot;
 
 import org.labkey.api.pipeline.*;
 import org.labkey.api.security.ACL;
-import org.labkey.api.util.AppProps;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;

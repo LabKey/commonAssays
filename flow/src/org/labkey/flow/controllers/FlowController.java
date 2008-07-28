@@ -33,6 +33,8 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
+import org.labkey.api.settings.AdminConsole.*;
+import org.labkey.api.settings.AdminConsole;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.data.FlowProtocol;
@@ -73,6 +75,11 @@ public class FlowController extends SpringFlowController<FlowController.Action>
     {
         super();
         setActionResolver(_actionResolver);
+    }
+
+    public static void registerAdminConsoleLinks()
+    {
+        AdminConsole.addLink(SettingsLinkType.Configuration, "flow cytometry", new ActionURL(FlowAdminAction.class, ContainerManager.getRoot()));
     }
 
     @RequiresPermission(ACL.PERM_READ)

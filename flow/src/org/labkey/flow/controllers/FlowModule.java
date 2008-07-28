@@ -160,6 +160,7 @@ public class FlowModule extends DefaultModule
         super.startup(moduleContext);
         ModuleLoader.getInstance().registerFolderType(new FlowFolderType(this));
         Search.register(new FlowManager.FCSFileSearch(null,null));
+        FlowController.registerAdminConsoleLinks();
     }
 
 

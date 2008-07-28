@@ -181,6 +181,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         ReportService.get().registerReport(new SpectraCountRReport());
         ReportService.get().addUIProvider(new MS2ReportUIProvider());
+        MS2Controller.registerAdminConsoleLinks();
 
         super.startup(context);
     }

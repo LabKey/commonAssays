@@ -20,7 +20,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.util.AppProps;
+import org.labkey.api.settings.AppProps;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 
 import java.io.BufferedWriter;

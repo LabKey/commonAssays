@@ -18,7 +18,7 @@ package org.labkey.ms2.reader;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.AppProps;
+import org.labkey.api.settings.AppProps;
 import org.systemsbiology.jrap.MSXMLParser;
 import org.systemsbiology.jrap.ScanHeader;
 import org.systemsbiology.jrap.Scan;

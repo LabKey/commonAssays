@@ -37,6 +37,9 @@ import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.api.gwt.server.BaseRemoteService;
+import org.labkey.api.admin.AdminUrls;
+import org.labkey.api.settings.AdminConsole;
+import org.labkey.api.settings.AdminConsole.*;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.SensitivitySummary;
@@ -94,6 +97,13 @@ public class MS2Controller extends SpringActionController
     {
         super();
         setActionResolver(_actionResolver);
+    }
+
+
+    public static void registerAdminConsoleLinks()
+    {
+        AdminConsole.addLink(SettingsLinkType.Management, "ms2", getShowMS2AdminURL(null));
+        AdminConsole.addLink(SettingsLinkType.Management, "protein databases", MS2UrlsImpl.get().getShowProteinAdminUrl());
     }
 
 
@@ -164,7 +174,7 @@ public class MS2Controller extends SpringActionController
     private NavTree appendAdminNavTrail(NavTree root, String adminPageTitle, ActionURL adminPageURL, String title, PageConfig page, String helpTopic)
     {
         page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic, HelpTopic.Area.CPAS));
-        root.addChild("Admin Console", new ActionURL("admin", "showAdmin", ""));
+        root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
         root.addChild(adminPageTitle, adminPageURL);
         root.addChild(title);
         return root;
@@ -5852,8 +5862,6 @@ public class MS2Controller extends SpringActionController
         {
             return new ActionURL(ShowProteinAdminAction.class, ContainerManager.getRoot());
         }
-
-
 
         public static MS2UrlsImpl get()
         {
