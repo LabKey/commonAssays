@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * <code>TPPTask</code> PipelineJob task to run the TPP (xinteract) for further
@@ -100,6 +101,11 @@ public class TPPTask extends PipelineJob.Task
          * List of pepXML files to use as inputs to "xinteract".
          */
         File[] getInteractInputFiles();
+
+        /**
+         * List of mzXML files to use as inputs to "xinteract" quantitation.
+         */
+        File[] getInteractSpectraFiles();
 
         /**
          * True if PeptideProphet and ProteinProphet can be run on the input files.
@@ -195,7 +201,10 @@ public class TPPTask extends PipelineJob.Task
             WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
             WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
 
-            // TODO: mzXML files may also be required, and input disk space requirements
+            // Set mzXML directory only if needed.
+            File dirMzXml = null;
+
+            // TODO: mzXML files may be required, and input disk space requirements
             //          may be too great to copy to a temporary directory.
             File[] inputFiles = getJobSupport().getInteractInputFiles();
             if (inputFiles.length > 0)
@@ -206,14 +215,23 @@ public class TPPTask extends PipelineJob.Task
                     lock = wd.ensureCopyingLock();
                     for (int i = 0; i < inputFiles.length; i++)
                         inputFiles[i] = wd.inputFile(inputFiles[i], false);
+
+                    if (isSpectraProcessor(params))
+                    {
+                        File[] spectraFiles = getJobSupport().getInteractSpectraFiles();
+                        for (int i = 0; i < spectraFiles.length; i++)
+                        {
+                            spectraFiles[i] = wd.inputFile(spectraFiles[i], false);
+                            if (dirMzXml == null)
+                                dirMzXml = spectraFiles[i].getParentFile();
+                        }
+                    }
                 }
                 finally
                 {
                     if (lock != null) { lock.release(); }
                 }
             }
-
-            File dirMzXml = getJobSupport().getDataDirectory();
 
             File fileWorkPepXML = wd.newFile(FT_PEP_XML);
             File fileWorkProtXML = null;
@@ -242,7 +260,7 @@ public class TPPTask extends PipelineJob.Task
                     
                     if (!"3.0.2".equals(ver))
                     {
-                        prophetOpts.append("F");
+                        // prophetOpts.append("F");
                         if ("yes".equalsIgnoreCase(params.get("pipeline prophet, use hydrophobicity")))
                             prophetOpts.append("R");
                         if ("yes".equalsIgnoreCase(params.get("pipeline prophet, use pI")))
@@ -259,13 +277,22 @@ public class TPPTask extends PipelineJob.Task
                     interactCmd.add("-nR");
 
                 String paramMinProb = params.get("pipeline prophet, min probability");
+                if (paramMinProb == null || paramMinProb.length() == 0)
+                    paramMinProb = params.get("pipeline prophet, min peptide probability");
                 if (paramMinProb != null && paramMinProb.length() > 0)
-                    interactCmd.add("-pp" + paramMinProb);
+                    interactCmd.add("-p" + paramMinProb);
+                
+                paramMinProb = params.get("pipeline prophet, min protein probability");
+                if (paramMinProb != null && paramMinProb.length() > 0)
+                    interactCmd.add("-pr" + paramMinProb);
             }
 
-            String quantParam = getQuantitationCmd(params, wd.getRelativePath(dirMzXml));
-            if (quantParam != null)
-                interactCmd.add(quantParam);
+            if (dirMzXml != null)
+            {
+                String[] quantParams = getQuantitationCmd(params, wd.getRelativePath(dirMzXml));
+                if (quantParams != null)
+                    interactCmd.addAll(Arrays.asList(quantParams));
+            }
 
             interactCmd.add("-N" + fileWorkPepXML.getName());
 
@@ -323,13 +350,27 @@ public class TPPTask extends PipelineJob.Task
         }
     }
 
-    public String getQuantitationCmd(Map<String, String> params, String pathMzXml) throws FileNotFoundException
+    private boolean isSpectraProcessor(Map<String, String> params)
+    {
+        // Spectrum file(s) required to do quantitation.
+        return (getQuantitionAlgorithm(params) != null);
+    }
+    
+    private String getQuantitionAlgorithm(Map<String, String> params)
     {
         String paramAlgorithm = params.get("pipeline quantitation, algorithm");
         if (paramAlgorithm == null)
             return null;
         if (!"q3".equalsIgnoreCase(paramAlgorithm) && !"xpress".equalsIgnoreCase(paramAlgorithm))
             return null;    // CONSIDER: error message.
+        return paramAlgorithm;
+    }
+
+    private String[] getQuantitationCmd(Map<String, String> params, String pathMzXml) throws FileNotFoundException
+    {
+        String paramAlgorithm = getQuantitionAlgorithm(params);
+        if (paramAlgorithm == null)
+            return null;
 
         List<String> quantOpts = new ArrayList<String>();
 
@@ -378,7 +419,7 @@ public class TPPTask extends PipelineJob.Task
         quantOpts.add("\"-d" + pathMzXml + "\"");
 
         if ("xpress".equals(paramAlgorithm))
-            return ("-X" + StringUtils.join(quantOpts.iterator(), ' '));
+            return new String[] { "-X" + StringUtils.join(quantOpts.iterator(), ' ') };
 
         String paramMinPP = params.get("pipeline quantitation, min peptide prophet");
         if (paramMinPP != null)
@@ -393,13 +434,16 @@ public class TPPTask extends PipelineJob.Task
         String ver = params.get("pipeline, msinspect ver");
         
         // TODO: Doesn't work when JAVA_HOME has a space in the path
-        return ("-C1" + PipelineJobService.get().getJavaPath() + " -client -Xmx256M -jar "
+        return new String[] {
+                "-C1" + PipelineJobService.get().getJavaPath() + " -client -Xmx256M -jar "
                 + "" + PipelineJobService.get().getJarPath("viewerApp.jar", "msinspect", ver) + ""
                 + " --q3 " + StringUtils.join(quantOpts.iterator(), ' ')
-                + " -C2Q3ProteinRatioParser");
+                ,
+                "-C2Q3ProteinRatioParser"
+        };
     }
 
-    protected void getLabelOptions(String paramQuant, List<String> quantOpts)
+    private void getLabelOptions(String paramQuant, List<String> quantOpts)
     {
         String[] quantSpecs = paramQuant.split(",");
         for (String spec : quantSpecs)

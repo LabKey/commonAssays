@@ -188,6 +188,17 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         return files.toArray(new File[files.size()]);
     }
 
+    public File[] getInteractSpectraFiles()
+    {
+        ArrayList<File> files = new ArrayList<File>();
+        for (File fileSpectra : getInputFiles())
+        {
+            files.add(AbstractMS2SearchProtocol.FT_MZXML.newFile(getDataDirectory(),
+                    FileUtil.getBaseName(fileSpectra)));
+        }
+        return files.toArray(new File[files.size()]);
+    }
+
     public File getSearchSpectraFile()
     {
         assert getInputFiles().length == 1;
