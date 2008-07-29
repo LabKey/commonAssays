@@ -85,9 +85,9 @@ public class SequestLocalPipelineProvider extends AbstractMS2SearchPipelineProvi
             if (!context.hasPermission(ACL.PERM_INSERT))
                 return;
             StringBuilder html = new StringBuilder();
-            html.append("<table><tr><td class=\"normal\" style=\"font-weight:bold;\">Sequest specific settings:</td></tr>");
+            html.append("<table><tr><td style=\"font-weight:bold;\">Sequest specific settings:</td></tr>");
             ActionURL setDefaultsURL = new ActionURL(PipelineController.SetSequestDefaultsAction.class, context.getContainer());
-            html.append("<tr><td class=\"normal\">&nbsp;&nbsp;&nbsp;&nbsp;")
+            html.append("<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;")
                 .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
                 .append(" - Specify the default XML parameters file for Sequest.</td></tr></table>");
             out.write(html.toString());

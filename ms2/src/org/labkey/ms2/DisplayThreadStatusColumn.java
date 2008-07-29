@@ -64,19 +64,19 @@ public class DisplayThreadStatusColumn extends SimpleDisplayColumn
         {
             case RUNNING:
                 button1 =
-                        "<a href=\"annotThreadControl.view?button=kill&id=" + curId + "\"><img border='0' align='middle' src='" + PageFlowUtil.buttonSrc("Kill") + "'></a>";
+                        "<a href=\"annotThreadControl.view?button=kill&id=" + curId + "\"><img align='middle' src='" + PageFlowUtil.buttonSrc("Kill") + "'></a>";
                 button2 =
-                        "<a href=\"annotThreadControl.view?button=pause&id=" + curId + "\"><img border='0' align='middle' src='" + PageFlowUtil.buttonSrc("Pause") + "'></a>";
+                        "<a href=\"annotThreadControl.view?button=pause&id=" + curId + "\"><img align='middle' src='" + PageFlowUtil.buttonSrc("Pause") + "'></a>";
                 break;
             case PAUSED:
                 button1 =
-                        "<a href=\"annotThreadControl.view?button=kill&id=" + curId + "\"><img border='0' align='middle' src='" + PageFlowUtil.buttonSrc("Kill") + "'></a>";
+                        "<a href=\"annotThreadControl.view?button=kill&id=" + curId + "\"><img align='middle' src='" + PageFlowUtil.buttonSrc("Kill") + "'></a>";
                 button2 =
-                        "<a href=\"annotThreadControl.view?button=continue&id=" + curId + "\"><img border='0' align='middle' src='" + PageFlowUtil.buttonSrc("Continue") + "'></a>";
+                        "<a href=\"annotThreadControl.view?button=continue&id=" + curId + "\"><img align='middle' src='" + PageFlowUtil.buttonSrc("Continue") + "'></a>";
                 break;
             case INCOMPLETE:
                 button1 =
-                        "<a href=\"annotThreadControl.view?button=recover&id=" + curId + "\"><img border='0' align='middle' src='" + PageFlowUtil.buttonSrc("Recover") + "'></a>";
+                        "<a href=\"annotThreadControl.view?button=recover&id=" + curId + "\"><img align='middle' src='" + PageFlowUtil.buttonSrc("Recover") + "'></a>";
                 button2 = "";
                 break;
             case UNKNOWN:

@@ -51,31 +51,31 @@
 <input type="hidden" name="fractionProtocol" value="<%=form.getFractionProtocol()%>">
 <input type="hidden" name="<%=MS2PipelineForm.PARAMS.path%>" value="<%=h(form.getPath())%>">
 <input type="hidden" name="<%=MS2PipelineForm.PARAMS.searchEngine%>" value="<%=h(form.getSearchEngine())%>">
-<table border="0">
+<table>
     <tr><td colspan=2 style="font-size:<%=ThemeFont.getThemeFont().getHeader_1Size()%>">
     Before searching describe how each mzXML file was created using the following information<br>
     </td>
     </tr>
     <tr><td style="padding-left:10px" >
-        <b>Run Name</b> </td><td class="normal">Your name for this MS2 run</td>
+        <b>Run Name</b> </td><td>Your name for this MS2 run</td>
     </tr>
     <tr>
         <td style="padding-left:10px"><b>Sample Set</b></td>
-        <td class="normal">Set that contains the sample used in this analysis. <a href="<%=getViewContext().getActionURL().relativeUrl("showUploadMaterials.view", "", "Experiment")%>">Upload</a> sample information using the experiment module, and <a href="<%=getViewContext().getActionURL().relativeUrl("listMaterialSources.view", "", "Experiment")%>">set the active sample set</a>. Optional.</td>
+        <td>Set that contains the sample used in this analysis. <a href="<%=getViewContext().getActionURL().relativeUrl("showUploadMaterials.view", "", "Experiment")%>">Upload</a> sample information using the experiment module, and <a href="<%=getViewContext().getActionURL().relativeUrl("listMaterialSources.view", "", "Experiment")%>">set the active sample set</a>. Optional.</td>
     </tr>
     <tr>
         <td style="padding-left:10px"><b>Sample Id</b></td>
-        <td class="normal">Unique Id of the sample within sample set.</td>
+        <td>Unique Id of the sample within sample set.</td>
     </tr>
     <tr>
         <td style="padding-left:10px"><b>Protocol</b> </td>
-    <td class="normal">Protocol used to prepare sample and run Mass Spec. <a href="<%=PipelineController.urlShowCreateMS2Protocol(getViewContext().getContainer(), form)%>">Create</a> a new protocol.</td>
+    <td>Protocol used to prepare sample and run Mass Spec. <a href="<%=PipelineController.urlShowCreateMS2Protocol(getViewContext().getContainer(), form)%>">Create</a> a new protocol.</td>
     </tr>
     </table>
     <br>
     <labkey:button text="Submit"/>&nbsp;<labkey:button text="Cancel" href="<%=up.urlReferer(getViewContext().getContainer())%>"/>
     <br/>&nbsp;<br/>
-<table border="0">
+<table>
 <%
 
     if (form.isProtocolFractions())
@@ -93,15 +93,15 @@
         String runName = "MS2 Sample Prep (" + getPathDescription() + "), (" + protocolName + ")";
         String error = form.getError(0);
 %>
-<tr><td colspan="2" class="heading-1">Run Settings (with Fractionation)</td></tr>
+<tr><td colspan="2" class="labkey-heading-1">Run Settings (with Fractionation)</td></tr>
 <tr><td>&nbsp;</td><td>
-  <table border="0">
+  <table>
 <%      if (error != null && error.length() > 0)
         { %>
   <tr><td class="labkey-error" colspan="2"><%=error%></td></tr>
 <%      } %>
-  <tr><td class="ms-searchform">Run Name</td>
-    <td class="normal">
+  <tr><td class="labkey-form-label">Run Name</td>
+    <td>
 <%
         int index = 0;
         for (File file : getMzXmlFileStatus().keySet())
@@ -122,10 +122,10 @@
         if (form.isProtocolShare())
         {
 %>
-    <tr><td colspan="2" class="heading-1">Default Settings for All Runs</td></tr>
+    <tr><td colspan="2" class="labkey-heading-1">Default Settings for All Runs</td></tr>
     <tr ><td >&nbsp;</td><td>
-        <table border="0">
-    <tr><td class="ms-searchform">Sample Set</td><td><%=materialSourceSelect(null, "defaults", 0, "defaultMaterialSource(this)")%></td></tr>
+        <table>
+    <tr><td class="labkey-form-label">Sample Set</td><td><%=materialSourceSelect(null, "defaults", 0, "defaultMaterialSource(this)")%></td></tr>
 <%
             StringBuilder builder = new StringBuilder();
             int iParam = 0;
@@ -171,15 +171,15 @@
                 runName = "MS2 Sample Prep (" + getStrippedFileName(file) + "), (" + protocolName + ")";
             }
 %>
-  <tr><td colspan="2" class="heading-1"><%=h(file.getName())%></td></tr>
+  <tr><td colspan="2" class="labkey-heading-1"><%=h(file.getName())%></td></tr>
   <tr><td>&nbsp;</td><td>
-    <table border="0">
+    <table>
 <%          if (error != null && error.length() > 0)
             { %>
     <tr><td class="labkey-error" colspan="2"><%=error%></td></tr>
 <%          } %>
-    <tr><td class="ms-searchform">Run Name</td>
-      <td class="normal"><input type="hidden" name="fileNames[<%=index%>]" value="<%=h(file.getName())%>">
+    <tr><td class="labkey-form-label">Run Name</td>
+      <td><input type="hidden" name="fileNames[<%=index%>]" value="<%=h(file.getName())%>">
                         <input type="hidden" name="protocolNames[<%=index%>]" value="<%=h(protocolName)%>">
                         <input name="runNames[<%=index%>]" size=50 value="<%=h(runName)%>"></td></tr>
     <tr><td colspan="2"><%=renderXarInputs(index, getStrippedFileName(file))%>

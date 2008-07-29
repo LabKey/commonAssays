@@ -87,7 +87,7 @@
         <th style="<%= headerTDStyle %>">Warnings</th>
     </tr>
     <tr>
-        <td class="ms-searchform">
+        <td class="labkey-form-label">
             <span class="labkey-error"><b>WARNING</b>: The following runs use a data file by the same name.</span><br><br>
             <% include(duplicateDataFileView, out); %>
         </td>
@@ -131,7 +131,7 @@
             </table>
         </td>
     </tr>
-<form method="post" action="upload.view" enctype="multipart/form-data" class="normal">
+<form method="post" action="upload.view" enctype="multipart/form-data">
     <tr>
         <td>
             <table>
@@ -145,7 +145,7 @@
                     boolean curveBased = (pass == 0);
             %>
                         <td valign="top">
-                        <table cellspacing="0" cellpadding="3" bgcolor="#FFFFA0">
+                        <table class="labkey-nab-run">
                             <tr>
                                 <th align="center" colspan=<%= assay.getCutoffs().length + 1%>>Cutoff Dilutions<br>(<%= curveBased ? "Curve Based" : "Point Based" %>)</th>
                             </tr>
@@ -166,14 +166,14 @@
                                     DilutionSummary summary = results.getDilutionSummary();
                             %>
                             <tr>
-                                <td class="normal">
+                                <td>
                                     <%=h(results.getKey())%>
                                 </td>
                                 <%
                                     for (int cutoff : assay.getCutoffs())
                                     {
                                 %>
-                                <td class="normal" align="right">
+                                <td align="right">
                                     <%
                                         double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0) :
                                                 summary.getInterpolatedCutoffDilution(cutoff / 100.0);
@@ -211,22 +211,22 @@
                         <table width="100%">
                             <tr>
                                 <td style="<%= labelStyle %>">Range</td>
-                                <td class="normal"
+                                <td
                                     align=left><%=Luc5Assay.intString(assay.getControlRange())%></td>
                             </tr>
                             <tr>
                                 <td style="<%= labelStyle %>">Virus Control</td>
-                                <td class="normal" align="left"><%=Luc5Assay.intString(assay.getVirusControlMean())%> &plusmn; <%=Luc5Assay.percentString(assay.getVirusControlPlusMinus())%></td>
+                                <td align="left"><%=Luc5Assay.intString(assay.getVirusControlMean())%> &plusmn; <%=Luc5Assay.percentString(assay.getVirusControlPlusMinus())%></td>
                             </tr>
                             <tr>
                                 <td style="<%= labelStyle %>">Cell Control</td>
-                                <td class="normal" align=left><%=Luc5Assay.intString(assay.getCellControlMean())%> &plusmn; <%=Luc5Assay.percentString(assay.getCellControlPlusMinus())%></td>
+                                <td align=left><%=Luc5Assay.intString(assay.getCellControlMean())%> &plusmn; <%=Luc5Assay.percentString(assay.getCellControlPlusMinus())%></td>
                             </tr>
                         </table>
                     </td>
                 </tr>
                 </table>
-                <table cellspacing="0" cellpadding="3" class="grid">
+                <table class="labkey-grid">
                     <tr>
                     <%
                         Set<String> pdsWithData = new HashSet<String>();
@@ -282,7 +282,7 @@
     </tr>
     <tr>
         <td>
-            <table class="normal">
+            <table>
                 <tr>
                     <%
                         for (NabAssayController.SampleResult results : bean.getSampleResults())
@@ -310,11 +310,11 @@
                                         shortDecFormat = new DecimalFormat("0");
                             %>
                             <tr>
-                                <td class=normal align=right><%= shortDecFormat.format(summary.getDilution(data)) %></td>
-                                <td class=normal
+                                <td align=right><%= shortDecFormat.format(summary.getDilution(data)) %></td>
+                                <td
                                     align=right><%= Luc5Assay.percentString(summary.getPercent(data)) %></td>
-                                <td class=normal>&plusmn;</td>
-                                <td class=normal
+                                <td>&plusmn;</td>
+                                <td
                                     align=right><%= Luc5Assay.percentString(summary.getPlusMinus(data)) %></td>
                             </tr>
                             <%
@@ -344,7 +344,7 @@
                                     for (int c = 1; c <= assay.getPlate().getColumns(); c++)
                                     {
                                 %>
-                                <td class="normal" style="font-weight:bold"><%=c %></td>
+                                <td style="font-weight:bold"><%=c %></td>
                                 <%
                                     }
                                 %>
@@ -354,13 +354,13 @@
                                 {
                             %>
                             <tr>
-                                <td class="normal" style="font-weight:bold"><%=(char) ('A' + row)%></td>
+                                <td style="font-weight:bold"><%=(char) ('A' + row)%></td>
 
                                 <%
                                     for (int col = 0; col < assay.getPlate().getColumns(); col++)
                                     {
                                 %>
-                                <td class=normal align=right>
+                                <td align=right>
                                     <%=Luc5Assay.intString(assay.getPlate().getWell(row, col).getValue())%></td>
                                 <%
                                     }

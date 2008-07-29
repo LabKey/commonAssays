@@ -23,7 +23,7 @@
     MS2StatsWebPart me = (MS2StatsWebPart) HttpView.currentView();
     StatsBean bean = me.getModelBean();
 %>
-<table class="dataRegion">
+<table class="labkey-data-region">
 <tr><td>MS2 Runs:</td><td><%=bean.runs%></td></tr>
 <tr><td>MS2 Peptides:</td><td><%=bean.peptides%></td></tr>
 </table>

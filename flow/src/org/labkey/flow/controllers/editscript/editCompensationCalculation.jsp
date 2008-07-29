@@ -108,8 +108,8 @@ var keywordValueSubsetListMap = KV;
 <% if (hasAutoCompScripts) { %>
     <p/>
     <table width="100%">
-        <tr class="wpHeader">
-            <th class="wpTitle" align="left">Choose AutoCompensation script:</th>
+        <tr class="labkey-wp-header">
+            <th align="left">Choose AutoCompensation script:</th>
         </tr>
     </table>
     Your FlowJo workspace contains AutoCompensation scripts; you can optionally
@@ -130,15 +130,15 @@ var keywordValueSubsetListMap = KV;
 
     <p/>
     <table width="100%">
-        <tr class="wpHeader">
-            <th class="wpTitle" align="left">Analyze FCS Files Where:</th>
+        <tr class="labkey-wp-header">
+            <th align="left">Analyze FCS Files Where:</th>
         </tr>
     </table>
     Filters may optionally be applied to this analysis script.  The set of keyword and
     value pairs <i>must all</i> match in the FCS header to be included in the analysis.
     You can change the filter later by editing the script settings from the
     analysis script start page.
-    <table class="normal">
+    <table>
         <tr><th/><th>Keyword</th><th/><th>Value</th></tr>
         <%
         for (int i = 0; i < clauseCount; i++)
@@ -159,15 +159,15 @@ var keywordValueSubsetListMap = KV;
 
             %>
             <tr>
-                <td class="normal"><%= i == 0 ? "" : "and" %></td>
+                <td><%= i == 0 ? "" : "and" %></td>
             <% if (canEdit) { %>
-                <td class="normal"><select name="ff_filter_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /></select></td>
-                <td class="normal"><select name="ff_filter_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
-                <td class="normal"><input type="text" name="ff_filter_value" value="<%=h(value)%>"></td>
+                <td><select name="ff_filter_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /></select></td>
+                <td><select name="ff_filter_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
+                <td><input type="text" name="ff_filter_value" value="<%=h(value)%>"></td>
             <% } else { %>
-                <td class="normal"><%=fieldOptions.get(field)%></td>
-                <td class="normal"><%=opOptions.get(op)%></td>
-                <td class="normal"><%=h(value)%></td>
+                <td><%=fieldOptions.get(field)%></td>
+                <td><%=opOptions.get(op)%></td>
+                <td><%=h(value)%></td>
             <% } %>
             </tr>
             <%
@@ -177,8 +177,8 @@ var keywordValueSubsetListMap = KV;
 
     <p/>
     <table width="100%">
-        <tr class="wpHeader">
-            <th class="wpTitle" align="left">Select Compensation:</th>
+        <tr class="labkey-wp-header">
+            <th align="left">Select Compensation:</th>
         </tr>
     </table>
     For each parameter which requires compensation, specify the keyword name and value
@@ -190,7 +190,7 @@ var keywordValueSubsetListMap = KV;
     with that keyword value.  Use FlowJo to save a workspace template with AutoCompensation scripts or
     a workspace containing only one set of compensation controls, and upload that new workspace.
     </p>
-    <table class="normal" border="1">
+    <table border="1">
         <tr><th rowspan="2">Channel</th><th colspan="3">Positive</th><th colspan="3">Negative</th></tr>
         <tr><th>Keyword</th><th>Value</th><th>Subset</th><th>Keyword</th><th>Value</th><th>Subset</th></tr>
         <% for (int i = 0; i < form.parameters.length; i ++)
@@ -219,8 +219,8 @@ if (analysisNames.length > 0)
 %>
     <p/>
     <table width="100%">
-        <tr class="wpHeader">
-            <th class="wpTitle" align="left">Choose Source of Gating:</th>
+        <tr class="labkey-wp-header">
+            <th align="left">Choose Source of Gating:</th>
         </tr>
     </table>
     You can choose to use the gating from either the sample identified

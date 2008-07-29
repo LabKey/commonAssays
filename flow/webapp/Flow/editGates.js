@@ -85,7 +85,7 @@ function gatePointEditor()
 {
     if (!g_graphOptions.points || g_graphOptions.points.length == 0)
     {
-        var ret = ['<table class="normal"><tr><td colspan="2">'];
+        var ret = ['<table><tr><td colspan="2">'];
         ret.push(g_graphOptions.subset);
         ret.push('</td></tr>');
         ret.push('<tr><th>X Axis</th><th>Y Axis</th></tr>')
@@ -131,7 +131,7 @@ function gatePointEditor()
     var saveable = g_graphOptions.points.length >= 2 && g_graphOptions.dirty;
     if (interval)
     {
-        ret.str = ['<form class="normal" method="post" action="|formAction|">',
+        ret.str = ['<form method="post" action="|formAction|">',
                 '<input type="hidden" name="xaxis" value="|xAxis|">',
                 '<input type="hidden" name="yaxis" value="|yAxis|">',
                 '<input type="hidden" name="subset" value="|subset|">',
@@ -148,7 +148,7 @@ function gatePointEditor()
     }
     else
     {
-        ret.str = ['<form class="normal" method="post" action="|formAction|">',
+        ret.str = ['<form method="post" action="|formAction|">',
                 '<input type="hidden" name="xaxis" value="|xAxis|">',
                 '<input type="hidden" name="yaxis" value="|yAxis|">',
                 '<input type="hidden" name="subset" value="|subset|">',

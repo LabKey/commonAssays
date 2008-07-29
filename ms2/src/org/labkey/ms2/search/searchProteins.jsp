@@ -39,7 +39,7 @@
 
     String separator = bean.isHorizontal() ? "<td>&nbsp;</td>" : "</tr><tr>";
 %>
-<form action="<%= url %>" method="get">
+<form class="labkey-protein-search" action="<%= url %>" method="get">
     <table>
         <tr>
             <td>Name:</td>

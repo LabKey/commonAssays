@@ -51,7 +51,7 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
     {
         protocolListBox.setVisibleItemCount(1);
         protocolDescHtml.setWordWrap(true);
-        protocolDescHtml.setStylePrimaryName("ms-readonly");
+        protocolDescHtml.setStylePrimaryName("labkey-read-only");
         instance.add(protocolListBox);
         instance.add(protocolNameTextBox);
         instance.add(protocolDescTextArea);
@@ -62,7 +62,7 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
     private void initLabel()
     {
         listBoxLabel = new Label("Analysis protocols:");
-        listBoxLabel.addStyleName("ms-strong");
+        listBoxLabel.addStyleName("labkey-list-box");
         textBoxLabel = new Label("Protocol name:");
         descriptionLabel = new Label("Protocol description:");
         labelWidget = new VerticalPanel();

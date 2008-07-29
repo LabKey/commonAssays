@@ -32,7 +32,7 @@
     FlowCompensationMatrix matrix = well.getCompensationMatrix();
 
 %>
-<table class="normal">
+<table class="labkey-form">
     <% if (getRun() == null) { %>
     <tr><td colspan="2">The run has been deleted.</td></tr>
     <% } else { %>
@@ -62,7 +62,7 @@
     {
     %>
 <div style="overflow:auto;height:400px">
-    <table>
+    <table class="labkey-form">
     <tr><th colspan="2">Keywords</th></tr>
     <% for (Map.Entry<String, String> keyword : getKeywords().entrySet())
     { %>
@@ -82,7 +82,7 @@
     DecimalFormat fmt = new DecimalFormat("#,##0.####");
 %>
 <div style="overflow:auto;height:400px">
-<table class="normal">
+<table>
     <tr><th colspan="2">Statistics</th></tr>
     <% for (Map.Entry<StatisticSpec, Double> statistic : getStatistics().entrySet())
     { %>
@@ -99,7 +99,7 @@
 <% List<FlowWell> analyses = getWell().getFCSAnalyses();
     if (analyses.size() > 0)
     { %>
-<table class="normal"><tr><th colspan="3">Analyses performed on this file:</th></tr>
+<table class="labkey-form"><tr><th colspan="3">Analyses performed on this file:</th></tr>
     <tr><th>FCS Analysis Name</th><th>Run Analysis Name</th><th>Analysis Name</th></tr>
     <% for (FlowWell analysis : analyses)
     {
@@ -117,6 +117,6 @@
 <% if (well.getFCSURI() == null) { %>
     <p>There is no file on disk for this well.</p>
 <% } else { %>
-    <p class="normal"><a href="<%=h(getWell().urlFor(WellController.Action.chooseGraph))%>">More Graphs</a><br>
+    <p><a href="<%=h(getWell().urlFor(WellController.Action.chooseGraph))%>">More Graphs</a><br>
     <a href="<%=h(getWell().urlFor(WellController.Action.showFCS))%>&amp;mode=keywords">Keywords from the FCS file</a></p>
 <% } %>

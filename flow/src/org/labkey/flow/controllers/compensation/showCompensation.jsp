@@ -41,14 +41,14 @@
             return "N/A";
         ActionURL urlGraph = well.urlFor(WellController.Action.showGraph);
         urlGraph.addParameter(FlowParam.graph.toString(), spec.toString());
-        return "<img class=\"flow-graph\" border=\"0\" src=\"" + h(urlGraph) + "\">";
+        return "<img class=\"flow-graph\" src=\"" + h(urlGraph) + "\">";
     }
 %>
 <%
     final FlowCompensationMatrix flowComp = FlowCompensationMatrix.fromURL(getViewContext().getActionURL(), request);
     if (null == flowComp)
     {
-        %><font color="red">compensation matrix definition not found</font><%
+        %><font class="labkey-error">compensation matrix definition not found</font><%
         return;
     }
     final CompensationMatrix comp = flowComp.getCompensationMatrix();
@@ -60,7 +60,7 @@
 %>
 
     <p>Compensation Matrix: <%=h(comp.getName())%></p>
-<table class="normal" cellspacing=0 cellpadding=2>
+<table class="labkey-show-compensation">
     <tr><td style="border-right:solid 1px #AAAAAA;">&nbsp;</td>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         { %>
@@ -131,7 +131,7 @@
 <% for (Callback callback : callbacks)
 { %>
 <p><%=callback.title%></p>
-<table class="normal">
+<table>
     <tr><td>&nbsp;</td>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         { %>

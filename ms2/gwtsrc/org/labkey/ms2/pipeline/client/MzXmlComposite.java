@@ -91,7 +91,7 @@ public class MzXmlComposite extends SearchFormComposite
                     }    
                 }
                 HTML html = new HTML(name.toString());
-                html.setStylePrimaryName("ms-readonly");
+                html.setStylePrimaryName("labkey-read-only");
                 instance.add(html);
             }
         }

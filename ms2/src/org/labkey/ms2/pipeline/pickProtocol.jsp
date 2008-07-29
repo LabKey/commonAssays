@@ -125,17 +125,17 @@ analysis inside of CPAS.</p>
     if (protocolAvailableNames != null && protocolAvailableNames.length > 0)
     {
 %>
-    <table border=0>
+    <table>
 <%
     if (nUnannotated > 1)
     {
 %>
         <tr>
             <td colspan=3>
-                <input type="radio" <%=form.isProtocolShare() ? "checked" : "" %> id="protocolSharing.shared" name="protocolSharingString" value="share"><span class="heading-1"> The same protocol was used to create all files</span><br>
+                <input type="radio" <%=form.isProtocolShare() ? "checked" : "" %> id="protocolSharing.shared" name="protocolSharingString" value="share"><span class="labkey-heading-1"> The same protocol was used to create all files</span><br>
             </td>
         </tr>
-        <tr><td>&nbsp;&nbsp;&nbsp;</td><td class="normal">Shared Protocol</td>
+        <tr><td>&nbsp;&nbsp;&nbsp;</td><td>Shared Protocol</td>
             <td>
                 <select name="sharedProtocol" onclick="checkItem('protocolSharing.shared')">
                   <option></option>
@@ -152,10 +152,10 @@ analysis inside of CPAS.</p>
       </tr>
     <tr>
         <td colspan=2>
-    <input type="radio" <%=form.isProtocolFractions() ? "checked" : "" %> id="protocolSharing.fractions" name="protocolSharingString" value="fractions"><span class="heading-1">  All files are fractions of the same sample</span><br>
+    <input type="radio" <%=form.isProtocolFractions() ? "checked" : "" %> id="protocolSharing.fractions" name="protocolSharingString" value="fractions"><span class="labkey-heading-1">  All files are fractions of the same sample</span><br>
         </td>
     </tr>
-    <tr><td>&nbsp;&nbsp;&nbsp;</td><td class="normal">Fractionation Protocol</td>
+    <tr><td>&nbsp;&nbsp;&nbsp;</td><td>Fractionation Protocol</td>
         <td>
     <select name="fractionProtocol" onclick="checkItem('protocolSharing.fractions')">
       <option></option>
@@ -172,7 +172,7 @@ analysis inside of CPAS.</p>
       </tr>
 <tr>
     <td colspan=3>
-    <input type="radio" <%=form.isProtocolIndividual() ? "checked" : "" %> name="protocolSharingString" id="protocolSharing.none" value="none"> <span class="heading-1"> Each file was created with a different protocol</span><br>
+    <input type="radio" <%=form.isProtocolIndividual() ? "checked" : "" %> name="protocolSharingString" id="protocolSharing.none" value="none"> <span class="labkey-heading-1"> Each file was created with a different protocol</span><br>
     </td>
 </tr>
     <%
@@ -182,7 +182,7 @@ analysis inside of CPAS.</p>
         %><input type="hidden" name="protocolSharingString" value="none"><%
     }
     %>
-    <tr><td></td><td class="header">File</td><td class="header">Protocol</td></tr>
+    <tr><td></td><td class="labkey-header">File</td><td class="labkey-header">Protocol</td></tr>
 <%
 int index = 0;
 for (Map.Entry<File, FileStatus> entry : form.getMzXmlFileStatus().entrySet())
@@ -198,8 +198,8 @@ for (Map.Entry<File, FileStatus> entry : form.getMzXmlFileStatus().entrySet())
             }
 
 %>
-  <tr><td></td><td class="normal"><%=h(entry.getKey().getName())%></td>
-        <td class="normal">
+  <tr><td></td><td><%=h(entry.getKey().getName())%></td>
+        <td>
           <select name="protocolNames[<%=index%>]" onclick="checkItem('protocolSharing.none')" >
             <option></option>
 <%

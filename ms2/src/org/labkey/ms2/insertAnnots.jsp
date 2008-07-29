@@ -28,7 +28,7 @@
 <labkey:errors />
 <br>
 <form method="post" action="insertAnnots.post" enctype="multipart/form-data">
-<table border="0">
+<table>
     <tr>
       <td>Full file path:</td>
       <td><input type="text" name="fileName" id='fname' size="70" value="<%= h(bean.getFileName())%>"></td>

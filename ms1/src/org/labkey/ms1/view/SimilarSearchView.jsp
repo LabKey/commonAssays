@@ -49,10 +49,10 @@
     <input type="hidden" name="<%=MS1Controller.SimilarSearchForm.ParamNames.featureId.name()%>"
            value="<%=PageFlowUtil.filter(model.getFeatureId())%>"/>
     <% } %>
-    <table border="0" width="100%">
+    <table>
         <tr>
             <td>
-                <table border="0" cellspacing="0" cellpadding="3">
+                <table class="labkey-ms1-search">
                     <tr>
                         <td>m/z</td>
                         <td>=</td>

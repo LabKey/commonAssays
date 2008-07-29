@@ -42,7 +42,7 @@ public class EnzymeComposite extends SearchFormComposite implements SourcesChang
     public void init()
     {
         enzymeListBox.setVisibleItemCount(1);
-        enzymeReadOnly.setStylePrimaryName("ms-readonly");
+        enzymeReadOnly.setStylePrimaryName("labkey-read-only");
         instance.add(enzymeListBox);
         initWidget(instance);
         labelWidget = new Label();

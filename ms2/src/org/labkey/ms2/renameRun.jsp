@@ -27,10 +27,10 @@
 <form action="renameRun.post" method="post">
 <input type="hidden" name="<%=ReturnUrlForm.Params.returnUrl%>" value="<%=h(bean.returnURL)%>"/>
 <input type="hidden" name="run" value="<%=bean.run.getRun()%>"/>
-<table class="dataRegion">
+<table class="labkey-data-region">
     <tr>
-        <td class='ms-searchform'>Description:</td>
-        <td class='ms-vb'><input type="text" size="70" name="description" id="description" value="<%=h(bean.description)%>"/></td>
+        <td class='labkey-form-label'>Description:</td>
+        <td><input type="text" size="70" name="description" id="description" value="<%=h(bean.description)%>"/></td>
     </tr>
     <tr>
         <td colspan="2"><input type="image" src="<%=PageFlowUtil.buttonSrc("Rename")%>"/> <%=PageFlowUtil.buttonLink("Cancel", bean.returnURL)%></td>

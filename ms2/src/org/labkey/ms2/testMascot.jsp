@@ -34,7 +34,7 @@
     }
 %>
 
-<table border="0">
+<table>
     <tr><td colspan=2><b>Mascot settings tested:</b></td></tr>
     <tr><td>Server:</td><td><%
 if (!"".equals(form.getMascotServer()))

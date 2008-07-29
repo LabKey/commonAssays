@@ -26,7 +26,7 @@
     Container c = getViewContext().getContainer();
 %>
 <form method="post">
-<table class="dataRegion">
+<table class="labkey-data-region">
     <tr>
         <td><strong>Common:</strong></td>
         <td><%=h(bean.commonColumns)%></td>

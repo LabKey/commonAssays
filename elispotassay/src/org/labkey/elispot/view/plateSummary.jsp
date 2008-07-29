@@ -84,8 +84,8 @@
 
 </script>
 
-<table border=0 cellspacing=2 cellpadding=2>
-    <tr class="wpHeader"><th colspan=50 align=center>Plate Summary Information</th></tr>
+<table class="labkey-plate-summary">
+    <tr class="labkey-wp-header"><th colspan=50 align=center>Plate Summary Information</th></tr>
 <%
     // column header
     out.print("<tr>");
@@ -119,7 +119,7 @@
 
 <p/>&nbsp;<p/>
 
-<table id="detailsTable" border=0 cellspacing=2 cellpadding=2>
+<table id="detailsTable" class="labkey-plate-summary">
     <%
         for (int row=0; row < template.getRows(); row++)
         {

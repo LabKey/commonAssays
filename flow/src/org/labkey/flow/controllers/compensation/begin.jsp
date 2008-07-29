@@ -26,7 +26,7 @@
 <% if (matrices.size() == 0) { %>
 <p>No compensation matrices have been uploaded to this folder.</p>
 <% } else { %>
-<table class="normal">
+<table>
     <tr><th>Name</th><th>Created</th></tr>
     <% for (FlowCompensationMatrix matrix : matrices) { %>
         <tr><td><a href="<%=h(matrix.urlShow())%>"><%=matrix.getName()%></a></td><td><%=formatDateTime(matrix.getExpObject().getCreated())%></td></tr>

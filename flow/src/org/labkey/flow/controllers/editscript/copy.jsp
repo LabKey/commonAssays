@@ -19,7 +19,7 @@
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <% ScriptController.CopyProtocolForm form = (ScriptController.CopyProtocolForm) this.form; %>
-<form class="normal" action="<%=urlFor(ScriptController.Action.copy)%>" method="POST">
+<form action="<%=urlFor(ScriptController.Action.copy)%>" method="POST">
     <p>
         What do you want to call the new script?<br>
         <input type="text" name="name" value="<%=h(form.name)%>">

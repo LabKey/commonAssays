@@ -83,7 +83,7 @@ public abstract class InputXmlComposite extends SearchFormComposite  implements 
     {
         inputXmlTextArea.setVisibleLines(10);
         inputXmlTextArea.setWrap("OFF");
-        inputXmlHtml.setStylePrimaryName("ms-readonly");
+        inputXmlHtml.setStylePrimaryName("labkey-read-only");
         instance.add(inputXmlTextArea);
         initWidget(instance);
     }

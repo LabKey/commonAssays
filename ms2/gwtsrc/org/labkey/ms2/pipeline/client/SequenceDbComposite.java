@@ -46,12 +46,12 @@ public abstract class SequenceDbComposite extends SearchFormComposite implements
     public void init()
     {
         sequenceDbPathListBox.setVisibleItemCount(1);
-        sequenceDbLabel.setStylePrimaryName("ms-readonly");
+        sequenceDbLabel.setStylePrimaryName("labkey-read-only");
         dirPanel.add(sequenceDbPathListBox);
         dirPanel.add(statusLabel);
         dirPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         statusLabel.setWidth("100px");
-        statusLabel.setStylePrimaryName("cpas-message-strong");
+        statusLabel.setStylePrimaryName("labkey-message-strong");
         dirPanel.setSpacing(3);
         instance.add(dirPanel);
         instance.add(sequenceDbListBox);

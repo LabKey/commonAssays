@@ -36,7 +36,7 @@
     <%
         }
     %>
-    <table class="normal">
+    <table>
         <tr>
             <td>Choose Target Study:</td>
             <td>

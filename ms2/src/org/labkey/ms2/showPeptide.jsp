@@ -108,7 +108,7 @@
 
 <!--RIGHT (FRAGMENT)-->
 <td valign=top>
-<table border=0 cellspacing=1 cellpadding=1 width=230>
+<table class="labkey-show-peptide">
     <tr align=center bgcolor="#EEB422">
 <%
     // Render fragment table
@@ -222,7 +222,7 @@ if (p.getQuantitation() != null)
 
     if (errorMessage != null)
     { %>
-        <font color="red"><%= errorMessage %></font>
+        <font class="labkey-error"><%= errorMessage %></font>
 <%  }
 %>
 <table>

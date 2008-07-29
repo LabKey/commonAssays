@@ -49,7 +49,7 @@
 
     String labelStyle = "text-align:left;vertical-align:middle;font-weight:bold";
 %>
-<table class="normal">
+<table>
     <tr>
         <td valign="bottom">
             <table>
@@ -64,13 +64,13 @@
                 for (DilutionSummary dilSummary : bean.getDilutionSummaries())
                 {
                 %>
-                    <tr><td class=normal>
+                    <tr><td>
                         <%= h(dilSummary.getSampleId()) %>
                     </td>
-                    <td class="normal">
+                    <td>
                         <%= dilSummary.getInitialDilution() %>
                     </td>
-                    <td class="normal">
+                    <td>
                         <%= dilSummary.getFactor() %>
                     </td>
 
@@ -101,14 +101,14 @@
                     {
                 %>
                 <tr>
-                    <td class="normal">
+                    <td>
                         <%=h(summary.getSampleId())%>
                     </td>
                     <%
                         for (int cutoff : bean.getCutoffs())
                         {
                     %>
-                    <td class="normal">
+                    <td>
                         <%
                             double val = summary.getCutoffDilution(cutoff / 100.0);
                             if (val == Double.NEGATIVE_INFINITY)
@@ -159,7 +159,7 @@
     </tr>
 </table><br>
 
-<table class="normal">
+<table>
     <tr>
         <%
             for (DilutionSummary summary : bean.getDilutionSummaries())
@@ -179,11 +179,11 @@
                     {
                 %>
                 <tr>
-                    <td class=normal align=right><%= NabController.intString(summary.getDilution(data)) %></td>
-                    <td class=normal
+                    <td align=right><%= NabController.intString(summary.getDilution(data)) %></td>
+                    <td
                         align=right><%= NabController.percentString(summary.getPercent(data)) %></td>
-                    <td class=normal>&plusmn;</td>
-                    <td class=normal
+                    <td>&plusmn;</td>
+                    <td
                         align=right><%= NabController.percentString(summary.getPlusMinus(data)) %></td>
                 </tr>
                 <%

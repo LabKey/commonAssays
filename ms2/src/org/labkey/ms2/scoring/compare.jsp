@@ -38,7 +38,7 @@
     Choose discrimate values to display in ROC chart.<br>
     </td></tr>
     <tr><td valign="top">
-<table border="0">
+<table>
 <%
     int validRuns = 0;
     for (int i = 0; i < runs.length; i++)
@@ -47,7 +47,7 @@
         if (run == null)
             continue;
 %>
-    <tr><td colspan="2" class="heading-1"><%=h(run.getDescription())%></td></tr>
+    <tr><td colspan="2" class="labkey-heading-1"><%=h(run.getDescription())%></td></tr>
     <tr><td>&nbsp;</td>
 <%      if (run.getNegativeHitCount() < run.getPeptideCount() / 3)
         {
@@ -55,7 +55,7 @@
         }
         else
         {
-            %><td class="normal">
+            %><td>
                 <input type="hidden" name="runIds_<%=i%>" value="<%=run.getRun()%>"><%
 
             if (validRuns > 0)
@@ -83,25 +83,25 @@
     { %>
         <tr><td>&nbsp;</td></tr>
         <tr><td colspan=2>
-            <table border="0">
-                <tr><td class="ms-searchform">Title</td>
-                    <td class="normal"><input type="text" size="15" name="title" value="<%=form.getTitle()%>"></td></tr>
-                <tr><td class="ms-searchform">Correct Amino Acids</td>
-                    <td class="normal"><input type="text" size="4" name="percentAACorrect" value="<%=form.getPercentAACorrect()%>"> %</td></tr>
-                <tr><td class="ms-searchform">Increment</td>
-                    <td class="normal"><input type="text" size="4" name="increment" value="<%=form.getIncrement()%>"></td></tr>
-                <tr><td class="ms-searchform">Limit</td>
-                    <td class="normal"><input type="text" size="4" name="limit" value="<%=form.getLimit()%>"></td></tr>
-                <tr><td class="ms-searchform">Chart width</td>
-                    <td class="normal"><input type="text" size="4" name="width" value="<%=form.getWidth()%>"></td></tr>
-                <tr><td class="ms-searchform">Chart height</td>
-                    <td class="normal"><input type="text" size="4" name="height" value="<%=form.getHeight()%>"></td></tr>
-                <tr><td class="ms-searchform">Marks</td>
-                    <td class="normal"><input type="text" size="15" name="marks" value="<%=form.getMarks()%>"></td></tr>
-                <tr><td class="ms-searchform">Mark FDR</td>
-                    <td class="normal"><input type="checkbox" name="markFdr" <%=form.isMarkFdr() ? "checked=\"true\"" : ""%>"></td></tr>
-                <tr><td class="ms-searchform">Save TSVs</td>
-                    <td class="normal"><input type="checkbox" name="saveTsvs" <%=form.isSaveTsvs() ? "checked=\"true\"" : ""%>"></td></tr>
+            <table>
+                <tr><td class="labkey-form-label">Title</td>
+                    <td><input type="text" size="15" name="title" value="<%=form.getTitle()%>"></td></tr>
+                <tr><td class="labkey-form-label">Correct Amino Acids</td>
+                    <td><input type="text" size="4" name="percentAACorrect" value="<%=form.getPercentAACorrect()%>"> %</td></tr>
+                <tr><td class="labkey-form-label">Increment</td>
+                    <td><input type="text" size="4" name="increment" value="<%=form.getIncrement()%>"></td></tr>
+                <tr><td class="labkey-form-label">Limit</td>
+                    <td><input type="text" size="4" name="limit" value="<%=form.getLimit()%>"></td></tr>
+                <tr><td class="labkey-form-label">Chart width</td>
+                    <td><input type="text" size="4" name="width" value="<%=form.getWidth()%>"></td></tr>
+                <tr><td class="labkey-form-label">Chart height</td>
+                    <td><input type="text" size="4" name="height" value="<%=form.getHeight()%>"></td></tr>
+                <tr><td class="labkey-form-label">Marks</td>
+                    <td><input type="text" size="15" name="marks" value="<%=form.getMarks()%>"></td></tr>
+                <tr><td class="labkey-form-label">Mark FDR</td>
+                    <td><input type="checkbox" name="markFdr" <%=form.isMarkFdr() ? "checked=\"true\"" : ""%>"></td></tr>
+                <tr><td class="labkey-form-label">Save TSVs</td>
+                    <td><input type="checkbox" name="saveTsvs" <%=form.isSaveTsvs() ? "checked=\"true\"" : ""%>"></td></tr>
             </table>
         </td></tr>
         <tr>

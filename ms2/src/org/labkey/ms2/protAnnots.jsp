@@ -55,7 +55,7 @@
 </tr>
 </table>
 <br>
-<table cellspacing="10">
+<table class="labkey-prot-annots">
 <tr>
    <th>Genbank IDs</th><th>GIs</th><th>Swiss-Prot Accessions</th><th>Swiss-Prot Names</th><th>Ensembl</th><th>IPI numbers</th><th>GO Categories</th>
 </tr>

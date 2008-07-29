@@ -29,7 +29,7 @@
 %>
 <p>Use this page to set which properties of the sample need to match keywords of the FCS files.</p>
 
-<form class="normal" action="<%=form.getProtocol().urlFor(Action.joinSampleSet)%>" method="POST">
+<form action="<%=form.getProtocol().urlFor(Action.joinSampleSet)%>" method="POST">
     <table><tr><th>Sample Property</th><th>FCS Property</th></tr>
         <% for (int i = 0; i < form.ff_samplePropertyURI.length; i ++)
         { %>

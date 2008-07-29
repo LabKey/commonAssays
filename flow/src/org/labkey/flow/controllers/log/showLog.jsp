@@ -18,7 +18,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page extends="org.labkey.flow.controllers.log.LogController.Page" %>
-<table class="normal" border="1"><tr>
+<table border="1"><tr>
     <%  List<String[]> rows = new ArrayList();
         String[] headers = log.getHeadersAndEntries(rows);
         for (String header : headers)

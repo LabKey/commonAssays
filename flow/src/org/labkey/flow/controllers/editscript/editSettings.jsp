@@ -35,7 +35,7 @@
 <labkey:errors/>
 <form action="<%=form.urlFor(ScriptController.Action.editSettings)%>" method="POST">
     <table>
-        <tr class="wpHeader"><td class="wpTitle">Filter FCS files by keyword:</td></tr>
+        <tr class="labkey-wp-header"><td>Filter FCS files by keyword:</td></tr>
         <tr><td>
             Filters may be applied to this analysis script.  The set of keyword and
             value pairs <i>must</i> all match in the FCS header to be included in the analysis.
@@ -67,15 +67,15 @@
 
             %>
             <tr>
-                <td class="normal"><%= i == 0 ? "" : "and" %></td>
+                <td><%= i == 0 ? "" : "and" %></td>
             <% if (canEdit) { %>
-                <td class="normal"><select name="ff_filter_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /></select></td>
-                <td class="normal"><select name="ff_filter_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
-                <td class="normal"><input type="text" name="ff_filter_value" value="<%=h(value)%>"></td>
+                <td><select name="ff_filter_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /></select></td>
+                <td><select name="ff_filter_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
+                <td><input type="text" name="ff_filter_value" value="<%=h(value)%>"></td>
             <% } else { %>
-                <td class="normal"><%=fieldOptions.get(field)%></td>
-                <td class="normal"><%=opOptions.get(op)%></td>
-                <td class="normal"><%=h(value)%></td>
+                <td><%=fieldOptions.get(field)%></td>
+                <td><%=opOptions.get(op)%></td>
+                <td><%=h(value)%></td>
             <% } %>
             </tr>
             <%
@@ -93,7 +93,7 @@
     <p/>
     
     <table>
-        <tr class="wpHeader"><td class="wpTitle">Edit Minimum Values:</td></tr>
+        <tr class="labkey-wp-header"><td>Edit Minimum Values:</td></tr>
         <tr><td>
         For each parameter, specify the minimum value.  This value will be used when drawing graphs.
         Also, for the purpose of calculating statistics, and applying gates, values will be constrained to be greater than

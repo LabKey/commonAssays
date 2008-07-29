@@ -48,7 +48,7 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
     public void init()
     {
         super.init();
-        taxonomyReadOnly.setStylePrimaryName("ms-readonly");
+        taxonomyReadOnly.setStylePrimaryName("labkey-read-only");
         taxonomyListBox.setVisibleItemCount(1);
         instance.add(taxonomyListBox);
         labelWidget = new VerticalPanel();

@@ -25,7 +25,7 @@
     HttpView<MS2Controller.ManageViewsBean> me = (HttpView<MS2Controller.ManageViewsBean>) HttpView.currentView();
     MS2Controller.ManageViewsBean bean = me.getModelBean();
 %>
-<table class="dataRegion">
+<table class="labkey-data-region">
     <tr>
         <td>
             <form method="post" name="manageViewsForm" action="">
@@ -36,7 +36,7 @@
                         <input onchange="updateForm();" type="radio" <% if (bean.getDefaultViewType() == defaultViewType) { %>checked<% } %> name="defaultViewType" value="<%= PageFlowUtil.filter(defaultViewType.toString()) %>" id="defaultViewType<%= PageFlowUtil.filter(defaultViewType.toString()) %>"/> <%= PageFlowUtil.filter(defaultViewType.getDescription()) %><br/>
                     <% } %>
                 </p>
-                <table class="dataRegion" border="0">
+                <table class="labkey-data-region">
                     <tr>
                         <td><strong>Default</strong></td><td><strong>Delete</strong></td><td><strong>View Name</strong></td>
                     </tr>

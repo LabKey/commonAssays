@@ -33,7 +33,7 @@
             out.print("</font>");
     }
 %>
-<table border="0">
+<table>
     <tr><td colspan=2><b>Sequest settings tested:</b></td></tr>
     <tr><td>Server:</td><td align="left"><%
 if (!"".equals(form.getSequestServer()))

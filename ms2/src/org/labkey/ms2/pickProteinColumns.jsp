@@ -25,8 +25,8 @@
     MS2Controller.PickColumnsBean bean = ((JspView<MS2Controller.PickColumnsBean>) HttpView.currentView()).getModelBean();
     Container c = getViewContext().getContainer();
 %>
-<table class="dataRegion"><tr>
-  <td><form method="post" action=""><table class="dataRegion" border="0">
+<table class="labkey-data-region"><tr>
+  <td><form method="post" action=""><table class="labkey-data-region">
     <tr>
         <td><strong>Common:</strong></td>
         <td><%=h(bean.commonColumns)%></td>

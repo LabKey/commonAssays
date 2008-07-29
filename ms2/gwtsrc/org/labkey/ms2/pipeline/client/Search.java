@@ -113,8 +113,8 @@ public class Search implements EntryPoint
         protocolComposite.setVisibleLines(4);
 
         searchEngineLabel.setText("Search engine:");
-        searchEngineLabel.setStylePrimaryName("ms-searchform-nowrap");
-        actualSearchEngineLabel.setStylePrimaryName("ms-readonly");
+        searchEngineLabel.setStylePrimaryName("labkey-form-label-nowrap");
+        actualSearchEngineLabel.setStylePrimaryName("labkey-read-only");
         actualSearchEngineLabel.setText(searchEngine);
 
         sequenceDbComposite.setName("sequenceDB");
@@ -132,7 +132,7 @@ public class Search implements EntryPoint
             PropertyUtil.getServerProperty("helpTopic") + "\">" + searchEngine + " Documentation</a>");
 
         saveProtocolCheckBoxLabel.setText("Save protocol:");
-        saveProtocolCheckBoxLabel.setStylePrimaryName("ms-searchform-nowrap");
+        saveProtocolCheckBoxLabel.setStylePrimaryName("labkey-form-label-nowrap");
         saveProtocolCheckBox.setName("saveProtocol");
         saveProtocolCheckBox.setChecked(new Boolean(PropertyUtil.getServerProperty("saveProtocol")).booleanValue());
         buttonPanel.setSpacing(5);
@@ -250,7 +250,7 @@ public class Search implements EntryPoint
     {
         int rows = 8;
         int cols = 2;
-        String labelStyle = "ms-searchform-nowrap";
+        String labelStyle = "labkey-form-label-nowrap";
 
         subPanel.add(pathHidden);
         subPanel.add(searchEngineHidden);
@@ -293,13 +293,13 @@ public class Search implements EntryPoint
     {
         if(error.trim().length() ==  0)   return;
         appendDisplay("ERROR: " + error);
-        displayLabel.setStylePrimaryName("cpas-error");
+        displayLabel.setStylePrimaryName("labkey-error");
     }
 
     private void appendMessage(String message)
     {
         appendDisplay(message);
-        displayLabel.setStylePrimaryName("cpas-message-strong");
+        displayLabel.setStylePrimaryName("labkey-message-strong");
     }
 
     private void appendDisplay(String display)
@@ -319,13 +319,13 @@ public class Search implements EntryPoint
     private void setMessage(String message)
     {
         setDisplay(message);
-        displayLabel.setStylePrimaryName("cpas-message-strong");
+        displayLabel.setStylePrimaryName("labkey-message-strong");
     }
 
     private void setError(String error)
     {
         setDisplay(error);
-        displayLabel.setStylePrimaryName("cpas-error");
+        displayLabel.setStylePrimaryName("labkey-error");
     }
 
     private void setDisplay(String text)

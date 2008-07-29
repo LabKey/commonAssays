@@ -24,11 +24,11 @@
 <%
     MS2Controller.SaveViewBean bean = ((JspView<MS2Controller.SaveViewBean>) HttpView.currentView()).getModelBean();
 %>
-<form method="post" action="saveView.view" class="dataRegion">
+<form method="post" action="saveView.view" class="labkey-data-region">
     <table>
         <tr>
             <td>Name:</td>
-            <td class="normal">
+            <td>
                 <input name="name" id="name" style="width:200px;">
                 <input type=hidden value="<%=h(bean.viewParams)%>" name="viewParams">
                 <input type=hidden value="<%=h(bean.returnURL)%>" name="<%=ReturnUrlForm.Params.returnUrl%>">

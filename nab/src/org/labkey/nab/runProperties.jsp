@@ -89,7 +89,7 @@
         document.getElementById("fileId").disabled = disabled;
     }
 </script>
-<form method="post" onSubmit="return copyImpliedValues()" action="upload.view" enctype="multipart/form-data" class="normal">
+<form method="post" onSubmit="return copyImpliedValues()" action="upload.view" enctype="multipart/form-data">
 
 <table>
     <tr>
@@ -132,16 +132,16 @@
                     <td colspan="2">
                         <table>
                             <tr>
-                                <td class="header" style="text-align:center;vertical-align:bottom">
+                                <td class="labkey-header" style="text-align:center;vertical-align:bottom">
                                     Short Sample Id</td>
-                                <td class="header" style="text-align:center;vertical-align:bottom">
+                                <td class="labkey-header" style="text-align:center;vertical-align:bottom">
                                     Sample Description</td>
-                                <td class="header" style="text-align:center;vertical-align:bottom">
+                                <td class="labkey-header" style="text-align:center;vertical-align:bottom">
                                     Initial Dilution/<br>
                                     Concentration</td>
-                                <td class="header" style="text-align:center;vertical-align:bottom">
+                                <td class="labkey-header" style="text-align:center;vertical-align:bottom">
                                     Method</td>
-                                <td class="header" style="text-align:center;vertical-align:bottom">
+                                <td class="labkey-header" style="text-align:center;vertical-align:bottom">
                                     Factor</td>
                             </tr>
                             <%
@@ -161,14 +161,14 @@
                                     <input size="40" name="sampleInfos[<%= sampId %>].sampleDescription"
                                            value="<%= h(sampleInfo.getSampleDescription()) %>">
                                 </td>
-                                <td class="normal">
+                                <td>
                                     <input id="initialDilutionText<%= sampId %>"
                                            size="8"
                                            name="sampleInfos[<%= sampId %>].initialDilutionText"
                                            value="<%= h(sampleInfo.getInitialDilutionText()) %>"
                                            style="display:<%= sampId > 0 && form.getRunSettings().isSameInitialValue() ? "none" : "block" %>">
                                 </td>
-                                <td class="normal">
+                                <td>
                                     <select id="methodName<%= sampId %>"
                                             name="sampleInfos[<%= sampId %>].methodName"
                                             style="display:<%= sampId > 0 && form.getRunSettings().isSameMethod() ? "none" : "block" %>">
@@ -178,7 +178,7 @@
                                                 <%= SampleInfo.Method.Concentration == sampleInfo.getMethod() ? "SELECTED" : "" %>>Concentration</option>
                                     </select>
                                 </td>
-                                <td class="normal">
+                                <td>
                                     <input size="8" id="factor<%= sampId %>"
                                            name="sampleInfos[<%= sampId %>].factor"
                                            value="<%= sampleInfo.getFactor() %>"
@@ -237,37 +237,37 @@
             %>
             <table>
                 <tr>
-                    <td class="normal" style="<%= labelStyle %>">Virus Name</td>
+                    <td style="<%= labelStyle %>">Virus Name</td>
                     <td><input type="text" name="metadata.virusName" size="35"
                                value="<%= h(form.getMetadata().getVirusName()) %>"></td>
-                    <td class="normal" style="<%= labelStyle %>">Virus ID</td>
+                    <td style="<%= labelStyle %>">Virus ID</td>
                     <td><input type="text" name="metadata.virusId" size="35"
                                value="<%= h(form.getMetadata().getVirusId()) %>"></td>
                 </tr>
                 <tr>
-                    <td class="normal" style="<%= labelStyle %>">Host Cell</td>
+                    <td style="<%= labelStyle %>">Host Cell</td>
                     <td><input type="text" name="metadata.hostCell" size="35"
                                value="<%= h(form.getMetadata().getHostCell()) %>"></td>
-                    <td class="normal" style="<%= labelStyle %>">Study Name</td>
+                    <td style="<%= labelStyle %>">Study Name</td>
                     <td><input type="text" name="metadata.studyName" size="35"
                                value="<%= h(form.getMetadata().getStudyName()) %>"></td>
                 </tr>
                 <tr>
-                    <td class="normal" style="<%= labelStyle %>">Experiment Performer</td>
+                    <td style="<%= labelStyle %>">Experiment Performer</td>
                     <td><input type="text" name="metadata.experimentPerformer" size="35"
                                value="<%= h(form.getMetadata().getExperimentPerformer()) %>"></td>
-                    <td class="normal" style="<%= labelStyle %>">Experiment ID</td>
+                    <td style="<%= labelStyle %>">Experiment ID</td>
                     <td><input type="text" name="metadata.experimentId" size="35"
                                value="<%= h(form.getMetadata().getExperimentId()) %>"></td>
                 </tr>
                 <tr>
-                    <td class="normal" style="<%= labelStyle %>">Incubation Time</td>
+                    <td style="<%= labelStyle %>">Incubation Time</td>
                     <td><input type="text" name="metadata.incubationTime" size="35"
                                value="<%= h(form.getMetadata().getIncubationTime()) %>"></td>
                     <td colspan="2">&nbsp;</td>
                 </tr>
                 <tr>
-                    <td class="normal" style="<%= labelStyle %>">Plate Number</td>
+                    <td style="<%= labelStyle %>">Plate Number</td>
                     <td><input type="text" id="plateNumber" name="metadata.plateNumber" size="35"
                                value="<%= h(form.getMetadata().getPlateNumber()) %>">
                     </td>
@@ -277,12 +277,12 @@
                         Infer properties from file name</td>
                 </tr>
                 <tr>
-                    <td class="normal" style="<%= labelStyle %>">Experiment Date</td>
+                    <td style="<%= labelStyle %>">Experiment Date</td>
                     <td><input type="text" id="experimentDate" name="metadata.experimentDateString"
                                size="35"
                                value="<%= form.getRunSettings().isInferFromFile() ? "" : h(form.getMetadata().getExperimentDateString()) %>"  <%= form.getRunSettings().isInferFromFile() ? "DISABLED" : "" %>>
                     </td>
-                    <td class="normal" style="<%= labelStyle %>">File ID</td>
+                    <td style="<%= labelStyle %>">File ID</td>
                     <td><input type="text" id="fileId" name="metadata.fileId" size="35"
                                value="<%= form.getRunSettings().isInferFromFile() ? "" : h(form.getMetadata().getFileId()) %>"  <%= form.getRunSettings().isInferFromFile() ? "DISABLED" : "" %>>
                     </td>

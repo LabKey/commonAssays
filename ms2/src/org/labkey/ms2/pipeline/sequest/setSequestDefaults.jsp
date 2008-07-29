@@ -24,9 +24,9 @@ PipelineController.SetDefaultsForm form = (PipelineController.SetDefaultsForm) g
 %>
 <labkey:errors />
 <form method="post" action="<%=urlFor(PipelineController.SetSequestDefaultsAction.class)%>">
-<table border="0">
-    <tr><td class='ms-searchform'>Sequest<br>Default XML:</td>
-        <td class='ms-vb'><textarea name="configureXml" cols="90" rows="20"><%=form.getConfigureXml()%></textarea><br>
+<table>
+    <tr><td class='labkey-form-label'>Sequest<br>Default XML:</td>
+        <td><textarea name="configureXml" cols="90" rows="20"><%=form.getConfigureXml()%></textarea><br>
                     For detailed explanations of all available input parameters, see the
                     <a href="http://fields.scripps.edu/sequest/index.html">Sequest Documentation</a> on-line.</td></tr>
     <tr><td colspan="2"><labkey:button text="Set Defaults"/>&nbsp;<labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(getContainer())%>"/></td></tr>

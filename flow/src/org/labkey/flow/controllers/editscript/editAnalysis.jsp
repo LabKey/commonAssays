@@ -121,7 +121,7 @@
 </script>
 
 <form method="post" action="<%=formAction(ScriptController.Action.editAnalysis)%>">
-    <p class="normal">
+    <p>
         <b>Statistics</b><br>
         Which statistics do you want to calculate? Enter one statistic per line.<br>
         <textarea name="statistics" rows="10" cols="60" wrap="off"><%=h(bean.statistics)%></textarea><br>
@@ -165,7 +165,7 @@
         </table>
 
     </p>
-    <p class="normal">
+    <p>
         <b>Graphs</b><br>
         Which graphs do you want to have drawn? Enter one graph per line.<br>
         <textarea name="graphs" rows="10" cols="60" wrap="off"><%=h(bean.graphs)%></textarea><br>
@@ -198,7 +198,7 @@
             </tr>
         </table>
     </p>
-    <p class="normal">
+    <p>
         <b>Additional Subsets</b><br>
         Use this textbox to specify boolean expressions involving subsets that you want to calculate statistics for.
         A boolean subset expression has parentheses around it, and uses the operators '&' (and), '|' (or), and '!' (not).

@@ -42,7 +42,7 @@
     if (calc != null)
     {
 %>
-<table class="normal" border="1"><tr><th rowspan="2">Channel</th><th colspan="3">Positive</th><th colspan="3">
+<table border="1"><tr><th rowspan="2">Channel</th><th colspan="3">Positive</th><th colspan="3">
     Negative</th></tr>
     <tr><th>Keyword</th><th>Value</th><th>Subset</th><th>Keyword</th><th>Value</th><th>Subset</th></tr>
     <% for (int i = 0; i < form.parameters.length; i++)

@@ -22,9 +22,9 @@
 
 <form method="post" action="<%=urlFor(PipelineController.AddSequenceDBAction.class)%>" enctype="multipart/form-data">
 <labkey:errors />
-<table border="0">
-    <tr><td class='ms-searchform'>FASTA File:</td>
-        <td class='ms-vb'><input size="70" type="file" name="sequenceDBFile"></td></tr>
+<table>
+    <tr><td class='labkey-form-label'>FASTA File:</td>
+        <td><input size="70" type="file" name="sequenceDBFile"></td></tr>
     <tr><td><labkey:button text="Add"/>&nbsp;<labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlReferer(getContainer())%>"/></td></tr>
 </table>
 </form>

@@ -48,7 +48,7 @@
 </p>
 <form action="<%=form.getProtocol().urlFor(ProtocolController.Action.editFCSAnalysisFilter)%>" method="POST">
     <table>
-        <tr class="wpHeader"><th colspan="3" class="wpTitle" align="left">Filter FCS files by keyword:</th></tr>
+        <tr class="labkey-wp-header"><th colspan="3" align="left">Filter FCS files by keyword:</th></tr>
         <% for (int i = 0; i < clauseCount; i ++) {
         FieldKey field = null;
         String op = null;
@@ -62,11 +62,11 @@
         }
         %>
             <% if (i != 0) { %>
-        <tr><td class="normal">and</td></tr>
+        <tr><td>and</td></tr>
             <% } %>
-        <tr><td class="normal"><select name="ff_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /> </select></td>
-            <td class="normal"><select name="ff_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
-            <td class="normal"><input name="ff_value" type="text" value="<%=h(value)%>" /></td>
+        <tr><td><select name="ff_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /> </select></td>
+            <td><select name="ff_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
+            <td><input name="ff_value" type="text" value="<%=h(value)%>" /></td>
 
         </tr>
         <% } %>

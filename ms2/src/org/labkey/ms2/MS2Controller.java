@@ -660,7 +660,7 @@ public class MS2Controller extends SpringActionController
         href.append(run.getRun());
         href.append("','modifications','height=300,width=");
         href.append(width);
-        href.append(",status=yes,toolbar=no,menubar=no,location=no,resizable=yes');return false;\"><img border=0 src=\"");
+        href.append(",status=yes,toolbar=no,menubar=no,location=no,resizable=yes');return false;\"><img src=\"");
         href.append(PageFlowUtil.buttonSrc("Show Modifications"));
         href.append("\"></a>");
 
@@ -3999,7 +3999,7 @@ public class MS2Controller extends SpringActionController
             html.append("</script>");
             html.append("<form method=post name=\"").append(formName).append("\" action=''>");
 
-            html.append("<table class=\"dataRegion\" cellspacing=\"0\" cellpadding=\"1\">");
+            html.append("<table class=\"labkey-data-region\">");
             ht.render(html);
             html.append("</table>");
             html.append("<input type='hidden' name='").append(DataRegionSelection.DATA_REGION_SELECTION_KEY).append("' value='").append(PageFlowUtil.filter(ht.getSelectionKey())).append("'>");
@@ -5465,7 +5465,7 @@ public class MS2Controller extends SpringActionController
                 }
             };
 
-            StringBuilder html = new StringBuilder("<table class=\"dataRegion\"><tr><td>Please select the destination folder. Folders that are not configured with a pipeline root are not valid destinations. They are shown in the list, but are not linked.</td></tr><tr><td>&nbsp;</td></tr>");
+            StringBuilder html = new StringBuilder("<table class=\"labkey-data-region\"><tr><td>Please select the destination folder. Folders that are not configured with a pipeline root are not valid destinations. They are shown in the list, but are not linked.</td></tr><tr><td>&nbsp;</td></tr>");
             ct.render(html);
             html.append("</table>");
 

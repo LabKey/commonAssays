@@ -21,7 +21,7 @@
 
 <form method="POST" name="updateClusterSequenceDB" action="<%=urlFor(PipelineController.SetupClusterSequenceDBAction.class)%>">
     <labkey:errors />
-    <table class="normal">
+    <table>
         <tr>
             <td>Local Path to Sequence Database Files:</td>
         </tr>

@@ -37,7 +37,7 @@
 <tr><td colspan="2">&nbsp;</td></tr>
 <tr>
     <td><img src="<%=h(sensitivityURL)%>" alt="Sensitivity Plot"></td>
-    <td><table class="dataRegion">
+    <td><table class="labkey-data-region">
         <tr><td><b>Minimum probability</b></td><td><b>Sensitivity</b></td><td><b>Error rate</b></td></tr>
 <%
     for (int i = 0; i < sensitivity.length; i++)

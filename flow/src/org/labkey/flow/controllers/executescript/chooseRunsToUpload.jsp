@@ -40,8 +40,7 @@
     {
         assert root != null;
 
-        %><form method="POST" action="<%=org.labkey.api.util.PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer())%>"
-          class="normal">
+        %><form method="POST" action="<%=org.labkey.api.util.PageFlowUtil.urlFor(AnalysisScriptController.Action.chooseRunsToUpload, context.getContainer())%>">
         <input type="hidden" name="path" value="<%=h(form.path)%>">
         <p>
             Choose which directories in '<%=h(PageFlowUtil.decode(form.path))%>' contain the FCS files for your experiment runs.

@@ -33,7 +33,7 @@ Publishing results to <b><%= h(bean.getTargetContainer().getPath()) %></b>.  All
 <form action="handlePublish.post" method="POST">
     <input type="hidden" name="plateIds" value="false">
     <input type="hidden" name="targetContainerId" value="<%= bean.getTargetContainer().getId() %>">
-    <table class="normal">
+    <table>
         <tr>
             <th>Include</th>
             <th>Specimen Id</th>

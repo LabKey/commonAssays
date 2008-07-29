@@ -28,7 +28,7 @@
     MS2Controller.RunSummaryBean bean = me.getModelBean();
     MS2Run run = bean.run;
 %>
-<table class="dataRegion">
+<table class="labkey-data-region">
     <tr>
     <td>Search Enzyme:</td><td><%=MS2Controller.defaultIfNull(run.getSearchEnzyme(), "n/a")%></td>
     <td>File Name:</td><td><%=MS2Controller.defaultIfNull(run.getFileName(), "n/a")%></td>
@@ -48,28 +48,28 @@ if (null != bean.quantAlgorithm)
 
 if (bean.writePermissions)
 { %>
-    <a href="<%=h(MS2Controller.getRenameRunURL(c, run, me.getViewContext().getActionURL()))%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Rename")%>"></a><%
+    <a href="<%=h(MS2Controller.getRenameRunURL(c, run, me.getViewContext().getActionURL()))%>"><img src="<%=PageFlowUtil.buttonSrc("Rename")%>"></a><%
 } %>
     <%=bean.modHref%><%
 
 if (null != run.getParamsFileName() && null != run.getPath())
 { %>
-    <a target="paramFile" href="showParamsFile.view?run=<%=run.getRun()%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Show " + run.getParamsFileName())%>"></a><%
+    <a target="paramFile" href="showParamsFile.view?run=<%=run.getRun()%>"><img src="<%=PageFlowUtil.buttonSrc("Show " + run.getParamsFileName())%>"></a><%
 }
 
 if (run.getHasPeptideProphet())
 { %>
-    <a target="peptideProphetSummary" href="showPeptideProphetDetails.view?run=<%=run.getRun()%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Show Peptide Prophet Details")%>"></a><%
+    <a target="peptideProphetSummary" href="showPeptideProphetDetails.view?run=<%=run.getRun()%>"><img src="<%=PageFlowUtil.buttonSrc("Show Peptide Prophet Details")%>"></a><%
 }
 
 if (run.hasProteinProphet())
 { %>
-    <a target="proteinProphetSummary" href="showProteinProphetDetails.view?run=<%=run.getRun()%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Show Protein Prophet Details")%>"></a><%
+    <a target="proteinProphetSummary" href="showProteinProphetDetails.view?run=<%=run.getRun()%>"><img src="<%=PageFlowUtil.buttonSrc("Show Protein Prophet Details")%>"></a><%
 }
 
 if(run.getNegativeHitCount() > run.getPeptideCount() / 3)
 { %>
-    <a href="discriminateScore.view?run=<%=run.getRun()%>"><img border=0 src="<%=PageFlowUtil.buttonSrc("Discriminate")%>"></a><%
+    <a href="discriminateScore.view?run=<%=run.getRun()%>"><img src="<%=PageFlowUtil.buttonSrc("Discriminate")%>"></a><%
 } %>
     </tr>
 </table>
