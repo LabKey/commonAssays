@@ -24,9 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Arrays;
 
 /**
@@ -35,7 +33,7 @@ import java.util.Arrays;
  * engine's raw output.  This task may run PeptideProphet, ProteinProphet,
  * Quantitation, and batch fractions into a single pepXML.
  */
-public class TPPTask extends PipelineJob.Task
+public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
 {
     public static final FileType FT_PEP_XML = new FileType(".pep.xml");
     public static final FileType FT_PROT_XML = new FileType(".prot.xml");
@@ -46,6 +44,13 @@ public class TPPTask extends PipelineJob.Task
     private static final FileType FT_PEP_SHTML = new FileType(".pep.shtml");
     private static final FileType FT_INTERMEDIATE_PROT_XSL = new FileType(".pep-prot.xsl");
     private static final FileType FT_INTERMEDIATE_PROT_SHTML = new FileType(".pep-prot.shtml");
+
+    private static final String PEPTIDE_PROPHET_ACTION_NAME = "PeptideProphet";
+    private static final String PROTEIN_PROPHET_ACTION_NAME = "ProteinProphet";
+    private static final String QUANITATION_ACTION_NAME = "Quantitation";
+    private static final String PEP_XML_ROLLUP_ACTION_NAME = "PepXML Rollup";
+    private static final String PROTEIN_PROPHET_ROLLUP_ACTION_NAME = "ProteinProphet Rollup";
+    private static final String QUANTITATION_ROLLUP_ACTION_NAME = "Quantitation Rollup";
 
     public static File getPepXMLFile(File dirAnalysis, String baseName)
     {
@@ -132,7 +137,7 @@ public class TPPTask extends PipelineJob.Task
 
         public PipelineJob.Task createTask(PipelineJob job)
         {
-            return new TPPTask(job);
+            return new TPPTask(this, job);
         }
 
         public FileType[] getInputTypes()
@@ -165,6 +170,18 @@ public class TPPTask extends PipelineJob.Task
 
             return true;
         }
+
+        public List<String> getActionNames()
+        {
+            if (isJoin())
+            {
+                return Arrays.asList(PEP_XML_ROLLUP_ACTION_NAME, PROTEIN_PROPHET_ROLLUP_ACTION_NAME, QUANTITATION_ROLLUP_ACTION_NAME);
+            }
+            else
+            {
+                return Arrays.asList(PEPTIDE_PROPHET_ACTION_NAME, PROTEIN_PROPHET_ACTION_NAME, QUANITATION_ACTION_NAME);
+            }
+        }
     }
 
     public static class FactoryJoin extends Factory
@@ -182,9 +199,9 @@ public class TPPTask extends PipelineJob.Task
         }
     }
 
-    protected TPPTask(PipelineJob job)
+    protected TPPTask(Factory factory, PipelineJob job)
     {
-        super(job);
+        super(factory, job);
     }
 
     public JobSupport getJobSupport()
@@ -192,7 +209,7 @@ public class TPPTask extends PipelineJob.Task
         return getJob().getJobSupport(JobSupport.class);
     }
 
-    public void run()
+    public List<PipelineAction> run() throws PipelineJobException
     {
         try
         {
@@ -207,6 +224,7 @@ public class TPPTask extends PipelineJob.Task
             // TODO: mzXML files may be required, and input disk space requirements
             //          may be too great to copy to a temporary directory.
             File[] inputFiles = getJobSupport().getInteractInputFiles();
+            File[] originalInputFiles = inputFiles.clone();
             if (inputFiles.length > 0)
             {
                 WorkDirectory.CopyingResource lock = null;
@@ -302,14 +320,17 @@ public class TPPTask extends PipelineJob.Task
             getJob().runSubProcess(new ProcessBuilder(interactCmd),
                     wd.getDir());
 
+            File filePepXML;
+            File fileProtXML = null;
+
             WorkDirectory.CopyingResource lock = null;
             try
             {
                 lock = wd.ensureCopyingLock();
-                wd.outputFile(fileWorkPepXML);
+                filePepXML = wd.outputFile(fileWorkPepXML);
                 if (fileWorkProtXML != null)
                 {
-                    wd.outputFile(fileWorkProtXML,
+                    fileProtXML = wd.outputFile(fileWorkProtXML,
                             FT_PROT_XML.getName(getJobSupport().getBaseName()));
                 }
             }
@@ -329,24 +350,46 @@ public class TPPTask extends PipelineJob.Task
             // the raw pepXML file(s).
             if (!getJobSupport().isFractions() || inputFiles.length > 1)
             {
-                for (File fileInput : getJobSupport().getInteractInputFiles())
+                for (File fileInput : inputFiles)
                 {
                     if (!fileInput.delete())
                         getJob().warn("Failed to delete intermediate file " + fileInput);
                 }
             }
-        }
-        catch (PipelineJob.RunProcessException erp)
-        {
-            // Handled in runSubProcess
-        }
-        catch (InterruptedException ei)
-        {
-            // Handled in runSubProcess
+
+            List<PipelineAction> actions = new ArrayList<PipelineAction>();
+
+            // First step takes all the pepXMLs as inputs and either runs PeptideProphet (non-join) or rolls them up (join)
+            PipelineAction pepXMLAction = new PipelineAction(_factory.isJoin() ? PEP_XML_ROLLUP_ACTION_NAME : PEPTIDE_PROPHET_ACTION_NAME);
+            for (File fileInput : originalInputFiles)
+            {
+                pepXMLAction.addInput(fileInput);
+            }
+            pepXMLAction.addOutput(filePepXML, false);
+            actions.add(pepXMLAction);
+
+            // Second step optionally runs ProteinProphet on the pepXML
+            if (fileProtXML != null)
+            {
+                PipelineAction protXMLAction = new PipelineAction(_factory.isJoin() ? PROTEIN_PROPHET_ROLLUP_ACTION_NAME : PROTEIN_PROPHET_ACTION_NAME);
+                protXMLAction.addInput(filePepXML);
+                protXMLAction.addOutput(fileProtXML, false);
+                actions.add(protXMLAction);
+            }
+
+            // TODO - optional third step for quantitation. Need to figure out how to say that a step touches an output without claiming that it created it
+
+            // All the programs are launched through the same XInteract command, so set the same command line on them all
+            for (PipelineAction action : actions)
+            {
+                action.addParameter(PipelineAction.COMMAND_LINE_PARAM, StringUtils.join(interactCmd, " "));
+            }
+
+            return actions;
         }
         catch (IOException e)
         {
-            getJob().error(e.getMessage(), e);
+            throw new PipelineJobException(e);
         }
     }
 

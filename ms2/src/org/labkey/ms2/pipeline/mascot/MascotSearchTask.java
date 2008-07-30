@@ -16,25 +16,19 @@
 package org.labkey.ms2.pipeline.mascot;
 
 import org.apache.commons.io.FileUtils;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.pipeline.WorkDirFactory;
-import org.labkey.api.pipeline.WorkDirectory;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.*;
 
 import java.io.*;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * <code>MascotSearchTask</code>
  */
-public class MascotSearchTask extends PipelineJob.Task
+public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
 {
     private static final String KEY_HASH = "HASH";
     private static final String KEY_FILESIZE = "FILESIZE";
@@ -104,7 +98,7 @@ public class MascotSearchTask extends PipelineJob.Task
 
         public PipelineJob.Task createTask(PipelineJob job)
         {
-            return new MascotSearchTask(job);
+            return new MascotSearchTask(this, job);
         }
 
         public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
@@ -127,9 +121,9 @@ public class MascotSearchTask extends PipelineJob.Task
         }
     }
 
-    protected MascotSearchTask(PipelineJob job)
+    protected MascotSearchTask(Factory factory, PipelineJob job)
     {
-        super(job);
+        super(factory, job);
     }
 
     public JobSupport getJobSupport()
@@ -137,7 +131,7 @@ public class MascotSearchTask extends PipelineJob.Task
         return getJob().getJobSupport(JobSupport.class);
     }
 
-    public void run()
+    public List<PipelineAction> run() throws PipelineJobException
     {
         try
         {
@@ -164,7 +158,7 @@ public class MascotSearchTask extends PipelineJob.Task
             if (databases.length > 1)
             {
                 getJob().error("Mascot does not support multiple databases searching. ("+paramDatabase+")");
-                return;
+                return Collections.emptyList();
             }
 
             params.put("pipeline, user name", "LabKey User");
@@ -350,18 +344,14 @@ public class MascotSearchTask extends PipelineJob.Task
             wd.discardFile(fileWorkSpectra);
             wd.discardFile(fileWorkInputXML);
             wd.remove();
-        }
-        catch (PipelineJob.RunProcessException e)
-        {
-            // Handled in runSubProcess
-        }
-        catch (InterruptedException e)
-        {
-            // Handled in runSubProcess
+
+            PipelineAction action = new PipelineAction(_factory.getId());
+            action.addAll(wd);
+            return Collections.singletonList(action);
         }
         catch (IOException e)
         {
-            getJob().error(e.getMessage(), e);
+            throw new PipelineJobException(e);
         }
     }
 

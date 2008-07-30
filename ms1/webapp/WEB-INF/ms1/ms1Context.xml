@@ -25,6 +25,7 @@
                             <ref bean="mzxmlConverterId"/>
 <!--                            <ref bean="peakabooFactory"/> -->
                             <ref bean="msInspectFactory"/>
+                            <!--<ref bean="expGenerator"/>-->
                             <ref bean="expGeneratorFeatures"/>
                             <value type="java.lang.Class">org.labkey.api.exp.pipeline.XarImportTaskId</value>
                         </list>
@@ -77,12 +78,12 @@
         <constructor-arg value="mzxmlConverter"/>
     </bean>
 
-    <bean id="expGeneratorFeatures" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
+    <bean id="expGeneratorFeatures" class="org.labkey.api.exp.pipeline.XarTemplateSubstitutionFactorySettings">
         <constructor-arg value="expGeneratorFeatures"/>
         <property name="inputExt" value=".peptides.tsv"/>
     </bean>
 
-    <bean id="expGeneratorPeptides" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
+    <bean id="expGeneratorPeptides" class="org.labkey.api.exp.pipeline.XarTemplateSubstitutionFactorySettings">
         <constructor-arg value="expGeneratorPeptides"/>
         <property name="inputExt" value=".pepmatch.tsv"/>
     </bean>
@@ -96,7 +97,11 @@
     <bean id="gtOne" class="org.labkey.api.pipeline.cmd.ValidateNumber">
         <property name="min" value="1"/>
     </bean>
-    
+
+    <bean id="expGenerator" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
+        <property name="outputExt" value=".ms1.xar.xml"/>
+    </bean>
+
     <bean id="peakabooFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
         <constructor-arg value="peakabooFactory"/>
         <property name="statusName" value="PEAK EXTRACTION"/>

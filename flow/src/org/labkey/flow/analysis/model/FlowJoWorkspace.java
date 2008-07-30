@@ -886,7 +886,7 @@ abstract public class FlowJoWorkspace implements Serializable
             workspaceData.setName(workspaceFile.getName());
             workspaceData.save(user);
 
-            ExpProtocolApplication startingInputs = run.addProtocolApplication(user, null, ExpProtocol.ApplicationType.ExperimentRun);
+            ExpProtocolApplication startingInputs = run.addProtocolApplication(user, null, ExpProtocol.ApplicationType.ExperimentRun, null);
             startingInputs.addDataInput(user, workspaceData, InputRole.Workspace.toString(), null);
             Map<FlowJoWorkspace.SampleInfo, FlowFCSFile> fcsFiles = new HashMap();
             iSample = 0;
@@ -896,7 +896,7 @@ abstract public class FlowJoWorkspace implements Serializable
                     return null;
 
                 iSample++;
-                ExpProtocolApplication paSample = run.addProtocolApplication(user, FlowProtocolStep.keywords.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
+                ExpProtocolApplication paSample = run.addProtocolApplication(user, FlowProtocolStep.keywords.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication, null);
                 paSample.addDataInput(user, workspaceData, InputRole.Workspace.toString(), InputRole.Workspace.getPropertyDescriptor(container));
                 ExpData fcsFile = svc.createData(container, FlowDataType.FCSFile);
                 fcsFile.setName(sample.getLabel());
@@ -921,7 +921,7 @@ abstract public class FlowJoWorkspace implements Serializable
                 CompensationMatrix compMatrix = entry.getKey();
                 AttributeSet compAttrs = entry.getValue();
                 FlowCompensationMatrix flowComp = FlowCompensationMatrix.create(user, container, null, compAttrs);
-                ExpProtocolApplication paComp = run.addProtocolApplication(user, FlowProtocolStep.calculateCompensation.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
+                ExpProtocolApplication paComp = run.addProtocolApplication(user, FlowProtocolStep.calculateCompensation.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication, null);
                 paComp.addDataInput(user, workspaceData, InputRole.Workspace.toString(), null);
                 flowComp.getData().setSourceApplication(paComp);
                 flowComp.getData().setName(compMatrix.getName() + " " + workspaceFile.getName());
@@ -941,7 +941,7 @@ abstract public class FlowJoWorkspace implements Serializable
                 {
                     iAnalysis++;
                     ExpProtocolApplication paAnalysis = run.addProtocolApplication(user,
-                            FlowProtocolStep.analysis.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication);
+                            FlowProtocolStep.analysis.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication, null);
                     FlowFCSFile fcsFile = entry.getValue();
                     results.setURI(fcsFile.getFCSURI());
                     paAnalysis.addDataInput(user, fcsFile.getData(), InputRole.FCSFile.toString(), InputRole.FCSFile.getPropertyDescriptor(container));

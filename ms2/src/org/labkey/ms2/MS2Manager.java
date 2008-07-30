@@ -609,7 +609,7 @@ public class MS2Manager
                 try
                 {
                     File file = new File(run.getPath(), run.getFileName());
-                    ExpData data = ExperimentService.get().getDataByURL(file, c);
+                    ExpData data = ExperimentService.get().getExpDataByURL(file, c);
                     if (data != null)
                     {
                         ExpRun expRun = data.getRun();

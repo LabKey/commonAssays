@@ -15,32 +15,32 @@
  */
 package org.labkey.ms2.pipeline.tandem;
 
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.pipeline.WorkDirFactory;
-import org.labkey.api.pipeline.WorkDirectory;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.*;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <code>XTandemSearchTask</code> PipelineJob task that runs X! Tandem on an mzXML
  * file, and converts the native output to pepXML.
  */
-public class XTandemSearchTask extends PipelineJob.Task
+public class XTandemSearchTask extends PipelineJob.Task<XTandemSearchTask.Factory>
 {
     private static final String INPUT_XML = "input.xml";
     private static final String TAXONOMY_XML = "taxonomy.xml";
     private static final String TAXON_NAME = "sequences";
 
+    private static final String X_TANDEM_ACTION_NAME = "X!Tandem";
+    private static final String TANDEM2_XML_ACTION_NAME = "Tandem2XML";
+    
     private static final FileType FT_XTAN_XML = new FileType(".xtan.xml");
 
     public static File getNativeOutputFile(File dirAnalysis, String baseName)
@@ -65,7 +65,7 @@ public class XTandemSearchTask extends PipelineJob.Task
 
         public PipelineJob.Task createTask(PipelineJob job)
         {
-            return new XTandemSearchTask(job);
+            return new XTandemSearchTask(this, job);
         }
 
         public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
@@ -83,11 +83,16 @@ public class XTandemSearchTask extends PipelineJob.Task
                    NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName));
 
         }
+
+        public List<String> getActionNames()
+        {
+            return Arrays.asList(X_TANDEM_ACTION_NAME, TANDEM2_XML_ACTION_NAME);
+        }
     }
 
-    protected XTandemSearchTask(PipelineJob job)
+    protected XTandemSearchTask(Factory factory, PipelineJob job)
     {
-        super(job);
+        super(factory, job);
     }
 
     public JobSupport getJobSupport()
@@ -95,7 +100,7 @@ public class XTandemSearchTask extends PipelineJob.Task
         return getJob().getJobSupport(JobSupport.class);
     }
 
-    public void run()
+    public List<PipelineAction> run() throws PipelineJobException
     {
         try
         {
@@ -122,9 +127,9 @@ public class XTandemSearchTask extends PipelineJob.Task
 
             String ver = getJob().getParameters().get("pipeline, xtandem version");
             String exePath = PipelineJobService.get().getExecutablePath("tandem.exe", "xtandem", ver);
-            getJob().runSubProcess(new ProcessBuilder(exePath,
-                    INPUT_XML),
-                    wd.getDir());
+            ProcessBuilder xTandemPB = new ProcessBuilder(exePath, INPUT_XML);
+            
+            getJob().runSubProcess(xTandemPB, wd.getDir());
 
             // Remove parameters files.
             wd.discardFile(fileWorkParameters);
@@ -132,18 +137,21 @@ public class XTandemSearchTask extends PipelineJob.Task
 
             ver = getJob().getParameters().get("pipeline, tpp version");
             exePath = PipelineJobService.get().getExecutablePath("Tandem2XML", "tpp", ver);
-            getJob().runSubProcess(new ProcessBuilder(exePath,
-                    fileWorkOutputXML.getName(),
-                    fileWorkPepXMLRaw.getName()),
+            ProcessBuilder tandem2XmlPB = new ProcessBuilder(exePath,
+                fileWorkOutputXML.getName(),
+                fileWorkPepXMLRaw.getName());
+            getJob().runSubProcess(tandem2XmlPB,
                     wd.getDir());
 
             // Move final outputs to analysis directory.
             WorkDirectory.CopyingResource lock = null;
+            File fileOutputXML;
+            File filePepXMLRaw;
             try
             {
                 lock = wd.ensureCopyingLock();
-                wd.outputFile(fileWorkOutputXML);
-                wd.outputFile(fileWorkPepXMLRaw);
+                fileOutputXML = wd.outputFile(fileWorkOutputXML);
+                filePepXMLRaw = wd.outputFile(fileWorkPepXMLRaw);
             }
             finally
             {
@@ -151,18 +159,25 @@ public class XTandemSearchTask extends PipelineJob.Task
             }
             
             wd.remove();
-        }
-        catch (PipelineJob.RunProcessException e)
-        {
-            // Handled in runSubProcess
-        }
-        catch (InterruptedException e)
-        {
-            // Handled in runSubProcess
+            PipelineAction action1 = new PipelineAction(X_TANDEM_ACTION_NAME);
+            action1.addParameter(PipelineAction.COMMAND_LINE_PARAM, StringUtils.join(xTandemPB.command(), ' '));
+            action1.addInput(fileDataSpectra);
+            for (File sequenceFile : getJobSupport().getSequenceFiles())
+            {
+                action1.addInput(sequenceFile.toURI());
+            }
+            action1.addOutput(fileOutputXML.toURI(), false);
+
+            PipelineAction action2 = new PipelineAction(TANDEM2_XML_ACTION_NAME);
+            action2.addParameter(PipelineAction.COMMAND_LINE_PARAM, StringUtils.join(tandem2XmlPB.command(), ' '));
+            action2.addInput(fileOutputXML.toURI());
+            action2.addOutput(filePepXMLRaw.toURI(), true);
+
+            return Arrays.asList(action1, action2);
         }
         catch (IOException e)
         {
-            getJob().error(e.getMessage(), e);
+            throw new PipelineJobException(e);
         }
     }
 

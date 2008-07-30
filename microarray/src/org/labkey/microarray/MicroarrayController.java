@@ -229,7 +229,7 @@ public class MicroarrayController extends SpringActionController
             for (Map<String, File> fileMap : files)
             {
                 File f = fileMap.get(FILE_DESCRIPTION);
-                ExpData data = ExperimentService.get().getDataByURL(f, getContainer());
+                ExpData data = ExperimentService.get().getExpDataByURL(f, getContainer());
                 if (data != null && data.getRun() != null)
                 {
                     errors.addError(new ObjectError("main", null, null, "The file " + f.getAbsolutePath() + " has already been uploaded"));

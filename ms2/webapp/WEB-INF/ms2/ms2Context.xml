@@ -15,9 +15,10 @@
                             <ref bean="mzxmlConverter"/>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemSearchTask</value>
                             <ref bean="tppTask"/>
+                            <!--<ref bean="expGenerator"/>-->
                             <ref bean="expGeneratorSearch"/>
                             <ref bean="expImportSearch"/>
-                            <ref bean="tppTaskJoin"/>                            
+                            <ref bean="tppTaskJoin"/>
                             <ref bean="expGeneratorSearchJoin"/>
                             <ref bean="expImportSearchJoin"/>
                         </list>
@@ -111,13 +112,17 @@
         <constructor-arg value="join"/>
     </bean>
 
-    <bean id="expGeneratorSearch" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
+    <bean id="expGenerator" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
+        <property name="outputExt" value=".search.xar.xml"/>
+    </bean>
+
+    <bean id="expGeneratorSearch" class="org.labkey.api.exp.pipeline.XarTemplateSubstitutionFactorySettings">
         <constructor-arg value="expGeneratorSearch"/>
         <property name="outputExt" value=".search.xar.xml"/>
         <property name="dependencyId" ref="tppTask"/>
     </bean>
 
-    <bean id="expGeneratorSearchJoin" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
+    <bean id="expGeneratorSearchJoin" class="org.labkey.api.exp.pipeline.XarTemplateSubstitutionFactorySettings">
         <constructor-arg value="expGeneratorSearchJoin"/>
         <property name="outputExt" value=".search.xar.xml"/>
         <property name="join" value="true"/>

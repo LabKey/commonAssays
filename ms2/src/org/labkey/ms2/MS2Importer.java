@@ -347,7 +347,7 @@ public abstract class MS2Importer
             }
             File pepXMLFile = new File(path, pepXMLFileName);
 
-            ExpData pepXMLData = ExperimentService.get().getDataByURL(pepXMLFile, c);
+            ExpData pepXMLData = ExperimentService.get().getExpDataByURL(pepXMLFile, c);
             if (pepXMLData != null)
             {
                 fractionMap.put("PepXmlDataLSID", pepXMLData.getLSID());

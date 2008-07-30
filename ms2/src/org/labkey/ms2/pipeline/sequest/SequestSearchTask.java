@@ -15,10 +15,7 @@
  */
 package org.labkey.ms2.pipeline.sequest;
 
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.pipeline.WorkDirFactory;
-import org.labkey.api.pipeline.WorkDirectory;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
@@ -31,14 +28,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <code>SequestSearchTask</code>
  */
-public class SequestSearchTask extends PipelineJob.Task
+public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factory>
 {
     private static final String SEQUEST_PARAMS = "sequest.params";
     private static final String REMOTE_PARAMS = "remote.params";
@@ -72,7 +67,7 @@ public class SequestSearchTask extends PipelineJob.Task
 
         public PipelineJob.Task createTask(PipelineJob job)
         {
-            return new SequestSearchTask(job);
+            return new SequestSearchTask(this, job);
         }
 
         public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
@@ -90,9 +85,9 @@ public class SequestSearchTask extends PipelineJob.Task
         }
     }
 
-    protected SequestSearchTask(PipelineJob job)
+    protected SequestSearchTask(Factory factory, PipelineJob job)
     {
-        super(job);
+        super(factory, job);
     }
 
     public JobSupport getJobSupport()
@@ -100,7 +95,7 @@ public class SequestSearchTask extends PipelineJob.Task
         return getJob().getJobSupport(JobSupport.class);
     }
 
-    public void run()
+    public List<PipelineAction> run() throws PipelineJobException
     {
         try
         {
@@ -195,22 +190,18 @@ public class SequestSearchTask extends PipelineJob.Task
             wd.discardFile(fileWorkParamsLocal);
             wd.discardFile(fileWorkParamsRemote);
             wd.remove();
-        }
-        catch (PipelineJob.RunProcessException e)
-        {
-            // Handled in runSubProcess
-        }
-        catch (InterruptedException e)
-        {
-            // Handled in runSubProcess
+
+            PipelineAction action = new PipelineAction(_factory.getId());
+            action.addAll(wd);
+            return Collections.singletonList(action);
         }
         catch(IOException e)
         {
-            getJob().error(e.getMessage(), e);
+            throw new PipelineJobException(e);
         }
         catch (SequestParamsException e)
         {
-            getJob().error(e.getMessage(), e);
+            throw new PipelineJobException(e);
         }
     }
 
@@ -243,18 +234,18 @@ public class SequestSearchTask extends PipelineJob.Task
     private void writeSequestV1ParamFile(File fileParams, Map<String, String> params) throws SequestParamsException
     {
         URI uriSequenceRoot = getJobSupport().getSequenceRootDirectory().toURI();
-        writeSequestParamFile(fileParams, params,
-                SequestParamsBuilderFactory.createVersion1Builder(params, uriSequenceRoot));
+        writeSequestParamFile(fileParams,
+            SequestParamsBuilderFactory.createVersion1Builder(params, uriSequenceRoot));
     }
 
     private void writeSequestV2ParamFile(File fileParams, Map<String, String> params) throws SequestParamsException
     {
         URI uriSequenceRoot = getJobSupport().getSequenceRootDirectory().toURI();
-        writeSequestParamFile(fileParams, params,
-                SequestParamsBuilderFactory.createVersion2Builder(params, uriSequenceRoot));
+        writeSequestParamFile(fileParams,
+            SequestParamsBuilderFactory.createVersion2Builder(params, uriSequenceRoot));
     }
 
-    private void writeSequestParamFile(File fileParams, Map<String, String> params, SequestParamsBuilder builder)
+    private void writeSequestParamFile(File fileParams, SequestParamsBuilder builder)
             throws SequestParamsException
     {
         String parseError = builder.initXmlValues();

@@ -17,6 +17,8 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineAction;
+import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.util.FileType;
 import org.labkey.common.tools.FastaValidator;
 import org.apache.commons.lang.StringUtils;
@@ -24,11 +26,13 @@ import org.apache.commons.lang.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Collections;
 
 /**
  * <code>FastaCheckTask</code>
  */
-public class FastaCheckTask extends PipelineJob.Task
+public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
 {
     public static class Factory extends AbstractTaskFactory
     {
@@ -41,7 +45,7 @@ public class FastaCheckTask extends PipelineJob.Task
 
         public PipelineJob.Task createTask(PipelineJob job)
         {
-            return new FastaCheckTask(job);
+            return new FastaCheckTask(this, job);
         }
 
         public FileType[] getInputTypes()
@@ -63,9 +67,9 @@ public class FastaCheckTask extends PipelineJob.Task
         }
     }
 
-    protected FastaCheckTask(PipelineJob job)
+    protected FastaCheckTask(Factory factory, PipelineJob job)
     {
-        super(job);
+        super(factory, job);
     }
 
     public MS2SearchJobSupport getJobSupport()
@@ -73,12 +77,14 @@ public class FastaCheckTask extends PipelineJob.Task
         return getJob().getJobSupport(MS2SearchJobSupport.class);
     }
 
-    public void run()
+    public List<PipelineAction> run() throws PipelineJobException
     {
         try
         {
             getJob().header("Check FASTA validity");
-            
+
+            PipelineAction action = new PipelineAction(_factory.getId());
+
             for (File sequenceFile : getJobSupport().getSequenceFiles())
             {
                 // todo: NetworkDrive access on PipelineJobService
@@ -86,18 +92,24 @@ public class FastaCheckTask extends PipelineJob.Task
                 if (!sequenceFile.exists())
                     continue;
                 getJob().info("Checking sequence file validity of " + sequenceFile);
-                
+
+                action.addInput(sequenceFile.toURI());
+
                 FastaValidator validator = new FastaValidator(sequenceFile);
                 String errors = StringUtils.join(validator.validate(), "\n");
                 if (errors.length() > 0)
+                {
                     getJob().error(errors);
+                    return Collections.emptyList();
+                }
             }
 
             getJob().info("");  // blank line
+            return Collections.singletonList(action);
         }
         catch (IOException e)
         {
-            getJob().error(e.getMessage(), e);
+            throw new PipelineJobException("Failed to check FASTA file(s)", e);
         }
     }
 }

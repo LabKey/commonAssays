@@ -281,8 +281,8 @@ public class Search implements EntryPoint
 
         for(int i = 0; i < rows; i++)
         {
-            formGrid.getCellFormatter().setStylePrimaryName(i,0, "ms-top-color");
-            formGrid.getCellFormatter().setStylePrimaryName(i,1, "ms-top");
+            formGrid.getCellFormatter().setStylePrimaryName(i,0, "labkey-form-label");
+            formGrid.getCellFormatter().setStylePrimaryName(i,1, "labkey-form");
         }
         subPanel.add(formGrid);
         subPanel.add(buttonPanel);

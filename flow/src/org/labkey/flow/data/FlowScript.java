@@ -183,7 +183,7 @@ public class FlowScript extends FlowDataObject
         data.setName(name);
         initScript(data);
         data.save(user);
-        ExpProtocolApplication app = run.getExperimentRun().addProtocolApplication(user, FlowProtocolStep.defineGates.getAction(run.getExperimentRun().getProtocol()), FlowProtocolStep.defineGates.applicationType);
+        ExpProtocolApplication app = run.getExperimentRun().addProtocolApplication(user, FlowProtocolStep.defineGates.getAction(run.getExperimentRun().getProtocol()), FlowProtocolStep.defineGates.applicationType, null);
         if (input != null)
         {
             app.addDataInput(user, input, inputRole.toString(), null);
