@@ -22,6 +22,7 @@ import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJobData;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.query.QueryAction;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
@@ -40,6 +41,7 @@ import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowTableType;
+import org.labkey.flow.script.FlowPipelineProvider;
 
 public class FlowOverview extends Overview
 {
@@ -144,7 +146,7 @@ public class FlowOverview extends Overview
         StringBuilder description = new StringBuilder("The pipeline root tells " + FlowModule.getLongProductName() + " where in the file system FCS files are permitted to be loaded from.");
         if (_canSetPipelineRoot)
         {
-            ActionURL urlPipelineRoot = new ActionURL("Pipeline", "setup", getContainer());
+            ActionURL urlPipelineRoot = PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer());
             if (_hasPipelineRoot)
             {
                 Action ret = new Action("Change pipeline root", urlPipelineRoot);
@@ -168,15 +170,15 @@ public class FlowOverview extends Overview
     private Action getBrowseForFCSFilesAction()
     {
         if (!_hasPipelineRoot || !_canInsert) return null;
-        ActionURL urlUploadFCSFiles = new ActionURL("Pipeline", "browse", getContainer());
+        ActionURL urlUploadFCSFiles = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), FlowPipelineProvider.NAME);
         return new Action(_fcsFileCount == 0 ? "Browse for FCS files to be loaded" : "Browse for more FCS files to be loaded", urlUploadFCSFiles);
     }
 
     private Action getUploadFlowJoAnalysisAction()
     {
-        ActionURL urlUploadFlowJoAnalysis = getContainer().urlFor(AnalysisScriptController.Action.showUploadWorkspace);
-        Action ret = new Action("Upload FlowJo Workspace", urlUploadFlowJoAnalysis);
-        ret.setExplanatoryHTML("You can also upload results that have been calculated in FlowJo");
+        ActionURL urlUploadFlowJoAnalysis = new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, getContainer());
+        Action ret = new Action("Import FlowJo Workspace Analysis", urlUploadFlowJoAnalysis);
+        ret.setExplanatoryHTML("You can also import statistics that have been calculated by FlowJo");
         return ret;
     }
 

@@ -22,6 +22,7 @@ import org.labkey.api.jsp.JspBase;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
@@ -118,7 +119,7 @@ public class SpringFlowController<A extends Enum> extends SpringActionController
         NavTree project;
         if (context.getContainer().getFolderType() instanceof FlowFolderType)
         {
-            project = new NavTree("Dashboard", new ActionURL("Project", "begin", context.getContainer()));
+            project = new NavTree("Dashboard", PageFlowUtil.urlProvider(ProjectUrls.class).urlStart(context.getContainer()));
         }
         else
         {

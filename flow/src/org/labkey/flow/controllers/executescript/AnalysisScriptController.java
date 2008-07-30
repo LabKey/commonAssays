@@ -18,6 +18,7 @@ package org.labkey.flow.controllers.executescript;
 
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -26,10 +27,8 @@ import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
-import org.labkey.api.pipeline.browse.DefaultBrowseView;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
@@ -52,10 +51,13 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
 import java.net.URI;
+import java.sql.SQLException;
 import java.util.*;
 
 public class AnalysisScriptController extends SpringFlowController<AnalysisScriptController.Action>
 {
+    static Logger _log = Logger.getLogger(SpringActionController.class);
+
     public enum Action
     {
         begin,
@@ -67,12 +69,6 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
         chooseRunsToAnalyze,
         chooseAnalysisName,
         analyzeSelectedRuns,
-
-        showUploadWorkspace,
-        chooseAnalysis,
-        uploadWorkspaceChooseAnalysis,
-        uploadWorkspaceBrowse,
-        browseForWorkspace,
     }
 
     static SpringActionController.DefaultActionResolver _actionResolver = new SpringActionController.DefaultActionResolver(AnalysisScriptController.class);
@@ -392,17 +388,117 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             return _analysisScript;
         }
     }
-    protected Class<Action> getActionClass()
+
+    public enum ImportAnalysisStep
     {
-        return Action.class;
+        INIT("Start"),
+        UPLOAD_WORKSPACE("Upload Workspace"),
+        ASSOCIATE_FCSFILES("Associate FCS Files"),
+        CHOOSE_ANALYSIS("Choose Analysis Folder"),
+        CONFIRM("Confirm");
+
+        String title;
+
+        ImportAnalysisStep(String title)
+        {
+            this.title = title;
+        }
+
+        public String getTitle()
+        {
+            return title;
+        }
+
+        public int getNumber()
+        {
+            return ordinal();
+        }
+
+        public static ImportAnalysisStep fromNumber(int number)
+        {
+            for (ImportAnalysisStep step : values())
+                if (step.ordinal() == number)
+                    return step;
+            return INIT;
+        }
     }
 
-    public abstract class BaseUploadWorkspaceAction extends FormViewAction<UploadWorkspaceResultsForm>
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class ImportAnalysisAction extends FormViewAction<ImportAnalysisForm>
     {
-        Pair<String, Action> nav;
-        ActionURL successURL;
+        String title;
+        PipeRoot root;
+        boolean foundRoot;
 
-        public void validateCommand(UploadWorkspaceResultsForm form, Errors errors)
+        public void validateCommand(ImportAnalysisForm form, Errors errors)
+        {
+            if (form.getWizardStep().getNumber() > ImportAnalysisStep.INIT.getNumber())
+            {
+                getWorkspace(form, errors);
+                if (errors.hasErrors())
+                    form.setWizardStep(ImportAnalysisStep.UPLOAD_WORKSPACE);
+            }
+        }
+
+        public ModelAndView getView(ImportAnalysisForm form, boolean reshow, BindException errors) throws Exception
+        {
+            return new JspView<ImportAnalysisForm>(AnalysisScriptController.class, "importAnalysis.jsp", form, errors);
+//            return new GroovyView<ImportAnalysisForm>("/org/labkey/flow/controllers/executescript/importAnalysis.jsp", form, errors);
+        }
+
+        public boolean handlePost(ImportAnalysisForm form, BindException errors) throws Exception
+        {
+            if (form.getWizardStep() == ImportAnalysisStep.INIT)
+            {
+                form.setWizardStep(ImportAnalysisStep.UPLOAD_WORKSPACE);
+            }
+            else
+            {
+                // wizard step is the last step shown to the user.
+                // Handle the post and setup the form for the next wizard step.
+                switch (form.getWizardStep())
+                {
+                    case UPLOAD_WORKSPACE:
+                        stepUploadWorkspace(form, errors);
+                        break;
+
+                    case ASSOCIATE_FCSFILES:
+                        stepAssociateFCSFiles(form, errors);
+                        break;
+
+                    case CHOOSE_ANALYSIS:
+                        stepChooseAnalysis(form, errors);
+                        break;
+
+                    case CONFIRM:
+                        stepConfirm(form, errors);
+                        break;
+                }
+            }
+
+            title = form.getWizardStep().getTitle();
+
+            return false;
+        }
+
+        private PipeRoot getPipeRoot()
+        {
+            if (foundRoot)
+                return root;
+            foundRoot = true;
+            try
+            {
+                root = PipelineService.get().findPipelineRoot(getContainer());
+            }
+            catch (SQLException e)
+            {
+                _log.error("resolving pipeline root", e);
+            }
+            return root;
+        }
+
+        // reads uploaded workspace.file or workspace.path from pipeline
+        private void getWorkspace(ImportAnalysisForm form, Errors errors)
         {
             WorkspaceData workspace = form.getWorkspace();
             Map<String, MultipartFile> files = getFileMap();
@@ -412,167 +508,182 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             workspace.validate(getContainer(), errors, getRequest());
         }
 
-        public ActionURL getSuccessURL(UploadWorkspaceResultsForm form)
+        private File getRunPathRoot(ImportAnalysisForm form, Errors errors) throws Exception
         {
-            return successURL;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return appendFlowNavTrail(root, null, nav.first, nav.second);
-        }
-
-        protected boolean uploadWorkspaceChooseAnalysis(UploadWorkspaceResultsForm form, BindException errors)
-        {
-            try
+            if (form.getRunFilePathRoot() != null)
             {
-                successURL = doUploadWorkspace(form, errors);
-                if (successURL != null)
-                    return true;
-            }
-            catch (Throwable t)
-            {
-                ExceptionUtil.logExceptionToMothership(getRequest(), t);
-                errors.reject(ERROR_MSG, t.toString());
-            }
-            return false;
-        }
-    }
+                PipeRoot root = getPipeRoot();
+                File runFilePathRoot = root.resolvePath(form.getRunFilePathRoot());
 
-    @RequiresPermission(ACL.PERM_UPDATE)
-    public class UploadWorkspaceChooseAnalysisAction extends BaseUploadWorkspaceAction
-    {
-        public ModelAndView getView(UploadWorkspaceResultsForm form, boolean reshow, BindException errors) throws Exception
-        {
-            nav = new Pair<String, Action>("Upload FlowJo Workspace Analysis Results", Action.uploadWorkspaceChooseAnalysis);
-            return new JspView<UploadWorkspaceResultsForm>(AnalysisScriptController.class, "uploadWorkspaceChooseAnalysis.jsp", form, errors);
-        }
-
-        public boolean handlePost(UploadWorkspaceResultsForm form, BindException errors) throws Exception
-        {
-            if (form.ff_confirm)
-                return uploadWorkspaceChooseAnalysis(form, errors);
-            return false;
-        }
-    }
-
-    @RequiresPermission(ACL.PERM_UPDATE)
-    public class ShowUploadWorkspaceAction extends BaseUploadWorkspaceAction
-    {
-        public ModelAndView getView(UploadWorkspaceResultsForm form, boolean reshow, BindException errors) throws Exception
-        {
-            nav = new Pair<String, Action>("Upload FlowJo Results", Action.showUploadWorkspace);
-            return new JspView<UploadWorkspaceResultsForm>(AnalysisScriptController.class, "showUploadWorkspace.jsp", form, errors);
-        }
-
-        public boolean handlePost(UploadWorkspaceResultsForm form, BindException errors) throws Exception
-        {
-            return uploadWorkspaceChooseAnalysis(form, errors);
-        }
-    }
-
-    protected ActionURL doUploadWorkspace(UploadWorkspaceResultsForm form, BindException errors) throws Exception
-    {
-        WorkspaceData workspaceData = form.getWorkspace();
-
-        String path = workspaceData.getPath();
-        File workspaceFile = null;
-        if (path != null)
-        {
-            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-            workspaceFile = root.resolvePath(path);
-        }
-        FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
-        File runFilePathRoot = null;
-        FlowExperiment experiment;
-        if (StringUtils.isEmpty(form.ff_newAnalysisName))
-        {
-            experiment = FlowExperiment.fromExperimentId(form.ff_existingAnalysisId);
-        }
-        else
-        {
-            experiment = FlowExperiment.createForName(getUser(), getContainer(), form.ff_newAnalysisName);
-        }
-        if (!experiment.getContainer().equals(getContainer()))
-        {
-            throw new IllegalArgumentException("Wrong container");
-        }
-
-        if (workspaceFile != null)
-        {
-            for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
-            {
-                File sampleFile = new File(workspaceFile.getParent(), sampleInfo.getLabel());
-                if (sampleFile.exists())
+                if (runFilePathRoot == null)
                 {
-                    runFilePathRoot = workspaceFile.getParentFile();
-                    break;
+                    errors.reject(ERROR_MSG, "The directory containing FCS files wasn't found.");
+                    return null;
+                }
+                if (!runFilePathRoot.isDirectory())
+                {
+                    errors.reject(ERROR_MSG, "The path specified must be a directory containing FCS files.");
+                    return null;
+                }
+                return runFilePathRoot;
+            }
+            return null;
+        }
+
+        private void stepUploadWorkspace(ImportAnalysisForm form, BindException errors) throws Exception
+        {
+            // guess the FCS files are in the same directory as the workspace
+            if (form.getRunFilePathRoot() == null)
+            {
+                PipeRoot root = null;
+                WorkspaceData workspaceData = form.getWorkspace();
+                String path = workspaceData.getPath();
+                File workspaceFile = null;
+                if (path != null)
+                {
+                    root = getPipeRoot();
+                    workspaceFile = root.resolvePath(path);
+                }
+
+                if (workspaceFile != null)
+                {
+                    FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
+                    File runFilePathRoot = null;
+                    for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
+                    {
+                        File sampleFile = new File(workspaceFile.getParent(), sampleInfo.getLabel());
+                        if (sampleFile.exists())
+                        {
+                            runFilePathRoot = workspaceFile.getParentFile();
+                            break;
+                        }
+                    }
+
+                    if (runFilePathRoot != null)
+                    {
+                        String relPath = root.relativePath(runFilePathRoot);
+                        if (relPath != null)
+                        {
+                            String[] parts = StringUtils.split(relPath, File.separatorChar);
+                            form.setRunFilePathRoot(StringUtils.join(parts, "/"));
+                        }
+                    }
                 }
             }
+            form.setWizardStep(ImportAnalysisStep.ASSOCIATE_FCSFILES);
+        }
+
+        private void stepAssociateFCSFiles(ImportAnalysisForm form, BindException errors) throws Exception
+        {
+            File runFilePathRoot = getRunPathRoot(form, errors);
+            if (errors.hasErrors())
+                return;
 
             if (runFilePathRoot != null)
             {
-                FlowRun[] existing = experiment.findRun(runFilePathRoot, null);
-                if (existing.length != 0)
+                boolean found = false;
+                WorkspaceData workspaceData = form.getWorkspace();
+                FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
+                for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
                 {
-                    errors.reject(ERROR_MSG, "This analysis folder already contains this path.");
-                    return null;
+                    File sampleFile = new File(runFilePathRoot, sampleInfo.getLabel());
+                    if (sampleFile.exists())
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    errors.reject(ERROR_MSG, "No samples from workspace found in selected directory");
+                    return;
                 }
             }
-        }
-        else
-        {
-            workspaceFile = new File(FlowSettings.getWorkingDirectory(), form.getWorkspace().getName());
+            form.setWizardStep(ImportAnalysisStep.CHOOSE_ANALYSIS);
         }
 
-        ViewBackgroundInfo info = getViewBackgroundInfo();
-        PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
-        if (pr == null)
+        private void stepChooseAnalysis(ImportAnalysisForm form, BindException errors) throws Exception
         {
-            // root-less pipeline job for workapce uploaded via the browser
-            assert path == null : "Shouldn't be able to upload workspace from pipeline without a pipeline root";
-            info.setUrlHelper(null);
+            FlowExperiment experiment;
+            if (StringUtils.isEmpty(form.getNewAnalysisName()))
+            {
+                experiment = FlowExperiment.fromExperimentId(form.getExistingAnalysisId());
+            }
+            else
+            {
+                experiment = FlowExperiment.getForName(getUser(), getContainer(), form.getNewAnalysisName());
+            }
+            if (experiment != null)
+            {
+                if (!experiment.getContainer().equals(getContainer()))
+                    throw new IllegalArgumentException("Wrong container");
+
+                File runFilePathRoot = getRunPathRoot(form, errors);
+                if (runFilePathRoot != null)
+                {
+                    FlowRun[] existing = experiment.findRun(runFilePathRoot, null);
+                    if (existing.length != 0)
+                    {
+                        errors.reject(ERROR_MSG, "This analysis folder already contains this path.");
+                        return;
+                    }
+                }
+            }
+            form.setWizardStep(ImportAnalysisStep.CONFIRM);
         }
 
-        WorkspaceJob job = new WorkspaceJob(info, workspaceData, experiment, workspaceFile, runFilePathRoot);
-        return executeScript(job);
-    }
-
-    @RequiresPermission(ACL.PERM_UPDATE)
-    public class BrowseForWorkspaceAction extends SimpleViewAction<BrowsePipelineForm>
-    {
-        public ModelAndView getView(BrowsePipelineForm form, BindException errors) throws Exception
+        private void stepConfirm(ImportAnalysisForm form, BindException errors) throws Exception
         {
-            return new DefaultBrowseView<BrowsePipelineForm>(form);
+            PipeRoot root = null;
+            WorkspaceData workspaceData = form.getWorkspace();
+            String path = workspaceData.getPath();
+            File workspaceFile;
+            if (path != null)
+            {
+                root = getPipeRoot();
+                workspaceFile = root.resolvePath(path);
+            }
+            else
+            {
+                workspaceFile = new File(FlowSettings.getWorkingDirectory(), form.getWorkspace().getName());
+            }
+
+            FlowExperiment experiment;
+            if (StringUtils.isEmpty(form.getNewAnalysisName()))
+            {
+                experiment = FlowExperiment.fromExperimentId(form.getExistingAnalysisId());
+            }
+            else
+            {
+                experiment = FlowExperiment.createForName(getUser(), getContainer(), form.getNewAnalysisName());
+            }
+            if (!experiment.getContainer().equals(getContainer()))
+                throw new IllegalArgumentException("Wrong container");
+
+            File runFilePathRoot = getRunPathRoot(form, errors);
+            ViewBackgroundInfo info = getViewBackgroundInfo();
+            if (root == null)
+            {
+                // root-less pipeline job for workapce uploaded via the browser
+                info.setUrlHelper(null);
+            }
+
+            WorkspaceJob job = new WorkspaceJob(info, workspaceData, experiment, workspaceFile, runFilePathRoot);
+            HttpView.throwRedirect(executeScript(job));
+        }
+
+        public ActionURL getSuccessURL(ImportAnalysisForm form)
+        {
+            return null;
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Browse for Workspace");
-        }
-    }
-
-    @RequiresPermission(ACL.PERM_UPDATE)
-    public class UploadWorkspaceBrowseAction extends BrowseForWorkspaceAction
-    {
-        public ModelAndView getView(BrowsePipelineForm form, BindException errors) throws Exception
-        {
-            String[] files = form.getFile();
-            if (files.length == 0)
-            {
-                errors.reject(ERROR_MSG, "You must select at least one file.");
-                return super.getView(form, errors);
-            }
-            WorkspaceData wsData = new WorkspaceData();
-            wsData.setPath(files[0]);
-            wsData.validate(getContainer(), errors, getRequest());
-            if (errors.hasErrors())
-            {
-                return super.getView(form, errors);
-            }
-            ActionURL url = getContainer().urlFor(Action.uploadWorkspaceChooseAnalysis);
-            url.addParameter("workspace.path", files[0]);
-            return HttpView.redirect(url);
+            String display = "Import Analysis";
+            if (title != null)
+                display += ": " + title;
+            return root.addChild(display);
         }
     }
 

@@ -50,6 +50,11 @@ public class ChooseRunsRegion extends DataRegion
         renderHiddenFormFields(out, mode);
     }
 
+    protected String getNoRowsMessage()
+    {
+        return "No runs available.  Please import some FCS files or import a FlowJo workspace associated with FCS files.";
+    }
+
     protected boolean isRecordSelectorEnabled(RenderContext ctx)
     {
         return getDisabledReason(ctx) == null;
