@@ -31,7 +31,6 @@
 <%
     JspView<NabController.UploadAssayForm> me = (JspView<NabController.UploadAssayForm>) HttpView.currentView();
     org.labkey.nab.NabController.UploadAssayForm form = me.getModelBean();
-    String headerTDStyle = "text-align:left;background-color:#EEEEEE;border-top:solid 1px";
     String dataTDStyle = "padding-left:20px";
     PlateTemplate activeTemplate = me.getModelBean().getActivePlateTemplate(me.getViewContext().getContainer(), me.getViewContext().getUser());
     PlateTemplate[] templates = me.getModelBean().getPlateTemplates(me.getViewContext().getContainer(), me.getViewContext().getUser());
@@ -92,8 +91,8 @@
 <form method="post" onSubmit="return copyImpliedValues()" action="upload.view" enctype="multipart/form-data">
 
 <table>
-    <tr>
-        <th style="<%= headerTDStyle %>">Plate Data</th>
+    <tr class="labkey-wp-header">
+        <th>Plate Data</th>
     </tr>
     <tr>
         <td>
@@ -122,8 +121,8 @@
             </table>
         </td>
     </tr>
-    <tr>
-        <th style="<%= headerTDStyle %>">Sample Properties</th>
+    <tr class="labkey-wp-header">
+        <th>Sample Properties</th>
     </tr>
     <tr>
         <td style="<%= dataTDStyle %>">
@@ -227,8 +226,8 @@
             </table>
         </td>
     </tr>
-    <tr>
-        <th style="<%= headerTDStyle %>">Experiment/Virus Properties</th>
+    <tr class="labkey-wp-header">
+        <th>Experiment/Virus Properties</th>
     </tr>
     <tr>
         <td style="<%= dataTDStyle %>">

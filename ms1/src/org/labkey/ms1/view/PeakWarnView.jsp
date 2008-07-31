@@ -22,7 +22,7 @@
     JspView me = (JspView)HttpView.currentView();
     ActionURL urlPipeline = new ActionURL("Pipeline", "begin", me.getViewContext().getContainer());
 %>
-<table class="labkey-peak-warning">
+<table class="labkey-peak-warning" width="100%">
     <tr>
         <td>
             <b>Warning:</b> Peak data for these features are still loading, or may have failed to load.

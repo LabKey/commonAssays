@@ -52,7 +52,7 @@
     <table>
         <tr>
             <td>
-                <table class="labkey-ms1-search">
+                <table class="labkey-form">
                     <tr>
                         <td>m/z</td>
                         <td>=</td>

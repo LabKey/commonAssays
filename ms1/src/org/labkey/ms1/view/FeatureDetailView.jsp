@@ -185,7 +185,7 @@
 <script type="text/javascript" src="<%=contextPath%>/slider/rangeslider.js"></script>
 
 <!-- Main View Layout Table -->
-<table class="labkey-feature-detail">
+<table class="labkey-form">
     <tr>
         <!-- Previous/Next Feature buttons -->
         <td align="left">
@@ -214,7 +214,7 @@
     <tr>
         <td valign="top">
             <!-- feature data -->
-            <table class="labkey-feature-data">
+            <table class="labkey-form">
                 <tr>
                     <td class="labkey-feature-caption">Scan</td>
                     <td><%=feature.getScan()%></td>
@@ -384,7 +384,7 @@
 
             <!-- m/z filter UI -->
 
-            <table class="labkey-mz-filter">
+            <table class="labkey-form">
                 <tr>
                     <td colspan="3" style="text-align:center;font-weight:bold">Show Peaks within:</td>
                 </tr>
@@ -454,7 +454,7 @@
 
             <!-- Scan Filter UI -->
 
-            <table class="labkey-scan-filter">
+            <table class="labkey-form">
                 <tr>
                     <td style="text-align:center"><span style="font-weight:bold">Show Peaks in Scans Within:</span></td>
                 </tr>

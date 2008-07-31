@@ -156,7 +156,7 @@ public abstract class AbstractProteinDataRegion extends DataRegion
         out.write("<tr");
         if (isShadeAlternatingRows() && rowIndex % 2 == 0)
         {
-            out.write(" bgcolor=\"#EEEEEE\"");
+            out.write(" class=\"labkey-alternate-row\"");
         }
         if (!_expanded)
         {

@@ -39,7 +39,6 @@
     Luc5Assay assay = bean.getAssay();
     ViewContext context = me.getViewContext();
     boolean writer = context.getContainer().hasPermission(context.getUser(), ACL.PERM_INSERT);
-    String headerTDStyle = "text-align:left;background-color:#EEEEEE;border-top:solid 1px";
 
     String errs = PageFlowUtil.getStrutsError(request, "main");
     if (null != StringUtils.trimToNull(errs))
@@ -62,8 +61,8 @@
     {
 %>
 <table>
-    <tr>
-        <th style="<%= headerTDStyle %>">Warnings</th>
+    <tr class="labkey-wp-header">
+        <th>Warnings</th>
     </tr>
     <tr>
         <td class="labkey-form-label">
@@ -78,8 +77,8 @@
 
 <input type="hidden" name="rowId" value="<%= assay.getRunRowId() %>">
 <table>
-<tr>
-    <th style="<%= headerTDStyle %>">Run Summary: <%= h(assay.getName()) %></th>
+<tr class="labkey-wp-header">
+    <th>Run Summary: <%= h(assay.getName()) %></th>
 </tr>
     <tr>
         <td>
@@ -127,7 +126,7 @@
                             boolean curveBased = (pass == 0);
                     %>
                                 <td>
-                                <table class="labkey-nab-run labkey-nab-run-label">
+                                <table class="labkey-form labkey-nab-run-label">
                                     <tr>
                                         <th align="center" colspan=<%= assay.getCutoffs().length + 1%>>Cutoff Dilutions<br>(<%= curveBased ? "Curve Based" : "Point Based" %>)</th>
                                     </tr>
@@ -189,7 +188,7 @@
                             %>
                             </tr>
                         </table><br>
-                        <table class="labkey-nab-run" width="100%">
+                        <table class="labkey-form">
                             <tr>
                                 <td style="<%= labelStyle %>">Sample Id</td>
                                 <td style="<%= labelStyle %>">Description</td>
@@ -208,7 +207,7 @@
                             %>
                         </table><br>
 
-                        <table class="labkey-nab-run">
+                        <table class="labkey-form">
                             <tr>
                                 <td style="<%= labelStyle %>">Sample Id</td>
                                 <td style="<%= labelStyle %>">Initial Dil.</td>
@@ -268,8 +267,8 @@
             </table>
         </td>
     </tr>
-    <tr>
-        <th style="<%= headerTDStyle %>">Sample Information</th>
+    <tr class="labkey-wp-header">
+        <th>Sample Information</th>
     </tr>
     <tr>
         <td>
@@ -320,8 +319,8 @@
             </table>
         </td>
     </tr>
-    <tr>
-        <th style="<%= headerTDStyle %>">Plate Data</th>
+    <tr class="labkey-wp-header">
+        <th>Plate Data</th>
     </tr>
     <tr>
         <td>
@@ -372,7 +371,7 @@
     {
 %>
     <tr>
-        <th style="<%= headerTDStyle %>">Discussions</th>
+        <th class="labkey-nab-run-header">Discussions</th>
     </tr>
     <tr>
         <td>

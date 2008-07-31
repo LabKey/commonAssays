@@ -129,7 +129,7 @@ public class Protein
     }
 
 
-    static final String startTag = "<font color=\"#00CE18\"><u>";
+    static final String startTag = "<font class=\"labkey-message\"><u>";
     static final String endTag = "</u></font>";
 
     public StringBuffer getFormattedSequence()

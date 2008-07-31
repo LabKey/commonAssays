@@ -59,7 +59,7 @@ public class FlowQueryView extends QueryView
     {
         super(schema, settings);
         setShadeAlternatingRows(true);
-        setShowColumnSeparators(true);
+        setShowBorders(true);
         setViewItemFilter(new ReportService.ItemFilter() {
             public boolean accept(String type, String label)
             {

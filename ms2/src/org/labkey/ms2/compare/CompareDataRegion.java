@@ -46,7 +46,7 @@ public class CompareDataRegion extends DataRegion
         _columnHeader = columnHeader;
         setName(MS2Manager.getDataRegionNameCompare());
         setShadeAlternatingRows(true);
-        setShowColumnSeparators(true);
+        setShowBorders(true);
         setShowPagination(false);
     }
     
@@ -85,7 +85,7 @@ public class CompareDataRegion extends DataRegion
         {
             if (shade)
             {
-                renderers.get(columnIndex).setBackgroundColor("#EEEEEE");
+                renderers.get(columnIndex).setDisplayClass("labkey-alternate-row");
             }
             shade = !shade;
             columnIndex++;
@@ -94,8 +94,7 @@ public class CompareDataRegion extends DataRegion
         {
             out.write("<td colspan=\"");
             out.write(Integer.toString(_offset));
-            out.write("\" style=\"text-align: center; vertical-align: bottom; border-bottom: 1px solid rgb(170, 170, 170);");
-            out.write("border-right: 1px solid rgb(170, 170, 170);");
+            out.write("\" style=\"text-align: center; vertical-align: bottom;\" class=\"labkey-header-cell\"");
             out.write("\">");
             out.write(_columnHeader);
             out.write("</td>");
@@ -103,13 +102,13 @@ public class CompareDataRegion extends DataRegion
 
         for (String caption : _multiColumnCaptions)
         {
-            out.write("<td align=\"center\" colspan=\"" + _colSpan + "\" style=\"" + COLUMN_SEPARATOR_STYLE_ARRIBS + "; border-bottom: 1px solid rgb(170, 170, 170);\"");
+            out.write("<td align=\"center\" colspan=\"" + _colSpan + "\" class=\"labkey-header-cell\"");
             if (shade)
             {
-                out.write(" bgcolor=\"#EEEEEE\"");
+                out.write(" class=\"labkey-alternate-row\"");
                 for (int i = 0; i < _colSpan; i++)
                 {
-                    renderers.get(columnIndex++).setBackgroundColor("#EEEEEE");
+                    renderers.get(columnIndex++).setDisplayClass("labkey-alternate-row");
                 }
             }
             else
@@ -124,7 +123,7 @@ public class CompareDataRegion extends DataRegion
         {
             out.write("<td colspan=\"");
             out.write(Integer.toString(renderers.size() - _colSpan * _multiColumnCaptions.size() + _offset));
-            out.write("\" style=\"border-right: 1px solid rgb(170, 170, 170); border-bottom: 1px solid rgb(170, 170, 170)\">&nbsp;</td>");
+            out.write("\">&nbsp;</td>");
         }
         out.write("</tr>\n");
 

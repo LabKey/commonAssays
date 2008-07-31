@@ -26,7 +26,7 @@
 %>
 <table>
     <% for(Software sware : swares) {%>
-    <tr bgcolor="#EEEEEE">
+    <tr class="labkey-alternate-row">
         <td><b><%=PageFlowUtil.filter(sware.getName())%></b>
         <%
         String version = sware.getVersion();

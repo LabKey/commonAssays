@@ -30,7 +30,7 @@
 
 %>
 <% if(null != dataFile && null != expData) { %>
-<table class="labkey-file-detail">
+<table class="labkey-form">
     <tr>
         <td>Data File:</td>
         <% urlDownload.addParameter("rowId", expData.getRowId()); %>
