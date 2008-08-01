@@ -15,7 +15,6 @@
  */
 package org.labkey.ms2.pipeline.mascot;
 
-import org.apache.commons.io.FileUtils;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
@@ -36,6 +35,7 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
 
     private static final FileType FT_MASCOT_DAT = new FileType(".dat");
     private static final FileType FT_MASCOT_MGF = new FileType(".mgf");
+    private static final String ACTION_NAME = "Mascot Search";
 
     public static File getNativeSpectraFile(File dirAnalysis, String baseName)
     {
@@ -113,11 +113,13 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
                 return false;
 
             // Either raw converted pepXML from DAT, or completely analyzed pepXML
-            if (!NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) &&
-                    !NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName)))
-                return false;
+            return NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) ||
+                   NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName));
+        }
 
-            return true;
+        public List<String> getProtocolActionNames()
+        {
+            return Collections.singletonList(ACTION_NAME);
         }
     }
 
@@ -131,7 +133,7 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
         return getJob().getJobSupport(JobSupport.class);
     }
 
-    public List<PipelineAction> run() throws PipelineJobException
+    public List<RecordedAction> run() throws PipelineJobException
     {
         try
         {
@@ -140,7 +142,8 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
             WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
             WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
 
-            File fileWorkSpectra = wd.newFile(getJobSupport().getSearchSpectraFile().getName());
+            RecordedAction action = new RecordedAction(ACTION_NAME);
+
             File fileWorkMGF = wd.newFile(FT_MASCOT_MGF);
             File fileWorkDAT = wd.newFile(FT_MASCOT_DAT);
             File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(wd.getDir(),
@@ -169,7 +172,7 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
             /*
             0. pre-Mascot search: c) translate the mzXML file to mgf for Mascot (msxml2other)
             */
-            FileUtils.copyFile(getJobSupport().getSearchSpectraFile(), fileWorkSpectra);
+            File fileWorkSpectra = wd.inputFile(getJobSupport().getSearchSpectraFile(), false);
             ArrayList<String> argsM2S = new ArrayList<String>();
             String ver = getJob().getParameters().get("pipeline, tpp version");
             argsM2S.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", ver));
@@ -331,9 +334,9 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
             try
             {
                 lock = wd.ensureCopyingLock();
-                wd.outputFile(fileWorkPepXMLRaw);
-                wd.outputFile(fileWorkDAT);
-                wd.outputFile(fileWorkMGF);
+                action.addOutput(wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
+                action.addOutput(wd.outputFile(fileWorkDAT), "DAT", false);
+                action.addOutput(wd.outputFile(fileWorkMGF), "RawPepXML", false);
             }
             finally
             {
@@ -345,8 +348,11 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
             wd.discardFile(fileWorkInputXML);
             wd.remove();
 
-            PipelineAction action = new PipelineAction(_factory.getId());
-            action.addAll(wd);
+            for (File file : getJobSupport().getSequenceFiles())
+            {
+                action.addInput(file, "FASTA");
+            }
+            action.addInput(getJobSupport().getSearchSpectraFile(), "mzXML");
             return Collections.singletonList(action);
         }
         catch (IOException e)

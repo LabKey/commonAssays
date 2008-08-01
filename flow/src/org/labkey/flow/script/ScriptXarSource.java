@@ -22,6 +22,7 @@ import org.labkey.api.exp.ExperimentException;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJob;
 import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlException;
 
@@ -38,8 +39,9 @@ public class ScriptXarSource extends XarSource
     File _logFile;
     ExperimentArchiveDocument _doc;
 
-    public ScriptXarSource(ExperimentArchiveDocument doc, File root, File workingDirectory) throws Exception
+    public ScriptXarSource(ExperimentArchiveDocument doc, File root, File workingDirectory, PipelineJob job) throws Exception
     {
+        super(job);
         _root = root;
         _doc = doc;
         _workingDirectory = workingDirectory;
@@ -69,7 +71,7 @@ public class ScriptXarSource extends XarSource
         return _root;
     }
 
-    public boolean isUnderPipelineRoot(PipeRoot pr, Container container, File file) throws Exception
+    public boolean allowImport(PipeRoot pr, Container container, File file)
     {
         return true;
     }
@@ -87,9 +89,5 @@ public class ScriptXarSource extends XarSource
     public File getLogFile() throws IOException
     {
         return _logFile;
-    }
-
-    public void init() throws IOException, ExperimentException
-    {
     }
 }

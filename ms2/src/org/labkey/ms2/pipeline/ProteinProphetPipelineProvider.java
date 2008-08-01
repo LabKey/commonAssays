@@ -20,6 +20,7 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.util.FileType;
+import org.labkey.ms2.MS2Controller;
 
 import java.io.File;
 import java.util.List;
@@ -44,7 +45,7 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
             if (!entry.isDirectory())
                 continue;
 
-            addFileActions("MS2", "importProteinProphet", "Import ProteinProphet",
+            addFileActions(MS2Controller.ImportProteinProphetAction.class, "Import ProteinProphet",
                     entry, entry.listFiles(new ProteinProphetFilenameFilter()));
         }
     }

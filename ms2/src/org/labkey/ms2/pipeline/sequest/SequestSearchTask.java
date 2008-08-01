@@ -41,6 +41,7 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
     private static final FileType FT_RAW_XML = new FileType("_raw.pep.xml");
     private static final FileType FT_SPECTRA_ARCHIVE = new FileType(".pep.tgz");
 
+    private static final String ACTION_NAME = "Sequest Search";
 
     public static File getNativeOutputFile(File dirAnalysis, String baseName)
     {
@@ -83,6 +84,12 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
 
             return true;
         }
+
+
+        public List<String> getProtocolActionNames()
+        {
+            return Collections.singletonList(ACTION_NAME);
+        }
     }
 
     protected SequestSearchTask(Factory factory, PipelineJob job)
@@ -95,7 +102,7 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
         return getJob().getJobSupport(JobSupport.class);
     }
 
-    public List<PipelineAction> run() throws PipelineJobException
+    public List<RecordedAction> run() throws PipelineJobException
     {
         try
         {
@@ -106,6 +113,8 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
 
             WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
             WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
+
+            RecordedAction action = new RecordedAction(ACTION_NAME);
 
             File fileParamsLocal = new File(getJobSupport().getAnalysisDirectory(), SEQUEST_PARAMS);
             File fileWorkParamsLocal = wd.newFile(SEQUEST_PARAMS);
@@ -122,7 +131,7 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
             writeSequestV2ParamFile(fileWorkParamsRemote, params);
 
             File dirOutputDta = new File(wd.getDir(), getJobSupport().getBaseName());
-            File fileTgz = wd.newFile(FT_SPECTRA_ARCHIVE);
+            File fileWorkTgz = wd.newFile(FT_SPECTRA_ARCHIVE);
             File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(wd.getDir(),
                     getJobSupport().getBaseName());
 
@@ -150,7 +159,6 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
             out2XmlParams.getParam("-E").setValue(enzyme);
             inputXmlParams.addAll(convertParams(out2XmlParams.getParams(), params));
 
-
             /*
             1. perform Sequest search
             */
@@ -169,7 +177,7 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
             // TODO: This limits SequestSearchTask to running only on LabKey Server
             String exePath = PipelineJobService.get().getExecutablePath("bsdtar.exe", null, null);
             getJob().runSubProcess(new ProcessBuilder(exePath,
-                    "czf", fileTgz.getAbsolutePath(), "*"), dirOutputDta);
+                    "czf", fileWorkTgz.getAbsolutePath(), "*"), dirOutputDta);
 
             if (!FileUtil.deleteDir(dirOutputDta))
                 throw new IOException("Failed to delete DTA directory " + dirOutputDta.getAbsolutePath());
@@ -179,8 +187,8 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
             try
             {
                 lock = wd.ensureCopyingLock();
-                wd.outputFile(fileTgz);
-                wd.outputFile(fileWorkPepXMLRaw);
+                action.addOutput(wd.outputFile(fileWorkTgz), "TGZ", false);
+                action.addOutput(wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
             }
             finally
             {
@@ -191,8 +199,12 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
             wd.discardFile(fileWorkParamsRemote);
             wd.remove();
 
-            PipelineAction action = new PipelineAction(_factory.getId());
-            action.addAll(wd);
+            for (File file : getJobSupport().getSequenceFiles())
+            {
+                action.addInput(file, "FASTA");
+            }
+            action.addInput(getJobSupport().getSearchSpectraFile(), "mzXML");
+            
             return Collections.singletonList(action);
         }
         catch(IOException e)

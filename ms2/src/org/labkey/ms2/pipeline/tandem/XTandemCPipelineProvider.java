@@ -112,7 +112,7 @@ public class XTandemCPipelineProvider extends AbstractMS2SearchPipelineProvider
                 continue;
             }
 
-            addAction("ms2-pipeline", "searchXTandem", "X!Tandem Peptide Search",
+            addAction(PipelineController.SearchXTandemAction.class, "X!Tandem Peptide Search",
                     entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter(pr.isPerlPipeline())));
         }
     }

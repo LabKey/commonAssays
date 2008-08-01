@@ -504,8 +504,8 @@ abstract public class ScriptJob extends FlowJob
             addStatus("Inserting records into database");
             try
             {
-                ScriptXarSource source = new ScriptXarSource(xardoc, root, workingDirectory);
-                ExperimentService.get().loadXar(source, this, true);
+                ScriptXarSource source = new ScriptXarSource(xardoc, root, workingDirectory, this);
+                ExperimentService.get().importXar(source, this, true);
                 FlowManager.get().updateFlowObjectCols(getContainer());
             }
             catch (Throwable t)

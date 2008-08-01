@@ -54,7 +54,7 @@ public class MicroarrayPipelineProvider extends PipelineProvider
             {
                 File[] files = entry.listFiles(ArrayPipelineManager.getImageFileFilter());
                 if (files != null)
-                    addAction("Microarray", "importImageFiles", "Import Images",
+                    addAction(MicroarrayController.ImportImageFilesAction.class, "Import Images",
                             entry, files);
                 
                 files = entry.listFiles(ArrayPipelineManager.getMageFileFilter());

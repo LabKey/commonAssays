@@ -84,7 +84,7 @@ public class XTandemSearchTask extends PipelineJob.Task<XTandemSearchTask.Factor
 
         }
 
-        public List<String> getActionNames()
+        public List<String> getProtocolActionNames()
         {
             return Arrays.asList(X_TANDEM_ACTION_NAME, TANDEM2_XML_ACTION_NAME);
         }
@@ -100,7 +100,7 @@ public class XTandemSearchTask extends PipelineJob.Task<XTandemSearchTask.Factor
         return getJob().getJobSupport(JobSupport.class);
     }
 
-    public List<PipelineAction> run() throws PipelineJobException
+    public List<RecordedAction> run() throws PipelineJobException
     {
         try
         {
@@ -159,19 +159,20 @@ public class XTandemSearchTask extends PipelineJob.Task<XTandemSearchTask.Factor
             }
             
             wd.remove();
-            PipelineAction action1 = new PipelineAction(X_TANDEM_ACTION_NAME);
-            action1.addParameter(PipelineAction.COMMAND_LINE_PARAM, StringUtils.join(xTandemPB.command(), ' '));
-            action1.addInput(fileDataSpectra);
+            RecordedAction action1 = new RecordedAction(X_TANDEM_ACTION_NAME);
+            action1.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(xTandemPB.command(), ' '));
+            action1.addInput(fileDataSpectra, "mzXML");
+            action1.addInput(getJobSupport().getParametersFile(), "SearchConfig");
             for (File sequenceFile : getJobSupport().getSequenceFiles())
             {
-                action1.addInput(sequenceFile.toURI());
+                action1.addInput(sequenceFile, "FASTA");
             }
-            action1.addOutput(fileOutputXML.toURI(), false);
+            action1.addOutput(fileOutputXML, "TandemXML", false);
 
-            PipelineAction action2 = new PipelineAction(TANDEM2_XML_ACTION_NAME);
-            action2.addParameter(PipelineAction.COMMAND_LINE_PARAM, StringUtils.join(tandem2XmlPB.command(), ' '));
-            action2.addInput(fileOutputXML.toURI());
-            action2.addOutput(filePepXMLRaw.toURI(), true);
+            RecordedAction action2 = new RecordedAction(TANDEM2_XML_ACTION_NAME);
+            action2.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(tandem2XmlPB.command(), ' '));
+            action2.addInput(fileOutputXML, "TandemXML");
+            action2.addOutput(filePepXMLRaw, "RawPepXML", true);
 
             return Arrays.asList(action1, action2);
         }

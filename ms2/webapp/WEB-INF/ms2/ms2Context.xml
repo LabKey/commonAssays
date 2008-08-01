@@ -9,18 +9,20 @@
                 <!-- X! Tandem search pipeline -->
                 <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.tandem.XTandemPipelineJob"/>
+                    <property name="protocolObjectId" value="MS2.XTandemSearch" />
+                    <property name="protocolName" value="X!Tandem analysis" />
                     <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
                             <ref bean="mzxmlConverter"/>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemSearchTask</value>
                             <ref bean="tppTask"/>
-                            <!--<ref bean="expGenerator"/>-->
                             <ref bean="expGeneratorSearch"/>
                             <ref bean="expImportSearch"/>
                             <ref bean="tppTaskJoin"/>
                             <ref bean="expGeneratorSearchJoin"/>
                             <ref bean="expImportSearchJoin"/>
+                            <!--<ref bean="expGenerator"/>-->
                         </list>
                     </property>
                 </bean>
@@ -28,6 +30,8 @@
                 <!-- Mascot search pipelines -->
                 <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.mascot.MascotPipelineJob"/>
+                    <property name="protocolObjectId" value="MS2.MascotSearch" />
+                    <property name="protocolName" value="Mascot analysis" />
                     <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
@@ -46,6 +50,8 @@
                 <!-- Sequest search pipelines -->
                 <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.sequest.SequestPipelineJob"/>
+                    <property name="protocolObjectId" value="MS2.SequestSearch" />
+                    <property name="protocolName" value="Sequest analysis" />
                     <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
@@ -154,9 +160,20 @@
     <bean id="readwMzxmlConverter" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
         <constructor-arg value="readwMzxmlConverter"/>
         <property name="statusName" value="MZXML CONVERSION"/>
-        <property name="inputExtension" value=".RAW"/>
+        <property name="groupParameterName" value="readw" />
+        <property name="protocolActionName" value="ReAdW mzXML Conversion" />
         <property name="outputExtension" value=".mzXML"/>
         <property name="switchFormat" ref="unixNewSwitch"/>
+        <property name="inputPaths">
+            <map>
+                <entry key="input">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg value=".RAW"/>
+                        <property name="role" value="mzXML" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
         <property name="converters">
             <list>
                 <bean class="org.labkey.api.pipeline.cmd.RequiredInLine">

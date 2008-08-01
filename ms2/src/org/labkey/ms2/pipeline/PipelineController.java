@@ -20,7 +20,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.struts.upload.FormFile;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.labkey.api.data.*;
-import org.labkey.api.exp.ExperimentPipelineJob;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.jsp.JspLoader;
@@ -186,8 +185,7 @@ public class PipelineController extends SpringActionController
                 {
                     if (AbstractMS2SearchProtocol.FT_SEARCH_XAR.isType(file))
                     {
-                        ExperimentPipelineJob job = new ExperimentPipelineJob(info, file, description, false);
-                        PipelineService.get().queueJob(job);
+                        ExperimentService.get().importXarAsync(info, file, description);
                     }
                     else if (TPPTask.isPepXMLFile(file))
                     {
@@ -1243,8 +1241,7 @@ public class PipelineController extends SpringActionController
                 }
 
                 String dataDescription = AbstractFileAnalysisJob.getDataDescription(form.getDirData(), baseName, protocol.getName());
-                ExperimentPipelineJob job = new ExperimentPipelineJob(getViewBackgroundInfo(), fileInstance, dataDescription, false);
-                PipelineService.get().queueJob(job);
+                ExperimentService.get().importXarAsync(getViewBackgroundInfo(), fileInstance, dataDescription);
             }
 
             return true;

@@ -16,12 +16,13 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.AbstractTaskFactory;
+import org.labkey.api.pipeline.AbstractTaskFactorySettings;
 import org.labkey.api.util.FileType;
 
 /**
  * <code>AbstractMS2SearchTaskFactory</code>
  */
-abstract public class AbstractMS2SearchTaskFactory extends AbstractTaskFactory
+abstract public class AbstractMS2SearchTaskFactory extends AbstractTaskFactory<AbstractTaskFactorySettings>
 {
     protected AbstractMS2SearchTaskFactory(Class namespaceClass)
     {

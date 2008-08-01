@@ -114,7 +114,7 @@ public class FlowProtocolStep implements Serializable
         FlowProtocol ret = getForContainer(container);
         if (ret != null)
             return ret;
-        ExpProtocol protocol = ExperimentService.get().createExpProtocol(container, getName(), applicationType);
+        ExpProtocol protocol = ExperimentService.get().createExpProtocol(container, applicationType, getName());
         protocol.setDescription(description);
         protocol.save(user);
         return new FlowProtocol(protocol);

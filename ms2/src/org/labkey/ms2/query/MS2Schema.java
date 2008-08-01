@@ -439,8 +439,7 @@ public class MS2Schema extends UserSchema
                 "\nFROM " + MS2Manager.getTableInfoRuns() + " ms2Runs " +
                 "\nWHERE ms2Runs.ExperimentRunLSID = " + ExprColumn.STR_TABLE_ALIAS + ".LSID AND ms2Runs.Deleted = ?)");
         sql.add(Boolean.FALSE);
-        ColumnInfo ms2DetailsColumn = new ExprColumn(result, alias, sql, Types.INTEGER);
-        ms2DetailsColumn.setName("MS2Details");
+        ColumnInfo ms2DetailsColumn = new ExprColumn(result, "MS2Details", sql, Types.INTEGER);
         ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
         ms2DetailsColumn.setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {

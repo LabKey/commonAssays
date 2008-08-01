@@ -9,6 +9,8 @@
                 <bean class="org.labkey.api.pipeline.file.FileAnalysisTaskPipelineSettings">
                     <constructor-arg value="ms1FeaturePipeline"/>
                     <property name="description" value="msInspect Find Features"/>
+                    <property name="protocolObjectId" value="MS1.msInspectFeatureFindingAnalysis" />
+                    <property name="protocolName" value="msInspect Feature Finding Analysis" />
                     <property name="protocolFactoryName" value="inspect"/>
                     <property name="sharedOutputExts">
                         <list>
@@ -35,9 +37,11 @@
                 <bean class="org.labkey.api.pipeline.file.FileAnalysisTaskPipelineSettings">
                     <constructor-arg value="ms1FeaturePeptidePipeline"/>
                     <property name="description" value="msInspect Find Features and Match Peptides"/>
+                    <property name="protocolObjectId" value="MS1.msInspectFeaturePeptideMatchingAnalysis" />
+                    <property name="protocolName" value="msInspect Feature Peptide Matching Analysis" />
                     <property name="protocolFactoryName" value="pepmatch"/>
                     <property name="initialInputExt" value=".pep.xml"/>
-                    <property name="fileExtHeirarchy">
+                    <property name="fileExtHierarchy">
                         <map>
                             <entry key=".mzXML">
                                 <list><value>.pep.xml</value></list>
@@ -105,6 +109,8 @@
     <bean id="peakabooFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
         <constructor-arg value="peakabooFactory"/>
         <property name="statusName" value="PEAK EXTRACTION"/>
+        <property name="groupParameterName" value="peakaboo" />
+        <property name="protocolActionName" value="Peakaboo" />
         <property name="inputExtension" value=".mzXML"/>
         <property name="outputExtension" value=".peaks.xml"/>
         <property name="switchFormat" ref="unixMixedSwitch"/>
@@ -162,7 +168,9 @@
 
     <bean id="msInspectFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
         <constructor-arg value="msInspectFactory"/>
-        <property name="statusName" value="FIND PEPTIDES"/>
+        <property name="statusName" value="FIND FEATURES"/>
+        <property name="groupParameterName" value="msinspect" />
+        <property name="protocolActionName" value="msInspect Find Features" />
         <property name="inputExtension" value=".mzXML"/>
         <property name="outputExtension" value=".peptides.tsv"/>
         <property name="outputPaths">
@@ -271,13 +279,16 @@
     <bean id="pepMatchFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
         <constructor-arg value="pepMatchFactory"/>
         <property name="statusName" value="MATCH PEPTIDES"/>
+        <property name="groupParameterName" value="ms1 pepmatch" />
+        <property name="protocolActionName" value="MS1-MS2 Peptide Matching" />
         <property name="removeInput" value="true"/>
         <property name="inputExtension" value=".peptides.tsv"/>
         <property name="inputPaths">
             <map>
-                <entry key="input-peptides">
+                <entry key="input">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
                         <constructor-arg value=".pep.xml"/>
+                        <property name="role" value="pepXML" />
                     </bean>
                 </entry>
             </map>

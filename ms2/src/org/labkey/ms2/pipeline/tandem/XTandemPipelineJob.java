@@ -84,10 +84,9 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
         return new XTandemPipelineJob(this, file);
     }
 
+    /** Currently prophet analysis enabled for native, comet, and k-store algorithms */
     public boolean isProphetEnabled()
     {
-        // Currently prophet analysis is only supported for the 'comet' scoring
-        // algorithm.
         String paramScore = getParameters().get("scoring, algorithm");
         if (paramScore == null || paramScore.length() == 0)
             paramScore = "native";

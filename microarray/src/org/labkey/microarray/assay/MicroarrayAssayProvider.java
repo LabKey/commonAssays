@@ -20,6 +20,7 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.view.HttpView;
@@ -110,7 +111,7 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
     public List<Domain> createDefaultDomains(Container c, User user)
     {
         List<Domain> result = super.createDefaultDomains(c, user);
-        Domain dataDomain = PropertyService.get().createDomain(c, "urn:lsid:${LSIDAuthority}:" + ExpProtocol.ASSAY_DOMAIN_DATA + ".Folder-${Container.RowId}:" + ASSAY_NAME_SUBSTITUTION, "Data Properties");
+        Domain dataDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ExpProtocol.ASSAY_DOMAIN_DATA + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":" + ASSAY_NAME_SUBSTITUTION, "Data Properties");
         dataDomain.setDescription("The user is prompted to select a MAGEML file that contains the data values. If the spot-level data within the file contains a column that matches the data column name here, it will be imported.");
         result.add(dataDomain);
         return result;

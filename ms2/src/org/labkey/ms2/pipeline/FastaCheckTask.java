@@ -15,10 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.AbstractTaskFactory;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineAction;
-import org.labkey.api.pipeline.PipelineJobException;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
 import org.labkey.common.tools.FastaValidator;
 import org.apache.commons.lang.StringUtils;
@@ -34,7 +31,9 @@ import java.util.Collections;
  */
 public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
 {
-    public static class Factory extends AbstractTaskFactory
+    private static final String ACTION_NAME = "Check FASTA";
+
+    public static class Factory extends AbstractTaskFactory<AbstractTaskFactorySettings>
     {
         public Factory()
         {
@@ -60,6 +59,11 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
             return "CHECK FASTA";
         }
 
+        public List<String> getProtocolActionNames()
+        {
+            return Collections.singletonList(ACTION_NAME);
+        }
+
         public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
         {
             // No way of knowing.
@@ -77,13 +81,13 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
         return getJob().getJobSupport(MS2SearchJobSupport.class);
     }
 
-    public List<PipelineAction> run() throws PipelineJobException
+    public List<RecordedAction> run() throws PipelineJobException
     {
         try
         {
             getJob().header("Check FASTA validity");
 
-            PipelineAction action = new PipelineAction(_factory.getId());
+            RecordedAction action = new RecordedAction(ACTION_NAME);
 
             for (File sequenceFile : getJobSupport().getSequenceFiles())
             {
@@ -93,7 +97,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
                     continue;
                 getJob().info("Checking sequence file validity of " + sequenceFile);
 
-                action.addInput(sequenceFile.toURI());
+                action.addInput(sequenceFile, "FASTA");
 
                 FastaValidator validator = new FastaValidator(sequenceFile);
                 String errors = StringUtils.join(validator.validate(), "\n");

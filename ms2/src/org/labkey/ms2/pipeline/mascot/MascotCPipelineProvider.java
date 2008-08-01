@@ -89,7 +89,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
                 continue;
             }
 
-            addAction("ms2-pipeline", "searchMascot", "Mascot Peptide Search",
+            addAction(PipelineController.SearchMascotAction.class, "Mascot Peptide Search",
                     entry, entry.listFiles(MS2PipelineManager.getAnalyzeFilter(pr.isPerlPipeline())));
         }
     }
