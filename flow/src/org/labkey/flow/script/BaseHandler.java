@@ -21,6 +21,7 @@ import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.persist.AttributeSet;
 import org.fhcrc.cpas.exp.xml.*;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.data.Container;
 
 import java.util.*;
@@ -49,7 +50,7 @@ abstract public class BaseHandler
         app.setName(_step.getName());
         app.setProtocolLSID(_step.getLSID(_job.getContainer()));
         app.setActionSequence(_step.getDefaultActionSequence());
-        app.setCpasType("ProtocolApplication");
+        app.setCpasType(ExpProtocol.ApplicationType.ProtocolApplication.toString());
         if (scriptLSID != null)
         {
             InputOutputRefsType.DataLSID dataLSID = app.getInputRefs().addNewDataLSID();

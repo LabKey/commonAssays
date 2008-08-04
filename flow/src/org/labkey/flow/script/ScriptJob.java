@@ -21,10 +21,7 @@ import org.fhcrc.cpas.exp.xml.*;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.exp.api.ExpProtocolApplication;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.*;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
@@ -392,7 +389,7 @@ abstract public class ScriptJob extends FlowJob
         appInput.setName("Starting inputs");
         appInput.setProtocolLSID(getProtocol().getLSID());
         appInput.setActionSequence(0);
-        appInput.setCpasType(ExperimentService.EXPERIMENT_RUN_CPAS_TYPE);
+        appInput.setCpasType(ExpProtocol.ApplicationType.ExperimentRun.toString());
         for (Map.Entry<LogType, StringBuffer> logEntry : _runData._logs.entrySet())
         {
             StringBuffer buf = logEntry.getValue();
@@ -432,7 +429,7 @@ abstract public class ScriptJob extends FlowJob
         appOutput.setName("Mark run outputs");
         appOutput.setProtocolLSID(getProtocol().getLSID());
         appOutput.setActionSequence(FlowProtocolStep.markRunOutputs.getDefaultActionSequence());
-        appOutput.setCpasType(ExperimentService.EXPERIMENT_RUN_OUTPUT_CPAS_TYPE);
+        appOutput.setCpasType(ExpProtocol.ApplicationType.ExperimentRunOutput.toString());
         inputRefs = appOutput.getInputRefs();
         for (Map.Entry<String, StartingInput> entry : _runData._runOutputs.entrySet())
         {
