@@ -84,7 +84,7 @@
 
 </script>
 
-<table class="labkey-form">
+<table>
     <tr class="labkey-wp-header"><th colspan=50 align=center>Plate Summary Information</th></tr>
 <%
     // column header
@@ -119,7 +119,7 @@
 
 <p/>&nbsp;<p/>
 
-<table id="detailsTable" class="labkey-form">
+<table id="detailsTable">
     <%
         for (int row=0; row < template.getRows(); row++)
         {

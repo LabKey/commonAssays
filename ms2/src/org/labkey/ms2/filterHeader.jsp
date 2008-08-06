@@ -46,7 +46,7 @@
     </table>
 </form>
 <form method="post" id="extraFilter" action="<%=h(bean.extraFilterURL)%>">
-    <table class="labkey-filter-header">
+    <table>
         <tr>
             <td style="height: 100%; padding-right: 1em">
                 <fieldset>
@@ -62,7 +62,7 @@
                                 } %>
                                 </select><%=PageFlowUtil.helpPopup("Grouping", "<table><tr><td style=\"vertical-align: top;\"><b>None</b></td><td>Shows peptides without nesting them.</td></tr><tr><td style=\"vertical-align: top;\"><b>Protein</b></td><td>Shows peptides, grouped by their search engine assigned protein.</td></tr><tr><td style=\"vertical-align: top;\"><b>Protein Prophet</b></td><td>Shows peptides, grouped by their ProteinProphet protein groups.</td></tr><tr><td style=\"vertical-align: top;\"><b>Query - Peptides</b></td><td>Shows peptides. If you choose columns from ProteinProphet or the search engine assigned protein, the peptides will be grouped under those columns. Use the Customize View link to change the column list.</td></tr><tr><td style=\"vertical-align: top;\"><b>Query - Protein Groups</b></td><td>Shows proteins, grouped under the ProteinProphet assigned groups. Use the Customize View link to change the column list.</td></tr></table>", true)%>
                             </td>
-                            <td style="vertical-align: middle;" nowrap><input id="viewTypeExpanded" style="margin-right: 0px;" type="checkbox" name="expanded" value="1"<%=bean.expanded ? " checked" : ""%><%=!bean.currentViewType.supportsExpansion() ? " disabled" : ""%>>Expanded<%=PageFlowUtil.helpPopup("Expanded", "If selected, the groups will all be expanded. If not, the groups will be collapsed but can be expanded individually")%></td>
+                            <td style="vertical-align: middle;" nowrap><input id="viewTypeExpanded" type="checkbox" name="expanded" value="1"<%=bean.expanded ? " checked" : ""%><%=!bean.currentViewType.supportsExpansion() ? " disabled" : ""%>>Expanded<%=PageFlowUtil.helpPopup("Expanded", "If selected, the groups will all be expanded. If not, the groups will be collapsed but can be expanded individually")%></td>
                             <td style="vertical-align: middle;" nowrap><input type="image" id="viewTypeSubmitButton" src="<%=PageFlowUtil.buttonSrc("Go")%>" />
                         </tr>
                     </table>

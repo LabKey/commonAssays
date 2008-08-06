@@ -32,7 +32,7 @@
     FlowCompensationMatrix matrix = well.getCompensationMatrix();
 
 %>
-<table class="labkey-form">
+<table>
     <% if (getRun() == null) { %>
     <tr><td colspan="2">The run has been deleted.</td></tr>
     <% } else { %>
@@ -61,8 +61,8 @@
     if (getKeywords().size() > 0)
     {
     %>
-<div style="overflow:auto;height:400px">
-    <table class="labkey-form">
+<div style="overflow:auto;" height="400px">
+    <table>
     <tr><th colspan="2">Keywords</th></tr>
     <% for (Map.Entry<String, String> keyword : getKeywords().entrySet())
     { %>
@@ -81,7 +81,7 @@
 {
     DecimalFormat fmt = new DecimalFormat("#,##0.####");
 %>
-<div style="overflow:auto;height:400px">
+<div style="overflow:auto;" height="400px">
 <table>
     <tr><th colspan="2">Statistics</th></tr>
     <% for (Map.Entry<StatisticSpec, Double> statistic : getStatistics().entrySet())
@@ -99,7 +99,7 @@
 <% List<FlowWell> analyses = getWell().getFCSAnalyses();
     if (analyses.size() > 0)
     { %>
-<table class="labkey-form"><tr><th colspan="3">Analyses performed on this file:</th></tr>
+<table><tr><th colspan="3">Analyses performed on this file:</th></tr>
     <tr><th>FCS Analysis Name</th><th>Run Analysis Name</th><th>Analysis Name</th></tr>
     <% for (FlowWell analysis : analyses)
     {

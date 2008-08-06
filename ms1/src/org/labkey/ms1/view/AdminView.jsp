@@ -24,7 +24,7 @@
     AdminViewContext ctx = me.getModelBean();
 %>
 
-<table class="labkey-form">
+<table>
     <tr>
         <td>Data Files Awaiting Deletion:</td>
         <td><%=ctx.getNumDeleted()%></td>

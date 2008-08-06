@@ -260,6 +260,7 @@ public class Search implements EntryPoint
         subPanel.add(new Label("Choose an existing protocol or define a new one."));
         subPanel.setWidth("100%");
 
+        formGrid.setStyleName("labkey-form");
         formGrid.resize(rows , cols);
         formGrid.setWidget(0, 0, protocolComposite.getLabel(labelStyle));
         formGrid.setWidget(0, 1, protocolComposite);
@@ -282,7 +283,6 @@ public class Search implements EntryPoint
         for(int i = 0; i < rows; i++)
         {
             formGrid.getCellFormatter().setStylePrimaryName(i,0, "labkey-form-label");
-            formGrid.getCellFormatter().setStylePrimaryName(i,1, "labkey-form");
         }
         subPanel.add(formGrid);
         subPanel.add(buttonPanel);

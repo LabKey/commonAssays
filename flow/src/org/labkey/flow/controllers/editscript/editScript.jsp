@@ -26,7 +26,7 @@
 %>
 <form method="POST" action="<%=h(formAction(ScriptController.Action.editScript))%>">
 <% if (error != null) { %>
-<p style="color:red"><%=PageFlowUtil.filter(error.getMessage(), true).replaceAll("\\n", "<br>")%></p>
+<p class="labkey-error"><%=PageFlowUtil.filter(error.getMessage(), true).replaceAll("\\n", "<br>")%></p>
 <% if (error.getLine() != 0) { %>
 <script>
 function findOffset(text, line, column)

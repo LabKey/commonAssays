@@ -40,7 +40,7 @@
     String separator = bean.isHorizontal() ? "<td>&nbsp;</td>" : "</tr><tr>";
 %>
 <form action="<%= url %>" method="get">
-    <table class="labkey-form">
+    <table>
         <tr>
             <td>Name:</td>
             <td nowrap><input size="12" type="text" name="identifier" value="<%= h(bean.getIdentifier()) %>"/><%= helpPopup("Protein Search: Name", "Required to search for proteins. You may use the name as specified by the FASTA file, or an annotation, such as a gene name, that has been loaded from an annotations file. You may comma separate multiple names.") %></td>

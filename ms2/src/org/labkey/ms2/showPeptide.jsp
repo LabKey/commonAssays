@@ -108,7 +108,7 @@
 
 <!--RIGHT (FRAGMENT)-->
 <td valign=top>
-<table class="labkey-show-peptide">
+<table width="230px">
     <tr align=center bgcolor="#EEB422">
 <%
     // Render fragment table

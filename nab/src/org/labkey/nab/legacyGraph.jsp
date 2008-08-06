@@ -81,7 +81,7 @@
             </table>
         </td>
         <td valign="bottom">
-            <table class="labkey-nab-run-label">
+            <table class="labkey-form-label">
                 <tr>
                     <th colspan=3>Absolute Cutoff Dilutions<br>(Curve Based)</th>
                 </tr>

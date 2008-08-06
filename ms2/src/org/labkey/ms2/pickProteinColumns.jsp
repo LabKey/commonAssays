@@ -65,7 +65,7 @@
       </tr>
     <tr>
         <td><strong>Current:</strong></td>
-        <td><textarea style="font-family:sans-serif; font-size:small; width:100%;" name="columns" id="columns" rows="3" cols="100"><%=h(bean.currentColumns)%></textArea></td>
+        <td><textarea style="font-size:small;width: 100%;" name="columns" id="columns" rows="3" cols="100"><%=h(bean.currentColumns)%></textArea></td>
     </tr>
     <tr><td colspan=2 align=center><input type="image" src="<%=PageFlowUtil.buttonSrc("Pick Columns")%>" onclick="this.form.action='<%=h(MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, false))%>';"> <input type="image" src="<%=PageFlowUtil.buttonSrc("Save As Default")%>" onclick="this.form.action='<%=h(MS2Controller.getPickProteinColumnsPostURL(c, bean.returnURL, true))%>';"></td></tr>
   </table></form></td>

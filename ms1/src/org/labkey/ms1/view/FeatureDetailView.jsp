@@ -55,10 +55,10 @@
 
             var scc = document.getElementById("spectrumChartContainer");
             if(scc)
-                scc.className = "labkey-nav-frame";
+                scc.className = "labkey-frame";
             var bcc = document.getElementById("bubbleChartContainer");
             if(bcc)
-                bcc.className = "labkey-nav-frame";
+                bcc.className = "labkey-frame";
 
             document.getElementById("sliderMzWindow").focus();
         }
@@ -124,8 +124,8 @@
 
             _sliderScan.recalculate();
 
-            setElemClassName("elutionChartContainer", "labkey-nav-frame");
-            setElemClassName("bubbleChartContainer", "labkey-nav-frame");
+            setElemClassName("elutionChartContainer", "labkey-frame");
+            setElemClassName("bubbleChartContainer", "labkey-frame");
             document.getElementById("sliderScanWindow").focus();
         }
         else
@@ -185,7 +185,7 @@
 <script type="text/javascript" src="<%=contextPath%>/slider/rangeslider.js"></script>
 
 <!-- Main View Layout Table -->
-<table class="labkey-form">
+<table>
     <tr>
         <!-- Previous/Next Feature buttons -->
         <td align="left">
@@ -214,71 +214,71 @@
     <tr>
         <td valign="top">
             <!-- feature data -->
-            <table class="labkey-form">
+            <table>
                 <tr>
-                    <td class="labkey-feature-caption">Scan</td>
+                    <td class="labkey-alternate-row">Scan</td>
                     <td><%=feature.getScan()%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">Time</td>
+                    <td class="labkey-alternate-row">Time</td>
                     <td><%=model.formatNumber(feature.getTime())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">m/z</td>
+                    <td class="labkey-alternate-row">m/z</td>
                     <td><%=model.formatNumber(feature.getMz())%>
                         &nbsp;[<a href="<%=model.getFindSimilarUrl()%>">find&nbsp;similar</a>]
                     </td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">Accurate</td>
+                    <td class="labkey-alternate-row">Accurate</td>
                     <td><%=PageFlowUtil.filter(feature.getAccurateMz())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">Mass</td>
+                    <td class="labkey-alternate-row">Mass</td>
                     <td><%=model.formatNumber(feature.getMass())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">Intensity</td>
+                    <td class="labkey-alternate-row">Intensity</td>
                     <td><%=model.formatNumber(feature.getIntensity())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">Charge</td>
+                    <td class="labkey-alternate-row">Charge</td>
                     <td>+<%=PageFlowUtil.filter(feature.getCharge())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">Charge States</td>
+                    <td class="labkey-alternate-row">Charge States</td>
                     <td><%=PageFlowUtil.filter(feature.getChargeStates())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">KL</td>
+                    <td class="labkey-alternate-row">KL</td>
                     <td><%=model.formatNumber(feature.getKl())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">Background</td>
+                    <td class="labkey-alternate-row">Background</td>
                     <td><%=model.formatNumber(feature.getBackground())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">Median</td>
+                    <td class="labkey-alternate-row">Median</td>
                     <td><%=model.formatNumber(feature.getMedian())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">Peaks</td>
+                    <td class="labkey-alternate-row">Peaks</td>
                     <td><%=PageFlowUtil.filter(feature.getPeaks())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">First Scan</td>
+                    <td class="labkey-alternate-row">First Scan</td>
                     <td><%=PageFlowUtil.filter(feature.getScanFirst())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">Last Scan</td>
+                    <td class="labkey-alternate-row">Last Scan</td>
                     <td><%=PageFlowUtil.filter(feature.getScanLast())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">Total Intensity</td>
+                    <td class="labkey-alternate-row">Total Intensity</td>
                     <td><%=model.formatNumber(feature.getTotalIntensity())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">MS2 Scan</td>
+                    <td class="labkey-alternate-row">MS2 Scan</td>
                     <td>
                         <%
                             if(feature.getMs2Scan() != null)
@@ -293,15 +293,15 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">MS2 Charge</td>
+                    <td class="labkey-alternate-row">MS2 Charge</td>
                     <td>+<%=PageFlowUtil.filter(feature.getMs2Charge())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">MS2 Probability</td>
+                    <td class="labkey-alternate-row">MS2 Probability</td>
                     <td><%=model.formatNumber(feature.getMs2ConnectivityProbability())%></td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">Matching Peptide</td>
+                    <td class="labkey-alternate-row">Matching Peptide</td>
                     <td>
                         <%
                             {
@@ -328,7 +328,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="labkey-feature-caption">Experiment Run</td>
+                    <td class="labkey-alternate-row">Experiment Run</td>
                     <td>
                         <a href="<%=model.getRunDetailsUrl()%>">
                         <%=feature.getExpRun() == null ? "&nbsp;" : PageFlowUtil.filter(feature.getExpRun().getName())%>
@@ -380,18 +380,18 @@
         <td>&nbsp;</td>
         <td id="scanFilterCol-3" style="display:none">&nbsp;</td>
 
-        <td class="labkey-mz-filter">
+        <td class="labkey-ms1-filter">
 
             <!-- m/z filter UI -->
 
-            <table class="labkey-form">
+            <table>
                 <tr>
                     <td colspan="3" style="text-align:center;font-weight:bold">Show Peaks within:</td>
                 </tr>
                 <tr>
                     <td width="50%" style="font-size:x-small;text-align:right">-50</td>
                     <td>
-                        <div class="slider" id="sliderMzWindow" tabindex="1" style="width:350px"/>
+                        <div class="slider" id="sliderMzWindow" tabindex="1" width="350px"/>
                     </td>
                     <td width="50%" style="font-size:x-small;text-align:left">50</td>
                 </tr>
@@ -450,11 +450,11 @@
             </a>.
         </td>
 
-        <td id="scanFilterUI" class="labkey-scan-filter">
+        <td id="scanFilterUI" class="labkey-ms1-filter" style="display: none;">
 
             <!-- Scan Filter UI -->
 
-            <table class="labkey-form">
+            <table>
                 <tr>
                     <td style="text-align:center"><span style="font-weight:bold">Show Peaks in Scans Within:</span></td>
                 </tr>

@@ -126,7 +126,7 @@
                             boolean curveBased = (pass == 0);
                     %>
                                 <td>
-                                <table class="labkey-form labkey-nab-run-label">
+                                <table class="labkey-form-label">
                                     <tr>
                                         <th align="center" colspan=<%= assay.getCutoffs().length + 1%>>Cutoff Dilutions<br>(<%= curveBased ? "Curve Based" : "Point Based" %>)</th>
                                     </tr>
@@ -188,7 +188,7 @@
                             %>
                             </tr>
                         </table><br>
-                        <table class="labkey-form">
+                        <table>
                             <tr>
                                 <td style="<%= labelStyle %>">Sample Id</td>
                                 <td style="<%= labelStyle %>">Description</td>
@@ -207,7 +207,7 @@
                             %>
                         </table><br>
 
-                        <table class="labkey-form">
+                        <table>
                             <tr>
                                 <td style="<%= labelStyle %>">Sample Id</td>
                                 <td style="<%= labelStyle %>">Initial Dil.</td>
@@ -370,8 +370,8 @@
     if (!bean.isPrintView() && writer)
     {
 %>
-    <tr>
-        <th class="labkey-nab-run-header">Discussions</th>
+    <tr class="labkey-wp-header">
+        <th>Discussions</th>
     </tr>
     <tr>
         <td>

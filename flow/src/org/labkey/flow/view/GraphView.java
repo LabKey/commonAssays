@@ -90,7 +90,7 @@ public class GraphView extends GridView
                 }
             }
 
-            out.write("<table class=\"labkey-data-region-header\">\n");
+            out.write("<table>\n");
             region.getButtonBar(DataRegion.MODE_GRID).render(ctx, out);
             out.write("</table>\n");
 
@@ -122,7 +122,7 @@ public class GraphView extends GridView
             }
             out.write("</table>\n");
 
-            out.write("<table class=\"labkey-data-region-footer\">\n");
+            out.write("<table>\n");
             region.getButtonBar(DataRegion.MODE_DETAILS).render(ctx, out);
             out.write("</table>\n");
         }

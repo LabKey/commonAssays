@@ -51,7 +51,7 @@ abstract public class BaseFlowPage extends JspBase
         if (_errors.size() == 0)
             return "";
         StringBuilder ret = new StringBuilder();
-        ret.append("<p style=\"color:red\">");
+        ret.append("<p class=\"labkey-error\">");
         ret.append(message + "<br>");
         for (Object error : _errors)
         {

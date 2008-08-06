@@ -47,7 +47,7 @@
         if (run == null)
             continue;
 %>
-    <tr><td colspan="2" class="labkey-heading-1"><%=h(run.getDescription())%></td></tr>
+    <tr><td colspan="2" class="labkey-header-large"><%=h(run.getDescription())%></td></tr>
     <tr><td>&nbsp;</td>
 <%      if (run.getNegativeHitCount() < run.getPeptideCount() / 3)
         {

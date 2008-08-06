@@ -24,7 +24,7 @@
     Map<String, String> fixed = bean.fixed;
     Map<String, String> var = bean.var;
 %>
-<table style="width:100%;">
+<table width="100%">
 <%  if (0 == (var.size() + fixed.size()))
         out.print("<tr><td colspan=2><b>None</b></td></tr>\n");
 

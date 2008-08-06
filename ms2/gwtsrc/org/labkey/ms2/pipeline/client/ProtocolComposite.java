@@ -17,6 +17,7 @@
 package org.labkey.ms2.pipeline.client;
 
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.DOM;
 
 import java.util.*;
 
@@ -62,7 +63,7 @@ public class ProtocolComposite extends SearchFormComposite implements SourcesCha
     private void initLabel()
     {
         listBoxLabel = new Label("Analysis protocols:");
-        listBoxLabel.addStyleName("labkey-list-box");
+        listBoxLabel.addStyleName("labkey-strong");
         textBoxLabel = new Label("Protocol name:");
         descriptionLabel = new Label("Protocol description:");
         labelWidget = new VerticalPanel();

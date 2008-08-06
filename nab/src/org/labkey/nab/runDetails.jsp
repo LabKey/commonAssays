@@ -59,7 +59,6 @@
         out.write(errs);
         out.write("</span>");
     }
-    String labelStyle = "text-align:left;vertical-align:middle;font-weight:bold";
 
     QueryView duplicateDataFileView = bean.getDuplicateDataFileView(me.getViewContext());
 
@@ -118,7 +117,7 @@
                             if (property != null)
                                 value = formatValue(property.getKey(), property.getValue());
                     %>
-                        <td style="<%= labelStyle %>"><%= property != null ? h(property.getKey().getNonBlankLabel()) : "&nbsp;"  %></td>
+                        <th><%= property != null ? h(property.getKey().getNonBlankLabel()) : "&nbsp;"  %></th>
                         <td ><%= property != null ? h(value) : "&nbsp;"  %></td>
                     <%
                         }
@@ -144,7 +143,7 @@
                     boolean curveBased = (pass == 0);
             %>
                         <td valign="top">
-                        <table class="labkey-form">
+                        <table>
                             <tr>
                                 <th align="center" colspan=<%= assay.getCutoffs().length + 1%>>Cutoff Dilutions<br>(<%= curveBased ? "Curve Based" : "Point Based" %>)</th>
                             </tr>
@@ -154,7 +153,7 @@
                                     for (int cutoff : assay.getCutoffs())
                                     {
                                 %>
-                                <td style="<%= labelStyle %>" align="center"><%= cutoff %>%</td>
+                                <th align="center"><%= cutoff %>%</th>
                                 <%
                                     }
                                 %>
@@ -209,16 +208,16 @@
                     <td colspan="2" valign="top">
                         <table width="100%">
                             <tr>
-                                <td style="<%= labelStyle %>">Range</td>
+                                <th>Range</th>
                                 <td
                                     align=left><%=Luc5Assay.intString(assay.getControlRange())%></td>
                             </tr>
                             <tr>
-                                <td style="<%= labelStyle %>">Virus Control</td>
+                                <th>Virus Control</th>
                                 <td align="left"><%=Luc5Assay.intString(assay.getVirusControlMean())%> &plusmn; <%=Luc5Assay.percentString(assay.getVirusControlPlusMinus())%></td>
                             </tr>
                             <tr>
-                                <td style="<%= labelStyle %>">Cell Control</td>
+                                <th>Cell Control</th>
                                 <td align=left><%=Luc5Assay.intString(assay.getCellControlMean())%> &plusmn; <%=Luc5Assay.percentString(assay.getCellControlPlusMinus())%></td>
                             </tr>
                         </table>
@@ -226,8 +225,7 @@
                 </tr>
                 </table>
                 <table class="labkey-data-region labkey-show-borders">
-                    <tr>
-                    <%
+                    <colgroup><%
                         Set<String> pdsWithData = new HashSet<String>();
                         for (NabAssayController.SampleResult results : bean.getSampleResults())
                         {
@@ -242,9 +240,23 @@
                         {
                             if (!pdsWithData.contains(pd.getName()))
                                 continue;
+                            %>
+                            <col>
+                            <%
+                        }
+
+                    %></colgroup>
+                    <tr class="labkey-col-header">
+                    <%
+
+
+                        for (PropertyDescriptor pd : samplePropertyDescriptors)
+                        {
+                            if (!pdsWithData.contains(pd.getName()))
+                                continue;
 
                     %>
-                        <td style="<%= labelStyle %>"><%= h(pd.getLabel()) %></td>
+                        <th><%= h(pd.getLabel()) %></th>
                     <%
                         }
                     %>
@@ -294,8 +306,8 @@
                                 <th colspan="4"><%= h(results.getKey()) %></th>
                             </tr>
                             <tr>
-                                <td style="<%= labelStyle %>" align="right"><%= summary.getMethod().getAbbreviation() %></td>
-                                <td style="<%= labelStyle %>" align="center" colspan="3">Neut.</td>
+                                <th align="right"><%= summary.getMethod().getAbbreviation() %></th>
+                                <th align="center" colspan="3">Neut.</th>
                             </tr>
                             <%
                                 List<WellData> dataList = summary.getWellData();

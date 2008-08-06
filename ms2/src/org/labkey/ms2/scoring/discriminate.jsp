@@ -45,7 +45,7 @@
     </td></tr>
     <tr><td valign="top">
 <table>
-<tr><td colspan="2" class="labkey-heading-1"><%=h(form.getRun().getDescription())%></td>
+<tr><td colspan="2" class="labkey-header-large"><%=h(form.getRun().getDescription())%></td>
 <tr><td colspan="2">
             <table>
                 <tr><td class="labkey-form-label">Title</td>

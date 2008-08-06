@@ -132,7 +132,7 @@ analysis inside of CPAS.</p>
 %>
         <tr>
             <td colspan=3>
-                <input type="radio" <%=form.isProtocolShare() ? "checked" : "" %> id="protocolSharing.shared" name="protocolSharingString" value="share"><span class="labkey-heading-1"> The same protocol was used to create all files</span><br>
+                <input type="radio" <%=form.isProtocolShare() ? "checked" : "" %> id="protocolSharing.shared" name="protocolSharingString" value="share"><span class="labkey-header-large"> The same protocol was used to create all files</span><br>
             </td>
         </tr>
         <tr><td>&nbsp;&nbsp;&nbsp;</td><td>Shared Protocol</td>
@@ -152,7 +152,7 @@ analysis inside of CPAS.</p>
       </tr>
     <tr>
         <td colspan=2>
-    <input type="radio" <%=form.isProtocolFractions() ? "checked" : "" %> id="protocolSharing.fractions" name="protocolSharingString" value="fractions"><span class="labkey-heading-1">  All files are fractions of the same sample</span><br>
+    <input type="radio" <%=form.isProtocolFractions() ? "checked" : "" %> id="protocolSharing.fractions" name="protocolSharingString" value="fractions"><span class="labkey-header-large">  All files are fractions of the same sample</span><br>
         </td>
     </tr>
     <tr><td>&nbsp;&nbsp;&nbsp;</td><td>Fractionation Protocol</td>
@@ -172,7 +172,7 @@ analysis inside of CPAS.</p>
       </tr>
 <tr>
     <td colspan=3>
-    <input type="radio" <%=form.isProtocolIndividual() ? "checked" : "" %> name="protocolSharingString" id="protocolSharing.none" value="none"> <span class="labkey-heading-1"> Each file was created with a different protocol</span><br>
+    <input type="radio" <%=form.isProtocolIndividual() ? "checked" : "" %> name="protocolSharingString" id="protocolSharing.none" value="none"> <span class="labkey-header-large"> Each file was created with a different protocol</span><br>
     </td>
 </tr>
     <%

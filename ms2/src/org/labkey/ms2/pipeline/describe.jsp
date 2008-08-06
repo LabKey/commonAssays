@@ -56,19 +56,19 @@
     Before searching describe how each mzXML file was created using the following information<br>
     </td>
     </tr>
-    <tr><td style="padding-left:10px" >
+    <tr><td class="labkey-indented" >
         <b>Run Name</b> </td><td>Your name for this MS2 run</td>
     </tr>
     <tr>
-        <td style="padding-left:10px"><b>Sample Set</b></td>
+        <td class="labkey-indented"><b>Sample Set</b></td>
         <td>Set that contains the sample used in this analysis. <a href="<%=getViewContext().getActionURL().relativeUrl("showUploadMaterials.view", "", "Experiment")%>">Upload</a> sample information using the experiment module, and <a href="<%=getViewContext().getActionURL().relativeUrl("listMaterialSources.view", "", "Experiment")%>">set the active sample set</a>. Optional.</td>
     </tr>
     <tr>
-        <td style="padding-left:10px"><b>Sample Id</b></td>
+        <td class="labkey-indented"><b>Sample Id</b></td>
         <td>Unique Id of the sample within sample set.</td>
     </tr>
     <tr>
-        <td style="padding-left:10px"><b>Protocol</b> </td>
+        <td class="labkey-indented"><b>Protocol</b> </td>
     <td>Protocol used to prepare sample and run Mass Spec. <a href="<%=PipelineController.urlShowCreateMS2Protocol(getViewContext().getContainer(), form)%>">Create</a> a new protocol.</td>
     </tr>
     </table>
@@ -93,7 +93,7 @@
         String runName = "MS2 Sample Prep (" + getPathDescription() + "), (" + protocolName + ")";
         String error = form.getError(0);
 %>
-<tr><td colspan="2" class="labkey-heading-1">Run Settings (with Fractionation)</td></tr>
+<tr><td colspan="2" class="labkey-header-large">Run Settings (with Fractionation)</td></tr>
 <tr><td>&nbsp;</td><td>
   <table>
 <%      if (error != null && error.length() > 0)
@@ -122,7 +122,7 @@
         if (form.isProtocolShare())
         {
 %>
-    <tr><td colspan="2" class="labkey-heading-1">Default Settings for All Runs</td></tr>
+    <tr><td colspan="2" class="labkey-header-large">Default Settings for All Runs</td></tr>
     <tr ><td >&nbsp;</td><td>
         <table>
     <tr><td class="labkey-form-label">Sample Set</td><td><%=materialSourceSelect(null, "defaults", 0, "defaultMaterialSource(this)")%></td></tr>
@@ -171,7 +171,7 @@
                 runName = "MS2 Sample Prep (" + getStrippedFileName(file) + "), (" + protocolName + ")";
             }
 %>
-  <tr><td colspan="2" class="labkey-heading-1"><%=h(file.getName())%></td></tr>
+  <tr><td colspan="2" class="labkey-header-large"><%=h(file.getName())%></td></tr>
   <tr><td>&nbsp;</td><td>
     <table>
 <%          if (error != null && error.length() > 0)

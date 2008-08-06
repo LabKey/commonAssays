@@ -60,11 +60,15 @@
 %>
 
     <p>Compensation Matrix: <%=h(comp.getName())%></p>
-<table class="labkey-form">
-    <tr><td class="labkey-show-compensation-header labkey-row">&nbsp;</td>
+<table class="labkey-data-region labkey-show-borders">
+    <colgroup><% for (int i = 0; i < channelCount + 1; i ++)
+        { %>
+        <col>
+        <% } %></colgroup>
+    <tr><td class="labkey-data-region-title">&nbsp;</td>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         { %>
-        <th class="labkey-show-compensation-header labkey-row"><%=h(channelNames[iChannelValue])%></th>
+        <th class="labkey-col-header"><%=h(channelNames[iChannelValue])%></th>
         <% } %>
     </tr>
     <% for (int iChannel = 0; iChannel < channelCount; iChannel ++)
@@ -72,17 +76,13 @@
         String className = 0==(iChannel%2)?"labkey-alternate-row":"labkey-row";
     %>
     <tr>
-        <th class="labkey-show-compensation-header <%=className%>" style="text-align:right;"><%=h(channelNames[iChannel])%></th>
+        <th class="labkey-row-header <%=className%>" style="text-align:right;"><%=h(channelNames[iChannel])%></th>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         {
-        %><td class="labkey-show-compensation-header <%=className%>" style="text-align:right;"><%=format.format(comp.getRow(iChannel)[iChannelValue])%></td><%
+        %><td class="<%=className%>" style="text-align:right;"><%=format.format(comp.getRow(iChannel)[iChannelValue])%></td><%
         }%>
     </tr>
     <%}%>
-    <% for (int iChannel = 0; iChannel <= channelCount; iChannel ++)
-    {
-        %><td class="labkey-show-compensation-cell"><%=org.labkey.api.util.PageFlowUtil._gif(1, 80)%></td><%
-    }%>
 </table>
 
 

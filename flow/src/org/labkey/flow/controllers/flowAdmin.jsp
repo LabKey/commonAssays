@@ -29,7 +29,7 @@
 <form method="POST" action="<%=h(new ActionURL(FlowController.FlowAdminAction.class, ContainerManager.getRoot()))%>">
     <p>
         Which directory should the flow module use to do work in?  By default, it will use the system temporary directory.<br>
-        <input type="text" id="workingDirectory" name="workingDirectory" value="<%=h(form.getWorkingDirectory())%>">
+        <input size=50 type="text" id="workingDirectory" name="workingDirectory" value="<%=h(form.getWorkingDirectory())%>">
     </p>
     <labkey:button text="update" />
     <labkey:button text="cancel" href="<%=PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL()%>" />

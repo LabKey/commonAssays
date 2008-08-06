@@ -94,7 +94,7 @@ public class CompareDataRegion extends DataRegion
         {
             out.write("<td colspan=\"");
             out.write(Integer.toString(_offset));
-            out.write("\" style=\"text-align: center; vertical-align: bottom;\" class=\"labkey-header-cell\"");
+            out.write("\" style=\"text-align: center; vertical-align: bottom;\"");
             out.write("\">");
             out.write(_columnHeader);
             out.write("</td>");
@@ -102,7 +102,7 @@ public class CompareDataRegion extends DataRegion
 
         for (String caption : _multiColumnCaptions)
         {
-            out.write("<td align=\"center\" colspan=\"" + _colSpan + "\" class=\"labkey-header-cell\"");
+            out.write("<td align=\"center\" colspan=\"" + _colSpan + "\"");
             if (shade)
             {
                 out.write(" class=\"labkey-alternate-row\"");

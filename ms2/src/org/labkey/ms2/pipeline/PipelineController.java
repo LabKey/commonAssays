@@ -1006,7 +1006,7 @@ public class PipelineController extends SpringActionController
         @Override
         protected void renderView(Object model, PrintWriter out) throws Exception
         {
-            out.write("<span class=\"labkey-heading-1\">");
+            out.write("<span class=\"labkey-header-large\">");
             out.write("To create a protocol, start with a protocol template and fill in values specified by the template.<br><br>");
             out.write("Which protocol template would you like to start with?<br>");
             out.write("<ul>");
