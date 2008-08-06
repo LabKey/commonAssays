@@ -48,10 +48,8 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
 
     private static final String PEPTIDE_PROPHET_ACTION_NAME = "PeptideProphet";
     private static final String PROTEIN_PROPHET_ACTION_NAME = "ProteinProphet";
-    private static final String QUANITATION_ACTION_NAME = "Quantitation";
-    private static final String PEP_XML_ROLLUP_ACTION_NAME = "PepXML Rollup";
-    private static final String PROTEIN_PROPHET_ROLLUP_ACTION_NAME = "ProteinProphet Rollup";
-    private static final String QUANTITATION_ROLLUP_ACTION_NAME = "Quantitation Rollup";
+    private static final String PEPTIDE_QUANITATION_ACTION_NAME = "Peptide Quantitation";
+    private static final String PROTEIN_QUANITATION_ACTION_NAME = "Protein Quantitation";
 
     public static File getPepXMLFile(File dirAnalysis, String baseName)
     {
@@ -124,7 +122,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
         boolean isRefreshRequired();
     }
 
-    public static class Factory extends AbstractTaskFactory
+    public static class Factory extends AbstractTaskFactory<AbstractTaskFactorySettings, Factory>
     {
         public Factory()
         {
@@ -165,16 +163,18 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
             if (!NetworkDrive.exists(getPepXMLFile(dirAnalysis, baseName)))
                 return false;
 
-            if (support.isProphetEnabled() &&
-                    !NetworkDrive.exists(getProtXMLFile(dirAnalysis, baseName)))
-                return false;
+            return !support.isProphetEnabled() || NetworkDrive.exists(getProtXMLFile(dirAnalysis, baseName));
 
-            return true;
         }
 
         public List<String> getProtocolActionNames()
         {
-            return Arrays.asList(PEPTIDE_PROPHET_ACTION_NAME, PROTEIN_PROPHET_ACTION_NAME, QUANITATION_ACTION_NAME);
+            return Arrays.asList(PEPTIDE_PROPHET_ACTION_NAME, PEPTIDE_QUANITATION_ACTION_NAME, PROTEIN_PROPHET_ACTION_NAME, PROTEIN_QUANITATION_ACTION_NAME);
+        }
+
+        public String getGroupParameterName()
+        {
+            return "tpp";
         }
     }
 
@@ -190,11 +190,6 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
         public boolean isParticipant(PipelineJob job) throws IOException, SQLException
         {
             return job.getJobSupport(JobSupport.class).isFractions();
-        }
-
-        public List<String> getProtocolActionNames()
-        {
-            return Arrays.asList(PEP_XML_ROLLUP_ACTION_NAME, PROTEIN_PROPHET_ROLLUP_ACTION_NAME, QUANTITATION_ROLLUP_ACTION_NAME);
         }
     }
 
@@ -220,7 +215,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
             List<RecordedAction> actions = new ArrayList<RecordedAction>();
 
             // First step takes all the pepXMLs as inputs and either runs PeptideProphet (non-join) or rolls them up (join)
-            RecordedAction pepXMLAction = new RecordedAction(_factory.isJoin() ? PEP_XML_ROLLUP_ACTION_NAME : PEPTIDE_PROPHET_ACTION_NAME);
+            RecordedAction pepXMLAction = new RecordedAction(PEPTIDE_PROPHET_ACTION_NAME);
             actions.add(pepXMLAction);
 
             // Set mzXML directory only if needed.
@@ -260,6 +255,22 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
                 }
             }
 
+            RecordedAction peptideQuantAction = null;
+            String[] quantParams = null;
+
+            if (dirMzXml != null)
+            {
+                quantParams = getQuantitationCmd(params, wd.getRelativePath(dirMzXml));
+                if (quantParams != null)
+                {
+                    peptideQuantAction = new RecordedAction(PEPTIDE_QUANITATION_ACTION_NAME);
+                    String algorithm = getQuantitionAlgorithm(params);
+                    peptideQuantAction.setDescription(algorithm + " " + peptideQuantAction.getName());
+                    peptideQuantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", SimpleTypeNames.STRING), algorithm);
+                    actions.add(peptideQuantAction);
+                }
+            }
+
             File fileWorkPepXML = wd.newFile(FT_PEP_XML);
             File fileWorkProtXML = null;
             RecordedAction protXMLAction = null;
@@ -268,7 +279,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
                 fileWorkProtXML = wd.newFile(FT_INTERMEDIATE_PROT_XML);
 
                 // Second step optionally runs ProteinProphet on the pepXML
-                protXMLAction = new RecordedAction(_factory.isJoin() ? PROTEIN_PROPHET_ROLLUP_ACTION_NAME : PROTEIN_PROPHET_ACTION_NAME);
+                protXMLAction = new RecordedAction(PROTEIN_PROPHET_ACTION_NAME);
                 actions.add(protXMLAction);
             }
 
@@ -321,20 +332,15 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
                     interactCmd.add("-pr" + paramMinProb);
             }
 
-            RecordedAction quantAction = null;
+            RecordedAction proteinQuantAction = null;
 
-            if (dirMzXml != null)
+            if (quantParams != null && getJobSupport().isProphetEnabled())
             {
-                String[] quantParams = getQuantitationCmd(params, wd.getRelativePath(dirMzXml));
-                if (quantParams != null)
-                {
-                    interactCmd.addAll(Arrays.asList(quantParams));
-                    quantAction = new RecordedAction(_factory.isJoin() ? QUANTITATION_ROLLUP_ACTION_NAME : QUANITATION_ACTION_NAME);
-                    String algorithm = getQuantitionAlgorithm(params);
-                    quantAction.setDescription(quantAction.getName() + " - " + algorithm);
-                    quantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", SimpleTypeNames.STRING), algorithm);
-                    actions.add(quantAction);
-                }
+                proteinQuantAction = new RecordedAction(PROTEIN_QUANITATION_ACTION_NAME);
+                String algorithm = getQuantitionAlgorithm(params);
+                proteinQuantAction.setDescription(algorithm + " " + proteinQuantAction.getName());
+                proteinQuantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", SimpleTypeNames.STRING), algorithm);
+                actions.add(proteinQuantAction);
             }
 
             interactCmd.add("-N" + fileWorkPepXML.getName());
@@ -358,17 +364,21 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
                 protXMLAction.addInput(filePepXML, "PepXML");
                 protXMLAction.addOutput(fileProtXML, "ProtXML", false);
 
-                if (quantAction != null)
+                if (peptideQuantAction != null)
                 {
                     for (File file : getJobSupport().getInteractSpectraFiles())
                     {
-                        quantAction.addInput(file, "mzXML");
+                        peptideQuantAction.addInput(file, "mzXML");
                     }
+                    peptideQuantAction.addInput(filePepXML, "PepXML");
+                    peptideQuantAction.addOutput(filePepXML, "QuantPepXML", false);
+                }
 
-                    quantAction.addInput(filePepXML, "PepXML");
-                    quantAction.addInput(fileProtXML, "ProtXML");
-                    quantAction.addOutput(filePepXML, "QuantPepXML", false);
-                    quantAction.addOutput(fileProtXML, "QuantProtXML", false);
+                if (proteinQuantAction != null)
+                {
+                    proteinQuantAction.addInput(fileProtXML, "ProtXML");
+                    proteinQuantAction.addInput(filePepXML, "PepXML");
+                    proteinQuantAction.addOutput(fileProtXML, "QuantProtXML", false);
                 }
             }
             finally

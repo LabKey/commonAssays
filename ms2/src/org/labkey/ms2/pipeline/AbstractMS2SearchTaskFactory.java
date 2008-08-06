@@ -22,7 +22,7 @@ import org.labkey.api.util.FileType;
 /**
  * <code>AbstractMS2SearchTaskFactory</code>
  */
-abstract public class AbstractMS2SearchTaskFactory extends AbstractTaskFactory<AbstractTaskFactorySettings>
+abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractMS2SearchTaskFactory<FactoryType>> extends AbstractTaskFactory<AbstractTaskFactorySettings, FactoryType>
 {
     protected AbstractMS2SearchTaskFactory(Class namespaceClass)
     {

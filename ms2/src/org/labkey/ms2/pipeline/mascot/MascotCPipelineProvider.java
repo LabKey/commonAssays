@@ -267,9 +267,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
 
         if (0 == enzymes.size())
         {
-            String connectivityResult = mascotClient.testConnectivity(false);
-            if (!"".equals(connectivityResult))
-                throw new IOException(connectivityResult);
+            throw new IOException("Could not find any enzymes, perhaps labkeydbmgmt.pl is out of date?");
         }
         return enzymes;
 //        Map<String, String> mock = new HashMap< String, String >();

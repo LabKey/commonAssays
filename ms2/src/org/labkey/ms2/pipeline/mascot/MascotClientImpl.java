@@ -33,9 +33,7 @@ import org.labkey.ms2.pipeline.client.Enzyme;
 import org.labkey.ms2.pipeline.client.CutSite;
 import org.labkey.ms2.pipeline.SearchFormUtil;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.net.*;
 import java.util.*;
 
 
@@ -263,8 +261,8 @@ public class MascotClientImpl implements SearchClient
                 {
                     if (0 == attemptStatus)
                     {
-                        if (!url.equals(testUrl))
-                            errorString = "Test passed ONLY when mascot server is set to " + alternativeLink.toString();
+                        if (!originalUrl.equals(testUrl))
+                            errorString = "Test passed ONLY when mascot server is set to " + testUrl;
 
                         _lastWorkingSet = 2;
                         _lastWorkingUrl = testUrl;
@@ -297,7 +295,7 @@ public class MascotClientImpl implements SearchClient
             getLogger().error("connect("+_url+","+_userAccount+","+_userPassword+","+_proxyURL+")", x);
             //Fail to parse Mascot Server URL
             errorCode = 1;
-            errorString = "Fail to parse Mascot Server URL";
+            errorString = "Failed to parse Mascot Server URL";
         }
     }
 
@@ -1467,23 +1465,26 @@ public class MascotClientImpl implements SearchClient
         // report the results as a property set, i.e. key=value pairs
 
         Properties results = new Properties();
+        InputStream in = null;
         String mascotRequestURL = requestURL(parameters);
         try
         {
             URL mascotURL = new URL(mascotRequestURL);
+            HttpURLConnection connection = (HttpURLConnection)mascotURL.openConnection();
+            connection.setInstanceFollowRedirects(true);
+            in = new BufferedInputStream(connection.getInputStream());
             if (parse)
             {
-                InputStream in = new BufferedInputStream(mascotURL.openStream());
                 results.load(in);
                 in.close();
                 errorString = results.getProperty("errorstring", ""); 
             }
             else
             {
-                BufferedReader in = new BufferedReader(new InputStreamReader(mascotURL.openStream()));
                 String str;
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                 StringBuffer reply = new StringBuffer();
-                while ((str = in.readLine()) != null) {
+                while ((str = reader.readLine()) != null) {
                     reply.append (str);
                     reply.append ("\n");
                 }
@@ -1491,45 +1492,37 @@ public class MascotClientImpl implements SearchClient
                 in.close();
             }
         }
-        catch (MalformedURLException x)
-        {
-            String password = parameters.getProperty("password","");
-            if (password.length() >0)
-                mascotRequestURL = mascotRequestURL.replace(password, "***");
-            // If using the class logger, then assume user interface will deliver the error message.
-            String msg = "Exception "+x.getClass()+" connect("+_url+","+parameters.getProperty("username","<null>")+","
-                    +(parameters.getProperty("password","").length()>0 ? "***" : "")
-                    +","+_proxyURL+")="+mascotRequestURL;
-            if (getLogger() == _log)
-                getLogger().debug(msg);
-            else
-                getLogger().error(msg);
-            errorCode = 1;
-            errorString = "Fail to parse Mascot Server URL";
-            results.setProperty("error", "1");
-            results.setProperty("errorstring", errorString);
-            results.setProperty("exceptionmessage", x.getMessage());
-            results.setProperty("exceptionclass", x.getClass().getName());
-        }
         catch (Exception x)
         {
             String password = parameters.getProperty("password","");
             if (password.length() >0)
                 mascotRequestURL = mascotRequestURL.replace(password, "***");
             // If using the class logger, then assume user interface will deliver the error message.
-            String msg = "Exception "+x.getClass()+" connect("+_url+","+parameters.getProperty("username","<null>")+","
-                    +(password.length()>0 ? "***" : "")
+            String msg = "Connect("+_url+","+parameters.getProperty("username","<null>")+","
+                    +(parameters.getProperty("password","").length()>0 ? "***" : "")
                     +","+_proxyURL+")="+mascotRequestURL;
             if (getLogger() == _log)
-                getLogger().debug(msg);
+                getLogger().debug(msg, x);
             else
-                getLogger().error(msg);
-            errorCode = 2;
-            errorString = "Failed to interact with Mascot Server";
-            results.setProperty("error", "2");
+                getLogger().error(msg, x);
+            if (x instanceof MalformedURLException)
+            {
+                errorCode = 1;
+                errorString = "Fail to parse Mascot Server URL";
+            }
+            else
+            {
+                errorCode = 2;
+                errorString = "Failed to interact with Mascot Server";
+            }
+            results.setProperty("error", Integer.toString(errorCode));
             results.setProperty("errorstring", errorString);
             results.setProperty("exceptionmessage", x.getMessage());
             results.setProperty("exceptionclass", x.getClass().getName());
+        }
+        finally
+        {
+            if (in != null) { try { in.close(); } catch (IOException e) {} }
         }
 
         return results;

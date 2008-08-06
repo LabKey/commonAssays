@@ -90,6 +90,7 @@
     </bean>
 
     <bean id="expGenerator" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
+        <constructor-arg value="expGenerator" />
         <property name="outputExt" value=".ms1.xar.xml"/>
     </bean>
 

@@ -59,7 +59,7 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
         String getSequestServer();
     }
 
-    public static class Factory extends AbstractMS2SearchTaskFactory
+    public static class Factory extends AbstractMS2SearchTaskFactory<Factory>
     {
         public Factory()
         {
@@ -89,6 +89,11 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
         public List<String> getProtocolActionNames()
         {
             return Collections.singletonList(ACTION_NAME);
+        }
+
+        public String getGroupParameterName()
+        {
+            return "sequest";
         }
     }
 

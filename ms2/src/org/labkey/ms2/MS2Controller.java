@@ -4177,7 +4177,14 @@ public class MS2Controller extends SpringActionController
             String message;
             if (0 == mascotClient.getErrorCode())
             {
-                message = "Test passed.";
+                if ("".equals(mascotClient.getErrorString()))
+                {
+                    message = "Test passed.";
+                }
+                else
+                {
+                    message = mascotClient.getErrorString();
+                }
                 form.setParameters(mascotClient.getParameters());
             }
             else

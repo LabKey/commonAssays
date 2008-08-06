@@ -191,7 +191,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
             if (provider == null)
             {
-                results.appendError("Problem loading residu modifications: provider equals null\n");
+                results.appendError("Problem loading residue modifications: provider equals null\n");
             }
         }
         try

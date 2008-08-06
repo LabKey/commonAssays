@@ -22,7 +22,6 @@ import org.fhcrc.cpas.util.NetworkDrive;
 import java.io.IOException;
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -61,11 +60,7 @@ abstract public class AbstractMS2SearchPipelineProvider
     public boolean dbExists(String dirSequenceRoot, String db)
     {
         File dbFile = new File(dirSequenceRoot, db);
-        if(!NetworkDrive.exists(dbFile))
-        {
-            return false;
-        }
-        return true;
+        return NetworkDrive.exists(dbFile);
     }
 
     abstract public boolean supportsDirectories();

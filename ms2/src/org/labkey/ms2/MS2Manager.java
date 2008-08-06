@@ -1171,7 +1171,7 @@ public class MS2Manager
     // Cache the basic stats for the MS2 stats web part
     private static Map<String, String> _basicStats = null;
 
-    public static Map<String, String> getBasicStats() throws SQLException
+    public static synchronized Map<String, String> getBasicStats() throws SQLException
     {
         if (null == _basicStats)
             _basicStats = computeBasicStats();

@@ -56,7 +56,7 @@ public class XTandemSearchTask extends PipelineJob.Task<XTandemSearchTask.Factor
     {
     }
 
-    public static class Factory extends AbstractMS2SearchTaskFactory
+    public static class Factory extends AbstractMS2SearchTaskFactory<Factory>
     {
         public Factory()
         {
@@ -87,6 +87,11 @@ public class XTandemSearchTask extends PipelineJob.Task<XTandemSearchTask.Factor
         public List<String> getProtocolActionNames()
         {
             return Arrays.asList(X_TANDEM_ACTION_NAME, TANDEM2_XML_ACTION_NAME);
+        }
+
+        public String getGroupParameterName()
+        {
+            return "xtandem";
         }
     }
 

@@ -33,7 +33,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
 {
     private static final String ACTION_NAME = "Check FASTA";
 
-    public static class Factory extends AbstractTaskFactory<AbstractTaskFactorySettings>
+    public static class Factory extends AbstractTaskFactory<AbstractTaskFactorySettings, Factory>
     {
         public Factory()
         {
@@ -68,6 +68,11 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
         {
             // No way of knowing.
             return false;
+        }
+
+        public String getGroupParameterName()
+        {
+            return "fasta check";
         }
     }
 

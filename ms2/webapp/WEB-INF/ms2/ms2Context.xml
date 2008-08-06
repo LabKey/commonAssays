@@ -17,12 +17,9 @@
                             <ref bean="mzxmlConverter"/>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemSearchTask</value>
                             <ref bean="tppTask"/>
-                            <ref bean="expGeneratorSearch"/>
-                            <ref bean="expImportSearch"/>
+                            <ref bean="expGenerator"/>
                             <ref bean="tppTaskJoin"/>
-                            <ref bean="expGeneratorSearchJoin"/>
-                            <ref bean="expImportSearchJoin"/>
-                            <!--<ref bean="expGenerator"/>-->
+                            <ref bean="expGeneratorJoin"/>
                         </list>
                     </property>
                 </bean>
@@ -38,11 +35,9 @@
                             <ref bean="mzxmlConverter"/>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.mascot.MascotSearchTask</value>
                             <ref bean="tppTask"/>
-                            <ref bean="expGeneratorSearch"/>
-                            <ref bean="expImportSearch"/>
+                            <ref bean="expGenerator"/>
                             <ref bean="tppTaskJoin"/>
-                            <ref bean="expGeneratorSearchJoin"/>
-                            <ref bean="expImportSearchJoin"/>
+                            <ref bean="expGeneratorJoin"/>
                         </list>
                     </property>
                 </bean>
@@ -58,11 +53,9 @@
                             <ref bean="mzxmlConverter"/>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.sequest.SequestSearchTask</value>
                             <ref bean="tppTask"/>
-                            <ref bean="expGeneratorSearch"/>
-                            <ref bean="expImportSearch"/>
+                            <ref bean="expGenerator"/>
                             <ref bean="tppTaskJoin"/>
-                            <ref bean="expGeneratorSearchJoin"/>
-                            <ref bean="expImportSearchJoin"/>
+                            <ref bean="expGeneratorJoin"/>
                         </list>
                     </property>
                 </bean>
@@ -119,7 +112,16 @@
     </bean>
 
     <bean id="expGenerator" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
+        <constructor-arg value="expGenerator"/>
         <property name="outputExt" value=".search.xar.xml"/>
+        <property name="dependencyId" ref="tppTask"/>
+    </bean>
+
+    <bean id="expGeneratorJoin" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
+        <constructor-arg value="expGeneratorJoin"/>
+        <property name="outputExt" value=".search.xar.xml"/>
+        <property name="join" value="true" />
+        <property name="dependencyId" ref="tppTaskJoin"/>
     </bean>
 
     <bean id="expGeneratorSearch" class="org.labkey.api.exp.pipeline.XarTemplateSubstitutionFactorySettings">

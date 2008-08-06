@@ -19,6 +19,7 @@ import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.*;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.sql.SQLException;
@@ -35,7 +36,9 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
 
     private static final FileType FT_MASCOT_DAT = new FileType(".dat");
     private static final FileType FT_MASCOT_MGF = new FileType(".mgf");
-    private static final String ACTION_NAME = "Mascot Search";
+    private static final String MZXML2SEARCH_ACTION_NAME = "MzXML2Search";
+    private static final String MASCOT_ACTION_NAME = "Mascot";
+    private static final String MASCOT2XML_ACTION_NAME = "Mascot2XML";
 
     public static File getNativeSpectraFile(File dirAnalysis, String baseName)
     {
@@ -89,7 +92,7 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
         void setMascotSequenceRelease(String sequenceRelease);
     }
 
-    public static class Factory extends AbstractMS2SearchTaskFactory
+    public static class Factory extends AbstractMS2SearchTaskFactory<Factory>
     {
         public Factory()
         {
@@ -99,6 +102,11 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
         public PipelineJob.Task createTask(PipelineJob job)
         {
             return new MascotSearchTask(this, job);
+        }
+
+        public String getGroupParameterName()
+        {
+            return "mascot";
         }
 
         public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
@@ -119,7 +127,7 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
 
         public List<String> getProtocolActionNames()
         {
-            return Collections.singletonList(ACTION_NAME);
+            return Arrays.asList(MZXML2SEARCH_ACTION_NAME, MASCOT_ACTION_NAME, MASCOT2XML_ACTION_NAME);
         }
     }
 
@@ -142,7 +150,9 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
             WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
             WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
 
-            RecordedAction action = new RecordedAction(ACTION_NAME);
+            RecordedAction mzxml2SearchAction = new RecordedAction(MZXML2SEARCH_ACTION_NAME);
+            RecordedAction mascotAction = new RecordedAction(MASCOT_ACTION_NAME);
+            RecordedAction mascot2XMLAction = new RecordedAction(MASCOT2XML_ACTION_NAME);
 
             File fileWorkMGF = wd.newFile(FT_MASCOT_MGF);
             File fileWorkDAT = wd.newFile(FT_MASCOT_DAT);
@@ -169,9 +179,9 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
             File fileWorkInputXML = wd.newFile("input.xml");
             getJobSupport().createParamParser().writeFromMap(params, fileWorkInputXML);
 
-            /*
-            0. pre-Mascot search: c) translate the mzXML file to mgf for Mascot (msxml2other)
-            */
+            File fileMGF = new File(getJobSupport().getSearchSpectraFile().getParentFile(), fileWorkMGF.getName());
+
+            // 0. pre-Mascot search: c) translate the mzXML file to mgf for Mascot (msxml2other)
             File fileWorkSpectra = wd.inputFile(getJobSupport().getSearchSpectraFile(), false);
             ArrayList<String> argsM2S = new ArrayList<String>();
             String ver = getJob().getParameters().get("pipeline, tpp version");
@@ -183,23 +193,26 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
             String paramMaxParent = params.get("spectrum, maximum parent m+h");
             if (paramMaxParent != null)
                 argsM2S.add("-T" + paramMaxParent);
-            argsM2S.add(fileWorkSpectra.getName());
+            argsM2S.add(fileWorkSpectra.getAbsolutePath());
 
-            getJob().runSubProcess(new ProcessBuilder(argsM2S.toArray(new String[argsM2S.size()])),
-                    wd.getDir());
+            getJob().runSubProcess(new ProcessBuilder(argsM2S), wd.getDir());
 
-            /*
-            1. perform Mascot search
-            */
+            //  1. perform Mascot search
             getJob().header("mascot client output");
 
             MascotClientImpl mascotClient = new MascotClientImpl(getJobSupport().getMascotServer(), getJob().getLogger(),
                 getJobSupport().getMascotUserAccount(), getJobSupport().getMascotUserPassword());
             mascotClient.setProxyURL(getJobSupport().getMascotHTTPProxy());
             int iReturn = mascotClient.search(fileWorkInputXML.getAbsolutePath(),
-                    fileWorkMGF.getAbsolutePath(), fileWorkDAT.getAbsolutePath());
-            if (iReturn != 0 || !fileWorkDAT.exists())
-                throw new IOException("Failed running Mascot.");
+                    fileMGF.getAbsolutePath(), fileWorkDAT.getAbsolutePath());
+            if (iReturn != 0)
+            {
+                throw new IOException("Error code " + mascotClient.getErrorString());
+            }
+            if (!fileWorkDAT.exists())
+            {
+                throw new IOException("Did not get excepted results file from Mascot: " + fileWorkDAT);
+            }
 
             getJob().header("Sequence Database Synchronization output");
 
@@ -305,26 +318,24 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
                 }
             }
 
-            /*
-            5. translate Mascot result file to pep.xml format
-            */
-
-            //File fileSequenceDatabase = new File(_uriSequenceRoot.getPath(), sequenceDB);
+            // 2. translate Mascot result file to pep.xml format
             File fileSequenceDatabase = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
 
             String exePath = PipelineJobService.get().getExecutablePath("Mascot2XML", "tpp", ver);
-            getJob().runSubProcess(new ProcessBuilder(exePath,
-                    fileWorkDAT.getName(),
-                    "-D" + fileSequenceDatabase.getAbsolutePath(),
-                    "-xml",
-                    "-notgz",
-                    "-desc"
-                    //wch: 2007-05-11
-                    //     expand the protein id to match X!Tandem output or user who run X! Tandem first
-                    //     will fail to access protein associated information in mascot run
-                    //,"-shortid"
-                    ),
-                    wd.getDir());
+            String[] args =
+            {
+                exePath,
+                fileWorkDAT.getName(),
+                "-D" + fileSequenceDatabase.getAbsolutePath(),
+                "-xml",
+                "-notgz",
+                "-desc"
+                //wch: 2007-05-11
+                //     expand the protein id to match X!Tandem output or user who run X! Tandem first
+                //     will fail to access protein associated information in mascot run
+                //,"-shortid"
+            };
+            getJob().runSubProcess(new ProcessBuilder(args), wd.getDir());
             
             File fileOutputPepXML = wd.newFile(new FileType(".xml"));
             if (!fileOutputPepXML.renameTo(fileWorkPepXMLRaw))
@@ -334,9 +345,22 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
             try
             {
                 lock = wd.ensureCopyingLock();
-                action.addOutput(wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
-                action.addOutput(wd.outputFile(fileWorkDAT), "DAT", false);
-                action.addOutput(wd.outputFile(fileWorkMGF), "RawPepXML", false);
+
+                mzxml2SearchAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(argsM2S, " "));
+                mzxml2SearchAction.addInput(getJobSupport().getSearchSpectraFile(), "mzXML");
+                mzxml2SearchAction.addOutput(fileMGF, "MGF", false);
+
+                mascotAction.addInput(fileWorkInputXML, "SearchConfig");
+                for (File file : getJobSupport().getSequenceFiles())
+                {
+                    mascotAction.addInput(file, "FASTA");
+                }
+                mascotAction.addInput(fileMGF, "MGF");
+                mascotAction.addOutput(wd.outputFile(fileWorkDAT), "DAT", false);
+
+                mascot2XMLAction.addInput(wd.outputFile(fileWorkDAT), "DAT");
+                mascot2XMLAction.addOutput(wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
+                mascot2XMLAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(args));
             }
             finally
             {
@@ -344,16 +368,11 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
             }
 
 
-            wd.discardFile(fileWorkSpectra);
             wd.discardFile(fileWorkInputXML);
             wd.remove();
 
-            for (File file : getJobSupport().getSequenceFiles())
-            {
-                action.addInput(file, "FASTA");
-            }
-            action.addInput(getJobSupport().getSearchSpectraFile(), "mzXML");
-            return Collections.singletonList(action);
+            mzxml2SearchAction.addInput(getJobSupport().getSearchSpectraFile(), "mzXML");
+            return Arrays.asList(mzxml2SearchAction, mascotAction, mascot2XMLAction);
         }
         catch (IOException e)
         {
