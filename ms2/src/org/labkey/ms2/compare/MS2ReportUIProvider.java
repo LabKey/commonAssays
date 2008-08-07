@@ -17,7 +17,7 @@ package org.labkey.ms2.compare;
 
 import org.labkey.api.reports.report.view.DefaultReportUIProvider;
 import org.labkey.api.reports.report.view.RReportBean;
-import org.labkey.api.reports.report.view.ChartUtil;
+import org.labkey.api.reports.report.view.ReportUtil;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.QuerySettings;
@@ -36,7 +36,7 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
         bean.setReportType(SpectraCountRReport.TYPE);
         bean.setRedirectUrl(context.getActionURL().toString());
 
-        ActionURL chartURL = ChartUtil.getRReportDesignerURL(context, bean);
+        ActionURL chartURL = ReportUtil.getRReportDesignerURL(context, bean);
         chartURL = SpectraCountRReport.addReportParameters(chartURL, context);
 
         designers.put(SpectraCountRReport.TYPE, chartURL.getLocalURIString());

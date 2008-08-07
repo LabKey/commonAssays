@@ -32,7 +32,7 @@ import org.labkey.api.reports.Report;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.reports.report.RReportDescriptor;
 import org.labkey.api.reports.report.ReportDescriptor;
-import org.labkey.api.reports.report.view.ChartUtil;
+import org.labkey.api.reports.report.view.ReportUtil;
 import org.labkey.api.security.User;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
@@ -270,7 +270,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         descriptor.setProperty(ReportDescriptor.Prop.queryName, "SpectraCountPeptide");
         descriptor.setReportName("Default MS2 report");
 
-        String key = ChartUtil.getReportKey(MS2Schema.SCHEMA_NAME, "SpectraCountPeptide");
+        String key = ReportUtil.getReportKey(MS2Schema.SCHEMA_NAME, "SpectraCountPeptide");
         try {
             context.setContainer(ContainerManager.getSharedContainer());
             ReportService.get().saveReport(context, key, r);
