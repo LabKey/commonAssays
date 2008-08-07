@@ -68,9 +68,16 @@ public class GWTSearchServiceResult implements IsSerializable
 
     private String protocolXml;
     /**
-     * @gwt.typeArgs <java.lang.String, java.lang.String>
+     * @gwt.typeArgs <java.lang.String>
      */
-    private Map mzXmlMap;
+    private List fileInputNames;
+
+    /**
+     * @gwt.typeArgs <java.lang.String>
+     */
+    private List fileInputStatus;
+
+    private boolean activeJobs;
 
     private String errors = "";
 
@@ -113,6 +120,7 @@ public class GWTSearchServiceResult implements IsSerializable
     {
         return sequenceDbPaths;
     }
+
     /**
      * @gwt.typeArgs sequenceDbPaths <java.lang.String>
      */
@@ -120,6 +128,7 @@ public class GWTSearchServiceResult implements IsSerializable
     {
         this.sequenceDbPaths = sequenceDbPaths;
     }
+
     /**
      * @gwt.typeArgs <java.lang.String>
      */
@@ -127,6 +136,7 @@ public class GWTSearchServiceResult implements IsSerializable
     {
         return protocols;
     }
+
     /**
      * @gwt.typeArgs protocols <java.lang.String>
      */
@@ -181,19 +191,45 @@ public class GWTSearchServiceResult implements IsSerializable
     }
 
     /**
-     * @gwt.typeArgs <java.lang.String, java.lang.String>
+     * @gwt.typeArgs <java.lang.String>
      */
-    public Map getMzXmlMap()
+    public List getFileInputNames()
     {
-        return mzXmlMap;
+        return fileInputNames;
     }
 
     /**
-     * @gwt.typeArgs  mzXmlMap <java.lang.String, java.lang.String>
+     * @gwt.typeArgs protocols <java.lang.String>
      */
-    public void setMzXmlMap(Map mzXmlMap)
+    public void setFileInputNames(List names)
     {
-        this.mzXmlMap = mzXmlMap;
+        this.fileInputNames = names;
+    }
+
+    /**
+     * @gwt.typeArgs <java.lang.String>
+     */
+    public List getFileInputStatus()
+    {
+        return fileInputStatus;
+    }
+
+    /**
+     * @gwt.typeArgs protocols <java.lang.String>
+     */
+    public void setFileInputStatus(List fileInputStatus)
+    {
+        this.fileInputStatus = fileInputStatus;
+    }
+
+    public boolean isActiveJobs()
+    {
+        return activeJobs;
+    }
+
+    public void setActiveJobs(boolean activeJobs)
+    {
+        this.activeJobs = activeJobs;
     }
 
     /**

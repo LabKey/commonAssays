@@ -17,9 +17,9 @@
                             <ref bean="mzxmlConverter"/>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.tandem.XTandemSearchTask</value>
                             <ref bean="tppTask"/>
-                            <ref bean="expGenerator"/>
+                            <ref bean="expGeneratorSearch"/>
                             <ref bean="tppTaskJoin"/>
-                            <ref bean="expGeneratorJoin"/>
+                            <ref bean="expGeneratorSearchJoin"/>
                         </list>
                     </property>
                 </bean>
@@ -35,9 +35,9 @@
                             <ref bean="mzxmlConverter"/>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.mascot.MascotSearchTask</value>
                             <ref bean="tppTask"/>
-                            <ref bean="expGenerator"/>
+                            <ref bean="expGeneratorSearch"/>
                             <ref bean="tppTaskJoin"/>
-                            <ref bean="expGeneratorJoin"/>
+                            <ref bean="expGeneratorSearchJoin"/>
                         </list>
                     </property>
                 </bean>
@@ -53,9 +53,9 @@
                             <ref bean="mzxmlConverter"/>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.sequest.SequestSearchTask</value>
                             <ref bean="tppTask"/>
-                            <ref bean="expGenerator"/>
+                            <ref bean="expGeneratorSearch"/>
                             <ref bean="tppTaskJoin"/>
-                            <ref bean="expGeneratorJoin"/>
+                            <ref bean="expGeneratorSearchJoin"/>
                         </list>
                     </property>
                 </bean>
@@ -66,7 +66,7 @@
                     <constructor-arg value="finishPerlCluster"/>
                     <property name="taskProgressionSpec">
                         <list>
-                            <ref bean="expGeneratorSearch"/>
+                            <ref bean="expTemplateSearch"/>
                             <ref bean="expImportSearch"/>
                         </list>
                     </property>
@@ -78,7 +78,7 @@
                     <constructor-arg value="finishPerlClusterJoined"/>
                     <property name="taskProgressionSpec">
                         <list>
-                            <ref bean="expGeneratorSearchJoin"/>
+                            <ref bean="expTemplateSearchJoin"/>
                             <ref bean="expImportSearchJoin"/>
                         </list>
                     </property>
@@ -111,27 +111,27 @@
         <constructor-arg value="join"/>
     </bean>
 
-    <bean id="expGenerator" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
-        <constructor-arg value="expGenerator"/>
-        <property name="outputExt" value=".search.xar.xml"/>
-        <property name="dependencyId" ref="tppTask"/>
-    </bean>
-
-    <bean id="expGeneratorJoin" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
-        <constructor-arg value="expGeneratorJoin"/>
-        <property name="outputExt" value=".search.xar.xml"/>
-        <property name="join" value="true" />
-        <property name="dependencyId" ref="tppTaskJoin"/>
-    </bean>
-
-    <bean id="expGeneratorSearch" class="org.labkey.api.exp.pipeline.XarTemplateSubstitutionFactorySettings">
+    <bean id="expGeneratorSearch" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
         <constructor-arg value="expGeneratorSearch"/>
         <property name="outputExt" value=".search.xar.xml"/>
         <property name="dependencyId" ref="tppTask"/>
     </bean>
 
-    <bean id="expGeneratorSearchJoin" class="org.labkey.api.exp.pipeline.XarTemplateSubstitutionFactorySettings">
+    <bean id="expGeneratorSearchJoin" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
         <constructor-arg value="expGeneratorSearchJoin"/>
+        <property name="outputExt" value=".search.xar.xml"/>
+        <property name="join" value="true" />
+        <property name="dependencyId" ref="tppTaskJoin"/>
+    </bean>
+
+    <bean id="expTemplateSearch" class="org.labkey.api.exp.pipeline.XarTemplateSubstitutionFactorySettings">
+        <constructor-arg value="expTemplateSearch"/>
+        <property name="outputExt" value=".search.xar.xml"/>
+        <property name="dependencyId" ref="tppTask"/>
+    </bean>
+
+    <bean id="expTemplateSearchJoin" class="org.labkey.api.exp.pipeline.XarTemplateSubstitutionFactorySettings">
+        <constructor-arg value="expTemplateSearchJoin"/>
         <property name="outputExt" value=".search.xar.xml"/>
         <property name="join" value="true"/>
         <property name="dependencyId" ref="tppTaskJoin"/>
@@ -165,7 +165,6 @@
         <property name="groupParameterName" value="readw" />
         <property name="protocolActionName" value="ReAdW mzXML Conversion" />
         <property name="outputExtension" value=".mzXML"/>
-        <property name="switchFormat" ref="unixNewSwitch"/>
         <property name="inputPaths">
             <map>
                 <entry key="input">
@@ -181,12 +180,42 @@
                 <bean class="org.labkey.api.pipeline.cmd.RequiredInLine">
                     <property name="value" value="ReAdW"/>
                 </bean>
-                <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
-                    <property name="switchName" value="mzxml"/>
-                </bean>
-                <bean class="org.labkey.api.pipeline.cmd.PathInLine"/>
-                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                    <property name="function" value="output"/>
+                <bean class="org.labkey.api.pipeline.cmd.EnumToCommandArgs">
+                    <property name="parameter" value="pipeline, readw version"/>
+                    <property name="default" value="3.5.1"/>
+                    <property name="converters">
+                        <map>
+                            <entry key="3.5.1">
+                                <bean class="org.labkey.api.pipeline.cmd.ListToCommandArgs">
+                                    <property name="switchFormat" ref="unixNewSwitch"/>
+                                    <property name="converters">
+                                        <list>
+                                            <bean class="org.labkey.api.pipeline.cmd.RequiredSwitch">
+                                                <property name="switchName" value="mzxml"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.BooleanToSwitch">
+                                                <property name="parameter" value="readw, use compression"/>
+                                                <property name="switchName" value="compress"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.BooleanToSwitch">
+                                                <property name="parameter" value="readw, verbose"/>
+                                                <property name="switchName" value="verbose"/>
+                                            </bean>
+                                            <bean class="org.labkey.api.pipeline.cmd.PathInLine"/>
+                                            <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                                                <property name="function" value="output"/>
+                                            </bean>
+                                        </list>
+                                    </property>
+                                </bean>
+                            </entry>
+<!--                            <entry key="1.0">
+                                <bean class="org.labkey.api.pipeline.cmd.ListToCommandArgs">
+
+                                </bean>                                
+                            </entry> -->
+                        </map>
+                    </property>
                 </bean>
             </list>
         </property>

@@ -20,14 +20,18 @@ import org.labkey.ms2.pipeline.client.SearchService;
 import org.labkey.ms2.pipeline.client.GWTSearchServiceResult;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.FileType;
+import org.labkey.api.settings.AppProps;
+import org.labkey.api.data.Container;
 import org.apache.log4j.Logger;
 import java.util.*;
 import java.io.IOException;
 import java.io.File;
+import java.io.FileFilter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
@@ -88,11 +92,12 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         if(protocolName.equals("new"))
         {
             results.setSelectedProtocol("");
-            getMzXml("",path, searchEngine);
+            getMzXml(path, searchEngine, false);
             return results;
         }
         URI  uriRoot = new File(dirRoot).toURI();
 
+        boolean protocolExists = false;
         AbstractMS2SearchProtocolFactory protocolFactory = provider.getProtocolFactory();
         try
         {
@@ -101,6 +106,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
                 File protocolFile = protocolFactory.getParametersFile(new File(URIUtil.resolve(uriRoot, path)), protocolName);
                 if (NetworkDrive.exists(protocolFile))
                 {
+                    protocolExists = true;
                     protocol = protocolFactory.loadInstance(protocolFile);
 
                     // Don't allow the instance file to override the protocol name.
@@ -138,7 +144,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             results.setProtocolDescription(protocol.getDescription());
             results.setProtocolXml(protocol.getXml());
         }
-        getMzXml(results.getSelectedProtocol(), path, searchEngine);
+        getMzXml(path, searchEngine, protocolExists);
         return results;
     }
 
@@ -419,64 +425,126 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         return results;
     }
 
-    private void getMzXml(String protocolName, String path, String searchEngine)
+    private void getMzXml(String path, String searchEngine, boolean protocolExists)
     {
-        if(protocolName == null) protocolName = "";
-        if(provider == null)
-        {
+        if (provider == null)
             provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
-        }
+        if (protocol == null)
+            protocolExists = false;
+
         PipeRoot pr;
-        URI uriRoot = null;
+        URI uriRoot;
         try
         {
-            pr = PipelineService.get().findPipelineRoot(getContainer());
+            Container c = getContainer();
+            pr = PipelineService.get().findPipelineRoot(c);
             if (pr == null || !URIUtil.exists(pr.getUri()))
-                results.appendError("Can't find root directory.");
+                throw new IOException("Can't find root directory.");
+
             uriRoot = pr.getUri();
-        }
-        catch(SQLException e)
-        {
-            results.appendError(e.getMessage());
-        }
-        URI uriData = URIUtil.resolve(uriRoot, path);
-        if (uriData == null)
-            results.appendError("Can't find the root directory");
+            URI uriData = URIUtil.resolve(uriRoot, path);
+            if (uriData == null)
+                throw new IOException("Invalid data directory.");
 
-        File dirData = new File(uriData);
-        File dirAnalysis = provider.getProtocolFactory().getAnalysisDir(dirData,protocolName);
-        if(dirData == null)
-        {
-            _log.debug("Problem loading protocol: no analysis directory in protocol");
-            results.appendError("Problem loading protocol: no analysis directory in protocol\n");
-        }
-        Map<File,FileStatus> mzXmlFileStatus = null;
+            File dirData = new File(uriData);
+            File dirAnalysis = null;
+            if (protocol != null)
+                dirAnalysis = protocol.getAnalysisDir(dirData);
 
-        try
-        {
-            mzXmlFileStatus =
-                MS2PipelineManager.getAnalysisFileStatus(dirData,dirAnalysis,getContainer());
-        }
-        catch(IOException e)
-        {
-            results.appendError(e.getMessage());
-        }
-        catch(NullPointerException e)
-        {
-            //Error should have already been reported.
-        }
-        Map<String,String> returnMap = new HashMap<String,String>();
-
-        if(mzXmlFileStatus.size() > 0)
-        {
-            for(Map.Entry<File, FileStatus> entry:mzXmlFileStatus.entrySet())
+            results.setActiveJobs(false);
+            results.setFileInputNames(new ArrayList<String>());
+            results.setFileInputStatus(new ArrayList<String>());
+            if (pr.isPerlPipeline() && AppProps.getInstance().isPerlPipelineEnabled())
             {
-                FileStatus status = entry.getValue();
-                String name = entry.getKey().getName();
-                returnMap.put(name, status.toString());
+                // Do what the Perl Pipeline has always done.
+                Map<File, FileStatus> mapFileStatus =
+                    MS2PipelineManager.getAnalysisFileStatus(dirData, dirAnalysis, c);
+                for (Map.Entry<File, FileStatus> entry : mapFileStatus.entrySet())
+                {
+                    results.getFileInputNames().add(entry.getKey().getName());
+                    FileStatus status = entry.getValue();
+                    if (status == FileStatus.UNKNOWN || status == FileStatus.ANNOTATED)
+                        results.getFileInputStatus().add(null);
+                    else
+                    {
+                        // For Perl Pipeline anything that has status at all, means the
+                        // the job is active.
+                        results.getFileInputStatus().add(status.toString());
+                        results.setActiveJobs(true);
+                    }
+                }
             }
+            else
+            {
+                // todo: use the file list passed to the form by initial post
+                File[] fileInputs = dirData.listFiles(MS2PipelineManager.getAnalyzeFilter(false));
+                Arrays.sort(fileInputs, new Comparator<File>()
+                {
+                    public int compare(File o1, File o2)
+                    {
+                        return o1.getName().compareToIgnoreCase(o2.getName());
+                    }
+                });
 
+                for (File file : fileInputs)
+                {
+                    String name = file.getName();
+                    results.getFileInputNames().add(name);
+                    if (protocolExists)
+                        results.getFileInputStatus().add(getInputStatus(protocol, dirData, dirAnalysis, name, true));
+                }
+                if (protocolExists)
+                    results.getFileInputStatus().add(getInputStatus(protocol, dirData, dirAnalysis, null, false));
+            }
         }
-        results.setMzXmlMap(returnMap);
+        catch (SQLException e)
+        {
+            results.appendError(e.getMessage());
+        }
+        catch (IOException e)
+        {
+            results.appendError(e.getMessage());
+        }
+    }
+
+    private String getInputStatus(AbstractMS2SearchProtocol protocol, File dirData, File dirAnalysis,
+                              String fileInputName, boolean statusSingle)
+    {
+        File fileStatus = null;
+
+        if (!statusSingle)
+        {
+            fileStatus = PipelineJob.FT_LOG.newFile(dirAnalysis,
+                    AbstractFileAnalysisProtocol.getDataSetBaseName(dirData));
+        }
+        else if (fileInputName != null)
+        {
+            File fileInput = new File(dirData, fileInputName);
+            FileType ft = protocol.findInputType(fileInput);
+            if (ft != null)
+                fileStatus = PipelineJob.FT_LOG.newFile(dirAnalysis, ft.getBaseName(fileInput));
+        }
+
+        if (fileStatus != null)
+        {
+            String path = PipelineJobService.statusPathOf(fileStatus.getAbsolutePath());
+            try
+            {
+                PipelineStatusFile sf = PipelineService.get().getStatusFile(path);
+                if (sf == null)
+                    return null;
+
+                if (sf.isActive())
+                    results.setActiveJobs(true);
+                return sf.getStatus();
+            }
+            catch (SQLException e)
+            {
+            }
+        }
+
+        // Failed to get status.  Assume job is active, and return unknown status.
+        results.setActiveJobs(true);
+        return "UNKNOWN";
     }
 }

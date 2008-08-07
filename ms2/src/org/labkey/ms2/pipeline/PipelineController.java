@@ -268,6 +268,7 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(ACL.PERM_INSERT)
     public class SearchAction extends FormViewAction<MS2SearchForm>
     {
+        private boolean _perlPipeline;
         private File _dirRoot;
         private File _dirSeqRoot;
         private File _dirData;
@@ -296,6 +297,8 @@ public class PipelineController extends SpringActionController
             PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
             if (pr == null || !URIUtil.exists(pr.getUri()))
                 return HttpView.throwNotFoundMV();
+
+            _perlPipeline = pr.isPerlPipeline();
 
             URI uriRoot = pr.getUri();
             _dirRoot = new File(uriRoot);
@@ -415,9 +418,8 @@ public class PipelineController extends SpringActionController
         {
 
             if(!form.isRunSearch())
-            {
                 return false;
-            }
+
             try
             {
                 _provider.ensureEnabled();   // throws exception if not enabled
@@ -456,20 +458,30 @@ public class PipelineController extends SpringActionController
                 }
 
                 Container c = getContainer();
-                List<File> mzXMLFileList = new ArrayList<File>();
+                File[] mzXMLFiles;
 
-                File[] annotatedFiles = MS2PipelineManager.getAnalysisFiles(_dirData, _dirAnalysis, FileStatus.ANNOTATED, c);
-                mzXMLFileList.addAll(Arrays.asList(annotatedFiles));
-                File[] unprocessedFile = MS2PipelineManager.getAnalysisFiles(_dirData, _dirAnalysis, FileStatus.UNKNOWN, c);
-                mzXMLFileList.addAll(Arrays.asList(unprocessedFile));
-                    
-                File[] mzXMLFiles = mzXMLFileList.toArray(new File[mzXMLFileList.size()]);
-
-                if (mzXMLFiles.length == 0)
+                if (_perlPipeline && AppProps.getInstance().isPerlPipelineEnabled())
                 {
-                    errors.reject(ERROR_MSG, "Analysis for this protocol is already complete.");
-                    return false;
+                    List<File> mzXMLFileList = new ArrayList<File>();
+
+                    File[] annotatedFiles = MS2PipelineManager.getAnalysisFiles(_dirData, _dirAnalysis, FileStatus.ANNOTATED, c);
+                    mzXMLFileList.addAll(Arrays.asList(annotatedFiles));
+                    File[] unprocessedFile = MS2PipelineManager.getAnalysisFiles(_dirData, _dirAnalysis, FileStatus.UNKNOWN, c);
+                    mzXMLFileList.addAll(Arrays.asList(unprocessedFile));
+                    
+                    mzXMLFiles = mzXMLFileList.toArray(new File[mzXMLFileList.size()]);
+
+                    if (mzXMLFiles.length == 0)
+                    {
+                        errors.reject(ERROR_MSG, "Analysis for this protocol is already complete.");
+                        return false;
+                    }
                 }
+                else
+                {
+                    mzXMLFiles = _dirData.listFiles(MS2PipelineManager.getAnalyzeFilter(false));
+                }
+                    
 
                 _protocol.getFactory().ensureDefaultParameters(_dirRoot);
 
@@ -504,7 +516,8 @@ public class PipelineController extends SpringActionController
                 else
                 {
                     // For backward compatibility, we need to create placeholder jobs for
-                    // a Perl-driven cluster.
+                    // a Perl-driven cluster.  These are not queued, but simply set
+                    // status to show to the user.
                     
                     // If this is a single file job, or a factions job, then it requires its own processing.
                     if (mzXMLFiles.length == 1 || job.isFractions())

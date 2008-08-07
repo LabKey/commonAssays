@@ -120,5 +120,10 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
         {
             throw new PipelineJobException("Failed to check FASTA file(s)", e);
         }
+        // Sometimes thrown by the checker.
+        catch (IllegalArgumentException e)
+        {
+            throw new PipelineJobException("Failed to check FASTA file(s)", e);
+        }
     }
 }

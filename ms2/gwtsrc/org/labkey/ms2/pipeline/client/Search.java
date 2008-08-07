@@ -176,6 +176,10 @@ public class Search implements EntryPoint
             buttonPanel.remove(copyButton);
         else
             buttonPanel.insert(copyButton, 1);
+        if (mzXmlComposite.hasRun())
+            searchButton.setText("Retry");
+        else
+            searchButton.setText("Search");
         if(hasErrors() || !mzXmlComposite.hasWork())
         {
             if(force) searchButton.setEnabled(true);
@@ -687,7 +691,8 @@ public class Search implements EntryPoint
             String defaultProtocol = gwtResult.getSelectedProtocol();
             String protocolDescription = gwtResult.getProtocolDescription();
             protocolComposite.update(protocols, defaultProtocol, protocolDescription);
-            mzXmlComposite.update(gwtResult.getMzXmlMap());
+            mzXmlComposite.update(gwtResult.getFileInputNames(), gwtResult.getFileInputStatus(),
+                    gwtResult.isActiveJobs());
             appendError(inputXmlComposite.update(gwtResult.getProtocolXml()));
             appendError(syncXml2Form());
             String defaultDb = gwtResult.getDefaultSequenceDb();
@@ -719,7 +724,8 @@ public class Search implements EntryPoint
             String defaultProtocol = gwtResult.getSelectedProtocol();
             String protocolDescription = gwtResult.getProtocolDescription();
             protocolComposite.update(protocols, defaultProtocol, protocolDescription);
-            mzXmlComposite.update(gwtResult.getMzXmlMap());
+            mzXmlComposite.update(gwtResult.getFileInputNames(), gwtResult.getFileInputStatus(),
+                    gwtResult.isActiveJobs());
             enzymeComposite.update(gwtResult.getEnzymeMap());
             residueModComposite.update(gwtResult.getMod0Map(), gwtResult.getMod1Map());
             appendError(inputXmlComposite.update(gwtResult.getProtocolXml()));

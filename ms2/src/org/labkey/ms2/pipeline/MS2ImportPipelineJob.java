@@ -53,7 +53,7 @@ public class MS2ImportPipelineJob extends PipelineJob
 
         // If there is a .status file created by the Perl pipeline, then connect this job
         // to it.
-        File fileStatus = FT_CLUSTER_STATUS.newFile(_file.getParentFile(), basename);
+        File fileStatus = FT_PERL_STATUS.newFile(_file.getParentFile(), basename);
         if (NetworkDrive.exists(fileStatus))
             setStatusFile(fileStatus);
 

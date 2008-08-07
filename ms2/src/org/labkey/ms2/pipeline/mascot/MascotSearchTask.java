@@ -120,8 +120,11 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
                     !NetworkDrive.exists(getNativeOutputFile(dirAnalysis, baseName)))
                 return false;
 
-            // Either raw converted pepXML from DAT, or completely analyzed pepXML
-            return NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) ||
+            String baseNameJoined = support.getJoinedBaseName();
+
+            // Fraction roll-up, completely analyzed sample pepXML, or the raw pepXML exist
+            return NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseNameJoined)) ||
+                   NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) ||
                    NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName));
         }
 

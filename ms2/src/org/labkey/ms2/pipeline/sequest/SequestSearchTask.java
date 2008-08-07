@@ -75,14 +75,13 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
         {
             JobSupport support = (JobSupport) job;
             String baseName = support.getBaseName();
+            String baseNameJoined = support.getJoinedBaseName();
             File dirAnalysis = support.getAnalysisDirectory();
 
-            // Either raw converted pepXML from Tandem2XML, or completely analyzed pepXML
-            if (!NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) &&
-                    !NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName)))
-                return false;
-
-            return true;
+            // Fraction roll-up, completely analyzed sample pepXML, or the raw pepXML exist
+            return NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseNameJoined)) ||
+                   NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseName)) ||
+                   NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName));
         }
 
 

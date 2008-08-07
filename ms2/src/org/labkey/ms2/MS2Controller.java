@@ -4704,6 +4704,11 @@ public class MS2Controller extends SpringActionController
                             url = new ActionURL("MS2", "addFileRunStatus", "");
                             url.addParameter("error", e.getMessage());
                         }
+                        catch (IOException e)
+                        {
+                            url = new ActionURL("MS2", "addFileRunStatus", "");
+                            url.addParameter("error", e.getMessage());                            
+                        }
                     }
                 }
             }

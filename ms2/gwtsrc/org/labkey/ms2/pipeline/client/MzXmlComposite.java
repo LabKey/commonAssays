@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.Widget;
 import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * User: billnelson@uky.edu
@@ -32,11 +33,8 @@ import java.util.Iterator;
 public class MzXmlComposite extends SearchFormComposite
 {
     VerticalPanel instance = new VerticalPanel();
-    public static final String RUNNING = "RUNNING";
-    public static final String UNKNOWN = "UNKNOWN";
-    public static final String ANNOTATED = "ANNOTATED";
-    public static final String COMPLETE = "COMPLETE";
-    boolean hasWork;
+    private boolean hasWork;
+    private boolean hasRun;
 
     public MzXmlComposite()
     {
@@ -44,56 +42,44 @@ public class MzXmlComposite extends SearchFormComposite
         init();
     }
 
-     public MzXmlComposite(Map mzXmlmap)
-     {
-         super();
-         update(mzXmlmap);
-         init();
-
-     }
-
     public void init()
     {
         initWidget(instance);
         labelWidget = new Label();
     }
 
-    public void update(Map mzXmlMap)
+    public void update(List fileInputNames, List fileInputStatus, boolean isActiveJobs)
     {
-        Set keySet =  mzXmlMap.keySet();
-        hasWork = false;
+        hasRun = false;
+        hasWork = !isActiveJobs;
+
         instance.clear();
-        int count = 1;
-        int num = keySet.size();
-        if(num > 1)
+        int num = (fileInputNames == null ? 0 : fileInputNames.size());
+        if(num != 0)
         {
-            ((Label)labelWidget).setText("Analyze files:");
-        }
-        if(num > 0)
-        {
-            for(Iterator it = keySet.iterator(); it.hasNext();)
+            if(num > 1)
             {
-                StringBuffer name = new StringBuffer((String)it.next());
-                String status = (String)mzXmlMap.get(name.toString());
-                if(status.equals(ANNOTATED) || status.equals(UNKNOWN))
-                {
-                    hasWork = true;
-                }
-                else
-                {
-                    name.append("(<b>");
-                    name.append(status);
-                    name.append("</b>)");
-                    if(count < (num))
-                    {
-                        name.append("<br>");
-                        count++;
-                    }    
-                }
-                HTML html = new HTML(name.toString());
-                html.setStylePrimaryName("labkey-read-only");
-                instance.add(html);
+                ((Label)labelWidget).setText("Analyze files:");
             }
+            StringBuffer names = new StringBuffer();
+            for(int i = 0; i < num; i++)
+            {
+                if (i > 0)
+                    names.append("<br>");
+                names.append((String) fileInputNames.get(i));
+                if(fileInputStatus != null && i < fileInputStatus.size())
+                {
+                    String status = (String) fileInputStatus.get(i);
+                    if (status != null && !"".equals(status))
+                    {
+                        names.append(" (<b>").append(status).append("</b>)");
+                        hasRun = true;
+                    }
+                }
+            }
+            HTML html = new HTML(names.toString());
+            html.setStylePrimaryName("labkey-read-only");
+            instance.add(html);
         }
         else
         {
@@ -136,6 +122,16 @@ public class MzXmlComposite extends SearchFormComposite
     public void setHasWork(boolean hasWork)
     {
         this.hasWork = hasWork;
+    }
+
+    public boolean hasRun()
+    {
+        return hasRun;
+    }
+
+    public void setHasRun(boolean hasRun)
+    {
+        this.hasRun = hasRun;
     }
 
     public void clearStatus()
