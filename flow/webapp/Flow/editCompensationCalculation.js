@@ -239,21 +239,11 @@ function universalNegative()
     var elSubset = selectSubset("negative", 0);
     for (var i = 1; ; i ++)
     {
-        var elKeyword = selectKeywordName("positive", i);
+        var elKeyword = selectKeywordName("negative", i);
         if (!elKeyword)
             return;
-
-        var positiveKeyword = getValue(elKeyword);
-        if (!positiveKeyword)
-        {
-            clearParameter("negative", i);
-        }
-        else
-        {
-            elKeyword = selectKeywordName("negative", i);
-            elKeyword.selectedIndex = idxName;
-            copyOptions(elValue, selectKeywordValue("negative", i));
-            copyOptions(elSubset, selectSubset("negative", i));
-        }
+        elKeyword.selectedIndex = idxName;
+        copyOptions(elValue, selectKeywordValue("negative", i));
+        copyOptions(elSubset, selectSubset("negative", i));
     }
 }
