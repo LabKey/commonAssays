@@ -19,12 +19,19 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.PickViewBean bean = ((JspView<MS2Controller.PickViewBean>)HttpView.currentView()).getModelBean();
 %>
 <p><%=h(bean.viewInstructions)%></p>
-<p>To define a view: display a run, filter the run, click "Save View", and pick a name.  The filter you've set up will be saved with the view and the name will then appear in the list below.</p>
+<p>
+    To create a view, go back to the
+    <a href="<%= new ActionURL(MS2Controller.ShowListAction.class, HttpView.currentContext().getContainer())%>">list of MS2 runs</a>
+    and click to view one of the individual runs. Apply the filters that you want. Click on the "Save View" button,
+    and pick a name. The next time you do a comparison, your saved view will appear in the list below and you can
+    select it to apply the same filter to your comparison.
+</p>
 <form method="get" action="<%=h(bean.nextURL)%>">
     <input type="hidden" name="runList" value="<%=bean.runList%>">
     <%=bean.select%><br/>

@@ -49,6 +49,7 @@ public class ProteinGroupProteins
 
         ResultSet rs = context.getResultSet();
         int originalRow = rs.getRow();
+        rs.beforeFirst();
 
         int firstGroupId = Integer.MAX_VALUE;
         int lastGroupId = Integer.MIN_VALUE;
