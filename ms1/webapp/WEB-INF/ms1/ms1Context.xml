@@ -12,12 +12,12 @@
                     <property name="protocolObjectId" value="MS1.msInspectFeatureFindingAnalysis" />
                     <property name="protocolName" value="msInspect Feature Finding Analysis" />
                     <property name="protocolFactoryName" value="inspect"/>
-                    <property name="sharedOutputExts">
-                        <list>
-                            <value>.mzXML</value>
-                            <value>.mzXML.inspect</value>
-                            <value>.mzXML.ms2.tsv</value>
-                        </list>
+                    <property name="fileExtHierarchy">
+                        <map>
+                            <entry key=".mzXML"><list/></entry>
+                            <entry key=".mzXML.inspect"><list/></entry>
+                            <entry key=".mzXML.ms2.tsv"><list/></entry>
+                        </map>
                     </property>
                     <property name="xarGeneratorSupport">
                         <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$Features"/>
@@ -51,12 +51,6 @@
                                 <list><value>.pep.xml</value></list>
                             </entry>
                         </map>
-                    </property>
-                    <property name="sharedOutputExts">
-                        <list>
-                            <value>.mzXML.inspect</value>
-                            <value>.mzXML.ms2.tsv</value>
-                        </list>
                     </property>
                     <property name="xarGeneratorSupport">
                         <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$Peptides"/>
@@ -156,7 +150,6 @@
         <property name="statusName" value="FIND FEATURES"/>
         <property name="groupParameterName" value="msinspect" />
         <property name="protocolActionName" value="msInspect Find Features" />
-        <property name="inputExtension" value=".mzXML"/>
         <property name="outputExtension" value=".peptides.tsv"/>
         <property name="inputPaths">
             <map>
@@ -166,26 +159,14 @@
                         <property name="role" value="mzXML" />
                     </bean>
                 </entry>
-                <entry key="msInspectDefFile">
-                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <property name="name" value="inspect.xml" />
-                        <property name="role" value="msInspectDefFile" />
-                    </bean>
-                </entry>
+                <entry key="mzXML cache" value-ref="mzXMLCache"/>
+                <entry key="ms2 cache" value-ref="ms2Cache"/>
             </map>
         </property>
         <property name="outputPaths">
             <map>
-                <entry key="output-cache">
-                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <constructor-arg value=".mzXML.inspect"/>
-                    </bean>
-                </entry>
-                <entry key="output-ms2">
-                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
-                        <constructor-arg value=".mzXML.ms2.tsv"/>
-                    </bean>
-                </entry>
+                <entry key="mzXML cache" value-ref="mzXMLCache"/>
+                <entry key="ms2 cache" value-ref="ms2Cache"/>
             </map>
         </property>
         <property name="switchFormat" ref="unixNewSwitch"/>
@@ -275,6 +256,18 @@
                 <bean class="org.labkey.api.pipeline.cmd.PathInLine"/>
             </list>
         </property>
+    </bean>
+
+    <bean id="mzXMLCache" class="org.labkey.api.pipeline.cmd.TaskPath">
+        <constructor-arg value=".mzXML.inspect"/>
+        <property name="optional" value="true"/>
+        <property name="role" value="mzXML cache" />
+    </bean>
+
+    <bean id="ms2Cache" class="org.labkey.api.pipeline.cmd.TaskPath">
+        <constructor-arg value=".mzXML.ms2.tsv"/>
+        <property name="optional" value="true"/>
+        <property name="role" value="ms2 cache" />
     </bean>
 
     <bean id="pepMatchFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">

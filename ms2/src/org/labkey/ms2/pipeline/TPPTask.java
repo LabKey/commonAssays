@@ -224,6 +224,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
             // TODO: mzXML files may be required, and input disk space requirements
             //          may be too great to copy to a temporary directory.
             File[] inputFiles = getJobSupport().getInteractInputFiles();
+            File[] inputWorkFiles = new File[inputFiles.length];
             for (File fileInput : inputFiles)
             {
                 pepXMLAction.addInput(fileInput, "RawPepXML");
@@ -236,7 +237,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
                 {
                     lock = wd.ensureCopyingLock();
                     for (int i = 0; i < inputFiles.length; i++)
-                        inputFiles[i] = wd.inputFile(inputFiles[i], false);
+                        inputWorkFiles[i] = wd.inputFile(inputFiles[i], false);
 
                     if (isSpectraProcessor(params))
                     {
@@ -345,7 +346,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
 
             interactCmd.add("-N" + fileWorkPepXML.getName());
 
-            for (File fileInput : inputFiles)
+            for (File fileInput : inputWorkFiles)
                 interactCmd.add(wd.getRelativePath(fileInput));
 
             getJob().runSubProcess(new ProcessBuilder(interactCmd), wd.getDir());
