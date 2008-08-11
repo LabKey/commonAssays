@@ -97,14 +97,6 @@ public class NabModule extends DefaultModule implements ContainerManager.Contain
     }
 
 
-    @Override
-    public Set<String> getModuleDependencies()
-    {
-        Set<String> result = new HashSet<String>();
-        result.add("Study");
-        return result;
-    }
-
     public ActionURL getTabURL(Container c, User user)
     {
         ActionURL defaultURL = super.getTabURL(c, user);

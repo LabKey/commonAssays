@@ -344,17 +344,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         return PageFlowUtil.set(MS2Manager.getSchema(), ProteinManager.getSchema());
     }
 
-
-    @Override
-    public Set<String> getModuleDependencies()
-    {
-        Set<String> result = new HashSet<String>();
-        result.add("Pipeline");
-        result.add("Experiment");
-        return result;
-    }
-
-
     @Override
     public Set<Class<? extends TestCase>> getJUnitTests()
     {

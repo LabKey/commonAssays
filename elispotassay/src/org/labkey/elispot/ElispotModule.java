@@ -78,11 +78,6 @@ public class ElispotModule extends DefaultModule implements ContainerManager.Con
         ElispotPlateReaderService.registerProvider(new TextPlateReader());
     }
 
-    public Set<String> getModuleDependencies()
-    {
-        return Collections.singleton("Experiment");
-    }
-
     public void afterSchemaUpdate(ModuleContext moduleContext, ViewContext viewContext)
     {
         // Issue #5689, module was renamed to avoid a collision with a 3rd party module,

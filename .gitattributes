@@ -595,7 +595,6 @@ ms1/src/org/labkey/ms1/model/SimilarSearchModel.java -text
 ms1/src/org/labkey/ms1/model/Software.java -text
 ms1/src/org/labkey/ms1/model/SoftwareParam.java -text
 ms1/src/org/labkey/ms1/pipeline/MSInspectFeaturesDataHandler.java -text
-ms1/src/org/labkey/ms1/pipeline/MSInspectXarGeneratorSupport.java -text
 ms1/src/org/labkey/ms1/pipeline/PeaksFileDataHandler.java -text
 ms1/src/org/labkey/ms1/pipeline/PeaksFileImporter.java -text
 ms1/src/org/labkey/ms1/pipeline/templates/msInspectFeatures.xml -text

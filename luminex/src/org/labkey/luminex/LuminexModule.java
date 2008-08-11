@@ -80,9 +80,4 @@ public class LuminexModule extends DefaultModule implements ContainerManager.Con
     {
         return PageFlowUtil.set(LuminexSchema.getSchema());
     }
-
-    public Set<String> getModuleDependencies()
-    {
-        return Collections.singleton("Experiment");
-    }
 }

@@ -67,7 +67,7 @@
             </exp:ParameterDeclarations>
             <exp:Properties/>
         </exp:Protocol>
-        <exp:Protocol rdf:about="${FolderLSIDBase}:MS2.SequestAnalysis.Fractions:">
+        <exp:Protocol rdf:about="${FolderLSIDBase}:MS2.SequestAnalysis.Fractions:3">
 			<exp:Name>Sequest Analysis (with Fractions)</exp:Name>
 			<exp:ProtocolDescription>Use Sequest to search for peptides in multiple mzXml files</exp:ProtocolDescription>
 			<exp:ApplicationType>ExperimentRun</exp:ApplicationType>

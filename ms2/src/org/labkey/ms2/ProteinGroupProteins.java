@@ -47,68 +47,47 @@ public class ProteinGroupProteins
     {
         Map<Integer, List<ProteinSummary>> result = new HashMap<Integer, List<ProteinSummary>>();
 
+        ResultSet rs = context.getResultSet();
+        int originalRow = rs.getRow();
+
+        int firstGroupId = Integer.MAX_VALUE;
+        int lastGroupId = Integer.MIN_VALUE;
+
+        while (rs.next())
+        {
+            int groupId = rs.getInt(columnName);
+            firstGroupId = Math.min(firstGroupId, groupId);
+            lastGroupId = Math.max(lastGroupId, groupId);
+        }
+
+        rs.absolute(originalRow);
+
+        StringBuilder whereClause = new StringBuilder();
+
+        whereClause.append(" pg.RowId >= ");
+        whereClause.append(firstGroupId);
+        whereClause.append(" AND pg.RowId <= ");
+        whereClause.append(lastGroupId);
+
         if (_runs != null && !_runs.isEmpty())
         {
-            StringBuilder inClause = new StringBuilder();
-            inClause.append("SELECT pg.RowId FROM\n");
-            inClause.append(MS2Manager.getTableInfoProteinGroups());
-            inClause.append(" pg, ");
-            inClause.append(MS2Manager.getTableInfoProteinProphetFiles());
-            inClause.append(" ppf WHERE ppf.RowId = pg.ProteinProphetFileId AND ppf.Run IN (");
-
-            inClause.append(_runs.get(0).getRun());
+            whereClause.append(" AND ppf.Run IN (");
+            whereClause.append(_runs.get(0).getRun());
             for (int i = 1; i < _runs.size(); i++)
             {
-                inClause.append(", ");
-                inClause.append(_runs.get(i).getRun());
+                whereClause.append(", ");
+                whereClause.append(_runs.get(i).getRun());
             }
 
-            inClause.append(")");
-            addGroupsToList(inClause, result);
+            whereClause.append(")");
         }
-        else
-        {
-            ResultSet rs = context.getResultSet();
-            int originalRow = rs.getRow();
 
-            Set<Integer> requestedGroupIds = new HashSet<Integer>();
-            Set<Integer> newGroupIds = new HashSet<Integer>();
-            String separator = "";
-            StringBuilder inClause = new StringBuilder();
-
-            while (rs.next())
-            {
-                Integer groupId = rs.getInt(columnName);
-                if (!requestedGroupIds.contains(groupId) && !newGroupIds.contains(groupId))
-                {
-                    inClause.append(separator);
-                    inClause.append(groupId);
-                    separator = ", ";
-                    newGroupIds.add(groupId);
-
-                    // Do this in batches so our IN clause doesn't blow past the database limit
-                    if (newGroupIds.size() == 250)
-                    {
-                        addGroupsToList(inClause, result);
-                        requestedGroupIds.addAll(newGroupIds);
-                        newGroupIds = new HashSet<Integer>();
-                        separator = "";
-                        inClause = new StringBuilder();
-                    }
-                }
-            }
-
-            if (newGroupIds.size() > 0)
-            {
-                addGroupsToList(inClause, result);
-            }
-
-            rs.absolute(originalRow);
-        }
+        addGroupsToList(whereClause, result);
+        
         return result;
     }
 
-    private void addGroupsToList(StringBuilder inClause, Map<Integer, List<ProteinSummary>> result)
+    private void addGroupsToList(StringBuilder extraWhereClause, Map<Integer, List<ProteinSummary>> result)
         throws SQLException
     {
         String sql = "SELECT pg.RowId, protseq.SeqId, proteinseq.LookupString AS Protein, protseq.Description, protseq.BestGeneName, protSeq.BestName, protseq.Mass " +
@@ -120,7 +99,7 @@ public class ProteinGroupProteins
                 "   " + MS2Manager.getTableInfoProteinProphetFiles() + " ppf\n" +
                 "WHERE pgm.ProteinGroupId = pg.RowId " +
                 "   AND pgm.SeqId = protseq.SeqId " +
-                "   AND pg.RowId IN (" + inClause + ")" +
+                "   AND " + extraWhereClause +
                 "   AND pg.ProteinProphetFileId = ppf.RowId" +
                 "   AND ppf.Run = r.Run" +
                 "   AND r.FastaId = proteinseq.FastaId" +

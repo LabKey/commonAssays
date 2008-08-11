@@ -43,7 +43,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
 {
-    private Table.TableResultSet _rs;
+    private GroupedResultSet _rs;
 
     public ProteinProphetPeptideView(ViewContext viewContext, MS2Run... runs)
     {
@@ -175,6 +175,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         proteinRgn.setName(MS2Manager.getDataRegionNameProteinGroups());
         proteinRgn.addDisplayColumns(getProteinDisplayColumns(requestedProteinColumnNames, false));
         proteinRgn.setShowRecordSelectors(true);
+        proteinRgn.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTH);
         proteinRgn.setExpanded(expanded);
         proteinRgn.setShowPagination(false);
         proteinRgn.setRecordSelectorValueColumns("ProteinGroupId");

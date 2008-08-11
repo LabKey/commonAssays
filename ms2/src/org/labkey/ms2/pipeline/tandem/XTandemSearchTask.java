@@ -199,23 +199,22 @@ public class XTandemSearchTask extends PipelineJob.Task<XTandemSearchTask.Factor
             List<RecordedAction> actions = new ArrayList<RecordedAction>();
             if (!searchComplete)
             {
-                RecordedAction action1 = new RecordedAction(X_TANDEM_ACTION_NAME);
-                action1.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(xTandemPB.command(), ' '));
-                action1.addInput(fileDataSpectra, "mzXML");
-                action1.addInput(getJobSupport().getParametersFile(), "SearchConfig");
+                RecordedAction xtandemAction = new RecordedAction(X_TANDEM_ACTION_NAME);
+                xtandemAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(xTandemPB.command(), ' '));
+                xtandemAction.addInput(fileDataSpectra, "mzXML");
                 for (File sequenceFile : getJobSupport().getSequenceFiles())
                 {
-                    action1.addInput(sequenceFile, "FASTA");
+                    xtandemAction.addInput(sequenceFile, "FASTA");
                 }
-                action1.addOutput(fileOutputXML, "TandemXML", false);
-                actions.add(action1);
+                xtandemAction.addOutput(fileOutputXML, "TandemXML", false);
+                actions.add(xtandemAction);
             }
 
-            RecordedAction action2 = new RecordedAction(TANDEM2_XML_ACTION_NAME);
-            action2.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(tandem2XmlPB.command(), ' '));
-            action2.addInput(fileOutputXML, "TandemXML");
-            action2.addOutput(filePepXMLRaw, "RawPepXML", true);
-            actions.add(action2);
+            RecordedAction tandem2XmlAction = new RecordedAction(TANDEM2_XML_ACTION_NAME);
+            tandem2XmlAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(tandem2XmlPB.command(), ' '));
+            tandem2XmlAction.addInput(fileOutputXML, "TandemXML");
+            tandem2XmlAction.addOutput(filePepXMLRaw, "RawPepXML", true);
+            actions.add(tandem2XmlAction);
 
             return actions;
         }

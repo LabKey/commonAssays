@@ -159,14 +159,4 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
     {
         return PageFlowUtil.set(MS1Manager.get().getSchema());
     }
-
-    @Override
-    public Set<String> getModuleDependencies()
-    {
-        Set<String> result = new HashSet<String>();
-        result.add("Pipeline");
-        result.add("Experiment");
-        result.add("MS2");
-        return result;
-    }
 }

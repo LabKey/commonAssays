@@ -101,15 +101,6 @@ public class FlowModule extends DefaultModule
         ContainerManager.addContainerListener(new FlowContainerListener());
     }
 
-
-    @Override
-    public Set<String> getModuleDependencies()
-    {
-        Set<String> result = new HashSet<String>();
-        result.add("Experiment");
-        return result;
-    }
-
     public void afterSchemaUpdate(ModuleContext moduleContext, ViewContext viewContext)
     {
         super.afterSchemaUpdate(moduleContext, viewContext);

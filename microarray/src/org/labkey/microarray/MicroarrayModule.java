@@ -99,11 +99,6 @@ public class MicroarrayModule extends DefaultModule implements ContainerManager.
     {
     }
 
-    public Set<String> getModuleDependencies()
-    {
-        return PageFlowUtil.set("Experiment");
-    }
-
     public Collection<String> getSummary(Container c)
     {
         return Collections.emptyList();

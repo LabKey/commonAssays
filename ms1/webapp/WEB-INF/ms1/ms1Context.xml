@@ -19,9 +19,6 @@
                             <entry key=".mzXML.ms2.tsv"><list/></entry>
                         </map>
                     </property>
-                    <property name="xarGeneratorSupport">
-                        <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$Features"/>
-                    </property>
                     <property name="taskProgressionSpec">
                         <list>
                             <ref bean="mzxmlConverterId"/>
@@ -51,9 +48,6 @@
                                 <list><value>.pep.xml</value></list>
                             </entry>
                         </map>
-                    </property>
-                    <property name="xarGeneratorSupport">
-                        <bean class="org.labkey.ms1.pipeline.MSInspectXarGeneratorSupport$Peptides"/>
                     </property>
                     <property name="taskProgressionSpec">
                         <list>

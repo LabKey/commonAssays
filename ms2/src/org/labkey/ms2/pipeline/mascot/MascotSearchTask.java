@@ -353,7 +353,6 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
                 mzxml2SearchAction.addInput(getJobSupport().getSearchSpectraFile(), "mzXML");
                 mzxml2SearchAction.addOutput(fileMGF, "MGF", false);
 
-                mascotAction.addInput(fileWorkInputXML, "SearchConfig");
                 for (File file : getJobSupport().getSequenceFiles())
                 {
                     mascotAction.addInput(file, "FASTA");

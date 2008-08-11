@@ -80,6 +80,7 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         proteinRgn.setExpanded(expanded);
         proteinRgn.setMaxRows(_maxGroupingRows);
         proteinRgn.setOffset(_offset);
+        proteinRgn.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTH);
 
         MS2Run run = getSingleRun();
 

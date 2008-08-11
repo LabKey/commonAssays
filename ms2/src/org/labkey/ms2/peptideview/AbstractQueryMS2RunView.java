@@ -99,7 +99,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
             super(schema, settings);
             _expanded = expanded;
             _allowNesting = allowNesting;
-            _buttonBarPosition = DataRegion.ButtonBarPosition.BOTTOM;
+            _buttonBarPosition = DataRegion.ButtonBarPosition.BOTH;
             setShowExportButtons(false);
         }
         
