@@ -20,7 +20,6 @@
 <%@ page import="org.fhcrc.cpas.exp.xml.ProtocolBaseType"%>
 <%@ page import="org.labkey.api.exp.api.ExpMaterial"%>
 <%@ page import="org.labkey.api.pipeline.PipelineUrls"%>
-<%@ page import="org.labkey.api.view.ThemeFont"%>
 <%@ page import="org.labkey.ms2.pipeline.FileStatus"%>
 <%@ page import="org.labkey.ms2.pipeline.MS2ExperimentForm"%>
 <%@ page import="org.labkey.ms2.pipeline.MS2PipelineForm" %>
@@ -52,7 +51,7 @@
 <input type="hidden" name="<%=MS2PipelineForm.PARAMS.path%>" value="<%=h(form.getPath())%>">
 <input type="hidden" name="<%=MS2PipelineForm.PARAMS.searchEngine%>" value="<%=h(form.getSearchEngine())%>">
 <table>
-    <tr><td colspan=2 style="font-size:<%=ThemeFont.getThemeFont().getHeader_1Size()%>">
+    <tr><td colspan=2 class="labkey-header-large">
     Before searching describe how each mzXML file was created using the following information<br>
     </td>
     </tr>

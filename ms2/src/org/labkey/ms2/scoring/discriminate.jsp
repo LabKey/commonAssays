@@ -17,7 +17,6 @@
 %>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.view.ActionURL"%>
-<%@ page import="org.labkey.api.view.ThemeFont"%>
 <%@ page import="org.labkey.ms2.scoring.ScoringController" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -40,7 +39,7 @@
 <form method=get action="discriminate.post">
 <input type="hidden" name="runId" value="<%=form.getRunId()%>">
 <table>
-    <tr><td colspan=2 style="font-size:<%=ThemeFont.getThemeFont().getHeader_1Size()%>">
+    <tr><td colspan=2 class="labkey-header-large">
     Enter expressions to use for verious charges.<br>
     </td></tr>
     <tr><td valign="top">

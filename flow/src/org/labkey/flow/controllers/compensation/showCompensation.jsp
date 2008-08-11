@@ -29,9 +29,10 @@
 <%@ page import="org.labkey.flow.view.GraphView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%!
-    String compImg(FlowWell well, String param) throws Exception
+    String compImg(FlowWell well, String param, String graphSize) throws Exception
     {
         if (well == null)
             return "N/A";
@@ -41,7 +42,7 @@
             return "N/A";
         ActionURL urlGraph = well.urlFor(WellController.Action.showGraph);
         urlGraph.addParameter(FlowParam.graph.toString(), spec.toString());
-        return "<img class=\"flow-graph\" src=\"" + h(urlGraph) + "\">";
+        return "<img style=\"height: " + graphSize + ";width: " + graphSize + ";\" class=\"labkey-flow-graph\" src=\"" + h(urlGraph) + "\">";
     }
 %>
 <%
@@ -109,20 +110,22 @@
 
         abstract String render(int iChannel, int iChannelValue) throws Exception;
     }
+
+    final String graphSize = FlowPreference.graphSize.getValue(request);
     Callback[] callbacks = new Callback[]
             {
                     new Callback("Uncompensated Graphs")
                     {
                         String render(int iChannel, int iChannelValue) throws Exception
                         {
-                            return compImg(wellMap.get(channelNames[iChannel] + "+"), channelNames[iChannelValue]);
+                            return compImg(wellMap.get(channelNames[iChannel] + "+"), channelNames[iChannelValue], graphSize);
                         }
                     },
                     new Callback("Compensated Graphs")
                     {
                         String render(int iChannel, int iChannelValue) throws Exception
                         {
-                            return compImg(wellMap.get(channelNames[iChannel] + "+"), "<" + channelNames[iChannelValue] + ">");
+                            return compImg(wellMap.get(channelNames[iChannel] + "+"), "<" + channelNames[iChannelValue] + ">", graphSize);
                         }
                     }
             };

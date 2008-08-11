@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.FlowPreference;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -51,9 +52,10 @@ public class GraphColumn extends DataColumn
     public void renderGraph(RenderContext ctx, Writer out) throws IOException
     {
         Object boundValue = getColumnInfo().getValue(ctx);
+        String graphSize = FlowPreference.graphSize.getValue(ctx.getRequest());
         if (boundValue == null)
         {
-            out.write("<img class=\"flow-graph\" src=\"");
+            out.write("<img style=\"height: " + graphSize + ";width: " + graphSize + ";\" class=\"labkey-flow-graph\" src=\"");
             out.write(AppProps.getInstance().getContextPath() + "/_.gif\">");
             return;
         }
@@ -62,7 +64,7 @@ public class GraphColumn extends DataColumn
         ActionURL urlGraph = PageFlowUtil.urlFor(WellController.Action.showGraph, ctx.getContainer());
         urlGraph.addParameter(FlowParam.objectId.toString(), boundValue.toString());
         urlGraph.addParameter(FlowParam.graph.toString(), displayValue.toString());
-        out.write("<img class=\"flow-graph\" src=\"");
+        out.write("<img style=\"height: " + graphSize + ";width: " + graphSize + ";\" class=\"labkey-flow-graph\" src=\"");
         out.write(PageFlowUtil.filter(urlGraph));
         out.write("\"><wbr>");
     }

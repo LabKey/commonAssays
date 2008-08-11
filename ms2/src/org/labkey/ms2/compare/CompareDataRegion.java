@@ -85,7 +85,7 @@ public class CompareDataRegion extends DataRegion
         {
             if (shade)
             {
-                renderers.get(columnIndex).setDisplayClass("labkey-alternate-row");
+                renderers.get(columnIndex).addDisplayClass("labkey-alternate-row");
             }
             shade = !shade;
             columnIndex++;
@@ -108,7 +108,7 @@ public class CompareDataRegion extends DataRegion
                 out.write(" class=\"labkey-alternate-row\"");
                 for (int i = 0; i < _colSpan; i++)
                 {
-                    renderers.get(columnIndex++).setDisplayClass("labkey-alternate-row");
+                    renderers.get(columnIndex++).addDisplayClass("labkey-alternate-row");
                 }
             }
             else

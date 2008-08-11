@@ -27,23 +27,7 @@
     sizes.put("100", "Small Graphs");
 %>
 
-<style id="flow-graph">
-    .flow-graph
-    {
-        height: <%=graphSize%>px;
-        width: <%=graphSize%>px;
-    }
-    a.graphSizeCurrent
-    {
-        cursor:default;
-        text-decoration:none;
-        font-weight:bold;
-    }
-    a.graphSize
-    {
-        cursor:pointer;
-    }
-</style>
+
 <script>
     var urlUpdateSize = <%=q(FlowPreference.graphSize.urlUpdate())%>
     var currentSize = <%=graphSize%>;
@@ -64,7 +48,7 @@
         var el = event.srcElement;
         if (!el)
             el = event.target;
-        if (!el || el.className != 'flow-graph')
+        if (!el || el.className != 'labkey-flow-graph')
             return;
         if (currentSize == fullSize)
             return;
@@ -121,20 +105,21 @@
         for (var i = 0; i < images.length; i ++)
         {
             var img = images[i];
-            if (img.className == "flow-graph")
+            if (img.className == "labkey-flow-graph")
             {
                 img.style.width = size;
                 img.style.height = size;
             }
         }
 
-        setGraphClasses("graphSize" + currentSize, "graphSize");
+        setGraphClasses("graphSize" + currentSize, "");
         currentSize = size;
-        setGraphClasses("graphSize" + currentSize, "graphSizeCurrent");
+        setGraphClasses("graphSize" + currentSize, "labkey-selected-link");
         document.getElementById("updateGraphSize").src = urlUpdateSize + currentSize;
     }
 </script>
-<% for (Map.Entry<String, String> entry : sizes.entrySet()) { %>
-[<a class="<%=entry.getKey().equals(graphSize) ? "graphSizeCurrent" : "graphSize"%>" name="graphSize<%=entry.getKey()%>" onclick="setGraphSize(<%=entry.getKey()%>)"><%=h(entry.getValue())%></a>]
+<%
+    for (Map.Entry<String, String> entry : sizes.entrySet()) { %>
+[<a class="<%=entry.getKey().equals(graphSize) ? "labkey-selected-link" : ""%>" name="graphSize<%=entry.getKey()%>" onclick="setGraphSize(<%=entry.getKey()%>)"><%=h(entry.getValue())%></a>]
 <% } %>
 <img id="updateGraphSize" height="1" width="1" src="<%=request.getContextPath()%>/_.gif">

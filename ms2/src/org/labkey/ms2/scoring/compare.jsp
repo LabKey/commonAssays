@@ -34,7 +34,7 @@
 <% if (runs.length > 0)
 { %>
 <table>
-    <tr><td colspan=2 style="font-size:<%=ThemeFont.getThemeFont().getHeader_1Size()%>">
+    <tr><td colspan=2 class="labkey-header-large">
     Choose discrimate values to display in ROC chart.<br>
     </td></tr>
     <tr><td valign="top">
