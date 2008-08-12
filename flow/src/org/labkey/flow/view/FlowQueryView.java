@@ -20,18 +20,16 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpRunTable;
 import org.labkey.api.jsp.JspLoader;
-import org.labkey.api.query.QueryPicker;
+import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.query.QueryParam;
-import org.labkey.api.query.QueryAction;
+import org.labkey.api.reports.ReportService;
+import org.labkey.api.reports.report.ChartQueryReport;
+import org.labkey.api.reports.report.RReport;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.reports.ReportService;
-import org.labkey.api.reports.report.RReport;
-import org.labkey.api.reports.report.ChartQueryReport;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.controllers.FlowParam;
@@ -215,7 +213,7 @@ public class FlowQueryView extends QueryView
         List<NavTree> children = new ArrayList<NavTree>();
         if (getContainer().getFolderType() instanceof FlowFolderType)
         {
-            children.add(0, new NavTree("Flow Dashboard", new ActionURL("Project", "begin", getContainer())));
+            children.add(0, new NavTree("Flow Dashboard", PageFlowUtil.urlProvider(ProjectUrls.class).urlStart(getContainer())));
         }
         else
         {

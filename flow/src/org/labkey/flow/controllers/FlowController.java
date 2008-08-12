@@ -17,22 +17,24 @@ package org.labkey.flow.controllers;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
-import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.module.Module;
-import org.labkey.api.pipeline.*;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
+import org.labkey.api.settings.AdminConsole;
+import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
-import org.labkey.api.settings.AdminConsole.*;
-import org.labkey.api.settings.AdminConsole;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.data.FlowProtocol;
@@ -450,13 +452,18 @@ public class FlowController extends SpringFlowController<FlowController.Action>
     }
 
     @RequiresPermission(ACL.PERM_READ)
-    public class SavePerferencesAction extends SimpleRedirectAction
+    public class SavePerferencesAction extends SimpleViewAction
     {
-        public ActionURL getRedirectURL(Object o) throws Exception
+        public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             FlowPreference.update(getRequest());
             URI uri = new URI(getRequest().getContextPath() + "/_.gif");
-            return new ActionURL(uri.toString());
+            return HttpView.redirect(uri.toString());
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
         }
     }
 

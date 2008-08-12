@@ -16,19 +16,21 @@
  */
 %>
 <%@ page buffer="none" %>
-<%@ page import="org.labkey.api.security.ACL" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.flow.controllers.compensation.CompensationController"%>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
-<%@ page import="org.labkey.flow.controllers.run.RunController"%>
-<%@ page import="org.labkey.flow.controllers.run.RunForm"%>
+<%@ page import="org.labkey.api.announcements.DiscussionService" %>
+<%@ page import="org.labkey.api.security.ACL"%>
+<%@ page import="org.labkey.api.view.ActionURL"%>
+<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.labkey.api.view.ViewContext"%>
+<%@ page import="org.labkey.flow.controllers.compensation.CompensationController" %>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
+<%@ page import="org.labkey.flow.controllers.run.RunController" %>
+<%@ page import="org.labkey.flow.controllers.run.RunForm" %>
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix" %>
 <%@ page import="org.labkey.flow.data.FlowLog" %>
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
-<%@ page import="org.labkey.flow.view.FlowQueryView" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.flow.view.FlowQueryView" %>
+<%@ page import="org.labkey.flow.view.SetCommentView" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -36,9 +38,13 @@
     ViewContext context = HttpView.currentContext();
     FlowRun run = form.getRun();
     FlowCompensationMatrix comp = run.getCompensationMatrix();
+
+%>
+<p>Comment: <% include(new SetCommentView(run), out); %>
+</p>
+<%
     FlowQueryView view = new FlowQueryView(form);
     include(view, out);%>
-
 <%
     FlowLog[] logs = run.getLogs();
     if (logs.length != 0)
@@ -80,4 +86,14 @@
     <%if (run.getPath() != null) {%>
     <labkey:link href="<%=run.urlFor(RunController.Action.download)%>" text="Download FCS Files" /><br>
     <% } %>
+    <%
+        DiscussionService.Service service = DiscussionService.get();
+        DiscussionService.DiscussionView discussion = service.getDisussionArea(
+                getViewContext(),
+                run.getLSID(),
+                run.urlShow(),
+                "Discussion of " + run.getLabel(),
+                false, true);
+        include(discussion, out);
+    %>
 </p>

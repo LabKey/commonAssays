@@ -16,30 +16,39 @@
 
 package org.labkey.flow.data;
 
-import org.labkey.api.security.User;
-
-import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExpProtocolApplication;
-import org.labkey.api.data.*;
-import org.fhcrc.cpas.flow.script.xml.*;
-import org.labkey.flow.script.FlowAnalyzer;
-import org.labkey.flow.persist.FlowManager;
-import org.labkey.flow.persist.FlowDataHandler;
-import org.labkey.api.view.ActionURL;
 import org.apache.log4j.Logger;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import java.sql.SQLException;
-import java.util.*;
-import java.io.File;
-
-import org.labkey.flow.controllers.executescript.AnalysisScriptController;
-import org.labkey.flow.controllers.FlowParam;
+import org.fhcrc.cpas.flow.script.xml.ChannelDef;
+import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
+import org.fhcrc.cpas.flow.script.xml.ScriptDef;
+import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpProtocolApplication;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryAction;
+import org.labkey.api.security.User;
+import org.labkey.api.view.ActionURL;
 import org.labkey.flow.analysis.model.PopulationSet;
 import org.labkey.flow.analysis.model.ScriptComponent;
 import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.executescript.AnalysisScriptController;
+import org.labkey.flow.persist.FlowDataHandler;
+import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.query.FlowTableType;
+import org.labkey.flow.script.FlowAnalyzer;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class FlowScript extends FlowDataObject
 {
@@ -153,6 +162,11 @@ public class FlowScript extends FlowDataObject
     public int getScriptId()
     {
         return getExpObject().getRowId();
+    }
+
+    public String getComment()
+    {
+        return getExpObject().getComment();
     }
 
     static public String lsidForName(Container container, String name)
@@ -331,6 +345,15 @@ public class FlowScript extends FlowDataObject
     {
         return getExpObject().getTargetRuns().length;
     }
+
+    public ActionURL getRunsUrl()
+    {
+        ActionURL runsUrl = FlowTableType.Runs.urlFor(getContainer(), QueryAction.executeQuery);
+        FieldKey key = FieldKey.fromParts("AnalysisScript", "RowId");
+        runsUrl.addFilter("query", key, CompareType.EQUAL, this.getScriptId());
+        return runsUrl;
+    }
+
     public int getTargetApplicationCount()
     {
         return getExpObject().getTargetApplications().length;

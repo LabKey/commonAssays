@@ -27,6 +27,7 @@ public enum FlowPreference
 {
     graphSize("300"),
     showGraphs("1"),
+    showRuns("1"),
     editScriptRunId(null),
     editScriptCompId(null),
     editScriptWellId(null)
@@ -53,6 +54,30 @@ public enum FlowPreference
     {
         HttpSession session = request.getSession(true);
         session.setAttribute(getKey(), value);
+    }
+
+    public void updateValue(HttpServletRequest request)
+    {
+        String value = request.getParameter(name());
+        if (value != null)
+        {
+            setValue(request, value);
+        }
+    }
+
+    public boolean getBooleanValue(HttpServletRequest request)
+    {
+        try
+        {
+            String value = getValue(request);
+            return "1".equals(value) || Boolean.valueOf(value);
+        }
+        catch (Exception e)
+        {
+            if (_defValue == null)
+                return false;
+            return "1".equals(_defValue) || Boolean.valueOf(_defValue);
+        }
     }
 
     public int getIntValue(HttpServletRequest request)
@@ -85,11 +110,7 @@ public enum FlowPreference
     {
         for (FlowPreference pref : values())
         {
-            String value = request.getParameter(pref.name());
-            if (value != null)
-            {
-                pref.setValue(request, value);
-            }
+            pref.updateValue(request);
         }
     }
 }

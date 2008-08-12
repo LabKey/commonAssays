@@ -17,7 +17,6 @@
 package org.labkey.flow.controllers.executescript;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.query.QueryAction;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
@@ -32,7 +31,6 @@ import org.labkey.flow.data.FlowCompensationMatrix;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.query.FlowTableType;
 
 import java.util.List;
 
@@ -51,6 +49,7 @@ public class ScriptOverview extends Overview
         }
         return ret;
     }
+    
     public ScriptOverview(User user, Container container, FlowScript script)
     {
         super(user, container);
@@ -58,15 +57,7 @@ public class ScriptOverview extends Overview
         _runCount = _script.getRunCount();
         _canEdit = _runCount == 0 && hasPermission(ACL.PERM_UPDATE);
 
-        ActionURL runsUrl = FlowTableType.Runs.urlFor(container, QueryAction.executeQuery);
-
-        setTitle("Analysis script '" + h(_script.getName()) + "'");
-        StringBuilder explanatoryHTML = new StringBuilder();
-        //explanatoryHTML.append("An analysis script tells " + FlowModule.getLongProductName() + " how to calculate the compensation matrix, what gates to apply, statistics to calculate, and graphs to draw.<br>");
-        explanatoryHTML.append("Analysis scripts may have up to two sections in them.<br>");
-        explanatoryHTML.append("The compensation calculation describes how to locate the compensation controls in each run, and which gates need to be applied to them.<br>");
-        explanatoryHTML.append("The analysis section describes which gates in the analysis, as well as the statistics that need to be calculated, and the graphs that need to be drawn.<br>");
-        setExplanatoryHTML(explanatoryHTML.toString());
+        ActionURL runsUrl = _script.getRunsUrl();
 
         if (_runCount == 0)
         {

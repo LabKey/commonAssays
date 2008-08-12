@@ -1,0 +1,85 @@
+<%
+/*
+ * Copyright (c) 2006-2008 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+%>
+<%@ page import="org.labkey.api.announcements.DiscussionService" %>
+<%@ page import="org.labkey.api.data.ShowRows" %>
+<%@ page import="org.labkey.api.query.QueryForm" %>
+<%@ page import="org.labkey.api.query.QueryView" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.flow.FlowPreference" %>
+<%@ page import="org.labkey.flow.controllers.executescript.ScriptOverview" %>
+<%@ page import="org.labkey.flow.data.FlowScript" %>
+<%@ page import="org.labkey.flow.query.FlowSchema" %>
+<%@ page import="org.labkey.flow.query.FlowTableType" %>
+<%@ page import="org.labkey.flow.view.SetCommentView" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
+<%
+    FlowScript script = (FlowScript)getModelBean();
+    ViewContext context = getViewContext();
+    ActionURL url = context.getActionURL();
+
+%>
+Analysis scripts may have up to two sections in them.
+The compensation calculation describes how to locate the compensation controls in each run, and which gates need to be applied to them.
+The analysis section describes which gates in the analysis, as well as the statistics that need to be calculated, and the graphs that need to be drawn.
+<p>
+Comment: <% include(new SetCommentView(script), out); %>
+</p>
+<%
+    ScriptOverview overview = new ScriptOverview(context.getUser(), context.getContainer(), script);
+%>
+<%=overview.toString()%>
+
+<div>
+<% if (script.getRunCount() > 0) {
+    boolean showRuns = FlowPreference.showRuns.getBooleanValue(request);
+    if (showRuns) {
+        %><labkey:link href="<%=url.clone().replaceParameter("showRuns", "0")%>" text="Hide Runs"/><br/><%
+        QueryForm form = new QueryForm();
+        form.setViewContext(context);
+        form.setSchemaName(FlowSchema.SCHEMANAME);
+        form.setQueryName(FlowTableType.Runs.toString());
+        //form.bindParameters(script.getRunsUrl().getPropertyValues());
+
+        QueryView view = new QueryView(form);
+        view.setShadeAlternatingRows(true);
+        view.setShowPagination(false);
+        view.setShowBorders(true);
+        view.getSettings().setShowRows(ShowRows.ALL);
+        view.getSettings().setAllowChooseQuery(false);
+        view.getSettings().setAllowChooseView(false);
+        view.getSettings().setAllowCustomizeView(false);
+        include(view, out);
+    } else {
+        %><labkey:link href="<%=url.clone().replaceParameter("showRuns", "1")%>" text="Show Runs"/><%
+    }
+} %>
+</div>
+
+<%
+    DiscussionService.Service service = DiscussionService.get();
+    DiscussionService.DiscussionView discussion = service.getDisussionArea(
+            context,
+            script.getLSID(),
+            script.urlShow(),
+            "Discussion of " + script.getLabel(),
+            false, true);
+    include(discussion, out);
+%>
+

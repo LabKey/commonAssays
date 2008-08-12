@@ -15,15 +15,21 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.announcements.DiscussionService" %>
+<%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
+<%@ page import="org.labkey.api.jsp.JspLoader" %>
 <%@ page import="org.labkey.api.security.ACL" %>
-<%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.flow.FlowPreference" %>
+<%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
+<%@ page import="org.labkey.flow.analysis.web.StatisticSpec"%>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ page import="org.labkey.flow.data.*" %>
-<%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
-<%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
-<%@ page import="java.util.List" %>
-<%@ page import="org.labkey.api.exp.api.ExpMaterial"%>
+<%@ page import="org.labkey.flow.view.GraphView" %>
+<%@ page import="org.labkey.flow.view.SetCommentView" %>
 <%@ page import="java.text.DecimalFormat" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%
     FlowWell well = getWell();
@@ -43,7 +49,9 @@
     { %>
     <tr><td>FCS File:</td><td><a href="<%=h(fcsFile.urlShow())%>"><%=h(fcsFile.getName())%></a></td></tr>
     <% } %>
-    <tr><td>Comment:</td><td><%=h(well.getComment())%></tr>
+    <tr><td>Comment:</td>
+        <td><%include(new SetCommentView(well), out);%></td>
+    </tr>
     <% if (script != null) { %>
     <tr><td>Analysis Script:</td><td><a href="<%=h(script.urlShow())%>"><%=h(script.getName())%></a></td></tr>
     <% } %>
@@ -92,10 +100,16 @@
     </div>
 <% } %>
 
-<% for (GraphSpec graph : getGraphs())
-{ %>
-<img src="<%=h(getWell().urlFor(WellController.Action.showGraph))%>&amp;graph=<%=u(graph.toString())%>">
-<% } %>
+<%
+if (getGraphs().length > 0)
+{
+    final String graphSize = FlowPreference.graphSize.getValue(request);
+    include(new JspView(JspLoader.createPage(request, GraphView.class, "setGraphSize.jsp")), out);
+    for (GraphSpec graph : getGraphs()) {
+        %><img style="width:<%=graphSize%>;height:<%=graphSize%>;"class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.Action.showGraph))%>&amp;graph=<%=u(graph.toString())%>"><%
+    }
+}
+%>
 <% List<FlowWell> analyses = getWell().getFCSAnalyses();
     if (analyses.size() > 0)
     { %>
@@ -120,3 +134,13 @@
     <p><a href="<%=h(getWell().urlFor(WellController.Action.chooseGraph))%>">More Graphs</a><br>
     <a href="<%=h(getWell().urlFor(WellController.Action.showFCS))%>&amp;mode=keywords">Keywords from the FCS file</a></p>
 <% } %>
+<%
+    DiscussionService.Service service = DiscussionService.get();
+    DiscussionService.DiscussionView discussion = service.getDisussionArea(
+            getViewContext(),
+            well.getLSID(),
+            well.urlShow(),
+            "Discussion of " + well.getLabel(),
+            false, true);
+    include(discussion, out);
+%>

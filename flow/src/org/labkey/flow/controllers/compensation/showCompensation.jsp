@@ -15,21 +15,25 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.analysis.model.CompensationMatrix" %>
-<%@ page import="java.text.DecimalFormat" %>
-<%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
-<%@ page import="java.util.List" %>
-<%@ page import="org.labkey.flow.data.*" %>
+<%@ page import="org.labkey.api.announcements.DiscussionService" %>
+<%@ page import="org.labkey.api.jsp.JspLoader" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.flow.controllers.well.WellController" %>
-<%@ page import="org.labkey.flow.controllers.FlowParam" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.HashMap" %>
-<%@ page import="org.labkey.api.jsp.JspLoader"%>
-<%@ page import="org.labkey.flow.view.GraphView"%>
-<%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
+<%@ page import="org.labkey.flow.analysis.model.CompensationMatrix" %>
+<%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
+<%@ page import="org.labkey.flow.controllers.FlowParam" %>
+<%@ page import="org.labkey.flow.controllers.well.WellController" %>
+<%@ page import="org.labkey.flow.data.FlowCompensationMatrix" %>
+<%@ page import="org.labkey.flow.data.FlowDataType"%>
+<%@ page import="org.labkey.flow.data.FlowRun"%>
+<%@ page import="org.labkey.flow.data.FlowWell"%>
+<%@ page import="org.labkey.flow.view.GraphView" %>
+<%@ page import="org.labkey.flow.view.SetCommentView" %>
+<%@ page import="java.text.DecimalFormat" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%!
     String compImg(FlowWell well, String param, String graphSize) throws Exception
@@ -60,7 +64,13 @@
     format.setMinimumFractionDigits(3);
 %>
 
-    <p>Compensation Matrix: <%=h(comp.getName())%></p>
+<table>
+    <tr><td>Compensation Matrix:</td><td><%=h(comp.getName())%></td></tr>
+    <tr><td>Comment:</td>
+        <td><%include(new SetCommentView(flowComp), out);%></td>
+    </tr>
+</table>
+
 <table class="labkey-data-region labkey-show-borders">
     <colgroup><% for (int i = 0; i < channelCount + 1; i ++)
         { %>
@@ -159,3 +169,13 @@
     <%}%>
 </table>
 <% } %>
+<%
+    DiscussionService.Service service = DiscussionService.get();
+    DiscussionService.DiscussionView discussion = service.getDisussionArea(
+            getViewContext(),
+            flowComp.getLSID(),
+            flowComp.urlShow(),
+            "Discussion of " + flowComp.getLabel(),
+            false, true);
+    include(discussion, out);
+%>

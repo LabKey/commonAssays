@@ -33,6 +33,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.view.*;
 import org.labkey.common.util.Pair;
+import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
@@ -91,8 +92,8 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             {
                 return HttpView.redirect(getContainer().urlFor(FlowController.Action.begin));
             }
-            ScriptOverview overview = new ScriptOverview(getUser(), getContainer(), script);
-            return new HtmlView(overview.toString());
+            FlowPreference.showRuns.updateValue(getRequest());
+            return new JspView<FlowScript>(AnalysisScriptController.class, "showScript.jsp", script, errors);
         }
 
         public NavTree appendNavTrail(NavTree root)

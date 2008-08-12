@@ -258,7 +258,6 @@ flow/src/org/labkey/flow/analysis/web/SubsetSpec.java -text
 flow/src/org/labkey/flow/controllers/BaseController.java -text
 flow/src/org/labkey/flow/controllers/BaseFlowController.java -text
 flow/src/org/labkey/flow/controllers/BaseFlowPage.java -text
-flow/src/org/labkey/flow/controllers/CommentForm.java -text
 flow/src/org/labkey/flow/controllers/FlowAdminForm.java -text
 flow/src/org/labkey/flow/controllers/FlowController.java -text
 flow/src/org/labkey/flow/controllers/FlowModule.java -text
@@ -311,6 +310,7 @@ flow/src/org/labkey/flow/controllers/executescript/chooseRunsToAnalyze.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/chooseRunsToUpload.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/importAnalysis.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/main.jsp -text
+flow/src/org/labkey/flow/controllers/executescript/showScript.jsp -text
 flow/src/org/labkey/flow/controllers/flowAdmin.jsp -text
 flow/src/org/labkey/flow/controllers/log/LogController.java -text
 flow/src/org/labkey/flow/controllers/log/showLog.jsp -text
@@ -405,7 +405,9 @@ flow/src/org/labkey/flow/view/FlowQueryView.java -text
 flow/src/org/labkey/flow/view/GraphColumn.java -text
 flow/src/org/labkey/flow/view/GraphView.java -text
 flow/src/org/labkey/flow/view/JobStatusView.java -text
+flow/src/org/labkey/flow/view/SetCommentView.java -text
 flow/src/org/labkey/flow/view/errors.jsp -text
+flow/src/org/labkey/flow/view/setComment.jsp -text
 flow/src/org/labkey/flow/view/setGraphSize.jsp -text
 flow/src/org/labkey/flow/webparts/AnalysesWebPart.java -text
 flow/src/org/labkey/flow/webparts/AnalysisScriptTypeColumn.java -text
