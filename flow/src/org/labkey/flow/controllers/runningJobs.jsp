@@ -16,29 +16,26 @@
  */
 %>
 <%@ page import="org.labkey.api.data.Container"%>
-<%@ page import="org.labkey.api.pipeline.PipelineJob"%>
-<%@ page import="org.labkey.api.pipeline.PipelineJobData" %>
-<%@ page import="org.labkey.api.pipeline.PipelineService" %>
-<%@ page import="org.labkey.api.pipeline.PipelineStatusUrls" %>
 <%@ page import="org.labkey.api.portal.ProjectUrls" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.flow.script.FlowJob" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.pipeline.*" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
+    // Wish the flow module didn't have to have its own way of showing
+    // jobs in the pipeline.  Considering the Enterprise Pipeline, this
+    // is now the only supported way to get this information.
 
+    // The flow module used to just inspect jobs in the in-memory mini-
+    // pipeline queue.
     Container c = getViewContext().getContainer();
-    PipelineJobData data = PipelineService.get().getPipelineQueue().getJobData(null);
-    List<FlowJob> jobs = new ArrayList();
-    for (PipelineJob job : data.getPendingJobs())
+    List<FlowJob> jobs = new ArrayList<FlowJob>();
+    for (PipelineStatusFile sf : PipelineService.get().getQueuedStatusFiles())
     {
-        if (job instanceof FlowJob)
-            jobs.add((FlowJob) job);
-    }
-    for (PipelineJob job : data.getRunningJobs())
-    {
+        PipelineJob job = sf.createJobInstance();
         if (job instanceof FlowJob)
             jobs.add((FlowJob) job);
     }

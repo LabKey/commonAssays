@@ -18,6 +18,7 @@ package org.labkey.flow.view;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -30,6 +31,7 @@ import org.labkey.flow.script.ScriptJob;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Map;
+import java.util.Date;
 
 public class JobStatusView extends HttpView
 {
@@ -43,24 +45,26 @@ public class JobStatusView extends HttpView
     {
         _psf = psf;
         _job = job;
-        if (_job == null)
+        if (psf == null || PipelineJob.COMPLETE_STATUS.equals(psf.getStatus()))
         {
             _status = "This job is completed.";
         }
+        else if (PipelineJob.ERROR_STATUS.equals(psf.getStatus()))
+        {
+            _status = "This job encountered an error.";
+        }
+        else if (PipelineJob.CANCELLED_STATUS.equals(psf.getStatus()))
+        {
+            _status = "This job was cancelled at " + psf.getModified();
+        }
+        else if (PipelineJob.WAITING_STATUS.equals(psf.getStatus()))
+        {
+            _status = "This job has not started yet.";
+        }
         else
         {
-            if (!_job.isStarted())
-            {
-                _status = "This job has not started yet.";
-            }
-            else if (_job.checkInterrupted())
-            {
-                _status = "This job was interrupted after running for " + (_job.getElapsedTime() / 1000) + " seconds.";
-            }
-            else
-            {
-                _status = "This job has been running for " + (_job.getElapsedTime() / 1000) + " seconds."; 
-            }
+            long sec = (new Date().getTime() - psf.getCreated().getTime()) / 1000;
+            _status = "This job has been running for " + sec + " seconds."; 
         }
     }
 
@@ -125,7 +129,7 @@ public class JobStatusView extends HttpView
             }
         }
         out.write("</tr></table>");
-        if (_job != null && !_job.checkInterrupted())
+        if (_psf != null && _psf.isActive())
         {
             ActionURL cancelURL = new ActionURL(FlowController.CancelJobAction.class, getViewContext().getContainer());
             cancelURL.addParameter("statusFile", _psf.getFilePath());

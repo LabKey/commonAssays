@@ -24,9 +24,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.module.Module;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.pipeline.*;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
@@ -105,6 +103,8 @@ public class FlowController extends SpringFlowController<FlowController.Action>
     @RequiresPermission(ACL.PERM_READ)
     public class ShowStatusJobAction extends SimpleViewAction<StatusJobForm>
     {
+        private PipelineStatusFile _psf;
+
         public void validate(StatusJobForm form, BindException errors)
         {
             String statusFile = form.getStatusFile();
@@ -123,7 +123,11 @@ public class FlowController extends SpringFlowController<FlowController.Action>
             else
             {
                 PipelineStatusFile psf = PipelineService.get().getStatusFile(form.getStatusFile());
-                FlowJob job = findJob(form.getStatusFile());
+                if (psf == null)
+                {
+                    errors.rejectValue("statusFile", ERROR_MSG, "Status not found.");
+                    return new JspView<StatusJobForm>("/org/labkey/flow/view/errors.jsp", form, errors);
+                }
 
                 if (PipelineJob.COMPLETE_STATUS.equals(psf.getStatus()))
                 {
@@ -137,7 +141,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
                     }
                 }
 
-                if (job != null && !job.isDone())
+                if (psf.isActive())
                 {
                     // Take 1 second longer each time to refresh.
                     int refresh = form.getRefresh();
@@ -157,7 +161,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
                     helper.setFragment("end");
                     getViewContext().getResponse().setHeader("Refresh", refresh + ";URL=" + helper.toString());
                 }
-                return new JobStatusView(psf, job);
+                return new JobStatusView(psf, findJob(form.getStatusFile()));
             }
         }
 
@@ -224,9 +228,17 @@ public class FlowController extends SpringFlowController<FlowController.Action>
     FlowJob findJob(String statusFile) throws Exception
     {
         PipelineService service = PipelineService.get();
-        PipelineJob job = service.getPipelineQueue().findJob(getContainer(), statusFile);
-        if (job instanceof FlowJob)
-            return (FlowJob) job;
+        try
+        {
+            PipelineJob job = service.getPipelineQueue().findJobInMemory(getContainer(), statusFile);
+            if (job instanceof FlowJob)
+                return (FlowJob) job;
+        }
+        catch (UnsupportedOperationException e)
+        {
+            // Enterprise pipeline does not have this information
+            // in memory.
+        }
         return null;
     }
 
@@ -241,16 +253,27 @@ public class FlowController extends SpringFlowController<FlowController.Action>
             }
             else
             {
-                FlowJob job = findJob(form.getStatusFile());
-                if (job == null)
+                PipelineStatusFile sf = PipelineService.get().getStatusFile(form.getStatusFile());
+                if (sf == null)
                 {
                     errors.rejectValue("statusFile", ERROR_MSG, "Job " + form.getStatusFile() + " not found.");
                 }
                 else
                 {
-                    PipelineService service = PipelineService.get();
-                    service.getPipelineQueue().cancelJob(getContainer(), job.getJobId());
-                    return HttpView.redirect(job.getStatusHref());
+                    Container c = getContainer();
+                    PipelineService.get().getPipelineQueue().cancelJob(c, sf.getJobId());
+
+                    // Attempting to stay consistent previously existing code, create a FlowJob
+                    // from the job store, and go to its status href.  This URL is not set in the
+                    // PipelineStatusFile until the job completes.  Apparently FlowJobs have useful
+                    // information to show at this URL, even when the job has not completed.
+                    ActionURL redirect = null;
+                    FlowJob job = (FlowJob) PipelineJobService.get().getJobStore().getJob(sf.getJobId());
+                    if (job != null)
+                        return HttpView.redirect(job.getStatusHref());
+                    else if (sf.getDataUrl() != null)
+                        return HttpView.redirect(sf.getDataUrl());
+                    errors.rejectValue("statusFile", ERROR_MSG, "Data for " + form.getStatusFile() + " not found.");
                 }
             }
             return new JspView<CancelJobForm>("/org/labkey/flow/view/errors.jsp", form, errors);

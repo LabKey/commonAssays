@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
@@ -140,7 +141,7 @@ public class ArrayPipelineManager {
     }
     
     
-    public static File[] getImageFiles(File imageDir, FileStatus status, Container c) throws IOException
+    public static File[] getImageFiles(File imageDir, FileStatus status, Container c) throws IOException, SQLException
     {
         Map<File, FileStatus> imageFileStatus = getExtractionStatus(imageDir, c);
         List<File> fileList = new ArrayList<File>();
@@ -152,7 +153,7 @@ public class ArrayPipelineManager {
         return fileList.toArray(new File[fileList.size()]);
     }
     
-    public static File[] getMageFiles(URI uriData, FileStatus status, Container c) throws IOException
+    public static File[] getMageFiles(URI uriData, FileStatus status, Container c) throws IOException, SQLException
     {
         Map<File, FileStatus> mageFileStatus = getExperimentRunStatus(uriData, c);
         List<File> fileList = new ArrayList<File>();
@@ -164,7 +165,7 @@ public class ArrayPipelineManager {
         return fileList.toArray(new File[fileList.size()]);
     }
     
-    public static Map<File, FileStatus> getExtractionStatus(File imageDir, Container c) throws IOException
+    public static Map<File, FileStatus> getExtractionStatus(File imageDir, Container c) throws IOException, SQLException
     {
         Set<File> knownFiles = new HashSet<File>();
         Set<File> checkedDirectories = new HashSet<File>();
@@ -192,8 +193,8 @@ public class ArrayPipelineManager {
                 if (logExists)
                 {
                     // Check to see if images match what is being or has been processed by the pipeline.
-                    PipelineJob job = PipelineService.get().getPipelineQueue().findJob(c, logFile.getCanonicalPath());
-                    if (null == job || job.isDone())
+                    PipelineStatusFile sf = PipelineService.get().getStatusFile(logFile.getCanonicalPath());
+                    if (null == sf || !sf.isActive())
                         status = FileStatus.COMPLETE;
                     else
                         status = FileStatus.RUNNING;
@@ -237,7 +238,7 @@ public class ArrayPipelineManager {
         return imageFileMap;
     }
     
-    public static Map<File, FileStatus> getExperimentRunStatus(URI uriData, Container c) throws IOException
+    public static Map<File, FileStatus> getExperimentRunStatus(URI uriData, Container c) throws IOException, SQLException
     {
         Set<File> knownFiles = new HashSet<File>();
         Set<File> checkedDirectories = new HashSet<File>();
@@ -263,12 +264,12 @@ public class ArrayPipelineManager {
             {
                 FileStatus status = FileStatus.UNKNOWN;
                 if (logExists) {//Check to see if files match what is being or has been processed by the pipeline.
-                    PipelineJob job = PipelineService.get().getPipelineQueue().findJob(c, logFile.getAbsolutePath());
-                    if (null == job || job.isDone())
+                    PipelineStatusFile sf = PipelineService.get().getStatusFile(logFile.getCanonicalPath());
+                    if (null == sf || !sf.isActive())
                         status = FileStatus.COMPLETE;
                     else
                         status = FileStatus.RUNNING;
-                    
+
                     BufferedReader logFileReader = null;
                     try {
                         logFileReader = new BufferedReader(new FileReader(logFile));

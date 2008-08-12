@@ -122,8 +122,7 @@ public class FlowOverview extends Overview
         addStep(getSamplesStep());
         if (_canUpdate)
         {
-            PipelineJobData jobData = PipelineService.get().getPipelineQueue().getJobData(getContainer());
-            int jobCount = jobData.getPendingJobs().size() + jobData.getRunningJobs().size();
+            int jobCount = PipelineService.get().getQueuedStatusFiles(getContainer()).length;
             if (jobCount != 0)
             {
                 Action action = new Action("Show jobs", PageFlowUtil.urlFor(FlowController.Action.showJobs, getContainer()));
