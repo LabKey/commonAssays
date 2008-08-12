@@ -24,6 +24,7 @@
 <%@ page import="org.labkey.ms2.MS2Peptide"%>
 <%@ page import="org.labkey.ms2.Quantitation"%>
 <%@ page import="java.text.DecimalFormat" %>
+<%@ page import="org.labkey.api.data.Container" %>
 <%
     JspView<EditElutionGraphContext> me = (JspView<EditElutionGraphContext>) HttpView.currentView();
     org.labkey.ms2.EditElutionGraphContext ctx = me.getModelBean();
@@ -35,11 +36,12 @@
     decimalRatioFormat.setMaximumFractionDigits(2);
     ActionURL saveUrl = ctx.getUrl().clone();
     saveUrl.setAction("saveElutionProfile.post");
+    Container c = me.getViewContext().getContainer();
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<%= PageFlowUtil.getStandardIncludes() %>
+<%= PageFlowUtil.getStandardIncludes(c) %>
 <title>Edit Elution Profile - <%=p%></title>
 </head>
 <body onload="updateRange('light'); updateRange('heavy');">
