@@ -150,8 +150,7 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
         {
             Map<String, String> params = getJob().getParameters();
 
-            WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
-            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
+            WorkDirectory wd = _factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
 
             RecordedAction mzxml2SearchAction = new RecordedAction(MZXML2SEARCH_ACTION_NAME);
             RecordedAction mascotAction = new RecordedAction(MASCOT_ACTION_NAME);
@@ -401,22 +400,17 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
             throw new FileNotFoundException(datFile.getAbsolutePath() + " not found");
 
         InputStream datIn = null;
-        try
-        {
-            datIn = new FileInputStream(dat);
-        }
-        catch (FileNotFoundException e)
-        {
-            throw e;
-        }
-        BufferedReader datReader = new BufferedReader(new InputStreamReader(datIn));
         boolean skipParameter = true;
         String mimeNameSubString = "; name=\""+mimeName+"\"";
         String tagEqual=tag+"=";
         String value = null;
-        String line = null;
         try
         {
+            datIn = new FileInputStream(dat);
+
+            BufferedReader datReader = new BufferedReader(new InputStreamReader(datIn));
+
+            String line;
             while (null != (line = datReader.readLine()))
             {
                 // TODO: check for actual MIME boundary
@@ -434,19 +428,17 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
                 }
             }
         }
+        catch (FileNotFoundException e)
+        {
+            throw e;
+        }
         catch (IOException e)
         {
             // fail to readLine!
         }
         finally
         {
-            try
-            {
-                datReader.close();
-            }
-            catch (IOException e)
-            {
-            }
+            if (datIn != null) { try { datIn.close(); } catch (IOException e) {} }
         }
         return value;
     }

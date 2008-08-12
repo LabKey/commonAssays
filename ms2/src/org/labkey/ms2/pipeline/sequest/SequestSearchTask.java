@@ -115,8 +115,7 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
             params.put("search, useremail", params.get("pipeline, email address"));
             params.put("search, username", "CPAS User");
 
-            WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
-            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
+            WorkDirectory wd = _factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
 
             RecordedAction action = new RecordedAction(ACTION_NAME);
 

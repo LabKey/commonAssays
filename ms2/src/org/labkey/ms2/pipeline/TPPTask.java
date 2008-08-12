@@ -209,8 +209,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
         {
             Map<String, String> params = getJob().getParameters();
 
-            WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
-            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
+            WorkDirectory wd = _factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
 
             List<RecordedAction> actions = new ArrayList<RecordedAction>();
 
@@ -335,13 +334,18 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
 
             RecordedAction proteinQuantAction = null;
 
-            if (quantParams != null && getJobSupport().isProphetEnabled())
+            if (quantParams != null)
             {
-                proteinQuantAction = new RecordedAction(PROTEIN_QUANITATION_ACTION_NAME);
-                String algorithm = getQuantitionAlgorithm(params);
-                proteinQuantAction.setDescription(algorithm + " " + proteinQuantAction.getName());
-                proteinQuantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", SimpleTypeNames.STRING), algorithm);
-                actions.add(proteinQuantAction);
+                interactCmd.addAll(Arrays.asList(quantParams));
+
+                if (getJobSupport().isProphetEnabled())
+                {
+                    proteinQuantAction = new RecordedAction(PROTEIN_QUANITATION_ACTION_NAME);
+                    String algorithm = getQuantitionAlgorithm(params);
+                    proteinQuantAction.setDescription(algorithm + " " + proteinQuantAction.getName());
+                    proteinQuantAction.addParameter(new RecordedAction.ParameterType("Quantitation algorithm", "terms.labkey.org#QuantitationAlgorithm", SimpleTypeNames.STRING), algorithm);
+                    actions.add(proteinQuantAction);
+                }
             }
 
             interactCmd.add("-N" + fileWorkPepXML.getName());

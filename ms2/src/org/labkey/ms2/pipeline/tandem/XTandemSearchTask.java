@@ -16,7 +16,6 @@
 package org.labkey.ms2.pipeline.tandem;
 
 import org.labkey.api.pipeline.*;
-import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.*;
@@ -117,8 +116,7 @@ public class XTandemSearchTask extends PipelineJob.Task<XTandemSearchTask.Factor
             JobSupport support = getJobSupport();
             String baseName = support.getBaseName();
 
-            WorkDirFactory factory = PipelineJobService.get().getWorkDirFactory();
-            WorkDirectory wd = factory.createWorkDirectory(getJob().getJobGUID(), support, getJob().getLogger());
+            WorkDirectory wd = _factory.createWorkDirectory(getJob().getJobGUID(), support, getJob().getLogger());
 
             // Avoid re-running an X! Tandem search, if the .xtan.xml alreayd exists.
             // Several labs soft-link or copy .xtan.xml files to reduce processing time.
