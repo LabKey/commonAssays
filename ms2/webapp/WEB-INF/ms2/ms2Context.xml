@@ -92,11 +92,7 @@
                 <bean class="org.labkey.ms2.pipeline.mascot.MascotSearchTask$Factory"/>
                 <bean class="org.labkey.ms2.pipeline.sequest.SequestSearchTask$Factory"/>
                 <bean class="org.labkey.ms2.pipeline.TPPTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.TPPTask$FactoryJoin">
-                    <property name="workDirFactory">
-                        <bean class="org.labkey.pipeline.api.WorkDirectoryLocal$Factory" />
-                    </property>
-                </bean>
+                <bean class="org.labkey.ms2.pipeline.TPPTask$FactoryJoin"/>
             </list>
         </property>
         <property name="factories">
