@@ -83,6 +83,13 @@
         urlShowRunGraph.addParameter("rowId", Integer.toString(run.getRunId()));
     %>
     <labkey:link href="<%=h(urlShowRunGraph)%>" text="Experiment Run Graph"/><br>
+    <%
+        ActionURL showFileURL = run.getDownloadWorkspaceURL();
+        if (showFileURL != null)
+        {
+            %><labkey:link href="<%=showFileURL%>" text="Download Workspace XML File"/><br/><%
+        }
+    %>
     <%if (run.getPath() != null) {%>
     <labkey:link href="<%=run.urlFor(RunController.Action.download)%>" text="Download FCS Files" /><br>
     <% } %>

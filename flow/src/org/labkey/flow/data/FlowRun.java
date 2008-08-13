@@ -22,15 +22,16 @@ import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.run.RunController;
+import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowAnalyzer;
-import org.labkey.flow.persist.FlowManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -268,6 +269,18 @@ public class FlowRun extends FlowObject<ExpRun>
     public String getPath()
     {
         return getExperimentRun().getFilePathRoot();
+    }
+
+    public ActionURL getDownloadWorkspaceURL()
+    {
+        PropertyDescriptor pd = InputRole.Workspace.getPropertyDescriptor(getContainer());
+        if (pd == null)
+            return null;
+        ExpData[] datas = getExperimentRun().getInputDatas(pd, ExpProtocol.ApplicationType.ExperimentRun);
+        if (datas.length == 0 || !datas[0].isFileOnDisk())
+            return null;
+        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer(), datas[0]);
+        return url;
     }
 
     public void addParams(Map<FlowParam,Object> map)
