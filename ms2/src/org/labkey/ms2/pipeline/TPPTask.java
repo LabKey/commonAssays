@@ -51,6 +51,11 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
     private static final String PEPTIDE_QUANITATION_ACTION_NAME = "Peptide Quantitation";
     private static final String PROTEIN_QUANITATION_ACTION_NAME = "Protein Quantitation";
 
+    public static String getTPPVersion(PipelineJob job)
+    {
+        return job.getParameters().get("pipeline tpp, version");
+    }
+
     public static File getPepXMLFile(File dirAnalysis, String baseName)
     {
         return FT_PEP_XML.newFile(dirAnalysis, baseName);
@@ -283,7 +288,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
                 actions.add(protXMLAction);
             }
 
-            String ver = getJob().getParameters().get("pipeline, tpp version");
+            String ver = getTPPVersion(getJob());
             List<String> interactCmd = new ArrayList<String>();
             interactCmd.add(PipelineJobService.get().getExecutablePath("xinteract", "tpp", ver));
 

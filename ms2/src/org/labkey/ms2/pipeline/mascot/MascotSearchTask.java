@@ -186,7 +186,7 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
             // 0. pre-Mascot search: c) translate the mzXML file to mgf for Mascot (msxml2other)
             File fileWorkSpectra = wd.inputFile(getJobSupport().getSearchSpectraFile(), false);
             ArrayList<String> argsM2S = new ArrayList<String>();
-            String ver = getJob().getParameters().get("pipeline, tpp version");
+            String ver = TPPTask.getTPPVersion(getJob());
             argsM2S.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", ver));
             argsM2S.add("-mgf");
             String paramMinParent = params.get("spectrum, minimum parent m+h");
