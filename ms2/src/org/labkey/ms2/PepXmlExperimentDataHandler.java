@@ -70,31 +70,31 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         {
             boolean restart = false;
 
-            MS2Run existingRun = MS2Manager.getRunByFileName(dataFile.getParent(), dataFile.getName(), info.getContainer());
-            if (existingRun != null)
+            MS2Run existingMS2Run = MS2Manager.getRunByFileName(dataFile.getParent(), dataFile.getName(), info.getContainer());
+            if (existingMS2Run != null)
             {
-                if (existingRun.getExperimentRunLSID() != null && !existingRun.getExperimentRunLSID().equals(expRun.getLSID()))
+                if (existingMS2Run.getExperimentRunLSID() != null && expRun != null && !existingMS2Run.getExperimentRunLSID().equals(expRun.getLSID()))
                 {
-                    ExpRun associatedRun = ExperimentService.get().getExpRun(existingRun.getExperimentRunLSID());
+                    ExpRun associatedRun = ExperimentService.get().getExpRun(existingMS2Run.getExperimentRunLSID());
                     if (associatedRun != null)
                     {
                         throw new ExperimentException("The MS2 data '" +
                                 dataFile.getPath() + "' is already associated with an experiment run in the folder " +
-                                associatedRun.getContainer().getPath() + " (LSID= '" + existingRun.getExperimentRunLSID() + "')");
+                                associatedRun.getContainer().getPath() + " (LSID= '" + existingMS2Run.getExperimentRunLSID() + "')");
                     }
                 }
 
                 // If the run failed the first time, then restart it.
-                if (existingRun.statusId != MS2Importer.STATUS_SUCCESS)
+                if (existingMS2Run.statusId != MS2Importer.STATUS_SUCCESS)
                     restart = true;
 
                 if (expRun != null)
                 {
-                    existingRun.setExperimentRunLSID(expRun.getLSID());
-                    MS2Manager.updateRun(existingRun, null);
+                    existingMS2Run.setExperimentRunLSID(expRun.getLSID());
+                    MS2Manager.updateRun(existingMS2Run, null);
                 }
             }
-            if (existingRun != null && !restart)
+            if (existingMS2Run != null && !restart)
             {
                 // Don't try to load it again if it's already in the system
                 return;
@@ -113,7 +113,8 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
             {
                 run.setExperimentRunLSID(expRun.getLSID());
                 MS2Manager.updateRun(run, info.getUser());
-            }        }
+            }
+        }
         catch (SQLException e)
         {
             throw new ExperimentException(e);

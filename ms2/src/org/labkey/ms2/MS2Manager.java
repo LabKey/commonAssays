@@ -249,7 +249,7 @@ public class MS2Manager
     public static MS2Run getRunByFileName(String path, String fileName, Container c)
     {
         path = path.replace('\\', '/');
-        MS2Run[] runs = getRuns("Path = ? AND runs.FileName = ? AND Deleted = ? AND Container = ?", path, fileName, Boolean.FALSE, c.getId());
+        MS2Run[] runs = getRuns("LOWER(Path) = LOWER(?) AND LOWER(runs.FileName) = LOWER(?) AND Deleted = ? AND Container = ?", path, fileName, Boolean.FALSE, c.getId());
         if (null == runs || runs.length == 0)
         {
             return null;
