@@ -20,15 +20,16 @@ import jxl.Sheet;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.read.biff.BiffException;
-import org.apache.log4j.Logger;
-import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.ConversionException;
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.*;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.ParticipantVisit;
 import org.labkey.api.study.assay.*;
@@ -640,6 +641,10 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                 ExperimentService.get().commitTransaction();
                 ownTransaction = false;
             }
+        }
+        catch (ValidationException ve)
+        {
+            throw new ExperimentException(ve.toString(), ve);
         }
         finally
         {

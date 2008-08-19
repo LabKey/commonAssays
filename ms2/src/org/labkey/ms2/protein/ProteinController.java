@@ -16,29 +16,29 @@
 
 package org.labkey.ms2.protein;
 
-import org.labkey.api.view.*;
-import org.labkey.api.data.*;
-import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.ACL;
-import org.labkey.api.security.User;
-import org.labkey.api.exp.*;
-import org.labkey.api.query.*;
-import org.labkey.api.util.CaseInsensitiveHashSet;
-import org.labkey.api.action.SpringActionController;
-import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
+import org.labkey.api.data.*;
+import org.labkey.api.exp.*;
+import org.labkey.api.query.*;
+import org.labkey.api.security.ACL;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.User;
+import org.labkey.api.util.CaseInsensitiveHashSet;
+import org.labkey.api.view.*;
 import org.labkey.common.tools.TabLoader;
-import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.MS2Controller;
-import org.springframework.web.servlet.ModelAndView;
+import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.servlet.ModelAndView;
 
-import java.util.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.*;
 
 /**
  * User: jeckels
@@ -371,6 +371,12 @@ public class ProteinController extends SpringActionController
                 connection.commit();
 
                 scope.commitTransaction();
+            }
+            catch (ValidationException ve)
+            {
+                for (ValidationError error : ve.getErrors())
+                    errors.reject(SpringActionController.ERROR_MSG, error.getMessage());
+                return false;
             }
             finally
             {
