@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolForm"%>
-<%@ page import="org.labkey.flow.data.FlowProtocol"%>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.Action" %>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController"%>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.Action"%>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolForm" %>
+<%@ page import="org.labkey.flow.data.FlowProtocol" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% ProtocolForm form = (ProtocolForm) __form;
@@ -45,4 +45,8 @@
 <p><b>FCS Analysis Filter</b><br>
     You can choose to only analyze FCS files where the keywords match certain criteria.<br>
     <labkey:link href="<%=protocol.urlFor(ProtocolController.Action.editFCSAnalysisFilter)%>" text="Edit FCS Analysis Filter" />
+</p>
+<p><b>ICS Metadata</b><br>
+    Define columns used to subtract background from stimulated wells.<br>
+    <labkey:link href="<%=protocol.urlFor(ProtocolController.Action.editICSMetadata)%>" text="Edit ICS Metadata" />
 </p>

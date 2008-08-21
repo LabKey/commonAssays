@@ -29,6 +29,7 @@ import org.labkey.api.view.NavTree;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.ICSMetadata;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -46,6 +47,7 @@ public class ProtocolController extends SpringFlowController<ProtocolController.
         updateSamples,
         editFCSAnalysisName,
         editFCSAnalysisFilter,
+        editICSMetadata,
     }
 
     static SpringActionController.DefaultActionResolver _actionResolver = new SpringActionController.DefaultActionResolver(ProtocolController.class);
@@ -228,4 +230,34 @@ public class ProtocolController extends SpringFlowController<ProtocolController.
         }
     }
 
+    @RequiresPermission(ACL.PERM_UPDATE)
+    public class EditICSMetadataAction extends ProtocolViewAction<EditICSMetadataForm>
+    {
+        public void validateCommand(EditICSMetadataForm target, Errors errors)
+        {
+        }
+
+        public ModelAndView getView(EditICSMetadataForm form, boolean reshow, BindException errors) throws Exception
+        {
+            form.setMetadata(getProtocol().getICSMetadataString());
+            return FormPage.getView(ProtocolController.class, form, "editICSMetadata.jsp");
+        }
+
+        public boolean handlePost(EditICSMetadataForm form, BindException errors) throws Exception
+        {
+            ICSMetadata metadata = ICSMetadata.fromString(form.getMetadata());
+            getProtocol().setICSMetadata(getUser(), form.getMetadata());
+            return true;
+        }
+
+        public ActionURL getSuccessURL(EditICSMetadataForm form)
+        {
+            return getProtocol().urlShow();
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(root, getProtocol(), "Edit ICS Metadata", Action.editICSMetadata);
+        }
+    }
 }

@@ -537,6 +537,22 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         setProperty(user, FlowProperty.FCSAnalysisFilter.getPropertyDescriptor(), value);
     }
 
+    public String getICSMetadataString()
+    {
+        return (String)getProperty(FlowProperty.ICSMetadata);
+    }
+
+    public void setICSMetadata(User user, String value) throws SQLException
+    {
+        setProperty(user, FlowProperty.ICSMetadata.getPropertyDescriptor(), value);
+    }
+
+    public ICSMetadata getICSMetadata()
+    {
+        String metadata = getICSMetadataString();
+        return ICSMetadata.fromString(metadata);
+    }
+
     public String getProtocolSettingsDescription()
     {
         List<String> parts = new ArrayList<String>();
@@ -551,6 +567,10 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         if (getFCSAnalysisNameExpr() != null)
         {
             parts.add("FCSAnalysis name setting");
+        }
+        if (getICSMetadataString() != null)
+        {
+            parts.add("ICS Metadata");
         }
         if (parts.size() == 0)
             return null;

@@ -33,6 +33,7 @@ import org.labkey.api.view.*;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.query.FlowQueryForm;
@@ -66,6 +67,17 @@ public class FlowQueryView extends QueryView
                 return false;
             }
         });
+    }
+
+    protected MenuButton createExportMenuButton(boolean exportAsWebPage)
+    {
+        MenuButton button = super.createExportMenuButton(exportAsWebPage);
+
+        // XXX: only add menu item for queries based on FCSAnalyses
+        ActionURL url = getViewContext().cloneActionURL();
+        url.setAction(RunController.ExportToSpiceAction.class);
+        button.addMenuItem("Export All to Spice (.spd)", url);
+        return button;
     }
 
     protected boolean showRecordSelectors()
