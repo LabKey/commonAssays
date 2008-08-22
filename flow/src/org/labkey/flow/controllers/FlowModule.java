@@ -29,7 +29,6 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Search;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.flow.controllers.compensation.CompensationController;
@@ -55,7 +54,6 @@ import org.labkey.flow.webparts.AnalysisScriptsWebPart;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
 
-import javax.servlet.ServletException;
 import java.sql.ResultSet;
 import java.util.Set;
 
@@ -83,14 +81,7 @@ public class FlowModule extends DefaultModule
                     if (null != fs)
                         return fs;
                 }
-                try
-                {
-                    fs = new FlowSchema(c);
-                }
-                catch (ServletException e)
-                {
-                    throw UnexpectedException.wrap(e);
-                }
+                fs = new FlowSchema(schema.getUser(), schema.getContainer());
                 if (null != c)
                     c.put("org.labkey.flow.controllers.FlowModule$FlowSchema", fs);
                 return fs;
