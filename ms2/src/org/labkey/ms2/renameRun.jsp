@@ -33,7 +33,7 @@
         <td><input type="text" size="70" name="description" id="description" value="<%=h(bean.description)%>"/></td>
     </tr>
     <tr>
-        <td colspan="2"><input type="image" src="<%=PageFlowUtil.buttonSrc("Rename")%>"/> <%=PageFlowUtil.buttonLink("Cancel", bean.returnURL)%></td>
+        <td colspan="2"><%=PageFlowUtil.generateSubmitButton("Rename")%><%=PageFlowUtil.generateButton("Cancel", bean.returnURL)%></td>
     </tr>
 </table>
 </form>

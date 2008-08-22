@@ -290,6 +290,6 @@
         </td>
     </tr>
 </table>
-    <%= buttonImg("Calculate") %> <%= buttonLink("Reset Form", "begin.view?reset=true") %>
+    <%= generateSubmitButton("Calculate") %> <%= generateButton("Reset Form", "begin.view?reset=true") %>
 
 </form>

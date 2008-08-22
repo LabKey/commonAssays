@@ -70,7 +70,7 @@
         if (getViewContext().getContainer().hasPermission(getViewContext().getUser(), ACL.PERM_DELETE))
         {
 %>
-<%= buttonLink("Delete Run", "deleteRun.view?rowId=" + bean.getRunId(), "return confirm('Permanently delete this run?')")%>
+<%= generateButton("Delete Run", "deleteRun.view?rowId=" + bean.getRunId(), "return confirm('Permanently delete this run?')")%>
 <%
         }
 %>

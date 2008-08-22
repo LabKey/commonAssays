@@ -63,20 +63,15 @@ public class DisplayThreadStatusColumn extends SimpleDisplayColumn
         switch (curStatus)
         {
             case RUNNING:
-                button1 =
-                        "<a href=\"annotThreadControl.view?button=kill&id=" + curId + "\"><img align='middle' src='" + PageFlowUtil.buttonSrc("Kill") + "'></a>";
-                button2 =
-                        "<a href=\"annotThreadControl.view?button=pause&id=" + curId + "\"><img align='middle' src='" + PageFlowUtil.buttonSrc("Pause") + "'></a>";
+                button1 = PageFlowUtil.generateButton("Kill", "annotThreadControl.view?button=kill&id=" + curId);
+                button2 = PageFlowUtil.generateButton("Pause", "annotThreadControl.view?button=pause&id=" + curId);
                 break;
             case PAUSED:
-                button1 =
-                        "<a href=\"annotThreadControl.view?button=kill&id=" + curId + "\"><img align='middle' src='" + PageFlowUtil.buttonSrc("Kill") + "'></a>";
-                button2 =
-                        "<a href=\"annotThreadControl.view?button=continue&id=" + curId + "\"><img align='middle' src='" + PageFlowUtil.buttonSrc("Continue") + "'></a>";
+                button1 = PageFlowUtil.generateButton("Kill", "annotThreadControl.view?button=kill&id=" + curId);
+                button2 = PageFlowUtil.generateButton("Continue", "annotThreadControl.view?button=continue&id=" + curId);
                 break;
             case INCOMPLETE:
-                button1 =
-                        "<a href=\"annotThreadControl.view?button=recover&id=" + curId + "\"><img align='middle' src='" + PageFlowUtil.buttonSrc("Recover") + "'></a>";
+                button1 = PageFlowUtil.generateButton("Recover", "annotThreadControl.view?button=recover&id=" + curId);
                 button2 = "";
                 break;
             case UNKNOWN:

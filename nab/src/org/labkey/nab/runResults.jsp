@@ -54,7 +54,7 @@
     if (bean.isNewRun())
     {
 %>
-    This run has been automatically saved. <%= buttonLink("Delete Run", "deleteRun.view?rowId=" + assay.getRunRowId())%><br>
+    This run has been automatically saved. <%= generateButton("Delete Run", "deleteRun.view?rowId=" + assay.getRunRowId())%><br>
 <%
     }
     if (!bean.isPrintView() &&  duplicateDataFileView.hasRecords())

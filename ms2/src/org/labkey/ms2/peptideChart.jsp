@@ -43,7 +43,7 @@ Run: <%=h(bean.run.toString())%><br>
                         <option value="<%=GoTypes.PROCESS%>"<%=GoTypes.PROCESS == bean.goChartType ? " selected" : ""%>><%=GoTypes.PROCESS%></option>
                     </select>
                 </td>
-                <td valign="middle"><input type="image" src="<%=PageFlowUtil.buttonSrc("Submit")%>"></td>
+                <td valign="middle"><%=PageFlowUtil.generateSubmitButton("Submit")%></td>
             </tr>
         </table>
     </td>

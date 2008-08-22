@@ -37,5 +37,5 @@
     <%=bean.select%><br/>
     <br/><br/>
     <% out.flush(); bean.extraOptionsView.render(request, response); %><br/>
-    <input type="image" src="<%=PageFlowUtil.buttonSrc("Go")%>" name="submit">
+    <%=PageFlowUtil.generateSubmitButton("Go", "", "name=\"submit\"")%>
 </form>

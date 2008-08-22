@@ -69,7 +69,7 @@
     </tr>
     <tr>
       <td/>
-      <td><input type="image" src="<%= PageFlowUtil.buttonSrc("Load Annotations") %>" /></td>
+      <td><%=PageFlowUtil.generateSubmitButton("Load Annotations")%></td>
    </tr>
 </table>
 </form>

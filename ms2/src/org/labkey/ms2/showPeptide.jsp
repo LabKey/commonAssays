@@ -40,8 +40,7 @@
     <table>
     <tr><td height=60>
         <b><%=p.getPeptide()%></b>
-        <a target="cmt" href="http://www.ncbi.nlm.nih.gov/blast/Blast.cgi?CMD=Web&amp;LAYOUT=TwoWindows&amp;AUTO_FORMAT=Semiauto&amp;ALIGNMENTS=50&amp;ALIGNMENT_VIEW=Pairwise&amp;CDD_SEARCH=on&amp;CLIENT=web&amp;COMPOSITION_BASED_STATISTICS=on&amp;DATABASE=nr&amp;DESCRIPTIONS=100&amp;ENTREZ_QUERY=(none)&amp;EXPECT=1000&amp;FILTER=L&amp;FORMAT_OBJECT=Alignment&amp;FORMAT_TYPE=HTML&amp;I_THRESH=0.005&amp;MATRIX_NAME=BLOSUM62&amp;NCBI_GI=on&amp;PAGE=Proteins&amp;PROGRAM=blastp&amp;SERVICE=plain&amp;SET_DEFAULTS.x=41&amp;SET_DEFAULTS.y=5&amp;SHOW_OVERVIEW=on&amp;END_OF_HTTPGET=Yes&amp;SHOW_LINKOUT=yes&amp;QUERY=<%=p.getTrimmedPeptide()%>"><%=PageFlowUtil.buttonImg("Blast")%></a><br>
-
+        <%=PageFlowUtil.generateButton("Blast", "http://www.ncbi.nlm.nih.gov/blast/Blast.cgi?CMD=Web&amp;LAYOUT=TwoWindows&amp;AUTO_FORMAT=Semiauto&amp;ALIGNMENTS=50&amp;ALIGNMENT_VIEW=Pairwise&amp;CDD_SEARCH=on&amp;CLIENT=web&amp;COMPOSITION_BASED_STATISTICS=on&amp;DATABASE=nr&amp;DESCRIPTIONS=100&amp;ENTREZ_QUERY=(none)&amp;EXPECT=1000&amp;FILTER=L&amp;FORMAT_OBJECT=Alignment&amp;FORMAT_TYPE=HTML&amp;I_THRESH=0.005&amp;MATRIX_NAME=BLOSUM62&amp;NCBI_GI=on&amp;PAGE=Proteins&amp;PROGRAM=blastp&amp;SERVICE=plain&amp;SET_DEFAULTS.x=41&amp;SET_DEFAULTS.y=5&amp;SHOW_OVERVIEW=on&amp;END_OF_HTTPGET=Yes&amp;SHOW_LINKOUT=yes&amp;QUERY=" + p.getTrimmedPeptide(), "", "target=\"cmt\"")%><br>
         <%=p.getScan()%>&nbsp;&nbsp;<%=p.getCharge()%>+&nbsp;&nbsp;<%=p.getRawScore()%>&nbsp;&nbsp;<%=Formats.f3.format(p.getDiffScore())%>&nbsp;&nbsp;<%=Formats.f3.format(p.getZScore())%>&nbsp;&nbsp;<%=Formats.percent.format(p.getIonPercent())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getMass())%>&nbsp;&nbsp;<%=Formats.signf4.format(p.getDeltaMass())%>&nbsp;&nbsp;<%=Formats.f4.format(p.getPeptideProphet())%>&nbsp;&nbsp;<%=p.getProteinHits()%><br>
         <%=p.getProtein()%><br>
 <%
@@ -51,15 +50,15 @@
         }
 
         if (null == ctx.previousUrl)
-            out.print(PageFlowUtil.buttonImg("<< Prev", "disabled"));
+            out.print(PageFlowUtil.generateDisabledButton("<< Prev"));
         else
-            out.print("    <a href=\"" + ctx.previousUrl.getEncodedLocalURIString() + "\">" + PageFlowUtil.buttonImg("<< Prev") + "</a>");
+            out.print("    " + PageFlowUtil.generateButton("<< Prev", ctx.previousUrl.getLocalURIString()));
 %>&nbsp;
 <%
     if (null == ctx.nextUrl)
-        out.print(PageFlowUtil.buttonImg("Next >>", "disabled"));
+        out.print(PageFlowUtil.generateDisabledButton("Next >>"));
     else
-        out.print("    <a href=\"" + ctx.nextUrl.getEncodedLocalURIString() + "\">" + PageFlowUtil.buttonImg("Next >>") + "</a>");
+        out.print("    " + PageFlowUtil.generateButton("Next >>", ctx.nextUrl.getLocalURIString()));
 %>&nbsp;
 <%
     if (fraction.wasloadedFromGzFile() && null != ctx.showGzUrl)
@@ -69,13 +68,13 @@
         for (String gzFileExtension : gzFileExtensions)
         {
             ctx.showGzUrl.replaceParameter("extension", gzFileExtension);
-            out.println("    <a href=\"" + ctx.showGzUrl.getEncodedLocalURIString() + "\">" + PageFlowUtil.buttonImg("Show " + gzFileExtension.toUpperCase()) + "</a>&nbsp;");
+            out.println("    " + PageFlowUtil.generateButton("Show " + gzFileExtension.toUpperCase(), ctx.showGzUrl.getLocalURIString()) + "&nbsp;");
         }
     }
     out.print(ctx.modificationHref);
 %>
         <% if(null != ctx.pepSearchHref && ctx.pepSearchHref.length() > 0) { %>
-        <a href="<%=ctx.pepSearchHref%>" target="pepSearch"><%=PageFlowUtil.buttonImg("Find Features")%></a>
+        <%=PageFlowUtil.generateButton("Find Features", ctx.pepSearchHref, "", "target=\"pepSearch\"")%>
         <% } %>
 
     </td></tr>
@@ -99,7 +98,7 @@
         X&nbsp;Start&nbsp;<input name="xStart" id="xStart" value="<%=ctx.actualXStart%>" size=8>
         X&nbsp;End&nbsp;<input name="xEnd" id="xEnd" value="<%=ctx.actualXEnd%>" size=8>
         <input name="queryString" type="hidden" value="<%=PageFlowUtil.filter(ctx.url.getRawQuery())%>">
-        <input type="image" src="<%=PageFlowUtil.buttonSrc("Scale Graph")%>">
+        <%=PageFlowUtil.generateSubmitButton("Scale Graph")%>
     </form>
     </td></tr>
     </table>

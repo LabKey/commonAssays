@@ -83,7 +83,7 @@
     if (getContainer().hasPermission(getUser(), ACL.PERM_UPDATE))
     {
 %>
-<%=buttonLink("edit", well.urlFor(WellController.Action.editWell))%><br>
+<%=generateButton("edit", well.urlFor(WellController.Action.editWell))%><br>
 <% } %>
 <% if (getStatistics().size() > 0)
 {

@@ -30,17 +30,21 @@
     <tr>
         <td><strong>Common:</strong></td>
         <td><%=h(bean.commonColumns)%></td>
-        <td nowrap><input type="image" src="<%=PageFlowUtil.buttonSrc("Pick")%>" onclick="return setCurrent('<%=h(bean.commonColumns)%>')"> <input type="image" src="<%=PageFlowUtil.buttonSrc("Add")%>" onclick="return appendToCurrent('<%=h(bean.commonColumns)%>')"></td>
+        <td nowrap>
+            <%=PageFlowUtil.generateSubmitButton("Pick", "return setCurrent('" + h(bean.commonColumns) + "')")%>
+            <%=PageFlowUtil.generateSubmitButton("Add", "return appendToCurrent('" + h(bean.commonColumns) + "')")%></td>
     </tr>
     <tr>
         <td nowrap><strong>Protein Prophet:</strong></td>
         <td><%=h(bean.proteinProphetColumns)%></td>
-        <td nowrap align=right><input type="image" src="<%=PageFlowUtil.buttonSrc("Add")%>" onclick="return appendToCurrent('<%=h(bean.proteinProphetColumns)%>')"></td>
+        <td nowrap align=right>
+            <%=PageFlowUtil.generateSubmitButton("Add", "return appendToCurrent('" + h(bean.proteinProphetColumns) + "')")%></td>
     </tr>
     <tr>
         <td><strong>Quantitation:</strong></td>
         <td><%=h(bean.quantitationColumns)%></td>
-        <td nowrap align=right><input type="image" src="<%=PageFlowUtil.buttonSrc("Add")%>" onclick="return appendToCurrent('<%=h(bean.quantitationColumns)%>')"></td>
+        <td nowrap align=right>
+            <%=PageFlowUtil.generateSubmitButton("Add", "return appendToCurrent('" + h(bean.quantitationColumns) + "')")%></td>
     </tr>
     <tr>
         <td>&nbsp;</td>
@@ -58,7 +62,9 @@
     <tr>
         <td><strong>Default:</strong></td>
         <td><%=h(bean.defaultColumns)%></td>
-        <td nowrap ><input type="image" src="<%=PageFlowUtil.buttonSrc("Pick")%>" onclick="return setCurrent('<%=h(bean.defaultColumns)%>');"> <input type="image" src="<%=PageFlowUtil.buttonSrc("Add")%>" onclick="return appendToCurrent('<%=h(bean.defaultColumns)%>')"></td>
+        <td nowrap >
+            <%=PageFlowUtil.generateSubmitButton("Pick", "return setCurrent('" + h(bean.defaultColumns) + "');")%>
+            <%=PageFlowUtil.generateSubmitButton("Add", "return appendToCurrent('" + h(bean.defaultColumns) + "');")%></td>
     </tr>
     <tr>
         <td>&nbsp;</td>
@@ -67,7 +73,9 @@
         <td><strong>Current:</strong></td>
         <td><textarea style="width:100%;" name="columns" id="columns" rows="3" cols="100"><%=h(bean.currentColumns)%></textArea></td>
     </tr>
-    <tr><td colspan=2 align=center><input type="image" src="<%=PageFlowUtil.buttonSrc("Pick Columns")%>" onclick="this.form.action='<%=h(MS2Controller.getPickPeptideColumnsPostURL(c, bean.returnURL, false))%>';"> <input type="image" src="<%=PageFlowUtil.buttonSrc("Save As Default")%>" onclick="this.form.action='<%=h(MS2Controller.getPickPeptideColumnsPostURL(c, bean.returnURL, true))%>';"></td></tr>
+    <tr><td colspan=2 align=center>
+        <%=PageFlowUtil.generateSubmitButton("Pick Columns", "this.form.action='" + h(MS2Controller.getPickPeptideColumnsPostURL(c, bean.returnURL, false)) + "';")%>
+        <%=PageFlowUtil.generateSubmitButton("Save As Default", "this.form.action='" + h(MS2Controller.getPickPeptideColumnsPostURL(c, bean.returnURL, true)) + "';")%></td></tr>
 </table></form>
 
 <script type="text/javascript">

@@ -653,18 +653,15 @@ public class MS2Controller extends SpringActionController
         // in the status bar and spreads out the content unnecessarily.
         int width = ("https".equals(getViewContext().getActionURL().getScheme()) ? 175 : 100);
 
-        StringBuilder href = new StringBuilder();
-        href.append("<a href=\"showModifications.view?run=");
-        href.append(run.getRun());
-        href.append("\" target=\"modifications\" onClick=\"window.open('showModifications.view?run=");
-        href.append(run.getRun());
-        href.append("','modifications','height=300,width=");
-        href.append(width);
-        href.append(",status=yes,toolbar=no,menubar=no,location=no,resizable=yes');return false;\"><img src=\"");
-        href.append(PageFlowUtil.buttonSrc("Show Modifications"));
-        href.append("\"></a>");
+        String onClick = "window.open('showModifications.view?run=" +
+                run.getRun() +
+                "','modifications','height=300,width=" +
+                width +
+                ",status=yes,toolbar=no,menubar=no,location=no,resizable=yes');return false;";
 
-        return href.toString();
+        String href = "showModifications.view?run=" + run.getRun();
+
+        return PageFlowUtil.generateButton("Show Modifications", href, onClick, "target=\"modifications\"");
     }
 
 

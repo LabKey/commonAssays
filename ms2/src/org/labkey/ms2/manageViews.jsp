@@ -58,7 +58,7 @@
                         </tr>
                     <% } %>
                     <tr>
-                        <td colspan="3"><%=buttonImg("OK")%> <%=PageFlowUtil.buttonLink("Cancel", bean.getReturnURL())%></td>
+                        <td colspan="3"><%=generateSubmitButton("OK")%> <%=PageFlowUtil.generateButton("Cancel", bean.getReturnURL())%></td>
                     </tr>
                 </table>
             </form>

@@ -41,7 +41,7 @@ if (bean.canShare)
         </tr><%
 } %>
         <tr>
-            <td colspan=2><input type="image" src="<%=PageFlowUtil.buttonSrc("Save View")%>"> <%=PageFlowUtil.buttonLink("Cancel", bean.returnURL)%></td>
+            <td colspan=2><%=PageFlowUtil.generateSubmitButton("Save View")%><%=PageFlowUtil.generateButton("Cancel", bean.returnURL)%></td>
         </tr>
     </table>
 </form>

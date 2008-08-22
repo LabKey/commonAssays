@@ -32,7 +32,7 @@
             <td><input type="checkbox" name="allowUpload" <%= isAllowUpload() ? "checked" : "" %>> Allow Upload</td>
         </tr>
         <tr>
-            <td><%= buttonImg("Done")%></td>
+            <td><%= generateSubmitButton("Done")%></td>
         </tr>
     </table>
 </form>

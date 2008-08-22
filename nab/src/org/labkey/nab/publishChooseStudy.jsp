@@ -53,5 +53,5 @@
             </td>
         </tr>
     </table>
-    <%= buttonLink("Cancel", "begin.view") %> <%= buttonImg("Next") %>
+    <%= generateButton("Cancel", "begin.view") %> <%= generateSubmitButton("Next") %>
 </form>

@@ -99,9 +99,8 @@
 <% if (form.getWizardStep() == AnalysisScriptController.ImportAnalysisStep.INIT) { %>
     <p>You can import results from a FlowJo workspace containing statistics that FlowJo has calculated.
         To do this, use FlowJo to save the workspace as XML.</p>
-
-    <input type="image" src="<%=PageFlowUtil.buttonSrc("Begin")%>">
-    <%=PageFlowUtil.buttonLink("Cancel", cancelUrl)%>
+    <%=PageFlowUtil.generateSubmitButton("Begin")%>
+    <%=PageFlowUtil.generateButton("Cancel", cancelUrl)%>
 <% } else if (form.getWizardStep().getNumber() < AnalysisScriptController.ImportAnalysisStep.CONFIRM.getNumber()) { %>
 
     <% if (form.getWizardStep() == AnalysisScriptController.ImportAnalysisStep.UPLOAD_WORKSPACE) { %>
@@ -155,7 +154,7 @@
                     from a central location.
                     </p><%
                 if (canSetPipelineRoot) {
-                    %><%=PageFlowUtil.buttonLink("Set pipeline root", PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(container))%><%
+                    %><%=PageFlowUtil.generateButton("Set pipeline root", PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(container))%><%
                 } else {
                     %>Contact your administrator to set the pipeline root for this folder.<%
                 }
@@ -212,7 +211,7 @@
                     You can safely skip this step, however no graphs can be generated
                     when importing the FlowJo workspace without the FCS files.</p><%
                 if (canSetPipelineRoot) {
-                    %><%=PageFlowUtil.buttonLink("Set pipeline root", PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(container))%><%
+                    %><%=PageFlowUtil.generateButton("Set pipeline root", PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(container))%><%
                 } else {
                     %>Contact your administrator to set the pipeline root for this folder.<%
                 }
@@ -258,9 +257,9 @@
         </div>
     <% } %>
 
-    <%=PageFlowUtil.buttonLink("Back", "javascript:window.history.back();")%>
-    <input type="image" src="<%=PageFlowUtil.buttonSrc("Next")%>">
-    <%=PageFlowUtil.buttonLink("Cancel", cancelUrl)%>
+    <%=PageFlowUtil.generateButton("Back", "javascript:window.history.back();")%>
+    <%=PageFlowUtil.generateSubmitButton("Next")%>
+    <%=PageFlowUtil.generateButton("Cancel", cancelUrl)%>
     
 <% } else { %>
     <input type="hidden" name="runFilePathRoot" id="runFilePathRoot" value="<%=h(form.getRunFilePathRoot())%>">
@@ -311,8 +310,8 @@
         </li>
     </ul>
 
-    <%=PageFlowUtil.buttonLink("Back", "javascript:window.history.back();")%>
-    <input type="image" src="<%=PageFlowUtil.buttonSrc("Finish")%>">
-    <%=PageFlowUtil.buttonLink("Cancel", cancelUrl)%>
+    <%=PageFlowUtil.generateButton("Back", "javascript:window.history.back();")%>
+    <%=PageFlowUtil.generateSubmitButton("Finish")%>
+    <%=PageFlowUtil.generateButton("Cancel", cancelUrl)%>
 <% } %>
 </form>

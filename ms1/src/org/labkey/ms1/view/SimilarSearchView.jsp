@@ -109,7 +109,7 @@
                     </tr>
                     <tr>
                         <td colspan="4" style="text-align:right">
-                            <input name="submit" type="image" src="<%=PageFlowUtil.buttonSrc("Search")%>"/>
+                            <%=PageFlowUtil.generateSubmitButton("Search", "name=\"submit\"")%>
                         </td>
                     </tr>
                 </table>

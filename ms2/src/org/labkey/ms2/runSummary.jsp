@@ -48,28 +48,28 @@ if (null != bean.quantAlgorithm)
 
 if (bean.writePermissions)
 { %>
-    <a href="<%=h(MS2Controller.getRenameRunURL(c, run, me.getViewContext().getActionURL()))%>"><img src="<%=PageFlowUtil.buttonSrc("Rename")%>"></a><%
+    <%=PageFlowUtil.generateButton("Rename", MS2Controller.getRenameRunURL(c, run, me.getViewContext().getActionURL()))%><%
 } %>
     <%=bean.modHref%><%
 
 if (null != run.getParamsFileName() && null != run.getPath())
 { %>
-    <a target="paramFile" href="showParamsFile.view?run=<%=run.getRun()%>"><img src="<%=PageFlowUtil.buttonSrc("Show " + run.getParamsFileName())%>"></a><%
+    <%=PageFlowUtil.generateButton("Show " + run.getParamsFileName(), "showParamsFile.view?run=" + run.getRun(), "", "target=\"paramFile\"")%><%
 }
 
 if (run.getHasPeptideProphet())
 { %>
-    <a target="peptideProphetSummary" href="showPeptideProphetDetails.view?run=<%=run.getRun()%>"><img src="<%=PageFlowUtil.buttonSrc("Show Peptide Prophet Details")%>"></a><%
+    <%=PageFlowUtil.generateButton("Show Peptide Prophet Details", "showPeptideProphetDetails.view?run=" + run.getRun(), "", "target=\"peptideProphetSummary\"")%><%
 }
 
 if (run.hasProteinProphet())
 { %>
-    <a target="proteinProphetSummary" href="showProteinProphetDetails.view?run=<%=run.getRun()%>"><img src="<%=PageFlowUtil.buttonSrc("Show Protein Prophet Details")%>"></a><%
+    <%=PageFlowUtil.generateButton("Show Protein Prophet Details", "showProteinProphetDetails.view?run=" + run.getRun(), "", "target=\"proteinProphetSummary\"")%><%
 }
 
 if(run.getNegativeHitCount() > run.getPeptideCount() / 3)
 { %>
-    <a href="discriminateScore.view?run=<%=run.getRun()%>"><img src="<%=PageFlowUtil.buttonSrc("Discriminate")%>"></a><%
+    <%=PageFlowUtil.generateButton("Discriminate", "discriminateScore.view?run=" + run.getRun())%><%
 } %>
     </tr>
 </table>

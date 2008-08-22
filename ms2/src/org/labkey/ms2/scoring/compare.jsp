@@ -105,7 +105,7 @@
             </table>
         </td></tr>
         <tr>
-            <td colspan="2"><input type=image src="<%=PageFlowUtil.submitSrc()%>"></td>
+            <td colspan="2"><%=PageFlowUtil.generateSubmitButton("Submit")%></td>
         </tr>
 <%
         params.append("&size=").append(validRuns);

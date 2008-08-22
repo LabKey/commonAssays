@@ -194,16 +194,16 @@
                 String nextFeatureCaption = "Next Feature >>";
 
                 if(model.getPrevFeatureId() < 0)
-                    out.write(PageFlowUtil.buttonImg(prevFeatureCaption, "disabled"));
+                    out.write(PageFlowUtil.generateDisabledButton(prevFeatureCaption));
                 else
-                    out.print("<a href=\"" + model.getPrevFeatureUrl() + "\">" + PageFlowUtil.buttonImg(prevFeatureCaption) + "</a>");
+                    out.print(PageFlowUtil.generateButton(prevFeatureCaption, model.getPrevFeatureUrl()));
 
                 out.write("&nbsp;");
 
                 if(model.getNextFeatureId() < 0)
-                    out.write(PageFlowUtil.buttonImg(nextFeatureCaption, "disabled"));
+                    out.write(PageFlowUtil.generateDisabledButton(nextFeatureCaption));
                 else
-                    out.print("<a href=\"" + model.getNextFeatureUrl() + "\">" + PageFlowUtil.buttonImg(nextFeatureCaption) + "</a>");
+                    out.print(PageFlowUtil.generateButton(nextFeatureCaption, model.getNextFeatureUrl()));
             %>
         </td>
 
@@ -351,16 +351,16 @@
                 String nextScanUrl = model.getNextScanUrl();
 
                 if (null == prevScanUrl)
-                    out.print(PageFlowUtil.buttonImg(prevScanCaption, "disabled"));
+                    out.print(PageFlowUtil.generateDisabledButton(prevScanCaption));
                 else
-                    out.print("<a href=\"" + prevScanUrl + "\">" + PageFlowUtil.buttonImg(prevScanCaption) + "</a>");
+                    out.print(PageFlowUtil.generateButton(prevScanCaption, prevScanUrl));
 
                 out.print("&nbsp;");
 
                 if (null == nextScanUrl)
-                    out.print(PageFlowUtil.buttonImg(nextScanCaption, "disabled"));
+                    out.print(PageFlowUtil.generateDisabledButton(nextScanCaption));
                 else
-                    out.print("<a href=\"" + nextScanUrl + "\">" + PageFlowUtil.buttonImg(nextScanCaption) + "</a>");
+                    out.print(PageFlowUtil.generateButton(nextScanCaption, nextScanUrl));
 
             %>
             <!-- m/z and intensity peaks mass chart -->
@@ -414,9 +414,9 @@
                 </tr>
                 <tr>
                     <td colspan="3" style="text-align:right">
-                        <img src="<%=PageFlowUtil.buttonSrc("Cancel")%>" onclick="cancelMzFilter();" alt="Cancel" title="Cancel Chanages" tabindex="4"/>
-                        <img src="<%=PageFlowUtil.buttonSrc("Reset")%>" onclick="resetMzWindowFilter();" alt="Reset" title="Reset to Defaults and Refresh" tabindex="5"/>
-                        <img src="<%=PageFlowUtil.buttonSrc("Filter")%>" onclick="submitMzWindowFilter();" alt="Filter" title="Set Filter and Refresh" tabindex="6"/>
+                        <%=PageFlowUtil.generateSubmitButton("Cancel", "cancelMzFilter();", "title=\"Cancel Chanages\" tabindex=\"4\"")%>
+                        <%=PageFlowUtil.generateSubmitButton("Reset", "resetMzWindowFilter();", "title=\"Reset to Defaults and Refresh\" tabindex=\"5\"")%>
+                        <%=PageFlowUtil.generateSubmitButton("Filter", "submitMzWindowFilter();", "title=\"Set Filter and Refresh\" tabindex=\"6\"")%>
                     </td>
                 </tr>
             </table>
@@ -489,9 +489,9 @@
                 </tr>
                 <tr>
                     <td nowrap style="text-align:right">
-                        <img src="<%=PageFlowUtil.buttonSrc("Cancel")%>" onclick="cancelScanFilter();" alt="Cancel" title="Cancel Chanages" tabindex="104"/>
-                        <img src="<%=PageFlowUtil.buttonSrc("Reset")%>" onclick="resetScanWindowFilter();" alt="Reset" title="Reset to Defaults and Refresh" tabindex="105"/>
-                        <img src="<%=PageFlowUtil.buttonSrc("Filter")%>" onclick="submitScanWindowFilter();" alt="Filter" title="Set Filter and Refresh" tabindex="106"/>
+                        <%=PageFlowUtil.generateSubmitButton("Cancel", "cancelScanFilter();", "title=\"Cancel Chanages\" tabindex=\"104\"")%>
+                        <%=PageFlowUtil.generateSubmitButton("Reset", "resetScanWindowFilter();", "title=\"Reset to Defaults and Refresh\" tabindex=\"105\"")%>
+                        <%=PageFlowUtil.generateSubmitButton("Filter", "submitScanWindowFilter();", "title=\"Set Filter and Refresh\" tabindex=\"106\"")%>
                     </td>
                 </tr>
             </table>
