@@ -35,19 +35,25 @@ import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.ICSMetadata;
 import org.labkey.flow.query.FlowQueryForm;
 import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.SubtractBackgroundQuery;
 import org.labkey.flow.webparts.FlowFolderType;
 
 import java.io.PrintWriter;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 public class FlowQueryView extends QueryView
 {
     List<DisplayColumn> _displayColumns;
     boolean __hasGraphs;
+    private boolean _subtractBackground;
 
     public FlowQueryView(FlowQueryForm form)
     {
@@ -95,6 +101,26 @@ public class FlowQueryView extends QueryView
     protected DataView createDataView()
     {
         DataView ret = super.createDataView();
+
+        if (_subtractBackground)
+        {
+            FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+            ICSMetadata metadata = protocol.getICSMetadata();
+            if (metadata == null)
+                throw new IllegalStateException("need to configure ICSMetadata");
+
+            SubtractBackgroundQuery export = new SubtractBackgroundQuery(this.getSettings().getSortFilterURL(), this, metadata);
+            try
+            {
+                ResultSet rs = export.createResultSet(0);
+                ret.setResultSet(rs);
+            }
+            catch (SQLException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
         if (hasGraphs() && showGraphs())
         {
             ret = new GraphView(ret);

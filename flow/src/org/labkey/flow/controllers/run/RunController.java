@@ -16,24 +16,21 @@
 
 package org.labkey.flow.controllers.run;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.data.*;
-import org.labkey.api.query.CustomView;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QueryDefinition;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.ShowRows;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.view.*;
 import org.labkey.flow.analysis.model.FCS;
-import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.data.*;
-import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowTableType;
+import org.labkey.flow.query.SubtractBackgroundQuery;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.script.MoveRunFromWorkspaceJob;
 import org.springframework.validation.BindException;
@@ -47,8 +44,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -284,8 +281,7 @@ public class RunController extends SpringFlowController<RunController.Action>
                 throw new IllegalStateException("need to configure ICSMetadata");
 
             SubtractBackgroundQuery export = new SubtractBackgroundQuery(form.getViewContext().getActionURL(), form, metadata);
-            export.genSql(errors);
-            ResultSet rs = export.createResultSet(true, 0);
+            ResultSet rs = export.createResultSet(0);
 //            DbSchema schema = FlowManager.get().getSchema();
 //            ResultSet rs = Table.executeQuery(schema, export);
 
@@ -310,299 +306,6 @@ public class RunController extends SpringFlowController<RunController.Action>
         public NavTree appendNavTrail(NavTree root)
         {
             return null;
-        }
-    }
-
-    // XXX: rename to BackgroundSubtractQuery
-    /**
-     * SELECT
-     *   A.Name, A.OtherNonStatColumns, ...
-     *   A.MatchColumn1, A.MatchColumn2,
-     *   A.BackgroundColumn,
-     *   A.Stat_1 - BG.Stat_1 AS "Corrected Stat_1",
-     *   A.Stat_2 - BG.Stat_2 AS "Corrected Stat_2"
-     * FROM
-     *   (SELECT
-     *      FCSAnalyses.Name, FCSAnalyses.OtherNonStatColumns, ...
-     *      FCSAnalyses.MatchColumn1, FCSAnalyses.MatchColumn2,
-     *      FCSAnalyses.BackgroundColumn,
-     *      FCSAnalyses.Stat_1, FCSAnlyses.Stat_2
-     *    FROM FCSAnalyses
-     *    WHERE
-     *      -- is not a background well
-     *    ) AS A
-     * INNER JOIN
-     *   (SELECT
-     *      FCSAnalyses.MatchColumn1, FCSAnalyses.MatchColumn2,
-     *      AVG(FCSAnalyses.Stat_1) AS Stat_1,
-     *      AVG(FCSAnalyses.Stat_2) AS Stat_2
-     *    FROM FCSAnalyses
-     *    WHERE
-     *      -- is a background well
-     *      FCSAnalyses.BackgroundColumn = BackgroundValue,
-     *    GROUP BY FCSAnalyses.MatchColumn1, FCSAnalyses.MatchColumn2
-     *    ) AS BG
-     *  ON A.MatchColumn1 = BG.MatchColumn1 AND A.MatchColumn2 = BG.MatchColumn2
-     */
-    static class SubtractBackgroundQuery extends SQLFragment
-    {
-        protected RunForm _form;
-        protected FlowRun _run;
-        protected ActionURL _currentUrl;
-        protected ICSMetadata _metadata;
-
-        protected QueryDefinition _query;
-        protected CustomView _customView;
-        protected TableInfo _table;
-        protected List<ColumnInfo> _columns;
-        protected List<ColumnInfo> _ordinaryCols = new ArrayList<ColumnInfo>();
-        protected List<ColumnInfo> _matchCols = new ArrayList<ColumnInfo>();
-        protected List<ColumnInfo> _statCols = new ArrayList<ColumnInfo>();
-        protected List<ColumnInfo> _backgroundCols = new ArrayList<ColumnInfo>();
-        protected SimpleFilter _backgroundFilter = new SimpleFilter();
-        private int _indent = 0;
-
-        protected SubtractBackgroundQuery(ActionURL currentUrl, RunForm form, ICSMetadata metadata)
-        {
-            _currentUrl = currentUrl;
-            _form = form;
-            _run = form.getRun();
-            _metadata = metadata;
-
-            _query = _form.getQueryDef();
-            _customView = _form.getCustomView();
-            _table = _query.getMainTable();
-            _columns = _query.getColumns(_customView, _table);
-
-            scanColumns();
-        }
-
-        protected ResultSet createResultSet(boolean export, int maxRows) throws SQLException
-        {
-            return Table.executeQuery(FlowManager.get().getSchema(), getSQL(), getParams().toArray(), maxRows, !export);
-//            return Table.executeQuery(FlowManager.get().getSchema(), this);
-        }
-
-        // XXX: only keep %P stats?
-        protected boolean isStatColumn(ColumnInfo column)
-        {
-            return column.getName().startsWith("Statistic/") &&
-                   column.getName().endsWith(":Freq_Of_Parent");
-        }
-
-        protected List<DisplayColumn> getDisplayColumns()
-        {
-            List<DisplayColumn> cols = new LinkedList<DisplayColumn>();
-            for (ColumnInfo column : _columns)
-            {
-//                if (isStatColumn(column))
-//                {
-//                    ColumnInfo corrected = new ColumnInfo(column);
-//                    corrected.setAlias("Corrected " + column.getName());
-//                    DisplayColumn renderer = corrected.getRenderer();
-//                    cols.add(renderer);
-//                }
-//                else
-                {
-                    cols.add(column.getRenderer());
-                }
-            }
-            return cols;
-        }
-
-        protected void scanColumns()
-        {
-            for (ColumnInfo column : _columns)
-            {
-                FieldKey key = FieldKey.fromString(column.getName());
-                ScriptSettings.FilterInfo background = null;
-                if (isStatColumn(column))
-                {
-                    _statCols.add(column);
-                }
-                else if (_metadata.getMatchColumns().contains(key))
-                {
-                    _matchCols.add(column);
-                }
-                else if (null != (background = _metadata.getBackgroundFilter(key)))
-                {
-                    _backgroundCols.add(column);
-//                    _backgroundFilter.addCondition(column.getSelectName(), background.getValue(), background.getOp());
-                    _backgroundFilter.addCondition(column.getValueSql().toString(), background.getValue(), background.getOp());
-                }
-                else
-                {
-                    _ordinaryCols.add(column);
-                }
-            }
-
-            if (_statCols.size() == 0)
-                throw new IllegalArgumentException("at least one statistic column is required");
-            if (_matchCols.size() == 0)
-                throw new IllegalArgumentException("at least one column matching background to stimulated wells is required");
-            if (_backgroundCols.size() == 0)
-                throw new IllegalArgumentException("at least one background column is required");
-        }
-
-        protected void genSql(BindException errors)
-        {
-            SqlDialect dialect = _table.getSqlDialect();
-
-            append("SELECT");
-            indent();
-
-            String strComma = "";
-            for (ColumnInfo column : _ordinaryCols)
-            {
-                assert column.getParentTable() == _table : "Column is from the wrong table: " + column.getParentTable() + " instead of " + _table;
-//                column.declareJoins(joins);
-                append(strComma);
-                appendNewLine();
-                append("A.").append(column.getSelectName());
-//                column.getSelectName();
-//                column.getLegalName();
-//                column.getColumnName();
-                strComma = ",";
-            }
-            for (ColumnInfo column : _matchCols)
-            {
-                append(",");
-                appendNewLine();
-                append("A.").append(column.getSelectName());
-            }
-            for (ColumnInfo column: _backgroundCols)
-            {
-                append(",");
-                appendNewLine();
-                append("A.").append(column.getSelectName());
-            }
-            for (ColumnInfo column : _statCols)
-            {
-                append(",");
-                appendNewLine();
-                append("A.").append(column.getSelectName()).append(" - ").append("BG.").append(column.getSelectName());
-//                append(" AS ").append("\"Corrected ").append(column.getSelectName()).append("\"");
-                append(" AS ").append(column.getSelectName());
-            }
-
-            appendNewLine();
-            append("FROM");
-            indent();
-            // XXX: get original Filter and Sort
-            // XXX: add "NOT backgroundFilter"
-            appendNewLine();
-            SQLFragment originalFrag = Table.getSelectSQL(_table, _columns, null, null, 0, 0);
-            append("(").append(originalFrag).append(") AS A");
-            outdent();
-
-            Map<String, SQLFragment> joins = new LinkedHashMap<String, SQLFragment>();
-
-            appendNewLine();
-            append("INNER JOIN");
-            indent();
-            appendNewLine();
-            append("(SELECT");
-            indent();
-
-            strComma = "";
-            for (ColumnInfo column : _matchCols)
-            {
-                assert column.getParentTable() == _table : "Column is from the wrong table: " + column.getParentTable() + " instead of " + _table;
-                column.declareJoins(joins);
-                append(strComma);
-                appendNewLine();
-                append(column.getSelectSql());
-                strComma = ",";
-            }
-//            for (ColumnInfo column : _backgroundCols)
-//            {
-//                assert column.getParentTable() == _table : "Column is from the wrong table: " + column.getParentTable() + " instead of " + _table;
-//                column.declareJoins(joins);
-//                append(",");
-//                appendNewLine();
-//                append(column.getSelectSql());
-//            }
-            for (ColumnInfo column : _statCols)
-            {
-                assert column.getParentTable() == _table : "Column is from the wrong table: " + column.getParentTable() + " instead of " + _table;
-                column.declareJoins(joins);
-                append(",");
-                appendNewLine();
-                append("AVG(").append(column.getValueSql()).append(") AS ").append(column.getSelectName());
-            }
-            outdent();
-
-            appendNewLine();
-            append("FROM");
-            indent();
-            appendNewLine();
-            append(_table.getFromSQL());
-            for (Map.Entry<String, SQLFragment> entry : joins.entrySet())
-            {
-                appendNewLine();
-                append(entry.getValue());
-            }
-            outdent();
-
-//            append("WHERE");
-//            indent();
-            appendNewLine();
-            SQLFragment filterFrag = _backgroundFilter.getSQLFragment(dialect, Table.createColumnMap(_table, _backgroundCols));
-            append(filterFrag);
-//            outdent();
-
-            appendNewLine();
-            append("GROUP BY");
-            indent();
-
-            strComma = "";
-            for (ColumnInfo column : _matchCols)
-            {
-                append(strComma);
-                appendNewLine();
-                append(column.getValueSql());
-                strComma = ", ";
-            }
-            outdent();
-
-            appendNewLine();
-            append(") AS BG");
-            outdent();
-
-            strComma = "";
-            appendNewLine();
-            append("ON");
-            indent();
-
-            for (ColumnInfo column : _matchCols)
-            {
-                append(strComma);
-                appendNewLine();
-                append("A.").append(column.getSelectName());
-                append(" = BG.").append(column.getSelectName());
-                strComma = " AND ";
-            }
-        }
-
-        protected void appendNewLine()
-        {
-            append(getNewLine());
-        }
-
-        protected String getNewLine()
-        {
-            assert _indent >= 0;
-            return "\n" + StringUtils.repeat("  ", _indent);
-        }
-
-        protected void indent()
-        {
-            _indent++;
-        }
-
-        protected void outdent()
-        {
-            _indent--;
         }
     }
 
