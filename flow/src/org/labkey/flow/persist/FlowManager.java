@@ -27,6 +27,8 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.*;
+import org.labkey.api.util.Search.SearchTermParser;
+import org.labkey.api.util.Search.Searchable;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -575,22 +577,22 @@ public class FlowManager
     }
 
 
-    public static class FCSFileSearch implements Search.Searchable
+    public static class FCSFileSearch implements Searchable
     {
         public static final String SEARCH_DOMAIN = "fcsfile";
         public static final String SEARCH_RESULT_TYPE = "labkey/fcsfile";
         public static final String SEARCH_RESULT_TYPE_DESCR = "FCS Files";
 
         Collection<String> containerIds;
-        Search.SearchTermParser parser;
+        SearchTermParser parser;
         
-        public FCSFileSearch(Collection<String> containerIds, Search.SearchTermParser parser)
+        public FCSFileSearch(Collection<String> containerIds, SearchTermParser parser)
         {
             this.containerIds = containerIds;
             this.parser = parser;
         }
 
-        public void search(Search.SearchTermParser parser, Set<Container> containers, List<SearchHit> hits)
+        public void search(SearchTermParser parser, Set<Container> containers, List<SearchHit> hits, User user)
         {
             List<String> ids = new ArrayList<String>(containers.size());
             for(Container c : containers)
