@@ -484,9 +484,19 @@ public class MS2Schema extends UserSchema
 
                     public String getURL(RenderContext ctx)
                     {
-                        ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
-                        setURL(url.toString() + "&run=${" + _runCol.getAlias() + "}");
-                        return super.getURL(ctx);
+                        if (_runCol.getValue(ctx) != null)
+                        {
+                            // In rare cases we'll have something that qualifies as an MS2 run
+                            // based on its protocol LSID but that doesn't actually have a MS2 run
+                            // attached to it in the database, so don't show links to it
+                            ActionURL url = new ActionURL(MS2Controller.ShowRunAction.class, getContainer());
+                            setURL(url.toString() + "&run=${" + _runCol.getAlias() + "}");
+                            return super.getURL(ctx);
+                        }
+                        else
+                        {
+                            return null;
+                        }
                     }
 
                     public void addQueryColumns(Set<ColumnInfo> columns)

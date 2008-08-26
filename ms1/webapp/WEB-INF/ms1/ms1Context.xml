@@ -82,9 +82,17 @@
         <property name="statusName" value="PEAK EXTRACTION"/>
         <property name="groupParameterName" value="peakaboo" />
         <property name="protocolActionName" value="Peakaboo" />
-        <property name="inputExtension" value=".mzXML"/>
         <property name="outputExtension" value=".peaks.xml"/>
         <property name="switchFormat" ref="unixMixedSwitch"/>
+        <property name="inputPaths">
+            <map>
+                <entry key="mzXMLFile">
+                    <bean class="org.labkey.api.pipeline.cmd.TaskPath">
+                        <constructor-arg value=".mzXML"/>
+                    </bean>
+                </entry>
+            </map>
+        </property>
         <property name="converters">
             <list>
                 <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
@@ -133,7 +141,7 @@
                     <property name="switchName" value="e"/>                    
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                    <property name="key" value="input"/>
+                    <property name="key" value="mzXMLFile" />
                 </bean>
             </list>
         </property>
@@ -145,12 +153,12 @@
         <property name="groupParameterName" value="msinspect" />
         <property name="protocolActionName" value="msInspect Find Features" />
         <property name="outputExtension" value=".peptides.tsv"/>
+        <property name="actionableInput" value="mzXMLFile" />
         <property name="inputPaths">
             <map>
-                <entry key="input">
+                <entry key="mzXMLFile">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
                         <constructor-arg value=".mzXML"/>
-                        <property name="role" value="mzXML" />
                     </bean>
                 </entry>
                 <entry key="mzXML cache" value-ref="mzXMLCache"/>
@@ -247,7 +255,9 @@
                     <property name="function" value="output"/>
                     <property name="switchName" value="out"/>                    
                 </bean>
-                <bean class="org.labkey.api.pipeline.cmd.PathInLine"/>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                    <property name="key" value="mzXMLFile" />
+                </bean>
             </list>
         </property>
     </bean>
@@ -255,13 +265,11 @@
     <bean id="mzXMLCache" class="org.labkey.api.pipeline.cmd.TaskPath">
         <constructor-arg value=".mzXML.inspect"/>
         <property name="optional" value="true"/>
-        <property name="role" value="mzXML cache" />
     </bean>
 
     <bean id="ms2Cache" class="org.labkey.api.pipeline.cmd.TaskPath">
         <constructor-arg value=".mzXML.ms2.tsv"/>
         <property name="optional" value="true"/>
-        <property name="role" value="ms2 cache" />
     </bean>
 
     <bean id="pepMatchFactory" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
@@ -272,16 +280,14 @@
         <property name="removeInput" value="true"/>
         <property name="inputPaths">
             <map>
-                <entry key="input">
+                <entry key="features">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
                         <constructor-arg value=".peptides.tsv"/>
-                        <property name="role" value="Features" />
                     </bean>
                 </entry>
-                <entry key="input-peptides">
+                <entry key="pepXML">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">
                         <constructor-arg value=".pep.xml"/>
-                        <property name="role" value="pepXML" />
                     </bean>
                 </entry>
             </map>
@@ -295,9 +301,11 @@
                     <property name="exePath" value="pepmatch"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.PathInLine">
-                    <property name="key" value="input-peptides"/>
+                    <property name="key" value="pepXML"/>
                 </bean>
-                <bean class="org.labkey.api.pipeline.cmd.PathInLine"/>
+                <bean class="org.labkey.api.pipeline.cmd.PathInLine">
+                    <property name="key" value="features"/>
+                </bean>
                 <bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">
                     <property name="parameter" value="ms1 pepmatch, m/z window"/>
                     <property name="switchName" value="w"/>
