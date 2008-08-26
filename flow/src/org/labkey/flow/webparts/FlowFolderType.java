@@ -16,11 +16,12 @@
 
 package org.labkey.flow.webparts;
 
-import org.labkey.api.module.DefaultFolderType;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.module.DefaultFolderType;
 import org.labkey.api.security.User;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.Portal;
 import org.labkey.flow.controllers.FlowModule;
 
 import java.util.Arrays;
@@ -33,7 +34,8 @@ public class FlowFolderType extends DefaultFolderType
                 "Perform statistical analysis and create graphs for high-volume, highly standardized flow experiments. Organize, archive and track statistics and keywords for FlowJo experiments.",
                 Arrays.asList(OverviewWebPart.FACTORY.createWebPart()),
                 Arrays.asList(AnalysesWebPart.FACTORY.createWebPart(),
-                        AnalysisScriptsWebPart.FACTORY.createWebPart()),
+                        AnalysisScriptsWebPart.FACTORY.createWebPart(),
+                        Portal.getPortalPart("Messages").createWebPart()),
                 getDefaultModuleSet(module, getModule("Pipeline")), module);
     }
 
