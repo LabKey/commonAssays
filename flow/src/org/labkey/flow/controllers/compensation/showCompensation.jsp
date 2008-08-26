@@ -17,6 +17,7 @@
 %>
 <%@ page import="org.labkey.api.announcements.DiscussionService" %>
 <%@ page import="org.labkey.api.jsp.JspLoader" %>
+<%@ page import="org.labkey.api.security.ACL" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
@@ -24,10 +25,10 @@
 <%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
 <%@ page import="org.labkey.flow.controllers.FlowParam" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
-<%@ page import="org.labkey.flow.data.FlowCompensationMatrix" %>
+<%@ page import="org.labkey.flow.data.FlowCompensationMatrix"%>
 <%@ page import="org.labkey.flow.data.FlowDataType"%>
 <%@ page import="org.labkey.flow.data.FlowRun"%>
-<%@ page import="org.labkey.flow.data.FlowWell"%>
+<%@ page import="org.labkey.flow.data.FlowWell" %>
 <%@ page import="org.labkey.flow.view.GraphView" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
 <%@ page import="java.text.DecimalFormat" %>
@@ -62,13 +63,17 @@
     DecimalFormat format = new DecimalFormat();
     format.setMaximumFractionDigits(3);
     format.setMinimumFractionDigits(3);
+
+    boolean canEdit = getViewContext().hasPermission(ACL.PERM_UPDATE);
 %>
 
 <table>
     <tr><td>Compensation Matrix:</td><td><%=h(comp.getName())%></td></tr>
-    <tr><td>Comment:</td>
-        <td><%include(new SetCommentView(flowComp), out);%></td>
-    </tr>
+    <% if (canEdit || flowComp.getExpObject().getComment() != null) { %>
+        <tr><td>Comment:</td>
+            <td><%include(new SetCommentView(flowComp), out);%></td>
+        </tr>
+    <% } %>
 </table>
 
 <table class="labkey-data-region labkey-show-borders">

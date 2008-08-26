@@ -16,10 +16,14 @@
  */
 %>
 <%@ page import="org.labkey.api.announcements.DiscussionService" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.ShowRows" %>
+<%@ page import="org.labkey.api.data.SimpleFilter" %>
 <%@ page import="org.labkey.api.query.QueryForm" %>
 <%@ page import="org.labkey.api.query.QueryView" %>
+<%@ page import="org.labkey.api.security.ACL" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.view.DataView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ScriptOverview" %>
@@ -30,16 +34,19 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    FlowScript script = (FlowScript)getModelBean();
+    final FlowScript script = (FlowScript)getModelBean();
     ViewContext context = getViewContext();
     ActionURL url = context.getActionURL();
 
+    boolean canEdit = getViewContext().hasPermission(ACL.PERM_UPDATE);
 %>
 Analysis scripts may have up to two sections in them.
 The compensation calculation describes how to locate the compensation controls in each run, and which gates need to be applied to them.
 The analysis section describes which gates in the analysis, as well as the statistics that need to be calculated, and the graphs that need to be drawn.
 <p>
-Comment: <% include(new SetCommentView(script), out); %>
+<% if (canEdit || script.getExpObject().getComment() != null) { %>
+    Comment: <% include(new SetCommentView(script), out); %>
+<% } %>
 </p>
 <%
     ScriptOverview overview = new ScriptOverview(context.getUser(), context.getContainer(), script);
@@ -57,7 +64,17 @@ Comment: <% include(new SetCommentView(script), out); %>
         form.setQueryName(FlowTableType.Runs.toString());
         //form.bindParameters(script.getRunsUrl().getPropertyValues());
 
-        QueryView view = new QueryView(form);
+        QueryView view = new QueryView(form) {
+            protected void setupDataView(DataView ret)
+            {
+                super.setupDataView(ret);
+                SimpleFilter filter = (SimpleFilter)ret.getRenderContext().getBaseFilter();
+                if (filter == null)
+                    filter = new SimpleFilter();
+                filter.addCondition("AnalysisScript/RowId", script.getScriptId(), CompareType.EQUAL);
+                ret.getRenderContext().setBaseFilter(filter);
+            }
+        };
         view.setShadeAlternatingRows(true);
         view.setShowPagination(false);
         view.setShowBorders(true);

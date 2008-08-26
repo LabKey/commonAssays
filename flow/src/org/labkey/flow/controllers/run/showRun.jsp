@@ -39,8 +39,12 @@
     FlowRun run = form.getRun();
     FlowCompensationMatrix comp = run.getCompensationMatrix();
 
+    boolean canEdit = getViewContext().hasPermission(ACL.PERM_UPDATE);
 %>
-<p>Comment: <% include(new SetCommentView(run), out); %>
+<p>
+<% if (canEdit || run.getExpObject().getComment() != null) { %>
+    Comment: <% include(new SetCommentView(run), out); %>
+<% } %>
 </p>
 <%
     FlowQueryView view = new FlowQueryView(form);
