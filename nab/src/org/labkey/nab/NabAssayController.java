@@ -845,7 +845,7 @@ public class NabAssayController extends SpringActionController
     {
         XYSeriesCollection curvesDataset = new XYSeriesCollection();
         XYSeriesCollection pointDataset = new XYSeriesCollection();
-        JFreeChart chart = ChartFactory.createXYLineChart(null, null, "Percentage", curvesDataset, PlotOrientation.VERTICAL, true, true, false);
+        JFreeChart chart = ChartFactory.createXYLineChart(null, null, "Percent Neutralization", curvesDataset, PlotOrientation.VERTICAL, true, true, false);
         XYPlot plot = chart.getXYPlot();
         plot.setDataset(1, pointDataset);
         plot.getRenderer(0).setStroke(new BasicStroke(1.5f));
@@ -889,7 +889,7 @@ public class NabAssayController extends SpringActionController
                 plot.getRenderer(1).setSeriesPaint(curvesDataset.getSeriesCount() - 1, currentColor);
         }
 
-        chart.getXYPlot().setDomainAxis(new LogarithmicAxis("Dilution"));
+        chart.getXYPlot().setDomainAxis(new LogarithmicAxis("Dilution/Concentration"));
         chart.getXYPlot().addRangeMarker(new ValueMarker(0f, Color.DARK_GRAY, new BasicStroke()));
         for (int cutoff : cutoffs)
             chart.getXYPlot().addRangeMarker(new ValueMarker(cutoff));

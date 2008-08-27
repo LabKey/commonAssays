@@ -117,8 +117,8 @@
                             if (property != null)
                                 value = formatValue(property.getKey(), property.getValue());
                     %>
-                        <th><%= property != null ? h(property.getKey().getNonBlankLabel()) : "&nbsp;"  %></th>
-                        <td ><%= property != null ? h(value) : "&nbsp;"  %></td>
+                        <th class="labkey-header"><%= property != null ? h(property.getKey().getNonBlankLabel()) : "&nbsp;"  %></th>
+                        <td><%= property != null ? h(value) : "&nbsp;"  %></td>
                     <%
                         }
                     %>
@@ -137,24 +137,28 @@
                         <td valign="top" rowspan="2">
                             <img src="graph.view?rowId=<%= bean.getRunId() %>">
                         </td>
-            <%
-                for (int pass = 0; pass < 2; pass++)
-                {
-                    boolean curveBased = (pass == 0);
-            %>
                         <td valign="top">
-                        <table>
+                        <table class="labkey-data-region labkey-show-borders" style="background-color:#FFFFA0;border:0">
                             <tr>
-                                <th align="center" colspan=<%= assay.getCutoffs().length + 1%>>Cutoff Dilutions<br>(<%= curveBased ? "Curve Based" : "Point Based" %>)</th>
+                                <td style="background-color:#FFFFFF;border:0">&nbsp;</td>
+                                <th colspan="<%= 2* assay.getCutoffs().length %>">Cutoff Dilutions</th>
                             </tr>
                             <tr>
-                                <td>&nbsp;</td>
+                                <td style="background-color:#FFFFFF;border:0">&nbsp;</td>
+                                <th style="text-align:center" colspan=<%= assay.getCutoffs().length %>>Curve Based</th>
+                                <th style="text-align:center" colspan=<%= assay.getCutoffs().length %>>Point Based</th>
+                            </tr>
+                            <tr>
+                                <td style="background-color:#FFFFFF;border:0 1px 0 0">&nbsp;</td>
                                 <%
-                                    for (int cutoff : assay.getCutoffs())
+                                    for (int set = 0; set < 2; set++)
                                     {
-                                %>
-                                <th align="center"><%= cutoff %>%</th>
-                                <%
+                                        for (int cutoff : assay.getCutoffs())
+                                        {
+                                    %>
+                                    <th  style="text-align:center"><%= cutoff %>%</th>
+                                    <%
+                                        }
                                     }
                                 %>
                             </tr>
@@ -164,34 +168,39 @@
                                     DilutionSummary summary = results.getDilutionSummary();
                             %>
                             <tr>
-                                <td>
+                                <td class="labkey-header">
                                     <%=h(results.getKey())%>
                                 </td>
                                 <%
-                                    for (int cutoff : assay.getCutoffs())
+                                    for (int set = 0; set < 2; set++)
                                     {
-                                %>
-                                <td align="right">
-                                    <%
-                                        double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0) :
-                                                summary.getInterpolatedCutoffDilution(cutoff / 100.0);
-                                        if (val == Double.NEGATIVE_INFINITY)
-                                            out.write("&lt; " + Luc5Assay.intString(summary.getMinDilution()));
-                                        else if (val == Double.POSITIVE_INFINITY)
-                                            out.write("&gt; " + Luc5Assay.intString(summary.getMaxDilution()));
-                                        else
+                                        for (int cutoff : assay.getCutoffs())
                                         {
-                                            DecimalFormat shortDecFormat;
-                                            if (summary.getMethod() == SampleInfo.Method.Concentration)
-                                                shortDecFormat = new DecimalFormat("0.###");
-                                            else
-                                                shortDecFormat = new DecimalFormat("0");
+                                            %>
+                                <td style="text-align:right">
+                                            <%
+                                            boolean curveBased = set == 0;
 
-                                            out.write(shortDecFormat.format(val));
-                                        }
-                                    %>
+                                            double val = curveBased ? summary.getCutoffDilution(cutoff / 100.0) :
+                                                    summary.getInterpolatedCutoffDilution(cutoff / 100.0);
+                                            if (val == Double.NEGATIVE_INFINITY)
+                                                out.write("&lt; " + Luc5Assay.intString(summary.getMinDilution()));
+                                            else if (val == Double.POSITIVE_INFINITY)
+                                                out.write("&gt; " + Luc5Assay.intString(summary.getMaxDilution()));
+                                            else
+                                            {
+                                                DecimalFormat shortDecFormat;
+                                                if (summary.getMethod() == SampleInfo.Method.Concentration)
+                                                    shortDecFormat = new DecimalFormat("0.###");
+                                                else
+                                                    shortDecFormat = new DecimalFormat("0");
+
+                                                out.write(shortDecFormat.format(val));
+                                            %>
                                 </td>
-                                <%
+                                            <%
+                                            }
+                                        }
                                     }
                                 %>
                             </tr>
@@ -200,24 +209,21 @@
                             %>
                         </table>
                     </td>
-                    <%
-                        }
-                    %>
-                    </tr>
+                </tr>
                 <tr>
                     <td colspan="2" valign="top">
                         <table width="100%">
                             <tr>
-                                <th>Range</th>
+                                <th class="labkey-header">Range</th>
                                 <td
                                     align=left><%=Luc5Assay.intString(assay.getControlRange())%></td>
                             </tr>
                             <tr>
-                                <th>Virus Control</th>
+                                <th class="labkey-header">Virus Control</th>
                                 <td align="left"><%=Luc5Assay.intString(assay.getVirusControlMean())%> &plusmn; <%=Luc5Assay.percentString(assay.getVirusControlPlusMinus())%></td>
                             </tr>
                             <tr>
-                                <th>Cell Control</th>
+                                <th class="labkey-header">Cell Control</th>
                                 <td align=left><%=Luc5Assay.intString(assay.getCellControlMean())%> &plusmn; <%=Luc5Assay.percentString(assay.getCellControlPlusMinus())%></td>
                             </tr>
                         </table>
@@ -303,7 +309,7 @@
                     <td>
                         <table>
                             <tr>
-                                <th colspan="4"><%= h(results.getKey()) %></th>
+                                <th colspan="4" class="labkey-header" style="text-align:center"><%= h(results.getKey()) %></th>
                             </tr>
                             <tr>
                                 <th align="right"><%= summary.getMethod().getAbbreviation() %></th>

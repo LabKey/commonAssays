@@ -267,7 +267,6 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             Map<String, Object>[] dataMaps = new Map[luminexDataRows.length];
 
             Map<Integer, Analyte> analytes = new HashMap<Integer, Analyte>();
-            List<PropertyDescriptor> types = new ArrayList<PropertyDescriptor>();
 
             // Map from data id to experiment run source
             Map<Integer, ExpRun> runs = new HashMap<Integer, ExpRun>();
@@ -286,37 +285,44 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
             int index = 0;
             Container sourceContainer = null;
+
+            List<PropertyDescriptor> types = new ArrayList<PropertyDescriptor>();
+            // little hack here: since the property descriptors created by the 'addProperty' calls below are not in the database,
+            // they have no RowId, and such are never equal to each other.  Since the loop below is run once for each row of data,
+            // this will produce a types set that contains rowCount*columnCount property descriptors unless we prevent additions
+            // to the map after the first row.  This is done by nulling out the 'tempTypes' object after the first iteration:
+            List<PropertyDescriptor> tempTypes = types;
             for (LuminexDataRow luminexDataRow : luminexDataRows)
             {
                 Map<String, Object> dataMap = new HashMap<String, Object>();
-                addProperty(study, "RowId", luminexDataRow.getRowId(), dataMap, types);
-                addProperty(study, "ConcInRangeString", luminexDataRow.getConcInRangeString(), dataMap, types);
-                addProperty(study, "ConcInRange", luminexDataRow.getConcInRange(), dataMap, types);
-                addProperty(study, "ConcInRangeOORIndicator", luminexDataRow.getConcInRangeOORIndicator(), dataMap, types);
-                addProperty(study, "ExpConc", luminexDataRow.getExpConc(), dataMap, types);
-                addProperty(study, "FI", luminexDataRow.getFi(), dataMap, types);
-                addProperty(study, "FIString", luminexDataRow.getFiString(), dataMap, types);
-                addProperty(study, "FIOORIndicator", luminexDataRow.getFiOORIndicator(), dataMap, types);
-                addProperty(study, "FIBackground", luminexDataRow.getFiBackground(), dataMap, types);
-                addProperty(study, "FIBackgroundString", luminexDataRow.getFiBackgroundString(), dataMap, types);
-                addProperty(study, "FIBackgroundOORIndicator", luminexDataRow.getFiBackgroundOORIndicator(), dataMap, types);
-                addProperty(study, "ObsConcString", luminexDataRow.getObsConcString(), dataMap, types);
-                addProperty(study, "ObsConc", luminexDataRow.getObsConc(), dataMap, types);
-                addProperty(study, "ObsConcOORIndicator", luminexDataRow.getObsConcOORIndicator(), dataMap, types);
-                addProperty(study, "ObsOverExp", luminexDataRow.getObsOverExp(), dataMap, types);
-                addProperty(study, "StdDev", luminexDataRow.getStdDev(), dataMap, types);
-                addProperty(study, "StdDevString", luminexDataRow.getStdDevString(), dataMap, types);
-                addProperty(study, "StdDevOORIndicator", luminexDataRow.getStdDevOORIndicator(), dataMap, types);
-                addProperty(study, "Type", luminexDataRow.getType(), dataMap, types);
-                addProperty(study, "Well", luminexDataRow.getWell(), dataMap, types);
-                addProperty(study, "Dilution", luminexDataRow.getDilution(), dataMap, types);
-                addProperty(study, "DataRowGroup", luminexDataRow.getDataRowGroup(), dataMap, types);
-                addProperty(study, "Ratio", luminexDataRow.getRatio(), dataMap, types);
-                addProperty(study, "SamplingErrors", luminexDataRow.getSamplingErrors(), dataMap, types);
-                addProperty(study, "Outlier", luminexDataRow.isOutlier(), dataMap, types);
-                addProperty(study, "Description", luminexDataRow.getDescription(), dataMap, types);
-                addProperty(study, "ExtraSpecimenInfo", luminexDataRow.getExtraSpecimenInfo(), dataMap, types);
-                addProperty(study, "SourceLSID", new Lsid("LuminexDataRow", Integer.toString(luminexDataRow.getRowId())).toString(), dataMap, types);
+                addProperty(study, "RowId", luminexDataRow.getRowId(), dataMap, tempTypes);
+                addProperty(study, "ConcInRangeString", luminexDataRow.getConcInRangeString(), dataMap, tempTypes);
+                addProperty(study, "ConcInRange", luminexDataRow.getConcInRange(), dataMap, tempTypes);
+                addProperty(study, "ConcInRangeOORIndicator", luminexDataRow.getConcInRangeOORIndicator(), dataMap, tempTypes);
+                addProperty(study, "ExpConc", luminexDataRow.getExpConc(), dataMap, tempTypes);
+                addProperty(study, "FI", luminexDataRow.getFi(), dataMap, tempTypes);
+                addProperty(study, "FIString", luminexDataRow.getFiString(), dataMap, tempTypes);
+                addProperty(study, "FIOORIndicator", luminexDataRow.getFiOORIndicator(), dataMap, tempTypes);
+                addProperty(study, "FIBackground", luminexDataRow.getFiBackground(), dataMap, tempTypes);
+                addProperty(study, "FIBackgroundString", luminexDataRow.getFiBackgroundString(), dataMap, tempTypes);
+                addProperty(study, "FIBackgroundOORIndicator", luminexDataRow.getFiBackgroundOORIndicator(), dataMap, tempTypes);
+                addProperty(study, "ObsConcString", luminexDataRow.getObsConcString(), dataMap, tempTypes);
+                addProperty(study, "ObsConc", luminexDataRow.getObsConc(), dataMap, tempTypes);
+                addProperty(study, "ObsConcOORIndicator", luminexDataRow.getObsConcOORIndicator(), dataMap, tempTypes);
+                addProperty(study, "ObsOverExp", luminexDataRow.getObsOverExp(), dataMap, tempTypes);
+                addProperty(study, "StdDev", luminexDataRow.getStdDev(), dataMap, tempTypes);
+                addProperty(study, "StdDevString", luminexDataRow.getStdDevString(), dataMap, tempTypes);
+                addProperty(study, "StdDevOORIndicator", luminexDataRow.getStdDevOORIndicator(), dataMap, tempTypes);
+                addProperty(study, "Type", luminexDataRow.getType(), dataMap, tempTypes);
+                addProperty(study, "Well", luminexDataRow.getWell(), dataMap, tempTypes);
+                addProperty(study, "Dilution", luminexDataRow.getDilution(), dataMap, tempTypes);
+                addProperty(study, "DataRowGroup", luminexDataRow.getDataRowGroup(), dataMap, tempTypes);
+                addProperty(study, "Ratio", luminexDataRow.getRatio(), dataMap, tempTypes);
+                addProperty(study, "SamplingErrors", luminexDataRow.getSamplingErrors(), dataMap, tempTypes);
+                addProperty(study, "Outlier", luminexDataRow.isOutlier(), dataMap, tempTypes);
+                addProperty(study, "Description", luminexDataRow.getDescription(), dataMap, tempTypes);
+                addProperty(study, "ExtraSpecimenInfo", luminexDataRow.getExtraSpecimenInfo(), dataMap, tempTypes);
+                addProperty(study, "SourceLSID", new Lsid("LuminexDataRow", Integer.toString(luminexDataRow.getRowId())).toString(), dataMap, tempTypes);
 
                 Analyte analyte = analytes.get(luminexDataRow.getAnalyteId());
                 if (analyte == null)
@@ -324,13 +330,13 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                     analyte = Table.selectObject(LuminexSchema.getTableInfoAnalytes(), luminexDataRow.getAnalyteId(), Analyte.class);
                     analytes.put(analyte.getRowId(), analyte);
                 }
-                addProperty(study, "Analyte Name", analyte.getName(), dataMap, types);
-                addProperty(study, "Analyte FitProb", analyte.getFitProb(), dataMap, types);
-                addProperty(study, "Analyte RegressionType", analyte.getRegressionType(), dataMap, types);
-                addProperty(study, "Analyte ResVar", analyte.getResVar(), dataMap, types);
-                addProperty(study, "Analyte StdCurve", analyte.getStdCurve(), dataMap, types);
-                addProperty(study, "Analyte MinStandardRecovery", analyte.getMinStandardRecovery(), dataMap, types);
-                addProperty(study, "Analyte MaxStandardRecovery", analyte.getMaxStandardRecovery(), dataMap, types);
+                addProperty(study, "Analyte Name", analyte.getName(), dataMap, tempTypes);
+                addProperty(study, "Analyte FitProb", analyte.getFitProb(), dataMap, tempTypes);
+                addProperty(study, "Analyte RegressionType", analyte.getRegressionType(), dataMap, tempTypes);
+                addProperty(study, "Analyte ResVar", analyte.getResVar(), dataMap, tempTypes);
+                addProperty(study, "Analyte StdCurve", analyte.getStdCurve(), dataMap, tempTypes);
+                addProperty(study, "Analyte MinStandardRecovery", analyte.getMinStandardRecovery(), dataMap, tempTypes);
+                addProperty(study, "Analyte MaxStandardRecovery", analyte.getMaxStandardRecovery(), dataMap, tempTypes);
 
                 ExpRun run = runs.get(luminexDataRow.getDataId());
                 if (run == null)
@@ -340,7 +346,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                     sourceContainer = run.getContainer();
                     runs.put(luminexDataRow.getDataId(), run);
                 }
-                addStandardRunPublishProperties(study, types, dataMap, run);
+                addStandardRunPublishProperties(study, tempTypes, dataMap, run);
 
                 Map<String, ObjectProperty> props = runProperties.get(run);
                 if (props == null)
@@ -355,7 +361,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                     {
                         PropertyDescriptor publishPD = pd.clone();
                         publishPD.setName("Run " + pd.getName());
-                        addProperty(publishPD, prop.value(), dataMap, types);
+                        addProperty(publishPD, prop.value(), dataMap, tempTypes);
                     }
                 }
 
@@ -377,6 +383,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 }
 
                 dataMaps[index++] = dataMap;
+                tempTypes = null;
             }
             return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol, dataMaps, types, getDataRowIdFieldKey().toString(), errors);
         }
