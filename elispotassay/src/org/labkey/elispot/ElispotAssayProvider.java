@@ -265,6 +265,11 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
 
             Container sourceContainer = null;
 
+            // little hack here: since the property descriptors created by the 'addProperty' calls below are not in the database,
+            // they have no RowId, and such are never equal to each other.  Since the loop below is run once for each row of data,
+            // this will produce a types set that contains rowCount*columnCount property descriptors unless we prevent additions
+            // to the map after the first row.  This is done by nulling out the 'tempTypes' object after the first iteration:
+            Set<PropertyDescriptor> tempTypes = typeSet;
             for (OntologyObject row : dataRows)
             {
                 Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -276,7 +281,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
                 {
                     Object value = rowProperties.get(pd.getPropertyURI());
                     if (!ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY.equals(pd.getName()))
-                        addProperty(pd, value, dataMap, typeSet);
+                        addProperty(pd, value, dataMap, tempTypes);
                     else
                         materialLsid = (String) value;
                 }
@@ -291,7 +296,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
                                 !VISITID_PROPERTY_NAME.equals(pd.getName()) &&
                                 !DATE_PROPERTY_NAME.equals(pd.getName()))
                         {
-                            addProperty(pd, material.getProperty(pd), dataMap, typeSet);
+                            addProperty(pd, material.getProperty(pd), dataMap, tempTypes);
                         }
                     }
                 }
@@ -321,7 +326,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
                     {
                         PropertyDescriptor publishPd = pd.clone();
                         publishPd.setName("Run " + pd.getName());
-                        addProperty(publishPd, runProperties.get(pd.getPropertyURI()), dataMap, typeSet);
+                        addProperty(publishPd, runProperties.get(pd.getPropertyURI()), dataMap, tempTypes);
                     }
                 }
 
@@ -335,9 +340,10 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
                 dataMap.put("SourceLSID", run.getLSID());
                 dataMap.put(getDataRowIdFieldKey().toString(), publishKey.getDataId());
 
-                addStandardRunPublishProperties(study, typeSet, dataMap, run);
+                addStandardRunPublishProperties(study, tempTypes, dataMap, run);
 
                 dataMaps[rowIndex++] = dataMap;
+                tempTypes = null;
             }
             return AssayPublishService.get().publishAssayData(user, sourceContainer, study, protocol.getName(), protocol,
                     dataMaps, new ArrayList<PropertyDescriptor>(typeSet), getDataRowIdFieldKey().toString(), errors);
