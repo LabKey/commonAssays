@@ -120,11 +120,15 @@ public class PCWorkspace extends FlowJoWorkspace
         ret.setName(elPopulation.getAttribute("name"));
         for (Element elPolygonGate : getElementsByTagName(elPopulation, "PolygonGate"))
         {
-            ret.addGate(readPolygonGate(elPolygonGate));
+            boolean invert = "1".equals(elPolygonGate.getAttribute("negated")) || "0".equals(elPolygonGate.getAttribute("eventsInside"));
+            PolygonGate gate = readPolygonGate(elPolygonGate);
+            ret.addGate(invert ? new NotGate(gate) : gate);
         }
         for (Element elRectangleGate : getElementsByTagName(elPopulation, "RectangleGate"))
         {
-            ret.addGate(readRectangleGate(elRectangleGate));
+            boolean invert = "1".equals(elRectangleGate.getAttribute("negated")) || "0".equals(elRectangleGate.getAttribute("eventsInside"));
+            PolygonGate gate = readRectangleGate(elRectangleGate);
+            ret.addGate(invert ? new NotGate(gate) : gate);
         }
         for (Element elSubpopulations : getElementsByTagName(elPopulation, "Subpopulations"))
         {

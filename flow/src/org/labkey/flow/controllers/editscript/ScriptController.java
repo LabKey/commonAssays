@@ -29,6 +29,7 @@ import org.fhcrc.cpas.flow.script.xml.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.jsp.FormPage;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.ACL;
 import org.labkey.api.util.ExceptionUtil;
@@ -37,7 +38,6 @@ import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.HomeTemplate;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.flow.ScriptParser;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.model.Polygon;
@@ -926,8 +926,9 @@ public class ScriptController extends BaseFlowController
                 {
                     if (regionGate instanceof PolygonGate)
                     {
-                    Polygon newPoly = new Polygon(((PolygonGate)regionGate).getPolygon().Y, ((PolygonGate)regionGate).getPolygon().X);
-                    regionGate = new PolygonGate(regionGate.getYAxis(), regionGate.getXAxis(), newPoly);
+                        // XXX: negate
+                        Polygon newPoly = new Polygon(((PolygonGate)regionGate).getPolygon().Y, ((PolygonGate)regionGate).getPolygon().X);
+                        regionGate = new PolygonGate(regionGate.getYAxis(), regionGate.getXAxis(), newPoly);
                     }
                 }
                 else
@@ -1064,6 +1065,7 @@ public class ScriptController extends BaseFlowController
             double max = Math.max(arrX[0], arrX[1]);
             return new IntervalGate(xAxis, min, max);
         }
+        // UNDONE: negate the gate
         PolygonGate poly = new PolygonGate(xAxis, yAxis, new Polygon(arrX, arrY));
         return poly;
     }

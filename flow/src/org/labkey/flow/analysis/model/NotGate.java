@@ -26,6 +26,13 @@ public class NotGate extends Gate
 {
     Gate _gate;
 
+    public NotGate() { }
+
+    public NotGate(Gate gate)
+    {
+        setGate(gate);
+    }
+
     public boolean equals(Object other)
     {
         if (!super.equals(other))

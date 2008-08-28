@@ -324,10 +324,11 @@ public class MacWorkspace extends FlowJoWorkspace
                 if (!(node instanceof Element))
                     continue;
                 Element el = (Element) node;
+                boolean invert = "1".equals(el.getAttribute("negated")) || "0".equals(el.getAttribute("eventsInside"));
                 if ("Polygon".equals(el.getTagName()) || "PolyRect".equals(el.getTagName()))
                 {
                     PolygonGate gate = readPolygon(el);
-                    ret.addGate(gate);
+                    ret.addGate(invert ? new NotGate(gate) : gate);
                     analysis.addGraph(new GraphSpec(parentSubset, gate.getXAxis(), gate.getYAxis()));
                 }
                 else if ("Range".equals(el.getTagName()))
@@ -344,7 +345,7 @@ public class MacWorkspace extends FlowJoWorkspace
                     }
                     scaleValues(axis, lstValues);
                     IntervalGate gate = new IntervalGate(axis, lstValues.get(0).doubleValue(), lstValues.get(1).doubleValue());
-                    ret.addGate(gate);
+                    ret.addGate(invert ? new NotGate(gate) : gate);
                     analysis.addGraph(new GraphSpec(parentSubset, gate.getXAxis()));
                 }
                 else if ("Ellipse".equals(el.getTagName()))
@@ -356,7 +357,7 @@ public class MacWorkspace extends FlowJoWorkspace
                         vertices[i] = new EllipseGate.Point(polygon.getPolygon().X[i], polygon.getPolygon().Y[i]);
                     }
                     EllipseGate gate = EllipseGate.fromVertices(polygon.getXAxis(), polygon.getYAxis(), vertices);
-                    ret.addGate(gate);
+                    ret.addGate(invert ? new NotGate(gate) : gate);
                     analysis.addGraph(new GraphSpec(parentSubset, polygon.getXAxis(), polygon.getYAxis()));
                 }
             }
