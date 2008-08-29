@@ -300,7 +300,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         File fileProtXml = TPPTask.getProtXMLFile(dirAnalysis, baseName);
         if (!NetworkDrive.exists(fileProtXml))
         {
-            File fileProtXMLInt = TPPTask.getProtXMLIntermediatFile(dirAnalysis, baseName);
+            File fileProtXMLInt = TPPTask.getProtXMLIntermediateFile(dirAnalysis, baseName);
             if (NetworkDrive.exists(fileProtXMLInt))
                 fileProtXml = fileProtXMLInt;
         }

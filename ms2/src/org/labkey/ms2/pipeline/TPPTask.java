@@ -73,9 +73,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
 
     public static boolean isProtXMLFile(File file)
     {
-        return (FT_PROT_XML.isType(file) ||
-                FT_INTERMEDIATE_PROT_XML.isType(file) ||
-                FT_TPP_PROT_XML.isType(file));
+        return getProtXMLFileType(file) != null;
     }
 
     public static FileType getProtXMLFileType(File file)
@@ -95,7 +93,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
         return null;
     }
 
-    public static File getProtXMLIntermediatFile(File dirAnalysis, String baseName)
+    public static File getProtXMLIntermediateFile(File dirAnalysis, String baseName)
     {
         return FT_INTERMEDIATE_PROT_XML.newFile(dirAnalysis, baseName);
     }

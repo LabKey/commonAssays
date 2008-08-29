@@ -112,7 +112,7 @@ public class MS2PipelineManager
                 File parent = file.getParentFile();
                 String basename = FileUtil.getBaseName(file, 2);
                 return !fileExists(TPPTask.getProtXMLFile(parent, basename)) &&
-                        !fileExists(TPPTask.getProtXMLIntermediatFile(parent, basename)) &&
+                        !fileExists(TPPTask.getProtXMLIntermediateFile(parent, basename)) &&
                         !fileExists(AbstractMS2SearchProtocol.FT_SEARCH_XAR.newFile(parent, basename));
             }
 
