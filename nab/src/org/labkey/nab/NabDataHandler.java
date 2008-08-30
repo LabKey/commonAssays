@@ -24,6 +24,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.study.*;
 import org.labkey.api.study.assay.*;
+import org.labkey.api.query.ValidationException;
 import org.labkey.common.util.Pair;
 import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
@@ -91,6 +92,10 @@ public class NabDataHandler extends AbstractExperimentDataHandler
                 OntologyManager.ensureObject(container.getId(), dataRowLsid.toString(),  data.getLSID());
                 OntologyManager.insertProperties(container.getId(), results.toArray(new ObjectProperty[results.size()]), dataRowLsid.toString());
             }
+        }
+        catch (ValidationException ve)
+        {
+            throw new ExperimentException(ve.getMessage(), ve);
         }
         catch (SQLException e)
         {

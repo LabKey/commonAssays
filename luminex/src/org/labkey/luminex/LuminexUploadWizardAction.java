@@ -29,6 +29,9 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.query.ValidationException;
+import org.labkey.api.query.ValidationError;
+import org.labkey.api.action.SpringActionController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
 
@@ -241,7 +244,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                                     entry.getValue(), entry.getKey().getPropertyType());
                             objProperties[i++] = property;
                         }
-                        OntologyManager.insertProperties(getContainer().getId(), objProperties, analyte.getLsid());
+                        try {
+                            OntologyManager.insertProperties(getContainer().getId(), objProperties, analyte.getLsid());
+                        }
+                        catch (ValidationException ve)
+                        {
+                            for (ValidationError error : ve.getErrors())
+                                errors.reject(SpringActionController.ERROR_MSG, error.getMessage());
+                        }
                     }
 
                     LuminexSchema.getSchema().getScope().commitTransaction();

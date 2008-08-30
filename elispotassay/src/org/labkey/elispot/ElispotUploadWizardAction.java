@@ -39,6 +39,8 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
+import org.labkey.api.query.ValidationException;
+import org.labkey.api.query.ValidationError;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -325,6 +327,11 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     }
                 }
                 ExperimentService.get().getSchema().getScope().commitTransaction();
+            }
+            catch (ValidationException ve)
+            {
+                for (ValidationError error : ve.getErrors())
+                    errors.reject(SpringActionController.ERROR_MSG, error.getMessage());
             }
             catch (ExperimentException e)
             {

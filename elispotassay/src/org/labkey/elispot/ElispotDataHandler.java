@@ -29,6 +29,7 @@ import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.query.ValidationException;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 
 import java.io.File;
@@ -138,6 +139,10 @@ public class ElispotDataHandler extends AbstractExperimentDataHandler
                     }
                 }
             }
+        }
+        catch (ValidationException ve)
+        {
+            throw new ExperimentException(ve.getMessage(), ve);
         }
         catch (SQLException se)
         {
