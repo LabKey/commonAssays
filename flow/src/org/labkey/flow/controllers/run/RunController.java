@@ -19,18 +19,19 @@ package org.labkey.flow.controllers.run;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.ShowRows;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.view.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.NavTree;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.controllers.editscript.ScriptController;
-import org.labkey.flow.data.*;
-import org.labkey.flow.query.FlowTableType;
-import org.labkey.flow.query.SubtractBackgroundQuery;
+import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.script.MoveRunFromWorkspaceJob;
 import org.springframework.validation.BindException;
@@ -43,7 +44,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
-import java.sql.ResultSet;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.zip.ZipEntry;
@@ -260,52 +260,6 @@ public class RunController extends SpringFlowController<RunController.Action>
         {
             String label = run != null ? "Move '" + run.getLabel() + "' to an analysis" : "Run not found";
             return appendFlowNavTrail(root, run, label, Action.moveToWorkspace);
-        }
-    }
-
-    @RequiresPermission(ACL.PERM_UPDATE)
-    public class ExportToSpiceAction extends SimpleViewAction<RunForm> //extends ExportAction<RunForm>
-    {
-//        public void export(RunForm form, HttpServletResponse response, BindException errors) throws Exception
-        public ModelAndView getView(RunForm form, BindException errors) throws Exception
-        {
-            FlowRun run = form.getRun();
-            if (run == null)
-                throw new IllegalArgumentException("runId required");
-            if (run.getDefaultQuery() != FlowTableType.FCSAnalyses) // XXX: is this expensive?
-                throw new IllegalArgumentException("only analysis runs allowed");
-
-            FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
-            ICSMetadata metadata = protocol.getICSMetadata();
-            if (metadata == null)
-                throw new IllegalStateException("need to configure ICSMetadata");
-
-            SubtractBackgroundQuery export = new SubtractBackgroundQuery(form.getViewContext().getActionURL(), form, metadata);
-            ResultSet rs = export.createResultSet(0);
-//            DbSchema schema = FlowManager.get().getSchema();
-//            ResultSet rs = Table.executeQuery(schema, export);
-
-//            TSVWriter tsv = new TSVGridWriter(rs, export._columns.toArray(new ColumnInfo[0]));
-//            tsv.write(response);
-
-            DataRegion rgn = new DataRegion();
-            rgn.setName("export");
-            rgn.setMaxRows(0);
-            rgn.setShowRows(ShowRows.ALL);
-            rgn.setDisplayColumns(export.getDisplayColumns());
-            RenderContext ctx = new RenderContext(getViewContext(), errors);
-            ctx.setResultSet(rs);
-            DataView view = new GridView (rgn, ctx);
-
-
-//            Writer writer = response.getWriter();
-//            writer.write(export.toString());
-            return view;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return null;
         }
     }
 

@@ -16,8 +16,8 @@
  */
 %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
-<%@ page import="java.util.Map" %>
 <%@ page import="java.util.LinkedHashMap" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% String graphSize = FlowPreference.graphSize.getValue(request);
@@ -28,7 +28,7 @@
 %>
 
 
-<script>
+<script type="text/javascript">
     var urlUpdateSize = <%=q(FlowPreference.graphSize.urlUpdate())%>
     var currentSize = <%=graphSize%>;
     var fullSize = 300;

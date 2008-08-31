@@ -33,7 +33,7 @@ import org.labkey.api.view.*;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.run.RunController;
+import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
@@ -53,7 +53,7 @@ public class FlowQueryView extends QueryView
 {
     List<DisplayColumn> _displayColumns;
     boolean __hasGraphs;
-    private boolean _subtractBackground;
+    private SubtractBackgroundQuery _subtractQuery;
 
     public FlowQueryView(FlowQueryForm form)
     {
@@ -75,16 +75,16 @@ public class FlowQueryView extends QueryView
         });
     }
 
-    protected MenuButton createExportMenuButton(boolean exportAsWebPage)
-    {
-        MenuButton button = super.createExportMenuButton(exportAsWebPage);
-
-        // XXX: only add menu item for queries based on FCSAnalyses
-        ActionURL url = getViewContext().cloneActionURL();
-        url.setAction(RunController.ExportToSpiceAction.class);
-        button.addMenuItem("Export All to Spice (.spd)", url);
-        return button;
-    }
+//    protected MenuButton createExportMenuButton(boolean exportAsWebPage)
+//    {
+//        MenuButton button = super.createExportMenuButton(exportAsWebPage);
+//
+//        // XXX: only add menu item for queries based on FCSAnalyses
+//        ActionURL url = getViewContext().cloneActionURL();
+//        url.setAction(RunController.ExportToSpiceAction.class);
+//        button.addMenuItem("Export All to Spice (.spd)", url);
+//        return button;
+//    }
 
     protected boolean showRecordSelectors()
     {
@@ -102,22 +102,17 @@ public class FlowQueryView extends QueryView
     {
         DataView ret = super.createDataView();
 
-        if (_subtractBackground)
+        if (subtractBackground() && _subtractQuery != null)
         {
-            FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
-            ICSMetadata metadata = protocol.getICSMetadata();
-            if (metadata == null)
-                throw new IllegalStateException("need to configure ICSMetadata");
-
-            SubtractBackgroundQuery export = new SubtractBackgroundQuery(this.getSettings().getSortFilterURL(), this, metadata);
             try
             {
-                ResultSet rs = export.createResultSet(0);
+                ResultSet rs = _subtractQuery.createResultSet(getSettings(), ret.getRenderContext());
                 ret.setResultSet(rs);
+                ret.getDataRegion().setDisplayColumns(_subtractQuery.getDisplayColumns());
             }
             catch (SQLException e)
             {
-                e.printStackTrace();
+                ret.getRenderContext().getErrors().reject("main", e.getMessage());
             }
         }
 
@@ -138,26 +133,91 @@ public class FlowQueryView extends QueryView
 
     protected void renderView(Object model, PrintWriter out) throws Exception
     {
-        if (!isPrintView() && hasGraphs())
+        if (!isPrintView())
         {
-            if (showGraphs())
+            if (hasGraphs())
             {
-                ActionURL urlHide = getViewContext().cloneActionURL();
-                urlHide.deleteParameter(param("showGraphs"));
-                out.write(textLink("Hide Graphs", urlHide));
-                JspView view = new JspView(JspLoader.createPage(getViewContext().getRequest(), FlowQueryView.class, "setGraphSize.jsp"));
-                view.setFrame(FrameType.NONE);
-                HttpView.currentView().include(view, out);
+                if (showGraphs())
+                {
+                    ActionURL urlHide = getViewContext().cloneActionURL();
+                    urlHide.deleteParameter(param("showGraphs"));
+                    out.write(textLink("Hide Graphs", urlHide));
+                    JspView view = new JspView(JspLoader.createPage(getViewContext().getRequest(), FlowQueryView.class, "setGraphSize.jsp"));
+                    view.setFrame(FrameType.NONE);
+                    HttpView.currentView().include(view, out);
+                }
+                else
+                {
+                    ActionURL urlShow = getViewContext().cloneActionURL();
+                    urlShow.addParameter(param("showGraphs"), "true");
+                    out.write(textLink("Show Graphs", urlShow));
+                }
+                out.write("<br>");
             }
-            else
+
+            //if (is a query based on FCSAnalysis and)
             {
-                ActionURL urlShow = getViewContext().cloneActionURL();
-                urlShow.addParameter(param("showGraphs"), "true");
-                out.write(textLink("Show Graphs", urlShow));
-                out.write("&nbsp;");
+                FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+                if (protocol == null || protocol.getICSMetadataString() == null)
+                {
+                    // XXX: uncomment once ICSMetatdata is no longer experimental
+                    //ActionURL urlSetupMetadata = new ActionURL(ProtocolController.EditICSMetadataAction.class, getContainer());
+                    //out.write(textLink("Define ICS Metadata", urlSetupMetadata));
+                    //out.write("&nbsp;");
+                }
+                else
+                {
+                    ActionURL urlSetupMetadata = new ActionURL(ProtocolController.EditICSMetadataAction.class, getContainer());
+                    out.write(textLink("Modify ICS Metadata", urlSetupMetadata));
+                    out.write("&nbsp;");
+
+                    ICSMetadata metadata = protocol.getICSMetadata();
+                    List<String> errors = new LinkedList<String>();
+                    SubtractBackgroundQuery subtractQuery = new SubtractBackgroundQuery(this, metadata, errors);
+
+                    if (subtractBackground())
+                    {
+                        ActionURL urlSubtract = getViewContext().cloneActionURL();
+                        urlSubtract.deleteParameter(param("subtractBackground"));
+                        out.write(textLink("Hide Background Correction", urlSubtract));
+                        out.write("&nbsp;");
+
+                        if (errors.size() == 0)
+                        {
+                            _subtractQuery = subtractQuery;
+                        }
+                        else
+                        {
+                            renderErrors(out, "Can't subtract background from query:", errors);
+                        }
+                    }
+                    else
+                    {
+                        if (errors.size() == 0)
+                        {
+                            ActionURL urlSubtract = getViewContext().cloneActionURL();
+                            urlSubtract.addParameter(param("subtractBackground"), "true");
+                            out.write(textLink("Show Background Correction", urlSubtract));
+                            out.write("&nbsp;");
+                        }
+                    }
+                }
+                out.write("<br>");
             }
         }
         super.renderView(model, out);
+    }
+
+    protected Object renderErrors(PrintWriter out, String message, List<String> errors)
+    {
+        out.print("<p class=\"labkey-error\" style=\"padding-left:1em; text-indent:-1em;\">");
+        out.print(PageFlowUtil.filter(message));
+        for (String e : errors)
+        {
+            out.append("<br>").append(PageFlowUtil.filter(e)).append("</span>");
+        }
+        out.print("</p>");
+        return null;
     }
 
     public FlowQuerySettings getSettings()
@@ -168,6 +228,11 @@ public class FlowQueryView extends QueryView
     protected boolean showGraphs()
     {
         return getSettings().getShowGraphs();
+    }
+
+    protected boolean subtractBackground()
+    {
+        return getSettings().getSubtractBackground();
     }
 
     protected ActionURL urlChangeView()

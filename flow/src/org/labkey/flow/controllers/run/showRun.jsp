@@ -41,11 +41,11 @@
 
     boolean canEdit = getViewContext().hasPermission(ACL.PERM_UPDATE);
 %>
-<p>
 <% if (canEdit || run.getExpObject().getComment() != null) { %>
+<p>
     Comment: <% include(new SetCommentView(run), out); %>
-<% } %>
 </p>
+<% } %>
 <%
     FlowQueryView view = new FlowQueryView(form);
     include(view, out);%>

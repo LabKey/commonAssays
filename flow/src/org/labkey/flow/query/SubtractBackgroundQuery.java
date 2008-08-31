@@ -16,14 +16,14 @@
 
 package org.labkey.flow.query;
 
+import org.apache.commons.collections15.IteratorUtils;
+import org.apache.commons.collections15.Transformer;
 import org.apache.commons.lang.StringUtils;
 import org.labkey.api.data.*;
-import org.labkey.api.query.CustomView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.analysis.model.ScriptSettings;
-import org.labkey.flow.controllers.run.RunForm;
 import org.labkey.flow.data.ICSMetadata;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.view.FlowQueryView;
@@ -62,61 +62,54 @@ import java.util.*;
  *    ) AS BG
  *  ON A.MatchColumn1 = BG.MatchColumn1 AND A.MatchColumn2 = BG.MatchColumn2
  */
-public class SubtractBackgroundQuery extends SQLFragment
+public class SubtractBackgroundQuery
 {
-//    protected RunForm _form;
-//    protected FlowRun _run;
-    protected ActionURL _currentUrl;
     protected ICSMetadata _metadata;
 
+    protected FlowQueryView _view;
     protected QueryDefinition _query;
-//    protected CustomView _customView;
     protected TableInfo _table;
     protected List<ColumnInfo> _columns;
+    protected List<DisplayColumn> _displayColumns;
+    private List<ColumnInfo> _displayColumnInfos;
+
     protected List<ColumnInfo> _ordinaryCols = new ArrayList<ColumnInfo>();
     protected List<ColumnInfo> _matchCols = new ArrayList<ColumnInfo>();
     protected List<ColumnInfo> _statCols = new ArrayList<ColumnInfo>();
     protected List<ColumnInfo> _backgroundCols = new ArrayList<ColumnInfo>();
     protected SimpleFilter _backgroundFilter = new SimpleFilter();
-    private int _indent = 0;
 
-    public SubtractBackgroundQuery(ActionURL currentUrl, FlowQueryView view, ICSMetadata metadata)
+    public SubtractBackgroundQuery(FlowQueryView view, ICSMetadata metadata, List<String> errors)
     {
-        _currentUrl = currentUrl;
         _metadata = metadata;
-//            _run = view.getSchema().getRun();
+        _view = view;
+//      _run = view.getSchema().getRun();
         _query = view.getQueryDef();
         _table = view.getTable();
+        _displayColumns = new LinkedList<DisplayColumn>(view.getDisplayColumns());
         _columns = new LinkedList<ColumnInfo>();
-        for (DisplayColumn displayCol : view.getDisplayColumns())
+        for (DisplayColumn displayCol : _displayColumns)
         {
             ColumnInfo column = displayCol.getColumnInfo();
             if (column != null)
                 _columns.add(column);
         }
+        _displayColumnInfos = getDisplayList(_columns);
 
-        scanColumns();
+        scanColumns(errors);
     }
 
-    public SubtractBackgroundQuery(ActionURL currentUrl, RunForm form, ICSMetadata metadata)
+    public ResultSet createResultSet(FlowQuerySettings settings, RenderContext context) throws SQLException
     {
-        _currentUrl = currentUrl;
-//        _form = form;
-//        _run = form.getRun();
-        _metadata = metadata;
+        SimpleFilter filter = (SimpleFilter)context.getBaseFilter();
+        Sort sort = context.getBaseSort();
 
-        _query = form.getQueryDef();
-        CustomView customView = form.getCustomView();
-        _table = _query.getMainTable();
-        _columns = _query.getColumns(customView, _table);
+        ActionURL sortFilterUrl = settings.getSortFilterURL();
+        filter.addUrlFilters(sortFilterUrl, "query");
+        sort.applyURLSort(sortFilterUrl, "query");
 
-        scanColumns();
-    }
-
-    public ResultSet createResultSet(int maxRows) throws SQLException
-    {
-        genSql();
-        return Table.executeQuery(FlowManager.get().getSchema(), getSQL(), getParams().toArray(), maxRows, true);
+        SQLFragment sql = genSql(filter, sort, settings.getMaxRows(), settings.getOffset());
+        return Table.executeQuery(FlowManager.get().getSchema(), sql.getSQL(), sql.getParams().toArray(), settings.getMaxRows(), true);
     }
 
     // XXX: only keep %P stats?
@@ -126,27 +119,27 @@ public class SubtractBackgroundQuery extends SQLFragment
                column.getName().endsWith(":Freq_Of_Parent");
     }
 
-    public List<DisplayColumn> getDisplayColumns()
+    protected List<ColumnInfo> getDisplayList(List<ColumnInfo> columns)
     {
-        List<DisplayColumn> cols = new LinkedList<DisplayColumn>();
-        for (ColumnInfo column : _columns)
+        Map<String, ColumnInfo> colMap = new LinkedHashMap<String, ColumnInfo>();
+        for (ColumnInfo column : columns)
         {
-//                if (isStatColumn(column))
-//                {
-//                    ColumnInfo corrected = new ColumnInfo(column);
-//                    corrected.setAlias("Corrected " + column.getName());
-//                    DisplayColumn renderer = corrected.getRenderer();
-//                    cols.add(renderer);
-//                }
-//                else
+            colMap.put(column.getAlias(), column);
+            ColumnInfo displayColumn = column.getDisplayField();
+            if (displayColumn != null)
             {
-                cols.add(column.getRenderer());
+                colMap.put(displayColumn.getAlias(), displayColumn);
             }
         }
-        return cols;
+        return Collections.unmodifiableList(new ArrayList<ColumnInfo>(colMap.values()));
     }
 
-    protected void scanColumns()
+    public List<DisplayColumn> getDisplayColumns()
+    {
+        return _displayColumns;
+    }
+
+    protected void scanColumns(List<String> errors)
     {
         for (ColumnInfo column : _columns)
         {
@@ -171,179 +164,189 @@ public class SubtractBackgroundQuery extends SQLFragment
             }
         }
 
-        if (_statCols.size() == 0)
-            throw new IllegalArgumentException("at least one statistic column is required");
         if (_matchCols.size() != _metadata.getMatchColumns().size())
-            throw new IllegalArgumentException("column matching background to stimulated wells is required");
+            errors.add("expected to find background match columns '" + StringUtils.join(_metadata.getMatchColumns(), ", ") + "' but only found '" + columnsToString(_matchCols) + "'");
         if (_backgroundCols.size() != _metadata.getBackgroundFilter().size())
-            throw new IllegalArgumentException("at least one background column is required");
-    }
+            errors.add("expected to find background columns '" + filtersToString(_metadata.getBackgroundFilter()) + "' but only found '" + StringUtils.join(_backgroundCols, ", ") + "'");
+        if (_statCols.size() == 0)
+            errors.add("at least one statistic column is required");
 
-    protected void genSql()
-    {
-        SqlDialect dialect = _table.getSqlDialect();
-        Map<String, ColumnInfo> columnMap = Table.createColumnMap(_table, _columns);
-
-        append("SELECT");
-        indent();
-
-        String strComma = "";
-        for (ColumnInfo column : _ordinaryCols)
-        {
-            assert column.getParentTable() == _table : "Column is from the wrong table: " + column.getParentTable() + " instead of " + _table;
-//                column.declareJoins(joins);
-            append(strComma);
-            appendNewLine();
-            append("A.").append(column.getSelectName());
-//                column.getSelectName();
-//                column.getLegalName();
-//                column.getColumnName();
-            strComma = ",";
-        }
-        for (ColumnInfo column : _matchCols)
-        {
-            append(",");
-            appendNewLine();
-            append("A.").append(column.getSelectName());
-        }
-        for (ColumnInfo column: _backgroundCols)
-        {
-            append(",");
-            appendNewLine();
-            append("A.").append(column.getSelectName());
-        }
+        // add a new "Corrected_Stat" columns
         for (ColumnInfo column : _statCols)
         {
-            append(",");
-            appendNewLine();
-            append("A.").append(column.getSelectName()).append(" - ").append("BG.").append(column.getSelectName());
-//                append(" AS ").append("\"Corrected ").append(column.getSelectName()).append("\"");
-            append(" AS ").append(column.getSelectName());
+            ColumnInfo correctedColumn = new ColumnInfo(column, column.getParentTable());
+            correctedColumn.setName("Corrected_" + column.getName());
+            correctedColumn.setAlias("Corrected_" + column.getAlias());
+
+            DisplayColumn corrected = correctedColumn.getDisplayColumnFactory().createRenderer(correctedColumn);
+            corrected.setCaption("Corrected " + corrected.getCaption());
+
+            // XXX: ugh, linear
+            int i = 0;
+            for (DisplayColumn d : _displayColumns)
+            {
+                if (column.equals(d.getColumnInfo()))
+                    break;
+                i++;
+            }
+            _displayColumns.add(i+1, corrected);
+        }
+    }
+
+    private String columnsToString(List<ColumnInfo> columns)
+    {
+        return StringUtils.join(IteratorUtils.transformedIterator(columns.iterator(), new Transformer<ColumnInfo, String>() {
+            public String transform(ColumnInfo column)
+            {
+                return column.getName();
+            }
+        }), ", ");
+    }
+
+    private String filtersToString(List<ScriptSettings.FilterInfo> filters)
+    {
+        return StringUtils.join(IteratorUtils.transformedIterator(filters.iterator(), new Transformer<ScriptSettings.FilterInfo, FieldKey>() {
+            public FieldKey transform(ScriptSettings.FilterInfo filter)
+            {
+                return filter.getField();
+            }
+        }), ", ");
+    }
+
+    protected SQLFragment genSql(Filter baseFilter, Sort baseSort, int maxRows, long offset)
+    {
+        SqlDialect dialect = _table.getSqlDialect();
+        Map<String, ColumnInfo> columnMap = Table.createColumnMap(_table, _displayColumnInfos);
+        Table.ensureRequiredColumns(_table, columnMap, baseFilter, baseSort);
+
+        SQLFragment selectFrag = new SQLFragment();
+        selectFrag.append("SELECT");
+
+        String strComma = "";
+//        for (ColumnInfo column : _ordinaryCols)
+//        {
+//            assert column.getParentTable() == _table : "Column is from the wrong table: " + column.getParentTable() + " instead of " + _table;
+//            selectFrag.append(strComma);
+//            selectFrag.appendNewLine();
+//            selectFrag.append("A.").append(column.getSelectName());
+//            strComma = ",";
+//        }
+//        for (ColumnInfo column : _matchCols)
+//        {
+//            selectFrag.append(",");
+//            selectFrag.appendNewLine();
+//            selectFrag.append("A.").append(column.getSelectName());
+//        }
+//        for (ColumnInfo column: _backgroundCols)
+//        {
+//            selectFrag.append(",");
+//            selectFrag.appendNewLine();
+//            selectFrag.append("A.").append(column.getSelectName());
+//        }
+        selectFrag.append(" A.*");
+        for (ColumnInfo column : _statCols)
+        {
+            selectFrag.append(",\n");
+            selectFrag.append("A.").append(column.getSelectName()).append(" - ").append("BG.").append(column.getSelectName());
+            selectFrag.append(" AS ").append("Corrected_").append(column.getSelectName());
         }
 
-        appendNewLine();
-        append("FROM");
-        indent();
-        appendNewLine();
-
-//            ActionURL sortFilterUrl = _form.getQuerySettings().getSortFilterURL();
-        ActionURL sortFilterUrl = _currentUrl;
-        SimpleFilter filter = new SimpleFilter(sortFilterUrl, "query");
+        selectFrag.append("\n");
+        SQLFragment fromFrag = new SQLFragment();
+        fromFrag.append("FROM");
+        selectFrag.append("\n");
 
         // WHERE not background
+        // BUG: baseFilter doesn't work -- need to have selectSql for some reason
+        SimpleFilter filter = new SimpleFilter(); // new SimpleFilter(baseFilter);
         SimpleFilter.FilterClause andClause = new SimpleFilter.AndClause(_backgroundFilter.getClauses().toArray(new SimpleFilter.FilterClause[0]));
         SimpleFilter.FilterClause notBackground = new SimpleFilter.NotClause(andClause);
         filter.addClause(notBackground);
 
-        SQLFragment originalFrag = Table.getSelectSQL(_table, _columns, filter, null, 0, 0);
-        append("(").append(originalFrag).append(") AS A");
-        outdent();
+        SQLFragment originalFrag = Table.getSelectSQL(_table, _displayColumnInfos, filter, null, 0, 0);
+        fromFrag.append("(").append(originalFrag).append(") AS A");
 
         Map<String, SQLFragment> joins = new LinkedHashMap<String, SQLFragment>();
 
-        appendNewLine();
-        append("INNER JOIN");
-        indent();
-        appendNewLine();
-        append("(SELECT");
-        indent();
+        fromFrag.append("\n");
+        fromFrag.append("INNER JOIN");
+        fromFrag.append("\n");
+        fromFrag.append("(SELECT");
 
-        strComma = "";
+        strComma = "\n";
         for (ColumnInfo column : _matchCols)
         {
             assert column.getParentTable() == _table : "Column is from the wrong table: " + column.getParentTable() + " instead of " + _table;
             column.declareJoins(joins);
-            append(strComma);
-            appendNewLine();
-            append(column.getSelectSql());
-            strComma = ",";
+            fromFrag.append(strComma);
+            fromFrag.append(column.getSelectSql());
+            strComma = ",\n";
         }
         for (ColumnInfo column : _statCols)
         {
             assert column.getParentTable() == _table : "Column is from the wrong table: " + column.getParentTable() + " instead of " + _table;
             column.declareJoins(joins);
-            append(",");
-            appendNewLine();
-            append("AVG(").append(column.getValueSql()).append(") AS ").append(column.getSelectName());
+            fromFrag.append(",\n");
+            fromFrag.append("AVG(").append(column.getValueSql()).append(") AS ").append(column.getSelectName());
         }
-        outdent();
 
-        appendNewLine();
-        append("FROM");
-        indent();
-        appendNewLine();
-        append(_table.getFromSQL());
+        fromFrag.append("\n");
+        fromFrag.append("FROM");
+        fromFrag.append("\n");
+        fromFrag.append(_table.getFromSQL());
         for (Map.Entry<String, SQLFragment> entry : joins.entrySet())
         {
-            appendNewLine();
-            append(entry.getValue());
+            fromFrag.append("\n");
+            fromFrag.append(entry.getValue());
         }
-        outdent();
 
-        appendNewLine();
+        fromFrag.append("\n");
 
         // WHERE background ...
-        filter = new SimpleFilter(sortFilterUrl, "query");
+        // XXX: baseFilter doesn't work
+        filter = new SimpleFilter(); //new SimpleFilter(baseFilter);
         filter.addAllClauses(_backgroundFilter);
         SQLFragment filterFrag = filter.getSQLFragment(dialect, columnMap);
 
-        append(filterFrag);
+        fromFrag.append(filterFrag);
 
-        appendNewLine();
-        append("GROUP BY");
-        indent();
+        fromFrag.append("\n");
+        fromFrag.append("GROUP BY");
 
-        strComma = "";
+        strComma = "\n";
         for (ColumnInfo column : _matchCols)
         {
-            append(strComma);
-            appendNewLine();
-            append(column.getValueSql());
-            strComma = ", ";
+            fromFrag.append(strComma);
+            fromFrag.append(column.getValueSql());
+            strComma = ",\n";
         }
-        outdent();
 
-        appendNewLine();
-        append(") AS BG");
-        outdent();
+        fromFrag.append("\n");
+        fromFrag.append(") AS BG");
+
+        fromFrag.append("\n");
+        fromFrag.append("ON");
 
         strComma = "";
-        appendNewLine();
-        append("ON");
-        indent();
-
         for (ColumnInfo column : _matchCols)
         {
-            append(strComma);
-            appendNewLine();
-            append("A.").append(column.getSelectName());
-            append(" = BG.").append(column.getSelectName());
+            fromFrag.append(strComma);
+            fromFrag.append("\n");
+            fromFrag.append("A.").append(column.getSelectName());
+            fromFrag.append(" = BG.").append(column.getSelectName());
             strComma = " AND ";
         }
 
-        Sort sort = new Sort(sortFilterUrl, "query");
-        appendNewLine();
-        append(sort.getOrderByClause(dialect, columnMap));
-    }
+        String orderBy = null;
+        if ((baseSort == null || baseSort.getSortList().size() == 0) && (maxRows > 0 || offset > 0))
+        {
+            baseSort = Table.createDefaultSort(_columns);
+        }
+        if (baseSort != null && baseSort.getSortList().size() > 0)
+        {
+            orderBy = baseSort.getOrderByClause(dialect, columnMap);
+        }
 
-    protected void appendNewLine()
-    {
-        append(getNewLine());
-    }
-
-    protected String getNewLine()
-    {
-        assert _indent >= 0;
-        return "\n" + StringUtils.repeat("  ", _indent);
-    }
-
-    protected void indent()
-    {
-        _indent++;
-    }
-
-    protected void outdent()
-    {
-        _indent--;
+        return dialect.limitRows(selectFrag, fromFrag, null, orderBy, maxRows, offset);
     }
 }

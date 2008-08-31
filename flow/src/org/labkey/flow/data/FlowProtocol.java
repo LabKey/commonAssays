@@ -550,6 +550,8 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     public ICSMetadata getICSMetadata()
     {
         String metadata = getICSMetadataString();
+        if (metadata == null || metadata.length() == 0)
+            return null;
         return ICSMetadata.fromString(metadata);
     }
 

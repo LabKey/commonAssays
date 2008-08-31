@@ -22,6 +22,7 @@ import org.springframework.beans.PropertyValues;
 public class FlowQuerySettings extends QuerySettings
 {
     private boolean _showGraphs;
+    private boolean _subtractBackground;
 
     public FlowQuerySettings(String dataRegionName)
     {
@@ -38,6 +39,7 @@ public class FlowQuerySettings extends QuerySettings
     {
         super.init(params);
         _showGraphs = _getParameter(param("showGraphs")) != null;
+        _subtractBackground = _getParameter(param("subtractBackground")) != null;
     }
 
     public boolean getShowGraphs()
@@ -47,5 +49,15 @@ public class FlowQuerySettings extends QuerySettings
     public void setShowGraphs(boolean b)
     {
         _showGraphs = b;
+    }
+
+    public boolean getSubtractBackground()
+    {
+        return _subtractBackground;
+    }
+
+    public void setSubtractBackground(boolean subtractBackground)
+    {
+        _subtractBackground = subtractBackground;
     }
 }
