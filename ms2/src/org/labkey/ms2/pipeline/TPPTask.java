@@ -510,10 +510,16 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
             quantOpts.add("--compat");
 
         String ver = params.get("pipeline, msinspect ver");
-        
+
+        String maxHeap = params.get("pipeline quantitation, q3 maxmemory");
+        if (maxHeap == null)
+        {
+            maxHeap = "1024";
+        }
+
         // TODO: Doesn't work when JAVA_HOME has a space in the path
         return new String[] {
-                "-C1" + PipelineJobService.get().getJavaPath() + " -client -Xmx256M -jar "
+                "-C1" + PipelineJobService.get().getJavaPath() + " -Xmx" + maxHeap + "M -jar "
                 + "" + PipelineJobService.get().getJarPath("viewerApp.jar", "msinspect", ver) + ""
                 + " --q3 " + StringUtils.join(quantOpts.iterator(), ' ')
                 ,
