@@ -27,7 +27,7 @@
     User user = HttpView.currentContext().getUser();
 %>
 <form method="post" action="<%=h(bean.applyViewURL)%>">
-    <table class="labkey-data-region">
+    <table class="labkey-button-bar">
         <tr>
             <td valign=bottom><%=bean.applyView%></td>
             <td valign=bottom><%=PageFlowUtil.generateSubmitButton("Go")%></td>

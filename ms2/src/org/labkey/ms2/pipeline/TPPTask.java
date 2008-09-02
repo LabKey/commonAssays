@@ -275,16 +275,6 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
             }
 
             File fileWorkPepXML = wd.newFile(FT_PEP_XML);
-            File fileWorkProtXML = null;
-            RecordedAction protXMLAction = null;
-            if (getJobSupport().isProphetEnabled())
-            {
-                fileWorkProtXML = wd.newFile(FT_INTERMEDIATE_PROT_XML);
-
-                // Second step optionally runs ProteinProphet on the pepXML
-                protXMLAction = new RecordedAction(PROTEIN_PROPHET_ACTION_NAME);
-                actions.add(protXMLAction);
-            }
 
             String ver = getTPPVersion(getJob());
             List<String> interactCmd = new ArrayList<String>();
@@ -363,14 +353,32 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
             {
                 lock = wd.ensureCopyingLock();
                 File filePepXML = wd.outputFile(fileWorkPepXML);
-                File fileProtXML = wd.outputFile(fileWorkProtXML, FT_PROT_XML.getName(getJobSupport().getBaseName()));
 
                 // Set up the first step with the right outputs
                 pepXMLAction.addOutput(filePepXML, "PepXML", false);
 
-                // Set up the second step with the right inputs and outputs
-                protXMLAction.addInput(filePepXML, "PepXML");
-                protXMLAction.addOutput(fileProtXML, "ProtXML", false);
+                File fileProtXML = null;
+
+                if (getJobSupport().isProphetEnabled())
+                {
+                    // If we ran ProteinProphet, set up a step with the right inputs and outputs
+                    File fileWorkProtXML = wd.newFile(FT_INTERMEDIATE_PROT_XML);
+                    if (!NetworkDrive.exists(fileWorkProtXML))
+                    {
+                        // TPP 4.0 changed the name of the output file from .pep-prot.xml to .prot.xml. If we can't
+                        // find a file with the old name, try the new one
+                        wd.discardFile(fileWorkProtXML);
+                        fileWorkProtXML = wd.newFile(FT_PROT_XML);
+                    }
+
+                    fileProtXML = wd.outputFile(fileWorkProtXML, FT_PROT_XML.getName(getJobSupport().getBaseName()));
+
+                    // Second step optionally runs ProteinProphet on the pepXML
+                    RecordedAction protXMLAction = new RecordedAction(PROTEIN_PROPHET_ACTION_NAME);
+                    protXMLAction.addInput(filePepXML, "PepXML");
+                    protXMLAction.addOutput(fileProtXML, "ProtXML", false);
+                    actions.add(protXMLAction);
+                }
 
                 if (peptideQuantAction != null)
                 {
@@ -382,7 +390,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
                     peptideQuantAction.addOutput(filePepXML, "QuantPepXML", false);
                 }
 
-                if (proteinQuantAction != null)
+                if (proteinQuantAction != null && fileProtXML != null)
                 {
                     proteinQuantAction.addInput(fileProtXML, "ProtXML");
                     proteinQuantAction.addInput(filePepXML, "PepXML");

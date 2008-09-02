@@ -44,7 +44,9 @@ if (null != bean.quantAlgorithm)
 { %>
     <tr><td>Quantitation:</td><td><%=h(bean.quantAlgorithm)%></td></tr><%
 } %>
-    <tr><td colspan=4><%
+</table>
+<div class="labkey-button-bar">
+<%
 
 if (bean.writePermissions)
 { %>
@@ -71,5 +73,4 @@ if(run.getNegativeHitCount() > run.getPeptideCount() / 3)
 { %>
     <%=PageFlowUtil.generateButton("Discriminate", "discriminateScore.view?run=" + run.getRun())%><%
 } %>
-    </tr>
-</table>
+</div>
