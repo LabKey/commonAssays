@@ -30,6 +30,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.HttpView;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -100,6 +101,11 @@ public class FlowSchema extends UserSchema
         if (_experiment == null && _run == null)
             return this;
         return new FlowSchema(_user, _container, _protocol);
+    }
+
+    FlowProtocol getProtocol()
+    {
+        return _protocol;
     }
 
     public TableInfo getTable(String name, String alias)
@@ -639,6 +645,17 @@ public class FlowSchema extends UserSchema
             return ret;
         }
 
+
+        ColumnInfo addBackgroundColumn(String columnAlias)
+        {
+            ColumnInfo colBackground = addObjectIdColumn(columnAlias);
+            colBackground.setFk(new BackgroundForeignKey(FlowSchema.this, _fps));
+            colBackground.setIsUnselectable(true);
+            //UNDONE addMethod(columnAlias, new StatisticMethod(colStatistic));
+            return colBackground;
+        }
+
+
         /* TableInfo */
         public SQLFragment getFromSQL(String alias)
         {
@@ -957,12 +974,14 @@ public class FlowSchema extends UserSchema
     {
         final private ExpDataTable _table;
         final private ColumnInfo _colStatistic;
+        final private ColumnInfo _colBackground;
         final private ColumnInfo _colGraph;
 
-        public DeferredFCSAnalysisVisibleColumns(ExpDataTable table, ColumnInfo colStatistic, ColumnInfo colGraph)
+        public DeferredFCSAnalysisVisibleColumns(ExpDataTable table, ColumnInfo colStatistic, ColumnInfo colGraph, ColumnInfo colBackground)
         {
             _table = table;
             _colStatistic = colStatistic;
+            _colBackground = colBackground;
             _colGraph = colGraph;
         }
 
@@ -977,6 +996,18 @@ public class FlowSchema extends UserSchema
             {
                 int count = 0;
                 FieldKey keyStatistic = new FieldKey(null, _colStatistic.getName());
+                for (FieldKey key : lookup.getDefaultVisibleColumns())
+                {
+                    ret.add(FieldKey.fromParts(keyStatistic, key));
+                    if (++count > 3)
+                        break;
+                }
+            }
+            lookup = _colBackground.getFk().getLookupTableInfo();
+            if (lookup != null)
+            {
+                int count = 0;
+                FieldKey keyStatistic = new FieldKey(null, _colBackground.getName());
                 for (FieldKey key : lookup.getDefaultVisibleColumns())
                 {
                     ret.add(FieldKey.fromParts(keyStatistic, key));
@@ -1050,6 +1081,7 @@ public class FlowSchema extends UserSchema
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
         }
         ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
+        ColumnInfo colBackground = ret.addStatisticColumn("Background");
         ColumnInfo colGraph = ret.addGraphColumn("Graph");
         ColumnInfo colFCSFile = ret.addDataInputColumn("FCSFile", InputRole.FCSFile.getPropertyDescriptor(getContainer()));
         colFCSFile.setFk(new LookupForeignKey(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()),
@@ -1060,7 +1092,7 @@ public class FlowSchema extends UserSchema
                     return detach().createFCSFileTable("FCSFile");
                 }
             });
-        ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph));
+        ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph, colBackground));
         return ret;
     }
 
@@ -1096,6 +1128,7 @@ public class FlowSchema extends UserSchema
         }
 
         ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
+        ColumnInfo colBackground = ret.addBackgroundColumn("Background");
 
         ColumnInfo colGraph = ret.addGraphColumn("Graph");
 
@@ -1110,7 +1143,7 @@ public class FlowSchema extends UserSchema
                 }
             });
 
-        ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph));
+        ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, colStatistic, colGraph, colBackground));
         return ret;
     }
 
@@ -1354,6 +1387,121 @@ public class FlowSchema extends UserSchema
                     "CREATE UNIQUE INDEX ix_" + shortName + "_rowid ON " + name + " (RowId);\n" +
                     "CREATE UNIQUE INDEX ix_" + shortName + "_objectid ON " + name + " (ObjectId);\n";
             Table.execute(flow, create, null);
+            long end = System.currentTimeMillis();
+            return name;
+        }
+        catch (SQLException x)
+        {
+            throw new RuntimeSQLException(x);
+        }
+    }
+
+
+    String getBackgroundJunctionTableName(Container c)
+    {
+        TempTableToken tok = null;
+        boolean tx = FlowManager.get().getSchema().getScope().isTransactionActive();
+        HttpServletRequest r = HttpView.currentRequest();
+        String tkey = "" + FlowManager.get().flowObjectModificationCount.get();
+        String attr = FlowSchema.class.getName() + "." + tkey + ".flow.bgjunction$" + c.getId();
+
+        tok = instanceCache.get(attr);
+        if (tok != null)
+            return tok.name;
+        tok = r == null ? null : (TempTableToken)r.getAttribute(attr);
+        if (tok != null)
+        {
+            instanceCache.put(attr, tok);
+            return tok.name;
+        }
+        if (!tx)
+            tok = (TempTableToken)staticCache.get(attr);
+        if (tok == null)
+        {
+            String name = createBackgroundJunctionTableName(c);
+            if (null == name)
+                return null;
+            tok = new TempTableToken(name);
+            TempTableTracker.track(FlowManager.get().getSchema(), name, tok);
+            if (!tx)
+                staticCache.put(attr, tok, 10 * Cache.SECOND);
+        }
+        instanceCache.put(attr, tok);
+        if (null != r)
+            r.setAttribute(attr, tok);
+        return tok.name;
+    }
+
+
+    String createBackgroundJunctionTableName(Container c)
+    {
+        try
+        {
+            long begin = System.currentTimeMillis();
+            DbSchema flow = FlowManager.get().getSchema();
+            String shortName = "flowJunction" + GUID.makeHash();
+            String name = flow.getSqlDialect().getGlobalTempTablePrefix() + shortName;
+            
+            ICSMetadata ics = _protocol.getICSMetadata();
+
+            // BACKGROUND            
+            FlowDataTable bg = (FlowDataTable)detach().getTable(FlowTableType.FCSAnalyses.toString(), "_bg");
+            bg.addObjectIdColumn("objectid");
+            Set<FieldKey> allColumns = new TreeSet<FieldKey>(ics.getMatchColumns());
+            for (ScriptSettings.FilterInfo f : ics.getBackgroundFilter())
+                allColumns.add(f.getField());
+            Map<FieldKey,ColumnInfo> bgMap = QueryService.get().getColumns(bg, allColumns);
+            if (bgMap.size() != allColumns.size())
+                return null;
+            ArrayList<ColumnInfo> bgFields = new ArrayList<ColumnInfo>();
+            bgFields.add(bg.getColumn("objectid"));
+            bgFields.addAll(bgMap.values());
+            SimpleFilter filter = new SimpleFilter();
+            for (ScriptSettings.FilterInfo f : ics.getBackgroundFilter())
+                filter.addCondition(bgMap.get(f.getField()), f.getValue(), f.getOp());
+            SQLFragment bgSQL = Table.getSelectSQL(bg, bgFields, null, null);
+            if (filter.getClauses().size() > 0)
+            {
+                Map<String, ColumnInfo> columnMap = Table.createColumnMap(bg, bgFields);
+                SQLFragment filterFrag = filter.getSQLFragment(flow.getSqlDialect(), columnMap);
+                SQLFragment t = new SQLFragment("SELECT * FROM (");
+                t.append(bgSQL);
+                t.append(") _filter_ " );
+                t.append(filterFrag);
+                bgSQL = t;
+            }
+
+            // FOREGROUND
+            FlowDataTable fg = (FlowDataTable)detach().getTable(FlowTableType.FCSAnalyses.toString(), "_fg");
+            fg.addObjectIdColumn("objectid");
+            Set<FieldKey> setMatchColumns = new HashSet<FieldKey>(ics.getMatchColumns());
+            Map<FieldKey,ColumnInfo> fgMap = QueryService.get().getColumns(fg, setMatchColumns);
+            if (fgMap.size() != setMatchColumns.size())
+                return null;
+            ArrayList<ColumnInfo> fgFields = new ArrayList<ColumnInfo>();
+            fgFields.add(fg.getColumn("objectid"));
+            fgFields.addAll(fgMap.values());
+            SQLFragment fgSQL = Table.getSelectSQL(fg, fgFields, null, null);
+
+            SQLFragment selectInto = new SQLFragment();
+            selectInto.append("SELECT F.objectid as fg, B.objectid as bg INTO " + name + "\n");
+            selectInto.append("FROM (").append(fgSQL).append(") AS F INNER JOIN (").append(bgSQL).append(") AS B");
+            selectInto.append(" ON " );
+            String and = "";
+            for (FieldKey m : setMatchColumns)
+            {
+                selectInto.append(and);
+                if (null == fgMap.get(m) || null == bgMap.get(m))
+                    return null;
+                selectInto.append("F.").append(fgMap.get(m).getAlias()).append("=B.").append(bgMap.get(m).getAlias());
+                and = " AND ";
+            }
+            Table.execute(flow, selectInto);
+            String create =
+                    "CREATE INDEX ix_" + shortName + "_fg ON " + name + " (fg);\n" +
+                    "CREATE INDEX ix_" + shortName + "_bg ON " + name + " (bg);\n";
+            Table.execute(flow, create, null);
+
             long end = System.currentTimeMillis();
             return name;
         }
