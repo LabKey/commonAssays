@@ -239,7 +239,10 @@ public class ProtocolController extends SpringFlowController<ProtocolController.
 
         public ModelAndView getView(EditICSMetadataForm form, boolean reshow, BindException errors) throws Exception
         {
-            form.setMetadata(getProtocol().getICSMetadataString());
+            String metadata = getProtocol().getICSMetadataString();
+            if (metadata == null)
+                metadata = "";
+            form.setMetadata(metadata);
             return FormPage.getView(ProtocolController.class, form, "editICSMetadata.jsp");
         }
 

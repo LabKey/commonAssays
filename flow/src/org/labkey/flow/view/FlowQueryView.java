@@ -33,7 +33,6 @@ import org.labkey.api.view.*;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
@@ -167,9 +166,9 @@ public class FlowQueryView extends QueryView
                 }
                 else
                 {
-                    ActionURL urlSetupMetadata = new ActionURL(ProtocolController.EditICSMetadataAction.class, getContainer());
-                    out.write(textLink("Modify ICS Metadata", urlSetupMetadata));
-                    out.write("&nbsp;");
+//                    ActionURL urlSetupMetadata = new ActionURL(ProtocolController.EditICSMetadataAction.class, getContainer());
+//                    out.write(textLink("Modify ICS Metadata", urlSetupMetadata));
+//                    out.write("&nbsp;");
 
                     ICSMetadata metadata = protocol.getICSMetadata();
                     List<String> errors = new LinkedList<String>();
@@ -190,6 +189,7 @@ public class FlowQueryView extends QueryView
                         {
                             renderErrors(out, "Can't subtract background from query:", errors);
                         }
+                        out.write("<br>");
                     }
                     else
                     {
@@ -199,10 +199,10 @@ public class FlowQueryView extends QueryView
                             urlSubtract.addParameter(param("subtractBackground"), "true");
                             out.write(textLink("Show Background Correction", urlSubtract));
                             out.write("&nbsp;");
+                            out.write("<br>");
                         }
                     }
                 }
-                out.write("<br>");
             }
         }
         super.renderView(model, out);
