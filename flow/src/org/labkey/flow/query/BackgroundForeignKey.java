@@ -81,6 +81,8 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
             return new SQLFragment("NULL");
 
         String junctionTable = _schema.getBackgroundJunctionTableName(_schema.getContainer());
+        if (null == junctionTable)
+            return new SQLFragment("NULL");
         
         SQLFragment ret = new SQLFragment(
                 "(SELECT AVG(flow.Statistic.Value)\n" +

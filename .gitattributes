@@ -378,6 +378,7 @@ flow/src/org/labkey/flow/persist/Script.java -text
 flow/src/org/labkey/flow/query/AttributeCache.java -text
 flow/src/org/labkey/flow/query/AttributeForeignKey.java -text
 flow/src/org/labkey/flow/query/BackgroundForeignKey.java -text
+flow/src/org/labkey/flow/query/BackgroundMethod.java -text
 flow/src/org/labkey/flow/query/FlowPropertySet.java -text
 flow/src/org/labkey/flow/query/FlowQueryForm.java -text
 flow/src/org/labkey/flow/query/FlowQuerySettings.java -text

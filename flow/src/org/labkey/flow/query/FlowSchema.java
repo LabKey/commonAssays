@@ -651,7 +651,7 @@ public class FlowSchema extends UserSchema
             ColumnInfo colBackground = addObjectIdColumn(columnAlias);
             colBackground.setFk(new BackgroundForeignKey(FlowSchema.this, _fps));
             colBackground.setIsUnselectable(true);
-            //UNDONE addMethod(columnAlias, new StatisticMethod(colStatistic));
+            addMethod(columnAlias, new BackgroundMethod(FlowSchema.this, colBackground));
             return colBackground;
         }
 
@@ -1081,7 +1081,7 @@ public class FlowSchema extends UserSchema
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
         }
         ColumnInfo colStatistic = ret.addStatisticColumn("Statistic");
-        ColumnInfo colBackground = ret.addStatisticColumn("Background");
+        ColumnInfo colBackground = ret.addBackgroundColumn("Background");
         ColumnInfo colGraph = ret.addGraphColumn("Graph");
         ColumnInfo colFCSFile = ret.addDataInputColumn("FCSFile", InputRole.FCSFile.getPropertyDescriptor(getContainer()));
         colFCSFile.setFk(new LookupForeignKey(PageFlowUtil.urlFor(WellController.Action.showWell, getContainer()),
