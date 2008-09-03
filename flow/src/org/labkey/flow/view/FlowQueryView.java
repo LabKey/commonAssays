@@ -34,9 +34,7 @@ import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowModule;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.FlowExperiment;
-import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
-import org.labkey.flow.data.ICSMetadata;
 import org.labkey.flow.query.FlowQueryForm;
 import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
@@ -44,8 +42,6 @@ import org.labkey.flow.query.SubtractBackgroundQuery;
 import org.labkey.flow.webparts.FlowFolderType;
 
 import java.io.PrintWriter;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 public class FlowQueryView extends QueryView
@@ -101,20 +97,6 @@ public class FlowQueryView extends QueryView
     {
         DataView ret = super.createDataView();
 
-        if (subtractBackground() && _subtractQuery != null)
-        {
-            try
-            {
-                ResultSet rs = _subtractQuery.createResultSet(getSettings(), ret.getRenderContext());
-                ret.setResultSet(rs);
-                ret.getDataRegion().setDisplayColumns(_subtractQuery.getDisplayColumns());
-            }
-            catch (SQLException e)
-            {
-                ret.getRenderContext().getErrors().reject("main", e.getMessage());
-            }
-        }
-
         if (hasGraphs() && showGraphs())
         {
             ret = new GraphView(ret);
@@ -152,57 +134,6 @@ public class FlowQueryView extends QueryView
                     out.write(textLink("Show Graphs", urlShow));
                 }
                 out.write("<br>");
-            }
-
-            //if (is a query based on FCSAnalysis and)
-            {
-                FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
-                if (protocol == null || protocol.getICSMetadataString() == null)
-                {
-                    // XXX: uncomment once ICSMetatdata is no longer experimental
-                    //ActionURL urlSetupMetadata = new ActionURL(ProtocolController.EditICSMetadataAction.class, getContainer());
-                    //out.write(textLink("Define ICS Metadata", urlSetupMetadata));
-                    //out.write("&nbsp;");
-                }
-                else
-                {
-//                    ActionURL urlSetupMetadata = new ActionURL(ProtocolController.EditICSMetadataAction.class, getContainer());
-//                    out.write(textLink("Modify ICS Metadata", urlSetupMetadata));
-//                    out.write("&nbsp;");
-
-                    ICSMetadata metadata = protocol.getICSMetadata();
-                    List<String> errors = new LinkedList<String>();
-                    SubtractBackgroundQuery subtractQuery = new SubtractBackgroundQuery(this, metadata, errors);
-
-                    if (subtractBackground())
-                    {
-                        ActionURL urlSubtract = getViewContext().cloneActionURL();
-                        urlSubtract.deleteParameter(param("subtractBackground"));
-                        out.write(textLink("Hide Background Correction", urlSubtract));
-                        out.write("&nbsp;");
-
-                        if (errors.size() == 0)
-                        {
-                            _subtractQuery = subtractQuery;
-                        }
-                        else
-                        {
-                            renderErrors(out, "Can't subtract background from query:", errors);
-                        }
-                        out.write("<br>");
-                    }
-                    else
-                    {
-                        if (errors.size() == 0)
-                        {
-                            ActionURL urlSubtract = getViewContext().cloneActionURL();
-                            urlSubtract.addParameter(param("subtractBackground"), "true");
-                            out.write(textLink("Show Background Correction", urlSubtract));
-                            out.write("&nbsp;");
-                            out.write("<br>");
-                        }
-                    }
-                }
             }
         }
         super.renderView(model, out);
