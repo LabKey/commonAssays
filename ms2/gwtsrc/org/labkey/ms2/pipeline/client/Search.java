@@ -176,7 +176,7 @@ public class Search implements EntryPoint
             buttonPanel.remove(copyButton);
         else
             buttonPanel.insert(copyButton, 1);
-        if (mzXmlComposite.hasRun())
+        if (mzXmlComposite.hasRun() && !protocolComposite.getSelectedProtocolValue().equals("new"))
             searchButton.setText("Retry");
         else
             searchButton.setText("Search");

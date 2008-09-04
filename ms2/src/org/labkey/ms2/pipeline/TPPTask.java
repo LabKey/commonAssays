@@ -127,6 +127,8 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
 
     public static class Factory extends AbstractTaskFactory<AbstractTaskFactorySettings, Factory>
     {
+        private String _javaVMOptions;
+
         public Factory()
         {
             super(TPPTask.class);
@@ -167,7 +169,6 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
                 return false;
 
             return !support.isProphetEnabled() || NetworkDrive.exists(getProtXMLFile(dirAnalysis, baseName));
-
         }
 
         public List<String> getProtocolActionNames()
@@ -179,6 +180,16 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
         {
             return "tpp";
         }
+
+        public String getJavaVMOptions()
+        {
+            return _javaVMOptions;
+        }
+
+        public void setJavaVMOptions(String javaVMOptions)
+        {
+            _javaVMOptions = javaVMOptions;
+        }
     }
 
     public static class FactoryJoin extends Factory
@@ -186,7 +197,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
         public FactoryJoin()
         {
             super("join");
-            
+
             setJoin(true);
         }
 
@@ -519,16 +530,11 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
 
         String ver = params.get("pipeline, msinspect ver");
 
-        String maxHeap = params.get("pipeline quantitation, q3 maxmemory");
-        if (maxHeap == null)
-        {
-            maxHeap = "1024";
-        }
-
         // TODO: Doesn't work when JAVA_HOME has a space in the path
         return new String[] {
-                "-C1" + PipelineJobService.get().getJavaPath() + " -Xmx" + maxHeap + "M -jar "
-                + "" + PipelineJobService.get().getJarPath("viewerApp.jar", "msinspect", ver) + ""
+                "-C1" + PipelineJobService.get().getJavaPath() + " " +
+                (_factory.getJavaVMOptions() == null ? "-Xmx1024M" : _factory.getJavaVMOptions())
+                + " -jar " + PipelineJobService.get().getJarPath("viewerApp.jar", "msinspect", ver)
                 + " --q3 " + StringUtils.join(quantOpts.iterator(), ' ')
                 ,
                 "-C2Q3ProteinRatioParser"

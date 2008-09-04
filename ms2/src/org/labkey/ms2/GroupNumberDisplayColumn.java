@@ -116,14 +116,14 @@ public class GroupNumberDisplayColumn extends DataColumn
             _collectionIdColumn = cols.get(idiKey);
             if (_collectionIdColumn == null)
             {
-                throw new IllegalStateException("Could not resolve IndistinguishableCollectionId column from " + thisFieldKey);
+                throw new IllegalStateException("Could not resolve IndistinguishableCollectionId column from " + thisFieldKey + ", parent table was " + getColumnInfo().getParentTable());
             }
             columns.add(_collectionIdColumn);
 
             ColumnInfo groupIdCol = cols.get(groupIdKey);
             if (groupIdCol == null)
             {
-                throw new IllegalStateException("Could not resolve RowId column from " + thisFieldKey);
+                throw new IllegalStateException("Could not resolve RowId column from " + thisFieldKey + ", parent table was " + getColumnInfo().getParentTable());
             }
             columns.add(groupIdCol);
 

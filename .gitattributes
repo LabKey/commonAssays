@@ -922,6 +922,7 @@ ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchProtocol.java -text
 ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchProtocolFactory.java -text
+ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchTask.java -text
 ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchTaskFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.java -text
 ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.jsp -text

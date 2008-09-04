@@ -421,7 +421,7 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
             {
                 Sheet sheet = workbook.getSheet(sheetIndex);
 
-                if ("Row #".equals(sheet.getCell(0, 0).getContents()))
+                if (sheet.getRows() == 0 || sheet.getColumns() == 0 || "Row #".equals(sheet.getCell(0, 0).getContents()))
                 {
                     continue;
                 }

@@ -17,25 +17,66 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.AbstractTaskFactorySettings;
+import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.NetworkDrive;
+
+import java.io.File;
+import java.util.Arrays;
 
 /**
  * <code>AbstractMS2SearchTaskFactory</code>
  */
 abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractMS2SearchTaskFactory<FactoryType>> extends AbstractTaskFactory<AbstractTaskFactorySettings, FactoryType>
 {
+    private FileType[] _inputTypes;
+
     protected AbstractMS2SearchTaskFactory(Class namespaceClass)
     {
         super(namespaceClass);
     }
 
+    public FactoryType cloneAndConfigure(AbstractTaskFactorySettings settings) throws CloneNotSupportedException
+    {
+        FactoryType result = super.cloneAndConfigure(settings);
+        
+        if (_inputTypes != null)
+        {
+            result.setInputTypes(_inputTypes);
+        }
+        
+        return result;
+    }
+
+    public void setInputTypes(FileType[] inputTypes)
+    {
+        _inputTypes = inputTypes;
+    }
+
     public FileType[] getInputTypes()
     {
-        return new FileType[] { AbstractMS2SearchProtocol.FT_MZXML };
+        if (_inputTypes == null)
+        {
+            return new FileType[] { AbstractMS2SearchProtocol.FT_MZXML };
+        }
+        return _inputTypes;
     }
 
     public String getStatusName()
     {
         return "SEARCH";
+    }
+
+    public File findInputFile(File dataDirectory, String baseName) throws PipelineJobException
+    {
+        for (FileType fileType : getInputTypes())
+        {
+            File f = fileType.newFile(dataDirectory, baseName);
+            if (NetworkDrive.exists(f))
+            {
+                return f;
+            }
+        }
+        throw new PipelineJobException("Could not find a file that matches input types: " + Arrays.toString(getInputTypes()));
     }
 }

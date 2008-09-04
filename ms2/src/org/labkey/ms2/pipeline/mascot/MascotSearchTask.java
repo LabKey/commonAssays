@@ -28,7 +28,7 @@ import java.util.*;
 /**
  * <code>MascotSearchTask</code>
  */
-public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
+public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Factory>
 {
     private static final String KEY_HASH = "HASH";
     private static final String KEY_FILESIZE = "FILESIZE";
@@ -181,10 +181,11 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
             File fileWorkInputXML = wd.newFile("input.xml");
             getJobSupport().createParamParser().writeFromMap(params, fileWorkInputXML);
 
-            File fileMGF = new File(getJobSupport().getSearchSpectraFile().getParentFile(), fileWorkMGF.getName());
+            File fileMzXML = _factory.findInputFile(getJobSupport().getDataDirectory(), getJobSupport().getBaseName());
+            File fileMGF = new File(fileMzXML.getParentFile(), fileWorkMGF.getName());
 
             // 0. pre-Mascot search: c) translate the mzXML file to mgf for Mascot (msxml2other)
-            File fileWorkSpectra = wd.inputFile(getJobSupport().getSearchSpectraFile(), false);
+            File fileWorkSpectra = wd.inputFile(fileMzXML, false);
             ArrayList<String> argsM2S = new ArrayList<String>();
             String ver = TPPTask.getTPPVersion(getJob());
             argsM2S.add(PipelineJobService.get().getExecutablePath("MzXML2Search", "tpp", ver));
@@ -349,7 +350,7 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
                 lock = wd.ensureCopyingLock();
 
                 mzxml2SearchAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(argsM2S, " "));
-                mzxml2SearchAction.addInput(getJobSupport().getSearchSpectraFile(), "mzXML");
+                mzxml2SearchAction.addInput(fileMzXML, "mzXML");
                 mzxml2SearchAction.addOutput(fileMGF, "MGF", false);
 
                 for (File file : getJobSupport().getSequenceFiles())
@@ -372,7 +373,6 @@ public class MascotSearchTask extends PipelineJob.Task<MascotSearchTask.Factory>
             wd.discardFile(fileWorkInputXML);
             wd.remove();
 
-            mzxml2SearchAction.addInput(getJobSupport().getSearchSpectraFile(), "mzXML");
             return Arrays.asList(mzxml2SearchAction, mascotAction, mascot2XMLAction);
         }
         catch (IOException e)

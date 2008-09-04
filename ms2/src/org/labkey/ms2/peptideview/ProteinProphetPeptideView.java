@@ -297,6 +297,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
 
         if (coverageFilter != null)
         {
+            coverageFilter = ProteinManager.reduceToValidColumns(coverageFilter, MS2Manager.getTableInfoPeptides());
             String sql = "SELECT Peptide FROM " + MS2Manager.getTableInfoPeptides() + " p, " +
                     MS2Manager.getTableInfoPeptideMemberships() + " pm," +
                     MS2Manager.getTableInfoProteinGroupMemberships() + " pgm, " +

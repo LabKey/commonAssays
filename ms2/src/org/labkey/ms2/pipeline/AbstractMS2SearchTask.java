@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2008 LabKey Corporation
+ * Copyright (c) 2008 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,17 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.ParamParser;
-
-import java.io.File;
-import java.util.Map;
+import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.util.FileType;
 
 /**
- * Interface for support required from the PipelineJob to run a search task,
- * beyond the base PipelineJob methods.
+ * User: jeckels
+ * Date: Sep 2, 2008
  */
-public interface MS2SearchJobSupport extends MS2PipelineJobSupport
+public abstract class AbstractMS2SearchTask<FactoryType extends AbstractMS2SearchTaskFactory> extends PipelineJob.Task<FactoryType>
 {
-    /**
-     * Returns the native output file for the search.
-     */
-    File getSearchNativeOutputFile();
-
-    /**
-     * Returns native spectra file converted from the standard format,
-     * or null if the standard format was used.
-     */
-    File getSearchNativeSpectraFile();
-
+    public AbstractMS2SearchTask(FactoryType factory, PipelineJob job)
+    {
+        super(factory, job);
+    }
 }

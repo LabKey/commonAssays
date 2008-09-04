@@ -34,7 +34,7 @@ import java.util.ArrayList;
  * <code>XTandemSearchTask</code> PipelineJob task that runs X! Tandem on an mzXML
  * file, and converts the native output to pepXML.
  */
-public class XTandemSearchTask extends PipelineJob.Task<XTandemSearchTask.Factory>
+public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.Factory>
 {
     private static final String INPUT_XML = "input.xml";
     private static final String TAXONOMY_XML = "taxonomy.xml";
@@ -125,13 +125,13 @@ public class XTandemSearchTask extends PipelineJob.Task<XTandemSearchTask.Factor
             File fileWorkOutputXML = null;
             boolean searchComplete = NetworkDrive.exists(fileOutputXML);
 
-            File fileDataSpectra = support.getSearchSpectraFile();
+            File fileMzXML = _factory.findInputFile(getJobSupport().getDataDirectory(), getJobSupport().getBaseName());
             File fileInputSpectra;
             WorkDirectory.CopyingResource lock = null;
             try
             {
                 lock = wd.ensureCopyingLock();
-                fileInputSpectra = wd.inputFile(fileDataSpectra, false);
+                fileInputSpectra = wd.inputFile(fileMzXML, false);
                 if (searchComplete)
                     fileWorkOutputXML = wd.inputFile(fileOutputXML, false);
             }
@@ -150,7 +150,7 @@ public class XTandemSearchTask extends PipelineJob.Task<XTandemSearchTask.Factor
                 // CONSIDER: If the file stays in its original location, the absolute path
                 //           is used, to ensure the loader can find it.  Better way?
                 String pathSpectra;
-                if (fileInputSpectra.equals(fileDataSpectra))
+                if (fileInputSpectra.equals(fileMzXML))
                     pathSpectra = fileInputSpectra.getAbsolutePath();
                 else
                     pathSpectra = wd.getRelativePath(fileInputSpectra);
@@ -199,7 +199,7 @@ public class XTandemSearchTask extends PipelineJob.Task<XTandemSearchTask.Factor
             {
                 RecordedAction xtandemAction = new RecordedAction(X_TANDEM_ACTION_NAME);
                 xtandemAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(xTandemPB.command(), ' '));
-                xtandemAction.addInput(fileDataSpectra, "mzXML");
+                xtandemAction.addInput(fileMzXML, "mzXML");
                 for (File sequenceFile : getJobSupport().getSequenceFiles())
                 {
                     xtandemAction.addInput(sequenceFile, "FASTA");

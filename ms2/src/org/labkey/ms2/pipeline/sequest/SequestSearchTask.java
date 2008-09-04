@@ -19,10 +19,7 @@ import org.labkey.api.pipeline.*;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
-import org.labkey.ms2.pipeline.AbstractMS2SearchTaskFactory;
-import org.labkey.ms2.pipeline.MS2SearchJobSupport;
-import org.labkey.ms2.pipeline.TPPTask;
+import org.labkey.ms2.pipeline.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +30,7 @@ import java.util.*;
 /**
  * <code>SequestSearchTask</code>
  */
-public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factory>
+public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.Factory>
 {
     private static final String SEQUEST_PARAMS = "sequest.params";
     private static final String REMOTE_PARAMS = "remote.params";
@@ -152,7 +149,8 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
             Mzxml2SearchParams mzXml2SearchParams = new Mzxml2SearchParams();
             Collection<String> inputXmlParams = convertParams(mzXml2SearchParams.getParams(), params);
             command.addAll(inputXmlParams);
-            command.add(getJobSupport().getSearchSpectraFile().getAbsolutePath());
+            File fileMzXML = _factory.findInputFile(getJobSupport().getDataDirectory(), getJobSupport().getBaseName());
+            command.add(fileMzXML.getAbsolutePath());
 
             getJob().runSubProcess(new ProcessBuilder(command), wd.getDir());
 
@@ -170,7 +168,7 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
             String sequenceRoot = getJobSupport().getSequenceRootDirectory().getAbsolutePath() + File.separator;
             int iReturn = sequestClient.search(sequenceRoot,
                     fileWorkParamsRemote.getAbsolutePath(),
-                    getJobSupport().getSearchSpectraFile().getAbsolutePath(),
+                    fileMzXML.getAbsolutePath(),
                     fileWorkPepXMLRaw.getAbsolutePath(),
                     inputXmlParams);
 
@@ -206,7 +204,7 @@ public class SequestSearchTask extends PipelineJob.Task<SequestSearchTask.Factor
             {
                 action.addInput(file, "FASTA");
             }
-            action.addInput(getJobSupport().getSearchSpectraFile(), "mzXML");
+            action.addInput(fileMzXML, "mzXML");
             
             return Collections.singletonList(action);
         }

@@ -167,7 +167,7 @@
         <property name="outputExtension" value=".mzXML"/>
         <property name="inputPaths">
             <map>
-                <!-- Confusingly call this mzXML so that the input name is the same for the specta source
+                <!-- Confusingly call this mzXML so that the input role is the same for the specta source
                 regardless of whether it came from a RAW file or a mzXML file -->
                 <entry key="mzXML">
                     <bean class="org.labkey.api.pipeline.cmd.TaskPath">

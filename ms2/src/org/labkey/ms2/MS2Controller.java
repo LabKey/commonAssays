@@ -1657,7 +1657,16 @@ public class MS2Controller extends SpringActionController
             {
                 ids.add(new Integer(idString));
             }
-            List<MS2Run> runs = MS2Manager.lookupRuns(ids, false, getUser());
+            List<MS2Run> runs;
+            try
+            {
+                runs = MS2Manager.lookupRuns(ids, false, getUser());
+            }
+            catch (RunListException e)
+            {
+                HttpView.throwNotFound(e.getMessage());
+                return null;
+            }
             List<ExpRun> expRuns = new ArrayList<ExpRun>();
             Container sourceContainer = null;
             for (Iterator<MS2Run> iter = runs.iterator(); iter.hasNext(); )
@@ -4807,7 +4816,7 @@ public class MS2Controller extends SpringActionController
             Table.update(getUser(), MS2Manager.getTableInfoQuantitation(), quant, quant.getPeptideId(), null);
 
             ActionURL url = getViewContext().getActionURL().clone();
-            url.setAction("showPeptide.view");
+            url.setAction(ShowPeptideAction.class);
             if (!validRanges)
             {
                 url.addParameter("elutionProfileError", "Invalid elution profile range");
@@ -5110,6 +5119,20 @@ public class MS2Controller extends SpringActionController
         public boolean handlePost(LoadAnnotForm form, BindException errors) throws Exception
         {
             String fname = form.getFileName();
+            try
+            {
+                File f = new File(fname).getCanonicalFile();
+            }
+            catch (IOException e)
+            {
+                String error = "Invalid file path";
+                if (e.getMessage() != null)
+                {
+                    error = error + " (" + e.getMessage() + ")";
+                }
+                errors.addError(new LabkeyError(error));
+                return false;
+            }
             String comment = form.getComment();
 
             DefaultAnnotationLoader loader;
@@ -5139,7 +5162,7 @@ public class MS2Controller extends SpringActionController
             }
             catch (IOException e)
             {
-                errors.addError(new ObjectError("main", null, null, e.getMessage()));
+                errors.addError(new LabkeyError(e.getMessage()));
                 return false;
             }
 

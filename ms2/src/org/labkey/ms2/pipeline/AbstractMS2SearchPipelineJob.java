@@ -18,9 +18,12 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
@@ -141,8 +144,25 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
 
     public File findOutputFile(String name)
     {
-        if (AbstractMS2SearchProtocol.FT_MZXML.isType(name))
-            return new File(getDataDirectory(), name);
+        // Look through all of the tasks in this pipeline
+        for (TaskId taskId : getTaskPipeline().getTaskProgression())
+        {
+            TaskFactory factory = PipelineJobService.get().getTaskFactory(taskId);
+            // Try to find one that does an MS2 search
+            if (factory instanceof AbstractMS2SearchTaskFactory)
+            {
+                for (FileType fileType : factory.getInputTypes())
+                {
+                    // If this file is an input to the search (usually .mzXML) it should go in the data directory,
+                    // not the analysis directory. This supports scenarios like msPrefix, where the rewritten
+                    // mzXML should be in the same directory as the mzXML and RAW files.
+                    if (fileType.isType(name))
+                    {
+                        return new File(getDataDirectory(), name);
+                    }
+                }
+            }
+        }
         
         return new File(getAnalysisDirectory(), name);
     }
@@ -190,20 +210,37 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
 
     public File[] getInteractSpectraFiles()
     {
+        // Default to looking for just mzXML files
+        FileType[] types = new FileType[] { AbstractMS2SearchProtocol.FT_MZXML };
+
+        for (TaskId taskId : getTaskPipeline().getTaskProgression())
+        {
+            TaskFactory factory = PipelineJobService.get().getTaskFactory(taskId);
+            // Try to find one that does an MS2 search
+            if (factory instanceof AbstractMS2SearchTaskFactory)
+            {
+                // Use the input types for the MS2 search, which allows for things like msPrefix processed files
+                types = factory.getInputTypes();
+                break;
+            }
+        }
+
         ArrayList<File> files = new ArrayList<File>();
         for (File fileSpectra : getInputFiles())
         {
-            files.add(AbstractMS2SearchProtocol.FT_MZXML.newFile(getDataDirectory(),
-                    FileUtil.getBaseName(fileSpectra)));
+            // Look at the different types in priority order
+            for (FileType type : types)
+            {
+                File f = type.newFile(getDataDirectory(), FileUtil.getBaseName(fileSpectra));
+                if (NetworkDrive.exists(f))
+                {
+                    files.add(f);
+                    // Once we found a match, don't try to add any other versions of this file name
+                    break;
+                }
+            }
         }
         return files.toArray(new File[files.size()]);
-    }
-
-    public File getSearchSpectraFile()
-    {
-        assert getInputFiles().length == 1;
-        
-        return AbstractMS2SearchProtocol.FT_MZXML.newFile(getDataDirectory(), getBaseName());
     }
 
     public File getSearchNativeSpectraFile()
