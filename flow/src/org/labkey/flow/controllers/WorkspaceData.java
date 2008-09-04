@@ -45,6 +45,7 @@ public class WorkspaceData implements Serializable
 
     public void setPath(String path)
     {
+        path = PageFlowUtil.decode(path);
         this.path = path;
         this.name = new File(path).getName();
     }

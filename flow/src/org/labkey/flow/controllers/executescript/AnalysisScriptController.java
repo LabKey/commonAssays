@@ -504,7 +504,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             WorkspaceData workspace = form.getWorkspace();
             Map<String, MultipartFile> files = getFileMap();
             MultipartFile file = files.get("workspace.file");
-            if (file != null)
+            if (file != null && StringUtils.isNotEmpty(file.getOriginalFilename()))
                 form.getWorkspace().setFile(file);
             workspace.validate(getContainer(), errors, getRequest());
         }
@@ -514,7 +514,8 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             if (form.getRunFilePathRoot() != null)
             {
                 PipeRoot root = getPipeRoot();
-                File runFilePathRoot = root.resolvePath(form.getRunFilePathRoot());
+                String path = PageFlowUtil.decode(form.getRunFilePathRoot());
+                File runFilePathRoot = root.resolvePath(path);
 
                 if (runFilePathRoot == null)
                 {

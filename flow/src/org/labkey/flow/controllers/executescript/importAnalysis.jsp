@@ -140,7 +140,7 @@
                      dirsSelectable : false,
                      browsePipeline : true,
                      relativeToRoot : true,
-                     fileFilter : /^.*\.xml/,
+                     fileFilter : /^.*\.xml/
                    });
                    tree.render();
                    tree.root.expand();

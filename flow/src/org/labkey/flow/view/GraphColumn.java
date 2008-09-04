@@ -16,18 +16,18 @@
 
 package org.labkey.flow.view;
 
-import org.labkey.api.data.*;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.settings.AppProps;
 import org.apache.log4j.Logger;
-
-import org.labkey.flow.controllers.well.WellController;
-import org.labkey.flow.controllers.FlowParam;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
 import org.labkey.flow.FlowPreference;
+import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.well.WellController;
 
-import java.io.Writer;
 import java.io.IOException;
+import java.io.Writer;
 
 public class GraphColumn extends DataColumn
 {
@@ -53,18 +53,21 @@ public class GraphColumn extends DataColumn
     {
         Object boundValue = getColumnInfo().getValue(ctx);
         String graphSize = FlowPreference.graphSize.getValue(ctx.getRequest());
+        Object displayValue = getColumnInfo().getDisplayField().getValue(ctx);
+        String graphTitle = PageFlowUtil.filter(displayValue.toString());
         if (boundValue == null)
         {
-            out.write("<img style=\"height: " + graphSize + ";width: " + graphSize + ";\" class=\"labkey-flow-graph\" src=\"");
-            out.write(AppProps.getInstance().getContextPath() + "/_.gif\">");
+            out.write("<span style=\"display:inline-block; vertical-align:top; height:" + graphSize + "; width:" + graphSize + ";\" class=\"labkey-disabled labkey-flow-graph\">");
+            out.write("No graph for:<br>" + graphTitle);
+            out.write("</span><wbr>");
             return;
         }
 
-        Object displayValue = getColumnInfo().getDisplayField().getValue(ctx);
         ActionURL urlGraph = PageFlowUtil.urlFor(WellController.Action.showGraph, ctx.getContainer());
         urlGraph.addParameter(FlowParam.objectId.toString(), boundValue.toString());
         urlGraph.addParameter(FlowParam.graph.toString(), displayValue.toString());
-        out.write("<img style=\"height: " + graphSize + ";width: " + graphSize + ";\" class=\"labkey-flow-graph\" src=\"");
+        out.write("<img alt=\"Graph of: " + graphTitle + "\" title=\"" + graphTitle + "\"");
+        out.write(" style=\"height: " + graphSize + "; width: " + graphSize + ";\" class=\"labkey-flow-graph\" src=\"");
         out.write(PageFlowUtil.filter(urlGraph));
         out.write("\"><wbr>");
     }

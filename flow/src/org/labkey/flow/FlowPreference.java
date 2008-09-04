@@ -25,7 +25,7 @@ import javax.servlet.http.HttpSession;
 
 public enum FlowPreference
 {
-    graphSize("300"),
+    graphSize("200"),
     showGraphs("1"),
     showRuns("1"),
     editScriptRunId(null),

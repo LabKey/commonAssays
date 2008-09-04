@@ -24,7 +24,7 @@
     Map<String, String> sizes = new LinkedHashMap();
     sizes.put("300", "Large Graphs");
     sizes.put("200", "Medium Graphs");
-    sizes.put("100", "Small Graphs");
+    sizes.put("150", "Small Graphs");
 %>
 
 
@@ -101,15 +101,12 @@
     }
     function setGraphSize(size)
     {
-        var images = document.images;
-        for (var i = 0; i < images.length; i ++)
+        var graphs = Ext.DomQuery.select("[@class *= 'labkey-flow-graph']");
+        for (var i = 0; i < graphs.length; i ++)
         {
-            var img = images[i];
-            if (img.className == "labkey-flow-graph")
-            {
-                img.style.width = size;
-                img.style.height = size;
-            }
+            var graph = graphs[i];
+            graph.style.width = size;
+            graph.style.height = size;
         }
 
         setGraphClasses("graphSize" + currentSize, "");
