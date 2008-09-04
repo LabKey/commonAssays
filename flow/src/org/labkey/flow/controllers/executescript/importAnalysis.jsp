@@ -84,7 +84,7 @@
 <labkey:errors/>
 <%--<%=currentView.renderErrors(true)%>--%>
 
-<form action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
+<form name="importAnalysis" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="step" value="<%=form.getStep()%>">
     <%
         Iterator i = form.getWorkspace().getHiddenFields().entrySet().iterator();
@@ -140,7 +140,13 @@
                      dirsSelectable : false,
                      browsePipeline : true,
                      relativeToRoot : true,
-                     fileFilter : /^.*\.xml/
+                     fileFilter : /^.*\.xml/,
+                     listeners : {
+                         dblclick : function (node, e) {
+                             if (node.isLeaf() && !node.disabled)
+                                 document.forms["importAnalysis"].submit();
+                         }
+                     }
                    });
                    tree.render();
                    tree.root.expand();
@@ -199,7 +205,13 @@
                      browsePipeline : true,
                      relativeToRoot : true,
                      fileFilter : /^.*\.fcs/,
-                     initialSelection : '<%=form.getRunFilePathRoot()%>'
+                     initialSelection : '<%=form.getRunFilePathRoot()%>',
+                     listeners : {
+                         dblclick : function (node, e) {
+                             if (!node.isLeaf() && !node.disabled)
+                                 document.forms["importAnalysis"].submit();
+                         }
+                     }
                    });
                    tree.render();
                    tree.root.expand();
