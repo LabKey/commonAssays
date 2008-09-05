@@ -4,6 +4,27 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
     <bean id="ms2PipelineRegistry" class="org.labkey.api.pipeline.TaskPipelineRegistrar">
+        <property name="factoryImpls">
+            <list>
+                <bean class="org.labkey.ms2.pipeline.FastaCheckTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.tandem.XTandemSearchTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.mascot.MascotSearchTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.sequest.SequestSearchTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.TPPTask$Factory"/>
+                <bean class="org.labkey.ms2.pipeline.TPPTask$FactoryJoin"/>
+            </list>
+        </property>
+        <property name="factories">
+            <list>
+                <ref bean="readwMzxmlConverter"/>
+                <ref bean="expGeneratorSearch"/>
+                <ref bean="expGeneratorSearchJoin"/>
+                <ref bean="expTemplateSearch"/>
+                <ref bean="expTemplateSearchJoin"/>
+                <ref bean="expImportSearch"/>
+                <ref bean="expImportSearchJoin"/>
+            </list>
+        </property>
         <property name="pipelines">
             <list>
                 <!-- X! Tandem search pipeline -->
@@ -85,23 +106,9 @@
                 </bean>
             </list>
         </property>
-        <property name="factoryImpls">
-            <list>
-                <bean class="org.labkey.ms2.pipeline.FastaCheckTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.tandem.XTandemSearchTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.mascot.MascotSearchTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.sequest.SequestSearchTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.TPPTask$Factory"/>
-                <bean class="org.labkey.ms2.pipeline.TPPTask$FactoryJoin"/>
-            </list>
-        </property>
-        <property name="factories">
-            <list>
-                <ref bean="readwMzxmlConverter"/>
-            </list>
-        </property>
     </bean>
 
+    <!-- TaskIds for TPP tasks registered in factoryImpls -->
     <bean id="tppTask" class="org.labkey.api.pipeline.TaskId">
         <constructor-arg><value type="java.lang.Class">org.labkey.ms2.pipeline.TPPTask</value></constructor-arg>
     </bean>
@@ -111,6 +118,7 @@
         <constructor-arg value="join"/>
     </bean>
 
+    <!-- Experiment derived tasks -->
     <bean id="expGeneratorSearch" class="org.labkey.api.exp.pipeline.XarGeneratorFactorySettings">
         <constructor-arg value="expGeneratorSearch"/>
         <property name="outputExt" value=".search.xar.xml"/>
@@ -150,6 +158,9 @@
         <property name="dependencyId" ref="tppTaskJoin"/>
     </bean>
 
+    <!-- mzXML conversion task, which is currently a no-op, since its converters -->
+    <!-- property is not set.  You can override this task, and set the converters -->
+    <!-- property in ms2Config.xml. -->
     <bean id="mzxmlConverter" class="org.labkey.api.pipeline.cmd.ConvertTaskFactorySettings">
         <constructor-arg value="mzxmlConverter"/>
         <property name="statusName" value="MZXML CONVERSION"/>
@@ -157,8 +168,9 @@
         <!-- Add converters in ms2Config.xml to enable -->
     </bean>
 
-    <bean id="unixNewSwitch" class="org.labkey.api.pipeline.cmd.UnixNewSwitchFormat"/>
-
+    <!-- ReAdW mzXML converter command task -->
+    <!-- The default configuration does not use this task.  It is here to simplify enabling the  -->
+    <!-- mzxmlConverter task for Thermo RAW to mzXML conversion. -->
     <bean id="readwMzxmlConverter" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">
         <constructor-arg value="readwMzxmlConverter"/>
         <property name="statusName" value="MZXML CONVERSION"/>
@@ -178,8 +190,10 @@
         </property>
         <property name="converters">
             <list>
-                <bean class="org.labkey.api.pipeline.cmd.RequiredInLine">
-                    <property name="value" value="ReAdW"/>
+                <bean class="org.labkey.api.pipeline.cmd.ExeToCommandArgs">
+                    <property name="exePath" value="ReAdW${version}"/>
+                    <property name="versionParamName" value="pipeline, readw version"/>
+                    <property name="softwarePackage" value="mzXML"/>
                 </bean>
                 <bean class="org.labkey.api.pipeline.cmd.EnumToCommandArgs">
                     <property name="parameter" value="pipeline, readw version"/>
@@ -195,7 +209,7 @@
                                                 <property name="switchName" value="mzxml"/>
                                             </bean>
                                             <bean class="org.labkey.api.pipeline.cmd.BooleanToSwitch">
-                                                <property name="parameter" value="readw, use compression"/>
+                                                <property name="parameter" value="readw, peaklist compression"/>
                                                 <property name="switchName" value="compress"/>
                                             </bean>
                                             <bean class="org.labkey.api.pipeline.cmd.BooleanToSwitch">
@@ -212,11 +226,18 @@
                                     </property>
                                 </bean>
                             </entry>
-<!--                            <entry key="1.0">
+                            <entry key="1.2">
                                 <bean class="org.labkey.api.pipeline.cmd.ListToCommandArgs">
-
+                                    <property name="converters">
+                                        <list>
+                                            <bean class="org.labkey.api.pipeline.cmd.PathInLine"/>
+                                            <bean class="org.labkey.api.pipeline.cmd.RequiredInLine">
+                                                <property name="value" value="p"/>
+                                            </bean>
+                                        </list>
+                                    </property>
                                 </bean>                                
-                            </entry> -->
+                            </entry>
                         </map>
                     </property>
                 </bean>
@@ -224,4 +245,6 @@
         </property>
     </bean>
 
+    <!-- Utility beans -->
+    <bean id="unixNewSwitch" class="org.labkey.api.pipeline.cmd.UnixNewSwitchFormat"/>
 </beans>

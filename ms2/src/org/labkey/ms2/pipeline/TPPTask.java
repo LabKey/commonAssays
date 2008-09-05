@@ -205,6 +205,11 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
         {
             return job.getJobSupport(JobSupport.class).isFractions();
         }
+
+        public String getGroupParameterName()
+        {
+            return "tpp fractions";
+        }
     }
 
     protected TPPTask(Factory factory, PipelineJob job)
