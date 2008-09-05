@@ -20,6 +20,7 @@ import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.reports.ReportService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -28,6 +29,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.ms1.model.Feature;
 import org.labkey.ms1.query.MS1Schema;
 import org.labkey.ms1.query.PeaksTableInfo;
+import org.labkey.ms1.report.PeaksRReport;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -71,6 +73,12 @@ public class PeaksView extends QueryView
         
 
         setShowRecordSelectors(false);
+        setViewItemFilter(new ReportService.ItemFilter() {
+            public boolean accept(String type, String label)
+            {
+                return (PeaksRReport.TYPE.equals(type));
+            }
+        });
     }
 
     protected TableInfo createTable()

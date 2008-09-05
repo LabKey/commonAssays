@@ -31,12 +31,16 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SystemMaintenance;
 import org.labkey.api.view.*;
+import org.labkey.api.reports.ReportService;
 import org.labkey.ms1.maintenance.PurgeTask;
 import org.labkey.ms1.model.PepSearchModel;
 import org.labkey.ms1.model.SimilarSearchModel;
 import org.labkey.ms1.pipeline.MSInspectFeaturesDataHandler;
 import org.labkey.ms1.pipeline.PeaksFileDataHandler;
 import org.labkey.ms1.query.MS1Schema;
+import org.labkey.ms1.report.FeaturesRReport;
+import org.labkey.ms1.report.MS1ReportUIProvider;
+import org.labkey.ms1.report.PeaksRReport;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Set;
@@ -144,6 +148,10 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
         //register the MS1 folder type
         ModuleLoader.getInstance().registerFolderType(new MS1FolderType(this));
         MS1Controller.registerAdminConsoleLinks();
+
+        ReportService.get().registerReport(new FeaturesRReport());
+        ReportService.get().registerReport(new PeaksRReport());
+        ReportService.get().addUIProvider(new MS1ReportUIProvider());
     }
 
 

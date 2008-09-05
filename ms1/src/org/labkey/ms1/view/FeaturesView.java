@@ -21,7 +21,9 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.view.DataView;
+import org.labkey.api.reports.ReportService;
 import org.labkey.ms1.MS1Manager;
+import org.labkey.ms1.report.FeaturesRReport;
 import org.labkey.ms1.query.*;
 
 import java.io.IOException;
@@ -80,6 +82,13 @@ public class FeaturesView extends QueryView
         setSettings(settings);
 
         setShowRecordSelectors(false);
+        setViewItemFilter(new ReportService.ItemFilter() {
+            public boolean accept(String type, String label)
+            {
+                return (FeaturesRReport.TYPE.equals(type));
+            }
+        });
+
     }
 
     public List<FeaturesFilter> getBaseFilters()

@@ -601,6 +601,10 @@ ms1/src/org/labkey/ms1/query/ScanFilter.java -text
 ms1/src/org/labkey/ms1/query/ScansTableInfo.java -text
 ms1/src/org/labkey/ms1/query/SimilarLinkDisplayColumn.java -text
 ms1/src/org/labkey/ms1/query/SimpleFeaturesFilter.java -text
+ms1/src/org/labkey/ms1/report/BaseMS1RReport.java -text
+ms1/src/org/labkey/ms1/report/FeaturesRReport.java -text
+ms1/src/org/labkey/ms1/report/MS1ReportUIProvider.java -text
+ms1/src/org/labkey/ms1/report/PeaksRReport.java -text
 ms1/src/org/labkey/ms1/view/AdminView.jsp -text
 ms1/src/org/labkey/ms1/view/AdminViewContext.java -text
 ms1/src/org/labkey/ms1/view/CompareRunsView.java -text
