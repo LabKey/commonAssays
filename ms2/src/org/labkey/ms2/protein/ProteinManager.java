@@ -617,20 +617,27 @@ public class ProteinManager
         return getPeptideFilter(currentUrl, mask, runs.get(0));
     }
 
-    public static SimpleFilter reduceToValidColumns(SimpleFilter fullFilter, TableInfo table)
+    public static SimpleFilter reduceToValidColumns(SimpleFilter fullFilter, TableInfo... tables)
     {
         SimpleFilter validFilter = new SimpleFilter();
         for (SimpleFilter.FilterClause clause : fullFilter.getClauses())
         {
-            boolean validClause = true;
+            boolean validClause = false;
             for (String columnName : clause.getColumnNames())
             {
-                if (table.getColumn(columnName) == null)
+                for (TableInfo table : tables)
                 {
-                    int index = columnName.lastIndexOf('.');
-                    if (index == -1 || table.getColumn(columnName.substring(index + 1)) == null)
+                    if (table.getColumn(columnName) == null)
                     {
-                        validClause = false;
+                        int index = columnName.lastIndexOf('.');
+                        if (index != -1 && table.getColumn(columnName.substring(index + 1)) != null)
+                        {
+                            validClause = true;
+                        }
+                    }
+                    else
+                    {
+                        validClause = true;
                     }
                 }
             }
