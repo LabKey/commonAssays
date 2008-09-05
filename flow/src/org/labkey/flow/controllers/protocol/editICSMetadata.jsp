@@ -19,6 +19,8 @@
 <%@ page import="org.labkey.flow.controllers.protocol.EditICSMetadataForm" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.query.FieldKey" %>
+<%@ page import="java.util.LinkedHashMap" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%! void addCompare(Map<String, String> options, CompareType ct)
@@ -26,27 +28,53 @@
     options.put(ct.getUrlKey(), ct.getDisplayValue());
 }%>
 <%
-    EditICSMetadataForm form = (EditICSMetadataForm) __form;
-//    Map<FieldKey, String> fieldOptions = new LinkedHashMap();
-//    fieldOptions.put(null, "");
-//    fieldOptions.putAll(form.getKeywordFieldMap());
-//    Map<String, String> opOptions = new LinkedHashMap();
-//    addCompare(opOptions, CompareType.EQUAL);
-//    addCompare(opOptions, CompareType.NEQ_OR_NULL);
-//    addCompare(opOptions, CompareType.ISBLANK);
-//    addCompare(opOptions, CompareType.NONBLANK);
-//    addCompare(opOptions, CompareType.STARTS_WITH);
-//    addCompare(opOptions, CompareType.CONTAINS);
+    EditICSMetadataForm form = (EditICSMetadataForm)__form;
+
+    Map<FieldKey, String> fieldOptions = new LinkedHashMap();
+    fieldOptions.put(null, "");
+    fieldOptions.putAll(form.getKeywordAndSampleFieldMap());
+
+    Map<String, String> opOptions = new LinkedHashMap();
+    addCompare(opOptions, CompareType.EQUAL);
+    addCompare(opOptions, CompareType.NEQ_OR_NULL);
+    addCompare(opOptions, CompareType.ISBLANK);
+    addCompare(opOptions, CompareType.NONBLANK);
+    addCompare(opOptions, CompareType.STARTS_WITH);
+    addCompare(opOptions, CompareType.CONTAINS);
 %>
 <labkey:errors />
 <form action="<%=form.getProtocol().urlFor(ProtocolController.Action.editICSMetadata)%>" method="POST">
+    <table class="labkey-wp">
+        <tr class="labkey-wp-header"><th align="left">Background and Foreground Match Columns:</th></tr>
+        <tr><td>Select the columns that match between both the foreground and background wells.</td></tr>
+    </table>
     <table>
-        <tr class="labkey-wp-header"><th align="left">ICS Metadata:</th></tr>
+        <% for (int i = 0; i < EditICSMetadataForm.MATCH_COLUMNS_MAX; i++) { %>
         <tr>
             <td>
-                <textarea name="metadata" rows="30" cols="120" style="width:100%"><%=form.getMetadata()%></textarea>
+                <select name="matchColumn"><labkey:options value="<%=form.matchColumn[i]%>" map="<%=fieldOptions%>" /></select>
             </td>
         </tr>
+        <% } %>
     </table>
+
+    <br><br>
+    <table class="labkey-wp">
+        <tr class="labkey-wp-header"><th align="left">Background Column and Value:</th></tr>
+        <tr><td>
+            Specify the column and value which uniquely identify the background wells from
+            the foreground wells.<br>If multiple wells match the background criteria, the
+            background value will be the average of all the matched wells.
+        </td></tr>
+    </table>
+    <table>
+        <tr>
+            <td><select name="backgroundField"><labkey:options value="<%=form.backgroundField%>" map="<%=fieldOptions%>" /></select></td>
+            <td><select name="backgroundOp"><labkey:options value="<%=form.backgroundOp%>" map="<%=opOptions%>" /></select></td>
+            <td><input name="backgroundValue" type="text" value="<%=h(form.backgroundValue)%>"></td>
+        </tr>
+    </table>
+
+    <br>
     <labkey:button text="Set ICS Metadata" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
 </form>

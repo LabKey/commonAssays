@@ -30,12 +30,12 @@ import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.controllers.SpringFlowController;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.ICSMetadata;
+import org.labkey.flow.analysis.model.ScriptSettings;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ProtocolController extends SpringFlowController<ProtocolController.Action>
 {
@@ -239,18 +239,46 @@ public class ProtocolController extends SpringFlowController<ProtocolController.
 
         public ModelAndView getView(EditICSMetadataForm form, boolean reshow, BindException errors) throws Exception
         {
-            String metadata = getProtocol().getICSMetadataString();
-            if (metadata == null)
-                metadata = "";
-            form.setMetadata(metadata);
-            return FormPage.getView(ProtocolController.class, form, "editICSMetadata.jsp");
+            form.init(getProtocol());
+            return FormPage.getView(ProtocolController.class, form, errors, "editICSMetadata.jsp");
         }
 
         public boolean handlePost(EditICSMetadataForm form, BindException errors) throws Exception
         {
-            ICSMetadata metadata = ICSMetadata.fromString(form.getMetadata());
-            getProtocol().setICSMetadata(getUser(), form.getMetadata());
-            return true;
+            ICSMetadata metadata = new ICSMetadata();
+            if (form.matchColumn != null && form.matchColumn.length > 0)
+            {
+                List<FieldKey> matchColumns = new ArrayList<FieldKey>(form.matchColumn.length);
+                for (FieldKey field : form.matchColumn)
+                    if (field != null)
+                        matchColumns.add(field);
+                metadata.setMatchColumns(matchColumns);
+            }
+            if (form.backgroundField != null && form.backgroundOp != null)
+            {
+                ScriptSettings.FilterInfo filter = new ScriptSettings.FilterInfo(form.backgroundField, form.backgroundOp, form.backgroundValue);
+                metadata.setBackgroundFilter(Collections.singletonList(filter));
+            }
+
+            if (metadata.isEmpty())
+            {
+                getProtocol().setICSMetadata(getUser(), null);
+                return true;
+            }
+            else
+            {
+                if (metadata.getMatchColumns() == null || metadata.getMatchColumns().size() == 0)
+                    errors.reject(ERROR_MSG, "At least one match column is required");
+                if (metadata.getBackgroundFilter() == null || metadata.getBackgroundFilter().size() == 0)
+                    errors.reject(ERROR_MSG, "A background filter is required");
+
+                if (errors.hasErrors())
+                    return false;
+
+                String value = metadata.toXmlString();
+                getProtocol().setICSMetadata(getUser(), value);
+                return true;
+            }
         }
 
         public ActionURL getSuccessURL(EditICSMetadataForm form)
