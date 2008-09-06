@@ -113,34 +113,39 @@ public class FlowSchema extends UserSchema
         try
         {
             FlowTableType type = FlowTableType.valueOf(name);
-            switch (type)
-            {
-                case FCSFiles:
-                    return createFCSFileTable(alias);
-                case FCSAnalyses:
-                    return createFCSAnalysisTable(alias, FlowDataType.FCSAnalysis);
-                case CompensationControls:
-                    return createCompensationControlTable(alias);
-                case Runs:
-                    return createRunTable(alias, null);
-                case CompensationMatrices:
-                    return createCompensationMatrixTable(alias);
-                case AnalysisScripts:
-                    return createAnalysisScriptTable(alias, false);
-                case Analyses:
-                    return createAnalysesTable(alias);
-                case Statistics:
-                    return createStatisticsTable(alias);
-                case Keywords:
-                    return createKeywordsTable(alias);
-            }
-            return null;
+            return getTable(type, alias);
         }
         catch (IllegalArgumentException iae)
         {
             // ignore
         }
         return super.getTable(name, alias);
+    }
+
+    public TableInfo getTable(FlowTableType type, String alias)
+    {
+        switch (type)
+        {
+            case FCSFiles:
+                return createFCSFileTable(alias);
+            case FCSAnalyses:
+                return createFCSAnalysisTable(alias, FlowDataType.FCSAnalysis);
+            case CompensationControls:
+                return createCompensationControlTable(alias);
+            case Runs:
+                return createRunTable(alias, null);
+            case CompensationMatrices:
+                return createCompensationMatrixTable(alias);
+            case AnalysisScripts:
+                return createAnalysisScriptTable(alias, false);
+            case Analyses:
+                return createAnalysesTable(alias);
+            case Statistics:
+                return createStatisticsTable(alias);
+            case Keywords:
+                return createKeywordsTable(alias);
+        }
+        return null;
     }
 
     public Set<String> getVisibleTableNames()
@@ -264,7 +269,9 @@ public class FlowSchema extends UserSchema
         ret.setDetailsURL(new DetailsURL(PageFlowUtil.urlFor(RunController.Action.showRun, _container), Collections.singletonMap(FlowParam.runId.toString(), ExpRunTable.Column.RowId.toString())));
         if (type == null || type == FlowDataType.FCSFile || type == FlowDataType.FCSAnalysis)
         {
-            ret.addColumn(ExpRunTable.Column.Flag);
+            ColumnInfo flag = ret.addColumn(ExpRunTable.Column.Flag);
+            if (type != null)
+                flag.setDescription(type.getLabel() + " Flag");
         }
         ret.addColumn(ExpRunTable.Column.Name);
         ret.addColumn(ExpRunTable.Column.FilePathRoot).setIsHidden(true);
@@ -881,7 +888,9 @@ public class FlowSchema extends UserSchema
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.RowId).setIsHidden(true);
         ret.addColumn(ExpDataTable.Column.LSID).setIsHidden(true);
-        ret.addColumn(ExpDataTable.Column.Flag);
+        ColumnInfo flag = ret.addColumn(ExpDataTable.Column.Flag);
+        if (type != null)
+            flag.setDescription(type.getLabel() + " Flag");
         ret.addColumn(ExpDataTable.Column.Created);
         ret.setTitleColumn("Name");
         ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);

@@ -25,49 +25,51 @@ import org.labkey.flow.persist.ObjectType;
 abstract public class FlowDataType extends DataType
 {
     String _name;
+    String _label;
     ObjectType _objType;
-    private FlowDataType(String type, ObjectType objType)
+    private FlowDataType(String type, String label, ObjectType objType)
     {
         super("Flow-" + type);
         _name = type;
+        _label = label;
         _objType = objType;
     }
 
-    static final public FlowDataType Log = new FlowDataType("Log", null){
+    static final public FlowDataType Log = new FlowDataType("Log", "Log", null){
         public FlowDataObject newInstance(ExpData data)
         {
             return null;
         }
     };
-    static final public FlowDataType FCSFile = new FlowDataType("FCSFile", ObjectType.fcsKeywords)
+    static final public FlowDataType FCSFile = new FlowDataType("FCSFile", "FCS File", ObjectType.fcsKeywords)
     {
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowFCSFile(data);
         }
     };
-    static final public FlowDataType FCSAnalysis = new FlowDataType("FCSAnalysis", ObjectType.fcsAnalysis)
+    static final public FlowDataType FCSAnalysis = new FlowDataType("FCSAnalysis", "FCS Analysis", ObjectType.fcsAnalysis)
     {
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowFCSAnalysis(data);
         }
     };
-    static final public FlowDataType CompensationControl = new FlowDataType("CompensationControl", ObjectType.compensationControl)
+    static final public FlowDataType CompensationControl = new FlowDataType("CompensationControl", "Comp. Control", ObjectType.compensationControl)
     {
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowCompensationControl(data);
         }
     };
-    static final public FlowDataType CompensationMatrix = new FlowDataType("CompensationMatrix", ObjectType.compensationMatrix)
+    static final public FlowDataType CompensationMatrix = new FlowDataType("CompensationMatrix", "Comp. Matrix", ObjectType.compensationMatrix)
     {
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowCompensationMatrix(data);
         }
     };
-    static final public FlowDataType Script = new FlowDataType("AnalysisScript", ObjectType.script)
+    static final public FlowDataType Script = new FlowDataType("AnalysisScript", "Script", ObjectType.script)
     {
         public FlowDataObject newInstance(ExpData data)
         {
@@ -88,6 +90,11 @@ abstract public class FlowDataType extends DataType
     public ObjectType getObjectType()
     {
         return _objType;
+    }
+
+    public String getLabel()
+    {
+        return _label;
     }
 
     public String urlFlag(boolean flagged)
