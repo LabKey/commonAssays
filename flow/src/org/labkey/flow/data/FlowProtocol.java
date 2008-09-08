@@ -231,7 +231,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         selectedColumns.add(colRowId);
         for (String propertyName : propertyNames)
         {
-            selectedColumns.add(colProperty.getFk().createLookupColumn(colProperty, propertyName));
+            ColumnInfo lookupColumn = colProperty.getFk().createLookupColumn(colProperty, propertyName);
+            if (lookupColumn != null)
+                selectedColumns.add(lookupColumn);
         }
         Map<SampleKey, ExpMaterial> ret = new HashMap<SampleKey, ExpMaterial>();
         ResultSet rsSamples = Table.select(sampleTable, selectedColumns, null, null);
