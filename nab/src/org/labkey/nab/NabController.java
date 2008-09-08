@@ -214,6 +214,13 @@ public class NabController extends ViewController
             // the file format in our validate method.
             return new ViewForward(getActionURL().relativeUrl("begin", "error=" + PageFlowUtil.encode("Data file format error: " + e.getMessage())));
         }
+        catch (IOException e)
+        {
+            // this is a hacky way to deal with a file format problem, but it lets us get away with
+            // only reading the xls once, rather than the double-read that would be required to validate
+            // the file format in our validate method.
+            return new ViewForward(getActionURL().relativeUrl("begin", "error=" + PageFlowUtil.encode(e.getMessage())));
+        }
 
         _cachedAssay = assay;
         ActionURL displayURL = cloneActionURL();

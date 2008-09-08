@@ -234,14 +234,31 @@ public class NabManager
         Workbook workbook = Workbook.getWorkbook(attachmentStream, settings);
         double[][] cellValues = new double[nabTemplate.getRows()][nabTemplate.getColumns()];
 
+        if (workbook.getNumberOfSheets() < 2)
+            throw new IOException("Invalid file format: plate data was expected on worksheet 2, but only 1 worksheet was found.");
         Sheet plateSheet = workbook.getSheet(1);
         for (int row = 0; row < nabTemplate.getRows(); row++)
         {
             for (int col = 0; col < nabTemplate.getColumns(); col++)
             {
                 Cell cell = plateSheet.getCell(col + START_COL, row + START_ROW);
-                String cellContents = cell.getContents();
-                cellValues[row][col] = Double.parseDouble(cellContents);
+
+                String cellContents = null;
+                if (cell != null)
+                    cellContents = cell.getContents();
+                if (cellContents == null || cellContents.length() == 0)
+                    throw new IOException("Invalid file format: plate data was expected in cell (" +
+                            (col + START_COL + 1) + ", " + (row + START_ROW + 1) + "), but was not found.");
+
+                try
+                {
+                    cellValues[row][col] = Double.parseDouble(cellContents);
+                }
+                catch (NumberFormatException e)
+                {
+                    throw new IOException("Invalid file format: numeric data was expected in cell (" + (col + START_COL + 1) + ", "
+                            + (row + START_ROW + 1) + "), but was not found: " + e.getMessage());
+                }
             }
         }
 
