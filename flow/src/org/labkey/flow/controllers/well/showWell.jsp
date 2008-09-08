@@ -30,14 +30,184 @@
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
+<style type="text/css">
+    .right {text-align:right;}
+</style>
+<script type="text/javascript">
+LABKEY.requiresExtJs(true);
+LABKEY.requiresScript("ColumnTree.js");
+</script>
 <%
     FlowWell well = getWell();
     FlowWell fcsFile = well.getFCSFile();
     FlowScript script = well.getScript();
     FlowCompensationMatrix matrix = well.getCompensationMatrix();
 
+    StringBuilder jsonStats = new StringBuilder();
+    jsonStats.append("[");
+    String comma = "";
+    for (Map.Entry<StatisticSpec, Double> statistic : getStatistics().entrySet())
+    {
+        StatisticSpec spec = statistic.getKey();
+        Double value = statistic.getValue();
+        jsonStats.append(comma);
+        jsonStats.append("{");
+        jsonStats.append("text:").append(PageFlowUtil.jsString(spec.toString())).append(",");
+        if (null == spec.getSubset())
+            jsonStats.append("subset:'',");
+        else
+        {
+            jsonStats.append("subset:").append(PageFlowUtil.jsString(spec.getSubset().toString())).append(",");
+            if (null != spec.getSubset().getParent())
+                jsonStats.append("parent:").append(PageFlowUtil.jsString(spec.getSubset().getParent().toString())).append(",");
+        }
+        jsonStats.append("stat:").append(PageFlowUtil.jsString(spec.getStatistic().getShortName())).append(",");
+        jsonStats.append("param:").append(PageFlowUtil.jsString(spec.getParameter())).append(",");
+        jsonStats.append("value:").append(value);
+        jsonStats.append("}");
+        comma = ",\n";
+    }
+    
+    jsonStats.append("]");
 %>
+<script type="text/javascript">
+
+function statisticsTree(statistics)
+{
+    var node, subset;
+    var map = {};
+    for (var i=0 ; i<statistics.length ; i++)
+    {
+        s = statistics[i];
+        node = map[s.subset];
+        if (!node)
+        {
+            var text = s.subset;
+            if (s.parent && 0==text.indexOf(s.parent+"/"))
+                text = text.substring(s.parent.length+1);
+            if (0==text.indexOf("(") && text.length-1 == text.lastIndexOf(")"))
+                text = text.substring(1,text.length-2);
+            node = new Ext.tree.TreeNode(Ext.apply({},{text:text, qtipCfg:{text:s.subset}, expanded:true, uiProvider:Ext.tree.ColumnNodeUI, parentNode:null}, s));    // stash original object in data
+            map[s.subset] = node;
+        }
+        var name = s.stat;
+        if (s.param)
+            name = name + "(" + s.param + ")";
+        node.attributes['__' + name] = s.value;
+    }
+    for (subset in map)
+    {
+        node = map[subset];
+        var parentSubset = node.attributes.parent;
+        if (!parentSubset)
+            parentSubset = '';
+        var parent = map[parentSubset];
+        if (parent && parent != node)
+        {
+            parent.appendChild(node);
+            node.attributes.parentNode = parent;
+        }
+    }
+    var treeData = [];
+    for (subset in map)
+    {
+        node = map[subset];
+        if (!node.attributes.parentNode && (node.childNodes.length > 0 /* || node.attributes.stats.length > 0 */))
+            treeData.push(node);
+    }
+    return treeData;
+}
+
+function statisticsColumns(statistics)
+{
+    var map = {};
+    var columns = [];
+
+    for (var i=0 ; i<statistics.length ; i++)
+    {
+        var s = statistics[i];
+        var name = s.stat;
+        if (s.param)
+            name = name + "(" + s.param + ")";
+        if (!map[name])
+        {
+            var renderer = null;
+            if ('Count' != s.stat)
+                renderer = _toFixed;
+            var col = {header:Ext.util.Format.htmlEncode(name), dataIndex:'__'+name, width:80, cls:'right', renderer:renderer, stat:s.stat, param:s.param}
+            map[name] = col;
+            columns.push(col);
+        }
+    }
+    columns.sort(function(a,b) {
+        var A = a.param ? a.param : "";
+        var B = b.param ? b.param : "";
+        if (A != B)
+            return A < B ? -1 : 1;
+        A = a.stat; B = b.stat;
+        if (A == B)
+            return 0;
+        if (A == 'Count')
+            return -1;
+        if (B == 'Count')
+            return 1;
+        if (A == '%P')
+            return -1;
+        if (B == '%P')
+            return 1;
+        if (A == '%G')
+            return -1;
+        if (B == '%G')
+            return 1;
+        return A < B ? -1 : 1;
+    });
+    return columns;
+}
+
+function _toFixed(f)
+{
+    if (f == undefined)
+        return "";
+    if (f.toFixed)
+        return f.toFixed(2);
+    return f;
+}
+
+Ext.onReady(function(){
+    var treeData = statisticsTree(statistics);
+    var statsColumns = statisticsColumns(statistics);
+    var population = [{header:'Population', dataIndex:'text', width:300}];
+    var columns = population.concat(statsColumns);
+
+//    var tree = new Ext.tree.TreePanel({
+    var tree = new Ext.tree.ColumnTree({
+        el:'statsTree',
+        rootVisible:false,
+        useArrows:true,
+        autoScroll:false,
+        autoHeight:true,
+//        height:600,
+//        width:800,
+        animate:true,
+        enableDD:false,
+        containerScroll: false,
+        columns: columns
+    });
+
+    var root = new Ext.tree.TreeNode({text:'-', expanded:true});
+    for (var i=0 ; i<treeData.length ; i++)
+        root.appendChild(treeData[i]);
+    tree.setRootNode(root);
+    tree.render();
+    tree.expandAll()
+});
+
+var statistics = <%=jsonStats%>;
+var treeData;
+var stats;
+</script>
 <table>
     <% if (getRun() == null) { %>
     <tr><td colspan="2">The run has been deleted.</td></tr>
@@ -85,28 +255,14 @@
 %>
 <%=generateButton("edit", well.urlFor(WellController.Action.editWell))%><br>
 <% } %>
-<% if (getStatistics().size() > 0)
-{
-    DecimalFormat fmt = new DecimalFormat("#,##0.####");
-%>
-<div style="overflow:auto;" height="400px">
-<table>
-    <tr><th colspan="2">Statistics</th></tr>
-    <% for (Map.Entry<StatisticSpec, Double> statistic : getStatistics().entrySet())
-    { %>
-    <tr><td><%=h(statistic.getKey().toString())%></td><td><%=fmt.format(statistic.getValue())%></td></tr>
-    <% } %>
-</table>
-    </div>
-<% } %>
-
+<div id="statsTree" class="extContainer"></div>
 <%
 if (getGraphs().length > 0)
 {
     final String graphSize = FlowPreference.graphSize.getValue(request);
     include(new JspView(JspLoader.createPage(request, GraphView.class, "setGraphSize.jsp")), out);
     for (GraphSpec graph : getGraphs()) {
-        %><img style="width:<%=graphSize%>;height:<%=graphSize%>;"class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.Action.showGraph))%>&amp;graph=<%=u(graph.toString())%>"><%
+        %><img style="width:<%=graphSize%>;height:<%=graphSize%>;"class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.Action.showGraph))%>&amp;graph=<%=u(graph.toString())%>"><wbr><%
     }
 }
 %>

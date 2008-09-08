@@ -58,11 +58,11 @@ public class StatisticSpec implements Serializable, Comparable
             _longName = longName;
             _shortName = shortName;
         }
-        String getShortName()
+        public String getShortName()
         {
             return _shortName;
         }
-        String getLongName()
+        public String getLongName()
         {
             return _longName;
         }
