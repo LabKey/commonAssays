@@ -341,6 +341,7 @@ flow/src/org/labkey/flow/controllers/runningJobs.jsp -text
 flow/src/org/labkey/flow/controllers/well/ChooseGraphForm.java -text
 flow/src/org/labkey/flow/controllers/well/EditWellForm.java -text
 flow/src/org/labkey/flow/controllers/well/WellController.java -text
+flow/src/org/labkey/flow/controllers/well/bulkUpdate.jsp -text
 flow/src/org/labkey/flow/controllers/well/chooseGraph.jsp -text
 flow/src/org/labkey/flow/controllers/well/editWell.jsp -text
 flow/src/org/labkey/flow/controllers/well/showWell.jsp -text
