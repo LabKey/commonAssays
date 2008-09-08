@@ -18,6 +18,7 @@
 <%@ page import="org.labkey.api.security.ACL"%>
 <%@ page import="org.labkey.api.view.ActionURL"%>
 <%@ page import="org.labkey.flow.data.FlowObject" %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     FlowObject flowObj = (FlowObject)getModelBean();
@@ -27,39 +28,136 @@
     setFlagUrl.addParameter("redirect", false);
 
     boolean canEdit = getViewContext().hasPermission(ACL.PERM_UPDATE);
+    String contextPath = getViewContext().getContextPath();
 %>
 <% if (canEdit) { %>
 <script type="text/javascript">
     LABKEY.requiresExtJs(false);
 </script>
-<input class="extContainer" type="text"
-       id="comment" name="comment" size="65"
-       value="<%=h(flowObj.getExpObject().getComment())%>" />
+<span class="extContainer x-form-field-wrap">
+    <input class="extContainer" type="text"
+           id="comment" name="comment" size="65"
+           value="<%=h(flowObj.getExpObject().getComment())%>" />
+</span>
 <script type="text/javascript">
-var textField = new Ext.form.TextField({
-   applyTo: 'comment',
-   emptyText: "Type to enter a comment",
-   labelLength: 65,
-   listeners: {
-       'change': function (self, newValue, oldValue) {
-           self.doSubmit();
-       }
-   }
+var CommentField = Ext.extend(Ext.form.TextField, {
+    initComponent : function () {
+        CommentField.superclass.initComponent.call(this);
+    },
+
+    initEvents : function () {
+        CommentField.superclass.initEvents.call(this);
+        this._originalValue = this.getValue();
+        this.on('change', this.doSubmit, this);
+        this.on('specialkey', this.handleSpecial, this);
+    },
+
+    handleSpecial : function (self, e) {
+        var key = e.getKey();
+        if (key == Ext.EventObject.ESC)
+        {
+            this.setValue(this._originalValue);
+        }
+        else if (key == Ext.EventObject.ENTER)
+        {
+            this.doSubmit();
+        }
+    },
+
+    doSubmit : function () {
+        this.hideStatus();
+        if (this.getValue() !== this._originalValue)
+        {
+            var newValue = this.getValue();
+
+            this.statusMessage('loading', "Updating...");
+            Ext.Ajax.request({
+                url: "<%=setFlagUrl%>&comment=" + encodeURIComponent(textField.getValue()),
+                success: function (response) {
+                    this.statusMessage('success', "Comment updated");
+                    this._originalValue = newValue;
+                },
+                failure: function (response) {
+                    this.statusMessage('error', "Error updating comment: " + response.responseText);
+                },
+                scope: this
+            });
+        }
+    },
+
+    hideStatus : function () {
+        if (this.statusEl)
+        {
+            this.statusEl.hide();
+            this.un('resize', this.alignStatusIcon, this);
+        }
+        if (this.delayHide)
+        {
+            this.delayHide.cancel();
+            delete this.delayHide;
+        }
+    },
+
+    statusMessage : function (status, msg) {
+        if (!this.rendered)
+            return;
+        if (!this.statusEl)
+        {
+            var elp = this.getErrorCt();
+            if (!elp) return;
+            this.statusEl = elp.createChild({
+                style: {
+                    position: "absolute",
+                    left: "0px", top: "0px",
+                    width: "16px", height: "18px",
+                    'padding-left': "18px",
+                    font: "normal 11px tahoma, arial, helvetica, sans-serif",
+                    'line-height': "18px",
+                    display: "block",
+                    visibility: "hidden",
+                    background: "transparent url(<%=contextPath%>/_.gif) no-repeat 0 2px"
+                }
+            });
+            this.alignStatusIcon();
+            this.on('resize', this.alignStatusIcon, this);
+        }
+
+        switch (status)
+        {
+            case 'loading':
+                this.statusEl.setStyle("background-image", "url(<%=contextPath%>/ext-2.2/resources/images/default/grid/loading.gif)");
+                this.statusEl.setStyle("color", "silver");
+                break;
+            case 'success':
+                this.statusEl.setStyle("background-image", "url(<%=contextPath%>/ext-2.2/resources/images/default/tree/drop-yes.gif)");
+                this.statusEl.setStyle("color", "green");
+                if (!this.delayHide)
+                {
+                    this.delayHide = new Ext.util.DelayedTask(function () { this.statusEl.hide({duration:0.6}); }, this);
+                }
+                this.delayHide.delay(4000);
+                break;
+            case 'error':
+                this.statusEl.setStyle("background-image", "url(<%=contextPath%>/ext-2.2/resources/images/default/form/exclamation.gif)")
+                this.statusEl.setStyle("color", "red");
+                break;
+        }
+
+        this.statusEl.update(msg);
+        this.statusEl.show();
+    },
+
+    alignStatusIcon : function () {
+        this.statusEl.alignTo(this.el, 'tl-tr', [2, 0]);
+    }
 });
-textField.doSubmit = function () {
-    if (textField.originalValue !== textField.getValue())
-    {
-        Ext.Ajax.request({
-            url: "<%=setFlagUrl%>&comment=" + textField.getValue()
-        });
-        textField.originalValue = textField.getValue();
-    }
-}
-textField.el.on("keypress", function (e) {
-    if (e.getKey() == Ext.EventObject.ENTER) {
-        textField.doSubmit();
-    }
-}, textField);
+var textField = new CommentField({
+    applyTo: 'comment',
+    emptyText: "Type to enter a comment",
+    fieldLabel: 'Comment',
+    msgTarget: 'side',
+    labelLength: 65
+});
 </script>
 <% } else { %>
 <%=h(flowObj.getExpObject().getComment())%>
