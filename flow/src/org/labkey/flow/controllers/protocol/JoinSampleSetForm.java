@@ -19,6 +19,7 @@ package org.labkey.flow.controllers.protocol;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.data.FlowProtocol;
@@ -69,9 +70,13 @@ public class JoinSampleSetForm extends ProtocolForm
     {
         LinkedHashMap<String,String> ret = new LinkedHashMap();
         ret.put("", "");
-        for (PropertyDescriptor pd : getProtocol().getSampleSet().getPropertiesForType())
+        ExpSampleSet sampleSet = getProtocol().getSampleSet();
+        if (sampleSet != null)
         {
-            ret.put(pd.getName(), pd.getName());
+            for (PropertyDescriptor pd : sampleSet.getPropertiesForType())
+            {
+                ret.put(pd.getName(), pd.getName());
+            }
         }
         return ret;
     }
