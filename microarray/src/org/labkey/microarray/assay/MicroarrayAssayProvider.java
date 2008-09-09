@@ -195,7 +195,7 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
         }
     }
 
-    public ActionURL publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL publish(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         throw new UnsupportedOperationException();
     }

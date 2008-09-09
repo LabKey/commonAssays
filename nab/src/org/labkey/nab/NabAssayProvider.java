@@ -241,7 +241,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
         return PropertyType.INTEGER;
     }
     
-    public ActionURL publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL publish(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try
         {
@@ -264,14 +264,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
             runPDs.addAll(Arrays.asList(getUploadSetColumns(protocol)));
 
             SimpleFilter filter = new SimpleFilter();
-            List<Object> ids = new ArrayList<Object>();
-            Map<Object, AssayPublishKey> dataIdToPublishKey = new HashMap<Object, AssayPublishKey>();
-            for (AssayPublishKey dataKey : dataKeys)
-            {
-                ids.add(dataKey.getDataId());
-                dataIdToPublishKey.put(dataKey.getDataId(), dataKey);
-            }
-            filter.addInClause(getDataRowIdFieldKey().toString(), ids);
+            filter.addInClause(getDataRowIdFieldKey().toString(), dataKeys.keySet());
 
             OntologyObject[] dataRows = Table.select(OntologyManager.getTinfoObject(), Table.ALL_COLUMNS, filter,
                     new Sort(getDataRowIdFieldKey().toString()), OntologyObject.class);
@@ -340,7 +333,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
                     }
                 }
 
-                AssayPublishKey publishKey = dataIdToPublishKey.get(row.getObjectId());
+                AssayPublishKey publishKey = dataKeys.get(row.getObjectId());
                 dataMap.put("ParticipantID", publishKey.getParticipantId());
                 dataMap.put("SequenceNum", publishKey.getVisitId());
                 if (TimepointType.DATE == studyType)

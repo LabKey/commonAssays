@@ -226,7 +226,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
                 ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property", SPECIMENID_PROPERTY_NAME);
     }
 
-    public ActionURL publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL publish(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try {
             int rowIndex = 0;
@@ -242,17 +242,9 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
 
             PropertyDescriptor[] samplePDs = getSampleWellGroupColumns(protocol);
             PropertyDescriptor[] dataPDs = ElispotSchema.getExistingDataProperties(protocol);
-            Map<Object, AssayPublishKey> dataIdToPublishKey = new HashMap<Object, AssayPublishKey>();
-
-            List<Object> ids = new ArrayList<Object>();
-            for (AssayPublishKey dataKey : dataKeys)
-            {
-                ids.add(dataKey.getDataId());
-                dataIdToPublishKey.put(dataKey.getDataId(), dataKey);
-            }
 
             SimpleFilter filter = new SimpleFilter();
-            filter.addInClause(getDataRowIdFieldKey().toString(), ids);
+            filter.addInClause(getDataRowIdFieldKey().toString(), dataKeys.keySet());
 
             // get the selected rows from the copy to study wizard
             OntologyObject[] dataRows = Table.select(OntologyManager.getTinfoObject(), Table.ALL_COLUMNS, filter,
@@ -330,7 +322,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
                     }
                 }
 
-                AssayPublishKey publishKey = dataIdToPublishKey.get(row.getObjectId());
+                AssayPublishKey publishKey = dataKeys.get(row.getObjectId());
                 dataMap.put("ParticipantID", publishKey.getParticipantId());
                 dataMap.put("SequenceNum", publishKey.getVisitId());
                 if (TimepointType.DATE == studyType)

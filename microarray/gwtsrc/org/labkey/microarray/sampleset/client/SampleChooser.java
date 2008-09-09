@@ -70,8 +70,6 @@ public class SampleChooser implements EntryPoint
             });
             _table.setWidget(0, 0, sampleCountListBox);
         }
-        
-        setSampleCount(_maxSampleCount);
 
         _table.setWidget(0, 1, new HTML("<b>Sample Set</b>"));
         _table.setWidget(0, 2, new HTML("<b>Sample Name</b>"));
@@ -111,21 +109,23 @@ public class SampleChooser implements EntryPoint
             }
         }
 
+        setSampleCount(_maxSampleCount);
+        
         rootPanel.add(_table);
     }
 
     private void updateSampleCount(ListBox sampleCountListBox)
     {
         int count = Integer.parseInt(sampleCountListBox.getValue(sampleCountListBox.getSelectedIndex()));
-        for (int i = 0; i < _maxSampleCount; i++)
-        {
-            _sampleInfos[i].setVisible(i < count);
-        }
         setSampleCount(count);
     }
 
     private void setSampleCount(int count)
     {
+        for (int i = 0; i < _maxSampleCount; i++)
+        {
+            _sampleInfos[i].setVisible(i < count);
+        }
         FormUtil.setValueInForm(Integer.toString(count), DOM.getElementById(SAMPLE_COUNT_ELEMENT_NAME));
     }
 }

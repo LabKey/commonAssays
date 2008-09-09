@@ -41,6 +41,7 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ActionURL;
+import org.labkey.common.util.Pair;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -251,22 +252,17 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return FieldKey.fromParts("Description");
     }
 
-    public ActionURL publish(User user, ExpProtocol protocol, Container study, Set<AssayPublishKey> dataKeys, List<String> errors)
+    public ActionURL publish(User user, ExpProtocol protocol, Container study, Map<Integer, AssayPublishKey> dataKeys, List<String> errors)
     {
         try
         {
             SimpleFilter filter = new SimpleFilter();
-            List<Object> ids = new ArrayList<Object>();
-            for (AssayPublishKey dataKey : dataKeys)
-            {
-                ids.add(dataKey.getDataId());
-            }
-            filter.addInClause("RowId", ids);
+            filter.addInClause("RowId", dataKeys.keySet());
             LuminexDataRow[] luminexDataRows = Table.select(LuminexSchema.getTableInfoDataRow(), Table.ALL_COLUMNS, filter, null, LuminexDataRow.class);
 
             Map<String, Object>[] dataMaps = new Map[luminexDataRows.length];
 
-            Map<Integer, Analyte> analytes = new HashMap<Integer, Analyte>();
+            Map<Integer, Pair<Analyte, Map<String, ObjectProperty>>> analytes = new HashMap<Integer, Pair<Analyte, Map<String, ObjectProperty>>>();
 
             // Map from data id to experiment run source
             Map<Integer, ExpRun> runs = new HashMap<Integer, ExpRun>();
@@ -324,62 +320,21 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 addProperty(study, "ExtraSpecimenInfo", luminexDataRow.getExtraSpecimenInfo(), dataMap, tempTypes);
                 addProperty(study, "SourceLSID", new Lsid("LuminexDataRow", Integer.toString(luminexDataRow.getRowId())).toString(), dataMap, tempTypes);
 
-                Analyte analyte = analytes.get(luminexDataRow.getAnalyteId());
-                if (analyte == null)
-                {
-                    analyte = Table.selectObject(LuminexSchema.getTableInfoAnalytes(), luminexDataRow.getAnalyteId(), Analyte.class);
-                    analytes.put(analyte.getRowId(), analyte);
-                }
-                addProperty(study, "Analyte Name", analyte.getName(), dataMap, tempTypes);
-                addProperty(study, "Analyte FitProb", analyte.getFitProb(), dataMap, tempTypes);
-                addProperty(study, "Analyte RegressionType", analyte.getRegressionType(), dataMap, tempTypes);
-                addProperty(study, "Analyte ResVar", analyte.getResVar(), dataMap, tempTypes);
-                addProperty(study, "Analyte StdCurve", analyte.getStdCurve(), dataMap, tempTypes);
-                addProperty(study, "Analyte MinStandardRecovery", analyte.getMinStandardRecovery(), dataMap, tempTypes);
-                addProperty(study, "Analyte MaxStandardRecovery", analyte.getMaxStandardRecovery(), dataMap, tempTypes);
+                ExpRun run = copyRunProperties(study, runs, runProperties, pds, tempTypes, luminexDataRow, dataMap);
+                sourceContainer = run.getContainer();
+                copyAnalyteProperties(study, analytes, tempTypes, luminexDataRow, dataMap, sourceContainer, protocol);
 
-                ExpRun run = runs.get(luminexDataRow.getDataId());
-                if (run == null)
+                AssayPublishKey dataKey = dataKeys.get(luminexDataRow.getRowId());
+                addProperty(sourceContainer, "ParticipantID", dataKey.getParticipantId(), dataMap, tempTypes);
+                if (timepointType == TimepointType.VISIT)
                 {
-                    ExpData data = ExperimentService.get().getExpData(luminexDataRow.getDataId());
-                    run = data.getRun();
-                    sourceContainer = run.getContainer();
-                    runs.put(luminexDataRow.getDataId(), run);
+                    addProperty(sourceContainer, "SequenceNum", (double)dataKey.getVisitId(), dataMap, tempTypes);
+                    addProperty(sourceContainer, "Date", luminexDataRow.getDate(), dataMap, tempTypes);
                 }
-                addStandardRunPublishProperties(study, tempTypes, dataMap, run);
-
-                Map<String, ObjectProperty> props = runProperties.get(run);
-                if (props == null)
+                else
                 {
-                    props = run.getObjectProperties();
-                    runProperties.put(run, props);
-                }
-                for (PropertyDescriptor pd : pds)
-                {
-                    ObjectProperty prop = props.get(pd.getPropertyURI());
-                    if (prop != null && !TARGET_STUDY_PROPERTY_NAME.equals(pd.getName()) && !PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(pd.getName()))
-                    {
-                        PropertyDescriptor publishPD = pd.clone();
-                        publishPD.setName("Run " + pd.getName());
-                        addProperty(publishPD, prop.value(), dataMap, tempTypes);
-                    }
-                }
-
-                for (AssayPublishKey dataKey : dataKeys)
-                {
-                    if (((Integer)dataKey.getDataId()).intValue() == luminexDataRow.getRowId())
-                    {
-                        dataMap.put("ParticipantID", dataKey.getParticipantId());
-                        if (timepointType.equals(TimepointType.VISIT))
-                        {
-                            dataMap.put("SequenceNum", dataKey.getVisitId());
-                        }
-                        else
-                        {
-                            dataMap.put("Date", dataKey.getDate());
-                        }
-                        break;
-                    }
+                    addProperty(sourceContainer, "SequenceNum", luminexDataRow.getVisitID(), dataMap, tempTypes);
+                    addProperty(sourceContainer, "Date", dataKey.getDate(), dataMap, tempTypes);
                 }
 
                 dataMaps[index++] = dataMap;
@@ -401,8 +356,102 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
     }
 
+    private ExpRun copyRunProperties(Container study, Map<Integer, ExpRun> runs, Map<ExpRun, Map<String, ObjectProperty>> runProperties, List<PropertyDescriptor> pds, List<PropertyDescriptor> tempTypes, LuminexDataRow luminexDataRow, Map<String, Object> dataMap)
+    {
+        ExpRun run = runs.get(luminexDataRow.getDataId());
+        if (run == null)
+        {
+            ExpData data = ExperimentService.get().getExpData(luminexDataRow.getDataId());
+            run = data.getRun();
+            runs.put(luminexDataRow.getDataId(), run);
+        }
+        addStandardRunPublishProperties(study, tempTypes, dataMap, run);
+
+        Map<String, ObjectProperty> props = runProperties.get(run);
+        if (props == null)
+        {
+            props = run.getObjectProperties();
+            runProperties.put(run, props);
+        }
+        for (PropertyDescriptor pd : pds)
+        {
+            ObjectProperty prop = props.get(pd.getPropertyURI());
+            if (!TARGET_STUDY_PROPERTY_NAME.equals(pd.getName()) && !PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME.equals(pd.getName()))
+            {
+                PropertyDescriptor publishPD = pd.clone();
+                publishPD.setName("Run " + pd.getName());
+                addProperty(publishPD, prop, dataMap, tempTypes);
+            }
+        }
+        return run;
+    }
+
+    private void copyAnalyteProperties(Container study, Map<Integer, Pair<Analyte, Map<String, ObjectProperty>>> analytes, List<PropertyDescriptor> tempTypes, LuminexDataRow luminexDataRow, Map<String, Object> dataMap, Container container, ExpProtocol protocol)
+        throws SQLException
+    {
+        // Look up the analyte info so we can copy it
+        Pair<Analyte, Map<String, ObjectProperty>> analyteInfo = analytes.get(luminexDataRow.getAnalyteId());
+        Analyte analyte;
+        Map<String, ObjectProperty> analyteProps;
+        // Check if we've already seen it and put in our cache
+        if (analyteInfo == null)
+        {
+            analyte = Table.selectObject(LuminexSchema.getTableInfoAnalytes(), luminexDataRow.getAnalyteId(), Analyte.class);
+            analyteProps = OntologyManager.getPropertyObjects(container.getId(), analyte.getLsid());
+            analytes.put(analyte.getRowId(), new Pair<Analyte, Map<String, ObjectProperty>>(analyte, analyteProps));
+        }
+        else
+        {
+            analyte = analyteInfo.first;
+            analyteProps = analyteInfo.second;
+        }
+
+        // Handle the hard-coded properties
+        addProperty(study, "Analyte Name", analyte.getName(), dataMap, tempTypes);
+        addProperty(study, "Analyte FitProb", analyte.getFitProb(), dataMap, tempTypes);
+        addProperty(study, "Analyte RegressionType", analyte.getRegressionType(), dataMap, tempTypes);
+        addProperty(study, "Analyte ResVar", analyte.getResVar(), dataMap, tempTypes);
+        addProperty(study, "Analyte StdCurve", analyte.getStdCurve(), dataMap, tempTypes);
+        addProperty(study, "Analyte MinStandardRecovery", analyte.getMinStandardRecovery(), dataMap, tempTypes);
+        addProperty(study, "Analyte MaxStandardRecovery", analyte.getMaxStandardRecovery(), dataMap, tempTypes);
+
+        // Handle the configurable properties
+        for (PropertyDescriptor pd : AbstractAssayProvider.getPropertiesForDomainPrefix(protocol, ASSAY_DOMAIN_ANALYTE))
+        {
+            ObjectProperty prop = analyteProps.get(pd.getPropertyURI());
+            PropertyDescriptor publishPD = pd.clone();
+            publishPD.setName("Analyte " + pd.getName());
+            publishPD.setLabel("Analyte " + pd.getLabel());
+            addProperty(publishPD, prop, dataMap, tempTypes);
+        }
+    }
+
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
         return Arrays.asList(new StudyParticipantVisitResolverType(), new ThawListResolverType());
+    }
+
+    public Set<String> getReservedPropertyNames(ExpProtocol protocol, Domain domain)
+    {
+        Set<String> result = super.getReservedPropertyNames(protocol, domain);
+
+        if (isDomainType(domain, protocol, ASSAY_DOMAIN_ANALYTE))
+        {
+            result.add("Name");
+            result.add("FitProb");
+            result.add("Fit Prob");
+            result.add("RegressionType");
+            result.add("Regression Type");
+            result.add("ResVar");
+            result.add("Res Var");
+            result.add("StdCurve");
+            result.add("Std Curve");
+            result.add("MinStandardRecovery");
+            result.add("Min Standard Recovery");
+            result.add("MaxStandardRecovery");
+            result.add("Max Standard Recovery");
+        }
+
+        return result;
     }
 }

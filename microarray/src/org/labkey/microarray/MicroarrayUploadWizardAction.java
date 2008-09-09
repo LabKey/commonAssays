@@ -18,7 +18,6 @@ package org.labkey.microarray;
 
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -35,8 +34,8 @@ import org.labkey.microarray.sampleset.client.SampleChooser;
 import org.labkey.microarray.sampleset.client.SampleInfo;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.InputSource;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 
@@ -44,14 +43,14 @@ import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
 import java.util.Map;
 import java.util.HashMap;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Writer;
+import java.io.FileInputStream;
 
 /**
  * User: jeckels
@@ -60,17 +59,20 @@ import java.io.Writer;
 @RequiresPermission(ACL.PERM_INSERT)
 public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUploadForm>
 {
-
-    private XPathExpression compileXPathExpression(String expression) throws XPathExpressionException
-    {
-        XPathFactory factory = XPathFactory.newInstance();
-        XPath xPath = factory.newXPath();
-        return xPath.compile(expression);
-    }
+    private static final String CHANNEL_COUNT_XPATH = "/MAGE-ML/BioAssay_package/BioAssay_assnlist/MeasuredBioAssay/FeatureExtraction_assn/FeatureExtraction/ProtocolApplications_assnlist/ProtocolApplication/SoftwareApplications_assnlist/SoftwareApplication/ParameterValues_assnlist/ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:Scan_NumChannels']/@value";
+    private static final String CHANNEL_COUNT_FORM_ELEMENT_NAME = "__channelCount";
 
     protected void addSampleInputColumns(ExpProtocol protocol, InsertView insertView)
     {
-        insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(MicroarrayAssayProvider.MIN_SAMPLE_COUNT, MicroarrayAssayProvider.MAX_SAMPLE_COUNT));
+        String channelCountString = insertView.getDataRegion().getHiddenFormFieldValue(CHANNEL_COUNT_FORM_ELEMENT_NAME);
+        int minSamples = MicroarrayAssayProvider.MIN_SAMPLE_COUNT;
+        int maxSamples = MicroarrayAssayProvider.MAX_SAMPLE_COUNT;
+        if (channelCountString != null)
+        {
+            minSamples = maxSamples = Integer.parseInt(channelCountString);
+        }
+
+        insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(minSamples, maxSamples));
     }
 
     private class SampleChooserDisplayColumn extends SimpleDisplayColumn
@@ -130,50 +132,52 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
         Map<PropertyDescriptor, String> allProperties = form.getRunProperties();
         Map<PropertyDescriptor, String> userProperties = new HashMap<PropertyDescriptor, String>();
 
-        Document input = null;
-
+        // We want to split the run properties into the ones that come from the user directly and the ones that
+        // come from the MageML - hide the ones from the MageML so the user doesn't edit the value
         Map<String, String> hiddenElements = new HashMap<String, String>();
-        AssayDataCollector dataCollector = form.getSelectedDataCollector();
+
+        Document document = null;
+        try
+        {
+            // Create a document for the MageML
+            DocumentBuilderFactory dbfact = DocumentBuilderFactory.newInstance();
+            dbfact.setAttribute("http://apache.org/xml/features/nonvalidating/load-external-dtd",false);
+            DocumentBuilder builder = dbfact.newDocumentBuilder();
+            document = builder.parse(new InputSource(new FileInputStream(form.getSelectedDataCollector().createData(form).values().iterator().next())));
+        }
+        catch (IOException e)
+        {
+            errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
+        }
+        catch (SAXException e)
+        {
+            errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
+        }
+        catch (ExperimentException e)
+        {
+            errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
+        }
+        catch (ParserConfigurationException e)
+        {
+            errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
+        }
 
         for (Map.Entry<PropertyDescriptor, String> entry : allProperties.entrySet())
         {
             PropertyDescriptor runPD = entry.getKey();
             String expression = runPD.getDescription();
-            if (expression != null)
+            if (expression != null && document != null)
             {
+                // We use the description of the property descriptor as the XPath. Far from ideal.
                 try
                 {
-                    XPathExpression xPathExpression = compileXPathExpression(expression);
-                    if (input == null)
-                    {
-                        DocumentBuilderFactory dbfact = DocumentBuilderFactory.newInstance();
-                        dbfact.setAttribute("http://apache.org/xml/features/nonvalidating/load-external-dtd",false);
-                        DocumentBuilder builder = dbfact.newDocumentBuilder();
-                        input = builder.parse(new InputSource(new FileInputStream(dataCollector.createData(form).values().iterator().next())));
-                    }
-                    String value = xPathExpression.evaluate(input);
-
+                    String value = evaluateXPath(document, expression);
                     hiddenElements.put(ColumnInfo.propNameFromName(runPD.getName()), value);
                 }
                 catch (XPathExpressionException e)
                 {
+                    // User isn't required to use the description as an XPath
                     userProperties.put(runPD, entry.getValue());
-                }
-                catch (IOException e)
-                {
-                    errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
-                }
-                catch (SAXException e)
-                {
-                    errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
-                }
-                catch (ExperimentException e)
-                {
-                    errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
-                }
-                catch (ParserConfigurationException e)
-                {
-                    errors.addError(new ObjectError("main", null, null, "Error parsing file: " + e.toString()));
                 }
             }
             else
@@ -189,6 +193,35 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
         {
             result.getDataRegion().addHiddenFormField(hiddenElement.getKey(), hiddenElement.getValue());
         }
+
+        try
+        {
+            String channelCountString = evaluateXPath(document, CHANNEL_COUNT_XPATH);
+            if (channelCountString != null)
+            {
+                try
+                {
+                    int channelCount = Integer.parseInt(channelCountString);
+                    result.getDataRegion().addHiddenFormField(CHANNEL_COUNT_FORM_ELEMENT_NAME, Integer.toString(channelCount));
+                }
+                catch (NumberFormatException e)
+                {
+                    // Continue on, the user can choose the count themselves
+                }
+            }
+        }
+        catch (XPathExpressionException e)
+        {
+            throw new RuntimeException("Invalid Channel Count XPath", e);
+        }
         return result;
+    }
+
+    private String evaluateXPath(Document document, String expression) throws XPathExpressionException
+    {
+        XPathFactory factory = XPathFactory.newInstance();
+        XPath xPath = factory.newXPath();
+        XPathExpression xPathExpression = xPath.compile(expression);
+        return xPathExpression.evaluate(document);
     }
 }
