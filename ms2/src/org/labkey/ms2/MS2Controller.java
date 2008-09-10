@@ -22,10 +22,12 @@ import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionMapping;
 import org.jfree.chart.imagemap.ImageMapUtilities;
 import org.labkey.api.action.*;
+import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.query.*;
@@ -33,13 +35,11 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
+import org.labkey.api.settings.AdminConsole;
+import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
-import org.labkey.api.gwt.server.BaseRemoteService;
-import org.labkey.api.admin.AdminUrls;
-import org.labkey.api.settings.AdminConsole;
-import org.labkey.api.settings.AdminConsole.*;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.SensitivitySummary;
@@ -57,11 +57,10 @@ import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 import org.labkey.ms2.query.*;
-import org.labkey.ms2.search.ProteinSearchWebPart;
 import org.labkey.ms2.scoring.ScoringController;
+import org.labkey.ms2.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -714,7 +713,7 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(RenameForm form, boolean reshow, BindException errors) throws Exception
         {
             _run = MS2Manager.getRun(form.getRun());
-            _returnURL = form.getReturnActionURL();
+            _returnURL = form.getReturnActionURL(getShowRunURL(getContainer(), form.getRun()));
 
             String description = form.getDescription();
             if (description == null || description.length() == 0)
@@ -723,7 +722,7 @@ public class MS2Controller extends SpringActionController
             RenameBean bean = new RenameBean();
             bean.run = _run;
             bean.description = description;
-            bean.returnURL = form.getReturnActionURL();
+            bean.returnURL = _returnURL;
 
             getPageConfig().setFocusId("description");
 
@@ -4468,11 +4467,18 @@ public class MS2Controller extends SpringActionController
         public void export(Object o, HttpServletResponse response, BindException errors) throws Exception
         {
             HttpServletRequest req = getViewContext().getRequest();
+            String helperName = req.getParameter("helpername");
+
+            if (null == helperName)
+                throw new NotFoundException("Parameter \"helperName\" is missing");
+
             response.setContentType("image/png");
             OutputStream out = response.getOutputStream();
 
-            String helperName = req.getParameter("helpername");
             PieJChartHelper pjch = (PieJChartHelper) Cache.getShared().get(helperName);
+
+            if (null == pjch)
+                throw new NotFoundException("Pie chart was not found.  Session may have timed out.");
 
             try
             {
