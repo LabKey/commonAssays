@@ -22,6 +22,8 @@ import org.labkey.microarray.sampleset.client.model.GWTSampleSet;
 import org.labkey.microarray.sampleset.client.model.GWTMaterial;
 import org.labkey.api.gwt.client.util.ServiceUtil;
 
+import java.util.List;
+
 /**
  * User: jeckels
  * Date: Feb 8, 2008

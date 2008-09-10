@@ -21,10 +21,14 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.security.ACL;
 import org.labkey.microarray.sampleset.client.SampleSetService;
 import org.labkey.microarray.sampleset.client.model.GWTSampleSet;
 import org.labkey.microarray.sampleset.client.model.GWTMaterial;
+
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * User: jeckels
@@ -46,6 +50,12 @@ public class SampleSetServiceImpl extends BaseRemoteService implements SampleSet
             ExpSampleSet set = sets[i];
             GWTSampleSet gwtSet = new GWTSampleSet(set.getName(), set.getLSID());
             gwtSet.setRowId(set.getRowId());
+            List<String> columnNames = new ArrayList<String>();
+            for (PropertyDescriptor propertyDescriptor : set.getPropertiesForType())
+            {
+                columnNames.add(propertyDescriptor.getName());
+            }
+            gwtSet.setColumnNames(columnNames);
             result[i] = gwtSet;
         }
         return result;

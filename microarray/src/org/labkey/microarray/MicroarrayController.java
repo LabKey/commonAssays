@@ -25,7 +25,6 @@ import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegionSelection;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpData;
@@ -43,6 +42,7 @@ import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.query.QueryView;
 import org.labkey.microarray.pipeline.FeatureExtractionPipelineJob;
 import org.labkey.microarray.pipeline.ArrayPipelineManager;
+import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
@@ -79,39 +79,12 @@ public class MicroarrayController extends SpringActionController
     }
     
     @RequiresPermission(ACL.PERM_INSERT)
-    public class DesignerAction extends SimpleViewAction<DesignerForm>
+    public class DesignerAction extends org.labkey.api.study.actions.DesignerAction
     {
-        private DesignerForm _form;
-
-        public ModelAndView getView(DesignerForm form, BindException errors) throws Exception
+        protected ModelAndView createGWTView(Map<String, String> properties)
         {
-            _form = form;
-            Integer rowId = form.getRowId();
-            Map<String, String> properties = new HashMap<String, String>();
-            if (rowId != null)
-            {
-                properties.put("protocolId", "" + rowId);
-                properties.put("copy", Boolean.toString(form.isCopy()));
-            }
-            properties.put("providerName", form.getProviderName());
-
-            // hack for 4404 : Lookup picker performance is terrible when there are many containers
-            ContainerManager.getAllChildren(ContainerManager.getRoot());
-
-            return new GWTView("org.labkey.assay.designer.AssayDesigner", properties);
+            return new GWTView(MicroarrayAssayDesigner.class, properties);
         }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            if (!_form.isCopy() && _form.getRowId() != null && _form.getProtocol() != null)
-            {
-                ExpProtocol protocol = _form.getProtocol(!_form.isCopy());
-                root.addChild(protocol.getName(), AssayService.get().getAssayRunsURL(getContainer(), protocol));
-            }
-            root.addChild("Assay Designer");
-            return root;
-        }
-
     }
 
     public static ActionURL getRunsURL(Container c)

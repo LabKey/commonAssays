@@ -21,6 +21,7 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.exp.api.*;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.view.HttpView;
@@ -40,8 +41,11 @@ import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.MicroarraySchema;
 import org.labkey.microarray.MicroarrayUploadWizardAction;
 import org.labkey.microarray.MicroarrayController;
+import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.sampleset.client.SampleInfo;
 import org.labkey.microarray.sampleset.client.SampleChooser;
+import org.labkey.common.util.Pair;
+import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 
 import java.util.*;
 import java.io.File;
@@ -58,6 +62,9 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
 
     public static final int MAX_SAMPLE_COUNT = 2;
     public static final int MIN_SAMPLE_COUNT = 1;
+
+    private static final String DEFAULT_CHANNEL_COUNT_XPATH = "/MAGE-ML/BioAssay_package/BioAssay_assnlist/MeasuredBioAssay/FeatureExtraction_assn/FeatureExtraction/ProtocolApplications_assnlist/ProtocolApplication/SoftwareApplications_assnlist/SoftwareApplication/ParameterValues_assnlist/ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:Scan_NumChannels']/@value";
+    private static final String DEFAULT_BARCODE_XPATH = "/MAGE-ML/BioAssay_package/BioAssay_assnlist/MeasuredBioAssay/FeatureExtraction_assn/FeatureExtraction/ProtocolApplications_assnlist/ProtocolApplication/SoftwareApplications_assnlist/SoftwareApplication/ParameterValues_assnlist/ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:FeatureExtractor_Barcode']/@value";
 
     public MicroarrayAssayProvider()
     {
@@ -259,6 +266,10 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
             if (lsid != null && !"".equals(lsid))
             {
                 material = ExperimentService.get().getExpMaterial(lsid);
+                if (material == null)
+                {
+                    throw new ExperimentException("Please choose a sample");
+                }
                 if (material != null && !material.getContainer().hasPermission(context.getUser(), ACL.PERM_READ))
                 {
                     throw new ExperimentException("You do not have permission to reference the sample with LSID " + lsid);
@@ -298,6 +309,34 @@ public class MicroarrayAssayProvider extends AbstractAssayProvider
                     + "\">pending MageML files list</a>.";
             result = new HtmlView(message);
         }
+        return result;
+    }
+
+    public ActionURL getDesignerURL(Container container, ExpProtocol protocol, boolean copy)
+    {
+        ActionURL result = super.getDesignerURL(container, protocol, copy);
+        result.setAction(MicroarrayController.DesignerAction.class);
+        return result;
+    }
+
+    public Pair<ExpProtocol, List<Domain>> getAssayTemplate(User user, Container targetContainer)
+    {
+        Pair<ExpProtocol, List<Domain>> result = super.getAssayTemplate(user, targetContainer);
+        List<ProtocolParameter> params = new ArrayList<ProtocolParameter>(result.getKey().getProtocolParameters().values());
+
+        ProtocolParameter channelCountParam = new ProtocolParameter();
+        channelCountParam.setOntologyEntryURI(MicroarrayAssayDesigner.CHANNEL_COUNT_PARAMETER_URI);
+        channelCountParam.setName("ChannelCountXPath");
+        channelCountParam.setValue(SimpleTypeNames.STRING, DEFAULT_CHANNEL_COUNT_XPATH);
+        params.add(channelCountParam);
+
+        ProtocolParameter barcodeParam = new ProtocolParameter();
+        barcodeParam.setOntologyEntryURI(MicroarrayAssayDesigner.BARCODE_PARAMETER_URI);
+        barcodeParam.setName("BarcodeXPath");
+        barcodeParam.setValue(SimpleTypeNames.STRING, DEFAULT_BARCODE_XPATH);
+        params.add(barcodeParam);
+
+        result.getKey().setProtocolParameters(params);
         return result;
     }
 }

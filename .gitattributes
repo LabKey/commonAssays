@@ -517,6 +517,7 @@ microarray/src/org/labkey/microarray/MicroarraySchema.java -text
 microarray/src/org/labkey/microarray/MicroarrayStatisticsView.java -text
 microarray/src/org/labkey/microarray/MicroarrayUploadWizardAction.java -text
 microarray/src/org/labkey/microarray/PendingMageMLFilesView.java -text
+microarray/src/org/labkey/microarray/SampleChooserDisplayColumn.java -text
 microarray/src/org/labkey/microarray/SampleSetServiceImpl.java -text
 microarray/src/org/labkey/microarray/assay/MageMLDataHandler.java -text
 microarray/src/org/labkey/microarray/assay/MicroarrayAssayProvider.java -text

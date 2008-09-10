@@ -16,17 +16,25 @@
 
 package org.labkey.microarray.sampleset.client.model;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * User: jeckels
  * Date: Feb 8, 2008
  */
-public class GWTSampleSet implements Serializable
+public class GWTSampleSet implements Serializable, IsSerializable
 {
     private String _lsid;
     private String _name;
     private int _rowId;
+
+    /**
+     * @gwt.typeArgs <java.lang.String>
+     */
+    private List _columnNames;
 
     public GWTSampleSet() {}
 
@@ -64,6 +72,16 @@ public class GWTSampleSet implements Serializable
     public void setRowId(int rowId)
     {
         _rowId = rowId;
+    }
+
+    public List getColumnNames()
+    {
+        return _columnNames;
+    }
+
+    public void setColumnNames(List columnNames)
+    {
+        _columnNames = columnNames;
     }
 
     public boolean equals(Object o)

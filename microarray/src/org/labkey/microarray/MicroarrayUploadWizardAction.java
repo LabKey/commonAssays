@@ -20,19 +20,15 @@ import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.ACL;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.view.InsertView;
-import org.labkey.api.view.GWTView;
-import org.labkey.microarray.sampleset.client.SampleChooser;
-import org.labkey.microarray.sampleset.client.SampleInfo;
-import org.labkey.microarray.assay.MicroarrayAssayProvider;
+import org.labkey.api.action.LabkeyError;
+import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.xml.sax.InputSource;
@@ -49,7 +45,6 @@ import javax.xml.parsers.DocumentBuilder;
 import java.util.Map;
 import java.util.HashMap;
 import java.io.IOException;
-import java.io.Writer;
 import java.io.FileInputStream;
 
 /**
@@ -59,72 +54,12 @@ import java.io.FileInputStream;
 @RequiresPermission(ACL.PERM_INSERT)
 public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUploadForm>
 {
-    private static final String CHANNEL_COUNT_XPATH = "/MAGE-ML/BioAssay_package/BioAssay_assnlist/MeasuredBioAssay/FeatureExtraction_assn/FeatureExtraction/ProtocolApplications_assnlist/ProtocolApplication/SoftwareApplications_assnlist/SoftwareApplication/ParameterValues_assnlist/ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:Scan_NumChannels']/@value";
-    private static final String CHANNEL_COUNT_FORM_ELEMENT_NAME = "__channelCount";
+    private Integer _channelCount;
+    private String _barcode;
 
     protected void addSampleInputColumns(ExpProtocol protocol, InsertView insertView)
     {
-        String channelCountString = insertView.getDataRegion().getHiddenFormFieldValue(CHANNEL_COUNT_FORM_ELEMENT_NAME);
-        int minSamples = MicroarrayAssayProvider.MIN_SAMPLE_COUNT;
-        int maxSamples = MicroarrayAssayProvider.MAX_SAMPLE_COUNT;
-        if (channelCountString != null)
-        {
-            minSamples = maxSamples = Integer.parseInt(channelCountString);
-        }
-
-        insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(minSamples, maxSamples));
-    }
-
-    private class SampleChooserDisplayColumn extends SimpleDisplayColumn
-    {
-        private final int _minCount;
-        private final int _maxCount;
-
-        public SampleChooserDisplayColumn(int minCount, int maxCount)
-        {
-            _minCount = minCount;
-            _maxCount = maxCount;
-            setCaption("Samples");
-        }
-
-        public boolean isEditable()
-        {
-            return true;
-        }
-
-        public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
-        {
-            Map<String, String> props = new HashMap<String, String>();
-
-            out.write("<input type=\"hidden\" name=\"" + SampleChooser.SAMPLE_COUNT_ELEMENT_NAME + "\" id=\"" + SampleChooser.SAMPLE_COUNT_ELEMENT_NAME + "\"/>\n");
-
-            for (int i = 0; i < _maxCount; i++)
-            {
-                String lsidID = SampleInfo.getLsidFormElementID(i);
-                String nameID = SampleInfo.getNameFormElementID(i);
-                out.write("<input type=\"hidden\" name=\"" + lsidID + "\" id=\"" + lsidID + "\"/>\n");
-                out.write("<input type=\"hidden\" name=\"" + nameID + "\" id=\"" + nameID + "\"/>\n");
-            }
-
-            props.put(SampleChooser.PROP_NAME_MAX_SAMPLE_COUNT, Integer.toString(_maxCount));
-            props.put(SampleChooser.PROP_NAME_MIN_SAMPLE_COUNT, Integer.toString(_minCount));
-            ExpSampleSet sampleSet = ExperimentService.get().lookupActiveSampleSet(ctx.getContainer());
-            if (sampleSet != null)
-            {
-                props.put(SampleChooser.PROP_NAME_DEFAULT_SAMPLE_SET_LSID, sampleSet.getLSID());
-                props.put(SampleChooser.PROP_NAME_DEFAULT_SAMPLE_SET_NAME, sampleSet.getName());
-                props.put(SampleChooser.PROP_NAME_DEFAULT_SAMPLE_ROW_ID, Integer.toString(sampleSet.getRowId()));
-            }
-            GWTView view = new GWTView(SampleChooser.class, props);
-            try
-            {
-                view.render(ctx.getRequest(), ctx.getViewContext().getResponse());
-            }
-            catch (Exception e)
-            {
-                throw (IOException)new IOException().initCause(e);
-            }
-        }
+        insertView.getDataRegion().addDisplayColumn(new SampleChooserDisplayColumn(protocol, _channelCount, _barcode));
     }
 
     protected InsertView createRunInsertView(AssayRunUploadForm form, boolean reshow, BindException errors)
@@ -166,7 +101,7 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
         {
             PropertyDescriptor runPD = entry.getKey();
             String expression = runPD.getDescription();
-            if (expression != null && document != null)
+            if (expression != null)
             {
                 // We use the description of the property descriptor as the XPath. Far from ideal.
                 try
@@ -196,13 +131,14 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
 
         try
         {
-            String channelCountString = evaluateXPath(document, CHANNEL_COUNT_XPATH);
+            ProtocolParameter channelCountParam = form.getProtocol().getProtocolParameters().get(MicroarrayAssayDesigner.CHANNEL_COUNT_PARAMETER_URI);
+            String channelCountXPath = channelCountParam == null ? null : channelCountParam.getStringValue();
+            String channelCountString = evaluateXPath(document, channelCountXPath);
             if (channelCountString != null)
             {
                 try
                 {
-                    int channelCount = Integer.parseInt(channelCountString);
-                    result.getDataRegion().addHiddenFormField(CHANNEL_COUNT_FORM_ELEMENT_NAME, Integer.toString(channelCount));
+                    _channelCount = new Integer(channelCountString);
                 }
                 catch (NumberFormatException e)
                 {
@@ -212,13 +148,28 @@ public class MicroarrayUploadWizardAction extends UploadWizardAction<AssayRunUpl
         }
         catch (XPathExpressionException e)
         {
-            throw new RuntimeException("Invalid Channel Count XPath", e);
+            errors.addError(new LabkeyError("Failed to evaluate channel count XPath: " + e.getMessage()));
+        }
+
+        try
+        {
+            ProtocolParameter barcodeParam = form.getProtocol().getProtocolParameters().get(MicroarrayAssayDesigner.BARCODE_PARAMETER_URI);
+            String barcodeXPath = barcodeParam == null ? null : barcodeParam.getStringValue();
+            _barcode = evaluateXPath(document, barcodeXPath);
+        }
+        catch (XPathExpressionException e)
+        {
+            errors.addError(new LabkeyError("Failed to evaluate barcode XPath: " + e.getMessage()));
         }
         return result;
     }
 
     private String evaluateXPath(Document document, String expression) throws XPathExpressionException
     {
+        if (expression == null && document != null)
+        {
+            return null;
+        }
         XPathFactory factory = XPathFactory.newInstance();
         XPath xPath = factory.newXPath();
         XPathExpression xPathExpression = xPath.compile(expression);

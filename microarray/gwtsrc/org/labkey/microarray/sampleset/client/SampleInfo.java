@@ -37,9 +37,11 @@ public class SampleInfo
     private int _index;
     private boolean _selected;
     private GWTSampleSet _sampleSet;
+    private final String _defaultSampleLSID;
 
-    public SampleInfo(int index, SampleCache cache)
+    public SampleInfo(int index, SampleCache cache, String defaultSampleLSID)
     {
+        _defaultSampleLSID = defaultSampleLSID;
         _name = "Sample " + (index + 1);
         _index = index;
         _cache = cache;
@@ -194,12 +196,19 @@ public class SampleInfo
         else
         {
             _materialListBox.clear();
+            _materialListBox.addItem("<None>", SampleChooser.DUMMY_LSID);
+            _materialListBox.setSelectedIndex(0);
+            _materialListBox.setEnabled(true);
             for (int i = 0; i < materials.length; i++)
             {
                 _materialListBox.addItem(materials[i].getName(), materials[i].getLsid());
+                if (materials[i].getLsid().equals(_defaultSampleLSID))
+                {
+                    _materialListBox.setSelectedIndex(_materialListBox.getItemCount() - 1);
+                    _materialListBox.setEnabled(false);
+                    _sampleSetListBox.setEnabled(false);
+                }
             }
-            _materialListBox.setEnabled(true);
-            _materialListBox.setSelectedIndex(0);
             pushToForm();
         }
     }
