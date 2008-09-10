@@ -185,14 +185,15 @@ public class ScriptController extends BaseFlowController
     protected Forward createScript(NewProtocolForm form) throws Exception
     {
         if (form.ff_name == null || form.ff_name.length() == 0)
+        {
             addError("The name cannot be blank.");
-        boolean errors = false;
+            return null;
+        }
         if (!isScriptNameUnique(form.ff_name))
         {
-            errors = addError("The name '" + form.ff_name + "' is already in use.  Please choose a unique name.");
-        }
-        if (errors)
+            addError("The name '" + form.ff_name + "' is already in use.  Please choose a unique name.");
             return null;
+        }
 
         ScriptDocument doc = ScriptDocument.Factory.newInstance();
         doc.addNewScript();
