@@ -31,6 +31,9 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.regex.Pattern" %>
+<%@ page import="java.util.regex.Matcher" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <style type="text/css">
     .right {text-align:right;}
@@ -69,8 +72,36 @@ LABKEY.requiresScript("ColumnTree.js");
         jsonStats.append("}");
         comma = ",\n";
     }
-    
     jsonStats.append("]");
+
+    Map<String,String> keywords = getKeywords();
+    ArrayList<String> names = new ArrayList<String>();
+    names.add("");
+    for (int i=1 ; keywords.containsKey("$P" + i + "N"); i++)
+        names.add(PageFlowUtil.jsString(keywords.get("$P" + i + "N")));
+
+    StringBuilder jsonKeywords = new StringBuilder();
+    jsonKeywords.append("[");
+    comma = "";
+    Pattern p = Pattern.compile("\\$?P(\\d+).*");
+    for (Map.Entry<String, String> entry : keywords.entrySet())
+    {
+        int index = 0;
+        String keyword = entry.getKey();
+        String value = entry.getValue();
+        Matcher m = p.matcher(keyword);
+        if (m.matches())
+            index = Integer.parseInt(m.group(1));
+        jsonKeywords.append(comma);
+        jsonKeywords.append("{");
+        jsonKeywords.append("index:").append(index);
+        jsonKeywords.append(",name:").append(index>0&&index<names.size()?names.get(index):"''");
+        jsonKeywords.append(",keyword:").append(PageFlowUtil.jsString(keyword));
+        jsonKeywords.append(",value:").append(PageFlowUtil.jsString(value));
+        jsonKeywords.append("}");
+        comma = ",\n";
+    }
+    jsonKeywords.append("]");
 %>
 <script type="text/javascript">
 
@@ -175,21 +206,25 @@ function _toFixed(f)
     return f;
 }
 
-Ext.onReady(function(){
+function _pad(i)
+{
+    var s = "" + i;
+    return s.length > 2 ? s : "  ".substr(s.length) + s;
+}
+
+function showStatistics()
+{
     var treeData = statisticsTree(statistics);
     var statsColumns = statisticsColumns(statistics);
     var population = [{header:'Population', dataIndex:'text', width:300}];
     var columns = population.concat(statsColumns);
 
-//    var tree = new Ext.tree.TreePanel({
     var tree = new Ext.tree.ColumnTree({
         el:'statsTree',
         rootVisible:false,
         useArrows:true,
         autoScroll:false,
         autoHeight:true,
-//        height:600,
-//        width:800,
         animate:true,
         enableDD:false,
         containerScroll: false,
@@ -201,96 +236,143 @@ Ext.onReady(function(){
         root.appendChild(treeData[i]);
     tree.setRootNode(root);
     tree.render();
-    tree.expandAll()
+}
+
+function showKeywords()
+{
+    for (var i=0 ; i<keywords.length ; i++)
+    {
+        var o = keywords[i];
+        o.label = o.index == 0 ? 'Keywords' : 'Parameter ' + _pad(o.index) + ' -- ' + o.name;
+    }
+
+    var store = new Ext.data.GroupingStore({
+        reader: new Ext.data.JsonReader({id:'keyword'}, [{name:'index'},{name:'name'},{name:'label'},{name:'keyword'}, {name:'value'}]),
+        data: keywords,
+        sortInfo: {field:'keyword', direction:"ASC"},
+        groupField:'label'});
+    
+    var grid = new Ext.grid.GridPanel({
+        el:'keywordsGrid',
+        autoScroll:false,
+        autoHeight:true,
+        width:600,
+        store: store,
+        columns:[
+            {id:'keyword', header:'Keyword', dataIndex:'keyword'},
+            {header:'Value', dataIndex:'value', width:200},
+            {header:'Label', dataIndex:'label'}
+        ]
+        ,view: new Ext.grid.GroupingView({
+            startCollapsed:true, hideGroupedColumn:true,
+            forceFit:true,
+            groupTextTpl: '{values.group}'
+        })
+    });
+
+    grid.render();
+}
+
+Ext.onReady(function()
+{
+    if (statistics.length > 0)
+
+    {
+        showStatistics();
+    }
+
+    if (keywords.length > 0)
+    {
+        showKeywords();
+    }
 });
 
 var statistics = <%=jsonStats%>;
 var treeData;
 var stats;
+var keywords = <%=jsonKeywords%>;
 </script>
-<table>
-    <% if (getRun() == null) { %>
-    <tr><td colspan="2">The run has been deleted.</td></tr>
-    <% } else { %>
-    <tr><td>Run Name:</td><td><%=h(getRun().getName())%></td></tr>
-    <% } %>
-    <tr><td>Well Name:</td><td><%=h(well.getName())%></td></tr>
-    <% if (fcsFile != null && fcsFile != well)
-    { %>
-    <tr><td>FCS File:</td><td><a href="<%=h(fcsFile.urlShow())%>"><%=h(fcsFile.getName())%></a></td></tr>
-    <% } %>
-    <tr><td>Comment:</td>
+<table><%
+
+if (getRun() == null) 
+{
+    %><tr><td colspan="2">The run has been deleted.</td></tr><%
+}
+else 
+{
+    %><tr><td>Run Name:</td><td><%=h(getRun().getName())%></td></tr><%
+}
+    %><tr><td>Well Name:</td><td><%=h(well.getName())%></td></tr><%
+
+if (fcsFile != null && fcsFile != well)
+{
+    %><tr><td>FCS File:</td><td><a href="<%=h(fcsFile.urlShow())%>"><%=h(fcsFile.getName())%></a></td></tr><%
+}
+    %><tr><td>Comment:</td>
         <td><%include(new SetCommentView(well), out);%></td>
-    </tr>
-    <% if (script != null) { %>
-    <tr><td>Analysis Script:</td><td><a href="<%=h(script.urlShow())%>"><%=h(script.getName())%></a></td></tr>
-    <% } %>
-    <% if (matrix != null) { %>
-    <tr><td>Compensation Matrix:</td><td><a href="<%=h(matrix.urlShow())%>"><%=h(matrix.getName())%></a></td></tr>
-    <% } %>
-    <% for (ExpMaterial sample : well.getSamples())
-    { %>
-    <tr><td><%=h(sample.getSampleSet().getName())%></td>
+    </tr><%
+
+if (script != null)
+{
+    %><tr><td>Analysis Script:</td><td><a href="<%=h(script.urlShow())%>"><%=h(script.getName())%></a></td></tr><%
+}
+if (matrix != null)
+{
+    %><tr><td>Compensation Matrix:</td><td><a href="<%=h(matrix.urlShow())%>"><%=h(matrix.getName())%></a></td></tr><%
+}
+for (ExpMaterial sample : well.getSamples())
+{
+    %><tr><td><%=h(sample.getSampleSet().getName())%></td>
         <td><a href="<%=h(sample.detailsURL())%>"><%=h(sample.getName())%></a></td>
-    </tr>
-    <% } %>
-</table>
-    <%
-    if (getKeywords().size() > 0)
-    {
-    %>
-<div style="overflow:auto;" height="400px">
-    <table>
-    <tr><th colspan="2">Keywords</th></tr>
-    <% for (Map.Entry<String, String> keyword : getKeywords().entrySet())
-    { %>
-    <tr><td><%=h(keyword.getKey())%></td><td><%=h(keyword.getValue())%></td></tr>
-    <% } %>
-</table>
-    </div>
-<% } %>
+    </tr><%
+}
+%></table>
+<div id="keywordsGrid" class="extContainer"></div>
 <%
-    if (getContainer().hasPermission(getUser(), ACL.PERM_UPDATE))
-    {
-%>
-<%=generateButton("edit", well.urlFor(WellController.Action.editWell))%><br>
-<% } %>
-<div id="statsTree" class="extContainer"></div>
-<%
+if (getContainer().hasPermission(getUser(), ACL.PERM_UPDATE))
+{
+    %><%=generateButton("edit", well.urlFor(WellController.Action.editWell))%><br><%
+}
+
+%><div id="statsTree" class="extContainer"></div><%
+
 if (getGraphs().length > 0)
 {
     final String graphSize = FlowPreference.graphSize.getValue(request);
     include(new JspView(JspLoader.createPage(request, GraphView.class, "setGraphSize.jsp")), out);
-    for (GraphSpec graph : getGraphs()) {
+    for (GraphSpec graph : getGraphs())
+    {
         %><img style="width:<%=graphSize%>;height:<%=graphSize%>;"class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.Action.showGraph))%>&amp;graph=<%=u(graph.toString())%>"><wbr><%
     }
 }
-%>
-<% List<FlowWell> analyses = getWell().getFCSAnalyses();
-    if (analyses.size() > 0)
-    { %>
-<table><tr><th colspan="3">Analyses performed on this file:</th></tr>
-    <tr><th>FCS Analysis Name</th><th>Run Analysis Name</th><th>Analysis Name</th></tr>
-    <% for (FlowWell analysis : analyses)
+
+List<FlowWell> analyses = getWell().getFCSAnalyses();
+if (analyses.size() > 0)
+{
+    %><table><tr><th colspan="3">Analyses performed on this file:</th></tr>
+    <tr><th>FCS Analysis Name</th><th>Run Analysis Name</th><th>Analysis Name</th></tr><%
+    for (FlowWell analysis : analyses)
     {
         FlowRun run = analysis.getRun();
         FlowExperiment experiment = run.getExperiment();
-    %>
-    <tr><td><a href="<%=h(analysis.urlShow())%>"><%=h(analysis.getLabel())%></a></td>
+
+        %><tr><td><a href="<%=h(analysis.urlShow())%>"><%=h(analysis.getLabel())%></a></td>
         <td><%=h(run.getLabel())%></td>
         <td><%=experiment == null ? "" : h(experiment.getLabel())%></td>
-    </tr>
-    <% } %>
-</table>
-<% } %>
+        </tr><%
+    }
+    %></table><%
+}
 
-<% if (well.getFCSURI() == null) { %>
-    <p>There is no file on disk for this well.</p>
-<% } else { %>
-    <p><a href="<%=h(getWell().urlFor(WellController.Action.chooseGraph))%>">More Graphs</a><br>
-    <a href="<%=h(getWell().urlFor(WellController.Action.showFCS))%>&amp;mode=keywords">Keywords from the FCS file</a></p>
-<% } %>
-<%
+if (well.getFCSURI() == null)
+{
+    %><p>There is no file on disk for this well.</p><%
+}
+else
+{
+    %><p><a href="<%=h(getWell().urlFor(WellController.Action.chooseGraph))%>">More Graphs</a><br>
+    <a href="<%=h(getWell().urlFor(WellController.Action.keywords))%>">Keywords from the FCS file</a></p><%
+} 
     DiscussionService.Service service = DiscussionService.get();
     DiscussionService.DiscussionView discussion = service.getDisussionArea(
             getViewContext(),

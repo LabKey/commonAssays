@@ -21,6 +21,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
@@ -69,7 +70,7 @@ public class WellController extends SpringFlowController<WellController.Action>
         chooseGraph,
         showGraph,
         generateGraph,
-        showFCS,
+        keywords,
     }
 
     static DefaultActionResolver _actionResolver = new DefaultActionResolver(WellController.class);
@@ -292,56 +293,90 @@ public class WellController extends SpringFlowController<WellController.Action>
         }
     }
 
-    @RequiresPermission(ACL.PERM_READ)
-    public class ShowFCSAction extends SimpleViewAction
+    abstract class FCSAction extends SimpleViewAction<Object>
     {
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
-            String mode = getActionURL().getParameter("mode");
             FlowWell well = getWell();
+            if (null == well)
+                HttpView.throwNotFound();
 
             try
             {
-                if (mode.equals("raw"))
-                {
-                    String strEventCount = getActionURL().getParameter("eventCount");
-                    int maxEventCount = Integer.MAX_VALUE;
-                    if (strEventCount != null)
-                    {
-                        maxEventCount = Integer.valueOf(strEventCount);
-                    }
-                    byte[] bytes = FCSAnalyzer.get().getFCSBytes(well.getFCSURI(), maxEventCount);
-                    PageFlowUtil.streamFileBytes(getViewContext().getResponse(), URIUtil.getFilename(well.getFCSURI()), bytes, true);
-                    return null;
-                }
-
-                getViewContext().getResponse().setContentType("text/plain");
-                FCSViewer viewer = new FCSViewer(FlowAnalyzer.getFCSUri(well));
-                if ("compensated".equals(mode))
-                {
-                    FlowCompensationMatrix comp = well.getRun().getCompensationMatrix();
-                    // viewer.applyCompensationMatrix(URIUtil.resolve(base, compFiles[0].getPath()));
-                }
-                if ("keywords".equals(mode))
-                {
-                    viewer.writeKeywords(getViewContext().getResponse().getWriter());
-                }
-                else
-                {
-                    viewer.writeValues(getViewContext().getResponse().getWriter());
-                }
+                return internalGetView(well);
             }
             catch (FileNotFoundException fnfe)
             {
                 errors.reject(ERROR_MSG, "The specified FCS file could not be found.");
-                return new ActionErrorsView<Object>();
+                return new SimpleErrorView(errors);
             }
+        }
+
+        protected abstract ModelAndView internalGetView(FlowWell well) throws Exception;
+    }
+    
+    
+    @RequiresPermission(ACL.PERM_READ)
+    public class KeywordsAction extends FCSAction
+    {
+        protected ModelAndView internalGetView(FlowWell well) throws Exception
+        {
+            // convert to use the same Ext control as ShowWellAction
+            getViewContext().getResponse().setContentType("text/plain");
+            FCSViewer viewer = new FCSViewer(FlowAnalyzer.getFCSUri(well));
+            viewer.writeKeywords(getViewContext().getResponse().getWriter());
             return null;
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
             return null;
+        }
+    }
+
+
+    // this is really for dev use as far as I can tell
+    @RequiresPermission(ACL.PERM_READ)
+    public class ShowFCSAction extends FCSAction
+    {
+        public ModelAndView internalGetView(FlowWell well) throws Exception
+        {
+            String mode = getActionURL().getParameter("mode");
+
+            if (mode.equals("raw"))
+            {
+                String strEventCount = getActionURL().getParameter("eventCount");
+                int maxEventCount = Integer.MAX_VALUE;
+                if (strEventCount != null)
+                {
+                    maxEventCount = Integer.valueOf(strEventCount);
+                }
+                byte[] bytes = FCSAnalyzer.get().getFCSBytes(well.getFCSURI(), maxEventCount);
+                PageFlowUtil.streamFileBytes(getViewContext().getResponse(), URIUtil.getFilename(well.getFCSURI()), bytes, true);
+                return null;
+            }
+
+            getViewContext().getResponse().setContentType("text/plain");
+            FCSViewer viewer = new FCSViewer(FlowAnalyzer.getFCSUri(well));
+            if ("compensated".equals(mode))
+            {
+                FlowCompensationMatrix comp = well.getRun().getCompensationMatrix();
+                // viewer.applyCompensationMatrix(URIUtil.resolve(base, compFiles[0].getPath()));
+            }
+            if ("keywords".equals(mode))
+            {
+                viewer.writeKeywords(getViewContext().getResponse().getWriter());
+            }
+            else
+            {
+                viewer.writeValues(getViewContext().getResponse().getWriter());
+            }
+            return null;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root;
         }
     }
 

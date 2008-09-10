@@ -60,6 +60,8 @@ public class FlowWell extends FlowDataObject
         if (wellId == 0)
             return null;
         FlowWell ret = fromWellId(wellId);
+        if (null == ret)
+            return null;
         ret.checkContainer(url);
         return ret;
 
