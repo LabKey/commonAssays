@@ -72,6 +72,7 @@ public abstract class BaseMS1RReport extends RReport
     public HttpView renderDataView(ViewContext context) throws Exception
     {
         QueryView view = getQueryView(context);
+        view.getSettings().setReportId(-1);
         view.setButtonBarPosition(DataRegion.ButtonBarPosition.NONE);
         return view;
     }
