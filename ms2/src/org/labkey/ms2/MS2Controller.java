@@ -4470,7 +4470,7 @@ public class MS2Controller extends SpringActionController
             String helperName = req.getParameter("helpername");
 
             if (null == helperName)
-                throw new NotFoundException("Parameter \"helperName\" is missing");
+                throw new NotFoundException("Parameter \"helpername\" is missing");
 
             response.setContentType("image/png");
             OutputStream out = response.getOutputStream();
@@ -4478,7 +4478,7 @@ public class MS2Controller extends SpringActionController
             PieJChartHelper pjch = (PieJChartHelper) Cache.getShared().get(helperName);
 
             if (null == pjch)
-                throw new NotFoundException("Pie chart was not found.  Session may have timed out.");
+                throw new NotFoundException("Pie chart was not found.");
 
             try
             {

@@ -119,7 +119,7 @@ public class SpringFlowController<A extends Enum> extends SpringActionController
         NavTree project;
         if (context.getContainer().getFolderType() instanceof FlowFolderType)
         {
-            project = new NavTree("Dashboard", PageFlowUtil.urlProvider(ProjectUrls.class).urlStart(context.getContainer()));
+            project = new NavTree("Dashboard", PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(context.getContainer()));
         }
         else
         {

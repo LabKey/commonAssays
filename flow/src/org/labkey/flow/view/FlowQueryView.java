@@ -247,7 +247,7 @@ public class FlowQueryView extends QueryView
         List<NavTree> children = new ArrayList<NavTree>();
         if (getContainer().getFolderType() instanceof FlowFolderType)
         {
-            children.add(0, new NavTree("Flow Dashboard", PageFlowUtil.urlProvider(ProjectUrls.class).urlStart(getContainer())));
+            children.add(0, new NavTree("Flow Dashboard", PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer())));
         }
         else
         {

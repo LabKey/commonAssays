@@ -188,7 +188,7 @@ public class FlowPipelineProvider extends PipelineProvider
         public String getDisplay()
         {
             String img = super.getDisplay();
-            return img + "&nbsp(" + getDescription() + ")";
+            return img + "&nbsp;(" + getDescription() + ")";
         }
     }
 }

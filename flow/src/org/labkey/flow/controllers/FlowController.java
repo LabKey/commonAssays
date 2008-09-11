@@ -89,7 +89,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
         {
             if (getContainer().getFolderType() instanceof FlowFolderType)
             {
-                ActionURL startUrl = PageFlowUtil.urlProvider(ProjectUrls.class).urlStart(getContainer());
+                ActionURL startUrl = PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer());
                 startUrl.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
                 HttpView.throwRedirect(startUrl);
             }
@@ -387,7 +387,7 @@ public class FlowController extends SpringFlowController<FlowController.Action>
 
         public ActionURL getSuccessURL(NewFolderForm newFolderForm)
         {
-            return PageFlowUtil.urlProvider(ProjectUrls.class).urlStart(destContainer);
+            return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(destContainer);
         }
 
         public NavTree appendNavTrail(NavTree root)

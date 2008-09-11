@@ -80,7 +80,7 @@ public class PipelineController extends SpringActionController
 
     public ActionURL urlProjectStart(Container container)
     {
-        return PageFlowUtil.urlProvider(ProjectUrls.class).urlStart(container);
+        return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(container);
     }
 
     public String getErrorMessage(BindException errors)

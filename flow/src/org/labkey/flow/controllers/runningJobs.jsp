@@ -50,7 +50,7 @@
 %>
     <tr><td><a href="<%=h(job.urlStatus())%>"><%=h(job.getStatusText())%></a></td>
         <td><%=h(job.getDescription())%></td>
-        <td><a href="<%=h(PageFlowUtil.urlProvider(ProjectUrls.class).urlStart(job.getContainer()))%>"><%=h(job.getContainer().getPath())%></a></td>
+        <td><a href="<%=h(PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(job.getContainer()))%>"><%=h(job.getContainer().getPath())%></a></td>
         <td><%=h(String.valueOf(job.getUser()))%></td><td><labkey:button text="Cancel" href="<%=job.urlCancel()%>"/></tr>
 <% } %>
 </table>
