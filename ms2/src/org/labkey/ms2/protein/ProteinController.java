@@ -27,7 +27,6 @@ import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
 import org.labkey.api.util.CaseInsensitiveHashSet;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.common.tools.TabLoader;
 import org.labkey.ms2.MS2Controller;
@@ -376,7 +375,7 @@ public class ProteinController extends SpringActionController
             catch (ValidationException ve)
             {
                 for (ValidationError error : ve.getErrors())
-                    errors.reject(SpringActionController.ERROR_MSG, PageFlowUtil.filter(error.getMessage()));
+                    errors.reject(SpringActionController.ERROR_MSG, error.getMessage());
                 return false;
             }
             finally
