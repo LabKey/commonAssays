@@ -1046,7 +1046,7 @@ public class MS2Controller extends SpringActionController
 
             _goChartType = ProteinDictionaryHelpers.GTypeStringToEnum(form.getChartType());
 
-            AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
+            AbstractMS2RunView peptideView = getPeptideView(queryURL.getParameter("grouping"), run);
 
             Map<String, SimpleFilter> filters = peptideView.getFilter(queryURL, run);
             String peptideFilterInfo = "";
