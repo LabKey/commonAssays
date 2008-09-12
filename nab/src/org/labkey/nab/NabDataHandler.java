@@ -187,11 +187,19 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         return dataFile;
     }
 
+    public static class MissingDataFileException extends ExperimentException
+    {
+        public MissingDataFileException(String message)
+        {
+            super(message);
+        }
+    }
+
     public static Luc5Assay getAssayResults(ExpRun run) throws ExperimentException
     {
         File dataFile = getDataFile(run);
         if (dataFile == null)
-            throw new ExperimentException("Nab data file could not be found for run " + run.getName() + ".  Deleted from file system?");
+            throw new MissingDataFileException("Nab data file could not be found for run " + run.getName() + ".  Deleted from file system?");
         return getAssayResults(run, dataFile);
     }
 

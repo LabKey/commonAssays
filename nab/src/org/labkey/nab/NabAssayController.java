@@ -516,7 +516,15 @@ public class NabAssayController extends SpringActionController
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
             if (run == null || !run.getContainer().equals(getContainer()))
                 HttpView.throwNotFound("Run " + form.getRowId() + " does not exist.");
-            Luc5Assay assay = NabDataHandler.getAssayResults(run);
+            Luc5Assay assay = null;
+            try
+            {
+                assay = NabDataHandler.getAssayResults(run);
+            }
+            catch (NabDataHandler.MissingDataFileException e)
+            {
+                HttpView.throwNotFound(e.getMessage());
+            }
             _run = ExperimentService.get().getExpRun(form.getRowId());
             _protocol = _run.getProtocol();
             PlateBasedAssayProvider provider = (PlateBasedAssayProvider) AssayService.get().getProvider(_protocol);

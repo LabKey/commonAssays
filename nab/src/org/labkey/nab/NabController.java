@@ -561,8 +561,13 @@ public class NabController extends ViewController
     {
         requiresPermission(ACL.PERM_READ);
 
+        if (form.getEntityId() == null || form.getName() == null)
+            HttpView.throwNotFound("Page not found: EntityId and name are required URL parameters- incomplete URL?");
         Plate plate = PlateService.get().getPlate(getContainer(), form.getEntityId());
 
+        if (plate == null)
+            HttpView.throwNotFound("Page not found: The specified plate does not exist.  It may have been deleted from the database.");
+        
         AttachmentService.get().download(getResponse(), plate, form.getName());
 
         return null;

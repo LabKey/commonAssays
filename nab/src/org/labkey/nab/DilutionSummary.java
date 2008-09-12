@@ -160,4 +160,4 @@ public class DilutionSummary implements Serializable
     {
         return _sampleGroup;
     }
-}
+    }
