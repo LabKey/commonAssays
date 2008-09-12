@@ -23,6 +23,7 @@ import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.Table;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.util.ResultSetUtil;
 import org.labkey.common.tools.DoubleArray;
 import org.labkey.common.tools.MatrixUtil;
 
@@ -145,16 +146,22 @@ public class DeltaScanColumn extends SimpleDisplayColumn
                 }
 
                 double[] b = MatrixUtil.linearRegression(x, y);
-                double r2 = MatrixUtil.r2(x, y);
-                double sigma = MatrixUtil.sigma(x, y, b);
+                Float b0 = new Float(b[0]);
+                Float b1 = new Float(b[1]);
+                Float r2 = new Float(MatrixUtil.r2(x, y));
+                Float sigma = new Float(MatrixUtil.sigma(x, y, b));
 
-                _log.debug("b0=" + b[0] + " b1=" + b[1] + " r2=" + r2 + " sigma=" + sigma);
+                if (allLegalValues(b0, b1, r2, sigma))
+                {
+                    _log.debug("b0=" + b0 + " b1=" + b1 + " r2=" + r2 + " sigma=" + sigma);
 
-                map.put("HydroB0", new Float(b[0]));
-                map.put("HydroB1", new Float(b[1]));
-                map.put("HydroR2", new Float(r2));
-                map.put("HydroSigma", new Float(sigma));
-                return map;
+                    map.put("HydroB0", b0);
+                    map.put("HydroB1", b1);
+                    map.put("HydroR2", r2);
+                    map.put("HydroSigma", sigma);
+
+                    return map;
+                }
             }
         }
         catch (SQLException e)
@@ -163,15 +170,25 @@ public class DeltaScanColumn extends SimpleDisplayColumn
         }
         finally
         {
-            if (rs != null)
-                try {rs.close();} catch(SQLException e) {_log.error(e);}
+            ResultSetUtil.close(rs);
         }
 
         map.put("HydroB0", 0.0f);
         map.put("HydroB1", 0.0f);
         map.put("HydroR2", 0.0f);
         map.put("HydroSigma", 0.0f);
+
         return map;
+    }
+
+
+    private static boolean allLegalValues(Float... floats)
+    {
+        for (Float f : floats)
+            if (null == f || f.isNaN() || f.isInfinite())
+                return false;
+
+        return true;
     }
 
 
