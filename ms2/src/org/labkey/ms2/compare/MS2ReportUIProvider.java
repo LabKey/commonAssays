@@ -41,10 +41,7 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
         bean.setReportType(SpectraCountRReport.TYPE);
         bean.setRedirectUrl(context.getActionURL().toString());
 
-        ActionURL chartURL = ReportUtil.getRReportDesignerURL(context, bean);
-        chartURL = SpectraCountRReport.addReportParameters(chartURL, context);
-
-        designers.put(SpectraCountRReport.TYPE, chartURL.getLocalURIString());
+        designers.put(SpectraCountRReport.TYPE, ReportUtil.getRReportDesignerURL(context, bean).getLocalURIString());
     }
 
     public String getReportIcon(ViewContext context, String reportType)

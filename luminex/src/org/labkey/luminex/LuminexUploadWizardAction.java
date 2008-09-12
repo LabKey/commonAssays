@@ -250,7 +250,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         catch (ValidationException ve)
                         {
                             for (ValidationError error : ve.getErrors())
-                                errors.reject(SpringActionController.ERROR_MSG, error.getMessage());
+                                errors.reject(SpringActionController.ERROR_MSG, PageFlowUtil.filter(error.getMessage()));
                         }
                     }
 

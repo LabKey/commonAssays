@@ -16,8 +16,6 @@
 
 package org.labkey.elispot;
 
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMessage;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
@@ -28,6 +26,8 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.ValidationError;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.Plate;
@@ -39,8 +39,6 @@ import org.labkey.api.study.assay.*;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
-import org.labkey.api.query.ValidationException;
-import org.labkey.api.query.ValidationError;
 import org.labkey.elispot.plate.ElispotPlateReaderService;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -331,7 +329,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             catch (ValidationException ve)
             {
                 for (ValidationError error : ve.getErrors())
-                    errors.reject(SpringActionController.ERROR_MSG, error.getMessage());
+                    errors.reject(SpringActionController.ERROR_MSG, PageFlowUtil.filter(error.getMessage()));
             }
             catch (ExperimentException e)
             {

@@ -110,8 +110,7 @@ public class SpectraCountRReport extends RReport
     {
         if (hasValidParameters(context))
         {
-            ActionURL url = super.getRunReportURL(context);
-            return addReportParameters(url, context);
+            return super.getRunReportURL(context);
         }
         return null;
     }
@@ -132,12 +131,7 @@ public class SpectraCountRReport extends RReport
         return null;
     }
 
-    public ActionURL getDownloadDataURL(ViewContext context)
-    {
-        ActionURL url = super.getDownloadDataURL(context);
-        return addReportParameters(url, context);
-    }
-
+/*
     public static ActionURL addReportParameters(ActionURL url, ViewContext context)
     {
         url.replaceParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME, context.getActionURL().getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME));
@@ -148,4 +142,5 @@ public class SpectraCountRReport extends RReport
 
         return url;
     }
+*/
 }
