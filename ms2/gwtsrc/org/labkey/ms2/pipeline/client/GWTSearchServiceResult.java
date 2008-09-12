@@ -199,7 +199,7 @@ public class GWTSearchServiceResult implements IsSerializable
     }
 
     /**
-     * @gwt.typeArgs protocols <java.lang.String>
+     * @gwt.typeArgs names <java.lang.String>
      */
     public void setFileInputNames(List names)
     {
@@ -207,7 +207,7 @@ public class GWTSearchServiceResult implements IsSerializable
     }
 
     /**
-     * @gwt.typeArgs <java.lang.String>
+     * @gwt.return <java.lang.String>
      */
     public List getFileInputStatus()
     {
@@ -215,7 +215,7 @@ public class GWTSearchServiceResult implements IsSerializable
     }
 
     /**
-     * @gwt.typeArgs protocols <java.lang.String>
+     * @gwt.typeArgs fileInputStatus <java.lang.String>
      */
     public void setFileInputStatus(List fileInputStatus)
     {

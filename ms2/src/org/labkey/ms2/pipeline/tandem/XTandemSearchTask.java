@@ -25,7 +25,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
 import java.util.ArrayList;
@@ -70,7 +69,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             return new XTandemSearchTask(this, job);
         }
 
-        public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
+        public boolean isJobComplete(PipelineJob job)
         {
             JobSupport support = (JobSupport) job;
             String baseName = support.getBaseName();

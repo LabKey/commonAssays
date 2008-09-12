@@ -22,7 +22,6 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Collections;
 
@@ -64,7 +63,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
             return Collections.singletonList(ACTION_NAME);
         }
 
-        public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
+        public boolean isJobComplete(PipelineJob job)
         {
             // No way of knowing.
             return false;

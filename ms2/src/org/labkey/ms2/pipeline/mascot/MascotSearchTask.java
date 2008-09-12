@@ -22,7 +22,6 @@ import org.labkey.ms2.pipeline.*;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -109,7 +108,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             return "mascot";
         }
 
-        public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
+        public boolean isJobComplete(PipelineJob job)
         {
             JobSupport support = (JobSupport) job;
             String baseName = support.getBaseName();

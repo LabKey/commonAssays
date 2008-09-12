@@ -159,7 +159,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             return job.getJobSupport(JobSupport.class).isSamples();
         }
 
-        public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
+        public boolean isJobComplete(PipelineJob job)
         {
             JobSupport support = job.getJobSupport(JobSupport.class);
             String baseName = support.getBaseName();

@@ -24,7 +24,6 @@ import org.labkey.ms2.pipeline.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -68,7 +67,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             return new SequestSearchTask(this, job);
         }
 
-        public boolean isJobComplete(PipelineJob job) throws IOException, SQLException
+        public boolean isJobComplete(PipelineJob job)
         {
             JobSupport support = (JobSupport) job;
             String baseName = support.getBaseName();

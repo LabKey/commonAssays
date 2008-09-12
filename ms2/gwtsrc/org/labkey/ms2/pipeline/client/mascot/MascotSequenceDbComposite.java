@@ -47,15 +47,17 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
 
     public void init()
     {
-        super.init();
+        sequenceDbLabel.setStylePrimaryName("ms-readonly");
+        instance.add(sequenceDbListBox);
         taxonomyReadOnly.setStylePrimaryName("labkey-read-only");
         taxonomyListBox.setVisibleItemCount(1);
         instance.add(taxonomyListBox);
         labelWidget = new VerticalPanel();
         initLabel(false);
+        initWidget(instance);
     }
 
-        private void initLabel(boolean readonly)
+    private void initLabel(boolean readonly)
     {
         taxonomyLabel.setText("Taxonomy:");
         ((VerticalPanel)labelWidget).clear();
@@ -124,20 +126,11 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
 
         if(readOnly)
         {
-            int pathIndex = sequenceDbPathListBox.getSelectedIndex();
-            if( pathIndex != -1)
-            {
-                path = sequenceDbPathListBox.getValue(pathIndex);
-            }
             int nameIndex = sequenceDbListBox.getSelectedIndex();
             if(nameIndex != -1)
             {
                 sequenceDbName = sequenceDbListBox.getValue(nameIndex);
             }
-            instance.remove(dirPanel);
-            dbWidgetName = sequenceDbPathListBox.getName();
-            sequenceDbPathHidden.setName(dbWidgetName);
-            sequenceDbPathHidden.setValue(path);
 
             instance.remove(sequenceDbListBox);
             sequenceDbLabel.setText(sequenceDbName);
@@ -173,7 +166,7 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
             if( labelIndex != -1)
             {
                 instance.remove(taxonomyReadOnly);
-                instance.insert(taxonomyListBox,1);
+                instance.add(taxonomyListBox);
             }
         }
         initLabel(readOnly);

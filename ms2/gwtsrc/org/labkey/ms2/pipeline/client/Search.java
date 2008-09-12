@@ -24,6 +24,7 @@ import com.google.gwt.user.client.Window;
 import org.labkey.api.gwt.client.util.PropertyUtil;
 import org.labkey.api.gwt.client.util.ServiceUtil;
 import org.labkey.api.gwt.client.ui.ImageButton;
+import org.labkey.api.gwt.client.ui.WindowUtil;
 
 import java.util.*;
 
@@ -40,7 +41,7 @@ public class Search implements EntryPoint
     private                 Hidden                  pathHidden = new Hidden();
     private                 Hidden                  searchEngineHidden = new Hidden();
     private                 Hidden                  runSearch = new Hidden();
-    private                 Label                   displayLabel = new Label();
+    private                 VerticalPanel           messagesPanel = new VerticalPanel();
     private                 ProtocolComposite       protocolComposite;
     private                 SequenceDbComposite     sequenceDbComposite;
     private                 MzXmlComposite          mzXmlComposite = new MzXmlComposite();
@@ -105,8 +106,7 @@ public class Search implements EntryPoint
         runSearch.setName("runSearch");
         runSearch.setValue("true");
 
-        displayLabel.setWordWrap(false);
-        displayLabel.setHeight("15px");
+        clearDisplay();
 
         protocolComposite.setName("protocol");
         protocolComposite.setWidth(INPUT_WIDTH);
@@ -259,7 +259,7 @@ public class Search implements EntryPoint
         subPanel.add(pathHidden);
         subPanel.add(searchEngineHidden);
         subPanel.add(runSearch);
-        subPanel.add(displayLabel);
+        subPanel.add(messagesPanel);
         subPanel.add(new Label("An MS2 search protocol is defined by a set of  options for the search engine and a set of protein databases to search."));
         subPanel.add(new Label("Choose an existing protocol or define a new one."));
         subPanel.setWidth("100%");
@@ -295,57 +295,51 @@ public class Search implements EntryPoint
 
     public void appendError(String error)
     {
-        if(error.trim().length() ==  0)   return;
-        appendDisplay("ERROR: " + error);
-        displayLabel.setStylePrimaryName("labkey-error");
+        if(error == null || error.trim().length() == 0)
+        {
+            return;
+        }
+        Label label = new Label("ERROR: " + error);
+        label.setStylePrimaryName("labkey-error");
+        messagesPanel.add(label);
     }
 
     private void appendMessage(String message)
     {
-        appendDisplay(message);
-        displayLabel.setStylePrimaryName("labkey-message-strong");
-    }
-
-    private void appendDisplay(String display)
-    {
-        if(display == null || display.length() == 0) return;
-        StringBuffer startingError = new StringBuffer(displayLabel.getText());
-        if(startingError.length() > 0) startingError.append("\n");
-        startingError.append(display);
-        displayLabel.setText(startingError.toString());
+        if(message == null || message.trim().length() == 0)
+        {
+            return;
+        }
+        Label label = new Label(message);
+        label.setStylePrimaryName("labkey-message-strong");
+        messagesPanel.add(label);
     }
 
     public void clearDisplay()
     {
-        displayLabel.setText("");
-    }
-
-    private void setMessage(String message)
-    {
-        setDisplay(message);
-        displayLabel.setStylePrimaryName("labkey-message-strong");
+        messagesPanel.clear();
     }
 
     private void setError(String error)
     {
-        setDisplay(error);
-        displayLabel.setStylePrimaryName("labkey-error");
+        clearDisplay();
+        appendError(error);
     }
 
     private void setDisplay(String text)
     {
-        if(text == null) displayLabel.setText("");
-        else displayLabel.setText(text);
+        clearDisplay();
+        appendMessage(text);
     }
 
     private boolean hasErrors()
     {
-        return(displayLabel.getText().length() > 0);
+        return(messagesPanel.getWidgetCount() > 0);
     }
 
     private void loading()
     {
-        setMessage("LOADING...");
+        setDisplay("LOADING...");
     }
 
     public String syncForm2Xml()
@@ -569,6 +563,7 @@ public class Search implements EntryPoint
             appendError(protocolComposite.validate());
             appendError(sequenceDbComposite.validate());
             event.setCancelled(hasErrors());
+            WindowUtil.scrollTo(0, 0);
         }
 
         public void onSubmitComplete(FormSubmitCompleteEvent event)
