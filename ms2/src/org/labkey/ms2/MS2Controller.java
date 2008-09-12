@@ -1109,7 +1109,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ACL.PERM_READ)
-    public class GetProteinGroupingPeptides extends SimpleViewAction<RunForm>
+    public class GetProteinGroupingPeptidesAction extends SimpleViewAction<RunForm>
     {
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
@@ -4951,9 +4951,9 @@ public class MS2Controller extends SpringActionController
 
     public static class RunForm extends FormData
     {
-        enum PARAMS
+        public enum PARAMS
         {
-            run
+            run, expanded, grouping
         }
 
         int run;

@@ -18,6 +18,7 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.*;
 import org.labkey.api.view.ActionURL;
+import org.labkey.ms2.MS2Controller;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -33,6 +34,7 @@ import java.util.Iterator;
 public abstract class AbstractProteinDataRegion extends DataRegion
 {
     protected boolean _expanded = false;
+    private boolean _renderedInnerGrid = false; 
     protected DataRegion _nestedRegion = null;
     protected final String _uniqueColumnName;
     private final String _groupURL;
@@ -42,7 +44,7 @@ public abstract class AbstractProteinDataRegion extends DataRegion
     {
         _uniqueColumnName = uniqueColumnName;
         ActionURL groupURL = url.clone();
-        groupURL.setAction("getProteinGroupingPeptides.view");
+        groupURL.setAction(MS2Controller.GetProteinGroupingPeptidesAction.class);
         groupURL.deleteParameter("proteinGroupingId");
 
         _groupURL = groupURL.toString() + "&proteinGroupingId=";
@@ -119,16 +121,22 @@ public abstract class AbstractProteinDataRegion extends DataRegion
     }
 
     protected void renderNestedGrid(Writer out, RenderContext ctx, ResultSet nestedRS, int rowIndex)
-            throws IOException
+        throws IOException, SQLException
     {
         renderRowStart(rowIndex, out, ctx);
 
         RenderContext nestedCtx = new RenderContext(ctx.getViewContext());
         nestedCtx.setResultSet(nestedRS);
         nestedCtx.setMode(DataRegion.MODE_GRID);
-        if (_expanded)
+
+        // We need to make sure that we've rendered at least one nested grid because it contains JavaScript that needs
+        // to be evaluated with the initial page rendering - we can't send it down later. So, regardless of the
+        // expansion state, always render the nested grid. If we're not expanded, the CSS will still prevent it from
+        // being shown, and the browser will detect that it already has it so it won't make a separate request for it.
+        if (_expanded || !_renderedInnerGrid)
         {
             _nestedRegion.render(nestedCtx, out);
+            _renderedInnerGrid = true;
         }
         else
         {

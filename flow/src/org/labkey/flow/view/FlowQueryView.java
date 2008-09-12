@@ -93,7 +93,7 @@ public class FlowQueryView extends QueryView
         return false;
     }
 
-    protected DataView createDataView()
+    public DataView createDataView()
     {
         DataView ret = super.createDataView();
 

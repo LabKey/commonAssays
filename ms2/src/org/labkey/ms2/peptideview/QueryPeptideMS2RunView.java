@@ -45,7 +45,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         super(viewContext, "Peptides", runs);
     }
 
-    protected QuerySettings createQuerySettings(String tableName, MS2Schema schema, int maxRows) throws RedirectException
+    protected QuerySettings createQuerySettings(MS2Schema schema) throws RedirectException
     {
         QuerySettings settings = new QuerySettings(_url.getPropertyValues(), DATA_REGION_NAME);
         settings.setAllowChooseQuery(false);
@@ -85,9 +85,9 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
         schema.setRuns(_runs);
 
-        QuerySettings settings = createQuerySettings(DATA_REGION_NAME, schema, _maxPeptideRows);
+        QuerySettings settings = createQuerySettings(schema);
 
-        PeptideQueryView peptideView = new PeptideQueryView(_viewContext, schema, settings, expanded, allowNesting);
+        PeptideQueryView peptideView = new PeptideQueryView(schema, settings, expanded, allowNesting);
 
         peptideView.setTitle("Peptides");
         return peptideView;
@@ -95,7 +95,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
     private class PeptideQueryView extends AbstractMS2QueryView
     {
-        public PeptideQueryView(ViewContext context, MS2Schema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
+        public PeptideQueryView(MS2Schema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
         {
             super(schema, settings, expanded, allowNesting);
         }
@@ -164,7 +164,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             return rgn;
         }
 
-        protected DataView createDataView()
+        public DataView createDataView()
         {
             DataRegion rgn = createDataRegion();
             GridView result = new GridView(rgn, new SortRewriterRenderContext(_selectedNestingOption, getViewContext()));
@@ -222,13 +222,13 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         QuerySettings settings;
         try
         {
-            settings = createQuerySettings(DATA_REGION_NAME, schema, _maxPeptideRows);
+            settings = createQuerySettings(schema);
         }
         catch (RedirectException e)
         {
             throw new RuntimeException(e);
         }
-        PeptideQueryView view = new PeptideQueryView(_viewContext, schema, settings, true, true);
+        PeptideQueryView view = new PeptideQueryView(schema, settings, true, true);
         QueryPeptideDataRegion rgn = (QueryPeptideDataRegion)view.createDataRegion();
 
         DataRegion nestedRegion = rgn.getNestedRegion();

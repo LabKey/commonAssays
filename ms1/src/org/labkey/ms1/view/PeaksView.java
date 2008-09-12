@@ -103,7 +103,7 @@ public class PeaksView extends QueryView
      * Overridden to create a customized data view.
      * @return A customized DataView
      */
-    protected DataView createDataView()
+    public DataView createDataView()
     {
         DataView view = super.createDataView();
         view.getRenderContext().setBaseSort(new Sort("ScanId,PeakFamilies/PeakFamilyId/MZMono"));

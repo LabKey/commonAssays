@@ -185,7 +185,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         ResultSet rs = createPeptideResultSet(requestedPeptideColumnNames, proteinRgn.getMaxRows(), proteinRgn.getOffset(), null);
         _rs = new GroupedResultSet(rs, "ProteinGroupId", _maxPeptideRows, _maxGroupingRows);
 
-        proteinRgn.setGroupedResultSet((GroupedResultSet)_rs);
+        proteinRgn.setGroupedResultSet(_rs);
         DataRegion peptideGrid = createPeptideDataRegion(requestedPeptideColumnNames);
         proteinRgn.setNestedRegion(peptideGrid);
 

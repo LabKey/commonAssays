@@ -44,8 +44,7 @@ public class SpectraCountQueryView extends QueryView
         setViewItemFilter(new ReportService.ItemFilter() {
             public boolean accept(String type, String label)
             {
-                if (SpectraCountRReport.TYPE.equals(type)) return true;
-                return false;
+                return SpectraCountRReport.TYPE.equals(type);
             }
         });
     }

@@ -21,8 +21,9 @@ import org.labkey.api.reports.report.view.ReportUtil;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.QuerySettings;
+import org.labkey.ms2.peptideview.SingleMS2RunRReport;
 
-import java.util.Map;/*
+import java.util.*;/*
  * User: Karl Lum
  * Date: May 21, 2008
  * Time: 11:53:28 AM
@@ -30,8 +31,12 @@ import java.util.Map;/*
 
 public class MS2ReportUIProvider extends DefaultReportUIProvider
 {
+    private static final Set<String> R_REPORT_TYPES = new HashSet<String>(Arrays.asList(SpectraCountRReport.TYPE, SingleMS2RunRReport.TYPE));
+
     public void getReportDesignURL(ViewContext context, QuerySettings settings, Map<String, String> designers)
     {
+        addDesignerURL(context, settings, designers, SingleMS2RunRReport.TYPE, SingleMS2RunRReport.PARAMS);
+
         RReportBean bean = new RReportBean(settings);
         bean.setReportType(SpectraCountRReport.TYPE);
         bean.setRedirectUrl(context.getActionURL().toString());
@@ -44,7 +49,7 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
 
     public String getReportIcon(ViewContext context, String reportType)
     {
-        if (SpectraCountRReport.TYPE.equals(reportType))
+        if (R_REPORT_TYPES.contains(reportType))
             return context.getContextPath() + "/reports/r.gif";
         return super.getReportIcon(context, reportType);
     }

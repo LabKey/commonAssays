@@ -17,6 +17,7 @@ package org.labkey.ms1.report;
 
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.reports.report.CustomRReport;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.query.*;
 import org.labkey.ms1.view.FeaturesView;
@@ -29,7 +30,7 @@ import java.util.List;
 * Date: Sep 5, 2008
 * Time: 10:55:13 AM
 */
-public class FeaturesRReport extends BaseMS1RReport
+public class FeaturesRReport extends CustomRReport
 {
     public static final String TYPE = "MS1.R.Features";
     public static final String[] PARAMS = new String[]{

@@ -381,7 +381,7 @@ public class ElispotAssayProvider extends PlateBasedAssayProvider
             super(protocol, context, settings);
         }
 
-        protected DataView createDataView()
+        public DataView createDataView()
         {
             DataView view = super.createDataView();
             view.getDataRegion().setRecordSelectorValueColumns("ObjectId");

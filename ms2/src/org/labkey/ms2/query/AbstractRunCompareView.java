@@ -194,7 +194,7 @@ public abstract class AbstractRunCompareView extends QueryView
         }
     }
     
-    protected DataView createDataView()
+    public DataView createDataView()
     {
         DataView result = super.createDataView();
         Sort sort = result.getRenderContext().getBaseSort();

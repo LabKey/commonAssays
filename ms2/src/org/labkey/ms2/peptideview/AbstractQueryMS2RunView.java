@@ -25,14 +25,17 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.*;
+import org.labkey.api.reports.ReportService;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Controller;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.sql.SQLException;
 
 /**
  * User: jeckels
@@ -85,6 +88,8 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
         return null;
     }
 
+    public abstract AbstractMS2QueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting) throws ServletException, SQLException;
+
     public abstract class AbstractMS2QueryView extends QueryView
     {
         protected QueryNestingOption _selectedNestingOption;
@@ -101,6 +106,15 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Abstrac
             _allowNesting = allowNesting;
             _buttonBarPosition = DataRegion.ButtonBarPosition.BOTH;
             setShowExportButtons(false);
+
+            setViewItemFilter(new ReportService.ItemFilter()
+            {
+                public boolean accept(String type, String label)
+                {
+                    return SingleMS2RunRReport.TYPE.equals(type);
+                }
+            });
+
         }
         
         public void setOverrideColumns(List<FieldKey> fieldKeys)

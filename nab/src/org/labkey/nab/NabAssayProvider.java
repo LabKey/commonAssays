@@ -394,7 +394,7 @@ public class NabAssayProvider extends PlateBasedAssayProvider
             return settings;
         }
         
-        protected DataView createDataView()
+        public DataView createDataView()
         {
             DataView view = super.createDataView();
             DataRegion rgn = view.getDataRegion();

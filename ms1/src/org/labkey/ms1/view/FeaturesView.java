@@ -180,7 +180,7 @@ public class FeaturesView extends QueryView
      * Overridden to create a customized data view.
      * @return A customized DataView
      */
-    protected DataView createDataView()
+    public DataView createDataView()
     {
         DataView view = super.createDataView();
         view.getRenderContext().setBaseSort(getBaseSort());

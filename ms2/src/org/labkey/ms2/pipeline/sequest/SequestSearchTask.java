@@ -112,27 +112,25 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             params.put("search, useremail", params.get("pipeline, email address"));
             params.put("search, username", "CPAS User");
 
-            WorkDirectory wd = _factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
-
             RecordedAction action = new RecordedAction(ACTION_NAME);
 
             File fileParamsLocal = new File(getJobSupport().getAnalysisDirectory(), SEQUEST_PARAMS);
-            File fileWorkParamsLocal = wd.newFile(SEQUEST_PARAMS);
+            File fileWorkParamsLocal = _wd.newFile(SEQUEST_PARAMS);
             if (!NetworkDrive.exists(fileParamsLocal))
             {
                 // Never write directly to the results directory.  Always write to
                 // a working directory, and rename to results, to avoid file truncation in
                 // case of failure.
                 writeSequestV1ParamFile(fileWorkParamsLocal, params);
-                wd.outputFile(fileWorkParamsLocal);
+                _wd.outputFile(fileWorkParamsLocal);
             }
             
-            File fileWorkParamsRemote = wd.newFile(REMOTE_PARAMS);
+            File fileWorkParamsRemote = _wd.newFile(REMOTE_PARAMS);
             writeSequestV2ParamFile(fileWorkParamsRemote, params);
 
-            File dirOutputDta = new File(wd.getDir(), getJobSupport().getBaseName());
-            File fileWorkTgz = wd.newFile(FT_SPECTRA_ARCHIVE);
-            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(wd.getDir(),
+            File dirOutputDta = new File(_wd.getDir(), getJobSupport().getBaseName());
+            File fileWorkTgz = _wd.newFile(FT_SPECTRA_ARCHIVE);
+            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
                     getJobSupport().getBaseName());
 
             /*
@@ -152,7 +150,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             File fileMzXML = _factory.findInputFile(getJobSupport().getDataDirectory(), getJobSupport().getBaseName());
             command.add(fileMzXML.getAbsolutePath());
 
-            getJob().runSubProcess(new ProcessBuilder(command), wd.getDir());
+            getJob().runSubProcess(new ProcessBuilder(command), _wd.getDir());
 
             String enzyme =
                 SequestParamsBuilderFactory.createVersion1Builder(params, null).getSupportedEnzyme(params.get("protein, cleavage site"));
@@ -176,9 +174,9 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 throw new IOException("Failed running Sequest.");
 
             // TODO: This limits SequestSearchTask to running only on LabKey Server
-            String exePath = PipelineJobService.get().getExecutablePath("bsdtar.exe", null, null);
+            String exePath = PipelineJobService.get().getExecutablePath("tar", null, null);
             getJob().runSubProcess(new ProcessBuilder(exePath,
-                    "czf", fileWorkTgz.getAbsolutePath(), "*"), dirOutputDta);
+                    "czf", fileWorkTgz.getAbsolutePath(), "."), dirOutputDta);
 
             if (!FileUtil.deleteDir(dirOutputDta))
                 throw new IOException("Failed to delete DTA directory " + dirOutputDta.getAbsolutePath());
@@ -187,18 +185,17 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             WorkDirectory.CopyingResource lock = null;
             try
             {
-                lock = wd.ensureCopyingLock();
-                action.addOutput(wd.outputFile(fileWorkTgz), "TGZ", false);
-                action.addOutput(wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
+                lock = _wd.ensureCopyingLock();
+                action.addOutput(_wd.outputFile(fileWorkTgz), "TGZ", false);
+                action.addOutput(_wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
             }
             finally
             {
                 if (lock != null) { lock.release(); }
             }
 
-            wd.discardFile(fileWorkParamsLocal);
-            wd.discardFile(fileWorkParamsRemote);
-            wd.remove();
+            _wd.discardFile(fileWorkParamsLocal);
+            _wd.discardFile(fileWorkParamsRemote);
 
             for (File file : getJobSupport().getSequenceFiles())
             {

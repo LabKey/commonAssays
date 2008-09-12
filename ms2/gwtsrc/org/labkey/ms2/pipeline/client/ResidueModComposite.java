@@ -343,17 +343,38 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
             table.setWidget(2, 0, new ImageButton("Enter"){
                 public void onClick(Widget sender)
                 {
+                    String error = "";
+                    String wt = molWt.getText();
+                    try
+                    {
+                        Float.parseFloat(wt);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        error = "modification mass contained an invalid mass value (" + wt + ")";
+                        searchForm.clearDisplay();
+                        searchForm.appendError(error);
+                        searchForm.setSearchButtonEnabled(false);
+                        molWt.setText("");
+                        return;
+                    }
                     add2List(tabIndex);
                     searchForm.syncForm2Xml();
                     dialog.hide();
                     dialog = null;
-                    String error = validate();
+                    error = validate();
                     if(error.length() > 0)
                     {
                         searchForm.clearDisplay();
                         searchForm.appendError(error);
                         searchForm.setSearchButtonEnabled(false);
                     }
+                    else
+                    {
+                        searchForm.clearDisplay();
+                        searchForm.setSearchButtonEnabled(true);
+                    }
+
                 }
             });
             table.setWidget(2, 1, new ImageButton("Cancel") {
@@ -361,6 +382,8 @@ public abstract class ResidueModComposite extends SearchFormComposite implements
                 {
                     dialog.hide();
                     dialog = null;
+                    searchForm.clearDisplay();
+                    searchForm.setSearchButtonEnabled(true);
                 }
             });
             dialog.setWidget(table);

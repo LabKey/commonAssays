@@ -16,13 +16,14 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.WorkDirectoryTask;
 import org.labkey.api.util.FileType;
 
 /**
  * User: jeckels
  * Date: Sep 2, 2008
  */
-public abstract class AbstractMS2SearchTask<FactoryType extends AbstractMS2SearchTaskFactory> extends PipelineJob.Task<FactoryType>
+public abstract class AbstractMS2SearchTask<FactoryType extends AbstractMS2SearchTaskFactory> extends WorkDirectoryTask<FactoryType>
 {
     public AbstractMS2SearchTask(FactoryType factory, PipelineJob job)
     {

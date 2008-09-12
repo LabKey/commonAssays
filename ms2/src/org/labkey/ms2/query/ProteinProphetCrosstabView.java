@@ -26,7 +26,6 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.data.AggregateColumnInfo;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.ViewContext;
 import org.labkey.api.gwt.client.model.GWTComparisonResult;
 import org.labkey.api.gwt.client.model.GWTComparisonMember;
 import org.labkey.api.gwt.client.model.GWTComparisonGroup;
@@ -75,7 +74,7 @@ public class ProteinProphetCrosstabView extends ComparisonCrosstabView
         return _schema.createProteinProphetCrosstabTable(_form, getViewContext());
     }
 
-    protected DataView createDataView()
+    public DataView createDataView()
     {
         DataView view = super.createDataView();
         view.getRenderContext().setViewContext(getViewContext());

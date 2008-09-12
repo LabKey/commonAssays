@@ -25,6 +25,7 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.exp.pipeline.XarTemplateSubstitutionId;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -37,7 +38,7 @@ import java.util.*;
  * Date: Nov 11, 2007
  */
 public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJob
-        implements MS2SearchJobSupport, TPPTask.JobSupport
+        implements MS2SearchJobSupport, TPPTask.JobSupport, XarTemplateSubstitutionId.JobSupport
 {
     enum Pipelines
     {
@@ -360,7 +361,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         for (File file : files)
         {
             sb.append("                                <exp:DataLSID DataFileUrl=\"");
-            sb.append(FileUtil.relativizeUnix(analysisDir, file));
+            sb.append(FileUtil.relativizeUnix(analysisDir, file, true));
             sb.append("\" RoleName=\"");
             sb.append(baseRoleName);
             sb.append("\">${AutoFileLSID}</exp:DataLSID>\n");
@@ -385,7 +386,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         Set<File> fileSet2 = new HashSet<File>(Arrays.asList(jobSpectraFiles));
         if (fileSet1.equals(fileSet2))
         {
-            result.append(FileUtil.relativizeUnix(analysisDir, dirData));
+            result.append(FileUtil.relativizeUnix(analysisDir, dirData, true));
             result.append("/*.mzxml");
         }
         else
@@ -396,7 +397,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                 {
                     result.append(";");
                 }
-                result.append(FileUtil.relativizeUnix(analysisDir, f));
+                result.append(FileUtil.relativizeUnix(analysisDir, f, true));
             }
         }
 

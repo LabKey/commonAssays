@@ -109,7 +109,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
             return rgn;
         }
 
-        protected DataView createDataView()
+        public DataView createDataView()
         {
             DataRegion rgn = createDataRegion();
             GridView result = new GridView(rgn, new SortRewriterRenderContext(_selectedNestingOption, getViewContext()));

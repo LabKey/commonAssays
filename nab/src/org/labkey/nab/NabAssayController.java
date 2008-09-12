@@ -33,14 +33,11 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.announcements.DiscussionService;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.ExperimentRunListView;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.query.UserSchema;
-import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.DilutionCurve;
@@ -52,7 +49,6 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.view.*;
 import org.labkey.common.util.Pair;
-import org.labkey.nab.query.NabRunDataTable;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -134,7 +130,7 @@ public class NabAssayController extends SpringActionController
             _run = run;
         }
 
-        protected DataView createDataView()
+        public DataView createDataView()
         {
             DataView view = super.createDataView();
             DataRegion rgn = view.getDataRegion();
@@ -634,7 +630,7 @@ public class NabAssayController extends SpringActionController
                 AssayProvider provider = AssayService.get().getProvider(_protocol);
                 QueryView dataView = new NabAssayProvider.NabRunDataQueryView(_protocol, _context, provider)
                 {
-                    protected DataView createDataView()
+                    public DataView createDataView()
                     {
                         DataView view = super.createDataView();
                         SimpleFilter filter = new SimpleFilter();

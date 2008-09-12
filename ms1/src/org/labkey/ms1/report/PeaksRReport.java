@@ -18,6 +18,7 @@ package org.labkey.ms1.report;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.reports.report.CustomRReport;
 import org.labkey.ms1.MS1Controller;
 import org.labkey.ms1.MS1Manager;
 import org.labkey.ms1.model.Feature;
@@ -29,7 +30,7 @@ import org.labkey.ms1.view.PeaksView;
 * Date: Sep 5, 2008
 * Time: 1:31:13 PM
 */
-public class PeaksRReport extends BaseMS1RReport
+public class PeaksRReport extends CustomRReport
 {
     public static final String TYPE = "MS1.R.Peaks";
     public static final String[] PARAMS = new String[]{

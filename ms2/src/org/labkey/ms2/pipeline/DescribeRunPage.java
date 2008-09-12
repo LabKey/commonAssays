@@ -216,7 +216,7 @@ abstract public class DescribeRunPage extends JspBase
                 if (root != null)
                 {
                     File rootFile = new File(root.getUri(getViewContext().getContainer()));
-                    String result = FileUtil.relativizeUnix(rootFile, parentFile);
+                    String result = FileUtil.relativizeUnix(rootFile, parentFile, true);
                     if (result.length() > 0)
                     {
                         return "root/" + result;

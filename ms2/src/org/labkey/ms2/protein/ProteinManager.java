@@ -817,7 +817,7 @@ public class ProteinManager
     {
         SQLFragment sql = getProteinSql(currentUrl, run, extraPeptideWhere, maxRows, offset);
 
-        return Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray());
+        return Table.executeQuery(getSchema(), sql.toString(), sql.getParams().toArray(), maxRows);
     }
 
     public static SQLFragment getProteinSql(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, long offset)

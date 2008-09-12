@@ -115,7 +115,7 @@ public class PeptidesView extends QueryView
         return region;
     }
 
-    protected DataView createDataView()
+    public DataView createDataView()
     {
         DataView view = super.createDataView();
         view.getRenderContext().setBaseSort(new Sort("Fraction/Run/Description,Scan,Charge"));

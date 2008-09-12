@@ -132,7 +132,7 @@ public class ProteinController extends SpringActionController
 
             QueryView queryView = new QueryView(schema, settings)
             {
-                protected DataView createDataView()
+                public DataView createDataView()
                 {
                     DataView result = super.createDataView();
                     result.getRenderContext().setBaseSort(new Sort("LookupString"));

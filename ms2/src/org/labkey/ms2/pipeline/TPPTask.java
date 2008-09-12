@@ -34,7 +34,7 @@ import java.util.Arrays;
  * engine's raw output.  This task may run PeptideProphet, ProteinProphet,
  * Quantitation, and batch fractions into a single pepXML.
  */
-public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
+public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 {
     public static final FileType FT_PEP_XML = new FileType(".pep.xml");
     public static final FileType FT_PROT_XML = new FileType(".prot.xml");
@@ -228,8 +228,6 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
         {
             Map<String, String> params = getJob().getParameters();
 
-            WorkDirectory wd = _factory.createWorkDirectory(getJob().getJobGUID(), getJobSupport(), getJob().getLogger());
-
             List<RecordedAction> actions = new ArrayList<RecordedAction>();
 
             // First step takes all the pepXMLs as inputs and either runs PeptideProphet (non-join) or rolls them up (join)
@@ -253,16 +251,16 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
                 WorkDirectory.CopyingResource lock = null;
                 try
                 {
-                    lock = wd.ensureCopyingLock();
+                    lock = _wd.ensureCopyingLock();
                     for (int i = 0; i < inputFiles.length; i++)
-                        inputWorkFiles[i] = wd.inputFile(inputFiles[i], false);
+                        inputWorkFiles[i] = _wd.inputFile(inputFiles[i], false);
 
                     if (isSpectraProcessor(params))
                     {
                         File[] spectraFiles = getJobSupport().getInteractSpectraFiles();
                         for (int i = 0; i < spectraFiles.length; i++)
                         {
-                            spectraFiles[i] = wd.inputFile(spectraFiles[i], false);
+                            spectraFiles[i] = _wd.inputFile(spectraFiles[i], false);
                             if (dirMzXml == null)
                                 dirMzXml = spectraFiles[i].getParentFile();
                         }
@@ -279,7 +277,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
 
             if (dirMzXml != null)
             {
-                quantParams = getQuantitationCmd(params, wd.getRelativePath(dirMzXml));
+                quantParams = getQuantitationCmd(params, _wd.getRelativePath(dirMzXml));
                 if (quantParams != null)
                 {
                     peptideQuantAction = new RecordedAction(PEPTIDE_QUANITATION_ACTION_NAME);
@@ -290,7 +288,7 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
                 }
             }
 
-            File fileWorkPepXML = wd.newFile(FT_PEP_XML);
+            File fileWorkPepXML = _wd.newFile(FT_PEP_XML);
 
             String ver = getTPPVersion(getJob());
             List<String> interactCmd = new ArrayList<String>();
@@ -360,15 +358,15 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
             interactCmd.add("-N" + fileWorkPepXML.getName());
 
             for (File fileInput : inputWorkFiles)
-                interactCmd.add(wd.getRelativePath(fileInput));
+                interactCmd.add(_wd.getRelativePath(fileInput));
 
-            getJob().runSubProcess(new ProcessBuilder(interactCmd), wd.getDir());
+            getJob().runSubProcess(new ProcessBuilder(interactCmd), _wd.getDir());
 
             WorkDirectory.CopyingResource lock = null;
             try
             {
-                lock = wd.ensureCopyingLock();
-                File filePepXML = wd.outputFile(fileWorkPepXML);
+                lock = _wd.ensureCopyingLock();
+                File filePepXML = _wd.outputFile(fileWorkPepXML);
 
                 // Set up the first step with the right outputs
                 pepXMLAction.addOutput(filePepXML, "PepXML", false);
@@ -378,16 +376,16 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
                 if (getJobSupport().isProphetEnabled())
                 {
                     // If we ran ProteinProphet, set up a step with the right inputs and outputs
-                    File fileWorkProtXML = wd.newFile(FT_INTERMEDIATE_PROT_XML);
+                    File fileWorkProtXML = _wd.newFile(FT_INTERMEDIATE_PROT_XML);
                     if (!NetworkDrive.exists(fileWorkProtXML))
                     {
                         // TPP 4.0 changed the name of the output file from .pep-prot.xml to .prot.xml. If we can't
                         // find a file with the old name, try the new one
-                        wd.discardFile(fileWorkProtXML);
-                        fileWorkProtXML = wd.newFile(FT_PROT_XML);
+                        _wd.discardFile(fileWorkProtXML);
+                        fileWorkProtXML = _wd.newFile(FT_PROT_XML);
                     }
 
-                    fileProtXML = wd.outputFile(fileWorkProtXML, FT_PROT_XML.getName(getJobSupport().getBaseName()));
+                    fileProtXML = _wd.outputFile(fileWorkProtXML, FT_PROT_XML.getName(getJobSupport().getBaseName()));
 
                     // Second step optionally runs ProteinProphet on the pepXML
                     RecordedAction protXMLAction = new RecordedAction(PROTEIN_PROPHET_ACTION_NAME);
@@ -419,11 +417,10 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
             }
 
             // Deal with possible TPP outputs, if TPP was not XML_ONLY
-            wd.discardFile(wd.newFile(FT_PEP_XSL));
-            wd.discardFile(wd.newFile(FT_PEP_SHTML));
-            wd.discardFile(wd.newFile(FT_INTERMEDIATE_PROT_XSL));
-            wd.discardFile(wd.newFile(FT_INTERMEDIATE_PROT_SHTML));
-            wd.remove();
+            _wd.discardFile(_wd.newFile(FT_PEP_XSL));
+            _wd.discardFile(_wd.newFile(FT_PEP_SHTML));
+            _wd.discardFile(_wd.newFile(FT_INTERMEDIATE_PROT_XSL));
+            _wd.discardFile(_wd.newFile(FT_INTERMEDIATE_PROT_SHTML));
 
             // If no combined analysis is coming or this is the combined analysis, remove
             // the raw pepXML file(s).
@@ -435,8 +432,6 @@ public class TPPTask extends PipelineJob.Task<TPPTask.Factory>
                         getJob().warn("Failed to delete intermediate file " + fileInput);
                 }
             }
-
-            // TODO - optional third step for quantitation. Need to figure out how to say that a step touches an output without claiming that it created it
 
             // All the programs are launched through the same XInteract command, so set the same command line on them all
             for (RecordedAction action : actions)

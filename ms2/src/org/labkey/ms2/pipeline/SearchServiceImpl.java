@@ -120,20 +120,24 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         }
         catch(IOException e)
         {
-            results.setSelectedProtocol("Loading Error");
-            _log.debug("Problem loading protocol.\n" + e.getMessage());
-            results.appendError("Problem loading protocol.\n" + e.getMessage());
+            results.setSelectedProtocol("");
+            results.setProtocolDescription("");
+            results.setProtocolXml("");
+            PipelineService.get().rememberLastProtocolSetting(provider.getProtocolFactory(), getContainer(),
+                getUser(),"");
+            getMzXml(path, searchEngine, false);
+            _log.error("Could not find " + protocolName + ".");
         }
         if (protocol != null)
         {
             results.setSelectedProtocol(protocolName);
-            try
+            if (protocol.getDbNames().length > 0)
             {
                 results.setDefaultSequenceDb(protocol.getDbNames()[0]);
                 if(!provider.dbExists(dirSequenceRoot,protocol.getDbNames()[0]))
                     results.appendError("The database " + protocol.getDbNames()[0] + " cannot be found.");
             }
-            catch(ArrayIndexOutOfBoundsException e)
+            else
             {
                 _log.debug("Problem loading protocol: no database in protocol");
                 results.appendError("Problem loading protocol: No database in protocol");

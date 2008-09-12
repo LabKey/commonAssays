@@ -59,7 +59,7 @@ public class CompareRunsView extends ComparisonCrosstabView
         return _schema.getComparePeptideTableInfo(_runIds);
     }
 
-    protected DataView createDataView()
+    public DataView createDataView()
     {
         DataView view = super.createDataView();
         view.getRenderContext().setViewContext(getViewContext());

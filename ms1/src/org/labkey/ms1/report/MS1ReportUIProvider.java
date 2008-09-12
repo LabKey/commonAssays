@@ -37,29 +37,6 @@ public class MS1ReportUIProvider extends DefaultReportUIProvider
         addDesignerURL(context, settings, designers, PeaksRReport.TYPE, PeaksRReport.PARAMS);
     }
 
-    protected void addDesignerURL(ViewContext context, QuerySettings settings, Map<String, String> designers, String type, String[] params)
-    {
-        RReportBean bean = new RReportBean(settings);
-        bean.setReportType(type);
-        bean.setRedirectUrl(context.getActionURL().toString());
-
-        ActionURL designerURL = ReportUtil.getRReportDesignerURL(context, bean);
-        designerURL = addForwardParams(designerURL, context, params);
-
-        designers.put(type, designerURL.getLocalURIString());
-    }
-
-    protected ActionURL addForwardParams(ActionURL url, ViewContext context, String[] params)
-    {
-        for(String name : params)
-        {
-            String value = context.getActionURL().getParameter(name);
-            if(null != value)
-                url.replaceParameter(name, value);
-        }
-        return url;
-    }
-
     public String getReportIcon(ViewContext context, String reportType)
     {
         if (FeaturesRReport.TYPE.equals(reportType) || PeaksRReport.TYPE.equals(reportType))

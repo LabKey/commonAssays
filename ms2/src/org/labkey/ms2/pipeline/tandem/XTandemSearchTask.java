@@ -116,8 +116,6 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             JobSupport support = getJobSupport();
             String baseName = support.getBaseName();
 
-            WorkDirectory wd = _factory.createWorkDirectory(getJob().getJobGUID(), support, getJob().getLogger());
-
             // Avoid re-running an X! Tandem search, if the .xtan.xml alreayd exists.
             // Several labs soft-link or copy .xtan.xml files to reduce processing time.
             ProcessBuilder xTandemPB = null;
@@ -130,10 +128,10 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             WorkDirectory.CopyingResource lock = null;
             try
             {
-                lock = wd.ensureCopyingLock();
-                fileInputSpectra = wd.inputFile(fileMzXML, false);
+                lock = _wd.ensureCopyingLock();
+                fileInputSpectra = _wd.inputFile(fileMzXML, false);
                 if (searchComplete)
-                    fileWorkOutputXML = wd.inputFile(fileOutputXML, false);
+                    fileWorkOutputXML = _wd.inputFile(fileOutputXML, false);
             }
             finally
             {
@@ -142,10 +140,10 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
 
             if (!searchComplete)
             {
-                fileWorkOutputXML = wd.newFile(FT_XTAN_XML);
+                fileWorkOutputXML = _wd.newFile(FT_XTAN_XML);
 
-                File fileWorkParameters = wd.newFile(INPUT_XML);
-                File fileWorkTaxonomy = wd.newFile(TAXONOMY_XML);
+                File fileWorkParameters = _wd.newFile(INPUT_XML);
+                File fileWorkTaxonomy = _wd.newFile(TAXONOMY_XML);
 
                 // CONSIDER: If the file stays in its original location, the absolute path
                 //           is used, to ensure the loader can find it.  Better way?
@@ -153,7 +151,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
                 if (fileInputSpectra.equals(fileMzXML))
                     pathSpectra = fileInputSpectra.getAbsolutePath();
                 else
-                    pathSpectra = wd.getRelativePath(fileInputSpectra);
+                    pathSpectra = _wd.getRelativePath(fileInputSpectra);
 
                 writeRunParameters(pathSpectra, fileWorkParameters, fileWorkTaxonomy, fileWorkOutputXML);
 
@@ -161,38 +159,37 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
                 String exePath = PipelineJobService.get().getExecutablePath("tandem.exe", "xtandem", ver);
                 xTandemPB = new ProcessBuilder(exePath, INPUT_XML);
 
-                getJob().runSubProcess(xTandemPB, wd.getDir());
+                getJob().runSubProcess(xTandemPB, _wd.getDir());
 
                 // Remove parameters files.
-                wd.discardFile(fileWorkParameters);
-                wd.discardFile(fileWorkTaxonomy);
+                _wd.discardFile(fileWorkParameters);
+                _wd.discardFile(fileWorkTaxonomy);
             }
 
-            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(wd.getDir(), baseName);
+            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(), baseName);
 
             String ver = TPPTask.getTPPVersion(getJob());
             String exePath = PipelineJobService.get().getExecutablePath("Tandem2XML", "tpp", ver);
             ProcessBuilder tandem2XmlPB = new ProcessBuilder(exePath,
-                wd.getRelativePath(fileWorkOutputXML),
+                _wd.getRelativePath(fileWorkOutputXML),
                 fileWorkPepXMLRaw.getName());
             getJob().runSubProcess(tandem2XmlPB,
-                    wd.getDir());
+                    _wd.getDir());
 
             // Move final outputs to analysis directory.
             File filePepXMLRaw;
             lock = null;
             try
             {
-                lock = wd.ensureCopyingLock();
+                lock = _wd.ensureCopyingLock();
                 if (!searchComplete)
-                    fileOutputXML = wd.outputFile(fileWorkOutputXML);
-                filePepXMLRaw = wd.outputFile(fileWorkPepXMLRaw);
+                    fileOutputXML = _wd.outputFile(fileWorkOutputXML);
+                filePepXMLRaw = _wd.outputFile(fileWorkPepXMLRaw);
             }
             finally
             {
                 if (lock != null) { lock.release(); }
             }
-            wd.remove();
 
             List<RecordedAction> actions = new ArrayList<RecordedAction>();
             if (!searchComplete)

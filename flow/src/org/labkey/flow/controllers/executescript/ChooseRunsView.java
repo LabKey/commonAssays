@@ -18,13 +18,10 @@ package org.labkey.flow.controllers.executescript;
 
 import org.labkey.api.data.*;
 import org.labkey.api.query.QueryAction;
-import org.labkey.api.query.QueryPicker;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.flow.view.FlowQueryView;
 
-import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.List;
 
 public class ChooseRunsView extends FlowQueryView
@@ -60,7 +57,7 @@ public class ChooseRunsView extends FlowQueryView
 
 
 
-    protected DataView createDataView()
+    public DataView createDataView()
     {
         DataView ret = super.createDataView();
         DataRegion rgn = ret.getDataRegion();

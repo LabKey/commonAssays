@@ -57,6 +57,7 @@ import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.scoring.ScoringController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
+import org.labkey.ms2.peptideview.SingleMS2RunRReport;
 
 import java.beans.PropertyChangeEvent;
 import java.io.File;
@@ -180,6 +181,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         ModuleLoader.getInstance().registerFolderType(new MS2FolderType(this));
 
         ReportService.get().registerReport(new SpectraCountRReport());
+        ReportService.get().registerReport(new SingleMS2RunRReport());
         ReportService.get().addUIProvider(new MS2ReportUIProvider());
         MS2Controller.registerAdminConsoleLinks();
 
