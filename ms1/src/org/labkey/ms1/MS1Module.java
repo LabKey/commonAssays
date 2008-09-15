@@ -27,11 +27,11 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.reports.ReportService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SystemMaintenance;
 import org.labkey.api.view.*;
-import org.labkey.api.reports.ReportService;
 import org.labkey.ms1.maintenance.PurgeTask;
 import org.labkey.ms1.model.PepSearchModel;
 import org.labkey.ms1.model.SimilarSearchModel;
@@ -43,8 +43,10 @@ import org.labkey.ms1.report.MS1ReportUIProvider;
 import org.labkey.ms1.report.PeaksRReport;
 
 import java.beans.PropertyChangeEvent;
+import java.util.Collection;
 import java.util.Set;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.sql.SQLException;
 
 
 /**
@@ -125,6 +127,22 @@ public class MS1Module extends SpringModule implements ContainerManager.Containe
         // If the module starts loading data into its own database tables,
         // it needs to clean up the relevant rows when a container
         // that holds MS1 data is deleted
+    }
+
+    public Collection<String> getSummary(Container c)
+    {
+        Collection<String> ret = null;
+        try
+        {
+            ret = MS1Manager.get().getContainerSummary(c);
+        }
+        catch(SQLException e)
+        {
+            ret = new ArrayList<String>();
+            ret.add(e.getMessage());
+        }
+        
+        return ret;
     }
 
     public void propertyChange(PropertyChangeEvent evt)

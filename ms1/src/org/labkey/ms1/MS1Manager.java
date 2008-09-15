@@ -27,6 +27,8 @@ import java.io.File;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.util.Map;
+import java.util.Collection;
+import java.util.ArrayList;
 
 public class MS1Manager
 {
@@ -228,6 +230,19 @@ public class MS1Manager
 
         MinMaxScanInfo[] result = Table.executeQuery(getSchema(), sql.toString(), new Object[]{runId, scanFirst, scanLast, true, false}, MinMaxScanInfo.class);
         return null == result || 0 == result.length ? null : result[0];
+    }
+
+    public Collection<String> getContainerSummary(Container container) throws SQLException
+    {
+        ArrayList<String> items = new ArrayList<String>();
+
+        String sql = "select count(*) as NumRuns \n" +
+                "from ms1.Files as f inner join exp.data as d on (f.ExpDataFileId=d.RowId)\n" +
+                "where type=? and deleted=? and d.Container=?";
+        Integer count = Table.executeSingleton(getSchema(), sql, new Object[]{FILETYPE_FEATURES, false, container.getId()}, Integer.class);
+        if(null != count && count.intValue() > 0)
+            items.add(count.intValue() + (count.intValue() > 1 ? " MS1 Runs" : " MS1 Run"));
+        return items;
     }
 
     public void deleteFeaturesData(ExpData expData) throws SQLException
