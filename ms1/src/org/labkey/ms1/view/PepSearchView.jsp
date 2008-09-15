@@ -45,6 +45,6 @@
         <label for="cbxSubfolders">Search Subfolders</label>
         <%=helpPopup("Search Subfolders", "Check to search this folder and all of its descendants.")%>
         &nbsp;
-        <%=PageFlowUtil.generateSubmitButton("Search", "", "id=\"btnSearch\" name=\"submit\" style=\"vertical-align:middle\"")%>
+        <%=PageFlowUtil.generateSubmitButton("Search", "", "id=\"btnSearch\" name=\"submit\"")%>
     </p>
 </form>
