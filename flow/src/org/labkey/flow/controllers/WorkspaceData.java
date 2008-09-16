@@ -102,20 +102,20 @@ public class WorkspaceData implements Serializable
         {
             errors.reject(null, wve.getMessage());
         }
-        catch (RuntimeException ex)
+        catch (Exception ex)
         {
             errors.reject(null, ex.getMessage());
             ExceptionUtil.logExceptionToMothership(request, ex);
         }
     }
 
-    public void validate(Container container) throws WorkspaceValidationException
+    public void validate(Container container) throws WorkspaceValidationException, IOException
     {
         if (object == null)
         {
             if (path != null)
             {
-                PipeRoot pipeRoot = null;
+                PipeRoot pipeRoot;
                 try
                 {
                     pipeRoot = PipelineService.get().findPipelineRoot(container);
@@ -131,68 +131,64 @@ public class WorkspaceData implements Serializable
                 }
 
                 File file = pipeRoot.resolvePath(path);
-                if (file == null)
-                {
-                    throw new WorkspaceValidationException("The path '" + path + "' is invalid.");
-                }
-                if (!file.exists())
-                {
-                    throw new WorkspaceValidationException("The file '" + path + "' does not exist.");
-                }
-                else if (file.isDirectory())
-                {
-                    throw new WorkspaceValidationException("The file '" + path + "' is a directory.");
-                }
-                else
-                {
-                    try
-                    {
-                        FileInputStream is = new FileInputStream(file);
-                        try
-                        {
-                            object = FlowJoWorkspace.readWorkspace(is);
-                        }
-                        catch (SAXParseException spe)
-                        {
-                            throw new WorkspaceValidationException("Error parsing the workspace.  This might be because it is not an " +
-                                    "XML document: " + spe);
-                        }
-                        catch (Exception e)
-                        {
-                            throw new RuntimeException("Error parsing workspace: " + e, e);
-                        }
-                    }
-                    catch (FileNotFoundException fnfe)
-                    {
-                        _log.error("Error", fnfe);
-                        throw new WorkspaceValidationException("Unable to access the file '" + path + "'.");
-                    }
-                }
-
+                object = readWorkspace(file, path);
+            }
+            else if (file != null && !file.isEmpty())
+            {
+                object = readWorkspace(file.getInputStream());
             }
             else
             {
-                if (file != null && !file.isEmpty())
-                {
-                    try
-                    {
-                        object = FlowJoWorkspace.readWorkspace(file.getInputStream());
-                    }
-                    catch (SAXParseException spe)
-                    {
-                        throw new WorkspaceValidationException("Error parsing the workspace.  This might be because it is not an " +
-                                "XML document: " + spe);
-                    }
-                    catch (Exception e)
-                    {
-                        throw new RuntimeException("Error parsing workspace: " + e);
-                    }
-                }
-                else
-                {
-                    throw new WorkspaceValidationException("No workspace file was specified.");
-                }
+                throw new WorkspaceValidationException("No workspace file was specified.");
             }
+        }
+    }
+
+    private static FlowJoWorkspace readWorkspace(File file, String path) throws WorkspaceValidationException
+    {
+        if (file == null)
+        {
+            throw new WorkspaceValidationException("The path '" + path + "' is invalid.");
+        }
+        if (!file.exists())
+        {
+            throw new WorkspaceValidationException("The file '" + path + "' does not exist.");
+        }
+        if (file.isDirectory())
+        {
+            throw new WorkspaceValidationException("The file '" + path + "' is a directory.");
+        }
+        if (!file.canRead())
+        {
+            throw new WorkspaceValidationException("The file '" + path + "' is not readable.");
+        }
+
+        try
+        {
+            FileInputStream is = new FileInputStream(file);
+            return readWorkspace(is);
+        }
+        catch (FileNotFoundException fnfe)
+        {
+            _log.error("Error", fnfe);
+            throw new WorkspaceValidationException("Unable to access the file '" + path + "'.");
+        }
+    }
+
+    private static FlowJoWorkspace readWorkspace(InputStream is) throws WorkspaceValidationException
+    {
+        try
+        {
+            return FlowJoWorkspace.readWorkspace(is);
+        }
+        catch (SAXParseException spe)
+        {
+            throw new WorkspaceValidationException("Error parsing the workspace.  This might be because it is not an " +
+                    "XML document: " + spe);
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Error parsing workspace: " + e, e);
         }
     }
 

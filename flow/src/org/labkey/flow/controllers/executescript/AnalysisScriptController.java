@@ -534,11 +534,18 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
 
         private void stepUploadWorkspace(ImportAnalysisForm form, BindException errors) throws Exception
         {
+            WorkspaceData workspaceData = form.getWorkspace();
+            FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
+            List<FlowJoWorkspace.SampleInfo> samples = workspace.getSamples();
+            if (samples.size() == 0)
+            {
+                errors.reject(ERROR_MSG, "The workspace doesn't have any samples");
+            }
+
             // guess the FCS files are in the same directory as the workspace
             if (form.getRunFilePathRoot() == null)
             {
                 PipeRoot root = null;
-                WorkspaceData workspaceData = form.getWorkspace();
                 String path = workspaceData.getPath();
                 File workspaceFile = null;
                 if (path != null)
@@ -549,9 +556,8 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
 
                 if (workspaceFile != null)
                 {
-                    FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
                     File runFilePathRoot = null;
-                    for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
+                    for (FlowJoWorkspace.SampleInfo sampleInfo : samples)
                     {
                         File sampleFile = new File(workspaceFile.getParent(), sampleInfo.getLabel());
                         if (sampleFile.exists())
@@ -583,22 +589,28 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
 
             if (runFilePathRoot != null)
             {
-                boolean found = false;
+                List<String> missing = new LinkedList();
                 WorkspaceData workspaceData = form.getWorkspace();
                 FlowJoWorkspace workspace = workspaceData.getWorkspaceObject();
-                for (FlowJoWorkspace.SampleInfo sampleInfo : workspace.getSamples())
+                List<FlowJoWorkspace.SampleInfo> samples = workspace.getSamples();
+                for (FlowJoWorkspace.SampleInfo sampleInfo : samples)
                 {
                     File sampleFile = new File(runFilePathRoot, sampleInfo.getLabel());
-                    if (sampleFile.exists())
+                    if (!sampleFile.exists())
                     {
-                        found = true;
-                        break;
+                        missing.add(sampleInfo.getLabel());
+                        if (missing.size() > 9)
+                            break;
                     }
                 }
 
-                if (!found)
+                if (missing.size() > 0)
                 {
-                    errors.reject(ERROR_MSG, "No samples from workspace found in selected directory");
+                    String msg = "Some of the samples used by the workspace were not found in the selected directory '" + form.getRunFilePathRoot() + "'.<br>&nbsp;&nbsp;";
+                    msg += "The first ten missing samples (there may be more) are:<br>&nbsp;&nbsp;" + StringUtils.join(missing, ", ");
+                    if (missing.size() > 9)
+                        msg += ", ...";
+                    errors.reject(ERROR_MSG, msg);
                     return;
                 }
             }
@@ -637,20 +649,6 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
 
         private void stepConfirm(ImportAnalysisForm form, BindException errors) throws Exception
         {
-            PipeRoot root = null;
-            WorkspaceData workspaceData = form.getWorkspace();
-            String path = workspaceData.getPath();
-            File workspaceFile;
-            if (path != null)
-            {
-                root = getPipeRoot();
-                workspaceFile = root.resolvePath(path);
-            }
-            else
-            {
-                workspaceFile = new File(FlowSettings.getWorkingDirectory(), form.getWorkspace().getName());
-            }
-
             FlowExperiment experiment;
             if (StringUtils.isEmpty(form.getNewAnalysisName()))
             {
@@ -663,6 +661,25 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
             if (!experiment.getContainer().equals(getContainer()))
                 throw new IllegalArgumentException("Wrong container");
 
+            PipeRoot root = null;
+            WorkspaceData workspaceData = form.getWorkspace();
+            String path = workspaceData.getPath();
+            boolean deleteWorkspaceFile = false;
+            File workspaceFile;
+            if (path != null)
+            {
+                root = getPipeRoot();
+                workspaceFile = root.resolvePath(path);
+            }
+            else
+            {
+                String filename = form.getWorkspace().getName();
+                workspaceFile = File.createTempFile(filename, null, FlowSettings.getWorkingDirectory());
+                workspaceFile.deleteOnExit();
+                workspaceData.getFile().transferTo(workspaceFile);
+                deleteWorkspaceFile = true;
+            }
+
             File runFilePathRoot = getRunPathRoot(form, errors);
             ViewBackgroundInfo info = getViewBackgroundInfo();
             if (root == null)
@@ -671,7 +688,7 @@ public class AnalysisScriptController extends SpringFlowController<AnalysisScrip
                 info.setUrlHelper(null);
             }
 
-            WorkspaceJob job = new WorkspaceJob(info, workspaceData, experiment, workspaceFile, runFilePathRoot);
+            WorkspaceJob job = new WorkspaceJob(info, experiment, workspaceFile, runFilePathRoot, deleteWorkspaceFile);
             HttpView.throwRedirect(executeScript(job));
         }
 

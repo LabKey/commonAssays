@@ -28,6 +28,7 @@ import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowRun;
 
 import java.io.File;
+import java.io.FileInputStream;
 
 /**
  * User: kevink
@@ -37,25 +38,26 @@ public class WorkspaceJob extends FlowJob
 {
     private static Logger _log = getJobLogger(WorkspaceJob.class);
 
-    private WorkspaceData _workspaceData;
     private final FlowExperiment _experiment;
     private final File _workspaceFile;
     private final File _runFilePathRoot;
+    private final boolean _deleteWorkspaceFile;
 
     private final File _containerFolder;
     private FlowRun _run;
 
     public WorkspaceJob(ViewBackgroundInfo info,
-                        WorkspaceData workspaceData, FlowExperiment experiment,
-                        File workspaceFile, File runFilePathRoot)
+                        FlowExperiment experiment,
+                        File workspaceFile, File runFilePathRoot,
+                        boolean deleteWorkspaceFile)
             throws Exception
     {
         super(FlowPipelineProvider.NAME, info);
-        _workspaceData = workspaceData;
         _experiment = experiment;
         _workspaceFile = workspaceFile;
         _runFilePathRoot = runFilePathRoot;
         _containerFolder = getWorkingFolder(getContainer());
+        _deleteWorkspaceFile = deleteWorkspaceFile;
 
         initStatus();
     }
@@ -103,8 +105,7 @@ public class WorkspaceJob extends FlowJob
         boolean completeStatus = false;
         try
         {
-            _workspaceData.validate(getContainer());
-            FlowJoWorkspace workspace = _workspaceData.getWorkspaceObject();
+            FlowJoWorkspace workspace = FlowJoWorkspace.readWorkspace(new FileInputStream(_workspaceFile));
             _run = workspace.createExperimentRun(this, getUser(), getContainer(), _experiment, _workspaceFile, _runFilePathRoot);
             setStatus(PipelineJob.COMPLETE_STATUS);
             completeStatus = true;
@@ -120,5 +121,7 @@ public class WorkspaceJob extends FlowJob
                 setStatus(PipelineJob.ERROR_STATUS);
             }
         }
+        if (_deleteWorkspaceFile)
+            _workspaceFile.delete();
     }
 }
