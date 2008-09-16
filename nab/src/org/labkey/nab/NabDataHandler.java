@@ -101,6 +101,10 @@ public class NabDataHandler extends AbstractExperimentDataHandler
         {
             throw new RuntimeException(e);
         }
+        catch (DilutionCurve.FitFailedException e)
+        {
+            throw new ExperimentException(e.getMessage(), e);
+        }
     }
 
     public static List<DilutionSummary> getDilutionSummaries(int... dataObjectIds) throws ExperimentException, SQLException
@@ -154,7 +158,7 @@ public class NabDataHandler extends AbstractExperimentDataHandler
     }
 
     private void saveICValue(String name, double icValue, DilutionSummary dilution, Lsid dataRowLsid,
-                             ExpProtocol protocol, Container container, String format, List<ObjectProperty> results)
+                             ExpProtocol protocol, Container container, String format, List<ObjectProperty> results) throws DilutionCurve.FitFailedException
     {
         String outOfRange = null;
         if (Double.NEGATIVE_INFINITY == icValue)

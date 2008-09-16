@@ -825,7 +825,7 @@ public class NabAssayController extends SpringActionController
             ChartColor.MAGENTA
     };
 
-    private void renderChartPNG(HttpServletResponse response, DilutionSummary[] summaries, int[] cutoffs, boolean lockAxes) throws IOException
+    private void renderChartPNG(HttpServletResponse response, DilutionSummary[] summaries, int[] cutoffs, boolean lockAxes) throws IOException, DilutionCurve.FitFailedException
     {
         List<Pair<String, DilutionSummary>> summaryMap = new ArrayList<Pair<String, DilutionSummary>>();
         for (DilutionSummary summary : summaries)
@@ -840,12 +840,12 @@ public class NabAssayController extends SpringActionController
         renderChartPNG(response, summaryMap, cutoffs, lockAxes);
     }
 
-    private void renderChartPNG(HttpServletResponse response, Luc5Assay assay, boolean lockAxes) throws IOException
+    private void renderChartPNG(HttpServletResponse response, Luc5Assay assay, boolean lockAxes) throws IOException, DilutionCurve.FitFailedException
     {
         renderChartPNG(response, assay.getSummaries(), assay.getCutoffs(), lockAxes);
     }
 
-    private void renderChartPNG(HttpServletResponse response, List<Pair<String, DilutionSummary>> dilutionSummaries, int[] cutoffs, boolean lockAxes) throws IOException
+    private void renderChartPNG(HttpServletResponse response, List<Pair<String, DilutionSummary>> dilutionSummaries, int[] cutoffs, boolean lockAxes) throws IOException, DilutionCurve.FitFailedException
     {
         XYSeriesCollection curvesDataset = new XYSeriesCollection();
         XYSeriesCollection pointDataset = new XYSeriesCollection();

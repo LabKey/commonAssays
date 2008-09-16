@@ -330,13 +330,20 @@ public class NabManager
         for (DilutionSummary dilution : temp.getSummaries())
         {
             WellGroup group = dilution.getWellGroup();
-            assert groupInPlate(plate, group) : "Group not found in plate";
-            for (int cutoff : cutoffs)
+            try
             {
-                group.setProperty("Curve IC" + cutoff, dilution.getCutoffDilution((double) cutoff / 100.0));
-                group.setProperty("Point IC" + cutoff, dilution.getInterpolatedCutoffDilution((double) cutoff / 100.0));
+                assert groupInPlate(plate, group) : "Group not found in plate";
+                for (int cutoff : cutoffs)
+                {
+                    group.setProperty("Curve IC" + cutoff, dilution.getCutoffDilution((double) cutoff / 100.0));
+                    group.setProperty("Point IC" + cutoff, dilution.getInterpolatedCutoffDilution((double) cutoff / 100.0));
+                }
+                group.setProperty(SampleProperty.FitError.name(), dilution.getFitError());
             }
-            group.setProperty(SampleProperty.FitError.name(), dilution.getFitError());
+            catch (DilutionCurve.FitFailedException e)
+            {
+                throw new IOException(e.getMessage(), e);
+            }
         }
 
         int rowid = PlateService.get().save(container, user, plate);

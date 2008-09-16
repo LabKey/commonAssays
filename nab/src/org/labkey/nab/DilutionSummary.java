@@ -116,7 +116,7 @@ public class DilutionSummary implements Serializable
         return SampleInfo.Method.valueOf(name);
     }
 
-    public double getCutoffDilution(double cutoff)
+    public double getCutoffDilution(double cutoff) throws DilutionCurve.FitFailedException
     {
         return getDilutionCurve().getCutoffDilution(cutoff);
     }
@@ -126,22 +126,22 @@ public class DilutionSummary implements Serializable
         return getDilutionCurve().getInterpolatedCutoffDilution(cutoff);
     }
 
-    public DilutionCurve.DoublePoint[] getCurve()
+    public DilutionCurve.DoublePoint[] getCurve() throws DilutionCurve.FitFailedException
     {
         return getDilutionCurve().getCurve();
     }
 
-    public double getFitError()
+    public double getFitError() throws DilutionCurve.FitFailedException
     {
         return getDilutionCurve().getFitError();
     }
 
-    public double getMinDilution()
+    public double getMinDilution() throws DilutionCurve.FitFailedException
     {
         return getDilutionCurve().getMinDilution();
     }
 
-    public double getMaxDilution()
+    public double getMaxDilution() throws DilutionCurve.FitFailedException
     {
         return getDilutionCurve().getMaxDilution();
     }

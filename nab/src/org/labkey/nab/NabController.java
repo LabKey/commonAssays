@@ -504,7 +504,7 @@ public class NabController extends ViewController
     }
 
 
-    private void renderChartPNG(DilutionSummary[] dilutionSummaries, int[] cutoffs) throws IOException
+    private void renderChartPNG(DilutionSummary[] dilutionSummaries, int[] cutoffs) throws IOException, DilutionCurve.FitFailedException
     {
         XYSeriesCollection curvesDataset = new XYSeriesCollection();
         XYSeriesCollection pointDataset = new XYSeriesCollection();
