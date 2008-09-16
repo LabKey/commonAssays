@@ -114,18 +114,6 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         }
     }
 
-    private String getPropertyDescriptorURI(String name, PropertyDescriptor[] props)
-    {
-        for (PropertyDescriptor prop : props)
-        {
-            if (prop.getName().equalsIgnoreCase(name))
-            {
-                return prop.getPropertyURI();
-            }
-        }
-        return null;
-    }
-
     private static Double parseDouble(String value)
     {
         if (value == null || "".equals(value))
@@ -803,7 +791,10 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         {
             return row;
         }
-        
+
+        Map<String,PropertyDescriptor> analyteMap = OntologyManager.createImportPropertyMap(analyteColumns);
+        Map<String,PropertyDescriptor> excelMap = OntologyManager.createImportPropertyMap(excelRunColumns);
+
         do
         {
             String cellContents = analyteSheet.getCell(0, row).getContents();
@@ -822,8 +813,8 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
                     analyte.setStdCurve(value);
                 }
 
-                storePropertyValue(propName, value, analyteColumns, analyteProps);
-                storePropertyValue(propName, value, excelRunColumns, excelRunProps);
+                storePropertyValue(propName, value, analyteMap, analyteProps);
+                storePropertyValue(propName, value, excelMap, excelRunProps);
             }
 
             String recoveryPrefix = "conc in range = unknown sample concentrations within range where standards recovery is ";
@@ -876,12 +867,12 @@ public class LuminexExcelDataHandler extends AbstractExperimentDataHandler
         return row;
     }
 
-    private void storePropertyValue(String propName, String value, PropertyDescriptor[] columns, Map<String, Object> props)
+    private void storePropertyValue(String propName, String value, Map<String,PropertyDescriptor> columns, Map<String, Object> props)
     {
-        String analytePropURI = getPropertyDescriptorURI(propName, columns);
-        if (analytePropURI != null)
+        PropertyDescriptor pd = columns.get(propName);
+        if (pd != null)
         {
-            props.put(analytePropURI, value);
+            props.put(pd.getPropertyURI(), value);
         }
     }
 

@@ -118,8 +118,8 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         Domain uploadSetDomain = super.createUploadSetDomain(c, user);
 
         addProperty(uploadSetDomain, "Species", PropertyType.STRING);
-        addProperty(uploadSetDomain, "Lab ID", PropertyType.STRING);
-        addProperty(uploadSetDomain, "Analysis Software", PropertyType.STRING);
+        addProperty(uploadSetDomain, "LabID", "Lab ID", PropertyType.STRING);
+        addProperty(uploadSetDomain, "AnalysisSoftware", "Analysis Software", PropertyType.STRING);
 
         return uploadSetDomain;
     }
@@ -127,9 +127,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     protected Domain createRunDomain(Container c, User user)
     {
         Domain runDomain = super.createRunDomain(c, user);
-        addProperty(runDomain, "Replaces Previous File", PropertyType.BOOLEAN);
-        addProperty(runDomain, "Date file was modified", PropertyType.DATE_TIME);
-        addProperty(runDomain, "Specimen Type", PropertyType.STRING);
+        addProperty(runDomain, "ReplacesPreviousFile", "Replaces Previous File", PropertyType.BOOLEAN);
+        addProperty(runDomain, "DateModified", "Date file was modified", PropertyType.DATE_TIME);
+        addProperty(runDomain, "SpeciminType", "Specimen Type", PropertyType.STRING);
         addProperty(runDomain, "Additive", PropertyType.STRING);
         addProperty(runDomain, "Derivative", PropertyType.STRING);
 
@@ -145,9 +145,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
         Domain analyteDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ASSAY_DOMAIN_ANALYTE + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":${AssayName}", "Analyte Properties");
         analyteDomain.setDescription("The user will be prompted to enter these properties for each of the analytes in the file they upload. This is the third and final step of the upload process.");
-        addProperty(analyteDomain, "Standard Name", PropertyType.STRING);
+        addProperty(analyteDomain, "StandardName", "Standard Name", PropertyType.STRING);
 
-        addProperty(analyteDomain, "Units of Concentration", PropertyType.STRING);
+        addProperty(analyteDomain, "UnitsOfConcentration", "Units of Concentration", PropertyType.STRING);
 
         ListDefinition isotypeList = lists.get("LuminexIsotypes");
         if (isotypeList == null)
@@ -180,23 +180,23 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
         addProperty(analyteDomain, "Isotype", PropertyType.STRING).setLookup(new Lookup(lookupContainer, "lists", isotypeList.getName()));
 
-        addProperty(analyteDomain, "Analyte Type", PropertyType.STRING);
-        addProperty(analyteDomain, "Weighting Method", PropertyType.STRING);
+        addProperty(analyteDomain, "AnalyteType", "Analyte Type", PropertyType.STRING);
+        addProperty(analyteDomain, "WeightingMethod", "Weighting Method", PropertyType.STRING);
         
-        addProperty(analyteDomain, "Bead Manufacturer", PropertyType.STRING);
-        addProperty(analyteDomain, "Bead Dist", PropertyType.STRING);
-        addProperty(analyteDomain, "Bead Catalog Number", PropertyType.STRING);
+        addProperty(analyteDomain, "BeadManufacturer", "Bead Manufacturer", PropertyType.STRING);
+        addProperty(analyteDomain, "BeadDist", "Bead Dist", PropertyType.STRING);
+        addProperty(analyteDomain, "BeadCatalogNumber", "Bead Catalog Number", PropertyType.STRING);
         
         result.add(analyteDomain);
 
         Domain excelRunDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ASSAY_DOMAIN_EXCEL_RUN + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":${AssayName}", "Excel File Run Properties");
         excelRunDomain.setDescription("When the user uploads a Luminex data file, the server will try to find these properties in the header and footer of the spreadsheet, and does not prompt the user to enter them. This is part of the second step of the upload process.");
-        addProperty(excelRunDomain, "File Name", PropertyType.STRING);
-        addProperty(excelRunDomain, "Acquisition Date", PropertyType.DATE_TIME);
-        addProperty(excelRunDomain, "Reader Serial Number", PropertyType.STRING);
-        addProperty(excelRunDomain, "Plate ID", PropertyType.STRING);
-        addProperty(excelRunDomain, "RP1 PMT (Volts)", PropertyType.DOUBLE);
-        addProperty(excelRunDomain, "RP1 Target", PropertyType.STRING);
+        addProperty(excelRunDomain, "FileName", "File Name", PropertyType.STRING);
+        addProperty(excelRunDomain, "AcquisitionDate", "Acquisition Date", PropertyType.DATE_TIME);
+        addProperty(excelRunDomain, "ReaderSerialNumber", "Reader Serial Number", PropertyType.STRING);
+        addProperty(excelRunDomain, "PlateID", "Plate ID", PropertyType.STRING);
+        addProperty(excelRunDomain, "RP1PMTvolts", "RP1 PMT (Volts)", PropertyType.DOUBLE);
+        addProperty(excelRunDomain, "RP1Target", "RP1 Target", PropertyType.STRING);
         result.add(excelRunDomain);
 
         return result;
@@ -420,7 +420,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         {
             ObjectProperty prop = analyteProps.get(pd.getPropertyURI());
             PropertyDescriptor publishPD = pd.clone();
-            publishPD.setName("Analyte " + pd.getName());
+            publishPD.setName("Analyte" + pd.getName());
             publishPD.setLabel("Analyte " + pd.getLabel());
             addProperty(publishPD, prop, dataMap, tempTypes);
         }
