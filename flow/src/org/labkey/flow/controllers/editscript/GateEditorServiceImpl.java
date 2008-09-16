@@ -318,43 +318,45 @@ public class GateEditorServiceImpl extends BaseRemoteService implements GateEdit
             GWTWorkspace ret = new GWTWorkspace();
             ret.setEditingMode(workspaceOptions.editingMode);
             FlowRun run = FlowRun.fromRunId(workspaceOptions.runId);
-
-            FlowScript script;
-            if (workspaceOptions.editingMode.isRunMode())
+            if (run != null)
             {
-                script = run.getScript();
-                if (!canUpdate(run))
+                FlowScript script;
+                if (workspaceOptions.editingMode.isRunMode())
                 {
-                    ret.setReadOnly(true);
+                    script = run.getScript();
+                    if (!canUpdate(run))
+                    {
+                        ret.setReadOnly(true);
+                    }
                 }
-            }
-            else
-            {
-                script = FlowScript.fromScriptId(workspaceOptions.scriptId);
-                if (!canUpdate(script))
+                else
                 {
-                    ret.setReadOnly(true);
+                    script = FlowScript.fromScriptId(workspaceOptions.scriptId);
+                    if (!canUpdate(script))
+                    {
+                        ret.setReadOnly(true);
+                    }
                 }
-            }
-            GWTScript gwtScript = makeGWTScript(script);
-            if (!workspaceOptions.editingMode.isRunMode() && !workspaceOptions.editingMode.isCompensation())
-            {
-                if (gwtScript.getAnalysis() == null)
+                GWTScript gwtScript = makeGWTScript(script);
+                if (!workspaceOptions.editingMode.isRunMode() && !workspaceOptions.editingMode.isCompensation())
                 {
-                    gwtScript.setAnalysis(new GWTAnalysis());
+                    if (gwtScript.getAnalysis() == null)
+                    {
+                        gwtScript.setAnalysis(new GWTAnalysis());
+                    }
                 }
+                ret.setScript(gwtScript);
+                ret.setRun(makeRun(run));
+                ret.setWells(getWells(run, script, workspaceOptions.editingMode));
+                if (workspaceOptions.editingMode.isCompensation())
+                {
+                    ret.setSubsetReleventWellMap(getSubsetReleventWellMap((CompensationCalculation) script.getCompensationCalcOrAnalysis(FlowProtocolStep.calculateCompensation), ret.getWells()));
+                }
+                Map<String, String> parameters = EditScriptForm.getParameterNames(run, new String[0]);
+                ret.setParameterNames(parameters.keySet().toArray(new String[0]));
+                ret.setParameterLabels(parameters.values().toArray(new String[0]));
+                FlowPreference.editScriptRunId.setValue(_context.getRequest(), Integer.toString(run.getRunId()));
             }
-            ret.setScript(gwtScript);
-            ret.setRun(makeRun(run));
-            ret.setWells(getWells(run, script, workspaceOptions.editingMode));
-            if (workspaceOptions.editingMode.isCompensation())
-            {
-                ret.setSubsetReleventWellMap(getSubsetReleventWellMap((CompensationCalculation) script.getCompensationCalcOrAnalysis(FlowProtocolStep.calculateCompensation), ret.getWells()));
-            }
-            Map<String, String> parameters = EditScriptForm.getParameterNames(run, new String[0]);
-            ret.setParameterNames(parameters.keySet().toArray(new String[0]));
-            ret.setParameterLabels(parameters.values().toArray(new String[0]));
-            FlowPreference.editScriptRunId.setValue(_context.getRequest(), Integer.toString(run.getRunId()));
             return ret;
         }
         catch (Exception e)
