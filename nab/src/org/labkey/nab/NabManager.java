@@ -342,7 +342,7 @@ public class NabManager
             }
             catch (DilutionCurve.FitFailedException e)
             {
-                throw new IOException(e.getMessage(), e);
+                throw new IOException(e.getMessage());
             }
         }
 
