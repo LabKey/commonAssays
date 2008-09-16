@@ -90,7 +90,7 @@ public class FlowScript extends FlowDataObject
     static public FlowScript fromURL(ActionURL url, HttpServletRequest request) throws ServletException
     {
         FlowScript ret = FlowScript.fromScriptId(getIntParam(url, request, FlowParam.scriptId));
-        if (ret == null)
+        if (ret == null || ret.getExpObject() == null)
             return null;
         ret.checkContainer(url);
         return ret;

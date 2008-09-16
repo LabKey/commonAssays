@@ -519,13 +519,15 @@ public class FlowAnalyzer
     {
         if (script == null)
         {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         return getSubsets(script.getAnalysisScript(), FlowProtocolStep.analysis, true);
     }
 
     static public Collection<SubsetSpec> getSubsets(String script, FlowProtocolStep step, boolean includeBooleans)
     {
+        if (script == null || script.length() == 0)
+            return Collections.emptyList();
         try
         {
             ScriptDef scriptElement = parseScript(script);
@@ -564,7 +566,7 @@ public class FlowAnalyzer
         }
         catch (XmlException e)
         {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
     }
 

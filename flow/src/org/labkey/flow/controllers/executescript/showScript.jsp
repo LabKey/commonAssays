@@ -31,6 +31,7 @@
 <%@ page import="org.labkey.flow.query.FlowSchema" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
+<%@ page import="org.labkey.api.query.QuerySettings" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -78,7 +79,9 @@ The analysis section describes which gates in the analysis, as well as the stati
         view.setShadeAlternatingRows(true);
         view.setShowPagination(false);
         view.setShowBorders(true);
-        view.getSettings().setShowRows(ShowRows.ALL);
+        view.setShowRecordSelectors(false);
+        view.setShowExportButtons(false);
+        view.getSettings().setMaxRows(0);
         view.getSettings().setAllowChooseQuery(false);
         view.getSettings().setAllowChooseView(false);
         view.getSettings().setAllowCustomizeView(false);

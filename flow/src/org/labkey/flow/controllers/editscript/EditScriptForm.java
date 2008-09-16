@@ -56,6 +56,8 @@ public class EditScriptForm extends ViewForm
         {
             super.reset(mapping, request);
             analysisScript = FlowScript.fromScriptId(Integer.valueOf(request.getParameter("scriptId")));
+            if (analysisScript == null || analysisScript.getExpObject() == null)
+                throw new IllegalArgumentException("scriptId not found: " + request.getParameter("scriptId"));
             _runCount = analysisScript.getRunCount();
             step = FlowProtocolStep.fromRequest(request);
             _run = FlowRun.fromURL(getContext().getActionURL(), getRequest());
