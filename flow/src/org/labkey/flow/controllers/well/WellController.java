@@ -103,7 +103,10 @@ public class WellController extends SpringFlowController<WellController.Action>
     public Page getPage(String name) throws Exception
     {
         Page ret = (Page) getFlowPage(name);
-        ret.setWell(getWell());
+        FlowWell well = getWell();
+        if (well == null)
+            HttpView.throwNotFound("well not found");
+        ret.setWell(well);
         return ret;
     }
 
