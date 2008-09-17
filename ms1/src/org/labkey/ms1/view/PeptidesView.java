@@ -24,6 +24,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.User;
 import org.labkey.api.view.DataView;
+import org.labkey.api.reports.ReportService;
 import org.labkey.ms1.query.PeptideFilter;
 
 import java.util.Collections;
@@ -55,6 +56,8 @@ public class PeptidesView extends QueryView
         setSettings(settings);
 
         setShowRecordSelectors(false);
+
+        setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
     }
 
     public boolean isSearchSubfolders()

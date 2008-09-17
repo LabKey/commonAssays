@@ -40,6 +40,7 @@ import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.*;
 import org.labkey.api.view.*;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.api.reports.ReportService;
 import org.labkey.common.tools.MS2Modification;
 import org.labkey.common.tools.PeptideProphetSummary;
 import org.labkey.common.tools.SensitivitySummary;
@@ -2562,6 +2563,8 @@ public class MS2Controller extends SpringActionController
             proteinsSettings.setQueryName(MS2Schema.SEQUENCES_TABLE_NAME);
             proteinsSettings.setAllowChooseQuery(false);
             QueryView proteinsView = new QueryView(schema, proteinsSettings);
+            // Disable R and other reporting until there's an implementation that respects the search criteria
+            proteinsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
 
             proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
             SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
@@ -2610,6 +2613,8 @@ public class MS2Controller extends SpringActionController
 
             };
             groupsView.setButtonBarPosition(DataRegion.ButtonBarPosition.BOTTOM);
+            // Disable R and other reporting until there's an implementation that respects the search criteria
+            groupsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
 
             groupsView.setTitle("Protein Group Results");
             return groupsView;

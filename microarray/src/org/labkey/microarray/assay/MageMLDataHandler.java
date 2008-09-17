@@ -104,6 +104,13 @@ public class MageMLDataHandler extends AbstractAssayTsvDataHandler
                         Map<String, Class> expectedColumns = new HashMap<String, Class>(columns.length);
                         for (PropertyDescriptor col : columns)
                             expectedColumns.put(col.getName().toLowerCase(), col.getPropertyType().getJavaType());
+                        for (PropertyDescriptor col : columns)
+                        {
+                            if (col.getLabel() != null && !expectedColumns.containsKey(col.getLabel().toLowerCase()))
+                            {
+                                expectedColumns.put(col.getLabel().toLowerCase(), col.getPropertyType().getJavaType());
+                            }
+                        }
                         Reader fileReader = new InputStreamReader(tsvIn);
 
                         TabLoader loader = new TabLoader(fileReader, false);
