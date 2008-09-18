@@ -43,7 +43,7 @@
     Set<PropertyDescriptor> samplePropertyDescriptors = firstSample.keySet();
 
     Map<PropertyDescriptor, Object> runProperties = bean.getRunProperties();
-    Map<PropertyDescriptor, Object> nonNullRunProperties = new HashMap<PropertyDescriptor, Object>();
+    Map<PropertyDescriptor, Object> nonNullRunProperties = new LinkedHashMap<PropertyDescriptor, Object>();
     for (Map.Entry<PropertyDescriptor, Object> prop : runProperties.entrySet())
     {
         if (prop.getValue() != null)

@@ -37,7 +37,7 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.query.QueryView;
+import org.labkey.api.query.*;
 import org.labkey.api.security.ACL;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.study.DilutionCurve;
@@ -178,8 +178,9 @@ public class NabAssayController extends SpringActionController
         private Map<PropertyDescriptor, Object> _runProperties;
         private Set<String> _hiddenRunColumns;
         List<SampleResult> _sampleResults;
+        private ViewContext _viewContext;
 
-        public RenderAssayBean(Luc5Assay assay, boolean newRun, boolean printView, ExpProtocol protocol, PlateBasedAssayProvider provider, ExpRun run)
+        public RenderAssayBean(Luc5Assay assay, boolean newRun, boolean printView, ExpProtocol protocol, PlateBasedAssayProvider provider, ExpRun run, ViewContext viewContext)
         {
             _run = run;
             _provider = provider;
@@ -187,6 +188,7 @@ public class NabAssayController extends SpringActionController
             _assay = assay;
             _newRun = newRun;
             _printView = printView;
+            _viewContext = viewContext;
             _hiddenRunColumns = new HashSet<String>();
             _hiddenRunColumns.add(AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME);
             _hiddenRunColumns.add(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME);
@@ -270,15 +272,45 @@ public class NabAssayController extends SpringActionController
             if (_runProperties == null)
             {
                 _runProperties = new TreeMap<PropertyDescriptor, Object>(new PropertyDescriptorComparator());
-                for (PropertyDescriptor property : _provider.getUploadSetColumns(_protocol))
+                ResultSet rs = null;
+                try
                 {
-                    if (!_hiddenRunColumns.contains(property.getName()))
-                        _runProperties.put(property, _run.getProperty(property));
+                    Map<FieldKey, PropertyDescriptor> fieldKeys = new HashMap<FieldKey, PropertyDescriptor>();
+                    for (PropertyDescriptor property : _provider.getUploadSetColumns(_protocol))
+                    {
+                        if (!_hiddenRunColumns.contains(property.getName()))
+                            fieldKeys.put(FieldKey.fromParts("Run Properties", property.getName()), property);
+                    }
+                    for (PropertyDescriptor property : _provider.getRunPropertyColumns(_protocol))
+                    {
+                        if (!_hiddenRunColumns.contains(property.getName()))
+                            fieldKeys.put(FieldKey.fromParts("Run Properties", property.getName()), property);
+                    }
+
+                    TableInfo runTable = AssayService.get().createRunTable(null, _protocol, _provider, _viewContext.getUser(), _run.getContainer());
+                    SimpleFilter filter = new SimpleFilter("RowId", _run.getRowId());
+                    Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(runTable, fieldKeys.keySet());
+                    rs = Table.selectForDisplay(runTable, new ArrayList<ColumnInfo>(cols.values()), filter, null, 1, 0);
+                    if (!rs.next())
+                        HttpView.throwNotFound("Run " + _run.getRowId() + " was not found.");
+
+                    for (Map.Entry<FieldKey, ColumnInfo> entry : cols.entrySet())
+                    {
+                        ColumnInfo column = entry.getValue();
+                        ColumnInfo displayField = column.getDisplayField();
+                        if (column.getDisplayField() != null)
+                            column = displayField;
+                        _runProperties.put(fieldKeys.get(entry.getKey()), column.getValue(rs));
+                    }
                 }
-                for (PropertyDescriptor property : _provider.getRunPropertyColumns(_protocol))
+                catch (SQLException e)
                 {
-                    if (!_hiddenRunColumns.contains(property.getName()))
-                        _runProperties.put(property, _run.getProperty(property));
+                    throw new RuntimeSQLException(e);
+                }
+                finally
+                {
+                    if (rs != null)
+                        try { rs.close(); } catch (SQLException e) { /* do nothing */ }
                 }
                 ColumnInfo runName = ExperimentService.get().getTinfoExperimentRun().getColumn("Name");
                 if (runName != null)
@@ -530,7 +562,7 @@ public class NabAssayController extends SpringActionController
             PlateBasedAssayProvider provider = (PlateBasedAssayProvider) AssayService.get().getProvider(_protocol);
 
             HttpView view = new JspView<RenderAssayBean>("/org/labkey/nab/runDetails.jsp",
-                    new RenderAssayBean(assay, form.isNewRun(), isPrint(), _protocol, provider, _run));
+                    new RenderAssayBean(assay, form.isNewRun(), isPrint(), _protocol, provider, _run, getViewContext()));
             if (!isPrint())
                 view = new VBox(new NabDetailsHeaderView(_protocol, provider, _run.getRowId()), view);
             return view;
