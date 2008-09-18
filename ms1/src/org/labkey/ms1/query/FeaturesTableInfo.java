@@ -231,7 +231,7 @@ public class FeaturesTableInfo extends VirtualTable
             sql.append("\nINNER JOIN ms2.Runs AS r ON (fr.Run=r.Run");
             sql.append("\nAND r.Container IN (");
             sql.append(_schema.getContainerInList());
-            sql.append(new SQLFragment(")\nAND r.Deleted=?)", false));
+            sql.append(")\nAND r.Deleted='0')");
             sql.append(") AS pep ON (fi.MzXmlUrl=pep.MzXmlUrl AND fe.MS2Scan=pep.Scan AND fe.MS2Charge=pep.Charge)");
         }
 
@@ -245,7 +245,7 @@ public class FeaturesTableInfo extends VirtualTable
         if(!includeDeleted())
         {
             sql.append("\nAND ");
-            sql.append(new SQLFragment("fi.Imported=? AND fi.Deleted=?", true, false));
+            sql.append("fi.Imported='1' AND fi.Deleted='0'");
         }
 
         //if there are other filters, apply them as well
