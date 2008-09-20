@@ -303,7 +303,17 @@ public class FCS extends FCSHeader
         InputStream stream = null;
         try
         {
+            if (!file.isFile())
+            {
+                // Don't read from the File if it is "/dev/ttyp0"
+                return false;
+            }
             stream = new FileInputStream(file);
+            if (stream.available() < 6)
+            {
+                // Don't read from the File if it is "/dev/stdin"
+                return false;
+            }
             byte[] buffer = new byte[6];
             byte[] compare2 = new byte[]{'F', 'C', 'S', '2', '.', '0'};
             byte[] compare3 = new byte[]{'F', 'C', 'S', '3', '.', '0'};
