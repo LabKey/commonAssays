@@ -17,17 +17,12 @@
 package org.labkey.flow.gateeditor.client.ui;
 
 import org.labkey.flow.gateeditor.client.GateEditor;
-import org.labkey.flow.gateeditor.client.GateCallback;
 import org.labkey.flow.gateeditor.client.FlowUtil;
-import org.labkey.flow.gateeditor.client.model.GWTRun;
 import org.labkey.flow.gateeditor.client.model.GWTWell;
-import org.labkey.flow.gateeditor.client.model.GWTWorkspace;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.DOM;
 
 import java.util.Map;
-import java.util.Iterator;
 import java.util.HashMap;
 
 public class WellList extends GateComponent
@@ -35,8 +30,8 @@ public class WellList extends GateComponent
     VerticalPanel basePanel;
     ScrollPanel scrollPanel;
     VerticalPanel list;
-    Map labelWellMap = new HashMap();
-    Map wellLabelMap = new HashMap();
+    Map<Label,GWTWell> labelWellMap = new HashMap<Label,GWTWell>();
+    Map<Integer,Label> wellLabelMap = new HashMap<Integer,Label>();
     Label currentLabel;
 
     GateEditorListener listener = new GateEditorListener()
@@ -55,7 +50,7 @@ public class WellList extends GateComponent
     {
         public void onClick(Widget widget)
         {
-            GWTWell well = (GWTWell) labelWellMap.get(widget);
+            GWTWell well = labelWellMap.get(widget);
             editor.getState().setWell(well);
         }
     };
@@ -84,17 +79,15 @@ public class WellList extends GateComponent
 
     public void setWells(GWTWell[] wells)
     {
-        for (Iterator it = labelWellMap.keySet().iterator(); it.hasNext();)
+        for (Label label : labelWellMap.keySet())
         {
-            Label label = (Label) it.next();
             label.removeFromParent();
         }
         labelWellMap.clear();
         wellLabelMap.clear();
         currentLabel = null;
-        for (int i = 0; i < wells.length; i ++)
+        for (GWTWell well : wells)
         {
-            GWTWell well = wells[i];
             Label label = new Label(well.getLabel());
             DOM.setStyleAttribute(label.getElement(), "cursor", "default");
             if (well.getScript() != null)
@@ -118,7 +111,7 @@ public class WellList extends GateComponent
         }
         if (well != null)
         {
-            currentLabel = (Label) wellLabelMap.get(new Integer(well.getWellId()));
+            currentLabel = wellLabelMap.get(new Integer(well.getWellId()));
             if (currentLabel != null)
             {
                 DOM.setStyleAttribute(currentLabel.getElement(), "backgroundColor", "#FFDF8C");

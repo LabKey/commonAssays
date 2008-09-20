@@ -26,7 +26,6 @@ import org.labkey.api.gwt.client.ui.ImageButton;
 
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Iterator;
 
 public class PopulationTree extends GateComponent
 {
@@ -34,8 +33,8 @@ public class PopulationTree extends GateComponent
     ScrollPanel scrollPanel;
     VerticalPanel tree;
     ImageButton newPopulationButton;
-    Map populationNameLabelMap = new HashMap();
-    Map labelPopulationMap = new HashMap();
+    Map<String,Label> populationNameLabelMap = new HashMap<String,Label>();
+    Map<Label,GWTPopulation> labelPopulationMap = new HashMap<Label,GWTPopulation>();
     Label currentLabel;
 
     GateEditorListener listener = new GateEditorListener()
@@ -55,7 +54,7 @@ public class PopulationTree extends GateComponent
     {
         public void onClick(Widget sender)
         {
-            GWTPopulation population = (GWTPopulation) labelPopulationMap.get(sender);
+            GWTPopulation population = labelPopulationMap.get(sender);
             if (population != null)
             {
                 editor.getState().setPopulation(population);
@@ -144,17 +143,16 @@ public class PopulationTree extends GateComponent
         populationNameLabelMap.put(population.getFullName(), label);
         labelPopulationMap.put(label, population);
         GWTPopulation[] children = population.getPopulations();
-        for (int i = 0; i < children.length; i++)
+        for (GWTPopulation child : children)
         {
-            addLabels(children[i], depth + 1);
+            addLabels(child, depth + 1);
         }
     }
 
     public void setScriptComponent(GWTScriptComponent scriptComponent)
     {
-        for (Iterator it = labelPopulationMap.keySet().iterator(); it.hasNext();)
+        for (Label label : labelPopulationMap.keySet())
         {
-            Label label = (Label) it.next();
             label.removeFromParent();
         }
         labelPopulationMap.clear();
@@ -176,7 +174,7 @@ public class PopulationTree extends GateComponent
         }
         if (population != null)
         {
-            currentLabel = (Label) populationNameLabelMap.get(population.getFullName());
+            currentLabel = populationNameLabelMap.get(population.getFullName());
             if (currentLabel != null)
             {
                 makeBold(population, currentLabel);

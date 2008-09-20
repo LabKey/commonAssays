@@ -21,6 +21,8 @@ import org.labkey.flow.gateeditor.client.GateEditor;
 import org.labkey.flow.gateeditor.client.GateCallback;
 import org.labkey.flow.gateeditor.client.model.GWTCompensationMatrix;
 
+import java.util.Arrays;
+
 public class CompensationMatrixList extends GateComponent
 {
     HorizontalPanel widget;
@@ -51,11 +53,11 @@ public class CompensationMatrixList extends GateComponent
         listBox = new ListBox();
         listBox.addChangeListener(changeListener);
         widget.add(listBox);
-        editor.getService().getCompensationMatrices(new GateCallback() {
+        editor.getService().getCompensationMatrices(new GateCallback<GWTCompensationMatrix[]>() {
 
-            public void onSuccess(Object result)
+            public void onSuccess(GWTCompensationMatrix[] result)
             {
-                setCompensationMatrices((GWTCompensationMatrix[]) result);
+                setCompensationMatrices(result);
             }
         });
     }
@@ -68,12 +70,10 @@ public class CompensationMatrixList extends GateComponent
 
     public void updateCompensationMatrix()
     {
-        for (int i = 0; i < matrices.length; i ++)
+        int index = Arrays.asList(matrices).indexOf(getCompensationMatrix());
+        if (index >= 0)
         {
-            if (matrices[i].equals(getCompensationMatrix()))
-            {
-                listBox.setSelectedIndex(1);
-            }
+            listBox.setSelectedIndex(1);
         }
     }
 
@@ -81,9 +81,9 @@ public class CompensationMatrixList extends GateComponent
     {
         matrices = comps;
         listBox.clear();
-        for (int i = 0; i < comps.length; i++)
+        for (GWTCompensationMatrix comp : comps)
         {
-            listBox.addItem(comps[i].getLabel(), Integer.toString(comps[i].getCompId()));
+            listBox.addItem(comp.getLabel(), Integer.toString(comp.getCompId()));
         }
         if (comps.length > 0)
         {

@@ -21,11 +21,13 @@ import org.labkey.flow.gateeditor.client.GateEditor;
 import org.labkey.flow.gateeditor.client.GateCallback;
 import org.labkey.flow.gateeditor.client.model.*;
 
+import java.util.Arrays;
+
 public class RunList extends GateComponent
 {
     HorizontalPanel widget;
     ListBox listBox;
-    GateCallback currentRequest;
+    GateCallback<GWTWorkspace> currentRequest;
     GWTRun[] runs;
     GateEditorListener listener = new GateEditorListener()
     {
@@ -55,13 +57,13 @@ public class RunList extends GateComponent
                     return;
                 }
             }
-            currentRequest = new GateCallback()
+            currentRequest = new GateCallback<GWTWorkspace>()
             {
-                public void onSuccess(Object result)
+                public void onSuccess(GWTWorkspace result)
                 {
                     if (currentRequest == this)
                     {
-                        editor.getState().setWorkspace((GWTWorkspace) result);
+                        editor.getState().setWorkspace(result);
                     }
                 }
             };
@@ -74,12 +76,10 @@ public class RunList extends GateComponent
         {
             GWTRun run = getRun();
             GWTRun[] runs = getRuns();
-            for (int i = 0; i < runs.length; i ++)
+            int index = Arrays.asList(runs).indexOf(run);
+            if (index >= 0)
             {
-                if (runs[i].equals(run))
-                {
-                    listBox.setSelectedIndex(i);
-                }
+                listBox.setSelectedIndex(index);
             }
             updateWorkspace();
         }
@@ -106,11 +106,11 @@ public class RunList extends GateComponent
         listBox.addChangeListener(changeListener);
         widget.add(listBox);
         editor.addListener(listener);
-        editor.getService().getRuns(new GateCallback() {
+        editor.getService().getRuns(new GateCallback<GWTRun[]>() {
 
-            public void onSuccess(Object result)
+            public void onSuccess(GWTRun[] result)
             {
-                runs = (GWTRun[]) result;
+                runs = result;
                 updateRuns();
             }
         });
@@ -126,23 +126,18 @@ public class RunList extends GateComponent
     {
         GWTRun run = getRun();
         listBox.clear();
-        for (int i = 0; i < runs.length; i++)
+        for (GWTRun run1 : runs)
         {
-            listBox.addItem(runs[i].getName(), Integer.toString(runs[i].getRunId()));
+            listBox.addItem(run1.getName(), Integer.toString(run1.getRunId()));
         }
 
         if (runs.length > 0)
         {
-            if (run != null)
+            int index = Arrays.asList(runs).indexOf(run);
+            if (index >= 0)
             {
-                for (int i = 0; i < runs.length; i ++)
-                {
-                    if (runs[i].equals(run))
-                    {
-                        listBox.setSelectedIndex(i);
-                        return;
-                    }
-                }
+                listBox.setSelectedIndex(index);
+                return;
             }
             getEditor().getState().setRun(runs[0]);
         }

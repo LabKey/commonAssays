@@ -21,10 +21,10 @@ import org.labkey.flow.gateeditor.client.model.*;
 
 public interface GateEditorServiceAsync
 {
-    void getRuns(AsyncCallback asyncCallback);
-    void getWorkspace(GWTWorkspaceOptions workspaceOptions, AsyncCallback asyncCallback);
-    void getGraphInfo(GWTGraphOptions graphOptions, AsyncCallback asyncCallback);
-    void getCompensationMatrices(AsyncCallback asyncCallback);
-    void save(GWTScript script, AsyncCallback asyncCallback);
-    void save(GWTWell well, GWTScript script, AsyncCallback asyncCallback);
+    void getRuns(AsyncCallback<GWTRun[]> asyncCallback);
+    void getWorkspace(GWTWorkspaceOptions workspaceOptions, AsyncCallback<GWTWorkspace> asyncCallback);
+    void getGraphInfo(GWTGraphOptions graphOptions, AsyncCallback<GWTGraphInfo> asyncCallback);
+    void getCompensationMatrices(AsyncCallback<GWTCompensationMatrix[]> asyncCallback);
+    void save(GWTScript script, AsyncCallback<GWTScript> asyncCallback);
+    void save(GWTWell well, GWTScript script, AsyncCallback<GWTWell> asyncCallback);
 }

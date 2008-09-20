@@ -53,6 +53,10 @@ public class GateEditorForm extends ViewForm
             ret = FlowPreference.editScriptRunId.getIntValue(getRequest());
             try
             {
+                if (ret != 0 && FlowRun.fromRunId(ret) == null)
+                {
+                    ret = 0;
+                }
                 if (ret == 0)
                 {
                     FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);

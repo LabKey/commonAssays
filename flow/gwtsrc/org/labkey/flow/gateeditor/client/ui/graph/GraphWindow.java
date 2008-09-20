@@ -199,14 +199,13 @@ public class GraphWindow extends GateComponent
             }
         }
         status.setText(loadingText);
-        editor.getService().getGraphInfo(options, new GateCallback() {
+        editor.getService().getGraphInfo(options, new GateCallback<GWTGraphInfo>() {
 
-            public void onSuccess(Object result)
+            public void onSuccess(GWTGraphInfo graphInfo)
             {
-                GWTGraphInfo graphInfo = (GWTGraphInfo) result;
                 if (graphInfo.graphOptions.equals(getGraphOptions()))
                 {
-                    setGraphInfo((GWTGraphInfo) result);
+                    setGraphInfo(graphInfo);
                 }
             }
         });
@@ -280,7 +279,7 @@ public class GraphWindow extends GateComponent
         private boolean isOpen()
         {
             GWTGate gate = getGate();
-            return gate instanceof GWTPolygonGate && ((GWTPolygonGate) gate).isOpen();
+            return gate instanceof GWTPolygonGate && gate.isOpen();
         }
 
         private boolean isClosingPoint(GWTPoint ptScreen)

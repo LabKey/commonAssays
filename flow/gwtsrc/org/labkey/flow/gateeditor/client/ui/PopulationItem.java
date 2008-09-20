@@ -36,9 +36,9 @@ public class PopulationItem extends TreeItem
     {
         super(population.getName());
         this.population = population;
-        for (int i = 0; i < this.population.getPopulations().length; i++)
+        for (GWTPopulation child : this.population.getPopulations())
         {
-            addItem(new PopulationItem(this.population.getPopulations()[i]));
+            addItem(new PopulationItem(child));
         }
     }
 

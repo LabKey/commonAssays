@@ -24,10 +24,6 @@ public class GraphWindowMouseListener implements MouseListener
 {
     GraphWindow graphWindow;
 
-
-
-
-
     public GraphWindowMouseListener(GraphWindow graphWindow)
     {
         this.graphWindow = graphWindow;

@@ -73,11 +73,11 @@ public class GateEditor implements EntryPoint
 
     void init(GWTWorkspaceOptions workspaceOptions)
     {
-        getService().getWorkspace(workspaceOptions, new GateCallback() {
+        getService().getWorkspace(workspaceOptions, new GateCallback<GWTWorkspace>() {
 
-            public void onSuccess(Object result)
+            public void onSuccess(GWTWorkspace result)
             {
-                getState().setWorkspace((GWTWorkspace) result);
+                getState().setWorkspace(result);
             }
         });
     }
@@ -99,22 +99,21 @@ public class GateEditor implements EntryPoint
 
     public void save(GWTScript script)
     {
-        getService().save(script, new GateCallback()
+        getService().save(script, new GateCallback<GWTScript>()
         {
-            public void onSuccess(Object result)
+            public void onSuccess(GWTScript result)
             {
-                getState().setScript((GWTScript) result);
+                getState().setScript(result);
             }
         });
     }
 
     public void save(GWTWell well, GWTScript script)
     {
-        getService().save(well, script, new GateCallback()
+        getService().save(well, script, new GateCallback<GWTWell>()
         {
-            public void onSuccess(Object result)
+            public void onSuccess(GWTWell well)
             {
-                GWTWell well = (GWTWell) result;
                 GWTWorkspace workspace = getState().getWorkspace();
                 GWTWell[] wells = workspace.getWells();
                 for (int i = 0; i < wells.length; i ++)

@@ -108,13 +108,12 @@ public class NewPopulationDialog extends GateComponent
 
     private void addPopulations(ListBox listBox, GWTPopulation[] populations, int depth)
     {
-        for (int i = 0; i < populations.length; i ++)
+        for (GWTPopulation population : populations)
         {
-            GWTPopulation population = populations[i];
             if (population.isIncomplete())
                 continue;
             StringBuffer display = new StringBuffer();
-            for (int indent = 0; indent < depth; indent ++)
+            for (int indent = 0; indent < depth; indent++)
             {
                 display.append(".");
             }
